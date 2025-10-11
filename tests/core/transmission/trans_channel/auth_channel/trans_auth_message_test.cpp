@@ -51,9 +51,9 @@ void TransAuthMessageTest::SetUpTestCase(void)
 void TransAuthMessageTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: TransAuthMessageTest001
- * @tc.desc: TransAuthChannelMsgUnpack, Transmission auth message pack and unpack with invalid parameters.
+ * @tc.desc: TransAuthChannelMsgUnpack, Transmission auth message pack and unpack with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -90,9 +90,9 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthMessageUnpackTest001
- * @tc.desc: Transmission auth message unpack.
+ * @tc.desc: Transmission auth message unpack
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -153,9 +153,9 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthMessageUnpackTest002
- * @tc.desc: Transmission auth message unpack errcode.
+ * @tc.desc: Transmission auth message unpack errcode
  * @tc.type: FUNC
  * @tc.require:
  */

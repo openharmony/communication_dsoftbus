@@ -46,9 +46,9 @@ void TransProxyProcessDataTest::TearDownTestCase(void)
      std::cout << "test end out" << std::endl;
 }
 
-/**
+/*
  * @tc.name: TransGetProxyDataBufMaxSize001
- * @tc.desc: TransGetProxyDataBufMaxSize
+ * @tc.desc: TransGetProxyDataBufMaxSize test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -64,9 +64,9 @@ HWTEST_F(TransProxyProcessDataTest, TransGetProxyDataBufMaxSize001, TestSize.Lev
     EXPECT_NO_FATAL_FAILURE(TransGetProxyDataBufMaxSize());
 }
 
-/**
+/*
  * @tc.name: TransUnPackTlvPackHead001
- * @tc.desc: TransUnPackTlvPackHead
+ * @tc.desc: TransUnPackTlvPackHead test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -75,9 +75,9 @@ HWTEST_F(TransProxyProcessDataTest, TransUnPackTlvPackHead001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(TransUnPackTlvPackHead(nullptr));
 }
 
-/**
+/*
  * @tc.name: TransPackSliceHead001
- * @tc.desc: TransPackSliceHead
+ * @tc.desc: TransPackSliceHead test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -87,9 +87,9 @@ HWTEST_F(TransProxyProcessDataTest, TransPackSliceHead001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(TransPackSliceHead(&sliceHead));
 }
 
-/**
+/*
  * @tc.name: TransPackPacketHead001
- * @tc.desc: TransPackPacketHead
+ * @tc.desc: TransPackPacketHead test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -99,9 +99,9 @@ HWTEST_F(TransProxyProcessDataTest, TransPackPacketHead001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(TransPackPacketHead(&packetHead));
 }
 
-/**
+/*
  * @tc.name: TransUnPackPacketHead001
- * @tc.desc: TransUnPackPacketHead
+ * @tc.desc: TransUnPackPacketHead test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -111,9 +111,9 @@ HWTEST_F(TransProxyProcessDataTest, TransUnPackPacketHead001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(TransUnPackPacketHead(&packetHead));
 }
 
-/**
+/*
  * @tc.name: TransProxyPackBytes001
- * @tc.desc: TransProxyPackBytes
+ * @tc.desc: TransProxyPackBytes test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -124,9 +124,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackBytes001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackBytes002
- * @tc.desc: TransProxyPackBytes
+ * @tc.desc: TransProxyPackBytes test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -137,9 +137,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackBytes002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackBytes003
- * @tc.desc: TransProxyPackBytes
+ * @tc.desc: TransProxyPackBytes test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -155,9 +155,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackBytes003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 }
 
-/**
+/*
  * @tc.name: ProxyBuildTlvDataHead001
- * @tc.desc: ProxyBuildTlvDataHead
+ * @tc.desc: ProxyBuildTlvDataHead test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -168,9 +168,9 @@ HWTEST_F(TransProxyProcessDataTest, ProxyBuildTlvDataHead001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ProxyBuildTlvDataHead002
- * @tc.desc: ProxyBuildTlvDataHead
+ * @tc.desc: ProxyBuildTlvDataHead test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -186,9 +186,9 @@ HWTEST_F(TransProxyProcessDataTest, ProxyBuildTlvDataHead002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackTlvBytes001
- * @tc.desc: TransProxyPackTlvBytes
+ * @tc.desc: TransProxyPackTlvBytes test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -200,9 +200,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackTlvBytes001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackTlvBytes002
- * @tc.desc: TransProxyPackTlvBytes
+ * @tc.desc: TransProxyPackTlvBytes test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -214,9 +214,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackTlvBytes002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackTlvBytes003
- * @tc.desc: TransProxyPackTlvBytes
+ * @tc.desc: TransProxyPackTlvBytes test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -228,9 +228,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackTlvBytes003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackData001
- * @tc.desc: TransProxyPackData
+ * @tc.desc: TransProxyPackData test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -242,9 +242,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackData001, TestSize.Level1)
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackData002
- * @tc.desc: TransProxyPackData
+ * @tc.desc: TransProxyPackData test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,9 +256,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackData002, TestSize.Level1)
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackData003
- * @tc.desc: TransProxyPackData
+ * @tc.desc: TransProxyPackData test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -274,9 +274,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyPackData003, TestSize.Level1)
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: TransProxyNoSubPacketProc001
- * @tc.desc: TransProxyNoSubPacketProc
+ * @tc.desc: TransProxyNoSubPacketProc test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -287,9 +287,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyNoSubPacketProc001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransProxyNoSubPacketProc002
- * @tc.desc: TransProxyNoSubPacketProc
+ * @tc.desc: TransProxyNoSubPacketProc test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -300,9 +300,9 @@ HWTEST_F(TransProxyProcessDataTest, TransProxyNoSubPacketProc002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransProxyNoSubPacketProc003
- * @tc.desc: TransProxyNoSubPacketProc
+ * @tc.desc: TransProxyNoSubPacketProc test
  * @tc.type: FUNC
  * @tc.require:
  */

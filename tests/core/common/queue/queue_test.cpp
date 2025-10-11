@@ -43,7 +43,7 @@ public:
 void CommonCoreQueueTest::SetUpTestCase(void) { }
 void CommonCoreQueueTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: QueueInitTest001
  * @tc.desc: core common QueueInit invalid param test
  * @tc.type: FUNC
@@ -60,7 +60,7 @@ HWTEST_F(CommonCoreQueueTest, QueueInitTest001, TestSize.Level1)
     EXPECT_EQ(ret, QUEUE_INVAL);
 }
 
-/**
+/*
  * @tc.name: QueueSizeCalcTest001
  * @tc.desc: core common QueueSizeCalc invalid param test
  * @tc.type: FUNC
@@ -75,7 +75,7 @@ HWTEST_F(CommonCoreQueueTest, QueueSizeCalcTest001, TestSize.Level1)
     EXPECT_EQ(ret, QUEUE_INVAL);
 }
 
-/**
+/*
  * @tc.name: QueueCountGetTest001
  * @tc.desc: core common QueueCountGet invalid param test
  * @tc.type: FUNC
@@ -91,7 +91,7 @@ HWTEST_F(CommonCoreQueueTest, QueueCountGetTest001, TestSize.Level1)
     EXPECT_EQ(ret, QUEUE_INVAL);
 }
 
-/**
+/*
  * @tc.name: CreateQueueTest001
  * @tc.desc: core common CreateQueueTest invalid param test
  * @tc.type: FUNC
@@ -106,7 +106,7 @@ HWTEST_F(CommonCoreQueueTest, CreateQueueTest001, TestSize.Level1)
     SoftBusFree(queue);
 }
 
-/**
+/*
  * @tc.name: CreateQueueTest002
  * @tc.desc: core common CreateQueue success test
  * @tc.type: FUNC

@@ -65,9 +65,9 @@ static void BuildChannelMsg(ChannelMsg *data)
     data->msgUdid = nullptr;
 }
 
-/**
+/*
  * @tc.name: InformPermissionChangeTest001
- * @tc.desc: information permission change test, use the wrong or normal parameter.
+ * @tc.desc: information permission change test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -93,9 +93,9 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelOpenedTest001
- * @tc.desc: client ipc on channel opened test, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel opened test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -146,9 +146,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelOpenFailedTest001
- * @tc.desc: client ipc on channel open failed test, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel open failed test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -174,9 +174,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelLinkDownTest001
- * @tc.desc: client ipc on channel link down test, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel link down test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -212,9 +212,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelClosedTest001
- * @tc.desc: client ipc on channel closed test, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel closed test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -240,9 +240,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelMsgReceivedTest001
- * @tc.desc: client ipc on channel msg received test, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel msg received test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -275,9 +275,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelQosEventTest001
- * @tc.desc: client ipc on channel qos event test, use the wrong or normal parameter.
+ * @tc.desc: client ipc on channel qos event test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -309,9 +309,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelBindTest001
- * @tc.desc: ClientIpcOnChannelBind test.
+ * @tc.desc: ClientIpcOnChannelBind test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -343,9 +343,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelOpenFailedTest002
- * @tc.desc: ClientIpcOnChannelOpenFailed test.
+ * @tc.desc: ClientIpcOnChannelOpenFailed test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,9 +364,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Lev
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelLinkDownTest002
- * @tc.desc: ClientIpcOnChannelLinkDown test.
+ * @tc.desc: ClientIpcOnChannelLinkDown test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -386,9 +386,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level
     data = nullptr;
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelClosedTest002
- * @tc.desc: ClientIpcOnChannelClosed test.
+ * @tc.desc: ClientIpcOnChannelClosed test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -406,9 +406,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: ClientIpcSetChannelInfoTest001
- * @tc.desc: ClientIpcSetChannelInfo test.
+ * @tc.desc: ClientIpcSetChannelInfo test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -441,9 +441,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelMsgReceivedTest002
- * @tc.desc: ClientIpcOnChannelMsgReceived test.
+ * @tc.desc: ClientIpcOnChannelMsgReceived test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -470,9 +470,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Le
     SoftBusFree(receiveData);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnTransLimitChangeTest001
- * @tc.desc: ClientIpcOnTransLimitChange test.
+ * @tc.desc: ClientIpcOnTransLimitChange test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -489,9 +489,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CheckServiceIsRegisteredTest001
- * @tc.desc: CheckServiceIsRegistered test.
+ * @tc.desc: CheckServiceIsRegistered test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -504,9 +504,9 @@ HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcChannelOnQosTest001
- * @tc.desc: ClientIpcChannelOnQos test.
+ * @tc.desc: ClientIpcChannelOnQos test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -538,9 +538,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcCheckCollabRelationTest001
- * @tc.desc: ClientIpcCheckCollabRelation test.
+ * @tc.desc: ClientIpcCheckCollabRelation test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -572,9 +572,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcCheckParamTest001
- * @tc.desc: ClientIpcCheckParam test.
+ * @tc.desc: ClientIpcCheckParam test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -628,9 +628,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcCheckParamTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcBrProxyOpenedTest001
- * @tc.desc: ClientIpcBrProxyOpened test.
+ * @tc.desc: ClientIpcBrProxyOpened test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -655,9 +655,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcBrProxyOpenedTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcBrProxyReceivedDataTest001
- * @tc.desc: ClientIpcBrProxyReceivedData test.
+ * @tc.desc: ClientIpcBrProxyReceivedData test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -678,9 +678,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcBrProxyReceivedDataTest001, TestSize.Lev
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcBrProxyStateChangedTest001
- * @tc.desc: ClientIpcBrProxyStateChanged test.
+ * @tc.desc: ClientIpcBrProxyStateChanged test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -697,9 +697,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcBrProxyStateChangedTest001, TestSize.Lev
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientIpcQueryPermissionTest001
- * @tc.desc: ClientIpcQueryPermission test.
+ * @tc.desc: ClientIpcQueryPermission test
  * @tc.type: FUNC
  * @tc.require:
  */
