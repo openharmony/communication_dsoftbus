@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2772,7 +2772,6 @@ static int32_t RecvMessageInfoDump(int fd)
     {
         RecvMessage *recvNode = LIST_ENTRY(item, RecvMessage, node);
         SOFTBUS_DPRINTF(fd, "RecvMessage capBitMap                  : %u\n", recvNode->capBitMap[0]);
-        SOFTBUS_DPRINTF(fd, "RecvMessage key                        : %s\n", recvNode->key);
         SOFTBUS_DPRINTF(fd, "needBrMac                              : %d\n", recvNode->needBrMac);
     }
     (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
