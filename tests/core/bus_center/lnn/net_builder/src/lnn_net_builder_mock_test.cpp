@@ -174,6 +174,20 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_DELAY_TEST_001, TestSize.Le
 }
 
 /*
+ * @tc.name: PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001
+ * @tc.desc: process leave by addr type test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnNotifyAllTypeOffline(_)).WillRepeatedly(Return());
+    EXPECT_TRUE(ProcessLeaveByAddrType(nullptr) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002
  * @tc.desc: ProcessLeaveByAddrType test
  * @tc.type: FUNC
@@ -375,21 +389,6 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_001, TestSize.Level1
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessLeaveSpecific(nullptr) == SOFTBUS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001
- * @tc.desc: process leave by addr type test
- * @tc.type: FUNC
- * @tc.require:
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnNotifyAllTypeOffline(_)).WillRepeatedly(Return());
-    EXPECT_TRUE(ProcessLeaveByAddrType(nullptr) == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -698,6 +697,93 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_001, TestSize.Le
 }
 
 /*
+ * @tc.name: PROCESS_DEVICE_VERIFY_PASS_TEST_002
+ * @tc.desc: process device verify pass test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_002, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    DeviceVerifyPassMsgPara *msgPara =
+        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    msgPara->authHandle.authId = AUTH_ID;
+
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    connFsm->connInfo.authHandle.authId = AUTH_ID_ADD;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    g_netBuilder.connCount = CURRENT_COUNT;
+    g_netBuilder.maxConnCount = CONN_COUNT;
+    void *para = reinterpret_cast<void *>(msgPara);
+    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_NETWORK_FSM_START_FAIL);
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
+}
+
+/*
+ * @tc.name: PROCESS_DEVICE_VERIFY_PASS_TEST_003
+ * @tc.desc: process device verify pass test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    DeviceVerifyPassMsgPara *msgPara =
+        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    msgPara->authHandle.authId = AUTH_ID;
+
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->isDead = true;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    g_netBuilder.connCount = CURRENT_COUNT;
+    g_netBuilder.maxConnCount = CONN_COUNT;
+    void *para = reinterpret_cast<void *>(msgPara);
+    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_NETWORK_FSM_START_FAIL);
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
+}
+
+/*
+ * @tc.name: PROCESS_DEVICE_VERIFY_PASS_TEST_004
+ * @tc.desc: process device verify pass test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Level1)
+{
+    DeviceVerifyPassMsgPara *msgPara =
+        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    msgPara->authHandle.authId = AUTH_ID;
+
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    void *para = reinterpret_cast<void *>(msgPara);
+    EXPECT_TRUE(ProcessDeviceVerifyPass(para) != SOFTBUS_OK);
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
+}
+
+/*
  * @tc.name: PROCESS_VERIFY_RESULT_TEST_001
  * @tc.desc: process verify result test
  * @tc.type: FUNC
@@ -717,6 +803,83 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_001, TestSize.Level1)
     msgPara2->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     void *para2 = reinterpret_cast<void *>(msgPara2);
     EXPECT_TRUE(ProcessVerifyResult(para2) != SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PROCESS_VERIFY_RESULT_TEST_002
+ * @tc.desc: process verify result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_002, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    msgPara->requestId = REQUEST_ID;
+    void *para = reinterpret_cast<void *>(msgPara);
+
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    connFsm->connInfo.requestId = REQUEST_ID;
+    connFsm->isDead = true;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    EXPECT_TRUE(ProcessVerifyResult(para) != SOFTBUS_OK);
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
+}
+
+/*
+ * @tc.name: PROCESS_VERIFY_RESULT_TEST_003
+ * @tc.desc: process verify result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_003, TestSize.Level1)
+{
+    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    msgPara->requestId = REQUEST_ID;
+    msgPara->retCode = SOFTBUS_INVALID_PARAM;
+    void *para = reinterpret_cast<void *>(msgPara);
+
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    connFsm->connInfo.requestId = REQUEST_ID;
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnSendAuthResultMsgToConnFsm(_, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_TRUE(ProcessVerifyResult(para) == SOFTBUS_INVALID_PARAM);
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
+}
+
+/*
+ * @tc.name: PROCESS_VERIFY_RESULT_TEST_004
+ * @tc.desc: process verify result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_004, TestSize.Level1)
+{
+    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    msgPara->requestId = REQUEST_ID;
+    msgPara->retCode = SOFTBUS_INVALID_PARAM;
+    void *para = reinterpret_cast<void *>(msgPara);
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    connFsm->connInfo.requestId = REQUEST_ID;
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnSendAuthResultMsgToConnFsm(_, _)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_TRUE(ProcessVerifyResult(para) == SOFTBUS_OK);
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
 }
 
 /*
@@ -1034,176 +1197,6 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_002, TestSize
     TryDisconnectAllConnection(&fsmTest);
     TryNotifyAllTypeOffline(&fsmTest);
 
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
- * @tc.name: PROCESS_VERIFY_RESULT_TEST_002
- * @tc.desc: process verify result test
- * @tc.type: FUNC
- * @tc.require:
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_002, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
-    msgPara->requestId = REQUEST_ID;
-    void *para = reinterpret_cast<void *>(msgPara);
-
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    connFsm->connInfo.requestId = REQUEST_ID;
-    connFsm->isDead = true;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-    EXPECT_TRUE(ProcessVerifyResult(para) != SOFTBUS_OK);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
- * @tc.name: PROCESS_VERIFY_RESULT_TEST_003
- * @tc.desc: process verify result test
- * @tc.type: FUNC
- * @tc.require:
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_003, TestSize.Level1)
-{
-    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
-    msgPara->requestId = REQUEST_ID;
-    msgPara->retCode = SOFTBUS_INVALID_PARAM;
-    void *para = reinterpret_cast<void *>(msgPara);
-
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    connFsm->connInfo.requestId = REQUEST_ID;
-    connFsm->isDead = false;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, LnnSendAuthResultMsgToConnFsm(_, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_TRUE(ProcessVerifyResult(para) == SOFTBUS_INVALID_PARAM);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
- * @tc.name: PROCESS_VERIFY_RESULT_TEST_004
- * @tc.desc: process verify result test
- * @tc.type: FUNC
- * @tc.require:
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_004, TestSize.Level1)
-{
-    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
-    msgPara->requestId = REQUEST_ID;
-    msgPara->retCode = SOFTBUS_INVALID_PARAM;
-    void *para = reinterpret_cast<void *>(msgPara);
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    connFsm->connInfo.requestId = REQUEST_ID;
-    connFsm->isDead = false;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, LnnSendAuthResultMsgToConnFsm(_, _)).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_TRUE(ProcessVerifyResult(para) == SOFTBUS_OK);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
- * @tc.name: PROCESS_DEVICE_VERIFY_PASS_TEST_002
- * @tc.desc: process device verify pass test
- * @tc.type: FUNC
- * @tc.require:
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_002, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    DeviceVerifyPassMsgPara *msgPara =
-        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
-    (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    msgPara->authHandle.authId = AUTH_ID;
-
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    connFsm->connInfo.authHandle.authId = AUTH_ID_ADD;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-    g_netBuilder.connCount = CURRENT_COUNT;
-    g_netBuilder.maxConnCount = CONN_COUNT;
-    void *para = reinterpret_cast<void *>(msgPara);
-    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_NETWORK_FSM_START_FAIL);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
- * @tc.name: PROCESS_DEVICE_VERIFY_PASS_TEST_003
- * @tc.desc: process device verify pass test
- * @tc.type: FUNC
- * @tc.require:
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    DeviceVerifyPassMsgPara *msgPara =
-        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
-    (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    msgPara->authHandle.authId = AUTH_ID;
-
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    connFsm->connInfo.authHandle.authId = AUTH_ID;
-    connFsm->isDead = true;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-    g_netBuilder.connCount = CURRENT_COUNT;
-    g_netBuilder.maxConnCount = CONN_COUNT;
-    void *para = reinterpret_cast<void *>(msgPara);
-    EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_NETWORK_FSM_START_FAIL);
-    ListDelete(&connFsm->node);
-    SoftBusFree(connFsm);
-}
-
-/*
- * @tc.name: PROCESS_DEVICE_VERIFY_PASS_TEST_004
- * @tc.desc: process device verify pass test
- * @tc.type: FUNC
- * @tc.require:
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Level1)
-{
-    DeviceVerifyPassMsgPara *msgPara =
-        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
-    (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    msgPara->authHandle.authId = AUTH_ID;
-
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    ListInit(&connFsm->node);
-    (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    connFsm->connInfo.authHandle.authId = AUTH_ID;
-    connFsm->isDead = false;
-    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    void *para = reinterpret_cast<void *>(msgPara);
-    EXPECT_TRUE(ProcessDeviceVerifyPass(para) != SOFTBUS_OK);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
