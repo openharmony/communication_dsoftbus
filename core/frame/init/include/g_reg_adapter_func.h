@@ -87,6 +87,7 @@ typedef void (*SoftbusSetManufactureFilterFunc)(BleScanNativeFilter *nativeFilte
 typedef int32_t (*SetBroadcastingParamFunc)(int32_t bcId, const BroadcastParam *param);
 typedef int32_t (*StartUsbNcmAdapterFunc)(int32_t mode);
 typedef int32_t (*ConfigLocalIpv6Func)(const char *ifName, const char *localIpv6);
+typedef int (*SoftBusGetBtMacAddrFunc)(SoftBusBtAddr *mac);
 
 typedef struct TagAdapterOpenFuncList {
     InitSppSocketDriverFunc initSppSocketDriver;
@@ -140,6 +141,7 @@ typedef struct TagAdapterOpenFuncList {
     SetBroadcastingParamFunc setBroadcastingParam;
     StartUsbNcmAdapterFunc startUsbNcmAdapter;
     ConfigLocalIpv6Func configLocalIpv6;
+    SoftBusGetBtMacAddrFunc softBusGetBtMacAddr;
 } AdapterOpenFuncList;
 
 #ifdef __cplusplus

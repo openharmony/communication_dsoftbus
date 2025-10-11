@@ -318,6 +318,15 @@ DiscoveryBleDispatcherInterface *DiscOopBleInitPacked(DiscInnerCallback *discInn
     return pfnDiscEnhanceFuncList->discOopBleInit(discInnerCb);
 }
 
+DiscoveryBleDispatcherInterface *DiscPcCollaborationInitPacked(DiscInnerCallback *discInnerCb)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discPcCollaborationBleInit) != SOFTBUS_OK) {
+        return &g_SecondTouchBleInterface;
+    }
+    return pfnDiscEnhanceFuncList->discPcCollaborationBleInit(discInnerCb);
+}
+
 static int32_t Publish(const PublishOption *option)
 {
     return SOFTBUS_NOT_IMPLEMENT;
@@ -651,6 +660,15 @@ int32_t DiscOopBleEventInitPacked(void)
         return SOFTBUS_OK;
     }
     return pfnDiscEnhanceFuncList->discOopBleEventInit();
+}
+
+int32_t DiscPcCollaborationEventInitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discPcCollaborationEventInit) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnDiscEnhanceFuncList->discPcCollaborationEventInit();
 }
 
 void DiscTouchBleEventDeinitPacked(void)
