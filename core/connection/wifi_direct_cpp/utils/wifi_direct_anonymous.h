@@ -28,6 +28,7 @@ std::string WifiDirectAnonymizePtk(const std::string &ptk);
 std::string WifiDirectAnonymizeData(const std::string &data);
 std::string WifiDirectAnonymize(const std::string &data);
 std::string WifiDirectHashAnonymize(const std::vector<uint8_t> &input);
+std::string WifiDirectHashAnonymize(const std::vector<char> &input);
 }
 
 #endif
