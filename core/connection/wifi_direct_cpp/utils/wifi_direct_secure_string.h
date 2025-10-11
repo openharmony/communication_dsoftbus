@@ -43,9 +43,19 @@ public:
         return data_.data();
     }
 
+    [[nodiscard]] std::vector<char> VectorData() const
+    {
+        return data_;
+    }
+
     void Append(const std::string &str)
     {
         data_.insert(data_.end(), str.begin(), str.end());
+    }
+
+    void Append(const std::vector<char> &vec)
+    {
+        data_.insert(data_.end(), vec.begin(), vec.end());
     }
 
     void PushBack(char c)
