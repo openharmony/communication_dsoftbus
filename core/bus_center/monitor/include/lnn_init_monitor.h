@@ -32,7 +32,7 @@ typedef enum {
     SLE_DATA_TRANSFER_UPDATE,
     SLE_RANGING_UPDATE,
     COMMON_EVENT_UNKNOWN,
-} CommontEventType;
+} CommonEventType;
 
 typedef enum {
     NOTIFY_MODULE,
