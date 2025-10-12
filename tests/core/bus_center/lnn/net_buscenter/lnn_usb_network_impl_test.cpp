@@ -61,6 +61,7 @@ void LNNUsbNetworkImplMockTest::TearDown() { }
  * @tc.desc: LnnEnableUsbProtocol Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_001, TestSize.Level1)
 {
@@ -88,6 +89,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_001, TestSize.Leve
  * @tc.desc: LnnInitUsbProtocol Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_002, TestSize.Level1)
 {
@@ -118,6 +120,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_002, TestSize.Leve
  * @tc.desc: LnnGetUsbListenerModule Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_003, TestSize.Level1)
 {
@@ -136,6 +139,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_003, TestSize.Leve
  * @tc.desc: NotifyUsbAddressChanged Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_004, TestSize.Level1)
 {
@@ -157,6 +161,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_004, TestSize.Leve
  * @tc.desc: OnIpNetifStatusChanged Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_005, TestSize.Level1)
 {
@@ -214,6 +219,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_005, TestSize.Leve
  * @tc.desc: OnSoftbusIpNetworkDisconnected Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_006, TestSize.Level1)
 {
@@ -248,6 +254,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_006, TestSize.Leve
  * @tc.desc: DestroyUsbSubnetManager Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_007, TestSize.Level1)
 {
@@ -266,6 +273,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_007, TestSize.Leve
  * @tc.desc: GetAvailableIpAddr Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_008, TestSize.Level1)
 {
@@ -288,6 +296,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_008, TestSize.Leve
  * @tc.desc: GetIpEventInRunning And GetIpEventInOther Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_009, TestSize.Level1)
 {
@@ -339,6 +348,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_009, TestSize.Leve
  * @tc.desc: add ip and port to ledger
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_010, TestSize.Level1)
 {
@@ -368,6 +378,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_010, TestSize.Leve
  * @tc.desc: OpenAuthPort Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_011, TestSize.Level1)
 {
@@ -393,6 +404,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_011, TestSize.Leve
  * @tc.desc: OpenSessionPort Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_012, TestSize.Level1)
 {
@@ -422,6 +434,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_012, TestSize.Leve
  * @tc.desc: OpenIpLink Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_013, TestSize.Level1)
 {
@@ -449,6 +462,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_013, TestSize.Leve
  * @tc.desc: EnableIpSubnet Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_014, TestSize.Level1)
 {
@@ -502,6 +516,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_014, TestSize.Leve
  * @tc.desc: release ip and port to ledger
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_015, TestSize.Level1)
 {
@@ -543,6 +558,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_015, TestSize.Leve
  * @tc.desc: IsValidUsbIfname Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_016, TestSize.Level1)
 {
@@ -557,6 +573,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_016, TestSize.Leve
  * @tc.desc: IpAddrChangeEventHandler Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_017, TestSize.Level1)
 {
@@ -582,6 +599,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_017, TestSize.Leve
  * @tc.desc: UsbNcmChangeHandler Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_018, TestSize.Level1)
 {
@@ -618,6 +636,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_018, TestSize.Leve
  * @tc.desc: RegistUsbProtocolManager Test
  * @tc.type: FUNC
  * @tc.require: NONE
+ * @tc.level: Level1
  */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_019, TestSize.Level1)
 {

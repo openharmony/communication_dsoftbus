@@ -51,9 +51,9 @@ public:
 void SoftbusPermissionTest::SetUpTestCase(void) { }
 void SoftbusPermissionTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: IsValidPkgNameTest001
- * @tc.desc: is valid pkgname test, use the wrong or normal parameter.
+ * @tc.desc: is valid pkgname test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -68,9 +68,9 @@ HWTEST_F(SoftbusPermissionTest, IsValidPkgNameTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CheckTransPermissionTest001
- * @tc.desc: check trans permission test, use the wrong parameter.
+ * @tc.desc: check trans permission test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -85,9 +85,9 @@ HWTEST_F(SoftbusPermissionTest, CheckTransPermissionTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name: CheckTransSecLevelTest001
- * @tc.desc: check trans sec level test, use the wrong or normal parameter.
+ * @tc.desc: check trans sec level test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -104,9 +104,9 @@ HWTEST_F(SoftbusPermissionTest, CheckTransSecLevelTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CheckDiscPermissionTest001
- * @tc.desc: check disc permission test, use the wrong or normal parameter.
+ * @tc.desc: check disc permission test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -125,9 +125,9 @@ HWTEST_F(SoftbusPermissionTest, CheckDiscPermissionTest001, TestSize.Level0)
     EXPECT_TRUE(ret == false);
 }
 
-/**
+/*
  * @tc.name: GrantTransPermissionTest001
- * @tc.desc: grant trans permission test, use the wrong parameter.
+ * @tc.desc: grant trans permission test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -139,9 +139,9 @@ HWTEST_F(SoftbusPermissionTest, GrantTransPermissionTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: RemoveTransPermissionTest001
- * @tc.desc: remove trans permission test, use the wrong parameter.
+ * @tc.desc: remove trans permission test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -153,9 +153,9 @@ HWTEST_F(SoftbusPermissionTest, RemoveTransPermissionTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/**
+/*
  * @tc.name: CheckDynamicPermissionTest001
- * @tc.desc: check dynamic permission test, use the wrong parameter.
+ * @tc.desc: check dynamic permission test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -166,9 +166,9 @@ HWTEST_F(SoftbusPermissionTest, CheckDynamicPermissionTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name:CheckDmsServerPermissionTest001
- * @tc.desc: check dms server permission test, use the wrong parameter.
+ * @tc.desc: check dms server permission test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -179,9 +179,9 @@ HWTEST_F(SoftbusPermissionTest, CheckDmsServerPermissionTest001, TestSize.Level0
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsSystemService001
- * @tc.desc: SoftBusCheckIsSystemService
+ * @tc.desc: SoftBusCheckIsSystemService test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -195,9 +195,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsSystemService001, TestSize.Level0)
     EXPECT_TRUE(ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsNormalApp001
- * @tc.desc: SoftBusCheckIsNormalApp
+ * @tc.desc: SoftBusCheckIsNormalApp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -209,9 +209,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp001, TestSize.Level0)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsNormalApp002
- * @tc.desc: SoftBusCheckIsNormalApp
+ * @tc.desc: SoftBusCheckIsNormalApp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -223,9 +223,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp002, TestSize.Level0)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsNormalApp003
- * @tc.desc: SoftBusCheckIsNormalApp
+ * @tc.desc: SoftBusCheckIsNormalApp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -237,9 +237,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp003, TestSize.Level0)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsNormalApp004
- * @tc.desc: SoftBusCheckIsNormalApp
+ * @tc.desc: SoftBusCheckIsNormalApp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -254,9 +254,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp004, TestSize.Level0)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsAccessAndRecordAccessToken001
- * @tc.desc: SoftBusCheckIsAccessAndRecordAccessToken
+ * @tc.desc: SoftBusCheckIsAccessAndRecordAccessToken test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -268,9 +268,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsAccessAndRecordAccessToken001, Tes
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCalcPermType001
- * @tc.desc: SoftBusCalcPermType
+ * @tc.desc: SoftBusCalcPermType test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -284,9 +284,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCalcPermType001, TestSize.Level0)
     EXPECT_EQ(ret, SELF_APP);
 }
 
-/**
+/*
  * @tc.name:SoftBusCalcPermType002
- * @tc.desc: SoftBusCalcPermType
+ * @tc.desc: SoftBusCalcPermType test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -300,9 +300,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCalcPermType002, TestSize.Level0)
     EXPECT_EQ(ret, ATokenTypeEnum::TOKEN_TYPE_BUTT);
 }
 
-/**
+/*
  * @tc.name:PermStateChangeCallback001
- * @tc.desc: PermStateChangeCallback
+ * @tc.desc: PermStateChangeCallback test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -320,9 +320,9 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback001, TestSize.Level0)
     std::cout << "g_permissionChangeCb is empty." << std::endl;
 }
 
-/**
+/*
  * @tc.name:PermStateChangeCallback002
- * @tc.desc: PermStateChangeCallback
+ * @tc.desc: PermStateChangeCallback test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -341,9 +341,9 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback002, TestSize.Level0)
     std::cout << "g_permissionChangeCb is not empty." << std::endl;
 }
 
-/**
+/*
  * @tc.name:SoftBusRegisterDataSyncPermission001
- * @tc.desc: SoftBusRegisterDataSyncPermission
+ * @tc.desc: SoftBusRegisterDataSyncPermission test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -353,9 +353,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusRegisterDataSyncPermission001, TestSize.L
     EXPECT_NO_FATAL_FAILURE(SoftBusRegisterDataSyncPermission(tonkenId, nullptr, nullptr, INVALID_TEST_PID));
 }
 
-/**
+/*
  * @tc.name:SoftBusUnRegisterDataSyncPermission001
- * @tc.desc: SoftBusUnRegisterDataSyncPermission
+ * @tc.desc: SoftBusUnRegisterDataSyncPermission test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,9 +364,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusUnRegisterDataSyncPermission001, TestSize
     EXPECT_NO_FATAL_FAILURE(SoftBusUnRegisterDataSyncPermission(INVALID_TEST_PID));
 }
 
-/**
+/*
  * @tc.name:SoftBusGetTokenNameByTokenType001
- * @tc.desc: SoftBusGetTokenNameByTokenType
+ * @tc.desc: SoftBusGetTokenNameByTokenType test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -376,9 +376,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusGetTokenNameByTokenType001, TestSize.Leve
     EXPECT_NO_FATAL_FAILURE(SoftBusGetTokenNameByTokenType(nullptr, nameLen, TOKEN_HAP, ACEESS_TOKEN_TYPE_INVALID));
 }
 
-/**
+/*
  * @tc.name:SoftBusGetTokenNameByTokenType002
- * @tc.desc: SoftBusGetTokenNameByTokenType
+ * @tc.desc: SoftBusGetTokenNameByTokenType test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -391,9 +391,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusGetTokenNameByTokenType002, TestSize.Leve
         SoftBusGetTokenNameByTokenType(tokenName, nameLen, TOKEN_NATIVE, ACEESS_TOKEN_TYPE_INVALID));
 }
 
-/**
+/*
  * @tc.name:SoftBusGetTokenNameByTokenType003
- * @tc.desc: SoftBusGetTokenNameByTokenType
+ * @tc.desc: SoftBusGetTokenNameByTokenType test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -406,9 +406,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusGetTokenNameByTokenType003, TestSize.Leve
         SoftBusGetTokenNameByTokenType(tokenName, nameLen, TOKEN_SHELL, ACEESS_TOKEN_TYPE_INVALID));
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsCollabApp001
- * @tc.desc: SoftBusCheckIsCollabApp
+ * @tc.desc: SoftBusCheckIsCollabApp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -419,9 +419,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsCollabApp001, TestSize.Level0)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsCollabApp002
- * @tc.desc: SoftBusCheckIsCollabApp
+ * @tc.desc: SoftBusCheckIsCollabApp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -436,9 +436,9 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsCollabApp002, TestSize.Level0)
     EXPECT_FALSE(result);
 }
 
-/**
+/*
  * @tc.name:SoftBusCheckIsCollabApp003
- * @tc.desc: SoftBusCheckIsCollabApp
+ * @tc.desc: SoftBusCheckIsCollabApp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -453,7 +453,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsCollabApp003, TestSize.Level0)
     EXPECT_FALSE(result);
 }
 
-/**
+/*
  * @tc.name:CheckLnnPermissionTest001
  * @tc.desc: CheckLnnPermission param error
  * @tc.type: FUNC
@@ -474,7 +474,7 @@ HWTEST_F(SoftbusPermissionTest, CheckLnnPermissionTest001, TestSize.Level1)
     LnnDeinitPermission();
 }
 
-/**
+/*
  * @tc.name:LnnInitPermissionTest001
  * @tc.desc: LnnInitPermission func test
  * @tc.type: FUNC

@@ -56,6 +56,7 @@ void LNNBatteryInfoTest::TearDown() { }
  * @tc.name: LNN_SYNC_BATTERY_INFO_TEST_001
  * @tc.desc: test LnnSyncBatteryInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
@@ -76,6 +77,7 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
  * @tc.name: ON_RECEIVE_BATTERY_INFO_TEST_001
  * @tc.desc: test OnReceiveBatteryInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNBatteryInfoTest, ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Level1)

@@ -57,7 +57,7 @@ static void GenUkFailed(uint32_t requestId, int32_t reason)
     (void)reason;
 }
 
-/**
+/*
  * @tc.name: UkManagerInit001
  * @tc.desc: UkManagerInit001.
  * @tc.type: FUNC
@@ -71,7 +71,7 @@ HWTEST_F(TransUkManagerTest, UkManagerInit001, TestSize.Level1)
     TransUkRequestMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: UkRequestManagerTest001
  * @tc.desc: UkRequestManagerTest001.
  * @tc.type: FUNC
@@ -116,7 +116,7 @@ HWTEST_F(TransUkManagerTest, UkRequestManagerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: UkGetUkPolicyTest001
  * @tc.desc: UkGetUkPolicyTest001.
  * @tc.type: FUNC
@@ -175,7 +175,7 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: GetLocalAccountUidByUserIdTest_001
  * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull.
  * @tc.type: FUNC
@@ -192,7 +192,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_001, TestSize.Level0
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetLocalAccountUidByUserIdTest_002
  * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull.
  * @tc.type: FUNC
@@ -210,7 +210,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_002, TestSize.Level0
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetLocalAccountUidByUserIdTest_003
  * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnOK_WhenLnnGetLocalStrInfoSucceeds.
  * @tc.type: FUNC
@@ -235,7 +235,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_003, TestSize.Level0
     EXPECT_EQ(len, strlen("local_uid"));
 }
 
-/**
+/*
  * @tc.name: GetLocalAccountUidByUserIdTest_005
  * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnStrcpyErr_WhenStrcpySFails.
  * @tc.type: FUNC
@@ -252,7 +252,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_005, TestSize.Level0
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetLocalAccountUidByUserIdTest_006
  * @tc.desc: GetLocalAccountUidByUserIdTest
  * @tc.type: FUNC
@@ -274,7 +274,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_006, TestSize.Level1
     EXPECT_EQ(outLen, 0u);
 }
 
-/**
+/*
  * @tc.name: GetLocalAccountUidByUserIdTest_007
  * @tc.desc: GetLocalAccountUidByUserIdTest_007
  * @tc.type: FUNC
@@ -297,7 +297,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_007, TestSize.Level1
     EXPECT_EQ(badId[testLen - 1], '\0');
 }
 
-/**
+/*
  * @tc.name: FillHapSinkAclInfoToAppInfoTest_001
  * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleReturnImmediately_WhenAppInfoIsNull.
  * @tc.type: FUNC
@@ -308,7 +308,7 @@ HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_001, TestSize.Level
     EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(NULL));
 }
 
-/**
+/*
  * @tc.name: FillHapSinkAclInfoToAppInfoTest_002
  * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
  * @tc.type: FUNC
@@ -328,7 +328,7 @@ HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_002, TestSize.Level
     delete appInfo;
 }
 
-/**
+/*
  * @tc.name: FillHapSinkAclInfoToAppInfoTest_003
  * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
  * @tc.type: FUNC
@@ -348,7 +348,7 @@ HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_003, TestSize.Level
     delete appInfo;
 }
 
-/**
+/*
  * @tc.name: UkEncryptAndAddSinkSessionKeyTest001
  * @tc.desc: UkEncryptAndAddSinkSessionKeyTest001.
  * @tc.type: FUNC
@@ -390,7 +390,7 @@ HWTEST_F(TransUkManagerTest, UkEncryptAndAddSinkSessionKeyTest001, TestSize.Leve
     cJSON_Delete(json);
 }
 
-/**
+/*
  * @tc.name: UkDecryptAndAddSinkSessionKeyTest001
  * @tc.desc: UkDecryptAndAddSinkSessionKeyTest001.
  * @tc.type: FUNC
@@ -451,7 +451,7 @@ HWTEST_F(TransUkManagerTest, UkDecryptAndAddSinkSessionKeyTest001, TestSize.Leve
     cJSON_Delete(json);
 }
 
-/**
+/*
  * @tc.name: UkGetUserKeyIdByAclInfoTest001
  * @tc.desc: UkGetUserKeyIdByAclInfoTest001.
  * @tc.type: FUNC

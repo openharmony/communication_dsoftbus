@@ -67,6 +67,7 @@ void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, u
  * @tc.desc: LnnInitSyncInfoManager
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_INIT_SYNC_INFO_MANAGER_TEST_001, TestSize.Level1)
 {
@@ -84,6 +85,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_INIT_SYNC_INFO_MANAGER_TEST_001, TestSize.L
  * @tc.desc: invalid parameter
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level1)
 {
@@ -100,6 +102,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Le
  * @tc.desc: invalid parameter
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.Level1)
 {
@@ -117,6 +120,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
  * @tc.desc: invalid parameter
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
 {
@@ -132,6 +136,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level
  * @tc.desc: LnnSendP2pSyncInfoMsg test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
 {
@@ -170,6 +175,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.L
  * @tc.desc: networkId == nullptr
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_002, TestSize.Level1)
 {
@@ -185,6 +191,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_002, TestSize.L
  * @tc.desc: GetAuthHandleByNetworkId(networkId, &authHandle) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_003, TestSize.Level1)
 {
@@ -204,6 +211,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_003, TestSize.L
  * @tc.desc: AuthGetLatestAuthSeqListByType != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_004, TestSize.Level1)
 {
@@ -225,6 +233,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_004, TestSize.L
  * @tc.desc: msg == nullptr
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005, TestSize.Level1)
 {
@@ -248,6 +257,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005, TestSize.L
  * @tc.desc: SoftBusGenerateRandomArray((uint8_t *)&dataInfo.seq, sizeof(int64_t)) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_006, TestSize.Level1)
 {
@@ -286,6 +296,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_006, TestSize.L
  * @tc.desc: AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_007, TestSize.Level1)
 {
@@ -325,6 +336,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_007, TestSize.L
  * @tc.desc: AuthPostTransData(authHandle, &dataInfo) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008, TestSize.Level1)
 {
@@ -364,6 +376,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008, TestSize.L
  * @tc.desc: return nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, FindSyncChannelInfoByChannelId_001, TestSize.Level1)
 {
@@ -376,6 +389,7 @@ HWTEST_F(LNNSyncInfoManagerTest, FindSyncChannelInfoByChannelId_001, TestSize.Le
  * @tc.desc: SendSyncInfoMsgOnly
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsg_001, TestSize.Level1)
 {
@@ -405,6 +419,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsg_001, TestSize.Level1)
  * @tc.desc: return newMsg;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, DumpMsgExcludeListNode_001, TestSize.Level1)
 {
@@ -425,6 +440,7 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpMsgExcludeListNode_001, TestSize.Level1)
  * @tc.desc: return SOFTBUS_OK;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, DumpSyncInfoMsgList_001, TestSize.Level1)
 {
@@ -452,6 +468,7 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncInfoMsgList_001, TestSize.Level1)
  * @tc.desc: return newInfo;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, DumpSyncChannelInfo_001, TestSize.Level1)
 {
@@ -477,6 +494,7 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncChannelInfo_001, TestSize.Level1)
  * @tc.desc: SendSyncInfoMsgFromList
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsgFromList_001, TestSize.Level1)
 {
@@ -506,6 +524,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsgFromList_001, TestSize.Level1)
  * @tc.desc: info->serverChannelId != channelId && info->serverChannelId != INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_001, TestSize.Level1)
 {
@@ -531,6 +550,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_001, TestSize.Level1)
  * @tc.desc: info->serverChannelId != channelId && info->serverChannelId != INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_002, TestSize.Level1)
 {
@@ -555,6 +575,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_002, TestSize.Level1)
  * @tc.desc: isServer = false
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, AddChannelInfoNode_001, TestSize.Level1)
 {
@@ -568,6 +589,7 @@ HWTEST_F(LNNSyncInfoManagerTest, AddChannelInfoNode_001, TestSize.Level1)
  * @tc.desc: LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_001, TestSize.Level1)
 {
@@ -585,6 +607,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_001, TestSize.Level1)
  * @tc.desc: !isServer == true
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_002, TestSize.Level1)
 {
@@ -619,6 +642,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_002, TestSize.Level1)
  * @tc.desc: oldChannelId != INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_003, TestSize.Level1)
 {
@@ -647,6 +671,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_003, TestSize.Level1)
  * @tc.desc: info->serverChannelId == channelId
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_001, TestSize.Level1)
 {
@@ -668,6 +693,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_001, TestSize.Level1)
  * @tc.desc: oldChannelId != INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_002, TestSize.Level1)
 {
@@ -689,6 +715,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_002, TestSize.Level1)
  * @tc.desc: info->serverChannelId == INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_003, TestSize.Level1)
 {
@@ -708,6 +735,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_003, TestSize.Level1)
  * @tc.desc: LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_001, TestSize.Level1)
 {
@@ -724,6 +752,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_001, TestSize.Level1)
  * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_002, TestSize.Level1)
 {
@@ -764,6 +793,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_002, TestSize.Level1)
  * @tc.desc: SUCCESS
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_003, TestSize.Level1)
 {
@@ -804,6 +834,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_003, TestSize.Level1)
  * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_001, TestSize.Level1)
 {
@@ -818,6 +849,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_001, TestSize.Level1)
  * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_002, TestSize.Level1)
 {
@@ -840,6 +872,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_002, TestSize.Level1)
  * @tc.desc: len <= MSG_HEAD_LEN   &   len <= MSG_HEAD_LEN   &   info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_001, TestSize.Level1)
 {
@@ -860,6 +893,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_001, TestSize.Level1)
  * @tc.desc: type < 0 || type >= LNN_INFO_TYPE_COUNT
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_002, TestSize.Level1)
 {
@@ -884,6 +918,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_002, TestSize.Level1)
  * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_003, TestSize.Level1)
 {
@@ -909,6 +944,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_003, TestSize.Level1)
  * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_001, TestSize.Level1)
 {
@@ -927,6 +963,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_001, TestSize.Level1)
  * @tc.desc: !JSON_AddInt64ToObject(json, NETWORK_SYNC_CONN_CAP, connCap)
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_002, TestSize.Level1)
 {
@@ -950,6 +987,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_002, TestSize.Level1)
  * @tc.desc: SUCCESS
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_003, TestSize.Level1)
 {
@@ -974,6 +1012,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_003, TestSize.Level1)
  * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_001, TestSize.Level1)
 {
@@ -991,6 +1030,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_001, TestSize.Level1)
  * @tc.desc: !JSON_AddInt64ToObject(json, NETWORK_SYNC_CONN_CAP, connCap)
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_002, TestSize.Level1)
 {
@@ -1013,6 +1053,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_002, TestSize.Level1)
  * @tc.desc: SUCCESS
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_003, TestSize.Level1)
 {
@@ -1036,6 +1077,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackWifiOfflineMsg_003, TestSize.Level1)
  * @tc.desc: LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_001, TestSize.Level1)
 {
@@ -1053,6 +1095,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_001, TestSize.Level1)
  * @tc.desc: AuthGetLatestAuthSeqListByType(udid, localAuthSeq, authVerifyTime, DISCOVERY_TYPE_BLE) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_002, TestSize.Level1)
 {
@@ -1072,6 +1115,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_002, TestSize.Level1)
  * @tc.desc: peerAuthSeq == 0
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_003, TestSize.Level1)
 {
@@ -1091,6 +1135,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_003, TestSize.Level1)
  * @tc.desc: return SOFTBUS_OK;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_004, TestSize.Level1)
 {
@@ -1112,6 +1157,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckPeerAuthSeq_004, TestSize.Level1)
  * @tc.desc: return SOFTBUS_OK;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_001, TestSize.Level1)
 {
@@ -1132,6 +1178,7 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_001, TestSize.Level1)
  * @tc.desc: !JSON_GetInt64FromOject(json, NETWORK_SYNC_CONN_CAP, &peerConnCap) == true
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_002, TestSize.Level1)
 {
@@ -1155,6 +1202,7 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_002, TestSize.Level1)
  * @tc.desc: LnnHasCapability((uint32_t)peerConnCap, BIT_BLE) == true
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_003, TestSize.Level1)
 {
@@ -1180,6 +1228,7 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_003, TestSize.Level1)
  * @tc.desc: AuthGetDeviceUuid(authHandle.authId, uuid, UUID_BUF_LEN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_004, TestSize.Level1)
 {
@@ -1208,6 +1257,7 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_004, TestSize.Level1)
  * @tc.desc: LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_005, TestSize.Level1)
 {
@@ -1242,6 +1292,7 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_005, TestSize.Level1)
  * @tc.desc: LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &port) != 0
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_001, TestSize.Level1)
 {
@@ -1259,6 +1310,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_001, TestSize.Level1)
  * @tc.desc: LnnGetNodeKeyInfo(networkId, NODE_KEY_BLE_OFFLINE_CODE, remoteOfflineCode, WIFI_OFFLINE_CODE_LEN) != 0
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_002, TestSize.Level1)
 {
@@ -1278,6 +1330,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_002, TestSize.Level1)
  * @tc.desc: ConvertBytesToHexString != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_003, TestSize.Level1)
 {
@@ -1300,6 +1353,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_003, TestSize.Level1)
  * @tc.desc: strcmp(convertOfflineCode, offlineCode) != 0 || port != authPort
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_004, TestSize.Level1)
 {
@@ -1325,6 +1379,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_004, TestSize.Level1)
  * @tc.desc: return true
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_005, TestSize.Level1)
 {
@@ -1351,6 +1406,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_005, TestSize.Level1)
  * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_001, TestSize.Level1)
 {
@@ -1371,6 +1427,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_001, TestSize.Level1)
  * @tc.desc: !JSON_GetInt32FromOject(json, NETWORK_OFFLINE_PORT, &authPort) == false
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_002, TestSize.Level1)
 {
@@ -1394,6 +1451,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_002, TestSize.Level1)
  * @tc.desc: AuthGetDeviceUuid(authHandle.authId, uuid, UUID_BUF_LEN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_003, TestSize.Level1)
 {
@@ -1420,6 +1478,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_003, TestSize.Level1)
  * @tc.desc: LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_004, TestSize.Level1)
 {
@@ -1449,6 +1508,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_004, TestSize.Level1)
  *           LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
 {
@@ -1488,6 +1548,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
  * @tc.desc: data == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_001, TestSize.Level1)
 {
@@ -1504,6 +1565,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_001, TestSize.Level1)
  * @tc.desc: data->module != MODULE_P2P_NETWORKING_SYNC
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_002, TestSize.Level1)
 {
@@ -1523,6 +1585,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_002, TestSize.Level1)
  * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_003, TestSize.Level1)
 {
@@ -1545,6 +1608,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_003, TestSize.Level1)
  * @tc.desc: JSON_GetInt32FromOject(json, NETWORK_SYNC_TYPE, &peerNetworkType) == false
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_004, TestSize.Level1)
 {
@@ -1570,6 +1634,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_004, TestSize.Level1)
  * @tc.desc: peerNetworkType == DISCOVERY_TYPE_BLE
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_005, TestSize.Level1)
 {
@@ -1596,6 +1661,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_005, TestSize.Level1)
  * @tc.desc: peerNetworkType == DISCOVERY_TYPE_WIFI
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_006, TestSize.Level1)
 {
@@ -1622,6 +1688,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_006, TestSize.Level1)
  * @tc.desc: item == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_001, TestSize.Level1)
 {
@@ -1635,6 +1702,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_001, TestSize.Level
  * @tc.desc: item->clientChannelId != INVALID_CHANNEL_ID && item->serverChannelId != INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_002, TestSize.Level1)
 {
@@ -1658,6 +1726,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_002, TestSize.Level
  * @tc.desc: info->event != LNN_EVENT_NODE_ONLINE_STATE_CHANGED
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnLnnOnlineStateChange_001, TestSize.Level1)
 {
@@ -1675,6 +1744,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnLnnOnlineStateChange_001, TestSize.Level1)
  * @tc.desc: data == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_001, TestSize.Level1)
 {
@@ -1688,6 +1758,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_001, TestSize.Level1)
  * @tc.desc: data->len <= MSG_HEAD_LEN
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_002, TestSize.Level1)
 {
@@ -1706,6 +1777,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_002, TestSize.Level1)
  * @tc.desc: auth == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_003, TestSize.Level1)
 {
@@ -1727,6 +1799,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_003, TestSize.Level1)
  * @tc.desc: LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId)) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_004, TestSize.Level1)
 {
@@ -1751,6 +1824,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_004, TestSize.Level1)
  * @tc.desc: type < 0 || type >= LNN_INFO_TYPE_COUNT
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_005, TestSize.Level1)
 {
@@ -1775,6 +1849,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_005, TestSize.Level1)
  * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_006, TestSize.Level1)
 {
@@ -1800,6 +1875,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_006, TestSize.Level1)
  * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_007, TestSize.Level1)
 {
@@ -1826,6 +1902,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_007, TestSize.Level1)
  * @tc.desc: SUCCESS
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_008, TestSize.Level1)
 {
@@ -1852,6 +1929,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_008, TestSize.Level1)
  * @tc.desc: SUCCESS
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncAuthClose_001, TestSize.Level1)
 {
@@ -1864,6 +1942,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncAuthClose_001, TestSize.Level1)
  * @tc.desc: oldInfo->clientChannelId == INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_001, TestSize.Level1)
 {
@@ -1894,6 +1973,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_001, TestSize.Level1)
  * @tc.desc: oldInfo->isClientOpened = false
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_002, TestSize.Level1)
 {
@@ -1928,6 +2008,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_002, TestSize.Level1)
  * @tc.desc: oldInfo->isClientOpened = true
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_003, TestSize.Level1)
 {
@@ -1963,6 +2044,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_003, TestSize.Level1)
  * @tc.desc: info->clientChannelId == INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoByNewChannel_001, TestSize.Level1)
 {
@@ -1978,6 +2060,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoByNewChannel_001, TestSize.Level1)
  * @tc.desc: IsListEmpty(&g_syncInfoManager.channelInfoList)
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoByNewChannel_002, TestSize.Level1)
 {
@@ -1998,6 +2081,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoByNewChannel_002, TestSize.Level1)
  * @tc.desc: info->isClientOpened == true
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
 {
@@ -2030,6 +2114,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
  * @tc.desc: authHandle->authId != AUTH_INVALID_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, GetWifiDirectAuthByNetworkId_001, TestSize.Level1)
 {
@@ -2050,6 +2135,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetWifiDirectAuthByNetworkId_001, TestSize.Leve
  * @tc.desc: return SOFTBUS_ERR;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, GetWifiDirectAuthByNetworkId_002, TestSize.Level1)
 {
@@ -2070,6 +2156,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetWifiDirectAuthByNetworkId_002, TestSize.Leve
  * @tc.desc: GetWifiDirectAuthByNetworkId(networkId, &authHandle) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_001, TestSize.Level1)
 {
@@ -2087,6 +2174,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_001, TestSize.Level1)
  * @tc.desc: AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_ERR
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_002, TestSize.Level1)
 {
@@ -2107,6 +2195,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_002, TestSize.Level1)
  * @tc.desc: msg->complete != nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_003, TestSize.Level1)
 {
@@ -2132,6 +2221,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_003, TestSize.Level1)
  * @tc.desc: ret != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_001, TestSize.Level1)
 {
@@ -2148,6 +2238,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_001, TestSize.Level1)
  * @tc.desc: *remote == 0
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_002, TestSize.Level1)
 {
@@ -2167,6 +2258,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_002, TestSize.Level1)
  * @tc.desc: return SOFTBUS_OK;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_003, TestSize.Level1)
 {
@@ -2186,12 +2278,30 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_003, TestSize.Level1)
  * @tc.desc: LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &localCap) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK));
 
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
 }
 
@@ -2200,18 +2310,21 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_001, TestSize.Level1)
  * @tc.desc: (localCap & (1 << BIT_WIFI_P2P)) == 0
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_002, TestSize.Level1)
 {
-    uint32_t local = 0;
+    uint32_t p2pDynamicCap = 1 << BIT_WIFI_P2P;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
-    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(p2pDynamicCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)));
 
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
 }
 
@@ -2220,6 +2333,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_002, TestSize.Level1)
  * @tc.desc: GetFeatureCap(networkId, &local, &remote) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
 {
@@ -2229,10 +2343,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
 
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
@@ -2243,6 +2358,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
  * @tc.desc: (local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_004, TestSize.Level1)
 {
@@ -2252,10 +2368,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_004, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 1;
     uint32_t remote2 = 1;
@@ -2274,6 +2391,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_004, TestSize.Level1)
  * @tc.desc: LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_005, TestSize.Level1)
 {
@@ -2283,10 +2401,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_005, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2307,6 +2426,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_005, TestSize.Level1)
  * @tc.desc: LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_006, TestSize.Level1)
 {
@@ -2316,10 +2436,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_006, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2341,6 +2462,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_006, TestSize.Level1)
  * @tc.desc: (localCap & (1 << BIT_BR)) && (remoteCap & (1 << BIT_BR))
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_007, TestSize.Level1)
 {
@@ -2350,10 +2472,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_007, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2375,6 +2498,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_007, TestSize.Level1)
  * @tc.desc: return true;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_008, TestSize.Level1)
 {
@@ -2384,10 +2508,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_008, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2409,6 +2534,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_008, TestSize.Level1)
  * @tc.desc: return true;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendSyncInfoMsg_001, TestSize.Level1)
 {
@@ -2420,10 +2546,11 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendSyncInfoMsg_001, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2449,6 +2576,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendSyncInfoMsg_001, TestSize.Level1)
  * @tc.desc: authHandle->authId != AUTH_INVALID_ID
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, GetAuthHandleByNetworkId_001, TestSize.Level1)
 {
@@ -2467,6 +2595,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetAuthHandleByNetworkId_001, TestSize.Level1)
  * @tc.desc: return SOFTBUS_ERR;
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, GetAuthHandleByNetworkId_002, TestSize.Level1)
 {
@@ -2485,6 +2614,7 @@ HWTEST_F(LNNSyncInfoManagerTest, GetAuthHandleByNetworkId_002, TestSize.Level1)
  * @tc.desc: LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &authPort, WLAN_IF) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_001, TestSize.Level1)
 {
@@ -2504,6 +2634,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_001, TestSize.Level1)
  * @tc.desc: ConvertBytesToHexString == SOFTBUS_ERR
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_002, TestSize.Level1)
 {
@@ -2521,6 +2652,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_002, TestSize.Level1)
  * @tc.desc: msg == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_003, TestSize.Level1)
 {
@@ -2539,6 +2671,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_003, TestSize.Level1)
  * @tc.desc: GetHmlOrP2pAuthHandle(&authHandle, &num) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
 {
@@ -2574,6 +2707,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
  * @tc.desc: AuthPostTransData(authHandle[i], &dataInfo) == SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
 {
@@ -2616,6 +2750,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
  * @tc.desc: AuthPostTransData(authHandle[i], &dataInfo) == SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
+ * @tc.level: Level1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_006, TestSize.Level1)
 {
@@ -2651,5 +2786,39 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_006, TestSize.Level1)
     EXPECT_CALL(lnnSyncInfoMgrMock, AuthPostTransData(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
 
     EXPECT_EQ(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: IsEnhancedP2pSupported_001
+ * @tc.desc: test IsEnhancedP2pSupported
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LNNSyncInfoManagerTest, IsEnhancedP2pSupported_001, TestSize.Level1)
+{
+    uint32_t p2pStaticCap = 1 << STATIC_CAP_BIT_ENHANCED_P2P;
+    uint64_t hmlFeature = 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(p2pStaticCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(p2pStaticCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(hmlFeature), Return(SOFTBUS_OK)));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(hmlFeature), Return(SOFTBUS_OK)));
+
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), true);
 }
 } // namespace OHOS

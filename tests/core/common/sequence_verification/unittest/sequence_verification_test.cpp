@@ -30,9 +30,9 @@ public:
     static void TearDownTestCase(void) { }
 };
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_NormalCase_001
- * @tc.desc: Verify normal case, seq >= 0.
+ * @tc.desc: Verify normal case, seq >= 0
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -45,9 +45,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_001, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_NormalCase_002
- * @tc.desc: Verify normal case, seq < 0.
+ * @tc.desc: Verify normal case, seq < 0
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -64,9 +64,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_002, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_NormalCase_003
- * @tc.desc: Verify normal case and seq flip negative.
+ * @tc.desc: Verify normal case and seq flip negative
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -84,9 +84,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_003, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_NormalCase_004
- * @tc.desc: Verify normal case and seq flip positive.
+ * @tc.desc: Verify normal case and seq flip positive
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -103,9 +103,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_NormalCase_004, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_001
- * @tc.desc: Verify disorder seq.
+ * @tc.desc: Verify disorder seq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -119,9 +119,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_001, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_002
- * @tc.desc: Verify disorder seq, boundary valueseq(61-1=60[MAX_SEQ_BIAS]).
+ * @tc.desc: Verify disorder seq, boundary valueseq(61-1=60[MAX_SEQ_BIAS])
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -135,9 +135,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_002, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_003
- * @tc.desc: Verify disorder seq, boundary valueseq(62-1>60[MAX_SEQ_BIAS]).
+ * @tc.desc: Verify disorder seq, boundary valueseq(62-1>60[MAX_SEQ_BIAS])
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -157,9 +157,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_003, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_004
- * @tc.desc: Verify disorder seq, boundary valueseq(99-39=60[MAX_SEQ_BIAS]).
+ * @tc.desc: Verify disorder seq, boundary valueseq(99-39=60[MAX_SEQ_BIAS])
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -175,9 +175,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_004, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_005
- * @tc.desc: Verify disorder seq, boundary valueseq(99-38>60[MAX_SEQ_BIAS]).
+ * @tc.desc: Verify disorder seq, boundary valueseq(99-38>60[MAX_SEQ_BIAS])
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -199,9 +199,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_005, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_006
- * @tc.desc: Verify disorder seq, seq flip negative, boundary valueseq.
+ * @tc.desc: Verify disorder seq, seq flip negative, boundary valueseq
  * INT32_MIN + 58 - INT32_MIN + INT32_MAX - (INT32_MAX - 1) + 1 = 60[MAX_SEQ_BIAS]
  * @tc.type: FUNC
  * @tc.require:
@@ -222,9 +222,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_006, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_007
- * @tc.desc: Verify disorder seq, seq flip negative, boundary valueseq.
+ * @tc.desc: Verify disorder seq, seq flip negative, boundary valueseq
  * INT32_MIN + 59 - INT32_MIN + INT32_MAX - (INT32_MAX - 1) + 1 > 60[MAX_SEQ_BIAS]
  * @tc.type: FUNC
  * @tc.require:
@@ -245,9 +245,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_007, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_008
- * @tc.desc: Verify disorder seq, seq flip positive, boundary valueseq.
+ * @tc.desc: Verify disorder seq, seq flip positive, boundary valueseq
  * 31 + 29 = 60[MAX_SEQ_BIAS]
  * @tc.type: FUNC
  * @tc.require:
@@ -264,9 +264,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_008, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_DisorderCase_009
- * @tc.desc: Verify disorder seq, seq flip positive, boundary valueseq.
+ * @tc.desc: Verify disorder seq, seq flip positive, boundary valueseq
  * 32 + 29 > 60[MAX_SEQ_BIAS]
  * @tc.type: FUNC
  * @tc.require:
@@ -289,9 +289,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_DisorderCase_009, 
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_RepeatCase_001
- * @tc.desc: Verify repeat seq.
+ * @tc.desc: Verify repeat seq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -309,9 +309,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_001, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_RepeatCase_002
- * @tc.desc: Verify repeat seq.
+ * @tc.desc: Verify repeat seq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -329,9 +329,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_002, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_RepeatCase_003
- * @tc.desc: Verify repeat seq, flip negative.
+ * @tc.desc: Verify repeat seq, flip negative
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -351,9 +351,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_003, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_RepeatCase_004
- * @tc.desc: Verify repeat seq, flip negative.
+ * @tc.desc: Verify repeat seq, flip negative
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -373,9 +373,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_004, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_RepeatCase_005
- * @tc.desc: Verify repeat seq, flip positive.
+ * @tc.desc: Verify repeat seq, flip positive
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -395,9 +395,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_005, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_RepeatCase_006
- * @tc.desc: Verify repeat seq, flip positive.
+ * @tc.desc: Verify repeat seq, flip positive
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -417,9 +417,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_006, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_RepeatCase_007
- * @tc.desc: Verify repeat seq.
+ * @tc.desc: Verify repeat seq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -439,9 +439,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_RepeatCase_007, Te
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_LessThanMinCase_001
- * @tc.desc: Verify abnormal seq, minSeq positive.
+ * @tc.desc: Verify abnormal seq, minSeq positive
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -459,9 +459,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_00
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_LessThanMinCase_002
- * @tc.desc: Verify abnormal seq, minSeq negative.
+ * @tc.desc: Verify abnormal seq, minSeq negative
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -481,9 +481,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_00
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_LessThanMinCase_003
- * @tc.desc: Verify abnormal seq, minSeq negative.
+ * @tc.desc: Verify abnormal seq, minSeq negative
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -503,9 +503,9 @@ HWTEST_F(SequenceVerificationTest, Softbus_SeqVerifyTest_Test_LessThanMinCase_00
     }
 }
 
-/**
+/*
  * @tc.name: Softbus_SeqVerifyTest_Test_LessThanMinCase_004
- * @tc.desc: Verify abnormal seq, minSeq negative.
+ * @tc.desc: Verify abnormal seq, minSeq negative
  * @tc.type: FUNC
  * @tc.require:
  */

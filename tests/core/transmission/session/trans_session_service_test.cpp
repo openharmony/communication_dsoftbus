@@ -71,9 +71,9 @@ void TransSessionServiceTest::TearDownTestCase(void)
     TransServerDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionServiceTest01
- * @tc.desc: Transmission session service create session with invalid parameters.
+ * @tc.desc: Transmission session service create session with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -85,9 +85,9 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest01, TestSize.Level1)
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransSessionServiceTest02
- * @tc.desc: Transmission session service create session with existed session.
+ * @tc.desc: Transmission session service create session with existed session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -108,9 +108,9 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransSessionServiceTest03
- * @tc.desc: Transmission session service create session with invalid and wrong parameters.
+ * @tc.desc: Transmission session service create session with invalid and wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -124,9 +124,9 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest03, TestSize.Level1)
     EXPECT_EQ(ret,  SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransSessionServiceTest04
- * @tc.desc: Transmission session service open session with invalid parameters.
+ * @tc.desc: Transmission session service open session with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -158,9 +158,9 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest04, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: TransSessionServiceTest05
- * @tc.desc: Transmission session service open session with not wrong session.
+ * @tc.desc: Transmission session service open session with not wrong session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -191,9 +191,9 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: TransSessionServiceTest06
- * @tc.desc: Transmission session service initialize and deinitialize.
+ * @tc.desc: Transmission session service initialize and deinitialize
  * @tc.type: FUNC
  * @tc.require:
  */

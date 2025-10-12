@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,22 +55,6 @@ void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
 {
     (void)scene;
     (void)stage;
-    (void)func;
-    (void)line;
-    (void)extra;
-}
-
-void DiscAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, DiscAlarmExtra *extra)
-{
-    (void)scene;
-    (void)func;
-    (void)line;
-    (void)extra;
-}
-
-void DiscStatsInner(int32_t scene, const char *func, int32_t line, DiscStatsExtra *extra)
-{
-    (void)scene;
     (void)func;
     (void)line;
     (void)extra;

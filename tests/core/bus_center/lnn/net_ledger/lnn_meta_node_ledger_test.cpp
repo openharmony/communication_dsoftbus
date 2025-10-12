@@ -69,6 +69,7 @@ void LNNMetaNodeLedgerTest::TearDown()
  * @tc.name: LNN_ACTIVE_META_NODE_Test_001
  * @tc.desc: lnn active meta node test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
@@ -92,6 +93,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
  * @tc.name: LNN_GET_ALL_META_NODE_INFO_Test_001
  * @tc.desc: lnn get all meta node info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Level1)
@@ -110,6 +112,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Le
  * @tc.name: LNN_DEACTIVE_META_NODE_Test_001
  * @tc.desc: lnn deactive meta node test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1)
@@ -124,6 +127,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1
  * @tc.name: LNN_GET_META_NODE_UID_TEST_001
  * @tc.desc: lnn get meta node udid by network id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_001, TestSize.Level1)
@@ -138,6 +142,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_001, TestSize.Level1)
  * @tc.name: LNN_GET_META_NODE_UID_TEST_002
  * @tc.desc: lnn get meta node udid by network id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
@@ -162,6 +167,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
  * @tc.name: LNN_GET_META_NODE_INFO_TEST_001
  * @tc.desc: lnn get meta node info by network id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_001, TestSize.Level1)
@@ -176,6 +182,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_001, TestSize.Level1
  * @tc.name: LNN_GET_META_NODE_INFO_TEST_002
  * @tc.desc: lnn get meta node info by network id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_002, TestSize.Level1)

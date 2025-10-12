@@ -653,6 +653,11 @@ bool IsEnhancedWifiDirectSupported(const char *networkId)
         LNN_LOGE(LNN_LANE, "local=%{public}" PRIu64 ", remote=%{public}" PRIu64, localFeature, remoteFeature);
         return false;
     }
+    int32_t ret = CheckStaticNetCap(networkId, LANE_HML);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "static cap disable, ret=%{public}d", ret);
+        return false;
+    }
     return true;
 }
 

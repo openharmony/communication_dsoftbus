@@ -58,6 +58,7 @@ void LNNDataCloudSyncTest::TearDown() { }
  * @tc.name: LnnAsyncCallLedgerAllDataSyncToDB_Test_001
  * @tc.desc: LnnAsyncCallLedgerAllDataSyncToDB
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnAsyncCallLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
@@ -84,6 +85,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnAsyncCallLedgerAllDataSyncToDB_Test_001, TestS
  * @tc.name: LnnLedgerDataChangeSyncToDB_Test_002
  * @tc.desc: LnnLedgerDataChangeSyncToDB
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Level1)
@@ -98,6 +100,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Le
  * @tc.name: LnnDBDataChangeSyncToCache_Test_003
  * @tc.desc: LnnDBDataChangeSyncToCache
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Level1)
@@ -122,6 +125,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
  * @tc.name: LnnDBDataAddChangeSyncToCache_Test_004
  * @tc.desc: LnnDBDataAddChangeSyncToCache
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_004, TestSize.Level1)

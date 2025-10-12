@@ -47,6 +47,7 @@ void AuthNormalizeRequestTest::TearDown() { }
  * @tc.name: NOTIFY_NORMALIZE_REQUEST_SUCCESS_TEST_001
  * @tc.desc: notify normalize request success test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthNormalizeRequestTest, NOTIFY_NORMALIZE_REQUEST_SUCCESS_TEST_001, TestSize.Level1)
@@ -80,6 +81,7 @@ HWTEST_F(AuthNormalizeRequestTest, NOTIFY_NORMALIZE_REQUEST_SUCCESS_TEST_001, Te
  * @tc.name: NOTIFY_NORMALIZE_REQUEST_FAIL_TEST_001
  * @tc.desc: notify normalize request fail test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthNormalizeRequestTest, NOTIFY_NORMALIZE_REQUEST_FAIL_TEST_001, TestSize.Level1)

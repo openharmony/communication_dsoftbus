@@ -39,9 +39,9 @@ void SoftbusHtpSocketMockTest::SetUpTestCase(void) { }
 
 void SoftbusHtpSocketMockTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: SoftbusHtpSocketMockTest001
- * @tc.desc: test AcceptHtpClient function.
+ * @tc.desc: test AcceptHtpClient function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -60,9 +60,9 @@ HWTEST_F(SoftbusHtpSocketMockTest, SoftbusHtpSocketMockTest001, TestSize.Level1)
     SoftBusFree(clientAddr);
 }
 
-/**
+/*
  * @tc.name: SoftbusHtpSocketMockTest001
- * @tc.desc: test AcceptHtpClient function.
+ * @tc.desc: test AcceptHtpClient function
  * @tc.type: FUNC
  * @tc.require:
  */

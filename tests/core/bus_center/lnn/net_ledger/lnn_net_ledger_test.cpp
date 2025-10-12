@@ -43,6 +43,7 @@ void LNNNetLedgerMockTest::TearDown() { }
  * @tc.name: LnnSetLocalFeatureTest001
  * @tc.desc: LnnSetLocalFeature test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerMockTest, LnnSetLocalFeatureTest001, TestSize.Level0)

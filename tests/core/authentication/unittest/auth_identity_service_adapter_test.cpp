@@ -61,6 +61,7 @@ void DestroyInfo(char **returnData)
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_001
  * @tc.desc: cJSON_CreateObject fail
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_001, TestSize.Level1)
@@ -79,6 +80,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_002
  * @tc.desc: AddStringToJsonObject return false
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_002, TestSize.Level1)
@@ -101,6 +103,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_003
  * @tc.desc: IdServiceGenerateQueryParamByCredType fail with invalid param
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_003, TestSize.Level1)
@@ -125,6 +128,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_004
  * @tc.desc: cJSON_PrintUnformatted success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_004, TestSize.Level1)
@@ -155,6 +159,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
  * @tc.name: IS_INVALID_CRED_LIST_TEST_001
  * @tc.desc: invalid parameter
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_001, TestSize.Level1)
@@ -167,6 +172,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_001, TestSize
  * @tc.name: IS_INVALID_CRED_LIST_TEST_002
  * @tc.desc: test IsInvalidCredList with invalid param
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_002, TestSize.Level1)
@@ -181,6 +187,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_002, TestSize
  * @tc.name: IS_INVALID_CRED_LIST_TEST_003
  * @tc.desc: GetArrayItemNum return 0
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_003, TestSize.Level1)
@@ -198,6 +205,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_003, TestSize
  * @tc.name: IS_INVALID_CRED_LIST_TEST_004
  * @tc.desc: GetArrayItemNum return 1
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_004, TestSize.Level1)
@@ -215,6 +223,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_004, TestSize
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_001
  * @tc.desc: invalid parameter
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_001, TestSize.Level1)
@@ -238,6 +247,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_002
  * @tc.desc: InitDeviceAuthService fail
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_002, TestSize.Level1)
@@ -259,6 +269,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_003
  * @tc.desc: GetCredMgrInstance return nullptr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_003, TestSize.Level1)
@@ -281,6 +292,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_004
  * @tc.desc: GetCredAuthInstance return nullptr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_004, TestSize.Level1)
@@ -324,6 +336,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_005
  * @tc.desc: GetCredAuthInstance return nullptr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_005, TestSize.Level1)
@@ -374,6 +387,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_006
  * @tc.desc: GetCredAuthInstance return nullptr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_006, TestSize.Level1)
@@ -431,6 +445,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_007
  * @tc.desc: GetCredMgrInstance return nullptr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_007, TestSize.Level1)
@@ -476,6 +491,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_008
  * @tc.desc: GetCredAuthInstance return nullptr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_008, TestSize.Level1)
@@ -528,6 +544,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
  * @tc.name: ID_SERVICE_GENERATE_AUTH_PARAM_TEST_001
  * @tc.desc: hiChainParam is nullptr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_AUTH_PARAM_TEST_001, TestSize.Level1)
