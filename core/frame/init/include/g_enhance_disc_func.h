@@ -59,6 +59,7 @@ typedef DiscoveryBleDispatcherInterface *(*DiscShareBleInitFunc)(DiscInnerCallba
 typedef DiscoveryBleDispatcherInterface *(*DiscApproachBleInitFunc)(DiscInnerCallback *discInnerCb);
 typedef DiscoveryBleDispatcherInterface *(*DiscVLinkBleInitFunc)(DiscInnerCallback *discInnerCb);
 typedef DiscoveryUsbDispatcherInterface *(*DiscUsbInitFunc)(DiscInnerCallback *discInnerCb);
+typedef DiscoveryBleDispatcherInterface *(*DiscPcCollaborationInitFunc)(DiscInnerCallback *discInnerCb);
 typedef void (*DiscVLinkBleDeinitFunc)(void);
 typedef void (*DiscTouchBleDeinitFunc)(void);
 typedef void (*DiscApproachBleDeinitFunc)(void);
@@ -81,6 +82,7 @@ typedef DiscoveryBleDispatcherInterface *(*DiscOopBleInitFunc)(DiscInnerCallback
 typedef void (*DiscOopBleDeinitFunc)(void);
 typedef int32_t (*DiscOopBleEventInitFunc)(void);
 typedef void (*DiscOopBleEventDeinitFunc)(void);
+typedef int32_t (*DiscPcCollaborationEventInitFunc)(void);
 
 typedef int32_t (*DistUpdatePublishParamFunc)(const char *cust, const char *extCust);
 typedef int32_t (*DistDiscoveryStartActionPreLinkFunc)(void);
@@ -123,6 +125,9 @@ typedef struct TagDiscEnhanceFuncList {
     DiscOopBleDeinitFunc discOopBleDeinit;
     DiscOopBleEventInitFunc discOopBleEventInit;
     DiscOopBleEventDeinitFunc discOopBleEventDeinit;
+
+    DiscPcCollaborationInitFunc discPcCollaborationBleInit;
+    DiscPcCollaborationEventInitFunc discPcCollaborationEventInit;
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_BROADCAST_MGR_VIRTUAL)
     SchedulerStartBroadcastFunc schedulerStartBroadcast;
