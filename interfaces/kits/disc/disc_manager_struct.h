@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 #define CAPABILITY_NUM                  1
-#define CAPABILITY_MAX_BITNUM           16
+#define CAPABILITY_MAX_BITNUM           17
 
 typedef struct {
     int32_t freq;
