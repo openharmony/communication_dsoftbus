@@ -77,6 +77,7 @@ static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
  * @tc.desc: is node info changed test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.Level1)
 {
@@ -136,6 +137,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
  * @tc.desc: auth state process test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
@@ -175,6 +177,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
  * @tc.desc: auth state process on join lnn test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
 {
@@ -209,6 +212,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
  * @tc.desc: auth state process on auth done test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
 {
@@ -269,6 +273,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
  * @tc.desc: online state enter test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
 {
@@ -299,6 +304,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
  * @tc.desc: clean invalid connstate process test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, TestSize.Level1)
 {
@@ -350,6 +356,7 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
  * @tc.desc: online state process test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
@@ -378,6 +385,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
  * @tc.desc: leaving state enter test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1)
 {
@@ -402,6 +410,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1
  * @tc.desc: leaving state process test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
@@ -431,6 +440,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
  * @tc.desc: lnn stop connection fsm test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmMockTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {

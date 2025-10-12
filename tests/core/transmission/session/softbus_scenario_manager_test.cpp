@@ -52,7 +52,7 @@ void TransScenarioManagerTest::TearDownTestCase(void)
     ScenarioManagerdestroyInstance();
 }
 
-/**
+/*
  * @tc.name: TransScenarioManagerTest01
  * @tc.desc: Transmission scenario manager
  * @tc.type: FUNC
@@ -78,7 +78,7 @@ HWTEST_F(TransScenarioManagerTest, TransScenarioManagerTest01, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransScenarioManagerTest02
  * @tc.desc: Transmission scenario manager
  * @tc.type: FUNC

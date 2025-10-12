@@ -59,6 +59,7 @@ void LNNP2pInfoTest::TearDown() { }
  * @tc.name: LNN_GET_P2P_INFO_MSG_TEST_001
  * @tc.desc: test LnnGetP2pInfoMsg
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, LNN_GET_P2P_INFO_MSG_TEST_001, TestSize.Level1)
@@ -79,6 +80,7 @@ HWTEST_F(LNNP2pInfoTest, LNN_GET_P2P_INFO_MSG_TEST_001, TestSize.Level1)
  * @tc.name: LNN_GET_WIFI_DIRECT_ADDR_MSG_TEST_001
  * @tc.desc: test LnnGetWifiDirectAddrMsg
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, LNN_GET_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level1)
@@ -94,6 +96,7 @@ HWTEST_F(LNNP2pInfoTest, LNN_GET_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level1)
  * @tc.name: P2P_INFO_MOCK_TEST_001
  * @tc.desc: test LnnInitLocalP2pInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
@@ -132,6 +135,7 @@ HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
  * @tc.name: LNN_PARSE_WIFI_DIRECT_ADDR_MSG_TEST_001
  * @tc.desc: test LnnParseWifiDirectAddrMsg
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, LNN_PARSE_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level1)
@@ -151,6 +155,7 @@ HWTEST_F(LNNP2pInfoTest, LNN_PARSE_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level
  * @tc.name: IS_NEED_SYNC_P2P_INFO_TEST_001
  * @tc.desc: test IsNeedSyncP2pInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, IS_NEED_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
@@ -176,6 +181,7 @@ HWTEST_F(LNNP2pInfoTest, IS_NEED_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
  * @tc.name: PROCESS_SYNC_P2P_INFO_TEST_001
  * @tc.desc: test ProcessSyncP2pInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
@@ -222,6 +228,7 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
  * @tc.name: PROCESS_SYNC_P2P_INFO_TEST_002
  * @tc.desc: test ProcessSyncP2pInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_002, TestSize.Level1)
@@ -259,6 +266,7 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_002, TestSize.Level1)
  * @tc.name: ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001
  * @tc.desc: test OnReceiveWifiDirectSyncAddr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Level1)
@@ -286,6 +294,7 @@ HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Lev
  * @tc.name: LNN_SYNC_P2P_INFO_TEST_001
  * @tc.desc: test LnnSyncP2pInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, LNN_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
@@ -304,6 +313,7 @@ HWTEST_F(LNNP2pInfoTest, LNN_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
  * @tc.name: LNN_SYNC_WIFI_DIRECT_ADDR_TEST_001
  * @tc.desc: test LnnSyncWifiDirectAddr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, LNN_SYNC_WIFI_DIRECT_ADDR_TEST_001, TestSize.Level1)
@@ -322,6 +332,7 @@ HWTEST_F(LNNP2pInfoTest, LNN_SYNC_WIFI_DIRECT_ADDR_TEST_001, TestSize.Level1)
  * @tc.name: LNN_PARSE_P2P_INFO_MSG_TEST_001
  * @tc.desc: test LnnParseP2pInfoMsg
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, LNN_PARSE_P2P_INFO_MSG_TEST_001, TestSize.Level1)
@@ -372,6 +383,7 @@ HWTEST_F(LNNP2pInfoTest, LNN_PARSE_P2P_INFO_MSG_TEST_001, TestSize.Level1)
  * @tc.name: ON_RECEIVE_P2P_SYNC_INFO_MSG_TEST_001
  * @tc.desc: test OnReceiveP2pSyncInfoMsg
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_P2P_SYNC_INFO_MSG_TEST_001, TestSize.Level1)

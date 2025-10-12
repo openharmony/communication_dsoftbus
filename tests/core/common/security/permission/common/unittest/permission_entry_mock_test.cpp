@@ -73,9 +73,9 @@ public:
     void TearDown() override { }
 };
 
-/**
+/*
  * @tc.name: TestCheckPermissionEntry001
- * @tc.desc:
+ * @tc.desc: TestCheckPermissionEntry test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,9 +128,9 @@ HWTEST_F(PermissionEntryMockTest, TestCheckPermissionEntry001, TestSize.Level0)
     DeinitPermissionJson();
 }
 
-/**
+/*
  * @tc.name: TestCheckPermissionEntry002
- * @tc.desc:
+ * @tc.desc: TestCheckPermissionEntry test
  * @tc.type: FUNC
  * @tc.require:
  */

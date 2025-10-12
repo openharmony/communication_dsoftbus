@@ -197,6 +197,27 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest004, TestSize.Level1)
 }
 
 /*
+* @tc.name: BusCenterEventTest005
+* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest005, TestSize.Level1)
+{
+    SoftBusWifiState *mockState = nullptr;
+    NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
+    LnnNotifyWlanStateChangeEvent(nullptr);
+    mockState = (SoftBusWifiState *)SoftBusCalloc(sizeof(SoftBusWifiState));
+    ASSERT_TRUE(mockState != nullptr);
+    *mockState = (SoftBusWifiState)(SOFTBUS_WIFI_UNKNOWN + 1);
+    int32_t ret = LnnInitBusCenterEvent();
+    LnnDeinitBusCenterEvent();
+    EXPECT_NE(ret, SOFTBUS_OK);
+    SoftBusFree(mockState);
+}
+
+/*
 * @tc.name: BusCenterEventTest006
 * @tc.desc: Verify the LnnNotifyScreenStateChangeEvent function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
@@ -214,6 +235,25 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest006, TestSize.Level1)
     int32_t ret = LnnRegisterEventHandler(event, handler);
     LnnUnregisterEventHandler(event, handler);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: BusCenterEventTest007
+* @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest007, TestSize.Level1)
+{
+    LnnEventType event = LNN_EVENT_TYPE_MAX;
+    LnnEventHandler handler = nullptr;
+    SoftBusBtState *mockState = (SoftBusBtState *)SoftBusCalloc(sizeof(SoftBusWifiState));
+    ASSERT_TRUE(mockState != nullptr);
+    *mockState = (SoftBusBtState)(SOFTBUS_BT_UNKNOWN + 1);
+    int32_t ret = LnnRegisterEventHandler(event, handler);
+    LnnUnregisterEventHandler(event, handler);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(mockState);
 }
 
 /*
@@ -277,6 +317,26 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest010, TestSize.Level1)
 }
 
 /*
+* @tc.name: BusCenterEventTest011
+* @tc.desc: Authenticate the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest011, TestSize.Level1)
+{
+    LnnEventType event = LNN_EVENT_TYPE_MAX;
+    LnnEventHandler handler = nullptr;
+    SoftBusDifferentAccountState *mockState  =
+        (SoftBusDifferentAccountState *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
+    ASSERT_TRUE(mockState != nullptr);
+    *mockState = (SoftBusDifferentAccountState)(SOFTBUS_DIF_ACCOUNT_UNKNOWN + 1);
+    int32_t ret = LnnRegisterEventHandler(event, handler);
+    LnnUnregisterEventHandler(event, handler);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(mockState);
+}
+
+/*
 * @tc.name: BusCenterEventTest012
 * @tc.desc: Verify the LnnNotifyUserStateChangeEvent function return value equal SOFTBUS_LOCK_ERR.
 * @tc.type: FUNC
@@ -294,6 +354,25 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest012, TestSize.Level1)
     int32_t ret = LnnRegisterEventHandler(event, handler);
     LnnUnregisterEventHandler(event, handler);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/*
+* @tc.name: BusCenterEventTest013
+* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest013, TestSize.Level1)
+{
+    NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
+    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
+    SoftBusNightModeState *mockState = (SoftBusNightModeState *)SoftBusCalloc(sizeof(SoftBusNightModeState));
+    ASSERT_TRUE(mockState != nullptr);
+    *mockState = (SoftBusNightModeState)(SOFTBUS_NIGHT_MODE_UNKNOWN + 1);
+    int32_t ret = LnnInitBusCenterEvent();
+    LnnDeinitBusCenterEvent();
+    EXPECT_NE(ret, SOFTBUS_OK);
+    SoftBusFree(mockState);
 }
 
 /*
@@ -519,85 +598,6 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest024, TestSize.Level1)
     int32_t ret = LnnRegisterEventHandler(event, handler);
     LnnUnregisterEventHandler(event, handler);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/*
-* @tc.name: BusCenterEventTest005
-* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(BusCenterEventTest, BusCenterEventTest005, TestSize.Level1)
-{
-    SoftBusWifiState *mockState = nullptr;
-    NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
-    LnnNotifyWlanStateChangeEvent(nullptr);
-    mockState = (SoftBusWifiState *)SoftBusCalloc(sizeof(SoftBusWifiState));
-    ASSERT_TRUE(mockState != nullptr);
-    *mockState = (SoftBusWifiState)(SOFTBUS_WIFI_UNKNOWN + 1);
-    int32_t ret = LnnInitBusCenterEvent();
-    LnnDeinitBusCenterEvent();
-    EXPECT_NE(ret, SOFTBUS_OK);
-    SoftBusFree(mockState);
-}
-
-/*
-* @tc.name: BusCenterEventTest007
-* @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(BusCenterEventTest, BusCenterEventTest007, TestSize.Level1)
-{
-    LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = nullptr;
-    SoftBusBtState *mockState = (SoftBusBtState *)SoftBusCalloc(sizeof(SoftBusWifiState));
-    ASSERT_TRUE(mockState != nullptr);
-    *mockState = (SoftBusBtState)(SOFTBUS_BT_UNKNOWN + 1);
-    int32_t ret = LnnRegisterEventHandler(event, handler);
-    LnnUnregisterEventHandler(event, handler);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    SoftBusFree(mockState);
-}
-
-/*
-* @tc.name: BusCenterEventTest013
-* @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(BusCenterEventTest, BusCenterEventTest013, TestSize.Level1)
-{
-    NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
-    SoftBusNightModeState *mockState = (SoftBusNightModeState *)SoftBusCalloc(sizeof(SoftBusNightModeState));
-    ASSERT_TRUE(mockState != nullptr);
-    *mockState = (SoftBusNightModeState)(SOFTBUS_NIGHT_MODE_UNKNOWN + 1);
-    int32_t ret = LnnInitBusCenterEvent();
-    LnnDeinitBusCenterEvent();
-    EXPECT_NE(ret, SOFTBUS_OK);
-    SoftBusFree(mockState);
-}
-
-/*
-* @tc.name: BusCenterEventTest011
-* @tc.desc: Authenticate the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
-* @tc.type: FUNC
-* @tc.require: 1
-*/
-HWTEST_F(BusCenterEventTest, BusCenterEventTest011, TestSize.Level1)
-{
-    LnnEventType event = LNN_EVENT_TYPE_MAX;
-    LnnEventHandler handler = nullptr;
-    SoftBusDifferentAccountState *mockState  =
-        (SoftBusDifferentAccountState *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
-    ASSERT_TRUE(mockState != nullptr);
-    *mockState = (SoftBusDifferentAccountState)(SOFTBUS_DIF_ACCOUNT_UNKNOWN + 1);
-    int32_t ret = LnnRegisterEventHandler(event, handler);
-    LnnUnregisterEventHandler(event, handler);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    SoftBusFree(mockState);
 }
 
 /*
