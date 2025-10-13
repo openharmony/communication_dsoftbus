@@ -35,7 +35,7 @@ static const int32_t ACCOUNT_STRTOLL_BASE = 10;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
 #define CONTROL_PANEL "control_panel"
-#define CO_DRIVER_PANEL "co_driver_panel"
+#define CO_DRIVER_PANEL "co-driver_panel"
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 {
