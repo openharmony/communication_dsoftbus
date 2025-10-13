@@ -312,8 +312,10 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
         "ipc:ipc_single",
         "os_account:libaccountkits",
         "os_account:os_account_innerkits",
-        "window_manager:libdm",
       ]
+    }
+    if (dsoftbus_feature_lnn_multi_foreground) {
+      external_deps = [ "window_manager:libdm" ]
     }
   } else {
     external_deps = [
