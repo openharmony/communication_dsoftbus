@@ -37,7 +37,7 @@ namespace OHOS {
 void TransClientProxyGitpidTest::SetUpTestCase(void) {}
 void TransClientProxyGitpidTest::TearDownTestCase(void) {}
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelOpenedTest001
  * @tc.desc: ClientIpcOnChannelOpened test
  * @tc.type: FUNC
@@ -57,7 +57,7 @@ HWTEST_F(TransClientProxyGitpidTest, ClientIpcOnChannelOpenedTest001, TestSize.L
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelBindTest001
  * @tc.desc: ClientIpcOnChannelBind test
  * @tc.type: FUNC
@@ -74,7 +74,7 @@ HWTEST_F(TransClientProxyGitpidTest, ClientIpcOnChannelBindTest001, TestSize.Lev
     SoftBusFree(data);
 }
 
- /**
+ /*
  * @tc.name: ClientIpcOnChannelOpenFailedTest001
  * @tc.desc: ClientIpcOnChannelOpenFailed test
  * @tc.type: FUNC
@@ -94,7 +94,7 @@ HWTEST_F(TransClientProxyGitpidTest, ClientIpcOnChannelOpenFailedTest001, TestSi
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelLinkDownTest001
  * @tc.desc: ClientIpcOnChannelLinkDown test
  * @tc.type: FUNC
@@ -116,7 +116,7 @@ HWTEST_F(TransClientProxyGitpidTest, ClientIpcOnChannelLinkDownTest001, TestSize
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelClosedTest001
  * @tc.desc: ClientIpcOnChannelClosed test
  * @tc.type: FUNC
@@ -136,7 +136,7 @@ HWTEST_F(TransClientProxyGitpidTest, ClientIpcOnChannelClosedTest001, TestSize.L
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: ClientIpcSetChannelInfoTest001
  * @tc.desc: ClientIpcSetChannelInfon test
  * @tc.type: FUNC
@@ -157,7 +157,7 @@ HWTEST_F(TransClientProxyGitpidTest, ClientIpcSetChannelInfoTest001, TestSize.Le
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: ClientIpcOnChannelMsgReceivedTest001
  * @tc.desc: ClientIpcOnChannelMsgReceived test
  * @tc.type: FUNC
