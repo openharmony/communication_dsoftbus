@@ -138,9 +138,9 @@ void SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener(void)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransNoRegisterListenerTest001
- * @tc.desc: test callback after no register networking channel listener.
+ * @tc.desc: test callback after no register networking channel listener
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -160,9 +160,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level
     EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
-/**
+/*
  * @tc.name: TransRegisterListenerTest001
- * @tc.desc: test callback after register networking channel listener.
+ * @tc.desc: test callback after register networking channel listener
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -183,9 +183,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
-/**
+/*
   * @tc.name: TransNotifyNetworkingChannelOpenedTest001
-  * @tc.desc: test proxy channel opened with wrong param.
+  * @tc.desc: test proxy channel opened with wrong param
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -213,9 +213,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, Tes
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
   * @tc.name: TransOnProxyChannelOpenFailedTest001
-  * @tc.desc: test proxy channel open failed with wrong param.
+  * @tc.desc: test proxy channel open failed with wrong param
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -233,9 +233,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
   * @tc.name: TransOnProxyChannelClosedTest001
-  * @tc.desc: test proxy channel closed with wrong param.
+  * @tc.desc: test proxy channel closed with wrong param
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -257,9 +257,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
-/**
+/*
   * @tc.name: TransOnProxyChannelMsgReceivedTest001
-  * @tc.desc: test proxy channel msg received.
+  * @tc.desc: test proxy channel msg received
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -295,9 +295,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSiz
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
   * @tc.name: TransOpenNetWorkingChannelTest001
-  * @tc.desc: test proxy open networking channel with wrong param.
+  * @tc.desc: test proxy open networking channel with wrong param
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -316,7 +316,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Le
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 }
 
-/**
+/*
   * @tc.name: TransNotifyDecryptNetworkingMsg001
   * @tc.desc: TransNotifyDecryptNetworkingMsg
   * @tc.type: FUNC
@@ -331,7 +331,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
   * @tc.name: TransNotifyDecryptNetworkingMsg002
   * @tc.desc: TransNotifyDecryptNetworkingMsg
   * @tc.type: FUNC
@@ -351,7 +351,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg002, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
 }
 
-/**
+/*
   * @tc.name: TransNotifyDecryptNetworkingMsg003
   * @tc.desc: TransNotifyDecryptNetworkingMsg
   * @tc.type: FUNC
@@ -372,7 +372,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg003, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
   * @tc.name: TransNotifyDecryptNetworkingMsg004
   * @tc.desc: TransNotifyDecryptNetworkingMsg
   * @tc.type: FUNC
@@ -393,7 +393,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg004, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: NotifyNetworkingMsgReceived001
  * @tc.desc: NotifyNetworkingMsgReceived
  * @tc.type: FUNC
