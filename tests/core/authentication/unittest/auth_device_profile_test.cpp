@@ -315,32 +315,6 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACL_PEER_USERID_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: GET_STRING_HASH_001
- * @tc.desc: test generate hash fail and success
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthDeviceProfileTest, GET_STRING_HASH_001, TestSize.Level1)
-{
-    std::string str = "";
-    char hashStrBuf[SHA_256_HEX_HASH_LEN] = { 0 };
-    int32_t len = 32;
-    AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
-    int32_t ret = GetStringHash(str, hashStrBuf, len);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR));
-    ret = GetStringHash(str, hashStrBuf, len);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR);
-    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK));
-    str = "abcdef123456";
-    ret = GetStringHash(str, hashStrBuf, len);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
  * @tc.name: DP_HAS_ACCESS_CONTROL_PROFILE_TEST_001
  * @tc.desc: udid is nullptr
  * @tc.type: FUNC
@@ -1397,85 +1371,6 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_BY_UK_ID_TEST_001, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
- * @tc.name: IS_SK_ID_INVALID_INNER_TEST_001
- * @tc.desc: AccountId is default
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_INNER_TEST_001, TestSize.Level1)
-{
-    int32_t sessionKeyId = 1;
-    const char *accountHash = "1a2b3c4d5e6f";
-    const char *udidShortHash = "a1b2c3d4e5f6";
-    int32_t userId = 2;
-    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
-    AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    bool ret = IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
-    EXPECT_TRUE(ret);
-
-    DistributedDeviceProfile::Accesser accesser;
-    accesser.SetAccesserDeviceId("ab");
-    accesser.SetAccesserAccountId("ohosAnonymousUid");
-    accesser.SetAccesserSessionKeyId(1);
-    accesser.SetAccesserUserId(2);
-    aclProfile.SetAccesser(accesser);
-    DistributedDeviceProfile::Accessee accessee;
-    accessee.SetAccesseeDeviceId("cd");
-    accessee.SetAccesseeAccountId("ohosAnonymousUid");
-    accessee.SetAccesseeSessionKeyId(3);
-    accessee.SetAccesseeUserId(6);
-    aclProfile.SetAccessee(accessee);
-    ret = IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
-    EXPECT_TRUE(ret);
-
-    sessionKeyId = 3;
-    ret = IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
-    EXPECT_TRUE(ret);
-}
-
-/*
- * @tc.name: IS_SK_ID_INVALID_TEST_001
- * @tc.desc: accountHash or udidShortHash is nullptr
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_001, TestSize.Level1)
-{
-    int32_t sessionKeyId = 1;
-    const char *accountHash = "1a2b3c4d5e6f";
-    int32_t userId = 2;
-    bool ret = IsSKIdInvalid(sessionKeyId, nullptr, nullptr, userId);
-    EXPECT_FALSE(ret);
-    ret = IsSKIdInvalid(sessionKeyId, accountHash, nullptr, userId);
-    EXPECT_FALSE(ret);
-}
-
-/*
- * @tc.name: IS_SK_ID_INVALID_TEST_002
- * @tc.desc: 1.accountHash length error
-            2.udidShortHash length error
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_002, TestSize.Level1)
-{
-    int32_t sessionKeyId = 1;
-    const char *accountHash = "1a2b3c4d5e6f";
-    const char *udidShortHash = "a1b2c3d4e5f6";
-    int32_t userId = 2;
-    bool ret = IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
-    EXPECT_FALSE(ret);
-
-    const char *testUdidShortHash = "a1b2c3d4e5f6a1b2c3d4e5f6";
-    ret = IsSKIdInvalid(sessionKeyId, accountHash, testUdidShortHash, userId);
-    EXPECT_FALSE(ret);
-}
 
 /*
  * @tc.name: SELECT_ALL_ACL_TEST_001

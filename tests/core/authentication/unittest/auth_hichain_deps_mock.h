@@ -88,8 +88,6 @@ public:
         int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb) = 0;
     virtual void IdServiceDestroyCredentialList(char **returnData) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
-    virtual bool IsSKIdInvalid(
-        int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId) = 0;
     virtual int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType) = 0;
     virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
@@ -141,7 +139,6 @@ public:
     MOCK_METHOD4(IdServiceProcessCredData, int32_t(int64_t, const uint8_t *, uint32_t, DeviceAuthCallback *));
     MOCK_METHOD1(IdServiceDestroyCredentialList, void(char **));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
-    MOCK_METHOD4(IsSKIdInvalid, bool(int32_t, const char *, const char *, int32_t));
     MOCK_METHOD3(IdServiceGetCredTypeByCredId, int32_t(int32_t, const char *, int32_t *));
     MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
