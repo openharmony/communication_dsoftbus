@@ -596,6 +596,11 @@ int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv)
     return GetNetLedgerInterface()->LnnSetDLDeviceBroadcastCipherIv(udid, cipherIv);
 }
 
+int32_t LnnSetDLDeviceSparkCheck(const char *udid, const void *sparkCheck)
+{
+    return GetNetLedgerInterface()->LnnSetDLDeviceSparkCheck(udid, sparkCheck);
+}
+
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
 {
     return GetNetLedgerInterface()->LnnSetDLDeviceInfoName(udid, name);

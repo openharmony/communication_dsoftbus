@@ -277,6 +277,7 @@ public:
     virtual int32_t InitTrustedDevInfoTable(void) = 0;
     virtual int32_t LnnLoadLocalBroadcastCipherKeyPacked(void) = 0;
     virtual int32_t LnnUpdateLocalBroadcastCipherKeyPacked(BroadcastCipherKey *broadcastKey) = 0;
+    virtual int32_t LnnGetLocalBroadcastCipherKeyPacked(BroadcastCipherKey *broadcastKey) = 0;
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -494,6 +495,7 @@ public:
     MOCK_METHOD0(InitTrustedDevInfoTable, int32_t(void));
     MOCK_METHOD0(LnnLoadLocalBroadcastCipherKeyPacked, int32_t(void));
     MOCK_METHOD1(LnnUpdateLocalBroadcastCipherKeyPacked, int32_t(BroadcastCipherKey *));
+    MOCK_METHOD1(LnnGetLocalBroadcastCipherKeyPacked, int32_t(BroadcastCipherKey *broadcastKey));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerGetCommonDevInfoGlass(const CommonDeviceKey key, char *value, uint32_t len);

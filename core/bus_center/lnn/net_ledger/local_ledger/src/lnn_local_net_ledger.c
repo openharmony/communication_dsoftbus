@@ -1885,6 +1885,20 @@ static int32_t LlGetCipherInfoIv(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetSparkCheck(void *buf, uint32_t len)
+{
+    if (buf == NULL || len < SPARK_CHECK_LENGTH) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (memcpy_s(buf, len, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy sparkCheck fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalIrk(const void *id)
 {
     if (id == NULL) {
@@ -1934,6 +1948,19 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN, id, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.iv fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateLocalSparkCheck(const void *id)
+{
+    if (id == NULL) {
+        LNN_LOGE(LNN_LEDGER, "id is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s((char *)g_localNetLedger.localInfo.sparkCheck, SPARK_CHECK_LENGTH, id, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy sparkCheck fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -2166,6 +2193,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_USERID_CHECKSUM, USERID_CHECKSUM_LEN, LlGetUserIdCheckSum, LlUpdateUserIdCheckSum},
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
+    {BYTE_KEY_SPARK_CHECK, SPARK_CHECK_LENGTH, LlGetSparkCheck, UpdateLocalSparkCheck},
 };
 
 static LocalLedgerKeyByIfname g_localKeyByIfnameTable[] = {
@@ -2498,6 +2526,48 @@ static int32_t LnnFirstGetUdid(void)
     return SOFTBUS_OK;
 }
 
+static int32_t LnnGenSparkCheck(unsigned char *sparkCheck)
+{
+    int32_t ret = SOFTBUS_ENCRYPT_ERR;
+    do {
+        if (SoftBusGenerateRandomArray(sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "generate sparkCheck error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set sparkCheck error.");
+            break;
+        }
+        LNN_LOGI(LNN_LEDGER, "generate sparkCheck success.");
+        ret = SOFTBUS_OK;
+    } while (0);
+    return ret;
+}
+
+static int32_t LnnProcessSparkCheck(BroadcastCipherKey *broadcastKey)
+{
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    if (memcmp(broadcastKey->sparkCheck, sparkCheck, SPARK_CHECK_LENGTH) != 0) {
+        if (LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, broadcastKey->sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set sparkCheck error.");
+            return SOFTBUS_NETWORK_SET_DEVICE_INFO_ERR;
+        }
+        LNN_LOGI(LNN_LEDGER, "init load sparkCheck success.");
+        return SOFTBUS_OK;
+    }
+    int32_t ret = LnnGenSparkCheck(broadcastKey->sparkCheck);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "gen sparkCheck error, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = LnnUpdateLocalBroadcastCipherKeyPacked(broadcastKey);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update local sparkCheck failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
 {
     if (broadcastKey == NULL) {
@@ -2517,6 +2587,9 @@ static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
         broadcastKey->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set iv error.");
         return SOFTBUS_NETWORK_SET_DEVICE_INFO_ERR;
+    }
+    if (LnnProcessSparkCheck(broadcastKey) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "load sparkCheck error.");
     }
     LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
     return SOFTBUS_OK;
@@ -2549,6 +2622,9 @@ int32_t LnnGenBroadcastCipherInfo(void)
             broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "set iv error.");
             break;
+        }
+        if (LnnGenSparkCheck(broadcastKey.sparkCheck) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "gen sparkCheck error.");
         }
         if (LnnUpdateLocalBroadcastCipherKeyPacked(&broadcastKey) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "update local broadcast key failed");
