@@ -18,7 +18,9 @@
 #include "anonymizer.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#ifdef LNN_MULTI_FOREGROUND
 #include "display_manager.h"
+#endif
 #include "lnn_async_callback_utils.h"
 #include "lnn_device_info_struct.h"
 #include "lnn_log.h"
@@ -150,6 +152,7 @@ int32_t GetCurrentAccount(int64_t *account)
 
 int32_t GetAllDisplaysForCoDriverScreen(int32_t *coDriverUserId)
 {
+#ifdef LNN_MULTI_FOREGROUND
     uint64_t displayId = 0;
     int32_t foregroundUserId = 0;
     bool isHasCoDriverPanel = false;
@@ -183,6 +186,10 @@ int32_t GetAllDisplaysForCoDriverScreen(int32_t *coDriverUserId)
     LNN_LOGI(LNN_STATE, "account id=%{public}d", foregroundUserId);
     *coDriverUserId = foregroundUserId;
     return SOFTBUS_OK;
+#else
+    LNN_LOGE(LNN_STATE, "LNN_MULTI_FOREGROUND disable");
+    return SOFTBUS_NETWORK_GET_DISPLAY_ID_FAIL;
+#endif
 }
 
 static int32_t GetActiveOsAccountIdsByDisplayId(int32_t *userId)
@@ -210,6 +217,7 @@ static int32_t GetActiveOsAccountIdsByDisplayId(int32_t *userId)
  
 static int32_t GetAllDisplaysForMultiScreen()
 {
+#ifdef LNN_MULTI_FOREGROUND
     uint64_t displayId = 0;
     std::vector<OHOS::sptr<OHOS::Rosen::Display>> displays;
     displays = OHOS::Rosen::DisplayManager::GetInstance().GetAllDisplays();
@@ -231,6 +239,10 @@ static int32_t GetAllDisplaysForMultiScreen()
         return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
     }
     return SOFTBUS_OK;
+#else
+    LNN_LOGE(LNN_STATE, "LNN_MULTI_FOREGROUND disable");
+    return SOFTBUS_NETWORK_GET_DISPLAY_ID_FAIL;
+#endif
 }
 
 int32_t GetActiveOsAccountIds(void)
