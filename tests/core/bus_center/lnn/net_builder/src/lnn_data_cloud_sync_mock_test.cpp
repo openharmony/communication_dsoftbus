@@ -96,6 +96,13 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBCipherInfoSyncToCache_Test_001, TestSize.Le
     EXPECT_EQ(DBCipherInfoSyncToCache(&cacheInfo, fieldName, value, valueLength, udid), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, value));
     EXPECT_EQ(DBCipherInfoSyncToCache(&cacheInfo, fieldName, value, valueLength, udid), SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(DataCloudSyncMock, ConvertHexStringToBytes)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_SPARK_CHECK));
+    EXPECT_EQ(DBCipherInfoSyncToCache(&cacheInfo, fieldName, value, SPARK_CHECK_STR_LEN, udid), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(DBCipherInfoSyncToCache(&cacheInfo, fieldName, value, valueLength, udid),
+        SOFTBUS_KV_CONVERT_BYTES_FAILED);
+    EXPECT_EQ(DBCipherInfoSyncToCache(&cacheInfo, fieldName, value, valueLength, udid), SOFTBUS_OK);
 }
 
 /*
@@ -273,6 +280,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsCipherInfo_Test_001, TestSize
     EXPECT_EQ(JudgeFieldNameIsCipherInfo(fieldName), true);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_DISTRIBUTED_SWITCH));
     EXPECT_EQ(JudgeFieldNameIsCipherInfo(fieldName), true);
+    EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_SPARK_CHECK));
+    EXPECT_EQ(JudgeFieldNameIsCipherInfo(fieldName), true);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_DEVICE_PUB_MAC));
     EXPECT_EQ(JudgeFieldNameIsCipherInfo(fieldName), false);
 }
@@ -446,6 +455,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, SetDBDataToDistributedLedger_Test_001, TestSi
     EXPECT_CALL(DataCloudSyncMock, LnnUpdateNetworkId)
         .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetLedgerMock, LnnSetDLDeviceSparkCheck)
+        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     char deviceUdid[UDID_BUF_LEN] = { 0 };
@@ -460,6 +471,9 @@ HWTEST_F(LNNDataCloudSyncMockTest, SetDBDataToDistributedLedger_Test_001, TestSi
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_MEM_ERR);
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_STATE_VERSION));
+    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_NOT_FIND);
+    EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_OK);
+    EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_SPARK_CHECK));
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_NOT_FIND);
     EXPECT_EQ(SetDBDataToDistributedLedger(&cacheInfo, deviceUdid, 0, fieldName), SOFTBUS_OK);
     EXPECT_EQ(EOK, strcpy_s(fieldName, FIELDNAME_MAX_LEN, DEVICE_INFO_DISTRIBUTED_SWITCH));

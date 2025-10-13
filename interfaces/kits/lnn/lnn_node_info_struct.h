@@ -50,6 +50,9 @@ extern "C" {
 #define BROADCAST_IV_LEN 16
 #define BROADCAST_IV_STR_LEN 33
 
+#define SPARK_CHECK_LENGTH 16
+#define SPARK_CHECK_STR_LEN 33
+
 #define LFINDER_UDID_HASH_LEN 32
 #define LFINDER_IRK_LEN 16
 #define LFINDER_IRK_STR_LEN 33
@@ -222,6 +225,7 @@ typedef struct {
     ConnectInfo connectInfo;
     int32_t sleRangeCapacity;
     AclWriteState aclState;
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH];
 } NodeInfo;
 
 #ifdef __cplusplus
