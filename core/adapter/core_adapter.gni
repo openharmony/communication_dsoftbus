@@ -110,8 +110,10 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_external_deps += [
       "os_account:libaccountkits",
       "os_account:os_account_innerkits",
-      "window_manager:libdm",
     ]
+    if (dsoftbus_feature_lnn_multi_foreground) {
+      bus_center_core_adapter_external_deps += [ "window_manager:libdm" ]
+    }
   } else {
     bus_center_core_adapter_src += [
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
