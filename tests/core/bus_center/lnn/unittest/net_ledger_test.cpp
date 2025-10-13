@@ -254,6 +254,31 @@ HWTEST_F(NetLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_UDIDS_Test_001, T
 }
 
 /*
+ * @tc.name: IS_NEED_UPDATE_HUK_KEY_Test_001
+ * @tc.desc: is need update huk key test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, IS_NEED_UPDATE_HUK_KEY_Test_001, TestSize.Level1)
+{
+    uint64_t diffTime = 0;
+    bool ret = IsNeedUpdateHukKey(&diffTime);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: START_CHECK_HUK_KEY_TIME_PROC_Test_001
+ * @tc.desc: start check huk key time proc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, START_CHECK_HUK_KEY_TIME_PROC_Test_001, TestSize.Level1)
+{
+    int32_t para = 0;
+    EXPECT_NO_FATAL_FAILURE(StartCheckHukKeyTimeProc(static_cast<void *>(&para)));
+}
+
+/*
  * @tc.name: LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001
  * @tc.desc: Param is illegal and legal
  * @tc.type: FUNC

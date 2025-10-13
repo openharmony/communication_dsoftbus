@@ -47,6 +47,8 @@ constexpr char NODE_IP[] = "10.146.181.134";
 constexpr uint32_t TEST_DATA_LEN = 30;
 constexpr uint32_t AUTH_DEFAULT_VALUE = 0;
 constexpr int32_t INDEX = 1;
+constexpr int64_t TEST_ACCOUNT_ID = 12345;
+constexpr int64_t TEST_INVALID_ACCOUNT_ID = 12345;
 class AuthOtherMockTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -833,5 +835,63 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_USB_CONN_INFO_TEST_001, TestSize.Level1)
     isMetaAuth = true;
     ret = AuthGetUsbConnInfo(uuid, &connInfo, isMetaAuth);
     EXPECT_EQ(ret, AUTH_INVALID_ID);
+}
+
+/*
+ * @tc.name: IS_SAME_ACCOUNT_ID_TEST_001
+ * @tc.desc: IsSameAccountId test failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_001, TestSize.Level1)
+{
+    AuthOtherInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetLocalNum64Info).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_FALSE(IsSameAccountId(TEST_ACCOUNT_ID));
+}
+
+/*
+ * @tc.name: IS_SAME_ACCOUNT_ID_TEST_002
+ * @tc.desc: IsSameAccountId test failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_002, TestSize.Level1)
+{
+    int64_t localId = TEST_INVALID_ACCOUNT_ID;
+    AuthOtherInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetLocalNum64Info(_, _)).WillOnce(DoAll(SetArgPointee<1>(localId), Return(SOFTBUS_OK)));
+    EXPECT_CALL(authMock, LnnIsDefaultOhosAccount()).WillOnce(Return(false));
+    EXPECT_TRUE(IsSameAccountId(TEST_ACCOUNT_ID));
+}
+
+/*
+ * @tc.name: IS_SAME_ACCOUNT_ID_TEST_003
+ * @tc.desc: IsSameAccountId test failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_003, TestSize.Level1)
+{
+    AuthOtherInterfaceMock authMock;
+    int64_t localId = TEST_ACCOUNT_ID;
+    EXPECT_CALL(authMock, LnnGetLocalNum64Info(_, _)).WillOnce(DoAll(SetArgPointee<1>(localId), Return(SOFTBUS_OK)));
+    EXPECT_CALL(authMock, LnnIsDefaultOhosAccount()).WillOnce(Return(true));
+    EXPECT_FALSE(IsSameAccountId(localId));
+}
+
+/*
+ * @tc.name: IS_SAME_ACCOUNT_ID_TEST_004
+ * @tc.desc: IsSameAccountId test failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_004, TestSize.Level1)
+{
+    AuthOtherInterfaceMock authMock;
+    int64_t localId = TEST_ACCOUNT_ID;
+    EXPECT_CALL(authMock, LnnGetLocalNum64Info(_, _)).WillOnce(DoAll(SetArgPointee<1>(localId), Return(SOFTBUS_OK)));
+    EXPECT_CALL(authMock, LnnIsDefaultOhosAccount()).WillOnce(Return(false));
+    EXPECT_TRUE(IsSameAccountId(localId));
 }
 } // namespace OHOS
