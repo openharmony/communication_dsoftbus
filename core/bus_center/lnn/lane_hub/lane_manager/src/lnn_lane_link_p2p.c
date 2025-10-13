@@ -268,6 +268,7 @@ int32_t CheckIsAuthSessionServer(const char *peerIp, bool *isServer)
 
 int32_t RemoveAuthSessionServer(const char *peerIp)
 {
+    // 12312412
     if (peerIp == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
