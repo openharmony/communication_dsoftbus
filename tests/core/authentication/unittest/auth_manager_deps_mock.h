@@ -33,6 +33,7 @@
 #include "auth_tcp_connection.h"
 #include "auth_uk_manager.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
@@ -155,6 +156,10 @@ public:
     virtual uint32_t GetConnId(uint64_t connId) = 0;
     virtual int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request) = 0;
     virtual int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType) = 0;
+    virtual int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len) = 0;
+    virtual int32_t GetFd(uint64_t connId) = 0;
+    virtual void LnnClearAuthExchangeUdidPacked(const char *networkId) = 0;
+    virtual uint64_t GenConnId(int32_t connType, int32_t id) = 0;
 };
 class AuthManagerInterfaceMock : public AuthManagerInterface {
 public:
@@ -257,6 +262,10 @@ public:
     MOCK_METHOD1(GetConnId, uint32_t (uint64_t));
     MOCK_METHOD2(FindAuthRequestByConnInfo, int32_t (const AuthConnInfo *, AuthRequest *));
     MOCK_METHOD3(ConnectAuthDevice, int32_t (uint32_t, const AuthConnInfo *, ConnSideType));
+    MOCK_METHOD3(AuthSessionProcessDevInfoData, int32_t (int64_t, const uint8_t *, uint32_t));
+    MOCK_METHOD1(GetFd, int32_t (uint64_t));
+    MOCK_METHOD1(LnnClearAuthExchangeUdidPacked, void (const char *));
+    MOCK_METHOD2(GenConnId, uint64_t (int32_t, int32_t));
 };
 } // namespace OHOS
 #endif // AUTH_MANAGER_DEPS_MOCK_H
