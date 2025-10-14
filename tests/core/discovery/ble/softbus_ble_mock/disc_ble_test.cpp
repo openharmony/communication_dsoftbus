@@ -305,6 +305,7 @@ HWTEST_F(DiscBleTest, UpdateLocalDeviceInfo001, TestSize.Level1)
     ASSERT_NE(g_interface->mediumInterface->UpdateLocalDeviceInfo, nullptr);
     g_interface->mediumInterface->UpdateLocalDeviceInfo(TYPE_LOCAL_DEVICE_NAME);
 
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     DISC_LOGI(DISC_TEST, "UpdateLocalDeviceInfo001 end ----");
 }
 

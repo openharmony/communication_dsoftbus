@@ -46,7 +46,7 @@ HWTEST_F(DiscLogTest, DiscLogTest001, TestSize.Level0)
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_LNN, ++discDomainBase, "DiscLnn"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_BLE, ++discDomainBase, "DiscBle"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
-        DISC_BLE_ADAPTER, ++discDomainBase, "DiscBleAdapter"));
+        DISC_BLE_ADAPTER, ++discDomainBase, "DiscAdp"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_COAP, ++discDomainBase, "DiscCoap"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
         DISC_DFINDER, ++discDomainBase, "DiscDfinder"));
@@ -57,7 +57,7 @@ HWTEST_F(DiscLogTest, DiscLogTest001, TestSize.Level0)
         DISC_USB_ADAPTER, ++discDomainBase, "DiscUsbAdapter"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_SDK, ++discDomainBase, "DiscSdk"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
-        DISC_BROADCAST, ++discDomainBase, "DiscBroadcast"));
+        DISC_BROADCAST, ++discDomainBase, "DiscBC"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
         DISC_ACTION, ++discDomainBase, "DiscAction"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
