@@ -833,12 +833,14 @@ static int32_t GetUkNegoAuthParamInfo(const AuthACLInfo *info, HiChainAuthMode a
         AUTH_LOGE(AUTH_CONN, "get local node info fail");
         return ret;
     }
-    NodeInfo *remoteNodeInfo = LnnGetNodeInfoById(info->isServer ? info->sinkUdid : info->sourceUdid, CATEGORY_UDID);
-    if (remoteNodeInfo == NULL) {
+    NodeInfo remoteNodeInfo;
+    (void)memset_s(&remoteNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(info->isServer ? info->sinkUdid : info->sourceUdid, CATEGORY_UDID,
+        &remoteNodeInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "remote node info is null");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
-    ret = GenerateAuthParam(&nodeInfo, remoteNodeInfo, info, authMode, authParam);
+    ret = GenerateAuthParam(&nodeInfo, &remoteNodeInfo, info, authMode, authParam);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "gen auth param fail");
         return ret;
