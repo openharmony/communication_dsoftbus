@@ -978,11 +978,13 @@ static int32_t ClientTransProxyProcD2DAck(int32_t channelId, const char *data, u
         TRANS_LOGE(TRANS_SDK, "proxychannel delete dataSeqInfoList failed, channelId=%{public}d", channelId);
         return ret;
     }
-    if (sessionCallback.socketClient.OnMessageSent == NULL) {
+    ISocketListener *socketListener = isServer ? &(sessionCallback.socketServer) :
+        &(sessionCallback.socketClient);
+    if (socketListener == NULL || socketListener->OnMessageSent == NULL) {
         TRANS_LOGE(TRANS_SDK, "OnMessageSent not implement, channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_REGISTER_LISTENER_FAILED;
     }
-    sessionCallback.socketClient.OnMessageSent(socketId, dataSeq, SOFTBUS_OK);
+    socketListener->OnMessageSent(socketId, dataSeq, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 
