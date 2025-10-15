@@ -15,6 +15,7 @@
 #ifndef LNN_CIPHERKEY_MANAGER_STRUCT_H
 #define LNN_CIPHERKEY_MANAGER_STRUCT_H
 
+#include "lnn_node_info_struct.h"
 #include "softbus_common.h"
 #include "stdint.h"
 

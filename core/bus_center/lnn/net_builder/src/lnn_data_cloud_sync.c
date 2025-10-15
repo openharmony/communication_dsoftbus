@@ -565,7 +565,7 @@ static int32_t SetDBDataToDistributedLedger(NodeInfo *cacheInfo, char *deviceUdi
     } else if (strcmp(fieldName, DEVICE_INFO_SPARK_CHECK) == 0) {
         ret = LnnSetDLDeviceSparkCheck(deviceUdid, cacheInfo->sparkCheck);
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "set device sparkChecl to distributedLedger fail");
+            LNN_LOGE(LNN_BUILDER, "set device sparkCheck to distributedLedger fail");
             return ret;
         }
     }
