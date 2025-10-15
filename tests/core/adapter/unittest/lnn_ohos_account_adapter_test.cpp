@@ -55,7 +55,7 @@ void LnnOhosAccountAdapterTest::TearDown(void) { }
 
 /*
  * @tc.name: GetCurrentAccount_001
- * @tc.desc:  GetCurrentAccount
+ * @tc.desc: test with different parameters for the current account
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -70,7 +70,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_001, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_002
- * @tc.desc:  GetCurrentAccount
+ * @tc.desc: test with different parameters for the current account
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -87,7 +87,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_002, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_003
- * @tc.desc: GetCurrentAccount
+ * @tc.desc: test with different parameters for the current account
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -105,7 +105,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_003, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_004
- * @tc.desc: GetCurrentAccount
+ * @tc.desc: test with different parameters for the current account
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -123,7 +123,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_004, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_005
- * @tc.desc: GetCurrentAccount
+ * @tc.desc: test with different parameters for the current account
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -141,7 +141,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_005, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_006
- * @tc.desc: GetCurrentAccount
+ * @tc.desc: test with different parameters for the current account
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -159,7 +159,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_006, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountUid_InvalidParam01
- * @tc.desc: GetOsAccountUid invalid param
+ * @tc.desc: GetOsAccountUid invalid param test
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -173,7 +173,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam01, TestSize.Lev
 
 /*
  * @tc.name: GetOsAccountUid_InvalidParam02
- * @tc.desc: GetOsAccountUid invalid param
+ * @tc.desc: GetOsAccountUid invalid param test
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -187,7 +187,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam02, TestSize.Lev
 
 /*
  * @tc.name: GetOsAccountUid_InvalidParam03
- * @tc.desc: GetOsAccountUid invalid param
+ * @tc.desc: GetOsAccountUid invalid param test
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -206,7 +206,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam03, TestSize.Lev
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_001
- * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.desc: GetOsAccountUidByUserId invalid param test
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -221,7 +221,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_001, TestSize.L
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_002
- * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.desc: GetOsAccountUidByUserId invalid param test
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -236,7 +236,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_002, TestSize.L
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_003
- * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.desc: GetOsAccountUidByUserId invalid param test
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -252,7 +252,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_003, TestSize.L
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_004
- * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.desc: GetOsAccountUidByUserId invalid param test
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -268,7 +268,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_004, TestSize.L
 
 /*
  * @tc.name: GetOsAccountId_001
- * @tc.desc: GetOsAccountId
+ * @tc.desc: test for invalid param passed through the GetOsAccountId
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -287,7 +287,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_001, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_002
- * @tc.desc: GetOsAccountId
+ * @tc.desc: test for invalid param passed through the GetOsAccountId
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -305,7 +305,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_003
- * @tc.desc: GetOsAccountId
+ * @tc.desc: test for invalid param passed through the GetOsAccountId
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -327,7 +327,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_004
- * @tc.desc: GetOsAccountId
+ * @tc.desc: test for invalid param passed through the GetOsAccountId
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -351,7 +351,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_005
- * @tc.desc:  GetOsAccountId Fail
+ * @tc.desc: test for invalid param passed through the GetOsAccountId
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -527,7 +527,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_Test_006, TestSize.Le
 
 /*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001
- * @tc.desc:  GetOsAccountIdByUserId Failed
+ * @tc.desc: GetOsAccountIdByUserId invalid param and expected return Failed
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -540,7 +540,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001, TestS
 
 /*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002
- * @tc.desc:  GetOsAccountIdByUserId Failed
+ * @tc.desc: GetOsAccountIdByUserId invalid param and expected return Failed
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -553,7 +553,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002, TestS
 
 /*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003
- * @tc.desc:  GetOsAccountIdByUserId Failed
+ * @tc.desc: GetOsAccountIdByUserId invalid param and expected return Failed
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -568,7 +568,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003, TestS
 
 /*
  * @tc.name: GET_OS_ACCOUNT_TEST_001
- * @tc.desc:  GetOsAccountUid Failed with invalid param
+ * @tc.desc: GetOsAccountUid Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -581,7 +581,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_OS_ACCOUNT_TEST_002
- * @tc.desc:  GetOsAccountUid Failed
+ * @tc.desc: GetOsAccountUid Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -596,7 +596,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_OS_ACCOUNT_TEST_003
- * @tc.desc:  GetOsAccountUid Failed.
+ * @tc.desc: GetOsAccountUid Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -610,7 +610,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001
- * @tc.desc:  GetOsAccountUid Failed
+ * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -624,7 +624,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002
- * @tc.desc:  GetOsAccountUid Failed with invalid param
+ * @tc.desc: GetOsAccountUid Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -639,7 +639,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003
- * @tc.desc:  GetOsAccountUid Failed
+ * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -655,7 +655,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004
- * @tc.desc:  GetOsAccountUid Failed
+ * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -671,7 +671,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005
- * @tc.desc:  GetOsAccountUid Failed with invalid param
+ * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -774,7 +774,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_002, TestSize.Level0)
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_004
  * @tc.desc: GetOsAccountUidByUserId Success
  * @tc.type: FUN
@@ -801,7 +801,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_004, TestSize.Level0
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_005
  * @tc.desc: GetOsAccountUidByUserId idLen too small
  * @tc.type: FUN
@@ -829,7 +829,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_005, TestSize.Level0
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_006
  * @tc.desc: GetOsAccountUidByUserId Fail with Empty Account Name
  * @tc.type: FUN
@@ -853,7 +853,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_006, TestSize.Level0
     }
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_001
  * @tc.desc: GetOsAccountUidByUserId Fail with Default Account Name
  * @tc.type: FUN
@@ -877,7 +877,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_001, TestSize.
     }
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_002
  * @tc.desc: GetOsAccountUidByUserId Fail with Default Account Name
  * @tc.type: FUN

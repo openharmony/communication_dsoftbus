@@ -91,9 +91,10 @@ void TransChannelManagerTest::TearDownTestCase(void)
     DiscEventManagerDeinit();
 }
 
-/**
+/*
  * @tc.name: TransChannelInit001
- * @tc.desc: TransChannelInit001, use the wrong parameter.
+ * @tc.desc: TransChannelInit test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -103,9 +104,10 @@ HWTEST_F(TransChannelManagerTest, TransChannelInit001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: TransChannelDeinit001
- * @tc.desc: TransChannelDeinit001, use the wrong parameter.
+ * @tc.desc: TransChannelDeinit test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -116,10 +118,11 @@ HWTEST_F(TransChannelManagerTest, TransChannelDeinit001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: GetAppInfo001
  * @tc.desc: TransOpenChannel
- * @tc.desc: GetAppInfo, use the wrong parameter.
+ * @tc.desc: GetAppInfo test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -145,9 +148,10 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: TransOpenChannel002
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null parameter.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM
+ *           when given null parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -167,9 +171,10 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransOpenAuthChannel001
- * @tc.desc: TransOpenAuthChannel001, use the wrong parameter.
+ * @tc.desc: TransOpenAuthChannel test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -199,9 +204,10 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
     SoftBusFree(connOpt);
 }
 
-/**
+/*
  * @tc.name: MergeStatsInterval001
- * @tc.desc: MergeStatsInterval001, use the wrong parameter.
+ * @tc.desc: MergeStatsInterval test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -233,10 +239,12 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
     SoftBusFree(dest);
 }
 
-/**
+/*
  * @tc.name: TransRippleStats001
- * @tc.name: TransStreamStats, use the wrong parameter.
- * @tc.desc: TransRippleStats001, use the wrong parameter.
+ * @tc.name: TransStreamStats test
+ *           use the wrong parameter
+ * @tc.desc: TransRippleStats test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -274,9 +282,10 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransNotifyAuthSuccess001
- * @tc.desc: TransNotifyAuthSuccess, use the wrong parameter.
+ * @tc.desc: TransNotifyAuthSuccess test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -293,9 +302,10 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransRequestQos001
- * @tc.desc: TransRequestQos001, use the wrong parameter.
+ * @tc.desc: TransRequestQos test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -310,9 +320,10 @@ HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCloseChannel001
- * @tc.desc: TransCloseChannel001, use the wrong parameter.
+ * @tc.desc: TransCloseChannel test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -341,10 +352,12 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransSendMsg001
- * @tc.desc: TransSendMsg, use the wrong parameter.
- * @tc.desc: TransChannelDeathCallback, use the wrong parameter.
+ * @tc.desc: TransSendMsg test
+ *           use the wrong parameter
+ * @tc.desc: TransChannelDeathCallback test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -370,9 +383,10 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
     TransChannelDeathCallback(nullptr, pid);
 }
 
-/**
+/*
  * @tc.name: TransGetNameByChanId001
- * @tc.desc: TransGetNameByChanId001, use the wrong parameter.
+ * @tc.desc: TransGetNameByChanId test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -415,9 +429,10 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransGetAppInfoByChanId001
- * @tc.desc: TransGetAppInfoByChanId001, use the wrong parameter.
+ * @tc.desc: TransGetAppInfoByChanId test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -457,9 +472,10 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransGetConnByChanId Test
- * @tc.desc: TransGetConnByChanId001, use the wrong parameter.
+ * @tc.desc: TransGetConnByChanId test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -482,9 +498,10 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 
-/**
- * @tc.name: TransGetConnByChanId Test
- * @tc.desc: TransGetConnByChanId002, use the wrong parameter.
+/*
+ * @tc.name: TransGetConnByChanId002
+ * @tc.desc: TransGetConnByChanId test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -497,7 +514,7 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: GenerateProxyChannelId and ReleaseProxyChannelId test
  * @tc.desc: GenerateProxyChannelId
  * @tc.type: FUNC
@@ -514,7 +531,7 @@ HWTEST_F(TransChannelManagerTest, GenerateProxyChannelId001, TestSize.Level1)
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
-/**
+/*
  * @tc.name: IsLaneModuleError test
  * @tc.desc: IsLaneModuleError001
  * @tc.type: FUNC
@@ -528,7 +545,7 @@ HWTEST_F(TransChannelManagerTest, IsLaneModuleError001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: TransSetFirstTokenInfo test
  * @tc.desc: TransSetFirstTokenInfo001
  * @tc.type: FUNC
@@ -549,7 +566,7 @@ HWTEST_F(TransChannelManagerTest, TransSetFirstTokenInfo001, TestSize.Level1)
     TransFreeAppInfo(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransNotifyAuthSuccess test
  * @tc.desc: TransNotifyAuthSuccess002
  * @tc.type: FUNC
@@ -563,7 +580,7 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_CHANNELID_CONVERT_ADDR_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransReleaseUdpResources test
  * @tc.desc: TransReleaseUdpResources001
  * @tc.type: FUNC
@@ -575,7 +592,7 @@ HWTEST_F(TransChannelManagerTest, TransReleaseUdpResources001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCloseChannelWithStatistics test
  * @tc.desc: TransCloseChannelWithStatistics001
  * @tc.type: FUNC
@@ -588,7 +605,7 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannelWithStatistics001, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransSendMsg test
  * @tc.desc: TransSendMsg002
  * @tc.type: FUNC
@@ -600,7 +617,7 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransOpenChannel test
  * @tc.desc: TransOpenChannel003
  * @tc.type: FUNC
@@ -631,7 +648,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel003, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: TransOpenChannel test
  * @tc.desc: TransOpenChannel004
  * @tc.type: FUNC
@@ -665,7 +682,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel004, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: TransOpenChannel test
  * @tc.desc: TransOpenChannel005
  * @tc.type: FUNC
@@ -696,7 +713,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel005, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: TransOpenChannel test
  * @tc.desc: TransOpenChannel006
  * @tc.type: FUNC
@@ -729,7 +746,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel006, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: GetAuthAppInfo Test
  * @tc.desc: GetAuthAppInfo001
  * @tc.type: FUNC
@@ -746,7 +763,7 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo001, TestSize.Level1)
     EXPECT_NE(nullptr, appInfo);
 }
 
-/**
+/*
  * @tc.name: GetAuthAppInfo Test
  * @tc.desc: GetAuthAppInfo002
  * @tc.type: FUNC
@@ -760,7 +777,7 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo002, TestSize.Level1)
     EXPECT_EQ(nullptr, appInfo);
 }
 
-/**
+/*
  * @tc.name: GetAuthAppInfo Test
  * @tc.desc: GetAuthAppInfo003
  * @tc.type: FUNC
@@ -775,7 +792,7 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo003, TestSize.Level1)
     EXPECT_EQ(nullptr, appInfo);
 }
 
-/**
+/*
  * @tc.name: GetAuthAppInfo Test
  * @tc.desc: GetAuthAppInfo004
  * @tc.type: FUNC
@@ -791,7 +808,7 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo004, TestSize.Level1)
     EXPECT_EQ(nullptr, appInfo);
 }
 
-/**
+/*
  * @tc.name: GetAuthAppInfo Test
  * @tc.desc: GetAuthAppInfo005
  * @tc.type: FUNC
@@ -808,7 +825,7 @@ HWTEST_F(TransChannelManagerTest, GetAuthAppInfo005, TestSize.Level1)
     EXPECT_EQ(nullptr, appInfo);
 }
 
-/**
+/*
  * @tc.name: TransGetAndComparePid Test
  * @tc.desc: TransGetAndComparePid001
  * @tc.require:
@@ -821,7 +838,7 @@ HWTEST_F(TransChannelManagerTest, TransGetAndComparePid001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransPrivilegeCloseChannel001
  * @tc.desc: TransPrivilegeCloseChannel Test
  * @tc.require:
@@ -838,7 +855,7 @@ HWTEST_F(TransChannelManagerTest, TransPrivilegeCloseChannel001, TestSize.Level1
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: PrivilegeCloseListAddItem Test
  * @tc.desc: PrivilegeCloseListAddItem001
  * @tc.require:
@@ -864,7 +881,7 @@ HWTEST_F(TransChannelManagerTest, PrivilegeCloseListAddItem001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetChannelInfoFromBuf Test
  * @tc.desc: GetChannelInfoFromBuf001
  * @tc.require:
@@ -892,7 +909,7 @@ HWTEST_F(TransChannelManagerTest, GetChannelInfoFromBuf001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
-/**
+/*
  * @tc.name: GetUdpChannelInfoFromBuf Test
  * @tc.desc: GetUdpChannelInfoFromBuf001
  * @tc.require:
@@ -924,7 +941,7 @@ HWTEST_F(TransChannelManagerTest, GetUdpChannelInfoFromBuf001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
-/**
+/*
  * @tc.name: GetLimitChangeInfoFromBuf Test
  * @tc.desc: GetLimitChangeInfoFromBuf001
  * @tc.require:
@@ -953,7 +970,7 @@ HWTEST_F(TransChannelManagerTest, GetLimitChangeInfoFromBuf001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
-/**
+/*
  * @tc.name: TransReportChannelOpenedInfo Test
  * @tc.desc: TransReportChannelOpenedInfo001
  * @tc.require:
@@ -988,7 +1005,7 @@ HWTEST_F(TransChannelManagerTest, TransReportChannelOpenedInfo001, TestSize.Leve
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransReportLimitChangeInfo Test
  * @tc.desc: TransReportLimitChangeInfo001
  * @tc.require:
@@ -1003,7 +1020,7 @@ HWTEST_F(TransChannelManagerTest, TransReportLimitChangeInfo001, TestSize.Level1
     EXPECT_NO_FATAL_FAILURE(TransReportLimitChangeInfo(buf, len, TRANS_TEST_PID));
 }
 
-/**
+/*
  * @tc.name: GetCollabCheckResultFromBuf Test
  * @tc.desc: GetCollabCheckResultFromBuf001
  * @tc.require:
@@ -1032,7 +1049,7 @@ HWTEST_F(TransChannelManagerTest, GetCollabCheckResultFromBuf001, TestSize.Level
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
-/**
+/*
  * @tc.name: TransReportCheckCollabInfo Test
  * @tc.desc: TransReportCheckCollabInfo001
  * @tc.require:
@@ -1063,7 +1080,7 @@ HWTEST_F(TransChannelManagerTest, TransReportCheckCollabInfo001, TestSize.Level1
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProcessInnerEvent Test
  * @tc.desc: TransProcessInnerEvent001
  * @tc.require:
@@ -1094,7 +1111,7 @@ HWTEST_F(TransChannelManagerTest, TransProcessInnerEvent001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: GenerateChannelId test
  * @tc.desc: GenerateChannelId001
  * @tc.type: FUNC
@@ -1148,7 +1165,7 @@ static void AddStringToBuffer(const char *str, uint8_t *testBuffer, int32_t &buf
     bufferOffset += len;
 }
 
-/**
+/*
  * @tc.name: TransSetAccessInfo test
  * @tc.desc: TransSetAccessInfo001
  * @tc.type: FUNC
@@ -1193,7 +1210,7 @@ HWTEST_F(TransChannelManagerTest, TransSetAccessInfo001, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSetAccessInfo test
  * @tc.desc: TransSetAccessInfo002
  * @tc.type: FUNC
