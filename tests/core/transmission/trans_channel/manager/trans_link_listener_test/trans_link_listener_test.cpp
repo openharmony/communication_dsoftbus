@@ -44,9 +44,9 @@ void TransLinkListenerTest::SetUpTestCase(void)
 void TransLinkListenerTest::TearDownTestCase(void)
 {}
 
-/**
- * @tc.name: ClearIpInfo Test
- * @tc.desc: ClearIpInfo001, void return
+/*
+ * @tc.name: ClearIpInfo001
+ * @tc.desc: ClearIpInfo test, void return
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -59,9 +59,9 @@ HWTEST_F(TransLinkListenerTest, ClearIpInfo001, TestSize.Level1)
     TransChannelDeinit();
 }
 
-/**
- * @tc.name: OnWifiDirectDeviceOffLine Test
- * @tc.desc: OnWifiDirectDeviceOffLine001, void return
+/*
+ * @tc.name: OnWifiDirectDeviceOffLine001
+ * @tc.desc: OnWifiDirectDeviceOffLine test, void return
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -79,9 +79,9 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffLine001, TestSize.Level1)
     TransChannelDeinit();
 }
 
-/**
- * @tc.name: OnWifiDirectDeviceOffLine Test
- * @tc.desc: OnWifiDirectDeviceOffLine002, void return
+/*
+ * @tc.name: OnWifiDirectDeviceOffLine002
+ * @tc.desc: OnWifiDirectDeviceOffLine test, void return
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -98,9 +98,9 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffLine002, TestSize.Level1)
     TransChannelDeinit();
 }
 
-/**
- * @tc.name: OnWifiDirectRoleChange Test
- * @tc.desc: OnWifiDirectRoleChange, void return
+/*
+ * @tc.name: OnWifiDirectRoleChange001
+ * @tc.desc: OnWifiDirectRoleChange test, void return
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -111,9 +111,9 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectRoleChange001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: OnWifiDirectDeviceOnLine Test
- * @tc.desc: OnWifiDirectDeviceOnLine, void return
+/*
+ * @tc.name: OnWifiDirectDeviceOnLine001
+ * @tc.desc: OnWifiDirectDeviceOnLine test, void return
  * @tc.type: FUNC
  * @tc.require:
  */

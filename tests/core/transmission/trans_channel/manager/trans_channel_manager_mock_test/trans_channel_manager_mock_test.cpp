@@ -62,7 +62,7 @@ void TransChannelManagerMockTest::TearDownTestCase(void)
     DiscEventManagerDeinit();
 }
 
-/**
+/*
  * @tc.name: TransStreamStats test
  * @tc.desc: TransStreamStats002
  * @tc.type: FUNC
@@ -81,7 +81,7 @@ HWTEST_F(TransChannelManagerMockTest, TransStreamStats002, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: TransStreamStats test
  * @tc.desc: TransStreamStats003
  * @tc.type: FUNC
@@ -100,7 +100,7 @@ HWTEST_F(TransChannelManagerMockTest, TransStreamStats003, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: TransRequestQos test
  * @tc.desc: TransRequestQos003
  * @tc.type: FUNC
@@ -114,7 +114,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransRequestQos test
  * @tc.desc: TransRequestQos004
  * @tc.type: FUNC
@@ -128,7 +128,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransRequestQos test
  * @tc.desc: TransRequestQos005
  * @tc.type: FUNC
@@ -145,7 +145,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: TransRequestQos test
  * @tc.desc: TransRequestQos006
  * @tc.type: FUNC
@@ -163,7 +163,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos006, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransRippleStats test
  * @tc.desc: TransRippleStats002
  * @tc.type: FUNC
@@ -182,7 +182,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRippleStats002, TestSize.Level1)
     SoftBusFree(trafficStats);
 }
 
-/**
+/*
  * @tc.name: TransRippleStats test
  * @tc.desc: TransRippleStats003
  * @tc.type: FUNC
@@ -201,7 +201,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRippleStats003, TestSize.Level1)
     SoftBusFree(trafficStats);
 }
 
-/**
+/*
  * @tc.name: TransGetAndComparePidBySession test
  * @tc.desc: TransGetAndComparePidBySession001
  * @tc.type: FUNC
@@ -216,7 +216,7 @@ HWTEST_F(TransChannelManagerMockTest, TransGetAndComparePidBySession001, TestSiz
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetAndComparePidBySession test
  * @tc.desc: TransGetAndComparePidBySession002
  * @tc.type: FUNC
@@ -231,7 +231,7 @@ HWTEST_F(TransChannelManagerMockTest, TransGetAndComparePidBySession002, TestSiz
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/**
+/*
  * @tc.name: TransRequestQos test
  * @tc.desc: TransRequestQos002
  * @tc.type: FUNC
@@ -249,7 +249,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransAsyncChannelOpenTaskManager test
  * @tc.desc: TransAsyncChannelOpenTaskManager001
  * @tc.type: FUNC
@@ -265,7 +265,7 @@ HWTEST_F(TransChannelManagerMockTest, TransAsyncChannelOpenTaskManager001, TestS
     EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(channelId, CHANNEL_TYPE_BUTT));
 }
 
-/**
+/*
  * @tc.name: CheckAuthChannelIsExit test
  * @tc.desc: CheckAuthChannelIsExit001
  * @tc.type: FUNC
