@@ -1839,10 +1839,11 @@ static void UpdateDeviceNameToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 
 static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 {
-    if (strcmp(newInfo->networkId, oldInfo->networkId) == 0 || oldInfo->status != STATUS_ONLINE ||
-        !LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE)
-        || LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
-        oldInfo->stateVersion = newInfo->stateVersion;
+    if (LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+        if (strcmp(newInfo->networkId, oldInfo->networkId) == 0 || oldInfo->status != STATUS_ONLINE ||
+            !LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE)) {
+            oldInfo->stateVersion = newInfo->stateVersion;
+        }
     }
 
     UpdateDeviceNameToDLedger(newInfo, oldInfo);
