@@ -1215,7 +1215,8 @@ static int32_t GetSrvTypeIndex(BaseServiceType srvType)
         return CHANEL_STEADY;
     } else if (srvType == SRV_TYPE_SHARE || srvType == SRV_TYPE_TOUCH) {
         return CHANEL_SHARE;
-    } else if (srvType == SRV_TYPE_HB || srvType == SRV_TYPE_DIS || srvType == SRV_TYPE_OOP || srvType == SRV_TYPE_SD) {
+    } else if (srvType == SRV_TYPE_HB || srvType == SRV_TYPE_DIS || srvType == SRV_TYPE_OOP ||
+        srvType == SRV_TYPE_SD || srvType == SRV_TYPE_COLLABORATION) {
         return CHANEL_UNSTEADY;
     } else if (srvType == SRV_TYPE_D2D_PAGING) {
         return CHANEL_SLE_D2D_PAGING;

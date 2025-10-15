@@ -113,5 +113,15 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
 {
     return GetInterface()->JudgeDeviceTypeAndGetOsAccountIds();
 }
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetInterface()->LnnGetLocalNumInfo(key, info);
+}
+
+int32_t GetAllDisplaysForCoDriverScreen(int32_t *coDriverUserId)
+{
+    return GetInterface()->GetAllDisplaysForCoDriverScreen(coDriverUserId);
+}
 }
 } // namespace OHOS

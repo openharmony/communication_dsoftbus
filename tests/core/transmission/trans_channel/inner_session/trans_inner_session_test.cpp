@@ -100,9 +100,10 @@ static ISessionListenerInner g_innerSessionListener = {
     .OnSetChannelInfoByReqId = OnSetChannelInfoByReqId,
 };
 
-/**
+/*
  * @tc.name: InnerMessageHandlerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -113,9 +114,10 @@ HWTEST_F(TransInnerSessionTest, InnerMessageHandlerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnSetChannelInfoByReqIdTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -126,9 +128,10 @@ HWTEST_F(TransInnerSessionTest, TransOnSetChannelInfoByReqIdTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnSessionOpenedInnerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -141,9 +144,10 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest001, TestSize.Level
     TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
 }
 
-/**
+/*
  * @tc.name: GetIsClientInfoByIdTest001
- * @tc.desc: Should return SOFTBUS_OK when given valid param.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when given valid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -169,9 +173,10 @@ HWTEST_F(TransInnerSessionTest, GetIsClientInfoByIdTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCreateSessionServerInnerTest001
- * @tc.desc: Should return SOFTBUS_OK when param is valid.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when param is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -185,9 +190,10 @@ HWTEST_F(TransInnerSessionTest, TransCreateSessionServerInnerTest001, TestSize.L
     TransOnLinkDownInner(NETWORK_ID);
 }
 
-/**
+/*
  * @tc.name: TransOnSetChannelInfoByReqIdTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -198,9 +204,10 @@ HWTEST_F(TransInnerSessionTest, TransOnSetChannelInfoByReqIdTest002, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnSessionOpenedInnerTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -216,9 +223,10 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest002, TestSize.Level
 }
 
 
-/**
+/*
  * @tc.name: TransOnSessionOpenedInnerTest003
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -230,9 +238,10 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest003, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnSessionOpenedInnerTest004
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -248,9 +257,10 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest004, TestSize.Level
     TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
 }
 
-/**
+/*
  * @tc.name: InnerMessageHandlerTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is not null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is not null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -261,9 +271,10 @@ HWTEST_F(TransInnerSessionTest, InnerMessageHandlerTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnSessionOpenedInnerTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is not null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is not null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -296,9 +307,10 @@ HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransOpenSessionInnerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -313,9 +325,10 @@ HWTEST_F(TransInnerSessionTest, TransOpenSessionInnerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransSendDataInnerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: Should return SOFTBUS_NO_INIT
+ *           when g_InnerListener is null
  * @tc.type: FUNC
  * @tc.require:
  */

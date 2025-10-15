@@ -238,6 +238,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
  * @tc.name: LNN_SYNC_OFFLINE_COMPLETE_TEST_001
  * @tc.desc: test LnnSyncOfflineComplete
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
@@ -254,6 +255,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
  * @tc.name: LNN_SERVER_LEAVE_TEST_001
  * @tc.desc: test LnnServerLeave
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
@@ -272,6 +274,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
  * @tc.name: LNN_SERVER_JOIN_TEST_001
  * @tc.desc: test LnnServerJoin
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
@@ -294,6 +297,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
  * @tc.name: LNN_SERVER_JOIN_EXT_TEST_001
  * @tc.desc: test LnnServerJoinExt
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_EXT_TEST_001, TestSize.Level0)
@@ -316,6 +320,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_EXT_TEST_001, TestSize.Level0)
  * @tc.name: FIND_REQUEST_ID_BY_ADDR_TEST_001
  * @tc.desc: test FindRequestIdByAddr
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
@@ -333,6 +338,7 @@ HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
  * @tc.name: FIND_NODE_INFO_BY_RQUESTID_TEST_001
  * @tc.desc: test FindNodeInfoByRquestId
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level0)
@@ -349,6 +355,7 @@ HWTEST_F(LNNNetBuilderTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level0
  * @tc.name: LNN_GET_VERIFY_CALLBACK_TEST_001
  * @tc.desc: test three verify callback
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
@@ -374,6 +381,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
  * @tc.name: LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001
  * @tc.desc: lnn notify auth handle leave lnn test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001, TestSize.Level0)

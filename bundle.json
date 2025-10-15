@@ -69,7 +69,8 @@
       "dsoftbus_feature_dnet",
       "dsoftbus_feature_linkfinder",
       "dsoftbus_feature_coap",
-      "dsoftbus_feature_lnn_usb_ncm"
+      "dsoftbus_feature_lnn_usb_ncm",
+      "dsoftbus_feature_lnn_multi_foreground"
     ],
     "rom": "3000KB",
     "ram": "40MB",

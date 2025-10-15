@@ -47,9 +47,9 @@ void LnnLinkWatchTest::SetUp() { }
 
 void LnnLinkWatchTest::TearDown() { }
 
-/**
+/*
  * @tc.name: Add_Attr_001
- * @tc.desc: Verify the LnnIsLinkReady function return value equal false.
+ * @tc.desc: Verify the LnnIsLinkReady function return value equal false
  * @tc.type: FUNC
  * @tc.require: 1
  */

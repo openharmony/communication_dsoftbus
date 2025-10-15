@@ -235,7 +235,7 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     }
 
     BindToInterface(option->socketOption.addr, domain, fd, (char *)(option->socketOption.ifName), IF_NAME_SIZE);
-    CONN_LOGI(CONN_COMMON, "server listen tcp socket, fd=%{public}d", fd);
+    CONN_LOGI(CONN_COMMON, "fd=%{public}d", fd);
     return fd;
 }
 

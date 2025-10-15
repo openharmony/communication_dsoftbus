@@ -40,9 +40,9 @@ void TransPendingPktTest::SetUpTestCase(void)
 void TransPendingPktTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: PendingInit001
- * @tc.desc: PendingInit001, use the wrong parameter.
+ * @tc.desc: PendingInit001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -61,9 +61,9 @@ HWTEST_F(TransPendingPktTest, PendingInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: PendingDeinit001
- * @tc.desc: PendingDeinit001, use the wrong parameter.
+ * @tc.desc: PendingDeinit001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -81,10 +81,10 @@ HWTEST_F(TransPendingPktTest, PendingDeinit001, TestSize.Level1)
     PendingDeinit(type);
 }
 
-/**
+/*
  * @tc.name: CreatePendingItem001
- * @tc.desc: CreatePendingItem001, use the wrong parameter.
- * @tc.desc: ReleasePendingItem, use the wrong parameter.
+ * @tc.desc: CreatePendingItem001, use the wrong parameter
+ * @tc.desc: ReleasePendingItem, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -100,9 +100,9 @@ HWTEST_F(TransPendingPktTest, CreatePendingItem001, TestSize.Level1)
     ReleasePendingItem(nullptr);
 }
 
-/**
+/*
  * @tc.name: ProcPendingPacket001
- * @tc.desc: ProcPendingPacket001, use the wrong parameter.
+ * @tc.desc: ProcPendingPacket001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -122,9 +122,9 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: SetPendingPacket001
- * @tc.desc: SetPendingPacket001, use the wrong parameter.
+ * @tc.desc: SetPendingPacket001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -145,9 +145,9 @@ HWTEST_F(TransPendingPktTest, SetPendingPacket001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: DelPendingPacket001
- * @tc.desc: DelPendingPacket001, use the wrong parameter.
+ * @tc.desc: DelPendingPacket001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -167,9 +167,9 @@ HWTEST_F(TransPendingPktTest, DelPendingPacket001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_TDC_PENDINGLIST_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: ProcPendingPacket002
- * @tc.desc: ProcPendingPacket, use the wrong parameter.
+ * @tc.desc: ProcPendingPacket, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -201,9 +201,9 @@ HWTEST_F(TransPendingPktTest, ProcPendingPacket002, TestSize.Level1)
     PendingDeinit(type);
 }
 
-/**
+/*
  * @tc.name: TimeBefore001
- * @tc.desc: TimeBefore001, use the wrong parameter.
+ * @tc.desc: TimeBefore001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -218,9 +218,9 @@ HWTEST_F(TransPendingPktTest, TimeBefore001, TestSize.Level1)
     EXPECT_TRUE(res);
 }
 
-/**
+/*
  * @tc.name: ProcPendingPacket002
- * @tc.desc: ProcPendingPacket, use the wrong parameter.
+ * @tc.desc: ProcPendingPacket, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -239,9 +239,9 @@ HWTEST_F(TransPendingPktTest, SetPendingPacket002, TestSize.Level1)
     PendingDeinit(type);
 }
 
-/**
+/*
  * @tc.name: DelPendingPacket002
- * @tc.desc: DelPendingPacket002, use the wrong parameter.
+ * @tc.desc: DelPendingPacket002, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -259,9 +259,9 @@ HWTEST_F(TransPendingPktTest, DelPendingPacket002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: PendingPacketTestAll001
- * @tc.desc: PendingPacketTestAll001, use the wrong parameter.
+ * @tc.desc: PendingPacketTestAll001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */

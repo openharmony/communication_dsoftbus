@@ -63,9 +63,9 @@ void TransAuthNegotiateTest::TearDownTestCase(void)
     TransReqAuthPendingDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthPendingTest001
- * @tc.desc: Use the wrong parameter and legal parameter to test TransAddAuthReqToPendingList.
+ * @tc.desc: Use the wrong parameter and legal parameter to test TransAddAuthReqToPendingList
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -78,9 +78,9 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest001, TestSize.Level1)
     TransDelAuthReqFromPendingList(TRANS_TEST_AUTH_REQUEST_ID);
 }
 
-/**
+/*
  * @tc.name: TransAuthPendingTest002
- * @tc.desc: Use the wrong parameter and legal parameter to test TransUpdateAuthInfo.
+ * @tc.desc: Use the wrong parameter and legal parameter to test TransUpdateAuthInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -99,9 +99,9 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest002, TestSize.Level1)
     TransDelAuthReqFromPendingList(TRANS_TEST_AUTH_REQUEST_ID);
 }
 
-/**
+/*
  * @tc.name: TransAuthPendingTest003
- * @tc.desc: Use the wrong parameter and legal parameter to test TransCheckAuthNegoStatusByReqId.
+ * @tc.desc: Use the wrong parameter and legal parameter to test TransCheckAuthNegoStatusByReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -126,9 +126,9 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest003, TestSize.Level1)
     TransDelAuthReqFromPendingList(TRANS_TEST_AUTH_REQUEST_ID);
 }
 
-/**
+/*
  * @tc.name: TransAuthPendingTest004
- * @tc.desc: Use the wrong parameter and legal parameter to test WaitingForAuthNegoToBeDone.
+ * @tc.desc: Use the wrong parameter and legal parameter to test WaitingForAuthNegoToBeDone
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -143,9 +143,9 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest004, TestSize.Level1)
     TransDelAuthReqFromPendingList(TRANS_TEST_AUTH_REQUEST_ID);
 }
 
-/**
+/*
  * @tc.name: TransAuthPendingTest005
- * @tc.desc: Use the wrong parameter to test TransNegotiateSessionKey and TransReNegotiateSessionKey.
+ * @tc.desc: Use the wrong parameter to test TransNegotiateSessionKey and TransReNegotiateSessionKey
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -166,9 +166,9 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransAuthPendingTest006
- * @tc.desc: Use the wrong parameter to test GetAuthConnInfoByConnId.
+ * @tc.desc: Use the wrong parameter to test GetAuthConnInfoByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -181,7 +181,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest006, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: OnAuthSessionKeyGenSucc and OnAuthSessionKeyGenFail Test
  * @tc.desc: OnAuthSessionKeyGenFail OnAuthSessionKeyGenSucc001
  * @tc.type: FUNC
@@ -199,7 +199,7 @@ HWTEST_F(TransAuthNegotiateTest, OnAuthSessionKeyGenSucc001, TestSize.Level1)
     TransDelAuthReqFromPendingList(TRANS_TEST_AUTH_REQUEST_ID);
 }
 
-/**
+/*
  * @tc.name: OnUpdateSessionKeySucc and OnUpdateSessionKeyFail Test
  * @tc.desc: OnUpdateSessionKeySucc OnUpdateSessionKeyFail001
  * @tc.type: FUNC
@@ -217,9 +217,10 @@ HWTEST_F(TransAuthNegotiateTest, OnUpdateSessionKeyFail001, TestSize.Level1)
     TransDelAuthReqFromPendingList(TRANS_TEST_AUTH_REQUEST_ID);
 }
 
-/**
- * @tc.name: TransNegotiateSessionKey Test
- * @tc.desc: TransNegotiateSessionKey001
+/*
+ * @tc.name: TransNegotiateSessionKey001
+ * @tc.desc: TransNegotiateSessionKey test
+ *           use the wrong param expected return failed, and use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -241,9 +242,10 @@ HWTEST_F(TransAuthNegotiateTest, TransNegotiateSessionKey001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: TransNegotiateSessionKey Test
- * @tc.desc: TransNegotiateSessionKey002
+/*
+ * @tc.name: TransNegotiateSessionKey002
+ * @tc.desc: TransNegotiateSessionKey test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -262,9 +264,10 @@ HWTEST_F(TransAuthNegotiateTest, TransNegotiateSessionKey002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: TransReNegotiateSessionKey Test
- * @tc.desc: TransReNegotiateSessionKey001
+/*
+ * @tc.name: TransReNegotiateSessionKey001
+ * @tc.desc: TransReNegotiateSessionKey test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -277,9 +280,10 @@ HWTEST_F(TransAuthNegotiateTest, TransReNegotiateSessionKey001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: SetWlanAuthConnInfo Test
- * @tc.desc: SetWlanAuthConnInfo001
+/*
+ * @tc.name: SetWlanAuthConnInfo001
+ * @tc.desc: SetWlanAuthConnInfo test
+ *           use the wrong param expected return failed, and use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -292,9 +296,10 @@ HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
 }
 
-/**
- * @tc.name: SetWlanAuthConnInfo Test
- * @tc.desc: SetWlanAuthConnInfo002
+/*
+ * @tc.name: SetWlanAuthConnInfo002
+ * @tc.desc: SetWlanAuthConnInfo test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -313,9 +318,10 @@ HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: SetBrAuthConnInfo Test
- * @tc.desc: SetBrAuthConnInfo001
+/*
+ * @tc.name: SetBrAuthConnInfo001
+ * @tc.desc: SetBrAuthConnInfo test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -331,9 +337,10 @@ HWTEST_F(TransAuthNegotiateTest, SetBrAuthConnInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: SetBleAuthConnInfo Test
- * @tc.desc: SetBleAuthConnInfo001
+/*
+ * @tc.name: SetBleAuthConnInfo001
+ * @tc.desc: SetBleAuthConnInfo test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -352,9 +359,10 @@ HWTEST_F(TransAuthNegotiateTest, SetBleAuthConnInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: ConvertConnInfoToAuthConnInfo Test
- * @tc.desc: ConvertConnInfoToAuthConnInfo001
+/*
+ * @tc.name: ConvertConnInfoToAuthConnInfo001
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -371,9 +379,10 @@ HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: ConvertConnInfoToAuthConnInfo Test
- * @tc.desc: ConvertConnInfoToAuthConnInfo002
+/*
+ * @tc.name: ConvertConnInfoToAuthConnInfo002
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -387,9 +396,10 @@ HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo002, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: ConvertConnInfoToAuthConnInfo Test
- * @tc.desc: ConvertConnInfoToAuthConnInfo003
+/*
+ * @tc.name: ConvertConnInfoToAuthConnInfo003
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test
+ *           use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -406,9 +416,10 @@ HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo003, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: ConvertConnInfoToAuthConnInfo Test
- * @tc.desc: ConvertConnInfoToAuthConnInfo004
+/*
+ * @tc.name: ConvertConnInfoToAuthConnInfo004
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test
+ *           use the wrong param expected return failed, and use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -421,9 +432,10 @@ HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo004, TestSize.Leve
     EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
 }
 
-/**
- * @tc.name: GetAuthConnInfoByConnId Test
- * @tc.desc: GetAuthConnInfoByConnId001
+/*
+ * @tc.name: GetAuthConnInfoByConnId001
+ * @tc.desc: GetAuthConnInfoByConnId test
+ *           use the wrong param expected return failed, and use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -438,9 +450,10 @@ HWTEST_F(TransAuthNegotiateTest, GetAuthConnInfoByConnId001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: GetAuthConnInfoByConnId and TransAuthNegoTaskManager Test
- * @tc.desc: GetAuthConnInfoByConnId002
+/*
+ * @tc.name: GetAuthConnInfoByConnId002
+ * @tc.desc: GetAuthConnInfoByConnId and TransAuthNegoTaskManager Test
+ *           use the wrong param expected return failed, and use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */

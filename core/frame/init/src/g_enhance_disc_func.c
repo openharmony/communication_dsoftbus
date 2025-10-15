@@ -82,6 +82,8 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discOopBleDeinit = dlsym(soHandle, "DiscOopBleDeinit");
     g_discEnhanceFuncList.discOopBleEventInit = dlsym(soHandle, "DiscOopBleEventInit");
     g_discEnhanceFuncList.discOopBleEventDeinit = dlsym(soHandle, "DiscOopBleEventDeinit");
+    g_discEnhanceFuncList.discPcCollaborationBleInit = dlsym(soHandle, "DiscPcCollaborationBleInit");
+    g_discEnhanceFuncList.discPcCollaborationEventInit = dlsym(soHandle, "DiscPcCollaborationEventInit");
 
     g_discEnhanceFuncList.distUpdatePublishParam = dlsym(soHandle, "DistUpdatePublishParam");
     g_discEnhanceFuncList.distDiscoveryStartActionPreLink = dlsym(soHandle, "DistDiscoveryStartActionPreLink");

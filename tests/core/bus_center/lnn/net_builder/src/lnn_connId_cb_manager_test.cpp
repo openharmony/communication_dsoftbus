@@ -64,6 +64,7 @@ static LnnServerJoinExtCallBack cb = { .lnnServerJoinExtCallback = OnLnnServerJo
  * @tc.desc: AddConnIdCallbackInfoItem test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest001, TestSize.Level1)
 {
@@ -89,6 +90,7 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest001, TestSize.Level1)
  * @tc.desc: DelConnIdCallbackInfoItem test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest002, TestSize.Level1)
 {
@@ -103,6 +105,7 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest002, TestSize.Level1)
  * @tc.desc: InvokeCallbackForJoinExt test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest003, TestSize.Level1)
 {
@@ -118,6 +121,7 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest003, TestSize.Level1)
  * @tc.desc: GetConnIdCbInfoByAddr test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest004, TestSize.Level1)
 {

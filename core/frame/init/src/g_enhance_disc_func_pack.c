@@ -134,412 +134,139 @@ int32_t DiscFillBtypePacked(uint32_t capability, uint32_t allCap, NSTACKX_Discov
 }
 #endif
 
-static int32_t TouchBleStartActivePublish(const PublishOption *option)
+static int32_t BleStartActivePublish(const PublishOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t TouchBleStartPassivePublish(const PublishOption *option)
+static int32_t BleStartPassivePublish(const PublishOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t TouchBleStopActivePublish(const PublishOption *option)
+static int32_t BleStopActivePublish(const PublishOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t TouchBleStopPassivePublish(const PublishOption *option)
+static int32_t BleStopPassivePublish(const PublishOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t TouchBleStartActiveDiscovery(const SubscribeOption *option)
+static int32_t BleStartActiveDiscovery(const SubscribeOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t TouchBleStartPassiveDiscovery(const SubscribeOption *option)
+static int32_t BleStartPassiveDiscovery(const SubscribeOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t TouchBleStopPassiveDiscovery(const SubscribeOption *option)
+static int32_t BleStopPassiveDiscovery(const SubscribeOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static int32_t TouchBleStopActiveDiscovery(const SubscribeOption *option)
+static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
 {
     (void)option;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static void TouchBleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
+static void BleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     (void)status;
     (void)ifnameIdx;
 }
 
-static void TouchBleUpdateLocalDeviceInfo(InfoTypeChanged type)
+static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     (void)type;
 }
 
-static bool TouchBleIsConcern(uint32_t capability)
+static bool BleIsConcern(uint32_t capability)
 {
     (void)capability;
     return false;
 }
 
-static DiscoveryFuncInterface g_discTouchFuncInterface = {
-    .Publish = TouchBleStartActivePublish,
-    .StartScan = TouchBleStartPassivePublish,
-    .Unpublish = TouchBleStopActivePublish,
-    .StopScan = TouchBleStopPassivePublish,
-    .StartAdvertise = TouchBleStartActiveDiscovery,
-    .Subscribe = TouchBleStartPassiveDiscovery,
-    .Unsubscribe = TouchBleStopPassiveDiscovery,
-    .StopAdvertise = TouchBleStopActiveDiscovery,
-    .LinkStatusChanged = TouchBleLinkStatusChanged,
-    .UpdateLocalDeviceInfo = TouchBleUpdateLocalDeviceInfo
+static DiscoveryFuncInterface g_discVirtualFuncInterface = {
+    .Publish = BleStartActivePublish,
+    .StartScan = BleStartPassivePublish,
+    .Unpublish = BleStopActivePublish,
+    .StopScan = BleStopPassivePublish,
+    .StartAdvertise = BleStartActiveDiscovery,
+    .Subscribe = BleStartPassiveDiscovery,
+    .Unsubscribe = BleStopPassiveDiscovery,
+    .StopAdvertise = BleStopActiveDiscovery,
+    .LinkStatusChanged = BleLinkStatusChanged,
+    .UpdateLocalDeviceInfo = BleUpdateLocalDeviceInfo
 };
 
-static DiscoveryBleDispatcherInterface g_firstTouchBleInterface = {
-    .IsConcern = TouchBleIsConcern,
-    .mediumInterface = &g_discTouchFuncInterface,
+static DiscoveryBleDispatcherInterface g_virtualBleInterface = {
+    .IsConcern = BleIsConcern,
+    .mediumInterface = &g_discVirtualFuncInterface,
 };
 
 DiscoveryBleDispatcherInterface *DiscTouchBleInitPacked(DiscInnerCallback *discInnerCb)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discTouchBleInit) != SOFTBUS_OK) {
-        return &g_firstTouchBleInterface;
+        return &g_virtualBleInterface;
     }
     return pfnDiscEnhanceFuncList->discTouchBleInit(discInnerCb);
 }
-
-static int32_t OopBleStartActivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t OopBleStartPassivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t OopBleStopActivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t OopBleStopPassivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t OopBleStartActiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t OopBleStartPassiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t OopBleStopPassiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t OopBleStopActiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static void OopBleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
-{
-    (void)status;
-    (void)ifnameIdx;
-}
-
-static void OopBleUpdateLocalDeviceInfo(InfoTypeChanged type)
-{
-    (void)type;
-}
-
-static bool OopBleIsConcern(uint32_t capability)
-{
-    (void)capability;
-    return false;
-}
-
-static DiscoveryFuncInterface g_discOopFuncInterface = {
-    .Publish = OopBleStartActivePublish,
-    .StartScan = OopBleStartPassivePublish,
-    .Unpublish = OopBleStopActivePublish,
-    .StopScan = OopBleStopPassivePublish,
-    .StartAdvertise = OopBleStartActiveDiscovery,
-    .Subscribe = OopBleStartPassiveDiscovery,
-    .Unsubscribe = OopBleStopPassiveDiscovery,
-    .StopAdvertise = OopBleStopActiveDiscovery,
-    .LinkStatusChanged = OopBleLinkStatusChanged,
-    .UpdateLocalDeviceInfo = OopBleUpdateLocalDeviceInfo
-};
-
-static DiscoveryBleDispatcherInterface g_SecondTouchBleInterface = {
-    .IsConcern = OopBleIsConcern,
-    .mediumInterface = &g_discOopFuncInterface,
-};
 
 DiscoveryBleDispatcherInterface *DiscOopBleInitPacked(DiscInnerCallback *discInnerCb)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discOopBleInit) != SOFTBUS_OK) {
-        return &g_SecondTouchBleInterface;
+        return &g_virtualBleInterface;
     }
     return pfnDiscEnhanceFuncList->discOopBleInit(discInnerCb);
 }
 
-static int32_t Publish(const PublishOption *option)
+DiscoveryBleDispatcherInterface *DiscPcCollaborationInitPacked(DiscInnerCallback *discInnerCb)
 {
-    return SOFTBUS_NOT_IMPLEMENT;
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discPcCollaborationBleInit) != SOFTBUS_OK) {
+        return &g_virtualBleInterface;
+    }
+    return pfnDiscEnhanceFuncList->discPcCollaborationBleInit(discInnerCb);
 }
-
-static int32_t StartScanInPack(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t Unpublish(const PublishOption *option)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t StopScanInPack(const PublishOption *option)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t StartAdvertise(const SubscribeOption *option)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t Subscribe(const SubscribeOption *option)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t Unsubscribe(const SubscribeOption *option)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t StopAdvertise(const SubscribeOption *option)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static void LinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
-{
-    return;
-}
-
-static void UpdateLocalDeviceInfo(InfoTypeChanged type)
-{
-    return;
-}
-
-static bool IsConcern(uint32_t capability)
-{
-    return false;
-}
-
-static DiscoveryFuncInterface g_fun = {
-    .Publish = Publish,
-    .StartScan = StartScanInPack,
-    .Unpublish = Unpublish,
-    .StopScan = StopScanInPack,
-    .StartAdvertise = StartAdvertise,
-    .Subscribe = Subscribe,
-    .Unsubscribe = Unsubscribe,
-    .StopAdvertise = StopAdvertise,
-    .LinkStatusChanged = LinkStatusChanged,
-    .UpdateLocalDeviceInfo = UpdateLocalDeviceInfo,
-};
-
-static DiscoveryBleDispatcherInterface g_sharebleInterface = {
-    .IsConcern = IsConcern,
-    .mediumInterface = &g_fun,
-};
 
 DiscoveryBleDispatcherInterface *DiscShareBleInitPacked(DiscInnerCallback *discInnerCb)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discShareBleInit) != SOFTBUS_OK) {
-        return &g_sharebleInterface;
+        return &g_virtualBleInterface;
     }
     return pfnDiscEnhanceFuncList->discShareBleInit(discInnerCb);
 }
-
-static int32_t ApproachBleStartActivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t ApproachBleStartPassivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t ApproachBleStopActivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t ApproachBleStopPassivePublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t ApproachBleStartActiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t ApproachBleStartPassiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t ApproachBleStopPassiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t ApproachBleStopActiveDiscovery(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static void ApproachBleLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
-{
-    (void)status;
-    (void)ifnameIdx;
-}
-
-static void ApproachBleUpdateLocalDeviceInfo(InfoTypeChanged type)
-{
-    (void)type;
-}
-
-static bool ApproachBleIsConcern(uint32_t capability)
-{
-    (void)capability;
-    return false;
-}
-
-static DiscoveryFuncInterface g_discApproachFuncInterface = {
-    .Publish = ApproachBleStartActivePublish,
-    .StartScan = ApproachBleStartPassivePublish,
-    .Unpublish = ApproachBleStopActivePublish,
-    .StopScan = ApproachBleStopPassivePublish,
-    .StartAdvertise = ApproachBleStartActiveDiscovery,
-    .Subscribe = ApproachBleStartPassiveDiscovery,
-    .Unsubscribe = ApproachBleStopPassiveDiscovery,
-    .StopAdvertise = ApproachBleStopActiveDiscovery,
-    .LinkStatusChanged = ApproachBleLinkStatusChanged,
-    .UpdateLocalDeviceInfo = ApproachBleUpdateLocalDeviceInfo
-};
-
-static DiscoveryBleDispatcherInterface g_approachBleInterface = {
-    .IsConcern = ApproachBleIsConcern,
-    .mediumInterface = &g_discApproachFuncInterface,
-};
 
 DiscoveryBleDispatcherInterface *DiscApproachBleInitPacked(DiscInnerCallback *discInnerCb)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discApproachBleInit) != SOFTBUS_OK) {
-        return &g_approachBleInterface;
+        return &g_virtualBleInterface;
     }
     return pfnDiscEnhanceFuncList->discApproachBleInit(discInnerCb);
 }
-
-static int32_t StartSubscribe(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t StopSubscribe(const SubscribeOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t StartPublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t StopPublish(const PublishOption *option)
-{
-    (void)option;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static DiscoveryFuncInterface g_discVLinkInterface = {
-    .Subscribe = StartSubscribe,
-    .Unsubscribe = StopSubscribe,
-    .Publish = StartPublish,
-    .Unpublish = StopPublish,
-    .StartScan = StartScanInPack,
-    .StopScan = StopScanInPack,
-    .StartAdvertise = StartAdvertise,
-    .StopAdvertise = StopAdvertise,
-    .LinkStatusChanged = LinkStatusChanged,
-    .UpdateLocalDeviceInfo = UpdateLocalDeviceInfo
-};
-
-static DiscoveryBleDispatcherInterface g_vLinkBleInterface = {
-    .IsConcern = IsConcern,
-    .mediumInterface = &g_discVLinkInterface,
-};
 
 DiscoveryBleDispatcherInterface *DiscVLinkBleInitPacked(DiscInnerCallback *discInnerCb)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discVLinkBleInit) != SOFTBUS_OK) {
-        return &g_vLinkBleInterface;
+        return &g_virtualBleInterface;
     }
     return pfnDiscEnhanceFuncList->discVLinkBleInit(discInnerCb);
 }
@@ -651,6 +378,15 @@ int32_t DiscOopBleEventInitPacked(void)
         return SOFTBUS_OK;
     }
     return pfnDiscEnhanceFuncList->discOopBleEventInit();
+}
+
+int32_t DiscPcCollaborationEventInitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discPcCollaborationEventInit) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnDiscEnhanceFuncList->discPcCollaborationEventInit();
 }
 
 void DiscTouchBleEventDeinitPacked(void)
@@ -866,7 +602,7 @@ bool IsUnknownDevicePacked(const char *bleMacAddr)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
 
-    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->isUnknownDevice(bleMacAddr));
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->isUnknownDevice);
     DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, false, DISC_BLE, "not find isUnknownDevice");
     return pfnDiscEnhanceFuncList->isUnknownDevice(bleMacAddr);
 }

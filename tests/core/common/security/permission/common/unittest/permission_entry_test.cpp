@@ -47,9 +47,9 @@ public:
 void PermissionEntryTest::SetUpTestCase(void) { }
 void PermissionEntryTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: StrIsEmptyTest001
- * @tc.desc: str is empty test, use the wrong or normal parameter.
+ * @tc.desc: str is empty test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -63,9 +63,9 @@ HWTEST_F(PermissionEntryTest, StrIsEmptyTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: LoadPermissionJsonTest001
- * @tc.desc: load permission json test, use the wrong or normal parameter.
+ * @tc.desc: load permission json test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -77,9 +77,9 @@ HWTEST_F(PermissionEntryTest, LoadPermissionJsonTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: CheckPermissionEntryTest001
- * @tc.desc: check permission entry test, use the wrong or normal parameter.
+ * @tc.desc: check permission entry test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -113,9 +113,9 @@ HWTEST_F(PermissionEntryTest, CheckPermissionEntryTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: PermIsSecLevelPublicTest001
- * @tc.desc: perm is sec level public test, use the wrong or normal parameter.
+ * @tc.desc: perm is sec level public test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -134,9 +134,9 @@ HWTEST_F(PermissionEntryTest, PermIsSecLevelPublicTest001, TestSize.Level0)
     EXPECT_TRUE(ret == false);
 }
 
-/**
+/*
  * @tc.name: AddDynamicPermissionTest001
- * @tc.desc: add dynamic permission test, use the wrong or normal parameter.
+ * @tc.desc: add dynamic permission test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -161,9 +161,9 @@ HWTEST_F(PermissionEntryTest, AddDynamicPermissionTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: DeleteDynamicPermissionTest001
- * @tc.desc: delete dynamic permission test, use the wrong parameter.
+ * @tc.desc: delete dynamic permission test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -177,9 +177,9 @@ HWTEST_F(PermissionEntryTest, DeleteDynamicPermissionTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/**
+/*
  * @tc.name: LoadLnnPermissionJsonTest001
- * @tc.desc: fun param error.
+ * @tc.desc: fun param error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -192,9 +192,9 @@ HWTEST_F(PermissionEntryTest, LoadLnnPermissionJsonTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 }
 
-/**
+/*
  * @tc.name: CheckLnnPermissionEntryTest001
- * @tc.desc: fun param error.
+ * @tc.desc: fun param error
  * @tc.type: FUNC
  * @tc.require:
  */

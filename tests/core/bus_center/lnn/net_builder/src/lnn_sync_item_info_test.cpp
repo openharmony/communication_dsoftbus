@@ -59,6 +59,7 @@ void LNNSyncInfoItemTest::TearDown() { }
  * @tc.name: WIFI_CONNECT_TO_TARGET_AP_TEST_001
  * @tc.desc: test WifiConnectToTargetAp
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level1)
@@ -141,6 +142,7 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_SEND_TRANS_REQ_TEST_001, TestSize.Level1)
  * @tc.name: LNN_ONRECEIVE_DEVICE_NAME_TEST_001
  * @tc.desc: test OnReceiveDeviceName
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_DEVICE_NAME_TEST_001, TestSize.Level1)
@@ -161,6 +163,7 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_DEVICE_NAME_TEST_001, TestSize.Level
  * @tc.name: LNN_ONRECEIVE_TRANS_REQ_MSG_TEST_001
  * @tc.desc: test OnReceiveTransReqMsg
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_TRANS_REQ_MSG_TEST_001, TestSize.Level1)
@@ -184,6 +187,7 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_TRANS_REQ_MSG_TEST_001, TestSize.Lev
  * @tc.name: LNN_ONRECEIVE_BR_OFFLINE_TEST_001
  * @tc.desc: test OnReceiveBrOffline
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_BR_OFFLINE_TEST_001, TestSize.Level1)

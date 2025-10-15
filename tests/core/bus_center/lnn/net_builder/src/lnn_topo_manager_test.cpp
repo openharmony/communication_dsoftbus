@@ -90,6 +90,7 @@ void LNNTopoManagerTest::TearDown() { }
  * @tc.desc: LnnInitTopoManager test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
 {
@@ -123,6 +124,7 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
  * @tc.desc: LnnGetRelation test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
 {
@@ -146,6 +148,7 @@ HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
  * @tc.desc: AddTopoInfo test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, ADD_TOPO_INFO_TEST_001, TestSize.Level1)
 {
@@ -171,6 +174,7 @@ HWTEST_F(LNNTopoManagerTest, ADD_TOPO_INFO_TEST_001, TestSize.Level1)
  * @tc.desc: IsSameRelation test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, IS_SAME_RELATION_TEST_001, TestSize.Level1)
 {
@@ -189,6 +193,7 @@ HWTEST_F(LNNTopoManagerTest, IS_SAME_RELATION_TEST_001, TestSize.Level1)
  * @tc.desc: HasRelation test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, HAS_RELATION_TEST_001, TestSize.Level1)
 {
@@ -203,6 +208,7 @@ HWTEST_F(LNNTopoManagerTest, HAS_RELATION_TEST_001, TestSize.Level1)
  * @tc.desc: CreateTopoItem test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, CREATE_TOPO_ITEM_TEST_001, TestSize.Level1)
 {
@@ -233,6 +239,7 @@ HWTEST_F(LNNTopoManagerTest, CREATE_TOPO_ITEM_TEST_001, TestSize.Level1)
  * @tc.desc: PackCommonTopoMsg test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, PACK_COMMON_TOPO_MSG_TEST_001, TestSize.Level1)
 {
@@ -258,6 +265,7 @@ HWTEST_F(LNNTopoManagerTest, PACK_COMMON_TOPO_MSG_TEST_001, TestSize.Level1)
  * @tc.desc: PackTopoInfo test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, PACK_TOPO_INFO_TEST_001, TestSize.Level1)
 {
@@ -278,6 +286,7 @@ HWTEST_F(LNNTopoManagerTest, PACK_TOPO_INFO_TEST_001, TestSize.Level1)
  * @tc.desc: PackOneLnnRelation test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, PACK_ONE_LNN_RELATION_TEST_001, TestSize.Level1)
 {
@@ -299,6 +308,7 @@ HWTEST_F(LNNTopoManagerTest, PACK_ONE_LNN_RELATION_TEST_001, TestSize.Level1)
  * @tc.desc: UpdateLocalTopo test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, UPDATE_LOCAL_TOPO_TEST_001, TestSize.Level1)
 {
@@ -319,6 +329,7 @@ HWTEST_F(LNNTopoManagerTest, UPDATE_LOCAL_TOPO_TEST_001, TestSize.Level1)
  * @tc.desc: ForwardTopoMsgToAll test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, FORWARD_TOPO_MSG_TO_ALL_TEST_001, TestSize.Level1)
 {
@@ -343,6 +354,7 @@ HWTEST_F(LNNTopoManagerTest, FORWARD_TOPO_MSG_TO_ALL_TEST_001, TestSize.Level1)
  * @tc.desc: TryCorrectRelation test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, TRY_CORRECT_RELATION_TEST_001, TestSize.Level1)
 {
@@ -368,6 +380,7 @@ HWTEST_F(LNNTopoManagerTest, TRY_CORRECT_RELATION_TEST_001, TestSize.Level1)
  * @tc.desc: ProcessTopoUpdateInfo test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, PROCESS_TOPO_UPDATEINFO_TEST_001, TestSize.Level1)
 {
@@ -416,6 +429,7 @@ HWTEST_F(LNNTopoManagerTest, PROCESS_TOPO_UPDATEINFO_TEST_001, TestSize.Level1)
  * @tc.desc: OnReceiveTopoUpdateMsg test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, ON_RECEIVE_TOPO_UPDATE_MSG_TEST_001, TestSize.Level1)
 {
@@ -448,6 +462,7 @@ HWTEST_F(LNNTopoManagerTest, ON_RECEIVE_TOPO_UPDATE_MSG_TEST_001, TestSize.Level
  * @tc.desc: FillAllRelation test
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNTopoManagerTest, FILL_ALL_RELATION_TEST_001, TestSize.Level1)
 {

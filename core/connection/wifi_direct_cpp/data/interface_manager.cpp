@@ -19,6 +19,7 @@
 #include "conn_log.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_manager.h"
 
 namespace OHOS::SoftBus {
 InterfaceManager& InterfaceManager::GetInstance()
@@ -95,14 +96,18 @@ void InterfaceManager::InitInterface(InterfaceInfo::InterfaceType type)
     if (type == InterfaceInfo::InterfaceType::P2P) {
         name = IF_NAME_P2P;
         capability = static_cast<int32_t>(LinkInfo::LinkMode::GO) | static_cast<uint32_t>(LinkInfo::LinkMode::GC);
+        interfaces_[type].SetIsEnable(P2pAdapter::IsWifiP2pEnabled());
     }
     if (type == InterfaceInfo::InterfaceType::HML) {
         name = IF_NAME_HML;
         capability = static_cast<int32_t>(LinkInfo::LinkMode::HML);
+        auto state = (GetWifiDirectManager()->getHmlCapabilityCode() == CONN_HML_SUPPORT) &&
+            P2pAdapter::IsWifiP2pEnabled();
+        CONN_LOGI(CONN_WIFI_DIRECT, "init hml, state=%{public}d", state);
+        interfaces_[type].SetIsEnable(state);
     }
     interfaces_[type].SetRole(LinkInfo::LinkMode::NONE);
     interfaces_[type].SetName(name);
-    interfaces_[type].SetIsEnable(P2pAdapter::IsWifiP2pEnabled());
     interfaces_[type].SetBaseMac(WifiDirectUtils::MacArrayToString(WifiDirectUtils::GetInterfaceMacAddr(name)));
     interfaces_[type].SetCapability(capability);
 }

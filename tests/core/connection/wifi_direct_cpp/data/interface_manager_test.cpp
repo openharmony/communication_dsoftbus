@@ -16,6 +16,7 @@
 #define protected public
 
 #include <gtest/gtest.h>
+#include "wifi_direct_manager.h"
 #include "wifi_direct_mock.h"
 #include "data/interface_info.h"
 #include "data/interface_manager.h"
@@ -64,7 +65,6 @@ static int32_t readInterfaceInfo(InterfaceInfo &info)
 HWTEST_F(InterfaceManagerTest, InitInterfaceManagerTest, TestSize.Level1)
 {
     WifiDirectInterfaceMock wifiDirectInterfaceMock;
-
     EXPECT_CALL(wifiDirectInterfaceMock, Hid2dGetChannelListFor5G).WillRepeatedly(Return(WIFI_SUCCESS));
     EXPECT_CALL(wifiDirectInterfaceMock, GetP2pEnableStatus).WillRepeatedly(Return(WIFI_SUCCESS));
 

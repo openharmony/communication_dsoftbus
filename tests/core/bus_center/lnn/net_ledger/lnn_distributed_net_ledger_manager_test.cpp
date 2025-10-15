@@ -102,6 +102,7 @@ void LNNDistributedNetLedgerManagerTest::TearDown()
  * @tc.name: LNN_SET_DL_WIFI_DIRECT_ADDR_TEST_001
  * @tc.desc: LnnSetDLWifiDirectAddr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_WIFI_DIRECT_ADDR_TEST_001, TestSize.Level1)
@@ -123,6 +124,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_WIFI_DIRECT_ADDR_TEST_00
  * @tc.name: LNN_SET_DL_P2P_IP_TEST_001
  * @tc.desc: LnnSetDLP2pIp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_P2P_IP_TEST_001, TestSize.Level1)
@@ -149,6 +151,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_P2P_IP_TEST_001, TestSiz
  * @tc.name: LNN_SET_DL_AUTH_PORT_TEST_001
  * @tc.desc: LnnSetDLAuthPort test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_AUTH_PORT_TEST_001, TestSize.Level1)
@@ -170,6 +173,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_AUTH_PORT_TEST_001, Test
  * @tc.name: LNN_SET_DL_SESSION_PORT_TEST_001
  * @tc.desc: LnnSetDLSessionPort test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_SESSION_PORT_TEST_001, TestSize.Level1)
@@ -191,6 +195,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_SESSION_PORT_TEST_001, T
  * @tc.name: LNN_SET_DL_PROXY_PORT_TEST_001
  * @tc.desc: LnnSetDLProxyPort test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_PROXY_PORT_TEST_001, TestSize.Level1)
@@ -212,6 +217,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_PROXY_PORT_TEST_001, Tes
  * @tc.name: LNN_SET_DL_NODE_ADDR_TEST_001
  * @tc.desc: LnnSetDLNodeAddr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_NODE_ADDR_TEST_001, TestSize.Level1)
@@ -233,6 +239,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_NODE_ADDR_TEST_001, Test
  * @tc.name: LNN_SET_DL_BSS_TRANS_INFO_TEST_001
  * @tc.desc: LnnSetDLBssTransInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BSS_TRANS_INFO_TEST_001, TestSize.Level1)
@@ -260,6 +267,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BSS_TRANS_INFO_TEST_001,
  * @tc.name: LNN_SET_DL_BATTERY_INFO_TEST_001
  * @tc.desc: LnnSetDLBatteryInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BATTERY_INFO_TEST_001, TestSize.Level1)
@@ -287,6 +295,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BATTERY_INFO_TEST_001, T
  * @tc.name: LNN_SET_DL_CONN_USER_ID_TEST_001
  * @tc.desc: LnnSetDLConnUserId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_TEST_001, TestSize.Level1)
@@ -314,6 +323,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_TEST_001, T
  * @tc.name: LNN_SET_DL_CONN_USER_ID_CHECK_SUM_TEST_001
  * @tc.desc: LnnSetDLConnUserIdCheckSum test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_CHECK_SUM_TEST_001, TestSize.Level1)
@@ -341,6 +351,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_CHECK_SUM_T
  * @tc.name: LNN_SET_DL_CONN_CAPABILITY_TEST_001
  * @tc.desc: LnnSetDLConnCapability test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_CAPABILITY_TEST_001, TestSize.Level1)
@@ -369,6 +380,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_CAPABILITY_TEST_001
  * @tc.name: LNN_SET_DL_BLE_DIRECT_TIMESTAMP_TEST_001
  * @tc.desc: LnnSetDLBleDirectTimestamp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BLE_DIRECT_TIMESTAMP_TEST_001, TestSize.Level1)
@@ -390,6 +402,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BLE_DIRECT_TIMESTAMP_TES
  * @tc.name: LNN_GET_DL_AUTH_CAPACITY_TEST_001
  * @tc.desc: LnnGetDLAuthCapacity test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_AUTH_CAPACITY_TEST_001, TestSize.Level1)
@@ -411,6 +424,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_AUTH_CAPACITY_TEST_001, 
  * @tc.name: LNN_GET_DL_UPDATE_TIMESTAMP_TEST_001
  * @tc.desc: LnnGetDLUpdateTimestamp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_UPDATE_TIMESTAMP_TEST_001, TestSize.Level1)
@@ -436,6 +450,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_UPDATE_TIMESTAMP_TEST_00
  * @tc.name: LNN_GET_DL_BLE_DIRECT_TIMESTAMP_TEST_001
  * @tc.desc: LnnGetDLBleDirectTimestamp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_BLE_DIRECT_TIMESTAMP_TEST_001, TestSize.Level1)
@@ -461,6 +476,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_BLE_DIRECT_TIMESTAMP_TES
  * @tc.name: LNN_SET_DL_HEARTBEAT_TIMESTAMP_TEST_001
  * @tc.desc: LnnSetDLHeartbeatTimestamp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_HEARTBEAT_TIMESTAMP_TEST_001, TestSize.Level1)
@@ -482,6 +498,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_HEARTBEAT_TIMESTAMP_TEST
  * @tc.name: LNN_GET_DL_HEARTBEAT_TIMESTAMP_TEST_001
  * @tc.desc: LnnGetDLHeartbeatTimestamp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_HEARTBEAT_TIMESTAMP_TEST_001, TestSize.Level1)
@@ -503,6 +520,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_HEARTBEAT_TIMESTAMP_TEST
  * @tc.name: LNN_GET_DL_ONLINE_TIMESTAMP_TEST_001
  * @tc.desc: LnnGetDLOnlineTimestamp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_ONLINE_TIMESTAMP_TEST_001, TestSize.Level1)
@@ -524,6 +542,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_ONLINE_TIMESTAMP_TEST_00
  * @tc.name: LNN_GET_CONN_SUB_FEATURE_BY_UDIDHASH_STR_TEST_001
  * @tc.desc: LnnGetConnSubFeatureByUdidHashStr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_CONN_SUB_FEATURE_BY_UDIDHASH_STR_TEST_001, TestSize.Level1)
@@ -547,6 +566,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_CONN_SUB_FEATURE_BY_UDIDHAS
  * @tc.name: LNN_GET_REMOTE_BYTE_INFO_TEST_001
  * @tc.desc: LnnGetRemoteByteInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_001, TestSize.Level1)
@@ -572,6 +592,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_001, 
  * @tc.name: LNN_GET_REMOTE_BYTE_INFO_TEST_002
  * @tc.desc: LnnGetRemoteByteInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_002, TestSize.Level1)
@@ -599,6 +620,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_002, 
  * @tc.name: LNN_GET_REMOTE_BYTE_INFO_TEST_003
  * @tc.desc: LnnGetRemoteByteInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_003, TestSize.Level1)
@@ -620,6 +642,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_003, 
  * @tc.name: LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONLINE_TEST_001
  * @tc.desc: LnnGetRemoteBoolInfoIgnoreOnline test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONLINE_TEST_001, TestSize.Level1)
@@ -652,6 +675,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONL
  * @tc.name: LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONLINE_TEST_002
  * @tc.desc: LnnGetRemoteBoolInfoIgnoreOnline test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONLINE_TEST_002, TestSize.Level1)
@@ -680,6 +704,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONL
  * @tc.name: LNN_SET_DL_PTK_TEST_001
  * @tc.desc: LnnSetDlPtk test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_PTK_TEST_001, TestSize.Level1)
@@ -714,6 +739,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_PTK_TEST_001, TestSize.L
  * @tc.name: LNN_SET_DL_DEVICE_BROADCAST_CIPHERIV_TEST_001
  * @tc.desc: LnnSetDLDeviceBroadcastCipherIv test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_BROADCAST_CIPHERIV_TEST_001, TestSize.Level1)
@@ -737,6 +763,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_BROADCAST_CIPHERI
  * @tc.name: LNN_SET_DL_DEVICE_BROADCAST_CIPHER_KEY_TEST_001
  * @tc.desc: LnnSetDLDeviceBroadcastCipherKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_BROADCAST_CIPHER_KEY_TEST_001, TestSize.Level1)
@@ -760,6 +787,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_BROADCAST_CIPHER_
  * @tc.name: LNN_SET_DL_DEVICE_STATE_VERSION_TEST_001
  * @tc.desc: LnnSetDLDeviceStateVersion test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_STATE_VERSION_TEST_001, TestSize.Level1)
@@ -786,6 +814,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_STATE_VERSION_TES
  * @tc.name: LNN_SET_DL_DEVICE_NICK_NAME_BY_UDID_TEST_001
  * @tc.desc: LnnSetDLDeviceNickNameByUdid test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_NICK_NAME_BY_UDID_TEST_001, TestSize.Level1)
@@ -816,6 +845,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_NICK_NAME_BY_UDID
  * @tc.name: LNN_SET_DL_UNIFIED_DEFAULT_DEVICE_NAME_TEST_001
  * @tc.desc: LnnSetDLUnifiedDefaultDeviceName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEFAULT_DEVICE_NAME_TEST_001, TestSize.Level1)
@@ -847,6 +877,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEFAULT_DEVICE_N
  * @tc.name: LNN_SET_DL_UNIFIED_DEVICE_NAME_TEST_001
  * @tc.desc: LnnSetDLUnifiedDeviceName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEVICE_NAME_TEST_001, TestSize.Level1)
@@ -877,6 +908,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEVICE_NAME_TEST
  * @tc.name: LNN_SET_DL_DEVICE_NICK_NAME_TEST_001
  * @tc.desc: LnnSetDLDeviceNickName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_NICK_NAME_TEST_001, TestSize.Level1)
@@ -903,6 +935,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_NICK_NAME_TEST_00
  * @tc.name: LNN_SET_DL_DEVICE_INFO_NAME_TEST_001
  * @tc.desc: LnnSetDLDeviceInfoName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_INFO_NAME_TEST_001, TestSize.Level1)
@@ -934,6 +967,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_INFO_NAME_TEST_00
  * @tc.name: LNN_GET_REMOTE_NUM16_INFO_TEST_001
  * @tc.desc: LnnGetRemoteNum16Info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUM16_INFO_TEST_001, TestSize.Level1)
@@ -959,6 +993,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUM16_INFO_TEST_001,
  * @tc.name: LNN_GET_REMOTE_NUMU32_INFO_TEST_001
  * @tc.desc: LnnGetRemoteNumU32Info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_001, TestSize.Level1)
@@ -978,6 +1013,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_001
  * @tc.name: LNN_GET_REMOTE_NUMU32_INFO_TEST_002
  * @tc.desc: LnnGetRemoteNumU32Info test parameters is NUM_KEY_STA_FREQUENCY
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_002, TestSize.Level1)
@@ -1004,6 +1040,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_002
  * @tc.name: LNN_GET_REMOTE_NUMU32_INFO_TEST_003
  * @tc.desc: LnnGetRemoteNumU32Info test parameters is NUM_KEY_STATE_VERSION
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_003, TestSize.Level1)
@@ -1030,6 +1067,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_003
  * @tc.name: LNN_GET_REMOTE_NUMU32_INFO_TEST_004
  * @tc.desc: LnnGetRemoteNumU32Info test parameters is NUM_KEY_P2P_ROLE
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_004, TestSize.Level1)
@@ -1056,6 +1094,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_004
  * @tc.name: LNN_GET_REMOTE_NUMU32_INFO_TEST_005
  * @tc.desc: LnnGetRemoteNumU32Info test parameters is NUM_KEY_DEVICE_SECURITY_LEVEL
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_005, TestSize.Level1)
@@ -1075,6 +1114,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_005
  * @tc.name: LNN_GET_REMOTE_NUMU32_INFO_TEST_006
  * @tc.desc: LnnGetRemoteNumU32Info test parameters is NUM_KEY_STATIC_CAP_LEN
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_006, TestSize.Level1)
@@ -1099,6 +1139,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_006
  * @tc.name: LNN_GET_REMOTE_NUMU32_INFO_TEST_007
  * @tc.desc: LnnGetRemoteNumU32Info test parameters is NUM_KEY_STATIC_NET_CAP
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_007, TestSize.Level1)
@@ -1121,6 +1162,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_007
  * @tc.name: LNN_GET_REMOTE_STR_INFO_TEST_001
  * @tc.desc: LnnGetRemoteStrInfo test parameters is STRING_KEY_CHAN_LIST_5G
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_001, TestSize.Level1)
@@ -1147,6 +1189,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_001, T
  * @tc.name: LNN_GET_REMOTE_STR_INFO_TEST_002
  * @tc.desc: LnnGetRemoteStrInfo test parameters is STRING_KEY_WIFI_CFG
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_002, TestSize.Level1)
@@ -1173,6 +1216,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_002, T
  * @tc.name: LNN_GET_REMOTE_STR_INFO_TEST_003
  * @tc.desc: LnnGetRemoteStrInfo test parameters is STRING_KEY_P2P_GO_MAC
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_003, TestSize.Level1)
@@ -1199,6 +1243,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_003, T
  * @tc.name: LNN_GET_REMOTE_STR_INFO_TEST_004
  * @tc.desc: LnnGetRemoteStrInfo test parameters is STRING_KEY_NODE_ADDR
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_004, TestSize.Level1)
@@ -1224,6 +1269,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_004, T
  * @tc.name: LNN_GET_REMOTE_STR_INFO_TEST_005
  * @tc.desc: LnnGetRemoteStrInfo test parameters is STRING_KEY_WIFIDIRECT_ADDR
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_005, TestSize.Level1)
@@ -1250,6 +1296,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_005, T
  * @tc.name: LNN_GET_REMOTE_STR_INFO_TEST_006
  * @tc.desc: LnnGetRemoteStrInfo test parameters is STRING_KEY_P2P_MAC
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_006, TestSize.Level1)
@@ -1276,6 +1323,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_006, T
  * @tc.name: LNN_GET_REMOTE_NUM64_INFO_TEST_001
  * @tc.desc: LnnGetRemoteNumU64Info test parameters is NUM_KEY_P2P_ROLE
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUM64_INFO_TEST_001, TestSize.Level1)
@@ -1295,6 +1343,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUM64_INFO_TEST_001,
  * @tc.name: DL_GET_CONN_SUB_FEATURE_CAP_TEST_001
  * @tc.desc: DlGetConnSubFeatureCap test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, DL_GET_CONN_SUB_FEATURE_CAP_TEST_001, TestSize.Level1)
@@ -1315,6 +1364,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, DL_GET_CONN_SUB_FEATURE_CAP_TEST_00
  * @tc.name: LNN_SET_REMOTE_SCREEN_STATUS_INFO_TEST_001
  * @tc.desc: LnnSetRemoteScreenStatusInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_REMOTE_SCREEN_STATUS_INFO_TEST_001, TestSize.Level1)

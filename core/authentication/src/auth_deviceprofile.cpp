@@ -105,20 +105,6 @@ static int32_t GetAclPeerUserId(const OHOS::DistributedDeviceProfile::AccessCont
     return trustDevice.GetAccesser().GetAccesserUserId();
 }
 
-static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
-{
-    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
-    if (SoftBusGenerateStrHash((const unsigned char *)str.c_str(), str.length(), hash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "generate hash fail");
-        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
-    }
-    if (ConvertBytesToHexString(hashStrBuf, len + 1, hash, len / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "convert hash hex string fail");
-        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash, bool isOnlyPointToPoint)
 {
@@ -625,10 +611,24 @@ bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *l
         LNN_LOGE(LNN_STATE, "GetUserId failed");
         return false;
     }
+    int32_t coDriverUserId = 0;
+    int32_t localDevTypeId = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
+        return false;
+    }
     int32_t rc = DpClient::GetInstance().GetSessionKey(localUserId, sessionKeyId, vecSessionKey);
     if (rc != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "GetSessionKey failed, ret=%{public}d", rc);
-        return false;
+        LNN_LOGE(LNN_STATE, "GetSessionKey by localUserId failed, ret=%{public}d", rc);
+        if (localDevTypeId == TYPE_CAR_ID) {
+            GetAllDisplaysForCoDriverScreen(&coDriverUserId);
+            if (DpClient::GetInstance().GetSessionKey(coDriverUserId, sessionKeyId, vecSessionKey) !=
+                OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+                LNN_LOGE(LNN_STATE, "GetSessionKey by coDriverUserId failed, ret=%{public}d", rc);
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
     std::copy(vecSessionKey.begin(), vecSessionKey.end(), sessionKey);
     *length = vecSessionKey.size();
@@ -1058,86 +1058,6 @@ void UpdateAssetSessionKeyByAcl(
     ret = UpdateDpAclByAuthAcl(info, *sessionKeyId, currentTime, isSameAccount);
     LNN_LOGW(LNN_STATE, "UpdateDpAclByAuthAcl result ret=%{public}d", ret);
     return;
-}
-
-static bool IsSKIdInvalidInner(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
-    int32_t userId, OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile)
-{
-    std::string sourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
-    std::string sourceAccountId = aclProfile.GetAccesser().GetAccesserAccountId();
-    std::string sinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
-    std::string sinkAccountId = aclProfile.GetAccessee().GetAccesseeAccountId();
-    char aclUdidShortHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    char aclAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    if (strcmp(DEFAULT_ACCOUNT_UID, sourceAccountId.c_str()) == 0) {
-        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
-        sourceAccountId = aclAccountHash;
-    }
-    if (strcmp(DEFAULT_ACCOUNT_UID, sinkAccountId.c_str()) == 0) {
-        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
-        sinkAccountId = aclAccountHash;
-    }
-    if (aclProfile.GetAccesser().GetAccesserSessionKeyId() == sessionKeyId) {
-        if (GetStringHash(sinkDeviceId, aclUdidShortHash, CUST_UDID_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "GetStringHash fail");
-            return false;
-        }
-        if (StrCmpIgnoreCase(aclUdidShortHash, udidShortHash) != 0 ||
-            StrCmpIgnoreCase(sinkAccountId.c_str(), accountHash) != 0 ||
-            userId != aclProfile.GetAccessee().GetAccesseeUserId()) {
-            LNN_LOGE(LNN_STATE, "accountId/udid/userId error");
-            return true;
-        }
-        return false;
-    } else if (aclProfile.GetAccessee().GetAccesseeSessionKeyId() == sessionKeyId) {
-        if (GetStringHash(sourceDeviceId, aclUdidShortHash, CUST_UDID_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "GetStringHash fail");
-            return false;
-        }
-        if (StrCmpIgnoreCase(aclUdidShortHash, udidShortHash) != 0 ||
-            StrCmpIgnoreCase(sourceAccountId.c_str(), accountHash) != 0 ||
-            userId != aclProfile.GetAccesser().GetAccesserUserId()) {
-            LNN_LOGE(LNN_STATE, "accountId/udid/userId error");
-            return true;
-        }
-        return false;
-    }
-    LNN_LOGE(LNN_STATE, "skId not match!");
-    return true;
-}
-
-bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId)
-{
-    if (accountHash == nullptr || udidShortHash == nullptr || strlen(udidShortHash) < CUST_UDID_LEN ||
-        strlen(accountHash) < SHA_256_HEX_HASH_LEN - 1) {
-        LNN_LOGE(LNN_STATE, "param error");
-        return false;
-    }
-
-    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
-    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
-    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
-        return false;
-    }
-    if (aclProfiles.empty()) {
-        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
-        return true;
-    }
-    int32_t accesserSessionKeyId = 0;
-    int32_t accesseeSessionKeyId = 0;
-    for (auto &aclProfile : aclProfiles) {
-        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
-            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
-        accesserSessionKeyId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
-        accesseeSessionKeyId = aclProfile.GetAccessee().GetAccesseeSessionKeyId();
-        if (accesserSessionKeyId != sessionKeyId && accesseeSessionKeyId != sessionKeyId) {
-            continue;
-        }
-        return IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
-    }
-    LNN_LOGE(LNN_STATE, "key not found");
-    return true;
 }
 
 int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)

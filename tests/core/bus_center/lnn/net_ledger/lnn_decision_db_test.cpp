@@ -61,6 +61,7 @@ void LNNDbMockTest::TearDown()
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_001
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
@@ -75,6 +76,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_002
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
@@ -92,6 +94,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_003
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_003, TestSize.Level1)
@@ -110,6 +113,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_003, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_004
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_004, TestSize.Level1)
@@ -130,6 +134,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_004, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_005
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_005, TestSize.Level1)
@@ -151,6 +156,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_005, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_006
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_006, TestSize.Level1)
@@ -173,6 +179,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_006, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_007
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_007, TestSize.Level1)
@@ -212,6 +219,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_007, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_008
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_008, TestSize.Level1)
@@ -232,6 +240,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_008, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_009
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_009, TestSize.Level1)
@@ -253,6 +262,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_009, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_010
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_010, TestSize.Level1)
@@ -275,6 +285,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_010, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_011
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_011, TestSize.Level1)
@@ -297,6 +308,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_011, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_012
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
@@ -336,6 +348,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_013
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_013, TestSize.Level1)
@@ -363,6 +376,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_013, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_014
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_014, TestSize.Level1)
@@ -391,6 +405,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_014, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_015
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_015, TestSize.Level1)
@@ -420,6 +435,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_015, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_016
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
@@ -459,6 +475,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_017
  * @tc.desc: lnn init update key and local info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_017, TestSize.Level1)
@@ -484,6 +501,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_017, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_018
  * @tc.desc: lnn init update key and local info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_018, TestSize.Level1)
@@ -525,6 +543,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_018, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_019
  * @tc.desc: lnn init update key and local info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_019, TestSize.Level1)
@@ -577,6 +596,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_019, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_020
  * @tc.desc: lnn init update key and local info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_020, TestSize.Level1)
@@ -621,6 +641,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_020, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_021
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_021, TestSize.Level1)
@@ -661,6 +682,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_021, TestSize.Level1)
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_022
  * @tc.desc: lnn init decision db delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_022, TestSize.Level1)
@@ -701,6 +723,7 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_022, TestSize.Level1)
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_001
  * @tc.desc: lnn insert specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
@@ -721,6 +744,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSiz
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_002
  * @tc.desc: lnn insert specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
@@ -738,6 +762,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSiz
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_003
  * @tc.desc: lnn insert specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
@@ -756,6 +781,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSiz
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_004
  * @tc.desc: lnn insert specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
@@ -775,6 +801,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSiz
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_005
  * @tc.desc: lnn insert specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
@@ -794,6 +821,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSiz
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_006
  * @tc.desc: lnn insert specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
@@ -816,6 +844,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSiz
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_007
  * @tc.desc: lnn insert specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
@@ -838,6 +867,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSiz
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001
  * @tc.desc: lnn delete specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
@@ -858,6 +888,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSiz
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_002
  * @tc.desc: lnn delete specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
@@ -875,6 +906,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSiz
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003
  * @tc.desc: lnn delete specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
@@ -893,6 +925,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSiz
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004
  * @tc.desc: lnn delete specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
@@ -913,6 +946,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSiz
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_005
  * @tc.desc: lnn delete specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
@@ -932,6 +966,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSiz
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_006
  * @tc.desc: lnn delete specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
@@ -954,6 +989,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSiz
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_007
  * @tc.desc: lnn delete specific trusted devInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
@@ -976,6 +1012,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSiz
  * @tc.name: LNN_GET_TRUSTED_DEVICEINFO_Test_001
  * @tc.desc: lnn get trusted devInfo from db test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
@@ -994,6 +1031,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
  * @tc.name: LNN_GET_TRUSTED_DEVICEINFO_Test_002
  * @tc.desc: lnn get trusted devInfo from db test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
@@ -1012,6 +1050,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
  * @tc.name: LNN_GET_TRUSTED_DEVICEINFO_Test_003
  * @tc.desc: lnn get trusted devInfo from db test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
@@ -1030,6 +1069,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_003, TestSize.Level1)
  * @tc.name: LNN_GET_TRUSTED_DEVICEINFO_Test_004
  * @tc.desc: lnn get trusted devInfo from db test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
@@ -1050,6 +1090,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_004, TestSize.Level1)
  * @tc.name: LNN_GET_TRUSTED_DEVICEINFO_Test_005
  * @tc.desc: lnn get trusted devInfo from db test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
@@ -1075,6 +1116,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_005, TestSize.Level1)
  * @tc.name: LNN_GET_TRUSTED_DEVICEINFO_Test_006
  * @tc.desc: lnn get trusted devInfo from db test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
@@ -1101,6 +1143,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_006, TestSize.Level1)
  * @tc.name: LNN_GET_TRUSTED_DEVICEINFO_Test_007
  * @tc.desc: lnn get trusted devInfo from db test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
@@ -1127,6 +1170,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_007, TestSize.Level1)
  * @tc.name: DB_LOCK_AND_DB_UNLOCK_Test_001
  * @tc.desc: DbLock and DbUnlock test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, DB_LOCK_AND_DB_UNLOCK_Test_001, TestSize.Level1)
@@ -1140,6 +1184,7 @@ HWTEST_F(LNNDbMockTest, DB_LOCK_AND_DB_UNLOCK_Test_001, TestSize.Level1)
  * @tc.name: RECOVERY_TRUSTED_DEVINFO_PROCESS_Test_001
  * @tc.desc: RecoveryTrustedDevInfoProcess test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, RECOVERY_TRUSTED_DEVINFO_PROCESS_Test_001, TestSize.Level1)
@@ -1160,6 +1205,7 @@ HWTEST_F(LNNDbMockTest, RECOVERY_TRUSTED_DEVINFO_PROCESS_Test_001, TestSize.Leve
  * @tc.name: LNN_UPDATE_DECISION_DB_KEY_Test_001
  * @tc.desc: LnnUpdateDecisionDbKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_UPDATE_DECISION_DB_KEY_Test_001, TestSize.Level1)
@@ -1195,6 +1241,7 @@ HWTEST_F(LNNDbMockTest, LNN_UPDATE_DECISION_DB_KEY_Test_001, TestSize.Level1)
  * @tc.name: LNN_UPDATE_DECISION_DB_KEY_Test_002
  * @tc.desc: LnnUpdateDecisionDbKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, LNN_UPDATE_DECISION_DB_KEY_Test_002, TestSize.Level1)
@@ -1216,6 +1263,7 @@ HWTEST_F(LNNDbMockTest, LNN_UPDATE_DECISION_DB_KEY_Test_002, TestSize.Level1)
  * @tc.name: RETRIEVE_DEVICE_INFO_AND_KEYS_Test_001
  * @tc.desc: RetrieveDeviceInfoAndKeys test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_001, TestSize.Level1)
@@ -1231,6 +1279,7 @@ HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_001, TestSize.Level1)
  * @tc.name: RETRIEVE_DEVICE_INFO_AND_KEYS_Test_002
  * @tc.desc: RetrieveDeviceInfoAndKeys test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_002, TestSize.Level1)
@@ -1247,6 +1296,7 @@ HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_002, TestSize.Level1)
  * @tc.name: RETRIEVE_DEVICE_INFO_AND_KEYS_Test_003
  * @tc.desc: RetrieveDeviceInfoAndKeys test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_003, TestSize.Level1)
@@ -1265,6 +1315,7 @@ HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_003, TestSize.Level1)
  * @tc.name: RETRIEVE_DEVICE_INFO_AND_KEYS_Test_004
  * @tc.desc: RetrieveDeviceInfoAndKeys test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_004, TestSize.Level1)
@@ -1285,6 +1336,7 @@ HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_004, TestSize.Level1)
  * @tc.name: RETRIEVE_DEVICE_INFO_AND_KEYS_Test_005
  * @tc.desc: retrieve device info but retrieve device data once err
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_005, TestSize.Level1)
@@ -1307,6 +1359,7 @@ HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_005, TestSize.Level1)
  * @tc.name: RETRIEVE_DEVICE_INFO_AND_KEYS_Test_006
  * @tc.desc: retrieve device info and keys test return not ok
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_006, TestSize.Level1)
@@ -1331,6 +1384,7 @@ HWTEST_F(LNNDbMockTest, RETRIEVE_DEVICE_INFO_AND_KEYS_Test_006, TestSize.Level1)
  * @tc.name: SAVE_DEVICE_INFO_AND_KEYS_Test_001
  * @tc.desc: SaveDeviceInfoAndKeys test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_001, TestSize.Level1)
@@ -1348,6 +1402,7 @@ HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_001, TestSize.Level1)
  * @tc.name: SAVE_DEVICE_INFO_AND_KEYS_Test_002
  * @tc.desc: save device info and keys test but save remote device key info failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_002, TestSize.Level1)
@@ -1364,6 +1419,7 @@ HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_002, TestSize.Level1)
  * @tc.name: SAVE_DEVICE_INFO_AND_KEYS_Test_003
  * @tc.desc: save device info and keys test but save device key info failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_003, TestSize.Level1)
@@ -1382,6 +1438,7 @@ HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_003, TestSize.Level1)
  * @tc.name: SAVE_DEVICE_INFO_AND_KEYS_Test_004
  * @tc.desc: SaveDeviceInfoAndKeys test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_004, TestSize.Level1)
@@ -1402,6 +1459,7 @@ HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_004, TestSize.Level1)
  * @tc.name: SAVE_DEVICE_INFO_AND_KEYS_Test_005
  * @tc.desc: SaveDeviceInfoAndKeys test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_005, TestSize.Level1)
@@ -1424,6 +1482,7 @@ HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_005, TestSize.Level1)
  * @tc.name: SAVE_DEVICE_INFO_AND_KEYS_Test_006
  * @tc.desc: save device info and keys test but save local broadcast key info failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_006, TestSize.Level1)
@@ -1448,6 +1507,7 @@ HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_006, TestSize.Level1)
  * @tc.name: SAVE_DEVICE_INFO_AND_KEYS_Test_007
  * @tc.desc: save device info and keys test return not ok
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_007, TestSize.Level1)
@@ -1472,6 +1532,7 @@ HWTEST_F(LNNDbMockTest, SAVE_DEVICE_INFO_AND_KEYS_Test_007, TestSize.Level1)
  * @tc.name: FREE_UPDATE_KEY_RESOURCES_Test_001
  * @tc.desc: FreeUpdateKeyResources test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, FREE_UPDATE_KEY_RESOURCES_Test_001, TestSize.Level1)
@@ -1511,6 +1572,7 @@ HWTEST_F(LNNDbMockTest, FREE_UPDATE_KEY_RESOURCES_Test_001, TestSize.Level1)
  * @tc.name: UPDATE_KEY_AND_LOCAL_INFO_Test_001
  * @tc.desc: UpdateKeyAndLocalInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDbMockTest, UPDATE_KEY_AND_LOCAL_INFO_Test_001, TestSize.Level1)
