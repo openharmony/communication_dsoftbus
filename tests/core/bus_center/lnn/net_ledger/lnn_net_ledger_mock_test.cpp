@@ -46,6 +46,7 @@ void LNNNetLedgerMockTest::TearDown() { }
  * @tc.name: IsLocalIrkInfoChangeTest001
  * @tc.desc: local irk info change test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require: IBH09C
  */
 HWTEST_F(LNNNetLedgerMockTest, IsLocalIrkInfoChangeTest001, TestSize.Level0)
@@ -61,6 +62,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalIrkInfoChangeTest001, TestSize.Level0)
  * @tc.name: IsLocalIrkInfoChangeTest002
  * @tc.desc: local irk info change test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require: IBH09C
  */
 HWTEST_F(LNNNetLedgerMockTest, IsLocalIrkInfoChangeTest002, TestSize.Level0)
@@ -76,6 +78,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalIrkInfoChangeTest002, TestSize.Level0)
  * @tc.name: IsLocalBroadcastLinKeyChangeTest001
  * @tc.desc: local link key change test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require: IBH09C
  */
 HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest001, TestSize.Level0)
@@ -91,6 +94,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest001, TestSize.Lev
  * @tc.name: IsLocalBroadcastLinKeyChangeTest002
  * @tc.desc: local link key change test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require: IBH09C
  */
 HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest002, TestSize.Level0)
@@ -106,6 +110,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest002, TestSize.Lev
  * @tc.name: IsLocalBroadcastLinKeyChangeTest003
  * @tc.desc: local link key change test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require: IBH09C
  */
 HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest003, TestSize.Level0)
@@ -121,6 +126,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest003, TestSize.Lev
  * @tc.name: IsStaticFeatureChangeTest001
  * @tc.desc: IsStaticFeatureChange test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
@@ -138,6 +144,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
  * @tc.name: IsLocalSparkCheckChange001
  * @tc.desc: local sparkCheck invalid test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require: IBH09C
  */
 HWTEST_F(LNNNetLedgerMockTest, IsLocalSparkCheckChange001, TestSize.Level0)
@@ -157,6 +164,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalSparkCheckChange001, TestSize.Level0)
  * @tc.name: IsBleDirectlyOnlineFactorChange001
  * @tc.desc: Is BleDirectly Online Factor Change test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require: IBH09C
  */
 HWTEST_F(LNNNetLedgerMockTest, IsBleDirectlyOnlineFactorChange001, TestSize.Level0)

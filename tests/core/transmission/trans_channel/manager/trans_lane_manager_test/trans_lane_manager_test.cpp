@@ -56,10 +56,12 @@ void TransLaneManagerTest::SetUpTestCase(void)
 void TransLaneManagerTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: GetTransSessionInfoByLane001
- * @tc.desc: GetTransSessionInfoByLane, use the wrong parameter.
- * @tc.desc: ConvertLaneLinkTypeToDumper, use the wrong parameter.
+ * @tc.desc: GetTransSessionInfoByLane test
+ *           use the wrong parameter
+ * @tc.desc: ConvertLaneLinkTypeToDumper test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -97,9 +99,10 @@ HWTEST_F(TransLaneManagerTest, GetTransSessionInfoByLane001, TestSize.Level1)
     EXPECT_EQ(DUMPER_LANE_LINK_TYPE_BUTT, transDumpLaneLinkType);
 }
 
-/**
+/*
  * @tc.name: TransChannelInit001
- * @tc.desc: TransChannelInit001, use the wrong parameter.
+ * @tc.desc: TransChannelInit test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -110,9 +113,10 @@ HWTEST_F(TransLaneManagerTest, TransChannelInit001, TestSize.Level1)
     TransLaneMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLaneChannelForEachShowInfo001
- * @tc.desc: TransLaneChannelForEachShowInfo, use the wrong parameter.
+ * @tc.desc: TransLaneChannelForEachShowInfo test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -127,9 +131,10 @@ HWTEST_F(TransLaneManagerTest, TransLaneChannelForEachShowInfo001, TestSize.Leve
     TransLaneChannelForEachShowInfo(fd);
 }
 
-/**
+/*
  * @tc.name: TransLaneMgrAddLane001
- * @tc.desc: TransLaneMgrAddLane001, use the wrong parameter.
+ * @tc.desc: TransLaneMgrAddLane test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -178,9 +183,10 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransLaneMgrDelLane001
- * @tc.desc: TransLaneMgrDelLane001, use the wrong parameter.
+ * @tc.desc: TransLaneMgrDelLane test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -233,9 +239,10 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDelLane001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransLaneMgrDeathCallback001
- * @tc.desc: TransLaneMgrDeathCallback001, use the wrong parameter.
+ * @tc.desc: TransLaneMgrDeathCallback test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -254,9 +261,10 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDeathCallback001, TestSize.Level1)
     TransLaneMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransGetLaneReqIdByChannelId001
- * @tc.desc: TransGetLaneReqIdByChannelId001, use the wrong parameter.
+ * @tc.desc: TransGetLaneReqIdByChannelId test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -275,9 +283,10 @@ HWTEST_F(TransLaneManagerTest, TransGetLaneReqIdByChannelId001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetChannelInfoByLaneReqId001
- * @tc.desc: TransGetChannelInfoByLaneReqId001, use the wrong parameter.
+ * @tc.desc: TransGetChannelInfoByLaneReqId test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -303,7 +312,7 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelInfoByLaneReqId001, TestSize.Level
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: TransSocketChannelInfoTest001
  * @tc.desc: TransSocketChannelInfoTest001.
  * @tc.type: FUNC
@@ -361,7 +370,7 @@ HWTEST_F(TransLaneManagerTest, TransSocketChannelInfoTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetSocketChannelStateBySession001
  * @tc.desc: TransGetSocketChannelStateBySession001.
  * @tc.type: FUNC
@@ -404,9 +413,10 @@ HWTEST_F(TransLaneManagerTest, TransGetSocketChannelStateBySession001, TestSize.
     TransSocketLaneMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: CopyAppInfoFromSessionParam001
- * @tc.desc: CopyAppInfoFromSessionParam, use the wrong parameter.
+ * @tc.desc: CopyAppInfoFromSessionParam test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -426,9 +436,10 @@ HWTEST_F(TransLaneManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransGetChannelType001
- * @tc.desc: TransGetChannelType, use the wrong parameter.
+ * @tc.desc: TransGetChannelType test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -476,9 +487,10 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelType001, TestSize.Level1)
     SoftBusFree(transInfo);
 }
 
-/**
+/*
  * @tc.name: FindConfigType001
- * @tc.desc: FindConfigType001, use the wrong parameter.
+ * @tc.desc: FindConfigType test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -496,9 +508,10 @@ HWTEST_F(TransLaneManagerTest, FindConfigType001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH, ret);
 }
 
-/**
- * @tc.name: ConvertLaneLinkTypeToConnectType Test
- * @tc.desc: ConvertLaneLinkTypeToConnectType001
+/*
+ * @tc.name: ConvertLaneLinkTypeToConnectType001
+ * @tc.desc: ConvertLaneLinkTypeToConnectType test
+ *           use different linktype expected return current linktype
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -524,9 +537,10 @@ HWTEST_F(TransLaneManagerTest, ConvertLaneLinkTypeToConnectType001, TestSize.Lev
     EXPECT_EQ(CONNECT_TYPE_MAX, ret);
 }
 
-/**
- * @tc.name: TransGetConnectTypeByChannelId Test
- * @tc.desc: TransGetConnectTypeByChannelId001
+/*
+ * @tc.name: TransGetConnectTypeByChannelId001
+ * @tc.desc: TransGetConnectTypeByChannelId test
+ *           use the wrong param expected return failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -539,9 +553,10 @@ HWTEST_F(TransLaneManagerTest, TransGetConnectTypeByChannelId001, TestSize.Level
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 }
 
-/**
- * @tc.name: TransGetTransLaneInfoByLaneHandle Test
- * @tc.desc: TransGetTransLaneInfoByLaneHandle001
+/*
+ * @tc.name: TransGetTransLaneInfoByLaneHandle001
+ * @tc.desc: TransGetTransLaneInfoByLaneHandle test
+ *           use the wrong param expected return failed
  * @tc.type: FUNC
  * @tc.require:
  */

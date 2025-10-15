@@ -48,9 +48,10 @@ void SoftBusMessageOpenChannelMockTest::TearDownTestCase(void)
 {}
 
 
-/**
+/*
  * @tc.name: PackError001
- * @tc.desc: PackError001, use the wrong parameter or normal parameter.
+ * @tc.desc: PackError001 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -66,9 +67,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackError001, TestSize.Level1)
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: PackError002
- * @tc.desc: PackError002, use the wrong parameter or normal parameter.
+ * @tc.desc: PackError002 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -85,9 +87,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackError002, TestSize.Level1)
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: PackError003
- * @tc.desc: PackError003, use the wrong parameter or normal parameter.
+ * @tc.desc: PackError003 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -105,9 +108,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackError003, TestSize.Level1)
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: PackRequest001
- * @tc.desc: PackRequest001, use the wrong parameter or normal parameter.
+ * @tc.desc: PackRequest001 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -126,9 +130,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest001, TestSize.Level3)
     }
 }
 
-/**
+/*
  * @tc.name: PackRequest002
- * @tc.desc: PackRequest002, use the wrong parameter or normal parameter.
+ * @tc.desc: PackRequest002 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -149,9 +154,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest002, TestSize.Level3)
     }
 }
 
-/**
+/*
  * @tc.name: PackRequest003
- * @tc.desc: PackRequest003, use the wrong parameter or normal parameter.
+ * @tc.desc: PackRequest003 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -177,9 +183,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest003, TestSize.Level3)
     }
 }
 
-/**
+/*
  * @tc.name: PackRequest004
- * @tc.desc: PackRequest004, use the wrong parameter or normal parameter.
+ * @tc.desc: PackRequest004 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -204,9 +211,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest004, TestSize.Level3)
     }
 }
 
-/**
+/*
  * @tc.name: PackReply001
- * @tc.desc: PackReply001, use the wrong parameter or normal parameter.
+ * @tc.desc: PackReply001 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -225,9 +233,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: PackReply002
- * @tc.desc: PackReply002, use the wrong parameter or normal parameter.
+ * @tc.desc: PackReply002 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -248,9 +257,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply002, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: PackReply003
- * @tc.desc: PackReply003, use the wrong parameter or normal parameter.
+ * @tc.desc: PackReply003 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -273,9 +283,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply003, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: PackReply004
- * @tc.desc: PackReply004, use the wrong parameter or normal parameter.
+ * @tc.desc: PackReply004 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -299,9 +310,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply004, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: UnpackReply001
- * @tc.desc: UnpackReply001, use the wrong parameter or normal parameter.
+ * @tc.desc: UnpackReply001 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -321,9 +333,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackReply001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: UnpackReply002
- * @tc.desc: UnpackReply002, use the wrong parameter or normal parameter.
+ * @tc.desc: UnpackReply002 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -345,9 +358,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackReply002, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransTdcPackFastData001
- * @tc.desc: TransTdcPackFastData001, use the wrong parameter or normal parameter.
+ * @tc.desc: TransTdcPackFastData001 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -357,9 +371,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, TransTdcPackFastData001, TestSize.Le
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: JsonObjectPackRequestEx001
- * @tc.desc: JsonObjectPackRequestEx001, use the wrong parameter or normal parameter.
+ * @tc.desc: JsonObjectPackRequestEx001 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -372,9 +387,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, JsonObjectPackRequestEx001, TestSize
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ParseMessageToAppInfo001
- * @tc.desc: ParseMessageToAppInfo001, use the wrong parameter or normal parameter.
+ * @tc.desc: ParseMessageToAppInfo001 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -393,9 +409,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, ParseMessageToAppInfo001, TestSize.L
     }
 }
 
-/**
+/*
  * @tc.name: ParseMessageToAppInfo002
- * @tc.desc: ParseMessageToAppInfo002, use the wrong parameter or normal parameter.
+ * @tc.desc: ParseMessageToAppInfo002 test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -417,9 +434,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, ParseMessageToAppInfo002, TestSize.L
     }
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceRequest001
- * @tc.desc: PackExternalDeviceRequest
+ * @tc.desc: PackExternalDeviceRequest test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -428,9 +446,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest001, TestSi
     EXPECT_EQ(PackExternalDeviceRequest(nullptr, 321), nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceRequest002
- * @tc.desc: PackExternalDeviceRequest
+ * @tc.desc: PackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -444,9 +463,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest002, TestSi
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceRequest003
- * @tc.desc: PackExternalDeviceRequest
+ * @tc.desc: PackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -464,9 +484,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest003, TestSi
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceRequest004
- * @tc.desc: PackExternalDeviceRequest
+ * @tc.desc: PackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -487,9 +508,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest004, TestSi
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceRequest005
- * @tc.desc: PackExternalDeviceRequest
+ * @tc.desc: PackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -522,9 +544,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest005, TestSi
     EXPECT_STREQ(ret, data);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect001
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -547,9 +570,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect001, Tes
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect002
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -566,9 +590,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect002, Tes
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect003
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -588,9 +613,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect003, Tes
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect004
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -608,9 +634,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect004, Tes
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect005
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -631,9 +658,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect005, Tes
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect006
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -652,9 +680,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect006, Tes
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect007
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -681,9 +710,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect007, Tes
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceJsonObiect008
- * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.desc: PackExternalDeviceJsonObject test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -702,9 +732,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect008, Tes
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceRequest001
- * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.desc: UnpackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -725,9 +756,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest001, Test
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceRequest002
- * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.desc: UnpackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -746,9 +778,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest002, Test
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceRequest003
- * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.desc: UnpackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -767,9 +800,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest003, Test
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceRequest004
- * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.desc: UnpackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -786,9 +820,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest004, Test
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceRequest005
- * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.desc: UnpackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -808,9 +843,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest005, Test
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceRequest006
- * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.desc: UnpackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -832,9 +868,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest006, Test
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceRequest007
- * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.desc: UnpackExternalDeviceRequest test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -857,9 +894,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest007, Test
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceReply001
- * @tc.desc: PackExternalDeviceReply.
+ * @tc.desc: PackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -875,9 +913,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply001, TestSize
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceReply002
- * @tc.desc: PackExternalDeviceReply.
+ * @tc.desc: PackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -912,9 +951,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply002, TestSize
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceReply003
- * @tc.desc: PackExternalDeviceReply.
+ * @tc.desc: PackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -933,9 +973,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply003, TestSize
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceReply004
- * @tc.desc: PackExternalDeviceReply.
+ * @tc.desc: PackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -957,9 +998,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply004, TestSize
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceReply005
- * @tc.desc: PackExternalDeviceReply.
+ * @tc.desc: PackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -980,9 +1022,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply005, TestSize
     EXPECT_EQ(ret, nullptr);
 }
 
-/**
+/*
  * @tc.name: PackExternalDeviceReply006
- * @tc.desc: PackExternalDeviceReply.
+ * @tc.desc: PackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1010,9 +1053,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply006, TestSize
     EXPECT_STREQ(ret, data);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceReply001
- * @tc.desc: UnpackExternalDeviceReply.
+ * @tc.desc: UnpackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1042,9 +1086,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceReply001, TestSi
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceReply002
- * @tc.desc: UnpackExternalDeviceReply.
+ * @tc.desc: UnpackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1065,9 +1110,10 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceReply002, TestSi
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: UnpackExternalDeviceReply003
- * @tc.desc: UnpackExternalDeviceReply.
+ * @tc.desc: UnpackExternalDeviceReply test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */

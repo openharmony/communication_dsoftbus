@@ -1264,4 +1264,19 @@ HWTEST_F(AuthUkManagerTest, SECURITY_SET_CHANNEL_INFO_BY_REQ_ID_Test_001, TestSi
     DeInitUkNegoInstanceList();
     UkNegotiateDeinit();
 }
+
+/*
+ * @tc.name: IS_NEED_SINK_GENERATE_UK_Test_001
+ * @tc.desc: IsNeedSinkGenerateUk test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, IS_NEED_SINK_GENERATE_UK_Test_001, TestSize.Level1)
+{
+    bool ret = IsNeedSinkGenerateUk(nullptr);
+    EXPECT_EQ(ret, false);
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    ret = IsNeedSinkGenerateUk(peerUdid);
+    EXPECT_EQ(ret, false);
+}
 } // namespace OHOS

@@ -64,6 +64,7 @@ void LNNDataCloudSyncMockTest::TearDown() { }
  * @tc.name: DBCipherInfoSyncToCache_Test_001
  * @tc.desc: DBCipherInfoSyncToCache
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, DBCipherInfoSyncToCache_Test_001, TestSize.Level1)
@@ -109,6 +110,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBCipherInfoSyncToCache_Test_001, TestSize.Le
  * @tc.name: LNNDataCloudSyncMockTest_Test_001
  * @tc.desc: DBDeviceNameInfoSyncToCache
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LNNDataCloudSyncMockTest_Test_001, TestSize.Level1)
@@ -134,6 +136,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LNNDataCloudSyncMockTest_Test_001, TestSize.L
  * @tc.name: DBConnectMacInfoSyncToCache_Test_001
  * @tc.desc: DBConnectMacInfoSyncToCache
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, DBConnectMacInfoSyncToCache_Test_001, TestSize.Level1)
@@ -168,6 +171,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBConnectMacInfoSyncToCache_Test_001, TestSiz
  * @tc.name: JudgeFieldNameIsDeviceBasicInfo_Test_001
  * @tc.desc: JudgeFieldNameIsDeviceBasicInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsDeviceBasicInfo_Test_001, TestSize.Level1)
@@ -200,6 +204,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsDeviceBasicInfo_Test_001, Tes
  * @tc.name: JudgeFieldNameIsNumInfo_Test_001
  * @tc.desc: JudgeFieldNameIsNumInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsNumInfo_Test_001, TestSize.Level1)
@@ -230,6 +235,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsNumInfo_Test_001, TestSize.Le
  * @tc.name: JudgeFieldNameIsConnectInfo_Test_001
  * @tc.desc: JudgeFieldNameIsConnectInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsConnectInfo_Test_001, TestSize.Level1)
@@ -260,6 +266,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsConnectInfo_Test_001, TestSiz
  * @tc.name: JudgeFieldNameIsCipherInfo_Test_001
  * @tc.desc: JudgeFieldNameIsCipherInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsCipherInfo_Test_001, TestSize.Level1)
@@ -290,6 +297,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, JudgeFieldNameIsCipherInfo_Test_001, TestSize
  * @tc.name: DBDataChangeBatchSyncToCacheInternal_Test_001
  * @tc.desc: DBDataChangeBatchSyncToCacheInternal
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, DBDataChangeBatchSyncToCacheInternal_Test_001, TestSize.Level1)
@@ -338,6 +346,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBDataChangeBatchSyncToCacheInternal_Test_001
  * @tc.name: GetInfoFromSplitKey_Test_001
  * @tc.desc: GetInfoFromSplitKey
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, GetInfoFromSplitKey_Test_001, TestSize.Level1)
@@ -367,35 +376,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, GetInfoFromSplitKey_Test_001, TestSize.Level1
 }
 
 /*
- * @tc.name: HandleDBAddChangeInternal_Test_001
- * @tc.desc: HandleDBAddChangeInternal
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.Level1)
-{
-    NodeInfo localCaheInfo = {
-        .stateVersion = STATE_VERSION2,
-    };
-    EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
-    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
-    EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(DoAll(SetArgPointee<0>(localCaheInfo), Return(SOFTBUS_OK)));
-    const char *key = "key1#key2#key3";
-    const char *value = "value1#value2#value3";
-    NodeInfo cacheInfo;
-    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
-}
-
-/*
  * @tc.name: SetDBNameDataToDLedger_Test_001
  * @tc.desc: SetDBNameDataToDLedger
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, SetDBNameDataToDLedger_Test_001, TestSize.Level1)
@@ -437,6 +421,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, SetDBNameDataToDLedger_Test_001, TestSize.Lev
  * @tc.name: SetDBDataToDistributedLedger_Test_001
  * @tc.desc: SetDBDataToDistributedLedger
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, SetDBDataToDistributedLedger_Test_001, TestSize.Level1)
@@ -490,6 +475,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, SetDBDataToDistributedLedger_Test_001, TestSi
  * @tc.name: IsIgnoreUpdate_Test_001
  * @tc.desc: IsIgnoreUpdate
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, IsIgnoreUpdate_Test_001, TestSize.Level1)
@@ -513,6 +499,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, IsIgnoreUpdate_Test_001, TestSize.Level1)
  * @tc.name: HandleDBUpdateInternal_Test_001
  * @tc.desc: HandleDBUpdateInternal
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateInternal_Test_001, TestSize.Level1)
@@ -549,6 +536,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateInternal_Test_001, TestSize.Lev
  * @tc.name: LnnDBDataAddChangeSyncToCache_Test_001
  * @tc.desc: LnnDBDataAddChangeSyncToCache
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_001, TestSize.Level1)
@@ -561,9 +549,24 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_001, TestS
 }
 
 /*
+ * @tc.name: LnnDBDataAddChangeSyncToCache_Test_002
+ * @tc.desc: LnnDBDataAddChangeSyncToCache test execute success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestSize.Level1)
+{
+    const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    int32_t keySize = KEY_SIZE1;
+    EXPECT_NE(LnnDBDataAddChangeSyncToCache(key, value, keySize), SOFTBUS_OK);
+}
+
+/*
  * @tc.name: LnnDBDataChangeSyncToCacheInner_Test_001
  * @tc.desc: LnnDBDataChangeSyncToCacheInner
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, TestSize.Level1)
@@ -609,6 +612,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
  * @tc.name: LnnLedgerDataChangeSyncToDB_Test_001
  * @tc.desc: LnnLedgerDataChangeSyncToDB
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSize.Level1)
@@ -638,6 +642,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSiz
  * @tc.name: PackBroadcastCipherKeyInner_Test_001
  * @tc.desc: PackBroadcastCipherKeyInner
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSize.Level1)
@@ -667,9 +672,36 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
 }
 
 /*
+ * @tc.name: HandleDBAddChangeInternal_Test_001
+ * @tc.desc: HandleDBAddChangeInternal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.Level1)
+{
+    NodeInfo localCaheInfo = {
+        .stateVersion = STATE_VERSION2,
+    };
+    EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
+    EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(DoAll(SetArgPointee<0>(localCaheInfo), Return(SOFTBUS_OK)));
+    const char *key = "key1#key2#key3";
+    const char *value = "value1#value2#value3";
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: HandleDBAddChangeInternal_Test_002
  * @tc.desc: HandleDBAddChangeInternal test parameter error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_002, TestSize.Level1)
@@ -686,6 +718,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_002, TestSize.
  * @tc.name: HandleDBUpdateChangeInternal_Test_001
  * @tc.desc: HandleDBUpdateChangeInternal test parameter error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateChangeInternal_Test_001, TestSize.Level1)
@@ -703,6 +736,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateChangeInternal_Test_001, TestSi
  * @tc.name: CheckParamValidity_Test_001
  * @tc.desc: CheckParamValidity test parameter error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
@@ -725,23 +759,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LnnDBDataAddChangeSyncToCache_Test_002
- * @tc.desc: LnnDBDataAddChangeSyncToCache test execute success
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestSize.Level1)
-{
-    const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
-    const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
-    int32_t keySize = KEY_SIZE1;
-    EXPECT_NE(LnnDBDataAddChangeSyncToCache(key, value, keySize), SOFTBUS_OK);
-}
-
-/*
  * @tc.name: LnnUpdateOldCacheInfo_Test_001
  * @tc.desc: LnnUpdateOldCacheInfo test execute success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Level1)
@@ -768,6 +789,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Leve
  * @tc.name: LnnSaveAndUpdateDistributedNode_Test_001
  * @tc.desc: LnnSaveAndUpdateDistributedNode test parameter error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, TestSize.Level1)
@@ -782,6 +804,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, Tes
  * @tc.name: LnnDeleteDevInfoSyncToDB_Test_001
  * @tc.desc: LnnDeleteDevInfoSyncToDB test parameter error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnDeleteDevInfoSyncToDB_Test_001, TestSize.Level1)

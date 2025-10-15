@@ -504,5 +504,25 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
 {
     return GetAuthMangerIf()->ConnectAuthDevice(requestId, connInfo, sideType);
 }
+
+int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)
+{
+    return GetAuthMangerIf()->AuthSessionProcessDevInfoData(authSeq, data, len);
+}
+
+int32_t GetFd(uint64_t connId)
+{
+    return GetAuthMangerIf()->GetFd(connId);
+}
+
+void LnnClearAuthExchangeUdidPacked(const char *networkId)
+{
+    return GetAuthMangerIf()->LnnClearAuthExchangeUdidPacked(networkId);
+}
+
+uint64_t GenConnId(int32_t connType, int32_t id)
+{
+    return GetAuthMangerIf()->GenConnId(connType, id);
+}
 }
 } // namespace OHOS

@@ -45,9 +45,9 @@ public:
 void PermissionEntrystaticTest::SetUpTestCase(void) { }
 void PermissionEntrystaticTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: GetPeMapValueTest001
- * @tc.desc: get pe map value test, use the wrong parameter.
+ * @tc.desc: get pe map value test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -59,9 +59,9 @@ HWTEST_F(PermissionEntrystaticTest, GetPeMapValue001, TestSize.Level0)
     EXPECT_EQ(UNKNOWN_VALUE, ret);
 }
 
-/**
+/*
  * @tc.name: StrStartWithTest001
- * @tc.desc: str start with test, use the wrong or normal parameter.
+ * @tc.desc: str start with test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -81,9 +81,9 @@ HWTEST_F(PermissionEntrystaticTest, StrStartWithTest001, TestSize.Level0)
     EXPECT_TRUE(ret == false);
 }
 
-/**
+/*
  * @tc.name: ProcessAppInfoTest001
- * @tc.desc: process app info test, use the wrong or normal parameter.
+ * @tc.desc: process app info test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -95,9 +95,9 @@ HWTEST_F(PermissionEntrystaticTest, ProcessAppInfoTest001, TestSize.Level0)
     EXPECT_TRUE(pRet == nullptr);
 }
 
-/**
+/*
  * @tc.name: ProcessPermissionEntryTest001
- * @tc.desc: process permission entry test, use the wrong or normal parameter.
+ * @tc.desc: process permission entry test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -113,9 +113,9 @@ HWTEST_F(PermissionEntrystaticTest, ProcessPermissionEntryTest001, TestSize.Leve
     EXPECT_TRUE(pRet == nullptr);
 }
 
-/**
+/*
  * @tc.name: CompareStringTest001
- * @tc.desc: compare string test, use the wrong or normal parameter.
+ * @tc.desc: compare string test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -130,9 +130,9 @@ HWTEST_F(PermissionEntrystaticTest, CompareStringTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: GetPermTypeTest001
- * @tc.desc: get perm type test, use the wrong or normal parameter.
+ * @tc.desc: get perm type test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -184,9 +184,9 @@ HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest001, TestSize.Level0)
     EXPECT_EQ(NORMAL_APP, ret);
 }
 
-/**
+/*
  * @tc.name: GetPermTypeTest002
- * @tc.desc: get perm type test, use the wrong or normal parameter.
+ * @tc.desc: get perm type test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -239,9 +239,9 @@ HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: CheckPermissionAppInfoTest001
- * @tc.desc: check permission appinfo test, use the wrong or normal parameter.
+ * @tc.desc: check permission appinfo test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -272,9 +272,9 @@ HWTEST_F(PermissionEntrystaticTest, CheckPermissionAppInfoTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: CheckDBinderTest001
- * @tc.desc: check dbinder test, use the wrong or normal parameter.
+ * @tc.desc: check dbinder test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -297,9 +297,9 @@ HWTEST_F(PermissionEntrystaticTest, CheckDBinderTest001, TestSize.Level0)
     EXPECT_TRUE(ret == false);
 }
 
-/**
+/*
  * @tc.name: HaveGrantedPermissionTest001
- * @tc.desc: have graned permission test, use the wrong or normal parameter.
+ * @tc.desc: have graned permission test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -317,9 +317,9 @@ HWTEST_F(PermissionEntrystaticTest, HaveGrantedPermissionTest001, TestSize.Level
     EXPECT_TRUE(ret == false);
 }
 
-/**
+/*
  * @tc.name: NewDynamicPermissionEntryTest001
- * @tc.desc: have graned permission test, use the wrong or normal parameter.
+ * @tc.desc: have graned permission test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -350,9 +350,9 @@ HWTEST_F(PermissionEntrystaticTest, NewDynamicPermissionEntryTest001, TestSize.L
     EXPECT_TRUE(ret == false);
 }
 
-/**
+/*
  * @tc.name: DynamicPermissionTest001
- * @tc.desc: call AddDynamicPermission and DeleteDynamicPermission.
+ * @tc.desc: call AddDynamicPermission and DeleteDynamicPermission
  * @tc.type: FUNC
  * @tc.require:
  */

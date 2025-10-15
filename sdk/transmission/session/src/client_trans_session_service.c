@@ -143,7 +143,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
         return ret;
     }
-    TRANS_LOGI(TRANS_SDK, "ok");
+    TRANS_LOGD(TRANS_SDK, "ok");
     return ret;
 }
 
@@ -175,7 +175,7 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     }
     DeleteFileListener(sessionName);
     AnonymizeFree(tmpName);
-    TRANS_LOGI(TRANS_SDK, "ok");
+    TRANS_LOGD(TRANS_SDK, "ok");
     return ret;
 }
 

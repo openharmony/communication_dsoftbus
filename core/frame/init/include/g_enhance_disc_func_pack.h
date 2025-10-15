@@ -62,6 +62,7 @@ DiscoveryBleDispatcherInterface *DiscOopBleInitPacked(DiscInnerCallback *discInn
 DiscoveryBleDispatcherInterface *DiscShareBleInitPacked(DiscInnerCallback *discInnerCb);
 DiscoveryBleDispatcherInterface *DiscApproachBleInitPacked(DiscInnerCallback *discInnerCb);
 DiscoveryBleDispatcherInterface *DiscVLinkBleInitPacked(DiscInnerCallback *discInnerCb);
+DiscoveryBleDispatcherInterface *DiscPcCollaborationInitPacked(DiscInnerCallback *discInnerCb);
 void DiscShareBleDeinitPacked(void);
 void DiscApproachBleDeinitPacked(void);
 void DiscVLinkBleDeinitPacked(void);
@@ -78,6 +79,7 @@ int32_t DiscApproachBleEventInitPacked(void);
 int32_t DiscVLinkBleEventInitPacked(void);
 int32_t DiscTouchBleEventInitPacked(void);
 int32_t DiscOopBleEventInitPacked(void);
+int32_t DiscPcCollaborationEventInitPacked(void);
 void DiscTouchBleEventDeinitPacked(void);
 void DiscApproachBleEventDeinitPacked(void);
 void DiscVLinkBleEventDeinitPacked(void);

@@ -42,7 +42,7 @@ constexpr int32_t BUF_LEN = 10;
 
 #define ACCOUNT_RELATED   1
 #define ACCOUNT_UNRELATED 2
-#define ACCOUNT_SHARE     3
+#define ACCOUNT_SHARED     3
 
 #define SUBJECT_MASTER_CONTROLLER 1
 #define SUBJECT_ACCESSORY_DEVICE  2
@@ -145,6 +145,7 @@ static int32_t TestQueryCredentialByParams(int32_t osAccountId, const char *requ
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_TEST_001
  * @tc.desc: IdServiceGenerateQueryParam test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_QUERY_PARAM_TEST_001, TestSize.Level1)
@@ -206,6 +207,7 @@ int32_t QueryCredentialByParamsTest(int32_t osAccountId, const char *requestPara
  * @tc.name: ID_SERVICE_QUERY_CRED_TEST_001
  * @tc.desc: IdServiceQueryCredential test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Level1)
@@ -266,6 +268,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Leve
  * @tc.name: ID_SERVICE_GENERATE_AUTH_PARAM_001
  * @tc.desc: IdServiceGenerateAuthParam test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_AUTH_PARAM_001, TestSize.Level1)
@@ -332,6 +335,7 @@ int32_t AuthCredentialTest(
  * @tc.name: ID_SERVICE_AUTH_CRED_001
  * @tc.desc: IdServiceAuthCredential test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_AUTH_CRED_001, TestSize.Level1)
@@ -379,6 +383,7 @@ int32_t ProcessCredDataTest(
  * @tc.name: ID_SERVICE_PROCESS_CRED_DATA_001
  * @tc.desc: IdServiceProcessCredData test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_PROCESS_CRED_DATA_001, TestSize.Level1)
@@ -419,6 +424,7 @@ void DestroyInfoTest(char **returnData)
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_001
  * @tc.desc: init service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_001, TestSize.Level1)
@@ -443,7 +449,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_001, TestSize.Le
     if (g_regListenerTest.onCredDelete != nullptr) {
         g_regListenerTest.onCredDelete(nullptr, nullptr);
     }
-    msg = TestAssembleCredInfo(ACCOUNT_SHARE, SUBJECT_MASTER_CONTROLLER, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
+    msg = TestAssembleCredInfo(ACCOUNT_SHARED, SUBJECT_MASTER_CONTROLLER, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
     char localUdid[UDID_BUF_LEN] = { 0 };
     EXPECT_EQ(strcpy_s(localUdid, UDID_BUF_LEN, TEST_UDID), EOK);
     EXPECT_CALL(IdServiceMock, LnnGetLocalStrInfo)
@@ -466,6 +472,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_001, TestSize.Le
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_002
  * @tc.desc: init service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_002, TestSize.Level1)
@@ -481,7 +488,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_002, TestSize.Le
     EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(IdServiceMock, GetCredMgrInstance).WillRepeatedly(Return(&g_testCredMgr));
     int32_t ret = IdServiceRegCredMgr();
-    msg = TestAssembleCredInfo(ACCOUNT_SHARE, SUBJECT_ACCESSORY_DEVICE, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
+    msg = TestAssembleCredInfo(ACCOUNT_SHARED, SUBJECT_ACCESSORY_DEVICE, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
     EXPECT_CALL(IdServiceMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_CALL(IdServiceMock, LnnDeleteSpecificTrustedDevInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(IdServiceMock, LnnHbOnTrustedRelationReduced).WillRepeatedly(Return());
@@ -498,6 +505,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_002, TestSize.Le
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_003
  * @tc.desc: init service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_003, TestSize.Level1)
@@ -514,8 +522,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_003, TestSize.Le
     EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(IdServiceMock, GetCredMgrInstance).WillRepeatedly(Return(&g_testCredMgr));
     int32_t ret = IdServiceRegCredMgr();
-    msg1 = TestAssembleCredInfo(ACCOUNT_SHARE, SUBJECT_MASTER_CONTROLLER, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
-    msg2 = TestAssembleCredInfo(ACCOUNT_SHARE, SUBJECT_ACCESSORY_DEVICE, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
+    msg1 = TestAssembleCredInfo(ACCOUNT_SHARED, SUBJECT_MASTER_CONTROLLER, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
+    msg2 = TestAssembleCredInfo(ACCOUNT_SHARED, SUBJECT_ACCESSORY_DEVICE, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
     char localUdid[UDID_BUF_LEN] = { 0 };
     EXPECT_EQ(strcpy_s(localUdid, UDID_BUF_LEN, TEST_UDID), EOK);
     EXPECT_CALL(IdServiceMock, LnnGetLocalStrInfo)
@@ -540,6 +548,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_003, TestSize.Le
  * @tc.name: ID_SERVICE_DESTROY_CREDLIST_001
  * @tc.desc: IdServiceDestroyCredentialList test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_DESTROY_CREDLIST_001, TestSize.Level1)
@@ -579,6 +588,7 @@ int32_t QueryCredInfoByCredId(int32_t userId, const char *credId, char **credInf
  * @tc.name: ID_SERVICE_GET_CREDID_FROM_LIST_001
  * @tc.desc: IdServiceGetCredIdFromCredList test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GET_CREDID_FROM_LIST_001, TestSize.Level1)
@@ -620,5 +630,109 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GET_CREDID_FROM_LIST_001, TestSize
     EXPECT_NE(credId, nullptr);
 
     SoftBusFree(credId);
+}
+
+/*
+ * @tc.name: ID_SERVICE_IS_POTENTIAL_TRUSTED_DEVICE_001
+ * @tc.desc: Query credential fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_IS_POTENTIAL_TRUSTED_DEVICE_001, TestSize.Level1)
+{
+    AuthHichainIdServiceInterfaceMock IdServiceMock;
+    EXPECT_CALL(IdServiceMock, GetActiveOsAccountIds).WillRepeatedly(Return(2));
+
+    char *udid = nullptr;
+    char *accountId = nullptr;
+    bool isSameAccount = true;
+    bool ret = IdServiceIsPotentialTrustedDevice(udid, accountId, isSameAccount);
+    EXPECT_FALSE(ret);
+
+    const char *shortUdid = "123456";
+    ret = IdServiceIsPotentialTrustedDevice(shortUdid, accountId, isSameAccount);
+    EXPECT_FALSE(ret);
+
+    const char *shortAccountId = "654321";
+    ret = IdServiceIsPotentialTrustedDevice(shortUdid, shortAccountId, isSameAccount);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: GET_CRED_INFO_FROM_JSON_001
+ * @tc.desc: Get cred info success.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainIdServiceTest, GET_CRED_INFO_FROM_JSON_001, TestSize.Level1)
+{
+    const char *credInfo = "{\"credOwner\":\"DM\"}";
+    SoftBusCredInfo info;
+    (void)memset_s(&info, sizeof(SoftBusCredInfo), 0, sizeof(SoftBusCredInfo));
+    int32_t ret = GetCredInfoFromJson(credInfo, &info);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    char *testInfo = TestAssembleCredInfo(ACCOUNT_SHARED, SUBJECT_ACCESSORY_DEVICE, TEST_UDID_HASH, TEST_ACCOUNT_HASH);
+    ret = GetCredInfoFromJson(testInfo, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(testInfo);
+}
+
+/*
+ * @tc.name: IS_LOCAL_CRED_001
+ * @tc.desc: get local udid fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainIdServiceTest, IS_LOCAL_CRED_001, TestSize.Level1)
+{
+    AuthHichainIdServiceInterfaceMock IdServiceMock;
+    CredManager credManager;
+    credManager.destroyInfo = DestroyInfoTest;
+    EXPECT_CALL(IdServiceMock, GetCredMgrInstance).WillRepeatedly(Return(&credManager));
+
+    const char *udid = "123456";
+    bool ret = IsLocalCredInfo(udid);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: ID_SERVICE_REG_CRE_MGR_001
+ * @tc.desc: Register credManager fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_REG_CRE_MGR_001, TestSize.Level1)
+{
+    AUTH_LOGI(AUTH_TEST, "Start ID_SERVICE_REG_CRE_MGR_001 test.");
+    AuthHichainIdServiceInterfaceMock IdServiceMock;
+    EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    int32_t ret = IdServiceRegCredMgr();
+    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL);
+    IdServiceUnRegCredMgr();
+}
+
+/*
+ * @tc.name: ID_SERVICE_REG_CRE_MGR_002
+ * @tc.desc: Register credManager success.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_REG_CRE_MGR_002, TestSize.Level1)
+{
+    AUTH_LOGI(AUTH_TEST, "Start ID_SERVICE_REG_CRE_MGR_001 test.");
+    AuthHichainIdServiceInterfaceMock IdServiceMock;
+    CredManager credManager= {
+        .registerChangeListener = TestRegisterChangeListener,
+        .queryCredentialByParams = TestQueryCredentialByParams,
+        .unregisterChangeListener = TestUnRegisterChangeListener,
+        .destroyInfo = DestroyInfoTest,
+    };
+    EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(IdServiceMock, GetCredMgrInstance).WillRepeatedly(Return(&credManager));
+    int32_t ret = IdServiceRegCredMgr();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    IdServiceUnRegCredMgr();
 }
 } // namespace OHOS

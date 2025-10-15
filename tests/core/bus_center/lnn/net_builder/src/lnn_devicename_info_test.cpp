@@ -59,6 +59,7 @@ void LNNDeviceNameInfoTest::TearDown() { }
  * @tc.name: ON_RECEIVE_DEVICE_NAME_TEST_001
  * @tc.desc: on receive device name test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NAME_TEST_001, TestSize.Level1)
@@ -91,6 +92,7 @@ HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NAME_TEST_001, TestSize.Level1
  * @tc.name: ON_RECEIVE_DEVICE_NICK_NAME_TEST_001
  * @tc.desc: on receive device nick name test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NICK_NAME_TEST_001, TestSize.Level1)
@@ -118,6 +120,7 @@ HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NICK_NAME_TEST_001, TestSize.L
  * @tc.name: LNN_SYNC_DEVICE_NAME_TEST_001
  * @tc.desc: lnn sync device name test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
@@ -149,6 +152,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
  * @tc.name: NICK_NAME_MSG_PROC_TEST_001
  * @tc.desc: nick name msg proc test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, NICK_NAME_MSG_PROC_TEST_001, TestSize.Level1)
@@ -200,6 +204,7 @@ HWTEST_F(LNNDeviceNameInfoTest, NICK_NAME_MSG_PROC_TEST_001, TestSize.Level1)
  * @tc.name: NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001
  * @tc.desc: notify device display name change test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, TestSize.Level1)
@@ -223,6 +228,7 @@ HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, Test
  * @tc.name: LNN_INIT_DEVICE_NAME_TEST_001
  * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_001, TestSize.Level1)
@@ -237,6 +243,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_001, TestSize.Level1)
  * @tc.name: LNN_INIT_DEVICE_NAME_TEST_002
  * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_002, TestSize.Level1)
@@ -251,6 +258,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_002, TestSize.Level1)
  * @tc.name: LNN_SET_LOCAL_DEVICE_NAME_TEST_001
  * @tc.desc: LnnSetLocalDeviceName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_LOCAL_DEVICE_NAME_TEST_001, TestSize.Level1)
@@ -291,6 +299,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_LOCAL_DEVICE_NAME_TEST_001, TestSize.Lev
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001
  * @tc.desc: lnn Async device name test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001, TestSize.Level1)
@@ -327,6 +336,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001, TestSize.L
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_001
  * @tc.desc: LnnAsyncDeviceNameDelay test get info failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_001, TestSize.Level1)
@@ -352,6 +362,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_001, TestSize.L
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002
  * @tc.desc: LnnAsyncDeviceNameDelay test send sync info failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002, TestSize.Level1)
@@ -377,6 +388,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002, TestSize.L
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003
  * @tc.desc: LnnAsyncDeviceNameDelay test get nodeInfo success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003, TestSize.Level1)
@@ -403,6 +415,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003, TestSize.L
  * @tc.name: LNN_SET_DISPLAY_NAME_TEST_001
  * @tc.desc: LnnSetDisplayName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_DISPLAY_NAME_TEST_001, TestSize.Level1)

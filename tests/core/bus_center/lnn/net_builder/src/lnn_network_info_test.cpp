@@ -115,12 +115,16 @@ HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, LnnGetBasicInfoByUdid)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(serviceMock, LnnNotifyBasicInfoChanged).WillRepeatedly(Return());
     UpdateNetworkInfo(UUID);
     UpdateNetworkInfo(UUID);
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_OK);
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_OK);
 }
 
@@ -129,6 +133,7 @@ HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)
  * @tc.desc: test ConvertMsgToCapability
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_CAPABILITY_TEST_001, TestSize.Level1)
 {
@@ -155,6 +160,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_CAPABILITY_TEST_001, TestSize.Level1
  * @tc.desc: test IsP2pAvailable
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
 {
@@ -189,6 +195,7 @@ HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
  * @tc.desc: test WifiStateEventHandler
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_002, TestSize.Level1)
 {
@@ -214,6 +221,7 @@ HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_002, TestSize.Level1)
  * @tc.desc: test BtStateChangeEventHandler
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Level1)
 {
@@ -260,6 +268,7 @@ HWTEST_F(LNNNetworkInfoTest, BT_STATE_CHANGE_EVENT_HANDLER_TEST_001, TestSize.Le
  * @tc.desc: test ConvertCapabilityToMsg
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1)
 {
@@ -283,6 +292,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1
  * @tc.desc: test IsNeedToSend
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, IS_NEED_TO_SEND_TEST_001, TestSize.Level1)
 {
@@ -329,6 +339,7 @@ HWTEST_F(LNNNetworkInfoTest, IS_NEED_TO_SEND_TEST_001, TestSize.Level1)
  * @tc.desc: test GetNetworkCapability
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, GET_NETWORK_CAPABILITY_TEST_001, TestSize.Level1)
 {
@@ -367,6 +378,7 @@ HWTEST_F(LNNNetworkInfoTest, GET_NETWORK_CAPABILITY_TEST_001, TestSize.Level1)
  * @tc.desc: test IsSupportApCoexist
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, IS_SUPPORT_AP_COEXIST_TEST_001, TestSize.Level1)
 {
@@ -381,6 +393,7 @@ HWTEST_F(LNNNetworkInfoTest, IS_SUPPORT_AP_COEXIST_TEST_001, TestSize.Level1)
  * @tc.desc: test ConvertMsgToUserId
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USER_ID_TEST_001, TestSize.Level1)
 {
@@ -398,6 +411,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USER_ID_TEST_001, TestSize.Level1)
  * @tc.desc: test OnReceiveUserIdSyncInfoMsg
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, ON_RECEIVE_USER_ID_SYNCINFO_MSG_TEST_001, TestSize.Level1)
 {
@@ -428,6 +442,7 @@ HWTEST_F(LNNNetworkInfoTest, ON_RECEIVE_USER_ID_SYNCINFO_MSG_TEST_001, TestSize.
  * @tc.desc: test OnLnnProcessUserChangeMsgDelay
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, ON_LNN_PROCESS_USER_CHANGE_MSG_DELAY_TEST_001, TestSize.Level1)
 {
@@ -446,6 +461,7 @@ HWTEST_F(LNNNetworkInfoTest, ON_LNN_PROCESS_USER_CHANGE_MSG_DELAY_TEST_001, Test
  * @tc.desc: test LnnAsyncSendUserId
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, LNN_ASYNC_SEND_USER_ID_TEST_001, TestSize.Level1)
 {
@@ -480,6 +496,7 @@ HWTEST_F(LNNNetworkInfoTest, LNN_ASYNC_SEND_USER_ID_TEST_001, TestSize.Level1)
  * @tc.desc: test DoSendUserId
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, DO_SEND_USER_ID_TEST_001, TestSize.Level1)
 {
@@ -514,6 +531,7 @@ HWTEST_F(LNNNetworkInfoTest, DO_SEND_USER_ID_TEST_001, TestSize.Level1)
  * @tc.desc: test ConvertUserIdToMsg
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_USER_ID_TO_MSG_TEST_001, TestSize.Level1)
 {
@@ -525,6 +543,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_USER_ID_TO_MSG_TEST_001, TestSize.Level1)
  * @tc.desc: test NotifyRemoteDevOffLineByUserId
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_001, TestSize.Level1)
 {
@@ -542,6 +561,7 @@ HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_001, Test
  * @tc.desc: test NotifyRemoteDevOffLineByUserId
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_002, TestSize.Level1)
 {
@@ -559,6 +579,7 @@ HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_002, Test
  * @tc.desc: test NotifyRemoteDevOffLineByUserId
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_003, TestSize.Level1)
 {
@@ -576,6 +597,7 @@ HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_003, Test
  * @tc.desc: test IsSupportApCoexist
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, IS_SUPPORT_AP_COEXIST_TEST_002, TestSize.Level1)
 {
@@ -590,6 +612,7 @@ HWTEST_F(LNNNetworkInfoTest, IS_SUPPORT_AP_COEXIST_TEST_002, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId with valid input.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_001, TestSize.Level1)
 {
@@ -606,6 +629,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_001, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId with all zeros in the message.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_002, TestSize.Level1)
 {
@@ -622,6 +646,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_002, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId with the first two bytes set to FF.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_003, TestSize.Level1)
 {
@@ -637,6 +662,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_003, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId with the last two bytes set to FF.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_004, TestSize.Level1)
 {
@@ -652,6 +678,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_004, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId with len one less than BITLEN.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_005, TestSize.Level1)
 {
@@ -667,6 +694,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_005, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId with userId as NULL.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_006, TestSize.Level1)
 {
@@ -681,6 +709,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_006, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId with msg as NULL.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_007, TestSize.Level1)
 {
@@ -695,6 +724,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_007, TestSize.Level1)
  * @tc.desc: Test case for ConvertMsgToUserId and OnReceiveUserIdSyncInfoMsg with valid input.
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_008, TestSize.Level1)
 {
@@ -729,6 +759,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_008, TestSize.Level1)
  * @tc.desc: Test LnnProcessUserChangeMsg with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, LnnProcessUserChangeMsg_Test_001, TestSize.Level1)
 {
@@ -748,6 +779,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnProcessUserChangeMsg_Test_001, TestSize.Level1)
  * @tc.desc: Test OnLnnProcessUserChangeMsgDelay with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, OnLnnProcessUserChangeMsgDelay_Test_001, TestSize.Level1)
 {
@@ -765,6 +797,7 @@ HWTEST_F(LNNNetworkInfoTest, OnLnnProcessUserChangeMsgDelay_Test_001, TestSize.L
  * @tc.desc: Test LnnAsyncSendUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_001, TestSize.Level1)
 {
@@ -783,6 +816,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_001, TestSize.Level1)
  * @tc.desc: Test LnnAsyncSendUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
 {
@@ -821,6 +855,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
  * @tc.desc: Test DoSendUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_001, TestSize.Level1)
 {
@@ -857,6 +892,7 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_001, TestSize.Level1)
  * @tc.desc: Test DoSendUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_002, TestSize.Level1)
 {
@@ -881,6 +917,7 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_002, TestSize.Level1)
  * @tc.desc: Test DoSendUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_003, TestSize.Level1)
 {
@@ -906,6 +943,7 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_003, TestSize.Level1)
  * @tc.desc: Test DoSendUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_004, TestSize.Level1)
 {
@@ -966,6 +1004,7 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_005, TestSize.Level1)
  * @tc.desc: Test DoSendUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require: LnnAsyncCallbackDelayHelper return SOFTBUS_INVALID_PARAM
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_006, TestSize.Level1)
 {
@@ -999,6 +1038,7 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_006, TestSize.Level1)
  * @tc.desc: TestNotifyRemoteDevOffLineByUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_001, TestSize.Level1)
 {
@@ -1029,6 +1069,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_001, TestSize.L
  * @tc.desc: TestNotifyRemoteDevOffLineByUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_002, TestSize.Level1)
 {
@@ -1057,6 +1098,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_002, TestSize.L
  * @tc.desc: TestNotifyRemoteDevOffLineByUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_003, TestSize.Level1)
 {
@@ -1088,6 +1130,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_003, TestSize.L
  * @tc.desc: TestNotifyRemoteDevOffLineByUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_004, TestSize.Level1)
 {
@@ -1118,6 +1161,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_004, TestSize.L
  * @tc.desc: TestNotifyRemoteDevOffLineByUserId with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_005, TestSize.Level1)
 {
@@ -1148,6 +1192,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_005, TestSize.L
  * @tc.desc: TestConvertUserIdToMsg with all possible conditions
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, ConvertUserIdToMsg_Test_001, TestSize.Level1)
 {
@@ -1167,12 +1212,12 @@ static HmlCapabilityCode GetHmlCapabilityCodeFunc1(void)
 
 static HmlCapabilityCode GetHmlCapabilityCodeFunc2(void)
 {
-    return CONN_HML_CAP_UNKNOWN;
+    return CONN_HML_NOT_SUPPORT;
 }
 
 static HmlCapabilityCode GetHmlCapabilityCodeFunc3(void)
 {
-    return CONN_HML_NOT_SUPPORT;
+    return CONN_HML_CAP_UNKNOWN;
 }
 
 static VspCapabilityCode GetVspCapabilityCodeFunc1(void)
@@ -1195,6 +1240,7 @@ static VspCapabilityCode GetVspCapabilityCodeFunc3(void)
  * @tc.desc: GetEnhancedFLFeature test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, GetEnhancedFLFeature_Test_001, TestSize.Level1)
 {
@@ -1230,9 +1276,10 @@ HWTEST_F(LNNNetworkInfoTest, GetEnhancedFLFeature_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: UpdateHmlStaticCap_Test_001
- * @tc.desc: UpdateHmlStaticCap test
+ * @tc.desc: UpdateHmlStaticCap test get hmlCap failed
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_001, TestSize.Level1)
 {
@@ -1253,20 +1300,41 @@ HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_001, TestSize.Level1)
         .WillOnce(Return(&invalidManager));
     ret = UpdateHmlStaticCap();
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
-    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+}
+
+/*
+ * @tc.name: UpdateHmlStaticCap_Test_002
+ * @tc.desc: UpdateHmlStaticCap test get hmlCap success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     struct WifiDirectManager manager = {
         .getHmlCapabilityCode = GetHmlCapabilityCodeFunc1,
     };
     EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(netLedgerMock, LnnSetStaticNetCap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = UpdateHmlStaticCap();
     EXPECT_EQ(ret, SOFTBUS_OK);
+
     manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc2,
-    ret = UpdateHmlStaticCap();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc3,
+    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = UpdateHmlStaticCap();
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc3,
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1274,6 +1342,7 @@ HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_001, TestSize.Level1)
  * @tc.desc: WifiServiceOnStartHandle test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, WifiServiceOnStartHandle_Test_001, TestSize.Level1)
 {
@@ -1282,29 +1351,12 @@ HWTEST_F(LNNNetworkInfoTest, WifiServiceOnStartHandle_Test_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(nullptr));
     EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
     info.event = LNN_EVENT_WIFI_SERVICE_START;
-    uint32_t staticNetCap1 = 0;
-    uint32_t staticNetCap2 = 1;
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_CALL(netLedgerMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
-    struct WifiDirectManager invalidManager = {
-        .getHmlCapabilityCode = nullptr,
-    };
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillOnce(Return(&invalidManager)).WillOnce(Return(&invalidManager));
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info)
-        .WillOnce(DoAll(SetArgPointee<1>(staticNetCap1), Return(SOFTBUS_OK)));
-    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
     struct WifiDirectManager manager = {
-        .getHmlCapabilityCode = GetHmlCapabilityCodeFunc2,
         .getVspCapabilityCode = GetVspCapabilityCodeFunc2,
     };
-    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info)
-        .WillOnce(DoAll(SetArgPointee<1>(staticNetCap1), Return(SOFTBUS_OK)))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(staticNetCap2), Return(SOFTBUS_OK)));
-    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
     EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
 }
 
@@ -1313,6 +1365,7 @@ HWTEST_F(LNNNetworkInfoTest, WifiServiceOnStartHandle_Test_001, TestSize.Level1)
  * @tc.desc: LnnSetNetBandCapability test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkInfoTest, LnnSetNetBandCapability_Test_001, TestSize.Level1)
 {

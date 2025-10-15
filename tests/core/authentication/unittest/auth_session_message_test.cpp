@@ -75,6 +75,7 @@ void AuthSessionMessageTest::TearDown() { }
  * @tc.name: PackFastAuthValue_TEST_001
  * @tc.desc: PackFastAuthValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
@@ -113,6 +114,7 @@ HWTEST_F(AuthSessionMessageTest, PackFastAuthValue_TEST_001, TestSize.Level1)
  * @tc.name: GenerateUdidShortHash_TEST_001
  * @tc.desc: GenerateUdidShortHash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, GenerateUdidShortHash_TEST_001, TestSize.Level1)
@@ -127,6 +129,7 @@ HWTEST_F(AuthSessionMessageTest, GenerateUdidShortHash_TEST_001, TestSize.Level1
  * @tc.name: GetUdidOrShortHash_TEST_001
  * @tc.desc: GetUdidOrShortHash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, GetUdidOrShortHash_TEST_001, TestSize.Level1)
@@ -155,6 +158,7 @@ HWTEST_F(AuthSessionMessageTest, GetUdidOrShortHash_TEST_001, TestSize.Level1)
  * @tc.name: GetEnhancedP2pAuthKey_TEST_001
  * @tc.desc: GetEnhancedP2pAuthKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, GetEnhancedP2pAuthKey_TEST_001, TestSize.Level1)
@@ -184,6 +188,7 @@ HWTEST_F(AuthSessionMessageTest, GetEnhancedP2pAuthKey_TEST_001, TestSize.Level1
  * @tc.name: VerifySessionInfoIdType_TEST_001
  * @tc.desc: VerifySessionInfoIdType test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, VerifySessionInfoIdType_TEST_001, TestSize.Level1)
@@ -224,6 +229,7 @@ HWTEST_F(AuthSessionMessageTest, VerifySessionInfoIdType_TEST_001, TestSize.Leve
  * @tc.name: PackDeviceIdJson_TEST_001
  * @tc.desc: PackDeviceIdJson test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
@@ -246,6 +252,7 @@ HWTEST_F(AuthSessionMessageTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
  * @tc.name: UnpackWifiSinglePassInfo_TEST_001
  * @tc.desc: UnpackWifiSinglePassInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UnpackWifiSinglePassInfo_TEST_001, TestSize.Level1)
@@ -268,6 +275,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiSinglePassInfo_TEST_001, TestSize.Lev
  * @tc.name: UnPackBtDeviceIdV1_TEST_001
  * @tc.desc: UnPackBtDeviceIdV1 test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UnPackBtDeviceIdV1_TEST_001, TestSize.Level1)
@@ -286,6 +294,7 @@ HWTEST_F(AuthSessionMessageTest, UnPackBtDeviceIdV1_TEST_001, TestSize.Level1)
  * @tc.name: SetExchangeIdTypeAndValue_TEST_001
  * @tc.desc: SetExchangeIdTypeAndValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Level1)
@@ -323,6 +332,7 @@ HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Le
  * @tc.name: UnpackDeviceIdJson_TEST_001
  * @tc.desc: UnpackDeviceIdJson test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
@@ -366,6 +376,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
  * @tc.name: PackCommonDevInfo_TEST_001
  * @tc.desc: PackCommonDevInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
@@ -393,6 +404,7 @@ HWTEST_F(AuthSessionMessageTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
  * @tc.name: UnpackCipherRpaInfo_TEST_001
  * @tc.desc: UnpackCipherRpaInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
@@ -423,6 +435,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
  * @tc.name: UnpackWifiDirectInfo_TEST_001
  * @tc.desc: UnpackWifiDirectInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
@@ -466,6 +479,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
  * @tc.name: CheckBusVersion_TEST_001
  * @tc.desc: CheckBusVersion test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
@@ -496,6 +510,7 @@ HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
  * @tc.name: PackDeviceInfoBtV1_TEST_001
  * @tc.desc: PackDeviceInfoBtV1 test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
@@ -522,6 +537,7 @@ HWTEST_F(AuthSessionMessageTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
  * @tc.name: UpdatePeerDeviceName_TEST_001
  * @tc.desc: UpdatePeerDeviceName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UpdatePeerDeviceName_TEST_001, TestSize.Level1)
@@ -557,6 +573,7 @@ HWTEST_F(AuthSessionMessageTest, UpdatePeerDeviceName_TEST_001, TestSize.Level1)
  * @tc.name: ProcessDeviceIdMessage_TEST_001
  * @tc.desc: ProcessDeviceIdMessage test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, ProcessDeviceIdMessage_TEST_001, TestSize.Level1)
@@ -578,6 +595,7 @@ HWTEST_F(AuthSessionMessageTest, ProcessDeviceIdMessage_TEST_001, TestSize.Level
  * @tc.name: UnpackDeviceInfoMessage_TEST_001
  * @tc.desc: UnpackDeviceInfoMessage test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Level1)
@@ -606,6 +624,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Leve
  * @tc.name: IsDeviceMessagePacket_TEST_001
  * @tc.desc: IsDeviceMessagePacket test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, IsDeviceMessagePacket_TEST_001, TestSize.Level1)
@@ -623,6 +642,7 @@ HWTEST_F(AuthSessionMessageTest, IsDeviceMessagePacket_TEST_001, TestSize.Level1
  * @tc.name: PACK_FAST_AUTH_VALUE_TEST_001
  * @tc.desc: Pack fast auth value test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
@@ -641,6 +661,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
  * @tc.name: CHECK_BUS_VERSION_TEST_001
  * @tc.desc: check bus version test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
@@ -699,6 +720,7 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
  * @tc.name: POST_BT_V1_DEVID_TEST_001
  * @tc.desc: post bt v1 devid test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
@@ -722,6 +744,7 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
  * @tc.name: IS_EMPTY_SHORT_HASH_STR_TEST_001
  * @tc.desc: IsEmptyShortHashStr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Level1)
@@ -749,6 +772,7 @@ HWTEST_F(AuthSessionMessageTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Leve
  * @tc.name: GET_LOCAL_UDISHASH_TEST_001
  * @tc.desc: GetLocalUdidHash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, GET_LOCAL_UDISHASH_TEST_001, TestSize.Level1)
@@ -761,6 +785,7 @@ HWTEST_F(AuthSessionMessageTest, GET_LOCAL_UDISHASH_TEST_001, TestSize.Level1)
  * @tc.name: UPDATE_LOCAL_AUTH_STATE_TEST_001
  * @tc.desc: UpdateLocalAuthState test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, UPDATE_LOCAL_AUTH_STATE_TEST_001, TestSize.Level1)
@@ -786,6 +811,7 @@ HWTEST_F(AuthSessionMessageTest, UPDATE_LOCAL_AUTH_STATE_TEST_001, TestSize.Leve
  * @tc.name: PACK_FAST_AUTH_VALUE_TEST_002
  * @tc.desc: PackFastAuthValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
@@ -805,6 +831,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
  * @tc.name: GET_UDID_SHORT_HASH_TEST_001
  * @tc.desc: GetUdidShortHash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, GET_UDID_SHORT_HASH_TEST_001, TestSize.Level1)
@@ -836,6 +863,7 @@ HWTEST_F(AuthSessionMessageTest, GET_UDID_SHORT_HASH_TEST_001, TestSize.Level1)
  * @tc.name: PACK_NORMALIZED_KEY_VALUE_TEST_001
  * @tc.desc: PackNormalizedKeyValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
@@ -875,6 +903,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
  * @tc.name: PARSE_NORMALIZED_KEY_VALUE_TEST_001
  * @tc.desc: ParseNormalizedKeyValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
@@ -896,6 +925,7 @@ HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
  * @tc.name: PACK_DEVICE_JSON_INFO_TEST_001
  * @tc.desc: PackDeviceJsonInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
@@ -931,6 +961,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1
  * @tc.name: PACK_DEVICE_INFO_MESSAGE_TEST_001
  * @tc.desc: PackDeviceInfoMessage test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
@@ -952,6 +983,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1
  * @tc.name: GET_DUMP_SESSIONKEY_LIST_TEST_001
  * @tc.desc: GetDumpSessionKeyList test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionMessageTest, GET_DUMP_SESSIONKEY_LIST_TEST_001, TestSize.Level1)

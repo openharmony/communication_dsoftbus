@@ -1418,7 +1418,9 @@ int32_t P2pDirectChannelInit(void)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set sessionkey cb fail");
 
     ret = LnnRegisterEventHandler(LNN_EVENT_HA_LEAVE_META_NODE, TransStopP2pListenerHandle);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set HA leave Meta handle fail.");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "set HA leave Meta handle fail.");
+    }
 
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnP2pVerifyMsgReceived,

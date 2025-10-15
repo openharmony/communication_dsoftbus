@@ -202,7 +202,7 @@ static LnnLaneManager g_laneManagerApplyFail = {
     .lnnCancelLane = TestLnnCancelLaneFail,
 };
 
-/**
+/*
  * @tc.name: TransReqLanePendingInit001
  * @tc.desc: test TransReqLanePendingInit
  * @tc.type: FUNC
@@ -222,7 +222,7 @@ HWTEST_F(TransLanePendingTest, TransReqLanePendingInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransAsyncReqLanePendingInit001
  * @tc.desc: test TransAsyncReqLanePendingInit
  * @tc.type: FUNC
@@ -244,7 +244,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncReqLanePendingInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransSocketLaneMgrInit001
  * @tc.desc: test TransSocketLaneMgrInit
  * @tc.type: FUNC
@@ -266,7 +266,7 @@ HWTEST_F(TransLanePendingTest, TransSocketLaneMgrInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransFreeLanePendingInit001
  * @tc.desc: test TransFreeLanePendingInit
  * @tc.type: FUNC
@@ -288,7 +288,7 @@ HWTEST_F(TransLanePendingTest, TransFreeLanePendingInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: DestroyAsyncReqItemParam001
  * @tc.desc: test DestroyAsyncReqItemParam
  * @tc.type: FUNC
@@ -324,7 +324,7 @@ HWTEST_F(TransLanePendingTest, DestroyAsyncReqItemParam001, TestSize.Level1)
     SoftBusFree(param);
 }
 
-/**
+/*
  * @tc.name: TransGetConnectOptByConnInfo001
  * @tc.desc: test TransGetConnectOptByConnInfo
  * @tc.type: FUNC
@@ -378,7 +378,7 @@ HWTEST_F(TransLanePendingTest, TransGetConnectOptByConnInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetLaneInfo001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -397,7 +397,7 @@ HWTEST_F(TransLanePendingTest, TransGetLaneInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetLaneInfo002
  * @tc.desc: Should return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL when state is CORE_SESSION_STATE_CANCELLING
  * @tc.type: FUNC
@@ -458,7 +458,7 @@ HWTEST_F(TransLanePendingTest, TransGetLaneInfo002, TestSize.Level1)
     newParam = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfoByOption001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -477,7 +477,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByOption001, TestSize.Level1
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfoByOption002
  * @tc.desc: Should return SOFTBUS_TRANS_GET_LANE_INFO_ERR when GetLaneManager is nullptr
  * @tc.type: FUNC
@@ -532,7 +532,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByOption001, TestSize.Level1
     newParam = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfoByQos001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -553,7 +553,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfoByQos002
  * @tc.desc: Should return SOFTBUS_TRANS_GET_LANE_INFO_ERR when GetLaneManager is nullptr
  * @tc.type: FUNC
@@ -609,9 +609,9 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos001, TestSize.Level1)
     newParam = nullptr;
 }
 
-/**
+/*
  * @tc.name: BuildTransEventExtra001
- * @tc.desc:
+ * @tc.desc: BuildTransEventExtra test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -628,9 +628,9 @@ HWTEST_F(TransLanePendingTest, BuildTransEventExtra001, TestSize.Level1)
     param = nullptr;
 }
 
-/**
+/*
  * @tc.name: CallbackOpenChannelFailed001
- * @tc.desc:
+ * @tc.desc: CallbackOpenChannelFailed test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -646,9 +646,9 @@ HWTEST_F(TransLanePendingTest, CallbackOpenChannelFailed001, TestSize.Level1)
     param = nullptr;
 }
 
-/**
+/*
  * @tc.name: CopyAsyncReqItemSessionParamIds001
- * @tc.desc:
+ * @tc.desc: CopyAsyncReqItemSessionParamIds test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -671,9 +671,9 @@ HWTEST_F(TransLanePendingTest, CopyAsyncReqItemSessionParamIds001, TestSize.Leve
     param = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransGetLaneReqItemParamByLaneHandle001
- * @tc.desc:
+ * @tc.desc: TransGetLaneReqItemParamByLaneHandle test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -707,9 +707,9 @@ HWTEST_F(TransLanePendingTest, TransGetLaneReqItemParamByLaneHandle001, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: RecordFailOpenSessionKpi001
- * @tc.desc:
+ * @tc.desc: CopyAsyncReqItemSessionParamIds test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -728,9 +728,9 @@ HWTEST_F(TransLanePendingTest, RecordFailOpenSessionKpi001, TestSize.Level1)
     param = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAsyncOpenChannelProc001
- * @tc.desc:
+ * @tc.desc: TransAsyncOpenChannelProc test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -772,9 +772,9 @@ HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProc001, TestSize.Level1)
     TransAsyncSetFirstTokenInfo(firstTokenId, &appInfo, &extra);
 }
 
-/**
+/*
  * @tc.name: CheckSocketChannelState001
- * @tc.desc:
+ * @tc.desc: CheckSocketChannelState test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -807,9 +807,9 @@ HWTEST_F(TransLanePendingTest, CheckSocketChannelState001, TestSize.Level1)
     newParam = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransOnAsyncLaneSuccess001
- * @tc.desc:
+ * @tc.desc: TransOnAsyncLaneSuccess test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -852,9 +852,9 @@ HWTEST_F(TransLanePendingTest, TransOnAsyncLaneSuccess001, TestSize.Level1)
     newParam = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransOnAsyncLaneFail001
- * @tc.desc:
+ * @tc.desc: TransOnAsyncLaneFail test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -892,9 +892,9 @@ HWTEST_F(TransLanePendingTest, TransOnAsyncLaneFail001, TestSize.Level1)
     newParam = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAuthWithParaAddLaneReqToList001
- * @tc.desc:
+ * @tc.desc: TransAuthWithParaAddLaneReqToList test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -920,9 +920,9 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaAddLaneReqToList001, TestSize.Le
     g_authWithParaAsyncReqLaneList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAuthWithParaAddLaneReqToList002
- * @tc.desc:
+ * @tc.desc: TransAuthWithParaAddLaneReqToList test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -944,9 +944,9 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaAddLaneReqToList002, TestSize.Le
     g_authWithParaAsyncReqLaneList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAuthWithParaDelLaneReqById001
- * @tc.desc:
+ * @tc.desc: TransAuthWithParaDelLaneReqById test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -974,9 +974,9 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaDelLaneReqById001, TestSize.Leve
     g_authWithParaAsyncReqLaneList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransUpdateAuthWithParaLaneConnInfo001
- * @tc.desc:
+ * @tc.desc: TransUpdateAuthWithParaLaneConnInfo test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1007,9 +1007,9 @@ HWTEST_F(TransLanePendingTest, TransUpdateAuthWithParaLaneConnInfo001, TestSize.
     g_authWithParaAsyncReqLaneList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAuthWithParaGetLaneReqByLaneReqId001
- * @tc.desc:
+ * @tc.desc: TransAuthWithParaGetLaneReqByLaneReqId test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1043,9 +1043,9 @@ HWTEST_F(TransLanePendingTest, TransAuthWithParaGetLaneReqByLaneReqId001, TestSi
     g_authWithParaAsyncReqLaneList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransWaitingFreeCallback001
- * @tc.desc:
+ * @tc.desc: TransWaitingFreeCallback test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1070,9 +1070,9 @@ HWTEST_F(TransLanePendingTest, TransWaitingFreeCallback001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransWaitingFreeLane001
- * @tc.desc:
+ * @tc.desc: TransWaitingFreeLane test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1107,9 +1107,9 @@ HWTEST_F(TransLanePendingTest, TransWaitingFreeLane001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransFreeLaneByLaneHandle001
- * @tc.desc:
+ * @tc.desc: TransFreeLaneByLaneHandle test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1134,9 +1134,9 @@ HWTEST_F(TransLanePendingTest, TransFreeLaneByLaneHandle001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransUpdateFreeLaneStatus001
- * @tc.desc:
+ * @tc.desc: TransUpdateFreeLaneStatus test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1160,9 +1160,9 @@ HWTEST_F(TransLanePendingTest, TransUpdateFreeLaneStatus001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnLaneFreeSuccess001
- * @tc.desc:
+ * @tc.desc: TransOnLaneFreeSuccess test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1178,9 +1178,9 @@ HWTEST_F(TransLanePendingTest, TransOnLaneFreeSuccess001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: IsShareSession001
- * @tc.desc:
+ * @tc.desc: IsShareSession test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1194,9 +1194,9 @@ HWTEST_F(TransLanePendingTest, IsShareSession001, TestSize.Level1)
     EXPECT_EQ(ret, true);
 }
 
-/**
+/*
  * @tc.name: IsDslSession001
- * @tc.desc:
+ * @tc.desc: IsDslSession test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1219,9 +1219,9 @@ HWTEST_F(TransLanePendingTest, IsDslSession001, TestSize.Level1)
     EXPECT_EQ(ret, false);
 }
 
-/**
+/*
  * @tc.name: PeerDeviceIsLegacyOs001
- * @tc.desc:
+ * @tc.desc: PeerDeviceIsLegacyOs test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1243,9 +1243,9 @@ HWTEST_F(TransLanePendingTest, PeerDeviceIsLegacyOs001, TestSize.Level1)
     EXPECT_EQ(ret, true);
 }
 
-/**
+/*
  * @tc.name: GetAllocInfoBySessionParam001
- * @tc.desc:
+ * @tc.desc: GetAllocInfoBySessionParam test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1279,9 +1279,9 @@ HWTEST_F(TransLanePendingTest, GetAllocInfoBySessionParam001, TestSize.Level1)
     param = nullptr;
 }
 
-/**
+/*
  * @tc.name: GetRequestOptionBySessionParam001
- * @tc.desc:
+ * @tc.desc: GetRequestOptionBySessionParam test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1325,9 +1325,9 @@ HWTEST_F(TransLanePendingTest, GetRequestOptionBySessionParam001, TestSize.Level
     param = nullptr;
 }
 
-/**
+/*
  * @tc.name: CancelLaneOnWaitLaneState001
- * @tc.desc:
+ * @tc.desc: CancelLaneOnWaitLaneState test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1344,9 +1344,9 @@ HWTEST_F(TransLanePendingTest, CancelLaneOnWaitLaneState001, TestSize.Level1)
     CancelLaneOnWaitLaneState(laneHandle, true);
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfo001
- * @tc.desc:
+ * @tc.desc: TransAsyncGetLaneInfo test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1366,9 +1366,9 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfo002
- * @tc.desc:
+ * @tc.desc: TransAsyncGetLaneInfo test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1410,9 +1410,9 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfo002, TestSize.Level1)
     param = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransCancelLaneItemCondByLaneHandle001
- * @tc.desc:
+ * @tc.desc: TransCancelLaneItemCondByLaneHandle test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1437,7 +1437,7 @@ HWTEST_F(TransLanePendingTest, TransCancelLaneItemCondByLaneHandle001, TestSize.
 }
 
 
-/**
+/*
  * @tc.name: TransNotifyLaneQosEventTest001
  * @tc.desc: TransNotifyLaneQosEvent test
  * @tc.type: FUNC

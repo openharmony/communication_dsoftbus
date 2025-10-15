@@ -52,6 +52,7 @@ void AuthSessionJsonMockTest::TearDown() { }
  * @tc.name: GET_ENHANCED_P2P_AUTH_KEY_TEST_001
  * @tc.desc: GetEnhancedP2pAuthKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, GET_ENHANCED_P2P_AUTH_KEY_TEST_001, TestSize.Level1)
@@ -88,6 +89,7 @@ HWTEST_F(AuthSessionJsonMockTest, GET_ENHANCED_P2P_AUTH_KEY_TEST_001, TestSize.L
  * @tc.name: PACK_NORMALIZED_KEY_VALUE_TEST_001
  * @tc.desc: PackNormalizedKeyValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
@@ -137,6 +139,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
  * @tc.name: PARSE_NORMALIZED_KEY_VALUE_TEST_001
  * @tc.desc: ParseNormalizedKeyValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
@@ -176,6 +179,7 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.
  * @tc.name: PARSE_NORMALIZE_DATA_TEST_001
  * @tc.desc: ParseNormalizeData test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZE_DATA_TEST_001, TestSize.Level1)
@@ -211,6 +215,7 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZE_DATA_TEST_001, TestSize.Level1
  * @tc.name: VERIFY_SESSION_INFO_ID_TYPE_TEST_001
  * @tc.desc: VerifySessionInfoIdType test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, VERIFY_SESSION_INFO_ID_TYPE_TEST_001, TestSize.Level1)
@@ -253,6 +258,7 @@ HWTEST_F(AuthSessionJsonMockTest, VERIFY_SESSION_INFO_ID_TYPE_TEST_001, TestSize
  * @tc.name: PACK_DEVICE_JSON_INFO_TEST_001
  * @tc.desc: PackDeviceJsonInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
@@ -285,6 +291,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level
  * @tc.name: PACK_NORMALIZED_DATA_TEST_001
  * @tc.desc: PackNormalizedData test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1)
@@ -329,6 +336,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1
  * @tc.name: PACK_DEVICE_ID_JSON_TEST_001
  * @tc.desc: PackDeviceIdJson test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_ID_JSON_TEST_001, TestSize.Level1)
@@ -352,6 +360,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_ID_JSON_TEST_001, TestSize.Level1)
  * @tc.name: UNPACK_WIFI_SINGLE_PASS_INFO_TEST_001
  * @tc.desc: UnpackWifiSinglePassInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_WIFI_SINGLE_PASS_INFO_TEST_001, TestSize.Level1)
@@ -380,6 +389,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_WIFI_SINGLE_PASS_INFO_TEST_001, TestSiz
  * @tc.name: VERIFY_EXCHANGE_ID_TYPE_AND_INFO_TEST_001
  * @tc.desc: VerifyExchangeIdTypeAndInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, VERIFY_EXCHANGE_ID_TYPE_AND_INFO_TEST_001, TestSize.Level1)
@@ -414,6 +424,7 @@ HWTEST_F(AuthSessionJsonMockTest, VERIFY_EXCHANGE_ID_TYPE_AND_INFO_TEST_001, Tes
  * @tc.name: SET_EXCHANGE_ID_TYPE_AND_VALUE_TEST_001
  * @tc.desc: SetExchangeIdTypeAndValue test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, SET_EXCHANGE_ID_TYPE_AND_VALUE_TEST_001, TestSize.Level1)
@@ -463,6 +474,7 @@ HWTEST_F(AuthSessionJsonMockTest, SET_EXCHANGE_ID_TYPE_AND_VALUE_TEST_001, TestS
  * @tc.name: PACK_CIPHER_RPA_INFO_TEST_001
  * @tc.desc: PackCipherRpaInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_CIPHER_RPA_INFO_TEST_001, TestSize.Level1)
@@ -503,6 +515,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CIPHER_RPA_INFO_TEST_001, TestSize.Level1
  * @tc.name: PACK_COMMON_EX_TEST_001
  * @tc.desc: PackCommonEx test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_EX_TEST_001, TestSize.Level1)
@@ -545,6 +558,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_EX_TEST_001, TestSize.Level1)
  * @tc.name: PACK_COMMON_TEST_001
  * @tc.desc: PackCommon test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_TEST_001, TestSize.Level1)
@@ -574,6 +588,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_TEST_001, TestSize.Level1)
  * @tc.name: PACK_BT_TEST_001
  * @tc.desc: PackBt test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_BT_TEST_001, TestSize.Level1)
@@ -600,6 +615,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_BT_TEST_001, TestSize.Level1)
  * @tc.name: PACK_WIFI_TEST_001
  * @tc.desc: PackWiFi test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_WIFI_TEST_001, TestSize.Level1)
@@ -626,6 +642,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_WIFI_TEST_001, TestSize.Level1)
  * @tc.name: PACK_CERTIFICATEINFO_TEST_001
  * @tc.desc: PackCertificateInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATEINFO_TEST_001, TestSize.Level1)
@@ -654,9 +671,32 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATEINFO_TEST_001, TestSize.Level1
 }
 
 /*
+ * @tc.name: PACK_CERTIFICATEINFO_TEST_002
+ * @tc.desc: credIdType is ACCOUNT_SHARED.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATEINFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillRepeatedly(Return(true));
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    char id[] = { 'a', 'b', 'c', 'd', 'e', 'f' };
+    info.credId = id;
+    int32_t ret = PackCertificateInfo(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = PackCertificateInfo(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
  * @tc.name: UNPACK_CERTIFICATEINFO_TEST_001
  * @tc.desc: UnpackCertificateInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATEINFO_TEST_001, TestSize.Level1)
@@ -691,6 +731,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATEINFO_TEST_001, TestSize.Leve
  * @tc.name: PACK_USER_ID_CHECK_SUM_TEST_001
  * @tc.desc: PackUserIdCheckSum test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_USER_ID_CHECK_SUM_TEST_001, TestSize.Level1)
@@ -716,6 +757,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_USER_ID_CHECK_SUM_TEST_001, TestSize.Leve
  * @tc.name: PACK_DEVICE_INFO_MESSAGE_TEST_001
  * @tc.desc: PackDeviceInfoMessage test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_INFO_MESSAGE_TEST_001, TestSize.Level1)
@@ -759,6 +801,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_INFO_MESSAGE_TEST_001, TestSize.Le
  * @tc.name: PackSparkCheck_TEST_001
  * @tc.desc: pack spark check test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PackSparkCheck_TEST_001, TestSize.Level1)
@@ -780,6 +823,7 @@ HWTEST_F(AuthSessionJsonMockTest, PackSparkCheck_TEST_001, TestSize.Level1)
  * @tc.name: UnpackSparkCheck_TEST_001
  * @tc.desc: unpack spark check test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UnpackSparkCheck_TEST_001, TestSize.Level1)
@@ -801,6 +845,7 @@ HWTEST_F(AuthSessionJsonMockTest, UnpackSparkCheck_TEST_001, TestSize.Level1)
  * @tc.name: GENERATE_ACCOUNT_HASH_TEST_001
  * @tc.desc: GenerateAccountHash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, GENERATE_ACCOUNT_HASH_TEST_001, TestSize.Level1)
@@ -829,6 +874,7 @@ HWTEST_F(AuthSessionJsonMockTest, GENERATE_ACCOUNT_HASH_TEST_001, TestSize.Level
  * @tc.name: PACK_DEVICE_KEY_ID_TEST_001
  * @tc.desc: PackDeviceKeyId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_KEY_ID_TEST_001, TestSize.Level1)
@@ -862,6 +908,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_KEY_ID_TEST_001, TestSize.Level1)
  * @tc.name: TRY_GET_DM_SESSION_KEY_FOR_UNPACK_TEST_001
  * @tc.desc: TryGetDmSessionKeyForUnpack test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, TRY_GET_DM_SESSION_KEY_FOR_UNPACK_TEST_001, TestSize.Level1)
@@ -891,6 +938,7 @@ HWTEST_F(AuthSessionJsonMockTest, TRY_GET_DM_SESSION_KEY_FOR_UNPACK_TEST_001, Te
  * @tc.name: UNPACK_SK_ID_TEST_001
  * @tc.desc: UnpackSKId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_SK_ID_TEST_001, TestSize.Level1)
@@ -919,6 +967,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_SK_ID_TEST_001, TestSize.Level1)
  * @tc.name: PACK_UDID_ABATEMENT_FLAG_TEST_001
  * @tc.desc: PackUDIDAbatementFlag test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_UDID_ABATEMENT_FLAG_TEST_001, TestSize.Level1)
@@ -939,6 +988,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_UDID_ABATEMENT_FLAG_TEST_001, TestSize.Le
  * @tc.name: IS_NEED_NORMALIZED_PROCESS_TEST_001
  * @tc.desc: IsNeedNormalizedProcess test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, IS_NEED_NORMALIZED_PROCESS_TEST_001, TestSize.Level1)
@@ -974,6 +1024,7 @@ HWTEST_F(AuthSessionJsonMockTest, IS_NEED_NORMALIZED_PROCESS_TEST_001, TestSize.
  * @tc.name: UNPACK_META_PTK_TEST_001
  * @tc.desc: UnpackMetaPtk test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_META_PTK_TEST_001, TestSize.Level1)
@@ -998,6 +1049,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_META_PTK_TEST_001, TestSize.Level1)
  * @tc.name: UNPACK_PTK_TEST_001
  * @tc.desc: UnpackPtk test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_PTK_TEST_001, TestSize.Level1)
@@ -1022,6 +1074,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_PTK_TEST_001, TestSize.Level1)
  * @tc.name: PACK_CERTIFICATE_INFO_TEST_001
  * @tc.desc: PackCertificateInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
@@ -1053,6 +1106,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level
  * @tc.name: UNPACK_CERTIFICATE_INFO_TEST_001
  * @tc.desc: UnpackCertificateInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
@@ -1089,6 +1143,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATE_INFO_TEST_001, TestSize.Lev
  * @tc.name: UNPACK_CERTIFICATE_INFO_TEST_002
  * @tc.desc: UnpackCertificateInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATE_INFO_TEST_002, TestSize.Level1)

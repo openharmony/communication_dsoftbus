@@ -71,6 +71,7 @@ static DeviceProfileChangeListener g_deviceProfilePara = {
  * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
  * @tc.desc: test bindType is SAME_ACCOUNT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_001, TestSize.Level1)
@@ -85,6 +86,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_001, Te
  * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
  * @tc.desc: test onDeviceProfileAdd is null
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_002, TestSize.Level1)
@@ -100,6 +102,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_002, Te
  * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
  * @tc.desc: test OnTrustDeviceProfileAdd is OnDeviceBound success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_003, TestSize.Level1)
@@ -115,6 +118,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_003, Te
  * @tc.name: ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001
  * @tc.desc: test OnTrustDeviceProfileDelete success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001, TestSize.Level1)
@@ -131,6 +135,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001,
  * @tc.name: ON_TRUST_DEVICE_PROFILE_DELETE_TEST_002
  * @tc.desc: test onDeviceProfileDeleted is null
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_002, TestSize.Level1)
@@ -147,6 +152,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_002,
  * @tc.name: ON_TRUST_DEVICE_PROFILE_UPDATE_TEST
  * @tc.desc: test OnTrustDeviceProfileUpdate is null
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_UPDATE_TEST, TestSize.Level1)
@@ -160,6 +166,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_UPDATE_TEST, Tes
  * @tc.name: ON_DEVICE_PROFILE_ADD_TEST
  * @tc.desc: test OnDeviceProfileAdd is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_ADD_TEST, TestSize.Level1)
@@ -173,6 +180,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_ADD_TEST, TestSize.Lev
  * @tc.name: ON_DEVICE_PROFILE_DELETE_TEST
  * @tc.desc: test OnDeviceProfileDelete is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_DELETE_TEST, TestSize.Level1)
@@ -186,6 +194,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_DELETE_TEST, TestSize.
  * @tc.name: ON_DEVICE_PROFILE_UPDATE_TEST
  * @tc.desc: test OnDeviceProfileUpdate is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_UPDATE_TEST, TestSize.Level1)
@@ -199,6 +208,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_UPDATE_TEST, TestSize.
  * @tc.name: ON_SERVICE_PROFILE_ADD_TEST
  * @tc.desc: test OnServiceProfileAdd is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_ADD_TEST, TestSize.Level1)
@@ -212,6 +222,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_ADD_TEST, TestSize.Le
  * @tc.name: ON_SERVICE_PROFILE_DELETE_TEST
  * @tc.desc: test OnServiceProfileDelete is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_DELETE_TEST, TestSize.Level1)
@@ -225,6 +236,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_DELETE_TEST, TestSize
  * @tc.name: ON_SERVICE_PROFILE_UPDATE_TEST
  * @tc.desc: test OnServiceProfileUpdate is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_UPDATE_TEST, TestSize.Level1)
@@ -238,6 +250,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_UPDATE_TEST, TestSize
  * @tc.name: ON_CHARACTERISTIC_PROFILE_ADD_TEST
  * @tc.desc: test OnCharacteristicProfileAdd is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_ADD_TEST, TestSize.Level1)
@@ -251,6 +264,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_ADD_TEST, Test
  * @tc.name: ON_CHARACTERISTIC_PROFILE_DELETE_TEST
  * @tc.desc: test OnCharacteristicProfileDelete is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_DELETE_TEST, TestSize.Level1)
@@ -264,6 +278,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_DELETE_TEST, T
  * @tc.name: ON_CHARACTERISTIC_PROFILE_UPDATE_TEST
  * @tc.desc: test OnCharacteristicProfileUpdate is success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_UPDATE_TEST, TestSize.Level1)
@@ -277,6 +292,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_UPDATE_TEST, T
  * @tc.name: ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST
  * @tc.desc: OnTrustDeviceProfileActive
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, TestSize.Level1)
@@ -298,6 +314,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, Tes
  * @tc.name: ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST
  * @tc.desc: OnTrustDeviceProfileInactive
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST, TestSize.Level1)
