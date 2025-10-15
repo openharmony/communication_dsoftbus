@@ -953,7 +953,7 @@ void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen
         SoftBusFree(hex);
         return;
     }
-    COMM_LOGI(COMM_UTILS, "%{public}s dump %{public}u bytes: %{public}s", message, dataLen, hex);
+    COMM_LOGI(COMM_UTILS, "%{public}s %{public}u bytes: %{public}s", message, dataLen, hex);
     SoftBusFree(hex);
 }
 
