@@ -248,7 +248,7 @@ static bool LaneLinkAddrOfDefault(const LaneLinkInfo *sourceLink, const LaneLink
     return false;
 }
 
-static bool LaneLinkAddrOfWlanP2p(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+static bool LaneLinkAddrOfSoftApP2p(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
 {
     if (sourceLink == NULL || linkInfoItem == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
@@ -279,7 +279,7 @@ static CompareLinkAddr g_linkAddrCheck[LANE_LINK_TYPE_BUTT] = {
     [LANE_HML_RAW] = LaneLinkAddrOfDefault,
     [LANE_BLE_REUSE] = LaneLinkAddrOfDefault,
     [LANE_P2P_REUSE] = LaneLinkAddrOfDefault,
-    [LANE_SOFTAP_P2P] = LaneLinkAddrOfWlanP2p,
+    [LANE_SOFTAP_P2P] = LaneLinkAddrOfSoftApP2p,
 };
 
 static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
@@ -1852,7 +1852,7 @@ static int32_t LaneLinkOfSleDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     return SOFTBUS_OK;
 }
 
-static int32_t LaneLinkOfWlanP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+static int32_t LaneLinkOfSoftApP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -1893,7 +1893,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_USB] = LaneLinkOfUsb,
     [LANE_SLE] = LaneLinkOfSle,
     [LANE_SLE_DIRECT] = LaneLinkOfSleDirect,
-    [LANE_SOFTAP_P2P] = LaneLinkOfWlanP2p,
+    [LANE_SOFTAP_P2P] = LaneLinkOfSoftApP2p,
 };
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)

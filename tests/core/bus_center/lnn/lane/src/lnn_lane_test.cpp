@@ -311,7 +311,7 @@ static void OnLaneAllocSuccessForBle(uint32_t laneHandle, const LaneConnInfo *in
     CondSignal();
 }
 
-static void OnLaneAllocSuccessForWlanP2p(uint32_t laneHandle, const LaneConnInfo *info)
+static void OnLaneAllocSuccessForSoftApP2p(uint32_t laneHandle, const LaneConnInfo *info)
 {
     (void)laneHandle;
     ASSERT_NE(info, nullptr) << "invalid connInfo";
@@ -383,8 +383,8 @@ static LaneAllocListener g_listenerCbForBle = {
     .onLaneFreeFail = OnLaneFreeFail,
 };
 
-static LaneAllocListener g_listenerCbForWlanP2p = {
-    .onLaneAllocSuccess = OnLaneAllocSuccessForWlanP2p,
+static LaneAllocListener g_listenerCbForSoftApP2p = {
+    .onLaneAllocSuccess = OnLaneAllocSuccessForSoftApP2p,
     .onLaneAllocFail = OnLaneAllocFailNoExcept3,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
@@ -2417,14 +2417,14 @@ HWTEST_F(LNNLaneMockTest, LNN_ALLOC_TARGET_LANE_TEST_03, TestSize.Level1)
     allocInfo.linkList.linkTypeNum = 1;
     allocInfo.type = LANE_TYPE_TRANS;
     SetIsNeedCondWait();
-    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForWlanP2p);
+    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
     pfnLnnEnhanceFuncList->authMetaGetIpByMetaNodeId = AuthMetaGetIpByMetaNodeId;
     pfnLnnEnhanceFuncList->authMetaGetLocalIpByMetaNodeId = nullptr;
     SetIsNeedCondWait();
-    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForWlanP2p);
+    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 }
@@ -2453,7 +2453,7 @@ HWTEST_F(LNNLaneMockTest, LNN_ALLOC_TARGET_LANE_TEST_04, TestSize.Level1)
     int32_t ret = strcpy_s(allocInfo.commInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(ret, EOK);
     SetIsNeedCondWait();
-    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForWlanP2p);
+    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     SetIsNeedCondWait();
