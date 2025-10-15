@@ -1271,7 +1271,7 @@ HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_001, TestSize.Level1)
 
 /*
 * @tc.name: GET_VALID_LANE_RESOURCE_TEST_002
-* @tc.desc: GetValidLaneResource test LANE_WLAN_P2P
+* @tc.desc: GetValidLaneResource test LANE_SOFTAP_P2P
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -1280,7 +1280,7 @@ HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_002, TestSize.Level1)
     LaneLinkInfo info = {};
     ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_WLAN_ADDR), EOK);
     ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
-    info.type = LANE_WLAN_P2P;
+    info.type = LANE_SOFTAP_P2P;
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = AddLaneResourceToPool(&info, LANE_ID_BASE, false);

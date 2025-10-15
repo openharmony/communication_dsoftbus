@@ -1645,7 +1645,7 @@ static int32_t GetAllocInfoExtBySessionParam(const SessionParam *param, LaneAllo
         return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
     allocInfo->linkList.linkTypeNum = 1;
-    allocInfo->linkList.linkType[0] = LANE_WLAN_P2P;
+    allocInfo->linkList.linkType[0] = LANE_SOFTAP_P2P;
     allocInfo->commInfo.isVirtualLink = false;
     return SOFTBUS_OK;
 }
@@ -1885,7 +1885,7 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         return SetUsbConnInfo(&(info->connInfo.usb), connOpt);
     } else if (info->type == LANE_SLE_DIRECT) {
         return SetSleDirectConnInfo(&(info->connInfo.sleDirect), connOpt);
-    } else if (info->type == LANE_WLAN_P2P) {
+    } else if (info->type == LANE_SOFTAP_P2P) {
         return SetP2pExtConnInfo(&(info->connInfo.p2p), connOpt);
     }
 
