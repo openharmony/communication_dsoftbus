@@ -2150,5 +2150,6 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceSparkCheck_Test_001, TestSize.
     EXPECT_EQ(LnnSetDLDeviceSparkCheck(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnSetDLDeviceSparkCheck(devUdid, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnSetDLDeviceSparkCheck(devUdid, sparkCheck), SOFTBUS_NOT_FIND);
+    EXPECT_EQ(LnnSetDLDeviceSparkCheck(NODE1_UDID, sparkCheck), SOFTBUS_OK);
 }
 } // namespace OHOS
