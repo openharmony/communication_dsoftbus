@@ -76,7 +76,7 @@ void ClientProxyTest::TearDown() { }
 
 /*
  * @tc.name: OnJoinLNNResult
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -100,7 +100,7 @@ HWTEST_F(ClientProxyTest, OnJoinLNNResultTest_01, TestSize.Level1)
 
 /*
  * @tc.name: OnLeaveLNNResult
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -120,7 +120,7 @@ HWTEST_F(ClientProxyTest, OnLeaveLNNResultTest_01, TestSize.Level1)
 
 /*
  * @tc.name: OnNodeOnlineStateChanged
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -143,7 +143,7 @@ HWTEST_F(ClientProxyTest, OnNodeOnlineStateChangedTest_01, TestSize.Level1)
 
 /*
  * @tc.name: OnNodeBasicInfoChanged
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -165,7 +165,7 @@ HWTEST_F(ClientProxyTest, OnNodeBasicInfoChangedTest_01, TestSize.Level1)
 
 /*
  * @tc.name: OnTimeSyncResult
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,7 +187,7 @@ HWTEST_F(ClientProxyTest, OnTimeSyncResultTest_01, TestSize.Level1)
 
 /*
  * @tc.name: OnPublishLNNResult
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -207,7 +207,7 @@ HWTEST_F(ClientProxyTest, OnPublishLNNResultTest_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnRefreshLNNResult
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -227,7 +227,7 @@ HWTEST_F(ClientProxyTest, ClientOnRefreshLNNResult_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnRefreshDeviceFound
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -251,7 +251,7 @@ HWTEST_F(ClientProxyTest, ClientOnRefreshDeviceFound_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnJoinLNNResult_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -266,7 +266,7 @@ HWTEST_F(ClientProxyTest, ClientOnJoinLNNResult_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnLeaveLNNResult_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -279,7 +279,7 @@ HWTEST_F(ClientProxyTest, ClientOnLeaveLNNResult_01, TestSize.Level1)
 
 /*
  * @tc.name: ClinetOnNodeOnlineStateChanged_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -294,7 +294,7 @@ HWTEST_F(ClientProxyTest, ClinetOnNodeOnlineStateChanged_01, TestSize.Level1)
 
 /*
  * @tc.name: ClinetOnNodeBasicInfoChanged_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -308,7 +308,7 @@ HWTEST_F(ClientProxyTest, ClinetOnNodeBasicInfoChanged_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnNodeStatusChanged_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -322,7 +322,7 @@ HWTEST_F(ClientProxyTest, ClientOnNodeStatusChanged_01, TestSize.Level1)
 
 /*
  * @tc.name: ClinetNotifyDeviceTrustedChange_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -334,7 +334,7 @@ HWTEST_F(ClientProxyTest, ClinetNotifyDeviceTrustedChange_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientNotifyHichainProofException_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -346,7 +346,7 @@ HWTEST_F(ClientProxyTest, ClientNotifyHichainProofException_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnTimeSyncResult_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -359,7 +359,7 @@ HWTEST_F(ClientProxyTest, ClientOnTimeSyncResult_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnTimeSyncResult_02
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -372,7 +372,7 @@ HWTEST_F(ClientProxyTest, ClientOnTimeSyncResult_02, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnPublishLNNResult_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -384,7 +384,7 @@ HWTEST_F(ClientProxyTest, ClientOnPublishLNNResult_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnPublishLNNResult_02
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -403,7 +403,7 @@ HWTEST_F(ClientProxyTest, ClientOnPublishLNNResult_02, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnRefreshLNNResult_02
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -415,7 +415,7 @@ HWTEST_F(ClientProxyTest, ClientOnRefreshLNNResult_02, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnRefreshDeviceFound_02
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -428,7 +428,7 @@ HWTEST_F(ClientProxyTest, ClientOnRefreshDeviceFound_02, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnDataLevelChanged_01
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -444,7 +444,7 @@ HWTEST_F(ClientProxyTest, ClientOnDataLevelChanged_01, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnDataLevelChanged_02
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -459,7 +459,7 @@ HWTEST_F(ClientProxyTest, ClientOnDataLevelChanged_02, TestSize.Level1)
 
 /*
  * @tc.name: ClientOnDataLevelChanged_03
- * @tc.desc: bus center client proxy
+ * @tc.desc: bus center client proxy.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -481,7 +481,7 @@ HWTEST_F(ClientProxyTest, ClientOnDataLevelChanged_03, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelOpened_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -502,7 +502,7 @@ HWTEST_F(ClientProxyTest, OnChannelOpened_01, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelOpenFailed_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -520,7 +520,7 @@ HWTEST_F(ClientProxyTest, OnChannelOpenFailed_01, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelLinkDown_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -539,7 +539,7 @@ HWTEST_F(ClientProxyTest, OnChannelLinkDown_01, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelClosed_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -558,7 +558,7 @@ HWTEST_F(ClientProxyTest, OnChannelClosed_01, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelMsgReceived_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -577,7 +577,7 @@ HWTEST_F(ClientProxyTest, OnChannelMsgReceived_01, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelQosEvent_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -600,7 +600,7 @@ HWTEST_F(ClientProxyTest, OnChannelQosEvent_01, TestSize.Level1)
 
 /*
  * @tc.name: OnJoinMetaNodeResult_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -622,7 +622,7 @@ HWTEST_F(ClientProxyTest, OnJoinMetaNodeResult_01, TestSize.Level1)
 
 /*
  * @tc.name: OnLeaveMetaNodeResult_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -642,7 +642,7 @@ HWTEST_F(ClientProxyTest, OnLeaveMetaNodeResult_01, TestSize.Level1)
 
 /*
  * @tc.name: OnNodeOnlineStateChanged_02
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -663,7 +663,7 @@ HWTEST_F(ClientProxyTest, OnNodeOnlineStateChangedTest_02, TestSize.Level1)
 
 /*
  * @tc.name: OnNodeBasicInfoChanged_02
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -685,7 +685,7 @@ HWTEST_F(ClientProxyTest, OnNodeBasicInfoChangedTest_02, TestSize.Level1)
 
 /*
  * @tc.name: OnNodeStatusChanged_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -709,7 +709,7 @@ HWTEST_F(ClientProxyTest, OnNodeStatusChanged_01, TestSize.Level1)
 
 /*
  * @tc.name: OnLocalNetworkIdChanged_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -729,7 +729,7 @@ HWTEST_F(ClientProxyTest, OnLocalNetworkIdChanged_01, TestSize.Level1)
 
 /*
  * @tc.name: OnNodeDeviceTrustedChange_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -751,7 +751,7 @@ HWTEST_F(ClientProxyTest, OnNodeDeviceTrustedChange_01, TestSize.Level1)
 
 /*
  * @tc.name: OnHichainProofException_01
- * @tc.desc: bus center client proxy standard
+ * @tc.desc: bus center client proxy standard.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -769,4 +769,46 @@ HWTEST_F(ClientProxyTest, OnHichainProofException_01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: ClientOnRangeResult_01
+ * @tc.desc: Test ClientOnRangeResult function with null parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnRangeResult_01, TestSize.Level0)
+{
+    int32_t ret = ClientOnRangeResult(nullptr, 0, reinterpret_cast<const RangeResultInnerInfo *>(0x1));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientOnRangeResult("validPkgName", 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ClientOnRangeResult_02
+ * @tc.desc: Test ClientOnRangeResult function when GetClientProxy returns nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnRangeResult_02, TestSize.Level0)
+{
+    RangeResultInnerInfo rangeInfo = {BLE_ADV_HB, 1.0f, "networkId", 10, nullptr};
+
+    int32_t ret = ClientOnRangeResult("validPkgName", 0, &rangeInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ClientOnRangeResult_03
+ * @tc.desc: Test ClientOnRangeResult function with valid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnRangeResult_03, TestSize.Level0)
+{
+    RangeResultInnerInfo rangeInfo = {SLE_CONN_HADM, 1.0f, "networkId", 10, nullptr};
+
+    int32_t ret = ClientOnRangeResult("validPkgName", 0, &rangeInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS
