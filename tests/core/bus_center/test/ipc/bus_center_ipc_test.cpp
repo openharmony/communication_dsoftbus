@@ -259,7 +259,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_001, TestSize.Level0)
     GroupOwnerConfig config = {};
     GroupOwnerResult result = {};
 
-    int32_t ret = LnnIpcCreateGroupOwner(nullptr, callinPid, &config, &result);
+    int32_t ret = LnnIpcCreateGroupOwner(nullptr, callingPid, &config, &result);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -275,7 +275,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_002, TestSize.Level0)
     int32_t callingPid = 1234;
     GroupOwnerResult result = {};
 
-    int32_t ret = LnnIpcCreateGroupOwner(pkgName, callinPid, nullptr, &result);
+    int32_t ret = LnnIpcCreateGroupOwner(pkgName, callingPid, nullptr, &result);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -291,7 +291,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_003, TestSize.Level0)
     int32_t callingPid = 1234;
     GroupOwnerConfig config = {};
 
-    int32_t ret = LnnIpcCreateGroupOwner(pkgName, callinPid, &config, nullptr);
+    int32_t ret = LnnIpcCreateGroupOwner(pkgName, callingPid, &config, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
