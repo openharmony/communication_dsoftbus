@@ -206,6 +206,7 @@ struct BleOption {
     uint16_t challengeCode;
     uint32_t psm;
     BleProtocolType protocol;
+    uint32_t connectTimeoutMs;
 };
 
 struct BleDirectOption {
