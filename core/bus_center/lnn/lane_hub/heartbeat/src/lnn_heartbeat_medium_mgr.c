@@ -171,7 +171,7 @@ static void UpdateCapacity(NodeInfo *nodeInfo, HbRespData *hbResp)
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI);
         if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_WIFI) &&
-            (hbResp->capabiltiy & (1 << BIT_WIFI_5G)) == 0 && (hbResp->capabiltiy & (1 << BIT_WIFI_24G)) == 0) {
+            (nodeInfo->netCapacity & (1 << BIT_WIFI_5G)) == 0 && (nodeInfo->netCapacity & (1 << BIT_WIFI_24G)) == 0) {
             (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_5G);
             (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_24G);
         }
