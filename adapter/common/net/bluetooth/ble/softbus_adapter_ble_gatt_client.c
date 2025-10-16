@@ -59,14 +59,14 @@ static void GattcConnectionStateChangedCallback(int clientId, int connectionStat
 {
     CONN_LOGI(CONN_BLE, "clientId=%{public}d, state=%{public}d, status=%{public}d", clientId, connectionState, status);
     if (connectionState != OHOS_STATE_CONNECTED && connectionState != OHOS_STATE_DISCONNECTED) {
-        CONN_LOGI(CONN_BLE, "ignore connection state");
+        CONN_LOGI(CONN_BLE, "ignore conn state");
         return;
     }
 
     SoftBusGattcCallback cb = { 0 };
     GetGattcCallback(clientId, &cb);
     if (cb.connectionStateCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "get callback failed");
+        CONN_LOGE(CONN_BLE, "get callback fail");
         return;
     }
     cb.connectionStateCallback(clientId, connectionState, status);
@@ -88,7 +88,7 @@ static void GattcSearchServiceCompleteCallback(int clientId, int status)
     SoftBusGattcCallback cb = { 0 };
     GetGattcCallback(clientId, &cb);
     if (cb.serviceCompleteCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "get callback failed");
+        CONN_LOGE(CONN_BLE, "get callback fail");
         return;
     }
     cb.serviceCompleteCallback(clientId, status);
@@ -129,7 +129,7 @@ static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
     SoftBusGattcCallback cb = { 0 };
     GetGattcCallback(clientId, &cb);
     if (cb.configureMtuSizeCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "get callback failed");
+        CONN_LOGE(CONN_BLE, "get callback fail");
         return;
     }
     cb.configureMtuSizeCallback(clientId, mtuSize, status);
@@ -142,7 +142,7 @@ static void GattcRegisterNotificationCallback(int clientId, int status)
     SoftBusGattcCallback cb = { 0 };
     GetGattcCallback(clientId, &cb);
     if (cb.registNotificationCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "get callback failed");
+        CONN_LOGE(CONN_BLE, "get callback fail");
         return;
     }
     cb.registNotificationCallback(clientId, status);
@@ -163,7 +163,7 @@ static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, 
     SoftBusGattcCallback cb = { 0 };
     GetGattcCallback(clientId, &cb);
     if (cb.notificationReceiveCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "get callback failed");
+        CONN_LOGE(CONN_BLE, "get callback fail");
         return;
     }
     cb.notificationReceiveCallback(clientId, &notify, status);
@@ -188,7 +188,7 @@ int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
 
     SoftBusGattcManager *gattcManager = (SoftBusGattcManager *)SoftBusCalloc(sizeof(SoftBusGattcManager));
     if (gattcManager == NULL) {
-        CONN_LOGE(CONN_BLE, "calloc failed");
+        CONN_LOGE(CONN_BLE, "calloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -197,7 +197,7 @@ int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
     ListInit(&gattcManager->node);
     if (SoftBusMutexLock(&g_softBusGattcManager->lock) != SOFTBUS_OK) {
         SoftBusFree(gattcManager);
-        CONN_LOGE(CONN_BLE, "try to lock failed");
+        CONN_LOGE(CONN_BLE, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     ListAdd(&g_softBusGattcManager->list, &gattcManager->node);
@@ -208,9 +208,9 @@ int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
 
 static void GetGattcCallback(int32_t clientId, SoftBusGattcCallback *cb)
 {
-    CONN_CHECK_AND_RETURN_LOGE(g_softBusGattcManager != NULL, CONN_BLE, "GattcManager is null.");
+    CONN_CHECK_AND_RETURN_LOGE(g_softBusGattcManager != NULL, CONN_BLE, "GattcManager is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattcManager->lock) == SOFTBUS_OK,
-        CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
+        CONN_BLE, "lock fail, clientId=%{public}d", clientId);
     SoftBusGattcManager *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattcManager->list, SoftBusGattcManager, node) {
         if (it->clientId == clientId) {
@@ -230,7 +230,7 @@ int32_t SoftbusGattcRegister(void)
     appId.uuidLen = APP_UUID_LEN;
     int32_t clientId = BleGattcRegister(appId);
     if (clientId <= 0) {
-        CONN_LOGE(CONN_BLE, "BleGattcRegister error");
+        CONN_LOGE(CONN_BLE, "BleGattcRegister err");
         return INVALID_ID;
     }
     CONN_LOGI(CONN_BLE, "clientId=%{public}d", clientId);
@@ -242,13 +242,13 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
     CONN_LOGI(CONN_BLE, "clientId=%{public}d", clientId);
     int32_t ret = SOFTBUS_OK;
     if (BleGattcUnRegister(clientId) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "BleGattcUnRegister error");
+        CONN_LOGE(CONN_BLE, "BleGattcUnRegister err");
         ret = SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(g_softBusGattcManager != NULL, SOFTBUS_INVALID_PARAM,
         CONN_BLE, "GattcManager is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_softBusGattcManager->lock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
+        SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail, clientId=%{public}d", clientId);
     SoftBusGattcManager *it = NULL;
     SoftBusGattcManager *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_softBusGattcManager->list, SoftBusGattcManager, node) {
@@ -265,23 +265,23 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
 
 bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(btAddr != NULL, false, CONN_BLE, "btAddr is NULL");
+    CONN_CHECK_AND_RETURN_RET_LOGE(btAddr != NULL, false, CONN_BLE, "btAddr is null");
     bool isExist = false;
     char macStr[BT_MAC_LEN] = {0};
     if (ConvertBtMacToStr(macStr, BT_MAC_LEN, btAddr->addr, sizeof(btAddr->addr)) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "convert bt mac to str fail!");
+        CONN_LOGE(CONN_BLE, "convert bt mac to str fail");
         return isExist;
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, false, CONN_BLE, "BtAddrs is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
-        false, CONN_BLE, "try to lock failed");
+        false, CONN_BLE, "try to lock fail");
     BleConnMac *it = NULL;
     BleConnMac *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_btAddrs->list, BleConnMac, node) {
         if (StrCmpIgnoreCase((const char *)it->addr, (const char *)macStr) == 0) {
             char anomizeAddress[BT_MAC_LEN] = {0};
             ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, macStr, BT_MAC_LEN);
-            CONN_LOGE(CONN_BLE, "connection exist, addr=%{public}s", anomizeAddress);
+            CONN_LOGE(CONN_BLE, "conn exist, addr=%{public}s", anomizeAddress);
             isExist = true;
             ListDelete(&it->node);
             SoftBusFree(it);
@@ -296,7 +296,7 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
 {
     BleConnMac *bleConnAddr = (BleConnMac *)SoftBusCalloc(sizeof(BleConnMac));
     CONN_CHECK_AND_RETURN_RET_LOGE(bleConnAddr != NULL, SOFTBUS_MALLOC_ERR, CONN_BLE,
-        "calloc failed, clientId=%{public}d", clientId);
+        "calloc fail, clientId=%{public}d", clientId);
     ListInit(&bleConnAddr->node);
     int32_t status = ConvertBtMacToStr(bleConnAddr->addr, BT_MAC_LEN, addr->addr, BT_ADDR_LEN);
     if (status != SOFTBUS_OK) {
@@ -307,14 +307,14 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
     bleConnAddr->clientId = clientId;
 
     if (g_btAddrs == NULL) {
-        CONN_LOGE(CONN_BLE, "BtAddrs is null.");
+        CONN_LOGE(CONN_BLE, "BtAddrs is null");
         SoftBusFree(bleConnAddr);
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&g_btAddrs->lock) != SOFTBUS_OK) {
         SoftBusFree(bleConnAddr);
-        CONN_LOGE(CONN_BLE, "try to lock failed");
+        CONN_LOGE(CONN_BLE, "try to lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     ListAdd(&g_btAddrs->list, &bleConnAddr->node);
@@ -326,7 +326,7 @@ static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId)
 {
     CONN_CHECK_AND_RETURN_LOGE(g_btAddrs != NULL, CONN_BLE, "BtAddrs is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
-        CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
+        CONN_BLE, "try to lock fail, clientId=%{public}d", clientId);
     BleConnMac *it = NULL;
     BleConnMac *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_btAddrs->list, BleConnMac, node) {
@@ -344,7 +344,7 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
     CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "addr is NULL");
     BdAddr bdAddr = {0};
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
-        CONN_LOGE(CONN_BLE, "memcpy error");
+        CONN_LOGE(CONN_BLE, "memcpy err");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -358,7 +358,7 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
     status = SoftbusGattcAddMacAddrToList(clientId, addr);
     if (status != SOFTBUS_OK) {
         // fall-through
-        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
+        CONN_LOGW(CONN_BLE, "add mac fail, status=%{public}d", status);
     }
 
     return SOFTBUS_OK;
@@ -369,7 +369,7 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
     SoftbusGattcDeleteMacAddrFromList(clientId);
     (void)refreshGatt;
     if (BleGattcDisconnect(clientId) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "BleGattcDisconnect error");
+        CONN_LOGE(CONN_BLE, "BleGattcDisconnect err");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -377,10 +377,10 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
 
 int32_t SoftbusGattcSearchServices(int32_t clientId)
 {
-    CONN_LOGI(CONN_BLE, "input param clientId = %{public}d", clientId);
+    CONN_LOGI(CONN_BLE, "input param clientId=%{public}d", clientId);
     int32_t status = BleOhosStatusToSoftBus(BleGattcSearchServices(clientId));
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "status = %{public}d", status);
+        CONN_LOGE(CONN_BLE, "status=%{public}d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -402,7 +402,7 @@ int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
     btUuid.uuid = serverUuid->uuid;
     btUuid.uuidLen = serverUuid->uuidLen;
     if (!BleGattcGetService(clientId, btUuid)) {
-        CONN_LOGE(CONN_BLE, "BleGattcGetService error");
+        CONN_LOGE(CONN_BLE, "BleGattcGetService err");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -414,7 +414,7 @@ int32_t SoftbusGattcRegisterNotification(
 {
     (void)descriptorUuid;
     if (serverUuid == NULL || charaUuid == NULL) {
-        CONN_LOGE(CONN_BLE, "Uuid is null.");
+        CONN_LOGE(CONN_BLE, "Uuid is null");
         return SOFTBUS_INVALID_PARAM;
     }
     BtGattCharacteristic btCharaUuid;
@@ -424,7 +424,7 @@ int32_t SoftbusGattcRegisterNotification(
     btCharaUuid.characteristicUuid.uuidLen = charaUuid->uuidLen;
     int32_t status = BleOhosStatusToSoftBus(BleGattcRegisterNotification(clientId, btCharaUuid, true));
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "RegisterNotification error = %{public}d", status);
+        CONN_LOGE(CONN_BLE, "RegisterNotification err=%{public}d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -438,7 +438,7 @@ int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
     }
 
     if (BleGattcConfigureMtuSize(clientId, mtuSize) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "BleGattcConfigureMtuSize error");
+        CONN_LOGE(CONN_BLE, "BleGattcConfigureMtuSize err");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -490,9 +490,9 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
     CONN_LOGI(CONN_BLE, "clientId=%{public}d, writeType=%{public}d", clientId, clientData->writeType);
     if (BleGattcWriteCharacteristic(clientId, characteristic, writeType, clientData->valueLen,
         (const char *)clientData->value) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "error");
+        CONN_LOGE(CONN_BLE, "err");
         CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_clientSendSignal.sendCondLock) == SOFTBUS_OK,
-            SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
+            SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail");
         g_clientSendSignal.isWriteAvailable = true;
         (void)SoftBusMutexUnlock(&g_clientSendSignal.sendCondLock);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
@@ -503,12 +503,12 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
 int32_t SoftbusGattcSetFastestConn(int32_t clientId)
 {
     if (clientId <= 0) {
-        CONN_LOGE(CONN_BLE, "invalid param, clientId = %{public}d", clientId);
+        CONN_LOGE(CONN_BLE, "invalid param, clientId=%{public}d", clientId);
         return SOFTBUS_INVALID_PARAM;
     }
     int ret = BleGattcSetFastestConn(clientId, true);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
-        CONN_LOGE(CONN_BLE, "BleGattcSetFastestConn failed, return code = %{public}d", ret);
+        CONN_LOGE(CONN_BLE, "BleGattcSetFastestConn fail, err=%{public}d", ret);
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SET_FASTEST_ERR;
     }
     return SOFTBUS_OK;
@@ -517,17 +517,17 @@ int32_t SoftbusGattcSetFastestConn(int32_t clientId)
 int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusBleGattPriority priority)
 {
     if (clientId <= 0 || addr == NULL) {
-        CONN_LOGE(CONN_BLE, "invalid param, clientId = %{public}d", clientId);
+        CONN_LOGE(CONN_BLE, "invalid param, clientId=%{public}d", clientId);
         return SOFTBUS_INVALID_PARAM;
     }
     BdAddr bdAddr = { 0 };
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
-        CONN_LOGE(CONN_BLE, "addr memory copy failed");
+        CONN_LOGE(CONN_BLE, "addr memory copy fail");
         return SOFTBUS_INVALID_PARAM;
     }
     int ret = BleGattcSetPriority(clientId, &bdAddr, (BtGattPriority)priority);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
-        CONN_LOGE(CONN_BLE, "BleGattcSetPriority failed, return code = %{public}d", ret);
+        CONN_LOGE(CONN_BLE, "BleGattcSetPriority fail, err=%{public}d", ret);
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_SET_PRIORITY_ERR;
     }
     return SOFTBUS_OK;
@@ -547,7 +547,7 @@ int32_t InitSoftbusAdapterClient(void)
     }
 
     if (SoftBusMutexInit(&g_clientSendSignal.sendCondLock, NULL) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "mutex init failed");
+        CONN_LOGE(CONN_INIT, "mutex init fail");
         DestroySoftBusList(g_softBusGattcManager);
         DestroySoftBusList(g_btAddrs);
         return SOFTBUS_NO_INIT;
