@@ -93,7 +93,7 @@ static ConnEventExtra g_validExtra = {
     .connectingCnt = 0,
     .connectSuccessCnt = 1,
     .connectFailCnt = 0,
-    .virtualLinkType = -1,
+    .virtualLinkType = 0,
 };
 
 /**
