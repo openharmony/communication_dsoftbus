@@ -58,7 +58,7 @@ void BusCenterIpcTest::TearDown() { }
 
 /*
  * @tc.name: LnnIpcServerJoin
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -82,7 +82,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerJoinTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnIpcServerLeave
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -102,7 +102,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnIpcGetAllOnlineNodeInfo
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -118,7 +118,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcGetAllOnlineNodeInfoTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnIpcNotifyJoinResult
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -137,7 +137,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcNotifyJoinResultTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnIpcNotifyLeaveResult
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -154,7 +154,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcNotifyLeaveResultTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnIpcServerLeave
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -175,7 +175,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_02, TestSize.Level1)
 
 /*
  * @tc.name: LnnIpcServerLeave
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -197,7 +197,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_03, TestSize.Level1)
 
 /*
  * @tc.name: RemoveRangeRequestInfoByPkgName
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -213,7 +213,7 @@ HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_01, TestSize.Leve
 
 /*
  * @tc.name: RemoveRangeRequestInfoByPkgName
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -229,7 +229,7 @@ HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_02, TestSize.Leve
 
 /*
  * @tc.name: RemoveRangeRequestInfoByPkgName
- * @tc.desc: buscenter ipc test
+ * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -245,5 +245,53 @@ HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_03, TestSize.Leve
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnIpcUnregRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnIpcCreateGroupOwnerTest_001
+ * @tc.desc: Test the behavior of LnnIpcCreateGroupOwner when pkgName is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_001, TestSize.Level0)
+{
+    int32_t callingPid = 1234;
+    GroupOwnerConfig config = {};
+    GroupOwnerResult result = {};
+
+    int32_t ret = LnnIpcCreateGroupOwner(nullptr, callingPid, &config, &result);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnIpcCreateGroupOwnerTest_002
+ * @tc.desc: Test the behavior of LnnIpcCreateGroupOwner when config is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_002, TestSize.Level0)
+{
+    const char *pkgName = "testPkgName";
+    int32_t callingPid = 1234;
+    GroupOwnerResult result = {};
+
+    int32_t ret = LnnIpcCreateGroupOwner(pkgName, callingPid, nullptr, &result);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnIpcCreateGroupOwnerTest_003
+ * @tc.desc: Test the behavior of LnnIpcCreateGroupOwner when result is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_003, TestSize.Level0)
+{
+    const char *pkgName = "testPkgName";
+    int32_t callingPid = 1234;
+    GroupOwnerConfig config = {};
+
+    int32_t ret = LnnIpcCreateGroupOwner(pkgName, callingPid, &config, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
