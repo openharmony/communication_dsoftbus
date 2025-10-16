@@ -56,9 +56,10 @@ void SoftbusProxyChannelControlPagingTest::TearDownTestCase(void)
 {
 }
 
-/**@
+/*
  * @tc.name: TransPagingHandshakeTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -109,9 +110,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest001, Test
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransPagingGetAuthKeyTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -139,9 +141,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingGetAuthKeyTest001, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransPagingAckHandshakeTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -169,9 +172,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest001, T
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransPagingAckHandshakeTest002
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -199,9 +203,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest002, T
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransPagingResetTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -232,9 +237,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingResetTest001, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransProxyResetPeerTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */

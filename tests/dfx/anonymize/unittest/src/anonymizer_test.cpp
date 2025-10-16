@@ -46,7 +46,7 @@ const uint32_t DEVICE_NAME_MAX_LEN = 128;
 namespace OHOS {
 class AnonymizerTest : public testing::Test { };
 
-/**
+/*
  * @tc.name: AnonymizeTest001
  * @tc.desc: Test plainStr is null
  * @tc.type: FUNC
@@ -61,7 +61,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest001, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest002
  * @tc.desc: Test plainStr length < 2
  * @tc.type: FUNC
@@ -76,7 +76,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest002, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest003
  * @tc.desc: Test plainStr length = 2
  * @tc.type: FUNC
@@ -91,7 +91,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest003, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest004
  * @tc.desc: Test plainStr length > 2
  * @tc.type: FUNC
@@ -106,9 +106,9 @@ HWTEST_F(AnonymizerTest, AnonymizeTest004, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest005
- * @tc.desc: Test free
+ * @tc.desc: AnonymizeFree nullptr pointer test
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
@@ -119,7 +119,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest005, TestSize.Level0)
     EXPECT_EQ(nullptr, anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest006
  * @tc.desc: Test plainStr is empty
  * @tc.type: FUNC
@@ -134,7 +134,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest006, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest007
  * @tc.desc: Test anonymize udid
  * @tc.type: FUNC
@@ -152,7 +152,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest007, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest008
  * @tc.desc: Test anonymize mac
  * @tc.type: FUNC
@@ -178,7 +178,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest008, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest009
  * @tc.desc: Test anonymize ip
  * @tc.type: FUNC
@@ -200,9 +200,10 @@ HWTEST_F(AnonymizerTest, AnonymizeTest009, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest010
- * @tc.desc: Should return "NULL" when anonymizedStr is nullptr
+ * @tc.desc: Should return "NULL"
+ *           when anonymizedStr is nullptr
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
@@ -214,9 +215,10 @@ HWTEST_F(AnonymizerTest, AnonymizeTest010, TestSize.Level0)
     EXPECT_STREQ(ret, "NULL");
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest011
- * @tc.desc: Should return anonymizedStr when anonymizedStr is not nullptr
+ * @tc.desc: Should return anonymizedStr
+ *           when anonymizedStr is not nullptr
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
@@ -228,7 +230,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest011, TestSize.Level0)
     EXPECT_STREQ(ret, anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest012
  * @tc.desc: Test anonymize device name
  * @tc.type: FUNC
@@ -271,7 +273,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest012, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest013
  * @tc.desc: Test anonymize device name
  * @tc.type: FUNC
@@ -322,7 +324,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest013, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeTest014
  * @tc.desc: Test anonymize invalid utf-8 str
  * @tc.type: FUNC
@@ -338,7 +340,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest014, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeDeviceNameTest001
  * @tc.desc: Test anonymize device name
  * @tc.type: FUNC
@@ -360,7 +362,7 @@ HWTEST_F(AnonymizerTest, AnonymizeDeviceNameTest001, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeDeviceNameTest002
  * @tc.desc: Test anonymize nick device name
  * @tc.type: FUNC
@@ -399,7 +401,7 @@ HWTEST_F(AnonymizerTest, AnonymizeDeviceNameTest002, TestSize.Level0)
     AnonymizeFree(anonymizedStr);
 }
 
-/**
+/*
  * @tc.name: AnonymizeDeviceNameTest003
  * @tc.desc: Test anonymize user defined device name
  * @tc.type: FUNC

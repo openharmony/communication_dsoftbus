@@ -150,9 +150,9 @@ void SoftbusProxyChannelListenerTest::TearDownTestCase(void)
 {
 }
 
-/**
+/*
  * @tc.name: NotifyNormalChannelClosedTest001
- * @tc.desc: test notify normal channel closed.
+ * @tc.desc: test notify normal channel closed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -165,9 +165,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelClosedTest001, Test
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: NotifyNormalChannelOpenFailedTest001
- * @tc.desc: test notify normal channel open failed.
+ * @tc.desc: test notify normal channel open failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -180,9 +180,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenFailedTest001, 
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: NotifyNormalChannelOpenedTest001
- * @tc.desc: test notify normal channel opened.
+ * @tc.desc: test notify normal channel opened
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -205,9 +205,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest001, Test
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: NotifyNormalChannelOpenedTest002
- * @tc.desc: test notify normal channel opened.
+ * @tc.desc: test notify normal channel opened
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -243,9 +243,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest002, Test
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: OnProxyChannelOpenedTest001
- * @tc.desc: test On Proxy Channel Opened.
+ * @tc.desc: test On Proxy Channel Opened
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -260,9 +260,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenedTest001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnProxyChannelOpenFailedTest001
- * @tc.desc: test onproxy channel open failed.
+ * @tc.desc: test onproxy channel open failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -290,9 +290,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenFailedTest001, TestS
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: OnProxyChannelClosedTest001
- * @tc.desc: test onproxy channel open failed.
+ * @tc.desc: test onproxy channel open failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -310,9 +310,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelClosedTest001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnProxyChannelMsgReceivedTest001
- * @tc.desc: test on proxy channel msg received.
+ * @tc.desc: test on proxy channel msg received
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -332,9 +332,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelMsgReceivedTest001, Test
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransOpenNetWorkingChannelTest001
- * @tc.desc: test trans open networking channel.
+ * @tc.desc: test trans open networking channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -349,9 +349,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransOpenNetWorkingChannelTest001, Tes
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 }
 
-/**
+/*
  * @tc.name: TransSendNetworkingMessageTest001
- * @tc.desc: test trans send networking message.
+ * @tc.desc: test trans send networking message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,9 +364,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest001, Tes
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
-/**
+/*
  * @tc.name: TransSendNetworkingMessageTest002
- * @tc.desc: test trans send networking message.
+ * @tc.desc: test trans send networking message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -395,9 +395,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest002, Tes
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransSendNetworkingMessageTest003
- * @tc.desc: test trans send networking message.
+ * @tc.desc: test trans send networking message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -433,9 +433,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest003, Tes
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: OnProxyChannelBindTest001
- * @tc.desc: test OnProxyChannelBind.
+ * @tc.desc: test OnProxyChannelBindn input different apptype return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -457,9 +457,10 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelBindTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
-/**
+/*
  * @tc.name: FillExtraByProxyChannelErrorEndTest001
- * @tc.desc: test OnProxyChannelBind.
+ * @tc.desc: test FillExtraByProxyChannelErrorEnd function
+ *           expected results under different input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -489,9 +490,11 @@ HWTEST_F(SoftbusProxyChannelListenerTest, FillExtraByProxyChannelErrorEndTest001
     FillExtraByProxyChannelErrorEnd(&extra, appInfo, localUdid, 1);
     SoftBusFree(appInfo);
 }
-/**
+
+/*
  * @tc.name: TransGetConnectOptionTest001
- * @tc.desc: test OnProxyChannelBind.
+ * @tc.desc: test OnProxyChannelBind
+ *           under specific conditions return normal
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -512,9 +515,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransGetConnectOptionTest001, TestSize
     SoftBusFree(preferred);
 }
 
-/**
+/*
  * @tc.name: FillExtraByProxyChannelErrorEnd002
- * @tc.desc: test fill extra by proxy channel.
+ * @tc.desc: test fill extra by proxy channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -536,9 +539,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, FillExtraByProxyChannelErrorEnd002, Te
     SoftBusFree(extra);
 }
 
-/**
+/*
  * @tc.name: GetProxyChannelInfo001
- * @tc.desc: test fill extra by proxy channel.
+ * @tc.desc: test fill extra by proxy channel
  * @tc.type: FUNC
  * @tc.require:
  */
