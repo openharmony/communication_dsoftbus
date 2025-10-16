@@ -925,6 +925,31 @@ static void TransPagingSendBadKeyMsg(ProxyMessage *msg, uint8_t *accountHash, ui
     return;
 }
 
+static void TransPagingParseMessageEx(
+    ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash, const char *authAccountHash)
+{
+    if (msg == NULL || accountHash == NULL || udidHash == NULL || authAccountHash == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param!");
+        return;
+    }
+    switch (msg->msgHead.type) {
+        case PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE:
+            TransPagingProcessHandshakeMsg(msg, accountHash, udidHash, authAccountHash);
+            break;
+        case PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE_ACK:
+            TransPagingProcessHandshakeAckMsg(msg);
+            break;
+        case PROXYCHANNEL_MSG_TYPE_PAGING_BADKEY:
+            TransPagingProcessBadKeyMsg(msg);
+            break;
+        case PROXYCHANNEL_MSG_TYPE_PAGING_RESET:
+            TransPagingProcessResetMsg(msg);
+            break;
+        default:
+            break;
+    }
+}
+
 int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE((msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE &&
@@ -949,30 +974,22 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     }
     uint32_t decDataLen = (uint32_t)msg->dataLen - OVERHEAD_LEN;
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(decData != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc fail.");
+    if (decData == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "calloc fail.");
+        (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
+        return SOFTBUS_MALLOC_ERR;
+    }
     if (SoftBusDecryptData(&cipherKey, (uint8_t *)msg->data, (uint32_t)msg->dataLen,
         decData, &decDataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
         SoftBusFree(decData);
+        (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
         return SOFTBUS_DECRYPT_ERR;
     }
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     msg->data = (char *)decData;
     msg->dataLen = (int32_t)decDataLen;
-    switch (msg->msgHead.type) {
-        case PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE:
-            TransPagingProcessHandshakeMsg(msg, accountHash, udidHash, authAccountHash);
-            break;
-        case PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE_ACK:
-            TransPagingProcessHandshakeAckMsg(msg);
-            break;
-        case PROXYCHANNEL_MSG_TYPE_PAGING_BADKEY:
-            TransPagingProcessBadKeyMsg(msg);
-            break;
-        case PROXYCHANNEL_MSG_TYPE_PAGING_RESET:
-            TransPagingProcessResetMsg(msg);
-            break;
-    }
+    TransPagingParseMessageEx(msg, accountHash, udidHash, authAccountHash);
     SoftBusFree(msg->data);
     return SOFTBUS_OK;
 }
