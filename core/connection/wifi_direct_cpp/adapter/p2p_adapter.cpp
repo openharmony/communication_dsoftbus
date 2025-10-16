@@ -474,6 +474,7 @@ void P2pAdapter::Register(const GetCoexConflictCodeHook &coexConflictor)
 
 int P2pAdapter::GetCoexConflictCode(const char *ifName, int32_t channelId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(channelId != CHANNEL_INVALID, SOFTBUS_OK, CONN_WIFI_DIRECT, "invalid channel");
     CONN_CHECK_AND_RETURN_RET_LOGW(getCoexConflictCodeHook_ != nullptr, SOFTBUS_OK, CONN_WIFI_DIRECT,
         "not support, no conflict");
     return getCoexConflictCodeHook_(ifName, channelId);
