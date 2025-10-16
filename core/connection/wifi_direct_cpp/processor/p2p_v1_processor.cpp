@@ -1698,6 +1698,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
         return SOFTBUS_INVALID_PARAM;
     }
     auto freq = strtol(configs[P2P_GROUP_CONFIG_INDEX_FREQ].c_str(), nullptr, DECIMAL_BASE);
+    CONN_LOGI(CONN_WIFI_DIRECT, "freq=%{public}ld", freq);
     int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P, WifiDirectUtils::FrequencyToChannel(freq));
     CONN_CHECK_AND_RETURN_RET_LOGE(
         coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, ret=%{public}d", coexCode);
