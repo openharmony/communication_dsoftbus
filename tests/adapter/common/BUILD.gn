@@ -74,6 +74,61 @@ ohos_unittest("LnnWifiServiceMonitorTest") {
   }
 }
 
+ohos_unittest("LnnCommonEventMonitorTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func.c",
+    "$dsoftbus_root_path/tests/adapter/common/src/lnn_common_event_mock.cpp",
+    "$dsoftbus_root_path/tests/adapter/common/src/lnn_common_event_monitor_test.cpp",
+  ]
+
+  include_dirs = [
+    "$softbus_adapter_common/bus_center/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/adapter/bus_center/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/adapter/common/bus_center/include",
+    "$dsoftbus_root_path/adapter/common/bus_center/common_event",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
+    "$dsoftbus_root_path/sdk/frame/standard/include",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/adapter/common/bus_center/wlan",
+    "$dsoftbus_root_path/tests/adapter/common/src",
+    "$dsoftbus_root_path/tests/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+  ]
+
+  deps = test_deps
+  external_deps = test_external_deps
+  if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
+    external_deps += [
+      "ability_base:base",
+      "ability_base:want",
+      "common_event_service:cesfwk_innerkits",
+      "init:libbeget_proxy",
+      "ipc:ipc_core",
+      "power_manager:powermgr_client",
+    ]
+  }
+}
+
 ohos_unittest("LnnLinkWatchTest") {
   module_out_path = module_output_path
   sources = [
@@ -130,6 +185,7 @@ group("unittest") {
   testonly = true
   if (!defined(ohos_lite) && softbus_communication_wifi_feature == true) {
     deps = [
+      ":LnnCommonEventMonitorTest",
       ":LnnLinkWatchTest",
       ":LnnWifiServiceMonitorTest",
     ]
