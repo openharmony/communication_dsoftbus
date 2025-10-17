@@ -41,19 +41,19 @@ static sptr<IRemoteObject> GetSystemAbility()
         return nullptr;
     }
     if (!data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER)) {
-        CONN_LOGE(CONN_COMMON, "write SOFTBUS_SERVER_SA_ID_INNER failed");
+        CONN_LOGE(CONN_COMMON, "write SOFTBUS_SERVER_SA_ID_INNER fail");
         return nullptr;
     }
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        CONN_LOGE(CONN_COMMON, "get samgr failed");
+        CONN_LOGE(CONN_COMMON, "get samgr fail");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        CONN_LOGE(CONN_COMMON, "get GetSystemAbility failed, err=%{public}d", err);
+        CONN_LOGE(CONN_COMMON, "get GetSystemAbility fail, err=%{public}d", err);
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -63,17 +63,17 @@ int32_t ConnectionServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
     if (g_serverProxy != nullptr) {
-        CONN_LOGI(CONN_INIT, "Init success");
+        CONN_LOGI(CONN_INIT, "Init succ");
         return SOFTBUS_OK;
     }
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
-        CONN_LOGE(CONN_INIT, "Get remote softbus object failed");
+        CONN_LOGE(CONN_INIT, "Get remote softbus object fail");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     g_serverProxy = new (std::nothrow) ConnectionServerProxy(object);
     if (g_serverProxy == nullptr) {
-        CONN_LOGE(CONN_INIT, "Create connection server proxy failed");
+        CONN_LOGE(CONN_INIT, "Create connection server proxy fail");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     return SOFTBUS_OK;
@@ -83,7 +83,7 @@ void ConnectionServerProxyDeInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
     if (g_serverProxy == nullptr) {
-        CONN_LOGE(CONN_INIT, "g_serverProxy is nullptr");
+        CONN_LOGE(CONN_INIT, "g_serverProxy is null");
         return;
     }
     g_serverProxy.clear();
@@ -92,7 +92,7 @@ void ConnectionServerProxyDeInit(void)
 int32_t ServerIpcCreateServer(const char *pkgName, const char *name)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is nullptr");
+        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is null");
 
     return g_serverProxy->CreateServer(pkgName, name);
 }
@@ -100,7 +100,7 @@ int32_t ServerIpcCreateServer(const char *pkgName, const char *name)
 int32_t ServerIpcRemoveServer(const char *pkgName, const char *name)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is nullptr");
+        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is null");
 
     return g_serverProxy->RemoveServer(pkgName, name);
 }
@@ -108,7 +108,7 @@ int32_t ServerIpcRemoveServer(const char *pkgName, const char *name)
 int32_t ServerIpcConnect(const char *pkgName, const char *name, const Address *address)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is nullptr");
+        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is null");
 
     return g_serverProxy->Connect(pkgName, name, address);
 }
@@ -116,7 +116,7 @@ int32_t ServerIpcConnect(const char *pkgName, const char *name, const Address *a
 int32_t ServerIpcDisconnect(uint32_t handle)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is nullptr");
+        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is null");
 
     return g_serverProxy->Disconnect(handle);
 }
@@ -124,7 +124,7 @@ int32_t ServerIpcDisconnect(uint32_t handle)
 int32_t ServerIpcSend(uint32_t handle, const uint8_t *data, uint32_t len)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is nullptr");
+        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is null");
 
     return g_serverProxy->Send(handle, data, len);
 }
@@ -132,7 +132,7 @@ int32_t ServerIpcSend(uint32_t handle, const uint8_t *data, uint32_t len)
 int32_t ServerIpcGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is nullptr");
+        g_serverProxy != nullptr, SOFTBUS_NO_INIT, CONN_COMMON, "softbus server g_serverProxy is null");
 
     return g_serverProxy->ConnGetPeerDeviceId(handle, deviceId, len);
 }
