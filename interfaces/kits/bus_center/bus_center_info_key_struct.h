@@ -71,6 +71,7 @@ typedef enum {
     NUM_KEY_AUTH_PORT,
     NUM_KEY_PROXY_PORT,
     NUM_KEY_META_NODE,
+    NUM_KEY_META_TYPE,
     NUM_KEY_NET_CAP, /* dynamic network capabilities, depends on the user settings */
     NUM_KEY_FEATURE_CAPA,
     NUM_KEY_DEV_TYPE_ID,

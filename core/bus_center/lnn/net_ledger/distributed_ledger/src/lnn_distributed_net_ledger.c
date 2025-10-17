@@ -555,6 +555,7 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     }
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
+        state = AuthMetaGetMetaValueByMetaNodeIdPacked(id);
         LNN_LOGI(LNN_LEDGER, "can not find target node");
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return state;
@@ -1733,11 +1734,16 @@ void LnnRemoveNode(const char *udid)
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
 {
     NodeInfo *info = NULL;
+    const char *udid = NULL;
     if (id == NULL) {
         return NULL;
     }
     info = LnnGetNodeInfoById(id, type);
     if (info == NULL) {
+        udid = AuthMetaGetDeviceIdByMetaNodeIdPacked(id);
+        if (udid != NULL) {
+            return udid;
+        }
         LNN_LOGE(LNN_LEDGER, "uuid not find node info.");
         return NULL;
     }
@@ -1760,6 +1766,11 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
     }
     info = LnnGetNodeInfoById(srcId, srcIdType);
     if (info == NULL) {
+        id = AuthMetaGetDeviceIdByMetaNodeIdPacked(srcId);
+        if (id != NULL && strcpy_s(dstIdBuf, dstIdBufLen, id) == EOK) {
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_OK;
+        }
         LNN_LOGE(LNN_LEDGER, "no node info srcIdType=%{public}d", srcIdType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
