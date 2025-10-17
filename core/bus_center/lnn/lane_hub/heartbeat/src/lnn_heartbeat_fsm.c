@@ -842,7 +842,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
-    if (LnnHasActiveConnection(networkId, addrType) || QueryControlPlaneNodeValidPacked(networkId) == SOFTBUS_OK) {
+    if (LnnHasActiveConnection(networkId, addrType)) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "process dev lost in next period, networkId=%{public}s",
             AnonymizeWrapper(anonyNetworkId));
@@ -959,8 +959,7 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
     (void)hbFsm;
     uint64_t oldTimeStamp;
     char *anonyNetworkId = NULL;
-    if (LnnHasActiveConnection(networkId, LnnConvertHbTypeToConnAddrType(hbType)) ||
-        QueryControlPlaneNodeValidPacked(networkId) == SOFTBUS_OK) {
+    if (LnnHasActiveConnection(networkId, LnnConvertHbTypeToConnAddrType(hbType))) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "process screen off dev lost in next period, networkId=%{public}s",
             AnonymizeWrapper(anonyNetworkId));
