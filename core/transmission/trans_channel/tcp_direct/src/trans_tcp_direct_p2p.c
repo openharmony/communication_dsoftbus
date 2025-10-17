@@ -1043,6 +1043,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         CloseHtpChannelPacked(conn->channelId);
         conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
         conn->appInfo.isFlashLight = false;
+        conn->appInfo.myData.port = 0;
         (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo);
     }
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP) {
