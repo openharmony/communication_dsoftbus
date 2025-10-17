@@ -89,7 +89,7 @@ int32_t LnnInitModuleNotifyWithRetryAsync(uint32_t module, ModuleInitCallBack ca
     uint32_t delay, bool isFirstDelay);
 int32_t LnnInitModuleNotifyWithRetrySync(uint32_t module, ModuleInitCallBack callback, uint32_t retry,
     uint32_t delay);
-void LnnModuleMonitorRestartNetwork(void);
+void LnnRestartNetwork(void);
 
 void LnnInitSetDeviceInfoReady(void);
 

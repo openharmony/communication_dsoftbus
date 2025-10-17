@@ -163,7 +163,8 @@ typedef int (*SoftBusChannelToFrequencyFunc)(int channel);
 typedef bool (*SoftBusIs5GBandFunc)(int frequency);
 typedef int32_t (*LnnNotifyDiscoveryDeviceFunc)(
     const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
-typedef int32_t (*LnnRequestLeaveSpecificFunc)(const char *networkId, ConnectionAddrType addrType);
+typedef int32_t (*LnnRequestLeaveSpecificFunc)(const char *networkId, ConnectionAddrType addrType,
+    DeviceLeaveReason leaveReason);
 typedef ListenerModule (*LnnGetProtocolListenerModuleFunc)(ProtocolType protocol, ListenerMode mode);
 typedef char *(*LnnConvertIdToDeviceTypeFunc)(uint16_t typeId);
 typedef int32_t (*LnnConvertDeviceTypeToIdFunc)(const char *deviceType, uint16_t *typeId);

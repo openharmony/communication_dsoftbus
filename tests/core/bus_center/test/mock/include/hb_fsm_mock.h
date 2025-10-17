@@ -48,7 +48,8 @@ public:
     virtual int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbeatType type) = 0;
     virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type) = 0;
     virtual int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType) = 0;
-    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType,
+        DeviceLeaveReason leaveReason) = 0;
     virtual int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData) = 0;
     virtual int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *type) = 0;
     virtual int32_t LnnGetHbStrategyManager(
@@ -82,7 +83,7 @@ public:
     MOCK_METHOD3(LnnGetGearModeBySpecificType, int32_t(GearMode *, char *, LnnHeartbeatType));
     MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType(ConnectionAddrType));
     MOCK_METHOD2(LnnOfflineTimingByHeartbeat, int32_t(const char *, ConnectionAddrType));
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD1(LnnHbMediumMgrSendBegin, int32_t(LnnHeartbeatSendBeginData *));
     MOCK_METHOD1(LnnHbMediumMgrSendEnd, int32_t(LnnHeartbeatSendEndData *));
     MOCK_METHOD3(

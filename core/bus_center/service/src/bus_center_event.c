@@ -697,16 +697,16 @@ void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifyDeviceRootStateChangeEvent(void)
+void LnnNotifyDeviceRiskStateChangeEvent(void)
 {
-    SoftBusDeviceRootState state = SOFTBUS_DEVICE_ROOT_UNKNOWN;
+    SoftBusDeviceRiskState state = SOFTBUS_DEVICE_RISK_UNKNOWN;
     if (IsDeviceHasRiskFactorPacked()) {
-        state = SOFTBUS_DEVICE_IS_ROOT;
+        state = SOFTBUS_DEVICE_IS_RISK;
     } else {
-        state = SOFTBUS_DEVICE_NOT_ROOT;
+        state = SOFTBUS_DEVICE_NOT_RISK;
     }
-    LnnDeviceRootStateChangeEvent event = {.basic.event = LNN_EVENT_DEVICE_ROOT_STATE_CHANGED,
-        .status = (uint8_t)state};
+    LnnDeviceRiskStateChangeEvent event = {.basic.event = LNN_EVENT_DEVICE_RISK_STATE_CHANGED,
+        .status = state};
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
