@@ -164,6 +164,7 @@ static void AccountUpdateProcess(uint8_t *localAccountHash, uint8_t *accountHash
         LNN_LOGE(LNN_STATE, "invalid param");
         return;
     }
+    LnnAccoutIdStatusSet(accountId);
 
     char accountUid[ACCOUNT_UID_STR_LEN] = {0};
     uint32_t size = 0;
@@ -188,25 +189,32 @@ static void AccountUpdateProcess(uint8_t *localAccountHash, uint8_t *accountHash
     }
 }
 
+static int32_t GenerateDefaultAccountStrHash(unsigned char *accountHash)
+{
+    int32_t ret = SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
+        DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash));
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "OnAccountChanged generate default str hash fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
     int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
+    bool isDefaultAccount = false;
 
-    if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
-        (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
-    }
-    LnnAccoutIdStatusSet(accountId);
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "OnAccountChanged get local account hash fail");
         return;
     }
     if (LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGW(LNN_STATE, "OnAccountChanged get account account hash fail");
-        if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
-            DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "OnAccountChanged generate default str hash fail");
+        isDefaultAccount = true;
+        if (GenerateDefaultAccountStrHash(accountHash) != SOFTBUS_OK) {
             return;
         }
     }
@@ -216,9 +224,16 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
             accountHash[0], accountHash[1]);
         return;
     }
-    if (!IsSameAccountGroupDevice()) {
-        LNN_LOGE(LNN_STATE, "not have same account group, no need update accountId");
+    if (!IsSameAccountGroupDevice() && !isDefaultAccount) {
+        if (GenerateDefaultAccountStrHash(accountHash) != SOFTBUS_OK) {
+            return;
+        }
+        AccountUpdateProcess(localAccountHash, accountHash, accountId, reason);
+        LNN_LOGE(LNN_STATE, "not have same account group, update default accountId");
         return;
+    }
+    if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
+        (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     }
     AccountUpdateProcess(localAccountHash, accountHash, accountId, reason);
 }
