@@ -42,13 +42,13 @@ static napi_status CheckCreateConnectionParams(napi_env env, napi_callback_info 
 
     std::string deviceId {};
     if (!ParseString(env, deviceId, argv[ARGS_SIZE_ZERO])) {
-        COMM_LOGE(COMM_SDK, "expect string");
+        COMM_LOGE(COMM_SDK, "unexpect string");
         return napi_string_expected;
     }
 
     std::string name {};
     if (!ParseString(env, name, argv[ARGS_SIZE_ONE])) {
-        COMM_LOGE(COMM_SDK, "expect string");
+        COMM_LOGE(COMM_SDK, "unexpect string");
         return napi_string_expected;
     }
 
@@ -60,7 +60,7 @@ static napi_status CheckCreateConnectionParams(napi_env env, napi_callback_info 
     if (argc == ARGS_SIZE_THREE) {
         int32_t handle;
         if (!ParseInt32(env, handle, argv[ARGS_SIZE_TWO])) {
-            COMM_LOGE(COMM_SDK, "expect int");
+            COMM_LOGE(COMM_SDK, "unexpect int");
             return napi_invalid_arg;
         }
     }
@@ -122,7 +122,7 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
     std::string deviceId;
     std::string name;
     if (!ParseString(env, deviceId, argv[PARAM0]) || !ParseString(env, name, argv[PARAM1])) {
-        COMM_LOGE(COMM_SDK, "ParseString failed");
+        COMM_LOGE(COMM_SDK, "ParseString fail");
         return NapiGetUndefinedRet(env);
     };
     NapiLinkEnhanceConnection *connection = nullptr;
@@ -133,7 +133,7 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
     } else {
         connection = new NapiLinkEnhanceConnection(deviceId, name);
     }
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != nullptr, thisVar, COMM_SDK, "new link enhance connection failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != nullptr, thisVar, COMM_SDK, "new link enhance connection fail");
     auto status = napi_wrap(
         env, thisVar, connection,
         [](napi_env env, void *data, void *hint) {
@@ -145,7 +145,7 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
         },
         nullptr, nullptr);
     if (status != napi_ok) {
-        COMM_LOGE(COMM_SDK, "napi_wrap failed");
+        COMM_LOGE(COMM_SDK, "napi_wrap fail");
         delete connection;
         connection = nullptr;
         return thisVar;
@@ -318,14 +318,14 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
 
     int32_t handle = GeneralConnect(PKG_NAME.c_str(), connection->name_.c_str(), &address);
     if (handle <= 0) {
-        COMM_LOGE(COMM_SDK, "connect failed, err=%{public}d", handle);
+        COMM_LOGE(COMM_SDK, "connect fail, err=%{public}d", handle);
         int32_t errcode = ConvertToJsErrcode(handle);
         HandleSyncErr(env, errcode);
         return NapiGetUndefinedRet(env);
     }
     connection->handle_ = (uint32_t)handle;
     connection->state_ = ConnectionState::STATE_CONNECTING;
-    COMM_LOGI(COMM_SDK, "start connect handle=%{public}u", handle);
+    COMM_LOGI(COMM_SDK, "connect handle=%{public}u", handle);
     return NapiGetUndefinedRet(env);
 }
 
@@ -347,7 +347,7 @@ napi_value NapiLinkEnhanceConnection::Disconnect(napi_env env, napi_callback_inf
     std::lock_guard<std::mutex> guard(connectionListMutex_);
     for (auto iter = connectionList_.begin(); iter != connectionList_.end(); ++iter) {
         if ((*iter)->handle_ == connection->handle_) {
-            COMM_LOGI(COMM_SDK, "disconnect connection, handle=%{public}u", connection->handle_);
+            COMM_LOGI(COMM_SDK, "disconnect conn, handle=%{public}u", connection->handle_);
             int32_t errCode = ConvertToJsErrcode(GeneralDisconnect(connection->handle_));
             if (errCode == LINK_ENHANCE_PERMISSION_DENIED) {
                 HandleSyncErr(env, errCode);
@@ -374,10 +374,10 @@ napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info inf
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
     if (connection == nullptr) {
-        COMM_LOGE(COMM_SDK, "get connection failed");
+        COMM_LOGE(COMM_SDK, "get connection fail");
         return NapiGetUndefinedRet(env);
     }
-    COMM_LOGI(COMM_SDK, "close connection, handle=%{public}u", connection->handle_);
+    COMM_LOGI(COMM_SDK, "close conn, handle=%{public}u", connection->handle_);
     connection->lock_.lock();
     connection->isEnableConnectResult_ = false;
     connection->isEnableData_ = false;
@@ -426,19 +426,19 @@ napi_value NapiLinkEnhanceConnection::GetPeerDeviceId(napi_env env, napi_callbac
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
     if (connection == nullptr) {
-        COMM_LOGI(COMM_SDK, "get connection failed");
+        COMM_LOGI(COMM_SDK, "get connection fail");
         return NapiGetStringRet(env, deviceId);
     }
 
     uint32_t handle = connection->handle_;
     if (handle == 0) {
-        COMM_LOGI(COMM_SDK, "invalid connection");
+        COMM_LOGI(COMM_SDK, "invalid conn");
         return NapiGetStringRet(env, deviceId);
     }
     char cDeviceId[BT_MAC_LEN] = { 0 };
     int32_t ret = GeneralGetPeerDeviceId(handle, cDeviceId, BT_MAC_LEN);
     if (ret != 0) {
-        COMM_LOGI(COMM_SDK, "get peer deviceId failed, handle=%{public}u", connection->handle_);
+        COMM_LOGI(COMM_SDK, "get peer deviceId fail, handle=%{public}u", connection->handle_);
         if (ConvertToJsErrcode(ret) == LINK_ENHANCE_PERMISSION_DENIED) {
             HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         }
@@ -476,7 +476,7 @@ napi_value NapiLinkEnhanceConnection::SendData(napi_env env, napi_callback_info 
     size_t dataLen = 0;
     status = napi_get_arraybuffer_info(env, arrayBuffer, (void **)&bufferData, &dataLen);
     if (status != napi_ok || dataLen == 0) {
-        COMM_LOGE(COMM_SDK, "get arraybuffer info failed, dataLen=%{public}zu", dataLen);
+        COMM_LOGE(COMM_SDK, "get arraybuffer info fail, dataLen=%{public}zu", dataLen);
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
     }
@@ -486,7 +486,7 @@ napi_value NapiLinkEnhanceConnection::SendData(napi_env env, napi_callback_info 
         HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
         return NapiGetUndefinedRet(env);
     }
-    COMM_LOGI(COMM_SDK, "call send func handle=%{public}u, len=%{public}u", connection->handle_, (uint32_t)dataLen);
+    COMM_LOGI(COMM_SDK, "napi send handle=%{public}u, len=%{public}u", connection->handle_, (uint32_t)dataLen);
     int32_t ret = GeneralSend(connection->handle_, data, (uint32_t)dataLen);
     if (ret != 0) {
         SoftBusFree(data);

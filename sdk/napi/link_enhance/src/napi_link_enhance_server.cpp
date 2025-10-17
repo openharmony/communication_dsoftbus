@@ -38,7 +38,7 @@ static napi_status CheckCreateServerParams(napi_env env, napi_callback_info info
 
     std::string name {};
     if (!ParseString(env, name, argv[ARGS_SIZE_ZERO])) {
-        COMM_LOGE(COMM_SDK, "expect string");
+        COMM_LOGE(COMM_SDK, "unexpect string");
         return napi_string_expected;
     }
     if (name.length() == 0) {
@@ -99,7 +99,7 @@ napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info i
     }
     std::string name = "";
     if (!ParseString(env, name, argv[PARAM0])) {
-        COMM_LOGE(COMM_SDK, "Parse name failed ");
+        COMM_LOGE(COMM_SDK, "Parse name fail");
         return NapiGetUndefinedRet(env);
     }
     {
@@ -111,7 +111,7 @@ napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info i
     }
     NapiLinkEnhanceServer* enhanceServer = new NapiLinkEnhanceServer(name);
     if (enhanceServer == nullptr) {
-        COMM_LOGE(COMM_SDK, "new enhanceServer failed");
+        COMM_LOGE(COMM_SDK, "new enhanceServer fail");
         return NapiGetUndefinedRet(env);
     }
     auto status = napi_wrap(
@@ -126,7 +126,7 @@ napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info i
         nullptr,
         nullptr);
     if (status != napi_ok) {
-        COMM_LOGE(COMM_SDK, "napi_wrap failed");
+        COMM_LOGE(COMM_SDK, "napi_wrap fail");
         delete enhanceServer;
         enhanceServer = nullptr;
         return thisVar;
@@ -282,7 +282,7 @@ napi_value NapiLinkEnhanceServer::Start(napi_env env, napi_callback_info info)
     }
     int32_t ret = GeneralCreateServer(PKG_NAME.c_str(), enhanceServer->name_.c_str());
     if (ret != 0) {
-        COMM_LOGE(COMM_SDK, "create server failed, ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "create server fail, ret=%{public}d", ret);
         int32_t errCode = ConvertToJsErrcode(ret);
         HandleSyncErr(env, errCode);
     }
@@ -303,7 +303,7 @@ napi_value NapiLinkEnhanceServer::Stop(napi_env env, napi_callback_info info)
     }
     NapiLinkEnhanceServer *enhanceServer = NapiGetEnhanceServer(env, info);
     if (enhanceServer == nullptr) {
-        COMM_LOGE(COMM_SDK, "get server failed");
+        COMM_LOGE(COMM_SDK, "get server fail");
         return NapiGetUndefinedRet(env);
     }
     enhanceServer->lock_.lock();
@@ -313,7 +313,7 @@ napi_value NapiLinkEnhanceServer::Stop(napi_env env, napi_callback_info info)
 
     int32_t ret = GeneralRemoveServer(PKG_NAME.c_str(), enhanceServer->name_.c_str());
     if (ret != 0) {
-        COMM_LOGE(COMM_SDK, "remove server failed, ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "remove server fail, ret=%{public}d", ret);
         if (ConvertToJsErrcode(ret) == LINK_ENHANCE_PERMISSION_DENIED) {
             HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         }
@@ -336,12 +336,12 @@ napi_value NapiLinkEnhanceServer::Close(napi_env env, napi_callback_info info)
     }
     NapiLinkEnhanceServer *enhanceServer = NapiGetEnhanceServer(env, info);
     if (enhanceServer == nullptr) {
-        COMM_LOGE(COMM_SDK, "get server failed");
+        COMM_LOGE(COMM_SDK, "get server fail");
         return NapiGetUndefinedRet(env);
     }
     int32_t ret = GeneralRemoveServer(PKG_NAME.c_str(), enhanceServer->name_.c_str());
     if (ret != 0) {
-        COMM_LOGE(COMM_SDK, "remove server failed, ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "remove server fail, ret=%{public}d", ret);
         if (ConvertToJsErrcode(ret) == LINK_ENHANCE_PERMISSION_DENIED) {
             HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         }
