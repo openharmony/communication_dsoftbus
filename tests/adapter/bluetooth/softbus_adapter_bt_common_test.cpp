@@ -23,7 +23,7 @@
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
 
-#define STATE_LISTENER_MAX_NUM 21
+#define STATE_LISTENER_MAX_NUM 22
 
 using namespace testing::ext;
 using ::testing::_;
