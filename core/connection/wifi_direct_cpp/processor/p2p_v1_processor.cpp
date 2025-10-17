@@ -1299,13 +1299,17 @@ int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand
         channel = std::static_pointer_cast<AuthNegotiateChannel>(command->GetNegotiateChannel());
         channel->SetClose();
     }
-    auto remoteDeviceId = command->GetRemoteDeviceId();
 
+    auto remoteDeviceId = command->GetRemoteDeviceId();
+    auto gcIp = command->GetNegotiateMessage().GetLegacyP2pGcIp();
     WifiDirectLink dlink {};
     auto success = LinkManager::GetInstance().ProcessIfPresent(
-        InnerLink::LinkType::P2P, remoteDeviceId, [channel, this, &dlink](InnerLink &link) {
+        InnerLink::LinkType::P2P, remoteDeviceId, [channel, gcIp, this, &dlink](InnerLink &link) {
             link.SetState(InnerLink::LinkState::CONNECTED);
             link.SetNegotiateChannel(channel);
+            if (!gcIp.empty()) {
+                link.SetRemoteIpv4(gcIp);
+            }
             if (connectCommand_ != nullptr) {
                 link.GenerateLink(connectCommand_->GetConnectInfo().info_.requestId,
                     connectCommand_->GetConnectInfo().info_.pid, dlink, true);
@@ -1566,13 +1570,20 @@ int P2pV1Processor::ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<Ne
     CONN_CHECK_AND_RETURN_RET_LOGW(
         result == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "peer response error. ret=%{public}d", result);
 
+    auto gcIp = msg.GetLegacyP2pGcIp();
+    LinkManager::GetInstance().ProcessIfPresent(remoteMac, [gcIp](InnerLink &link) {
+        link.SetState(InnerLink::LinkState::CONNECTED);
+        if (!gcIp.empty()) {
+            link.SetRemoteIpv4(gcIp);
+        }
+    });
+
     if (connectCommand_ != nullptr) {
         auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
         auto pid = connectCommand_->GetConnectInfo().info_.pid;
         WifiDirectLink dlink {};
         auto success = LinkManager::GetInstance().ProcessIfPresent(
             remoteMac, [msg, requestId, pid, &dlink](InnerLink &link) {
-                link.SetState(InnerLink::LinkState::CONNECTED);
                 link.GenerateLink(requestId, pid, dlink, true);
                 dlink.channelId = WifiDirectUtils::FrequencyToChannel(link.GetFrequency());
             });
@@ -1901,7 +1912,7 @@ int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::s
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get listen module fail, ret=%{public}d", ret);
 
     std::shared_ptr<AuthNegotiateChannel> authChannel = nullptr;
-    if (channel != nullptr && channel->GetType() != NegotiateChannelType::AUTH_CHANNEL) {
+    if (channel != nullptr && channel->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
         authChannel = std::static_pointer_cast<AuthNegotiateChannel>(channel);
     }
 
