@@ -298,7 +298,7 @@ bool WifiDirectUtils::IsRemoteSupportTlv(const std::string &remoteDeviceId)
     auto networkId = UuidToNetworkId(remoteDeviceId);
     auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteBoolInfoIgnoreOnline(networkId.c_str(),
         BOOL_KEY_TLV_NEGOTIATION, &result);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get tlv feature fail");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get tlv feature fail");
     return result;
 }
 
