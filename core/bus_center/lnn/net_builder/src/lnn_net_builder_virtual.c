@@ -81,7 +81,7 @@ void ClearPcRestrictMap(void)
     return;
 }
 
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason)
 {
     (void)networkId;
     (void)addrType;

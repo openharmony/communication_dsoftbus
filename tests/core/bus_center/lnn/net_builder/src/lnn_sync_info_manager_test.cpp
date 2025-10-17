@@ -1254,7 +1254,7 @@ HWTEST_F(LNNSyncInfoManagerTest, BleOffLineProcess_004, TestSize.Level1)
 
 /*
  * @tc.name: BleOffLineProcess_005
- * @tc.desc: LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK
+ * @tc.desc: LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
  * @tc.level: Level1
@@ -1505,7 +1505,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_004, TestSize.Level1)
 /*
  * @tc.name: WlanOffLineProcess_005
  * @tc.desc: CheckWifiOfflineMsgResult(networkId, authPort, convertOfflineCode) == true &&
- *           LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN) != SOFTBUS_OK
+ *           LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
  * @tc.level: Level1

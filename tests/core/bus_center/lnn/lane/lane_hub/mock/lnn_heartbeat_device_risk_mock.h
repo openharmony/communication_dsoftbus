@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LNN_HEARTBEAT_SATIC_MOCK_H
-#define LNN_HEARTBEAT_SATIC_MOCK_H
+#ifndef LNN_HEARTBEAT_DEVICE_RISK_MOCK_H
+#define LNN_HEARTBEAT_DEVICE_RISK_MOCK_H
 
 #include <gmock/gmock.h>
 #include <securec.h>
@@ -33,22 +33,23 @@
 #include "softbus_error_code.h"
 
 namespace OHOS {
-class LnnHeatbeatStaticInterface {
+class LnnHeatbeatDeviceRiskInterface {
 public:
-    LnnHeatbeatStaticInterface() {};
-    virtual ~LnnHeatbeatStaticInterface() {};
+    LnnHeatbeatDeviceRiskInterface() {};
+    virtual ~LnnHeatbeatDeviceRiskInterface() {};
 
-    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType,
+        DeviceLeaveReason leaveReason) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
 };
 
-class LnnHeatbeatStaticInterfaceMock : public LnnHeatbeatStaticInterface {
+class LnnHeatbeatDeviceRiskInterfaceMock : public LnnHeatbeatDeviceRiskInterface {
 public:
-    LnnHeatbeatStaticInterfaceMock();
-    ~LnnHeatbeatStaticInterfaceMock() override;
+    LnnHeatbeatDeviceRiskInterfaceMock();
+    ~LnnHeatbeatDeviceRiskInterfaceMock() override;
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *id, IdCategory type, NodeInfo *info));
 };
 } // namespace OHOS

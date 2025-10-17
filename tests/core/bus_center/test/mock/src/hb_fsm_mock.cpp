@@ -108,9 +108,9 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     return HeartBeatFSMInterfaceInstance()->LnnOfflineTimingByHeartbeat(networkId, addrType);
 }
 
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason)
 {
-    return HeartBeatFSMInterfaceInstance()->LnnRequestLeaveSpecific(networkId, addrType);
+    return HeartBeatFSMInterfaceInstance()->LnnRequestLeaveSpecific(networkId, addrType, leaveReason);
 }
 
 int32_t LnnHbMediumMgrSendBegin(LnnHeartbeatSendBeginData *custData)

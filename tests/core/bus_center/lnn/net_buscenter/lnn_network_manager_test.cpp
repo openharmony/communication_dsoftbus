@@ -640,40 +640,40 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-HWTEST_F(LNNNetworkManagerMockTest, NetRootDeviceLeaveLnnTest_001, TestSize.Level1)
+HWTEST_F(LNNNetworkManagerMockTest, RiskDeviceLeaveLnnTest_001, TestSize.Level1)
 {
     int ret = 0;
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = NetRootDeviceLeaveLnn();
+    ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_OK));
-    ret = NetRootDeviceLeaveLnn();
+    ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
 }
 
-HWTEST_F(LNNNetworkManagerMockTest, NetDeviceRootStateEventHandler_001, TestSize.Level1)
+HWTEST_F(LNNNetworkManagerMockTest, NetDeviceRiskStateEventHandler_001, TestSize.Level1)
 {
-    LnnDeviceRootStateChangeEvent *event =
-        reinterpret_cast<LnnDeviceRootStateChangeEvent *>(SoftBusCalloc(sizeof(LnnDeviceRootStateChangeEvent)));
+    LnnDeviceRiskStateChangeEvent *event =
+        reinterpret_cast<LnnDeviceRiskStateChangeEvent *>(SoftBusCalloc(sizeof(LnnDeviceRiskStateChangeEvent)));
     event->basic.event = LNN_EVENT_TYPE_MAX;
-    event->status = SOFTBUS_DEVICE_IS_ROOT;
+    event->status = SOFTBUS_DEVICE_IS_RISK;
 
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
-    NetDeviceRootStateEventHandler(NULL);
+    NetDeviceRiskStateEventHandler(NULL);
 
-    NetDeviceRootStateEventHandler(&event->basic);
+    NetDeviceRiskStateEventHandler(&event->basic);
 
-    event->basic.event = LNN_EVENT_DEVICE_ROOT_STATE_CHANGED;
-    NetDeviceRootStateEventHandler(&event->basic);
+    event->basic.event = LNN_EVENT_DEVICE_RISK_STATE_CHANGED;
+    NetDeviceRiskStateEventHandler(&event->basic);
 
-    event->status = SOFTBUS_DEVICE_NOT_ROOT;
-    NetDeviceRootStateEventHandler(&event->basic);
+    event->status = SOFTBUS_DEVICE_NOT_RISK;
+    NetDeviceRiskStateEventHandler(&event->basic);
 
     EXPECT_EQ(event->status, 0);
 }

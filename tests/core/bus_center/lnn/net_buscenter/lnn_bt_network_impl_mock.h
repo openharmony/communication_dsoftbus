@@ -39,7 +39,8 @@ class LnnBtNetworkImplInterface {
 public:
     LnnBtNetworkImplInterface() {};
     virtual ~LnnBtNetworkImplInterface() {};
-    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType,
+        DeviceLeaveReason leaveReason) = 0;
     virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
     virtual int32_t SoftBusGetBtState(void) = 0;
     virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
@@ -132,7 +133,7 @@ class LnnBtNetworkImplInterfaceMock : public LnnBtNetworkImplInterface {
 public:
     LnnBtNetworkImplInterfaceMock();
     ~LnnBtNetworkImplInterfaceMock() override;
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t));
     MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
     MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t(SoftBusBtAddr *));

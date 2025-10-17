@@ -49,9 +49,9 @@ int32_t LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBle(const ch
 }
 
 extern "C" {
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason)
 {
-    return GetLnnBtNetworkImplInterface()->LnnRequestLeaveSpecific(networkId, addrType);
+    return GetLnnBtNetworkImplInterface()->LnnRequestLeaveSpecific(networkId, addrType, leaveReason);
 }
 
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)

@@ -133,13 +133,13 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0)
 {
     char *networkId = nullptr;
-    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN);
+    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnRequestLeaveSpecific(NETWORKID, CONNECTION_ADDR_WLAN);
+    ret = LnnRequestLeaveSpecific(NETWORKID, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT);
     EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnRequestLeaveSpecific(NETWORKID, CONNECTION_ADDR_WLAN);
+    ret = LnnRequestLeaveSpecific(NETWORKID, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

@@ -742,7 +742,7 @@ static bool IsNeedNotifyOfflineByAdv(const char *udid)
         LNN_LOGE(LNN_BUILDER, "ble capa disable, local=%{public}u, remote=%{public}u", local, info.netCapacity);
         return false;
     }
-    LnnRequestLeaveSpecific(info.networkId, CONNECTION_ADDR_MAX);
+    LnnRequestLeaveSpecific(info.networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
     return true;
 }
 
