@@ -99,7 +99,7 @@ static int32_t SetConnectionHandleAndState(ConnBleConnection *connection, int32_
 {
     int32_t ret = SoftBusMutexLock(&connection->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "client connection lock fail, connectionId=%{public}u, err=%{public}d",
+        CONN_LOGE(CONN_BLE, "client connection lock fail, connId=%{public}u, err=%{public}d",
             connection->connectionId, ret);
         (void)SoftbusGattcUnRegister(underlayerHandle);
         return SOFTBUS_LOCK_ERR;
@@ -108,7 +108,7 @@ static int32_t SetConnectionHandleAndState(ConnBleConnection *connection, int32_
     connection->state = BLE_CONNECTION_STATE_CONNECTING;
     (void)SoftBusMutexUnlock(&connection->lock);
     CONN_LOGI(CONN_BLE,
-        "ble client connect. connectionId=%{public}u, handle=%{public}d, fastestConnectEnable=%{public}d",
+        "ble client connect. connId=%{public}u, handle=%{public}d, fastestConnectEnable=%{public}d",
         connection->connectionId, underlayerHandle, connection->fastestConnectEnable);
     return SOFTBUS_OK;
 }
@@ -121,7 +121,7 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     SoftBusBtAddr binaryAddr = { 0 };
     int32_t ret = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_BLE, "client connect fail: convert string mac "
-        "to binary fail, connectionId=%{public}u, err=%{public}d", connection->connectionId, ret);
+        "to binary fail, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
     int32_t underlayerHandle = SoftbusGattcRegister();
     CONN_CHECK_AND_RETURN_RET_LOGW(underlayerHandle != INVALID_GATTC_ID, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_ERR,
         CONN_BLE, "ble client connect fail: underlayer register fail, underlayerHandle=%{public}d",
@@ -152,7 +152,7 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     }
     ret = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "client connect fail: underlayer connect fail, connectionId=%{public}u, err=%{public}d",
+        CONN_LOGE(CONN_BLE, "client connect fail: underlayer connect fail, connId=%{public}u, err=%{public}d",
             connection->connectionId, ret);
         (void)SoftbusGattcUnRegister(underlayerHandle);
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR;
@@ -646,7 +646,7 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
     (void)SoftBusMutexUnlock(&connection->lock);
     if (underlayerHandle == INVALID_UNDERLAY_HANDLE) {
         CONN_LOGD(CONN_BLE, "ble client connection disconnect, handle is valid, repeat disconnect? just report close. "
-            "connectionId=%{public}u", connection->connectionId);
+            "connId=%{public}u", connection->connectionId);
         g_clientEventListener.onClientConnectionClosed(connection->connectionId, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
@@ -660,7 +660,7 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
             0, NULL, UNDERLAY_CONNECTION_DISCONNECT_TIMEOUT);
     }
     CONN_LOGI(CONN_BLE,
-        "ble client disconnect, connectionId=%{public}u, handle=%{public}d, grace=%{public}d, refreshGatt=%{public}d, "
+        "ble client disconnect, connId=%{public}u, handle=%{public}d, grace=%{public}d, refreshGatt=%{public}d, "
         "err=%{public}d",
         connection->connectionId, underlayerHandle, grace, refreshGatt, ret);
     return ret;
@@ -808,7 +808,7 @@ int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePr
     int32_t ret = SoftBusMutexLock(&connection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
         "ble client update priority fail, try to get connection lock fail, "
-        "connectionId=%{public}u, error=%{public}d",
+        "connId=%{public}u, error=%{public}d",
         connection->connectionId, ret);
     int32_t underlayerHandle = connection->underlayerHandle;
     enum ConnBleConnectionState state = connection->state;

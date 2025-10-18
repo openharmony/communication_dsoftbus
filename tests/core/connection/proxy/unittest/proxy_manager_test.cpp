@@ -62,7 +62,7 @@ public:
 
 static void TestOnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
 {
-    CONN_LOGI(CONN_PROXY, "TestOnOpenSuccess, requestId=%{public}u, channelId=%{public}u",
+    CONN_LOGI(CONN_PROXY, "TestOnOpenSuccess, reqId=%{public}u, channelId=%{public}u",
         requestId, channel->channelId);
     g_channelId = channel->channelId;
     if (g_channel != nullptr) {

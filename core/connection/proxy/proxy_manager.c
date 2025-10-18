@@ -761,7 +761,7 @@ static void OnInnerReConnectSuccess(uint32_t requestId, struct ProxyChannel *cha
 
 static void OnInnerReConnectFail(uint32_t requestId, int32_t reason)
 {
-    CONN_LOGE(CONN_PROXY, "requestId=%{public}u, reason=%{public}d", requestId, reason);
+    CONN_LOGE(CONN_PROXY, "reqId=%{public}u, reason=%{public}d", requestId, reason);
 }
 
 static bool IsTargetDeviceAlreadyConnected(char *brAddr)
@@ -819,7 +819,7 @@ static void AttemptReconnectDevice(char *brAddr)
     proxyChannelRequestInfo->result.onOpenFail = OnInnerReConnectFail;
     proxyChannelRequestInfo->isInnerRequest = true;
     proxyChannelRequestInfo->timeoutMs = INNER_RECONNECT_TIMEOUT_MS;
-    CONN_LOGI(CONN_PROXY, "start reconnect requestId=%{public}u, addr=%{public}s, innerRetryNum=%{public}u",
+    CONN_LOGI(CONN_PROXY, "start reconnect reqId=%{public}u, addr=%{public}s, innerRetryNum=%{public}u",
         proxyChannelRequestInfo->requestId, anomizeAddress, innerRetryNum);
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL,
         0, 0, proxyChannelRequestInfo, delayMillis);
