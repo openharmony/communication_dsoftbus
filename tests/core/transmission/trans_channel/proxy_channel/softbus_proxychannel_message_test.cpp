@@ -132,9 +132,9 @@ void TestCallbackFail(void)
     ASSERT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyHandshakeErrMsgTest001
- * @tc.desc: test pack or unpack handshake err message.
+ * @tc.desc: test pack or unpack handshake err message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -152,9 +152,9 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeErrMsgTest001, TestS
     cJSON_free(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyHandshakeAckMsgTest001
- * @tc.desc: test pack or unpack handshake ack message.
+ * @tc.desc: test pack or unpack handshake ack message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -186,9 +186,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest001, TestS
     cJSON_free(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyHandshakeAckMsgTest002
- * @tc.desc: test pack or unpack handshake ack message, test normal app type.
+ * @tc.desc: test pack or unpack handshake ack message
+ *           test normal app type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -208,9 +209,9 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest002, TestS
     cJSON_free(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyHandshakeMsgTest001
- * @tc.desc: test pack or unpack handshake normal message.
+ * @tc.desc: test pack or unpack handshake normal message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -236,9 +237,9 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest001, TestSize
     cJSON_free(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyHandshakeMsgTest002
- * @tc.desc: test pack or unpack handshake auth message.
+ * @tc.desc: test pack or unpack handshake auth message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -263,9 +264,9 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest002, TestSize
     cJSON_free(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyHandshakeMsgTest003
- * @tc.desc: test pack or unpack handshake inner message.
+ * @tc.desc: test pack or unpack handshake inner message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -287,9 +288,9 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest003, TestSize
     cJSON_free(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyIdentityMsgTest001
- * @tc.desc: test pack or unpack identity message.
+ * @tc.desc: test pack or unpack identity message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -306,9 +307,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyIdentityMsgTest001, TestSize.
     cJSON_free(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackMessageTest001
- * @tc.desc: TransProxyPackMessageTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyPackMessage
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -344,9 +346,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackMessageTest002
- * @tc.desc: TransProxyPackMessageTest002, use normal param.
+ * @tc.desc: test TransProxyPackMessage
+ *           use normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -375,12 +378,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
-/**
-  * @tc.name: TransProxyParseMessageTest001
-  * @tc.desc: TransProxyParseMessageTest001, use wrong param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyParseMessageTest001
+ * @tc.desc: test TransProxyParseMessage
+ *           use wrong param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -422,12 +426,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
     SoftBusFree(buf);
 }
 
-/**
-  * @tc.name: TransProxyParseMessageTest002
-  * @tc.desc: TransProxyParseMessageTest002, use normal param, run normal message
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyParseMessageTest002
+ * @tc.desc: test TransProxyParseMessage
+ *           use normal param, run normal message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
@@ -451,12 +456,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
     SoftBusFree(buf);
 }
 
-/**
-  * @tc.name: TransProxyParseMessageTest003
-  * @tc.desc: TransProxyParseMessageTest003, use normal param, run handshark message
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyParseMessageTest003
+ * @tc.desc: test TransProxyParseMessage
+ *           use normal param, run handshark message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
@@ -505,12 +511,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
     SoftBusFree(buf);
 }
 
-/**
-  * @tc.name: TransProxyParseMessageTest004
-  * @tc.desc: TransProxyParseMessage
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyParseMessageTest004
+ * @tc.desc: test TransProxyParseMessage
+ *           use normal param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize.Level1)
 {
     AuthHandle auth;
@@ -525,12 +532,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
-  * @tc.name: TransProxyHandshakeTest001
-  * @tc.desc: TransProxyHandshakeTest001, use wrong param and normal param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyHandshakeTest001
+ * @tc.desc: test TransProxyHandshake
+ *           use wrong param and normal param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
@@ -566,12 +574,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Le
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyAckHandshakeTest001
-  * @tc.desc: TransProxyAckHandshakeTest001, use wrong param and normal param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyAckHandshakeTest001
+ * @tc.desc: test TransProxyAckHandshake
+ *           use wrong param and normal param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
 {
     int32_t retCode = -1;
@@ -597,12 +606,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyKeepAliveTest001
-  * @tc.desc: test proxy keepalive and keepalive ack message.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyKeepAliveTest001
+ * @tc.desc: test proxy keepalive and keepalive ack message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepAliveTest001, TestSize.Level1)
 {
     ProxyChannelInfo chanInfo;
@@ -631,12 +640,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepAliveTest001, TestSize.Le
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyResetPeerTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyResetPeerTest001
+ * @tc.desc: test proxy reset peer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
 {
     ProxyChannelInfo chanInfo;
@@ -656,12 +665,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest001, TestSize.Le
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyPackFastDataTest001
-  * @tc.desc: test trans proxy pack fast data.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyPackFastDataTest001
+ * @tc.desc: test trans proxy pack fast data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataTest001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
@@ -688,12 +697,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataTest001, TestSize
     SoftBusFree(sliceData);
 }
 
-/**
-  * @tc.name: TransProxyByteDataTest001
-  * @tc.desc: test trans proxy byte data.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyByteDataTest001
+ * @tc.desc: test trans proxy byte data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyByteDataTest001, TestSize.Level1)
 {
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
@@ -715,12 +724,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyByteDataTest001, TestSize.Lev
     SoftBusFree(dataInfo);
 }
 
-/**
-  * @tc.name: TransFastDataPackSliceHeadTest001
-  * @tc.desc: test fast data pack slice head.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransFastDataPackSliceHeadTest001
+ * @tc.desc: test fast data pack slice head
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransFastDataPackSliceHeadTest001, TestSize.Level1)
 {
     SliceFastHead *data = (SliceFastHead *)SoftBusCalloc(sizeof(SliceFastHead));
@@ -737,12 +746,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransFastDataPackSliceHeadTest001, Test
     SoftBusFree(data);
 }
 
-/**
-  * @tc.name: TransProxyPackFastDataHeadTest001
-  * @tc.desc: test trans proxy pack fast data head.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyPackFastDataHeadTest001
+ * @tc.desc: test trans proxy pack fast data head
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataHeadTest001, TestSize.Level1)
 {
     AppInfo *appInfo = nullptr;
@@ -768,12 +777,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataHeadTest001, Test
     SoftBusFree(dataInfo);
 }
 
-/**
-  * @tc.name: FastDataPackPacketHeadTest001
-  * @tc.desc: test fast data pack packethead.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: FastDataPackPacketHeadTest001
+ * @tc.desc: test fast data pack packethead
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, FastDataPackPacketHeadTest001, TestSize.Level1)
 {
     PacketFastHead *data = (PacketFastHead *)SoftBusCalloc(sizeof(PacketFastHead));
@@ -790,12 +799,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, FastDataPackPacketHeadTest001, TestSize
     SoftBusFree(data);
 }
 
-/**
-  * @tc.name: TransProxyEncryptFastDataTest001
-  * @tc.desc: test trans proxy encrypt fast data.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyEncryptFastDataTest001
+ * @tc.desc: test trans proxy encrypt fast data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyEncryptFastDataTest001, TestSize.Level1)
 {
     char sessionKey[FAST_TRANS_DATASIZE] = {0};
@@ -815,12 +824,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyEncryptFastDataTest001, TestS
     EXPECT_NE(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
-/**
-  * @tc.name: TransProxyParseMessageHeadTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyParseMessageHeadTest001
+ * @tc.desc: test proxy reset peer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -841,12 +850,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyParseMessageHeadTest002
-  * @tc.desc: TransProxyParseMessageHead
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyParseMessageHeadTest002
+ * @tc.desc: test TransProxyParseMessageHead
+ *           use normal param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest002, TestSize.Level1)
 {
     char data[TEST_DATA_LEN] = { 0x11, 0x22, 0x33, 0x44 };
@@ -857,12 +867,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest002, Test
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
-  * @tc.name: TransProxyGetRemoteTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyGetRemoteTest001
+ * @tc.desc: test proxy reset peer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetRemoteTest001, TestSize.Level1)
 {
     char brMac[BT_MAC_LEN] = {0};
@@ -875,12 +885,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetRemoteTest001, TestSize.Le
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyGetAuthConnInfoTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyGetAuthConnInfoTest001
+ * @tc.desc: test proxy reset peer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthConnInfoTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -890,12 +900,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthConnInfoTest001, TestS
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyConvertBrConnInfoTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyConvertBrConnInfoTest001
+ * @tc.desc: test proxy reset peer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBrConnInfoTest001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
@@ -903,12 +913,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBrConnInfoTest001, Tes
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyConvertBleConnInfoTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyConvertBleConnInfoTest001
+ * @tc.desc: test proxy reset peer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBleConnInfoTest001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
@@ -916,12 +926,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBleConnInfoTest001, Te
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyGetAuthIdTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyGetAuthIdTest001
+ * @tc.desc: test proxy reset peer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -933,12 +943,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Le
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyUnpackInnerHandshakeMsgTest001
-  * @tc.desc: test trans proxy unpack inner handshakemsg.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyUnpackInnerHandshakeMsgTest001
+ * @tc.desc: test trans proxy unpack inner handshakemsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -956,12 +966,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxyUnpackNormalHandshakeMsgTest001
-  * @tc.desc: test trans proxy unpack inner handshakemsg.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest001
+ * @tc.desc: test trans proxy unpack inner handshakemsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest001, TestSize.Level1)
 {
     char msg[FAST_ARRAY_SIZE] = {
@@ -986,12 +996,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest0
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: UnpackPackHandshakeMsgForFastDataTest001
-  * @tc.desc: test unpack pack handshakemsg for fastdata.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: UnpackPackHandshakeMsgForFastDataTest001
+ * @tc.desc: test unpack pack handshakemsg for fastdata
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -1010,13 +1020,15 @@ HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest00
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: GetBrMacFromConnInfoTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid len or null mac.
-  * @tc.desc: Should return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT when given invalid parameter.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: GetBrMacFromConnInfoTest001
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM
+ *           when given invalid len or null mac
+ * @tc.desc: Should return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT
+ *           when given invalid parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.Level1)
 {
     char brMac[BT_MAC_LEN] = "testBrMac";
@@ -1034,13 +1046,15 @@ HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
-/**
-  * @tc.name: PackPlaintextMessageTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null message or datainfo.
-  * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: PackPlaintextMessageTest001
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM
+ *           when given null message or datainfo
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when given valid parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.Level1)
 {
     ProxyMessageHead msg;
@@ -1057,12 +1071,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: PackHandshakeMsgForFastDataTest001
-  * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid parameter.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: PackHandshakeMsgForFastDataTest001
+ * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR
+ *           when given invalid parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -1083,13 +1098,15 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, Tes
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
-/**
-  * @tc.name: TransProxyUnpackNormalHandshakeMsgTest002
-  * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid msg.
-  * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given invalid msg.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest002
+ * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR
+ *           when given invalid msg
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR
+ *           when given invalid msg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
@@ -1130,14 +1147,17 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest0
     cJSON_Delete(msg);
 }
 
-/**
-  * @tc.name: TransProxyUnpackAuthHandshakeMsgTest001
-  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED when given null appInfo.
-  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED when given invalid msg.
-  * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyUnpackAuthHandshakeMsgTest001
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED
+ *           when given null appInfo
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED
+ *           when given invalid msg
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when given valid parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackAuthHandshakeMsgTest001, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
@@ -1154,12 +1174,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackAuthHandshakeMsgTest001
     cJSON_Delete(msg);
 }
 
-/**
-  * @tc.name: TransProxyUnpackInnerHandshakeMsgTest002
-  * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given invalid parameters.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyUnpackInnerHandshakeMsgTest002
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR
+ *           when given invalid parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
@@ -1176,12 +1197,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
     cJSON_Delete(msg);
 }
 
-/**
-  * @tc.name: TransProxyParseD2DDataTest001
-  * @tc.desc: test trans proxy parse .
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxyParseD2DDataTest001
+ * @tc.desc: test trans proxy parse
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseD2DDataTest001, TestSize.Level1)
 {
     int32_t len = 1;
