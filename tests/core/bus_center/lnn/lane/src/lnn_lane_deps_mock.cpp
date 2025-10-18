@@ -513,5 +513,10 @@ int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int
 {
     return GetLaneDepsInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
+
+int32_t AuthMetaGetMetaTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *metaType)
+{
+    return GetLaneDepsInterface()->AuthMetaGetMetaTypeByMetaNodeIdPacked(metaNodeId, metaType);
+}
 }
 } // namespace OHOS

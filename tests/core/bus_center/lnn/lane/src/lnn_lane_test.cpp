@@ -35,6 +35,7 @@
 #include "lnn_select_rule.h"
 #include "lnn_wifi_adpter_mock.h"
 #include "message_handler.h"
+#include "meta_socket_struct.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
@@ -2482,6 +2483,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_017, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     mock.SetDefaultResultForAlloc(63, 63, 0, 0);
+    EXPECT_CALL(mock, AuthMetaGetMetaTypeByMetaNodeIdPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_CONN_FAIL));
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
     LaneAllocInfo allocInfo = {};
@@ -2489,6 +2491,42 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_017, TestSize.Level1)
         DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
     SetIsNeedCondWait();
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+}
+
+/*
+* @tc.name: LANE_ALLOC_TEST_018
+* @tc.desc: lnnAllocLane with meta sdk
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_018, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    ASSERT_NE(laneManager, nullptr);
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+    EXPECT_CALL(mock, AuthMetaGetMetaTypeByMetaNodeIdPacked)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(META_TYPE_SDK), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(LaneDepsInterfaceMock::ActionOfGenerateStrHash);
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
+    wifiMock.SetDefaultResult();
+    EXPECT_CALL(wifiMock, LnnConnectP2p(NotNull(), laneReqId, NotNull()))
+        .WillRepeatedly(LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p);
+    LaneAllocInfo allocInfo = {};
+    CreateAllocInfoForAllocTest(LANE_T_BYTE, HIGH_BW - DEFAULT_QOSINFO_MIN_BW, DEFAULT_QOSINFO_MAX_LATENCY,
+        DEFAULT_QOSINFO_MIN_LATENCY, &allocInfo);
+    SetIsNeedCondWait();
+    int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &g_listenerCbForP2p);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+    SetIsNeedCondWait();
+    ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 }
