@@ -65,9 +65,10 @@ void SoftbusProxyChannelTransceiverPagingTest::TearDownTestCase(void)
 {
 }
 
-/**@
+/*
  * @tc.name: TransProxyPagingHandshakeMsgToLoopTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -87,9 +88,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransProxyPagingHandshakeMsgT
     TransProxyPagingHandshakeMsgToLoop(TEST_CHANNEL_ID, authKey, 0);
 }
 
-/**@
+/*
  * @tc.name: TransProxyParseMsgTypeTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -111,9 +113,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransProxyParseMsgTypeTest001
     TransProxyOnDataReceived(connectionId, moduleId, seq, data, len);
 }
 
-/**@
+/*
  * @tc.name: TransPagingWaitListenStatusTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -143,9 +146,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransPagingWaitListenStatusTe
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: CheckListenResultTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -180,9 +184,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckListenResultTest001, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: CheckPagingListenTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -206,9 +211,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest001, Tes
     CheckPagingListen((void *)tmp);
 }
 
-/**@
+/*
  * @tc.name: CheckPagingListenTest002
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -238,9 +244,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest002, Tes
     CheckPagingListen((void *)tmpTest);
 }
 
-/**@
+/*
  * @tc.name: CheckPagingListenTest003
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -267,9 +274,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest003, Tes
 }
 
 
-/**@
+/*
  * @tc.name: CheckPagingListenTest004
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -294,9 +302,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest004, Tes
     CheckPagingListen((void *)tmp);
 }
 
-/**@
+/*
  * @tc.name: CheckPagingListenTest005
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -323,9 +332,10 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest005, Tes
     CheckPagingListen((void *)tmp);
 }
 
-/**@
+/*
  * @tc.name: TransCheckPagingListenStateTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
