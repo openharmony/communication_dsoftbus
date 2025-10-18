@@ -79,15 +79,15 @@ uint8_t *ConnGattTransRecv(
     uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(data != NULL, NULL, CONN_BLE,
-        "ble recv packet fail: invalid param, data is null, connectionId=%{public}u", connectionId);
+        "ble recv packet fail: invalid param, data is null, connId=%{public}u", connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGW(dataLen != 0, NULL, CONN_BLE,
-        "ble recv packet fail: invalid param, data len is 0, connectionId=%{public}u", connectionId);
+        "ble recv packet fail: invalid param, data len is 0, connId=%{public}u", connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGW(outLen != NULL, NULL, CONN_BLE,
-        "ble recv packet fail: invalid param, outLen is null, connectionId=%{public}u", connectionId);
+        "ble recv packet fail: invalid param, outLen is null, connId=%{public}u", connectionId);
 
     BleTransHeader header = { 0 };
     CONN_CHECK_AND_RETURN_RET_LOGW(UnpackTransHeader(data, dataLen, &header) == SOFTBUS_OK, NULL, CONN_BLE,
-        "unpack ble trans header fail, discard this packet, connectionId=%{public}u, dataLen=%{public}u",
+        "unpack ble trans header fail, discard this packet, connId=%{public}u, dataLen=%{public}u",
         connectionId, dataLen);
 
     if (header.size == header.total) {
@@ -143,7 +143,7 @@ uint8_t *ConnGattTransRecv(
             CONN_LOGE(CONN_BLE,
                 "ble recv packet: it received an mis-order packet this time, There may be more times mis-order occured "
                 "try to re-order them. "
-                "connectionId=%{public}u, dataLen=%{public}u, "
+                "connId=%{public}u, dataLen=%{public}u, "
                 "headerSeq=%{public}u, headerTotal=%{public}u, headerSize=%{public}u, headerOffset=%{public}u, "
                 "thisSeq=%{public}u, thisTotal=%{public}u, thisSize=%{public}u, thisOffset=%{public}u",
                 connectionId, dataLen, it->header.seq, it->header.total, it->header.size, it->header.offset, header.seq,
@@ -555,7 +555,7 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     if (buffer->length > packLen &&
         memmove_s(buffer->buffer, buffer->length, buffer->buffer + packLen, buffer->length - packLen) != EOK) {
         CONN_LOGE(CONN_BLE, "coc connection parse data fail: memmove_s fail, retry next time. "
-            "connectionId=%{public}u", connectionId);
+            "connId=%{public}u", connectionId);
         SoftBusFree(dataCopy);
         return NULL;
     }
@@ -640,7 +640,7 @@ void *BleSendTask(void *arg)
                 ret = ConnCocTransSend(connection, sendNode->data, sendNode->dataLen, sendNode->module);
                 break;
             default:
-                CONN_LOGE(CONN_BLE, "ble connecion trans send fail, connectionId=%{public}u, protocol=%{public}d",
+                CONN_LOGE(CONN_BLE, "ble connecion trans send fail, connId=%{public}u, protocol=%{public}d",
                     connection->connectionId, connection->protocol);
         }
         ConnBleReturnConnection(&connection);

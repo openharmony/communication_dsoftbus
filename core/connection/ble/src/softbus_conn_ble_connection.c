@@ -351,7 +351,7 @@ static bool NeedProccessOccupy(ConnBleConnection *connection, int32_t delta, uin
     CONN_LOGI(CONN_BLE, "is occupied, process later, connId=%{public}u", connection->connectionId);
     BleReferenceContext *referenceContext = (BleReferenceContext *)SoftBusMalloc(sizeof(BleReferenceContext));
     CONN_CHECK_AND_RETURN_RET_LOGE(referenceContext != NULL, false, CONN_BLE,
-        "malloc buffer fail, connectionId=%{public}u", connection->connectionId);
+        "malloc buffer fail, connId=%{public}u", connection->connectionId);
     referenceContext->delta = delta;
     referenceContext->challengeCode = challengeCode;
     referenceContext->isActiveUpdateLocalRc = isActiveUpdateLocalRc;
@@ -1126,7 +1126,7 @@ static void BleOnOccupyRelease(uint32_t connectionId)
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "conn not exist, id=%{public}u", connectionId);
     int32_t ret = SoftBusMutexLock(&connection->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "lock fail, connectionId=%{public}u, error=%{public}d", connectionId, ret);
+        CONN_LOGE(CONN_BLE, "lock fail, connId=%{public}u, error=%{public}d", connectionId, ret);
         ConnBleReturnConnection(&connection);
         return;
     }

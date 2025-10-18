@@ -370,7 +370,7 @@ void AuthNegotiateChannel::OnConnOpened(uint32_t requestId, AuthHandle authHandl
     {
         std::lock_guard lock(lock_);
         remoteDeviceId = requestIdToDeviceIdMap_[requestId];
-        CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s", requestId,
+        CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}u remoteDeviceId=%{public}s", requestId,
             WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
         requestIdToDeviceIdMap_.erase(requestId);
         auto it = authOpenEventPromiseMap_.find(requestId);
@@ -390,7 +390,7 @@ void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
     {
         std::lock_guard lock(lock_);
         remoteDeviceId = requestIdToDeviceIdMap_[requestId];
-        CONN_LOGE(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s reason=%{public}d", requestId,
+        CONN_LOGE(CONN_WIFI_DIRECT, "reqId=%{public}u remoteDeviceId=%{public}s reason=%{public}d", requestId,
             WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(), reason);
         requestIdToDeviceIdMap_.erase(requestId);
         auto it = authOpenEventPromiseMap_.find(requestId);

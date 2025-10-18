@@ -965,7 +965,7 @@ int32_t ConnGattServerDisconnect(ConnBleConnection *connection)
     int32_t ret = SoftBusMutexLock(&connection->lock);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
-            "ble server connection disconnect fail, try to lock fail, connectionId=%{public}u, err=%{public}d",
+            "ble server connection disconnect fail, try to lock fail, connId=%{public}u, err=%{public}d",
             connection->connectionId, ret);
         return SOFTBUS_LOCK_ERR;
     }
@@ -982,7 +982,7 @@ int32_t ConnGattServerDisconnect(ConnBleConnection *connection)
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
             "ble server connection disconnect fail: convert string mac to binary fail, "
-            "connectionId=%{public}u, err=%{public}d",
+            "connId=%{public}u, err=%{public}d",
             connection->connectionId, ret);
         return ret;
     }
@@ -995,7 +995,7 @@ int32_t ConnGattServerDisconnect(ConnBleConnection *connection)
             0, NULL, UNDERLAY_CONNECTION_DISCONNECT_TIMEOUT);
     }
     CONN_LOGI(CONN_BLE,
-        "ble server connection disconnect, connectionId=%{public}u, handle=%{public}d, ret=%{public}d",
+        "ble server connection disconnect, connId=%{public}u, handle=%{public}d, ret=%{public}d",
         connection->connectionId, underlayerHandle, ret);
     return ret;
 }
