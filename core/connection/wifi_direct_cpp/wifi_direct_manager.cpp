@@ -161,7 +161,7 @@ static int32_t ForceDisconnectDevice(
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d linkType=%{public}d remoteUuid=%{public}s", info->requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}d linkType=%{public}d remoteUuid=%{public}s", info->requestId,
         info->linkType, OHOS::SoftBus::WifiDirectAnonymizeDeviceId(info->remoteUuid).c_str());
     return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ForceDisconnectDevice(
         *info, *callback);
@@ -260,13 +260,13 @@ static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
 
 static void OnForceDisconnectSuccess(uint32_t requestId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect succ, requestId=%{public}u", requestId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect succ, reqId=%{public}u", requestId);
     g_promiseMap[requestId]->set_value(SOFTBUS_OK);
 }
 
 static void OnForceDisconnectFailure(uint32_t requestId, int32_t reason)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect fail, requestId=%{public}u, reason=%{public}d",
+    CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect fail, reqId=%{public}u, reason=%{public}d",
         requestId, reason);
     g_promiseMap[requestId]->set_value(reason);
 }
@@ -305,12 +305,12 @@ static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkT
         .onDisconnectSuccess = OnForceDisconnectSuccess,
         .onDisconnectFailure = OnForceDisconnectFailure,
     };
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d linkType=%{public}d remoteUuid=%{public}s", info.requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}d linkType=%{public}d remoteUuid=%{public}s", info.requestId,
         info.linkType, OHOS::SoftBus::WifiDirectAnonymizeDeviceId(info.remoteUuid).c_str());
     auto ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ForceDisconnectDevice(
         info, callback);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect scheduler fail, requestId=%{public}d ret=%{public}d",
+        CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect scheduler fail, reqId=%{public}d ret=%{public}d",
             info.requestId, ret);
         std::lock_guard lock(g_promiseMaplock);
         g_promiseMap.erase(info.requestId);
@@ -318,7 +318,7 @@ static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkT
     }
     int32_t result = SOFTBUS_OK;
     result = g_promiseMap[info.requestId]->get_future().get();
-    CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect requestId=%{public}d reason=%{public}d", info.requestId, result);
+    CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect reqId=%{public}d reason=%{public}d", info.requestId, result);
     std::lock_guard lock(g_promiseMaplock);
     g_promiseMap.erase(info.requestId);
     return result;

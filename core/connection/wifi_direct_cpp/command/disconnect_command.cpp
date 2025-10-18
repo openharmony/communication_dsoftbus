@@ -85,7 +85,7 @@ std::shared_ptr<NegotiateChannel> DisconnectCommand::GetNegotiateChannel() const
 
 void DisconnectCommand::OnSuccess() const
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u", info_.info_.requestId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}u", info_.info_.requestId);
     if (callback_.onDisconnectSuccess != nullptr) {
         callback_.onDisconnectSuccess(info_.info_.requestId);
     }
@@ -93,7 +93,7 @@ void DisconnectCommand::OnSuccess() const
 
 void DisconnectCommand::OnFailure(int32_t reason) const
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     if (callback_.onDisconnectFailure != nullptr) {
         callback_.onDisconnectFailure(info_.info_.requestId, reason);
     }

@@ -23,6 +23,7 @@ group("fuzztest") {
       "authnegotiatechannelimproved_fuzzer:AuthNegotiateChannelImprovedFuzzTest",
       "proxynegotiatechannelimproved_fuzzer:ProxyNegotiateChannelImprovedFuzzTest",
       "softbusnegotiatemessage_fuzzer:SoftBusNegotiateMessageFuzzTest",
+      "wifidirectp2padapter_fuzzer:WifiDirectP2pAdapterFuzzTest",
       "wifidirectprotocol_fuzzer:WifiDirectProtocolFuzzTest",
     ]
   }

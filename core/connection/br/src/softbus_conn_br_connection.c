@@ -467,7 +467,7 @@ static int32_t BrUpdateConnectionRc(uint32_t connectionId, int32_t delta)
     
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock fail, connectionId=%{public}u, error=%{public}d", connectionId, status);
+        CONN_LOGE(CONN_BR, "lock fail, connId=%{public}u, error=%{public}d", connectionId, status);
         ConnBrReturnConnection(&connection);
         return SOFTBUS_LOCK_ERR;
     }
@@ -480,7 +480,7 @@ static int32_t BrUpdateConnectionRc(uint32_t connectionId, int32_t delta)
         status = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_LOCAL_RC, connectionId, delta,
             NULL, WAIT_TIMEOUT_TRY_AGAIN);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "post msg fail, connectionId=%{public}u, error=%{public}d", connectionId, status);
+            CONN_LOGE(CONN_BR, "post msg fail, connId=%{public}u, error=%{public}d", connectionId, status);
             return status;
         }
         return SOFTBUS_OK;
@@ -537,7 +537,7 @@ static int32_t BrPostReplyMessage(uint32_t connectionId, int32_t localRc)
     uint32_t dataLen = 0;
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     if (seq < 0) {
-        CONN_LOGE(CONN_BR, "reply message faild, connectionId=%{public}u, ret=%{public}d", connectionId, (int32_t)seq);
+        CONN_LOGE(CONN_BR, "reply message faild, connId=%{public}u, ret=%{public}d", connectionId, (int32_t)seq);
         return (int32_t)seq;
     }
     return ConnBrPostBytes(connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
@@ -550,7 +550,7 @@ static int32_t NotifyReferenceRequest(uint32_t connectionId, int32_t delta, int3
         SOFTBUS_INVALID_PARAM, CONN_BR, "conn not exist, id=%{public}u", connectionId);
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock fail, connectionId=%{public}u, error=%{public}d", connectionId, status);
+        CONN_LOGE(CONN_BR, "lock fail, connId=%{public}u, error=%{public}d", connectionId, status);
         ConnBrReturnConnection(&connection);
         return SOFTBUS_LOCK_ERR;
     }
@@ -591,7 +591,7 @@ static void BrOnOccupyRelease(uint32_t connectionId)
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BR, "conn not exist, id=%{public}u", connectionId);
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock fail, connectionId=%{public}u, error=%{public}d", connectionId, status);
+        CONN_LOGE(CONN_BR, "lock fail, connId=%{public}u, error=%{public}d", connectionId, status);
         ConnBrReturnConnection(&connection);
         return;
     }
@@ -610,7 +610,7 @@ static int32_t BrOnReferenceRequest(uint32_t connectionId, ReferenceCount *refer
 
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock fail, connectionId=%{public}u, error=%{public}d", connectionId, status);
+        CONN_LOGE(CONN_BR, "lock fail, connId=%{public}u, error=%{public}d", connectionId, status);
         ConnBrReturnConnection(&connection);
         return SOFTBUS_LOCK_ERR;
     }
@@ -619,10 +619,10 @@ static int32_t BrOnReferenceRequest(uint32_t connectionId, ReferenceCount *refer
     ConnBrReturnConnection(&connection);
 
     if (delta < 0 && isOccupied) {
-        CONN_LOGI(CONN_BR, "is occupied, request process later, connectionId=%{public}u", connectionId);
+        CONN_LOGI(CONN_BR, "is occupied, request process later, connId=%{public}u", connectionId);
         ReferenceCount *referenceParam = (ReferenceCount *)SoftBusMalloc(sizeof(ReferenceCount));
         if (referenceParam == NULL) {
-            CONN_LOGE(CONN_BR, "malloc buffer fail, connectionId=%{public}u", connectionId);
+            CONN_LOGE(CONN_BR, "malloc buffer fail, connId=%{public}u", connectionId);
             return SOFTBUS_MALLOC_ERR;
         }
         referenceParam->delta = delta;
@@ -631,7 +631,7 @@ static int32_t BrOnReferenceRequest(uint32_t connectionId, ReferenceCount *refer
         int32_t ret = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_PEER_RC,
             connectionId, 0, referenceParam, WAIT_TIMEOUT_TRY_AGAIN);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "post msg fail, connectionId=%{public}u, error=%{public}d", connectionId, ret);
+            CONN_LOGE(CONN_BR, "post msg fail, connId=%{public}u, error=%{public}d", connectionId, ret);
             SoftBusFree(referenceParam);
             return ret;
         }
@@ -646,7 +646,7 @@ int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json
     int32_t peerRc = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_DELTA, &delta) ||
         !GetJsonObjectSignedNumberItem(json, KEY_REFERENCE_NUM, &peerRc)) {
-        CONN_LOGE(CONN_BR, "parse delta or ref fail, connectionId=%{public}u, delta=%{public}d, peerRc=%{public}d",
+        CONN_LOGE(CONN_BR, "parse delta or ref fail, connId=%{public}u, delta=%{public}d, peerRc=%{public}d",
             connection->connectionId, delta, peerRc);
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -662,18 +662,18 @@ int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *jso
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "invalid param");
     int32_t peerRc = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_REFERENCE_NUM, &peerRc)) {
-        CONN_LOGE(CONN_BR, "parse delta or ref fail. connectionId=%{public}u", connection->connectionId);
+        CONN_LOGE(CONN_BR, "parse delta or ref fail. connId=%{public}u", connection->connectionId);
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "get lock fail, connectionId=%{public}u, error=%{public}d", connection->connectionId,
+        CONN_LOGE(CONN_BR, "get lock fail, connId=%{public}u, error=%{public}d", connection->connectionId,
             status);
         return SOFTBUS_LOCK_ERR;
     }
 
-    CONN_LOGI(CONN_BR, "connectionId=%{public}u, peerRc=%{public}d, localRc=%{public}d, currentState=%{public}d",
+    CONN_LOGI(CONN_BR, "connId=%{public}u, peerRc=%{public}d, localRc=%{public}d, currentState=%{public}d",
         connection->connectionId, peerRc, connection->connectionRc, connection->state);
     if (peerRc > 0 && connection->state == BR_CONNECTION_STATE_NEGOTIATION_CLOSING) {
         ConnRemoveMsgFromLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
@@ -902,7 +902,7 @@ static void RetryNotifyReferenceHandler(uint32_t connectionId)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR,
-        "RetryNotifyReferenceHandler: connection not exist, connectionId=%{public}u", connectionId);
+        "RetryNotifyReferenceHandler: connection not exist, connId=%{public}u", connectionId);
     ConnBrUpdateConnectionRc(connection, 0);
     ConnBrReturnConnection(&connection);
 }
