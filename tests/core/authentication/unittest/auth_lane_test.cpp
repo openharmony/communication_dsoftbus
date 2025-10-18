@@ -51,14 +51,14 @@ static void OnConnOpenedTest(uint32_t requestId, AuthHandle authHandle)
     (void)requestId;
     (void)authHandle;
     AUTH_LOGI(
-        AUTH_TEST, "OnConnOpenedTest: requestId=%{public}d, authId=%{public}" PRId64 "", requestId, authHandle.authId);
+        AUTH_TEST, "OnConnOpenedTest: reqId=%{public}d, authId=%{public}" PRId64 "", requestId, authHandle.authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 {
     (void)requestId;
     (void)reason;
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenFailedTest: requestId=%{public}d, reason=%{public}d.", requestId, reason);
+    AUTH_LOGI(AUTH_TEST, "OnConnOpenFailedTest: reqId=%{public}d, reason=%{public}d.", requestId, reason);
 }
 
 static AuthConnCallback authConnCb = {

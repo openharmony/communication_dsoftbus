@@ -318,7 +318,7 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
         reuseCnt = interface.GetReuseCount();
         return SOFTBUS_OK;
     });
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s, reuseCnt=%{public}d", requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}d, remoteMac=%{public}s, reuseCnt=%{public}d", requestId,
         WifiDirectAnonymizeMac(remoteMac).c_str(), reuseCnt);
     if (reuseCnt == 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt already 0");
@@ -346,7 +346,7 @@ void P2pV1Processor::ProcessForceDisconnectCommand(std::shared_ptr<ForceDisconne
     canAcceptNegotiateData_ = false;
     auto info = command->GetDisconnectInfo();
     auto requestId = info.info_.requestId;
-    CONN_LOGI(CONN_WIFI_DIRECT, "force disconnect link, requestId=%{public}d commandId=%{public}d", requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "force disconnect link, reqId=%{public}d commandId=%{public}d", requestId,
         command->GetId());
 
     auto innerLink = LinkManager::GetInstance().GetReuseLink(info.info_.linkType, info.info_.remoteUuid);
@@ -672,7 +672,7 @@ int P2pV1Processor::OnClientJoinEvent(std::shared_ptr<ClientJoinEvent> &event)
 int P2pV1Processor::CreateLink()
 {
     auto requestId = connectCommand_->GetConnectInfo().info_.requestId;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteDeviceId=%{public}s", requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}d, remoteDeviceId=%{public}s", requestId,
         WifiDirectAnonymizeDeviceId(connectCommand_->GetRemoteDeviceId()).c_str());
 
     if (connectCommand_->GetConnectInfo().info_.reuseOnly) {
@@ -1828,7 +1828,7 @@ int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, In
         return SOFTBUS_OK;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s", requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}d, remoteMac=%{public}s", requestId,
         WifiDirectAnonymizeMac(command->GetConnectInfo().info_.remoteMac).c_str());
     auto ipv4Info = link.GetRemoteIpv4();
     CONN_CHECK_AND_RETURN_RET_LOGW(!ipv4Info.empty(), SOFTBUS_CONN_PV1_USED_BY_OTHER_SERVICE_ERR, CONN_WIFI_DIRECT,
