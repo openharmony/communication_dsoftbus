@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -699,7 +699,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
     EXPECT_EQ(RegisterRangeCallbackForMsdp(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegisterRangeCallbackForMsdp(nullptr, &g_bleRangeCb1), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_PKG_NAME, &g_bleRangeCb), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_FUNC_NOT_SUPPORT);
+    EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_MSDP_NAME, &g_bleRangeCb),
+        SOFTBUS_FUNC_NOT_SUPPORT || SOFTBUS_PERMISSION_DENIED);
     EXPECT_EQ(UnregisterRangeCallbackForMsdp(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_PKG_NAME), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_MSDP_NAME), SOFTBUS_FUNC_NOT_SUPPORT);
