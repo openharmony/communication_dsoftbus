@@ -82,6 +82,7 @@
     "PROCESS_NAME": [
       "CollaborationFwk",
       "car_distributed_engine",
+      "cast_engine_service",
       "wear_link_service",
       "device_manager"
     ]
@@ -91,6 +92,7 @@
     "PROCESS_NAME": [
       "CollaborationFwk",
       "car_distributed_engine",
+      "cast_engine_service",
       "wear_link_service",
       "device_manager"
     ]
