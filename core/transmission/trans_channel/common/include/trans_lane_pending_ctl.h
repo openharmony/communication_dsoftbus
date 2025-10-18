@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,6 @@ int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, c
 int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
     uint32_t *laneHandle, NetWorkingChannelInfo *info);
 bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
-int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, bool isAsync, int32_t errCode);
 int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
 
 int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
