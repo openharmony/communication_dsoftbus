@@ -58,9 +58,9 @@ void DiscConnDfxTest::TearDown(void)
 {
 }
 
-/**
+/*
  * @tc.name: SoftbusRecordFirstDiscTime
- * @tc.desc: Verify SoftBus Record first Discovery time function.
+ * @tc.desc: Verify SoftBus Record first Discovery time function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -91,9 +91,9 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordFirstDiscTime_001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftbusRecordBleDiscDetails001
- * @tc.desc: Verify SoftbusRecordBleDiscDetails function.
+ * @tc.desc: Verify Softbus Record Ble Disc Details function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -121,9 +121,9 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordBleDiscDetails_001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftbusRecordDiscBleRssi001
- * @tc.desc: Verify SoftbusRecordDiscBleRssi function.
+ * @tc.desc: Verify Softbus Record Disc Ble Rssi function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -146,9 +146,9 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordDiscBleRssi_001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftbusRecordConnResult_001
- * @tc.desc: Verify SoftbusRecordConnResult function.
+ * @tc.desc: Verify Softbus Record Conn Result function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -185,9 +185,9 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordConnResult_001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftbusRecordConnResult_001
- * @tc.desc: Verify SoftbusRecordConnResult function.
+ * @tc.desc: Verify Softbus Record Conn Result function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -209,9 +209,9 @@ HWTEST_F(DiscConnDfxTest, SoftbusRecordProccessDuration_001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftbusReportDiscFault_001
- * @tc.desc: Verify SoftbusReportDiscFault function.
+ * @tc.desc: Verify Softbus Report Disc Fault function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -225,9 +225,9 @@ HWTEST_F(DiscConnDfxTest, SoftbusReportDiscFault_001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: InitBusCenterDfx001
- * @tc.desc: Verify InitBusCenterDfx function.
+ * @tc.desc: Verify Init BusCenter Dfx function
  * @tc.type: FUNC
  * @tc.require:
  */
