@@ -148,9 +148,10 @@ void TestDelTestProxyChannel(void)
     TransProxyManagerDeinitInner();
 }
 
-/**
+/*
  * @tc.name: SetCipherOfHandshakeMsgTest001
- * @tc.desc: SetCipherOfHandshakeMsgTest001, use the wrong parameter.
+ * @tc.desc: test SetCipherOfHandshakeMsgTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -170,9 +171,10 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: SetCipherOfHandshakeMsgTest002
- * @tc.desc: SetCipherOfHandshakeMsgTest002, use the wrong parameter.
+ * @tc.desc: test SetCipherOfHandshakeMsgTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -192,9 +194,10 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyHandshakeTest001
- * @tc.desc: TransProxyHandshakeTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyHandshakeTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -221,9 +224,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyAckHandshakeTest001
- * @tc.desc: TransProxyAckHandshake, use the wrong parameter.
+ * @tc.desc: test TransProxyAckHandshake
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -254,9 +258,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyKeepaliveTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter..
+ * @tc.desc: test improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -281,9 +286,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyKeepaliveTest002
- * @tc.desc: improve branch coverage, use the wrong or normal parameter..
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -304,9 +310,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest002, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyAckKeepaliveTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter..
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -335,9 +342,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyAckKeepaliveTest002
- * @tc.desc: improve branch coverage, use the wrong or normal parameter..
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -359,9 +367,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyResetPeerTest001
- * @tc.desc: TransProxyResetPeerTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyResetPeerTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -381,9 +390,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyResetPeerTest002
- * @tc.desc: TransProxyResetPeerTest002, use the wrong parameter.
+ * @tc.desc: test TransProxyResetPeerTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -403,9 +413,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyAddChanItemTest001
- * @tc.desc: TransProxyAddChanItemTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyAddChanItemTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -432,9 +443,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyAddChanItemTest001, TestSize.Level1)
     TransProxyManagerDeinitInner();
 }
 
-/**
+/*
  * @tc.name: TransProxyProcessErrMsgTest001
- * @tc.desc: TransProxyProcessErrMsgTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyProcessErrMsgTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -464,9 +476,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessErrMsgTest001, TestSize.Level1)
     TransProxyManagerDeinitInner();
 }
 
-/**
+/*
  * @tc.name: TransProxyProcessHandshakeMsgTest001
- * @tc.desc: TransProxyProcessHandshakeMsgTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyProcessHandshakeMsgTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -489,9 +502,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxyCreateChanInfoTest001
- * @tc.desc: TransProxyCreateChanInfoTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyCreateChanInfoTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -525,9 +539,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyCreateChanInfoTest001, TestSize.Level1
     SoftBusFree(authInfo);
 }
 
-/**
+/*
  * @tc.name: TransProxyTimerProcTest001
- * @tc.desc: TransProxyTimerProcTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyTimerProcTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -540,9 +555,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyTimerProcTest001, TestSize.Level1)
     TransProxyManagerDeinitInner();
 }
 
-/**
+/*
  * @tc.name: TransProxyDestroyChannelListTest001
- * @tc.desc: TransProxyDestroyChannelListTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyDestroyChannelListTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -558,9 +574,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyDestroyChannelListTest001, TestSize.Le
     TransProxyManagerDeinitInner();
 }
 
-/**
+/*
  * @tc.name: TransProxyDeathCallbackTest001
- * @tc.desc: TransProxyDeathCallbackTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyDeathCallbackTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -578,9 +595,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
     TransProxyManagerDeinitInner();
 }
 
-/**
+/*
  * @tc.name: TransProxyPackMessageHeadTest001
- * @tc.desc: TransProxyPackMessageHeadTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyPackMessageHeadTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -592,9 +610,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyPackMessageHeadTest001, TestSize.Level
     TransProxyManagerDeinitInner();
 }
 
-/**
+/*
  * @tc.name: TransProxyParseMessageTest001
- * @tc.desc: TransProxyParseMessageTest001, use the wrong parameter.
+ * @tc.desc: test TransProxyParseMessageTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -617,9 +636,10 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetConnIdByChanIdTest001
- * @tc.desc: TransGetConnIdByChanIdTest001, use the wrong parameter.
+ * @tc.desc: test TransGetConnIdByChanIdTest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -640,10 +660,12 @@ HWTEST_F(TransProxyChannelTest, TransGetConnIdByChanIdTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
-/**
+/*
  * @tc.name: TransProxySendInnerMessageTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null channelInfo.
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_PACKMSG_ERR when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM
+ *           when given null channelInfo
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_PACKMSG_ERR
+ *           when given invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -663,9 +685,10 @@ HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxySendInnerMessageTest002
- * @tc.desc: TransProxySendInnerMessage
+ * @tc.desc: Should return expected result
+ *           when given specific value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -684,9 +707,10 @@ HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest002, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
-/**
+/*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest001
- * @tc.desc: Should return corresponding link type when given different connect types.
+ * @tc.desc: Should return corresponding link type
+ *           when given different connect types
  * @tc.type: FUNC
  * @tc.require:
  */
