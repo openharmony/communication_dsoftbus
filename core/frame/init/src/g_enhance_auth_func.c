@@ -38,5 +38,10 @@ int32_t AuthRegisterEnhanceFunc(void *soHandle)
     g_authEnhanceFuncList.authMetaGetConnInfoBySide = dlsym(soHandle, "AuthMetaGetConnInfoBySide");
     g_authEnhanceFuncList.authClearDeviceKey = dlsym(soHandle, "AuthClearDeviceKey");
     g_authEnhanceFuncList.authMetaGetOsTypeByMetaNodeId = dlsym(soHandle, "AuthMetaGetOsTypeByMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetMetaTypeByMetaNodeId = dlsym(soHandle, "AuthMetaGetMetaTypeByMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetMetaNodeIdByIp = dlsym(soHandle, "AuthMetaGetMetaNodeIdByIp");
+    g_authEnhanceFuncList.authMetaGetDeviceIdByMetaNodeId = dlsym(soHandle, "AuthMetaGetDeviceIdByMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetP2pMacByMetaNodeId = dlsym(soHandle, "AuthMetaGetP2pMacByMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetMetaValueByMetaNodeId = dlsym(soHandle, "AuthMetaGetMetaValueByMetaNodeId");
     return SOFTBUS_OK;
 }
