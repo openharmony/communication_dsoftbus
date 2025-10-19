@@ -636,8 +636,8 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         stream->GetBufferLen(), stream->GetExtBufferLen());
     int32_t retryCnt = ACCEPT_RETRY_CNT;
     while (streamFd_ == -1 && retryCnt > 0) {
-        TRANS_LOGW(TRANS_STREAM, "accept thread may be bloced, retry after 100ms");
-        usleep(100 * 1000);
+        TRANS_LOGW(TRANS_STREAM, "accept thread may be blocked, retry after 100ms");
+        usleep(RETRY_INTERVAL_US);
         retryCnt--;
     }
     if (!isBlocked_) {

@@ -1089,7 +1089,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if ((flags & FLAG_EXTERNAL_DEVICE) != 0) {
         char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
         int32_t ret = TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false, TRANS_CTRL, "get pkg name fail.");
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
         if (!TransCheckMetaTypeQueryPermission(pkgName, conn->appInfo.metaType)) {
             TRANS_LOGE(TRANS_CTRL, "not supporting access");
             return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
