@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "bus_center_manager.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
@@ -42,7 +43,7 @@ static inline CodeType getCodeType(const AppInfo *appInfo)
 {
     return ((appInfo->udpConnType == UDP_CONN_TYPE_P2P || appInfo->udpConnType == UDP_CONN_TYPE_USB) &&
         CompareSessionName(ISHARE_SESSION_NAME, appInfo->myData.sessionName) &&
-        (CompareSessionName(ISHARE_SESSION_NAME, appInfo->peerData.sessionName))) ?
+        CompareSessionName(ISHARE_SESSION_NAME, appInfo->peerData.sessionName)) ?
         CODE_FILE_TRANS_UDP : CODE_EXCHANGE_UDP_INFO;
 }
 
@@ -69,7 +70,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
     (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
     (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
-    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int *)&(appInfo->businessType));
     (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
 
     int code = CODE_EXCHANGE_UDP_INFO;
@@ -91,7 +92,7 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
                 appInfo->peerData.userId = INVALID_USER_ID;
             }
             (void)GetJsonObjectNumber64Item(msg, "SINK_ACL_TOKEN_ID", (int64_t *)&appInfo->peerData.tokenId);
-            if (DecryptAndAddSinkSessionKey(msg, appInfo)!= SOFTBUS_OK) {
+            if (DecryptAndAddSinkSessionKey(msg, appInfo) != SOFTBUS_OK) {
                 return SOFTBUS_PARSE_JSON_ERR;
             }
             break;
@@ -135,8 +136,7 @@ static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInf
     (void)GetJsonObjectStringItem(msg, "DEVICE_ID", appInfo->peerData.deviceId, UUID_BUF_LEN);
     (void)GetJsonObjectStringItem(msg, "ACCOUNT_ID", appInfo->peerData.accountId, ACCOUNT_UID_LEN_MAX);
     (void)GetJsonObjectNumber64Item(msg, "SOURCE_ACL_TOKEN_ID", (int64_t *)&appInfo->peerData.tokenId);
-    (void)GetJsonObjectStringItem(
-        msg, "SOURCE_ACL_EXTRA_INFO", (appInfo->extraAccessInfo), EXTRA_ACCESS_INFO_LEN_MAX);
+    (void)GetJsonObjectStringItem(msg, "SOURCE_ACL_EXTRA_INFO", (appInfo->extraAccessInfo), EXTRA_ACCESS_INFO_LEN_MAX);
 }
 
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
@@ -144,7 +144,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
     TRANS_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
-    unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
+    unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = { 0 };
     size_t len = 0;
     (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char *)encodeSessionKey, BASE64_SESSION_KEY_LEN);
     if (strlen((char *)encodeSessionKey) != 0) {
@@ -220,10 +220,10 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
-    char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
+    char encodeSessionKey[BASE64_SESSION_KEY_LEN] = { 0 };
     size_t len = 0;
-    int32_t ret = SoftBusBase64Encode((unsigned char*)encodeSessionKey, BASE64_SESSION_KEY_LEN, &len,
-        (unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+    int32_t ret = SoftBusBase64Encode((unsigned char *)encodeSessionKey, BASE64_SESSION_KEY_LEN, &len,
+        (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "mbedtls base64 encode failed.");
         return SOFTBUS_DECRYPT_ERR;
@@ -288,7 +288,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc)
+int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char *errDesc)
 {
     TRANS_LOGI(TRANS_CTRL, "pack reply error info in negotiation.");
     if (msg == NULL || errDesc == NULL) {
@@ -299,6 +299,64 @@ int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc)
     (void)AddNumberToJsonObject(msg, CODE, CODE_EXCHANGE_UDP_INFO);
     (void)AddStringToJsonObject(msg, ERR_DESC, errDesc);
     (void)AddNumberToJsonObject(msg, ERR_CODE, errCode);
+
+    return SOFTBUS_OK;
+}
+
+static int32_t TransPackHASpecificData(const AppInfo *appInfo, cJSON *msg)
+{
+    unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = { 0 };
+    size_t keyLen = 0;
+    int32_t ret = SoftBusBase64Encode(
+        encodeSessionKey, BASE64_SESSION_KEY_LEN, &keyLen, (unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "base64 encode failed ret=%{public}d", ret);
+        return ret;
+    }
+
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", (char *)encodeSessionKey);
+    (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
+    return SOFTBUS_OK;
+}
+
+static int32_t TranPackSdkSpecificData(const AppInfo *appInfo, cJSON *msg)
+{
+    char hexSessionKey[HEXKEY] = { 0 };
+    int32_t ret =
+        ConvertBytesToHexString(hexSessionKey, HEXKEY, (unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "convert bytes to hex string failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", hexSessionKey);
+    (void)memset_s(hexSessionKey, sizeof(hexSessionKey), 0, sizeof(hexSessionKey));
+    return SOFTBUS_OK;
+}
+
+static int32_t TransPackMetaTypeSpecificData(const AppInfo *appInfo, cJSON *msg)
+{
+    int32_t ret = SOFTBUS_OK;
+    switch (appInfo->metaType) {
+        case META_HA: {
+            ret = TransPackHASpecificData(appInfo, msg);
+            break;
+        }
+        case META_SDK: {
+            ret = TranPackSdkSpecificData(appInfo, msg);
+            break;
+        }
+        default: {
+            TRANS_LOGE(TRANS_CTRL, "invalid metaType=%{public}d", appInfo->metaType);
+            ret = SOFTBUS_FUNC_NOT_SUPPORT;
+            break;
+        }
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_CTRL, "pack specific data by metaType=%{public}d failed, ret=%{public}d", appInfo->metaType, ret);
+        return ret;
+    }
 
     return SOFTBUS_OK;
 }
@@ -326,12 +384,8 @@ int32_t TransPackExtDeviceRequestInfo(cJSON *msg, const AppInfo *appInfo)
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
-    char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
-    size_t len = 0;
-    int32_t ret = SoftBusBase64Encode((unsigned char*)encodeSessionKey, BASE64_SESSION_KEY_LEN, &len,
-        (unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
-    (void)AddStringToJsonObject(msg, "SESSION_KEY", encodeSessionKey);
+    int32_t ret = TransPackMetaTypeSpecificData(appInfo, msg);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "pack specific data failed");
     (void)AddNumberToJsonObject(msg, "CODE", getCodeType(appInfo));
     (void)AddNumberToJsonObject(msg, "API_VERSION", appInfo->myData.apiVersion);
     (void)AddNumberToJsonObject(msg, "CHANNEL_TYPE", appInfo->udpChannelOptType);
@@ -343,7 +397,75 @@ int32_t TransPackExtDeviceRequestInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddStringToJsonObject(msg, "CLIENT_BUS_NAME", appInfo->myData.sessionName);
     (void)AddStringToJsonObject(msg, "PKG_NAME", appInfo->myData.pkgName);
     (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
-    (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
+    return SOFTBUS_OK;
+}
+
+static int32_t TransUnpackHASpecificData(const cJSON *msg, AppInfo *appInfo)
+{
+    char sessionKey[BASE64_SESSION_KEY_LEN] = { 0 };
+    (void)GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey));
+    if (strlen(sessionKey) != 0) {
+        size_t len = 0;
+        int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH, &len,
+            (unsigned char *)sessionKey, strlen(sessionKey));
+        (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+        if (len != SESSION_KEY_LENGTH) {
+            TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%{public}d, len=%{public}zu", ret, len);
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransUnpackSdkSpecificData(const cJSON *msg, AppInfo *appInfo)
+{
+    char sessionKey[HEXKEY] = { 0 };
+    (void)GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey));
+
+    if (strlen(sessionKey) == 0) {
+        return SOFTBUS_OK;
+    }
+
+    int32_t ret = ConvertHexStringToBytes(
+        (unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH, sessionKey, strlen(sessionKey));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "convert hex string to bytes failed, ret=%{public}d", ret);
+    }
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+    return ret;
+}
+
+static int32_t TransUnpackMetaTypeSpecificData(const cJSON *msg, AppInfo *appInfo)
+{
+    int32_t ret = LnnGetRemoteNumInfo(appInfo->peerData.deviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
+    if (ret != SOFTBUS_OK) {
+        char *anonymizeMetaNodeId = NULL;
+        Anonymize(appInfo->peerData.deviceId, &anonymizeMetaNodeId);
+        TRANS_LOGW(TRANS_CTRL, "get metaType by metaNodeId=%{public}s failed ret=%{public}d",
+            AnonymizeWrapper(anonymizeMetaNodeId), ret);
+        AnonymizeFree(anonymizeMetaNodeId);
+    }
+
+    switch (appInfo->metaType) {
+        case META_SDK: {
+            ret = TransUnpackSdkSpecificData(msg, appInfo);
+            break;
+        }
+        case META_HA:
+        default: {
+            TRANS_LOGW(TRANS_CTRL, "invalid metaType=%{public}d, maybe old HA version", appInfo->metaType);
+            ret = TransUnpackHASpecificData(msg, appInfo);
+            if (ret == SOFTBUS_OK) {
+                appInfo->metaType = META_HA;
+            }
+            break;
+        }
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_CTRL, "unpack specific data by metaType=%{public}d failed, ret=%{public}d", appInfo->metaType, ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
@@ -382,16 +504,10 @@ int32_t TransUnpackExtDeviceRequestInfo(const cJSON *msg, AppInfo *appInfo)
     appInfo->fileProtocol = 0;
     uint32_t remoteCapability = 0;
     (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
-    unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
-    size_t len = 0;
-    (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char *)encodeSessionKey, BASE64_SESSION_KEY_LEN);
-    if (strlen((char *)encodeSessionKey) != 0) {
-        int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
-            (unsigned char *)encodeSessionKey, strlen((char *)encodeSessionKey));
-        (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
-        TRANS_CHECK_AND_RETURN_RET_LOGE(
-            len == sizeof(appInfo->sessionKey), SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "Base64 decode failed.");
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "Base64 decode failed.");
+    int32_t ret = TransUnpackMetaTypeSpecificData(msg, appInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Failed to unpack specific data.");
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
     appInfo->peerData.userId = INVALID_USER_ID;
@@ -452,7 +568,7 @@ int32_t TransUnpackExtDeviceReplyInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     appInfo->fileProtocol = 0;
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
-    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int *)&(appInfo->businessType));
     (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
     (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int32_t *)&(appInfo->streamType));
     if (!GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&(appInfo->channelCapability))) {
@@ -460,4 +576,3 @@ int32_t TransUnpackExtDeviceReplyInfo(const cJSON *msg, AppInfo *appInfo)
     }
     return SOFTBUS_OK;
 }
-

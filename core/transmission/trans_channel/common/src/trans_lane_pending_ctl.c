@@ -813,6 +813,7 @@ static void TransAsyncSetFirstTokenInfo(uint64_t firstTokenId, AppInfo *appInfo,
 static int32_t CreateAppInfoByParam(uint32_t laneHandle, const SessionParam *param, AppInfo *appInfo)
 {
     GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
+    (void)LnnGetRemoteNumInfo(param->peerDeviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
     int32_t ret = TransCommonGetAppInfo(param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "GetAppInfo is null. ret=%{public}d", ret);
@@ -1707,7 +1708,7 @@ int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, c
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
-    if (appInfo->osType == HA_OS_TYPE) {
+    if (appInfo->osType == OTHER_OS_TYPE && appInfo->metaType == META_HA) {
         ret = TransAsyncGetLaneInfoByExt(param, laneHandle, appInfo);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SVC, "get lane info by allocInfo failed, ret=%{public}d", ret);

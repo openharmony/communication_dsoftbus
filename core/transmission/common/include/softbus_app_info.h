@@ -24,23 +24,26 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif /* __cplusplus */
 
-#define APP_INFO_FILE_FEATURES_SUPPORT 1
+#define APP_INFO_FILE_FEATURES_SUPPORT    1
 #define APP_INFO_FILE_FEATURES_NO_SUPPORT 0
 
 #define APP_INFO_ALGORITHM_AES_GCM_256 0
-#define APP_INFO_ALGORITHM_CHACHA 1
+#define APP_INFO_ALGORITHM_CHACHA      1
 
 #define APP_INFO_UDP_FILE_PROTOCOL 0x5a
 
 #define TRANS_FLAG_HAS_CHANNEL_AUTH 0x02L
 
-#define MAX_FAST_DATA_LEN (4 * 1024)
+#define MAX_FAST_DATA_LEN    (4 * 1024)
 #define BASE64_FAST_DATA_LEN 5558
-#define TOKENID_NOT_SET 0
-#define ACCOUNT_UID_LEN_MAX 65
-#define PAGING_NONCE_LEN 16
+#define TOKENID_NOT_SET      0
+#define ACCOUNT_UID_LEN_MAX  65
+#define PAGING_NONCE_LEN     16
+#define META_HA              100
+#define META_SDK             101
+#define HEXKEY               HEXIFY_LEN(SESSION_KEY_LENGTH)
 
 typedef enum {
     API_UNKNOWN = 0,
@@ -160,6 +163,7 @@ typedef struct {
     int32_t osType;
     int32_t waitOpenReplyCnt;
     uint32_t channelCapability;
+    int32_t metaType;
     const uint8_t *fastTransData;
     int64_t timeStart;
     int64_t connectedStart;
@@ -184,5 +188,5 @@ enum {
 
 #ifdef __cplusplus
 }
-#endif // __cplusplus
-#endif // SOFTBUS_APP_INFO_H
+#endif /* __cplusplus */
+#endif /* SOFTBUS_APP_INFO_H */

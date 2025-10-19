@@ -836,7 +836,7 @@ HWTEST_F(TransServerTcpDirectTest, TransGetLocalIp001, TestSize.Level1)
     ret = TransGetLocalIp(myIp, peerIp, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    int32_t osType = HA_OS_TYPE;
+    int32_t osType = OTHER_OS_TYPE;
     NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
     EXPECT_CALL(TransServerTcpDirectMock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));

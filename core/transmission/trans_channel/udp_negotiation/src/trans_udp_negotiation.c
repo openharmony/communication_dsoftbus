@@ -63,7 +63,6 @@
 
 #define ISHARE_SESSION_NAME "IShare*"
 #define CLONE_SESSION_NAME "IShare_"
-#define ISHARE_PKG_NAME "ohos.InterConnection.iShare"
 
 static int64_t g_seq = 0;
 static uint64_t g_channelIdFlagBitsMap = 0;
@@ -191,7 +190,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.isEncrypt = true;
     info.tokenType = appInfo->myData.tokenType;
     int32_t ret = LnnGetNetworkIdByUuid((const char *)appInfo->peerData.deviceId, networkId, NETWORK_ID_BUF_LEN);
-    if (ret != SOFTBUS_OK && appInfo->osType != HA_OS_TYPE) {
+    if (ret != SOFTBUS_OK && appInfo->osType != OTHER_OS_TYPE) {
         TRANS_LOGE(TRANS_CTRL, "get network id by uuid failed.");
         return ret;
     }
@@ -554,7 +553,7 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, AuthHandle authHandle, int64_t
     TRANS_CHECK_AND_RETURN_RET_LOGE(replyMsg != NULL, SOFTBUS_CREATE_JSON_ERR,
         TRANS_CTRL, "create cjson object failed.");
     int32_t ret = SOFTBUS_OK;
-    if (appInfo->osType == HA_OS_TYPE) {
+    if (appInfo->osType == OTHER_OS_TYPE) {
         ret = TransPackExtDeviceReplyInfo(replyMsg, appInfo);
     } else {
         ret = TransPackReplyUdpInfo(replyMsg, appInfo);
@@ -637,7 +636,7 @@ static int32_t TransGetUdpChannelLocalIp(AuthHandle authHandle, AppInfo *appInfo
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
     char localIp[IP_LEN] = { 0 };
     int32_t ret = SOFTBUS_OK;
-    if (appInfo->osType == HA_OS_TYPE) {
+    if (appInfo->osType == OTHER_OS_TYPE && appInfo->metaType == META_HA) {
         char peerUuid[UUID_BUF_LEN] = { 0 };
         ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get remote uuid failed.");
@@ -675,8 +674,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
     int32_t ret = SetPeerDeviceIdByAuth(authHandle, appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_PEER_PROC_ERR, TRANS_CTRL, "set deviceId failed.");
-    GetOsTypeByNetworkId(appInfo->peerNetWorkId, &appInfo->osType);
-    if (appInfo->osType == HA_OS_TYPE) {
+    GetOsTypeByNetworkId(appInfo->peerData.deviceId, &appInfo->osType);
+    if (appInfo->osType == OTHER_OS_TYPE) {
         ret = TransUnpackExtDeviceRequestInfo(msg, appInfo);
     } else {
         ret = TransUnpackRequestUdpInfo(msg, appInfo);
@@ -689,9 +688,9 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get pkgName failed, ret=%{public}d", ret);
-    if (appInfo->osType == HA_OS_TYPE) {
-        if (strcmp(appInfo->myData.pkgName, ISHARE_PKG_NAME) != 0) {
-            TRANS_LOGE(TRANS_CTRL, "osType=%{public}d not supporting access", appInfo->osType);
+    if (appInfo->osType == OTHER_OS_TYPE) {
+        if (!TransCheckMetaTypeQueryPermission(appInfo->myData.pkgName, appInfo->metaType)) {
+            TRANS_LOGE(TRANS_CTRL, "not supporting access");
             return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
         }
     }
@@ -780,7 +779,7 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
         return;
     }
     int32_t ret = SOFTBUS_OK;
-    if (channel.info.osType == HA_OS_TYPE) {
+    if (channel.info.osType == OTHER_OS_TYPE) {
         ret = TransUnpackExtDeviceReplyInfo(msg, &(channel.info));
     } else {
         ret = TransUnpackReplyUdpInfo(msg, &(channel.info));
@@ -902,7 +901,7 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, AuthHandle authHand
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = SOFTBUS_AUTH_REG_DATA_FAIL;
-    if (channel->info.osType == HA_OS_TYPE) {
+    if (channel->info.osType == OTHER_OS_TYPE) {
         ret = TransPackExtDeviceRequestInfo(requestMsg, &(channel->info));
     } else {
         ret = TransPackRequestUdpInfo(requestMsg, &(channel->info));
