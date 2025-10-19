@@ -275,7 +275,7 @@ static int32_t TransGetPeerDeviceId(AppInfo *appInfo, const SessionParam *param)
     TRANS_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param is null.");
     int32_t errCode = SOFTBUS_OK;
     GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
-    if (appInfo->osType == HA_OS_TYPE) {
+    if (appInfo->osType == OTHER_OS_TYPE) {
         errCode = strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId), param->peerDeviceId);
         TRANS_CHECK_AND_RETURN_RET_LOGE(errCode == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "copy peerDeviceId failed");
     } else {
@@ -846,4 +846,23 @@ int32_t TransCheckServerPermission(const char *mySessionName, const char *peerSe
     }
 
     return SOFTBUS_OK;
+}
+
+bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType)
+{
+#define ISHARE_PKG_NAME "ohos.InterConnection.iShare"
+#define CAST_PKG_NAME   "CastEngineService"
+    switch (metaType) {
+        case META_HA: {
+            return strcmp(pkgName, ISHARE_PKG_NAME) == 0;
+        }
+        case META_SDK: {
+            return strcmp(pkgName, CAST_PKG_NAME) == 0;
+        }
+        default: {
+            TRANS_LOGE(TRANS_CTRL, "invalid metaType=%{public}d", metaType);
+            return false;
+        }
+    }
+    return false;
 }

@@ -306,7 +306,7 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo002, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo003, TestSize.Level1)
 {
     AppInfo appInfo = {
-        .osType = HA_OS_TYPE,
+        .osType = OTHER_OS_TYPE,
         .udpChannelOptType = TYPE_INVALID_CHANNEL
     };
     AuthHandle authHandle;
@@ -492,7 +492,7 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo003, TestSize.Level1)
     UdpChannelInfo channel = {
         .info.myData.channelId = 1214,
         .info.streamType = COMMON_VIDEO_STREAM,
-        .info.osType = HA_OS_TYPE,
+        .info.osType = OTHER_OS_TYPE,
         .info.udpChannelOptType = TYPE_INVALID_CHANNEL
     };
     ret = StartExchangeUdpInfo(&channel, authHandle, 1);
