@@ -163,7 +163,7 @@ static int32_t TransOnSetChannelInfoByReqId(uint32_t reqId, int32_t channelId, i
 
 static void TransOnLinkDownInner(const char *networkId)
 {
-    TransCloseInnerSessionByNetworkId(networkId);
+    (void)networkId;
 }
 
 static ISessionListenerInner g_innerSessionListener = {
