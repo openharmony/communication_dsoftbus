@@ -453,7 +453,7 @@ int AuthNegotiateChannel::AssignValueForAuthConnInfo(bool isMeta, bool needUdid,
     authConnInfo.type = param.type;
     authConnInfo.info.ipInfo.port = param.remotePort;
     authConnInfo.info.ipInfo.moduleId = param.module;
-    if (isMeta) {
+    if (isMeta && channel != nullptr) {
         authConnInfo.info.ipInfo.authId = channel->handle_.authId;
     }
     auto ret = strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, param.remoteIp.c_str());
@@ -485,7 +485,7 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
     uint32_t &authReqId, std::shared_ptr<std::promise<AuthOpenEvent>> authOpenEventPromise)
 {
     bool isMeta = channel != nullptr ? channel->IsMeta() : false;
-    bool needUdid = false;
+    bool needUdid = true;
     if (param.remoteUuid.length() < UUID_BUF_LEN - 1) {
         isMeta = true;
         needUdid = false;

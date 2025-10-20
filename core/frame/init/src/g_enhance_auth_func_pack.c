@@ -153,3 +153,12 @@ bool AuthMetaGetMetaValueByMetaNodeIdPacked(const char *metaNodeId)
     }
     return pfnAuthEnhanceFuncList->authMetaGetMetaValueByMetaNodeId(metaNodeId);
 }
+
+int32_t AuthMetaGetFeatureSDKByMetaNodeIdPacked(const char *metaNodeId, uint64_t *featureSDK)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetFeatureSDKByMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetFeatureSDKByMetaNodeId(metaNodeId, featureSDK);
+}
