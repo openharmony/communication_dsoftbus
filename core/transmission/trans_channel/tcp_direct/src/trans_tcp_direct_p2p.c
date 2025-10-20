@@ -796,7 +796,6 @@ static int32_t TransGetLocalIp(char *myIp, const char *peerIp, const char *peerU
     int32_t ret = LnnGetRemoteNumInfo(peerUuid, NUM_KEY_META_TYPE, &metaType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get metaType failed, ret=%{public}d", ret);
-        return ret;
     }
     if (osType == OTHER_OS_TYPE && metaType == META_HA) {
         if (AuthMetaGetLocalIpByMetaNodeIdPacked(peerUuid, myIp, IP_LEN) != SOFTBUS_OK) {
