@@ -37,6 +37,8 @@
 #include "softbus_utils.h"
 #include "softbus_init_common.h"
 
+#define INVALID_META_TYPE (-1)
+
 static uint64_t GetCurrentTime(void)
 {
     SoftBusSysTime now = { 0 };
@@ -170,10 +172,9 @@ static int32_t DlGetAuthMetaType(const char *networkId, bool checkOnline, void *
     }
     (void)checkOnline;
 
-    if (AuthMetaGetMetaTypeByMetaNodeIdPacked(networkId, (int32_t *)buf) != SOFTBUS_OK) {
-        AONYMIZE("get node info fail. networkId=%{public}s", networkId);
-        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
-    }
+    *(int32_t *)buf = INVALID_META_TYPE;
+    (void)AuthMetaGetMetaTypeByMetaNodeIdPacked(networkId, (int32_t *)buf);
+    LNN_LOGI(LNN_LEDGER, "meta type is=%{public}d", *(int32_t *)buf);
     return SOFTBUS_OK;
 }
 
