@@ -631,7 +631,7 @@ bool VtpStreamSocket::EncryptStreamPacket(std::unique_ptr<IStream> stream, std::
 bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 {
 #define ACCEPT_RETRY_CNT  3
-#define RETRY_INTERVAL_US 100 * 1000 // 100ms
+#define RETRY_INTERVAL_US (100 * 1000) // 100ms
     TRANS_LOGD(TRANS_STREAM, "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd", streamType_,
         stream->GetBufferLen(), stream->GetExtBufferLen());
     int32_t retryCnt = ACCEPT_RETRY_CNT;
