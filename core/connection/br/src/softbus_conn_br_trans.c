@@ -387,13 +387,13 @@ static int32_t SendAck(const ConnBrConnection *connection, int32_t socketHandle)
         SoftBusFree(data);
         return status;
     }
+    CONN_LOGI(CONN_BR,
+        "br send ack, connectionId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64
+        ", error=%{public}d", connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
     status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, data, dataLen);
     if (status != SOFTBUS_OK) {
         ConnBrDelBrPendingPacket(connection->connectionId, connection->sequence);
     }
-    CONN_LOGI(CONN_BR,
-        "br send ack, connectionId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64
-        ", error=%{public}d", connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
     SoftBusFree(data);
     return status;
 }
