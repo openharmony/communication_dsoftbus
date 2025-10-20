@@ -77,8 +77,6 @@ ohos_unittest("LnnWifiServiceMonitorTest") {
 ohos_unittest("LnnCommonEventMonitorTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func.c",
     "$dsoftbus_root_path/tests/adapter/common/src/lnn_common_event_mock.cpp",
     "$dsoftbus_root_path/tests/adapter/common/src/lnn_common_event_monitor_test.cpp",
   ]
