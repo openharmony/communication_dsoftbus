@@ -506,9 +506,6 @@ int32_t TransUnpackExtDeviceRequestInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
     int32_t ret = TransUnpackMetaTypeSpecificData(msg, appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Failed to unpack specific data.");
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
     appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
     appInfo->peerData.userId = INVALID_USER_ID;
     return SOFTBUS_OK;
