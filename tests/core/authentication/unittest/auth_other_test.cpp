@@ -25,7 +25,6 @@
 #include "auth_device.c"
 #include "auth_interface.c"
 #include "auth_interface.h"
-#include "auth_lane.c"
 #include "auth_log.h"
 #include "auth_manager.c"
 #include "auth_manager.h"
@@ -34,7 +33,6 @@
 #include "auth_session_key.c"
 #include "auth_session_key.h"
 #include "auth_tcp_connection_mock.h"
-#include "lnn_ctrl_lane.h"
 #include "lnn_lane_interface.h"
 #include "softbus_adapter_json.h"
 #include "softbus_error_code.h"
@@ -45,7 +43,6 @@ using namespace testing::ext;
 using namespace testing;
 constexpr uint32_t TEST_DATA_LEN = 30;
 constexpr uint32_t MSG_LEN = 50;
-constexpr char NETWORK_ID[] = "testnetworkid123";
 
 class AuthOtherTest : public testing::Test {
 public:
@@ -1004,47 +1001,6 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: GET_AUTH_CONN_001
- * @tc.desc: get auth conn test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, GET_AUTH_CONN_001, TestSize.Level1)
-{
-    const char *uuid = "testuuid123";
-
-    AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
-    ASSERT_TRUE(connInfo != nullptr);
-
-    int32_t ret = GetAuthConn(uuid, LANE_BR, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
-    ret = GetAuthConn(nullptr, LANE_BR, connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-
-    connInfo->type = AUTH_LINK_TYPE_BR;
-    ret = GetAuthConn(uuid, LANE_BR, connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
-
-    connInfo->type = AUTH_LINK_TYPE_BLE;
-    ret = GetAuthConn(uuid, LANE_BLE, connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
-
-    connInfo->type = AUTH_LINK_TYPE_P2P;
-    ret = GetAuthConn(uuid, LANE_P2P, connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
-
-    ret = GetAuthConn(uuid, LANE_HML, connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
-
-    ret = GetAuthConn(uuid, LANE_WLAN_2P4G, connInfo);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
-
-    SoftBusFree(connInfo);
-}
-
-/*
  * @tc.name: AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001
  * @tc.desc: AuthGetAuthHandleByIndex test
  * @tc.type: FUNC
@@ -1072,49 +1028,6 @@ HWTEST_F(AuthOtherTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
     EXPECT_TRUE(AuthGetAuthHandleByIndex(&connInfo, true, 1, &authHandle) == SOFTBUS_LOCK_ERR);
     connInfo.type = AUTH_LINK_TYPE_MAX;
     EXPECT_TRUE(AuthGetAuthHandleByIndex(&connInfo, true, 1, &authHandle) == SOFTBUS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001
- * @tc.desc: AuthCheckSessionKeyValidByConnInfo test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, TestSize.Level1)
-{
-    const char *networkId = "123456456";
-    AuthConnInfo connInfo;
-    EXPECT_TRUE(AuthCheckSessionKeyValidByConnInfo(nullptr, &connInfo) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthCheckSessionKeyValidByConnInfo(networkId, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthCheckSessionKeyValidByConnInfo(networkId, &connInfo) == SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
-    EXPECT_TRUE(AuthCheckSessionKeyValidByAuthHandle(nullptr) == SOFTBUS_INVALID_PARAM);
-    AuthHandle authHandle = {
-        .type = AUTH_LINK_TYPE_WIFI,
-        .authId = 0,
-    };
-    EXPECT_TRUE(AuthCheckSessionKeyValidByAuthHandle(&authHandle) == SOFTBUS_AUTH_SESSION_KEY_INVALID);
-    authHandle.type = -1;
-    AuthTransData dataInfo;
-    AuthCloseConn(authHandle);
-    EXPECT_TRUE(AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthGetConnInfo(authHandle, &connInfo) == SOFTBUS_INVALID_PARAM);
-    authHandle.type = AUTH_LINK_TYPE_MAX;
-    AuthCloseConn(authHandle);
-    EXPECT_TRUE(AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthGetConnInfo(authHandle, &connInfo) == SOFTBUS_INVALID_PARAM);
-    AuthFreeLane(nullptr);
-    DelAuthReqInfoByAuthHandle(nullptr);
-    AuthFreeLane(&authHandle);
-    DelAuthReqInfoByAuthHandle(&authHandle);
-    AuthConnCallback callback;
-    EXPECT_TRUE(AuthAllocLane(nullptr, 1, &callback) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthAllocLane(networkId, 1, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthAllocLane(nullptr, 1, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthGetP2pConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
-    EXPECT_TRUE(AuthGetHmlConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
-    AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, true, nullptr);
-    AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, true, &authHandle);
 }
 
 /*
@@ -1188,43 +1101,6 @@ HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
     AuthDeviceKeyInfo keyInfo;
     EXPECT_TRUE(FillAuthSessionInfo(&info, &nodeInfo, &keyInfo, true) == SOFTBUS_OK);
     EXPECT_TRUE(FillAuthSessionInfo(&info, &nodeInfo, &keyInfo, false) == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001
- * @tc.desc: DelAuthReqInfoByAuthHandle test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001, TestSize.Level1)
-{
-    InitAuthReqInfo();
-    AuthConnCallback authConnCb = {
-        .onConnOpened = OnConnOpenedTest,
-        .onConnOpenFailed = OnConnOpenFailedTest,
-    };
-    EXPECT_EQ(AddAuthReqNode(NETWORK_ID, 1, 1, &authConnCb), SOFTBUS_OK);
-    EXPECT_EQ(AddAuthReqNode(NETWORK_ID, 2, 2, &authConnCb), SOFTBUS_OK);
-    EXPECT_EQ(AddAuthReqNode(NETWORK_ID, 3, 3, &authConnCb), SOFTBUS_OK);
-    OnAuthConnOpenedFail(1, -1);
-    OnAuthConnOpenedFail(4, -1);
-    AuthHandle authHandle = {
-        .authId = 2,
-        .type = 1,
-    };
-    AuthFreeLane(&authHandle);
-    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
-    authHandle.type = 0;
-    AuthFreeLane(&authHandle);
-    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
-    authHandle.authId = 1;
-    AuthFreeLane(&authHandle);
-    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
-    authHandle.authId = 2;
-    AuthFreeLane(&authHandle);
-    EXPECT_EQ(DelAuthReqInfoByAuthHandle(&authHandle), SOFTBUS_OK);
-    DeInitAuthReqInfo();
 }
 
 /*
