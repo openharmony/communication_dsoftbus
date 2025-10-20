@@ -718,10 +718,21 @@ static int32_t DlGetNodeDataChangeFlag(const char *networkId, bool checkOnline, 
 static int32_t DlGetNodeTlvNegoFlag(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
-    if (len != sizeof(bool)) {
+    uint64_t featureSDK = 0;
+    if (networkId == NULL || buf == NULL || len != sizeof(bool)) {
+        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+
+    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        if (AuthMetaGetFeatureSDKByMetaNodeIdPacked(networkId, &featureSDK) == SOFTBUS_OK) {
+            *((bool *)buf) = IsFeatureSupport(featureSDK, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
+            return SOFTBUS_OK;
+        }
+        AONYMIZE("get node info fail. networkId=%{public}s", networkId);
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
     if (checkOnline && !LnnIsNodeOnline(info) && !IsMetaNode(info)) {
         LNN_LOGE(LNN_LEDGER, "node is offline");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
