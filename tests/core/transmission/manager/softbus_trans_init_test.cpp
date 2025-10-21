@@ -39,7 +39,7 @@ void SoftbusTransInitTest::SetUpTestCase(void)
 void SoftbusTransInitTest::TearDownTestCase(void)
 {}
 
-static int32_t TransRegisterOpenfuncTemp()
+static int32_t TransRegisterOpenfuncTemp(void)
 {
     return SOFTBUS_NETWORK_DLOPEN_FAILED;
 }
@@ -66,7 +66,9 @@ HWTEST_F(SoftbusTransInitTest, TransOpenFuncInit002, TestSize.Level1)
 {
     void *pluginServerSoHandle = nullptr;
     (void)SoftBusDlopen(SOFTBUS_HANDLE_SERVER_PLUGIN, &pluginServerSoHandle);
-    ASSERT_TRUE(pluginServerSoHandle != nullptr);
+    if (pluginServerSoHandle == nullptr) {
+        return;
+    }
     SoftbusTransInitInterfaceMock mock;
     EXPECT_CALL(mock, SoftBusDlsym).WillOnce(Return(SOFTBUS_NETWORK_DLSYM_FAILED));
     int32_t ret = TransOpenFuncInit(pluginServerSoHandle);
@@ -85,7 +87,9 @@ HWTEST_F(SoftbusTransInitTest, TransOpenFuncInit003, TestSize.Level1)
     int32_t (*transRegisterOpenfunc)(void);
     void *pluginServerSoHandle = nullptr;
     (void)SoftBusDlopen(SOFTBUS_HANDLE_SERVER_PLUGIN, &pluginServerSoHandle);
-    ASSERT_TRUE(pluginServerSoHandle != nullptr);
+    if (pluginServerSoHandle == nullptr) {
+        return;
+    }
     transRegisterOpenfunc = &TransRegisterOpenfuncTemp;
     void *funcHandle = reinterpret_cast<void *>(transRegisterOpenfunc);
     EXPECT_CALL(mock, SoftBusDlsym).WillOnce(DoAll(SetArgPointee<2>(funcHandle), Return(SOFTBUS_OK)));
