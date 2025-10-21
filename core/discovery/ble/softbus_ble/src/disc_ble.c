@@ -1634,7 +1634,7 @@ static bool GetStartIsTakeHmlInfo(int32_t funcCode)
     DISC_CHECK_AND_RETURN_RET_LOGD(isCastDiscoveryReg, false, DISC_BLE, "castplus disc not start");
 
     int32_t ret = SoftBusMutexLock(&g_bleInfoLock);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false, DISC_BLE, "lock failed.");
     cJSON *json = cJSON_ParseWithLength((const char *)g_bleInfoManager[mode].capabilityData[CAST_CAP_POS],
         g_bleInfoManager[mode].capDataLen[CAST_CAP_POS]);
     SoftBusMutexUnlock(&g_bleInfoLock);
