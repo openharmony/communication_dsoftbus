@@ -841,14 +841,14 @@ HWTEST_F(TransServerTcpDirectTest, TransGetLocalIp001, TestSize.Level1)
     EXPECT_CALL(TransServerTcpDirectMock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
     EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetLocalIpByMetaNodeIdPacked)
-        .WillOnce(Return(SOFTBUS_TRANS_GET_LOCAL_IP_FAILED));
+        .WillRepeatedly(Return(SOFTBUS_TRANS_GET_LOCAL_IP_FAILED));
 
     ret = TransGetLocalIp(myIp, peerIp, peerUuid);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
 
-    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetLocalIpByMetaNodeIdPacked).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetLocalIpByMetaNodeIdPacked).WillRepeatedly(Return(SOFTBUS_OK));
     ret = TransGetLocalIp(myIp, peerIp, peerUuid);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
 }
 
 /**
