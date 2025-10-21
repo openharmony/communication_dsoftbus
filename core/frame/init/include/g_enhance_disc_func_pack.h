@@ -68,6 +68,7 @@ void DiscApproachBleDeinitPacked(void);
 void DiscVLinkBleDeinitPacked(void);
 void DiscTouchBleDeinitPacked(void);
 void DiscOopBleDeinitPacked(void);
+void PcCollaborationManagerDeinitPacked(void);
 
 void DiscCoapReportNotificationPacked(const NSTACKX_NotificationConfig *notification);
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
@@ -80,6 +81,7 @@ int32_t DiscVLinkBleEventInitPacked(void);
 int32_t DiscTouchBleEventInitPacked(void);
 int32_t DiscOopBleEventInitPacked(void);
 int32_t DiscPcCollaborationEventInitPacked(void);
+void DiscPcCollaborationEventDeinitPacked(void);
 void DiscTouchBleEventDeinitPacked(void);
 void DiscApproachBleEventDeinitPacked(void);
 void DiscVLinkBleEventDeinitPacked(void);

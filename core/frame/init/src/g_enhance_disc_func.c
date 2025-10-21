@@ -75,6 +75,8 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discVLinkBleEventDeinit = dlsym(soHandle, "DiscVLinkBleEventDeinit");
     g_discEnhanceFuncList.discTouchBleEventDeinit = dlsym(soHandle, "DiscTouchBleEventDeinit");
     g_discEnhanceFuncList.discCoapReportNotification = dlsym(soHandle, "DiscCoapReportNotification");
+    g_discEnhanceFuncList.pcCollaborationManagerDeinit = dlsym(soHandle, "PcCollaborationManagerDeinit");
+    g_discEnhanceFuncList.pcCollaborationEventDeinit = dlsym(soHandle, "DiscPcCollaborationEventDeInit");
  
     g_discEnhanceFuncList.discUsbDeinit = dlsym(soHandle, "DiscUsbDeinit");
     g_discEnhanceFuncList.discUsbInit = dlsym(soHandle, "DiscUsbInit");
