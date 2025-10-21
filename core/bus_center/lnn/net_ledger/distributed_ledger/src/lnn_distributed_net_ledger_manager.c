@@ -159,7 +159,20 @@ static int32_t DlGetAuthType(const char *networkId, bool checkOnline, void *buf,
 {
     (void)checkOnline;
     NodeInfo *info = NULL;
-    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (networkId == NULL || buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (info == NULL) {
+        if (AuthMetaGetMetaValueByMetaNodeIdPacked(networkId)) {
+            *((uint32_t *)buf) = (1 << ONLINE_METANODE);
+            return SOFTBUS_OK;
+        }
+        AONYMIZE("get node info fail. networkId=%{public}s", networkId);
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
     *((uint32_t *)buf) = info->AuthTypeValue;
     return SOFTBUS_OK;
 }
