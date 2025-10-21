@@ -57,6 +57,7 @@ void HeartBeatStrategyTest::TearDown() { }
  * @tc.name: GET_STRATEGY_TYPE_BY_POLICY_TEST_01
  * @tc.desc: get strategy type by policy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, GET_STRATEGY_TYPE_BY_POLICY_TEST_01, TestSize.Level1)
@@ -71,6 +72,7 @@ HWTEST_F(HeartBeatStrategyTest, GET_STRATEGY_TYPE_BY_POLICY_TEST_01, TestSize.Le
  * @tc.name: LNN_STOP_HEARTBEAT_ADV_BY_TYPE_NOW_TEST_01
  * @tc.desc: lnn stop heartbeat adv by type now test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_ADV_BY_TYPE_NOW_TEST_01, TestSize.Level1)
@@ -95,6 +97,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_ADV_BY_TYPE_NOW_TEST_01, Test
  * @tc.name: LNN_START_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01
  * @tc.desc: lnn start screen change offline timing test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_START_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, TestSize.Level1)
@@ -114,6 +117,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, 
  * @tc.name: LNN_STOP_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01
  * @tc.desc: lnn stop screen change offline timing test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, TestSize.Level1)
@@ -131,6 +135,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, T
  * @tc.name: LNN_START_OFFLINE_TIMING_STRATEGY_TEST_01
  * @tc.desc: lnn start offline timing strategy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_START_OFFLINE_TIMING_STRATEGY_TEST_01, TestSize.Level1)
@@ -152,6 +157,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_OFFLINE_TIMING_STRATEGY_TEST_01, TestS
  * @tc.name: LNN_STOP_OFFLINE_TIMING_STRATEGY_TEST_01
  * @tc.desc: lnn stop offline timing strategy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_OFFLINE_TIMING_STRATEGY_TEST_01, TestSize.Level1)
@@ -169,6 +175,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_OFFLINE_TIMING_STRATEGY_TEST_01, TestSi
  * @tc.name: LNN_STOP_HEARTBEAT_BY_TYPE_TEST_01
  * @tc.desc: lnn stop heartbeat by type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_BY_TYPE_TEST_01, TestSize.Level1)
@@ -183,6 +190,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_BY_TYPE_TEST_01, TestSize.Lev
  * @tc.name: LNN_STOPV0_HEARTBEAT_AND_NOT_TRANS_STATE_TEST_01
  * @tc.desc: lnn stopv0 heartbeat and not trans state test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOPV0_HEARTBEAT_AND_NOT_TRANS_STATE_TEST_01, TestSize.Level1)
@@ -197,6 +205,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOPV0_HEARTBEAT_AND_NOT_TRANS_STATE_TEST_01
  * @tc.name: LNN_GET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01
  * @tc.desc: lnn get medium param by specific type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_GET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, TestSize.Level1)
@@ -218,6 +227,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, T
  * @tc.name: LNN_SET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01
  * @tc.desc: lnn set medium param by specific type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_SET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, TestSize.Level1)
@@ -240,6 +250,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, T
  * @tc.name: LNN_GET_HB_STRATEGY_MANAGER_TEST_01
  * @tc.desc: lnn get hb strategy manager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_GET_HB_STRATEGY_MANAGER_TEST_01, TestSize.Level1)
@@ -292,6 +303,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_HB_STRATEGY_MANAGER_TEST_01, TestSize.Le
  * @tc.name: LNN_GET_GEAR_MODE_BY_SPECIFIC_TYPE_TEST_01
  * @tc.desc: lnn get gear mode by specific type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_GET_GEAR_MODE_BY_SPECIFIC_TYPE_TEST_01, TestSize.Level1)
@@ -317,6 +329,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_GEAR_MODE_BY_SPECIFIC_TYPE_TEST_01, Test
  * @tc.name: VISIT_CLEAR_NONE_SPLIT_HB_TYPE_TEST_01
  * @tc.desc: visit clear none split hb type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, VISIT_CLEAR_NONE_SPLIT_HB_TYPE_TEST_01, TestSize.Level1)
@@ -332,6 +345,7 @@ HWTEST_F(HeartBeatStrategyTest, VISIT_CLEAR_NONE_SPLIT_HB_TYPE_TEST_01, TestSize
  * @tc.name: SEND_EACH_SEPARATELY_TEST_01
  * @tc.desc: send each separately test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, SEND_EACH_SEPARATELY_TEST_01, TestSize.Level1)
@@ -363,6 +377,7 @@ HWTEST_F(HeartBeatStrategyTest, SEND_EACH_SEPARATELY_TEST_01, TestSize.Level1)
  * @tc.name: VISIT_CLEAR_UN_REGISTED_HB_TYPE_TEST_01
  * @tc.desc: visit clear un registed hb type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, VISIT_CLEAR_UN_REGISTED_HB_TYPE_TEST_01, TestSize.Level1)
@@ -376,6 +391,7 @@ HWTEST_F(HeartBeatStrategyTest, VISIT_CLEAR_UN_REGISTED_HB_TYPE_TEST_01, TestSiz
  * @tc.name: PROCESS_SEND_ONCE_STRATEGY_TEST_01
  * @tc.desc: process send once strategy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, PROCESS_SEND_ONCE_STRATEGY_TEST_01, TestSize.Level1)
@@ -412,6 +428,7 @@ HWTEST_F(HeartBeatStrategyTest, PROCESS_SEND_ONCE_STRATEGY_TEST_01, TestSize.Lev
  * @tc.name: LNN_START_HEARTBEAT_TEST_01
  * @tc.desc: lnn start heartbeat test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_START_HEARTBEAT_TEST_01, TestSize.Level1)
@@ -428,8 +445,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_HEARTBEAT_TEST_01, TestSize.Level1)
 
 /*
  * @tc.name: LNN_START_STRATEGY_DIRECTLY_TEST_01
- * @tc.desc: LnnStartHbByTypeAndStrategyDirectly test
+ * @tc.desc: lnn start hb by type and strategy directly test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_START_STRATEGY_DIRECTLY_TEST_01, TestSize.Level1)
@@ -442,8 +460,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_STRATEGY_DIRECTLY_TEST_01, TestSize.Le
 
 /*
  * @tc.name: LNN_DIRECT_SEND_STRATEGY_TEST_01
- * @tc.desc: DirectAdvSendStrategy test
+ * @tc.desc: direct adv send strategy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_DIRECT_SEND_STRATEGY_TEST_01, TestSize.Level1)
@@ -467,8 +486,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_DIRECT_SEND_STRATEGY_TEST_01, TestSize.Level
 
 /*
  * @tc.name: LNN_GET_STRATEGY_MANAGER_TEST_01
- * @tc.desc: LnnGetHbStrategyManager test
+ * @tc.desc: lnn get hb strategy manager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_GET_STRATEGY_MANAGER_TEST_01, TestSize.Level1)
@@ -484,8 +504,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_STRATEGY_MANAGER_TEST_01, TestSize.Level
 
 /*
  * @tc.name: LNN_FIXED_PERIOD_SEND_STRATEGY_TEST_01
- * @tc.desc: FixedPeriodSendStrategy test
+ * @tc.desc: fixed period send strategy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_FIXED_PERIOD_SEND_STRATEGY_TEST_01, TestSize.Level1)
@@ -509,8 +530,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_FIXED_PERIOD_SEND_STRATEGY_TEST_01, TestSize
 
 /*
  * @tc.name: LNN_SINGLE_SEND_STRATEGY_TEST_01
- * @tc.desc: SingleSendStrategy test
+ * @tc.desc: single send strategy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_SINGLE_SEND_STRATEGY_TEST_01, TestSize.Level1)
@@ -529,8 +551,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SINGLE_SEND_STRATEGY_TEST_01, TestSize.Level
 
 /*
  * @tc.name: LNN_PROCESS_BEAT_STRATEGY_TEST_01
- * @tc.desc: ProcessSendOnceStrategy test
+ * @tc.desc: process send once strategy test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_PROCESS_BEAT_STRATEGY_TEST_01, TestSize.Level1)
@@ -559,8 +582,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_PROCESS_BEAT_STRATEGY_TEST_01, TestSize.Leve
 
 /*
  * @tc.name: LNN_PROCESSCHECK_DEVSTATUSMSG_TEST_01
- * @tc.desc: ProcessCheckDevStatusMsg test
+ * @tc.desc: process check dev status msg test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_PROCESSCHECK_DEVSTATUSMSG_TEST_01, TestSize.Level1)
@@ -580,8 +604,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_PROCESSCHECK_DEVSTATUSMSG_TEST_01, TestSize.
 
 /*
  * @tc.name: LNN_SEND_DIRECTBOARD_CAST_TEST_01
- * @tc.desc: SendDirectBoardcast test
+ * @tc.desc: send direct boardcast test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_SEND_DIRECTBOARD_CAST_TEST_01, TestSize.Level1)
@@ -607,8 +632,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SEND_DIRECTBOARD_CAST_TEST_01, TestSize.Leve
 
 /*
  * @tc.name: LNN_SEND_EACH_SEPARATELY_TEST_01
- * @tc.desc: SendEachSeparately test
+ * @tc.desc: send each separately test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_SEND_EACH_SEPARATELY_TEST_01, TestSize.Level1)
@@ -634,8 +660,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SEND_EACH_SEPARATELY_TEST_01, TestSize.Level
 
 /*
  * @tc.name: LNN_RELAY_HEARTBEAT_V1_SPLIT_TEST_01
- * @tc.desc: RelayHeartbeatV1Split test
+ * @tc.desc: relay heartbeat V1 split test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V1_SPLIT_TEST_01, TestSize.Level1)
@@ -661,8 +688,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V1_SPLIT_TEST_01, TestSize.L
 
 /*
  * @tc.name: LNN_RELAY_HEARTBEAT_V0_SPLIT_OLD_TEST_01
- * @tc.desc: RelayHeartbeatV0SplitOld test
+ * @tc.desc: relay heartbeat V0 splitOld test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V0_SPLIT_OLD_TEST_01, TestSize.Level1)
@@ -694,8 +722,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_RELAY_HEARTBEAT_V0_SPLIT_OLD_TEST_01, TestSi
 
 /*
  * @tc.name: LNN_SET_GEARMODE_BY_SPECIFICTYPE_TEST_01
- * @tc.desc: LnnSetGearModeBySpecificType test
+ * @tc.desc: lnn set gear mode by specific type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_SET_GEARMODE_BY_SPECIFICTYPE_TEST_01, TestSize.Level1)
@@ -710,8 +739,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SET_GEARMODE_BY_SPECIFICTYPE_TEST_01, TestSi
 }
 /*
  * @tc.name: LNN_HB_STRATEGY_INIT_TEST_01
- * @tc.desc: LnnHbStrategyInit test
+ * @tc.desc: lnn hb strategy init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_HB_STRATEGY_INIT_TEST_01, TestSize.Level1)
@@ -729,8 +759,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_HB_STRATEGY_INIT_TEST_01, TestSize.Level1)
 
 /*
  * @tc.name: VISIT_ENABLE_HBTYPE_TEST_01
- * @tc.desc: VisitEnableHbType test
+ * @tc.desc: visit enable hb type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, VISIT_ENABLE_HBTYPE_TEST_01, TestSize.Level1)
@@ -743,8 +774,9 @@ HWTEST_F(HeartBeatStrategyTest, VISIT_ENABLE_HBTYPE_TEST_01, TestSize.Level1)
 
 /*
  * @tc.name: LNN_STOP_HEARTBEATVY_TYPE_TEST_01
- * @tc.desc: LnnStopHeartbeatByType test
+ * @tc.desc: lnn stop heartbeat by type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEATVY_TYPE_TEST_01, TestSize.Level1)
@@ -767,8 +799,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEATVY_TYPE_TEST_01, TestSize.Leve
 
 /*
  * @tc.name: LNN_STOPV0_HEARTBEAT_AND_NOT_TRANS_STATE_TEST_02
- * @tc.desc: LnnStopV0HeartbeatAndNotTransState test
+ * @tc.desc: lnn stop V0 heartbeat and not trans state test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOPV0_HEARTBEAT_AND_NOT_TRANS_STATE_TEST_02, TestSize.Level1)
