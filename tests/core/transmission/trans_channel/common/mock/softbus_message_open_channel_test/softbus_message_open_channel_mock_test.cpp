@@ -473,6 +473,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest002, TestSi
 HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest003, TestSize.Level1)
 {
     AppInfo appInfo;
+    appInfo.metaType = META_HA;
     cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     ASSERT_TRUE(json != nullptr);
 
@@ -494,6 +495,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest003, TestSi
 HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest004, TestSize.Level1)
 {
     AppInfo appInfo;
+    appInfo.metaType = META_HA;
     cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     ASSERT_TRUE(json != nullptr);
     unsigned char encodeSessionKey[] = "123";
@@ -518,6 +520,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest004, TestSi
 HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest005, TestSize.Level1)
 {
     AppInfo appInfo;
+    appInfo.metaType = META_HA;
     appInfo.myData.apiVersion = API_V2;
     unsigned char encodeSessionKey[] = "123";
     cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
