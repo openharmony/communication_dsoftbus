@@ -1910,36 +1910,6 @@ int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync)
     return TransDelLaneReqFromPendingList(laneHandle, isAsync);
 }
 
-int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, bool isAsync, int32_t errCode)
-{
-    SoftBusList *pendingList = isAsync ? g_asyncReqLanePendingList : g_reqLanePendingList;
-    if (pendingList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_NO_INIT;
-    }
-    if (SoftBusMutexLock(&(pendingList->lock)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "lock failed.");
-        return SOFTBUS_LOCK_ERR;
-    }
-
-    TransReqLaneItem *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &(pendingList->list), TransReqLaneItem, node) {
-        if (item->laneHandle == laneHandle) {
-            item->bSucc = bSucc;
-            item->errCode = errCode;
-            item->isFinished = true;
-            if (!isAsync) {
-                (void)SoftBusCondSignal(&item->cond);
-            }
-            (void)SoftBusMutexUnlock(&(pendingList->lock));
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&(pendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneHandle=%{public}u", laneHandle);
-    return SOFTBUS_NOT_FIND;
-}
-
 static bool CheckLaneHandleIsExited(uint32_t laneHandle)
 {
     if (g_freeLanePendingList == NULL) {
