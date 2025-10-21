@@ -270,7 +270,7 @@ struct GeneralConnection *GetGeneralConnectionByParam(const char *pkgName, int32
 
 static int32_t GeneralSendResetMessage(struct GeneralConnection *generalConnection)
 {
-    GeneralConnectionInfo info = {0};
+    GeneralConnectionInfo info = { { 0 } };
     info.localId = generalConnection->generalId;
     info.peerId = generalConnection->peerGeneralId;
     OutData *data = GeneralConnectionPackMsg(&info, GENERAL_CONNECTION_MSG_TYPE_RESET);
@@ -356,7 +356,7 @@ static void ClearAllGeneralConnection(const char *pkgName, int32_t pid)
 
 static int32_t GeneralSendMergeMessage(struct GeneralConnection *generalConnection, uint32_t updateHandle)
 {
-    GeneralConnectionInfo info = {0};
+    GeneralConnectionInfo info = { { 0 } };
     info.localId = generalConnection->generalId;
     info.peerId = generalConnection->peerGeneralId;
     info.updateHandle = updateHandle;
@@ -373,7 +373,7 @@ static int32_t GeneralSendMergeMessage(struct GeneralConnection *generalConnecti
 static int32_t GeneralSessionNegotiation(
     struct GeneralConnection *generalConnection, int32_t ackStatus, GeneralConnectionMsgType type)
 {
-    GeneralConnectionInfo info = {0};
+    GeneralConnectionInfo info = { { 0 } };
     if (strcpy_s(info.name, GENERAL_NAME_LEN, generalConnection->info.name) != EOK ||
         strcpy_s(info.bundleName, BUNDLE_NAME_MAX, generalConnection->info.bundleName) != EOK) {
             CONN_LOGE(CONN_BLE, "copy address fail, generalId=%{public}u", generalConnection->generalId);
@@ -1052,13 +1052,13 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
     }
     GeneralConnectionHead head = *(GeneralConnectionHead *)data;
     UnpackGeneralHead(&head);
-    GeneralConnectionMsgType msgType = head.msgType;
+    GeneralConnectionMsgType msgType = (GeneralConnectionMsgType)head.msgType;
     if (msgType >= GENERAL_CONNECTION_MSG_TYPE_MAX || (uint32_t)len < head.headLen) {
         CONN_LOGE(CONN_BLE, "invalid msgType, msgType=%{public}u, len=%{public}d, headLen=%{public}u",
             msgType, len, head.headLen);
         return;
     }
-    GeneralConnectionInfo info = {0};
+    GeneralConnectionInfo info =  { { 0 } };
     info.peerId = head.localId;
     info.localId = head.peerId;
     uint32_t recvDataLen = (uint32_t)len - head.headLen; // len greater than GENERAL_CONNECTION_HEADER_SIZE
@@ -1075,7 +1075,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         ConnReturnGeneralConnection(&connection);
         return;
     }
-    int32_t status = GeneralConnectionUnpackMsg(recvData, recvDataLen, &info, head.msgType);
+    int32_t status = GeneralConnectionUnpackMsg(recvData, recvDataLen, &info, msgType);
     CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "pack msg fail, handle=%{public}u, status=%{public}d",
         info.localId, status);
     status = ProcessInnerMessageByType(connectionId, msgType, &info);

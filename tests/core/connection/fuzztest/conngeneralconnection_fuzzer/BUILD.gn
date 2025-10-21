@@ -48,13 +48,10 @@ ohos_fuzztest("ConnGeneralConnectionFuzzTest") {
   ]
 
   sources = [
-    "$dsoftbus_root_path/core/connection/general/softbus_conn_general_connection.c",
     "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negotiation.c",
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_ipc.c",
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
-    "$dsoftbus_root_path/tests/core/connection//general/softbus_conn_general_connection_test.cpp",
     "$dsoftbus_root_path/tests/core/connection/general/hilog_mock.cpp",
-    "$dsoftbus_root_path/tests/core/connection/general/general_connection_mock.cpp",
     "conngeneralconnection_fuzzer.cpp",
   ]
 
