@@ -86,6 +86,7 @@ int32_t onUpdateSendInfo2(LnnHeartbeatUpdateInfoType type)
  * @tc.name: HbFirstSaveRecvTime
  * @tc.desc: heart beat first save
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
@@ -118,6 +119,7 @@ HWTEST_F(HeartBeatMediumTest, HbFirstSaveRecvTimeTest_01, TestSize.Level1)
  * @tc.name: RemoveRepeatRecvTime
  * @tc.desc: remove repeat received time
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
@@ -158,6 +160,7 @@ HWTEST_F(HeartBeatMediumTest, RemoveRepeatRecvTimeTest_01, TestSize.Level1)
  * @tc.name: IsRepeatedRecvInfo
  * @tc.desc: determine whether the message is repeated
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
@@ -202,6 +205,7 @@ HWTEST_F(HeartBeatMediumTest, IsRepeatedRecvInfoTest_01, TestSize.Level1)
  * @tc.name: GetOnlineNodeByRecvInfo
  * @tc.desc: get online node by received info
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
@@ -238,6 +242,7 @@ HWTEST_F(HeartBeatMediumTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
  * @tc.name: HbUpdateOfflineTiming
  * @tc.desc: updata offline timing
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
@@ -283,6 +288,7 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingTest_01, TestSize.Level1)
  * @tc.name: HbMediumMgrRecvProcess
  * @tc.desc: medium manger received process
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
@@ -340,6 +346,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
  * @tc.name: HbMediumMgrRecvHigherWeight
  * @tc.desc: after receive highter weight data process
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level1)
@@ -387,6 +394,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvHigherWeightTest_01, TestSize.Level
  * @tc.name: HbMediumMgrRelayProcess
  * @tc.desc: receive relay data process
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess, TestSize.Level1)
@@ -404,6 +412,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess, TestSize.Level1)
  * @tc.name: LnnDumpHbMgrRecvList
  * @tc.desc: dump hearbeat manger received list
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnDumpHbMgrRecvList_TEST01, TestSize.Level1)
@@ -441,6 +450,7 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbMgrRecvList_TEST01, TestSize.Level1)
  * @tc.name: LnnDumpHbOnlineNodeList
  * @tc.desc: dump heartbeat online nodelist
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
@@ -471,6 +481,7 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
  * @tc.name: VisitHbMediumMgrSendBegin
  * @tc.desc: visit heartbeat medium manger send begin
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
@@ -508,6 +519,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
  * @tc.name: LnnHbMediumMgrSendBegin
  * @tc.desc: heartbeat medium manger send begin
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
@@ -531,6 +543,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
  * @tc.name: VisitHbMediumMgrSendEnd
  * @tc.desc: visit heartbeat medium manger send end
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
@@ -571,6 +584,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
  * @tc.name: VisitHbMediumMgrStop
  * @tc.desc: visit heartbeat medium manger stop
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrStop_TEST01, TestSize.Level1)
@@ -599,6 +613,7 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrStop_TEST01, TestSize.Level1)
  * @tc.name: LnnHbMediumMgrSetParam
  * @tc.desc: heartbeat medium manger set param
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
@@ -621,6 +636,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSetParam_TEST01, TestSize.Level1)
  * @tc.name: LnnHbMediumMgrUpdateSendInfo
  * @tc.desc: medium manger updata send info
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrUpdateSendInfo_TEST01, TestSize.Level1)
@@ -652,6 +668,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrUpdateSendInfo_TEST01, TestSize.Leve
  * @tc.name: VisitUnRegistHeartbeatMediumMgr
  * @tc.desc: unregist heartbeat medium manger
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, VisitUnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1)
@@ -667,6 +684,7 @@ void DeInit(void) { }
  * @tc.name: LnnUnRegistHeartbeatMediumMgr
  * @tc.desc: unregist heartbeat medium manger
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, UnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1)
@@ -692,6 +710,7 @@ HWTEST_F(HeartBeatMediumTest, UnRegistHeartbeatMediumMgr_TEST01, TestSize.Level1
  * @tc.name: IsLocalSupportBleDirectOnline_TEST01
  * @tc.desc: heartbeat medium manger
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, IsLocalSupportBleDirectOnline_TEST01, TestSize.Level1)
@@ -710,6 +729,7 @@ HWTEST_F(HeartBeatMediumTest, IsLocalSupportBleDirectOnline_TEST01, TestSize.Lev
  * @tc.name: IsNeedConnectOnLine_TEST01
  * @tc.desc: heartbeat medium manger
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, IsNeedConnectOnLine_TEST01, TestSize.Level1)
@@ -736,6 +756,7 @@ HWTEST_F(HeartBeatMediumTest, IsNeedConnectOnLine_TEST01, TestSize.Level1)
  * @tc.name: HbIsRepeatedReAuthRequest_TEST01
  * @tc.desc: heartbeat medium manger
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbIsRepeatedReAuthRequest_TEST01, TestSize.Level1)
@@ -761,6 +782,7 @@ HWTEST_F(HeartBeatMediumTest, HbIsRepeatedReAuthRequest_TEST01, TestSize.Level1)
  * @tc.name: UpdateOnlineInfoNoConnection_TEST01
  * @tc.desc: update online info no connection
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, UpdateOnlineInfoNoConnection_TEST01, TestSize.Level1)
@@ -780,6 +802,7 @@ HWTEST_F(HeartBeatMediumTest, UpdateOnlineInfoNoConnection_TEST01, TestSize.Leve
  * @tc.name: HbGetOnlineNodeByRecvInfo_TEST01
  * @tc.desc: hb get online node by recv info
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbGetOnlineNodeByRecvInfo_TEST01, TestSize.Level1)
@@ -812,6 +835,7 @@ HWTEST_F(HeartBeatMediumTest, HbGetOnlineNodeByRecvInfo_TEST01, TestSize.Level1)
  * @tc.name: HbUpdateOfflineTimingByRecvInfo_TEST01
  * @tc.desc: hb update offline timing by recv info
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingByRecvInfo_TEST01, TestSize.Level1)
@@ -839,6 +863,7 @@ HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingByRecvInfo_TEST01, TestSize.L
  * @tc.name: SoftBusNetNodeResult_TEST01
  * @tc.desc: softbus net node result
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
@@ -874,6 +899,7 @@ HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
  * @tc.name: HbMediumMgrRelayProcess_TEST01
  * @tc.desc: hb medium mgr relay process
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess_TEST01, TestSize.Level1)
@@ -887,6 +913,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess_TEST01, TestSize.Level1)
  * @tc.name: LnnDumpHbOnlineNodeList_TEST02
  * @tc.desc: dump hb online node list
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST02, TestSize.Level1)
@@ -904,6 +931,7 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST02, TestSize.Level1)
  * @tc.name: LnnHbMediumMgrInit_TEST01
  * @tc.desc: hb medium mgr init
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrInit_TEST01, TestSize.Level1)
@@ -925,6 +953,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrInit_TEST01, TestSize.Level1)
  * @tc.name: LnnHeartbeatCtrlVirtual_TEST01
  * @tc.desc: lnn_heartbeat_ctrl_virtual.c
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnHeartbeatCtrlVirtual_TEST01, TestSize.Level1)
@@ -951,6 +980,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHeartbeatCtrlVirtual_TEST01, TestSize.Level1)
  * @tc.name: IsLocalSupportThreeState_TEST01
  * @tc.desc: three state test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, IsLocalSupportThreeState_TEST01, TestSize.Level1)
@@ -977,6 +1007,7 @@ HWTEST_F(HeartBeatMediumTest, IsLocalSupportThreeState_TEST01, TestSize.Level1)
  * @tc.name: HbIsValidJoinLnnRequest_TEST01
  * @tc.desc: three state test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
@@ -1022,6 +1053,7 @@ HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
  * @tc.name: IsNeedTriggerSparkGroup_TEST01
  * @tc.desc: three state test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
@@ -1070,6 +1102,7 @@ HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
  * @tc.name: LnnCleanTriggerSparkInfo_TEST01
  * @tc.desc: three state test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, LnnCleanTriggerSparkInfo_TEST01, TestSize.Level1)
@@ -1087,6 +1120,7 @@ HWTEST_F(HeartBeatMediumTest, LnnCleanTriggerSparkInfo_TEST01, TestSize.Level1)
  * @tc.name: HbMediumMgrRecvSleInfo_TEST01
  * @tc.desc: three state test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvSleInfo_TEST01, TestSize.Level1)

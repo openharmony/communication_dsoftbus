@@ -71,8 +71,9 @@ void BusCenterManagerTest::TearDown(void)
 
 /*
 * @tc.name: BusCenterManagerTest001
-* @tc.desc:
+* @tc.desc: bus center deinit looper test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest001, TestSize.Level1)
@@ -84,8 +85,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest001, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest002
-* @tc.desc:
+* @tc.desc: bus center init looper test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest002, TestSize.Level1)
@@ -98,8 +100,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest002, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest003
-* @tc.desc:
+* @tc.desc: bus center server init test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest003, TestSize.Level1)
@@ -112,8 +115,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest003, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest004
-* @tc.desc:
+* @tc.desc: bus center server init test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
@@ -143,8 +147,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest005
-* @tc.desc:
+* @tc.desc: bus center server init test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
@@ -193,8 +198,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest006
-* @tc.desc:
+* @tc.desc: bus center server init test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
@@ -231,8 +237,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest007
-* @tc.desc: test BusCenterServerInit
+* @tc.desc: bus center server init test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest007, TestSize.Level1)
@@ -246,8 +253,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest007, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest008
-* @tc.desc: test LnnInitLaneLooper
+* @tc.desc: init lane looper test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest008, TestSize.Level1)
@@ -266,6 +274,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest008, TestSize.Level1)
 * @tc.name: BusCenterServerInitTest001
 * @tc.desc: LnnInitPermission fun init error
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterManagerTest, BusCenterServerInitTest001, TestSize.Level1)
