@@ -316,7 +316,23 @@ void DiscOopBleDeinitPacked(void)
     return pfnDiscEnhanceFuncList->discOopBleDeinit();
 }
 
-
+void PcCollaborationManagerDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->pcCollaborationManagerDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->pcCollaborationManagerDeinit();
+}
+ 
+void DiscPcCollaborationEventDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->pcCollaborationEventDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->pcCollaborationEventDeinit();
+}
 
 void DiscCoapReportNotificationPacked(const NSTACKX_NotificationConfig *notification)
 {

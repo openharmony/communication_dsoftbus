@@ -83,6 +83,8 @@ typedef void (*DiscOopBleDeinitFunc)(void);
 typedef int32_t (*DiscOopBleEventInitFunc)(void);
 typedef void (*DiscOopBleEventDeinitFunc)(void);
 typedef int32_t (*DiscPcCollaborationEventInitFunc)(void);
+typedef void (*DiscPcCollaborationDeinitFunc)(void);
+typedef void (*DiscPcCollaborationEventDeinitFunc)(void);
 
 typedef int32_t (*DistUpdatePublishParamFunc)(const char *cust, const char *extCust);
 typedef int32_t (*DistDiscoveryStartActionPreLinkFunc)(void);
@@ -128,6 +130,8 @@ typedef struct TagDiscEnhanceFuncList {
 
     DiscPcCollaborationInitFunc discPcCollaborationBleInit;
     DiscPcCollaborationEventInitFunc discPcCollaborationEventInit;
+    DiscPcCollaborationDeinitFunc pcCollaborationManagerDeinit;
+    DiscPcCollaborationEventDeinitFunc pcCollaborationEventDeinit;
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_BROADCAST_MGR_VIRTUAL)
     SchedulerStartBroadcastFunc schedulerStartBroadcast;
