@@ -29,6 +29,10 @@ static sptr<ConnectionClientProxy> GetClientProxy(const char *pkgName, int32_t p
 {
     sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
     sptr<ConnectionClientProxy> clientProxy = new (std::nothrow) ConnectionClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        CONN_LOGE(CONN_COMMON, "failed to create ConnectionClientProxy");
+        return nullptr;
+    }
     return clientProxy;
 }
 

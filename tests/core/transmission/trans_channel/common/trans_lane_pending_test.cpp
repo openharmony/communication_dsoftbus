@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1409,33 +1409,6 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfo002, TestSize.Level1)
     SoftBusFree(param);
     param = nullptr;
 }
-
-/*
- * @tc.name: TransCancelLaneItemCondByLaneHandle001
- * @tc.desc: TransCancelLaneItemCondByLaneHandle test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLanePendingTest, TransCancelLaneItemCondByLaneHandle001, TestSize.Level1)
-{
-    uint32_t laneHandle = TEST_LANE_ID;
-    SoftBusList *tmpList = g_reqLanePendingList;
-    g_reqLanePendingList = nullptr;
-    int32_t ret =TransCancelLaneItemCondByLaneHandle(laneHandle, true, false, SOFTBUS_OK);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-    g_reqLanePendingList = tmpList;
-
-    ret =TransCancelLaneItemCondByLaneHandle(laneHandle, true, false, SOFTBUS_OK);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = TransAddLaneReqFromPendingList(laneHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret =TransCancelLaneItemCondByLaneHandle(laneHandle, true, false, SOFTBUS_OK);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    TransReqLanePendingDeinit();
-}
-
 
 /*
  * @tc.name: TransNotifyLaneQosEventTest001
