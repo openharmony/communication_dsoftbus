@@ -20,7 +20,6 @@
 
 #include "bus_center_info_key.h"
 #include "g_enhance_lnn_func.h"
-#include "lnn_ctrl_lane.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
