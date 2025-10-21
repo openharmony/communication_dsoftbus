@@ -248,7 +248,7 @@ static bool LaneLinkAddrOfDefault(const LaneLinkInfo *sourceLink, const LaneLink
     return false;
 }
 
-static bool LaneLinkAddrOfWlanP2p(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+static bool LaneLinkAddrOfSoftApP2p(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
 {
     if (sourceLink == NULL || linkInfoItem == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
@@ -279,7 +279,7 @@ static CompareLinkAddr g_linkAddrCheck[LANE_LINK_TYPE_BUTT] = {
     [LANE_HML_RAW] = LaneLinkAddrOfDefault,
     [LANE_BLE_REUSE] = LaneLinkAddrOfDefault,
     [LANE_P2P_REUSE] = LaneLinkAddrOfDefault,
-    [LANE_WLAN_P2P] = LaneLinkAddrOfWlanP2p,
+    [LANE_SOFTAP_P2P] = LaneLinkAddrOfSoftApP2p,
 };
 
 static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
@@ -708,7 +708,7 @@ static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_HML, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
         LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_SLE, LANE_SLE_DIRECT, LANE_COC_DIRECT, LANE_BLE_REUSE,
-        LANE_HML_RAW, LANE_USB, LANE_WLAN_P2P };
+        LANE_HML_RAW, LANE_USB, LANE_SOFTAP_P2P };
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
@@ -1852,7 +1852,7 @@ static int32_t LaneLinkOfSleDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     return SOFTBUS_OK;
 }
 
-static int32_t LaneLinkOfWlanP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+static int32_t LaneLinkOfSoftApP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
@@ -1871,7 +1871,7 @@ static int32_t LaneLinkOfWlanP2p(uint32_t reqId, const LinkRequest *reqInfo, con
         LNN_LOGE(LNN_LANE, "get local ip faild, ret=%{public}d", ret);
         return ret;
     }
-    linkInfo.type = LANE_WLAN_P2P;
+    linkInfo.type = LANE_SOFTAP_P2P;
     linkInfo.linkInfo.p2p.connInfo.protocol = LNN_PROTOCOL_IP;
     callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
@@ -1893,7 +1893,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_USB] = LaneLinkOfUsb,
     [LANE_SLE] = LaneLinkOfSle,
     [LANE_SLE_DIRECT] = LaneLinkOfSleDirect,
-    [LANE_WLAN_P2P] = LaneLinkOfWlanP2p,
+    [LANE_SOFTAP_P2P] = LaneLinkOfSoftApP2p,
 };
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
