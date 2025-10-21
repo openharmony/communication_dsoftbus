@@ -50,7 +50,7 @@ typedef enum {
     LANE_SLE,
     LANE_USB,
     LANE_SLE_DIRECT,
-    LANE_WLAN_P2P,
+    LANE_SOFTAP_P2P,
     LANE_LINK_TYPE_BUTT,
 } LaneLinkType;
 

@@ -311,12 +311,12 @@ static void OnLaneAllocSuccessForBle(uint32_t laneHandle, const LaneConnInfo *in
     CondSignal();
 }
 
-static void OnLaneAllocSuccessForWlanP2p(uint32_t laneHandle, const LaneConnInfo *info)
+static void OnLaneAllocSuccessForSoftApP2p(uint32_t laneHandle, const LaneConnInfo *info)
 {
     (void)laneHandle;
     ASSERT_NE(info, nullptr) << "invalid connInfo";
     GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
-    EXPECT_EQ(info->type, LANE_WLAN_P2P);
+    EXPECT_EQ(info->type, LANE_SOFTAP_P2P);
     CondSignal();
 }
 
@@ -383,8 +383,8 @@ static LaneAllocListener g_listenerCbForBle = {
     .onLaneFreeFail = OnLaneFreeFail,
 };
 
-static LaneAllocListener g_listenerCbForWlanP2p = {
-    .onLaneAllocSuccess = OnLaneAllocSuccessForWlanP2p,
+static LaneAllocListener g_listenerCbForSoftApP2p = {
+    .onLaneAllocSuccess = OnLaneAllocSuccessForSoftApP2p,
     .onLaneAllocFail = OnLaneAllocFailNoExcept3,
     .onLaneFreeSuccess = OnLaneFreeSuccess,
     .onLaneFreeFail = OnLaneFreeFail,
@@ -475,12 +475,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_ERRTEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_001
+* @tc.name: LANE_ALLOC_TEST_001
 * @tc.desc: lane alloc by select default link for T_MSG (build wlan5g)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_001, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -515,12 +515,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_002
+* @tc.name: LANE_ALLOC_TEST_002
 * @tc.desc: lane alloc by select default link for T_BYTE (not enable wlan and br, build ble)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_002, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_002, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -548,12 +548,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_003
+* @tc.name: LANE_ALLOC_TEST_003
 * @tc.desc: lane alloc by select default link for T_FILE (not enable wlan and hml, build p2p)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_003, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_003, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -582,12 +582,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_004
+* @tc.name: LANE_ALLOC_TEST_004
 * @tc.desc: lane alloc by select default link for T_RAW_STREAM (not enable wlan, build p2p)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_004, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_004, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -615,12 +615,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_005
+* @tc.name: LANE_ALLOC_TEST_005
 * @tc.desc: lane alloc by mesh link (not enable wlan, build br)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_005, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_005, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -647,12 +647,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_006
+* @tc.name: LANE_ALLOC_TEST_006
 * @tc.desc: lane alloc by RTT link (not enable hml, build p2p)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_006, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_006, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -681,12 +681,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_006, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_007
+* @tc.name: LANE_ALLOC_TEST_007
 * @tc.desc: lane alloc by qos require (HIGH_BW, build hml)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_007, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_007, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -718,12 +718,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_007, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_008
+* @tc.name: LANE_ALLOC_TEST_008
 * @tc.desc: lane alloc by qos require (MID_HIGH_BW, not enable hml, build wlan5g)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_008, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_008, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -760,12 +760,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_008, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_009
+* @tc.name: LANE_ALLOC_TEST_009
 * @tc.desc: lane alloc by qos require (MID_LOW_BW, not enable wlan5g and hml, build wlan24g)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_009, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_009, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -802,12 +802,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_009, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_010
+* @tc.name: LANE_ALLOC_TEST_010
 * @tc.desc: lane alloc by qos require (LOW_BW, not enable wlan5g\hml\br\p2p\coc_direct, build ble)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_010, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_010, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -837,12 +837,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_010, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_011
+* @tc.name: LANE_ALLOC_TEST_011
 * @tc.desc: lane alloc for exception deal before select link
 * @tc.type: FAILUE
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_011, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_011, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -883,12 +883,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_011, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_012
+* @tc.name: LANE_ALLOC_TEST_012
 * @tc.desc: lane alloc for continuous task(local is watch)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_012, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_012, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -922,12 +922,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_012, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_013
+* @tc.name: LANE_ALLOC_TEST_013
 * @tc.desc: lane alloc for continuous task(remote is watch)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_013, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_013, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -962,12 +962,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_013, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_014
+* @tc.name: LANE_ALLOC_TEST_014
 * @tc.desc: lane alloc for MIDDLE_LOW_BW&not continuous task(local is watch)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_014, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_014, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -999,12 +999,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_014, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_015
+* @tc.name: LANE_ALLOC_TEST_015
 * @tc.desc: lane alloc for MIDDLE_HIGH_BW&not continuous task(remote is watch)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_015, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_015, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -1037,12 +1037,12 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_015, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_016
+* @tc.name: LANE_ALLOC_TEST_016
 * @tc.desc: lane alloc for continuous task(lowBw and remote is hoos, expect link is br)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_016, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_016, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
@@ -2400,7 +2400,7 @@ static int32_t AuthMetaGetLocalIpByMetaNodeId(const char *metaNodeId, char *loca
 
 /*
 * @tc.name: LNN_ALLOC_TARGET_LANE_TEST_03
-* @tc.desc: lnnAllocTargetLane linkType LANE_WLAN_P2P get ip failed
+* @tc.desc: lnnAllocTargetLane linkType LANE_SOFTAP_P2P get ip failed
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -2413,25 +2413,25 @@ HWTEST_F(LNNLaneMockTest, LNN_ALLOC_TARGET_LANE_TEST_03, TestSize.Level1)
 
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->authMetaGetIpByMetaNodeId = nullptr;
-    allocInfo.linkList.linkType[0] = LANE_WLAN_P2P;
+    allocInfo.linkList.linkType[0] = LANE_SOFTAP_P2P;
     allocInfo.linkList.linkTypeNum = 1;
     allocInfo.type = LANE_TYPE_TRANS;
     SetIsNeedCondWait();
-    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForWlanP2p);
+    int32_t ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 
     pfnLnnEnhanceFuncList->authMetaGetIpByMetaNodeId = AuthMetaGetIpByMetaNodeId;
     pfnLnnEnhanceFuncList->authMetaGetLocalIpByMetaNodeId = nullptr;
     SetIsNeedCondWait();
-    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForWlanP2p);
+    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
 }
 
 /*
 * @tc.name: LNN_ALLOC_TARGET_LANE_TEST_04
-* @tc.desc: lnnAllocTargetLane linkType LANE_WLAN_P2P success
+* @tc.desc: lnnAllocTargetLane linkType LANE_SOFTAP_P2P success
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -2447,13 +2447,13 @@ HWTEST_F(LNNLaneMockTest, LNN_ALLOC_TARGET_LANE_TEST_04, TestSize.Level1)
     pfnLnnEnhanceFuncList->authMetaGetIpByMetaNodeId = AuthMetaGetIpByMetaNodeId;
     pfnLnnEnhanceFuncList->authMetaGetLocalIpByMetaNodeId = AuthMetaGetLocalIpByMetaNodeId;
     EXPECT_CALL(laneDepMock, SoftBusGenerateStrHash).WillRepeatedly(LaneDepsInterfaceMock::ActionOfGenerateStrHash);
-    allocInfo.linkList.linkType[0] = LANE_WLAN_P2P;
+    allocInfo.linkList.linkType[0] = LANE_SOFTAP_P2P;
     allocInfo.linkList.linkTypeNum = 1;
     allocInfo.type = LANE_TYPE_TRANS;
     int32_t ret = strcpy_s(allocInfo.commInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     EXPECT_EQ(ret, EOK);
     SetIsNeedCondWait();
-    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForWlanP2p);
+    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     SetIsNeedCondWait();
@@ -2463,12 +2463,12 @@ HWTEST_F(LNNLaneMockTest, LNN_ALLOC_TARGET_LANE_TEST_04, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_ALLOC_Test_017
+* @tc.name: LANE_ALLOC_TEST_017
 * @tc.desc: lnnAllocLane with HIGH_BW
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_017, TestSize.Level1)
+HWTEST_F(LNNLaneMockTest, LANE_ALLOC_TEST_017, TestSize.Level1)
 {
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     const LnnLaneManager *laneManager = GetLaneManager();
