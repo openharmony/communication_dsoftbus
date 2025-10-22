@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,18 @@ constexpr int32_t LNN_REFRESH_ID = 0;
 constexpr int32_t RESULT_REASON = -1;
 constexpr char PKGNAME[] = "softbustest";
 constexpr char IP_TEST[IP_LEN] = "192.168.51.170";
+
+static void GroupOwnerDestroyListenerTest(int32_t retCode)
+{
+    (void)retCode;
+}
+
+static void onTimeSyncResultWithSocketTest(const TimeSyncResultWithSocket *info, int32_t retCode)
+{
+    (void)info;
+    (void)retCode;
+}
+
 class ClientBusCentManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1207,5 +1219,249 @@ HWTEST_F(ClientBusCentManagerTest, FREE_DISC_SUBSCRIBE_MSG_Test_001, TestSize.Le
     msg->info->capability = nullptr;
     msg->info->capabilityData = nullptr;
     EXPECT_NO_FATAL_FAILURE(FreeDiscSubscribeMsg(&msg));
+}
+
+/*
+ * @tc.name: DESTROY_GROUP_OWNER_INNER_Test_001
+ * @tc.desc: destroy group error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, DESTROY_GROUP_OWNER_INNER_Test_001, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    const char *packname = "packname";
+    int32_t ret = DestroyGroupOwnerInner(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    g_busCenterClient.isInit = false;
+    ret = DestroyGroupOwnerInner(packname);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    g_busCenterClient.isInit = true;
+    g_busCenterClient.groupOwnerDestroyCb = nullptr;
+    ret = DestroyGroupOwnerInner(packname);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/*
+ * @tc.name: DESTROY_GROUP_OWNER_INNER_Test_002
+ * @tc.desc: destroy group ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, DESTROY_GROUP_OWNER_INNER_Test_002, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    const char *packname = "packname";
+    g_busCenterClient.isInit = true;
+    g_busCenterClient.groupOwnerDestroyCb = GroupOwnerDestroyListenerTest;
+    int32_t ret = DestroyGroupOwnerInner(packname);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: CREATE_GROUP_OWNER_INNER_Test_001
+ * @tc.desc: create croup param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_001, TestSize.Level1)
+{
+    const char *pkgName = "pkgName";
+    struct GroupOwnerConfig config;
+    struct GroupOwnerResult result;
+    GroupOwnerDestroyListener listener = GroupOwnerDestroyListenerTest;
+    (void)memset_s(&config, sizeof(GroupOwnerConfig), 0, sizeof(GroupOwnerConfig));
+    (void)memset_s(&result, sizeof(GroupOwnerResult), 0, sizeof(GroupOwnerResult));
+    int32_t ret = CreateGroupOwnerInner(nullptr, &config, &result, listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateGroupOwnerInner(pkgName, nullptr, &result, listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateGroupOwnerInner(pkgName, &config, nullptr, listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateGroupOwnerInner(pkgName, &config, &result, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CREATE_GROUP_OWNER_INNER_Test_002
+ * @tc.desc: create is not init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_002, TestSize.Level1)
+{
+    const char *pkgName = "pkgName";
+    struct GroupOwnerConfig config;
+    struct GroupOwnerResult result;
+    GroupOwnerDestroyListener listener = GroupOwnerDestroyListenerTest;
+    (void)memset_s(&config, sizeof(GroupOwnerConfig), 0, sizeof(GroupOwnerConfig));
+    (void)memset_s(&result, sizeof(GroupOwnerResult), 0, sizeof(GroupOwnerResult));
+    g_busCenterClient.isInit = false;
+    int32_t ret = CreateGroupOwnerInner(pkgName, &config, &result, listener);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/*
+ * @tc.name: CREATE_GROUP_OWNER_INNER_Test_003
+ * @tc.desc: already create group
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_003, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    const char *pkgName = "pkgName";
+    struct GroupOwnerConfig config;
+    struct GroupOwnerResult result;
+    GroupOwnerDestroyListener listener = GroupOwnerDestroyListenerTest;
+    (void)memset_s(&config, sizeof(GroupOwnerConfig), 0, sizeof(GroupOwnerConfig));
+    (void)memset_s(&result, sizeof(GroupOwnerResult), 0, sizeof(GroupOwnerResult));
+    g_busCenterClient.isInit = true;
+    g_busCenterClient.groupOwnerDestroyCb = GroupOwnerDestroyListenerTest;
+    int32_t ret = CreateGroupOwnerInner(pkgName, &config, &result, listener);
+    EXPECT_EQ(ret, SOFTBUS_CONN_ALREADY_CREATE_GROUP);
+}
+
+/*
+ * @tc.name: CREATE_GROUP_OWNER_INNER_Test_004
+ * @tc.desc: create group ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_004, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    const char *pkgName = "pkgName";
+    struct GroupOwnerConfig config;
+    struct GroupOwnerResult result;
+    GroupOwnerDestroyListener listener = GroupOwnerDestroyListenerTest;
+    (void)memset_s(&config, sizeof(GroupOwnerConfig), 0, sizeof(GroupOwnerConfig));
+    (void)memset_s(&result, sizeof(GroupOwnerResult), 0, sizeof(GroupOwnerResult));
+    g_busCenterClient.isInit = true;
+    g_busCenterClient.groupOwnerDestroyCb = nullptr;
+    EXPECT_CALL(busCentManagerMock, ServerIpcCreateGroupOwner).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = CreateGroupOwnerInner(pkgName, &config, &result, listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(busCentManagerMock, ServerIpcCreateGroupOwner).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = CreateGroupOwnerInner(pkgName, &config, &result, listener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: STOP_TIME_SYNC_INNER_Test_003
+ * @tc.desc: stop time is not init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_003, TestSize.Level1)
+{
+    const char *pkgName = "pkgName";
+    const char *targetNetworkId = "targetNetworkId";
+    g_busCenterClient.isInit = false;
+    int32_t ret = StopTimeSyncInner(pkgName, targetNetworkId);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/*
+ * @tc.name: START_TIME_SYNC_INNER_Test_002
+ * @tc.desc: start time is not init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_002, TestSize.Level1)
+{
+    const char *pkgName = "pkgName";
+    const char *targetNetworkId = "targetNetworkId";
+    TimeSyncAccuracy accuracy;
+    TimeSyncPeriod period;
+    ITimeSyncCb cb;
+    (void)memset_s(&accuracy, sizeof(TimeSyncAccuracy), 0, sizeof(TimeSyncAccuracy));
+    (void)memset_s(&period, sizeof(TimeSyncPeriod), 0, sizeof(TimeSyncPeriod));
+    (void)memset_s(&cb, sizeof(ITimeSyncCb), 0, sizeof(ITimeSyncCb));
+    g_busCenterClient.isInit = false;
+    int32_t ret = StartTimeSyncInner(pkgName, targetNetworkId, accuracy, period, &cb);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/*
+ * @tc.name: STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_003
+ * @tc.desc: stop time socket not init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_003, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    const char *pkgName = "pkgName";
+    TimeSyncSocketInfo socketInfo;
+    (void)memset_s(&socketInfo, sizeof(TimeSyncSocketInfo), 0, sizeof(TimeSyncSocketInfo));
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, CheckPackageName).WillRepeatedly(Return(SOFTBUS_INVALID_PKGNAME));
+    if (sizeof(socketInfo.peerIp) > 0) {
+        socketInfo.peerIp[0] = '1';
+        socketInfo.peerIp[sizeof(socketInfo.peerIp) - 1] = '\0';
+    }
+    g_busCenterClient.isInit = false;
+    int32_t ret = StopTimeSyncWithSocketInner(pkgName, &socketInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(busCentManagerMock, CheckPackageName).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = StopTimeSyncWithSocketInner(pkgName, &socketInfo);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    g_busCenterClient.isInit = true;
+    ret = StopTimeSyncWithSocketInner(pkgName, &socketInfo);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_STOP_TIME_SYNC_FAILED);
+}
+
+/*
+ * @tc.name: START_TIME_SYNC_WITH_SOCKET_INNER_Test_001
+ * @tc.desc: start time socket not init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_WITH_SOCKET_INNER_Test_001, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    const char *pkgName = "pkgName";
+    TimeSyncSocketInfo socketInfo;
+    TimeSyncAccuracy accuracy;
+    TimeSyncPeriod period;
+    ITimeSyncCbWithSocket cbWithSocket;
+
+    (void)memset_s(&socketInfo, sizeof(TimeSyncSocketInfo), 0, sizeof(TimeSyncSocketInfo));
+    (void)memset_s(&accuracy, sizeof(TimeSyncAccuracy), 0, sizeof(TimeSyncAccuracy));
+    (void)memset_s(&period, sizeof(TimeSyncPeriod), 0, sizeof(TimeSyncPeriod));
+    (void)memset_s(&cbWithSocket, sizeof(ITimeSyncCbWithSocket), 0, sizeof(ITimeSyncCbWithSocket));
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, CheckPackageName).WillRepeatedly(Return(SOFTBUS_INVALID_PKGNAME));
+    if (sizeof(socketInfo.peerIp) > 0) {
+        socketInfo.peerIp[0] = '1';
+        socketInfo.peerIp[sizeof(socketInfo.peerIp) - 1] = '\0';
+    }
+    g_busCenterClient.isInit = false;
+    cbWithSocket.onTimeSyncResultWithSocket = onTimeSyncResultWithSocketTest;
+    int32_t ret = StartTimeSyncWithSocketInner(pkgName, &socketInfo, accuracy, period, &cbWithSocket);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(busCentManagerMock, CheckPackageName).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = StartTimeSyncWithSocketInner(pkgName, &socketInfo, accuracy, period, &cbWithSocket);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    g_busCenterClient.isInit = true;
+    ret = StartTimeSyncWithSocketInner(pkgName, &socketInfo, accuracy, period, &cbWithSocket);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
