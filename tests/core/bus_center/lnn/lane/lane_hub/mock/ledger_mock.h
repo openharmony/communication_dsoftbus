@@ -47,7 +47,8 @@ public:
     virtual int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len) = 0;
-    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType,
+        DeviceLeaveReason leaveReason) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num) = 0;
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
@@ -78,7 +79,7 @@ public:
     MOCK_METHOD2(LnnGetDLHeartbeatTimestamp, int32_t(const char *, uint64_t *));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t(const char *, InfoKey, char *, uint32_t));
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
     MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t(char **, uint32_t *));
     MOCK_METHOD2(LnnConvertDLidToUdid, char*(const char *, IdCategory));
@@ -117,7 +118,7 @@ extern "C" {
     int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp);
     bool LnnGetOnlineStateById(const char *id, IdCategory type);
     int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
-    int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType);
+    int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason);
     int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
     const char *LnnConvertDLidToUdid(const char *id, IdCategory type);

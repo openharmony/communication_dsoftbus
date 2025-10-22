@@ -36,9 +36,9 @@ static LnnNetBuilderInterface *GetLnnNetBuilderInterface()
 }
 
 extern "C" {
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason)
 {
-    return GetLnnNetBuilderInterface()->LnnRequestLeaveSpecific(networkId, addrType);
+    return GetLnnNetBuilderInterface()->LnnRequestLeaveSpecific(networkId, addrType, leaveReason);
 }
 
 int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId)

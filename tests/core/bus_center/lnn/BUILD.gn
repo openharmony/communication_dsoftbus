@@ -2331,12 +2331,12 @@ ohos_unittest("LNNHeartBeatTest") {
   ]
 }
 
-ohos_unittest("LNNHeartBeatDeviceRootTest")
+ohos_unittest("LnnHeartBeatDeviceRiskTest")
 {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/heartbeat/lnn_heartbeat_device_root_test.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/mock/lnn_heartbeat_device_root_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/heartbeat/lnn_heartbeat_device_risk_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/mock/lnn_heartbeat_device_risk_mock.cpp",
   ]
 
   include_dirs = [
@@ -3916,6 +3916,7 @@ group("unittest") {
     ":LNNTimeSyncTest",
     ":LNNTimeSyncOtherTest",
     ":LNNHeartBeatTest",
+    ":LnnHeartBeatDeviceRiskTest",
   ]
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [

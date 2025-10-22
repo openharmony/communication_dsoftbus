@@ -65,7 +65,7 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
 static void PostNetchangedInfo(const char *networkId, ConnectionAddrType type)
 {
     LNN_LOGI(LNN_BUILDER, "start post offline, conntype=%{public}d", type);
-    if (LnnRequestLeaveSpecific(networkId, type) != SOFTBUS_OK) {
+    if (LnnRequestLeaveSpecific(networkId, type, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send request to NetBuilder fail");
     }
 }
@@ -188,7 +188,7 @@ static void OnReceiveUserIdSyncInfoMsg(LnnSyncInfoType type, const char *network
         LNN_LOGE(LNN_BUILDER, "update conn userId fail.");
         return;
     }
-    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
 }
 
 static uint8_t *ConvertCapabilityToMsg(uint32_t localCapability)
@@ -801,7 +801,7 @@ void LnnDeinitNetworkInfo(void)
 
 static void LnnProcessUserChangeMsg(LnnSyncInfoType syncType, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
 }
 
 void OnLnnProcessUserChangeMsgDelay(void *para)
@@ -811,7 +811,7 @@ void OnLnnProcessUserChangeMsgDelay(void *para)
         return;
     }
 
-    LnnRequestLeaveSpecific((char *)para, CONNECTION_ADDR_MAX);
+    LnnRequestLeaveSpecific((char *)para, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
     SoftBusFree(para);
 }
 
@@ -830,7 +830,7 @@ static void LnnAsyncSendUserId(void *param)
     int32_t ret = LnnSendSyncInfoMsg(data->type, data->networkId, data->msg, data->len, data->complete);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send info msg type=%{public}d fail, ret:%{public}d", data->type, ret);
-        LnnRequestLeaveSpecific(data->networkId, CONNECTION_ADDR_MAX);
+        LnnRequestLeaveSpecific(data->networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
     }
     SoftBusFree(data->msg);
     SoftBusFree(data);
@@ -848,7 +848,7 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
     }
     if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BLE)) {
         LNN_LOGI(LNN_BUILDER, "ble online, no need notify offline by adv");
-        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
         return;
     }
 
@@ -856,7 +856,7 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
         CreateSyncInfoParam(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
     if (data == NULL) {
         LNN_LOGE(LNN_BUILDER, "create async info fail");
-        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
         return;
     }
     ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnAsyncSendUserId, (void *)data);
@@ -864,7 +864,7 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
         SoftBusFree(data->msg);
         SoftBusFree(data);
         LNN_LOGE(LNN_BUILDER, "async userid to peer fail");
-        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
         return;
     }
 

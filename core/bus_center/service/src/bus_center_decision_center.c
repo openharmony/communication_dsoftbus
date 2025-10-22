@@ -57,7 +57,7 @@ static void LeaveSpecificBrNetwork(const char *addr)
         return;
     }
 
-    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
+    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR, DEVICE_LEAVE_REASON_DEFAULT);
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_STATE, "leave br network failed, ret=%{public}d", ret);
     }
