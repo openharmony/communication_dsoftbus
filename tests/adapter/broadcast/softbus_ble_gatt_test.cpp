@@ -24,7 +24,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#define GATT_ADV_MAX_NUM  21
+#define GATT_ADV_MAX_NUM  22
 
 using namespace testing::ext;
 using ::testing::AtMost;

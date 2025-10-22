@@ -77,7 +77,7 @@ void ConnectCommand::SetFailureCallback(const FailureCallback &callback)
 void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
-        "requestId=%{public}u, linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
+        "reqId=%{public}u, linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
         "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d, remoteDeviceId=%{public}s "
         "isVirtualLink=%{public}d",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
@@ -95,7 +95,7 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 
 void ConnectCommand::OnFailure(int32_t reason) const
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d, remoteDeviceId=%{public}s",
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}u, reason=%{public}d, remoteDeviceId=%{public}s",
         info_.info_.requestId, reason, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
     if (reason == SOFTBUS_CONN_NEED_RENEGOTIATE && !HasRetried()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "retry");

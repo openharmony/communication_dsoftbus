@@ -30,6 +30,10 @@ static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
     }
     sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "failed to create TransClientProxy");
+        return nullptr;
+    }
     return clientProxy;
 }
 

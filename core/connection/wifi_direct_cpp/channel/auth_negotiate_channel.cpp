@@ -370,7 +370,7 @@ void AuthNegotiateChannel::OnConnOpened(uint32_t requestId, AuthHandle authHandl
     {
         std::lock_guard lock(lock_);
         remoteDeviceId = requestIdToDeviceIdMap_[requestId];
-        CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s", requestId,
+        CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}u remoteDeviceId=%{public}s", requestId,
             WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
         requestIdToDeviceIdMap_.erase(requestId);
         auto it = authOpenEventPromiseMap_.find(requestId);
@@ -390,7 +390,7 @@ void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
     {
         std::lock_guard lock(lock_);
         remoteDeviceId = requestIdToDeviceIdMap_[requestId];
-        CONN_LOGE(CONN_WIFI_DIRECT, "requestId=%{public}u remoteDeviceId=%{public}s reason=%{public}d", requestId,
+        CONN_LOGE(CONN_WIFI_DIRECT, "reqId=%{public}u remoteDeviceId=%{public}s reason=%{public}d", requestId,
             WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(), reason);
         requestIdToDeviceIdMap_.erase(requestId);
         auto it = authOpenEventPromiseMap_.find(requestId);
@@ -453,7 +453,7 @@ int AuthNegotiateChannel::AssignValueForAuthConnInfo(bool isMeta, bool needUdid,
     authConnInfo.type = param.type;
     authConnInfo.info.ipInfo.port = param.remotePort;
     authConnInfo.info.ipInfo.moduleId = param.module;
-    if (isMeta && needUdid) {
+    if (isMeta && channel != nullptr) {
         authConnInfo.info.ipInfo.authId = channel->handle_.authId;
     }
     auto ret = strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, param.remoteIp.c_str());
@@ -484,19 +484,20 @@ int AuthNegotiateChannel::AuthOpenConnection(uint32_t requestId, AuthConnInfo au
 int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel,
     uint32_t &authReqId, std::shared_ptr<std::promise<AuthOpenEvent>> authOpenEventPromise)
 {
-    bool isMeta = false;
+    bool isMeta = channel != nullptr ? channel->IsMeta() : false;
     bool needUdid = true;
-    if (channel != nullptr) {
-        isMeta = channel->IsMeta();
-    }
     if (param.remoteUuid.length() < UUID_BUF_LEN - 1) {
         isMeta = true;
         needUdid = false;
     }
+    if (isMeta && param.type == AUTH_LINK_TYPE_P2P) {
+        needUdid = false;
+    }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, isMeta=%{public}d",
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
+                                "isMeta=%{public}d, needUdid=%{public}d",
         WifiDirectAnonymizeDeviceId(param.remoteUuid).c_str(), WifiDirectAnonymizeIp(param.remoteIp).c_str(),
-        param.remotePort, isMeta);
+        param.remotePort, isMeta, needUdid);
 
     AuthConnInfo authConnInfo {};
     auto ret = AssignValueForAuthConnInfo(isMeta, needUdid, param, channel, authConnInfo);

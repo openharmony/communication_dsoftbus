@@ -108,3 +108,57 @@ int32_t AuthMetaGetOsTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *osT
     }
     return pfnAuthEnhanceFuncList->authMetaGetOsTypeByMetaNodeId(metaNodeId, osType);
 }
+
+int32_t AuthMetaGetMetaTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *metaType)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetMetaTypeByMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetMetaTypeByMetaNodeId(metaNodeId, metaType);
+}
+
+int32_t AuthMetaGetMetaNodeIdByIpPacked(const char *ip, char *metaNodeId, int32_t len)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetMetaNodeIdByIp) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetMetaNodeIdByIp(ip, metaNodeId, len);
+}
+
+const char *AuthMetaGetDeviceIdByMetaNodeIdPacked(const char *metaNodeId)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetDeviceIdByMetaNodeId) != SOFTBUS_OK) {
+        return NULL;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetDeviceIdByMetaNodeId(metaNodeId);
+}
+
+int32_t AuthMetaGetP2pMacByMetaNodeIdPacked(const char *metaNodeId, char *p2pMacAddr, int32_t len)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetP2pMacByMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetP2pMacByMetaNodeId(metaNodeId, p2pMacAddr, len);
+}
+
+bool AuthMetaGetMetaValueByMetaNodeIdPacked(const char *metaNodeId)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetMetaValueByMetaNodeId) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetMetaValueByMetaNodeId(metaNodeId);
+}
+
+int32_t AuthMetaGetFeatureSDKByMetaNodeIdPacked(const char *metaNodeId, uint64_t *featureSDK)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetFeatureSDKByMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetFeatureSDKByMetaNodeId(metaNodeId, featureSDK);
+}

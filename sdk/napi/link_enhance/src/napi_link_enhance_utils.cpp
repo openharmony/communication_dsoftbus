@@ -40,7 +40,7 @@ static std::map<int32_t, std::string> napiErrMsgMap {
 int32_t DoInJsMainThread(napi_env env, std::function<void(void)> func)
 {
     if (napi_send_event(env, func, napi_eprio_high) != napi_ok) {
-        COMM_LOGE(COMM_SDK, "Failed to SendEvent");
+        COMM_LOGE(COMM_SDK, "send event fail");
         return -1;
     }
     return 0;
@@ -93,7 +93,7 @@ bool ParseUInt32(napi_env env, uint32_t &param, napi_value args)
         return false;
     }
     if (napi_get_value_uint32(env, args, &param) != napi_ok) {
-        COMM_LOGE(COMM_SDK, "napi_get_value_uint32 failed");
+        COMM_LOGE(COMM_SDK, "napi_get_value_uint32 fail");
         return false;
     }
     return true;
@@ -158,18 +158,18 @@ void NapiCallFunction(napi_env env, napi_ref callbackRef, napi_value *argv, size
     napi_value callRet = nullptr;
     napi_value callback = nullptr;
     if (callbackRef == nullptr) {
-        COMM_LOGE(COMM_SDK, "callbackRef is nullptr");
+        COMM_LOGE(COMM_SDK, "callbackRef is null");
         return;
     }
     auto status = napi_get_reference_value(env, callbackRef, &callback);
     if (status != napi_ok) {
-        COMM_LOGE(COMM_SDK, "napi_get_reference_value failed, status: %{public}d", status);
+        COMM_LOGE(COMM_SDK, "napi_get_reference_value fail, status: %{public}d", status);
         return;
     }
 
     status = napi_call_function(env, undefined, callback, argc, argv, &callRet);
     if (status != napi_ok) {
-        COMM_LOGE(COMM_SDK, "napi_call_function failed, status: %{public}d", status);
+        COMM_LOGE(COMM_SDK, "napi_call_function fail, status: %{public}d", status);
     }
 
     // Check whether the JS application triggers an exception in callback. If it is, clear it.

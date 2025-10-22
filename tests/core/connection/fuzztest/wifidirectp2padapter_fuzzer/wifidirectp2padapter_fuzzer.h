@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef LNN_CTRL_LANE_H
-#define LNN_CTRL_LANE_H
+#ifndef WIFIDIRECTP2PADAPTER_FUZZER_H
+#define WIFIDIRECTP2PADAPTER_FUZZER_H
 
-#include "auth_interface.h"
-#include "auth_manager.h"
-#include "lnn_lane_assign.h"
+#define FUZZ_PROJECT_NAME "wifidirectp2padapter_fuzzer"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-LaneInterface *CtrlLaneGetInstance(void);
-bool IsAuthReuseP2p(const char *networkId, const char *udid, AuthLinkType authType);
-
-#ifdef __cplusplus
-}
-#endif
 #endif

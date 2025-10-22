@@ -342,7 +342,7 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
     if (connection == NULL) {
         LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBleRequest, node) {
             CONN_LOGI(CONN_BLE,
-                "ble notify connect request fail, requestId=%{public}u, addr=%{public}s, protocol=%{public}d, "
+                "ble notify connect request fail, reqId=%{public}u, addr=%{public}s, protocol=%{public}d, "
                 "reason=%{public}d",
                 it->requestId, anomizeAddress, device->protocol, reason);
             DfxRecordBleConnectFail(it->requestId, DEFAULT_PID, (ConnBleDevice *)device, &it->statistics, reason);
@@ -361,7 +361,7 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
         ConnBleUpdateConnectionRc(connection, it->challengeCode, 1);
         CONN_LOGI(CONN_BLE,
             "ble notify connect request success, "
-            "requestId=%{public}u, addr=%{public}s, connId=%{public}u, protocol=%{public}d, challenge=%{public}u",
+            "reqId=%{public}u, addr=%{public}s, connId=%{public}u, protocol=%{public}d, challenge=%{public}u",
             it->requestId, anomizeAddress, connection->connectionId, device->protocol, it->challengeCode);
         it->statistics.reqId = it->requestId;
         it->statistics.reuse = isReuse;
@@ -659,7 +659,7 @@ static void BleClientConnected(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE,
-        "can not get ble connection, is it removed? connectionId=%{public}u", connectionId);
+        "can not get ble connection, is it removed? connId=%{public}u", connectionId);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
@@ -819,7 +819,7 @@ static void BleServerAccepted(uint32_t connectionId)
     status = ConvertBytesToHexString(
         udidHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), (unsigned char *)info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "convert peerUdidHash to string fail, connectionId=%{public}u, err=%{public}d.",
+        CONN_LOGE(CONN_BLE, "convert peerUdidHash to string fail, connId=%{public}u, err=%{public}d.",
             connectionId, status);
     }
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
@@ -1158,10 +1158,10 @@ static void BleKeepAliveTimeout(uint32_t connectionId, uint32_t requestId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
-        "connection not exist, connectionId=%{public}u", connectionId);
+        "connection not exist, connId=%{public}u", connectionId);
     int32_t status = ConnBleUpdateConnectionRc(connection, 0, -1);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "update rc fail, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
+        CONN_LOGE(CONN_BLE, "update rc fail, status=%{public}d, connId=%{public}u, reqId=%{public}u",
             status, connectionId, requestId);
     }
     ConnBleReturnConnection(&connection);
@@ -1220,7 +1220,7 @@ void ConnBleRemoveConnection(ConnBleConnection *connection)
         ConnBleReturnConnection(&connection);
     } else {
         CONN_LOGW(CONN_BLE,
-            "ble connection is not exist in global connection list, call remove duplicate? connectionId=%{public}u",
+            "ble connection is not exist in global connection list, call remove duplicate? connId=%{public}u",
             connection->connectionId);
     }
     (void)SoftBusMutexUnlock(&g_bleManager.connections->lock);
@@ -1260,7 +1260,7 @@ static bool ConnectionCompareByUdidIgnoreAddress(ConnBleConnection *connection,
         char optionAnimizeAddr[BT_MAC_LEN] = { 0 };
         ConvertAnonymizeMacAddress(animizeAddr, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
         ConvertAnonymizeMacAddress(optionAnimizeAddr, BT_MAC_LEN, option->udidAddressOption.addr, BT_MAC_LEN);
-        CONN_LOGW(CONN_BLE, "ble mac address are different. connectionId=%{public}u, addr=%{public}s, "
+        CONN_LOGW(CONN_BLE, "ble mac address are different. connId=%{public}u, addr=%{public}s, "
             "optionaddr=%{public}s", connection->connectionId, animizeAddr, optionAnimizeAddr);
     }
     return IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
@@ -1396,12 +1396,12 @@ void ConnBleReturnConnection(ConnBleConnection **connection)
 
     ConnBleConnection *underlayer = *connection;
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&underlayer->lock) == SOFTBUS_OK, CONN_BLE,
-        "ble connection lock fail. connectionId=%{public}u", underlayer->connectionId);
+        "ble connection lock fail. connId=%{public}u", underlayer->connectionId);
     underlayer->objectRc -= 1;
     int32_t objectRc = underlayer->objectRc;
     SoftBusMutexUnlock(&underlayer->lock);
     if (objectRc <= 0) {
-        CONN_LOGI(CONN_BLE, "release ble connection. connectionId=%{public}u", underlayer->connectionId);
+        CONN_LOGI(CONN_BLE, "release ble connection. connId=%{public}u", underlayer->connectionId);
         ConnBleFreeConnection(*connection);
     }
     *connection = NULL;
@@ -1428,10 +1428,10 @@ int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t tim
         SOFTBUS_INVALID_PARAM, CONN_BLE, "time is invaliad, time=%{public}u", time);
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
-        "connection not exist, connectionId=%{public}u", connectionId);
+        "connection not exist, connId=%{public}u", connectionId);
     int32_t status = ConnBleUpdateConnectionRc(connection, 0, 1);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "update rc fail, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
+        CONN_LOGE(CONN_BLE, "update rc fail, status=%{public}d, connId=%{public}u, reqId=%{public}u",
             status, connectionId, requestId);
         ConnBleReturnConnection(&connection);
         return SOFTBUS_CONN_BLE_INTERNAL_ERR;
@@ -1446,7 +1446,7 @@ int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGD(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
-        "connection not exist, connectionId=%{public}u", connectionId);
+        "connection not exist, connId=%{public}u", connectionId);
     bool isExist = false;
     ConnRemoveMsgFromLooper(
         &g_bleManagerSyncHandler, BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, connectionId, requestId, &isExist);
@@ -1458,7 +1458,7 @@ int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
         }
         status = ConnBleUpdateConnectionRc(connection, 0, -1);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update rc fail, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
+            CONN_LOGE(CONN_BLE, "update rc fail, status=%{public}d, connId=%{public}u, reqId=%{public}u",
                 status, connectionId, requestId);
             break;
         }
@@ -1950,7 +1950,7 @@ static void OnConnectFailed(uint32_t connectionId, int32_t error)
     int32_t ret = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_FAIL, 0, 0, ctx, 0);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
-            "post msg to looper fail, connectionId=%{public}u, error=%{public}d", connectionId, ret);
+            "post msg to looper fail, connId=%{public}u, error=%{public}d", connectionId, ret);
         SoftBusFree(ctx);
     }
 }
@@ -1961,7 +1961,7 @@ static void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uin
     if (ctx == NULL) {
         CONN_LOGE(CONN_BLE,
             "calloc data received context fail, "
-            "connectionId=%{public}u, isConnCharacteristic=%{public}d, dataLen=%{public}u",
+            "connId=%{public}u, isConnCharacteristic=%{public}d, dataLen=%{public}u",
             connectionId, isConnCharacteristic, dataLen);
         SoftBusFree(data);
         return;
@@ -1973,7 +1973,7 @@ static void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uin
     int32_t status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_DATA_RECEIVED, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
-            "post msg to looper fail, connectionId=%{public}u, isConnCharacteristic=%{public}d, dataLen=%{public}u",
+            "post msg to looper fail, connId=%{public}u, isConnCharacteristic=%{public}d, dataLen=%{public}u",
             connectionId, isConnCharacteristic, dataLen);
         SoftBusFree(data);
         SoftBusFree(ctx);
@@ -1989,7 +1989,7 @@ static void OnConnectionClosed(uint32_t connectionId, int32_t status)
     int32_t ret = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_CLOSED, 0, 0, ctx, 0);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
-            "post msg to looper fail, connectionId=%{public}u, error=%{public}d", connectionId, ret);
+            "post msg to looper fail, connId=%{public}u, error=%{public}d", connectionId, ret);
         SoftBusFree(ctx);
     }
 }

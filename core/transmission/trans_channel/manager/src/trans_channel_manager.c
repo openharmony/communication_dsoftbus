@@ -432,6 +432,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         return ret;
     }
     GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
+    (void)LnnGetRemoteNumInfo(param->peerDeviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);

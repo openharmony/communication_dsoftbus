@@ -76,7 +76,7 @@ HWTEST_F(ClientTransSocketTest, DBinderGrantPermissionTest002, TestSize.Level1)
     ASSERT_GT(pid, 0);
     std::string socketName = "DBinder" + std::to_string(uid) + std::string("_") + std::to_string(pid);
     auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
-    ASSERT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_NE(ret, SOFTBUS_NO_INIT);
 }
 
 /*

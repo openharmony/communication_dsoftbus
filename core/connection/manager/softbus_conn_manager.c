@@ -228,16 +228,16 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId)
 void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     CONN_CHECK_AND_RETURN_LOGW(data != NULL, CONN_COMMON,
-        "dispatch data fail: data is null, connectionId=%{public}u, module=%{public}d", connectionId, moduleId);
+        "dispatch data fail: data is null, connId=%{public}u, module=%{public}d", connectionId, moduleId);
     CONN_CHECK_AND_RETURN_LOGW(len > (int32_t)sizeof(ConnPktHead), CONN_COMMON,
         "dispatch data fail: dataLen=%{public}d < connection header size, "
-        "connectionId=%{public}u, module=%{public}d", len, connectionId, moduleId);
+        "connId=%{public}u, module=%{public}d", len, connectionId, moduleId);
 
     ConnListenerNode listener = { 0 };
     int32_t status = GetListenerByModuleId(moduleId, &listener);
     CONN_CHECK_AND_RETURN_LOGW(status == SOFTBUS_OK, CONN_COMMON,
         "dispatch data fail: get module listener fail or not register, "
-        "connectionId=%{public}u, module=%{public}d, dataLen=%{public}d, err=%{public}d",
+        "connId=%{public}u, module=%{public}d, dataLen=%{public}d, err=%{public}d",
         connectionId, moduleId, len, status);
 
     int32_t pktLen = len - (int32_t)sizeof(ConnPktHead);

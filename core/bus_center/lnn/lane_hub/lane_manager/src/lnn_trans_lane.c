@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
@@ -31,6 +32,7 @@
 #include "lnn_lane_def.h"
 #include "lnn_lane_dfx.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_lane_listener.h"
 #include "lnn_lane_model.h"
@@ -38,14 +40,14 @@
 #include "lnn_log.h"
 #include "lnn_select_rule.h"
 #include "lnn_trans_free_lane.h"
-#include "lnn_lane_link.h"
 #include "message_handler.h"
+#include "meta_socket_struct.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_init_common.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
-#include "softbus_init_common.h"
 #include "wifi_direct_error_code.h"
 #include "wifi_direct_manager.h"
 
@@ -519,14 +521,27 @@ static void UpdateLaneEventWithCap(uint32_t laneHandle, const char *networkId)
 
 static void UpdateLaneEventWithOnlineType(uint32_t laneHandle, const char *networkId)
 {
-    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-    if (nodeInfo == NULL) {
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "not found nodeInfo");
         return;
     }
-    uint32_t onlineType = nodeInfo->discoveryType;
+    uint32_t onlineType = nodeInfo.discoveryType;
     UpdateLaneEventInfo(laneHandle, EVENT_ONLINE_STATE,
         LANE_PROCESS_TYPE_UINT32, (void *)(&onlineType));
+}
+
+static bool IsMetaSdk(const char *networkId)
+{
+    int32_t metaType = META_TYPE_MAX;
+    int32_t ret = AuthMetaGetMetaTypeByMetaNodeIdPacked(networkId, &metaType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get meta type failed, ret=%{public}d", ret);
+        return false;
+    }
+    LNN_LOGI(LNN_LANE, "get meta type=%{public}d", metaType);
+    return (metaType == META_TYPE_SDK);
 }
 
 static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const LaneAllocInfo *allocInfo,
@@ -543,9 +558,15 @@ static int32_t AllocValidLane(uint32_t laneReqId, uint64_t allocLaneId, const La
         return SOFTBUS_MALLOC_ERR;
     }
     recommendLinkList->linkTypeNum = 0;
-    UpdateLaneEventWithCap(laneReqId, allocInfo->networkId);
-    UpdateLaneEventWithOnlineType(laneReqId, allocInfo->networkId);
-    int32_t ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
+    UpdateLaneEventWithCap(laneReqId, (const char *)allocInfo->networkId);
+    UpdateLaneEventWithOnlineType(laneReqId, (const char *)allocInfo->networkId);
+    int32_t ret = SOFTBUS_OK;
+    if (IsMetaSdk((const char *)allocInfo->networkId)) {
+        recommendLinkList->linkType[0] = LANE_P2P;
+        recommendLinkList->linkTypeNum++;
+    } else {
+        ret = SelectExpectLanesByQos((const char *)allocInfo->networkId, &selectParam, recommendLinkList);
+    }
     if (ret != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneReqId=%{public}u", laneReqId);

@@ -41,6 +41,9 @@ typedef enum {
     PROXY_MIDDLEWARE = 12,
     PROXY_SYNERGY = 13,
     CUSTOM_UNKNOWN, /**< Proxy Unknown */
+    HA_META_TYPE = 100,
+    META_TYPE_SDK = 101,
+    META_TYPE_MAX,
 } MetaNodeType;
 
 typedef struct {

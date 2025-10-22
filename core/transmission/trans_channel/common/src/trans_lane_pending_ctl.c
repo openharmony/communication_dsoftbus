@@ -813,6 +813,7 @@ static void TransAsyncSetFirstTokenInfo(uint64_t firstTokenId, AppInfo *appInfo,
 static int32_t CreateAppInfoByParam(uint32_t laneHandle, const SessionParam *param, AppInfo *appInfo)
 {
     GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
+    (void)LnnGetRemoteNumInfo(param->peerDeviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
     int32_t ret = TransCommonGetAppInfo(param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "GetAppInfo is null. ret=%{public}d", ret);
@@ -1645,7 +1646,7 @@ static int32_t GetAllocInfoExtBySessionParam(const SessionParam *param, LaneAllo
         return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
     allocInfo->linkList.linkTypeNum = 1;
-    allocInfo->linkList.linkType[0] = LANE_WLAN_P2P;
+    allocInfo->linkList.linkType[0] = LANE_SOFTAP_P2P;
     allocInfo->commInfo.isVirtualLink = false;
     return SOFTBUS_OK;
 }
@@ -1707,7 +1708,7 @@ int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, c
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
-    if (appInfo->osType == HA_OS_TYPE) {
+    if (appInfo->osType == OTHER_OS_TYPE && appInfo->metaType == META_HA) {
         ret = TransAsyncGetLaneInfoByExt(param, laneHandle, appInfo);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SVC, "get lane info by allocInfo failed, ret=%{public}d", ret);
@@ -1885,7 +1886,7 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         return SetUsbConnInfo(&(info->connInfo.usb), connOpt);
     } else if (info->type == LANE_SLE_DIRECT) {
         return SetSleDirectConnInfo(&(info->connInfo.sleDirect), connOpt);
-    } else if (info->type == LANE_WLAN_P2P) {
+    } else if (info->type == LANE_SOFTAP_P2P) {
         return SetP2pExtConnInfo(&(info->connInfo.p2p), connOpt);
     }
 
@@ -1907,36 +1908,6 @@ bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
 int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync)
 {
     return TransDelLaneReqFromPendingList(laneHandle, isAsync);
-}
-
-int32_t TransCancelLaneItemCondByLaneHandle(uint32_t laneHandle, bool bSucc, bool isAsync, int32_t errCode)
-{
-    SoftBusList *pendingList = isAsync ? g_asyncReqLanePendingList : g_reqLanePendingList;
-    if (pendingList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_NO_INIT;
-    }
-    if (SoftBusMutexLock(&(pendingList->lock)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "lock failed.");
-        return SOFTBUS_LOCK_ERR;
-    }
-
-    TransReqLaneItem *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &(pendingList->list), TransReqLaneItem, node) {
-        if (item->laneHandle == laneHandle) {
-            item->bSucc = bSucc;
-            item->errCode = errCode;
-            item->isFinished = true;
-            if (!isAsync) {
-                (void)SoftBusCondSignal(&item->cond);
-            }
-            (void)SoftBusMutexUnlock(&(pendingList->lock));
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&(pendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneHandle=%{public}u", laneHandle);
-    return SOFTBUS_NOT_FIND;
 }
 
 static bool CheckLaneHandleIsExited(uint32_t laneHandle)

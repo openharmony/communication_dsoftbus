@@ -393,7 +393,7 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
     ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
 
-    int32_t osType = HA_OS_TYPE;
+    int32_t osType = OTHER_OS_TYPE;
     char peerUuid[UUID_BUF_LEN] = "test.peer.uid123";
     (void)strcpy_s(appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, "7645723048r4h20test");
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid)
@@ -951,8 +951,9 @@ HWTEST_F(TransUdpStaticMockTest, TransGetUdpChannelLocalIp001, TestSize.Level1)
         .type = AUTH_LINK_TYPE_ENHANCED_P2P
     };
     AppInfo appInfo = {
-        .osType = HA_OS_TYPE,
-        .routeType = WIFI_P2P
+        .osType = OTHER_OS_TYPE,
+        .routeType = WIFI_P2P,
+        .metaType = META_HA
     };
 
     int32_t ret = TransGetUdpChannelLocalIp(authHandle, nullptr);

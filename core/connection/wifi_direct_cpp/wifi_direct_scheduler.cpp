@@ -26,7 +26,7 @@ WifiDirectScheduler& WifiDirectScheduler::GetInstance()
 int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback,
                                        bool markRetried)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, pid=%{public}d, type=%{public}d, networkId=%{public}s, "
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}d, pid=%{public}d, type=%{public}d, networkId=%{public}s, "
         "remoteUuid=%{public}s, expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d, "
         "isStrictProtocol=%{public}d, ratePreference=%{public}d isVirtualLink=%{public}d",
         info.requestId, info.pid, info.connectType, WifiDirectAnonymizeDeviceId(info.remoteNetworkId).c_str(),
@@ -50,7 +50,7 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
 
 int WifiDirectScheduler::CancelConnectDevice(const WifiDirectConnectInfo &info)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, pid=%{public}d", info.requestId, info.pid);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reqId=%{public}d, pid=%{public}d", info.requestId, info.pid);
 
     std::lock_guard commandLock(commandLock_);
     for (auto itc = commandList_.begin(); itc != commandList_.end(); itc++) {
@@ -74,7 +74,7 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
 {
     auto command = CommandFactory::GetInstance().CreateDisconnectCommand(info, callback);
     CONN_LOGI(CONN_WIFI_DIRECT,
-        "requestId=%{public}d, pid=%{public}d, linkId=%{public}d, networkId=%{public}s, remoteUuid=%{public}s",
+        "reqId=%{public}d, pid=%{public}d, linkId=%{public}d, networkId=%{public}s, remoteUuid=%{public}s",
         info.requestId, info.pid, info.linkId,
         WifiDirectAnonymizeDeviceId(WifiDirectUtils::UuidToNetworkId(command->GetRemoteDeviceId())).c_str(),
         WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str());
@@ -95,7 +95,7 @@ int WifiDirectScheduler::ForceDisconnectDevice(
 {
     auto command = CommandFactory::GetInstance().CreateForceDisconnectCommand(info, callback);
     CONN_LOGI(CONN_WIFI_DIRECT,
-        "requestId=%{public}d pid=%{public}d networkId=%{public}s remoteUuid=%{public}s linktype=%{public}d",
+        "reqId=%{public}d pid=%{public}d networkId=%{public}s remoteUuid=%{public}s linktype=%{public}d",
         info.requestId, info.pid,
         WifiDirectAnonymizeDeviceId(WifiDirectUtils::UuidToNetworkId(command->GetRemoteDeviceId())).c_str(),
         WifiDirectAnonymizeDeviceId(command->GetRemoteDeviceId()).c_str(), info.linkType);

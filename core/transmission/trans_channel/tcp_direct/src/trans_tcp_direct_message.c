@@ -68,7 +68,6 @@
 #define MAX_ERRDESC_LEN 128
 #define NCM_DEVICE_TYPE "ncm0"
 #define NCM_HOST_TYPE   "wwan0"
-#define ISHARE_PKG_NAME "ohos.InterConnection.iShare"
 
 typedef struct {
     int32_t channelType;
@@ -473,7 +472,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     char myIp[IP_LEN] = { 0 };
     int32_t ret = conn.serverSide ? GetServerSideIpInfo(&conn.appInfo, myIp, IP_LEN) :
                                     GetClientSideIpInfo(&conn.appInfo, myIp, IP_LEN);
-    if (ret != SOFTBUS_OK && conn.appInfo.osType != HA_OS_TYPE) {
+    if (ret != SOFTBUS_OK && conn.appInfo.osType != OTHER_OS_TYPE) {
         TRANS_LOGE(TRANS_CTRL, "get ip failed, ret=%{public}d.", ret);
         ClearAppInfoSessionKey(&conn.appInfo);
         return ret;
@@ -482,7 +481,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     GetChannelInfoFromConn(&info, &conn, channelId);
     info.myIp = myIp;
     char buf[NETWORK_ID_BUF_LEN] = { 0 };
-    if (info.osType == HA_OS_TYPE) {
+    if (info.osType == OTHER_OS_TYPE) {
         info.peerDeviceId = conn.appInfo.peerData.deviceId;
     } else {
         ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
@@ -592,7 +591,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
-    if (conn.appInfo.osType == HA_OS_TYPE) {
+    if (conn.appInfo.osType == OTHER_OS_TYPE) {
         StopP2pListenerByRemoteUuid(conn.appInfo.peerData.deviceId);
     }
 
@@ -772,7 +771,7 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
     char *reply = NULL;
-    if (appInfo->osType == HA_OS_TYPE) {
+    if (appInfo->osType == OTHER_OS_TYPE) {
         reply = PackExternalDeviceReply(appInfo);
     } else {
         reply = PackReply(appInfo);
@@ -1091,7 +1090,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
         int32_t ret = TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
-        if (strcmp(pkgName, ISHARE_PKG_NAME) != 0) {
+        if (!TransCheckMetaTypeQueryPermission(pkgName, conn->appInfo.metaType)) {
             TRANS_LOGE(TRANS_CTRL, "not supporting access");
             return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
         }
@@ -1146,10 +1145,8 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
 
 static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t cipherFlag, AuthHandle *authHandle)
 {
-    if (authHandle == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "authHandle is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(authHandle != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "authHandle is null");
+
     if (GetAuthHandleByChanId(channelId, authHandle) == SOFTBUS_OK && authHandle->authId != AUTH_INVALID_ID) {
         TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 " is not AUTH_INVALID_ID", authHandle->authId);
         return SOFTBUS_OK;
@@ -1161,9 +1158,11 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     TRANS_LOGI(TRANS_CTRL, "get auth linkType=%{public}d, flag=0x%{public}x", linkType, cipherFlag);
     if ((cipherFlag & FLAG_EXTERNAL_DEVICE) != 0) {
-        authHandle->type = linkType;
         authHandle->authId = AuthGetIdByIp(appInfo.peerData.addr);
-        return SOFTBUS_OK;
+        if (authHandle->authId != AUTH_INVALID_ID) {
+            authHandle->type = linkType;
+            return SOFTBUS_OK;
+        }
     }
 
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
@@ -1185,8 +1184,8 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
         }
         char *tmpPeerIp = NULL;
         Anonymize(appInfo.peerData.addr, &tmpPeerIp);
-        TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d get remote uuid by Ip=%{public}s failed",
-            channelId, AnonymizeWrapper(tmpPeerIp));
+        TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d get remote uuid by Ip=%{public}s failed", channelId,
+            AnonymizeWrapper(tmpPeerIp));
         AnonymizeFree(tmpPeerIp);
         authHandle->type = connInfo.type;
         authHandle->authId = AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);

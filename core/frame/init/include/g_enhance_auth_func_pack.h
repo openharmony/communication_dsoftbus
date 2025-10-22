@@ -40,6 +40,12 @@ void AuthMetaNotifyDataReceivedPacked(uint32_t connectionId, const SocketPktHead
 void AuthClearDeviceKeyPacked(void);
 void DelAuthMetaManagerByConnectionIdPacked(uint32_t connectionId);
 int32_t AuthMetaGetOsTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *osType);
+int32_t AuthMetaGetMetaTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *metaType);
+int32_t AuthMetaGetMetaNodeIdByIpPacked(const char *ip, char *metaNodeId, int32_t len);
+const char *AuthMetaGetDeviceIdByMetaNodeIdPacked(const char *metaNodeId);
+int32_t AuthMetaGetP2pMacByMetaNodeIdPacked(const char *metaNodeId, char *p2pMacAddr, int32_t len);
+bool AuthMetaGetMetaValueByMetaNodeIdPacked(const char *metaNodeId);
+int32_t AuthMetaGetFeatureSDKByMetaNodeIdPacked(const char *metaNodeId, uint64_t *featureSDK);
 #ifdef __cplusplus
 }
 #endif

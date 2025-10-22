@@ -39,6 +39,12 @@ typedef void (*DelAuthMetaManagerByConnectionIdFunc)(uint32_t connectionId);
 typedef int32_t (*AuthMetaGetConnInfoBySideFunc)(const char *uuid, bool isClient, AuthConnInfo *connInfo);
 typedef void (*AuthClearDeviceKeyFunc)(void);
 typedef int32_t (*AuthMetaGetOsTypeByMetaNodeIdFunc)(const char *metaNodeId, int32_t *osType);
+typedef int32_t (*AuthMetaGetMetaTypeByMetaNodeIdFunc)(const char *metaNodeId, int32_t *metaType);
+typedef int32_t (*AuthMetaGetMetaNodeIdByIpFunc)(const char *ip, char *metaNodeId, int32_t len);
+typedef const char *(*AuthMetaGetDeviceIdByMetaNodeIdFunc)(const char *metaNodeId);
+typedef int32_t (*AuthMetaGetP2pMacByMetaNodeIdFunc)(const char *metaNodeId, char *p2pMacAddr, int32_t len);
+typedef bool (*AuthMetaGetMetaValueByMetaNodeIdFunc)(const char *metaNodeId);
+typedef int32_t (*AuthMetaGetFeatureSDKByMetaNodeIdFunc)(const char *metaNodeId, uint64_t *featureSDK);
 typedef struct TagAuthEnhanceFuncList {
     AuthMetaInitFunc authMetaInit;
     AuthMetaNotifyDataReceivedFunc authMetaNotifyDataReceived;
@@ -50,6 +56,12 @@ typedef struct TagAuthEnhanceFuncList {
     AuthMetaGetConnInfoBySideFunc authMetaGetConnInfoBySide;
     AuthClearDeviceKeyFunc authClearDeviceKey;
     AuthMetaGetOsTypeByMetaNodeIdFunc authMetaGetOsTypeByMetaNodeId;
+    AuthMetaGetMetaTypeByMetaNodeIdFunc authMetaGetMetaTypeByMetaNodeId;
+    AuthMetaGetMetaNodeIdByIpFunc authMetaGetMetaNodeIdByIp;
+    AuthMetaGetDeviceIdByMetaNodeIdFunc authMetaGetDeviceIdByMetaNodeId;
+    AuthMetaGetP2pMacByMetaNodeIdFunc authMetaGetP2pMacByMetaNodeId;
+    AuthMetaGetMetaValueByMetaNodeIdFunc authMetaGetMetaValueByMetaNodeId;
+    AuthMetaGetFeatureSDKByMetaNodeIdFunc authMetaGetFeatureSDKByMetaNodeId;
 } AuthEnhanceFuncList;
 
 AuthEnhanceFuncList *AuthEnhanceFuncListGet(void);

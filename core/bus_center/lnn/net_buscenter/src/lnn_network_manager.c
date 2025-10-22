@@ -343,6 +343,7 @@ static void NetDeviceRiskStateEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_DEVICE_IS_RISK:
             if (g_isDeviceRisk) {
                 LNN_LOGI(LNN_BUILDER, "device is risk");
+                break;
             }
             g_isDeviceRisk = true;
             AuthStopListening(AUTH_LINK_TYPE_WIFI);

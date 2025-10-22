@@ -105,17 +105,20 @@ HWTEST_F(AuthSessionJsonTest, PackFastAuthValue_TEST_001, TestSize.Level1)
     deviceCommKey.keyLen = 5;
     deviceCommKey.keyIndex = 12345;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnEncryptAesGcm).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
+    EXPECT_CALL(mock, LnnEncryptAesGcm)
+        .WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
     int32_t ret = PackFastAuthValue(obj, &deviceCommKey);
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
-    EXPECT_CALL(mock, LnnEncryptAesGcm).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnEncryptAesGcm)
+        .WillOnce(Return(SOFTBUS_OK));
     ret = PackFastAuthValue(obj, &deviceCommKey);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     uint8_t *data = (uint8_t *)SoftBusCalloc(TEST_DATA_LEN);
     ASSERT_TRUE(data != nullptr);
     ret = memcpy_s(data, TEST_DATA_LEN, TEST_DATA, TEST_DATA_LEN);
     EXPECT_EQ(ret, EOK);
-    EXPECT_CALL(mock, LnnEncryptAesGcm).WillOnce(DoAll(SetArgPointee<2>(data), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnEncryptAesGcm)
+        .WillOnce(DoAll(SetArgPointee<2>(data), Return(SOFTBUS_OK)));
     ret = PackFastAuthValue(obj, &deviceCommKey);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     JSON_Delete(obj);
@@ -137,10 +140,12 @@ HWTEST_F(AuthSessionJsonTest, GetUdidOrShortHash_TEST_001, TestSize.Level1)
     ASSERT_TRUE(memcpy_s(info.connInfo.info.ipInfo.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
     char udidHashHexStr[SHA_256_HEX_HASH_LEN] = { 0 };
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
     bool ret = GetUdidOrShortHash(&info, udidHashHexStr, SHA_256_HEX_HASH_LEN);
     EXPECT_EQ(ret, false);
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = GetUdidOrShortHash(&info, udidHashHexStr, SHA_256_HEX_HASH_LEN);
     EXPECT_EQ(ret, true);
     info.connInfo.type = AUTH_LINK_TYPE_SESSION;
@@ -180,12 +185,18 @@ HWTEST_F(AuthSessionJsonTest, VerifySessionInfoIdType_TEST_001, TestSize.Level1)
     deviceKey.keyLen = 5;
     deviceKey.keyIndex = 12345;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, IsPotentialTrustedDevice).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, AuthFindLatestNormalizeKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, IsFeatureSupport).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthFindDeviceKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, IsPotentialTrustedDevice)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, AuthFindLatestNormalizeKey)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, IsFeatureSupport)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindDeviceKey)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ParseFastAuthValue(&info, encryptedFastAuth, &deviceKey);
     JsonObj *obj = JSON_CreateObject();
     EXPECT_NE(obj, nullptr);
@@ -233,18 +244,28 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
     char *deviceId = PackDeviceIdJson(nullptr, authSeq);
     EXPECT_EQ(deviceId, nullptr);
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     deviceId = PackDeviceIdJson(&info, authSeq);
     EXPECT_EQ(deviceId, nullptr);
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, FindAuthPreLinkNodeById).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetLocalNodeInfo).WillRepeatedly(Return(&nodeInfo));
-    EXPECT_CALL(mock, IsFeatureSupport).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, IsNeedUDIDAbatement).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, FindAuthPreLinkNodeById)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalNodeInfo)
+        .WillRepeatedly(Return(&nodeInfo));
+    EXPECT_CALL(mock, IsFeatureSupport)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, IsSupportFeatureByCapaBit)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, IsSupportUDIDAbatement)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, IsNeedUDIDAbatement)
+        .WillRepeatedly(Return(true));
     deviceId = PackDeviceIdJson(&info, authSeq);
     EXPECT_NE(deviceId, nullptr);
     JSON_Free(deviceId);
@@ -277,15 +298,18 @@ HWTEST_F(AuthSessionJsonTest, UnpackWifiSinglePassInfo_TEST_001, TestSize.Level1
     EXPECT_EQ(ret, true);
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, GetFd).WillRepeatedly(Return(TEST_FD));
+    EXPECT_CALL(mock, GetFd)
+        .WillRepeatedly(Return(TEST_FD));
     ret = UnpackWifiSinglePassInfo(obj, &info);
     EXPECT_EQ(ret, true);
     SoftBusSockAddr addr;
     addr.saFamily = SOFTBUS_AF_INET;
-    EXPECT_CALL(mock, SoftBusSocketGetPeerName).WillRepeatedly(DoAll(SetArgPointee<1>(addr), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, SoftBusSocketGetPeerName)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(addr), Return(SOFTBUS_OK)));
     ret = UnpackWifiSinglePassInfo(obj, &info);
     EXPECT_EQ(ret, true);
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillOnce(Return(SOFTBUS_OK));
     ret = UnpackWifiSinglePassInfo(obj, &info);
     EXPECT_EQ(ret, true);
     JSON_AddStringToObject(obj, DEV_IP_HASH_TAG, "12345678");
@@ -324,7 +348,8 @@ HWTEST_F(AuthSessionJsonTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Level
     JSON_AddInt32ToObject(obj2, EXCHANGE_ID_TYPE, EXCHANGE_NETWORKID);
     info.isServer = true;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByNetworkId)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = SetExchangeIdTypeAndValue(obj2, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     info.isServer = false;
@@ -404,18 +429,23 @@ HWTEST_F(AuthSessionJsonTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
     EXPECT_NE(json, nullptr);
     NodeInfo info;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetDeviceName).WillRepeatedly(Return(nullptr));
-    EXPECT_CALL(mock, LnnGetUnifiedDeviceName).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnConvertIdToDeviceType).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(mock, LnnGetDeviceName)
+        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(mock, LnnGetUnifiedDeviceName)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnConvertIdToDeviceType)
+        .WillRepeatedly(Return(nullptr));
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(
         memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, INVALID_UNIFIED_NAME, strlen(INVALID_UNIFIED_NAME)),
         EOK);
     EXPECT_EQ(memcpy_s(info.uuid, UUID_BUF_LEN, INVALID_UDID, strlen(INVALID_UDID)), EOK);
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = PackCommonDevInfo(json, &info, true);
     EXPECT_EQ(ret, SOFTBUS_AUTH_PACK_DEVINFO_FAIL);
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = PackCommonDevInfo(json, &info, true);
     EXPECT_EQ(ret, SOFTBUS_AUTH_PACK_DEVINFO_FAIL);
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -442,9 +472,12 @@ HWTEST_F(AuthSessionJsonTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
     JsonObj *json = JSON_CreateObject();
     EXPECT_NE(json, nullptr);
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetUnifiedDeviceName).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnConvertIdToDeviceType).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetUnifiedDeviceName)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnConvertIdToDeviceType)
+        .WillRepeatedly(Return(nullptr));
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_KEY, "cipherKeyTest");
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, "cipherIv");
     (void)JSON_AddStringToObject(json, IRK, "peerIrk");
@@ -566,14 +599,18 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
 {
     NodeInfo info;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetBtMac).WillOnce(Return(nullptr));
-    EXPECT_CALL(mock, LnnGetP2pMac).WillOnce(Return(nullptr));
+    EXPECT_CALL(mock, LnnGetBtMac)
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(mock, LnnGetP2pMac)
+        .WillOnce(Return(nullptr));
     int32_t ret = PackDeviceInfoBtV1(nullptr, &info, false);
     EXPECT_EQ(ret, SOFTBUS_AUTH_PACK_DEVINFO_FAIL);
     JsonObj *json = JSON_CreateObject();
     EXPECT_NE(json, nullptr);
-    EXPECT_CALL(mock, LnnGetBtMac).WillRepeatedly(Return("11:22:33:44:55"));
-    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetBtMac)
+        .WillRepeatedly(Return("11:22:33:44:55"));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = PackDeviceInfoBtV1(json, &info, false);
     EXPECT_EQ(ret, SOFTBUS_AUTH_PACK_DEVINFO_FAIL);
     ret = UnpackDeviceInfoBtV1(json, &info);
@@ -606,10 +643,14 @@ HWTEST_F(AuthSessionJsonTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Level1)
     NodeInfo nodeInfo;
     AuthSessionInfo info;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, IsNeedUDIDAbatement).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, IsFeatureSupport).WillRepeatedly(Return(false));
+    EXPECT_CALL(mock, IsSupportUDIDAbatement)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, IsNeedUDIDAbatement)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, IsFeatureSupport)
+        .WillRepeatedly(Return(false));
     (void)memset_s(&devInfo, sizeof(DevInfoData), 0, sizeof(DevInfoData));
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
@@ -642,7 +683,8 @@ HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
     uint32_t keyLen = 0;
     deviceCommKey.keyLen = keyLen;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnEncryptAesGcm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnEncryptAesGcm)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     uint64_t ret = PackFastAuthValue(obj, &deviceCommKey);
     EXPECT_NE(ret, SOFTBUS_OK);
     JSON_Delete(obj);
@@ -718,7 +760,8 @@ HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
     EXPECT_NE(obj, nullptr);
     AuthDeviceKeyInfo deviceCommKey;
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnEncryptAesGcm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnEncryptAesGcm)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     (void)memset_s(&deviceCommKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     int32_t ret = SoftBusGenerateRandomArray(deviceCommKey.deviceKey, SESSION_KEY_LENGTH);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -743,9 +786,12 @@ HWTEST_F(AuthSessionJsonTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level
         .len = SESSION_KEY_LENGTH,
     };
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetUdidByBrMac).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthFindLatestNormalizeKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnEncryptAesGcm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetUdidByBrMac)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindLatestNormalizeKey)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnEncryptAesGcm)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
     JsonObj *obj = JSON_CreateObject();
     EXPECT_NE(obj, nullptr);
@@ -788,9 +834,12 @@ HWTEST_F(AuthSessionJsonTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Leve
         .len = SESSION_KEY_LENGTH,
     };
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthFindLatestNormalizeKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthFindNormalizeKeyByServerSide).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindLatestNormalizeKey)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindNormalizeKeyByServerSide)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
     AuthSessionInfo info;
     EXPECT_NE(SOFTBUS_OK, ParseNormalizedKeyValue(&info, encNormalizedKey, &sessionKey));
@@ -820,9 +869,12 @@ HWTEST_F(AuthSessionJsonTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
         .normalizedKey = &sessionKey,
     };
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthFindLatestNormalizeKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthFindNormalizeKeyByServerSide).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindLatestNormalizeKey)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindNormalizeKeyByServerSide)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
     const char *encNormalizedKey = "encnormalizedkeytest";
     EXPECT_EQ(true, JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey));
@@ -873,7 +925,8 @@ HWTEST_F(AuthSessionJsonTest, GenerateUdidShortHash_TEST_001, TestSize.Level1)
     const char *udid = "123456";
     char udidHashHexStr[SHA_256_HEX_HASH_LEN] = { 0 };
     AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(GenerateUdidShortHash(udid, udidHashHexStr, SHA_256_HEX_HASH_LEN));
     EXPECT_TRUE(!GenerateUdidShortHash(udid, udidHashHexStr, 10));
 }
