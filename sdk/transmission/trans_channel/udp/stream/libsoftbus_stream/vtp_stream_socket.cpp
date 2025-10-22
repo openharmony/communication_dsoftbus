@@ -795,8 +795,12 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
     localSockAddr.sin_port = htons((short)local.port);
     localSockAddr.sin_addr.s_addr = inet_addr(local.ip.c_str());
     localIpPort_.ip = SoftBusInetNtoP(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
-    if (!SetSocketBoundInner(sockFd, localIpPort_.ip)) {
-        TRANS_LOGE(TRANS_STREAM, "SetSocketBoundInner failed, errno=%{public}d", FtGetErrno());
+    if (localIpPort_.ip.c_str() == nullptr || !SetSocketBoundInner(sockFd, localIpPort_.ip)) {
+        char *tmpIp = nullptr;
+        Anonymize(localIpPort_.ip.c_str(), &tmpIp);
+        TRANS_LOGE(TRANS_STREAM, "Ip=%{public}s, or SetSocketBoundInner failed, errno=%{public}d",
+            AnonymizeWrapper(tmpIp), FtGetErrno());
+        AnonymizeFree(tmpIp);
     }
 
     socklen_t localAddrLen = sizeof(localSockAddr);
