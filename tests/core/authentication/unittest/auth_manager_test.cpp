@@ -19,7 +19,6 @@
 #include <sys/time.h>
 
 #include "auth_device.c"
-#include "auth_lane.c"
 #include "auth_manager.c"
 #include "auth_manager.h"
 #include "auth_request.h"

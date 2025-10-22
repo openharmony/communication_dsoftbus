@@ -41,19 +41,19 @@ static sptr<IRemoteObject> GetSystemAbility()
     }
 
     if (!data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER)) {
-        CONN_LOGE(CONN_COMMON, "write SOFTBUS_SERVER_SA_ID_INNER failed");
+        CONN_LOGE(CONN_COMMON, "write SOFTBUS_SERVER_SA_ID_INNER fail");
         return nullptr;
     }
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        CONN_LOGE(CONN_COMMON, "Get samgr failed");
+        CONN_LOGE(CONN_COMMON, "Get samgr fail");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        CONN_LOGE(CONN_COMMON, "GetSystemAbility failed=%{public}d", err);
+        CONN_LOGE(CONN_COMMON, "GetSystemAbility fail=%{public}d", err);
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -294,37 +294,37 @@ int32_t ConnectionServerProxy::PrivilegeCloseChannel(uint64_t tokenId, int32_t p
 int32_t ConnectionServerProxy::CreateServer(const char *pkgName, const char *name)
 {
     if (pkgName == nullptr || name == nullptr) {
-        CONN_LOGE(CONN_COMMON, "pkgName or name is nullptr");
+        CONN_LOGE(CONN_COMMON, "pkgName or name is null");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        CONN_LOGE(CONN_COMMON, "remote is nullptr");
+        CONN_LOGE(CONN_COMMON, "remote is null");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pkgName)) {
-        CONN_LOGE(CONN_COMMON, "write package name failed");
+        CONN_LOGE(CONN_COMMON, "write package name fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(name)) {
-        CONN_LOGE(CONN_COMMON, "write name failed");
+        CONN_LOGE(CONN_COMMON, "write name fail");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_CREATE_SERVER, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "send request fail, err=%{public}d", ret);
         return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        CONN_LOGE(CONN_COMMON, "read serverRet failed");
+        CONN_LOGE(CONN_COMMON, "read serverRet fail");
         return SOFTBUS_IPC_ERR;
     }
     return serverRet;
@@ -333,37 +333,37 @@ int32_t ConnectionServerProxy::CreateServer(const char *pkgName, const char *nam
 int32_t ConnectionServerProxy::RemoveServer(const char *pkgName, const char *name)
 {
     if (pkgName == nullptr || name == nullptr) {
-        CONN_LOGE(CONN_COMMON, "pkgName or name is nullptr");
+        CONN_LOGE(CONN_COMMON, "pkgName or name is null");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        CONN_LOGE(CONN_COMMON, "remote is nullptr");
+        CONN_LOGE(CONN_COMMON, "remote is null");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pkgName)) {
-        CONN_LOGE(CONN_COMMON, "write package name failed");
+        CONN_LOGE(CONN_COMMON, "write package name fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(name)) {
-        CONN_LOGE(CONN_COMMON, "write name failed");
+        CONN_LOGE(CONN_COMMON, "write name fail");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_REMOVE_SERVER, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "send request fail, err=%{public}d", ret);
         return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        CONN_LOGE(CONN_COMMON, "read serverRet failed");
+        CONN_LOGE(CONN_COMMON, "read serverRet fail");
         return SOFTBUS_IPC_ERR;
     }
     return serverRet;
@@ -372,45 +372,45 @@ int32_t ConnectionServerProxy::RemoveServer(const char *pkgName, const char *nam
 int32_t ConnectionServerProxy::Connect(const char *pkgName, const char *name, const Address *address)
 {
     if (pkgName == nullptr || name == nullptr || address == nullptr) {
-        CONN_LOGE(CONN_COMMON, "pkgName or name or address is nullptr");
+        CONN_LOGE(CONN_COMMON, "pkgName or name or address is null");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        CONN_LOGE(CONN_COMMON, "remote is nullptr");
+        CONN_LOGE(CONN_COMMON, "remote is null");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(pkgName)) {
-        CONN_LOGE(CONN_COMMON, "write package name failed");
+        CONN_LOGE(CONN_COMMON, "write package name fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(name)) {
-        CONN_LOGE(CONN_COMMON, "write name failed");
+        CONN_LOGE(CONN_COMMON, "write name fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(address->addr.ble.mac)) {
-        CONN_LOGE(CONN_COMMON, "write address failed");
+        CONN_LOGE(CONN_COMMON, "write address fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(address->addrType)) {
-        CONN_LOGE(CONN_COMMON, "write addrType failed");
+        CONN_LOGE(CONN_COMMON, "write addrType fail");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_CONNECT, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "send request fail, err=%{public}d", ret);
         return ret;
     }
     int32_t handle = 0;
     if (!reply.ReadInt32(handle)) {
-        CONN_LOGE(CONN_COMMON, "read handle failed");
+        CONN_LOGE(CONN_COMMON, "read handle fail");
         return SOFTBUS_IPC_ERR;
     }
     return handle;
@@ -420,28 +420,28 @@ int32_t ConnectionServerProxy::Disconnect(uint32_t handle)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        CONN_LOGE(CONN_COMMON, "remote is nullptr");
+        CONN_LOGE(CONN_COMMON, "remote is null");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteUint32(handle)) {
-        CONN_LOGE(CONN_COMMON, "write handle failed");
+        CONN_LOGE(CONN_COMMON, "write handle fail");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_DISCONNECT, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "send request fail, err=%{public}d", ret);
         return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        CONN_LOGE(CONN_COMMON, "read serverRet failed");
+        CONN_LOGE(CONN_COMMON, "read serverRet fail");
         return SOFTBUS_IPC_ERR;
     }
     return serverRet;
@@ -450,41 +450,41 @@ int32_t ConnectionServerProxy::Disconnect(uint32_t handle)
 int32_t ConnectionServerProxy::Send(uint32_t handle, const uint8_t *data, uint32_t len)
 {
     if (data == nullptr) {
-        CONN_LOGE(CONN_COMMON, "data is nullptr");
+        CONN_LOGE(CONN_COMMON, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        CONN_LOGE(CONN_COMMON, "remote is nullptr");
+        CONN_LOGE(CONN_COMMON, "remote is null");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel dataParcel;
     if (!dataParcel.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteUint32(handle)) {
-        CONN_LOGE(CONN_COMMON, "write handle failed");
+        CONN_LOGE(CONN_COMMON, "write handle fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteUint32(len)) {
-        CONN_LOGE(CONN_COMMON, "write data len failed");
+        CONN_LOGE(CONN_COMMON, "write data len fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteRawData((void *)data, len)) {
-        CONN_LOGE(CONN_COMMON, "write data failed");
+        CONN_LOGE(CONN_COMMON, "write data fail");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_SEND, dataParcel, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "send request fail, err=%{public}d", ret);
         return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        CONN_LOGE(CONN_COMMON, "read serverRet failed");
+        CONN_LOGE(CONN_COMMON, "read serverRet fail");
         return SOFTBUS_IPC_ERR;
     }
     return serverRet;
@@ -493,50 +493,50 @@ int32_t ConnectionServerProxy::Send(uint32_t handle, const uint8_t *data, uint32
 int32_t ConnectionServerProxy::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len)
 {
     if (deviceId == nullptr) {
-        CONN_LOGE(CONN_COMMON, "deviceId is nullptr");
+        CONN_LOGE(CONN_COMMON, "deviceId is null");
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        CONN_LOGE(CONN_COMMON, "remote is nullptr");
+        CONN_LOGE(CONN_COMMON, "remote is null");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel dataParcel;
     if (!dataParcel.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteUint32(handle)) {
-        CONN_LOGE(CONN_COMMON, "write handle failed");
+        CONN_LOGE(CONN_COMMON, "write handle fail");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteUint32(len)) {
-        CONN_LOGE(CONN_COMMON, "write deviceId len failed");
+        CONN_LOGE(CONN_COMMON, "write deviceId len fail");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_GET_PEER_DEVICE_ID, dataParcel, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "send request fail, err=%{public}d", ret);
         return ret;
     }
     char *tmp = (char *)reply.ReadRawData(len);
     if (tmp == nullptr) {
-        CONN_LOGE(CONN_COMMON, "read deviceId failed");
+        CONN_LOGE(CONN_COMMON, "read deviceId fail");
         return SOFTBUS_IPC_ERR;
     }
     if (strcpy_s(deviceId, len, tmp) != EOK) {
-        CONN_LOGE(CONN_COMMON, "copy deviceId failed");
+        CONN_LOGE(CONN_COMMON, "copy deviceId fail");
         return SOFTBUS_STRCPY_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        CONN_LOGE(CONN_COMMON, "read serverRet failed");
+        CONN_LOGE(CONN_COMMON, "read serverRet fail");
         return SOFTBUS_IPC_ERR;
     }
     if (serverRet != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "get peer device id failed");
+        CONN_LOGE(CONN_COMMON, "get peer device id fail");
         return serverRet;
     }
     return serverRet;

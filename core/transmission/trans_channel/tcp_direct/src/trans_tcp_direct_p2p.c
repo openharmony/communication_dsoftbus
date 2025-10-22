@@ -632,7 +632,7 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     ReleaseSessionConnLock();
     info.myIp = myDataAddr;
     info.myPort = myDataPort;
-    info.peerIp = (conn->appInfo.osType == HA_OS_TYPE) ? NULL : peerDataAddr;
+    info.peerIp = (conn->appInfo.osType == OTHER_OS_TYPE) ? NULL : peerDataAddr;
     info.protocol = conn->appInfo.fdProtocol;
     info.myUid = conn->appInfo.myData.uid;
     if (VerifyP2p(authHandle, reqNum, &info) != SOFTBUS_OK) {
@@ -792,7 +792,12 @@ static int32_t TransGetLocalIp(char *myIp, const char *peerIp, const char *peerU
     }
     int32_t osType = 0;
     GetOsTypeByNetworkId(peerUuid, &osType);
-    if (osType == HA_OS_TYPE) {
+    int32_t metaType = 0;
+    int32_t ret = LnnGetRemoteNumInfo(peerUuid, NUM_KEY_META_TYPE, &metaType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get metaType failed, ret=%{public}d", ret);
+    }
+    if (osType == OTHER_OS_TYPE && metaType == META_HA) {
         if (AuthMetaGetLocalIpByMetaNodeIdPacked(peerUuid, myIp, IP_LEN) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "get local ip by metaNodeId failed.");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
@@ -816,7 +821,7 @@ static void DeleteExternalP2pListener(const char *peerUuid)
 {
     int32_t osType = 0;
     GetOsTypeByNetworkId(peerUuid, &osType);
-    if (osType == HA_OS_TYPE) {
+    if (osType == OTHER_OS_TYPE) {
         StopP2pListenerByRemoteUuid(peerUuid);
     }
     return;
@@ -1043,6 +1048,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         CloseHtpChannelPacked(conn->channelId);
         conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
         conn->appInfo.isFlashLight = false;
+        conn->appInfo.myData.port = 0;
         (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo);
     }
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP) {
@@ -1337,44 +1343,33 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     SessionConn *conn = NULL;
     int32_t ret = BuildSessionConn(appInfo, &conn);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "build new sessin conn fail, ret=%{public}d", ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "build new sessin conn fail, ret=%{public}d", ret);
+
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + (uint64_t)ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL, "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64,
         (uint64_t)(conn->channelId + ID_OFFSET));
-    ret = TransStartTimeSync(conn);
-    if (ret != SOFTBUS_OK) {
-        FreeFastTransData(&(conn->appInfo));
-        SoftBusFree(conn);
-        TRANS_LOGE(TRANS_CTRL, "start time sync failed, ret=%{public}d", ret);
-        return ret;
-    }
     uint64_t seq = TransTdcGetNewSeqId();
     if (seq == INVALID_SEQ_ID) {
-        FreeFastTransData(&(conn->appInfo));
-        SoftBusFree(conn);
-        return SOFTBUS_TRANS_INVALID_SEQ_ID;
+        ret = SOFTBUS_TRANS_INVALID_SEQ_ID;
+        goto EXIT_ERR;
     }
     conn->req = (int64_t)seq;
+    ret = TransStartTimeSync(conn);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "start time sync failed, ret=%{public}d", ret);
+        goto EXIT_ERR;
+    }
     ret = StartTransP2pDirectListener(connInfo->type, conn, appInfo);
     if (ret != SOFTBUS_OK) {
-        FreeFastTransData(&(conn->appInfo));
-        SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "start listener fail");
-        return ret;
+        goto EXIT_ERR;
     }
-    if (appInfo->osType == HA_OS_TYPE) {
-        conn->isMeta = true;
-    } else {
-        conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
-    }
+    conn->isMeta = (appInfo->osType == OTHER_OS_TYPE) ? true : TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
+
     ret = TransTdcAddSessionConn(conn);
     if (ret != SOFTBUS_OK) {
-        FreeFastTransData(&(conn->appInfo));
-        SoftBusFree(conn);
-        return ret;
+        goto EXIT_ERR;
     }
     ret = StartVerifyP2pInfo(appInfo, conn, connInfo->type);
     if (ret != SOFTBUS_OK) {
@@ -1384,6 +1379,10 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     *channelId = conn->channelId;
     TRANS_LOGI(TRANS_CTRL, "end: channelId=%{public}d", conn->channelId);
+    return SOFTBUS_OK;
+EXIT_ERR:
+    FreeFastTransData(&(conn->appInfo));
+    SoftBusFree(conn);
     return ret;
 }
 

@@ -555,6 +555,7 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     }
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
+        state = AuthMetaGetMetaValueByMetaNodeIdPacked(id);
         LNN_LOGI(LNN_LEDGER, "can not find target node");
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return state;
@@ -635,12 +636,18 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
         LNN_LOGE(LNN_LEDGER, "CreateCnnCodeKey error!");
         return INVALID_CONNECTION_CODE_VALUE;
     }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
+        return INVALID_CONNECTION_CODE_VALUE;
+    }
     short *ptr = (short *)LnnMapGet(&g_distributedNetLedger.cnnCode.connectionCode, key);
     if (ptr == NULL) {
         LNN_LOGE(LNN_LEDGER, " KEY not exist.");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         DestroyCnnCodeKey(key);
         return INVALID_CONNECTION_CODE_VALUE;
     }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     DestroyCnnCodeKey(key);
     return (*ptr);
 }
@@ -1733,11 +1740,16 @@ void LnnRemoveNode(const char *udid)
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
 {
     NodeInfo *info = NULL;
+    const char *udid = NULL;
     if (id == NULL) {
         return NULL;
     }
     info = LnnGetNodeInfoById(id, type);
     if (info == NULL) {
+        udid = AuthMetaGetDeviceIdByMetaNodeIdPacked(id);
+        if (udid != NULL) {
+            return udid;
+        }
         LNN_LOGE(LNN_LEDGER, "uuid not find node info.");
         return NULL;
     }
@@ -1760,6 +1772,11 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
     }
     info = LnnGetNodeInfoById(srcId, srcIdType);
     if (info == NULL) {
+        id = AuthMetaGetDeviceIdByMetaNodeIdPacked(srcId);
+        if (id != NULL && strcpy_s(dstIdBuf, dstIdBufLen, id) == EOK) {
+            SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_OK;
+        }
         LNN_LOGE(LNN_LEDGER, "no node info srcIdType=%{public}d", srcIdType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
@@ -2017,8 +2034,10 @@ static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNu
 
 bool LnnIsLSANode(const NodeBasicInfo *info)
 {
-    NodeInfo *nodeInfo = LnnGetNodeInfoById(info->networkId, CATEGORY_NETWORK_ID);
-    if (nodeInfo != NULL && LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_LSA)) {
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &nodeInfo) == SOFTBUS_OK &&
+        LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA)) {
         return true;
     }
     return false;

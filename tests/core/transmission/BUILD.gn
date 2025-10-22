@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     "common:unittest",
     "ipc:unittest",
+    "manager:unittest",
     "session:unittest",
     "trans_channel/auth_channel:unittest",
     "trans_channel/common:unittest",

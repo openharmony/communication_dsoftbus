@@ -33,7 +33,7 @@ EXTERN_C_START
 
 static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
 {
-    COMM_LOGI(COMM_SDK, "accept new connection, handle=%{public}u", handle);
+    COMM_LOGI(COMM_SDK, "accept new conn, handle=%{public}u", handle);
     CONN_CHECK_AND_RETURN_RET_LOGE(name != nullptr, SOFTBUS_INVALID_PARAM, COMM_SDK, "name is nullptr");
     std::string serverName = name;
     std::string deviceId = "";
@@ -47,7 +47,7 @@ static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
 
     if (enhanceServer == nullptr || enhanceServer->env_ == nullptr ||
         !enhanceServer->IsAcceptedEnable()) {
-        COMM_LOGE(COMM_SDK, "server status error, name=%{public}s", name);
+        COMM_LOGE(COMM_SDK, "server status err, name=%{public}s", name);
         return LINK_ENHANCE_PARAMETER_INVALID;
     }
     uint32_t inHandle = handle;
@@ -68,11 +68,11 @@ static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
         napi_value constructor = nullptr;
         if (napi_get_reference_value(enhanceServer->env_,
             NapiLinkEnhanceConnection::consRef_, &constructor) != napi_ok) {
-            COMM_LOGE(COMM_SDK, "get connection constructor failed");
+            COMM_LOGE(COMM_SDK, "get conn constructor fail");
             return;
         }
         if (napi_new_instance(enhanceServer->env_, constructor, argc, argv, &argvOut[ARGS_SIZE_ZERO]) != napi_ok) {
-            COMM_LOGE(COMM_SDK, "create js new connection object failed");
+            COMM_LOGE(COMM_SDK, "create js new conn object fail");
             return;
         }
         NapiCallFunction(enhanceServer->env_, enhanceServer->acceptConnectRef_, argvOut, ARGS_SIZE_ONE);
@@ -102,7 +102,7 @@ static int32_t NotifyConnectResult(NapiLinkEnhanceConnection *connection, bool s
         COMM_LOGE(COMM_SDK, "not register connect result listener");
         return SOFTBUS_CONN_GENERAL_LISTENER_NOT_ENABLE;
     }
-    COMM_LOGI(COMM_SDK, "find connection object, handle=%{public}u, success=%{public}d", connection->handle_, success);
+    COMM_LOGI(COMM_SDK, "find conn object, handle=%{public}u, success=%{public}d", connection->handle_, success);
     connection->state_ = success ? ConnectionState::STATE_CONNECTED : ConnectionState::STATE_DISCONNECTED;
     int32_t napiReason = reason;
     if (napiReason != 0) {
@@ -132,7 +132,7 @@ static int32_t NotifyConnectionStateChange(NapiLinkEnhanceConnection *connection
 
 static int32_t OnConnectionStateChangeAdapter(uint32_t handle, int32_t status, int32_t reason)
 {
-    COMM_LOGI(COMM_SDK, "connection state change, handle=%{public}u, state=%{public}d, reason=%{public}d", handle,
+    COMM_LOGI(COMM_SDK, "conn state change, handle=%{public}u, state=%{public}d, reason=%{public}d", handle,
         status, reason);
     std::lock_guard<std::mutex> guard(NapiLinkEnhanceConnection::connectionListMutex_);
     int32_t ret = LINK_ENHANCE_PARAMETER_INVALID;
@@ -173,7 +173,7 @@ static void NotifyDataReceived(NapiLinkEnhanceConnection *connection, const uint
         void *dataBuffer = nullptr;
         int32_t status = napi_create_arraybuffer(connection->env_, len, &dataBuffer, &arrayBuffer);
         if (status != napi_ok) {
-            COMM_LOGE(COMM_SDK, "create data array object failed");
+            COMM_LOGE(COMM_SDK, "create data array object fail");
             return;
         }
         (void)memcpy_s(dataBuffer, len, outData.get(), len);
@@ -186,13 +186,13 @@ static void NotifyDataReceived(NapiLinkEnhanceConnection *connection, const uint
 
 static void OnDataReceivedAdapter(uint32_t handle, const uint8_t *data, uint32_t len)
 {
-    CONN_CHECK_AND_RETURN_LOGE(data != nullptr, COMM_SDK, "data is nullptr");
-    COMM_LOGI(COMM_SDK, "connection data received, handle=%{public}u, len=%{public}u", handle, len);
+    CONN_CHECK_AND_RETURN_LOGE(data != nullptr, COMM_SDK, "data is null");
+    COMM_LOGI(COMM_SDK, "conn data received, handle=%{public}u, len=%{public}u", handle, len);
     std::lock_guard<std::mutex> guard(NapiLinkEnhanceConnection::connectionListMutex_);
     for (uint32_t i = 0; i < NapiLinkEnhanceConnection::connectionList_.size(); i++) {
         NapiLinkEnhanceConnection *connection = NapiLinkEnhanceConnection::connectionList_[i];
         if (connection->handle_ == handle) {
-            COMM_LOGI(COMM_SDK, "find connection object, handle=%{public}u", handle);
+            COMM_LOGI(COMM_SDK, "find conn object, handle=%{public}u", handle);
             NotifyDataReceived(connection, data, len);
             return;
         }
@@ -247,7 +247,7 @@ static napi_value Init(napi_env env, napi_value exports)
 
     int32_t ret = GeneralRegisterListener(&g_listener);
     if (ret != 0) {
-        COMM_LOGE(COMM_SDK, "enhance manager register listener failed ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "enhance manager register listener fail ret=%{public}d", ret);
     }
     return exports;
 }

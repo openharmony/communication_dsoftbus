@@ -630,9 +630,16 @@ bool VtpStreamSocket::EncryptStreamPacket(std::unique_ptr<IStream> stream, std::
 
 bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 {
-    TRANS_LOGD(TRANS_STREAM, "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd",
-        streamType_, stream->GetBufferLen(), stream->GetExtBufferLen());
-
+#define ACCEPT_RETRY_CNT  3
+#define RETRY_INTERVAL_US (100 * 1000) // 100ms
+    TRANS_LOGD(TRANS_STREAM, "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd", streamType_,
+        stream->GetBufferLen(), stream->GetExtBufferLen());
+    int32_t retryCnt = ACCEPT_RETRY_CNT;
+    while (streamFd_ == -1 && retryCnt > 0) {
+        TRANS_LOGW(TRANS_STREAM, "accept thread may be blocked, retry after 100ms");
+        usleep(RETRY_INTERVAL_US);
+        retryCnt--;
+    }
     if (!isBlocked_) {
         isBlocked_ = true;
         if (!SetNonBlockMode(streamFd_, StreamAttr(false))) {

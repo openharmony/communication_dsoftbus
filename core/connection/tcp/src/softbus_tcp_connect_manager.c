@@ -131,7 +131,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     LIST_FOR_EACH_ENTRY(temp, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (temp->connectionId == item->connectionId) {
             CONN_LOGE(CONN_COMMON,
-                "ConnectionId ready in ConnectionInfoList. ConnectionId=%{public}08x", item->connectionId);
+                "ConnectionId ready in ConnectionInfoList. connId=%{public}08x", item->connectionId);
             (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
             return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
         }
@@ -653,7 +653,7 @@ int32_t TcpPostBytes(
     }
     if (fd == -1) {
         SoftBusFree((void*)data);
-        CONN_LOGE(CONN_COMMON, "connectionId not found. connectionId=%{public}08x", connectionId);
+        CONN_LOGE(CONN_COMMON, "connectionId not found. connId=%{public}08x", connectionId);
         (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
@@ -695,7 +695,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     }
     info->isAvailable = false;
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
-    CONN_LOGE(CONN_COMMON, "ConnectionId is not exists. connectionId=%{public}08x", connectionId);
+    CONN_LOGE(CONN_COMMON, "ConnectionId is not exists. connId=%{public}08x", connectionId);
     return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
 }
 

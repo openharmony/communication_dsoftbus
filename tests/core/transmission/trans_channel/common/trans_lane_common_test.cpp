@@ -23,14 +23,14 @@
 using namespace testing;
 using namespace testing::ext;
 
-#define TEST_LEN 128
-#define TEST_PID 1024
-#define TEST_UID 2048
-#define TEST_CHANNEL_ID 1025
-#define TEST_SESSION_ID 16
-#define TEST_LANE_ID 268438005
-#define TEST_NEW_SESSION_ID 32
-#define TEST_NEW_CHANNEL_ID 1024
+#define TEST_LEN                128
+#define TEST_PID                1024
+#define TEST_UID                2048
+#define TEST_CHANNEL_ID         1025
+#define TEST_SESSION_ID         16
+#define TEST_LANE_ID            268438005
+#define TEST_NEW_SESSION_ID     32
+#define TEST_NEW_CHANNEL_ID     1024
 #define TEST_INVALID_SESSION_ID (-1)
 
 namespace OHOS {
@@ -51,25 +51,17 @@ const char *TEST_PKG_NAME = "testPkgName";
 
 class TransLaneCommonTest : public testing::Test {
 public:
-    TransLaneCommonTest()
-    {}
-    ~TransLaneCommonTest()
-    {}
+    TransLaneCommonTest() { }
+    ~TransLaneCommonTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void TransLaneCommonTest::SetUpTestCase(void)
-{
-}
+void TransLaneCommonTest::SetUpTestCase(void) { }
 
-void TransLaneCommonTest::TearDownTestCase(void)
-{
-}
+void TransLaneCommonTest::TearDownTestCase(void) { }
 
 static AppInfo *TestCreateAppInfo()
 {
@@ -300,7 +292,7 @@ HWTEST_F(TransLaneCommonTest, GetOsTypeByNetworkId001, TestSize.Level1)
  */
 HWTEST_F(TransLaneCommonTest, GetRemoteUdidWithNetworkId001, TestSize.Level1)
 {
-    char udid[DEVICE_ID_SIZE_MAX] = {0};
+    char udid[DEVICE_ID_SIZE_MAX] = { 0 };
     uint32_t len = DEVICE_ID_SIZE_MAX;
 
     NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
@@ -322,11 +314,11 @@ HWTEST_F(TransLaneCommonTest, GetRemoteUdidWithNetworkId001, TestSize.Level1)
 HWTEST_F(TransLaneCommonTest, TransGetRemoteDeviceVersion001, TestSize.Level1)
 {
     IdCategory type = CATEGORY_UDID;
-    char deviceVersion[DEVICE_VERSION_SIZE_MAX] = {0};
+    char deviceVersion[DEVICE_VERSION_SIZE_MAX] = { 0 };
     uint32_t len = DEVICE_VERSION_SIZE_MAX;
     TransGetRemoteDeviceVersion(nullptr, type, deviceVersion, len);
     EXPECT_EQ(strlen(deviceVersion), 0);
-    
+
     TransGetRemoteDeviceVersion(TEST_ID, type, nullptr, len);
 
     NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
@@ -654,13 +646,12 @@ HWTEST_F(TransLaneCommonTest, CancelWaitLaneState001, TestSize.Level1)
     ret = TransAddSocketChannelInfo(TEST_SESSION_NAME, TEST_NEW_SESSION_ID, channelId, channelType, state);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransUpdateSocketChannelLaneInfoBySession(TEST_SESSION_NAME, TEST_SESSION_ID,
-        laneHandle, isQosLane, isAsync);
+    ret = TransUpdateSocketChannelLaneInfoBySession(TEST_SESSION_NAME, TEST_SESSION_ID, laneHandle, isQosLane, isAsync);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     isAsync = false;
-    ret = TransUpdateSocketChannelLaneInfoBySession(TEST_SESSION_NAME, TEST_NEW_SESSION_ID,
-        laneHandle, isQosLane, isAsync);
+    ret = TransUpdateSocketChannelLaneInfoBySession(
+        TEST_SESSION_NAME, TEST_NEW_SESSION_ID, laneHandle, isQosLane, isAsync);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = CancelWaitLaneState(TEST_SESSION_NAME, TEST_SESSION_ID);
@@ -944,7 +935,7 @@ HWTEST_F(TransLaneCommonTest, CheckSourceCollabRelationTest001, TestSize.Level1)
  */
 HWTEST_F(TransLaneCommonTest, TransGetPeerDeviceId001, TestSize.Level1)
 {
-    int32_t osType = HA_OS_TYPE;
+    int32_t osType = OTHER_OS_TYPE;
     AppInfo appInfo;
     SessionParam sessionParam = {
         .peerDeviceId = "11.22.33.44"
@@ -966,5 +957,77 @@ HWTEST_F(TransLaneCommonTest, TransGetPeerDeviceId001, TestSize.Level1)
     EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_OK));
     ret = TransGetPeerDeviceId(&appInfo, &sessionParam);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TransCheckMetaTypeQueryPermission001
+ * @tc.desc: Test that the function returns true when pkgName is "ohos.InterConnection.iShare" and metaType is META_HA.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransCheckMetaTypeQueryPermission001, TestSize.Level1)
+{
+    const char *pkgName = "ohos.InterConnection.iShare";
+    int32_t metaType = META_HA;
+    bool retsult = TransCheckMetaTypeQueryPermission(pkgName, metaType);
+    EXPECT_TRUE(retsult);
+}
+
+/*
+ * @tc.name: TransCheckMetaTypeQueryPermission002
+ * @tc.desc: Test that the function returns false when pkgName is incorrect (e.g., "invalid.pkg") but metaType is
+ * META_HA.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransCheckMetaTypeQueryPermission002, TestSize.Level1)
+{
+    const char *pkgName = "invalid.pkg";
+    int32_t metaType = META_HA;
+    bool retsult = TransCheckMetaTypeQueryPermission(pkgName, metaType);
+    EXPECT_FALSE(retsult);
+}
+
+/*
+ * @tc.name: TransCheckMetaTypeQueryPermission003
+ * @tc.desc: Test that the function returns true when pkgName is "CastEngineService" and metaType is META_SDK.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransCheckMetaTypeQueryPermission003, TestSize.Level1)
+{
+    const char *pkgName = "CastEngineService";
+    int32_t metaType = META_SDK;
+    bool retsult = TransCheckMetaTypeQueryPermission(pkgName, metaType);
+    EXPECT_TRUE(retsult);
+}
+
+/*
+ * @tc.name: TransCheckMetaTypeQueryPermission004
+ * @tc.desc: Test that the function returns false when pkgName is incorrect (e.g., "invalid.pkg") but metaType is
+ * META_SDK.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransCheckMetaTypeQueryPermission004, TestSize.Level1)
+{
+    const char *pkgName = "invalid.pkg";
+    int32_t metaType = META_SDK;
+    bool retsult = TransCheckMetaTypeQueryPermission(pkgName, metaType);
+    EXPECT_FALSE(retsult);
+}
+
+/*
+ * @tc.name: TransCheckMetaTypeQueryPermission005
+ * @tc.desc: Test that when metaType is an invalid value (e.g., 999), the function returns false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransCheckMetaTypeQueryPermission005, TestSize.Level1)
+{
+    const char *pkgName = "CastEngineService";
+    int32_t metaType = 999; // invalid param
+    bool retsult = TransCheckMetaTypeQueryPermission(pkgName, metaType);
+    EXPECT_FALSE(retsult);
 }
 } // namespace OHOS

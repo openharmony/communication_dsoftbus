@@ -27,7 +27,7 @@ extern "C" {
 #define MAC_LEN 18
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11
-#define HA_OS_TYPE 12
+#define OTHER_OS_TYPE 12
 
 typedef enum {
     WLAN_IF = 0,
@@ -71,6 +71,7 @@ typedef enum {
     NUM_KEY_AUTH_PORT,
     NUM_KEY_PROXY_PORT,
     NUM_KEY_META_NODE,
+    NUM_KEY_META_TYPE,
     NUM_KEY_NET_CAP, /* dynamic network capabilities, depends on the user settings */
     NUM_KEY_FEATURE_CAPA,
     NUM_KEY_DEV_TYPE_ID,

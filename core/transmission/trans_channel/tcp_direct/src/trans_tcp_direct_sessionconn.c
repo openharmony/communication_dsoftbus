@@ -525,7 +525,7 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
                 TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
                 (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
             }
-            if (item->osType == HA_OS_TYPE) {
+            if (item->osType == OTHER_OS_TYPE) {
                 StopP2pListenerByRemoteUuid(item->peerDeviceId);
             }
             ListDelete(&item->node);

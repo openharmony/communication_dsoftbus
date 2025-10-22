@@ -412,7 +412,7 @@ static int32_t StartConnConnectDevice(const char *addr,
         return SOFTBUS_STRCPY_ERR;
     }
     int32_t status = ConnConnectDevice(&option, requestId, result);
-    CONN_LOGI(CONN_BLE, "connect device, status=%{public}d, requestId=%{public}u", status, requestId);
+    CONN_LOGI(CONN_BLE, "connect device, status=%{public}d, reqId=%{public}u", status, requestId);
     return status;
 }
 
@@ -1020,7 +1020,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
     CONN_CHECK_AND_RETURN_LOGE(info != NULL, CONN_BLE, "info is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
         "lock fail");
-    CONN_LOGI(CONN_BLE, "on connect disconnected, connectionId=%{public}u", connectionId);
+    CONN_LOGI(CONN_BLE, "on connect disconnected, connId=%{public}u", connectionId);
     struct GeneralConnection *it = NULL;
     struct GeneralConnection *next = NULL;
     ListNode waitNotify = {0};
@@ -1047,7 +1047,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
 static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     if (data == NULL || len < (int32_t)GENERAL_CONNECTION_HEADER_SIZE || moduleId != MODULE_BLE_GENERAL) {
-        CONN_LOGE(CONN_BLE, "invalid param, connectionId=%{public}u", connectionId);
+        CONN_LOGE(CONN_BLE, "invalid param, connId=%{public}u", connectionId);
         return;
     }
     GeneralConnectionHead head = *(GeneralConnectionHead *)data;
@@ -1131,7 +1131,7 @@ static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
         generalConnection->dereference(generalConnection);
         return status;
     }
-    CONN_LOGI(CONN_BLE, "recv connect request, handle=%{public}u, requestId=%{public}u",
+    CONN_LOGI(CONN_BLE, "recv connect request, handle=%{public}u, reqId=%{public}u",
         generalConnection->generalId, generalConnection->requestId);
     uint32_t handle = generalConnection->generalId;
     generalConnection->dereference(generalConnection);
@@ -1189,7 +1189,7 @@ static void Disconnect(uint32_t generalHandle, int32_t pid)
     struct GeneralConnection *generalConnection = GetConnectionByGeneralIdAndCheckPid(generalHandle, pid);
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE,
         "invalid param, generalId=%{public}u", generalHandle);
-    CONN_LOGI(CONN_BLE, "disconnect connection, generalId=%{public}u, connectionId=%{public}u",
+    CONN_LOGI(CONN_BLE, "disconnect connection, generalId=%{public}u, connId=%{public}u",
         generalHandle, generalConnection->underlayerHandle);
     GeneralSendResetMessage(generalConnection);
     ConnRemoveGeneralConnection(generalConnection);

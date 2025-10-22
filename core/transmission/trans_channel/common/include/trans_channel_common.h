@@ -79,6 +79,9 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
 int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid, int32_t sourceUid);
 
 int32_t TransCheckServerPermission(const char *mySessionName, const char *peerSessionName);
+
+bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
