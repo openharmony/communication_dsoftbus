@@ -45,5 +45,6 @@ void DiscEventManagerDeinit(void)
     DiscVLinkBleEventDeinitPacked();
     DiscTouchBleEventDeinitPacked();
     DiscOopBleEventDeinitPacked();
+    DiscPcCollaborationEventDeinitPacked();
 }
 
