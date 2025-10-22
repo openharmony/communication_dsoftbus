@@ -518,5 +518,10 @@ int32_t AuthMetaGetMetaTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *m
 {
     return GetLaneDepsInterface()->AuthMetaGetMetaTypeByMetaNodeIdPacked(metaNodeId, metaType);
 }
+
+int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
+{
+    return GetLaneDepsInterface()->LnnGetNetworkIdByUuid(uuid, buf, len);
+}
 }
 } // namespace OHOS
