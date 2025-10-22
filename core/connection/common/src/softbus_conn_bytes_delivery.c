@@ -117,6 +117,7 @@ static int32_t RetryDequeueExclusiveIfNeed(
     code = ConnDequeue(delivery->queue, (struct ConnQueueItem **)&out, 0);
     if (code == SOFTBUS_TIMOUT) {
         if (delivery->deliveryMessagePosting) {
+            SoftBusMutexUnlock(&delivery->lock);
             return MESSAGE_POSTING;
         }
         delivery->deliveryTaskRunning = false;
