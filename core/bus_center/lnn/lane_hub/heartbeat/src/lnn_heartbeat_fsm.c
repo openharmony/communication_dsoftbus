@@ -857,7 +857,9 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
         LNN_LOGI(LNN_HEART_BEAT, "is support burst and is not wakeup or V0, don't check");
         return SOFTBUS_OK;
     }
-    const char *udid = LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID);
+    char udid[UDID_BUF_LEN] = {0};
+    int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_HEART_BEAT, "convert networkid to udid fail");
     (void)LnnGenerateHexStringHash((const unsigned char *)udid, udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
