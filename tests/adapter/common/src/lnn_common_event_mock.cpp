@@ -41,9 +41,9 @@ void LnnNotifySysTimeChangeEvent(void)
     return LnnCommonEventInterface()->LnnNotifySysTimeChangeEvent();
 }
  
-void LnnNotifyDeviceRootStateChangeEvent(void)
+void LnnNotifyDeviceRiskStateChangeEvent(void)
 {
-    return LnnCommonEventInterface()->LnnNotifyDeviceRootStateChangeEvent();
+    return LnnCommonEventInterface()->LnnNotifyDeviceRiskStateChangeEvent();
 }
  
 void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)

@@ -187,7 +187,8 @@ static void OnReceiveBrOffline(LnnSyncInfoType type, const char *networkId, cons
             discType, code, peerCode);
         return;
     }
-    if (LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType(discType)) != SOFTBUS_OK) {
+    if (LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType(discType),
+        DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "request leave specific fail");
     }
 }

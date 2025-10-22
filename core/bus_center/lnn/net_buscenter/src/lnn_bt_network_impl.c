@@ -294,7 +294,7 @@ static void LeaveSpecificBrNetwork(const char *btMac)
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_BUILDER, "start leave specific br networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
-    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
+    int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR, DEVICE_LEAVE_REASON_DEFAULT);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "leave br network fail=%{public}d", ret);
     }

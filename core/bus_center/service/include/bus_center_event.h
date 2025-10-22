@@ -94,7 +94,7 @@ void LnnNotifyWifiServiceStart(void *para);
 
 void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event);
 
-void LnnNotifyDeviceRootStateChangeEvent(void);
+void LnnNotifyDeviceRiskStateChangeEvent(void);
 
 void LnnNotifyHaLeaveMetaNodeEvent(const char *metaNodeId);
 

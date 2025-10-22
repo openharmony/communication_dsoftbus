@@ -649,7 +649,7 @@ static void BleOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     (void)LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN);
-    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK) {
+    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "request leave specific fail, networkId:%{public}s",
             AnonymizeWrapper(anonyNetworkId));
     } else {
@@ -726,7 +726,7 @@ static void WlanOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
     }
     if (CheckWifiOfflineMsgResult(networkId, authPort, convertOfflineCode)) {
         Anonymize(networkId, &anonyNetworkId);
-        if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN) != SOFTBUS_OK) {
+        if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "wifi fast offline failed, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         } else {
             LNN_LOGI(LNN_BUILDER, "wifi fast offline success networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));

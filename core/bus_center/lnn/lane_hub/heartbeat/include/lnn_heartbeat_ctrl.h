@@ -61,6 +61,7 @@ bool LnnIsNeedInterceptBroadcast(bool disableGlass);
 
 void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback);
 void LnnUnregBleRangeCb(void);
+int32_t RiskDeviceLeaveLnn(void);
 
 #ifdef __cplusplus
 }

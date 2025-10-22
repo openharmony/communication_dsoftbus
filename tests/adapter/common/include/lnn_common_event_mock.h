@@ -28,7 +28,7 @@ public:
     LnnCommonEventInterface() {};
     virtual ~LnnCommonEventInterface() {};
     virtual void LnnNotifySysTimeChangeEvent(void) = 0;
-    virtual void LnnNotifyDeviceRootStateChangeEvent(void) = 0;
+    virtual void LnnNotifyDeviceRiskStateChangeEvent(void) = 0;
     virtual void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
@@ -44,7 +44,7 @@ public:
     LnnCommonEventInterfaceMock();
     ~LnnCommonEventInterfaceMock() override;
     MOCK_METHOD0(LnnNotifySysTimeChangeEvent, void(void));
-    MOCK_METHOD0(LnnNotifyDeviceRootStateChangeEvent, void(void));
+    MOCK_METHOD0(LnnNotifyDeviceRiskStateChangeEvent, void(void));
     MOCK_METHOD1(LnnNotifyScreenStateChangeEvent, void(SoftBusScreenState));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState));

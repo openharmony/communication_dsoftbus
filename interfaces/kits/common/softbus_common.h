@@ -679,6 +679,17 @@ typedef enum {
     SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY,
 } StrategyForBle;
 
+/**
+ * @brief Defines the Device Leaving Reason.
+ */
+typedef enum {
+    /* Default leave reason */
+    DEVICE_LEAVE_REASON_DEFAULT = 0,
+    /* Device not trust leave reason */
+    DEVICE_LEAVE_REASON_NOT_TRUST,
+    DEVICE_LEAVE_REASON_MAX,
+} DeviceLeaveReason;
+
 #ifdef __cplusplus
 }
 #endif

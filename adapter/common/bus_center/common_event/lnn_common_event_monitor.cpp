@@ -113,7 +113,7 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         LnnNotifySysTimeChangeEvent();
     }
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
-        LnnNotifyDeviceRootStateChangeEvent();
+        LnnNotifyDeviceRiskStateChangeEvent();
     }
     OnReceiveSleEvent(want);
     SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;

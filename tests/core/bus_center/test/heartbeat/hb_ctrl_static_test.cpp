@@ -417,7 +417,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_007, TestSize.L
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SLE_STATE_CHANGED), _))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED), _))
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_DEVICE_RISK_STATE_CHANGED), _))
         .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = LnnRegisterCommonEvent();
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -1279,7 +1279,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, IsHeartbeatEnableForMcu_001, TestSize.Level1)
     g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
     g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
     g_hbConditionState.OOBEState = SOFTBUS_OOBE_END;
-    g_hbConditionState.deviceRootState = SOFTBUS_DEVICE_NOT_ROOT;
+    g_hbConditionState.deviceRiskState = SOFTBUS_DEVICE_NOT_RISK;
 
     g_lnnInitMonitorInfoMgr.depInitEnd = true;
     g_lnnInitMonitorInfoMgr.deviceInfoReady = true;
@@ -1313,7 +1313,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, HbUpdateEnableStatusToMcu_001, TestSize.Level1
     g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
     g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
     g_hbConditionState.OOBEState = SOFTBUS_OOBE_END;
-    g_hbConditionState.deviceRootState = SOFTBUS_DEVICE_NOT_ROOT;
+    g_hbConditionState.deviceRiskState = SOFTBUS_DEVICE_NOT_RISK;
     g_hbConditionState.lockState = SOFTBUS_SCREEN_LOCK_UNKNOWN;
 
     g_lnnInitMonitorInfoMgr.depInitEnd = true;

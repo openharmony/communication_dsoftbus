@@ -64,7 +64,7 @@ void InitLedgerMock(LedgerInterfaceMock &hbLnnMock)
     ON_CALL(hbLnnMock, LnnGetDLHeartbeatTimestamp(_, _)).WillByDefault(DoAll(SetArgPointee<1>(1), Return(SOFTBUS_OK)));
     ON_CALL(hbLnnMock, LnnGetOnlineStateById(_, _)).WillByDefault(Return(true));
     ON_CALL(hbLnnMock, LnnGetRemoteStrInfo(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(hbLnnMock, LnnRequestLeaveSpecific(_, _)).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(hbLnnMock, LnnRequestLeaveSpecific(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbLnnMock, LnnGetAllOnlineNodeInfo(_, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbLnnMock, LnnGetTrustedDevInfoFromDb(_, _))
         .WillByDefault(LedgerInterfaceMock::ActionOfGetTrustedDevInfoFromDb);

@@ -64,10 +64,11 @@ void LNNNetworkInfoTest::SetUp() { }
 
 void LNNNetworkInfoTest::TearDown() { }
 
-int32_t TestLnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t TestLnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason)
 {
     (void)networkId;
     (void)addrType;
+    (void)leaveReason;
     return SOFTBUS_OK;
 }
 
