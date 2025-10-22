@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,11 @@ public:
     virtual int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName);
     virtual int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName);
     virtual int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+    virtual int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+        struct GroupOwnerResult *result) = 0;
+    virtual void ServerIpcDestroyGroupOwner(const char *pkgName) = 0;
+    virtual int32_t CheckPackageName(const char *pkgName) = 0;
+    virtual int32_t InitSoftBus(const char *pkgName) = 0;
 };
 class ClientBusCenterManagerInterfaceMock : public ClientBusCenterManagerInterface {
 public:
@@ -86,6 +91,11 @@ public:
     MOCK_METHOD2(ServerIpcTriggerRangeForMsdp, int32_t (const char *, const RangeConfig *));
     MOCK_METHOD1(SoftBusMutexLockInner, int32_t (SoftBusMutex *));
     MOCK_METHOD1(SoftBusMutexUnlockInner, int32_t (SoftBusMutex *));
+    MOCK_METHOD3(ServerIpcCreateGroupOwner, int32_t (const char *, const struct GroupOwnerConfig *,
+        struct GroupOwnerResult *));
+    MOCK_METHOD1(ServerIpcDestroyGroupOwner, void (const char *));
+    MOCK_METHOD1(CheckPackageName, int32_t (const char *));
+    MOCK_METHOD1(InitSoftBus, int32_t (const char *));
 };
 } // namespace OHOS
 #endif // CLIENT_BUS_CENTER_MANAGER_MOCK_H
