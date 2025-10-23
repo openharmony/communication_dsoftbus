@@ -46,6 +46,7 @@ static void DiscFeatureRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discCoapProcessDeviceInfo = dlsym(soHandle, "DiscCoapProcessDeviceInfo");
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
     g_discEnhanceFuncList.discCoapAssembleCapData = dlsym(soHandle, "DiscCoapAssembleCapData");
+    g_discEnhanceFuncList.discCoapUpdateAbility = dlsym(soHandle, "DiscCoapUpdateAbility");
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
     g_discEnhanceFuncList.discFillBtype = dlsym(soHandle, "DiscFillBtype");
     g_discEnhanceFuncList.discCoapAssembleBdata = dlsym(soHandle, "DiscCoapAssembleBdata");
@@ -77,7 +78,6 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discCoapReportNotification = dlsym(soHandle, "DiscCoapReportNotification");
     g_discEnhanceFuncList.pcCollaborationManagerDeinit = dlsym(soHandle, "PcCollaborationManagerDeinit");
     g_discEnhanceFuncList.pcCollaborationEventDeinit = dlsym(soHandle, "DiscPcCollaborationEventDeInit");
- 
     g_discEnhanceFuncList.discUsbDeinit = dlsym(soHandle, "DiscUsbDeinit");
     g_discEnhanceFuncList.discUsbInit = dlsym(soHandle, "DiscUsbInit");
     g_discEnhanceFuncList.discOopBleInit = dlsym(soHandle, "DiscOopBleInit");

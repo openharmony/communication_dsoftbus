@@ -52,6 +52,8 @@ int32_t DiscCoapProcessDeviceInfoPacked(const NSTACKX_DeviceInfo *nstackxInfo, D
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 int32_t DiscCoapAssembleCapDataPacked(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
     uint32_t outLen);
+void DiscCoapUpdateAbilityPacked(uint32_t capability, const char *capabilityData, uint32_t dataLen,
+    bool isPublish, bool isStart);
 #endif
 #endif
 
