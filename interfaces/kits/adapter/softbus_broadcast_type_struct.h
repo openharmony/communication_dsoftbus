@@ -368,6 +368,7 @@ typedef struct {
     uint8_t flag;
     BroadcastPayload bcData;
     BroadcastPayload rspData;
+    BroadcastPayload uuidData;
 } BroadcastPacket;
 
 /**

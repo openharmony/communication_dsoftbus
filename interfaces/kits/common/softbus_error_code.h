@@ -1646,6 +1646,7 @@ enum SoftBusErrNo {
     SOFTBUS_BC_MGR_REG_DUP, // duplicate registration
     SOFTBUS_BC_MGR_WAIT_COND_FAIL, // wait signal fail
     SOFTBUS_BC_MGR_UNEXPECTED_PACKETS, // parse packets fail
+    SOFTBUS_BC_MGR_BUILD_UUID_PACKT_FAIL, // build broadcast uuid packet fail
     /* errno begin: -((203 << 21) | (1 << 16) | (6 << 12) | 0x0FFF) */
     SOFTBUS_DISCOVER_BC_ADAPTER_ERR_BASE = SOFTBUS_SUB_ERRNO(DISC_SUB_MODULE_CODE, DISC_BC_ADAPTER_SUB_MODULE_CODE),
     SOFTBUS_BC_ADAPTER_REGISTER_FAIL,
