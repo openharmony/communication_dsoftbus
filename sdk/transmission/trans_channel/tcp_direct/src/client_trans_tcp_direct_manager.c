@@ -24,6 +24,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_htp_socket.h"
 #include "softbus_mintp_socket.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
@@ -358,6 +359,11 @@ static int32_t ClientTransSetTcpOption(int32_t fd)
     return SOFTBUS_OK;
 }
 
+static int32_t ClientTransSetHtpOption(int32_t fd)
+{
+    return ConnSetHtpKeepAlive(fd, HEART_TIME);
+}
+
 static int32_t GetFdByPeerIpAndPort(const char *peerIp, uint16_t peerPort, int32_t *fd)
 {
     if (g_tcpDirectChannelInfoList == NULL) {
@@ -453,7 +459,14 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         SoftBusFree(item);
         return ret;
     }
-    if (channel->fdProtocol != LNN_PROTOCOL_MINTP) {
+    if (channel->fdProtocol == LNN_PROTOCOL_HTP) {
+        ret = ClientTransSetHtpOption(channel->fd);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_SDK,
+                "Failed to set keep-alive, warning but do not terminate. channelId=%{public}d, fd=%{public}d",
+                channel->channelId, channel->fd);
+        }
+    } else if (channel->fdProtocol != LNN_PROTOCOL_MINTP) {
         ret = ClientTransSetTcpOption(channel->fd);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_SDK,
