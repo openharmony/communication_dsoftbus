@@ -107,9 +107,10 @@ void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, Pro
     SoftBusFree(chan);
 }
 
-/**@
+/*
  * @tc.name: TransProxyOpenProxyChannelTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test proxy open proxy channel
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,9 +129,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyOpenProxyChannelTest001, TestSize.Leve
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransProxyCreateChanInfoTest001
- * @tc.desc: test proxy create channel info.
+ * @tc.desc: test proxy create channel info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -178,9 +179,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyCreateChanInfoTest001, TestSize.Level1
     SoftBusFree(chanNormal);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetNewChanSeqTest001
- * @tc.desc: test proxy get new chan seq.
+ * @tc.desc: test proxy get new chan seq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -194,9 +195,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetNewChanSeqTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetAuthIdTest001
- * @tc.desc: test proxy get auth id.
+ * @tc.desc: test proxy get auth id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -212,9 +213,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetAuthIdTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetNameByChanIdTest001
- * @tc.desc: test proxy get auth id.
+ * @tc.desc: test proxy get auth id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -237,9 +238,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetNameByChanIdTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetSessionKeyByChanIdTest001
- * @tc.desc: test proxy get session key by chanId.
+ * @tc.desc: test proxy get session key by chanId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,9 +257,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetSessionKeyByChanIdTest001, TestSize
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetAppInfoByChanIdTest001
- * @tc.desc: test proxy get app info by chanId.
+ * @tc.desc: test proxy get app info by chanId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -275,9 +276,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetAppInfoByChanIdTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetConnIdByChanIdTest001
- * @tc.desc: test proxy get conn id by chanId.
+ * @tc.desc: test proxy get conn id by chanId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -294,9 +295,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetConnIdByChanIdTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetConnOptionByChanIdTest001
- * @tc.desc: test proxy get cpnn option by chanId.
+ * @tc.desc: test proxy get cpnn option by chanId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -335,9 +336,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetConnOptionByChanIdTest001, TestSize
     SoftBusFree(chan);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetSendMsgChanInfoTest001
- * @tc.desc: test proxy get sendmsg chanInfo by chanId.
+ * @tc.desc: test proxy get sendmsg chanInfo by chanId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -354,9 +355,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetSendMsgChanInfoTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyChanProcessByReqIdTest001
- * @tc.desc: test proxy get sendmsg chanInfo by chanId.
+ * @tc.desc: test proxy get sendmsg chanInfo by chanId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -382,9 +383,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyChanProcessByReqIdTest001, TestSize.Le
     EXPECT_TRUE(PROXY_CHANNEL_STATUS_HANDSHAKEING != (uint32_t)chanInfo.status);
 }
 
-/**@
+/*
  * @tc.name: TransProxyOnMessageReceivedTest005
- * @tc.desc: test proxy received normal message.
+ * @tc.desc: test proxy received normal message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -415,9 +416,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest005, TestSize.Lev
     EXPECT_FALSE(g_testProxyChannelReceiveFlag);
 }
 
-/**@
+/*
  * @tc.name: TransProxyDelChanByChanIdTest001
- * @tc.desc: test proxy del proxy channel.
+ * @tc.desc: test proxy del proxy channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -433,9 +434,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyDelChanByChanIdTest001, TestSize.Level
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransProxyDelChanByReqIdTest001
- * @tc.desc: test proxy del proxy channel by reqId.
+ * @tc.desc: test proxy del proxy channel by reqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -454,9 +455,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyDelChanByReqIdTest001, TestSize.Level1
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransProxyDelByConnIdTest001
- * @tc.desc: test proxy del proxy channel by connId.
+ * @tc.desc: test proxy del proxy channel by connId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -483,9 +484,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyDelByConnIdTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**@
+/*
  * @tc.name: TransProxyDeathCallbackTest001
- * @tc.desc: test proxy TransProxyDeathCallback.
+ * @tc.desc: test proxy TransProxyDeathCallback
  * @tc.type: FUNC
  * @tc.require:
  */
