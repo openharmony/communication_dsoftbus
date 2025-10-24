@@ -96,8 +96,9 @@ int WifiDirectP2pAdapter::SetGroupOwnerResult(std::string groupConfig, struct Gr
     return SOFTBUS_OK;
 }
 
-int WifiDirectP2pAdapter::CreateGroup(struct GroupOwnerResult *result)
+int WifiDirectP2pAdapter::CreateGroup(const struct GroupOwnerConfig *config, struct GroupOwnerResult *result)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(config != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "config is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(result != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "result is null");
     bool p2pEnable = false;
     InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&p2pEnable](const InterfaceInfo &interface) {
@@ -115,6 +116,7 @@ int WifiDirectP2pAdapter::CreateGroup(struct GroupOwnerResult *result)
     
     P2pAdapter::CreateGroupParam param {};
     param.frequency = freq;
+    param.freqType = config.freqType;
     auto res = P2pEntity::GetInstance().CreateGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGE(res.errorCode_ == SOFTBUS_OK, res.errorCode_, CONN_WIFI_DIRECT,
         "create group fail, errorCode=%{public}d", res.errorCode_);
