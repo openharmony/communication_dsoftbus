@@ -39,7 +39,7 @@ extern "C" {
 #define FLAG_AUTH_META 16
 #define FLAG_ENHANCE_P2P 32
 #define FLAG_SESSION_KEY 64
-#define FLAG_SLE 64
+#define FLAG_SLE 256
 #define FLAG_EXTERNAL_DEVICE 128
 #define AUTH_CONN_SERVER_SIDE 0x01
 
