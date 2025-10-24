@@ -143,7 +143,8 @@ static int32_t TestQueryCredentialByParams(int32_t osAccountId, const char *requ
 
 /*
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_TEST_001
- * @tc.desc: IdServiceGenerateQueryParam test
+ * @tc.desc: Verify that IdServiceGenerateQueryParam correctly generates query parameters for the
+ *           Hichain ID service, handling various input scenarios and memory allocations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -205,7 +206,8 @@ int32_t QueryCredentialByParamsTest(int32_t osAccountId, const char *requestPara
 
 /*
  * @tc.name: ID_SERVICE_QUERY_CRED_TEST_001
- * @tc.desc: IdServiceQueryCredential test
+ * @tc.desc: Verify that IdServiceQueryCredential queries credentials from the Hichain ID service,
+ *           handling initialization failures and invalid parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -266,7 +268,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: ID_SERVICE_GENERATE_AUTH_PARAM_001
- * @tc.desc: IdServiceGenerateAuthParam test
+ * @tc.desc: Verify that IdServiceGenerateAuthParam correctly generates authentication parameters
+ *           for the Hichain ID service, handling various input scenarios and memory allocations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -333,7 +336,8 @@ int32_t AuthCredentialTest(
 
 /*
  * @tc.name: ID_SERVICE_AUTH_CRED_001
- * @tc.desc: IdServiceAuthCredential test
+ * @tc.desc: Verify that IdServiceAuthCredential authenticates credentials using the Hichain ID
+ *           service, handling initialization failures and invalid parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -381,7 +385,8 @@ int32_t ProcessCredDataTest(
 
 /*
  * @tc.name: ID_SERVICE_PROCESS_CRED_DATA_001
- * @tc.desc: IdServiceProcessCredData test
+ * @tc.desc: Verify that IdServiceProcessCredData processes credential data using the Hichain ID
+ *           service, handling initialization failures and invalid parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -422,7 +427,9 @@ void DestroyInfoTest(char **returnData)
 
 /*
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_001
- * @tc.desc: init service test
+ * @tc.desc: Verify that IdServiceRegCredMgr successfully registers the credential manager and
+ *           handles credential add/update/delete events, including local string info and trusted
+ *           device info operations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -470,7 +477,9 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_001, TestSize.Le
 
 /*
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_002
- * @tc.desc: init service test
+ * @tc.desc: Verify that IdServiceRegCredMgr successfully registers the credential manager and
+ *           handles credential add/delete events, including scenarios where local string info is
+ *           not found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -503,7 +512,9 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_002, TestSize.Le
 
 /*
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_003
- * @tc.desc: init service test
+ * @tc.desc: Verify that IdServiceRegCredMgr successfully registers the credential manager and
+ *           handles credential add/update events, including scenarios with different subject
+ *           types and local string/number info operations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -546,7 +557,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_003, TestSize.Le
 
 /*
  * @tc.name: ID_SERVICE_DESTROY_CREDLIST_001
- * @tc.desc: IdServiceDestroyCredentialList test
+ * @tc.desc: Verify that IdServiceDestroyCredentialList correctly destroys a credential list,
+ *           handling null inputs and ensuring proper memory deallocation.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -586,7 +598,8 @@ int32_t QueryCredInfoByCredId(int32_t userId, const char *credId, char **credInf
 
 /*
  * @tc.name: ID_SERVICE_GET_CREDID_FROM_LIST_001
- * @tc.desc: IdServiceGetCredIdFromCredList test
+ * @tc.desc: Verify that IdServiceGetCredIdFromCredList correctly extracts a credential ID from a
+ *           credential list, handling various input formats and credential properties.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -634,7 +647,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GET_CREDID_FROM_LIST_001, TestSize
 
 /*
  * @tc.name: ID_SERVICE_IS_POTENTIAL_TRUSTED_DEVICE_001
- * @tc.desc: Query credential fail.
+ * @tc.desc: Verify that IdServiceIsPotentialTrustedDevice correctly determines if a device is
+ *           potentially trusted, handling null or invalid UDID and account ID inputs.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -660,7 +674,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_IS_POTENTIAL_TRUSTED_DEVICE_001, T
 
 /*
  * @tc.name: GET_CRED_INFO_FROM_JSON_001
- * @tc.desc: Get cred info success.
+ * @tc.desc: Verify that GetCredInfoFromJson successfully extracts credential information from a
+ *           JSON string, handling invalid JSON and valid credential data.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -680,7 +695,7 @@ HWTEST_F(AuthHichainIdServiceTest, GET_CRED_INFO_FROM_JSON_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_LOCAL_CRED_001
- * @tc.desc: get local udid fail.
+ * @tc.desc: Verify that IsLocalCredInfo returns false when unable to retrieve the local UDID.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -698,7 +713,8 @@ HWTEST_F(AuthHichainIdServiceTest, IS_LOCAL_CRED_001, TestSize.Level1)
 
 /*
  * @tc.name: ID_SERVICE_REG_CRE_MGR_001
- * @tc.desc: Register credManager fail.
+ * @tc.desc: Verify that IdServiceRegCredMgr returns an error when InitDeviceAuthService fails
+ *           during credential manager registration.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -715,7 +731,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_REG_CRE_MGR_001, TestSize.Level1)
 
 /*
  * @tc.name: ID_SERVICE_REG_CRE_MGR_002
- * @tc.desc: Register credManager success.
+ * @tc.desc: Verify that IdServiceRegCredMgr successfully registers the credential manager when
+ *           InitDeviceAuthService succeeds.
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -71,7 +71,9 @@ void AuthSessionFsmTest::TearDown() { }
 
 /*
  * @tc.name: TRANSLATE_TO_AUTH_FSM_TEST_001
- * @tc.desc: TranslateToAuthFsm test
+ * @tc.desc: Verify that FsmMsgTypeToStr correctly translates FSM message types to strings and
+ *           that CreateAuthFsm and TranslateToAuthFsm handle various input scenarios, including
+ *           null parameters and unknown message types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -109,7 +111,9 @@ HWTEST_F(AuthSessionFsmTest, TRANSLATE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PROC_AUTH_FSM_TEST_001
- * @tc.desc: ProcAuthFsm test
+ * @tc.desc: Verify that ProcAuthFsm processes authentication FSM messages, including adding
+ *           authentication requests, handling UDID information, and completing authentication
+ *           sessions under various conditions.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -161,7 +165,9 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: RECOVERY_DEVICE_KEY_TEST_001
- * @tc.desc: RecoveryFastAuthKey test
+ * @tc.desc: Verify that RecoveryFastAuthKey and HandleCommonMsg correctly handle device key
+ *           recovery and common FSM messages, including device not trusted and disconnected
+ *           events.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -189,7 +195,9 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_DEVICE_KEY_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CLIENT_SET_EXCHANGE_ID_TYPE_TEST_001
- * @tc.desc: ClientSetExchangeIdType test
+ * @tc.desc: Verify that ClientSetExchangeIdType handles different exchange ID types and that
+ *           AuditReportSetPeerDevInfo and AuditReportSetLocalDevInfo correctly report device
+ *           information for auditing.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -235,7 +243,8 @@ HWTEST_F(AuthSessionFsmTest, CLIENT_SET_EXCHANGE_ID_TYPE_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: GET_AUTH_FSM_TEST_001
- * @tc.desc: GetAuthFsmByConnId test
+ * @tc.desc: Verify that GetAuthFsmByAuthSeq and GetAuthFsmByConnId correctly retrieve
+ *           authentication FSMs, handling cases where the FSM is not found or is marked as dead.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -259,7 +268,9 @@ HWTEST_F(AuthSessionFsmTest, GET_AUTH_FSM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_SESSION_HANDLE_TEST_001
- * @tc.desc: AuthSessionHandle test
+ * @tc.desc: Verify that HandleMsgRecvDevInfoEarly, TryFinishAuthSession,
+ *           AuthSessionHandleDeviceNotTrusted, and AuthSessionHandleDeviceDisconnected correctly
+ *           handle various authentication session events and states.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -294,7 +305,8 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: HANDLE_CLOSE_ACK_TEST_001
- * @tc.desc: handle close ack base remote info
+ * @tc.desc: Verify that HandleCloseAckMessage correctly processes close acknowledgment messages,
+ *           considering BR state, authentication link type, and UDID information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
