@@ -116,7 +116,7 @@ int WifiDirectP2pAdapter::CreateGroup(const struct GroupOwnerConfig *config, str
     
     P2pAdapter::CreateGroupParam param {};
     param.frequency = freq;
-    param.freqType = config.freqType;
+    param.freqType = config->freqType;
     auto res = P2pEntity::GetInstance().CreateGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGE(res.errorCode_ == SOFTBUS_OK, res.errorCode_, CONN_WIFI_DIRECT,
         "create group fail, errorCode=%{public}d", res.errorCode_);
@@ -244,13 +244,14 @@ bool WifiDirectP2pAdapter::GetIsCreateGroup()
     return isCreateGroup_;
 }
 
-int WifiDirectP2pAdapter::CheckRoleAndProcess(LinkInfo::LinkMode role, struct GroupOwnerResult *result)
+int WifiDirectP2pAdapter::CheckRoleAndProcess(
+    LinkInfo::LinkMode role, const struct GroupOwnerConfig *config, struct GroupOwnerResult *result)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(result != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "result is null");
     CONN_LOGI(CONN_WIFI_DIRECT, "myRole=%{public}d", WifiDirectUtils::ToWifiDirectRole(role));
     switch (role) {
         case LinkInfo::LinkMode::NONE:
-            return CreateGroup(result);
+            return CreateGroup(config, result);
         case LinkInfo::LinkMode::GO:
             return ReuseGroup(result);
         case LinkInfo::LinkMode::GC:
@@ -286,7 +287,7 @@ int32_t WifiDirectP2pAdapter::ConnCreateGoOwner(const char *pkgName, const struc
         return ret;
     }
 
-    ret = CheckRoleAndProcess(role, result);
+    ret = CheckRoleAndProcess(role, config, result);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "create or reuse group fail, ret=%{public}d", ret);
         InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
