@@ -46,7 +46,7 @@ private:
     static inline Initiator initiator_;
 
     static int SetGroupOwnerResult(std::string groupConfig, struct GroupOwnerResult *result);
-    static int CreateGroup(struct GroupOwnerResult *result);
+    static int CreateGroup(const struct GroupOwnerConfig *config, struct GroupOwnerResult *result);
     static int RemoveGroup();
     static int RemoveGroupNotAddReuse();
     static int ReuseP2p();

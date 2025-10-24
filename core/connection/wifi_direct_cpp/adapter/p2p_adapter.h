@@ -34,6 +34,7 @@ public:
     struct CreateGroupParam {
         int32_t frequency;
         bool isWideBandSupported;
+        GroupFreqType freqType;
     };
 
     struct ConnectParam {

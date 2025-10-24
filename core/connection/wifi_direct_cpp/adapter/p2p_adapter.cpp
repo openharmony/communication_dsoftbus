@@ -109,6 +109,7 @@ int32_t P2pAdapter::GetStationFrequency()
 int32_t P2pAdapter::P2pCreateGroup(const CreateGroupParam &param)
 {
     FreqType type = param.isWideBandSupported ? FREQUENCY_160M : FREQUENCY_DEFAULT;
+    type = param.freqType == SOFTBUS_FREQUENCY_DEFAULT_11AX ? FREQUENCY_DEFAULT_11AX : type;
     int32_t ret = Hid2dCreateGroup(param.frequency, type);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
         CONN_WIFI_DIRECT, "create group fail, freq=%{public}d, type=%{public}d, error=%{public}d",
@@ -474,6 +475,7 @@ void P2pAdapter::Register(const GetCoexConflictCodeHook &coexConflictor)
 
 int P2pAdapter::GetCoexConflictCode(const char *ifName, int32_t channelId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(channelId != CHANNEL_INVALID, SOFTBUS_OK, CONN_WIFI_DIRECT, "invalid channel");
     CONN_CHECK_AND_RETURN_RET_LOGW(getCoexConflictCodeHook_ != nullptr, SOFTBUS_OK, CONN_WIFI_DIRECT,
         "not support, no conflict");
     return getCoexConflictCodeHook_(ifName, channelId);
