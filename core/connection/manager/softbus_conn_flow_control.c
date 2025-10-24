@@ -31,8 +31,8 @@ static int32_t Apply(struct ConnSlideWindowController *self, int32_t expect)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(self, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid parameter, controller is null");
 
-    int32_t status = SoftBusMutexLock(&self->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock fail");
+    int32_t ret = SoftBusMutexLock(&self->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock fail");
     if (!self->active) {
         (void)SoftBusMutexUnlock(&self->lock);
         return expect;
@@ -96,8 +96,8 @@ static int32_t ChangeConfiguration(
             SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid parameter, quota=%u", quotaInBytes);
     }
 
-    int32_t status = SoftBusMutexLock(&self->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock fail");
+    int32_t ret = SoftBusMutexLock(&self->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock fail");
 
     self->windowInMillis = windowInMillis;
     self->quotaInBytes = quotaInBytes;
@@ -138,8 +138,8 @@ int32_t ConnSlideWindowControllerConstructor(struct ConnSlideWindowController *s
 void ConnSlideWindowControllerDestructor(struct ConnSlideWindowController *self)
 {
     CONN_CHECK_AND_RETURN_LOGE(self, CONN_COMMON, "invalid parameter, controller is null");
-    int32_t status = SoftBusMutexLock(&self->lock);
-    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_COMMON, "lock fail");
+    int32_t ret = SoftBusMutexLock(&self->lock);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_COMMON, "lock fail");
     CleanupHistoriesUnsafe(self);
     SoftBusMutexDestroy(&self->lock);
 }

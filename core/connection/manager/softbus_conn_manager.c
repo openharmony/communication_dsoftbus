@@ -234,11 +234,11 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
         "connId=%{public}u, module=%{public}d", len, connectionId, moduleId);
 
     ConnListenerNode listener = { 0 };
-    int32_t status = GetListenerByModuleId(moduleId, &listener);
-    CONN_CHECK_AND_RETURN_LOGW(status == SOFTBUS_OK, CONN_COMMON,
+    int32_t ret = GetListenerByModuleId(moduleId, &listener);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_COMMON,
         "dispatch data fail: get module listener fail or not register, "
         "connId=%{public}u, module=%{public}d, dataLen=%{public}d, err=%{public}d",
-        connectionId, moduleId, len, status);
+        connectionId, moduleId, len, ret);
 
     int32_t pktLen = len - (int32_t)sizeof(ConnPktHead);
     char *pkt = data + sizeof(ConnPktHead);
