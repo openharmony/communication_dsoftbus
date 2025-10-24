@@ -1168,10 +1168,8 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
     char uuid[UUID_BUF_LEN] = { 0 };
     struct WifiDirectManager *mgr = GetWifiDirectManager();
-    if (mgr == NULL || mgr->getRemoteUuidByIp == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
-        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(mgr != NULL && mgr->getRemoteUuidByIp != NULL,
+        SOFTBUS_WIFI_DIRECT_INIT_FAILED, TRANS_CTRL, "GetWifiDirectManager failed");
     ret = mgr->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid));
     (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
@@ -1195,6 +1193,11 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
     authHandle->type = linkType;
     authHandle->authId = AuthGetIdByUuid(uuid, linkType, !fromAuthServer, isAuthMeta);
+    if (authHandle->authId == AUTH_INVALID_ID && linkType == AUTH_LINK_TYPE_SESSION_KEY) {
+        authHandle->type = AUTH_LINK_TYPE_SLE;
+        authHandle->authId = AuthGetIdByUuid(uuid, AUTH_LINK_TYPE_SLE, !fromAuthServer, isAuthMeta);
+        TRANS_LOGI(TRANS_CTRL, "Retry to obtain FLAG_SLE AuthLinkType success.");
+    }
     return SOFTBUS_OK;
 }
 
