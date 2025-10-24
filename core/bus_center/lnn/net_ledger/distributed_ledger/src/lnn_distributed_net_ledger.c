@@ -30,6 +30,7 @@
 #include "bus_center_event.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
 
 #include "lnn_map.h"
@@ -771,6 +772,13 @@ static int32_t UpdateFileInfo(NodeInfo *newInfo, NodeInfo *oldInfo)
             return SOFTBUS_MEM_ERR;
         }
     }
+    if (memcmp(newInfo->sparkCheck, oldInfo->sparkCheck, SPARK_CHECK_LENGTH) != 0) {
+        LNN_LOGI(LNN_LEDGER, "remote sparkCheck change");
+        if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "copy sparkCheck failed");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
     LNN_LOGI(LNN_LEDGER, "update file info success");
     return SOFTBUS_OK;
 }
@@ -877,7 +885,11 @@ static void UpdateDeviceInfoToMlps(const char *udid)
         return;
     }
     info->isOnline = true;
-    SendDeviceStateToMlpsPacked(info);
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call send device info fail");
+        SoftBusFree(info);
+    }
 }
 
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
@@ -1156,6 +1168,10 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
     LnnDumpRemotePtk(deviceInfo->remotePtk, info->remotePtk, "get and save remote device info");
     if (memcpy_s(deviceInfo->remotePtk, PTK_DEFAULT_LEN, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
+        return;
+    }
+    if (memcpy_s(deviceInfo->sparkCheck, SPARK_CHECK_LENGTH, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck fail");
         return;
     }
     deviceInfo->netCapacity = info->netCapacity;
@@ -1882,6 +1898,9 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     }
     if (memcpy_s((char *)oldInfo->cipherInfo.iv, BROADCAST_IV_LEN, newInfo->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo iv to distributed ledger fail");
+    }
+    if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck fail");
     }
     UpdateDevBasicInfoToDLedger(newInfo, oldInfo);
 }

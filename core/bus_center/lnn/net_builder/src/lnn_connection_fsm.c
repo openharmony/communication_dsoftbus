@@ -443,6 +443,59 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
 }
 
+static void UpdateDeviceInfoToMlps(const char *udid)
+{
+    LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "calloc info fail");
+        return;
+    }
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s outUdid fail");
+        SoftBusFree(info);
+        return;
+    }
+    info->isOnline = true;
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call send device info fail");
+        SoftBusFree(info);
+    }
+}
+
+static void TryTriggerSparkJoinAgain(const LnnConntionInfo *info, bool isAccountChanged)
+{
+    if (info == NULL || info->addr.type != CONNECTION_ADDR_WLAN || !isAccountChanged) {
+        LNN_LOGI(LNN_BUILDER, "no need handle");
+        return;
+    }
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(info->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get node info fail");
+        return;
+    }
+    if (LnnHasDiscoveryType(&oldInfo, DISCOVERY_TYPE_BLE)) {
+        UpdateDeviceInfoToMlps(info->nodeInfo->deviceInfo.deviceUdid);
+        TriggerSparkGroupJoinAgainPacked(info->nodeInfo->deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+    }
+}
+
+static bool IsAccountHashChanged(const LnnConntionInfo *connInfo)
+{
+    if (connInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return false;
+    }
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get node info fail");
+        return false;
+    }
+    return (memcmp(oldInfo.accountHash, connInfo->nodeInfo->accountHash, sizeof(oldInfo.accountHash)) != 0);
+}
+
 static void SetLnnConnNodeInfo(
     LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
 {
@@ -456,7 +509,9 @@ static void SetLnnConnNodeInfo(
     if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
         connInfo->nodeInfo->isSupportSv = true;
     }
+    bool isAccountChanged = IsAccountHashChanged(connInfo);
     report = LnnAddOnlineNode(connInfo->nodeInfo);
+    TryTriggerSparkJoinAgain(connInfo, isAccountChanged);
     SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
     if (LnnInsertLinkFinderInfoPacked(networkId) != SOFTBUS_OK) {
@@ -1188,6 +1243,11 @@ static int32_t LnnRecoveryBroadcastKey()
         ret = LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "set iv failed");
+            break;
+        }
+        ret = LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, broadcastKey.sparkCheck, SPARK_CHECK_LENGTH);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "set sparkCheck fail");
             break;
         }
         LNN_LOGI(LNN_BUILDER, "recovery broadcastKey success!");
