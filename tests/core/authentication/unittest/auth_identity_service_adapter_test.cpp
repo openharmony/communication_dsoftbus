@@ -59,7 +59,8 @@ void DestroyInfo(char **returnData)
 
 /*
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_001
- * @tc.desc: cJSON_CreateObject fail
+ * @tc.desc: Verify that IdServiceGenerateQueryParamByCredType returns nullptr when
+ *           cJSON_CreateObject fails during query parameter generation.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -78,7 +79,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
 
 /*
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_002
- * @tc.desc: AddStringToJsonObject return false
+ * @tc.desc: Verify that IdServiceGenerateQueryParamByCredType returns nullptr when
+ *           AddStringToJsonObject fails during query parameter generation.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -101,7 +103,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
 
 /*
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_003
- * @tc.desc: IdServiceGenerateQueryParamByCredType fail with invalid param
+ * @tc.desc: Verify that IdServiceGenerateQueryParamByCredType returns nullptr when
+ *           cJSON_PrintUnformatted fails due to an invalid parameter.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -126,7 +129,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
 
 /*
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_004
- * @tc.desc: cJSON_PrintUnformatted success
+ * @tc.desc: Verify that IdServiceGenerateQueryParamByCredType successfully generates query
+ *           parameters when cJSON_PrintUnformatted succeeds.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -157,7 +161,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED
 
 /*
  * @tc.name: IS_INVALID_CRED_LIST_TEST_001
- * @tc.desc: invalid parameter
+ * @tc.desc: Verify that IsInvalidCredList returns true when provided with a null credential list.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -170,7 +174,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_001, TestSize
 
 /*
  * @tc.name: IS_INVALID_CRED_LIST_TEST_002
- * @tc.desc: test IsInvalidCredList with invalid param
+ * @tc.desc: Verify that IsInvalidCredList returns true when CreateJsonObjectFromString fails to
+ *           parse the credential list.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -185,7 +190,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_002, TestSize
 
 /*
  * @tc.name: IS_INVALID_CRED_LIST_TEST_003
- * @tc.desc: GetArrayItemNum return 0
+ * @tc.desc: Verify that IsInvalidCredList returns true when GetArrayItemNum returns 0, indicating
+ *           an empty credential list.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -203,7 +209,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_003, TestSize
 
 /*
  * @tc.name: IS_INVALID_CRED_LIST_TEST_004
- * @tc.desc: GetArrayItemNum return 1
+ * @tc.desc: Verify that IsInvalidCredList returns false when GetArrayItemNum returns 1, indicating
+ *           a valid credential list.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -221,7 +228,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, IS_INVALID_CRED_LIST_TEST_004, TestSize
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_001
- * @tc.desc: invalid parameter
+ * @tc.desc: Verify that AuthIdServiceQueryCredential returns an invalid parameter error when
+ *           provided with null UDID hash, account hash, or credential list pointers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -245,7 +253,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_002
- * @tc.desc: InitDeviceAuthService fail
+ * @tc.desc: Verify that AuthIdServiceQueryCredential returns an error when InitDeviceAuthService
+ *           fails during credential query.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -267,7 +276,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_003
- * @tc.desc: GetCredMgrInstance return nullptr
+ * @tc.desc: Verify that AuthIdServiceQueryCredential returns an error when GetCredMgrInstance
+ *           returns nullptr during credential query.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -290,7 +300,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_004
- * @tc.desc: GetCredAuthInstance return nullptr
+ * @tc.desc: Verify that AuthIdServiceQueryCredential successfully queries credentials when
+ *           GetCredMgrInstance returns a valid manager and other operations succeed.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -334,7 +345,9 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_005
- * @tc.desc: GetCredAuthInstance return nullptr
+ * @tc.desc: Verify that AuthIdServiceQueryCredential successfully queries credentials when
+ *           GetCredMgrInstance returns a valid manager and other operations succeed, even if
+ *           GetCredAuthInstance returns nullptr.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -385,7 +398,9 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_006
- * @tc.desc: GetCredAuthInstance return nullptr
+ * @tc.desc: Verify that AuthIdServiceQueryCredential successfully queries credentials when
+ *           GetCredMgrInstance returns a valid manager and other operations succeed, even if
+ *           GetCredAuthInstance returns nullptr, and handles empty array item numbers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -443,7 +458,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_007
- * @tc.desc: GetCredMgrInstance return nullptr
+ * @tc.desc: Verify that AuthIdServiceQueryCredential returns an error when
+ *           GetSoftbusHichainAuthErrorCode indicates a failure during credential query.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -489,7 +505,9 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_008
- * @tc.desc: GetCredAuthInstance return nullptr
+ * @tc.desc: Verify that AuthIdServiceQueryCredential returns an error when
+ *           GetSoftbusHichainAuthErrorCode indicates a failure during credential query, even
+ *           with valid manager and successful operations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -542,7 +560,8 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
 
 /*
  * @tc.name: ID_SERVICE_GENERATE_AUTH_PARAM_TEST_001
- * @tc.desc: hiChainParam is nullptr
+ * @tc.desc: Verify that IdServiceGenerateAuthParam returns nullptr when provided with a null
+ *           HiChainParam.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

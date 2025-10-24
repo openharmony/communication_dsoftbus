@@ -82,7 +82,7 @@ static void OnGenFailedTest(uint32_t requestId, int32_t reason)
 
 /*
  * @tc.name: REQUIRE_APPLY_KEY_NEGO_LIST_LOCK_Test_001
- * @tc.desc: require ApplyKey NegoList Lock test
+ * @tc.desc: Verify the functionality of RequireApplyKeyNegoListLock and ReleaseApplyKeyNegoListLock.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -96,7 +96,7 @@ HWTEST_F(AuthApplyKeyProcessTest, REQUIRE_APPLY_KEY_NEGO_LIST_LOCK_Test_001, Tes
 
 /*
  * @tc.name: INIT_APPLY_KEY_NEGO_INSTANCE_LIST_Test_001
- * @tc.desc: Init ApplyKey NegoInstance List test
+ * @tc.desc: Verify the initialization and deinitialization of the ApplyKey negotiation instance list.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -117,7 +117,7 @@ HWTEST_F(AuthApplyKeyProcessTest, INIT_APPLY_KEY_NEGO_INSTANCE_LIST_Test_001, Te
 
 /*
  * @tc.name: GET_SAMPLE_APPLY_KEY_INSTANCE_NUM_Test_001
- * @tc.desc: Get applyKeyInstance number by same info test
+ * @tc.desc: Verify the retrieval of the number of ApplyKey instances based on business information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -166,7 +166,7 @@ HWTEST_F(AuthApplyKeyProcessTest, GET_SAMPLE_APPLY_KEY_INSTANCE_NUM_Test_001, Te
 
 /*
  * @tc.name: GET_GEN_APPLY_KEY_INSTANCE_BY_REQ_Test_001
- * @tc.desc: Get applyKeyInstance by req test
+ * @tc.desc: Verify the retrieval of a generated ApplyKey instance using a request ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -209,7 +209,7 @@ HWTEST_F(AuthApplyKeyProcessTest, GET_GEN_APPLY_KEY_INSTANCE_BY_REQ_Test_001, Te
 
 /*
  * @tc.name: GET_GEN_APPLY_KEY_INSTANCE_BY_CHANNEL_Test_001
- * @tc.desc: Get applyKeyInstance by channel test
+ * @tc.desc: Verify the retrieval of a generated ApplyKey instance using a channel ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -252,7 +252,8 @@ HWTEST_F(AuthApplyKeyProcessTest, GET_GEN_APPLY_KEY_INSTANCE_BY_CHANNEL_Test_001
 
 /*
  * @tc.name: SET_APPLY_KEY_NEGO_INFO_Test_001
- * @tc.desc: set apply key instance info test
+ * @tc.desc: Verify the setting of ApplyKey negotiation instance information,
+ *           including session key, finish status, and close acknowledgment.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -312,7 +313,7 @@ HWTEST_F(AuthApplyKeyProcessTest, SET_APPLY_KEY_NEGO_INFO_Test_001, TestSize.Lev
 
 /*
  * @tc.name: SET_APPLY_KEY_STAR_STATE_Test_001
- * @tc.desc: set apply key instance state test
+ * @tc.desc: Verify the setting of the ApplyKey instance's start state.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -352,7 +353,7 @@ HWTEST_F(AuthApplyKeyProcessTest, SET_APPLY_KEY_STAR_STATE_Test_001, TestSize.Le
 
 /*
  * @tc.name: AUTH_FIND_APPLY_KEY_Test_001
- * @tc.desc: Find ApplyKey by businessInfo test
+ * @tc.desc: Verify the functionality of AuthFindApplyKey to retrieve an ApplyKey using business information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -381,7 +382,7 @@ HWTEST_F(AuthApplyKeyProcessTest, AUTH_FIND_APPLY_KEY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GEN_APPLY_KEY_ID_Test_001
- * @tc.desc: Get ApplyKey by businessInfo test
+ * @tc.desc: Verify the generation of an ApplyKey using business information and request details.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -425,7 +426,7 @@ int32_t processLightAccountAuthStub(
 
 /*
  * @tc.name: ON_COMM_DATA_RECEIVED_Test_001
- * @tc.desc: Received Data process test
+ * @tc.desc: Verify the processing of received communication data, including different data types and modules.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -475,7 +476,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_COMM_DATA_RECEIVED_Test_001, TestSize.Level
 
 /*
  * @tc.name: ON_REQUEST_Test_001
- * @tc.desc: OnRequest func test
+ * @tc.desc: Verify the OnRequest function's behavior with various parameters, including null and valid inputs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -500,7 +501,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_REQUEST_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_ERROR_Test_001
- * @tc.desc: OnError func test
+ * @tc.desc: Verify that the OnError function handles error notifications without fatal failures.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -517,7 +518,8 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_ERROR_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_FINISHED_Test_001
- * @tc.desc: On Finished func test
+ * @tc.desc: Verify the OnFinished function's behavior when processing
+ *           authentication completion, including parsing return data.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -552,7 +554,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_FINISHED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_SESSION_KEY_RETURNED_Test_001
- * @tc.desc: On SessionKey Returned func test
+ * @tc.desc: Verify the OnSessionKeyReturned function's handling of session key data, including null and valid inputs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -584,8 +586,9 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_SESSION_KEY_RETURNED_Test_001, TestSize.Lev
 }
 
 /*
- * @tc.name: ON_SESSION_KEY_RETURNED_Test_001
- * @tc.desc: On Transmitted func test
+ * @tc.name: ON_TRANSMITTED_Test_001
+ * @tc.desc: Verify the OnTransmitted function's behavior when handling data transmission,
+ *           including various input scenarios.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -628,7 +631,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_TRANSMITTED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_GEN_FAILED_Test_001
- * @tc.desc: On GenFailed func test
+ * @tc.desc: Verify the OnGenFailed function's handling of apply key generation failures.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -660,7 +663,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_GEN_FAILED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_GEN_SUCCESS_Test_001
- * @tc.desc: On GenSuccess func test
+ * @tc.desc: Verify the OnGenSuccess function's handling of successful apply key generation.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -691,7 +694,8 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_GEN_SUCCESS_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: POST_APPLY_KEY_DATA_Test_001
- * @tc.desc: Post ApplyKey Data test
+ * @tc.desc: Verify the PostApplyKeyData function's ability to post apply key data,
+ *           including error handling for invalid parameters and insufficient data.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -724,7 +728,8 @@ HWTEST_F(AuthApplyKeyProcessTest, POST_APPLY_KEY_DATA_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: APPLY_KEY_GET_LIGHT_ACCOUNT_Test_001
- * @tc.desc: ApplyKey Get LightAccount Instance test
+ * @tc.desc: Verify the ApplyKeyGetLightAccountInstance function's ability to retrieve
+ *           a LightAccountVerifier instance, including error handling for initialization failures.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -755,7 +760,8 @@ int32_t StartLightAccountAuth(
 
 /*
  * @tc.name: PROCES_AUTH_HICHAIN_PARAM_Test_001
- * @tc.desc: Process AuthHichain Param test
+ * @tc.desc: Verify the ProcessAuthHichainParam function's handling of Hichain authentication parameters,
+ *           including error and success scenarios.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -782,7 +788,8 @@ HWTEST_F(AuthApplyKeyProcessTest, PROCES_AUTH_HICHAIN_PARAM_Test_001, TestSize.L
 
 /*
  * @tc.name: GET_UDID_AND_ACCOUNT_SHORT_HASH_Test_001
- * @tc.desc: Get UdidAndAccount ShortHash test
+ * @tc.desc: Verify the GetUdidAndAccountShortHash function's ability to retrieve
+ *           and hash UDID and account information, including error handling for various scenarios.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -824,7 +831,8 @@ HWTEST_F(AuthApplyKeyProcessTest, GET_UDID_AND_ACCOUNT_SHORT_HASH_Test_001, Test
 
 /*
  * @tc.name: PACK_APPLY_KEY_ACL_PARAM_Test_001
- * @tc.desc: Pack ApplyKey AclParam test
+ * @tc.desc: Verify the PackApplyKeyAclParam function's ability to pack ApplyKey ACL parameters
+ *           into a JSON object, including error handling for hashing and JSON object creation.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -852,7 +860,8 @@ HWTEST_F(AuthApplyKeyProcessTest, PACK_APPLY_KEY_ACL_PARAM_Test_001, TestSize.Le
 
 /*
  * @tc.name: UNPACK_APPLY_KEY_ACL_PARAM_Test_001
- * @tc.desc: Unpack ApplyKey AclParam test
+ * @tc.desc: Verify the UnpackApplyKeyAclParam function's ability to unpack ApplyKey
+ *           ACL parameters from a JSON object, including error handling for invalid parameters and JSON parsing.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -889,7 +898,8 @@ HWTEST_F(AuthApplyKeyProcessTest, UNPACK_APPLY_KEY_ACL_PARAM_Test_001, TestSize.
 
 /*
  * @tc.name: SEND_APPLY_KEY_NEGO_DEVICE_ID_Test_001
- * @tc.desc: Send ApplyKey Nego DeviceId test
+ * @tc.desc: Verify the SendApplyKeyNegoDeviceId function's ability to send ApplyKey negotiation device ID,
+ *           including error handling for invalid parameters and network issues.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -931,7 +941,8 @@ HWTEST_F(AuthApplyKeyProcessTest, SEND_APPLY_KEY_NEGO_DEVICE_ID_Test_001, TestSi
 
 /*
  * @tc.name: PROCESS_APPLY_KEY_NEGO_STATE_Test_001
- * @tc.desc: Process ApplyKey NegoState test
+ * @tc.desc: Verify the ProcessApplyKeyNegoState function's ability to process ApplyKey negotiation state,
+ *           including error handling for invalid parameters and network issues.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -959,7 +970,8 @@ HWTEST_F(AuthApplyKeyProcessTest, PROCESS_APPLY_KEY_NEGO_STATE_Test_001, TestSiz
 
 /*
  * @tc.name: START_APPLY_KEY_HICHAIN_Test_001
- * @tc.desc: Start ApplyKey Hichain test
+ * @tc.desc: Verify the StartApplyKeyHichain function's ability to initiate ApplyKey Hichain process,
+*            including error handling for invalid parameters and network issues.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -980,7 +992,8 @@ HWTEST_F(AuthApplyKeyProcessTest, START_APPLY_KEY_HICHAIN_Test_001, TestSize.Lev
 
 /*
  * @tc.name: PROCESS_APPLY_KEY_DEVICE_ID_Test_001
- * @tc.desc: Process ApplyKey DeviceId test
+ * @tc.desc: Verify the ProcessApplyKeyDeviceId function's handling of ApplyKey device ID processing,
+ *           including error handling for invalid parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -995,7 +1008,8 @@ HWTEST_F(AuthApplyKeyProcessTest, PROCESS_APPLY_KEY_DEVICE_ID_Test_001, TestSize
 
 /*
  * @tc.name: PROCESS_APPLY_KEY_DATA_Test_001
- * @tc.desc: Process ApplyKey Data test
+ * @tc.desc: Verify the ProcessApplyKeyData function's ability to process ApplyKey data,
+ *           including various scenarios and error handling.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1050,7 +1064,7 @@ HWTEST_F(AuthApplyKeyProcessTest, PROCESS_APPLY_KEY_DATA_Test_001, TestSize.Leve
 
 /*
  * @tc.name: CREATE_INSTANCE_STATIC_FUNC_Test_001
- * @tc.desc: create instance static func test
+ * @tc.desc: Verify the creation of ApplyKey negotiation instances and the handling of asynchronous callback results.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1109,7 +1123,8 @@ HWTEST_F(AuthApplyKeyProcessTest, CREATE_INSTANCE_STATIC_FUNC_Test_001, TestSize
 
 /*
  * @tc.name: SOFTBUS_GENERATE_STR_HASH_FUNC_Test_001
- * @tc.desc: SoftBusGenerateStrHash test
+ * @tc.desc: Verify the SoftBusGenerateStrHash function's ability to generate
+ *           a string hash and its integration with connection events and account hash generation.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1131,7 +1146,8 @@ HWTEST_F(AuthApplyKeyProcessTest, SOFTBUS_GENERATE_STR_HASH_FUNC_Test_001, TestS
 
 /*
  * @tc.name: AUTH_IS_APPLY_KEY_EXPIRED_Test_001
- * @tc.desc: AuthIsApplyKeyExpired test
+ * @tc.desc: Verify the AuthIsApplyKeyExpired function's ability to correctly determine
+ *           if an ApplyKey has expired based on its creation time.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1147,7 +1163,8 @@ HWTEST_F(AuthApplyKeyProcessTest, AUTH_IS_APPLY_KEY_EXPIRED_Test_001, TestSize.L
 
 /*
  * @tc.name: SEND_APPLY_NEGO_CLOSE_EVENT_Test_001
- * @tc.desc: Send ApplyKey NegoCloseAck Event test
+ * @tc.desc: Verify the SendApplyKeyNegoCloseAckEvent function's
+ *           ability to send an ApplyKey negotiation close acknowledgment event.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1170,7 +1187,7 @@ HWTEST_F(AuthApplyKeyProcessTest, SEND_APPLY_NEGO_CLOSE_EVENT_Test_001, TestSize
 
 /*
  * @tc.name: PROCESS_APPLY_KEY_CLOSE_ACK_DATA_Test_001
- * @tc.desc: Process ApplyKey CloseAck Data test
+ * @tc.desc: Verify the ProcessApplyKeyCloseAckData function's ability to process ApplyKey close acknowledgment data.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1222,9 +1239,10 @@ HWTEST_F(AuthApplyKeyProcessTest, PROCESS_APPLY_KEY_CLOSE_ACK_DATA_Test_001, Tes
 
 /*
  * @tc.name: SEND_APPLY_KEY_NEGO_CLOSE_ACK_EVENT_Test_001
- * @tc.desc: Send applyKeyNego closeAckEvent test
+ * @tc.desc: Verify the SendApplyKeyNegoCloseAckEvent function's ability to send
+ *           an ApplyKey negotiation close acknowledgment event, including error handling for data packing.
  * @tc.type: FUNC
- * @tc.level: Level1
+ * * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthApplyKeyProcessTest, SEND_APPLY_KEY_NEGO_CLOSE_ACK_EVENT_Test_001, TestSize.Level1)
@@ -1246,7 +1264,8 @@ HWTEST_F(AuthApplyKeyProcessTest, SEND_APPLY_KEY_NEGO_CLOSE_ACK_EVENT_Test_001, 
 
 /*
  * @tc.name: PROCESS_APPLY_KEY_CLOSE_ACK_DATA_TEST_001
- * @tc.desc: Process applyKey closeAckData test
+ * @tc.desc: Verify the ProcessApplyKeyCloseAckData function's ability to process ApplyKey
+ *           close acknowledgment data, including various scenarios and error handling.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

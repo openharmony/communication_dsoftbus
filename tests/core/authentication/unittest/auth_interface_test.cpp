@@ -65,7 +65,8 @@ void AuthOtherMockTest::TearDown() { }
 
 /*
  * @tc.name: AUTH_INIT_TEST_001
- * @tc.desc: AuthInit test success
+ * @tc.desc: Verify that AuthInit successfully initializes the authentication module when all
+ *           sub-modules initialize correctly.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -87,7 +88,9 @@ HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_INIT_TEST_002
- * @tc.desc: AuthInit test failed
+ * @tc.desc: Verify that AuthInit returns an error when sub-module initialization fails,
+ *           specifically when RegHichainSaStatusListener or CustomizedSecurityProtocolInit
+ *           encounters issues.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -109,7 +112,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_CHECK_META_EXIST_TEST_001
- * @tc.desc: AuthCheckMetaExist test success
+ * @tc.desc: Verify that AuthCheckMetaExist successfully checks for the existence of metadata for
+ *           a given connection information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -128,7 +132,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_CHECK_META_EXIST_TEST_002
- * @tc.desc: AuthCheckMetaExist test failed
+ * @tc.desc: Verify that AuthCheckMetaExist returns an invalid parameter error when provided with
+ *           null connection information or a null existence flag pointer.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -146,7 +151,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_HAS_TRUSTED_RELATION_TEST_001
- * @tc.desc: AuthHasTrustedRelation test success
+ * @tc.desc: Verify that AuthHasTrustedRelation returns TRUSTED_RELATION_NO when
+ *           LnnGetTrustedDevInfoFromDb successfully retrieves trusted device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -161,7 +167,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_HAS_TRUSTED_RELATION_TEST_002
- * @tc.desc: AuthHasTrustedRelation test failed
+ * @tc.desc: Verify that AuthHasTrustedRelation returns TRUSTED_RELATION_IGNORE when
+ *           LnnGetTrustedDevInfoFromDb fails to retrieve trusted device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -176,7 +183,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_HAS_SAME_ACCOUNT_GROUP_TEST_001
- * @tc.desc: AuthHasSameAccountGroup test
+ * @tc.desc: Verify that AuthHasSameAccountGroup correctly determines if there is a same account
+ *           group, based on the result of IsSameAccountGroupDevice.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -193,7 +201,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_SAME_ACCOUNT_GROUP_TEST_001, TestSize.Level
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_DEVICE_TEST_001
- * @tc.desc: IsSameAccountDevice test failed
+ * @tc.desc: Verify that IsSameAccountDevice returns false when LnnGetLocalByteInfo fails to
+ *           retrieve local device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -212,7 +221,8 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_DEVICE_TEST_002
- * @tc.desc: IsSameAccountDevice test failed
+ * @tc.desc: Verify that IsSameAccountDevice returns false when LnnGetLocalByteInfo returns an
+ *           invalid parameter, indicating a failure to retrieve local device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -230,7 +240,9 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_DEVICE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_IS_POTENTIAL_TRUSTED_TEST_001
- * @tc.desc: AuthIsPotentialTrusted test success
+ * @tc.desc: Verify that AuthIsPotentialTrusted correctly identifies a device as potentially
+ *           trusted when local byte info is available, default OHOS account is enabled, and
+ *           IsPotentialTrustedDevice returns true.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -250,7 +262,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_IS_POTENTIAL_TRUSTED_TEST_002
- * @tc.desc: AuthIsPotentialTrusted test failed
+ * @tc.desc: Verify that AuthIsPotentialTrusted returns false when LnnGetLocalByteInfo fails to
+ *           retrieve local device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -268,7 +281,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_GROUP_TEST_001
- * @tc.desc: AuthGetGroupType test failed
+ * @tc.desc: Verify that AuthGetGroupType returns AUTH_DEFAULT_VALUE when provided with null UDID
+ *           or UUID parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -285,7 +299,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_GROUP_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_META_TYPE_TEST_001
- * @tc.desc: AuthGetMetaType test
+ * @tc.desc: Verify that AuthGetMetaType correctly determines if an authentication ID corresponds
+ *           to a meta-authentication type.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -320,7 +335,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_META_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_RESTORE_AUTH_MANAGER_TEST_001
- * @tc.desc: AuthRestoreAuthManager test failed
+ * @tc.desc: Verify that AuthRestoreAuthManager fails to restore the authentication manager when
+ *           AuthFindLatestNormalizeKey returns an error.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -349,7 +365,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_RESTORE_AUTH_MANAGER_TEST_002
- * @tc.desc: AuthRestoreAuthManager test failed
+ * @tc.desc: Verify that AuthRestoreAuthManager fails to restore the authentication manager when
+ *           LnnGetLocalByteInfo returns an error.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -377,7 +394,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_RESTORE_AUTH_MANAGER_TEST_003
- * @tc.desc: AuthRestoreAuthManager mock AuthFindDeviceKey test
+ * @tc.desc: Verify that AuthRestoreAuthManager fails to restore the authentication manager when
+ *           both AuthFindLatestNormalizeKey and AuthFindDeviceKey return errors.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -406,7 +424,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001
- * @tc.desc: AuthDirectOnlineProcessSessionKey test
+ * @tc.desc: Verify that AuthDirectOnlineProcessSessionKey returns an error when provided with an
+ *           unsupported authentication link type.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -428,7 +447,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, Tes
 
 /*
  * @tc.name: FILL_AUTH_SESSION_INFO_TEST_001
- * @tc.desc: FillAuthSessionInfo test failed
+ * @tc.desc: Verify that FillAuthSessionInfo returns an error when LnnGetLocalByteInfo fails to
+ *           retrieve local node information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -453,7 +473,8 @@ HWTEST_F(AuthOtherMockTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001
- * @tc.desc: AuthGetAuthHandleByIndex test
+ * @tc.desc: Verify that AuthGetAuthHandleByIndex returns SOFTBUS_AUTH_NOT_SUPPORT_NORMALIZE or
+ *           SOFTBUS_LOCK_ERR under specific conditions related to LnnGetRemoteNodeInfoByKey.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -480,7 +501,9 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_002
- * @tc.desc: AuthGetAuthHandleByIndex test
+ * @tc.desc: Verify that AuthGetAuthHandleByIndex returns SOFTBUS_INVALID_PARAM or
+ *           SOFTBUS_AUTH_NOT_SUPPORT_NORMALIZE under specific conditions related to
+ *           LnnGetRemoteNodeInfoByKey and LnnGetNetworkIdByUdidHash.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -513,7 +536,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_002, TestSize.Lev
 
 /*
  * @tc.name: AUTH_GET_P2P_CONN_INFO_TEST_001
- * @tc.desc: AuthGetHmlConnInfo test failed
+ * @tc.desc: Verify that AuthGetHmlConnInfo and AuthGetP2pConnInfo return SOFTBUS_LOCK_ERR when
+ *           attempting to retrieve connection information without proper locking.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -550,7 +574,9 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001
- * @tc.desc: AuthCheckSessionKeyValidByConnInfo test
+ * @tc.desc: Verify that AuthCheckSessionKeyValidByConnInfo correctly validates session keys based
+ *           on connection information, handling invalid parameters and network node retrieval
+ *           failures.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -579,7 +605,9 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, 
 
 /*
  * @tc.name: GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001
- * @tc.desc: GetIsExchangeUdidByNetworkId test
+ * @tc.desc: Verify that GetIsExchangeUdidByNetworkId correctly retrieves the exchange UDID status
+ *           for a given network ID, handling invalid parameters and cases where the status is not
+ *           found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -601,7 +629,8 @@ HWTEST_F(AuthOtherMockTest, GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001, TestSize
 
 /*
  * @tc.name: GET_PEER_UDID_BY_NETWORK_ID_TEST_001
- * @tc.desc: GetPeerUdidByNetworkId test failed
+ * @tc.desc: Verify that GetPeerUdidByNetworkId returns an invalid parameter error when provided
+ *           with an invalid buffer length for the UDID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -616,7 +645,8 @@ HWTEST_F(AuthOtherMockTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level
 
 /*
  * @tc.name: CONVERT_TO_AUTH_LINK_TYPE_TEST_001
- * @tc.desc: ConvertToAuthLinkType test
+ * @tc.desc: Verify that ConvertToAuthLinkType correctly converts various DiscoveryType values to
+ *           their corresponding AuthLinkType values.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -646,7 +676,8 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_AUTH_LINK_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_TO_DISCOVERY_TYPE_TEST_001
- * @tc.desc: ConvertToDiscoveryType test
+ * @tc.desc: Verify that ConvertToDiscoveryType correctly converts various AuthLinkType values to
+ *           their corresponding DiscoveryType values.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -676,7 +707,8 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_DISCOVERY_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_AUTH_CAPACITY_TEST_001
- * @tc.desc: GetAuthCapacity test failed
+ * @tc.desc: Verify that GetAuthCapacity returns AUTH_DEFAULT_VALUE when SoftbusGetConfig fails to
+ *           retrieve the authentication capacity.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -691,7 +723,8 @@ HWTEST_F(AuthOtherMockTest, GET_AUTH_CAPACITY_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_CONFIG_SUPPORT_AS_SERVER_TEST_001
- * @tc.desc: GetConfigSupportAsServer test
+ * @tc.desc: Verify that GetConfigSupportAsServer returns false when SoftbusGetConfig fails to
+ *           retrieve the server support configuration.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -706,7 +739,9 @@ HWTEST_F(AuthOtherMockTest, GET_CONFIG_SUPPORT_AS_SERVER_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: CONVERT_TO_AUTH_CONN_INFO_TEST_001
- * @tc.desc: ConvertToAuthConnInfo test
+ * @tc.desc: Verify that ConvertToAuthConnInfo correctly converts ConnectionInfo to AuthConnInfo,
+ *           handling various connection types and protocols, including invalid and unsupported
+ *           types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -742,7 +777,8 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_AUTH_CONN_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_TO_CONNECT_OPTION_TEST_001
- * @tc.desc: ConvertToConnectOption test
+ * @tc.desc: Verify that ConvertToConnectOption correctly converts AuthConnInfo to ConnectOption,
+ *           handling various authentication link types, including unsupported types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -777,7 +813,8 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_CONNECT_OPTION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: COMPARE_SESSION_CONN_INFO_TEST_001
- * @tc.desc: CompareSessionConnInfo test
+ * @tc.desc: Verify that CompareConnInfo correctly compares two AuthConnInfo structures,
+ *           specifically for session connection information, considering connection ID and UDID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -805,7 +842,8 @@ HWTEST_F(AuthOtherMockTest, COMPARE_SESSION_CONN_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_USB_CONN_INFO_TEST_001
- * @tc.desc: AuthGetUsbConnInfo test failed
+ * @tc.desc: Verify that AuthGetUsbConnInfo returns SOFTBUS_LOCK_ERR or AUTH_INVALID_ID under
+ *           specific conditions related to retrieving USB connection information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -837,7 +875,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_USB_CONN_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_ID_TEST_001
- * @tc.desc: IsSameAccountId test failed
+ * @tc.desc: Verify that IsSameAccountId returns false when LnnGetLocalNum64Info fails to
+ *           retrieve the local account ID.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -850,7 +889,8 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_ID_TEST_002
- * @tc.desc: IsSameAccountId test failed
+ * @tc.desc: Verify that IsSameAccountId returns true when the provided account ID matches the
+ *           local account ID and the local account is not a default OHOS account.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -865,7 +905,8 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_ID_TEST_003
- * @tc.desc: IsSameAccountId test failed
+ * @tc.desc: Verify that IsSameAccountId returns false when the local account is a default OHOS
+ *           account, even if the provided account ID matches the local account ID.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -880,7 +921,8 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_ID_TEST_004
- * @tc.desc: IsSameAccountId test failed
+ * @tc.desc: Verify that IsSameAccountId returns true when the provided account ID matches the
+ *           local account ID and the local account is not a default OHOS account.
  * @tc.type: FUNC
  * @tc.require:
  */

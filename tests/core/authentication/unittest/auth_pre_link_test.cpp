@@ -78,6 +78,14 @@ static struct WifiDirectManager g_manager3 = {
     .linkHasPtk = NULL,
 };
 
+/*
+ * @tc.name: ADD_AUTH_GEN_CER_PARA_NODE_TEST_001
+ * @tc.desc: Verify that AddAuthGenCertParaNode correctly adds a node to the authentication
+ *           certificate parallel list and handles existing nodes.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, ADD_AUTH_GEN_CER_PARA_NODE_TEST_001, TestSize.Level1)
 {
     int32_t requestId = 1;
@@ -88,6 +96,14 @@ HWTEST_F(AuthPreLinkTest, ADD_AUTH_GEN_CER_PARA_NODE_TEST_001, TestSize.Level1)
     DelAuthGenCertParaNodeById(requestId);
 }
 
+/*
+ * @tc.name: UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_001
+ * @tc.desc: Verify that UpdateAuthGenCertParaNode returns an invalid parameter error when
+ *           provided with a null SoftbusCertChain.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_001, TestSize.Level1)
 {
     int32_t requestId = 1;
@@ -97,6 +113,14 @@ HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_002
+ * @tc.desc: Verify that UpdateAuthGenCertParaNode returns SOFTBUS_NOT_FIND when the specified
+ *           request ID is not found.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_002, TestSize.Level1)
 {
     int32_t requestId = 1;
@@ -107,6 +131,14 @@ HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
+/*
+ * @tc.name: UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_003
+ * @tc.desc: Verify that UpdateAuthGenCertParaNode successfully updates an authentication
+ *           certificate parallel node.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_003, TestSize.Level1)
 {
     int32_t requestId = 1;
@@ -120,6 +152,14 @@ HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_GEN_CER_PARA_NODE_TEST_003, TestSize.Level
     DelAuthGenCertParaNodeById(requestId);
 }
 
+/*
+ * @tc.name: FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_001
+ * @tc.desc: Verify that FindAndWaitAuthGenCertParaNodeById returns an invalid parameter error
+ *           when provided with a null AuthGenCertNode pointer.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_001, TestSize.Level1)
 {
     int32_t requestId = 1;
@@ -127,6 +167,14 @@ HWTEST_F(AuthPreLinkTest, FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_001, 
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_002
+ * @tc.desc: Verify that FindAndWaitAuthGenCertParaNodeById returns SOFTBUS_NOT_FIND when the
+ *           specified request ID is not found.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_002, TestSize.Level1)
 {
     int32_t requestId = 1;
@@ -135,6 +183,14 @@ HWTEST_F(AuthPreLinkTest, FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_002, 
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
+/*
+ * @tc.name: FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_003
+ * @tc.desc: Verify that FindAndWaitAuthGenCertParaNodeById correctly finds and waits for an
+ *           authentication certificate parallel node, handling timeouts and successful updates.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_003, TestSize.Level1)
 {
     int32_t requestId = 1;
@@ -154,6 +210,14 @@ HWTEST_F(AuthPreLinkTest, FIND_AND_WAIT_AUTH_GEN_CERT_PARA_NODE_BY_ID_TEST_003, 
     DelAuthGenCertParaNodeById(requestId);
 }
 
+/*
+ * @tc.name: IS_AUTH_PRE_LINK_NODE_EXIST_TEST_001
+ * @tc.desc: Verify that IsAuthPreLinkNodeExist correctly checks for the existence of an
+ *           authentication pre-link node.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, IS_AUTH_PRE_LINK_NODE_EXIST_TEST_001, TestSize.Level1)
 {
     uint32_t requestId = 1;
@@ -168,6 +232,14 @@ HWTEST_F(AuthPreLinkTest, IS_AUTH_PRE_LINK_NODE_EXIST_TEST_001, TestSize.Level1)
     DelAuthPreLinkById(requestId);
 }
 
+/*
+ * @tc.name: FIND_AUTH_PRE_LINK_NODE_BY_ID_TEST_001
+ * @tc.desc: Verify that FindAuthPreLinkNodeById correctly finds an authentication pre-link node
+ *           by its ID.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, FIND_AUTH_PRE_LINK_NODE_BY_ID_TEST_001, TestSize.Level1)
 {
     uint32_t requestId = 1;
@@ -184,6 +256,14 @@ HWTEST_F(AuthPreLinkTest, FIND_AUTH_PRE_LINK_NODE_BY_ID_TEST_001, TestSize.Level
     DelAuthPreLinkById(requestId);
 }
 
+/*
+ * @tc.name: FIND_AUTH_PRE_LINK_NODE_BY_UUID_TEST_001
+ * @tc.desc: Verify that FindAuthPreLinkNodeByUuid correctly finds an authentication pre-link node
+ *           by its UUID, handling null parameters and cases where the node is not found.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, FIND_AUTH_PRE_LINK_NODE_BY_UUID_TEST_001, TestSize.Level1)
 {
     uint32_t requestId = 1;
@@ -206,6 +286,15 @@ HWTEST_F(AuthPreLinkTest, FIND_AUTH_PRE_LINK_NODE_BY_UUID_TEST_001, TestSize.Lev
     DelAuthPreLinkById(requestId);
 }
 
+/*
+ * @tc.name: UPDATE_AUTH_PRE_LINK_UUID_BY_ID_TEST_001
+ * @tc.desc: Verify that UpdateAuthPreLinkUuidById correctly updates the UUID of an
+ *           authentication pre-link node, handling null UUIDs and cases where the node is not
+ *           found.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_PRE_LINK_UUID_BY_ID_TEST_001, TestSize.Level1)
 {
     uint32_t requestId = 1;

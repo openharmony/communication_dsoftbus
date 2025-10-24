@@ -115,7 +115,9 @@ static void SetAuthSessionInfo(AuthSessionInfo *info, uint64_t connId, bool isSe
 
 /*
  * @tc.name: NEW_AND_FIND_AUTH_MANAGER_TEST_001
- * @tc.desc: NewAndFindAuthManager test
+ * @tc.desc: Verify the creation and retrieval of an authentication manager, including checking
+ *           encryption size, finding by connection info, and handling authentication pass
+ *           notifications.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -175,7 +177,8 @@ static int32_t MyUpdateFuncReturnOk(AuthManager *auth1, const AuthManager *auth2
 
 /*
  * @tc.name: FIND_AUTH_MANAGER_TEST_001
- * @tc.desc: FindAuthManager test
+ * @tc.desc: Verify the functionality of finding an authentication manager by authentication ID and
+ *           connection ID, and updating it with various functions.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -212,7 +215,8 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_AUTH_MANAGER_BY_CONN_INFO_TEST_001
- * @tc.desc: GetAuthManagerByConnInfo test
+ * @tc.desc: Verify the retrieval of an authentication manager by connection information,
+ *           including handling invalid connection info and retrieving authentication IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -243,7 +247,8 @@ HWTEST_F(AuthManagerTest, GET_AUTH_MANAGER_BY_CONN_INFO_TEST_001, TestSize.Level
 
 /*
  * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001
- * @tc.desc: AuthDirectOnlineCreateAuthManager test
+ * @tc.desc: Verify the direct creation of an authentication manager for online devices,
+ *           including handling connection delays and retrieving active authentication IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -276,7 +281,9 @@ HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSi
 
 /*
  * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_002
- * @tc.desc: AuthDirectOnlineCreateAuthManager test
+ * @tc.desc: Verify the direct creation of an authentication manager for online devices under
+ *           various conditions, including handling authentication pass status, active time, and
+ *           session key management.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -314,7 +321,8 @@ HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_002, TestSi
 
 /*
  * @tc.name: GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001
- * @tc.desc: GetActiveAuthIdByConnInfo test
+ * @tc.desc: Verify the retrieval of an active authentication ID by connection information,
+ *           including handling session key management and authentication pass status.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -353,7 +361,8 @@ HWTEST_F(AuthManagerTest, GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: AUTH_MANAGER_GET_SESSION_KEY_TEST_001
- * @tc.desc: AuthManagerGetSessionKey test
+ * @tc.desc: Verify the retrieval of a session key from the authentication manager, including
+ *           handling different authentication link types and session key availability.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -389,7 +398,8 @@ HWTEST_F(AuthManagerTest, AUTH_MANAGER_GET_SESSION_KEY_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001
- * @tc.desc: RetryRegTrustDataChangeListener test
+ * @tc.desc: Verify the retry mechanism for registering the trust data change listener,
+ *           including handling device verification pass/disconnect events and group operations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -425,7 +435,8 @@ static void MyConnOpenFailed(uint32_t requestId, int32_t reason)
 
 /*
  * @tc.name: START_VERIFY_DEVICE_TEST_001
- * @tc.desc: StartVerifyDevice test
+ * @tc.desc: Verify the functionality of starting device verification, including handling
+ *           initialization failures, connection failures, and invalid parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -470,7 +481,8 @@ HWTEST_F(AuthManagerTest, START_VERIFY_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: COMPLEMENT_CONNECTION_INFO_IF_NEED_TEST_001
- * @tc.desc: ComplementConnectionInfoIfNeed test
+ * @tc.desc: Verify the functionality of complementing connection information, including handling
+ *           authentication pass/fail/finished events and various connection types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -502,7 +514,8 @@ HWTEST_F(AuthManagerTest, COMPLEMENT_CONNECTION_INFO_IF_NEED_TEST_001, TestSize.
 
 /*
  * @tc.name: HANDLE_RECONNECT_RESULT_TEST_001
- * @tc.desc: HandleReconnectResult test
+ * @tc.desc: Verify the handling of reconnection results, including adding authentication requests,
+ *           recording connection events, and processing connection results for various link types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -539,7 +552,8 @@ HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: TRY_GET_BR_CONN_INFO_TEST_001
- * @tc.desc: TryGetBrConnInfo test
+ * @tc.desc: Verify the handling of authentication data, connection data, device info data, and
+ *           close acknowledgment data, including various data types and error conditions.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -595,7 +609,8 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001
- * @tc.desc: AuthDeviceGetP2pConnInfo test
+ * @tc.desc: Verify the retrieval of P2P and HML connection information from an authentication
+ *           device, including handling null parameters and checking connection info.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -635,7 +650,8 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
 
 /*
  * @tc.name: AUTH_DEVICE_GET_USB_CONN_INFO_TEST_001
- * @tc.desc: AuthDeviceGetUsbConnInfo test
+ * @tc.desc: Verify the retrieval of USB connection information from an authentication device,
+ *           including handling null parameters and cases where the information is not found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -651,7 +667,8 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_USB_CONN_INFO_TEST_001, TestSize.Level
 
 /*
  * @tc.name: AUTH_DEVICE_OPEN_CONN_TEST_001
- * @tc.desc: AuthDeviceOpenConn test
+ * @tc.desc: Verify the functionality of opening a connection from an authentication device,
+ *           including handling null parameters, unsupported link types, and connection failures.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -677,7 +694,9 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001
- * @tc.desc: AuthGetLatestAuthSeqList test
+ * @tc.desc: Verify the retrieval of the latest authentication sequence list, including handling
+ *           null or empty UDID parameters and cases where the authentication manager is not
+ *           found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -697,7 +716,8 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level
 
 /*
  * @tc.name: AUTH_DEVICE_ENCRYPT_TEST_001
- * @tc.desc: AuthDeviceEncrypt test
+ * @tc.desc: Verify that AuthDeviceEncrypt returns an invalid parameter error when provided with
+ *           invalid authentication handles or insufficient output buffer length.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -714,7 +734,9 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DEVICE_GET_CONN_INFO_TEST_001
- * @tc.desc: AuthDeviceGetConnInfo test
+ * @tc.desc: Verify that AuthDeviceGetConnInfo retrieves connection information for a given
+ *           authentication handle, handling null parameters and cases where the authentication
+ *           manager is not found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -731,7 +753,9 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_CONN_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DEVICE_GET_SERVER_SIDE_TEST_001
- * @tc.desc: AuthDeviceGetServerSide test
+ * @tc.desc: Verify that AuthDeviceGetServerSide correctly retrieves the server-side flag for a
+ *           given authentication ID, handling null parameters and cases where the authentication
+ *           manager is not found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -753,7 +777,8 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_SERVER_SIDE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001
- * @tc.desc: AuthSetTcpKeepaliveByConnInfo test
+ * @tc.desc: Verify that AuthSetTcpKeepaliveByConnInfo handles null connection information and
+ *           returns an error when setting TCP keepalive fails.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -773,7 +798,9 @@ HWTEST_F(AuthManagerTest, AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001, TestSize.
 
 /*
  * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001
- * @tc.desc: AuthGetLatestAuthSeqListByType test
+ * @tc.desc: Verify that AuthGetLatestAuthSeqListByType retrieves the latest authentication
+ *           sequence list for a given UDID and authentication link type, handling null or empty
+ *           UDID parameters and invalid link types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -803,7 +830,8 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSi
 
 /*
  * @tc.name: PROCESS_SESSION_KEY_TEST_001
- * @tc.desc: ProcessSessionKey test
+ * @tc.desc: Verify the processing of an empty session key, including handling different
+ *           authentication link types and modules.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -838,7 +866,8 @@ HWTEST_F(AuthManagerTest, PROCESS_SESSION_KEY_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GENERATE_UDID_HASH_TEST_001
- * @tc.desc: GenerateUdidHash test
+ * @tc.desc: Verify the generation of a UDID hash, including handling authentication request
+ *           reporting, session info posting, and various data handling scenarios.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -871,7 +900,8 @@ HWTEST_F(AuthManagerTest, GENERATE_UDID_HASH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_ALL_HML_OR_P2P_AUTH_HANDLE_NUM_TEST_001
- * @tc.desc: GetAllHmlOrP2pAuthHandleNum test
+ * @tc.desc: Verify the retrieval of the number of HML or P2P authentication handles, including
+ *           handling different authentication link types and null parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -898,7 +928,9 @@ HWTEST_F(AuthManagerTest, GET_ALL_HML_OR_P2P_AUTH_HANDLE_NUM_TEST_001, TestSize.
 
 /*
  * @tc.name: AUTH_DEVICE_GET_AUTH_HANDLE_BY_INDEX_TEST_001
- * @tc.desc: AuthDeviceGetAuthHandleByIndex test
+ * @tc.desc: Verify that AuthDeviceGetAuthHandleByIndex retrieves an authentication handle by
+ *           index, handling null parameters and cases where the authentication manager is not
+ *           found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -920,7 +952,8 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSiz
 
 /*
  * @tc.name: AUTH_MAP_INIT_TEST_001
- * @tc.desc: AuthMapInit test
+ * @tc.desc: Verify the initialization of the authentication map, including inserting nodes,
+ *           deleting from the map, clearing the map, and retrieving nodes.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -946,7 +979,8 @@ HWTEST_F(AuthManagerTest, AUTH_MAP_INIT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_NEED_AUTH_LIMIT_TEST_001
- * @tc.desc: IsNeedAuthLimit test
+ * @tc.desc: Verify that IsNeedAuthLimit correctly determines if authentication limiting is
+ *           needed, handling null or invalid UDID parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -970,7 +1004,9 @@ HWTEST_F(AuthManagerTest, IS_NEED_AUTH_LIMIT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DEVICE_ENCRYPT_TEST_002
- * @tc.desc: AuthDeviceEncrypt test
+ * @tc.desc: Verify the encryption functionality of an authentication device, including handling
+ *           various authentication limit errors and cases where the authentication manager is not
+ *           found or encryption fails.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1002,7 +1038,8 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: REMOVE_AUTHSESSION_KEY_BY_INDEX_TEST_001
- * @tc.desc: RemoveAuthSessionKeyByIndex test
+ * @tc.desc: Verify that RemoveAuthSessionKeyByIndex correctly removes an authentication session
+ *           key by index.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1034,7 +1071,8 @@ static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
 
 /*
  * @tc.name: REPORT_AUTH_REQUEST_PASSED_TEST_001
- * @tc.desc: ReportAuthRequestPassed test
+ * @tc.desc: Verify that ReportAuthRequestPassed correctly handles reporting a passed
+ *           authentication request and triggers the onConnOpened callback.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1062,7 +1100,8 @@ HWTEST_F(AuthManagerTest, REPORT_AUTH_REQUEST_PASSED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FIND_NORMALIZE_KEY_AUTH_MANAGER_BY_UDID_TEST_001
- * @tc.desc: FindNormalizedKeyAuthManagerByUdid test
+ * @tc.desc: Verify that FindNormalizedKeyAuthManagerByUdid returns nullptr when no normalized key
+ *           authentication manager is found for the given UDID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1077,7 +1116,8 @@ HWTEST_F(AuthManagerTest, FIND_NORMALIZE_KEY_AUTH_MANAGER_BY_UDID_TEST_001, Test
 
 /*
  * @tc.name: IS_AUTH_NODE_DISCONNECT_TEST_001
- * @tc.desc: IsAuthNoNeedDisconnect test
+ * @tc.desc: Verify that IsAuthNoNeedDisconnect correctly determines if an authentication node
+ *           does not need to be disconnected based on connection type and port information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1100,7 +1140,9 @@ HWTEST_F(AuthManagerTest, IS_AUTH_NODE_DISCONNECT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: RAW_LINK_NEED_UPDATE_AUTH_MANAGER_TEST_001
- * @tc.desc: RawLinkNeedUpdateAuthManager test
+ * @tc.desc: Verify that RawLinkNeedUpdateAuthManager correctly determines if a raw link needs to
+ *           update the authentication manager, handling null UDID and various authentication
+ *           states.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1133,7 +1175,9 @@ HWTEST_F(AuthManagerTest, RAW_LINK_NEED_UPDATE_AUTH_MANAGER_TEST_001, TestSize.L
 
 /*
  * @tc.name: AUTH_DEVICE_GET_CONN_INFO_BY_TYPE_TEST_001
- * @tc.desc: AuthDeviceGetConnInfoByType test
+ * @tc.desc: Verify that AuthDeviceGetConnInfoByType retrieves connection information by type from
+ *           an authentication device, handling cases where the authentication manager is not
+ *           found or connection information retrieval fails.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
