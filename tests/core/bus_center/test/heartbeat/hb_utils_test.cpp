@@ -80,6 +80,7 @@ void HeartBeatUtilsTest::TearDown() { }
  * @tc.name: LnnConvertConnAddrTypeToHbTypeTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnConvertConnAddrTypeToHbTypeTest_01, TestSize.Level1)
@@ -97,6 +98,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnConvertConnAddrTypeToHbTypeTest_01, TestSize.Lev
  * @tc.name: LnnConvertHbTypeToConnAddrTypeTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnConvertHbTypeToConnAddrTypeTest_01, TestSize.Level1)
@@ -114,6 +116,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnConvertHbTypeToConnAddrTypeTest_01, TestSize.Lev
  * @tc.name: LnnConvertHbTypeToIdTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnConvertHbTypeToIdTest_01, TestSize.Level1)
@@ -132,6 +135,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnConvertHbTypeToIdTest_01, TestSize.Level1)
  * @tc.name: LnnHasActiveConnectionTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnHasActiveConnectionTest_01, TestSize.Level1)
@@ -151,6 +155,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnHasActiveConnectionTest_01, TestSize.Level1)
  * @tc.name: LnnCheckSupportedHbTypeTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnCheckSupportedHbTypeTest_01, TestSize.Level1)
@@ -171,6 +176,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnCheckSupportedHbTypeTest_01, TestSize.Level1)
  * @tc.name: LnnGenerateHexStringHashTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnGenerateHexStringHashTest_01, TestSize.Level1)
@@ -189,6 +195,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateHexStringHashTest_01, TestSize.Level1)
  * @tc.name: LnnGetShortAccountHashTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnGetShortAccountHashTest_01, TestSize.Level1)
@@ -208,6 +215,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGetShortAccountHashTest_01, TestSize.Level1)
  * @tc.name: LnnGenerateBtMacHashTest_01
  * @tc.desc: common utils use cases are used in networking
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_01, TestSize.Level1)
@@ -231,6 +239,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_01, TestSize.Level1)
  * @tc.name: LnnGenerateBtMacHashTest_02
  * @tc.desc: lnn generate bt mac hash
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_02, TestSize.Level1)
@@ -252,6 +261,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_02, TestSize.Level1)
  * @tc.name: LnnVisitHbTypeSetTest_01
  * @tc.desc: lnn visit hb type set
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnVisitHbTypeSetTest_01, TestSize.Level1)
@@ -267,8 +277,9 @@ HWTEST_F(HeartBeatUtilsTest, LnnVisitHbTypeSetTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnIsSupportHeartbeatCapTest_01
- * @tc.desc: LnnIsSupportHeartbeatCap test
+ * @tc.desc: lnn is support heartbeat cap test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnIsSupportHeartbeatCapTest_01, TestSize.Level1)
@@ -289,8 +300,9 @@ HWTEST_F(HeartBeatUtilsTest, LnnIsSupportHeartbeatCapTest_01, TestSize.Level1)
 
 /*
  * @tc.name: GenerateRandomNumForHbTest_01
- * @tc.desc: GenerateRandomNumForHb test
+ * @tc.desc: generate random num for hb test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
@@ -333,8 +345,9 @@ HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnIsLocalSupportBurstFeatureTest_01
- * @tc.desc: LnnIsLocalSupportBurstFeature test
+ * @tc.desc: lnn is local support burst feature test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnIsLocalSupportBurstFeatureTest_01, TestSize.Level1)
@@ -347,8 +360,9 @@ HWTEST_F(HeartBeatUtilsTest, LnnIsLocalSupportBurstFeatureTest_01, TestSize.Leve
 
 /*
  * @tc.name: LnnIsSupportBurstFeatureTest_01
- * @tc.desc: LnnIsSupportBurstFeature test
+ * @tc.desc: lnn is support burst feature test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnIsSupportBurstFeatureTest_01, TestSize.Level1)
@@ -373,8 +387,9 @@ HWTEST_F(HeartBeatUtilsTest, LnnIsSupportBurstFeatureTest_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnGenerateBtMacHashTest_03
- * @tc.desc: LnnGenerateBtMacHash test
+ * @tc.desc: lnn generate bt mac hash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_03, TestSize.Level1)
@@ -416,8 +431,9 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_03, TestSize.Level1)
 
 /*
  * @tc.name: LnnGetShortAccountHashTest_02
- * @tc.desc: LnnGetShortAccountHash test
+ * @tc.desc: lnn get short account hash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnGetShortAccountHashTest_02, TestSize.Level1)
@@ -432,8 +448,9 @@ HWTEST_F(HeartBeatUtilsTest, LnnGetShortAccountHashTest_02, TestSize.Level1)
 
 /*
  * @tc.name: LnnGenerateHexStringHashTest_02
- * @tc.desc: LnnGenerateHexStringHash test
+ * @tc.desc: lnn generate hex string hash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnGenerateHexStringHashTest_02, TestSize.Level1)
@@ -450,8 +467,9 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateHexStringHashTest_02, TestSize.Level1)
 
 /*
  * @tc.name: LnnHasActiveConnectionTest_02
- * @tc.desc: LnnHasActiveConnection test
+ * @tc.desc: lnn has active connection test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatUtilsTest, LnnHasActiveConnectionTest_02, TestSize.Level1)

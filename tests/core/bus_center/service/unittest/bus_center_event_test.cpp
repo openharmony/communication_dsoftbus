@@ -91,6 +91,7 @@ static void OnNetworkStateChange(const LnnEventBasicInfo *info)
 * @tc.name: BusCenterEventTest001
 * @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest001, TestSize.Level1)
@@ -123,6 +124,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest001, TestSize.Level1)
 * @tc.name: BusCenterEventTest002
 * @tc.desc: Verify the LnnNotifyBasicInfoChanged function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest002, TestSize.Level1)
@@ -151,6 +153,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest002, TestSize.Level1)
 * @tc.name: BusCenterEventTest003
 * @tc.desc: Verify the LnnNotifyLeaveResult function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest003, TestSize.Level1)
@@ -172,6 +175,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest003, TestSize.Level1)
 * @tc.name: BusCenterEventTest004
 * @tc.desc: Verify the LnnNotifyTimeSyncResult function return value equal SOFTBUS_LOCK_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest004, TestSize.Level1)
@@ -200,6 +204,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest004, TestSize.Level1)
 * @tc.name: BusCenterEventTest005
 * @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest005, TestSize.Level1)
@@ -221,6 +226,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest005, TestSize.Level1)
 * @tc.name: BusCenterEventTest006
 * @tc.desc: Verify the LnnNotifyScreenStateChangeEvent function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest006, TestSize.Level1)
@@ -241,6 +247,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest006, TestSize.Level1)
 * @tc.name: BusCenterEventTest007
 * @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest007, TestSize.Level1)
@@ -260,6 +267,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest007, TestSize.Level1)
 * @tc.name: BusCenterEventTest008
 * @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_LOCK_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest008, TestSize.Level1)
@@ -280,6 +288,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest008, TestSize.Level1)
 * @tc.name: BusCenterEventTest009
 * @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest009, TestSize.Level1)
@@ -300,6 +309,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest009, TestSize.Level1)
 * @tc.name: BusCenterEventTest010
 * @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest010, TestSize.Level1)
@@ -320,6 +330,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest010, TestSize.Level1)
 * @tc.name: BusCenterEventTest011
 * @tc.desc: Authenticate the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest011, TestSize.Level1)
@@ -340,6 +351,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest011, TestSize.Level1)
 * @tc.name: BusCenterEventTest012
 * @tc.desc: Verify the LnnNotifyUserStateChangeEvent function return value equal SOFTBUS_LOCK_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest012, TestSize.Level1)
@@ -360,6 +372,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest012, TestSize.Level1)
 * @tc.name: BusCenterEventTest013
 * @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest013, TestSize.Level1)
@@ -379,6 +392,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest013, TestSize.Level1)
 * @tc.name: BusCenterEventTest014
 * @tc.desc: Verify the LnnNotifyOOBEStateChangeEvent function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest014, TestSize.Level1)
@@ -399,6 +413,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest014, TestSize.Level1)
 * @tc.name: BusCenterEventTest015
 * @tc.desc: Verify the LnnNotifyBtAclStateChangeEvent function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest015, TestSize.Level1)
@@ -423,6 +438,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest015, TestSize.Level1)
 * @tc.name: BusCenterEventTest016
 * @tc.desc: Verify the LnnNotifyAddressChangedEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest016, TestSize.Level1)
@@ -443,6 +459,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest016, TestSize.Level1)
 * @tc.name: BusCenterEventTest017
 * @tc.desc: Verify the LnnNotifyNodeAddressChanged function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest017, TestSize.Level1)
@@ -465,6 +482,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest017, TestSize.Level1)
 * @tc.name: BusCenterEventTest018
 * @tc.desc: Verify the LnnNotifyNetworkStateChanged function return value equal SOFTBUS_LOCK_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest018, TestSize.Level1)
@@ -485,6 +503,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest018, TestSize.Level1)
 * @tc.name: BusCenterEventTest019
 * @tc.desc: Verify the LnnNotifySingleOffLineEvent function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest019, TestSize.Level1)
@@ -515,6 +534,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest019, TestSize.Level1)
 * @tc.name: BusCenterEventTest020
 * @tc.desc: Verify the LnnNotifyLpReportEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest020, TestSize.Level1)
@@ -534,6 +554,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest020, TestSize.Level1)
 * @tc.name: BusCenterEventTest021
 * @tc.desc: Verify the LnnNotifyNetworkIdChangeEvent function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest021, TestSize.Level1)
@@ -553,6 +574,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest021, TestSize.Level1)
 * @tc.name: BusCenterEventTest022
 * @tc.desc: Verify the LnnInitBusCenterEvent function return value equal SOFTBUS_LOOPER_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest022, TestSize.Level1)
@@ -568,6 +590,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest022, TestSize.Level1)
 * @tc.name: BusCenterEventTest023
 * @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_LOCK_ERR.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest023, TestSize.Level1)
@@ -588,6 +611,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest023, TestSize.Level1)
 * @tc.name: BusCenterEventTest024
 * @tc.desc: Verify the LnnRegisterEventHandler function return value equal SOFTBUS_INVALID_PARAM.
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest024, TestSize.Level1)
@@ -604,6 +628,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest024, TestSize.Level1)
  * @tc.name: BusCenterEventTest25
  * @tc.desc: Handle Notify Message Test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest25, TestSize.Level1)
@@ -615,6 +640,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest25, TestSize.Level1)
  * @tc.name: BusCenterEventTest26
  * @tc.desc: Test the LnnRegisterEventHandler function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest26, TestSize.Level1)
@@ -627,6 +653,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest26, TestSize.Level1)
  * @tc.name: BusCenterEventTest27
  * @tc.desc: Test the LnnNotifyDeviceTrustedChange function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest027, TestSize.Level1)
@@ -636,9 +663,10 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest027, TestSize.Level1)
 }
 
 /*
- * @tc.name:BusCenterEventTest28
+ * @tc.name: BusCenterEventTest28
  * @tc.desc: Test the LnnNotifyDeviceTrustedChange function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest028, TestSize.Level1)
@@ -652,6 +680,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest028, TestSize.Level1)
  * @tc.name: BusCenterEventTest29
  * @tc.desc: Test the LnnNotifyDeviceTrustedChange function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest029, TestSize.Level1)
@@ -665,6 +694,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest029, TestSize.Level1)
  * @tc.name: BusCenterEventTest30
  * @tc.desc: Test the LnnNotifyDataShareStateChangeEvent function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest030, TestSize.Level1)
@@ -676,6 +706,8 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest030, TestSize.Level1)
 /*
  * @tc.name: BusCenterEventTest31
  * @tc.desc: Test the LnnNotifyDifferentAccountChangeEvent function.
+ * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest031, TestSize.Level1)
@@ -688,8 +720,9 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest031, TestSize.Level1)
 }
 
 /* @tc.name: BusCenterEventTest032
- * @tc.desc:  Test the LnnNotifyDifferentAccountChangeEvent function.
+ * @tc.desc: Test the LnnNotifyDifferentAccountChangeEvent function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest032, TestSize.Level1)
@@ -705,6 +738,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest032, TestSize.Level1)
  * @tc.name: BusCenterEventTest33
  * @tc.desc: Test the LnnNotifyNightModeStateChangeEvent function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest033, TestSize.Level1)
@@ -718,6 +752,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest033, TestSize.Level1)
  * @tc.name: BusCenterEventTest34
  * @tc.desc: Test the LnnNotifyNightModeStateChangeEvent function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest034, TestSize.Level1)
@@ -732,6 +767,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest034, TestSize.Level1)
  * @tc.name: BusCenterEventTest35
  * @tc.desc: Test the LnnRegisterEventHandler function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest035, TestSize.Level1)
@@ -755,6 +791,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest035, TestSize.Level1)
  * @tc.name: BusCenterEventTest36
  * @tc.desc: Test the LnnNotifyOnlineState function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest036, TestSize.Level1)
@@ -774,6 +811,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest036, TestSize.Level1)
  * @tc.name: BusCenterEventTest37
  * @tc.desc: Test the LnnNotifyOnlineState function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: 1
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest037, TestSize.Level1)

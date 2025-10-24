@@ -90,6 +90,7 @@ void HeartBeatFSMTest::TearDown()
  * @tc.name: CheckHbFsmStateMsgArgs
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, CheckHbFsmStateMsgArgsTest_01, TestSize.Level1)
@@ -110,6 +111,7 @@ HWTEST_F(HeartBeatFSMTest, CheckHbFsmStateMsgArgsTest_01, TestSize.Level1)
  * @tc.name: CheckRemoveHbMsgParams
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, CheckRemoveHbMsgParamsTest_01, TestSize.Level1)
@@ -130,6 +132,7 @@ HWTEST_F(HeartBeatFSMTest, CheckRemoveHbMsgParamsTest_01, TestSize.Level1)
  * @tc.name: LnnRemoveSendEndMsg
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnRemoveSendEndMsgTest_01, TestSize.Level1)
@@ -161,6 +164,7 @@ HWTEST_F(HeartBeatFSMTest, LnnRemoveSendEndMsgTest_01, TestSize.Level1)
  * @tc.name: OnProcessSendOnce
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnProcessSendOnceTest_01, TestSize.Level1)
@@ -196,6 +200,7 @@ HWTEST_F(HeartBeatFSMTest, OnProcessSendOnceTest_01, TestSize.Level1)
  * @tc.name: RemoveCheckDevStatusMsg
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveCheckDevStatusMsgTest_01, TestSize.Level1)
@@ -244,6 +249,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveCheckDevStatusMsgTest_01, TestSize.Level1)
  * @tc.name: RemoveSendOnceMsg
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveSendOnceMsgTest_01, TestSize.Level1)
@@ -286,6 +292,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOnceMsgTest_01, TestSize.Level1)
  * @tc.name: OnSendOneHbBegin
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnSendOneHbBeginTest_01, TestSize.Level1)
@@ -304,6 +311,7 @@ HWTEST_F(HeartBeatFSMTest, OnSendOneHbBeginTest_01, TestSize.Level1)
  * @tc.name: OnSendOneHbEnd
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnSendOneHbEndTest_01, TestSize.Level1)
@@ -335,6 +343,7 @@ HWTEST_F(HeartBeatFSMTest, OnSendOneHbEndTest_01, TestSize.Level1)
  * @tc.name: OnStopHbByType
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnStopHbByTypeTest_01, TestSize.Level1)
@@ -364,6 +373,7 @@ HWTEST_F(HeartBeatFSMTest, OnStopHbByTypeTest_01, TestSize.Level1)
  * @tc.name: OnTransHbFsmState
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnTransHbFsmStateTest_01, TestSize.Level1)
@@ -384,6 +394,7 @@ HWTEST_F(HeartBeatFSMTest, OnTransHbFsmStateTest_01, TestSize.Level1)
  * @tc.name: ProcessLostHeartbeat
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
@@ -422,6 +433,7 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
  * @tc.name: IsTimestampExceedLimit
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, IsTimestampExceedLimitTest_01, TestSize.Level1)
@@ -447,6 +459,7 @@ HWTEST_F(HeartBeatFSMTest, IsTimestampExceedLimitTest_01, TestSize.Level1)
  * @tc.name: CheckDevStatusByNetworkId
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, CheckDevStatusByNetworkIdTest_01, TestSize.Level1)
@@ -489,6 +502,7 @@ HWTEST_F(HeartBeatFSMTest, CheckDevStatusByNetworkIdTest_01, TestSize.Level1)
  * @tc.name: OnCheckDevStatus
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnCheckDevStatusTest_01, TestSize.Level1)
@@ -531,10 +545,12 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatusTest_01, TestSize.Level1)
     SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
+
 /*
  * @tc.name: LnnPostNextSendOnceMsgToHbFsm
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostNextSendOnceMsgToHbFsmTest_01, TestSize.Level1)
@@ -572,10 +588,12 @@ HWTEST_F(HeartBeatFSMTest, LnnPostNextSendOnceMsgToHbFsmTest_01, TestSize.Level1
     SoftBusSleepMs(20);
     LnnDestroyHeartbeatFsm(hbFsm);
 }
+
 /*
  * @tc.name: RemoveSendOneEndMsgTest_01
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_01, TestSize.Level1)
@@ -605,10 +623,12 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
     SoftBusFree(msgPara);
 }
+
 /*
  * @tc.name: RemoveSendOneEndMsgTest_02
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_02, TestSize.Level1)
@@ -644,10 +664,12 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_02, TestSize.Level1)
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
 /*
  * @tc.name: RemoveSendOneEndMsgTest_03
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_03, TestSize.Level1)
@@ -687,10 +709,12 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_03, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
     SoftBusFree(msgPara1);
 }
+
 /*
  * @tc.name: RemoveSendOneEndMsgTest_04
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_04, TestSize.Level1)
@@ -727,10 +751,12 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_04, TestSize.Level1)
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
 }
+
 /*
  * @tc.name: RemoveSendOneEndMsgTest_05
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_05, TestSize.Level1)
@@ -755,10 +781,12 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_05, TestSize.Level1)
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
 }
+
 /*
  * @tc.name: RemoveScreenOffCheckStatus_01
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_01, TestSize.Level1)
@@ -784,10 +812,12 @@ HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_01, TestSize.Level1)
     ret = RemoveScreenOffCheckStatus(&ctrlMsgObj, &delMsg);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
+
 /*
  * @tc.name: RemoveScreenOffCheckStatus_02
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_02, TestSize.Level1)
@@ -813,10 +843,12 @@ HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_02, TestSize.Level1)
     ret = RemoveScreenOffCheckStatus(&ctrlMsgObj, &delMsg);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
+
 /*
  * @tc.name: RemoveScreenOffCheckStatus_03
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_03, TestSize.Level1)
@@ -845,6 +877,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_03, TestSize.Level1)
  * @tc.name: OnScreeOffCheckDevStatus_01
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_01, TestSize.Level1)
@@ -871,6 +904,7 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_01, TestSize.Level1)
  * @tc.name: LnnPostSendBeginMsgToHbFsm_01
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_01, TestSize.Level1)
@@ -889,6 +923,7 @@ HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_01, TestSize.Level1)
  * @tc.name: LnnPostTransStateMsgToHbFsm_01
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostTransStateMsgToHbFsm_01, TestSize.Level1)
@@ -906,6 +941,7 @@ HWTEST_F(HeartBeatFSMTest, LnnPostTransStateMsgToHbFsm_01, TestSize.Level1)
  * @tc.name: LnnPostScreenOffCheckDevMsgToHbFsm_01
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_01, TestSize.Level1)
@@ -922,6 +958,7 @@ HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_01, TestSize.Level
  * @tc.name: LnnPostUpdateSendInfoMsgToHbFsm_01
  * @tc.desc: check heartbeat fsm state message
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostUpdateSendInfoMsgToHbFsm_01, TestSize.Level1)
@@ -941,6 +978,7 @@ HWTEST_F(HeartBeatFSMTest, LnnPostUpdateSendInfoMsgToHbFsm_01, TestSize.Level1)
  * @tc.name: LnnPostSendBeginMsgToHbFsm_02
  * @tc.desc: lnn post send begin msg to hb fsm
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_02, TestSize.Level1)
@@ -959,6 +997,7 @@ HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_02, TestSize.Level1)
  * @tc.name: LnnPostScreenOffCheckDevMsgToHbFsm_02
  * @tc.desc: lnn post screen off check dev msg to hb fsm
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_02, TestSize.Level1)
@@ -978,8 +1017,9 @@ HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_02, TestSize.Level
 
 /*
  * @tc.name: CheckHbFsmStateMsgArgs_01
- * @tc.desc:
+ * @tc.desc: check hb fsm state msg args test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, CheckHbFsmStateMsgArgs_01, TestSize.Level1)
@@ -1001,8 +1041,9 @@ HWTEST_F(HeartBeatFSMTest, CheckHbFsmStateMsgArgs_01, TestSize.Level1)
 
 /*
  * @tc.name: HbFsmStateProcessFunc_01
- * @tc.desc:
+ * @tc.desc: hb fsm state process func test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, HbFsmStateProcessFunc_01, TestSize.Level1)
@@ -1032,8 +1073,9 @@ HWTEST_F(HeartBeatFSMTest, HbFsmStateProcessFunc_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnPostScreenOffCheckDevMsgToHbFsm_03
- * @tc.desc: LnnPostScreenOffCheckDevMsgToHbFsm test
+ * @tc.desc: lnn post screen off check dev msg to hb fsm test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_03, TestSize.Level1)
@@ -1047,8 +1089,9 @@ HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_03, TestSize.Level
 
 /*
  * @tc.name: LnnPostCheckDevStatusMsgToHbFsm_01
- * @tc.desc: LnnPostCheckDevStatusMsgToHbFsm test
+ * @tc.desc: lnn post check dev status msg to hb fsm test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostCheckDevStatusMsgToHbFsm_01, TestSize.Level1)
@@ -1063,8 +1106,9 @@ HWTEST_F(HeartBeatFSMTest, LnnPostCheckDevStatusMsgToHbFsm_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnPostSendEndMsgToHbFsm_01
- * @tc.desc: LnnPostSendEndMsgToHbFsm test
+ * @tc.desc: lnn post send end msg to hb fsm test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostSendEndMsgToHbFsm_01, TestSize.Level1)
@@ -1079,8 +1123,9 @@ HWTEST_F(HeartBeatFSMTest, LnnPostSendEndMsgToHbFsm_01, TestSize.Level1)
 
 /*
  * @tc.name: LnnPostSendBeginMsgToHbFsm_03
- * @tc.desc: LnnPostSendBeginMsgToHbFsm test
+ * @tc.desc: lnn post send begin msg to hb fsm test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_03, TestSize.Level1)
@@ -1094,8 +1139,9 @@ HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_03, TestSize.Level1)
 
 /*
  * @tc.name: LnnCreateHeartbeatFsm_01
- * @tc.desc: LnnCreateHeartbeatFsm test
+ * @tc.desc: lnn create heartbeat fsm test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, LnnCreateHeartbeatFsm_01, TestSize.Level1)
@@ -1108,8 +1154,9 @@ HWTEST_F(HeartBeatFSMTest, LnnCreateHeartbeatFsm_01, TestSize.Level1)
 
 /*
  * @tc.name: InitHeartbeatFsm_01
- * @tc.desc: InitHeartbeatFsm test
+ * @tc.desc: init heartbeat fsm test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, InitHeartbeatFsm_01, TestSize.Level1)
@@ -1125,8 +1172,9 @@ HWTEST_F(HeartBeatFSMTest, InitHeartbeatFsm_01, TestSize.Level1)
 
 /*
  * @tc.name: OnScreeOffCheckDevStatus_02
- * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.desc: on scree off check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_02, TestSize.Level1)
@@ -1147,8 +1195,9 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_02, TestSize.Level1)
 
 /*
  * @tc.name: OnScreeOffCheckDevStatus_03
- * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.desc: on scree off check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_03, TestSize.Level1)
@@ -1170,8 +1219,9 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_03, TestSize.Level1)
 
 /*
  * @tc.name: OnScreeOffCheckDevStatus_04
- * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.desc: on scree off check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_04, TestSize.Level1)
@@ -1198,8 +1248,9 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_04, TestSize.Level1)
 
 /*
  * @tc.name: OnScreeOffCheckDevStatus_05
- * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.desc: on scree off check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_05, TestSize.Level1)
@@ -1222,8 +1273,9 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_05, TestSize.Level1)
 
 /*
  * @tc.name: OnScreeOffCheckDevStatus_06
- * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.desc: on scree off check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_06, TestSize.Level1)
@@ -1243,8 +1295,9 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_06, TestSize.Level1)
 
 /*
  * @tc.name: OnScreeOffCheckDevStatus_07
- * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.desc: on scree off check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_07, TestSize.Level1)
@@ -1264,8 +1317,9 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_07, TestSize.Level1)
 
 /*
  * @tc.name: OnCheckDevStatus_01
- * @tc.desc: OnCheckDevStatus test
+ * @tc.desc: on check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_01, TestSize.Level1)
@@ -1297,8 +1351,9 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_01, TestSize.Level1)
 
 /*
  * @tc.name: OnCheckDevStatus_02
- * @tc.desc: OnCheckDevStatus test
+ * @tc.desc: on check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_02, TestSize.Level1)
@@ -1321,8 +1376,9 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_02, TestSize.Level1)
 
 /*
  * @tc.name: OnCheckDevStatus_03
- * @tc.desc: OnCheckDevStatus test
+ * @tc.desc: on check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_03, TestSize.Level1)
@@ -1347,8 +1403,9 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_03, TestSize.Level1)
 
 /*
  * @tc.name: OnCheckDevStatus_04
- * @tc.desc: OnCheckDevStatus test
+ * @tc.desc: on check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_04, TestSize.Level1)
@@ -1370,8 +1427,9 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_04, TestSize.Level1)
 
 /*
  * @tc.name: OnCheckDevStatus_05
- * @tc.desc: OnCheckDevStatus test
+ * @tc.desc: on check dev status test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_05, TestSize.Level1)
