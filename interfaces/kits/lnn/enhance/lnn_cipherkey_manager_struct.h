@@ -15,6 +15,7 @@
 #ifndef LNN_CIPHERKEY_MANAGER_STRUCT_H
 #define LNN_CIPHERKEY_MANAGER_STRUCT_H
 
+#include "lnn_node_info_struct.h"
 #include "softbus_common.h"
 #include "stdint.h"
 
@@ -26,6 +27,7 @@ typedef struct {
     char udid[UDID_BUF_LEN];
     uint64_t endTime;
     BroadcastCipherInfo cipherInfo;
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH];
 } BroadcastCipherKey;
 
 #ifdef __cplusplus

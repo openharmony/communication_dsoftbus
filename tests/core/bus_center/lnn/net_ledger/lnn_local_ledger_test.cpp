@@ -88,6 +88,7 @@ static void LocalLedgerKeyTestPackaged(void)
     EXPECT_EQ(LlUpdateStaticCapability(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnUpdateLocalScreenStatus(true), SOFTBUS_OK);
     EXPECT_EQ(UpdateHuksKeyTime(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalSparkCheck(nullptr), SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1124,4 +1125,99 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED);
 }
 
+/*
+ * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_004
+ * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_004, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnUpdateLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_EQ(SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED, LnnGenBroadcastCipherInfo());
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED, LnnGenBroadcastCipherInfo());
+}
+
+/*
+ * @tc.name: LlGetSparkCheck_001
+ * @tc.desc: LlGetSparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlGetSparkCheck_001, TestSize.Level1)
+{
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(nullptr, 0));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(sparkCheck, 0));
+    EXPECT_EQ(SOFTBUS_OK, LlGetSparkCheck(sparkCheck, SPARK_CHECK_LENGTH));
+}
+
+/*
+ * @tc.name: UpdateLocalSparkCheck_001
+ * @tc.desc: UpdateLocalSparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UpdateLocalSparkCheck_001, TestSize.Level1)
+{
+    unsigned char sparkCheck2[SPARK_CHECK_LENGTH] = {0};
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, UpdateLocalSparkCheck(nullptr));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalSparkCheck(sparkCheck2));
+}
+
+/*
+ * @tc.name: LnnGenSparkCheck_001
+ * @tc.desc: LnnGenSparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LnnGenSparkCheck_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck(sparkCheck));
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck(sparkCheck));
+}
+
+/*
+ * @tc.name: LNN_LOAD_BROADCAST_CIPHER_INFO_002
+ * @tc.desc: LnnLoadBroadcastCipherInfo process sparkCheck
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    ON_CALL(localLedgerMock, GetCommonOsType).WillByDefault(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _))
+        .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    EXPECT_CALL(localLedgerMock, LnnGetLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnUpdateLocalBroadcastCipherKeyPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    broadcastKey.sparkCheck[0] = 1;
+    EXPECT_EQ(LnnLoadBroadcastCipherInfo(&broadcastKey), SOFTBUS_OK);
+    broadcastKey.sparkCheck[0] = 0;
+    EXPECT_EQ(LnnLoadBroadcastCipherInfo(&broadcastKey), SOFTBUS_OK);
+    EXPECT_EQ(LnnLoadBroadcastCipherInfo(&broadcastKey), SOFTBUS_OK);
+    EXPECT_EQ(LnnLoadBroadcastCipherInfo(&broadcastKey), SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
 } // namespace OHOS

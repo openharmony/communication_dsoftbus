@@ -155,6 +155,13 @@ int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnSetDLDeviceSparkCheck(const char *udid, const void *sparkCheck)
+{
+    (void)udid;
+    (void)sparkCheck;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnSetDLDeviceStateVersion(const char *udid, int32_t stateVersion)
 {
     (void)udid;

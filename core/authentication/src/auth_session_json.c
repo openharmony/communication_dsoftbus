@@ -164,6 +164,7 @@
 #define AUTH_START_STATE            "AUTH_START_STATE"
 #define SLE_RANGE_CAP               "SLE_RANGE_CAP"
 #define SLE_MAC                     "SLE_MAC"
+#define SPARK_CHECK                 "SPARK_CHECK"
 
 #define HAS_CTRL_CHANNEL                 (0x1L)
 #define HAS_CHANNEL_AUTH                 (0x2L)
@@ -1607,6 +1608,10 @@ static int32_t FillBroadcastCipherKey(BroadcastCipherKey *broadcastKey, const No
         AUTH_LOGE(AUTH_FSM, "memcpy iv fail.");
         return SOFTBUS_MEM_ERR;
     }
+    if (memcpy_s(broadcastKey->sparkCheck, SPARK_CHECK_LENGTH, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy sparkCheck fail.");
+        return SOFTBUS_MEM_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1799,6 +1804,21 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
     return SOFTBUS_OK;
 }
 
+static void PackSparkCheck(JsonObj *json, const NodeInfo *info)
+{
+    char sparkCheck[SPARK_CHECK_STR_LEN] = {0};
+    if (ConvertBytesToHexString(sparkCheck, SPARK_CHECK_STR_LEN, info->sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert sparkCheck to string fail.");
+        return;
+    }
+    if (!JSON_AddStringToObject(json, SPARK_CHECK, sparkCheck)) {
+        (void)memset_s(sparkCheck, SPARK_CHECK_STR_LEN, 0, SPARK_CHECK_STR_LEN);
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail.");
+        return;
+    }
+    (void)memset_s(sparkCheck, SPARK_CHECK_STR_LEN, 0, SPARK_CHECK_STR_LEN);
+}
+
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -1847,6 +1867,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (!JSON_AddInt32ToObject(json, AUTH_VERSION_TAG, authVersion)) {
         AUTH_LOGE(AUTH_FSM, "pack authVersion fail.");
     }
+    PackSparkCheck(json, info);
     return SOFTBUS_OK;
 }
 
@@ -1982,6 +2003,23 @@ static void ParseCommonJsonInfo(const JsonObj *json, NodeInfo *info, bool isMeta
     ParseCommonJsonOptInfo(json, info);
 }
 
+static void UnpackSparkCheck(const JsonObj *json, NodeInfo *info)
+{
+    char sparkCheck[SPARK_CHECK_STR_LEN] = {0};
+    do {
+        if (!JSON_GetStringFromObject(json, SPARK_CHECK, sparkCheck, SPARK_CHECK_STR_LEN)) {
+            AUTH_LOGE(AUTH_FSM, "get json info fail.");
+            break;
+        }
+        if (ConvertHexStringToBytes(info->sparkCheck, SPARK_CHECK_LENGTH, sparkCheck,
+            strlen(sparkCheck)) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "convert sparkCheck to bytes fail.");
+            break;
+        }
+    } while (0);
+    (void)memset_s(sparkCheck, SPARK_CHECK_STR_LEN, 0, SPARK_CHECK_STR_LEN);
+}
+
 static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -2017,6 +2055,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
 
     UnpackCipherRpaInfo(json, info);
     OptInt(json, DEVICE_SECURITY_LEVEL, &info->deviceSecurityLevel, 0);
+    UnpackSparkCheck(json, info);
 }
 
 static int32_t GetBtDiscTypeString(const NodeInfo *info, char *buf, uint32_t len)

@@ -1138,5 +1138,10 @@ int32_t LnnUpdateLocalBroadcastCipherKeyPacked(BroadcastCipherKey *broadcastKey)
 {
     return GetLocalLedgerDepsInterface()->LnnUpdateLocalBroadcastCipherKeyPacked(broadcastKey);
 }
+
+int32_t LnnGetLocalBroadcastCipherKeyPacked(BroadcastCipherKey *broadcastKey)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetLocalBroadcastCipherKeyPacked(broadcastKey);
+}
 } // extern "C"
 } // namespace OHOS

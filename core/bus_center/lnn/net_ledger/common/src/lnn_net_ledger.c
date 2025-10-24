@@ -180,6 +180,26 @@ static bool IsLocalBroadcastLinKeyChange(NodeInfo *info)
     return false;
 }
 
+static bool IsLocalSparkCheckChange(NodeInfo *info)
+{
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    if (LnnGetLocalByteInfo(BYTE_KEY_SPARK_CHECK, sparkCheck, SPARK_CHECK_LENGTH) == SOFTBUS_OK) {
+        if (memcmp(info->sparkCheck, sparkCheck, SPARK_CHECK_LENGTH) != 0) {
+            if (memcpy_s(info->sparkCheck, SPARK_CHECK_LENGTH, sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+                LNN_LOGE(LNN_LEDGER, "memcpy local sparkCheck fail");
+            }
+            (void)memset_s(sparkCheck, sizeof(sparkCheck), 0, sizeof(sparkCheck));
+            return true;
+        }
+        LNN_LOGI(LNN_LEDGER, "local sparkCheck same");
+        (void)memset_s(sparkCheck, sizeof(sparkCheck), 0, sizeof(sparkCheck));
+        return false;
+    }
+    LNN_LOGE(LNN_LEDGER, "get local sparkCheck fail, ignore");
+    (void)memset_s(sparkCheck, sizeof(sparkCheck), 0, sizeof(sparkCheck));
+    return false;
+}
+
 static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 {
     if (IsCapacityChange(info)) {
@@ -222,6 +242,9 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         return true;
     }
     if (IsLocalBroadcastLinKeyChange(info)) {
+        return true;
+    }
+    if (IsLocalSparkCheckChange(info)) {
         return true;
     }
     return false;
