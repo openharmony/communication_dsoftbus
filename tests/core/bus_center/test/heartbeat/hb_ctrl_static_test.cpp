@@ -58,6 +58,7 @@ void HeartBeatCtrlStaticTest::TearDown() { }
  * @tc.name: HB_HANDLE_LEAVE_LNN_TEST_001
  * @tc.desc: handle leave lnn base remote info
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_001, TestSize.Level1)
@@ -94,6 +95,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_001, TestSize.Level1)
  * @tc.name: HB_HANDLE_LEAVE_LNN_TEST_002
  * @tc.desc: handle leave lnn base remote info
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_002, TestSize.Level1)
@@ -134,8 +136,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_HANDLE_LEAVE_LNN_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_DISENABLE_BLE_DISCOVERY_TIME_TEST_001
- * @tc.desc:
+ * @tc.desc: get disenable ble discovery time test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, GET_DISENABLE_BLE_DISCOVERY_TIME_TEST_001, TestSize.Level1)
@@ -151,8 +154,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, GET_DISENABLE_BLE_DISCOVERY_TIME_TEST_001, Tes
 
 /*
  * @tc.name: LNN_REGISTER_HEART_BEAT_TEST_001
- * @tc.desc:
+ * @tc.desc: lnn register heartbeat event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_HEART_BEAT_TEST_001, TestSize.Level1)
@@ -200,8 +204,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_HEART_BEAT_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: HB_SEND_CHECK_OFFLINE_MESSAGE_TEST_001
- * @tc.desc:
+ * @tc.desc: hb send check offline message test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, HB_SEND_CHECK_OFFLINE_MESSAGE_TEST_001, TestSize.Level1)
@@ -236,8 +241,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_SEND_CHECK_OFFLINE_MESSAGE_TEST_001, TestSi
 
 /*
  * @tc.name: HB_TRY_CLOUD_SYNC_TEST_001
- * @tc.desc:
+ * @tc.desc: hb try cloud sync test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, HB_TRY_CLOUD_SYNC_TEST_001, TestSize.Level1)
@@ -266,8 +272,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, HB_TRY_CLOUD_SYNC_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_001
- * @tc.desc:
+ * @tc.desc: lnn register common event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_001, TestSize.Level1)
@@ -287,8 +294,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_002
- * @tc.desc:
+ * @tc.desc: lnn register common event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_002, TestSize.Level1)
@@ -305,8 +313,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_002, TestSize.L
 
 /*
  * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_003
- * @tc.desc:
+ * @tc.desc: lnn register common event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_003, TestSize.Level1)
@@ -325,8 +334,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_003, TestSize.L
 
 /*
  * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_004
- * @tc.desc:
+ * @tc.desc: lnn register common event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_004, TestSize.Level1)
@@ -347,8 +357,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_004, TestSize.L
 
 /*
  * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_005
- * @tc.desc:
+ * @tc.desc: lnn register common event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_005, TestSize.Level1)
@@ -371,8 +382,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_005, TestSize.L
 
 /*
  * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_006
- * @tc.desc:
+ * @tc.desc: lnn register common event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_006, TestSize.Level1)
@@ -397,8 +409,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_006, TestSize.L
 
 /*
  * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_007
- * @tc.desc:
+ * @tc.desc: lnn register common event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_007, TestSize.Level1)
@@ -425,8 +438,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_007, TestSize.L
 
 /*
  * @tc.name: LNN_REGISTER_NETWORK_EVENT_TEST_001
- * @tc.desc:
+ * @tc.desc: lnn register network event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_NETWORK_EVENT_TEST_001, TestSize.Level1)
@@ -456,8 +470,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_NETWORK_EVENT_TEST_001, TestSize.
 
 /*
  * @tc.name: LNN_IS_HEARTBEAT_ENABLE_TEST_001
- * @tc.desc: IsHeartbeatEnable test
+ * @tc.desc: is heartbeat enable test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_HEARTBEAT_ENABLE_TEST_001, TestSize.Level1)
@@ -516,6 +531,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_HEARTBEAT_ENABLE_TEST_001, TestSize.Lev
  * @tc.name: LNN_START_HEARTBEAT_FRAME_DELAY_TEST_001
  * @tc.desc: LnnStartHeartbeatFrameDelay Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAME_DELAY_TEST_001, TestSize.Level1)
@@ -563,6 +579,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAME_DELAY_TEST_001, Test
  * @tc.name: LNN_SHIFT_LNN_GEAR_TEST_001
  * @tc.desc: LnnShiftLNNGear Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
@@ -617,6 +634,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
  * @tc.name: LNN_SHIFT_LNN_GEAR_TEST_002
  * @tc.desc: LnnShiftLNNGear Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_002, TestSize.Level1)
@@ -672,6 +690,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_SHIFT_LNN_GEAR_TEST_002, TestSize.Level1)
  * @tc.name: LNN_INIT_HEARTBEAT_TEST_001
  * @tc.desc: LnnInitHeartbeat Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_INIT_HEARTBEAT_TEST_001, TestSize.Level1)
@@ -711,6 +730,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_INIT_HEARTBEAT_TEST_001, TestSize.Level1)
  * @tc.name: LNN_TRIGGER_DATA_LEVEL_HEARTBEAT_TEST_001
  * @tc.desc: LnnTriggerDataLevelHeartbeat Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DATA_LEVEL_HEARTBEAT_TEST_001, TestSize.Level1)
@@ -756,6 +776,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DATA_LEVEL_HEARTBEAT_TEST_001, Tes
  * @tc.name: LNN_TRIGGER_HB_FOR_RANGE_TEST_001
  * @tc.desc: LnnTriggerHbRangeForMsdp Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_001, TestSize.Level1)
@@ -779,6 +800,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_001, TestSize.Le
  * @tc.name: LNN_TRIGGER_DIRECT_HEARTBEAT_TEST_001
  * @tc.desc: LnnTriggerDirectHeartbeat Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DIRECT_HEARTBEAT_TEST_001, TestSize.Level1)
@@ -807,6 +829,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DIRECT_HEARTBEAT_TEST_001, TestSiz
  * @tc.name: LNN_TRIGGER_CLOUD_SYNC_HEARTBEAT_TEST_001
  * @tc.desc: LnnTriggerCloudSyncHeartbeat Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_CLOUD_SYNC_HEARTBEAT_TEST_001, TestSize.Level1)
@@ -854,8 +877,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_CLOUD_SYNC_HEARTBEAT_TEST_001, Tes
 
 /*
  * @tc.name: LNN_REQUEST_BLE_DISCOVERY_PROCESS_TEST_001
- * @tc.desc: LnnRequestBleDiscoveryProcess test
+ * @tc.desc: lnn request ble discovery process test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_REQUEST_BLE_DISCOVERY_PROCESS_TEST_001, TestSize.Level1)
@@ -881,8 +905,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REQUEST_BLE_DISCOVERY_PROCESS_TEST_001, Te
 
 /*
  * @tc.name: SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_001
- * @tc.desc: SameAccountDevDisableDiscoveryProcess test
+ * @tc.desc: same account dev disable discovery process test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_001, TestSize.Level1)
@@ -903,8 +928,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
 
 /*
  * @tc.name: SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_002
- * @tc.desc: SameAccountDevDisableDiscoveryProcess test
+ * @tc.desc: same account dev disable discovery process test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TEST_002, TestSize.Level1)
@@ -927,8 +953,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
 
 /*
  * @tc.name: REQUEST_DISABLE_DISCOVERY_TEST_001
- * @tc.desc: RequestDisableDiscovery test
+ * @tc.desc: request disable discovery test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, REQUEST_DISABLE_DISCOVERY_TEST_001, TestSize.Level1)
@@ -952,8 +979,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, REQUEST_DISABLE_DISCOVERY_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_START_HEARTBEAT_FRAMED_ELAY_TEST_001
- * @tc.desc: LnnStartHeartbeatFrameDelay test
+ * @tc.desc: lnn start heartbeat frame delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAMED_ELAY_TEST_001, TestSize.Level1)
@@ -987,8 +1015,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAMED_ELAY_TEST_001, Test
 
 /*
  * @tc.name: LNN_IS_CLOUD_SYNC_END_TEST_001
- * @tc.desc: LnnIsCloudSyncEnd test
+ * @tc.desc: lnn is cloud syncEnd test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_CLOUD_SYNC_END_TEST_001, TestSize.Level1)
@@ -1005,6 +1034,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_CLOUD_SYNC_END_TEST_001, TestSize.Level
  * @tc.name: LNN_TRIGGER_HB_FOR_RANGE_TEST_002
  * @tc.desc: LnnTriggerHbRangeForMsdp Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_002, TestSize.Level1)
@@ -1027,6 +1057,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_002, TestSize.Le
  * @tc.name: LNN_TRIGGER_HB_FOR_RANGE_TEST_003
  * @tc.desc: LnnTriggerHbRangeForMsdp Abnormal test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_003, TestSize.Level1)
@@ -1047,6 +1078,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_003, TestSize.Le
  * @tc.name: HbSleStateEventHandler_001
  * @tc.desc: test info is nullptr or info->event != LNN_EVENT_SLE_STATE_CHANGED
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, HbSleStateEventHandler_001, TestSize.Level1)
@@ -1062,6 +1094,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, HbSleStateEventHandler_001, TestSize.Level1)
  * @tc.name: HbSleStateEventHandler_002
  * @tc.desc: test sleState is SOFTBUS_SLE_TURN_ON or SOFTBUS_SLE_TURN_OFF
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, HbSleStateEventHandler_002, TestSize.Level1)
@@ -1087,6 +1120,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, HbSleStateEventHandler_002, TestSize.Level1)
  * @tc.name: LnnTriggerSleHeartbeat_001
  * @tc.desc: test IsHeartbeatEnable is true or false
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LnnTriggerSleHeartbeat_001, TestSize.Level1)
@@ -1127,6 +1161,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnTriggerSleHeartbeat_001, TestSize.Level1)
  * @tc.name: LnnStopSleHeartbeat_001
  * @tc.desc: test IsHeartbeatEnable return false
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LnnStopSleHeartbeat_001, TestSize.Level1)
@@ -1140,6 +1175,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnStopSleHeartbeat_001, TestSize.Level1)
  * @tc.name: LnnStopSleHeartbeat_002
  * @tc.desc: test IsHeartbeatEnable return true
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LnnStopSleHeartbeat_002, TestSize.Level1)
@@ -1164,6 +1200,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnStopSleHeartbeat_002, TestSize.Level1)
  * @tc.name: LnnOfflineTimingBySleHb_001
  * @tc.desc: test networkId is nullptr or addrType != CONNECTION_ADDR_BLE
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LnnOfflineTimingBySleHb_001, TestSize.Level1)
@@ -1179,6 +1216,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnOfflineTimingBySleHb_001, TestSize.Level1)
  * @tc.name: LnnOfflineTimingBySleHb_002
  * @tc.desc: test LnnSetDLSleHbTimestamp and LnnStartSleOfflineTimingStrategy return ok or not ok
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LnnOfflineTimingBySleHb_002, TestSize.Level1)
@@ -1204,6 +1242,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnOfflineTimingBySleHb_002, TestSize.Level1)
  * @tc.name: LnnStopOfflineTimingBySleHb_001
  * @tc.desc: test LnnStopOfflineTimingBySleHb func
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LnnStopOfflineTimingBySleHb_001, TestSize.Level1)
@@ -1220,6 +1259,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnStopOfflineTimingBySleHb_001, TestSize.Leve
  * @tc.name: LnnIsNeedInterceptBroadcast_001
  * @tc.desc: test LnnIsNeedInterceptBroadcast func
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, LnnIsNeedInterceptBroadcast_001, TestSize.Level1)
@@ -1243,6 +1283,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnIsNeedInterceptBroadcast_001, TestSize.Leve
  * @tc.name: InitHbSpecificConditionState_001
  * @tc.desc: test InitHbSpecificConditionState func
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, InitHbSpecificConditionState_001, TestSize.Level1)
@@ -1268,6 +1309,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, InitHbSpecificConditionState_001, TestSize.Lev
  * @tc.name: IsHeartbeatEnableForMcu
  * @tc.desc: test IsHeartbeatEnableForMcu func
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, IsHeartbeatEnableForMcu_001, TestSize.Level1)
@@ -1302,6 +1344,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, IsHeartbeatEnableForMcu_001, TestSize.Level1)
  * @tc.name: HbUpdateEnableStatusToMcu
  * @tc.desc: test HbUpdateEnableStatusToMcu func
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlStaticTest, HbUpdateEnableStatusToMcu_001, TestSize.Level1)
