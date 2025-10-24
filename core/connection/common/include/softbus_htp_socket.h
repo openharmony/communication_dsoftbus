@@ -56,6 +56,8 @@ typedef struct {
 
 const SocketInterface *GetHtpProtocol(void);
 
+int32_t ConnSetHtpKeepAlive(int32_t fd, int32_t alivetime);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
