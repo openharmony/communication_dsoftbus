@@ -46,9 +46,9 @@ void TransProxySessionStaticTest::TearDownTestCase(void)
 }
 
 
-/**
+/*
  * @tc.name: TransProxyTransNormalMsgTest001
- * @tc.desc: test proxy post trans normal msg.
+ * @tc.desc: test proxy post trans normal msg
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -72,9 +72,9 @@ HWTEST_F(TransProxySessionStaticTest, TransProxyTransNormalMsgTest001, TestSize.
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackD2DMsgTest001
- * @tc.desc: test proxy post pack d2d msg.
+ * @tc.desc: test proxy post pack d2d msg
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -92,9 +92,9 @@ HWTEST_F(TransProxySessionStaticTest, TransProxyPackD2DMsgTest001, TestSize.Leve
     EXPECT_NE(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackAppNormalMsgTest001
- * @tc.desc: test proxy post pack normal msg.
+ * @tc.desc: test proxy post pack normal msg
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -137,9 +137,9 @@ void TransProxyNetworkTest::TestRegisterNetworkingChannelListener(void)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransNoRegisterListenerTest001
- * @tc.desc: test callback after no register networking channel listener.
+ * @tc.desc: test callback after no register networking channel listener
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -156,9 +156,9 @@ HWTEST_F(TransProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level1)
     EXPECT_NE(true, TransProxyNetworkTest::m_messageReceivedFlag);
 }
 
-/**
+/*
  * @tc.name: TransRegisterListenerTest001
- * @tc.desc: test callback after register networking channel listener.
+ * @tc.desc: test callback after register networking channel listener
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -177,12 +177,12 @@ HWTEST_F(TransProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     EXPECT_EQ(false, TransProxyNetworkTest::m_messageReceivedFlag);
 }
 
-/**
-  * @tc.name: TransOnProxyChannelOpenFailedTest001
-  * @tc.desc: test proxy channel open failed with wrong param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransOnProxyChannelOpenFailedTest001
+ * @tc.desc: test proxy channel open failed with wrong param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize.Level1)
 {
     int32_t channelId = -1;
@@ -197,12 +197,12 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize.L
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransOnProxyChannelClosedTest001
-  * @tc.desc: test proxy channel closed with wrong param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransOnProxyChannelClosedTest001
+ * @tc.desc: test proxy channel closed with wrong param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
@@ -221,12 +221,12 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
-/**
-  * @tc.name: TransOnProxyChannelMsgReceivedTest001
-  * @tc.desc: test proxy channel msg received.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransOnProxyChannelMsgReceivedTest001
+ * @tc.desc: test proxy channel msg received
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.Level1)
 {
     int32_t channelId = -1;
@@ -259,12 +259,13 @@ HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxySetCallBackTest001
-  * @tc.desc: TransProxySetCallBack test
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: TransProxySetCallBackTest001
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_PACKMSG_ERR
+ *           when given invalid parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(TransProxyNetworkTest, TransProxySetCallBackTest001, TestSize.Level1)
 {
     int32_t ret = TransProxySetCallBack(nullptr);
