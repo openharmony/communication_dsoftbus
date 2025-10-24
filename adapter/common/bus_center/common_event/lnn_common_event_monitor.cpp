@@ -14,7 +14,6 @@
  */
 
 #include "lnn_event_monitor_impl.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
