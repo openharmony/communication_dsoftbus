@@ -56,7 +56,7 @@ void LnnCommonEventMonitorTest::SetUp() { }
  
 void LnnCommonEventMonitorTest::TearDown() { }
  
-/**
+/*
  * @tc.name: LNN_OnReceiveSleEvent_001
  * @tc.desc: check sle common event D2D
  * @tc.type: FUNC
@@ -78,7 +78,7 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(eventSubscriber.OnReceiveEvent(data));
 }
  
-/**
+/*
  * @tc.name: LNN_OnReceiveSleEvent_002
  * @tc.desc: check sle common event
  * @tc.type: FUNC
@@ -101,7 +101,7 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_002, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(eventSubscriber.OnReceiveEvent(data));
 }
  
-/**
+/*
  * @tc.name: LNN_OnReceiveSleEvent_003
  * @tc.desc: check sle common event
  * @tc.type: FUNC
@@ -124,7 +124,7 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_003, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(eventSubscriber.OnReceiveEvent(data));
 }
  
-/**
+/*
  * @tc.name: LNN_OnReceiveSleEvent_004
  * @tc.desc: check sle common event
  * @tc.type: FUNC
@@ -147,7 +147,7 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_004, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(eventSubscriber.OnReceiveEvent(data));
 }
  
-/**
+/*
  * @tc.name: LNN_OnReceiveSleEvent_005
  * @tc.desc: check sle common event
  * @tc.type: FUNC
