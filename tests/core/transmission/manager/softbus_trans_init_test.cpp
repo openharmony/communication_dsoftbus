@@ -44,7 +44,7 @@ static int32_t TransRegisterOpenfuncTemp(void)
     return SOFTBUS_NETWORK_DLOPEN_FAILED;
 }
 
-/**
+/*
  * @tc.name: TransOpenFuncInit001
  * @tc.desc: Use the wrong parameter
  * @tc.type: FUNC
@@ -56,7 +56,7 @@ HWTEST_F(SoftbusTransInitTest, TransOpenFuncInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NETWORK_DLOPEN_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransOpenFuncInit002
  * @tc.desc: Use the wrong parameter
  * @tc.type: FUNC
@@ -75,7 +75,7 @@ HWTEST_F(SoftbusTransInitTest, TransOpenFuncInit002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NETWORK_DLSYM_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransOpenFuncInit003
  * @tc.desc: Use the wrong parameter
  * @tc.type: FUNC

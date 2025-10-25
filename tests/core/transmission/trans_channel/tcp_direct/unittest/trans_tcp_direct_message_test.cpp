@@ -112,9 +112,10 @@ AppInfo *TestSetAppInfo()
     return appInfo;
 }
 
-/**
+/*
  * @tc.name: P2pDirectChannelInitTest001
- * @tc.desc: P2pDirectChannelInit, use the wrong parameter.
+ * @tc.desc: test P2pDirectChannelInit
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -124,9 +125,10 @@ HWTEST_F(TransTcpDirectMessageTest, P2pDirectChannelInitTest001, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: OpenP2pDirectChannelTest001
- * @tc.desc: OpenP2pDirectChannel, use the wrong parameter.
+ * @tc.desc: test OpenP2pDirectChannel
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -173,9 +175,10 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: GenerateTdcChannelIdTest003
- * @tc.desc: GenerateTdcChannelId, use the wrong parameter.
+ * @tc.desc: test GenerateTdcChannelId
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -204,9 +207,10 @@ HWTEST_F(TransTcpDirectMessageTest, GenerateTdcChannelIdTest003, TestSize.Level1
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: GetSessionConnByRequestIdTest004
- * @tc.desc: GetSessionConnByRequestId, use the wrong parameter.
+ * @tc.desc: test GetSessionConnByRequestId
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -234,9 +238,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByRequestIdTest004, TestSize.L
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: GetSessionConnByReqTest005
- * @tc.desc: GetSessionConnByReq, use the wrong parameter.
+ * @tc.desc: test GetSessionConnByReq
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -259,9 +264,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByReqTest005, TestSize.Level1)
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: CreateNewSessinConnTest006
- * @tc.desc: CreateNewSessinConn, use the wrong parameter.
+ * @tc.desc: test CreateNewSessinConn
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -271,9 +277,10 @@ HWTEST_F(TransTcpDirectMessageTest, CreateNewSessinConnTest006, TestSize.Level1)
     EXPECT_EQ(nullptr, session);
 }
 
-/**
+/*
  * @tc.name: GetSessionConnByFdTest007
- * @tc.desc: GetSessionConnByFd, use the wrong parameter.
+ * @tc.desc: test GetSessionConnByFd
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -301,9 +308,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: GetSessionConnByIdTest008
- * @tc.desc: GetSessionConnById, use the wrong parameter.
+ * @tc.desc: test GetSessionConnById
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -324,9 +332,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByIdTest008, TestSize.Level1)
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: SetAppInfoByIdTest009
- * @tc.desc: SetAppInfoById, use the wrong parameter.
+ * @tc.desc: test SetAppInfoById
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -361,9 +370,10 @@ HWTEST_F(TransTcpDirectMessageTest, SetAppInfoByIdTest009, TestSize.Level1)
     appInfo = nullptr;
 }
 
-/**
+/*
  * @tc.name: GetAppInfoByIdTest0010
- * @tc.desc: GetAppInfoById, use the wrong parameter.
+ * @tc.desc: test GetAppInfoById
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -381,9 +391,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetAppInfoByIdTest0010, TestSize.Level1)
     appInfo = nullptr;
 }
 
-/**
+/*
  * @tc.name: SetAuthHandleByChanIdTest0011
- * @tc.desc: SetAuthHandleByChanId, use the wrong parameter.
+ * @tc.desc: test SetAuthHandleByChanId
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -398,9 +409,10 @@ HWTEST_F(TransTcpDirectMessageTest, SetAuthHandleByChanIdTest0011, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_TRANS_SET_AUTH_HANDLE_FAILED);
 }
 
-/**
+/*
  * @tc.name: GetAuthHandleByChanIdTest0012
- * @tc.desc: GetAuthHandleByChanId, use the wrong parameter.
+ * @tc.desc: test GetAuthHandleByChanId
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -425,9 +437,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthHandleByChanIdTest0012, TestSize.Leve
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: GetAuthIdByChanIdTest0013
- * @tc.desc: GetAuthIdByChanId, use the wrong parameter.
+ * @tc.desc: test GetAuthIdByChanId
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -449,9 +462,10 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0013, TestSize.Level1)
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcAddSessionConnTest0014
- * @tc.desc: TransTdcAddSessionConn, use the wrong parameter.
+ * @tc.desc: test TransTdcAddSessionConn
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -471,9 +485,10 @@ HWTEST_F(TransTcpDirectMessageTest, TransTdcAddSessionConnTest0014, TestSize.Lev
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: SetSessionKeyByChanIdTest0015
- * @tc.desc: SetSessionKeyByChanId, use the wrong parameter.
+ * @tc.desc: test SetSessionKeyByChanId
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -498,9 +513,10 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionKeyByChanIdTest0015, TestSize.Leve
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: SetSessionConnStatusByIdTest0016
- * @tc.desc: SetSessionConnStatusById, use the wrong parameter.
+ * @tc.desc: test SetSessionConnStatusById
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -525,9 +541,10 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionConnStatusByIdTest0016, TestSize.L
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: TcpTranGetAppInfobyChannelIdTest0017
- * @tc.desc: TcpTranGetAppInfobyChannelId, use the wrong parameter.
+ * @tc.desc: test TcpTranGetAppInfobyChannelId
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -551,9 +568,10 @@ HWTEST_F(TransTcpDirectMessageTest, TcpTranGetAppInfobyChannelIdTest0017, TestSi
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest0018
- * @tc.desc: OpenTcpDirectChannel, use the wrong parameter.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -594,9 +612,10 @@ HWTEST_F(TransTcpDirectMessageTest, OpenTcpDirectChannelTest0018, TestSize.Level
     AuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransGetLocalConfigTest001
- * @tc.desc: TransGetLocalConfig
+ * @tc.desc: test TransGetLocalConfig
+ *           use the wrong parameter return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -609,9 +628,10 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetLocalConfigTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransGetLocalConfigTest002
- * @tc.desc: TransGetLocalConfig
+ * @tc.desc: test TransGetLocalConfig
+ *           use the normal parameter return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -624,9 +644,10 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetLocalConfigTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransGetChannelIdsByAuthIdAndStatus001
- * @tc.desc: TransGetLocalConfig
+ * @tc.desc: test TransGetLocalConfig
+ *           use different parameter types return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -671,9 +692,10 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, Test
     SoftBusFree(channelId);
 }
 
-/**
+/*
  * @tc.name: TransDealTdcCheckCollabResult001
- * @tc.desc: check collab result.
+ * @tc.desc: test TransDealTdcCheckCollabResult
+ *           check collab result
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -688,9 +710,10 @@ HWTEST_F(TransTcpDirectMessageTest, TransDealTdcCheckCollabResult001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 }
 
-/**
+/*
  * @tc.name: TransDealTdcCheckCollabResult002
- * @tc.desc: check collab result.
+ * @tc.desc: test TransDealTdcCheckCollabResult
+ *           check collab result
  * @tc.type: FUNC
  * @tc.require:
  */
