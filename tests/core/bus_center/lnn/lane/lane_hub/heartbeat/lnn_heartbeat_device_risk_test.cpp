@@ -62,7 +62,7 @@ void LnnHeartBeatDeviceRiskTest::TearDown()
 {}
 
 /*
- * @tc.name: RiskDeviceLeaveLnnTest01
+ * @tc.name: RiskDeviceLeaveLnnTest001
  * @tc.desc: use abnomal parameter
  * @tc.type: FUNC
  * @tc.require:
@@ -70,19 +70,19 @@ void LnnHeartBeatDeviceRiskTest::TearDown()
 HWTEST_F(LnnHeartBeatDeviceRiskTest, RiskDeviceLeaveLnnTest001, TestSize.Level1)
 {
     int ret = 0;
-    NiceMock<LnnHeatbeatDeviceRiskInterfaceMock> LnnMock;
+    NiceMock<LnnHeatbeatDeviceRiskInterfaceMock> lnnDeviceRiskMock;
 
-    EXPECT_CALL(LnnMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(lnnDeviceRiskMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 
-    EXPECT_CALL(LnnMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnDeviceRiskMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
 }
 
 /*
- * @tc.name: HbDeviceRiskStateEventHandlerTest01
+ * @tc.name: HbDeviceRiskStateEventHandlerTest001
  * @tc.desc: use abnomal parameter
  * @tc.type: FUNC
  * @tc.require:
@@ -106,5 +106,7 @@ HWTEST_F(LnnHeartBeatDeviceRiskTest, HbDeviceRiskStateEventHandlerTest001, TestS
     HbDeviceRiskStateEventHandler(&event->basic);
 
     EXPECT_EQ(event->status, 0);
+
+    SoftBusFree(event);
 }
 }  // namespace OHOS
