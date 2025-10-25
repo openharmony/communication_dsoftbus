@@ -226,7 +226,8 @@ HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, Test
 
 /*
  * @tc.name: LNN_INIT_DEVICE_NAME_TEST_001
- * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return error
+ * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return
+ * error
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -241,7 +242,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DEVICE_NAME_TEST_002
- * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return success
+ * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return
+ * success
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

@@ -254,7 +254,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_006
- * @tc.desc: SoftBusGenerateRandomArray((uint8_t *)&dataInfo.seq, sizeof(int64_t)) != SOFTBUS_OK
+ * @tc.desc: SoftBusGenerateRandomArray((uint8_t *)&dataInfo.seq,
+ * sizeof(int64_t)) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -333,7 +334,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_007, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008
- * @tc.desc: AuthPostTransData(authHandle, &dataInfo) != SOFTBUS_OK
+ * @tc.desc: AuthPostTransData(authHandle, &dataInfo) !=
+ * SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -586,7 +588,8 @@ HWTEST_F(LNNSyncInfoManagerTest, AddChannelInfoNode_001, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelOpened_001
- * @tc.desc: LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK
+ * @tc.desc: LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID,
+ * networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
  * @tc.level: Level1
