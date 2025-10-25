@@ -81,7 +81,9 @@ void OnDeviceBound(const char *udid, const char *groupInfo)
 }
 /*
  * @tc.name: ON_DEVICE_NOT_TRUSTED_TEST_001
- * @tc.desc: on device not trusted test
+ * @tc.desc: Verify that OnGroupCreated, OnGroupDeleted, and OnDeviceNotTrusted callbacks are
+ *           correctly invoked and handle various input scenarios, including null and valid group
+ *           information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -135,7 +137,8 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_REQUEST_TEST_001
- * @tc.desc: on request test
+ * @tc.desc: Verify that OnRequest handles various input parameters and that
+ *           DfxRecordLnnExchangekeyEnd and DfxRecordLnnEndHichainEnd are called correctly.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -163,7 +166,9 @@ HWTEST_F(AuthHichainTest, ON_REQUEST_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_001
- * @tc.desc: is potential trusted device test
+ * @tc.desc: Verify that IsPotentialTrustedDevice correctly identifies potential trusted devices,
+ *           handling various scenarios including failures in retrieving local string information
+ *           and group manager instance.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -198,7 +203,9 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_002
- * @tc.desc: is potential trusted device test
+ * @tc.desc: Verify that IsPotentialTrustedDevice correctly identifies potential trusted devices
+ *           under various conditions, including different group manager configurations and JSON
+ *           parsing outcomes.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -238,7 +245,8 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: HI_CHAIN_GET_JOINED_GROUPS_TEST_001
- * @tc.desc: hichain get joined groups test
+ * @tc.desc: Verify that HichainGetJoinedGroups correctly retrieves the number of joined groups
+ *           for various group types and handles request cancellations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -265,7 +273,8 @@ HWTEST_F(AuthHichainTest, HI_CHAIN_GET_JOINED_GROUPS_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001
- * @tc.desc: is potential trusted device test
+ * @tc.desc: Verify that IsSameAccountGroupDevice correctly determines if a device belongs to the
+ *           same account group under various group manager configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -295,7 +304,8 @@ HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: HICHAIN_PROCESS_UK_NEGO_DATA_TEST_001
- * @tc.desc: hichain process uk negotiate data test
+ * @tc.desc: Verify that HichainProcessUkNegoData handles invalid parameters when processing
+ *           unique key negotiation data.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

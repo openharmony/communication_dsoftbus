@@ -90,7 +90,7 @@ void AuthConnectionTest::OnDataReceived(
 
 /*
  * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
- * @tc.desc: is enhance P2p moduleId test
+ * @tc.desc: Verify the IsEnhanceP2pModuleId function correctly identifies enhanced P2P module IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -112,7 +112,7 @@ HWTEST_F(AuthConnectionTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CEN_CONN_ID_TEST_001
- * @tc.desc: generate conn ID test
+ * @tc.desc: Verify the GenConnId function correctly generates connection IDs based on connection type and ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -127,7 +127,7 @@ HWTEST_F(AuthConnectionTest, CEN_CONN_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get conn type test
+ * @tc.desc: Verify the GetConnType function correctly extracts the connection type from a connection ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -140,8 +140,8 @@ HWTEST_F(AuthConnectionTest, CET_CONN_TYPE_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get conn type str test
+ * @tc.name: CET_CONN_TYPE_STR_TEST_001
+ * @tc.desc: Verify the GetConnTypeStr function returns the correct string representation for various connection types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -190,8 +190,8 @@ HWTEST_F(AuthConnectionTest, CET_CONN_TYPE_STR_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get conn id test
+ * @tc.name: CET_CONN_ID_TEST_001
+ * @tc.desc: Verify the GetConnId function correctly extracts the connection ID from a connection ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -204,8 +204,8 @@ HWTEST_F(AuthConnectionTest, CET_CONN_ID_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get fd test
+ * @tc.name: CET_FD_TEST_001
+ * @tc.desc: Verify the GetFd function correctly extracts the file descriptor from a connection ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -219,7 +219,8 @@ HWTEST_F(AuthConnectionTest, CET_FD_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FIND_CONN_REQUEST_BY_FD_TEST_001
- * @tc.desc: Test finding connection request by unused fd
+ * @tc.desc: Verify that FindConnRequestByFd returns nullptr when searching for
+ *           a connection request with an unused file descriptor.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -232,7 +233,8 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_FD_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FIND_CONN_REQUEST_BY_FD_TEST_002
- * @tc.desc: Test findind connection request by added fd
+ * @tc.desc: Verify that FindConnRequestByFd successfully retrieves a connection request
+ *           after it has been added with a valid file descriptor.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -252,7 +254,8 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_FD_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: FIND_CONN_REQUEST_BY_REQUEST_ID_TEST_001
- * @tc.desc: Test finding connection request by nonexisted request id
+ * @tc.desc: Verify that FindConnRequestByRequestId returns nullptr when searching
+ *           for a connection request with a non-existent request ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -264,8 +267,8 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_REQUEST_ID_TEST_001, TestSize.
 }
 
 /*
- * @tc.name: FIND_CONN_REQUEST_BY_REQUEST_ID_TEST_001
- * @tc.desc: Notify client connected
+ * @tc.name: NOTIFY_CLIENT_CONNECTED_TEST_001
+ * @tc.desc: Verify that NotifyClientConnected correctly triggers the onConnectResult callback for registered listeners.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -298,7 +301,7 @@ HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_CONNECTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: NOTIFY_CLIENT_DISCONNECTED_TEST_001
- * @tc.desc: Notify client disconnected
+ * @tc.desc: Verify that NotifyDisconnected correctly triggers the onDisconnected callback for registered listeners.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -329,7 +332,7 @@ HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_DISCONNECTED_TEST_001, TestSize.Level
 
 /*
  * @tc.name: NOTIFY_DATE_RECEIVED_TEST_001
- * @tc.desc: Notify data received
+ * @tc.desc: Verify that NotifyDataReceived correctly triggers the onDataReceived callback for registered listeners.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -365,7 +368,7 @@ HWTEST_F(AuthConnectionTest, NOTIFY_DATE_RECEIVED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_AUTH_DATA_SIZE_TEST_001
- * @tc.desc: Get auth data size
+ * @tc.desc: Verify that GetAuthDataSize correctly calculates the total size of authentication data.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -379,7 +382,8 @@ HWTEST_F(AuthConnectionTest, GET_AUTH_DATA_SIZE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_AUTH_DATA_TEST_001
- * @tc.desc: Test buffer is not enough while packing auth data
+ * @tc.desc: Verify that PackAuthData handles insufficient buffer size and
+ *           invalid parameters gracefully during authentication data packing.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -410,7 +414,8 @@ HWTEST_F(AuthConnectionTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: UNPACK_AUTH_DATA_TEST_001
- * @tc.desc: Test the data length is shorter than head length
+ * @tc.desc: Verify that UnpackAuthData handles cases where the provided data length
+ *           is shorter than the expected head length, returning nullptr.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -434,7 +439,8 @@ HWTEST_F(AuthConnectionTest, UNPACK_AUTH_DATA_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_AUTH_TIMEOUT_ERR_CODE_TEST_001
- * @tc.desc: Test GetAuthTimeoutErrCode return the exact error code according to auth link type
+ * @tc.desc: Verify that GetAuthTimeoutErrCode returns the correct timeout error code based on the
+ *           provided authentication link type.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -463,7 +469,8 @@ HWTEST_F(AuthConnectionTest, GET_AUTH_TIMEOUT_ERR_CODE_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: IS_SESSION_AUTH_TEST_001
- * @tc.desc: Is session auth
+ * @tc.desc: Verify that IsSessionAuth correctly identifies if a given module is a session
+ *           authentication module.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -480,8 +487,9 @@ HWTEST_F(AuthConnectionTest, IS_SESSION_AUTH_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: IS_SESSION_AUTH_TEST_001
- * @tc.desc: Is session key auth
+ * @tc.name: IS_SESSION_KEY_AUTH_TEST_001
+ * @tc.desc: Verify that IsSessionKeyAuth correctly identifies if a given module is a session key
+ *           authentication module.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -498,8 +506,8 @@ HWTEST_F(AuthConnectionTest, IS_SESSION_KEY_AUTH_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: IS_SESSION_AUTH_TEST_001
- * @tc.desc: Init WiFi conn
+ * @tc.name: INIT_WIFI_CONN_TEST_001
+ * @tc.desc: Verify that InitWiFiConn successfully initializes the Wi-Fi connection module.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -512,7 +520,8 @@ HWTEST_F(AuthConnectionTest, INIT_WIFI_CONN_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_COMM_DISCONNECTED_TEST_001
- * @tc.desc: notify comm disconnected
+ * @tc.desc: Verify that OnCommDisconnected correctly notifies registered listeners about
+ *           communication disconnections.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -546,7 +555,8 @@ HWTEST_F(AuthConnectionTest, ON_COMM_DISCONNECTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_CONN_INFO_BY_CONNECTION_ID_TEST_001
- * @tc.desc: get connInfo by connection id
+ * @tc.desc: Verify that GetConnInfoByConnectionId retrieves connection information using a
+ *           connection ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -563,7 +573,7 @@ HWTEST_F(AuthConnectionTest, GET_CONN_INFO_BY_CONNECTION_ID_TEST_001, TestSize.L
 
 /*
  * @tc.name: INIT_COMM_CONN_TEST_001
- * @tc.desc: init comm conn
+ * @tc.desc: Verify that InitCommConn successfully initializes the common connection module.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -577,7 +587,8 @@ HWTEST_F(AuthConnectionTest, INIT_COMM_CONN_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: SESSION_CONNECT_SUCC_TEST_001
- * @tc.desc: session connect succ
+ * @tc.desc: Verify that SessionConnectSucc correctly triggers the onConnectResult callback for
+ *           registered listeners upon successful session connection.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -605,7 +616,8 @@ HWTEST_F(AuthConnectionTest, SESSION_CONNECT_SUCC_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_001
- * @tc.desc: Mock ble is not enable
+ * @tc.desc: Verify that ConnectAuthDevice handles cases where BLE is disabled, resulting in an
+ *           authentication connection failure.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -625,7 +637,8 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_002
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_SESSION
+ * @tc.desc: Verify that ConnectAuthDevice successfully establishes a connection when the
+ *           authentication link type is AUTH_LINK_TYPE_SESSION.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -646,7 +659,8 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_003
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_SESSION_KEY
+ * @tc.desc: Verify that ConnectAuthDevice successfully establishes a connection when the
+ *           authentication link type is AUTH_LINK_TYPE_SESSION_KEY.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -665,7 +679,8 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_004
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_MAX
+ * @tc.desc: Verify that ConnectAuthDevice successfully handles the AUTH_LINK_TYPE_MAX
+ *           authentication link type.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -684,7 +699,8 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_004, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_005
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_WIFI or AUTH_LINK_TYPE_USB
+ * @tc.desc: Verify that ConnectAuthDevice successfully establishes a connection when the
+ *           authentication link type is AUTH_LINK_TYPE_WIFI or AUTH_LINK_TYPE_USB.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -707,7 +723,9 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_005, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_006
- * @tc.desc: ConnectAuthDevice fail, auth link type is AUTH_LINK_TYPE_BLE or AUTH_LINK_TYPE_SLE
+ * @tc.desc: Verify that ConnectAuthDevice fails to establish a connection when the
+ *           authentication link type is AUTH_LINK_TYPE_BLE or AUTH_LINK_TYPE_SLE, returning
+ *           appropriate error codes.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -730,7 +748,9 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_006, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_007
- * @tc.desc: ConnectAuthDevice fail, auth link type is AUTH_LINK_TYPE_P2P or AUTH_LINK_TYPE_ENHANCED_P2P
+ * @tc.desc: Verify that ConnectAuthDevice fails to establish a connection when the
+ *           authentication link type is AUTH_LINK_TYPE_P2P or AUTH_LINK_TYPE_ENHANCED_P2P,
+ *           returning appropriate error codes.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -753,7 +773,8 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_007, TestSize.Level1)
 
 /*
  * @tc.name: POST_BY_TEST_FOR_SESSION_TEST_001
- * @tc.desc: PostBytesForSession test, data is nullptr
+ * @tc.desc: Verify that PostBytesForSession handles null data parameters gracefully, returning
+ *           an invalid parameter error.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -768,7 +789,8 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: POST_BY_TEST_FOR_SESSION_TEST_002
- * @tc.desc: Mock SocketPostBytes fail
+ * @tc.desc: Verify that PostBytesForSession handles failures when SocketPostBytes returns an
+ *           error, propagating the error code.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -789,7 +811,8 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: POST_BY_TEST_FOR_SESSION_TEST_003
- * @tc.desc: PostBytesForSession success
+ * @tc.desc: Verify that PostBytesForSession successfully posts bytes for a session when all
+ *           parameters are valid.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -808,7 +831,8 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: IS_AUTH_SESSION_KEY_MODULE_TEST_001
- * @tc.desc: is auth session key module
+ * @tc.desc: Verify that IsAuthSessionKeyModule correctly identifies various authentication data
+ *           types as belonging to the session key module.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -839,7 +863,8 @@ HWTEST_F(AuthConnectionTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level
 
 /*
  * @tc.name: POST_BYTES_FOR_SESSION_KEY_TEST_001
- * @tc.desc: post bytes for sessionKey
+ * @tc.desc: Verify that PostBytesForSessionKey successfully posts bytes for a session key,
+ *           including handling different data types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -865,7 +890,8 @@ HWTEST_F(AuthConnectionTest, POST_BYTES_FOR_SESSION_KEY_TEST_001, TestSize.Level
 
 /*
  * @tc.name: POST_AUTH_DATA_TEST_001
- * @tc.desc: Post auth data
+ * @tc.desc: Verify that PostAuthData handles invalid parameters and correctly posts
+ *           authentication data for various connection types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -910,7 +936,8 @@ HWTEST_F(AuthConnectionTest, POST_AUTH_DATA_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: POST_AUTH_DATA_TEST_002
- * @tc.desc: Post auth data
+ * @tc.desc: Verify that PostAuthData handles various connection types when posting
+ *           authentication data, including expected success and failure scenarios.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -949,7 +976,8 @@ HWTEST_F(AuthConnectionTest, POST_AUTH_DATA_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_CONN_SIDE_TYPE_TEST_001
- * @tc.desc: get conn side type
+ * @tc.desc: Verify that GetConnSideType correctly extracts the connection side type from a
+ *           connection ID for various link types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -971,7 +999,8 @@ HWTEST_F(AuthConnectionTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CHECK_ACTIVE_AUTH_CONNECTION_TEST_001
- * @tc.desc: check active auth connection
+ * @tc.desc: Verify that CheckActiveAuthConnection correctly identifies whether an authentication
+ *           connection is active, including handling null input.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -990,7 +1019,7 @@ HWTEST_F(AuthConnectionTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_001
- * @tc.desc: Auth start wifi listening success
+ * @tc.desc: Verify that AuthStartListening successfully initiates listening for Wi-Fi connections.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1006,7 +1035,8 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_002
- * @tc.desc: Auth start enhanced p2p listening success
+ * @tc.desc: Verify that AuthStartListening successfully initiates listening for enhanced P2P
+ *           connections.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1022,7 +1052,8 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_003
- * @tc.desc: Unsupported link type
+ * @tc.desc: Verify that AuthStartListening returns an invalid parameter error for unsupported
+ *           link types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1036,7 +1067,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_004
- * @tc.desc: Auth start usb listening success
+ * @tc.desc: Verify that AuthStartListening successfully initiates listening for USB connections.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1052,7 +1083,8 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_004, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001
- * @tc.desc: Auth start AUTH_LINK_TYPE_P2P listening
+ * @tc.desc: Verify that AuthStartListeningForWifiDirect handles invalid parameters and
+ *           unsupported link types when initiating Wi-Fi Direct listening.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
