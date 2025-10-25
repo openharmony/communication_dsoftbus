@@ -46,7 +46,7 @@ void AuthUserCommonKeyTest::TearDown() { }
 
 /*
  * @tc.name: AUTH_USER_COMMON_KEY_Test_001
- * @tc.desc: AuthUserKey test
+ * @tc.desc: Test user key functions before initialization.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

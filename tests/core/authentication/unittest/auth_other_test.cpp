@@ -120,7 +120,8 @@ void OnGroupDeletedTest(const char *groupId)
 
 /*
  * @tc.name: ADD_CONN_REQUEST_TEST_001
- * @tc.desc: add conn request test
+ * @tc.desc: Verify that AddConnRequest successfully adds a connection request and that
+ *           FindConnRequestByRequestId and DelConnRequest function correctly.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -141,7 +142,8 @@ HWTEST_F(AuthOtherTest, ADD_CONN_REQUEST_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: REMOVE_FUNC_TEST_001
- * @tc.desc: remove func test
+ * @tc.desc: Verify that RemoveFunc handles null parameters and returns SOFTBUS_OK for valid
+ *           inputs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -161,7 +163,8 @@ HWTEST_F(AuthOtherTest, REMOVE_FUNC_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CHECK_ACTIVE_AUTH_CONNECTION_TEST_001
- * @tc.desc: check active auth connection test
+ * @tc.desc: Verify that CheckActiveAuthConnection returns false when provided with null or empty
+ *           connection information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -179,7 +182,8 @@ HWTEST_F(AuthOtherTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_META_TYPE_TEST_001
- * @tc.desc: auth get meta type test
+ * @tc.desc: Verify that AuthGetMetaType handles null pointers for the isMetaAuth parameter and
+ *           returns SOFTBUS_OK for valid inputs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -197,7 +201,8 @@ HWTEST_F(AuthOtherTest, AUTH_GET_META_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: REMOVE_AUTH_MANAGER_BY_AUTH_ID_TEST_001
- * @tc.desc: remove auth manager by auth id test
+ * @tc.desc: Verify that AuthManager can be created, and then retrieved and removed by connection
+ *           ID and authentication ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -239,7 +244,9 @@ HWTEST_F(AuthOtherTest, REMOVE_AUTH_MANAGER_BY_AUTH_ID_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: NOTIFY_DEVICE_VERIFY_PASSED_TEST_001
- * @tc.desc: notify device verify passed test
+ * @tc.desc: Verify that AuthNotifyDeviceVerifyPassed correctly notifies registered listeners
+ *           about device verification success, handling null callbacks and valid authentication
+ *           handles.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -268,7 +275,8 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_MANAGER_SET_AUTH_PASSED_TEST_001
- * @tc.desc: auth manager set auth passed test
+ * @tc.desc: Verify that AuthManagerSetAuthPassed and AuthManagerSetAuthFailed correctly update
+ *           the authentication status of an authentication manager.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -294,7 +302,8 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_PASSED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: HANDLE_CONNECTION_DATA_TEST_001
- * @tc.desc: handle connection data test
+ * @tc.desc: Verify that HandleConnectionData correctly processes connection data, including
+ *           creating and deleting authentication managers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -337,7 +346,8 @@ static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 
 /*
  * @tc.name: AUTH_DEVICE_OPEN_CONN_TEST_001
- * @tc.desc: auth device open conn test
+ * @tc.desc: Verify that AuthDeviceOpenConn handles various connection types and returns
+ *           appropriate error codes when opening a connection.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -372,8 +382,10 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_TEST_001
- * @tc.desc: update auth request conn info test
+ * @tc.name: FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001
+ * @tc.desc: Verify that FindAuthRequestByConnInfo, GetAuthRequestNoLock, and
+ *           FindAndDelAuthRequestByConnInfo correctly handle authentication requests, including
+ *           adding, finding, and deleting requests.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -415,8 +427,10 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1
 }
 
 /*
- * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_TEST_002
- * @tc.desc: update auth request conn info test
+ * @tc.name: FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_002
+ * @tc.desc: Verify that FindAndDelAuthRequestByConnInfo correctly handles authentication
+ *           requests, including adding, finding, and deleting requests, and performing
+ *           authentication connection callbacks.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -452,7 +466,8 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_002, TestSize.Level1
 
 /*
  * @tc.name: RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001
- * @tc.desc: rmove update session key func test
+ * @tc.desc: Verify that RemoveUpdateSessionKeyFunc handles null parameters and returns SOFTBUS_OK
+ *           for valid inputs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -473,7 +488,8 @@ HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: POST_CLOSE_ACK_MESSAGE_TEST_001
- * @tc.desc: post close ack message test
+ * @tc.desc: Verify that PostCloseAckMessage handles null session info and returns an error when
+ *           posting a close acknowledgment message fails.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -491,7 +507,8 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_AUTH_DATA_TEST_001
- * @tc.desc: pack auth data test
+ * @tc.desc: Verify that PackAuthData returns an error when provided with a null buffer for
+ *           packing authentication data.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -510,7 +527,8 @@ HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_CONN_SIDE_TYPE_TEST_001
- * @tc.desc: get connside type test
+ * @tc.desc: Verify that GetConnSideType correctly extracts the connection side type from a
+ *           connection ID for various connection types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -535,7 +553,8 @@ HWTEST_F(AuthOtherTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_COMM_DATA_RECEVIED_TEST_001
- * @tc.desc: on comm data received test
+ * @tc.desc: Verify that OnCommDataReceived handles various connection modules and data lengths,
+ *           including null data pointers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -564,7 +583,8 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_FLUSH_DEVICE_PACKET_TEST_001
- * @tc.desc: is flush device packet test
+ * @tc.desc: Verify that IsDeviceMessagePacket correctly determines if a packet is a device
+ *           message packet, handling various connection types and data heads.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -599,7 +619,8 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FSM_MSG_TYPE_TO_STR_TEST_001
- * @tc.desc: fsm msg type to str test
+ * @tc.desc: Verify that FsmMsgTypeToStr correctly converts FSM message types to their string
+ *           representations, handling unknown and valid types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -621,7 +642,8 @@ HWTEST_F(AuthOtherTest, FSM_MSG_TYPE_TO_STR_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_MANAGER_SET_SESSION_KEY_TEST_001
- * @tc.desc: fsm msg type to str test
+ * @tc.desc: Verify that AuthManagerSetSessionKey and AuthManagerGetSessionKey correctly set and
+ *           retrieve session keys, handling null session info and various authentication states.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -658,7 +680,8 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DEVICE_CLOSE_CONN_TEST_001
- * @tc.desc: fsm msg type to str test
+ * @tc.desc: Verify that AuthDeviceCloseConn closes a connection and AuthDevicePostTransData
+ *           handles invalid parameters and cases where the authentication manager is not found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -683,7 +706,8 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001
- * @tc.desc: fsm msg type to str test
+ * @tc.desc: Verify that AuthDeviceGetPreferConnInfo handles null UUID and connection info
+ *           parameters, and returns an error when the authentication manager is not found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -705,7 +729,8 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: AUTH_DEVICE_CHECK_CONN_INFO_TEST_001
- * @tc.desc: fsm msg type to str test
+ * @tc.desc: Verify that AuthDeviceCheckConnInfo correctly checks connection information for a
+ *           given UUID and authentication link type.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -721,7 +746,9 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CHECK_CONN_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001
- * @tc.desc: sync deviceInfo state process test
+ * @tc.desc: Verify that ConvertAuthLinkTypeToHisysEvtLinkType correctly converts AuthLinkType to
+ *           SoftBusLinkType for HisysEvent logging, and that ReportAuthResultEvt handles various
+ *           authentication results.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -779,7 +806,8 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
 
 /*
  * @tc.name: POST_MESSAGE_TO_AUTH_FSM_TEST_001
- * @tc.desc: post message to auth fsm test
+ * @tc.desc: Verify that PostMessageToAuthFsm handles invalid data lengths and returns an error
+ *           when posting messages to the authentication FSM.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -800,7 +828,9 @@ HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_FSM_TEST_001
- * @tc.desc: authSession handle device disconnected test
+ * @tc.desc: Verify that AuthSessionHandleDeviceDisconnected correctly handles device
+ *           disconnection events and that GetAuthFsmByConnId returns nullptr for non-existent
+ *           FSMs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -817,7 +847,8 @@ HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_RESTORE_MANAGER_TEST_001
- * @tc.desc: authRestore authManager test
+ * @tc.desc: Verify that AuthRestoreAuthManager handles null parameters and returns an error when
+ *           restoring the authentication manager fails.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -856,7 +887,8 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_PEER_UDID_BY_NETWORK_ID_TEST_001
- * @tc.desc: get peer udid by networkId test
+ * @tc.desc: Verify that GetPeerUdidByNetworkId handles null parameters and returns
+ *           SOFTBUS_NOT_FIND when the UDID is not found for a given network ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -874,7 +906,9 @@ HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_LATEST_ID_BY_CONNINFO_TEST_001
- * @tc.desc: get latest id by connInfo test
+ * @tc.desc: Verify that GetLatestIdByConnInfo returns AUTH_INVALID_ID when provided with null
+ *           connection information or when no valid authentication ID is found for the given
+ *           connection info.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -898,7 +932,8 @@ HWTEST_F(AuthOtherTest, GET_LATEST_ID_BY_CONNINFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: START_RECONNECT_DEVICE_TEST_001
- * @tc.desc: start reconnection device test
+ * @tc.desc: Verify that AuthStartReconnectDevice handles invalid parameters and that
+ *           HandleReconnectResult correctly processes reconnection results.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -924,7 +959,8 @@ HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001
- * @tc.desc: auth get latest authsed list test
+ * @tc.desc: Verify that AuthGetLatestAuthSeqList handles null or empty UDID parameters, invalid
+ *           buffer sizes, and cases where the authentication sequence list is not found.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -960,7 +996,8 @@ HWTEST_F(AuthOtherTest, AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: SYNC_DEVINFO_STATE_PROCESS_TEST_001
- * @tc.desc: sync deviceInfo state process test
+ * @tc.desc: Verify that SyncDevInfoStateProcess handles various FSM message types and null
+ *           parameters, ensuring correct state transitions for device information processing.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1002,7 +1039,9 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001
- * @tc.desc: AuthGetAuthHandleByIndex test
+ * @tc.desc: Verify that AuthGetAuthHandleByIndex handles null parameters, returns
+ *           SOFTBUS_LOCK_ERR for locking issues, SOFTBUS_NOT_FIND for non-existent
+ *           authentication managers, and SOFTBUS_INVALID_PARAM for invalid link types.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1032,7 +1071,9 @@ HWTEST_F(AuthOtherTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001
- * @tc.desc: AuthDirectOnlineProcessSessionKey test
+ * @tc.desc: Verify that AuthDirectOnlineProcessSessionKey returns SOFTBUS_AUTH_NOT_FOUND for
+ *           unsupported authentication link types and that AuthEncrypt and AuthDecrypt handle
+ *           null parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1056,7 +1097,9 @@ HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSiz
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_DEVICE_TEST_001
- * @tc.desc: IsSameAccountDevice test
+ * @tc.desc: Verify that IsSameAccountDevice correctly determines if a device belongs to the same
+ *           account, and that AuthIsPotentialTrusted and AuthHasSameAccountGroup function
+ *           correctly.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1081,7 +1124,8 @@ HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FILL_AUTH_SESSION_INFO_TEST_001
- * @tc.desc: FillAuthSessionInfo test
+ * @tc.desc: Verify that FillAuthSessionInfo correctly populates an AuthSessionInfo structure with
+ *           device and key information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1105,7 +1149,7 @@ HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
- * @tc.desc: IsEnhanceP2pModuleId test
+ * @tc.desc: Verify that IsEnhanceP2pModuleId correctly identifies enhanced P2P module IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1119,7 +1163,8 @@ HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001
- * @tc.desc: AuthStartListeningForWifiDirect test
+ * @tc.desc: Verify that AuthStartListeningForWifiDirect handles various authentication link
+ *           types and module IDs, and correctly processes Wi-Fi data reception.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1149,7 +1194,8 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.
 
 /*
  * @tc.name: IS_AUTH_SESSION_KEY_MODULE_TEST_001
- * @tc.desc: IsAuthSessionKeyModule test
+ * @tc.desc: Verify that IsAuthSessionKeyModule correctly identifies various data types as
+ *           belonging to the authentication session key module.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1178,7 +1224,9 @@ HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_WIFI_CONNECTED_TEST_001
- * @tc.desc: OnWiFiConnected test
+ * @tc.desc: Verify that OnWiFiConnected handles Wi-Fi connection events for both client and
+ *           server sides, and that IsSessionAuth correctly identifies session authentication
+ *           modules.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1199,7 +1247,9 @@ HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_TCP_SESSION_CONNECTED_TEST_001
- * @tc.desc: OnTcpSessionConnected test
+ * @tc.desc: Verify that OnTcpSessionConnected handles TCP session connection events for both
+ *           client and server sides, and that IsSessionAuth correctly identifies session
+ *           authentication modules.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1220,7 +1270,9 @@ HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_WIFI_DISCONNECTED_TEST_001
- * @tc.desc: OnWiFiDisconnected test
+ * @tc.desc: Verify that OnWiFiDisconnected handles Wi-Fi disconnection events for various
+ *           listener modules, and that IsSessionAuth correctly identifies session authentication
+ *           modules.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

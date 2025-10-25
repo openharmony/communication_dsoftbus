@@ -61,8 +61,8 @@ void AuthApplyKeyManagerTest::SetUp() { }
 void AuthApplyKeyManagerTest::TearDown() { }
 
 /*
- * @tc.name: AUTH_APPLY_KEY_MANAGER_INIT_Test_001
- * @tc.desc: init apply key
+ * @tc.name: AuthApplyKeyManagerTest001
+ * @tc.desc: Verify that AuthApplyKeyManager can be initialized and deinitialized successfully.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -82,7 +82,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_INIT_Test_001, TestSize
 
 /*
  * @tc.name: AUTH_APPLY_KEY_MANAGER_Test_001
- * @tc.desc: get and delete apply key
+ * @tc.desc: Verify that apply keys can be inserted, retrieved, and deleted successfully.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -108,7 +108,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_001, TestSize.Leve
 
 /*
  * @tc.name: AUTH_APPLY_KEY_MANAGER_Test_002
- * @tc.desc: test get expired apply key
+ * @tc.desc: Verify that expired apply keys are handled correctly during retrieval.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -127,7 +127,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_002, TestSize.Leve
 
 /*
  * @tc.name: AUTH_APPLY_KEY_MANAGER_Test_003
- * @tc.desc: test NULL param
+ * @tc.desc: Verify that AuthApplyKeyManager functions handle null parameters gracefully.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -144,7 +144,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_003, TestSize.Leve
 
 /*
  * @tc.name: AUTH_CLEAR_ACCOUNT_APPLY_KEY_Test_001
- * @tc.desc: clear account apply key test
+ * @tc.desc: Verify that AuthClearAccountApplyKey successfully clears all account-related apply keys.
  * @tc.type: FUNC
  * @tc.require:
  */

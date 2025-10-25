@@ -153,7 +153,8 @@ int32_t AuthDeviceProfileTest::SetSoftBusAclInfo(SoftBusAclInfo *info, int32_t u
 
 /*
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_003
- * @tc.desc: IsPotentialTrustedDeviceDp test
+ * @tc.desc: Verify that IsPotentialTrustedDeviceDp correctly identifies potential trusted devices,
+ *           including handling null device ID hash and account IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -173,7 +174,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVICE_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_004
- * @tc.desc: add ut for DelNotTrustDevice and UpdateDpSameAccount
+ * @tc.desc: Verify that DelNotTrustDevice and UpdateDpSameAccount functions handle null device ID
+ *           hash and update ACL parameters correctly.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -195,7 +197,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVICE_TEST_004, TestSize.Level1)
 
 /*
  * @tc.name: IS_NOT_TRUSTED_DEVICE_TEST_001
- * @tc.desc: Insert not truste device
+ * @tc.desc: Verify that InsertNotTrustDevice adds a device to the untrusted list and
+ *           IsNotTrustDevice correctly identifies it.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -219,7 +222,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_NOT_TRUSTED_DEVICE_TEST_002
- * @tc.desc: Do not insert not trust device
+ * @tc.desc: Verify that InsertDpSameAccountAcl and IsNotTrustDevice functions handle various
+ *           scenarios related to inserting and checking untrusted devices, including local string
+ *           info failures.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -246,7 +251,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GENERATE_DSOFTBUS_BUNDLE_NAME_TEST_001
- * @tc.desc: Generate Dsoftbus BundleName
+ * @tc.desc: Verify that GenerateDsoftbusBundleName correctly generates a DSoftBus bundle name
+ *           based on peer UDID, local UDID, and local user ID.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -262,8 +268,8 @@ HWTEST_F(AuthDeviceProfileTest, GENERATE_DSOFTBUS_BUNDLE_NAME_TEST_001, TestSize
 
 /*
  * @tc.name: GET_ACL_LOCAL_USERID_TEST_001
- * @tc.desc: 1.get accessee userId
-             2.get accesser userId
+ * @tc.desc: Verify that GetAclLocalUserId correctly extracts the local user ID from an
+ *           AccessControlProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -289,8 +295,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACL_LOCAL_USERID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_ACL_PEER_USERID_TEST_001
- * @tc.desc: 1.get accessee userId
-             2.get accesser userId
+ * @tc.desc: Verify that GetAclPeerUserId correctly extracts the peer user ID from an
+ *           AccessControlProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -316,7 +322,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACL_PEER_USERID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: DP_HAS_ACCESS_CONTROL_PROFILE_TEST_001
- * @tc.desc: udid is nullptr
+ * @tc.desc: Verify that DpHasAccessControlProfile returns false when provided with a null UDID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -329,7 +335,8 @@ HWTEST_F(AuthDeviceProfileTest, DP_HAS_ACCESS_CONTROL_PROFILE_TEST_001, TestSize
 
 /*
  * @tc.name: DP_HAS_ACCESS_CONTROL_PROFILE_TEST_002
- * @tc.desc: aclProfiles is empty
+ * @tc.desc: Verify that DpHasAccessControlProfile returns false when provided with an empty list
+ *           of ACL profiles.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -345,7 +352,8 @@ HWTEST_F(AuthDeviceProfileTest, DP_HAS_ACCESS_CONTROL_PROFILE_TEST_002, TestSize
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_TEST_001
- * @tc.desc: LnnGetLocalNum64Info fail
+ * @tc.desc: Verify that IsSameAccount returns false when LnnGetLocalNum64Info fails to retrieve
+ *           local account information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -360,7 +368,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_TEST_002
- * @tc.desc: accountId does not equal localAccountId
+ * @tc.desc: Verify that IsSameAccount correctly identifies when account IDs are different, and
+ *           handles scenarios with default OHOS accounts.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -386,7 +395,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_ACCOUNT_TEST_003
- * @tc.desc: accountId is default ohos account
+ * @tc.desc: Verify that IsSameAccount correctly identifies when the account is a default OHOS
+ *           account.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -404,7 +414,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: GET_SESSION_KEY_PROFILE_TEST_001
- * @tc.desc: sessionKey is nullptr
+ * @tc.desc: Verify that GetSessionKeyProfile returns false when provided with a null sessionKey
+ *           buffer.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -418,7 +429,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_001, TestSize.Level
 
 /*
  * @tc.name: GET_SESSION_KEY_PROFILE_TEST_002
- * @tc.desc: length is nullptr
+ * @tc.desc: Verify that GetSessionKeyProfile returns false when provided with a null length
+ *           pointer.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -432,7 +444,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_002, TestSize.Level
 
 /*
  * @tc.name: GET_SESSION_KEY_PROFILE_TEST_003
- * @tc.desc: GetActiveOsAccountIds fail
+ * @tc.desc: Verify that GetSessionKeyProfile returns false when GetActiveOsAccountIds fails or
+ *           returns an invalid user ID.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -452,7 +465,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_003, TestSize.Level
 
 /*
  * @tc.name: UPDATE_DP_SAME_ACCOUNT_ACL_TEST_001
- * @tc.desc: sessionKey is nullptr
+ * @tc.desc: Verify that UpdateDpSameAccountAcl returns an error when provided with a null
+ *           sessionKey.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -468,7 +482,8 @@ HWTEST_F(AuthDeviceProfileTest, UPDATE_DP_SAME_ACCOUNT_ACL_TEST_001, TestSize.Le
 
 /*
  * @tc.name: IS_TRUST_DEVICE_TEST_001
- * @tc.desc: device is not trusted
+ * @tc.desc: Verify that IsTrustDevice correctly identifies a device as not trusted based on
+ *           various ACL profiles and device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -522,7 +537,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_TRUST_DEVICE_TEST_002
- * @tc.desc: device is not trusted
+ * @tc.desc: Verify that IsTrustDevice correctly identifies a device as not trusted when ACL
+ *           profiles indicate a non-trusted status.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -560,7 +576,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: IS_TRUST_DEVICE_TEST_003
- * @tc.desc: device is trusted
+ * @tc.desc: Verify that IsTrustDevice correctly identifies a device as trusted based on ACL
+ *           profiles and device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -598,7 +615,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001
- * @tc.desc: LnnGetLocalStrInfo fail
+ * @tc.desc: Verify that CompareAclWithPeerDeviceInfo handles failures in retrieving local string
+ *           or byte information, returning false.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -626,7 +644,8 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001, Test
 
 /*
  * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002
- * @tc.desc: accountId is default
+ * @tc.desc: Verify that CompareAclWithPeerDeviceInfo correctly handles comparisons with default
+ *           account IDs and various ACL profile configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -663,7 +682,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, Test
 
 /*
  * @tc.name: IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003
- * @tc.desc: device is trust from access
+ * @tc.desc: Verify that IsTrustedDeviceFromAccess correctly determines if a device is trusted
+ *           based on access control parameters, including null inputs and various ACL update
+ *           scenarios.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -692,7 +713,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003, TestSize
 
 /*
  * @tc.name: PUT_DP_ACL_UK_BY_USER_ID_TEST_001
- * @tc.desc: sessionKey or sessionKeyId is nullptr
+ * @tc.desc: Verify that PutDpAclUkByUserId returns an error when provided with null sessionKey
+ *           or sessionKeyId parameters.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -711,7 +733,9 @@ HWTEST_F(AuthDeviceProfileTest, PUT_DP_ACL_UK_BY_USER_ID_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_001
- * @tc.desc: isSameSide is true
+ * @tc.desc: Verify that CompareAssetAclSameAccount correctly compares ACL profiles for the same
+ *           account when isSameSide is true, considering various bind types and
+ *           accesser/accessee configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -758,7 +782,8 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_001, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_002
- * @tc.desc: isSameSide is true
+ * @tc.desc: Verify that CompareAssetAclSameAccount correctly compares ACL profiles for the same
+ *           account when isSameSide is true, including scenarios with anonymous account IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -808,7 +833,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_002, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_003
- * @tc.desc: isSameSide is false
+ * @tc.desc: Verify that CompareAssetAclSameAccount correctly compares ACL profiles for the same
+ *           account when isSameSide is false, considering various accesser/accessee
+ *           configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -855,7 +882,8 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_003, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_004
- * @tc.desc: isSameSide is false
+ * @tc.desc: Verify that CompareAssetAclSameAccount correctly compares ACL profiles for the same
+ *           account when isSameSide is false, including scenarios with anonymous account IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -899,7 +927,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_004, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001
- * @tc.desc: isSameSide is true
+ * @tc.desc: Verify that CompareAssetAclDiffAccountWithUserLevel correctly compares ACL profiles
+ *           for different accounts with user-level binding when isSameSide is true, considering
+ *           various accesser/accessee configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -946,7 +976,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_T
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_002
- * @tc.desc: isSameSide is true
+ * @tc.desc: Verify that CompareAssetAclDiffAccountWithUserLevel correctly compares ACL profiles
+ *           for different accounts with user-level binding when isSameSide is false, considering
+ *           various accesser/accessee configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -988,7 +1020,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_T
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_001
- * @tc.desc: isSameSide is true
+ * @tc.desc: Verify that CompareAssetAclDiffAccount correctly compares ACL profiles for different
+ *           accounts when isSameSide is true, considering various bind types, bind levels, and
+ *           accesser/accessee configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1042,7 +1076,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_001, TestSize.Lev
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_002
- * @tc.desc: isSameSide is true
+ * @tc.desc: Verify that CompareAssetAclDiffAccount correctly compares ACL profiles for different
+ *           accounts when isSameSide is true, considering various bind types, bind levels, and
+ *           accesser/accessee configurations, including token IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1082,7 +1118,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_002, TestSize.Lev
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_003
- * @tc.desc: isSameSide is true
+ * @tc.desc: Verify that CompareAssetAclDiffAccount correctly compares ACL profiles for different
+ *           accounts when isSameSide is false, considering various bind types, bind levels, and
+ *           accesser/accessee configurations, including token IDs.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1136,7 +1174,8 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_003, TestSize.Lev
 
 /*
  * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_001
- * @tc.desc: isSameAccount is true
+ * @tc.desc: Verify that CompareAssetAllAcl correctly compares all ACL profiles when isSameAccount
+ *           is true, considering various bind types and accesser/accessee configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1173,7 +1212,9 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_002
- * @tc.desc: isSameAccount is false
+ * @tc.desc: Verify that CompareAssetAllAcl correctly compares all ACL profiles when isSameAccount
+ *           is false, considering various bind types, bind levels, and accesser/accessee
+ *           configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1209,7 +1250,8 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_003
- * @tc.desc: isSameAccount is false
+ * @tc.desc: Verify that CompareAssetAllAcl correctly compares all ACL profiles when isSameAccount
+ *           is false, considering various bind levels and accesser/accessee configurations.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1238,7 +1280,8 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: GET_LOCAL_UK_ID_FROM_ACCESS_TEST_001
- * @tc.desc: isServer is true or false
+ * @tc.desc: Verify that GetLocalUkIdFromAccess correctly retrieves the local unique key ID and
+ *           timestamp from an AccessControlProfile based on the isServer flag.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1279,7 +1322,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_LOCAL_UK_ID_FROM_ACCESS_TEST_001, TestSize.L
 
 /*
  * @tc.name: UPDATE_ACCESS_PROFILE_SESSION_KEY_ID_TEST_001
- * @tc.desc: Set ukid as default value
+ * @tc.desc: Verify that UpdateAccessProfileSessionKeyId correctly updates the session key ID
+ *           within an AccessControlProfile, handling default UKID values.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1294,7 +1338,8 @@ HWTEST_F(AuthDeviceProfileTest, UPDATE_ACCESS_PROFILE_SESSION_KEY_ID_TEST_001, T
 
 /*
  * @tc.name: GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_001
- * @tc.desc: acl or ukid or time is nullptr
+ * @tc.desc: Verify that GetAccessUkIdSameAccount returns an invalid parameter error when provided
+ *           with null ACL information, UKID, or timestamp pointers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1316,7 +1361,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_001, TestSize
 
 /*
  * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001
- * @tc.desc: acl or ukid or time is nullptr
+ * @tc.desc: Verify that GetAccessUkIdDiffAccountWithUserLevel returns an invalid parameter error
+ *           when provided with null ACL information, UKID, or timestamp pointers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1338,7 +1384,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TE
 
 /*
  * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_001
- * @tc.desc: acl or ukid or time is nullptr
+ * @tc.desc: Verify that GetAccessUkIdDiffAccount returns an invalid parameter error when provided
+ *           with null ACL information, UKID, or timestamp pointers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1358,7 +1405,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_001, TestSize
 
 /*
  * @tc.name: GET_ACCESS_UK_BY_UK_ID_TEST_001
- * @tc.desc: uk is nullptr
+ * @tc.desc: Verify that GetAccessUkByUkId returns an invalid parameter error when provided with a
+ *           null unique key buffer.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1374,7 +1422,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_BY_UK_ID_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: SELECT_ALL_ACL_TEST_001
- * @tc.desc: trustedInfoArray or num is nullptr
+ * @tc.desc: Verify that SelectAllAcl returns an invalid parameter error when provided with null
+ *           trustedInfoArray or num pointers.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

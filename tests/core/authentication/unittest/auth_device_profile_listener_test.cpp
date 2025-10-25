@@ -68,8 +68,9 @@ static DeviceProfileChangeListener g_deviceProfilePara = {
 };
 
 /*
- * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
- * @tc.desc: test bindType is SAME_ACCOUNT
+ * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST_001
+ * @tc.desc: Verify that OnTrustDeviceProfileAdd successfully handles adding a TrustDeviceProfile
+ *           with a SAME_ACCOUNT bind type.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -83,8 +84,9 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_001, Te
 }
 
 /*
- * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
- * @tc.desc: test onDeviceProfileAdd is null
+ * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST_002
+ * @tc.desc: Verify that OnTrustDeviceProfileAdd handles cases where onDeviceProfileAdd callback
+ *           is null, returning an error.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -99,8 +101,9 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_002, Te
 }
 
 /*
- * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
- * @tc.desc: test OnTrustDeviceProfileAdd is OnDeviceBound success
+ * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST_003
+ * @tc.desc: Verify that OnTrustDeviceProfileAdd successfully handles adding a TrustDeviceProfile
+ *           when a valid OnDeviceBound callback is registered.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -116,7 +119,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_003, Te
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001
- * @tc.desc: test OnTrustDeviceProfileDelete success
+ * @tc.desc: Verify that OnTrustDeviceProfileDelete successfully handles deleting a
+ *           TrustDeviceProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -133,7 +137,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001,
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_DELETE_TEST_002
- * @tc.desc: test onDeviceProfileDeleted is null
+ * @tc.desc: Verify that OnTrustDeviceProfileDelete handles cases where onDeviceProfileDeleted
+ *           callback is null, returning an error.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -150,7 +155,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_002,
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_UPDATE_TEST
- * @tc.desc: test OnTrustDeviceProfileUpdate is null
+ * @tc.desc: Verify that OnTrustDeviceProfileUpdate successfully handles updating a
+ *           TrustDeviceProfile, including cases with null profiles.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -164,7 +170,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_UPDATE_TEST, Tes
 
 /*
  * @tc.name: ON_DEVICE_PROFILE_ADD_TEST
- * @tc.desc: test OnDeviceProfileAdd is success
+ * @tc.desc: Verify that OnDeviceProfileAdd successfully handles adding a DeviceProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -178,7 +184,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_ADD_TEST, TestSize.Lev
 
 /*
  * @tc.name: ON_DEVICE_PROFILE_DELETE_TEST
- * @tc.desc: test OnDeviceProfileDelete is success
+ * @tc.desc: Verify that OnDeviceProfileDelete successfully handles deleting a DeviceProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -192,7 +198,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_DELETE_TEST, TestSize.
 
 /*
  * @tc.name: ON_DEVICE_PROFILE_UPDATE_TEST
- * @tc.desc: test OnDeviceProfileUpdate is success
+ * @tc.desc: Verify that OnDeviceProfileUpdate successfully handles updating a DeviceProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -206,7 +212,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_UPDATE_TEST, TestSize.
 
 /*
  * @tc.name: ON_SERVICE_PROFILE_ADD_TEST
- * @tc.desc: test OnServiceProfileAdd is success
+ * @tc.desc: Verify that OnServiceProfileAdd successfully handles adding a ServiceProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -220,7 +226,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_ADD_TEST, TestSize.Le
 
 /*
  * @tc.name: ON_SERVICE_PROFILE_DELETE_TEST
- * @tc.desc: test OnServiceProfileDelete is success
+ * @tc.desc: Verify that OnServiceProfileDelete successfully handles deleting a ServiceProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -234,7 +240,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_DELETE_TEST, TestSize
 
 /*
  * @tc.name: ON_SERVICE_PROFILE_UPDATE_TEST
- * @tc.desc: test OnServiceProfileUpdate is success
+ * @tc.desc: Verify that OnServiceProfileUpdate successfully handles updating a ServiceProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -248,7 +254,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_UPDATE_TEST, TestSize
 
 /*
  * @tc.name: ON_CHARACTERISTIC_PROFILE_ADD_TEST
- * @tc.desc: test OnCharacteristicProfileAdd is success
+ * @tc.desc: Verify that OnCharacteristicProfileAdd successfully handles adding a
+ *           CharacteristicProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -262,7 +269,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_ADD_TEST, Test
 
 /*
  * @tc.name: ON_CHARACTERISTIC_PROFILE_DELETE_TEST
- * @tc.desc: test OnCharacteristicProfileDelete is success
+ * @tc.desc: Verify that OnCharacteristicProfileDelete successfully handles deleting a
+ *           CharacteristicProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -276,7 +284,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_DELETE_TEST, T
 
 /*
  * @tc.name: ON_CHARACTERISTIC_PROFILE_UPDATE_TEST
- * @tc.desc: test OnCharacteristicProfileUpdate is success
+ * @tc.desc: Verify that OnCharacteristicProfileUpdate successfully handles updating a
+ *           CharacteristicProfile.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -290,7 +299,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_UPDATE_TEST, T
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST
- * @tc.desc: OnTrustDeviceProfileActive
+ * @tc.desc: Verify that OnTrustDeviceProfileActive correctly handles device profile activation,
+ *           including screen state and heartbeat feature checks.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -312,7 +322,8 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, Tes
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST
- * @tc.desc: OnTrustDeviceProfileInactive
+ * @tc.desc: Verify that OnTrustDeviceProfileInactive correctly handles device profile
+ *           deactivation.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
