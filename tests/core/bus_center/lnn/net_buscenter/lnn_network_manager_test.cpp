@@ -102,7 +102,7 @@ static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
  * @tc.name: LNN_NETWORK_MANAGER_TEST_001
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level1)
@@ -145,7 +145,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
  * @tc.name: LNN_NETWORK_MANAGER_TEST_002
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level1)
@@ -179,7 +179,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
  * @tc.name: LNN_NETWORK_MANAGER_TEST_003
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level1)
@@ -235,7 +235,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
  * @tc.name: LNN_NETWORK_MANAGER_TEST_004
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level1)
@@ -274,6 +274,13 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
     EXPECT_TRUE(res == SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: NET_USER_STATE_EVENTHANDLER_TEST_001
+ * @tc.desc: test func NetUserStateEventHandler
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, NET_USER_STATE_EVENTHANDLER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -305,6 +312,13 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_USER_STATE_EVENTHANDLER_TEST_001, TestSi
     info1 = nullptr;
 }
 
+/*
+ * @tc.name: NET_LOCK_STATE_EVENTHANDLER_TEST_001
+ * @tc.desc: test func NetLockStateEventHandler
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, NET_LOCK_STATE_EVENTHANDLER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -320,6 +334,13 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_LOCK_STATE_EVENTHANDLER_TEST_001, TestSi
     (void)NetLockStateEventHandler(&info);
 }
 
+/*
+ * @tc.name: NET_OOB_STATE_EVENTHANDLER_TEST_001
+ * @tc.desc: test func NetOOBEStateEventHandler
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, NET_OOB_STATE_EVENTHANDLER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -347,6 +368,13 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_OOB_STATE_EVENTHANDLER_TEST_001, TestSiz
     info1 = nullptr;
 }
 
+/*
+ * @tc.name: ON_DEVICE_BOUND_TEST_001
+ * @tc.desc: test func OnDeviceBound
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
 {
     const char *udid = nullptr;
@@ -365,6 +393,13 @@ HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
 }
 
+/*
+ * @tc.name: CREAT_NETIFMGR_TEST_001
+ * @tc.desc: test func CreateNetifMgr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -382,6 +417,13 @@ HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_001, TestSize.Level1)
     }
 }
 
+/*
+ * @tc.name: CREAT_NETIFMGR_TEST_002
+ * @tc.desc: test func CreateNetifMgr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -412,6 +454,13 @@ HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_002, TestSize.Level1)
     info1 = nullptr;
 }
 
+/*
+ * @tc.name: SAVE_BRNETWORK_DEVICE_TEST_001
+ * @tc.desc: test func SaveBrNetworkDevices
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, SAVE_BRNETWORK_DEVICE_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -430,6 +479,13 @@ HWTEST_F(LNNNetworkManagerMockTest, SAVE_BRNETWORK_DEVICE_TEST_001, TestSize.Lev
     (void)SaveBrNetworkDevices();
 }
 
+/*
+ * @tc.name: NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_001
+ * @tc.desc: test func NetAccountStateChangeEventHandler
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -457,6 +513,13 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_00
     info1 = nullptr;
 }
 
+/*
+ * @tc.name: GET_ALL_PROTOCOLS_TEST_001
+ * @tc.desc: test func GetAllProtocols
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -484,6 +547,13 @@ HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
     SoftBusFree(data);
 }
 
+/*
+ * @tc.name: NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001
+ * @tc.desc: test func NightModeChangeEventHandler
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -508,6 +578,13 @@ HWTEST_F(LNNNetworkManagerMockTest, NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001, Tes
     info1 = nullptr;
 }
 
+/*
+ * @tc.name: REGIST_NETIFMGR_TEST_001
+ * @tc.desc: test func RestartCoapDiscovery
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, REGIST_NETIFMGR_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -556,6 +633,13 @@ HWTEST_F(LNNNetworkManagerMockTest, REGIST_NETIFMGR_TEST_001, TestSize.Level1)
     EXPECT_TRUE(res == nullptr);
 }
 
+/*
+ * @tc.name: CONVERT_TO_NET_IF_TYPE_001
+ * @tc.desc: test func ConvertToNetIfType
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, CONVERT_TO_NET_IF_TYPE_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -595,6 +679,13 @@ HWTEST_F(LNNNetworkManagerMockTest, CONVERT_TO_NET_IF_TYPE_001, TestSize.Level1)
     EXPECT_NE(lnnNetIfType, 0);
 }
 
+/*
+ * @tc.name: LNN_REGISTER_EVENT_001
+ * @tc.desc: test func LnnRegisterEventHandler
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -640,7 +731,14 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-HWTEST_F(LNNNetworkManagerMockTest, RiskDeviceLeaveLnnTest_001, TestSize.Level1)
+/*
+ * @tc.name: Risk_Device_Leave_Lnn_Test_001
+ * @tc.desc: test func RiskDeviceLeaveLnn
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNNetworkManagerMockTest, Risk_Device_Leave_Lnn_Test_001, TestSize.Level1)
 {
     int ret = 0;
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
@@ -654,7 +752,14 @@ HWTEST_F(LNNNetworkManagerMockTest, RiskDeviceLeaveLnnTest_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
 }
 
-HWTEST_F(LNNNetworkManagerMockTest, NetDeviceRiskStateEventHandler_001, TestSize.Level1)
+/*
+ * @tc.name: Net_Device_Risk_State_Event_Handler_001
+ * @tc.desc: test func NetDeviceRiskStateEventHandler
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNNetworkManagerMockTest, Net_Device_Risk_State_Event_Handler_001, TestSize.Level1)
 {
     LnnDeviceRiskStateChangeEvent *event =
         reinterpret_cast<LnnDeviceRiskStateChangeEvent *>(SoftBusCalloc(sizeof(LnnDeviceRiskStateChangeEvent)));
@@ -676,5 +781,6 @@ HWTEST_F(LNNNetworkManagerMockTest, NetDeviceRiskStateEventHandler_001, TestSize
     NetDeviceRiskStateEventHandler(&event->basic);
 
     EXPECT_EQ(event->status, 0);
+    SoftBusFree(event);
 }
 } // namespace OHOS
