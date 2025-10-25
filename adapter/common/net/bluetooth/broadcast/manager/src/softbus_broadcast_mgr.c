@@ -802,6 +802,7 @@ static bool CheckServiceUuidIsMatch(const BcScanFilter *filter, const BroadcastP
 static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayload *bcData)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(bcData != NULL, false, DISC_BROADCAST, "bcData is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcData->payload != NULL, false, DISC_BROADCAST, "payload is nullptr");
 
     if (bcData->type != BC_DATA_TYPE_SERVICE && bcData->type != BC_DATA_TYPE_MANUFACTURER &&
         bcData->type != BC_DATA_TYPE_SERVICE_UUID) {
@@ -847,14 +848,18 @@ static void ReleaseBroadcastReportInfo(BroadcastReportInfo *bcInfo)
 
     SoftBusFree(bcInfo->packet.bcData.payload);
     SoftBusFree(bcInfo->packet.rspData.payload);
+    SoftBusFree(bcInfo->packet.uuidData.payload);
 }
 
 static int32_t BuildBcPayload(const SoftbusBroadcastPayload *srcData, BroadcastPayload *dstData)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(srcData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "srcData is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(dstData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "dstData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(srcData->payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST,
-        "broadcast payload is nullptr");
+
+    if (srcData->payload == NULL) {
+        DISC_LOGW(DISC_BROADCAST, "payload is null, skip");
+        return SOFTBUS_OK;
+    }
 
     dstData->type = (BroadcastDataType)srcData->type;
     dstData->id = srcData->id;
@@ -888,18 +893,22 @@ static int32_t BuildBroadcastPacket(const SoftbusBroadcastData *softbusBcData, B
     DumpSoftbusData("scan result bcData", softbusBcData->bcData.payloadLen, softbusBcData->bcData.payload);
 
     // 2.2. Build broadcast response payload.
-    if (softbusBcData->rspData.payload == NULL) {
-        packet->rspData.payload = NULL;
-        DISC_LOGD(DISC_BROADCAST, "no rspData");
-    } else {
-        ret = BuildBcPayload(&(softbusBcData->rspData), &(packet->rspData));
-        if (ret != SOFTBUS_OK) {
-            SoftBusFree(packet->bcData.payload);
-            DISC_LOGE(DISC_BROADCAST, "build broadcast rsp payload failed");
-            return SOFTBUS_BC_MGR_BUILD_RSP_PACKT_FAIL;
-        }
-        DumpSoftbusData("scan result rspData", softbusBcData->rspData.payloadLen, softbusBcData->rspData.payload);
+    ret = BuildBcPayload(&(softbusBcData->rspData), &(packet->rspData));
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(packet->bcData.payload);
+        DISC_LOGE(DISC_BROADCAST, "build broadcast rsp payload failed");
+        return SOFTBUS_BC_MGR_BUILD_RSP_PACKT_FAIL;
     }
+    DumpSoftbusData("scan result rspData", softbusBcData->rspData.payloadLen, softbusBcData->rspData.payload);
+
+    ret = BuildBcPayload(&(softbusBcData->uuidData), &(packet->uuidData));
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(packet->bcData.payload);
+        SoftBusFree(packet->rspData.payload);
+        DISC_LOGE(DISC_BROADCAST, "build broadcast uuid payload failed");
+        return SOFTBUS_BC_MGR_BUILD_UUID_PACKT_FAIL;
+    }
+    DumpSoftbusData("scan result uuidData", softbusBcData->uuidData.payloadLen, softbusBcData->uuidData.payload);
     return SOFTBUS_OK;
 }
 
@@ -949,6 +958,7 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
     DISC_CHECK_AND_RETURN_LOGE(reportData != NULL, DISC_BROADCAST, "reportData is nullptr");
 
     BroadcastReportInfo bcInfo;
+    memset_s(&bcInfo, sizeof(bcInfo), 0, sizeof(bcInfo));
     int32_t ret = BuildBroadcastReportInfo(reportData, &bcInfo);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BROADCAST, "build bc report info failed");
     bool isFindMatchFiter = false;
@@ -963,6 +973,7 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
             scanManager->scanCallback->OnReportScanDataCallback == NULL ||
             scanManager->adapterScanId != adapterScanId ||
             !(CheckScanResultDataIsMatch(managerId, &(bcInfo.packet.bcData)) ||
+            CheckScanResultDataIsMatch(managerId, &(bcInfo.packet.uuidData)) ||
             (scanManager->srvType == SRV_TYPE_APPROACH &&
             CheckScanResultDataIsMatchApproach(managerId, &(bcInfo.packet.rspData))))) {
             SoftBusMutexUnlock(&g_scanLock);
