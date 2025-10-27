@@ -30,7 +30,6 @@
 #define HTP_ADDR_TYPE_IPV4 1
 #define HTP_ADDR_TYPE_IPV6 2
 
-#define HTP_KEEPALIVE_TIME 7200
 #define HTP_KEEPIDLE 1
 
 static int32_t MacToHtpAddr(const char *mac, SoftBusSockAddrHtp *addr, uint16_t port)
@@ -202,7 +201,7 @@ static int32_t AcceptHtpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
     return SOFTBUS_OK;
 }
 
-static int32_t ConnSetHtpKeepaliveState(int32_t fd, bool needKeepalive)
+static int32_t ConnSetHtpKeepaliveState(int32_t fd)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(fd > 0, SOFTBUS_NOT_FIND, CONN_COMMON, "invalid param");
     int32_t enable = 1;
@@ -214,23 +213,23 @@ static int32_t ConnSetHtpKeepaliveState(int32_t fd, bool needKeepalive)
     return SOFTBUS_ADAPTER_OK;
 }
 
-int32_t ConnSetHtpKeepAlive(int32_t fd, int32_t alivetime)
+int32_t ConnSetHtpKeepalive(int32_t fd, int32_t aliveTime)
 {
     if (fd <= 0) {
         CONN_LOGE(CONN_COMMON, "invalid fd=%{public}d", fd);
         return SOFTBUS_INVALID_FD;
     }
-    if (alivetime <= 0 || alivetime > HTP_KEEPALIVE_TIME) {
-        CONN_LOGE(CONN_COMMON, "invalid alivetime=%{public}d", alivetime);
+    if (aliveTime <= 0) {
+        CONN_LOGE(CONN_COMMON, "invalid aliveTime=%{public}d", aliveTime);
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t rc = SoftBusSocketSetOpt(fd, IPPROTO_HTP, HTP_KEEPIDLE, &alivetime, sizeof(alivetime));
+    int32_t rc = SoftBusSocketSetOpt(fd, IPPROTO_HTP, HTP_KEEPIDLE, &aliveTime, sizeof(aliveTime));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set HTP_KEEPALIVE fail, fd=%{public}d, alivetime=%{public}d, ret=%{public}d.",
-            fd, alivetime, rc);
+        CONN_LOGE(CONN_COMMON, "set HTP_KEEPALIVE fail, fd=%{public}d, aliveTime=%{public}d, ret=%{public}d.",
+            fd, aliveTime, rc);
         return SOFTBUS_ADAPTER_ERR;
     }
-    return ConnSetHtpKeepaliveState(fd, true);
+    return ConnSetHtpKeepaliveState(fd);
 }
 
 const SocketInterface *GetHtpProtocol(void)
