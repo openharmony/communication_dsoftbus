@@ -1205,6 +1205,19 @@ static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
     return ret;
 }
 
+static int32_t TransDisableIdleCheck(uint8_t *buf, uint32_t len)
+{
+    int32_t offset = 0;
+    int32_t channelId = 0;
+    int32_t ret = ReadInt32FromBuf(buf, len, &offset, &channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed.");
+        return ret;
+    }
+    ret = TransDisableConnBrIdleCheck(channelId);
+    return ret;
+}
+
 int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
 {
     SoftBusHitraceChainBegin("TransProcessInnerEvent");
@@ -1228,6 +1241,9 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
             break;
         case EVENT_TYPE_SET_ACCESS_INFO:
             ret = TransSetAccessInfo(buf, len, callingPid);
+            break;
+        case EVENT_TYPE_DISABLE_CONN_BR_IDLE_CHECK:
+            ret = TransDisableIdleCheck(buf, len);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);
