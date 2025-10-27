@@ -504,6 +504,11 @@ static int32_t CreateSinkLinkInfo(const struct WifiDirectSinkLink *link, LaneLin
         return SOFTBUS_STRCPY_ERR;
     }
     linkInfo->linkInfo.p2p.channel = link->channelId;
+    if (strncmp(link->remoteUuid, link->remoteMac, sizeof(link->remoteMac)) == 0) {
+        LNN_LOGI(LNN_STATE, "uuid is invalid, udid will be updated when JoinMetaNode");
+        linkInfo->type = LANE_HML_RAW;
+        return SOFTBUS_OK;
+    }
     if (GetRemoteUdidByUuid(link->remoteUuid, linkInfo->peerUdid) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(link->remoteUuid, &anonyUuid);
@@ -520,7 +525,11 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    LNN_LOGI(LNN_LANE, "on server wifidirect link=%{public}d connected", link->linkType);
+    char *anonyUuid = NULL;
+    Anonymize(link->remoteUuid, &anonyUuid);
+    LNN_LOGI(LNN_STATE, "on server link=%{public}d connected, uuid=%{public}s",
+        link->linkType, AnonymizeWrapper(anonyUuid));
+    AnonymizeFree(anonyUuid);
     LaneLinkInfo laneLinkInfo;
     (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     if (CreateSinkLinkInfo(link, &laneLinkInfo) != SOFTBUS_OK) {
@@ -559,21 +568,29 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    LNN_LOGI(LNN_LANE, "on server wifidirect link=%{public}d disconnected", link->linkType);
+    char *anonyUuid = NULL;
+    Anonymize(link->remoteUuid, &anonyUuid);
+    LNN_LOGI(LNN_STATE, "on server link=%{public}d disconnected, uuid=%{public}s",
+        link->linkType, AnonymizeWrapper(anonyUuid));
+    AnonymizeFree(anonyUuid);
     char remoteUdid[UDID_BUF_LEN] = {0};
     if (GetRemoteUdidByUuid(link->remoteUuid, remoteUdid) != SOFTBUS_OK) {
-        char *anonyUuid = NULL;
-        Anonymize(link->remoteUuid, &anonyUuid);
-        LNN_LOGE(LNN_STATE, "get remote udid failed, remoteUuid=%{public}s", AnonymizeWrapper(anonyUuid));
-        AnonymizeFree(anonyUuid);
+        LNN_LOGE(LNN_STATE, "get remote udid failed");
         return;
     }
-    LaneLinkType linkType = link->linkType == WIFI_DIRECT_LINK_TYPE_HML ? LANE_HML : LANE_P2P;
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    if (FindLaneResourceByLinkType(remoteUdid, linkType, &resourceItem) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "find lane resource fail");
-        return;
+    if (link->linkType == WIFI_DIRECT_LINK_TYPE_HML) {
+        if (FindLaneResourceByLinkType(remoteUdid, LANE_HML, &resourceItem) != SOFTBUS_OK &&
+            FindLaneResourceByLinkType(remoteUdid, LANE_HML_RAW, &resourceItem) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "find hml lane resource fail");
+            return;
+        }
+    } else {
+        if (FindLaneResourceByLinkType(remoteUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "find p2p lane resource fail");
+            return;
+        }
     }
     DelLaneResourceByLaneId(resourceItem.laneId, true);
 }
