@@ -361,7 +361,7 @@ static int32_t ClientTransSetTcpOption(int32_t fd)
 
 static int32_t ClientTransSetHtpOption(int32_t fd)
 {
-    return ConnSetHtpKeepAlive(fd, HEART_TIME);
+    return ConnSetHtpKeepalive(fd, HEART_TIME);
 }
 
 static int32_t GetFdByPeerIpAndPort(const char *peerIp, uint16_t peerPort, int32_t *fd)
