@@ -2925,3 +2925,30 @@ int32_t TransProxyD2dGetSleMac(int32_t channelId, int32_t pid, char *sleMac, uin
     }
     return SOFTBUS_OK;
 }
+
+int32_t TransDisableConnBrIdleCheck(int32_t channelId)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t connId = 0;
+    ProxyChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->channelId == channelId && item->appInfo.linkType == LANE_BR) {
+            connId = item->connId;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+
+    UpdateOption option = {
+        .type = CONNECT_BR,
+        .brOption = {
+            .enableIdleCheck = false,
+        }
+    };
+    return ConnUpdateConnection(connId, &option);
+}
