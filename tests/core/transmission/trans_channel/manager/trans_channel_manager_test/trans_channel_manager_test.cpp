@@ -1109,6 +1109,10 @@ HWTEST_F(TransChannelManagerTest, TransProcessInnerEvent001, TestSize.Level1)
     eventType = EVENT_TYPE_SET_ACCESS_INFO;
     ret = TransProcessInnerEvent(eventType, buf, len);
     EXPECT_NE(SOFTBUS_OK, ret);
+
+    eventType = EVENT_TYPE_DISABLE_CONN_BR_IDLE_CHECK;
+    ret = TransDisableIdleCheck(buf, len);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
