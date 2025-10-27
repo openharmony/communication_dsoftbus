@@ -778,6 +778,9 @@ int P2pV1Processor::CreateLinkAsGo()
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac, P2P_V1_WAITING_CLIENT_JOIN_MS);
 
     connectCommand_->PreferNegotiateChannel();
+    ret = StartAuthListening(localIp);
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "start auth listen failed, ret=%{public}d", ret);
     ret = SendConnectRequestAsGo(*connectCommand_->GetConnectInfo().channel_, remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "send message fail, ret=%{public}d", ret);
