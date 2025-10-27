@@ -277,6 +277,9 @@ typedef struct {
         struct {
             ConnectSlePowerLevel slePowerLevel;
         } sleOption;
+        struct {
+            bool enableIdleCheck;
+        } brOption;
     };
 } UpdateOption;
 

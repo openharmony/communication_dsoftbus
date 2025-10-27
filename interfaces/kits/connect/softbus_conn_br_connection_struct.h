@@ -72,6 +72,7 @@ typedef struct {
     int32_t ackTimeoutCount;
     // connect process status
     SoftBusList *connectProcessStatus;
+    bool enableIdleCheck;
 } ConnBrConnection;
 
 typedef struct {

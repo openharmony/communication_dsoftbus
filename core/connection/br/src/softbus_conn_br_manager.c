@@ -82,6 +82,7 @@ static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress);
 static int32_t BrPendConnection(const ConnectOption *option, uint32_t time);
 static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress, uint32_t duration);
 static void UnpendConnection(const char *addr);
+static int32_t BrUpdateConnection(uint32_t connectionId, UpdateOption *option);
 
 static ConnBrManager g_brManager = { 0 };
 static ConnectCallback g_connectCallback = { 0 };
@@ -1620,6 +1621,22 @@ static bool BrCheckActiveConnection(const ConnectOption *option, bool needOccupy
     return isActive;
 }
 
+static int32_t BrUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "invaliad param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, SOFTBUS_INVALID_PARAM, CONN_BR,
+        "invaliad param, not br connect type. type=%{public}d", option->type);
+    CONN_LOGI(CONN_BR, "enableIdleCheck=%{public}d", option->brOption.enableIdleCheck);
+
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, CONN_BR,
+        "connection is not exist, connId=%{public}u", connectionId);
+
+    int32_t ret = ConnBrSetIdleCheck(connection, option->brOption.enableIdleCheck);
+    ConnBrReturnConnection(&connection);
+    return ret;
+}
+
 static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress, uint32_t duration)
 {
     CONN_LOGI(CONN_BR, "addr=%{public}s, duration=%{public}u", anomizeAddress, duration);
@@ -1865,7 +1882,7 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         .StartLocalListening = BrStartLocalListening,
         .StopLocalListening = BrStopLocalListening,
         .CheckActiveConnection = BrCheckActiveConnection,
-        .UpdateConnection = NULL,
+        .UpdateConnection = BrUpdateConnection,
         .PreventConnection = BrPendConnection,
         .ConfigPostLimit = ConnBrTransConfigPostLimit,
     };
