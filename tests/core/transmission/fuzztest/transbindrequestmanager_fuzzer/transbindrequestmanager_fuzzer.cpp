@@ -119,6 +119,9 @@ void TransAddTimestampToListTest(FuzzedDataProvider &provider)
     (void)TransAddTimestampToList(param.mySocketName, nullptr, param.peerNetworkId, timestamp);
     (void)TransAddTimestampToList(param.mySocketName, param.peerSocketName, nullptr, timestamp);
     (void)TransAddTimestampToList(param.mySocketName, param.peerSocketName, param.peerNetworkId, timestamp);
+    (void)TransBindRequestManagerInit();
+    (void)TransAddTimestampToList(param.mySocketName, param.peerSocketName, param.peerNetworkId, timestamp);
+    TransBindRequestManagerDeinit();
 }
 
 void TransDelTimestampFormListTest(FuzzedDataProvider &provider)
@@ -169,6 +172,34 @@ void TransResetBindDeniedFlagTest(FuzzedDataProvider &provider)
     TransBindRequestManagerDeinit();
     TransBindRequestManagerDeinit();
 }
+
+void FreeBindRequestMessageTest(FuzzedDataProvider &provider)
+{
+    FreeBindRequestMessage(nullptr);
+    SoftBusMessage *msg = (SoftBusMessage *)SoftBusMalloc(sizeof(SoftBusMessage));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)memset_s(msg, sizeof(SoftBusMessage), 0, sizeof(SoftBusMessage));
+    uint8_t value = provider.ConsumeIntegral<uint8_t>();
+    msg->obj = calloc(1, sizeof(value));
+    (void)memset_s(msg->obj, sizeof(value), value, sizeof(value));
+    FreeBindRequestMessage(msg);
+}
+
+void TransBindRequestLoopMsgHandlerTest(FuzzedDataProvider &provider)
+{
+    SoftBusMessage *msg = (SoftBusMessage *)SoftBusMalloc(sizeof(SoftBusMessage));
+    if (msg == nullptr) {
+        return;
+    }
+    (void)memset_s(msg, sizeof(SoftBusMessage), 0, sizeof(SoftBusMessage));
+    TransBindRequestLoopMsgHandler(msg);
+    msg->what = LOOP_DELETE_TIMESTAMP;
+    TransBindRequestLoopMsgHandler(msg);
+    msg->what = LOOP_RESET_BIND_DENIED_FLAG;
+    TransBindRequestLoopMsgHandler(msg);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -188,6 +219,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransDelTimestampFormListTest(provider);
     OHOS::GetDeniedFlagByPeerTest(provider);
     OHOS::TransResetBindDeniedFlagTest(provider);
+    OHOS::FreeBindRequestMessageTest(provider);
+    OHOS::TransBindRequestLoopMsgHandlerTest(provider);
 
     return 0;
 }
