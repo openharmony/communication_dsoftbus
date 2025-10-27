@@ -350,6 +350,7 @@ ConnBrConnection *ConnBrCreateConnection(const char *addr, ConnSideType side, in
     connection->waitSequence = 0;
     connection->ackTimeoutCount = 0;
     connection->retryCount = 0;
+    connection->enableIdleCheck = true;
     return connection;
 }
 
@@ -859,10 +860,35 @@ int32_t ConnBrStopServer(void)
 void ConnBrRefreshIdleTimeout(ConnBrConnection *connection)
 {
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR, "connection not exist");
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BR,
+        "lock fail, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
+    bool enableIdleCheck = connection->enableIdleCheck;
+    if (!enableIdleCheck) {
+        (void)SoftBusMutexUnlock(&connection->lock);
+        return;
+    }
     ConnRemoveMsgFromLooper(
         &g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
     ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId,
         0, NULL, BR_CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS);
+    (void)SoftBusMutexUnlock(&connection->lock);
+}
+
+int32_t ConnBrSetIdleCheck(ConnBrConnection *connection, bool enableCheck)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
+        "br connection close idle timeout fail, invalid param, connection is null");
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_BR,
+        "lock fail, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
+    connection->enableIdleCheck = enableCheck;
+    if (!connection->enableIdleCheck) {
+        ConnRemoveMsgFromLooper(
+            &g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
+    }
+    (void)SoftBusMutexUnlock(&connection->lock);
+    return SOFTBUS_OK;
 }
 
 static void BrConnectionIdleDisconnectTimeoutHandler(uint32_t connectionId)
