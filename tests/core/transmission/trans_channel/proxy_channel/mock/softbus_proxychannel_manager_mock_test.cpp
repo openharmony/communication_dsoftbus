@@ -165,10 +165,17 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     std::cout << "OnProxyChannelOpened calling enter" << std::endl;
     return SoftbusTransProxyChannelManagerMock::GetMockObj().OnProxyChannelOpened(channelId, appInfo, isServer);
 }
+
 void TransCheckChannelOpenRemoveFromLooper(int32_t channelId)
 {
     std::cout << "TransCheckChannelOpenRemoveFromLooper calling enter" << std::endl;
     return SoftbusTransProxyChannelManagerMock::GetMockObj().TransCheckChannelOpenRemoveFromLooper(channelId);
+}
+
+int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
+{
+    std::cout << "ConnUpdateConnection calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().ConnUpdateConnection(connectionId, option);
 }
 
 #ifdef __cplusplus
