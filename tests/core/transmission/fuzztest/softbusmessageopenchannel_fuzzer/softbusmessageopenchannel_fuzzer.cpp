@@ -369,6 +369,149 @@ void TransTdcPackFastDataTest(FuzzedDataProvider &provider)
     uint32_t outLen = provider.ConsumeIntegral<uint32_t>();
 
     (void)TransTdcPackFastData(&appInfo, &outLen);
+    appInfo.fastTransData = (uint8_t *)SoftBusCalloc(appInfo.fastTransDataSize + FAST_TDC_EXT_DATA_SIZE);
+    (void)TransTdcPackFastData(&appInfo, &outLen);
+}
+
+void PackExternalDeviceJsonObjectTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
+    std::string str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
+    char tmp[UINT8_MAX] = { 0 };
+    if (strcpy_s(tmp, UINT8_MAX, str.c_str()) != EOK) {
+        return;
+    }
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(tmp);
+    (void)PackExternalDeviceJsonObject(&appInfo, json, encodeSessionKey);
+    cJSON_Delete(json);
+}
+
+void TransPackHASpecificDataTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
+    (void)TransPackHASpecificData(&appInfo, json);
+    cJSON_Delete(json);
+}
+
+void TransPackMetaTypeSpecificDataTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
+    (void)TransPackMetaTypeSpecificData(&appInfo, json);
+    cJSON_Delete(json);
+}
+
+void PackExternalDeviceRequestTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    int64_t requestId = provider.ConsumeIntegral<int64_t>();
+    (void)PackExternalDeviceRequest(&appInfo, requestId);
+}
+
+void TransUnpackHASpecificDataTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
+    (void)TransUnpackHASpecificData(json, &appInfo);
+    cJSON_Delete(json);
+}
+
+void TransUnpackMetaTypeSpecificDataTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
+    (void)TransUnpackMetaTypeSpecificData(json, &appInfo);
+    cJSON_Delete(json);
+}
+
+void UnpackExternalDeviceRequestTest(FuzzedDataProvider &provider)
+{
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
+    (void)UnpackExternalDeviceRequest(json, nullptr);
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    (void)UnpackExternalDeviceRequest(json, &appInfo);
+    cJSON_Delete(json);
+}
+
+void PackExternalDeviceReplyTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    (void)PackExternalDeviceReply(&appInfo);
+}
+
+void UnpackExternalDeviceReplyTest(FuzzedDataProvider &provider)
+{
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
+    (void)UnpackExternalDeviceReply(json, nullptr);
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
+    (void)UnpackExternalDeviceReply(json, &appInfo);
+    cJSON_Delete(json);
 }
 } // namespace OHOS
 
@@ -386,6 +529,15 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransTdcEncryptTest(provider);
     OHOS::PackTcpFastDataPacketHeadTest(provider);
     OHOS::TransTdcPackFastDataTest(provider);
+    OHOS::PackExternalDeviceJsonObjectTest(provider);
+    OHOS::TransPackHASpecificDataTest(provider);
+    OHOS::TransPackMetaTypeSpecificDataTest(provider);
+    OHOS::PackExternalDeviceRequestTest(provider);
+    OHOS::TransUnpackHASpecificDataTest(provider);
+    OHOS::TransUnpackMetaTypeSpecificDataTest(provider);
+    OHOS::UnpackExternalDeviceRequestTest(provider);
+    OHOS::PackExternalDeviceReplyTest(provider);
+    OHOS::UnpackExternalDeviceReplyTest(provider);
 
     return 0;
 }
