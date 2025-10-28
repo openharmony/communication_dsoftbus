@@ -65,41 +65,38 @@ void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
     if (g_channelStatisticsList == NULL) {
         return;
     }
+    int32_t socketId;
+    if (ClientGetSessionIdByChannelId(channel->channelId, channel->channelType, &socketId, false) !=
+        SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channel->channelId);
+        return;
+    }
+
+    if (SoftBusMutexLock(&g_channelStatisticsList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "channel statistics list lock fail");
+        return;
+    }
+    if ((int32_t)g_channelStatisticsList->cnt >= MAX_SOCKET_RESOURCE_NUM) {
+        TRANS_LOGE(TRANS_SDK, "channel statistics out of max num");
+        (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
+        return;
+    }
+
+    SocketResource *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_channelStatisticsList->list, SocketResource, node) {
+        if (item->socketId == socketId) {
+            TRANS_LOGE(TRANS_SDK, "socket id already in channel statistics list");
+            (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
+            return;
+        }
+    }
 
     SocketResource *newItem = (SocketResource *)SoftBusCalloc(sizeof(SocketResource));
     if (newItem == NULL) {
         TRANS_LOGE(TRANS_SDK, "socket resource calloc fail");
         return;
     }
-    if (ClientGetSessionIdByChannelId(channel->channelId, channel->channelType, &newItem->socketId, false) !=
-        SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channel->channelId);
-        SoftBusFree(newItem);
-        return;
-    }
-
-    if (SoftBusMutexLock(&g_channelStatisticsList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "channel statistics list lock fail");
-        SoftBusFree(newItem);
-        return;
-    }
-    if ((int32_t)g_channelStatisticsList->cnt >= MAX_SOCKET_RESOURCE_NUM) {
-        TRANS_LOGE(TRANS_SDK, "channel statistics out of max num");
-        (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-        SoftBusFree(newItem);
-        return;
-    }
-
-    SocketResource *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_channelStatisticsList->list, SocketResource, node) {
-        if (item->socketId == newItem->socketId) {
-            TRANS_LOGE(TRANS_SDK, "socket id already in channel statistics list");
-            (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-            SoftBusFree(newItem);
-            return;
-        }
-    }
-
+    newItem->socketId = socketId;
     ListInit(&newItem->node);
     CreateSocketResource(newItem, sessionName, channel);
     ListAdd(&g_channelStatisticsList->list, &newItem->node);
@@ -224,7 +221,7 @@ static void ReserveDeleteInfo(ListNode *listNode, SocketResource *item)
         return;
     }
     *sourceItem = *item;
-    ListAdd(listNode, &(sourceItem->node));
+    ListAdd(listNode, &sourceItem->node);
 }
 
 static void DestoryDeleteInfo(ListNode *listNode)
