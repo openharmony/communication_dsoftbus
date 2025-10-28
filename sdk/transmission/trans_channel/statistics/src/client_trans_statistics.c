@@ -268,7 +268,6 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
     }
     ListNode deleteList;
     ListInit(&deleteList);
-    SocketResource deleteItem;
     SocketResource *item = NULL;
     SocketResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
