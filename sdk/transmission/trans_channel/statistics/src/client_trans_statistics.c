@@ -211,6 +211,42 @@ void DeleteSocketResourceBySocketId(int32_t socketId)
     }
 }
 
+static void ReserveDeleteInfo(ListNode *listNode, SocketResource *item)
+{
+    if (listNode == NULL || item == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+
+    SocketResource *sourceItem = (SocketResource *)SoftBusCalloc(sizeof(SocketResource));
+    if (sourceItem == NULL) {
+        TRANS_LOGE(TRANS_SDK, "malloc fail.");
+        return;
+    }
+    *sourceItem = *item;
+    ListAdd(listNode, &(sourceItem->node));
+}
+
+static void DestoryDeleteInfo(ListNode *listNode)
+{
+    if (listNode == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+
+    if (IsListEmpty(listNode)) {
+        return;
+    }
+
+    SocketResource *targetNode = NULL;
+    SocketResource *targetNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(targetNode, targetNodeNext, listNode, SocketResource, node) {
+        CloseChannelAndSendStatistics(targetNode);
+        ListDelete(&(targetNode->node));
+        SoftBusFree(targetNode);
+    }
+}
+
 void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
 {
     if (channelId < 0) {
@@ -230,24 +266,21 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
         TRANS_LOGE(TRANS_SDK, "channel statistics list lock fail");
         return;
     }
-    bool flag = false;
+    ListNode deleteList;
+    ListInit(&deleteList);
     SocketResource deleteItem;
     SocketResource *item = NULL;
     SocketResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
         if (item->socketId == socketId) {
-            flag = true;
-            deleteItem = *item;
+            ReserveDeleteInfo(&deleteList, item);
             ListDelete(&item->node);
             g_channelStatisticsList->cnt--;
             SoftBusFree(item);
-            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-    if (flag) {
-        CloseChannelAndSendStatistics(&deleteItem);
-    }
+    DestoryDeleteInfo(&deleteList);
 }
 
 int32_t ClientTransStatisticsInit(void)
