@@ -1193,11 +1193,6 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
     authHandle->type = linkType;
     authHandle->authId = AuthGetIdByUuid(uuid, linkType, !fromAuthServer, isAuthMeta);
-    if (authHandle->authId == AUTH_INVALID_ID && linkType == AUTH_LINK_TYPE_SESSION_KEY) {
-        authHandle->type = AUTH_LINK_TYPE_SLE;
-        authHandle->authId = AuthGetIdByUuid(uuid, AUTH_LINK_TYPE_SLE, !fromAuthServer, isAuthMeta);
-        TRANS_LOGI(TRANS_CTRL, "Retry to obtain FLAG_SLE AuthLinkType success.");
-    }
     return SOFTBUS_OK;
 }
 
