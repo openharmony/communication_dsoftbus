@@ -188,23 +188,26 @@ void DeleteSocketResourceBySocketId(int32_t socketId)
     TRANS_CHECK_AND_RETURN_LOGE(g_channelStatisticsList != NULL, TRANS_SDK, "channel statistices list init fail.");
     TRANS_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_channelStatisticsList->lock) == SOFTBUS_OK,
         TRANS_SDK, "channel statistics list lock fail.");
+    bool flag = false;
     SocketResource deleteItem;
     SocketResource *item = NULL;
     SocketResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
         if (item->socketId == socketId) {
+            flag = true;
             deleteItem = *item;
             ListDelete(&item->node);
             g_channelStatisticsList->cnt--;
             SoftBusFree(item);
-            (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
             TRANS_LOGI(TRANS_SDK, "delete socket resource by socket=%{public}d", socketId);
-            return;
         }
     }
     (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-    CloseChannelAndSendStatistics(&deleteItem);
-    TRANS_LOGE(TRANS_SDK, "not found channel statistics by socket=%{public}d", socketId);
+    if (flag) {
+        CloseChannelAndSendStatistics(&deleteItem);
+    } else {
+        TRANS_LOGE(TRANS_SDK, "not found channel statistics by socket=%{public}d", socketId);
+    }
 }
 
 void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
@@ -226,11 +229,13 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
         TRANS_LOGE(TRANS_SDK, "channel statistics list lock fail");
         return;
     }
+    bool flag = false;
     SocketResource deleteItem;
     SocketResource *item = NULL;
     SocketResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
         if (item->socketId == socketId) {
+            flag = true;
             deleteItem = *item;
             ListDelete(&item->node);
             g_channelStatisticsList->cnt--;
@@ -238,7 +243,9 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
         }
     }
     (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-    CloseChannelAndSendStatistics(&deleteItem);
+    if (flag) {
+        CloseChannelAndSendStatistics(&deleteItem);
+    }
 }
 
 int32_t ClientTransStatisticsInit(void)
