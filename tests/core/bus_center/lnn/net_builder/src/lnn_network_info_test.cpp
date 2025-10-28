@@ -843,7 +843,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
     dataInfo->msg = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
     if (dataInfo->msg == nullptr) {
         SoftBusFree(dataInfo);
-        ASSERT_NE(dataInfo->msg, nullptr);
+        return;
     }
     LnnAsyncSendUserId(dataInfo);
 
@@ -852,7 +852,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
     dataInfo->msg = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
     if (dataInfo->msg == nullptr) {
         SoftBusFree(dataInfo);
-        ASSERT_NE(dataInfo->msg, nullptr);
+        return;
     }
     LnnAsyncSendUserId(dataInfo);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
