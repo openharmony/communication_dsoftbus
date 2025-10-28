@@ -937,9 +937,6 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return;
     }
-    if (instance.info.isServer) {
-        (void)SendUkNegoCloseAckEvent(instance.channelId, instance.requestId);
-    }
     UkNegotiateInfo *negoInfo = NULL;
 
     if (!RequireUkNegotiateListLock()) {
@@ -953,8 +950,12 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
         return;
     }
     negoInfo->isRecvFinishEvent = true;
+    UkNegotiateInfo negoInfoTemp = *negoInfo;
     AUTH_LOGI(AUTH_CONN, "update instance event. finish=%{public}d", negoInfo->isRecvFinishEvent);
     ReleaseUkNegotiateListLock();
+    if (instance.info.isServer || (!instance.info.isServer && negoInfoTemp.isRecvCloseAckEvent)) {
+        (void)SendUkNegoCloseAckEvent(instance.channelId, instance.requestId);
+    }
     OnGenSuccess((uint32_t)authSeq);
 }
 
@@ -1266,10 +1267,11 @@ static int32_t ProcessCloseAckData(uint32_t requestId, const uint8_t *data, uint
         return SOFTBUS_AUTH_UK_NEGOINFO_NOT_FIND;
     }
     negoInfo->isRecvCloseAckEvent = true;
+    UkNegotiateInfo negoInfoTemp = *negoInfo;
     AUTH_LOGI(AUTH_CONN, "set negotiate info recv closeAck ok, closeAck=%{public}d", negoInfo->isRecvCloseAckEvent);
     ReleaseUkNegotiateListLock();
     OnGenSuccess(requestId);
-    if (!instance.info.isServer) {
+    if (!instance.info.isServer && negoInfoTemp.isRecvFinishEvent) {
         (void)SendUkNegoCloseAckEvent(instance.channelId, requestId);
     }
     return SOFTBUS_OK;
