@@ -56,8 +56,8 @@ int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *t
     attr.detachState = SOFTBUS_THREAD_DETACH;
     attr.taskName = taskName;
     SoftBusThread actionAsyncThread;
-    int32_t status = SoftBusThreadCreate(&actionAsyncThread, &attr, runnable, arg);
-    return status;
+    int32_t ret = SoftBusThreadCreate(&actionAsyncThread, &attr, runnable, arg);
+    return ret;
 }
 
 void ConvertAnonymizeMacAddress(char *outAnomize, uint32_t anomizeLen, const char *mac, uint32_t macLen)
@@ -184,8 +184,8 @@ int32_t WaitQueueLength(
         if (queueCount < (maxLen - diffLen)) {
             break;
         }
-        int32_t status = ConnectSoftBusCondWait(cond, mutex, WAIT_QUEUE_DELAY);
-        if (status != SOFTBUS_OK && status != SOFTBUS_TIMOUT) {
+        int32_t ret = ConnectSoftBusCondWait(cond, mutex, WAIT_QUEUE_DELAY);
+        if (ret != SOFTBUS_OK && ret != SOFTBUS_TIMOUT) {
             CONN_LOGE(CONN_COMMON, "wait queue length cond wait fail");
             return SOFTBUS_CONN_COND_WAIT_FAIL;
         }
