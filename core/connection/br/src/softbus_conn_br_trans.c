@@ -304,12 +304,12 @@ int32_t ConnBrPostBytes(
         return SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR;
     }
     ConnBrRefreshIdleTimeout(connection);
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR,
             "br post bytes fail: try to lock fail, connId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 ", error=%{public}d",
-            connectionId, pid, len, flag, module, seq, status);
+            connectionId, pid, len, flag, module, seq, ret);
         ConnBrReturnConnection(&connection);
         SoftBusFree(data);
         return SOFTBUS_LOCK_ERR;
@@ -350,26 +350,26 @@ int32_t ConnBrPostBytes(
     }
     g_startBrSendLPInfo.messagePosted = true;
     if (!g_startBrSendLPInfo.sendTaskRunning) {
-        status = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "start br send task fail errno=%{public}d", status);
+        ret = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "start br send task fail errno=%{public}d", ret);
             SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
             FreeSendNode(node);
-            return status;
+            return ret;
         }
         g_startBrSendLPInfo.sendTaskRunning = true;
         CONN_LOGD(CONN_BR, "start br send task succ");
     }
     SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
 
-    status = ConnBrEnqueueNonBlock((const void *)node);
-    if (status != SOFTBUS_OK) {
+    ret = ConnBrEnqueueNonBlock((const void *)node);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR,
             "br post bytes fail: enqueue fail, error=%{public}d, connId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
-            status, connectionId, pid, len, flag, module, seq);
+            ret, connectionId, pid, len, flag, module, seq);
         FreeSendNode(node);
-        return status;
+        return ret;
     }
     CONN_LOGI(CONN_BR,
         "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
@@ -399,23 +399,23 @@ static int32_t SendAck(const ConnBrConnection *connection, int32_t socketHandle)
             connection->sequence, (int32_t)ctrlMsgSeq);
         return (int32_t)ctrlMsgSeq;
     }
-    int32_t status = ConnBrCreateBrPendingPacket(connection->connectionId, connection->sequence);
-    if (status != SOFTBUS_OK) {
+    int32_t ret = ConnBrCreateBrPendingPacket(connection->connectionId, connection->sequence);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BR, "br send ack fail: create pending fail, connId=%{public}u, window=%{public}d, "
             "seq=%{public}" PRId64 ", error=%{public}d", connection->connectionId, connection->window,
-            connection->sequence, status);
+            connection->sequence, ret);
         SoftBusFree(data);
-        return status;
+        return ret;
     }
     CONN_LOGI(CONN_BR,
         "br send ack, connId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64
-        ", error=%{public}d", connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
-    status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, data, dataLen);
-    if (status != SOFTBUS_OK) {
+        ", error=%{public}d", connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, ret);
+    ret = BrTransSend(connection->connectionId, socketHandle, connection->mtu, data, dataLen);
+    if (ret != SOFTBUS_OK) {
         ConnBrDelBrPendingPacket(connection->connectionId, connection->sequence);
     }
     SoftBusFree(data);
-    return status;
+    return ret;
 }
 
 static void WaitAck(ConnBrConnection *connection)
@@ -545,9 +545,9 @@ void *SendHandlerLoop(void *arg)
 
         CONN_LOGI(CONN_BR, "br send data, connId=%{public}u, status=%{public}d, socketHandle=%{public}d",
             sendNode->connectionId, status, socketHandle);
-        status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, sendNode->data, sendNode->len);
+        ret = BrTransSend(connection->connectionId, socketHandle, connection->mtu, sendNode->data, sendNode->len);
         g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
-            sendNode->module, sendNode->seq, status);
+            sendNode->module, sendNode->seq, ret);
         ConnBrReturnConnection(&connection);
         FreeSendNode(sendNode);
         sendNode = NULL;
@@ -585,9 +585,9 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onPostByteFinshed != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init br trans module fail: invalid param, listener->onPostByteFinshed is null");
 
-    int32_t status = ConnBrInnerQueueInit();
-    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
-        "init br trans module fail: init br send queue fail, error=%{public}d", status);
+    int32_t ret = ConnBrInnerQueueInit();
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_INIT,
+        "init br trans module fail: init br send queue fail, error=%{public}d", ret);
 
     struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
     if (controller == NULL) {
@@ -599,12 +599,12 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
     g_sppDriver = sppDriver;
     g_transEventListener = *listener;
     g_flowController = controller;
-    status = SoftBusMutexInit(&g_startBrSendLPInfo.lock, NULL);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_INIT, "init br trans module fail: init send lp lock fail, err=%{public}d", status);
+    ret = SoftBusMutexInit(&g_startBrSendLPInfo.lock, NULL);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGW(CONN_INIT, "init br trans module fail: init send lp lock fail, err=%{public}d", ret);
         ConnBrInnerQueueDeinit();
         ConnSlideWindowControllerDelete(controller);
-        return status;
+        return ret;
     }
     return SOFTBUS_OK;
 }

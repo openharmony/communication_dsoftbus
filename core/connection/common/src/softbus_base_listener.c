@@ -86,10 +86,10 @@ static _Atomic bool g_initBaseListener = false;
 
 static SoftbusListenerNode *GetListenerNodeCommon(ListenerModule module, bool create)
 {
-    int32_t status = SoftBusMutexLock(&g_listenerListLock);
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, NULL, CONN_COMMON, "lock fail, module=%{public}d, error=%{public}d",
-        module, status);
+        ret == SOFTBUS_OK, NULL, CONN_COMMON, "lock fail, module=%{public}d, error=%{public}d",
+        module, ret);
     SoftbusListenerNode *node = g_listenerList[module];
     do {
         if (node == NULL) {
@@ -101,9 +101,9 @@ static SoftbusListenerNode *GetListenerNodeCommon(ListenerModule module, bool cr
             }
             g_listenerList[module] = node;
         }
-        status = SoftBusMutexLock(&node->lock);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "lock listener fail, module=%{public}d, error=%{public}d", module, status);
+        ret = SoftBusMutexLock(&node->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "lock listener fail, module=%{public}d, error=%{public}d", module, ret);
             node = NULL;
             break;
         }
@@ -126,18 +126,18 @@ static SoftbusListenerNode *GetOrCreateListenerNode(ListenerModule module)
 
 static void RemoveListenerNode(SoftbusListenerNode *node)
 {
-    int32_t status = SoftBusMutexLock(&g_listenerListLock);
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
     CONN_CHECK_AND_RETURN_LOGE(
-        status == SOFTBUS_OK, CONN_COMMON, "lock listener lists fail, module=%{public}d, error=%{public}d",
-        node->module, status);
+        ret == SOFTBUS_OK, CONN_COMMON, "lock listener lists fail, module=%{public}d, error=%{public}d",
+        node->module, ret);
     do {
         if (g_listenerList[node->module] != node) {
             CONN_LOGW(CONN_COMMON, "listener node is not in listener list, just skip, module=%{public}d",
                 node->module);
             break;
         }
-        status = SoftBusMutexLock(&node->lock);
-        if (status != SOFTBUS_OK) {
+        ret = SoftBusMutexLock(&node->lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "lock listener node fail, module=%{public}d", node->module);
             break;
         }
@@ -153,8 +153,8 @@ static void ReturnListenerNode(SoftbusListenerNode **nodePtr)
 {
     SoftbusListenerNode *node = *nodePtr;
     do {
-        int32_t status = SoftBusMutexLock(&node->lock);
-        if (status != SOFTBUS_OK) {
+        int32_t ret = SoftBusMutexLock(&node->lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "lock listener node fail, module=%{public}d", node->module);
             break;
         }
@@ -183,9 +183,9 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
 
     node->module = module;
     // NOT apply recursive lock on purpose, problem will be exposes quickly if exist
-    int32_t status = SoftBusMutexInit(&node->lock, NULL);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "init lock fail, module=%{public}d, error=%{public}d", module, status);
+    int32_t ret = SoftBusMutexInit(&node->lock, NULL);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "init lock fail, module=%{public}d, error=%{public}d", module, ret);
         SoftBusFree(node);
         return NULL;
     }
@@ -276,16 +276,16 @@ static int32_t InitBaseListenerLock(void)
     SoftBusMutexAttr attr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
-    int32_t status = SoftBusMutexInit(&g_watchThreadStateLock, &attr);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "init watch thread lock fail, error=%{public}d", status);
+    int32_t ret = SoftBusMutexInit(&g_watchThreadStateLock, &attr);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "init watch thread lock fail, error=%{public}d", ret);
         return SOFTBUS_LOCK_ERR;
     }
     // NOT apply recursive lock on purpose, problem will be exposes quickly if exist
-    status = SoftBusMutexInit(&g_listenerListLock, NULL);
-    if (status != SOFTBUS_OK) {
+    ret = SoftBusMutexInit(&g_listenerListLock, NULL);
+    if (ret != SOFTBUS_OK) {
         SoftBusMutexDestroy(&g_watchThreadStateLock);
-        CONN_LOGE(CONN_INIT, "init listener list lock fail, error=%{public}d", status);
+        CONN_LOGE(CONN_INIT, "init listener list lock fail, error=%{public}d", ret);
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -305,9 +305,9 @@ int32_t InitBaseListener(void)
 
     CONN_CHECK_AND_RETURN_RET_LOGE(InitBaseListenerLock() == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON,
         "init lock fail");
-    int32_t status = SoftBusMutexLock(&g_listenerListLock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "lock listener list fail, error=%{public}d", status);
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "lock listener list fail, error=%{public}d", ret);
         SoftBusMutexDestroy(&g_watchThreadStateLock);
         SoftBusMutexDestroy(&g_listenerListLock);
         return SOFTBUS_LOCK_ERR;
@@ -346,9 +346,9 @@ void DeinitBaseListener(void)
 
 uint32_t CreateListenerModule(void)
 {
-    int32_t status = SoftBusMutexLock(&g_listenerListLock);
+    int32_t ret = SoftBusMutexLock(&g_listenerListLock);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, UNUSE_BUTT, CONN_COMMON, "lock fail, error=%{public}d", status);
+        ret == SOFTBUS_OK, UNUSE_BUTT, CONN_COMMON, "lock fail, error=%{public}d", ret);
 
     ListenerModule module = LISTENER_MODULE_DYNAMIC_START;
     for (; module <= LISTENER_MODULE_DYNAMIC_END; module++) {
@@ -399,9 +399,9 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     CONN_CHECK_AND_RETURN_RET_LOGW(
         node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON, "get listener node fail, module=%{public}d", module);
 
-    int32_t status = SoftBusMutexLock(&node->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock listener node fail, module=%{public}d, error=%{public}d", module, status);
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "lock listener node fail, module=%{public}d, error=%{public}d", module, ret);
         ReturnListenerNode(&node);
         return SOFTBUS_LOCK_ERR;
     }
@@ -409,15 +409,15 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
         if (node->info.status != LISTENER_IDLE) {
             CONN_LOGE(CONN_COMMON, "listener is not idle status, module=%{public}d, status=%{public}d",
                 module, node->info.status);
-            status = SOFTBUS_CONN_LISTENER_NOT_IDLE;
+            ret = SOFTBUS_CONN_LISTENER_NOT_IDLE;
             break;
         }
         node->listener.onConnectEvent = listener->onConnectEvent;
         node->listener.onDataEvent = listener->onDataEvent;
-        status = StartWatchThread();
-        if (status != SOFTBUS_OK) {
+        ret = StartWatchThread();
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "start watch thread fail, module=%{public}d, "
-                "status=%{public}d", module, status);
+                "status=%{public}d", module, ret);
             break;
         }
         node->info.status = LISTENER_RUNNING;
@@ -425,7 +425,7 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     } while (false);
     (void)SoftBusMutexUnlock(&node->lock);
     ReturnListenerNode(&node);
-    return status;
+    return ret;
 }
 
 static void SetIpv6Tos(int fd, uint32_t tos)
@@ -542,9 +542,9 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
     SoftbusListenerNode *node = GetOrCreateListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON, "get listener node fail, module=%{public}d", module);
-    int32_t status = SoftBusMutexLock(&node->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, error=%{public}d", module, status);
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, error=%{public}d", module, ret);
         ReturnListenerNode(&node);
         FillConnEventExtra(info, &extra, SOFTBUS_LOCK_ERR);
         CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
@@ -556,7 +556,7 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         if (node->info.status != LISTENER_IDLE) {
             CONN_LOGE(CONN_COMMON, "listener is not idle status, module=%{public}d, status=%{public}d",
                 module, node->info.status);
-            status = SOFTBUS_CONN_LISTENER_NOT_IDLE;
+            ret = SOFTBUS_CONN_LISTENER_NOT_IDLE;
             break;
         }
 
@@ -564,26 +564,26 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         node->listener.onDataEvent = listener->onDataEvent;
         if (memcpy_s(&node->info.listenerInfo, sizeof(LocalListenerInfo), info, sizeof(LocalListenerInfo)) != EOK) {
             CONN_LOGE(CONN_COMMON, "memcpy_s listener info fail, module=%{public}d", node->module);
-            status = SOFTBUS_LOCK_ERR;
+            ret = SOFTBUS_LOCK_ERR;
             break;
         }
         listenPort = StartServerListenUnsafe(node, info);
         if (listenPort <= 0) {
             CONN_LOGE(CONN_COMMON, "start server fail, module=%{public}d, listenPort=%{public}d",
                 module, listenPort);
-            status = listenPort;
+            ret = listenPort;
             break;
         }
 
-        status = StartWatchThread();
-        if (status != SOFTBUS_OK) {
+        ret = StartWatchThread();
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "start listener thread fail, module=%{public}d, status=%{public}d",
-                module, status);
+                module, ret);
             CleanupServerListenInfoUnsafe(node);
             break;
         }
-        status = AddEvent(g_eventWatcher, node->info.listenFd, READ_TRIGGER);
-        if (status != SOFTBUS_OK) {
+        ret = AddEvent(g_eventWatcher, node->info.listenFd, READ_TRIGGER);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "add fd trigger to watch fail, module=%{public}d", module);
             StopWatchThread();
             CleanupServerListenInfoUnsafe(node);
@@ -595,9 +595,9 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
     } while (false);
     (void)SoftBusMutexUnlock(&node->lock);
     ReturnListenerNode(&node);
-    FillConnEventExtra(info, &extra, status);
+    FillConnEventExtra(info, &extra, ret);
     CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
-    return status == SOFTBUS_OK ? listenPort : status;
+    return ret == SOFTBUS_OK ? listenPort : ret;
 }
 
 int32_t StopBaseListener(ListenerModule module)
@@ -616,22 +616,22 @@ int32_t StopBaseListener(ListenerModule module)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON, "listener node not exist, module=%{public}d", module);
 
-    int32_t status = ShutdownBaseListener(node);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "stop listen thread fail, module=%{public}d, error=%{public}d", module, status);
+    int32_t ret = ShutdownBaseListener(node);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "stop listen thread fail, module=%{public}d, error=%{public}d", module, ret);
     }
     ReturnListenerNode(&node);
-    extra.errcode = status;
-    extra.result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra.errcode = ret;
+    extra.result = ret == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_STOP_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
-    return status;
+    return ret;
 }
 
 static int32_t ShutdownBaseListener(SoftbusListenerNode *node)
 {
-    int32_t status = SoftBusMutexLock(&node->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON,
-        "lock fail, module=%{public}d, error=%{public}d", node->module, status);
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON,
+        "lock fail, module=%{public}d, error=%{public}d", node->module, ret);
 
     do {
         if (node->info.status != LISTENER_RUNNING) {
@@ -639,10 +639,10 @@ static int32_t ShutdownBaseListener(SoftbusListenerNode *node)
                 node->module, node->info.status);
             break;
         }
-        status = StopWatchThread();
-        if (status != SOFTBUS_OK) {
+        ret = StopWatchThread();
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "stop watch thread fail, module=%{public}d, error=%{public}d",
-                node->module, status);
+                node->module, ret);
             // fall-through
         }
         node->info.status = LISTENER_IDLE;
@@ -674,7 +674,7 @@ static int32_t ShutdownBaseListener(SoftbusListenerNode *node)
     } while (false);
 
     SoftBusMutexUnlock(&node->lock);
-    return status;
+    return ret;
 }
 
 static bool IsValidTriggerType(TriggerType trigger)
@@ -714,10 +714,10 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
     CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
         "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
 
-    int32_t status = SoftBusMutexLock(&node->lock);
-    if (status != SOFTBUS_OK) {
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
-                               "error=%{public}d", module, fd, trigger, status);
+                               "error=%{public}d", module, fd, trigger, ret);
         ReturnListenerNode(&node);
         return SOFTBUS_LOCK_ERR;
     }
@@ -726,7 +726,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
         if (node->info.status != LISTENER_RUNNING) {
             CONN_LOGE(CONN_COMMON, "module is not running, module=%{public}d, fd=%{public}d, trigger=%{public}d",
                 module, fd, trigger);
-            status = SOFTBUS_CONN_FAIL;
+            ret = SOFTBUS_CONN_FAIL;
             break;
         }
 
@@ -746,8 +746,8 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
                     module, fd, trigger, target->triggerSet);
                 break;
             }
-            status = ModifyEvent(g_eventWatcher, fd, target->triggerSet | trigger);
-            if (status == SOFTBUS_OK) {
+            ret = ModifyEvent(g_eventWatcher, fd, target->triggerSet | trigger);
+            if (ret == SOFTBUS_OK) {
                 target->triggerSet |= trigger;
                 CONN_LOGI(CONN_COMMON, "add trigger success, module=%{public}d, fd=%{public}d, "
                     "AddTrigger=%{public}d, triggerSet=%{public}u", module, fd, trigger, target->triggerSet);
@@ -759,11 +759,11 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
         if (fdNode == NULL) {
             CONN_LOGE(CONN_COMMON, "calloc fail, module=%{public}d, fd=%{public}d, trigger=%{public}d",
                 module, fd, trigger);
-            status = SOFTBUS_MALLOC_ERR;
+            ret = SOFTBUS_MALLOC_ERR;
             break;
         }
-        status = AddEvent(g_eventWatcher, fd, trigger);
-        if (status == SOFTBUS_OK) {
+        ret = AddEvent(g_eventWatcher, fd, trigger);
+        if (ret == SOFTBUS_OK) {
             ListInit(&fdNode->node);
             fdNode->fd = fd;
             fdNode->triggerSet = trigger;
@@ -778,7 +778,7 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 
     (void)SoftBusMutexUnlock(&node->lock);
     ReturnListenerNode(&node);
-    return status;
+    return ret;
 }
 
 int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
@@ -794,10 +794,10 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
     CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
         "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
 
-    int32_t status = SoftBusMutexLock(&node->lock);
-    if (status != SOFTBUS_OK) {
+    int32_t ret = SoftBusMutexLock(&node->lock);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
-                               "error=%{public}d", module, fd, trigger, status);
+                               "error=%{public}d", module, fd, trigger, ret);
         ReturnListenerNode(&node);
         return SOFTBUS_LOCK_ERR;
     }
@@ -816,7 +816,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
             CONN_LOGW(CONN_COMMON, "fd node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d",
                 module, fd, trigger);
             // consider delete trigger success,
-            status = SOFTBUS_NOT_FIND;
+            ret = SOFTBUS_NOT_FIND;
             break;
         }
 
@@ -826,7 +826,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
                 "module=%{public}d, fd=%{public}d, wantDeleteTrigger=%{public}d, triggerSet=%{public}u",
                 module, fd, trigger, target->triggerSet);
             // consider delete trigger success,
-            status = SOFTBUS_OK;
+            ret = SOFTBUS_OK;
             break;
         }
 
@@ -835,7 +835,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
             (void)ModifyEvent(g_eventWatcher, fd, target->triggerSet);
             CONN_LOGI(CONN_COMMON, "delete trigger success, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
                                    "triggerSet=%{public}u", module, fd, trigger, target->triggerSet);
-            status = SOFTBUS_OK;
+            ret = SOFTBUS_OK;
             break;
         }
         (void)RemoveEvent(g_eventWatcher, fd);
@@ -850,7 +850,7 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 
     SoftBusMutexUnlock(&node->lock);
     ReturnListenerNode(&node);
-    return status;
+    return ret;
 }
 
 static void CleanupWatchThreadState(WatchThreadState **statePtr)
@@ -1117,12 +1117,12 @@ static void ProcessSpecifiedListenerNodeEvent(SoftbusListenerNode *node, ListNod
     SoftbusBaseListener listener = node->listener;
     struct FdNode *fdArray = NULL;
     uint32_t fdArrayLen = 0;
-    int32_t status = CopyWaitEventFdsUnsafe(node, &fdArray, &fdArrayLen);
+    int32_t ret = CopyWaitEventFdsUnsafe(node, &fdArray, &fdArrayLen);
     SoftBusMutexUnlock(&node->lock);
-    if (status != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON,
             "copy wait event fds fail, wakeupTrace=%{public}d, module=%{public}d, error=%{public}d",
-            wakeupTrace, node->module, status);
+            wakeupTrace, node->module, ret);
         return;
     }
     ProcessServerAcceptEvent(node, fdNode, wakeupTrace, &listener);
@@ -1193,11 +1193,11 @@ static void *WatchTask(void *arg)
     CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_COMMON, "invalid param");
     WatchThreadState *watchState = (WatchThreadState *)arg;
     while (true) {
-        int32_t status = SoftBusMutexLock(&watchState->lock);
-        if (status != SOFTBUS_OK) {
+        int32_t ret = SoftBusMutexLock(&watchState->lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "lock fail, retry after some times. "
                                    "waitDelay=%{public}dms, watchTrace=%{public}d, error=%{public}d",
-                WATCH_UNEXPECT_FAIL_RETRY_WAIT_MILLIS, watchState->traceId, status);
+                WATCH_UNEXPECT_FAIL_RETRY_WAIT_MILLIS, watchState->traceId, ret);
             SoftBusSleepMs(WATCH_UNEXPECT_FAIL_RETRY_WAIT_MILLIS);
             continue;
         }
@@ -1242,16 +1242,16 @@ static int32_t StartWatchThread(void)
 {
     static int32_t watchThreadTraceIdGenerator = 1;
 
-    int32_t status = SoftBusMutexLock(&g_watchThreadStateLock);
+    int32_t ret = SoftBusMutexLock(&g_watchThreadStateLock);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock global watch thread state fail");
+        ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock global watch thread state fail");
 
     do {
         if (g_watchThreadState != NULL) {
-            status = SoftBusMutexLock(&g_watchThreadState->lock);
-            if (status != SOFTBUS_OK) {
-                CONN_LOGE(CONN_COMMON, "lock watch thread state self fail, error=%{public}d", status);
-                status = SOFTBUS_LOCK_ERR;
+            ret = SoftBusMutexLock(&g_watchThreadState->lock);
+            if (ret != SOFTBUS_OK) {
+                CONN_LOGE(CONN_COMMON, "lock watch thread state self fail, error=%{public}d", ret);
+                ret = SOFTBUS_LOCK_ERR;
                 break;
             }
             int32_t referenceCount = ++g_watchThreadState->referenceCount;
@@ -1264,21 +1264,21 @@ static int32_t StartWatchThread(void)
 
         WatchThreadState *state = SoftBusCalloc(sizeof(WatchThreadState));
         if (state == NULL) {
-            status = SOFTBUS_MALLOC_ERR;
+            ret = SOFTBUS_MALLOC_ERR;
             break;
         }
         state->traceId = ++watchThreadTraceIdGenerator;
 
-        status = SoftBusMutexInit(&state->lock, NULL);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "init lock fail, error=%{public}d", status);
+        ret = SoftBusMutexInit(&state->lock, NULL);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "init lock fail, error=%{public}d", ret);
             CleanupWatchThreadState(&state);
             break;
         }
         state->referenceCount = 1;
-        status = ConnStartActionAsync(state, WatchTask, NULL);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "start watch task async fail, error=%{public}d", status);
+        ret = ConnStartActionAsync(state, WatchTask, NULL);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "start watch task async fail, error=%{public}d", ret);
             CleanupWatchThreadState(&state);
             break;
         }
@@ -1286,22 +1286,22 @@ static int32_t StartWatchThread(void)
         g_watchThreadState = state;
     } while (false);
     (void)SoftBusMutexUnlock(&g_watchThreadStateLock);
-    return status;
+    return ret;
 }
 
 static int32_t StopWatchThread(void)
 {
-    int32_t status = SoftBusMutexLock(&g_watchThreadStateLock);
+    int32_t ret = SoftBusMutexLock(&g_watchThreadStateLock);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock global watch thread state fail");
+        ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock global watch thread state fail");
     do {
         if (g_watchThreadState == NULL) {
             CONN_LOGW(CONN_COMMON, "watch thread is already stop or never start");
             break;
         }
 
-        status = SoftBusMutexLock(&g_watchThreadState->lock);
-        if (status != SOFTBUS_OK) {
+        ret = SoftBusMutexLock(&g_watchThreadState->lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "lock watch thread state self");
             break;
         }
@@ -1315,5 +1315,5 @@ static int32_t StopWatchThread(void)
         }
     } while (false);
     (void)SoftBusMutexUnlock(&g_watchThreadStateLock);
-    return status;
+    return ret;
 }
