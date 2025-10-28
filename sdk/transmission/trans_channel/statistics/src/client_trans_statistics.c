@@ -200,6 +200,7 @@ void DeleteSocketResourceBySocketId(int32_t socketId)
             g_channelStatisticsList->cnt--;
             SoftBusFree(item);
             TRANS_LOGI(TRANS_SDK, "delete socket resource by socket=%{public}d", socketId);
+            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
@@ -240,6 +241,7 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
             ListDelete(&item->node);
             g_channelStatisticsList->cnt--;
             SoftBusFree(item);
+            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
