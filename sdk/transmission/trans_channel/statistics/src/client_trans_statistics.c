@@ -94,6 +94,7 @@ void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
     SocketResource *newItem = (SocketResource *)SoftBusCalloc(sizeof(SocketResource));
     if (newItem == NULL) {
         TRANS_LOGE(TRANS_SDK, "socket resource calloc fail");
+        (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
         return;
     }
     newItem->socketId = socketId;
