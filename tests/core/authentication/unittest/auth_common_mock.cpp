@@ -118,9 +118,10 @@ int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle)
     return GetCommonInterface()->LnnNotifyLeaveLnnByAuthHandle(authHandle);
 }
 
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType,
+    DeviceLeaveReason leaveReason)
 {
-    return GetCommonInterface()->LnnRequestLeaveSpecific(networkId, addrType);
+    return GetCommonInterface()->LnnRequestLeaveSpecific(networkId, addrType, leaveReason);
 }
 
 int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac)

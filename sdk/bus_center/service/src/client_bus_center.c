@@ -461,6 +461,10 @@ int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, TimeSync
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (accuracy != HIGH_ACCURACY) {
+        LNN_LOGI(LNN_STATE, "not support");
+        return SOFTBUS_OK;
+    }
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         return ret;

@@ -64,9 +64,9 @@ void LNNIpNetworkImplMockTest::TearDown() { }
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_001
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1)
@@ -119,9 +119,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_002
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1)
@@ -155,9 +155,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_003
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1)
@@ -190,9 +190,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_004
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1)
@@ -247,9 +247,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1
 }
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_005
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1)
@@ -292,9 +292,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_006
- * @tc.desc: IsValidLocalIpTest
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_006, TestSize.Level1)
@@ -310,9 +310,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_006, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_007
- * @tc.desc: WifiStateChangeWifiOrApTest
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_007, TestSize.Level1)
@@ -331,9 +331,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_007, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_008
- * @tc.desc: GetWifiServiceIpAddrTest
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_008, TestSize.Level1)
@@ -353,9 +353,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_008, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_009
- * @tc.desc: OpenPortAndEnableIPTest
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_009, TestSize.Level1)
@@ -401,9 +401,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_009, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_010
- * @tc.desc: LocalIpInfoTest
+ * @tc.desc: test ip network impl
  * @tc.type: FUNC
- * @tc.require: I5OMIK
+ * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_010, TestSize.Level1)

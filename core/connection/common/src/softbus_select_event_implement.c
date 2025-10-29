@@ -126,8 +126,8 @@ int32_t WatchEvent(EventWatcher *watcher, int32_t timeoutMS, ListNode *out)
 
     ListNode fdHeadNode;
     ListInit(&fdHeadNode);
-    int32_t status = watcher->callback(&fdHeadNode);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, CONN_COMMON, "get all fd event fail");
+    int32_t ret = watcher->callback(&fdHeadNode);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "get all fd event fail");
     SoftBusFdSets fdSets = {0};
     int32_t maxFd = PrepareFdSets(&fdHeadNode, &fdSets);
             

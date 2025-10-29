@@ -837,6 +837,21 @@ void TransProxyProcessHandshakeAuthMsgTest(FuzzedDataProvider &provider)
         SoftBusFree(msg.data);
     }
 }
+
+void TransDisableConnBrIdleCheckTest(FuzzedDataProvider &provider)
+{
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    if (info == nullptr) {
+        return;
+    }
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    FillAppInfo(provider, &appInfo);
+    (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
+    (void)TransDisableConnBrIdleCheck(channelId);
+    (void)TransProxyDelByConnId(info->connId);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -876,5 +891,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyGetLocalInfoTest(provider);
     OHOS::ConstructProxyChannelInfoTest(provider);
     OHOS::TransProxyProcessHandshakeAuthMsgTest(provider);
+    OHOS::TransDisableConnBrIdleCheckTest(provider);
     return 0;
 }

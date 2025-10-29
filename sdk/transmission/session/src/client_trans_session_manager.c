@@ -3096,6 +3096,8 @@ int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    int32_t routeType = 0;
+    int32_t channelId = 0;
     int32_t ret = LockClientSessionServerList();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
@@ -3115,7 +3117,27 @@ int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)
     } else {
         ret = SOFTBUS_NOT_IMPLEMENT;
     }
+    routeType = sessionNode->routeType;
+    channelId = sessionNode->channelId;
     UnlockClientSessionServerList();
+
+    if (maxIdleTime == 0 && routeType == BT_BR) {
+        uint32_t bufLen = sizeof(int32_t);
+        uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
+        int32_t offSet = 0;
+        if (buf == NULL) {
+            TRANS_LOGE(TRANS_SDK, "malloc buf failed, socket=%{public}d.", socket);
+            return SOFTBUS_MALLOC_ERR;
+        }
+        ret = WriteInt32ToBuf(buf, bufLen, &offSet, channelId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "write channelId=%{public}d to buf failed! ret=%{public}d", channelId, ret);
+            SoftBusFree(buf);
+            return ret;
+        }
+        ret = ServerIpcProcessInnerEvent(EVENT_TYPE_DISABLE_CONN_BR_IDLE_CHECK, buf, bufLen);
+        SoftBusFree(buf);
+    }
     return ret;
 }
 

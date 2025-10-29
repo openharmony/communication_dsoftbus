@@ -631,13 +631,13 @@ bool VtpStreamSocket::EncryptStreamPacket(std::unique_ptr<IStream> stream, std::
 bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 {
 #define ACCEPT_RETRY_CNT  3
-#define RETRY_INTERVAL_US 100 * 1000 // 100ms
+#define RETRY_INTERVAL_US (100 * 1000) // 100ms
     TRANS_LOGD(TRANS_STREAM, "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd", streamType_,
         stream->GetBufferLen(), stream->GetExtBufferLen());
     int32_t retryCnt = ACCEPT_RETRY_CNT;
     while (streamFd_ == -1 && retryCnt > 0) {
-        TRANS_LOGW(TRANS_STREAM, "accept thread may be bloced, retry after 100ms");
-        usleep(100 * 1000);
+        TRANS_LOGW(TRANS_STREAM, "accept thread may be blocked, retry after 100ms");
+        usleep(RETRY_INTERVAL_US);
         retryCnt--;
     }
     if (!isBlocked_) {
@@ -795,8 +795,12 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
     localSockAddr.sin_port = htons((short)local.port);
     localSockAddr.sin_addr.s_addr = inet_addr(local.ip.c_str());
     localIpPort_.ip = SoftBusInetNtoP(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
-    if (!SetSocketBoundInner(sockFd, localIpPort_.ip)) {
-        TRANS_LOGE(TRANS_STREAM, "SetSocketBoundInner failed, errno=%{public}d", FtGetErrno());
+    if (localIpPort_.ip.c_str() == nullptr || !SetSocketBoundInner(sockFd, localIpPort_.ip)) {
+        char *tmpIp = nullptr;
+        Anonymize(localIpPort_.ip.c_str(), &tmpIp);
+        TRANS_LOGE(TRANS_STREAM, "Ip=%{public}s, or SetSocketBoundInner failed, errno=%{public}d",
+            AnonymizeWrapper(tmpIp), FtGetErrno());
+        AnonymizeFree(tmpIp);
     }
 
     socklen_t localAddrLen = sizeof(localSockAddr);

@@ -75,8 +75,9 @@ void BusCenterDecisionTest::TearDown(void)
 
 /*
 * @tc.name: BusCenterDecisionTest001
-* @tc.desc:
+* @tc.desc: decision report connect exception test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level1)
@@ -91,8 +92,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest002
-* @tc.desc:bus center decision test
+* @tc.desc: decision clear connect exception test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest002, TestSize.Level1)
@@ -107,8 +109,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest002, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest003
-* @tc.desc:bus center decision test
+* @tc.desc: decision process online state test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest003, TestSize.Level1)
@@ -125,8 +128,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest003, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest004
-* @tc.desc:bus center decision test
+* @tc.desc: init decision center test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest004, TestSize.Level1)
@@ -139,8 +143,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest004, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest005
-* @tc.desc:InitDecisionCenter test
+* @tc.desc: init decision center test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest005, TestSize.Level1)
@@ -164,8 +169,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest005, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest006
-* @tc.desc: InitDecisionCenter test
+* @tc.desc: init decision center test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest006, TestSize.Level1)
@@ -189,8 +195,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest006, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest007
-* @tc.desc: InitDecisionCenter test
+* @tc.desc: init decision center test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require: 1
 */
 HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest007, TestSize.Level1)

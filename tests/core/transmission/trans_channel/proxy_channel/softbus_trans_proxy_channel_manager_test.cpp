@@ -57,9 +57,9 @@ void SoftbusTransProxyChannelManagerTest::TearDownTestCase(void)
     TransProxyManagerDeinit();
 }
 
-/**@
+/*
  * @tc.name: GetProxyChannelMgrHead
- * @tc.desc: test proxy GetProxyChannelMgrHead.
+ * @tc.desc: test proxy GetProxyChannelMgrHead
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -68,9 +68,9 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, GetProxyChannelMgrHead, TestSize.L
     EXPECT_EQ(GetProxyChannelMgrHead(), nullptr);
 }
 
-/**@
+/*
  * @tc.name: GetProxyChannelLock001
- * @tc.desc: test proxy GetProxyChannelLock001.
+ * @tc.desc: test whether the GetProxyChannelLock is init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -79,9 +79,9 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, GetProxyChannelLock001, TestSize.L
     EXPECT_EQ(GetProxyChannelLock(), SOFTBUS_NO_INIT);
 }
 
-/**@
+/*
  * @tc.name: ReleaseProxyChannelLock001
- * @tc.desc: test proxy ReleaseProxyChannelLock001.
+ * @tc.desc: test the ReleaseProxyChannelLock without exceptions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -90,9 +90,9 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, ReleaseProxyChannelLock001, TestSi
     EXPECT_NO_THROW(ReleaseProxyChannelLock());
 }
 
-/**@
+/*
  * @tc.name: ReleaseProxyChannelLock002
- * @tc.desc: test proxy ReleaseProxyChannelLock002.
+ * @tc.desc: test the ReleaseProxyChannelLock without exceptions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -104,9 +104,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, ReleaseProxyChannelLock002, TestSi
     g_proxyChannelList = nullptr;
 }
 
-/**@
+/*
  * @tc.name: FindConfigType
- * @tc.desc: test proxy FindConfigType.
+ * @tc.desc: test proxy FindConfigType
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -116,9 +117,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, FindConfigType, TestSize.Level1)
     EXPECT_EQ(result, SOFTBUS_CONFIG_TYPE_MAX);
 }
 
-/**@
+/*
  * @tc.name: TransGetLocalConfig001
- * @tc.desc: test proxy TransGetLocalConfig001.
+ * @tc.desc: test proxy TransGetLocalConfig
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -133,9 +135,9 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransGetLocalConfig001, TestSize.L
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
 }
 
-/**@
+/*
  * @tc.name: TransGetLocalConfig002
- * @tc.desc: test proxy TransGetLocalConfig002.
+ * @tc.desc: test proxy Trans Get Local Config
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -152,9 +154,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransGetLocalConfig002, TestSize.L
     EXPECT_EQ(result, SOFTBUS_GET_CONFIG_VAL_ERR);
 }
 
-/**@
+/*
  * @tc.name: TransProxyProcessDataConfig001
- * @tc.desc: test proxy TransProxyProcessDataConfig001.
+ * @tc.desc: test proxy TransProxyProcessDataConfig
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -165,9 +168,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyProcessDataConfig001, Te
     EXPECT_EQ(TransProxyProcessDataConfig(&appInfo), SOFTBUS_OK);
 }
 
-/**@
+/*
  * @tc.name: TransProxyHandshakeUnpackErrMsg001
- * @tc.desc: test proxy TransProxyHandshakeUnpackErrMsg001.
+ * @tc.desc: test proxy TransProxyHandshakeUnpackErrMsg
+ *           use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -183,9 +187,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyHandshakeUnpackErrMsg001
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
 }
 
-/**@
+/*
  * @tc.name: TransProxyHandshakeUnpackErrMsg002
- * @tc.desc: test proxy TransProxyHandshakeUnpackErrMsg002.
+ * @tc.desc: test proxy TransProxyHandshakeUnpackErrMsg
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -207,9 +212,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyHandshakeUnpackErrMsg002
     EXPECT_EQ(errCode, 0);
 }
 
-/**@
+/*
  * @tc.name: TransProxyHandshakeUnpackRightMsg001
- * @tc.desc: test proxy TransProxyHandshakeUnpackRightMsg001.
+ * @tc.desc: test proxy TransProxyHandshakeUnpackRightMsg
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -223,9 +229,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyHandshakeUnpackRightMsg0
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**@
+/*
  * @tc.name: TransProxyGetLocalInfo001
- * @tc.desc: test proxy TransProxyGetLocalInfo001.
+ * @tc.desc: test proxy TransProxyGetLocalInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -247,9 +254,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyGetLocalInfo001, TestSiz
     EXPECT_EQ(result, SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED);
 }
 
-/**@
+/*
  * @tc.name: TransProxyFillDataConfig001
- * @tc.desc: test proxy TransProxyFillDataConfig001.
+ * @tc.desc: test proxy TransProxyFillDataConfig
+ *           use normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -263,9 +271,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillDataConfig001, TestS
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**@
+/*
  * @tc.name: TransProxyFillDataConfig002
- * @tc.desc: test proxy TransProxyFillDataConfig002.
+ * @tc.desc: test proxy TransProxyFillDataConfig
+ *           use normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -283,9 +292,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillDataConfig002, TestS
     EXPECT_EQ(result, SOFTBUS_GET_CONFIG_VAL_ERR);
 }
 
-/**@
+/*
  * @tc.name: TransProxyFillChannelInfo001
- * @tc.desc: test proxy TransProxyFillChannelInfo001.
+ * @tc.desc: test proxy TransProxyFillChannelInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -301,9 +311,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo001, Test
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**@
+/*
  * @tc.name: TransProxyFillChannelInfo002
- * @tc.desc: test proxy TransProxyFillChannelInfo002.
+ * @tc.desc: test proxy TransProxyFillChannelInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -321,9 +332,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo002, Test
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**@
+/*
  * @tc.name: TransProxyFillChannelInfo003
- * @tc.desc: test proxy TransProxyFillChannelInfo003.
+ * @tc.desc: test proxy TransProxyFillChannelInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -344,9 +356,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo003, Test
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 }
 
-/**@
+/*
  * @tc.name: TransProxyFillChannelInfo004
- * @tc.desc: test proxy TransProxyFillChannelInfo004.
+ * @tc.desc: test proxy TransProxyFillChannelInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -368,9 +381,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyFillChannelInfo004, Test
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransNotifyUserSwitchTest001
- * @tc.desc: client send file crc check sum, use normal parameter.
+ * @tc.desc: client send file crc check sum
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -389,9 +403,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransNotifyUserSwitchTest001, Test
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: HandleProxyChanelOpenedTest001
- * @tc.desc: HandleProxyChanelOpened
+ * @tc.desc: test HandleProxyChanelOpened
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -407,9 +422,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, HandleProxyChanelOpenedTest001, Te
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
-/**
+/*
  * @tc.name: HandleProxyChanelOpenedTest002
- * @tc.desc: HandleProxyChanelOpened
+ * @tc.desc: test HandleProxyChanelOpened
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -426,9 +442,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, HandleProxyChanelOpenedTest002, Te
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
 }
 
-/**
+/*
  * @tc.name: HandleProxyChanelOpenedTest003
- * @tc.desc: HandleProxyChanelOpened
+ * @tc.desc: test HandleProxyChanelOpened
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -445,9 +462,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, HandleProxyChanelOpenedTest003, Te
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: HandleProxyGenUkResultTest001
- * @tc.desc: HandleProxyGenUkResult
+ * @tc.desc: test HandleProxyGenUkResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -462,9 +480,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, HandleProxyGenUkResultTest001, Tes
     EXPECT_NO_FATAL_FAILURE(HandleProxyGenUkResult(requestId, ukId, SOFTBUS_OK));
 }
 
-/**
+/*
  * @tc.name: HandleProxyGenUkResultTest002
- * @tc.desc: HandleProxyGenUkResult
+ * @tc.desc: test HandleProxyGenUkResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -493,9 +512,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, HandleProxyGenUkResultTest002, Tes
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: HandleProxyGenUkResultTest003
- * @tc.desc: HandleProxyGenUkResult
+ * @tc.desc: test HandleProxyGenUkResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -517,9 +537,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, HandleProxyGenUkResultTest003, Tes
     EXPECT_NO_THROW(HandleProxyGenUkResult(requestId, ukId, SOFTBUS_INVALID_PARAM));
 }
 
-/**
+/*
  * @tc.name: TransDealProxyChannelOpenResultTest001
- * @tc.desc: TransDealProxyChannelOpenResult
+ * @tc.desc: test TransDealProxyChannelOpenResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -539,9 +560,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyChannelOpenResultTes
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransDealProxyChannelOpenResultTest002
- * @tc.desc: TransDealProxyChannelOpenResult
+ * @tc.desc: test TransDealProxyChannelOpenResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -571,9 +593,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyChannelOpenResultTes
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransDealProxyChannelOpenResultTest003
- * @tc.desc: TransDealProxyChannelOpenResult
+ * @tc.desc: test TransDealProxyChannelOpenResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -601,9 +624,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyChannelOpenResultTes
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransDealProxyChannelOpenResultTest004
- * @tc.desc: TransDealProxyChannelOpenResult
+ * @tc.desc: test TransDealProxyChannelOpenResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -629,9 +653,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyChannelOpenResultTes
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransProxyProcessReNegotiateMsgTest001
- * @tc.desc: TransProxyProcessReNegotiateMsg
+ * @tc.desc: test TransProxyProcessReNegotiateMsg
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -659,9 +684,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyProcessReNegotiateMsgTes
     EXPECT_EQ(ret, SOFTBUS_TRANS_AUTH_REQUEST_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransProxyProcessReNegotiateMsgTest002
- * @tc.desc: TransProxyProcessReNegotiateMsg
+ * @tc.desc: test TransProxyProcessReNegotiateMsg
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -689,9 +715,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyProcessReNegotiateMsgTes
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransProxyProcessResetMsgTest001
- * @tc.desc: TransProxyProcessResetMsg
+ * @tc.desc: test TransProxyProcessResetMsg
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -717,9 +744,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyProcessResetMsgTest001, 
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransProxyProcessResetMsgTest002
- * @tc.desc: TransProxyProcessResetMsg
+ * @tc.desc: test TransProxyProcessResetMsg
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -751,9 +779,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyProcessResetMsgTest002, 
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnMessageReceivedTest001
- * @tc.desc: TransProxyOnMessageReceived
+ * @tc.desc: test TransProxyOnMessageReceived
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -762,9 +791,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyOnMessageReceivedTest001
     EXPECT_NO_THROW(TransProxyOnMessageReceived(nullptr));
 }
 
-/**
+/*
  * @tc.name: TransNotifySingleNetworkOffLineTest001
- * @tc.desc: TransNotifySingleNetworkOffLine
+ * @tc.desc: test TransNotifySingleNetworkOffLine
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -794,9 +824,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransNotifySingleNetworkOffLineTes
     EXPECT_NO_THROW(TransNotifySingleNetworkOffLine(info));
 }
 
-/**
+/*
  * @tc.name: TransNotifyOffLineTest001
- * @tc.desc: TransNotifyOffLine
+ * @tc.desc: test TransNotifyOffLine
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -826,9 +857,10 @@ int32_t OnChannelOpenedTest(const char *pkgName, int32_t pid, const char *sessio
     return SOFTBUS_OK;
 }
 
-/**
+/*
  * @tc.name: TransProxyManagerInitTest001
- * @tc.desc: TransProxyManagerInit
+ * @tc.desc: test TransProxyManagerInit
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -845,9 +877,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyManagerInitTest001, Test
     EXPECT_EQ(ret, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
 }
 
-/**
+/*
  * @tc.name: TransProxyResetReplyCntTest001
- * @tc.desc: TransProxyResetReplyCnt
+ * @tc.desc: test TransProxyResetReplyCnt
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -868,9 +901,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyResetReplyCntTest001, Te
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransProxyResetReplyCntTest002
- * @tc.desc: TransProxyResetReplyCnt
+ * @tc.desc: test TransProxyResetReplyCnt
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -888,9 +922,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyResetReplyCntTest002, Te
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransDealProxyCheckCollabResultTest001
- * @tc.desc: TransDealProxyCheckCollabResult
+ * @tc.desc: test TransDealProxyCheckCollabResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -904,9 +939,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyCheckCollabResultTes
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 }
 
-/**
+/*
  * @tc.name: TransDealProxyCheckCollabResultTest002
- * @tc.desc: TransDealProxyCheckCollabResult
+ * @tc.desc: test TransDealProxyCheckCollabResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -930,9 +966,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyCheckCollabResultTes
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransDealProxyCheckCollabResultTest003
- * @tc.desc: TransDealProxyCheckCollabResult
+ * @tc.desc: test TransDealProxyCheckCollabResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -959,9 +996,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyCheckCollabResultTes
     ListDelete(&(proxyChannelInfo->node));
 }
 
-/**
+/*
  * @tc.name: TransDealProxyCheckCollabResultTest004
- * @tc.desc: TransDealProxyCheckCollabResult
+ * @tc.desc: test TransDealProxyCheckCollabResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -984,9 +1022,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyCheckCollabResultTes
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransDealProxyCheckCollabResultTest005
- * @tc.desc: TransDealProxyCheckCollabResult
+ * @tc.desc: test TransDealProxyCheckCollabResult
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1012,9 +1051,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyCheckCollabResultTes
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
 }
 
-/**
+/*
  * @tc.name: TransPagingUpdateDataConfigTest001
- * @tc.desc: TransProxyResetReplyCnt
+ * @tc.desc: test TransProxyResetReplyCnt
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1035,5 +1075,28 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransPagingUpdateDataConfigTest001
     appInfo.isSupportNewHead = true;
     ret = TransPagingUpdateDataConfig(&appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransDisableConnBrIdleCheckTest001
+ * @tc.desc: TransDisableConnBrIdleCheck
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDisableConnBrIdleCheckTest001, TestSize.Level1)
+{
+    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(proxyChannelInfo != nullptr);
+    proxyChannelInfo->channelId = TEST_CHANNEL_ID;
+    proxyChannelInfo->connId = 99;
+
+    ListAdd(&g_proxyChannelList->list, &(proxyChannelInfo->node));
+
+    SoftbusTransProxyChannelManagerMock mock;
+    EXPECT_CALL(mock, ConnUpdateConnection).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransDisableConnBrIdleCheck(TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&(proxyChannelInfo->node));
 }
 } // namespace OHOS

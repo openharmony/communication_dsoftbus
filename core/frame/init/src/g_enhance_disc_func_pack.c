@@ -122,6 +122,16 @@ int32_t DiscCoapAssembleCapDataPacked(uint32_t capability, const char *capabilit
     }
     return pfnDiscEnhanceFuncList->discCoapAssembleCapData(capability, capabilityData, dataLen, outData, outLen);
 }
+
+void DiscCoapUpdateAbilityPacked(uint32_t capability, const char *capabilityData, uint32_t dataLen,
+    bool isPublish, bool isStart)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapUpdateAbility) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->discCoapUpdateAbility(capability, capabilityData, dataLen, isPublish, isStart);
+}
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
 
 int32_t DiscFillBtypePacked(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
@@ -316,7 +326,23 @@ void DiscOopBleDeinitPacked(void)
     return pfnDiscEnhanceFuncList->discOopBleDeinit();
 }
 
-
+void PcCollaborationManagerDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->pcCollaborationManagerDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->pcCollaborationManagerDeinit();
+}
+ 
+void DiscPcCollaborationEventDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->pcCollaborationEventDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->pcCollaborationEventDeinit();
+}
 
 void DiscCoapReportNotificationPacked(const NSTACKX_NotificationConfig *notification)
 {

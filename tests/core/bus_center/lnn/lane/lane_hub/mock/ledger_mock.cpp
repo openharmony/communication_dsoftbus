@@ -81,9 +81,9 @@ int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint
     return GetLedgerInterface()->LnnGetRemoteStrInfo(netWorkId, key, info, len);
 }
 
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason)
 {
-    return GetLedgerInterface()->LnnRequestLeaveSpecific(networkId, addrType);
+    return GetLedgerInterface()->LnnRequestLeaveSpecific(networkId, addrType, leaveReason);
 }
 
 int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)

@@ -52,7 +52,7 @@ void AuthHichainMockTest::TearDown() { }
 
 /*
  * @tc.name: GEN_DEVICE_LEVEL_PARAM_TEST_001
- * @tc.desc: GenDeviceLevelParam test
+ * @tc.desc: test GenDeviceLevelParam
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -92,7 +92,7 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_TRANSMIT_TEST_001
- * @tc.desc: OnTransmit test
+ * @tc.desc: test OnTransmit
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -114,7 +114,7 @@ HWTEST_F(AuthHichainMockTest, ON_TRANSMIT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_DEVICE_SIDE_FLAG_TEST_001
- * @tc.desc: GetDeviceSideFlag test
+ * @tc.desc: test GetDeviceSideFlag
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -155,7 +155,7 @@ HWTEST_F(AuthHichainMockTest, GET_DEVICE_SIDE_FLAG_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CHECK_ERR_RETURN_VALIDITY_TEST_001
- * @tc.desc: CheckErrReturnValidity test
+ * @tc.desc: test CheckErrReturnValidity
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -180,8 +180,7 @@ HWTEST_F(AuthHichainMockTest, CHECK_ERR_RETURN_VALIDITY_TEST_001, TestSize.Level
 }
 
 /*
- * @tc.name: ON_REQUEST_TEST_001
- * @tc.desc: OnRequest test
+ * @tc.desc: test OnRequest
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -297,7 +296,7 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_UDID_HASH_TEST_001
- * @tc.desc: GetUdidHash test
+ * @tc.desc: test GetUdidHash
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -335,7 +334,7 @@ HWTEST_F(AuthHichainMockTest, GET_UDID_HASH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: HICHAIN_START_AUTH_TEST_001
- * @tc.desc: HichainStartAuth test
+ * @tc.desc: test HichainStartAuth
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -373,7 +372,7 @@ HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_EXTERNAL_AUTH_INFO_001
- * @tc.desc: PackExternalAuthInfo test
+ * @tc.desc: test PackExternalAuthInfo
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -426,7 +425,7 @@ HWTEST_F(AuthHichainMockTest, PACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
 
 /*
  * @tc.name: UNPACK_EXTERNAL_AUTH_INFO_001
- * @tc.desc: UnpackExternalAuthInfo test
+ * @tc.desc: test UnpackExternalAuthInfo
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

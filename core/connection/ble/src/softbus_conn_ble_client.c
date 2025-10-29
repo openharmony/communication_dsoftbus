@@ -606,7 +606,7 @@ static void MtuSettedMsgHandler(const MtuConfiguredContext *ctx)
             break;
         }
 
-    ret = UpdateBleConnectionStateInOrder(
+        ret = UpdateBleConnectionStateInOrder(
             connection, BLE_CONNECTION_STATE_MTU_SETTING, BLE_CONNECTION_STATE_MTU_SETTED);
         if (ret != SOFTBUS_OK) {
             CONN_LOGW(CONN_BLE, "update connection state fail, connId=%{public}u, handle=%{public}d, err=%{public}d",

@@ -1860,7 +1860,7 @@ static void LeaveSameIpOnlineDevice(LnnConntionInfo *connInfo)
             LNN_LOGI(
                 LNN_BUILDER, "need old same ip device offline, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
             AnonymizeFree(anonyNetworkId);
-            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_WLAN);
+            LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT);
             SoftBusFree(info);
             return;
         }

@@ -62,6 +62,6 @@ int32_t LnnInitModuleNotifyWithRetryAsync(uint32_t module, ModuleInitCallBack ca
     return SOFTBUS_OK;
 }
 
-void LnnModuleMonitorRestartNetwork(void) { }
+void LnnRestartNetwork(void) { }
 
 void LnnInitSetDeviceInfoReady(void) { }

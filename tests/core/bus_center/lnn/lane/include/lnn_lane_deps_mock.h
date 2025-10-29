@@ -123,6 +123,7 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
     virtual int32_t AuthMetaGetMetaTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *metaType) = 0;
+    virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -194,6 +195,7 @@ public:
     MOCK_METHOD4(LnnGetRemoteNumInfoByIfnameIdx, int32_t (const char *, InfoKey, int32_t *, int32_t));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD2(AuthMetaGetMetaTypeByMetaNodeIdPacked, int32_t (const char *metaNodeId, int32_t *metaType));
+    MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *uuid, char *buf, uint32_t len));
 
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,

@@ -573,34 +573,13 @@ static int32_t TransPackHASpecificData(const AppInfo *appInfo, cJSON *msg)
     return ret;
 }
 
-static int32_t TranPackSdkSpecificData(const AppInfo *appInfo, cJSON *msg)
-{
-    char hexSessionKey[HEXKEY] = { 0 };
-    int32_t ret =
-        ConvertBytesToHexString(hexSessionKey, HEXKEY, (unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "convert bytes to hex string failed, ret=%{public}d", ret);
-        return ret;
-    }
-
-    ret = PackExternalDeviceJsonObject(appInfo, msg, (unsigned char *)hexSessionKey);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "pack json object failed ret=%{public}d", ret);
-    }
-    (void)memset_s(hexSessionKey, sizeof(hexSessionKey), 0, sizeof(hexSessionKey));
-    return ret;
-}
-
 static int32_t TransPackMetaTypeSpecificData(const AppInfo *appInfo, cJSON *msg)
 {
     int32_t ret = SOFTBUS_OK;
     switch (appInfo->metaType) {
+        case META_SDK:
         case META_HA: {
             ret = TransPackHASpecificData(appInfo, msg);
-            break;
-        }
-        case META_SDK: {
-            ret = TranPackSdkSpecificData(appInfo, msg);
             break;
         }
         default: {
@@ -664,25 +643,6 @@ static int32_t TransUnpackHASpecificData(const cJSON *msg, AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t TransUnpackSdkSpecificData(const cJSON *msg, AppInfo *appInfo)
-{
-    char sessionKey[HEXKEY] = { 0 };
-    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey)),
-        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get sessionKey.");
-
-    if (strlen(sessionKey) == 0) {
-        return SOFTBUS_OK;
-    }
-
-    int32_t ret = ConvertHexStringToBytes(
-        (unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH, sessionKey, strlen(sessionKey));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "convert hex string to bytes failed, ret=%{public}d", ret);
-    }
-    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-    return ret;
-}
-
 static int32_t TransUnpackMetaTypeSpecificData(const cJSON *msg, AppInfo *appInfo)
 {
     int32_t ret = LnnGetRemoteNumInfo(appInfo->peerData.deviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
@@ -695,11 +655,11 @@ static int32_t TransUnpackMetaTypeSpecificData(const cJSON *msg, AppInfo *appInf
     }
 
     switch (appInfo->metaType) {
-        case META_SDK: {
-            ret = TransUnpackSdkSpecificData(msg, appInfo);
+        case META_SDK:
+        case META_HA: {
+            ret = TransUnpackHASpecificData(msg, appInfo);
             break;
         }
-        case META_HA:
         default: {
             TRANS_LOGW(TRANS_CTRL, "invalid metaType=%{public}d, maybe old HA version", appInfo->metaType);
             ret = TransUnpackHASpecificData(msg, appInfo);

@@ -39,7 +39,8 @@ public:
     virtual int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategy(
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
-    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType,
+        DeviceLeaveReason leaveReason) = 0;
     virtual AuthVerifyCallback *LnnGetReAuthVerifyCallback(void) = 0;
     virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
     virtual int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable) = 0;
@@ -84,7 +85,7 @@ public:
     MOCK_METHOD3(LnnNotifyMasterElect, int32_t(const char *, const char *, int32_t));
     MOCK_METHOD1(LnnSetHbAsMasterNodeState, int32_t(bool));
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD0(LnnGetReAuthVerifyCallback, AuthVerifyCallback *(void));
     MOCK_METHOD3(LnnSetGearModeBySpecificType, int32_t(const char *, const GearMode *, LnnHeartbeatType));
     MOCK_METHOD2(LnnEnableHeartbeatByType, int32_t(LnnHeartbeatType, bool));

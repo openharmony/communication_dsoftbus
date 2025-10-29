@@ -418,18 +418,18 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_GET_STATE_NOTIFY_INFO_001, TestSize.Level
     ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    (void)strncpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN);
-    LaneDepsInterfaceMock laneMock;
-    EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoById)
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUuid)
         .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(nodeInfo), Return(SOFTBUS_OK)));
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_LANE_GET_LEDGER_INFO_ERR, ret);
 
+    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo)
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, &laneLinkInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_LANE_GET_LEDGER_INFO_ERR, ret);
 
     ret = GetStateNotifyInfo(PEER_IP_P2P, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -625,10 +625,12 @@ HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strncpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN);
-    LaneDepsInterfaceMock laneMock;
-    EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(nodeInfo), Return(SOFTBUS_OK)));
-    LaneListenerDepsInterfaceMock listenerMock;
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUuid)
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LaneListenerDepsInterfaceMock> listenerMock;
     EXPECT_CALL(listenerMock, DetectDisableWifiDirectApply).WillRepeatedly(Return());
     NiceMock<LaneNetCapInterfaceMock> capMock;
     EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
@@ -641,23 +643,31 @@ HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
     EXPECT_EQ(strcpy_s(link.remoteIp, IP_LEN, PEER_IP_P2P), EOK);
     EXPECT_EQ(strncpy_s(link.remoteUuid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN), EOK);
     EXPECT_EQ(strncpy_s(link.remoteMac, MAC_ADDR_STR_LEN, MAC_TEST, MAC_ADDR_STR_LEN), EOK);
-    LnnOnWifiDirectDeviceOnline(nullptr, link.remoteIp, link.remoteUuid, true);
-    LnnOnWifiDirectDeviceOnline(link.remoteMac, nullptr, link.remoteUuid, true);
-    LnnOnWifiDirectDeviceOnline(link.remoteMac, link.remoteIp, nullptr, true);
-    LnnOnWifiDirectDeviceOnline(link.remoteMac, link.remoteIp, link.remoteUuid, true);
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOnline(nullptr, link.remoteIp, link.remoteUuid, true));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOnline(link.remoteMac, nullptr, link.remoteUuid, true));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOnline(link.remoteMac, link.remoteIp, nullptr, true));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOnline(link.remoteMac, link.remoteIp, link.remoteUuid, true));
     const char *localIp = "192.168.33.33";
-    LnnOnWifiDirectDeviceOffline(nullptr, link.remoteIp, link.remoteUuid, localIp);
-    LnnOnWifiDirectDeviceOffline(link.remoteMac, nullptr, link.remoteUuid, localIp);
-    LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, nullptr, localIp);
-    LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, link.remoteUuid, localIp);
-    LnnOnWifiDirectConnectedForSink(nullptr);
-    LnnOnWifiDirectConnectedForSink(&link);
-    LnnOnWifiDirectDisconnectedForSink(nullptr);
-    LnnOnWifiDirectDisconnectedForSink(&link);
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOffline(nullptr, link.remoteIp, link.remoteUuid, localIp));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOffline(link.remoteMac, nullptr, link.remoteUuid, localIp));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, nullptr, localIp));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, link.remoteUuid, localIp));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, link.remoteUuid, localIp));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectConnectedForSink(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectConnectedForSink(&link));
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUuid)
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     EXPECT_EQ(CreateSinkLinkInfo(nullptr, &linkInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(CreateSinkLinkInfo(&link, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(CreateSinkLinkInfo(&link, &linkInfo), SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
     EXPECT_EQ(CreateSinkLinkInfo(&link, &linkInfo), SOFTBUS_OK);
 }
 

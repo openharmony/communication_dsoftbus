@@ -142,9 +142,10 @@ string TestGetMsgPack()
     return data;
 }
 
-/**
+/*
  * @tc.name: TransTcpDirectInitTest001
- * @tc.desc: TransTcpDirectInit, use correct parameters.
+ * @tc.desc: test TransTcpDirectInit
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -161,9 +162,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpDirectInitTest001, TestSize.Level1)
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcDeathCallbackTest002
- * @tc.desc: TransTdcDeathCallback, use correct parameters.
+ * @tc.desc: test TransTdcDeathCallback
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -188,9 +190,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcDeathCallbackTest002, TestSize.Level1)
     TransTcpDirectDeinit();
 }
 
-/**
+/*
  * @tc.name: TransOpenDirectChannelTest003
- * @tc.desc: TransOpenDirectChannel, use correct parameters.
+ * @tc.desc: test TransOpenDirectChannel
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -249,9 +252,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransTdcStopSessionProcTest004
- * @tc.desc: TransTdcStopSessionProc, use correct parameters.
+ * @tc.desc: test TransTdcStopSessionProc
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -265,9 +269,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProcTest004, TestSize.Level1
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSrvDataListInitTest005
- * @tc.desc: TransSrvDataListInit and TransSrvDataListDeinit, use correct parameters.
+ * @tc.desc: test TransSrvDataListInit and TransSrvDataListDeinit
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -279,9 +284,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDataListInitTest005, TestSize.Level1)
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSrvAddDataBufNodeTest006
- * @tc.desc: TransSrvAddDataBufNode, use correct parameters.
+ * @tc.desc: test TransSrvAddDataBufNode
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -299,9 +305,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvAddDataBufNodeTest006, TestSize.Level1)
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSrvDelDataBufNodeTest007
- * @tc.desc: TransSrvDelDataBufNode, use correct parameters.
+ * @tc.desc: test TransSrvDelDataBufNode
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -321,9 +328,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: VerifyP2pPackTest008
- * @tc.desc: VerifyP2pPack, use correct parameters.
+ * @tc.desc: test VerifyP2pPack
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -336,9 +344,10 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
     EXPECT_TRUE(ret == nullptr);
 }
 
-/**
+/*
  * @tc.name: VerifyP2pUnPackTest009
- * @tc.desc: VerifyP2pUnPack, use correct parameters.
+ * @tc.desc: test VerifyP2pUnPack
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -365,9 +374,10 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     cJSON_Delete(json);
 }
 
-/**
+/*
  * @tc.name: VerifyP2pPackErrorTest0010
- * @tc.desc: VerifyP2pPackError, use correct parameters.
+ * @tc.desc: test VerifyP2pPackError
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -383,9 +393,10 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
     EXPECT_TRUE(ret == nullptr);
 }
 
-/**
+/*
  * @tc.name: GetCipherFlagByAuthIdTest0011
- * @tc.desc: GetCipherFlagByAuthId, use correct parameters.
+ * @tc.desc: test GetCipherFlagByAuthId
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
 */
@@ -408,9 +419,10 @@ HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: TransTdcStartSessionListenerTest0012
- * @tc.desc: tTransTdcStartSessionListener, use correct parameters.
+ * @tc.desc: test TransTdcStartSessionListener
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -441,9 +453,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransTdcSetCallBackTest0013
- * @tc.desc: trans tcp direct set callback, use correct parameters.
+ * @tc.desc: trans tcp direct set callback
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -457,9 +470,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetUidAndPidTest0015
- * @tc.desc: TransTdcOnChannelOpenFailed, use correct parameters.
+ * @tc.desc: test TransTdcOnChannelOpenFailed
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -487,9 +501,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcGetUidAndPidTest0015, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest0016
- * @tc.desc: TransTdcPostBytes, use wrong parameters.
+ * @tc.desc: test TransTdcPostBytes
+ *           use wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -515,9 +530,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvRecvDataTest0017
- * @tc.desc: TransTdcSrvRecvData, use correct parameters.
+ * @tc.desc: test TransTdcSrvRecvData
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -537,9 +553,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenFailedTest0018
- * @tc.desc: NotifyChannelOpenFailed, use correct parameters.
+ * @tc.desc: test NotifyChannelOpenFailed
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -585,9 +602,10 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     TransDelSessionConnById(conn->channelId);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenFailedBySessionConnTest0018
- * @tc.desc: NotifyChannelOpenFailedBySessionConn, use correct parameters.
+ * @tc.desc: test NotifyChannelOpenFailedBySessionConn
+ *           use correct parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -629,9 +647,9 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedBySessionConnTest0018, T
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: TcpChannelInfoTest001
- * @tc.desc: test TcpChannelInfo with invalid parameters.
+ * @tc.desc: test TcpChannelInfo with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -641,9 +659,9 @@ HWTEST_F(TransCoreTcpDirectTest, TcpChannelInfoTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: CreateTcpChannelInfoListTest
- * @tc.desc: test function of CreateTcpChannelInfoList.
+ * @tc.desc: test function of CreateTcpChannelInfoList
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -658,9 +676,9 @@ HWTEST_F(TransCoreTcpDirectTest, CreateTcpChannelInfoListTest, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TcpChannelInfoTest002
- * @tc.desc: test TcpChannelInfo with valid parameters.
+ * @tc.desc: test TcpChannelInfo with valid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -681,9 +699,9 @@ HWTEST_F(TransCoreTcpDirectTest, TcpChannelInfoTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransTcpGetPrivilegeCloseList001
- * @tc.desc: test TransTcpGetPrivilegeCloseList with valid parameters.
+ * @tc.desc: test TransTcpGetPrivilegeCloseList with valid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -708,9 +726,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpGetPrivilegeCloseList001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransDelTcpChannelInfoByChannelId001
- * @tc.desc: test TransDelTcpChannelInfoByChannelId.
+ * @tc.desc: test TransDelTcpChannelInfoByChannelId
+ *           use normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -728,9 +747,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransDelTcpChannelInfoByChannelId001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnSessionOpenFailProc001
- * @tc.desc: test OnSessionOpenFailProc and NotifyTdcChannelTimeOut.
+ * @tc.desc: test OnSessionOpenFailProc and NotifyTdcChannelTimeOut
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -754,9 +774,10 @@ HWTEST_F(TransCoreTcpDirectTest, OnSessionOpenFailProc001, TestSize.Level1)
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: OnSessionOpenFailProc002
- * @tc.desc: test OnSessionOpenFailProc and TransTdcTimerProc.
+ * @tc.desc: test OnSessionOpenFailProc and TransTdcTimerProc
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -776,9 +797,10 @@ HWTEST_F(TransCoreTcpDirectTest, OnSessionOpenFailProc002, TestSize.Level1)
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: TransTdcTimerProc001
- * @tc.desc: test TransTdcTimerProc.
+ * @tc.desc: test TransTdcTimerProc
+ *           when given HANDSHAKE_TIMEOUT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -795,9 +817,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcTimerProc001, TestSize.Level1)
     TransDelSessionConnById(1);
 }
 
-/**
+/*
  * @tc.name: TransTdcStopSessionProc001
- * @tc.desc: test TransTdcStopSessionProc.
+ * @tc.desc: test TransTdcStopSessionProc
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -815,9 +838,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
     TransDelSessionConnById(1);
 }
 
-/**
+/*
  * @tc.name: TransTdcStopSessionProc002
- * @tc.desc: test TransTdcStopSessionProc.
+ * @tc.desc: test TransTdcStopSessionProc
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -835,9 +859,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProc002, TestSize.Level1)
     TransDelSessionConnById(1);
 }
 
-/**
+/*
  * @tc.name: TransTdcStopSessionProc003
- * @tc.desc: test TransTdcStopSessionProc.
+ * @tc.desc: test TransTdcStopSessionProc
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -855,9 +880,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProc003, TestSize.Level1)
     TransDelSessionConnById(1);
 }
 
-/**
+/*
  * @tc.name: TransUpdateAppInfo001
- * @tc.desc: test TransUpdateAppInfo.
+ * @tc.desc: test TransUpdateAppInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -877,9 +903,11 @@ HWTEST_F(TransCoreTcpDirectTest, TransUpdateAppInfo001, TestSize.Level1)
     SoftBusFree(appInfo);
     SoftBusFree(connInfo);
 }
-/**
+
+/*
  * @tc.name: TransUpdateAppInfo002
- * @tc.desc: test TransUpdateAppInfo.
+ * @tc.desc: test TransUpdateAppInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -900,9 +928,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransUpdateAppInfo002, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransUpdateAppInfo003
- * @tc.desc: test TransUpdateAppInfo.
+ * @tc.desc: test TransUpdateAppInfo
+ *           use wrong param or normal param
  * @tc.type: FUNC
  * @tc.require:
  */

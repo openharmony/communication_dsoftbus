@@ -79,7 +79,7 @@ static InitDepsStatus LnnInitModuleStatusGet(uint32_t module)
     return status;
 }
 
-void LnnModuleMonitorRestartNetwork(void)
+void LnnRestartNetwork(void)
 {
     RestartCoapDiscovery();
     HbEnableDiscovery();
@@ -91,7 +91,7 @@ static void LnnInitMonitorInitComplete(void *para)
     (void)para;
     g_lnnInitMonitorInfoMgr.depInitEnd = true;
     if (g_lnnInitMonitorInfoMgr.deviceInfoReady) {
-        LnnModuleMonitorRestartNetwork();
+        LnnRestartNetwork();
     }
 }
 
@@ -140,7 +140,7 @@ void LnnInitSetDeviceInfoReady(void)
 {
     g_lnnInitMonitorInfoMgr.deviceInfoReady = true;
     if (g_lnnInitMonitorInfoMgr.depInitEnd) {
-        LnnModuleMonitorRestartNetwork();
+        LnnRestartNetwork();
     }
 }
 

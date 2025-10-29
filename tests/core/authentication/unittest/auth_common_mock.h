@@ -59,7 +59,8 @@ public:
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t LnnNotifyEmptySessionKey(int64_t authId) = 0;
     virtual int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle);
-    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType);
+    virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType,
+        DeviceLeaveReason leaveReason);
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
     virtual int32_t SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
     virtual int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count) = 0;
@@ -103,7 +104,7 @@ public:
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t(InfoKey, const char *));
     MOCK_METHOD1(LnnNotifyEmptySessionKey, int32_t(int64_t));
     MOCK_METHOD1(LnnNotifyLeaveLnnByAuthHandle, int32_t(AuthHandle *));
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t(SoftBusBtAddr *));
     MOCK_METHOD2(GetNodeFromPcRestrictMap, int32_t(const char *, uint32_t *));
     MOCK_METHOD1(DeleteNodeFromPcRestrictMap, void(const char *));

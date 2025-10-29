@@ -54,7 +54,8 @@ void AuthRequestTest::TearDown() { }
 
 /*
  * @tc.name:GET_AUTH_REQUEST_TEST_001
- * @tc.desc: GetAuthRequestWaitNum test
+ * @tc.desc: Verify that GetAuthRequestWaitNum correctly calculates the number of waiting
+ *           authentication requests in the list.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -96,7 +97,8 @@ HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name:GET_AUTH_REQUEST_TEST_002
- * @tc.desc: GetAuthRequestWaitNum test
+ * @tc.desc: Verify that GetAuthRequestWaitNum correctly calculates the number of waiting
+ *           authentication requests in the list under different conditions.
  * @tc.type: FUNC
  * @tc.require:
  */

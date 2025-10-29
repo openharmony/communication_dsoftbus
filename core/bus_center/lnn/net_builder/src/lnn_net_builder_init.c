@@ -510,8 +510,8 @@ void TryElectAsMasterState(const char *networkId, bool isOnline)
         LNN_LOGE(LNN_BUILDER, "get local master node info from ledger failed");
         return;
     }
-    const char *peerUdid = LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID);
-    if (peerUdid == NULL) {
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_BUILDER, "get invalid peerUdid, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
@@ -742,7 +742,7 @@ static bool IsNeedNotifyOfflineByAdv(const char *udid)
         LNN_LOGE(LNN_BUILDER, "ble capa disable, local=%{public}u, remote=%{public}u", local, info.netCapacity);
         return false;
     }
-    LnnRequestLeaveSpecific(info.networkId, CONNECTION_ADDR_MAX);
+    LnnRequestLeaveSpecific(info.networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
     return true;
 }
 

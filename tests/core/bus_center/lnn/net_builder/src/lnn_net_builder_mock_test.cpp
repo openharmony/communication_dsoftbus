@@ -1406,7 +1406,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_003, TestSize.Level1
 
 /*
  * @tc.name: ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001
- * @tc.desc: on lnn prodecc not trusted msg delay test
+ * @tc.desc: on lnn prodecc not trusted msg delay
+ * test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1

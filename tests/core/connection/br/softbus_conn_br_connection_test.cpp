@@ -471,6 +471,14 @@ HWTEST_F(ConnectionBrConnectionTest, BrTransSend, TestSize.Level1)
     uint32_t mtu = 0;
     NiceMock<ConnectionBrInterfaceMock> brMock;
     EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillRepeatedly(Return(&g_controller));
+    ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
+    ASSERT_NE(nullptr, device);
+    (void)strcpy_s(device->addr, BT_MAC_LEN, "11:22:33:44:55:66");
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
+
+    ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
+    ConnBrSaveConnection(connection);
+    connectionId = connection->connectionId;
     int32_t ret = BrTransSend(connectionId, socketHandle, mtu, &data, dataLen);
     EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL, ret);
 
@@ -481,6 +489,30 @@ HWTEST_F(ConnectionBrConnectionTest, BrTransSend, TestSize.Level1)
 
     dataLen = 10;
     ret = BrTransSend(connectionId, socketHandle, mtu, &data, dataLen);
+    ConnBrRemoveConnection(connection);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, UpdateConnection, TestSize.Level1)
+{
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillRepeatedly(Return(&g_controller));
+    ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
+    ASSERT_NE(nullptr, device);
+    (void)strcpy_s(device->addr, BT_MAC_LEN, "12:13:14:15:16:11");
+    EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
+
+    ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
+    ConnBrSaveConnection(connection);
+    UpdateOption option = {
+        .type = CONNECT_BR,
+        .brOption = {
+            .enableIdleCheck = false,
+        }
+    };
+    int32_t ret = g_connectFuncInterface->UpdateConnection(connection->connectionId, &option);
+    ConnBrRefreshIdleTimeout(connection);
+    ConnBrRemoveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

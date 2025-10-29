@@ -87,6 +87,7 @@ typedef struct {
     uint8_t flag;
     SoftbusBroadcastPayload bcData;
     SoftbusBroadcastPayload rspData;
+    SoftbusBroadcastPayload uuidData;
 } SoftbusBroadcastData;
 
 /**

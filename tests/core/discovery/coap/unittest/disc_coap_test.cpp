@@ -116,9 +116,9 @@ HWTEST_F(DiscCoapTest, CoapPublish002, TestSize.Level1)
     DiscoveryFuncInterface *tmp = DiscCoapInit(nullptr);
     EXPECT_EQ(tmp, nullptr);
     int32_t ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;
@@ -248,9 +248,9 @@ HWTEST_F(DiscCoapTest, CoapStartScan002, TestSize.Level1)
     DiscoveryFuncInterface *tmp = DiscCoapInit(nullptr);
     EXPECT_EQ(tmp, nullptr);
     int32_t ret = g_discCoapFuncInterface->StartScan(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = g_discCoapFuncInterface->StopScan(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;
@@ -339,9 +339,9 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise002, TestSize.Level1)
     DiscoveryFuncInterface *tmp = DiscCoapInit(nullptr);
     EXPECT_EQ(tmp, nullptr);
     int32_t ret = g_discCoapFuncInterface->StartAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = g_discCoapFuncInterface->StopAdvertise(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;
@@ -466,9 +466,9 @@ HWTEST_F(DiscCoapTest, CoapSubscribe002, TestSize.Level1)
     DiscoveryFuncInterface *tmp = DiscCoapInit(nullptr);
     EXPECT_EQ(tmp, nullptr);
     int32_t ret = g_discCoapFuncInterface->Subscribe(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = g_discCoapFuncInterface->Unsubscribe(&g_testSubOption);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;
