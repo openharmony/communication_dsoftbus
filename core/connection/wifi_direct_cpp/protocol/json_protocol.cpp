@@ -62,7 +62,7 @@ bool JsonProtocol::Read(int &key, uint8_t *&value, size_t &size)
     if (!found) {
         CONN_LOGE(CONN_WIFI_DIRECT, "not find key=%{public}s", jsonKey.c_str());
         readPos_++;
-        return true;
+        return Read(key, value, size);
     }
 
     bool ret = true;
