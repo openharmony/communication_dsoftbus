@@ -111,9 +111,10 @@ void TransTcpDirectCallbackTest::SetUpTestCase(void)
 void TransTcpDirectCallbackTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: TransTdcOnChannelOpenedTest001
- * @tc.desc: notify channel opend  test.
+ * @tc.desc: test TransTdcOnChannelOpened
+ *           notify channel opend test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -131,9 +132,10 @@ HWTEST_F(TransTcpDirectCallbackTest, TransTdcOnChannelOpenedTest001, TestSize.Le
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcOnChannelClosedTest002
- * @tc.desc: notify channel Closed  test.
+ * @tc.desc: test TransTdcOnChannelClosed
+ *           notify channel Closed test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -153,9 +155,10 @@ HWTEST_F(TransTcpDirectCallbackTest, TransTdcOnChannelClosedTest001, TestSize.Le
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcOnChannelOpenFailedTest003
- * @tc.desc: notify channel opend Failed test.
+ * @tc.desc: test TransTdcOnChannelOpenFailed
+ *           notify channel opend Failed test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -175,9 +178,10 @@ HWTEST_F(TransTcpDirectCallbackTest, TransTdcOnChannelOpenFailedTest001, TestSiz
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetPkgNameTest004
- * @tc.desc: GetPkgName test.
+ * @tc.desc: test TransTdcGetPkgName
+ *           use normal parms test GetPkgName
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -192,9 +196,10 @@ HWTEST_F(TransTcpDirectCallbackTest, TransTdcGetPkgNameTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetUidAndPidTest005
- * @tc.desc: GetUidAndPid test.
+ * @tc.desc: test TransTdcGetUidAndPid
+ *           use normal parms test GetUidAndPid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -209,9 +214,10 @@ HWTEST_F(TransTcpDirectCallbackTest, TransTdcGetUidAndPidTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcOnMsgReceivedTest006
- * @tc.desc: OnMsgReceived test.
+ * @tc.desc: test TransTdcOnMsgReceived
+ *           use normal parms test OnMsgReceived
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -229,9 +235,10 @@ HWTEST_F(TransTcpDirectCallbackTest, TransTdcOnMsgReceivedTest001, TestSize.Leve
     SoftBusFree(receiveData);
 }
 
-/**
+/*
  * @tc.name: TransTdcOnChannelBindTest001
- * @tc.desc: OnChannelBind test.
+ * @tc.desc: test TransTdcOnChannelBind
+ *           use normal parms test OnChannelBind
  * @tc.type: FUNC
  * @tc.require:
  */
