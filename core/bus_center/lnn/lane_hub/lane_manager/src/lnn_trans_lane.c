@@ -521,12 +521,13 @@ static void UpdateLaneEventWithCap(uint32_t laneHandle, const char *networkId)
 
 static void UpdateLaneEventWithOnlineType(uint32_t laneHandle, const char *networkId)
 {
-    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-    if (nodeInfo == NULL) {
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "not found nodeInfo");
         return;
     }
-    uint32_t onlineType = nodeInfo->discoveryType;
+    uint32_t onlineType = nodeInfo.discoveryType;
     UpdateLaneEventInfo(laneHandle, EVENT_ONLINE_STATE,
         LANE_PROCESS_TYPE_UINT32, (void *)(&onlineType));
 }

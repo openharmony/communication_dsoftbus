@@ -346,7 +346,7 @@ void AuthDeviceNotTrust(const char *peerUdid)
     LnnDeleteSpecificTrustedDevInfo(peerUdid, JudgeDeviceTypeAndGetOsAccountIds());
     LnnHbOnTrustedRelationReduced();
     AuthRemoveDeviceKeyByUdidPacked(peerUdid);
-    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "request leave specific fail");
     } else {
         AUTH_LOGI(AUTH_HICHAIN, "request leave specific successful");

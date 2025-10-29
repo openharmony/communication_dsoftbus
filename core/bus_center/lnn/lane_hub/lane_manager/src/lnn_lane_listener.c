@@ -357,6 +357,22 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
     return SOFTBUS_OK;
 }
 
+static int32_t GetRemoteUdidByUuid(const char *peerUuid, char *peerUdid)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = LnnGetNetworkIdByUuid(peerUuid, networkId, sizeof(networkId));
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get networkId by uuid failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, LaneLinkInfo *laneLinkInfo)
 {
     if (peerIp == NULL || peerUuid == NULL || laneLinkInfo == NULL) {
@@ -368,19 +384,12 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, Lane
         LNN_LOGE(LNN_STATE, "strncpy peerIp fail");
         return SOFTBUS_STRCPY_ERR;
     }
-
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
+    if (GetRemoteUdidByUuid(peerUuid, laneLinkInfo->peerUdid) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(peerUuid, &anonyUuid);
-        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, peerUuid=%{public}s", AnonymizeWrapper(anonyUuid));
+        LNN_LOGE(LNN_STATE, "get remote udid failed, peerUuid=%{public}s", AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
-    }
-    if (strncpy_s(laneLinkInfo->peerUdid, UDID_BUF_LEN, nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
-        LNN_LOGE(LNN_STATE, "copy peerudid fail");
-        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -495,18 +504,17 @@ static int32_t CreateSinkLinkInfo(const struct WifiDirectSinkLink *link, LaneLin
         return SOFTBUS_STRCPY_ERR;
     }
     linkInfo->linkInfo.p2p.channel = link->channelId;
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetRemoteNodeInfoById(link->remoteUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
+    if (strncmp(link->remoteUuid, link->remoteMac, sizeof(link->remoteMac)) == 0) {
+        LNN_LOGI(LNN_STATE, "uuid is invalid, udid will be updated when JoinMetaNode");
+        linkInfo->type = LANE_HML_RAW;
+        return SOFTBUS_OK;
+    }
+    if (GetRemoteUdidByUuid(link->remoteUuid, linkInfo->peerUdid) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(link->remoteUuid, &anonyUuid);
-        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", AnonymizeWrapper(anonyUuid));
+        LNN_LOGE(LNN_STATE, "get remote udid failed, remoteUuid=%{public}s", AnonymizeWrapper(anonyUuid));
         AnonymizeFree(anonyUuid);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
-    }
-    if (strncpy_s(linkInfo->peerUdid, UDID_BUF_LEN, nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
-        LNN_LOGE(LNN_STATE, "copy peerudid fail");
-        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -517,7 +525,11 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    LNN_LOGI(LNN_LANE, "on server wifidirect link=%{public}d connected", link->linkType);
+    char *anonyUuid = NULL;
+    Anonymize(link->remoteUuid, &anonyUuid);
+    LNN_LOGI(LNN_STATE, "on server link=%{public}d connected, uuid=%{public}s",
+        link->linkType, AnonymizeWrapper(anonyUuid));
+    AnonymizeFree(anonyUuid);
     LaneLinkInfo laneLinkInfo;
     (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     if (CreateSinkLinkInfo(link, &laneLinkInfo) != SOFTBUS_OK) {
@@ -556,22 +568,29 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    LNN_LOGI(LNN_LANE, "on server wifidirect link=%{public}d disconnected", link->linkType);
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetRemoteNodeInfoById(link->remoteUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
-        char *anonyUuid = NULL;
-        Anonymize(link->remoteUuid, &anonyUuid);
-        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", AnonymizeWrapper(anonyUuid));
-        AnonymizeFree(anonyUuid);
+    char *anonyUuid = NULL;
+    Anonymize(link->remoteUuid, &anonyUuid);
+    LNN_LOGI(LNN_STATE, "on server link=%{public}d disconnected, uuid=%{public}s",
+        link->linkType, AnonymizeWrapper(anonyUuid));
+    AnonymizeFree(anonyUuid);
+    char remoteUdid[UDID_BUF_LEN] = {0};
+    if (GetRemoteUdidByUuid(link->remoteUuid, remoteUdid) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get remote udid failed");
         return;
     }
-    LaneLinkType linkType = link->linkType == WIFI_DIRECT_LINK_TYPE_HML ? LANE_HML : LANE_P2P;
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    if (FindLaneResourceByLinkType(nodeInfo.deviceInfo.deviceUdid, linkType, &resourceItem) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "find lane resource fail");
-        return;
+    if (link->linkType == WIFI_DIRECT_LINK_TYPE_HML) {
+        if (FindLaneResourceByLinkType(remoteUdid, LANE_HML, &resourceItem) != SOFTBUS_OK &&
+            FindLaneResourceByLinkType(remoteUdid, LANE_HML_RAW, &resourceItem) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "find hml lane resource fail");
+            return;
+        }
+    } else {
+        if (FindLaneResourceByLinkType(remoteUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "find p2p lane resource fail");
+            return;
+        }
     }
     DelLaneResourceByLaneId(resourceItem.laneId, true);
 }

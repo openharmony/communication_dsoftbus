@@ -518,7 +518,7 @@ static int32_t ProcessDeviceNotTrusted(const void *para)
     do {
         char networkId[NETWORK_ID_BUF_LEN] = { 0 };
         if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) == SOFTBUS_OK) {
-            LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+            LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
             break;
         }
         LIST_FOR_EACH_ENTRY(item, &LnnGetNetBuilder()->fsmList, LnnConnectionFsm, node) {
@@ -757,11 +757,7 @@ static int32_t ProcessLeaveSpecific(const void *para)
 {
     const SpecificLeaveMsgPara *msgPara = (const SpecificLeaveMsgPara *)para;
     LnnConnectionFsm *item = NULL;
-
-    if (msgPara == NULL) {
-        LNN_LOGW(LNN_BUILDER, "leave specific msg is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(msgPara != NULL, SOFTBUS_INVALID_PARAM, LNN_BUILDER, "leave specific msg is null");
 
     int32_t rc;
     bool deviceLeave = false;
@@ -772,6 +768,9 @@ static int32_t ProcessLeaveSpecific(const void *para)
             continue;
         }
         deviceLeave = true;
+        if (msgPara->leaveReason == DEVICE_LEAVE_REASON_NOT_TRUST) {
+            item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
+        }
         rc = LnnSendLeaveRequestToConnFsm(item);
         if (rc == SOFTBUS_OK) {
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;

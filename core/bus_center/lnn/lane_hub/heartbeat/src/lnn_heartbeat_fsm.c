@@ -857,7 +857,9 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
         LNN_LOGI(LNN_HEART_BEAT, "is support burst and is not wakeup or V0, don't check");
         return SOFTBUS_OK;
     }
-    const char *udid = LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID);
+    char udid[UDID_BUF_LEN] = {0};
+    int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_HEART_BEAT, "convert networkid to udid fail");
     (void)LnnGenerateHexStringHash((const unsigned char *)udid, udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
@@ -866,7 +868,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
         AnonymizeWrapper(anonyUdidHash), AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyUdidHash);
-    if (LnnRequestLeaveSpecific(networkId, addrType) != SOFTBUS_OK) {
+    if (LnnRequestLeaveSpecific(networkId, addrType, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost send request to NetBuilder fail");
         return SOFTBUS_NETWORK_REQ_LEAVE_LNN_FAIL;
     }
@@ -995,7 +997,8 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
         LNN_LOGI(LNN_HEART_BEAT, "local device support lp, no need offline");
         return;
     }
-    if (LnnRequestLeaveSpecific(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
+    if (LnnRequestLeaveSpecific(networkId, LnnConvertHbTypeToConnAddrType(hbType),
+        DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost send request to NetBuilder fail");
         return;
     }
@@ -1140,7 +1143,7 @@ static void CheckSleDevStatus(LnnHeartbeatFsm *hbFsm, const char *networkId,
     LNN_LOGI(LNN_HEART_BEAT, "notify node lost sle heartbeat, networkId=%{public}s,"
         "timestamp=%{public}" PRIu64 "->%{public}" PRIu64 "",
         AnonymizeWrapper(anonyNetworkId), oldTimeStamp, nowTime);
-    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK) {
+    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost sle hb, send request to NetBuilder fail, networkId=%{public}s",
             AnonymizeWrapper(anonyNetworkId));
     }

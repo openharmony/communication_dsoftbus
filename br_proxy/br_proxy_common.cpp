@@ -57,7 +57,6 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
     if (g_abilityMgrHandle == nullptr) {
         g_abilityMgrHandle = dlopen(BR_PROXY_ADAPTER_PATH, RTLD_LAZY);
     }
-    g_abilityMgrHandle = dlopen(BR_PROXY_ADAPTER_PATH, RTLD_LAZY);
     if (g_abilityMgrHandle == nullptr) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] dlopen failed!");
         return SOFTBUS_INVALID_PARAM;
@@ -101,6 +100,8 @@ static int32_t GetAbilityName(char *abilityName, int32_t userId, uint32_t abilit
     int32_t ret = g_getAbilityName(abilityName, userId, abilityNameLen, bundleName, appIndex);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret = %{public}d", ret);
+        dlclose(g_abilityMgrHandle);
+        g_abilityMgrHandle = nullptr;
         return ret;
     }
     if (g_abilityMgrHandle != nullptr) {

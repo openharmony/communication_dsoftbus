@@ -208,9 +208,9 @@ int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock fail, connId=%{public}u, error=%{public}d", connection->connectionId, status);
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "lock fail, connId=%{public}u, error=%{public}d", connection->connectionId, ret);
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -257,10 +257,10 @@ int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json)
     }
     CONN_LOGD(CONN_BR, "connId=%{public}u, peerWindow=%{public}d, seq=%{public}" PRId64, connection->connectionId,
         peerWindows, seq);
-    int32_t status = ConnBrSetBrPendingPacket(connection->connectionId, (int64_t)seq, NULL);
-    if (status != SOFTBUS_OK) {
+    int32_t ret = ConnBrSetBrPendingPacket(connection->connectionId, (int64_t)seq, NULL);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR,
-            "set br pending packet fail, connId=%{public}u, error=%{public}d", connection->connectionId, status);
+            "set br pending packet fail, connId=%{public}u, error=%{public}d", connection->connectionId, ret);
     }
-    return status;
+    return ret;
 }

@@ -14,7 +14,6 @@
  */
 
 #include "lnn_event_monitor_impl.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -113,7 +112,7 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         LnnNotifySysTimeChangeEvent();
     }
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
-        LnnNotifyDeviceRootStateChangeEvent();
+        LnnNotifyDeviceRiskStateChangeEvent();
     }
     OnReceiveSleEvent(want);
     SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;

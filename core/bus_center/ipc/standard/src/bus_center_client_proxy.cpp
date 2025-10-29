@@ -25,6 +25,10 @@ static sptr<BusCenterClientProxy> GetClientProxy(const char *pkgName, int32_t pi
 {
     sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "failed to create BusCenterClientProxy");
+        return nullptr;
+    }
     return clientProxy;
 }
 

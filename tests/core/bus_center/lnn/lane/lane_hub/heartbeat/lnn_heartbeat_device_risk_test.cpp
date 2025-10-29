@@ -23,7 +23,7 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_device_info.h"
 #include "lnn_heartbeat_ctrl.c"
-#include "lnn_heartbeat_device_root_mock.h"
+#include "lnn_heartbeat_device_risk_mock.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_node_info.h"
 #include "message_handler.h"
@@ -36,7 +36,7 @@ using namespace testing::ext;
 
 NodeInfo nodeinfo1;
 
-class LnnHeartBeatDeviceRootTest : public testing::Test {
+class LnnHeartBeatDeviceRiskTest : public testing::Test {
 public:
     static void SetUpTestCase();
 
@@ -47,64 +47,66 @@ public:
     void TearDown();
 };
 
-void LnnHeartBeatDeviceRootTest::SetUpTestCase()
+void LnnHeartBeatDeviceRiskTest::SetUpTestCase()
 {
 }
 
-void LnnHeartBeatDeviceRootTest::TearDownTestCase()
+void LnnHeartBeatDeviceRiskTest::TearDownTestCase()
 {
 }
 
-void LnnHeartBeatDeviceRootTest::SetUp()
+void LnnHeartBeatDeviceRiskTest::SetUp()
 {}
 
-void LnnHeartBeatDeviceRootTest::TearDown()
+void LnnHeartBeatDeviceRiskTest::TearDown()
 {}
 
 /*
- * @tc.name: HbRootDeviceLeaveLnnTest01
+ * @tc.name: RiskDeviceLeaveLnnTest001
  * @tc.desc: use abnomal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnHeartBeatDeviceRootTest, HbRootDeviceLeaveLnnTest001, TestSize.Level1)
+HWTEST_F(LnnHeartBeatDeviceRiskTest, RiskDeviceLeaveLnnTest001, TestSize.Level1)
 {
     int ret = 0;
-    NiceMock<LnnHeatbeatStaticInterfaceMock> LnnMock;
+    NiceMock<LnnHeatbeatDeviceRiskInterfaceMock> lnnDeviceRiskMock;
 
-    EXPECT_CALL(LnnMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = HbRootDeviceLeaveLnn();
+    EXPECT_CALL(lnnDeviceRiskMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 
-    EXPECT_CALL(LnnMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = HbRootDeviceLeaveLnn();
+    EXPECT_CALL(lnnDeviceRiskMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
 }
 
 /*
- * @tc.name: HbDeviceRootStateEventHandlerTest01
+ * @tc.name: HbDeviceRiskStateEventHandlerTest001
  * @tc.desc: use abnomal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnHeartBeatDeviceRootTest, HbDeviceRootStateEventHandlerTest001, TestSize.Level1)
+HWTEST_F(LnnHeartBeatDeviceRiskTest, HbDeviceRiskStateEventHandlerTest001, TestSize.Level1)
 {
-    LnnDeviceRootStateChangeEvent *event =
-        reinterpret_cast<LnnDeviceRootStateChangeEvent*>(SoftBusCalloc(sizeof(LnnDeviceRootStateChangeEvent)));
+    LnnDeviceRiskStateChangeEvent *event =
+        reinterpret_cast<LnnDeviceRiskStateChangeEvent*>(SoftBusCalloc(sizeof(LnnDeviceRiskStateChangeEvent)));
     event->basic.event = LNN_EVENT_TYPE_MAX;
-    event->status = SOFTBUS_DEVICE_IS_ROOT;
-    g_hbConditionState.deviceRootState = SOFTBUS_DEVICE_IS_ROOT;
-    HbDeviceRootStateEventHandler(NULL);
+    event->status = SOFTBUS_DEVICE_IS_RISK;
+    g_hbConditionState.deviceRiskState = SOFTBUS_DEVICE_IS_RISK;
+    HbDeviceRiskStateEventHandler(NULL);
 
-    HbDeviceRootStateEventHandler(&event->basic);
+    HbDeviceRiskStateEventHandler(&event->basic);
 
-    event->basic.event = LNN_EVENT_DEVICE_ROOT_STATE_CHANGED;
-    HbDeviceRootStateEventHandler(&event->basic);
+    event->basic.event = LNN_EVENT_DEVICE_RISK_STATE_CHANGED;
+    HbDeviceRiskStateEventHandler(&event->basic);
 
-    g_hbConditionState.deviceRootState = SOFTBUS_DEVICE_NOT_ROOT;
-    event->status = SOFTBUS_DEVICE_NOT_ROOT;
-    HbDeviceRootStateEventHandler(&event->basic);
+    g_hbConditionState.deviceRiskState = SOFTBUS_DEVICE_NOT_RISK;
+    event->status = SOFTBUS_DEVICE_NOT_RISK;
+    HbDeviceRiskStateEventHandler(&event->basic);
 
     EXPECT_EQ(event->status, 0);
+
+    SoftBusFree(event);
 }
 }  // namespace OHOS

@@ -117,7 +117,7 @@ void FsmStopCallback(struct tagLnnConnectionFsm *connFsm) { }
 
 /*
  * @tc.name: LNN_CREATE_CONNECTION_FSM_TEST_001
- * @tc.desc: para is null
+ * @tc.desc: test LnnCreateConnectionFsm with null addr
  * @tc.type: FUNC
  * @tc.require:I5PRUD
  */
@@ -296,7 +296,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001, TestSiz
 
 /*
  * @tc.name: LNN_REPORT_LNN_RESULT_EVT_TEST_001
- * @tc.desc: test OnlineTrustGroupProc
+ * @tc.desc: test ReportLnnResultEvt
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -963,7 +963,7 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_001
- * @tc.desc: test LeaveSameIpOnlineDevice no have online info
+ * @tc.desc: test LeaveSameIpOnlineDevice with no online info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -987,7 +987,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_001, TestSize.Le
 
 /*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_002
- * @tc.desc: test LeaveSameIpOnlineDevice info not omline
+ * @tc.desc: test LeaveSameIpOnlineDevice with not online info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1003,7 +1003,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_002, TestSize.Le
 
 /*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_003
- * @tc.desc: test have same info
+ * @tc.desc: test LeaveSameIpOnlineDevice with same info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1035,7 +1035,8 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_003, TestSize.Le
 
 /*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_004
- * @tc.desc: test two device have same info online
+ * @tc.desc: test LeaveSameIpOnlineDevice with two devices have same info
+ * online
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1075,7 +1076,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_004, TestSize.Le
 
 /*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_005
- * @tc.desc: test connInfo is null
+ * @tc.desc: test LeaveSameIpOnlineDevice with null connInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1092,7 +1093,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_005, TestSize.Le
 
 /*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_006
- * @tc.desc: test IP of connInfo is null
+ * @tc.desc: test LeaveSameIpOnlineDevice with null IP in connInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1113,7 +1114,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_006, TestSize.Le
 
 /*
  * @tc.name: PROCESS_BLE_ONLINE_TEST_001
- * @tc.desc: test local authentication failed
+ * @tc.desc: test ProcessBleOnline with local authentication failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1134,7 +1135,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: PROCESS_BLE_ONLINE_TEST_002
- * @tc.desc: test device cannot authentication
+ * @tc.desc: test ProcessBleOnline with device cannot authentication
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1155,7 +1156,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_002, TestSize.Level0)
 
 /*
  * @tc.name: PROCESS_BLE_ONLINE_TEST_003
- * @tc.desc: test remote node is online
+ * @tc.desc: test ProcessBleOnline with remote node is online
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1183,7 +1184,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_003, TestSize.Level0)
 
 /*
  * @tc.name: PROCESS_BLE_ONLINE_TEST_004
- * @tc.desc: test remote node is not online
+ * @tc.desc: test ProcessBleOnline with remote node is not online
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1211,7 +1212,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_004, TestSize.Level0)
 
 /*
  * @tc.name: PROCESS_BLE_ONLINE_TEST_005
- * @tc.desc: test online failed
+ * @tc.desc: test ProcessBleOnline with online failed
  * @tc.type: FUNC
  * @tc.require:
  */

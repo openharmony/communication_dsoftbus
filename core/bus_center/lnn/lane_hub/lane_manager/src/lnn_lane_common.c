@@ -210,15 +210,15 @@ static int32_t SleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     return SOFTBUS_OK;
 }
 
-static int32_t WlanP2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+static int32_t SoftApP2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
-    connInfo->type = LANE_WLAN_P2P;
+    connInfo->type = LANE_SOFTAP_P2P;
     if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
         &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy P2pConnInfo fail");
         return SOFTBUS_MEM_ERR;
     }
-    profile->linkType = LANE_WLAN_P2P;
+    profile->linkType = LANE_SOFTAP_P2P;
     return SOFTBUS_OK;
 }
 
@@ -238,7 +238,7 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_USB] = UsbInfoProc,
     [LANE_SLE] = SleInfoProc,
     [LANE_SLE_DIRECT] = SleDirectInfoProc,
-    [LANE_WLAN_P2P] = WlanP2pInfoProc,
+    [LANE_SOFTAP_P2P] = SoftApP2pInfoProc,
 };
 
 int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)

@@ -50,6 +50,9 @@ typedef int32_t (*DiscCoapProcessDeviceInfoFunc)(const NSTACKX_DeviceInfo *nstac
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 typedef int32_t (*DiscCoapAssembleCapDataFunc)(
     uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData, uint32_t outLen);
+typedef void (*DiscCoapUpdateAbilityFunc)(uint32_t capability, const char *capabilityData, uint32_t dataLen,
+    bool isPublish, bool isStart);
+
 #endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
 typedef int32_t (*DiscFillBtypeFunc)(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet);
 #endif
@@ -83,6 +86,8 @@ typedef void (*DiscOopBleDeinitFunc)(void);
 typedef int32_t (*DiscOopBleEventInitFunc)(void);
 typedef void (*DiscOopBleEventDeinitFunc)(void);
 typedef int32_t (*DiscPcCollaborationEventInitFunc)(void);
+typedef void (*DiscPcCollaborationDeinitFunc)(void);
+typedef void (*DiscPcCollaborationEventDeinitFunc)(void);
 
 typedef int32_t (*DistUpdatePublishParamFunc)(const char *cust, const char *extCust);
 typedef int32_t (*DistDiscoveryStartActionPreLinkFunc)(void);
@@ -128,6 +133,8 @@ typedef struct TagDiscEnhanceFuncList {
 
     DiscPcCollaborationInitFunc discPcCollaborationBleInit;
     DiscPcCollaborationEventInitFunc discPcCollaborationEventInit;
+    DiscPcCollaborationDeinitFunc pcCollaborationManagerDeinit;
+    DiscPcCollaborationEventDeinitFunc pcCollaborationEventDeinit;
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_BROADCAST_MGR_VIRTUAL)
     SchedulerStartBroadcastFunc schedulerStartBroadcast;
@@ -143,6 +150,7 @@ typedef struct TagDiscEnhanceFuncList {
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
     DiscCoapProcessDeviceInfoFunc discCoapProcessDeviceInfo;
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
+    DiscCoapUpdateAbilityFunc discCoapUpdateAbility;
     DiscCoapAssembleCapDataFunc discCoapAssembleCapData;
 #endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
     DiscFillBtypeFunc discFillBtype;

@@ -952,7 +952,8 @@ HWTEST_F(TransUdpStaticMockTest, TransGetUdpChannelLocalIp001, TestSize.Level1)
     };
     AppInfo appInfo = {
         .osType = OTHER_OS_TYPE,
-        .routeType = WIFI_P2P
+        .routeType = WIFI_P2P,
+        .metaType = META_HA
     };
 
     int32_t ret = TransGetUdpChannelLocalIp(authHandle, nullptr);

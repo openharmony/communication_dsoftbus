@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,23 +26,17 @@ namespace OHOS {
 
 class TransLinkListenerTest : public testing::Test {
 public:
-    TransLinkListenerTest()
-    {}
-    ~TransLinkListenerTest()
-    {}
+    TransLinkListenerTest() { }
+    ~TransLinkListenerTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void TransLinkListenerTest::SetUpTestCase(void)
-{}
+void TransLinkListenerTest::SetUpTestCase(void) { }
 
-void TransLinkListenerTest::TearDownTestCase(void)
-{}
+void TransLinkListenerTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: ClearIpInfo001
@@ -60,12 +54,12 @@ HWTEST_F(TransLinkListenerTest, ClearIpInfo001, TestSize.Level1)
 }
 
 /*
- * @tc.name: OnWifiDirectDeviceOffLine001
- * @tc.desc: OnWifiDirectDeviceOffLine test, void return
+ * @tc.name: OnWifiDirectDeviceOffline001
+ * @tc.desc: OnWifiDirectDeviceOffline test, void return
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffLine001, TestSize.Level1)
+HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffline001, TestSize.Level1)
 {
     const char *peerMac = "11:33:44:22:33:56";
     const char *localIp = "172.30.";
@@ -74,18 +68,18 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffLine001, TestSize.Level1)
     TransManagerInterfaceMock mock;
     int32_t ret = TransChannelInit();
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_OK));
-    OnWifiDirectDeviceOffLine(peerMac, peerIp, peerUuid, localIp);
+    OnWifiDirectDeviceOffline(peerMac, peerIp, peerUuid, localIp);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();
 }
 
 /*
- * @tc.name: OnWifiDirectDeviceOffLine002
- * @tc.desc: OnWifiDirectDeviceOffLine test, void return
+ * @tc.name: OnWifiDirectDeviceOffline002
+ * @tc.desc: OnWifiDirectDeviceOffline test, void return
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffLine002, TestSize.Level1)
+HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffline002, TestSize.Level1)
 {
     const char *peerMac = "11:33:44:22:33:56";
     const char *peerIp = "192.168.11.33";
@@ -93,7 +87,7 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffLine002, TestSize.Level1)
     TransManagerInterfaceMock mock;
     int32_t ret = TransChannelInit();
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_OK));
-    OnWifiDirectDeviceOffLine(peerMac, peerIp, peerUuid, peerIp);
+    OnWifiDirectDeviceOffline(peerMac, peerIp, peerUuid, peerIp);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();
 }
@@ -112,12 +106,12 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectRoleChange001, TestSize.Level1)
 }
 
 /*
- * @tc.name: OnWifiDirectDeviceOnLine001
- * @tc.desc: OnWifiDirectDeviceOnLine test, void return
+ * @tc.name: OnWifiDirectDeviceOnline001
+ * @tc.desc: OnWifiDirectDeviceOnline test, void return
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOnLine001, TestSize.Level1)
+HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOnline001, TestSize.Level1)
 {
     const char *peerMac = "11:33:44:22:33:56";
     const char *peerIp = "192.168.11.33";
@@ -126,8 +120,8 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOnLine001, TestSize.Level1)
     TransManagerInterfaceMock mock;
     int32_t ret = TransChannelInit();
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_OK));
-    OnWifiDirectDeviceOnLine(peerMac, peerIp, peerUuid, isSource);
+    OnWifiDirectDeviceOnline(peerMac, peerIp, peerUuid, isSource);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();
 }
-} // OHOS
+} // namespace OHOS

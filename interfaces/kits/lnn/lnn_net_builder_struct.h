@@ -130,6 +130,7 @@ typedef struct {
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     ConnectionAddrType addrType;
+    DeviceLeaveReason leaveReason;
 } SpecificLeaveMsgPara;
 
 typedef struct {

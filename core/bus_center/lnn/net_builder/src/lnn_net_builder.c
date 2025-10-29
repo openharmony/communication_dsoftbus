@@ -564,7 +564,8 @@ void OnLnnProcessNotTrustedMsgDelay(void *para)
             LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d",
                 AnonymizeWrapper(anonyNetworkId), type);
             AnonymizeFree(anonyNetworkId);
-            LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type));
+            LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type),
+                DEVICE_LEAVE_REASON_DEFAULT);
             continue;
         }
     }
@@ -613,7 +614,8 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
             LNN_LOGI(LNN_BUILDER, "networkId=%{public}s, LnnRequestLeaveSpecificType=%{public}d",
                 AnonymizeWrapper(anonyNetworkId), type);
             AnonymizeFree(anonyNetworkId);
-            LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type));
+            LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType((DiscoveryType)type),
+                DEVICE_LEAVE_REASON_DEFAULT);
             continue;
         }
     }
@@ -1387,7 +1389,7 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
+int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason)
 {
     SpecificLeaveMsgPara *para = NULL;
 
@@ -1409,6 +1411,7 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
         return SOFTBUS_STRCPY_ERR;
     }
     para->addrType = addrType;
+    para->leaveReason = leaveReason;
     if (PostBuildMessageToHandler(MSG_TYPE_LEAVE_SPECIFIC, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave specific msg failed");
         SoftBusFree(para);
