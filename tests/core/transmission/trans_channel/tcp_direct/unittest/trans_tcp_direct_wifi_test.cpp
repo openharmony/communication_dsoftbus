@@ -91,9 +91,10 @@ void TransTcpDirectWifiTest::SetUpTestCase(void)
 void TransTcpDirectWifiTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest001
- * @tc.desc: OpenTcpDirectChannel, use the wrong parameter.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -111,9 +112,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest001, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest002
- * @tc.desc: OpenTcpDirectChannel, return ok.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           use the normal parameter return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -139,9 +141,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest002, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest003
- * @tc.desc: OpenTcpDirectChannel, module is UNUSE_BUTT.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           module is UNUSE_BUTT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -163,9 +166,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest003, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest004
- * @tc.desc: OpenTcpDirectChannel, CreateNewSessinConn func return null.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           CreateNewSessinConn func return null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,9 +191,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest004, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest005
- * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED  when CreateNewSessinConn return valid paramter.
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED
+ *           when CreateNewSessinConn return valid paramter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -215,9 +220,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest005, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest006
- * @tc.desc: OpenTcpDirectChannel, ConnOpenClientSocket func return SOFTBUS_NO_INIT.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           ConnOpenClientSocket func return SOFTBUS_NO_INIT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -242,9 +248,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest006, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest007
- * @tc.desc: OpenTcpDirectChannel, AddTrigger func return SOFTBUS_NO_INIT.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           AddTrigger func return SOFTBUS_NO_INIT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -271,9 +278,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest007, TestSize.Level1)
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest008
- * @tc.desc: OpenTcpDirectChannel, TransSrvAddDataBufNode func return SOFTBUS_NO_INIT.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           TransSrvAddDataBufNode func return SOFTBUS_NO_INIT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -299,9 +307,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest008, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest009
- * @tc.desc: OpenTcpDirectChannel, TransTdcAddSessionConn func return SOFTBUS_NO_INIT.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           TransTdcAddSessionConn func return SOFTBUS_NO_INIT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -327,9 +336,10 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest009, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: OpenTcpDirectChannelTest010
- * @tc.desc: OpenTcpDirectChannel, test usb channel.
+ * @tc.desc: test OpenTcpDirectChannel
+ *           test usb channel
  * @tc.type: FUNC
  * @tc.require:
  */
