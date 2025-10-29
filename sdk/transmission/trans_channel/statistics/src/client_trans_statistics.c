@@ -65,6 +65,13 @@ void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
     if (g_channelStatisticsList == NULL) {
         return;
     }
+    int32_t socketId;
+    if (ClientGetSessionIdByChannelId(channel->channelId, channel->channelType, &socketId, false) !=
+        SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channel->channelId);
+        return;
+    }
+
     if (SoftBusMutexLock(&g_channelStatisticsList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "channel statistics list lock fail");
         return;
@@ -74,30 +81,22 @@ void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
         (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
         return;
     }
-    SocketResource *newItem = (SocketResource *)SoftBusCalloc(sizeof(SocketResource));
-    if (newItem == NULL) {
-        TRANS_LOGE(TRANS_SDK, "socket resource calloc fail");
-        (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-        return;
-    }
-    if (ClientGetSessionIdByChannelId(channel->channelId, channel->channelType, &newItem->socketId, false) !=
-        SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channel->channelId);
-        (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-        SoftBusFree(newItem);
-        return;
-    }
 
     SocketResource *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_channelStatisticsList->list, SocketResource, node) {
-        if (item->socketId == newItem->socketId) {
+        if (item->socketId == socketId) {
             TRANS_LOGE(TRANS_SDK, "socket id already in channel statistics list");
             (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-            SoftBusFree(newItem);
             return;
         }
     }
 
+    SocketResource *newItem = (SocketResource *)SoftBusCalloc(sizeof(SocketResource));
+    if (newItem == NULL) {
+        TRANS_LOGE(TRANS_SDK, "socket resource calloc fail");
+        return;
+    }
+    newItem->socketId = socketId;
     ListInit(&newItem->node);
     CreateSocketResource(newItem, sessionName, channel);
     ListAdd(&g_channelStatisticsList->list, &newItem->node);
@@ -186,21 +185,63 @@ void DeleteSocketResourceBySocketId(int32_t socketId)
     TRANS_CHECK_AND_RETURN_LOGE(g_channelStatisticsList != NULL, TRANS_SDK, "channel statistices list init fail.");
     TRANS_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_channelStatisticsList->lock) == SOFTBUS_OK,
         TRANS_SDK, "channel statistics list lock fail.");
+    bool flag = false;
+    SocketResource deleteItem;
     SocketResource *item = NULL;
     SocketResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
         if (item->socketId == socketId) {
-            CloseChannelAndSendStatistics(item);
+            flag = true;
+            deleteItem = *item;
             ListDelete(&item->node);
             g_channelStatisticsList->cnt--;
             SoftBusFree(item);
-            (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
             TRANS_LOGI(TRANS_SDK, "delete socket resource by socket=%{public}d", socketId);
-            return;
+            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-    TRANS_LOGE(TRANS_SDK, "not found channel statistics by socket=%{public}d", socketId);
+    if (flag) {
+        CloseChannelAndSendStatistics(&deleteItem);
+    } else {
+        TRANS_LOGE(TRANS_SDK, "not found channel statistics by socket=%{public}d", socketId);
+    }
+}
+
+static void ReserveDeleteInfo(ListNode *listNode, SocketResource *item)
+{
+    if (listNode == NULL || item == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+
+    SocketResource *sourceItem = (SocketResource *)SoftBusCalloc(sizeof(SocketResource));
+    if (sourceItem == NULL) {
+        TRANS_LOGE(TRANS_SDK, "malloc fail.");
+        return;
+    }
+    *sourceItem = *item;
+    ListAdd(listNode, &sourceItem->node);
+}
+
+static void DestoryDeleteInfo(ListNode *listNode)
+{
+    if (listNode == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+
+    if (IsListEmpty(listNode)) {
+        return;
+    }
+
+    SocketResource *targetNode = NULL;
+    SocketResource *targetNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(targetNode, targetNodeNext, listNode, SocketResource, node) {
+        CloseChannelAndSendStatistics(targetNode);
+        ListDelete(&(targetNode->node));
+        SoftBusFree(targetNode);
+    }
 }
 
 void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
@@ -213,27 +254,29 @@ void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
         TRANS_LOGE(TRANS_SDK, "channel statistices list init fail");
         return;
     }
+    int32_t socketId;
+    if (ClientGetSessionIdByChannelId(channelId, channelType, &socketId, false) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channelId);
+        return;
+    }
     if (SoftBusMutexLock(&g_channelStatisticsList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "channel statistics list lock fail");
         return;
     }
-    int32_t socketId;
-    if (ClientGetSessionIdByChannelId(channelId, channelType, &socketId, false) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channelId);
-        (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
-        return;
-    }
+    ListNode deleteList;
+    ListInit(&deleteList);
     SocketResource *item = NULL;
     SocketResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
         if (item->socketId == socketId) {
-            CloseChannelAndSendStatistics(item);
+            ReserveDeleteInfo(&deleteList, item);
             ListDelete(&item->node);
             g_channelStatisticsList->cnt--;
             SoftBusFree(item);
         }
     }
     (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
+    DestoryDeleteInfo(&deleteList);
 }
 
 int32_t ClientTransStatisticsInit(void)
