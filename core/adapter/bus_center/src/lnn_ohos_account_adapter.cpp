@@ -18,9 +18,6 @@
 #include "anonymizer.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#ifdef LNN_MULTI_FOREGROUND
-#include "display_manager.h"
-#endif
 #include "lnn_async_callback_utils.h"
 #include "lnn_device_info_struct.h"
 #include "lnn_log.h"
@@ -34,10 +31,10 @@
 #include "auth_hichain_adapter.h"
 
 static const int32_t ACCOUNT_STRTOLL_BASE = 10;
+static const int32_t CONTROL_PANEL_DISPLAY_ID = 0;
+static const int32_t CO_DRIVER_PANEL_DISPLAY_ID = 6;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
-#define CONTROL_PANEL "control_panel"
-#define CO_DRIVER_PANEL "co-driver_panel"
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 {
@@ -152,33 +149,10 @@ int32_t GetCurrentAccount(int64_t *account)
 
 int32_t GetAllDisplaysForCoDriverScreen(int32_t *coDriverUserId)
 {
-#ifdef LNN_MULTI_FOREGROUND
-    uint64_t displayId = 0;
+    int32_t displayId = CO_DRIVER_PANEL_DISPLAY_ID;
     int32_t foregroundUserId = 0;
-    bool isHasCoDriverPanel = false;
-    std::vector<OHOS::sptr<OHOS::Rosen::Display>> displays;
-    displays = OHOS::Rosen::DisplayManager::GetInstance().GetAllDisplays();
-    if (displays.empty()) {
-        LNN_LOGE(LNN_STATE, "GetAllDisplays failed");
-        return SOFTBUS_NETWORK_GET_DISPLAY_ID_FAIL;
-    }
-    for (const auto &display : displays) {
-        if (display != nullptr) {
-            std::string displayName = display->GetName();
-            if (displayName == CO_DRIVER_PANEL) {
-                displayId = display->GetId();
-                isHasCoDriverPanel = true;
-            }
-            LNN_LOGI(LNN_STATE, "Found displayName=%{public}s, ID=%{public}" PRIu64,
-                displayName.c_str(), display->GetId());
-        }
-    }
-    if (!isHasCoDriverPanel) {
-        LNN_LOGE(LNN_STATE, "not found coDriverPanel name");
-        return SOFTBUS_NETWORK_GET_DISPLAY_ID_FAIL;
-    }
     auto result = OHOS::AccountSA::OsAccountManager::
-        GetForegroundOsAccountLocalId(static_cast<int32_t>(displayId), foregroundUserId);
+        GetForegroundOsAccountLocalId(displayId, foregroundUserId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "GetForegroundOsAccountLocalId failed, result=%{public}d", result);
         return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
@@ -186,26 +160,18 @@ int32_t GetAllDisplaysForCoDriverScreen(int32_t *coDriverUserId)
     LNN_LOGI(LNN_STATE, "account id=%{public}d", foregroundUserId);
     *coDriverUserId = foregroundUserId;
     return SOFTBUS_OK;
-#else
-    LNN_LOGE(LNN_STATE, "LNN_MULTI_FOREGROUND disable");
-    return SOFTBUS_NETWORK_GET_DISPLAY_ID_FAIL;
-#endif
 }
 
 static int32_t GetActiveOsAccountIdsByDisplayId(int32_t *userId)
 {
-    uint64_t displayId = 0;
+    int32_t displayId = CONTROL_PANEL_DISPLAY_ID;
     int32_t foregroundUserId = 0;
     if (userId == nullptr) {
         LNN_LOGE(LNN_STATE, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalNumU64Info(NUM_KEY_DISPLAY_ID, &displayId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "get displayId fail");
-        return SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR;
-    }
     auto result = OHOS::AccountSA::OsAccountManager::
-        GetForegroundOsAccountLocalId(static_cast<int32_t>(displayId), foregroundUserId);
+        GetForegroundOsAccountLocalId(displayId, foregroundUserId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "GetForegroundOsAccountLocalId failed, result=%{public}d", result);
         return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
@@ -213,36 +179,6 @@ static int32_t GetActiveOsAccountIdsByDisplayId(int32_t *userId)
     LNN_LOGI(LNN_STATE, "account id=%{public}d", foregroundUserId);
     *userId = foregroundUserId;
     return SOFTBUS_OK;
-}
- 
-static int32_t GetAllDisplaysForMultiScreen()
-{
-#ifdef LNN_MULTI_FOREGROUND
-    uint64_t displayId = 0;
-    std::vector<OHOS::sptr<OHOS::Rosen::Display>> displays;
-    displays = OHOS::Rosen::DisplayManager::GetInstance().GetAllDisplays();
-    if (displays.empty()) {
-        LNN_LOGE(LNN_STATE, "GetAllDisplays failed");
-        return SOFTBUS_NETWORK_GET_DISPLAY_ID_FAIL;
-    }
-    for (const auto &display : displays) {
-        if (display != nullptr) {
-            std::string displayName = display->GetName();
-            if (displayName == CONTROL_PANEL) {
-                displayId = display->GetId();
-            }
-            LNN_LOGI(LNN_STATE, "Found displayName=%{public}s, ID=%{public}" PRIu64, displayName.c_str(), displayId);
-        }
-    }
-    if (LnnSetLocalNumU64Info(NUM_KEY_DISPLAY_ID, displayId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set displayId fail");
-        return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
-    }
-    return SOFTBUS_OK;
-#else
-    LNN_LOGE(LNN_STATE, "LNN_MULTI_FOREGROUND disable");
-    return SOFTBUS_NETWORK_GET_DISPLAY_ID_FAIL;
-#endif
 }
 
 int32_t GetActiveOsAccountIds(void)
@@ -265,7 +201,6 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
         return GetActiveOsAccountIds();
     }
     if (localDevTypeId == TYPE_CAR_ID) {
-        GetAllDisplaysForMultiScreen();
         if (GetActiveOsAccountIdsByDisplayId(&userId) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "get active OsAccountIds fail");
             return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
