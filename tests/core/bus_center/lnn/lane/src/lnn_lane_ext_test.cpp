@@ -1295,4 +1295,56 @@ HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_002, TestSize.Level1)
     ret = ClearLaneResourceByLaneId(LANE_ID_BASE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+* @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_001
+* @tc.desc: FindLaneIdByP2pMac tests return invalid param
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_001, TestSize.Level1)
+{
+    LaneLinkType type = LANE_LINK_TYPE_BUTT;
+    uint64_t laneId = 0;
+    int32_t ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    type = LANE_HML;
+    ret = FindLaneIdByP2pMac(nullptr, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = FindLaneIdByP2pMac(PEER_MAC, type, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_002
+* @tc.desc: FindLaneIdByP2pMac tests resource check
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_002, TestSize.Level1)
+{
+    uint64_t laneId = 0;
+    LaneLinkType type = LANE_SOFTAP_P2P;
+    int32_t ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.remoteMac, IP_LEN, PEER_MAC), EOK);
+    info.type = LANE_HML;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = AddLaneResourceToPool(&info, LANE_ID_BASE, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    ret = FindLaneIdByP2pMac(LOCAL_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    type = LANE_HML;
+    ret = FindLaneIdByP2pMac(LOCAL_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClearLaneResourceByLaneId(LANE_ID_BASE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS
