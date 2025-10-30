@@ -1347,6 +1347,29 @@ HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_002, TestSize.Level1)
 }
 
 /*
+ * @tc.name: ClearHmlFeatureCap_Test_001
+ * @tc.desc: ClearHmlFeatureCap test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, ClearHmlFeatureCap_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    uint64_t feature = 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU64Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(feature), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNum64Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
+}
+
+/*
  * @tc.name: WifiServiceOnStartHandle_Test_001
  * @tc.desc: WifiServiceOnStartHandle test
  * @tc.type: FUNC
