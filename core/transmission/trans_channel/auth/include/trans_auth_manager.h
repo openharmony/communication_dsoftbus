@@ -63,6 +63,7 @@ int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pi
 void TransAsyncAuthChannelTask(int32_t channelId);
 void TransAuthDeathCallback(const char *pkgName, int32_t pid);
 int32_t TransAuthGetRoleByAuthId(int32_t authId, bool *isClient);
+int32_t TransGetLocalDeviceId(const char *mySessionName, AppInfo *appInfo);
 
 #ifdef __cplusplus
 #if __cplusplus
