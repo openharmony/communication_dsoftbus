@@ -1803,6 +1803,7 @@ int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "udid is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
+    const char *networkId = NULL;
 
     if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
@@ -1810,6 +1811,11 @@ int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
     }
     NodeInfo *nodeInfo = LnnGetNodeInfoById(udid, CATEGORY_UDID);
     if (nodeInfo == NULL) {
+        networkId = AuthMetaGetDeviceIdByMetaNodeIdPacked(udid);
+        if (networkId != NULL && strncpy_s((char*)buf, len, networkId, strlen(networkId)) == EOK) {
+            (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+            return SOFTBUS_OK;
+        }
         LNN_LOGE(LNN_LEDGER, "get info fail");
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
