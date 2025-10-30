@@ -41,9 +41,10 @@ void TransSdkStreamTest::SetUpTestCase(void)
 void TransSdkStreamTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: SendStreamTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
+ * @tc.desc: extern module active publish
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require: I5FG70
  */

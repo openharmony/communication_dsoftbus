@@ -51,9 +51,10 @@ void StreamPacketizerTest::SetUpTestCase(void) { }
 
 void StreamPacketizerTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: CalculateHeaderSizeTest001
- * @tc.desc: CalculateHeaderSize
+ * @tc.desc: test CalculateHeaderSize
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -68,9 +69,10 @@ HWTEST_F(StreamPacketizerTest, CalculateHeaderSizeTest001, TestSize.Level1)
     EXPECT_EQ(ret, extSize);
 }
 
-/**
+/*
  * @tc.name: PacketizeStreamTest001
- * @tc.desc: PacketizeStream
+ * @tc.desc: test PacketizeStream
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */

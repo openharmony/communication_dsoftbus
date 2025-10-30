@@ -58,9 +58,10 @@ void StreamManagerTest::SetUpTestCase(void)
 void StreamManagerTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: CreateStreamClientChannel001
- * @tc.desc: CreateStreamClientChannel, use the wrong parameter.
+ * @tc.desc: test CreateStreamClientChannel
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -93,10 +94,12 @@ HWTEST_F(StreamManagerTest, CreateStreamClientChannel001, TestSize.Level1)
     streamSocketListener->DestroyEnvironment(pkgName);
 }
 
-/**
+/*
  * @tc.name: CreateStreamServerChannel001
- * @tc.desc: CreateStreamServerChannel001, use the wrong parameter.
- * @tc.desc: DestroyEnvironment, use the wrong parameter.
+ * @tc.desc: test CreateStreamServerChannel
+ *           use the wrong parameter
+ * @tc.desc: test DestroyEnvironment
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -125,9 +128,10 @@ HWTEST_F(StreamManagerTest, CreateStreamServerChannel001, TestSize.Level1)
     EXPECT_EQ(-1, ret);
 }
 
-/**
+/*
  * @tc.name: DestroyStreamDataChannel001
- * @tc.desc: DestroyStreamDataChannel001, use the wrong parameter.
+ * @tc.desc: test DestroyStreamDataChannel
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -141,9 +145,10 @@ HWTEST_F(StreamManagerTest, DestroyStreamDataChannel001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: Send001
- * @tc.desc: Send001, use the wrong parameter.
+ * @tc.desc: test Send
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -155,9 +160,10 @@ HWTEST_F(StreamManagerTest, Send001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: SetOption001
- * @tc.desc: SetOption001, use the wrong parameter.
+ * @tc.desc: test SetOption
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -186,9 +192,10 @@ HWTEST_F(StreamManagerTest, SetOption001, TestSize.Level1)
     streamSocketListener->SetStreamRecvListener(nullptr);
 }
 
-/**
+/*
  * @tc.name: SetMultiLayer001
- * @tc.desc: SetMultiLayer, use the wrong parameter.
+ * @tc.desc: test SetMultiLayer
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
