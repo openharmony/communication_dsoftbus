@@ -629,8 +629,10 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_001, TestSize.Level1)
     };
     connInfo.type = AUTH_LINK_TYPE_BR;
     AuthConnectionInterfaceMock mock;
-    EXPECT_CALL(mock, SoftBusGetBtState).WillOnce(Return(BLE_DISABLE));
-    EXPECT_CALL(mock, PostAuthEvent).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGetBtState)
+        .WillOnce(Return(BLE_DISABLE));
+    EXPECT_CALL(mock, PostAuthEvent)
+        .WillOnce(Return(SOFTBUS_OK));
     int32_t ret = ConnectAuthDevice(1, &connInfo, CONN_SIDE_CLIENT);
     EXPECT_EQ(ret, SOFTBUS_AUTH_CONN_FAIL);
 }
@@ -650,7 +652,8 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_002, TestSize.Level1)
     };
     connInfo.type = AUTH_LINK_TYPE_SESSION;
     AuthConnectionInterfaceMock mock;
-    EXPECT_CALL(mock, PostAuthEvent).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, PostAuthEvent)
+        .WillOnce(Return(SOFTBUS_OK));
     int32_t ret = ConnectAuthDevice(TEST_REQUEST_ID, &connInfo, CONN_SIDE_CLIENT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     DisconnectAuthDevice(nullptr);
@@ -692,7 +695,8 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_004, TestSize.Level1)
     };
     connInfo.type = AUTH_LINK_TYPE_MAX;
     AuthConnectionInterfaceMock mock;
-    EXPECT_CALL(mock, PostAuthEvent).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, PostAuthEvent)
+        .WillOnce(Return(SOFTBUS_OK));
     int32_t ret = ConnectAuthDevice(TEST_REQUEST_ID, &connInfo, CONN_SIDE_CLIENT);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -804,7 +808,8 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level1)
     int32_t ret = PostBytesForSession(TEST_FD, &head, data);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
     head.len = TEST_DATA_LEN;
-    EXPECT_CALL(mock, SocketPostBytes).WillOnce(Return(SOFTBUS_AUTH_PACK_SOCKET_PKT_FAIL));
+    EXPECT_CALL(mock, SocketPostBytes)
+        .WillOnce(Return(SOFTBUS_AUTH_PACK_SOCKET_PKT_FAIL));
     ret = PostBytesForSession(TEST_FD, &head, data);
     EXPECT_EQ(ret, SOFTBUS_AUTH_PACK_SOCKET_PKT_FAIL);
 }
@@ -824,7 +829,8 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_003, TestSize.Level1)
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     head.len = TEST_DATA_LEN;
     AuthConnectionInterfaceMock mock;
-    EXPECT_CALL(mock, SocketPostBytes).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SocketPostBytes)
+        .WillOnce(Return(SOFTBUS_OK));
     int32_t ret = PostBytesForSession(TEST_FD, &head, data);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -1027,7 +1033,8 @@ HWTEST_F(AuthConnectionTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Lev
 HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_001, TestSize.Level1)
 {
     AuthConnectionInterfaceMock mock;
-    EXPECT_CALL(mock, StartSocketListening).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, StartSocketListening)
+        .WillOnce(Return(SOFTBUS_OK));
     int32_t ret = AuthStartListening(AUTH_LINK_TYPE_WIFI, TEST_IP, TEST_PORT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     AuthStopListening(AUTH_LINK_TYPE_WIFI);
@@ -1044,7 +1051,8 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_001, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_002, TestSize.Level1)
 {
     AuthConnectionInterfaceMock mock;
-    EXPECT_CALL(mock, StartSocketListening).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, StartSocketListening)
+        .WillOnce(Return(SOFTBUS_OK));
     int32_t ret = AuthStartListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P, TEST_IP, TEST_PORT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
@@ -1075,7 +1083,8 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_003, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_004, TestSize.Level1)
 {
     AuthConnectionInterfaceMock mock;
-    EXPECT_CALL(mock, StartSocketListening).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, StartSocketListening)
+        .WillOnce(Return(SOFTBUS_OK));
     int32_t ret = AuthStartListening(AUTH_LINK_TYPE_USB, TEST_IP, TEST_PORT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     AuthStopListening(AUTH_LINK_TYPE_USB);
