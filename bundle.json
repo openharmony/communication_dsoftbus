@@ -69,8 +69,7 @@
       "dsoftbus_feature_dnet",
       "dsoftbus_feature_linkfinder",
       "dsoftbus_feature_coap",
-      "dsoftbus_feature_lnn_usb_ncm",
-      "dsoftbus_feature_lnn_multi_foreground"
+      "dsoftbus_feature_lnn_usb_ncm"
     ],
     "rom": "3000KB",
     "ram": "40MB",
@@ -115,8 +114,7 @@
         "usb_manager",
         "selinux_adapter",
         "time_service",
-        "napi",
-        "window_manager"
+        "napi"
       ],
       "third_party": [
         "cJSON",
