@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "securec.h"
 #include <stdatomic.h>
 #include <string.h>
 
@@ -343,11 +344,13 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
         return;
     }
     SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
     BtScanResultToSoftbus(data, &scanResult);
 
     if (ParseScanResult(data->advData, data->advLen, &scanResult) != SOFTBUS_OK) {
         SoftBusFree(scanResult.data.bcData.payload);
         SoftBusFree(scanResult.data.rspData.payload);
+        SoftBusFree(scanResult.data.uuidData.payload);
         SoftBusMutexUnlock(&g_scannerLock);
         return;
     }
@@ -355,6 +358,7 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
         DISC_LOGE(DISC_BLE_ADAPTER, "scanner callback is null");
         SoftBusFree(scanResult.data.bcData.payload);
         SoftBusFree(scanResult.data.rspData.payload);
+        SoftBusFree(scanResult.data.uuidData.payload);
         SoftBusMutexUnlock(&g_scannerLock);
         return;
     }
@@ -372,6 +376,7 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
     callback.OnReportScanDataCallback(BROADCAST_PROTOCOL_BLE, channelId, &scanResult);
     SoftBusFree(scanResult.data.bcData.payload);
     SoftBusFree(scanResult.data.rspData.payload);
+    SoftBusFree(scanResult.data.uuidData.payload);
 }
 
 static void WrapperScanStateChangeCb(uint8_t channelId, int32_t resultCode, bool isStartScan)
