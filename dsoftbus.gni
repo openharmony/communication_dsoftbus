@@ -191,7 +191,3 @@ if (dsoftbus_feature_deps_sle) {
 if (dsoftbus_feature_deps_remoteP2p_service) {
   defines += [ "DSOFTBUS_DEVICE_CLOUD_CONVERGENCE" ]
 }
-
-if (dsoftbus_feature_lnn_multi_foreground) {
-  defines += [ "LNN_MULTI_FOREGROUND" ]
-}
