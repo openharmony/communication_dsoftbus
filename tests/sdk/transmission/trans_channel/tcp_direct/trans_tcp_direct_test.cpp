@@ -123,9 +123,10 @@ static ISessionListener g_sessionlistener = {
     .OnMessageReceived = OnMessageReceived,
 };
 
-/**
+/*
  * @tc.name: CreateSessionServerTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
+ * @tc.desc: extern module active publish
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -148,9 +149,10 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CreateSessionServerTest002
- * @tc.desc: extern module active publish, use the normal parameter.
+ * @tc.desc: extern module active publish
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -164,9 +166,10 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CreateSessionServerTest003
- * @tc.desc: extern module active publish, use the same normal parameter.
+ * @tc.desc: extern module active publish
+ *           use the same normal parameter
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -183,9 +186,10 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CreateSessionServerTest004
- * @tc.desc: extern module active publish, create 11 sessionServer, succ 10, failed at 11th.
+ * @tc.desc: extern module active publish
+ *           create 11 sessionServer, succ 10, failed at 11th
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -227,9 +231,10 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: RemoveSessionServerTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
+ * @tc.desc: extern module active publish
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -243,9 +248,10 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: RemoveSessionServerTest002
- * @tc.desc: extern module active publish, use the same parameter.
+ * @tc.desc: extern module active publish
+ *           use the same parameter
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -262,9 +268,10 @@ HWTEST_F(TransTcpDirectTest, RemoveSessionServerTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 }
 
-/**
+/*
  * @tc.name: OpenSessionTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
+ * @tc.desc: extern module active publish
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -294,9 +301,10 @@ HWTEST_F(TransTcpDirectTest, OpenSessionTest001, TestSize.Level1)
     EXPECT_GE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SendBytesTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
+ * @tc.desc: extern module active publish
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -323,9 +331,10 @@ HWTEST_F(TransTcpDirectTest, SendBytesTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SendMessageTest001
- * @tc.desc: extern module active publish, use the wrong parameter.
+ * @tc.desc: extern module active publish
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -352,9 +361,10 @@ HWTEST_F(TransTcpDirectTest, SendMessageTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransClientGetTdcDataBufByChannelTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -389,9 +399,10 @@ HWTEST_F(TransTcpDirectTest, TransClientGetTdcDataBufByChannelTest001, TestSize.
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransClientUpdateTdcDataBufWInfoTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -431,9 +442,10 @@ HWTEST_F(TransTcpDirectTest, TransClientUpdateTdcDataBufWInfoTest001, TestSize.L
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcRecvDataTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -505,9 +517,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcRecvDataTest001_1
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -568,9 +581,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001_1, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcRecvDataTest001_2
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -615,9 +629,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001_2, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcPackDataTest001
- * @tc.desc: TransTdcPackData, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcPackData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -639,9 +654,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcPackDataTest001, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessPostDataTest001
- * @tc.desc: TransTdcProcessPostData, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcProcessPostData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -663,9 +679,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest001, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcDecryptTest001
- * @tc.desc: TransTdcDecrypt, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcDecrypt
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -678,9 +695,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcDecryptTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransTdcEncryptWithSeqTest001
- * @tc.desc: TransTdcEncryptWithSeq, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcEncryptWithSeq
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -704,9 +722,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcEncryptWithSeqTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransTdcSetPendingPacketTest001
- * @tc.desc: TransTdcSetPendingPacket, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcSetPendingPacket
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -734,9 +753,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetPendingPacketTest001, TestSize.Level1)
     PendingDeinit(type);
 }
 
-/**
+/*
  * @tc.name: TransTdcSendAckTest001
- * @tc.desc: TransTdcSendAck, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcSendAck
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -748,9 +768,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendAckTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_GET_INFO_FAILED);
 }
 
-/**
+/*
  * @tc.name: TransGetDataBufSizeTest001
- * @tc.desc: TransGetDataBufSize, use the wrong or normal parameter.
+ * @tc.desc: test TransGetDataBufSize
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -763,9 +784,10 @@ HWTEST_F(TransTcpDirectTest, TransGetDataBufSizeTest001, TestSize.Level1)
     EXPECT_EQ(res, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransDestroyDataBufTest001
- * @tc.desc: TransDestroyDataBuf, use the wrong or normal parameter.
+ * @tc.desc: test TransDestroyDataBuf
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -787,9 +809,10 @@ HWTEST_F(TransTcpDirectTest, TransDestroyDataBufTest001, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransGetDataBufNodeByIdTest001
- * @tc.desc: TransGetDataBufNodeById, use the wrong or normal parameter.
+ * @tc.desc: test TransGetDataBufNodeById
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -812,9 +835,10 @@ HWTEST_F(TransTcpDirectTest, TransGetDataBufNodeByIdTest001, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessDataByFlagTest001
- * @tc.desc: TransTdcProcessDataByFlag, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcProcessDataByFlag
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -829,9 +853,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataByFlagTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessDataTest001
- * @tc.desc: TransTdcProcessData, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcProcessData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -870,9 +895,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransResizeDataBufferTest001
- * @tc.desc: TransResizeDataBuffer, use the wrong or normal parameter.
+ * @tc.desc: test TransResizeDataBuffer
+ *           use the wrong or normal paramete
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -893,9 +919,10 @@ HWTEST_F(TransTcpDirectTest, TransResizeDataBufferTest001, TestSize.Level1)
     SoftBusFree(oldBuf);
 }
 
- /**
+ /*
  * @tc.name: TransTdcProcAllDataTest001
- * @tc.desc: TransTdcProcAllData, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcProcAllData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -922,9 +949,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest001, TestSize.Level1)
     SoftBusFree(oldBuf);
 }
 
-/**
+/*
  * @tc.name: ClientTdcOnConnectEventTest001
- * @tc.desc: ClientTdcOnConnectEvent, use the wrong or normal parameter.
+ * @tc.desc: test ClientTdcOnConnectEvent
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -935,9 +963,10 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnConnectEventTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: ClientTdcOnDataEventTest001
- * @tc.desc: ClientTdcOnDataEvent, use the wrong or normal parameter.
+ * @tc.desc: test ClientTdcOnDataEvent
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -961,9 +990,10 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: TransGetNewTcpChannelTest001
- * @tc.desc: TransGetNewTcpChannel, use the wrong or normal parameter.
+ * @tc.desc: test TransGetNewTcpChannel
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -990,9 +1020,10 @@ HWTEST_F(TransTcpDirectTest, TransGetNewTcpChannelTest001, TestSize.Level1)
     SoftBusFree(channelInfo);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessDataByFlagTest002
- * @tc.desc: TransTdcProcessDataByFlag, use different parameters.
+ * @tc.desc: test TransTdcProcessDataByFlag
+ *           use different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1025,9 +1056,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataByFlagTest002, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcAllDataTest002
- * @tc.desc: TransTdcProcAllData, use different parameters.
+ * @tc.desc: test TransTdcProcAllData
+ *           use different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1044,9 +1076,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest002, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcDecryptTest002
- * @tc.desc: TransTdcDecrypt, use different parameters.
+ * @tc.desc: test TransTdcDecrypt
+ *           use different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1058,9 +1091,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcDecryptTest002, TestSize.Level1)
     EXPECT_FALSE(ret == SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: ClientTransTdcOnChannelOpenedTest001
- * @tc.desc: ClientTransTdcOnChannelOpened, use the wrong or normal parameter.
+ * @tc.desc: test ClientTransTdcOnChannelOpened
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1078,9 +1112,10 @@ HWTEST_F(TransTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.Leve
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: ClientTdcOnDataEventTest002
- * @tc.desc: ClientTdcOnDataEvent, use the wrong or normal parameter.
+ * @tc.desc: test ClientTdcOnDataEvent
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1112,9 +1147,10 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest002, TestSize.Level1)
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcCreateListenerWithoutAddTriggerTest001
- * @tc.desc: TransTdcCreateListenerWithoutAddTrigger, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcCreateListenerWithoutAddTrigger
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1131,9 +1167,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest001, Tes
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransTdcCloseFdTest001
- * @tc.desc: TransTdcCloseFd, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcCloseFd
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1151,9 +1188,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcCloseFdTest001, TestSize.Level1)
     EXPECT_TRUE(fd);
 }
 
-/**
+/*
  * @tc.name: UnPackTcpDataPacketHeadTest001
- * @tc.desc: UnPackTcpDataPacketHead, use the wrong or normal parameter.
+ * @tc.desc: test UnPackTcpDataPacketHead
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1165,9 +1203,10 @@ HWTEST_F(TransTcpDirectTest, UnPackTcpDataPacketHeadTest001, TestSize.Level1)
     EXPECT_TRUE(data.seq);
 }
 
-/**
+/*
  * @tc.name: CheckCollaborationSessionNameTest001
- * @tc.desc: CheckCollaborationSessionName, use the wrong or normal parameter.
+ * @tc.desc: test CheckCollaborationSessionName
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1181,9 +1220,10 @@ HWTEST_F(TransTcpDirectTest, CheckCollaborationSessionNameTest001, TestSize.Leve
     EXPECT_EQ(ret, false);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessPostDataTest002
- * @tc.desc: TransTdcProcessPostData, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcProcessPostData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1227,9 +1267,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessPostDataTest002, TestSize.Level1)
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcSendBytesTest001
- * @tc.desc: TransTdcSendBytes, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcSendBytes
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1261,9 +1302,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level1)
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcSendMessageTest001
- * @tc.desc: TransTdcSendMessage, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcSendMessage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1294,9 +1336,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendMessageTest001, TestSize.Level1)
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessDataTest002
- * @tc.desc: TransTdcProcessData, use the wrong or normal parameter.
+ * @tc.desc: test TransTdcProcessData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1354,9 +1397,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest002, TestSize.Level1)
     g_tcpDataList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcProcAllDataTest003
- * @tc.desc: TransTdcProcAllData, use different parameters.
+ * @tc.desc: test TransTdcProcAllData
+ *           use different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1389,9 +1433,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest003, TestSize.Level1)
     g_tcpDataList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcProcAllDataTest004
- * @tc.desc: TransTdcProcAllData, use different parameters.
+ * @tc.desc: test TransTdcProcAllData
+ *           use different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1447,9 +1492,10 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level1)
     g_tcpDataList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAssembleTlvData001
- * @tc.desc: TransAssembleTlvData
+ * @tc.desc: test TransAssembleTlvData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1460,9 +1506,10 @@ HWTEST_F(TransTcpDirectTest, TransAssembleTlvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransAssembleTlvData002
- * @tc.desc: TransAssembleTlvData
+ * @tc.desc: test TransAssembleTlvData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1485,9 +1532,10 @@ HWTEST_F(TransTcpDirectTest, TransAssembleTlvData002, TestSize.Level1)
     SoftBusFree(tlvElement);
 }
 
-/**
+/*
  * @tc.name: BuildNeedAckTlvData001
- * @tc.desc: BuildNeedAckTlvData
+ * @tc.desc: test BuildNeedAckTlvData
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1498,9 +1546,10 @@ HWTEST_F(TransTcpDirectTest, BuildNeedAckTlvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: BuildDataHead001
- * @tc.desc: BuildDataHead
+ * @tc.desc: test BuildDataHead
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1512,9 +1561,10 @@ HWTEST_F(TransTcpDirectTest, BuildDataHead001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransTdcNeedSendAck001
- * @tc.desc: TransTdcNeedSendAck
+ * @tc.desc: test TransTdcNeedSendAck
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -44,9 +44,10 @@ void VtpInstanceTest::SetUpTestCase(void)
 void VtpInstanceTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: UpdateVtpLogLevel001
- * @tc.desc: UpdateVtpLogLevel001, use the wrong parameter.
+ * @tc.desc: test UpdateVtpLogLevel
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -56,9 +57,10 @@ HWTEST_F(VtpInstanceTest, UpdateVtpLogLevel001, TestSize.Level1)
     EXPECT_EQ(FILLP_DBG_LVL_DEBUG, ret);
 }
 
-/**
+/*
  * @tc.name: GetVersion001
- * @tc.desc: GetVersion001, use the wrong parameter.
+ * @tc.desc: test GetVersion
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -71,9 +73,10 @@ HWTEST_F(VtpInstanceTest, GetVersion001, TestSize.Level1)
     EXPECT_TRUE(tmpStr == "VTP_V1.0");
 }
 
-/**
+/*
  * @tc.name: CryptoRand001
- * @tc.desc: CryptoRand001, use the wrong parameter.
+ * @tc.desc: test CryptoRand
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -86,10 +89,12 @@ HWTEST_F(VtpInstanceTest, CryptoRand001, TestSize.Level1)
     EXPECT_NE(0, res);
 }
 
-/**
+/*
  * @tc.name: PreSetFillpCoreParams001
- * @tc.desc: PreSetFillpCoreParams001, use the wrong parameter.
- * @tc.desc: InitVtp, use the wrong parameter.
+ * @tc.desc: test PreSetFillpCoreParams
+ *           use the wrong parameter
+ * @tc.desc: test InitVtp
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -106,11 +111,14 @@ HWTEST_F(VtpInstanceTest, PreSetFillpCoreParams001, TestSize.Level1)
     vtpInstance->DestroyVtp(pkgName);
 }
 
-/**
+/*
  * @tc.name: WaitForDestroy001
- * @tc.desc: WaitForDestroy001, use the wrong parameter.
- * @tc.desc: DestroyVtp, use the wrong parameter.
- * @tc.desc: UpdateSocketStreamCount, use the wrong parameter.
+ * @tc.desc: test WaitForDestroy
+ *           use the wrong parameter
+ * @tc.desc: test DestroyVtp
+ *           use the wrong parameter
+ * @tc.desc: test UpdateSocketStreamCount
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */

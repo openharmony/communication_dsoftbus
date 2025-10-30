@@ -203,9 +203,9 @@ static void SocketFileCallbackFuncTest(int32_t socket, FileEvent *event)
     (void)event;
 }
 
-/**
+/*
  * @tc.name: TransFileListenerTest001
- * @tc.desc: trans file listener init.
+ * @tc.desc: trans file listener init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -223,9 +223,9 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest001, TestSize.Level0)
     TransFileDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileListenerTest002
- * @tc.desc: trans set file receive listener by sessionName.
+ * @tc.desc: trans set file receive listener by sessionName
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -250,9 +250,9 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest002, TestSize.Level0)
     TransFileDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileListenerTest003
- * @tc.desc: trans delete file listener by sessionName.
+ * @tc.desc: trans delete file listener by sessionName
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -276,9 +276,9 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest003, TestSize.Level0)
     TransFileDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileListenerTest004
- * @tc.desc: trans set file send listener by sessionName.
+ * @tc.desc: trans set file send listener by sessionName
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -300,9 +300,9 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest004, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT);
 }
 
-/**
+/*
  * @tc.name: TransFileListenerTest005
- * @tc.desc: trans get file listener by sessionName.
+ * @tc.desc: trans get file listener by sessionName
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -342,9 +342,9 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
     SoftBusFree(fileListener);
 }
 
-/**
+/*
  * @tc.name: TransFileTest001
- * @tc.desc: trans register file callback.
+ * @tc.desc: trans register file callback
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -361,9 +361,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest002
- * @tc.desc: trans open file channel.
+ * @tc.desc: trans open file channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -406,9 +406,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest003
- * @tc.desc: trans open file channel use diff param.
+ * @tc.desc: trans open file channel use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -442,9 +442,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest004
- * @tc.desc: trans file send listener use diff param.
+ * @tc.desc: trans file send listener use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -499,9 +499,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest005
- * @tc.desc: trans file recv listener use diff param.
+ * @tc.desc: trans file recv listener use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -549,9 +549,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest006
- * @tc.desc: trans file channel open use diff param.
+ * @tc.desc: trans file channel open use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -595,9 +595,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest007
- * @tc.desc: trans file channel use wrong param.
+ * @tc.desc: trans file channel use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -633,9 +633,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest008
- * @tc.desc: trans file send use diff param.
+ * @tc.desc: trans file send use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -653,9 +653,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
-/**
+/*
  * @tc.name: TransFileTest009
- * @tc.desc: trans set reuse addr.
+ * @tc.desc: trans set reuse addr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -675,9 +675,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransFileTest010
- * @tc.desc: trans set reuse port.
+ * @tc.desc: trans set reuse port
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -694,9 +694,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransFileTest011
- * @tc.desc: trans open tcp server.
+ * @tc.desc: trans open tcp server
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -713,9 +713,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
-/**
+/*
  * @tc.name: TransFileTest012
- * @tc.desc: trans start nstackx file at server.
+ * @tc.desc: trans start nstackx file at server
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -736,9 +736,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level1)
     ConnDeinitSockets();
 }
 
-/**
+/*
  * @tc.name: TransFileTest013
- * @tc.desc: trans start nstackx file at client.
+ * @tc.desc: trans start nstackx file at client
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -752,7 +752,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level1)
     (void)StartNStackXDFileClient("127.0.0.1", peerPort, &key, keyLen, g_fileMsgRecviver);
 }
 
-/**
+/*
  * @tc.name: TransFileTest014
  * @tc.desc: trans register file callback of socket
  * @tc.type: FUNC
@@ -776,7 +776,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level1)
     TransFileDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest015
  * @tc.desc: trans add new file callback of socket
  * @tc.type: FUNC
@@ -800,9 +800,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level1)
     TransFileDeinit();
 }
 
-/**
+/*
  * @tc.name: TransFileTest016
- * @tc.desc: trans open tcp server.
+ * @tc.desc: trans open tcp server
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -819,9 +819,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest016, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
-/**
+/*
  * @tc.name: TransFileTest017
- * @tc.desc: trans open tcp server.
+ * @tc.desc: trans open tcp server
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -845,9 +845,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest017, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: TransFileTest018
- * @tc.desc: trans open tcp server.
+ * @tc.desc: trans open tcp server
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -867,9 +867,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest018, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransFileTest019
- * @tc.desc: trans open tcp server.
+ * @tc.desc: trans open tcp server
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -889,7 +889,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest019, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: FreeFileStatusListTest001
  * @tc.desc: test free file status list
  * @tc.type: FUNC
@@ -921,7 +921,7 @@ HWTEST_F(TransSdkFileTest, FreeFileStatusListTest001, TestSize.Level1)
     FreeFileStatusList(event2);
 }
 
-/**
+/*
  * @tc.name: FreeFileStatusListTest002
  * @tc.desc: test free file status list with null files
  * @tc.type: FUNC
@@ -940,7 +940,7 @@ HWTEST_F(TransSdkFileTest, FreeFileStatusListTest002, TestSize.Level1)
     ASSERT_EQ(event.statusList.notStartedList.files, nullptr);
 }
 
-/**
+/*
  * @tc.name: FillFileStatusListTest001
  * @tc.desc: test fill file status list
  * @tc.type: FUNC
@@ -973,7 +973,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest001, TestSize.Level1)
     SoftBusFree(fileInfo);
 }
 
-/**
+/*
  * @tc.name: FillFileStatusListTest002
  * @tc.desc: test fill file status list
  * @tc.type: FUNC
@@ -996,7 +996,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest002, TestSize.Level1)
     ASSERT_EQ(0, event.statusList.notStartedList.fileCnt);
 }
 
-/**
+/*
  * @tc.name: FillFileStatusListTest003
  * @tc.desc: test fill file status list
  * @tc.type: FUNC
@@ -1055,7 +1055,7 @@ void InitDFileMsg(DFileMsg *msgData)
     msgData->rate = 0;
 }
 
-/**
+/*
  * @tc.name: FillFileStatusListTest004
  * @tc.desc: test fill file status list
  * @tc.type: FUNC
@@ -1103,7 +1103,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest004, TestSize.Level1)
     SoftBusFree(fileInfo);
 }
 
-/**
+/*
  * @tc.name: FillFileStatusListTest005
  * @tc.desc: test fill file status list
  * @tc.type: FUNC
@@ -1154,7 +1154,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level1)
     SoftBusFree(fileInfo);
 }
 
-/**
+/*
  * @tc.name: FillFileStatusListTest006
  * @tc.desc: test fill file status list
  * @tc.type: FUNC
@@ -1169,7 +1169,7 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest006, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: NotifySocketSendResultTest001
  * @tc.desc: test notify socket send result
  * @tc.type: FUNC
@@ -1198,7 +1198,7 @@ HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level1)
     NotifySocketRecvResult(socket, DFILE_ON_CONNECT_FAIL, &msgData, &listener);
 }
 
-/**
+/*
  * @tc.name: FillFileEventErrorCodeTest
  * @tc.desc: test fill file event error code
  * @tc.type: FUNC

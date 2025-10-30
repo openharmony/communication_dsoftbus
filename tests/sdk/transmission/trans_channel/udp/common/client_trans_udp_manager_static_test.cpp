@@ -51,9 +51,10 @@ void ClientTransUdpManagerStaticTest::SetUpTestCase(void) {}
 
 void ClientTransUdpManagerStaticTest::TearDownTestCase(void) {}
 
-/**
+/*
  * @tc.name: TransOnUdpChannelBind
- * @tc.desc: udp channel on bind test, use the invalid parameter.
+ * @tc.desc: udp channel on bind test
+ *           use the invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -70,9 +71,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelBindTest001, TestSize
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: OnRawStreamEncryptOptGetTest001
- * @tc.desc: on raw stream encrypt test, use the wrong or normal parameter.
+ * @tc.desc: on raw stream encrypt test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -85,9 +87,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest001, TestS
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransSetUdpChannelEnableTest001
- * @tc.desc: trans delete businness channel test, use the wrong or normal parameter.
+ * @tc.desc: trans delete businness channel test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -97,9 +100,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransSetUdpChannelEnableTest001, TestS
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransUdpManagerStaticTest001
- * @tc.desc: client trans udp manager static test, use the wrong or normal parameter.
+ * @tc.desc: client trans udp manager static test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -144,9 +148,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     EXPECT_EQ(SOFTBUS_ACCESS_TOKEN_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransUdpManagerStaticTest002
- * @tc.desc: client trans udp manager static test, use the wrong or normal parameter.
+ * @tc.desc: client trans udp manager static test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -182,9 +187,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, Te
     OnQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
 }
 
-/**
+/*
  * @tc.name: ClientTransAddUdpChannelTest001
- * @tc.desc: client trans add udp channel test, use the wrong or normal parameter.
+ * @tc.desc: client trans add udp channel test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -220,9 +226,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
     (void)TransDeleteUdpChannel(udpChannel->channelId);
 }
 
-/**
+/*
  * @tc.name: TransDeleteBusinnessChannelTest001
- * @tc.desc: trans delete businness channel test, use the wrong or normal parameter.
+ * @tc.desc: trans delete businness channel test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -249,9 +256,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, Te
     EXPECT_EQ(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH, ret);
 }
 
-/**
+/*
  * @tc.name: TransSetdFileIdByChannelIdTest001
- * @tc.desc: trans delete businness channel test, use the wrong or normal parameter.
+ * @tc.desc: trans delete businness channel test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -273,9 +281,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransSetdFileIdByChannelIdTest001, Tes
     (void)TransDeleteUdpChannel(udpChannel->channelId);
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelOpenFailedTest002
- * @tc.desc: trans on udp channel opened test, use the wrong or normal parameter.
+ * @tc.desc: trans on udp channel opened test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -296,9 +305,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransOnUdpChannelOpenFailedTest001, Te
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
-/**
+/*
  * @tc.name: NotifyCallbackTest001
- * @tc.desc: trans NotifyCallback test, use the wrong or normal parameter.
+ * @tc.desc: trans NotifyCallback test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -323,9 +333,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, NotifyCallbackTest001, TestSize.Level1
     (void)TransDeleteUdpChannel(channel->channelId);
 }
 
-/**
+/*
  * @tc.name: CloseUdpChannelProcTest001
- * @tc.desc: trans CloseUdpChannelProc test, use the wrong or normal parameter.
+ * @tc.desc: trans CloseUdpChannelProc test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
 */
@@ -350,9 +361,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelProc001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CloseUdpChannelTest001
- * @tc.desc: close udp channel test, use the wrong or normal parameter.
+ * @tc.desc: close udp channel test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -368,9 +380,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, CloseUdpChannelTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: OnIdleTimeoutResetTest001
- * @tc.desc: client On idle timeout reset test, use the wrong or normal parameter.
+ * @tc.desc: client On idle timeout reset test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -380,9 +393,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnIdleTimeoutResetTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
-/**
+/*
  * @tc.name: OnRawStreamEncryptOptGetTest002
- * @tc.desc: on raw stream encrypt test, use the wrong or normal parameter.
+ * @tc.desc: on raw stream encrypt test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -395,9 +409,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest002, TestS
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: OnRawStreamEncryptOptGetTest003
- * @tc.desc: on raw stream encrypt test, use the wrong or normal parameter.
+ * @tc.desc: on raw stream encrypt test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -414,9 +429,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest003, TestS
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: OnRawStreamEncryptOptGetTest004
- * @tc.desc: on raw stream encrypt test, use the wrong or normal parameter.
+ * @tc.desc: on raw stream encrypt test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -445,9 +461,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, OnRawStreamEncryptOptGetTest004, TestS
     (void)TransDeleteUdpChannel(udpChannel->channelId);
 }
 
-/**
+/*
  * @tc.name: TransUdpChannelSetStreamMultiLayer
- * @tc.desc: TransUdpChannelSetStreamMultiLayer
+ * @tc.desc: test TransUdpChannelSetStreamMultiLayer
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -469,9 +486,10 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransUdpChannelSetStreamMultiLayer, Te
     (void)TransDeleteUdpChannel(udpChannel->channelId);
 }
 
-/**
+/*
  * @tc.name: TransSendLimitChangeDataToCoreTest001
- * @tc.desc: TransSendLimitChangeDataToCore
+ * @tc.desc: test TransSendLimitChangeDataToCore
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
