@@ -492,6 +492,32 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     return SOFTBUS_OK;
 }
 
+static void TransPagingResetBadkeyDisConnection(uint32_t connId)
+{
+    TRANS_LOGW(TRANS_CTRL, "paging reset bad key dis connect, connId=%{public}u", connId);
+    ConnectionInfo info;
+    (void)memset_s(&info, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
+    int32_t ret = ConnGetConnectionInfo(connId, &info);
+    TRANS_CHECK_AND_RETURN_LOGE(
+        ret == SOFTBUS_OK, TRANS_CTRL, "ConnGetConnectionInfo fail, ret=%{public}d", ret);
+    if (info.type != CONNECT_SLE) {
+        TRANS_LOGW(TRANS_CTRL, "connect type not sle, type=%{public}d", info.type);
+        return;
+    }
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    option.type = info.type;
+    option.sleOption.protocol = info.sleInfo.protocol;
+    if (memcpy_s(option.sleOption.address, sizeof(option.sleOption.address),
+        info.sleInfo.address, sizeof(info.sleInfo.address)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy sle address");
+        return;
+    }
+    ret = ConnDisconnectDeviceAllConn(&option);
+    TRANS_CHECK_AND_RETURN_LOGE(
+        ret == SOFTBUS_OK, TRANS_CTRL, "ConnDisconnectDeviceAllConn fail, ret=%{public}d", ret);
+}
+
 int32_t TransPagingReset(ProxyChannelInfo *info)
 {
     char *payLoad = NULL;
@@ -510,6 +536,7 @@ int32_t TransPagingReset(ProxyChannelInfo *info)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth key fail.");
         cJSON_free(payLoad);
+        TransPagingResetBadkeyDisConnection(info->connId);
         return ret;
     }
     ret = TransPagingPackMessage(&msg, &dataInfo, info, false);
