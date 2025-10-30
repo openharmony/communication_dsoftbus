@@ -106,7 +106,7 @@ HWTEST_F(AuthSessionFsmTest, TRANSLATE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
     EXPECT_TRUE(authFsm == nullptr);
     authFsm = TranslateToAuthFsm(&authFsm->fsm, FSM_MSG_UNKNOWN, nullptr);
     EXPECT_TRUE(authFsm == nullptr);
-    AuthFsmDeinitCallback(nullptr);
+    EXPECT_NO_FATAL_FAILURE(AuthFsmDeinitCallback(nullptr));
 }
 
 /*
@@ -120,7 +120,7 @@ HWTEST_F(AuthSessionFsmTest, TRANSLATE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
 {
-    ClearAuthRequest();
+    EXPECT_NO_FATAL_FAILURE(ClearAuthRequest());
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     request.authId = REQUEST_ID;
@@ -131,18 +131,18 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_BR;
-    AddUdidInfo(REQUEST_ID, true, &connInfo);
-    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    EXPECT_NO_FATAL_FAILURE(AddUdidInfo(REQUEST_ID, true, &connInfo));
+    EXPECT_NO_FATAL_FAILURE(AddUdidInfo(REQUEST_ID, false, &connInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
-    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    EXPECT_NO_FATAL_FAILURE(AddUdidInfo(REQUEST_ID, false, &connInfo));
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    EXPECT_NO_FATAL_FAILURE(AddUdidInfo(REQUEST_ID, false, &connInfo));
     connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
-    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    EXPECT_NO_FATAL_FAILURE(AddUdidInfo(REQUEST_ID, false, &connInfo));
     connInfo.type = AUTH_LINK_TYPE_USB;
-    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    EXPECT_NO_FATAL_FAILURE(AddUdidInfo(REQUEST_ID, false, &connInfo));
     connInfo.type = AUTH_LINK_TYPE_MAX;
-    AddUdidInfo(REQUEST_ID, false, &connInfo);
+    EXPECT_NO_FATAL_FAILURE(AddUdidInfo(REQUEST_ID, false, &connInfo));
     AuthFsm authFsm;
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_BLE;
@@ -154,13 +154,13 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
     authFsm.info.isServer = false;
     authFsm.info.isSupportFastAuth = false;
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    CompleteAuthSession(&authFsm, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(CompleteAuthSession(&authFsm, SOFTBUS_OK));
     authFsm.info.isSupportFastAuth = true;
-    CompleteAuthSession(&authFsm, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(CompleteAuthSession(&authFsm, SOFTBUS_OK));
     authFsm.info.normalizedType = NORMALIZED_KEY_ERROR;
     authFsm.info.isConnectServer = true;
     authFsm.info.peerState = AUTH_STATE_ACK;
-    CompleteAuthSession(&authFsm, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(CompleteAuthSession(&authFsm, SOFTBUS_OK));
 }
 
 /*
@@ -178,19 +178,19 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_DEVICE_KEY_TEST_001, TestSize.Level1)
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     authFsm.info.isNodeInfoReceived = true;
     authFsm.info.isCloseAckReceived = true;
-    HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_NOT_TRUSTED, nullptr);
-    HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_DISCONNECTED, nullptr);
+    EXPECT_NO_FATAL_FAILURE(HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_NOT_TRUSTED, nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_DISCONNECTED, nullptr));
     authFsm.info.isCloseAckReceived = false;
-    HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_DISCONNECTED, nullptr);
+    EXPECT_NO_FATAL_FAILURE(HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_DISCONNECTED, nullptr));
     authFsm.info.isNodeInfoReceived = false;
-    HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_DISCONNECTED, nullptr);
-    HandleCommonMsg(&authFsm, SOFTBUS_AUTH_INNER_ERR, nullptr);
+    EXPECT_NO_FATAL_FAILURE(HandleCommonMsg(&authFsm, FSM_MSG_DEVICE_DISCONNECTED, nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleCommonMsg(&authFsm, SOFTBUS_AUTH_INNER_ERR, nullptr));
     ASSERT_TRUE(memcpy_s(authFsm.info.udid, UDID_BUF_LEN, UDID_TEST, strlen(UDID_TEST)) == EOK);
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
     EXPECT_NE(RecoveryFastAuthKey(&authFsm), SOFTBUS_OK);
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     EXPECT_NE(RecoveryFastAuthKey(&authFsm), SOFTBUS_OK);
-    SyncDevIdStateEnter(nullptr);
+    EXPECT_NO_FATAL_FAILURE(SyncDevIdStateEnter(nullptr));
 }
 
 /*
@@ -210,28 +210,29 @@ HWTEST_F(AuthSessionFsmTest, CLIENT_SET_EXCHANGE_ID_TYPE_TEST_001, TestSize.Leve
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     (void)memset_s(auditData, sizeof(LnnAuditExtra), 0, sizeof(LnnAuditExtra));
-    AuditReportSetPeerDevInfo(nullptr, &info);
-    AuditReportSetPeerDevInfo(auditData, nullptr);
+    EXPECT_NO_FATAL_FAILURE(AuditReportSetPeerDevInfo(nullptr, &info));
+    EXPECT_NO_FATAL_FAILURE(AuditReportSetPeerDevInfo(auditData, nullptr));
     info.connInfo.type = AUTH_LINK_TYPE_BR;
     EXPECT_TRUE(memcpy_s(info.connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);
-    AuditReportSetPeerDevInfo(auditData, &info);
+    EXPECT_NO_FATAL_FAILURE(AuditReportSetPeerDevInfo(auditData, &info));
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     EXPECT_TRUE(memcpy_s(info.connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
-    AuditReportSetPeerDevInfo(auditData, &info);
+    EXPECT_NO_FATAL_FAILURE(AuditReportSetPeerDevInfo(auditData, &info));
     info.connInfo.type = AUTH_LINK_TYPE_SLE;
     EXPECT_TRUE(memcpy_s(info.connInfo.info.sleInfo.sleMac, BT_MAC_LEN, SLE_MAC, strlen(SLE_MAC)) == EOK);
-    AuditReportSetPeerDevInfo(auditData, &info);
+    EXPECT_NO_FATAL_FAILURE(AuditReportSetPeerDevInfo(auditData, &info));
     info.connInfo.type = AUTH_LINK_TYPE_MAX;
-    AuditReportSetPeerDevInfo(auditData, &info);
-    AuditReportSetLocalDevInfo(nullptr);
-    BuildLnnAuditEvent(nullptr, &info, SOFTBUS_OK, SOFTBUS_OK, AUDIT_EVENT_PACKETS_ERROR);
-    BuildLnnAuditEvent(auditData, nullptr, SOFTBUS_OK, SOFTBUS_OK, AUDIT_EVENT_PACKETS_ERROR);
+    EXPECT_NO_FATAL_FAILURE(AuditReportSetPeerDevInfo(auditData, &info));
+    EXPECT_NO_FATAL_FAILURE(AuditReportSetLocalDevInfo(nullptr));
+    EXPECT_NO_FATAL_FAILURE(BuildLnnAuditEvent(nullptr, &info, SOFTBUS_OK, SOFTBUS_OK, AUDIT_EVENT_PACKETS_ERROR));
+    EXPECT_NO_FATAL_FAILURE(BuildLnnAuditEvent(auditData, nullptr, SOFTBUS_OK, SOFTBUS_OK, AUDIT_EVENT_PACKETS_ERROR));
     SoftBusFree(auditData);
     AuthFsm authFsm;
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     authFsm.info.idType = EXCHANGE_FAIL;
     EXPECT_NE(ClientSetExchangeIdType(&authFsm), SOFTBUS_OK);
-    EXPECT_CALL(mock, PostDeviceInfoMessage).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
+    EXPECT_CALL(mock, PostDeviceInfoMessage)
+        .WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = true;
     EXPECT_TRUE(TrySyncDeviceInfo(AUTH_SEQ_1, &info) == SOFTBUS_OK);
@@ -284,23 +285,23 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_TEST_001, TestSize.Level1)
     (void)memset_s(&para, sizeof(MessagePara), 0, sizeof(MessagePara));
     ASSERT_TRUE(memcpy_s(para.data, TMP_DATA_LEN, TMP_IN_DATA, TMP_DATA_LEN) == EOK);
     para.len = TMP_DATA_LEN;
-    HandleMsgRecvDevInfoEarly(&authFsm, &para);
+    EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDevInfoEarly(&authFsm, &para));
     authFsm.info.deviceInfoData = reinterpret_cast<uint8_t *>(SoftBusMalloc(TMP_DATA_LEN));
     EXPECT_TRUE(authFsm.info.deviceInfoData != nullptr);
     para.len = 0;
-    HandleMsgRecvDevInfoEarly(&authFsm, &para);
-    TryFinishAuthSession(&authFsm);
+    EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDevInfoEarly(&authFsm, &para));
+    EXPECT_NO_FATAL_FAILURE(TryFinishAuthSession(&authFsm));
     authFsm.info.isNodeInfoReceived = true;
-    TryFinishAuthSession(&authFsm);
+    EXPECT_NO_FATAL_FAILURE(TryFinishAuthSession(&authFsm));
     authFsm.info.isCloseAckReceived = true;
-    TryFinishAuthSession(&authFsm);
+    EXPECT_NO_FATAL_FAILURE(TryFinishAuthSession(&authFsm));
     authFsm.info.isAuthFinished = true;
-    TryFinishAuthSession(&authFsm);
+    EXPECT_NO_FATAL_FAILURE(TryFinishAuthSession(&authFsm));
     EXPECT_TRUE(AuthSessionHandleDeviceNotTrusted(INVALID_UDID_TEST) == SOFTBUS_OK);
     EXPECT_TRUE(AuthSessionHandleDeviceNotTrusted(UDID_TEST) == SOFTBUS_OK);
     EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID_1, true) == SOFTBUS_OK);
     EXPECT_TRUE(AuthSessionHandleDeviceDisconnected(CONN_ID, true) == SOFTBUS_OK);
-    AuthSessionFsmExit();
+    EXPECT_NO_FATAL_FAILURE(AuthSessionFsmExit());
 }
 
 /*
@@ -319,20 +320,22 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_CLOSE_ACK_TEST_001, TestSize.Level1)
     AuthFsm authFsm;
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
 
-    EXPECT_CALL(mock, SoftBusGetBrState()).WillRepeatedly(Return(BR_ENABLE));
+    EXPECT_CALL(mock, SoftBusGetBrState())
+        .WillRepeatedly(Return(BR_ENABLE));
     int32_t ret = HandleCloseAckMessage(&authFsm, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    EXPECT_CALL(mock, SoftBusGetBrState()).WillRepeatedly(Return(BR_DISABLE));
+    EXPECT_CALL(mock, SoftBusGetBrState())
+        .WillRepeatedly(Return(BR_DISABLE));
     ret = HandleCloseAckMessage(&authFsm, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
-    UpdateUdidHashIfEmpty(&authFsm, &info);
+    EXPECT_NO_FATAL_FAILURE(UpdateUdidHashIfEmpty(&authFsm, &info));
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     info.nodeInfo.feature = 0;
     ret = HandleCloseAckMessage(&authFsm, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_EQ(memcpy_s(info.udid, UDID_BUF_LEN, UDID_TEST, strlen(UDID_TEST)), 0);
-    UpdateUdidHashIfEmpty(&authFsm, &info);
+    EXPECT_NO_FATAL_FAILURE(UpdateUdidHashIfEmpty(&authFsm, &info));
     info.nodeInfo.feature = 0x1F7CA;
     ret = HandleCloseAckMessage(&authFsm, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -357,16 +360,16 @@ HWTEST_F(AuthSessionFsmTest, IS_NEED_EXCHANGE_NETWORKID_TEST_001, TestSize.Level
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     (void)memset_s(&para, sizeof(para), 0, sizeof(para));
     info.localState = AUTH_STATE_START;
-    LocalAuthStateProc(&authFsm, &info, &result);
+    EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
     info.localState = AUTH_STATE_ACK;
-    LocalAuthStateProc(&authFsm, &info, &result);
+    EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
     info.localState = AUTH_STATE_WAIT;
-    LocalAuthStateProc(&authFsm, &info, &result);
+    EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
     info.localState = AUTH_STATE_COMPATIBLE;
-    LocalAuthStateProc(&authFsm, &info, &result);
+    EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
     info.localState = AUTH_STATE_UNKNOW;
-    LocalAuthStateProc(&authFsm, &info, &result);
-    HandleMsgRecvDeviceIdNego(&authFsm, &para);
+    EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
+    EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDeviceIdNego(&authFsm, &para));
     bool ret = IsNeedExchangeNetworkId(feature, BIT_SUPPORT_EXCHANGE_NETWORKID);
     EXPECT_TRUE(ret == false);
 }
@@ -388,8 +391,8 @@ HWTEST_F(AuthSessionFsmTest, ADD_CONCURRENT_AUTH_REQUEST_TEST_001, TestSize.Leve
     EXPECT_TRUE(strcpy_s(authFsm.info.udidHash, SHA_256_HEX_HASH_LEN, UDID_HASH) == EOK);
     ret = AddConcurrentAuthRequest(&authFsm);
     EXPECT_TRUE(ret != 0);
-    StopAuthFsm(&authFsm);
-    SyncNegotiationEnter(nullptr);
+    EXPECT_NO_FATAL_FAILURE(StopAuthFsm(&authFsm));
+    EXPECT_NO_FATAL_FAILURE(SyncNegotiationEnter(nullptr));
 }
 
 /*
@@ -468,10 +471,10 @@ HWTEST_F(AuthSessionFsmTest, PROCESS_CLIENT_AUTH_STATE_TEST_001, TestSize.Level1
     ret = ProcessClientAuthState(&authFsm);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    DeviceAuthStateEnter(nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeviceAuthStateEnter(nullptr));
     FsmStateMachine fsm;
     (void)memset_s(&fsm, sizeof(FsmStateMachine), 0, sizeof(FsmStateMachine));
-    DeviceAuthStateEnter(&fsm);
+    EXPECT_NO_FATAL_FAILURE(DeviceAuthStateEnter(&fsm));
 }
 
 /*
@@ -543,7 +546,7 @@ HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_PROCESS_TEST_002, TestSize.Level1
     ret = DeviceAuthStateProcess(&authFsm.fsm, msgType, para3);
     EXPECT_TRUE(ret == true);
     authFsm.info.isNodeInfoReceived = true;
-    HandleMsgRecvCloseAck(&authFsm, para1);
+    EXPECT_NO_FATAL_FAILURE(HandleMsgRecvCloseAck(&authFsm, para1));
 }
 
 /*
@@ -563,8 +566,10 @@ HWTEST_F(AuthSessionFsmTest, SYNC_DEV_ID_STATE_PROCESS_TEST_001, TestSize.Level1
     authFsm.isDead = false;
     (void)memset_s(&authFsm, sizeof(authFsm), 0, sizeof(authFsm));
     (void)memset_s(para, sizeof(MessagePara), 0, sizeof(MessagePara));
-    EXPECT_CALL(mock, PostDeviceIdMessage).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, ProcessDeviceIdMessage).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, PostDeviceIdMessage)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ProcessDeviceIdMessage)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = SyncDevIdStateProcess(&(authFsm.fsm), FSM_MSG_RECV_DEVICE_ID, para);
     EXPECT_TRUE(ret);
     para = (MessagePara *)SoftBusCalloc(sizeof(MessagePara));
@@ -602,18 +607,24 @@ HWTEST_F(AuthSessionFsmTest, IS_PEER_SUPPORT_NEGO_AUTH_TEST_001, TestSize.Level1
 {
     AuthSessionInfo info;
     AuthSessionFsmInterfaceMock mock;
-    EXPECT_CALL(mock, GetUdidShortHash).WillOnce(Return(false));
+    EXPECT_CALL(mock, GetUdidShortHash)
+        .WillOnce(Return(false));
     bool ret = IsPeerSupportNegoAuth(&info);
     EXPECT_TRUE(ret);
-    EXPECT_CALL(mock, GetUdidShortHash).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
+    EXPECT_CALL(mock, GetUdidShortHash)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
     ret = IsPeerSupportNegoAuth(&info);
     EXPECT_TRUE(ret);
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillOnce(Return(true));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, IsSupportFeatureByCapaBit)
+        .WillOnce(Return(true));
     ret = IsPeerSupportNegoAuth(&info);
     EXPECT_TRUE(ret);
-    EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillOnce(Return(false));
+    EXPECT_CALL(mock, IsSupportFeatureByCapaBit)
+        .WillOnce(Return(false));
     ret = IsPeerSupportNegoAuth(&info);
     EXPECT_FALSE(ret);
 }
@@ -633,9 +644,12 @@ HWTEST_F(AuthSessionFsmTest, GET_FIRST_FSM_TEST_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.isConnectServer = true;
     AuthSessionFsmInterfaceMock mock;
-    EXPECT_CALL(mock, GetUdidShortHash).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, GetUdidShortHash)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, IsSupportFeatureByCapaBit)
+        .WillRepeatedly(Return(true));
     int32_t ret = GetFirstFsmState(&info, authSeq, &state);
     EXPECT_EQ(ret, SOFTBUS_OK);
     info.isConnectServer = false;
@@ -716,11 +730,14 @@ HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_001, TestSize.Level1)
     HiChainAuthParam authParam;
     (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
     uint32_t requestId = REQUEST_ID_1;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByUdidPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, GetAuthRequest).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByUdidPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAuthRequest)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
-    ClearAuthRequest();
+    EXPECT_NO_FATAL_FAILURE(ClearAuthRequest());
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     request.authId = REQUEST_ID;
@@ -743,18 +760,22 @@ HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_002, TestSize.Level1)
     HiChainAuthParam authParam;
     (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
     uint32_t requestId = REQUEST_ID_1;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByUdidPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, GetAuthRequest).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByUdidPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAuthRequest)
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
-    ClearAuthRequest();
+    EXPECT_NO_FATAL_FAILURE(ClearAuthRequest());
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     request.authId = REQUEST_ID;
     request.deviceTypeId = TYPE_PC_ID;
     EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
     requestId = REQUEST_ID;
-    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, GetAuthRequest)
+        .WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).Times(0);
     EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
 }
@@ -779,26 +800,35 @@ HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_003, TestSize.Level1)
     NodeInfo infoOther;
     infoOther.deviceInfo.deviceTypeId = 0;
     AuthSessionFsmInterfaceMock mock;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByUdidPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NOT_FIND));
-    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByUdidPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAuthRequest)
+        .WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_NOT_FIND));
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
     EXPECT_NE(authParam.deviceTypeId, TYPE_PC_ID);
     authParam.deviceTypeId = 0;
-    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoPc), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, GetAuthRequest)
+        .WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
+        .WillOnce(DoAll(SetArgPointee<2>(infoPc), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).Times(0);
-    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
     EXPECT_EQ(authParam.deviceTypeId, TYPE_PC_ID);
     authParam.deviceTypeId = 0;
-    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
-    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_CALL(mock, GetAuthRequest)
+        .WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
+        .WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
     EXPECT_NE(authParam.deviceTypeId, TYPE_PC_ID);
     authParam.deviceTypeId = 0;
-    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
-    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_CALL(mock, GetAuthRequest)
+        .WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById)
+        .WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
     EXPECT_EQ(authParam.deviceTypeId, 0);
 }
 
@@ -818,9 +848,13 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_MSG_RECV_DEVICE_ID_001, TestSize.Level1)
     authFsm.authSeq = AUTH_SEQ_1;
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_BLE;
     NiceMock<AuthSessionFsmInterfaceMock> mock;
-    EXPECT_CALL(mock, ProcessDeviceIdMessage).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, PostDeviceInfoMessage).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(mock, LnnIsNeedInterceptBroadcast).WillOnce(Return(true)).WillOnce(Return(false));
+    EXPECT_CALL(mock, ProcessDeviceIdMessage)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, PostDeviceInfoMessage)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, LnnIsNeedInterceptBroadcast)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
 
     authFsm.info.isServer = true;
     EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDeviceId(&authFsm, &para));
@@ -843,8 +877,11 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_MSG_RECV_DEVICE_ID_NDGO_001, TestSize.Level1
     authFsm.authSeq = AUTH_SEQ_1;
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_BLE;
     NiceMock<AuthSessionFsmInterfaceMock> mock;
-    EXPECT_CALL(mock, ProcessDeviceIdMessage).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnIsNeedInterceptBroadcast).WillOnce(Return(true)).WillOnce(Return(false));
+    EXPECT_CALL(mock, ProcessDeviceIdMessage)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnIsNeedInterceptBroadcast)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
 
     authFsm.info.isServer = true;
     EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDeviceIdNego(&authFsm, &para));
@@ -929,7 +966,8 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_MSG_POST_DEVICE_ID_TEST_001, TestSize.Level1
     MessagePara para;
     (void)memset_s(&para, sizeof(MessagePara), 0, sizeof(MessagePara));
     NiceMock<AuthSessionFsmInterfaceMock> mock;
-    EXPECT_CALL(mock, PostDeviceIdMessage).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, PostDeviceIdMessage)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_NO_FATAL_FAILURE(HandleMsgPostDeviceId(&authFsm, &para));
 }
 
@@ -945,12 +983,16 @@ HWTEST_F(AuthSessionFsmTest, SAVE_LAST_AUTH_SEQ_TEST_001, TestSize.Level1)
     uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     ASSERT_TRUE(memcpy_s(hash, SHA_256_HASH_LEN, DEVICE_ID_HASH, DEVICE_ID_HASH_LEN) == EOK);
     NiceMock<AuthSessionFsmInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
     EXPECT_NO_FATAL_FAILURE(SaveLastAuthSeq(hash, AUTH_SEQ));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfoPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfoPacked)
+        .WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
     EXPECT_NO_FATAL_FAILURE(SaveLastAuthSeq(hash, AUTH_SEQ));
-    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfoPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(SaveLastAuthSeq(hash, AUTH_SEQ));
 }
 
@@ -990,7 +1032,8 @@ HWTEST_F(AuthSessionFsmTest, LOCAL_AUTH_STATE_PROC_TEST_001, TestSize.Level1)
     info.localState = AUTH_STATE_START;
     int32_t result = 0;
     NiceMock<AuthSessionFsmInterfaceMock> mock;
-    EXPECT_CALL(mock, PostDeviceIdMessage).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, PostDeviceIdMessage)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
     info.localState = AUTH_STATE_ACK;
     EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
@@ -1014,15 +1057,20 @@ HWTEST_F(AuthSessionFsmTest, IS_PEER_SUPPORT_NEGO_AUTH_TEST_002, TestSize.Level1
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     AuthSessionFsmInterfaceMock mock;
-    EXPECT_CALL(mock, GetUdidShortHash).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
+    EXPECT_CALL(mock, GetUdidShortHash)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
     bool ret = IsPeerSupportNegoAuth(&info);
     EXPECT_TRUE(ret);
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillOnce(Return(true));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, IsSupportFeatureByCapaBit)
+        .WillOnce(Return(true));
     ret = IsPeerSupportNegoAuth(&info);
     EXPECT_TRUE(ret);
-    EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillOnce(Return(false));
+    EXPECT_CALL(mock, IsSupportFeatureByCapaBit)
+        .WillOnce(Return(false));
     ret = IsPeerSupportNegoAuth(&info);
     EXPECT_FALSE(ret);
 }
@@ -1046,9 +1094,12 @@ HWTEST_F(AuthSessionFsmTest, GET_FIRST_FSM_TEST_002, TestSize.Level1)
 
     info.isConnectServer = false;
     AuthSessionFsmInterfaceMock mock;
-    EXPECT_CALL(mock, GetUdidShortHash).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, IsSupportFeatureByCapaBit).WillRepeatedly(Return(false));
+    EXPECT_CALL(mock, GetUdidShortHash)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, IsSupportFeatureByCapaBit)
+        .WillRepeatedly(Return(false));
     ret = GetFirstFsmState(&info, authSeq, &state);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
