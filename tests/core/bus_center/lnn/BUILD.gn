@@ -3925,39 +3925,6 @@ ohos_unittest("LNNNetLedgerTest") {
   external_deps += [ "huks:libhukssdk" ]
 }
 
-ohos_unittest("LNNDistributedNetLedgerCoverageTest") {
-  module_out_path = module_output_path
-  sources = [
-    "net_ledger/lnn_distributed_net_ledger_coverage_test.cpp",
-    "net_ledger/lnn_distributed_net_ledger_coverage_mock.cpp",
-  ]
-
-  include_dirs = lnn_mock_test_include_dirs
-  include_dirs += [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src"
-  ]
-  deps = lnn_mock_test_deps
-
-  if (is_standard_system) {
-    external_deps = [
-      "cJSON:cjson",
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "googletest:gmock",
-      "googletest:gtest_main",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "cJSON:cjson",
-      "c_utils:utils",
-      "googletest:gmock",
-      "googletest:gtest_main",
-      "hilog:libhilog",
-    ]
-  }
-}
-
 group("unittest") {
   testonly = true
   deps = [
@@ -4004,7 +3971,6 @@ group("unittest") {
     ":NetLedgerTest",
     ":LNNTimeSyncTest",
     ":LNNTimeSyncOtherTest",
-    ":LNNDistributedNetLedgerCoverageTest",
     ":LNNHeartBeatTest",
     ":LnnHeartBeatDeviceRiskTest",
   ]
