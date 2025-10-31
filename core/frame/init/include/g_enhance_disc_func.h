@@ -46,7 +46,7 @@ typedef int32_t (*SchedulerDeinitBroadcastFunc)(void);
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
 typedef int32_t (*DiscCoapProcessDeviceInfoFunc)(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock);
+    const DiscInnerCallback discCb);
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 typedef int32_t (*DiscCoapAssembleCapDataFunc)(
     uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData, uint32_t outLen);
