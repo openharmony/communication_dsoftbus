@@ -81,9 +81,10 @@ static ISessionListener g_sessionlistener = {
     .OnSessionClosed = OnSessionClosed,
 };
 
-/**
+/*
  * @tc.name: GetSessionKeyTest001
- * @tc.desc: use the wrong parameter.
+ * @tc.desc: test GetSessionKey
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -107,9 +108,10 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: GetSessionKeyTest002
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test GetSessionKey
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -124,9 +126,10 @@ HWTEST_F(TransSessionTest, GetSessionKeyTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_FUNC_NOT_SUPPORT, ret);
 }
 
-/**
+/*
  * @tc.name: GetSessionHandleTest001
- * @tc.desc: use the wrong parameter.
+ * @tc.desc: test GetSessionHandle
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -143,9 +146,10 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: GetSessionHandleTest002
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test GetSessionHandle
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -159,9 +163,10 @@ HWTEST_F(TransSessionTest, GetSessionHandleTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_FUNC_NOT_SUPPORT, ret);
 }
 
-/**
+/*
  * @tc.name: DisableSessionListenerTest001
- * @tc.desc: use the wrong parameter.
+ * @tc.desc: test DisableSessionListener
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -173,9 +178,10 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: DisableSessionListenerTest002
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test DisableSessionListener
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -188,9 +194,10 @@ HWTEST_F(TransSessionTest, DisableSessionListenerTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_FUNC_NOT_SUPPORT, ret);
 }
 
-/**
+/*
  * @tc.name: OpenAuthSessionTest001
- * @tc.desc: use the wrong parameter.
+ * @tc.desc: test OpenAuthSession
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -208,9 +215,10 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: OpenAuthSessionTest002
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test OpenAuthSession
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -222,9 +230,10 @@ HWTEST_F(TransSessionTest, OpenAuthSessionTest002, TestSize.Level1)
     EXPECT_GE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: NotifyAuthSuccessTest001
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test NotifyAuthSuccess
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -236,9 +245,10 @@ HWTEST_F(TransSessionTest, NotifyAuthSuccessTest001, TestSize.Level1)
     NotifyAuthSuccess(sessionId);
 }
 
-/**
+/*
  * @tc.name: SendFileTest001
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test SendFile
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,9 +266,10 @@ HWTEST_F(TransSessionTest, SendFileTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SendFileTest002
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test SendFile
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -291,9 +302,10 @@ HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: QosReportTest001
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test QosReport
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -311,9 +323,10 @@ HWTEST_F(TransSessionTest, QosReportTest001, TestSize.Level1)
 }
 
 
-/**
+/*
  * @tc.name: ClientCleanAllSessionWhenServerDeathTest001
- * @tc.desc: use the normal parameter.
+ * @tc.desc: test ClientCleanAllSessionWhenServerDeath
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */

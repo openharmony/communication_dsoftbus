@@ -274,11 +274,11 @@ void TearDownTestCase()
     TRANS_LOGI(TRANS_TEST, "[Test]TearDown end");
 }
 
-/**
- * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0100
- * @tc.desc   : Test limiation of SendByte
- * @tc.type   : FUNC
- * @tc.size   : MediumTest
+/*
+ * @tc.name: SUB_Softbus_Trans_SendByte_Func_0100
+ * @tc.desc: Test limiation of SendByte
+ * @tc.type: FUNC
+ * @tc.size: MediumTest
  */
 void TransFuncTest001(void)
 {
@@ -293,11 +293,11 @@ void TransFuncTest001(void)
     TEST_ASSERT_TRUE(ret == 0);
 }
 
-/**
- * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0200
- * @tc.desc   : Test up limitation data size of SendByte
- * @tc.type   : FUNC
- * @tc.size   : MediumTest
+/*
+ * @tc.name: SUB_Softbus_Trans_SendByte_Func_0200
+ * @tc.desc: Test up limitation data size of SendByte
+ * @tc.type: FUNC
+ * @tc.size: MediumTest
  */
 void TransFuncTest002(void)
 {
@@ -312,11 +312,11 @@ void TransFuncTest002(void)
     TEST_ASSERT_TRUE(ret == 0);
 }
 
-/**
- * @tc.name   : SUB_Softbus_Trans_SendByte_Func_0300
- * @tc.desc   : Test up limitation data size of SendByte
- * @tc.type   : FUNC
- * @tc.size   : MediumTest
+/*
+ * @tc.name: SUB_Softbus_Trans_SendByte_Func_0300
+ * @tc.desc: Test up limitation data size of SendByte
+ * @tc.type: FUNC
+ * @tc.size: MediumTest
  */
 void TransFuncTest003(void)
 {
@@ -331,11 +331,11 @@ void TransFuncTest003(void)
     TEST_ASSERT_TRUE(ret == 0);
 }
 
-/**
- * @tc.name   : SUB_Softbus_Trans_SendMessage_Func_0100
- * @tc.desc   : Test the minimum data size of SendMessage
- * @tc.type   : FUNC
- * @tc.size   : MediumTest
+/*
+ * @tc.name: SUB_Softbus_Trans_SendMessage_Func_0100
+ * @tc.desc: Test the minimum data size of SendMessage
+ * @tc.type: FUNC
+ * @tc.size: MediumTest
  */
 void TransFuncTest004(void)
 {
@@ -350,11 +350,11 @@ void TransFuncTest004(void)
     TEST_ASSERT_TRUE(ret == 0);
 }
 
-/**
- * @tc.name   : SUB_Softbus_Trans_SendMessage_Func_0200
- * @tc.desc   : Test send 1000 Byte data size via function SendMessage
- * @tc.type   : FUNC
- * @tc.size   : MediumTest
+/*
+ * @tc.name: SUB_Softbus_Trans_SendMessage_Func_0200
+ * @tc.desc: Test send 1000 Byte data size via function SendMessage
+ * @tc.type: FUNC
+ * @tc.size: MediumTest
  */
 void TransFuncTest005(void)
 {
@@ -369,11 +369,11 @@ void TransFuncTest005(void)
     TEST_ASSERT_TRUE(ret == 0);
 }
 
-/**
- * @tc.name   : SUB_Softbus_Trans_Session_Func_0100
- * @tc.desc   : Test the maximum number of sessions that can be create by function CreateSessionServer
- * @tc.type   : FUNC
- * @tc.size   : MediumTest
+/*
+ * @tc.name: SUB_Softbus_Trans_Session_Func_0100
+ * @tc.desc: Test the maximum number of sessions that can be create by function CreateSessionServer
+ * @tc.type: FUNC
+ * @tc.size: MediumTest
  */
 void TransFuncTest006(void)
 {
