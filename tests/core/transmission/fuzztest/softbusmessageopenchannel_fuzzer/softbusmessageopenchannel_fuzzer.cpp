@@ -384,17 +384,17 @@ void PackExternalDeviceJsonObjectTest(FuzzedDataProvider &provider)
         COMM_LOGE(COMM_TEST, "Init appInfo failed!");
         return;
     }
-    cJSON *json = cJSON_CreateObject();
-    if (json == nullptr) {
-        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
-        return;
-    }
     std::string str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
     char tmp[UINT8_MAX] = { 0 };
     if (strcpy_s(tmp, UINT8_MAX, str.c_str()) != EOK) {
         return;
     }
     unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(tmp);
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
+        return;
+    }
     (void)PackExternalDeviceJsonObject(&appInfo, json, encodeSessionKey);
     cJSON_Delete(json);
 }
