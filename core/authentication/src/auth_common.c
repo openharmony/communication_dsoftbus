@@ -389,7 +389,7 @@ static int32_t SetP2pSocketOption(const AuthConnInfo *connInfo, ConnectOption *o
     }
     option->socketOption.port = connInfo->info.ipInfo.port;
     option->socketOption.protocol = LNN_PROTOCOL_IP;
-    option->socketOption.keepAlive = 1;
+    option->socketOption.keepAlive = 0;
     if (connInfo->type == AUTH_LINK_TYPE_P2P) {
         option->socketOption.moduleId = AUTH_P2P;
     } else {
