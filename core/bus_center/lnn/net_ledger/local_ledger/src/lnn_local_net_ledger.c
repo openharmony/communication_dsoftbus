@@ -1428,7 +1428,7 @@ static int32_t UpdateLocalFeatureCapability(const void *capability)
     if (capability == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    g_localNetLedger.localInfo.feature |= *(uint64_t *)capability;
+    g_localNetLedger.localInfo.feature = *(uint64_t *)capability;
     return SOFTBUS_OK;
 }
 
