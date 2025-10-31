@@ -752,7 +752,7 @@ static bool IsAllowSave(const char *bundleName, bool isFindServer)
         (void)SoftBusMutexUnlock(&g_generalManager.connections->lock);
     } else {
         CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_generalManager.servers->lock) == SOFTBUS_OK,
-            SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail");
+            false, CONN_BLE, "lock fail");
         Server *item = NULL;
         LIST_FOR_EACH_ENTRY(item, &g_generalManager.servers->list, Server, node) {
             if (StrCmpIgnoreCase(item->info.bundleName, bundleName) == 0) {
