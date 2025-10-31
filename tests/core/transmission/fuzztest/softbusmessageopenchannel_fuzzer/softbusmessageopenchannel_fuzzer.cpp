@@ -369,8 +369,12 @@ void TransTdcPackFastDataTest(FuzzedDataProvider &provider)
     uint32_t outLen = provider.ConsumeIntegral<uint32_t>();
 
     (void)TransTdcPackFastData(&appInfo, &outLen);
-    appInfo.fastTransData = (uint8_t *)SoftBusCalloc(appInfo.fastTransDataSize + FAST_TDC_EXT_DATA_SIZE);
+    appInfo.fastTransData = reinterpret_cast<const uint8_t *>(SoftBusCalloc(appInfo.fastTransDataSize));
+    if (appInfo.fastTransData == nullptr) {
+        return;
+    }
     (void)TransTdcPackFastData(&appInfo, &outLen);
+    SoftBusFree(const_cast<void*>(static_cast<const void*>(appInfo.fastTransData)));
 }
 
 void PackExternalDeviceJsonObjectTest(FuzzedDataProvider &provider)
@@ -472,17 +476,17 @@ void TransUnpackMetaTypeSpecificDataTest(FuzzedDataProvider &provider)
 
 void UnpackExternalDeviceRequestTest(FuzzedDataProvider &provider)
 {
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
     cJSON *json = cJSON_CreateObject();
     if (json == nullptr) {
         COMM_LOGE(COMM_TEST, "Init cJSON failed!");
         return;
     }
     (void)UnpackExternalDeviceRequest(json, nullptr);
-    AppInfo appInfo;
-    if (!InitAppInfo(provider, &appInfo)) {
-        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
-        return;
-    }
     (void)UnpackExternalDeviceRequest(json, &appInfo);
     cJSON_Delete(json);
 }
@@ -499,17 +503,17 @@ void PackExternalDeviceReplyTest(FuzzedDataProvider &provider)
 
 void UnpackExternalDeviceReplyTest(FuzzedDataProvider &provider)
 {
+    AppInfo appInfo;
+    if (!InitAppInfo(provider, &appInfo)) {
+        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
+        return;
+    }
     cJSON *json = cJSON_CreateObject();
     if (json == nullptr) {
         COMM_LOGE(COMM_TEST, "Init cJSON failed!");
         return;
     }
     (void)UnpackExternalDeviceReply(json, nullptr);
-    AppInfo appInfo;
-    if (!InitAppInfo(provider, &appInfo)) {
-        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
-        return;
-    }
     (void)UnpackExternalDeviceReply(json, &appInfo);
     cJSON_Delete(json);
 }
