@@ -104,9 +104,10 @@ ChannelInfo *TestGetRightChannelInfo(void)
     return info;
 }
 
-/**
+/*
  * @tc.name: AddSocketResourceTest001
- * @tc.desc: AddSocketResource, use the wrong or normal parameter.
+ * @tc.desc: test AddSocketResource
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -129,9 +130,10 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level1)
     SoftBusFree(rightChannel);
 }
 
-/**
+/*
  * @tc.name: UpdateChannelStatisticsTest001
- * @tc.desc: UpdateChannelStatistics, use the wrong or normal parameter.
+ * @tc.desc: test UpdateChannelStatistics
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -151,9 +153,10 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest001, TestSize.Lev
     ClientTransStatisticsDeinit();
 }
 
-/**
+/*
  * @tc.name: CreateSocketResourceTest001
- * @tc.desc: CreateSocketResource, use the wrong or normal parameter.
+ * @tc.desc: test CreateSocketResource
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -176,9 +179,10 @@ HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level1
     SoftBusFree(item);
 }
 
-/**
+/*
  * @tc.name: AddSocketResourceTest002
- * @tc.desc: AddSocketResource, use the wrong or normal parameter.
+ * @tc.desc: test AddSocketResource
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -204,9 +208,10 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level1)
     ClientTransStatisticsDeinit();
 }
 
-/**
+/*
  * @tc.name: UpdateChannelStatisticsTest002
- * @tc.desc: UpdateChannelStatistics, use the wrong or normal parameter.
+ * @tc.desc: test UpdateChannelStatistics
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -232,9 +237,10 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Lev
     ClientTransStatisticsDeinit();
 }
 
-/**
+/*
  * @tc.name: PackStatisticsTest001
- * @tc.desc: PackStatistics, use the wrong or normal parameter.
+ * @tc.desc: test PackStatistics
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -250,9 +256,10 @@ HWTEST_F(ClientTransStatisticsTest, PackStatisticsTest001, TestSize.Level1)
     SoftBusFree(resource);
 }
 
-/**
+/*
  * @tc.name: CloseChannelAndSendStatisticsTest001
- * @tc.desc: CloseChannelAndSendStatistics, use the wrong or normal parameter.
+ * @tc.desc: test CloseChannelAndSendStatistics
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -265,9 +272,10 @@ HWTEST_F(ClientTransStatisticsTest, CloseChannelAndSendStatisticsTest001, TestSi
     SoftBusFree(resource);
 }
 
-/**
+/*
  * @tc.name: DeleteSocketResourceByChannelIdTest002
- * @tc.desc: DeleteSocketResourceByChannelId, use the wrong or normal parameter.
+ * @tc.desc: test DeleteSocketResourceByChannelId
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -300,9 +308,10 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
     ClientTransStatisticsDeinit();
 }
 
-/**
+/*
  * @tc.name: ClientTransStatisticsDeinitTest001
- * @tc.desc: ClientTransStatisticsDeinit, use the wrong or normal parameter.
+ * @tc.desc: test ClientTransStatisticsDeinit
+ *           use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -323,9 +332,10 @@ HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize
     EXPECT_EQ(g_channelStatisticsList, nullptr);
 }
 
-/**
+/*
  * @tc.name: DeleteSocketResourceBySocketIdTest002
- * @tc.desc: DeleteSocketResourceBySocketId, use the wrong or normal parameter.
+ * @tc.desc: test DeleteSocketResourceBySocketId
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
