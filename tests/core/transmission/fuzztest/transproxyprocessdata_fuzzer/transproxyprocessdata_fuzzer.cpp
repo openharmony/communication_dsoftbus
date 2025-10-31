@@ -596,7 +596,7 @@ void ProxyBuildNeedAckTlvDataTest(FuzzedDataProvider &provider)
     pktHead.magicNum = provider.ConsumeIntegral<uint32_t>();
     pktHead.tlvCount = provider.ConsumeIntegral<uint8_t>();
     pktHead.tlvElement = reinterpret_cast<uint8_t *>(SoftBusCalloc(PROXY_TLV_ELEMENT * sizeof(TlvElement)));
-    if (pktHead.tlvElement == nullptr){
+    if (pktHead.tlvElement == nullptr) {
         return;
     }
     bool needAck = provider.ConsumeBool();
