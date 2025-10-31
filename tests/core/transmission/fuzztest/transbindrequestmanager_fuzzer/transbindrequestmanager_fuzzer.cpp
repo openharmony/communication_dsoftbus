@@ -169,7 +169,6 @@ void TransResetBindDeniedFlagTest(FuzzedDataProvider &provider)
     TransBindRequestManagerDeinit();
     TransBindRequestManagerDeinit();
 }
-
 } // namespace OHOS
 
 /* Fuzzer entry point */
