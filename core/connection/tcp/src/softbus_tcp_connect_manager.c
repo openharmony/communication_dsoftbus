@@ -205,28 +205,11 @@ static void DelTcpConnNode(uint32_t connectionId)
     return;
 }
 
-static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
-{
-    if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END) {
-        return true;
-    }
-    return false;
-}
-
 static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0 || clientAddr == NULL) {
         CONN_LOGE(CONN_COMMON, "cfd is invalid or clientAddr is null. cfd=%{public}d", cfd);
         return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (module == AUTH_P2P || IsEnhanceP2pModuleId(module)) {
-        CONN_LOGI(CONN_COMMON, "recv p2p conned. cfd=%{public}d", cfd);
-        if (TcpConnSetKeepalive(cfd, true) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "set keepalive fail");
-            ConnShutdownSocket(cfd);
-            return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
-        }
     }
 
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
