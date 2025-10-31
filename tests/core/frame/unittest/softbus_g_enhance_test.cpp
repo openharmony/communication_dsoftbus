@@ -765,12 +765,11 @@ int32_t DeInitBroadcastMgrStub(void)
 }
  
 int32_t DiscCoapProcessDeviceInfoStub(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock)
+    const DiscInnerCallback discCb)
 {
     (void)nstackxInfo;
     (void)devInfo;
     (void)discCb;
-    (void)discCbLock;
     return SOFTBUS_OK;
 }
  
@@ -834,10 +833,11 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest026, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
  
     pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo = nullptr;
-    ret = DiscCoapProcessDeviceInfoPacked(nullptr, nullptr, nullptr, nullptr);
+    DiscInnerCallback discCb = {0};
+    ret = DiscCoapProcessDeviceInfoPacked(nullptr, nullptr, discCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo = DiscCoapProcessDeviceInfoStub;
-    ret = DiscCoapProcessDeviceInfoPacked(nullptr, nullptr, nullptr, nullptr);
+    ret = DiscCoapProcessDeviceInfoPacked(nullptr, nullptr, discCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
     pfnDiscEnhanceFuncList->discCoapAssembleBdata = nullptr;
