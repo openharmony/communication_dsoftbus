@@ -38,7 +38,8 @@ void ConnectionServerProxyTest::TearDown() { }
 
 /*
  * @tc.name: ConnectionServerProxyNotInitTest
- * @tc.desc: test g_serverProxy is null.
+ * @tc.desc: test ConnectionServerProxyNotInit
+ *           test g_serverProxy is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -65,7 +66,8 @@ HWTEST_F(ConnectionServerProxyTest, ConnectionServerProxyNotInitTest, TestSize.L
 
 /*
  * @tc.name: ConnectionServerProxyInitTest001
- * @tc.desc: test connection server proxy init.
+ * @tc.desc: test ConnectionServerProxyInit
+ *           test connection server proxy init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -83,7 +85,8 @@ HWTEST_F(ConnectionServerProxyTest, ConnectionServerProxyInitTest001, TestSize.L
 
 /*
  * @tc.name: ConnectionServerProxyInitTest002
- * @tc.desc: test g_serverProxy is not null.
+ * @tc.desc: test ConnectionServerProxyInit
+ *           test g_serverProxy is not null
  * @tc.type: FUNC
  * @tc.require:
  */

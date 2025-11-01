@@ -106,9 +106,10 @@ UdpChannelInfo* GetPackTest()
     return Channel;
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest001
- * @tc.desc: get lock and relsease lock.
+ * @tc.desc: test TransUdpManager
+ *           get lock and relsease lock
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -124,9 +125,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest002
- * @tc.desc: udp channel init and deinit.
+ * @tc.desc: test TransUdpManager
+ *           udp channel init and deinit
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -144,9 +146,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest003
- * @tc.desc: add udp channel and del udp channel.
+ * @tc.desc: test TransUdpManager
+ *           add udp channel and del udp channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -177,9 +180,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest005
- * @tc.desc: get UdpChannelInfo by seq, use normal param.
+ * @tc.desc: test TransUdpManager
+ *           get UdpChannelInfo by seq, use normal param
  * @tc.type: FUNC
  * @tc.require: Zero
  */
@@ -203,9 +207,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest005, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest006
- * @tc.desc: get UdpChannelInfo by seq, use wrong param.
+ * @tc.desc: test TransUdpManager
+ *           get UdpChannelInfo by seq, use wrong param
  * @tc.type: FUNC
  * @tc.require: NonZero
  */
@@ -235,9 +240,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest006, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest007
- * @tc.desc: get UdpChannelInfo by channelId, use normal param.
+ * @tc.desc: test TransUdpManager
+ *           get UdpChannelInfo by channelId, use normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -262,9 +268,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest007, TestSize.Level1)
     SoftBusFree(newChannel);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest008
- * @tc.desc: get UdpChannelInfo by channelId, use wrong param.
+ * @tc.desc: test TransUdpManager
+ *           get UdpChannelInfo by channelId, use wrong param
  * @tc.type: FUNC
  * @tc.require: NonZero
  */
@@ -294,9 +301,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest008, TestSize.Level1)
     SoftBusFree(newChannel);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest009
- * @tc.desc: get UdpChannelInfo by requestId, use normal param;
+ * @tc.desc: test TransUdpManager
+ *           get UdpChannelInfo by requestId, use normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -319,9 +327,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest009, TestSize.Level1)
     SoftBusFree(newChannel);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest010
- * @tc.desc: get UdpChannelInfo by requestId, use wrong param;
+ * @tc.desc: test TransUdpManager
+ *           get UdpChannelInfo by requestId, use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -354,9 +363,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest010, TestSize.Level1)
     SoftBusFree(newChannel);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest011
- * @tc.desc: set UdpChannel status, use normal param first, then use wrong parameters.
+ * @tc.desc: test TransUdpManager
+ *           set UdpChannel status, use normal param first, then use wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -382,9 +392,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest011, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest012
- * @tc.desc: set UdpChannel opt type, use wrong param first, then use normal parameters.
+ * @tc.desc: test TransUdpManager
+ *           set UdpChannel opt type, use wrong param first, then use normal parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -407,9 +418,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest012, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest013
- * @tc.desc: update UdpChannelInfo by seq, use normal parameters.
+ * @tc.desc: test TransUdpManager
+ *           update UdpChannelInfo by seq, use normal parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -429,9 +441,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest013, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest014
- * @tc.desc: update UdpChannelInfo by seq, use wrong parameters.
+ * @tc.desc: test TransUdpManager
+ *           update UdpChannelInfo by seq, use wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -457,9 +470,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest014, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest015
- * @tc.desc: get pkgName and sessionName by channelId, use normal parameters.
+ * @tc.desc: test TransUdpManager
+ *           get pkgName and sessionName by channelId, use normal parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -479,9 +493,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest015, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest016
- * @tc.desc: get pkgName and sessionName by channelId, use wrong parameters.
+ * @tc.desc: test TransUdpManager
+ *           get pkgName and sessionName by channelId, use wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -518,9 +533,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest016, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest017
- * @tc.desc: trans get channel obj by channelId.
+ * @tc.desc: test TransUdpManager
+ *           trans get channel obj by channelId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -546,9 +562,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest017, TestSize.Level1)
     EXPECT_TRUE(Channel_1 == nullptr);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest018
- * @tc.desc: trans get channel obj by channelId, use normal param.
+ * @tc.desc: test TransUdpManager
+ *           trans get channel obj by channelId, use normal param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -570,9 +587,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest018, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest019
- * @tc.desc: trans get channel obj by channelId, use wrong param.
+ * @tc.desc: test TransUdpManager
+ *           trans get channel obj by channelId, use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -596,9 +614,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest019, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest020
- * @tc.desc: trans notify udp channel close list.
+ * @tc.desc: test TransUdpManager
+ *           trans notify udp channel close list
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -616,9 +635,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest020, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest021
- * @tc.desc: trans close udp channel by networkId.
+ * @tc.desc: test TransUdpManager
+ *           trans close udp channel by networkId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -636,9 +656,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest021, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest022
- * @tc.desc: trans notify udp channel timeout use diff param.
+ * @tc.desc: test TransUdpManager
+ *           trans notify udp channel timeout use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -657,9 +678,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest022, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest023
- * @tc.desc: trans notify udp channel timeout use diff param.
+ * @tc.desc: test TransUdpManager
+ *           trans notify udp channel timeout use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -679,9 +701,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest023, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest024
- * @tc.desc: trans notify udp channel timeout use diff param.
+ * @tc.desc: test TransUdpManager
+ *           trans notify udp channel timeout use diff param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -700,9 +723,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest024, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest025
- * @tc.desc: TransUdpGetIpAndConnectTypeById test.
+ * @tc.desc: test TransUdpManager
+ *           TransUdpGetIpAndConnectTypeById test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -734,9 +758,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest025, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest026
- * @tc.desc: IsUdpRecoveryTransLimit test.
+ * @tc.desc: IsUdpRecoveryTransLimit test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -758,9 +783,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest026, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
- * @tc.name: TransUdpGetIpAndConnectTypeById
- * @tc.desc: Get localIp and connectType wiht channelId
+/*
+ * @tc.name: TransUdpGetIpAndConnectTypeById001
+ * @tc.desc: test TransUdpGetIpAndConnectTypeById
+ *           Get localIp and connectType wiht channelId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -783,9 +809,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById001, TestSize.Level
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest027
- * @tc.desc: UdpChannelFileTransLimit test.
+ * @tc.desc: UdpChannelFileTransLimit test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -814,9 +841,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest027, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest028
- * @tc.desc: ModifyUpdChannelTos test.
+ * @tc.desc: ModifyUpdChannelTos test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -842,9 +870,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest028, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpManagerTest029
- * @tc.desc: UdpChannelFileTransLimit test.
+ * @tc.desc: UdpChannelFileTransLimit test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -875,9 +904,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest029, TestSize.Level1)
     appInfo = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransUdpGetIpAndConnectTypeById002
- * @tc.desc: Get localIp and connectType with 'localIp' parameter
+ * @tc.desc: test TransUdpGetIpAndConnectTypeById
+ *           Get localIp and connectType with 'localIp' parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -904,9 +934,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpGetIpAndConnectTypeById003
- * @tc.desc: Get localIp and connectType with 'connectType' parameter
+ * @tc.desc: test TransUdpGetIpAndConnectTypeById
+ *           Get localIp and connectType with 'connectType' parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -924,9 +955,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetIpAndConnectTypeById003, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpGetPrivilegeCloseList001
  * @tc.desc: TransUdpGetPrivilegeCloseList Test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -942,9 +974,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseList001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransUdpResetReplyCnt001
- * @tc.desc: reset reply count
+ * @tc.desc: test TransUdpResetReplyCnt
+ *           reset reply count
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -954,9 +987,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpResetReplyCnt001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransUdpResetReplyCnt002
- * @tc.desc: reset reply count
+ * @tc.desc: test TransUdpResetReplyCnt
+ *           reset reply count
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -977,9 +1011,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpResetReplyCnt002, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSetUdpChannelOptTypeTest001
- * @tc.desc: TransSetUdpChannelOptType
+ * @tc.desc: test TransSetUdpChannelOptType
+ *           use the wrong parameter expected SOFTBUS_NO_INIT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -990,9 +1025,10 @@ HWTEST_F(TransUdpManagerTest, TransSetUdpChannelOptTypeTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetUdpAppInfoByChannelIdTest001
- * @tc.desc: TransGetUdpAppInfoByChannelId
+ * @tc.desc: test TransGetUdpAppInfoByChannelId
+ *           use the wrong parameter expected SOFTBUS_NO_INIT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1003,9 +1039,10 @@ HWTEST_F(TransUdpManagerTest, TransGetUdpAppInfoByChannelIdTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: UdpChannelFileTransRecoveryLimitTest001
- * @tc.desc: UdpChannelFileTransRecoveryLimit
+ * @tc.desc: test UdpChannelFileTransRecoveryLimit
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1022,9 +1059,10 @@ HWTEST_F(TransUdpManagerTest, UdpChannelFileTransRecoveryLimitTest001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: IsUdpRecoveryTransLimitTest001
- * @tc.desc: IsUdpRecoveryTransLimit
+ * @tc.desc: test IsUdpRecoveryTransLimit
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1034,9 +1072,10 @@ HWTEST_F(TransUdpManagerTest, IsUdpRecoveryTransLimitTest001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: TransUdpUpdateReplyCntTest001
- * @tc.desc: TransUdpUpdateReplyCnt
+ * @tc.desc: test TransUdpUpdateReplyCnt
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1053,9 +1092,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpUpdateReplyCntTest001, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpUpdateUdpPortTest001
- * @tc.desc: TransUdpUpdateUdpPort
+ * @tc.desc: test TransUdpUpdateUdpPort
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1082,9 +1122,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpUpdateUdpPortTest001, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransCheckUdpChannelOpenStatusTest001
- * @tc.desc: TransCheckUdpChannelOpenStatus
+ * @tc.desc: test TransCheckUdpChannelOpenStatus
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1117,9 +1158,10 @@ HWTEST_F(TransUdpManagerTest, TransCheckUdpChannelOpenStatusTest001, TestSize.Le
     SoftBusFree(curCount);
 }
 
-/**
+/*
  * @tc.name: TransSetTosTest001
- * @tc.desc: TransSetTos
+ * @tc.desc: test TransSetTos
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1146,9 +1188,10 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpGetPrivilegeCloseListTest001
- * @tc.desc: TransUdpGetPrivilegeCloseList
+ * @tc.desc: test TransUdpGetPrivilegeCloseList
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1177,9 +1220,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest001, TestSize.Lev
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpGetPrivilegeCloseListTest002
- * @tc.desc: TransUdpGetPrivilegeCloseList
+ * @tc.desc: test TransUdpGetPrivilegeCloseList
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1206,9 +1250,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest002, TestSize.Lev
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpGetPrivilegeCloseListTest003
- * @tc.desc: TransUdpGetPrivilegeCloseList
+ * @tc.desc: test TransUdpGetPrivilegeCloseList
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1235,9 +1280,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpGetPrivilegeCloseListTest003, TestSize.Lev
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: CompareSessionNameTest001
- * @tc.desc: CompareSessionName
+ * @tc.desc: test CompareSessionName
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1251,9 +1297,10 @@ HWTEST_F(TransUdpManagerTest, CompareSessionNameTest001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: TransUdpUpdateAccessInfo001
- * @tc.desc: TransUdpUpdateAccessInfo
+ * @tc.desc: test TransUdpUpdateAccessInfo
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -26,9 +26,10 @@ using namespace testing::ext;
 namespace OHOS {
 class DiscEventTest : public testing::Test { };
 
-/**
+/*
  * @tc.name: DiscEventTest001
- * @tc.desc: Test disc event form size
+ * @tc.desc: test DiscEvent
+ *           Test disc event form size
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -50,9 +51,10 @@ HWTEST_F(DiscEventTest, DiscEventTest001, TestSize.Level0)
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
 }
 
-/**
+/*
  * @tc.name: DiscEventTest002
- * @tc.desc: Test all valid disc event form items
+ * @tc.desc: test DiscEvent
+ *           Test all valid disc event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -105,9 +107,10 @@ HWTEST_F(DiscEventTest, DiscEventTest002, TestSize.Level0)
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_SCAN, validExtra);
 }
 
-/**
+/*
  * @tc.name: DiscEventTest003
- * @tc.desc: Test all invalid disc event form items
+ * @tc.desc: test DiscEvent
+ *           Test all invalid disc event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -151,9 +154,10 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_SCAN, invalidExtra);
 }
 
-/**
+/*
  * @tc.name: DiscEventTest004
- * @tc.desc: Test empty disc event form
+ * @tc.desc: test DiscEvent
+ *           Test empty disc event form
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */

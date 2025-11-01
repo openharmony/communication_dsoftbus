@@ -77,9 +77,10 @@ static void GenerateAppInfo(AppInfo *appInfo)
     EXPECT_EQ(res, EOK);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationExchangeTest001
- * @tc.desc: Transmission udp negotiation pack and unpack request with invalid parameters.
+ * @tc.desc: test TransUdpNegotiationExchange
+ *           Transmission udp negotiation pack and unpack request with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -101,9 +102,10 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest001, Te
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationExchangeTest002
- * @tc.desc: Transmission udp negotiation pack and unpack request.
+ * @tc.desc: test TransUdpNegotiationExchange
+ *           Transmission udp negotiation pack and unpack request
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -139,9 +141,10 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest002, Te
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationExchangeTest003
- * @tc.desc: Transmission udp negotiation pack and unpack reply with invalid parameters.
+ * @tc.desc: test TransUdpNegotiationExchange
+ *           Transmission udp negotiation pack and unpack reply with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -169,9 +172,10 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest003, Te
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationExchangeTest004
- * @tc.desc: Transmission udp negotiation pack and unpack reply.
+ * @tc.desc: test TransUdpNegotiationExchange
+ *           Transmission udp negotiation pack and unpack reply
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -206,9 +210,10 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest004, Te
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationExchangeTest005
- * @tc.desc: Transmission udp negotiation pack and unpack reply with invalid channel option type.
+ * @tc.desc: test TransUdpNegotiationExchange
+ *           Transmission udp negotiation pack and unpack reply with invalid channel option type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -238,9 +243,10 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest005, Te
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationExchangeTest006
- * @tc.desc: Transmission udp negotiation pack and unpack error info with invalid parameters.
+ * @tc.desc: test TransUdpNegotiationExchange
+ *           Transmission udp negotiation pack and unpack error info with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -259,9 +265,10 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest006, Te
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationExchangeTest007
- * @tc.desc: Transmission udp negotiation pack and unpack error info.
+ * @tc.desc: test TransUdpNegotiationExchange
+ *           Transmission udp negotiation pack and unpack error info
  * @tc.type: FUNC
  * @tc.require:
  */
