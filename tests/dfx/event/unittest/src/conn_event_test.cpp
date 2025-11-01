@@ -96,9 +96,10 @@ static ConnEventExtra g_validExtra = {
     .virtualLinkType = 0,
 };
 
-/**
+/*
  * @tc.name: ConnEventTest001
- * @tc.desc: Test conn event form size
+ * @tc.desc: test ConnEvent
+ *           Test conn event form size
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -114,9 +115,10 @@ HWTEST_F(ConnEventTest, ConnEventTest001, TestSize.Level0)
     CONN_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, g_validExtra);
 }
 
-/**
+/*
  * @tc.name: ConnEventTest002
- * @tc.desc: Test all valid conn event form items
+ * @tc.desc: test ConnEvent
+ *           Test all valid conn event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -203,9 +205,10 @@ static ConnEventExtra g_invalidExtra = {
     .virtualLinkType = -1,
 };
 
-/**
+/*
  * @tc.name: ConnEventTest003
- * @tc.desc: Test all invalid conn event form items
+ * @tc.desc: test ConnEvent
+ *           Test all invalid conn event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -222,9 +225,10 @@ HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, g_invalidExtra);
 }
 
-/**
+/*
  * @tc.name: ConnEventTest004
- * @tc.desc: Test empty conn event form
+ * @tc.desc: test ConnEvent
+ *           Test empty conn event form
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -270,9 +274,10 @@ static ConnAuditExtra g_extra = {
     .localPort = "2484",
 };
 
-/**
+/*
  * @tc.name: ConnEventTest005
- * @tc.desc: Test conn event form size
+ * @tc.desc: test ConnEvent
+ *           Test conn event form size
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */

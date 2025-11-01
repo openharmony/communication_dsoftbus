@@ -113,7 +113,7 @@ static IPublishCb g_publishCb = {
     .OnPublishResult = TestOnPublishResult,
 };
 
-/**
+/*
  * @tc.name: StopPublishLNNTest004
  * @tc.desc: not start publish.
  * @tc.in: Test Moudle, Test Number, Test Levels.
@@ -130,7 +130,7 @@ HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest001, TestSize.Level2)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNNTest005
  * @tc.desc: Verify StopPublishLNN again.
  * @tc.in: Test Moudle, Test Number, Test Levels.
@@ -151,7 +151,7 @@ HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest002, TestSize.Level2)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest004
  * @tc.desc: not start discover.
  * @tc.in: Test Moudle, Test Number, Test Levels.
@@ -168,7 +168,7 @@ HWTEST_F(DiscSdkOnlyL2Test, StopRefreshLNNTest001, TestSize.Level2)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest005
  * @tc.desc: Verify StopRefreshLNN again.
  * @tc.in: Test Moudle, Test Number, Test Levels.

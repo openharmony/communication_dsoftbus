@@ -457,7 +457,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Lev
     EXPECT_TRUE(StopTimeSync(TEST_PKG_NAME, networkId) != SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest001
  * @tc.desc: Verify wrong parameter
  * @tc.type: FUNC
@@ -504,7 +504,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
     g_pInfo.dataLen = strlen(CAPABILITY_1);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest002
  * @tc.desc: Verify normal case
  * @tc.type: FUNC
@@ -544,7 +544,7 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
     }
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest001
  * @tc.desc: Verify wrong parameter
  * @tc.type: FUNC
@@ -593,7 +593,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
     g_sInfo.dataLen = strlen(CAPABILITY_1);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest002
  * @tc.desc: Verify normal case
  * @tc.type: FUNC
@@ -633,7 +633,7 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     }
 }
 
-/**
+/*
  * @tc.name: SET_NODE_DATA_CHANGE_FLAG_INNER_Test001
  * @tc.desc: Set Node Data Change Flag Inner
  * @tc.type: FUNC
