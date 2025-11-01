@@ -81,9 +81,10 @@ SessionConn *TestSetSessionConn()
     return conn;
 }
 
-/**
+/*
  * @tc.name: SwitchAuthLinkTypeToFlagTypeTest001
- * @tc.desc: SwitchAuthLinkTypeToFlagType test.
+ * @tc.desc: SwitchAuthLinkTypeToFlagType test
+ *           use different AuthLinkType
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -111,9 +112,10 @@ HWTEST_F(TransTcpDirectListenerTest, SwitchAuthLinkTypeToFlagTypeTest001, TestSi
     EXPECT_EQ(FLAG_WIFI, ret);
 }
 
-/**
+/*
  * @tc.name: StartVerifySessionTest001
- * @tc.desc: StartVerifySession test, get cipher flag fail.
+ * @tc.desc: StartVerifySession test
+ *           get cipher flag fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,9 +130,10 @@ HWTEST_F(TransTcpDirectListenerTest, StartVerifySessionTest001, TestSize.Level1)
     TransProcDataRes(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_OK, 1, 1);
 }
 
-/**
+/*
  * @tc.name: CreateSessionConnNodeTest001
- * @tc.desc: CreateSessionConnNode test, get local deviceId failed.
+ * @tc.desc: CreateSessionConnNode test
+ *           get local deviceId failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -148,9 +151,10 @@ HWTEST_F(TransTcpDirectListenerTest, CreateSessionConnNodeTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TdcOnConnectEventTest001
- * @tc.desc: TdcOnConnectEvent test, create srv dataBuff fail.
+ * @tc.desc: TdcOnConnectEvent test
+ *           create srv dataBuff fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -167,9 +171,10 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnConnectEventTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TdcOnConnectEventTest002
- * @tc.desc: TdcOnConnectEvent test, use invalid cfd.
+ * @tc.desc: TdcOnConnectEvent test
+ *           use invalid cfd
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -186,9 +191,10 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnConnectEventTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TdcOnDataEventTest001
- * @tc.desc: TdcOnDataEvent test, can not get sessionConn by fd.
+ * @tc.desc: TdcOnDataEvent test
+ *           can not get sessionConn by fd
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -202,9 +208,10 @@ HWTEST_F(TransTcpDirectListenerTest, TdcOnDataEventTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_FD, ret);
 }
 
-/**
+/*
  * @tc.name: TransSetTcpDirectConnectType001
  * @tc.desc: TransSetTcpDirectConnectType test
+ *           use different connectType
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -224,9 +231,10 @@ HWTEST_F(TransTcpDirectListenerTest, TransSetTcpDirectConnectType001, TestSize.L
     EXPECT_EQ(connectType, CONNECT_TCP);
 }
 
-/**
+/*
  * @tc.name: ProcessSocketInEvent001
  * @tc.desc: ProcessSocketInEvent test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -248,9 +256,10 @@ HWTEST_F(TransTcpDirectListenerTest, ProcessSocketInEvent001, TestSize.Level1)
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: TransProcDataRes
  * @tc.desc: test TransProcDataRes001
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */

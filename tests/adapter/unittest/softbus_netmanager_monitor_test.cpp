@@ -56,8 +56,9 @@ void AdapterNetManagerMonitorTest::SetUp() { }
 void AdapterNetManagerMonitorTest::TearDown() { }
 
 /*
- * @tc.name: ConfigNetLinkUp
- * @tc.desc: config net link up test
+ * @tc.name: ConfigNetLinkUpTest001
+ * @tc.desc: test ConfigNetLinkUp
+ *           config net link up test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -71,8 +72,9 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigNetLinkUpTest001, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConfigLocalIp
- * @tc.desc: config net link local ip test
+ * @tc.name: ConfigLocalIpTest001
+ * @tc.desc: test ConfigLocalIp
+ *           config net link local ip test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -87,8 +89,9 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigLocalIpTest001, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConfigRoute
- * @tc.desc: config net link route test
+ * @tc.name: ConfigRouteTest001
+ * @tc.desc: test ConfigRoute
+ *           config net link route test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -106,7 +109,8 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigRouteTest001, TestSize.Level1)
 
 /*
  * @tc.name: LnnInitNetManagerMonitorImpl_001
- * @tc.desc: Verify the LnnInitNetManagerMonitorImpl function return value equal SOFTBUS_INVALID_PARAM
+ * @tc.desc: test LnnInitNetManagerMonitorImpl
+ *           Verify the LnnInitNetManagerMonitorImpl function return value equal SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -120,7 +124,8 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetManagerMonitorImpl_001, TestSiz
 
 /*
  * @tc.name: LnnInitNetlinkMonitorImpl_001
- * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR
+ * @tc.desc: test LnnInitNetlinkMonitorImpl
+ *           Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -134,7 +139,8 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_001, TestSize.L
 
 /*
  * @tc.name: LnnInitNetlinkMonitorImpl_002
- * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value SOFTBUS_NETWORK_CREATE_SOCKET_FAILED
+ * @tc.desc: test LnnInitNetlinkMonitorImpl
+ *           Verify the LnnInitNetlinkMonitorImpl function return value SOFTBUS_NETWORK_CREATE_SOCKET_FAILED
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -150,7 +156,8 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_002, TestSize.L
 
 /*
  * @tc.name: LnnInitNetlinkMonitorImpl_003
- * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR
+ * @tc.desc: test LnnInitNetlinkMonitorImpl
+ *           Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -169,7 +176,8 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_003, TestSize.L
 
 /*
  * @tc.name: LnnInitNetlinkMonitorImpl_004
- * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_OK
+ * @tc.desc: test LnnInitNetlinkMonitorImpl
+ *           Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -187,9 +195,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_004, TestSize.L
 }
 
 /*
- * @tc.name:ConfigLocalIpv6_001
- * @tc.desc:ConfigLocalIpv6_001 function return value equal SOFTBUS_NETWORK_CONFIG_NETLINK_IPV6_FAILED
- * @tc.type:FUNC
+ * @tc.name: ConfigLocalIpv6_001
+ * @tc.desc: test ConfigLocalIpv6
+ *           ConfigLocalIpv6_001 function return value equal SOFTBUS_NETWORK_CONFIG_NETLINK_IPV6_FAILED
+ * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(AdapterNetManagerMonitorTest, ConfigLocalIpv6_001, TestSize.Level1)
@@ -201,9 +210,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigLocalIpv6_001, TestSize.Level1)
 }
 
 /*
- * @tc.name:AddAttr_001
- * @tc.desc:AddAttr_001 function return value equal SOFTBUS_NETWORK_INVALID_NLMSG
- * @tc.type:FUNC
+ * @tc.name: AddAttr_001
+ * @tc.desc: test AddAttr
+ *           AddAttr_001 function return value equal SOFTBUS_NETWORK_INVALID_NLMSG
+ * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(AdapterNetManagerMonitorTest, AddAttr_001, TestSize.Level1)
@@ -224,9 +234,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, AddAttr_001, TestSize.Level1)
 }
 
 /*
- * @tc.name:LnnIsLinkReady_001
- * @tc.desc:LnnIsLinkReady_001 function return false
- * @tc.type:FUNC
+ * @tc.name: LnnIsLinkReady_001
+ * @tc.desc: test LnnIsLinkReady
+ *           LnnIsLinkReady function return false
+ * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(AdapterNetManagerMonitorTest, LnnIsLinkReady_001, TestSize.Level1)
@@ -236,9 +247,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnIsLinkReady_001, TestSize.Level1)
 }
 
 /*
- * @tc.name:GetRtAttr_001
- * @tc.desc:GetRtAttr_001 function return SOFTBUS_NETWORK_NETLINK_GET_ATTR_FAILED
- * @tc.type:FUNC
+ * @tc.name: GetRtAttr_001
+ * @tc.desc: test GetRtAttr
+ *           GetRtAttr function return SOFTBUS_NETWORK_NETLINK_GET_ATTR_FAILED
+ * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_001, TestSize.Level1)
@@ -255,9 +267,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_001, TestSize.Level1)
 }
 
 /*
- * @tc.name:GetRtAttr_002
- * @tc.desc:GetRtAttr_002 function return SOFTBUS_OK
- * @tc.type:FUNC
+ * @tc.name: GetRtAttr_002
+ * @tc.desc: test GetRtAttr
+ *           GetRtAttr function return SOFTBUS_OK
+ * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_002, TestSize.Level1)
@@ -274,9 +287,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_002, TestSize.Level1)
 }
 
 /*
- * @tc.name:GetRtAttr_003
- * @tc.desc:GetRtAttr_003 function return SOFTBUS_OK
- * @tc.type:FUNC
+ * @tc.name: GetRtAttr_003
+ * @tc.desc: test GetRtAttr
+ *           GetRtAttr function return SOFTBUS_OK
+ * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_003, TestSize.Level1)
@@ -293,9 +307,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_003, TestSize.Level1)
 }
 
 /*
- * @tc.name:ProcessNetlinkAnswer_001
- * @tc.desc:ProcessNetlinkAnswer_001 function return SOFTBUS_OK.
- * @tc.type:FUNC
+ * @tc.name: ProcessNetlinkAnswer_001
+ * @tc.desc: test ProcessNetlinkAnswer
+ *           ProcessNetlinkAnswer function return SOFTBUS_OK
+ * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(AdapterNetManagerMonitorTest, ProcessNetlinkAnswer_001, TestSize.Level1)

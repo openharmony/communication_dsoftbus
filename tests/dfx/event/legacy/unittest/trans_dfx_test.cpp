@@ -112,9 +112,10 @@ TransArgvNode g_validTransCmdArray[TRANS_DUMP_PROCESS_TEST_NUM] = {
     {TEST_FD, TEST_ARGC_TWO, {"-l", "concurrent_sessionlist"}},
 };
 
-/**
+/*
  * @tc.name: SoftbusReportTransInfoEvt001
- * @tc.desc: Verify SoftbusReportTransInfoEvt function.
+ * @tc.desc: test SoftbusReportTransInfoEvt
+ *           Verify SoftbusReportTransInfoEvt function
  * @tc.type: FUNC
  * @tc.require: I5NJEO
  */
@@ -125,9 +126,10 @@ HWTEST_F(TransDfxTest, SoftbusReportTransInfoEvt001, TestSize.Level0)
     SoftbusReportTransInfoEvt(nullptr);
 }
 
-/**
+/*
  * @tc.name: SoftBusTransDumpHandler_001
- * @tc.desc: Verify SoftBusTransDumpHandler function, use the normal parameter.
+ * @tc.desc: test SoftBusTransDumpHandler
+ *           Verify SoftBusTransDumpHandler function, use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -140,9 +142,10 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler_001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusTransDumpHandler002
- * @tc.desc: Verify SoftBusTransDumpHandler function, use valid param, return SOFTBUS_OK.
+ * @tc.desc: test SoftBusTransDumpHandler
+ *           Verify SoftBusTransDumpHandler function, use valid param, return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -161,10 +164,11 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler002, TestSize.Level0)
     SoftBusHiDumperTransDeInit();
 }
 
-/**
+/*
  * @tc.name: SoftBusTransDumpHandler003
- * @tc.desc: Verify SoftBusTransDumpHandler function, use hidumperHandler use valid param, return SOFTBUS_OK,
- *     but the TransRegisterSessionTest2() and TransRunningSessionInfo2 use invalid param, test error switch
+ * @tc.desc: test SoftBusTransDumpHandler
+ *           Verify SoftBusTransDumpHandler function, use hidumperHandler use valid param, return SOFTBUS_OK,
+ *           but the TransRegisterSessionTest2() and TransRunningSessionInfo2 use invalid param, test error switch
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -182,10 +186,11 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler003, TestSize.Level0)
     SoftBusHiDumperTransDeInit();
 }
 
-/**
+/*
  * @tc.name: SoftBusTransDumpHandler004
- * @tc.desc: Verify SoftBusTransDumpHandler function, use hidumperHandler use valid param, return SOFTBUS_OK,
- *     but the TransRegisterSessionTest2() and TransRunningSessionInfo2 use invalid param, test error switch
+ * @tc.desc: test SoftBusTransDumpHandler
+ *           Verify SoftBusTransDumpHandler function, use hidumperHandler use valid param, return SOFTBUS_OK,
+ *           but the TransRegisterSessionTest2() and TransRunningSessionInfo2 use invalid param, test error switch
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -207,9 +212,11 @@ HWTEST_F(TransDfxTest, SoftBusTransDumpHandler004, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusRegTransVarDump001
- * @tc.desc: Verify SoftBusRegTransVarDump function, use hidumperHandler use valid param, return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: test SoftBusRegTransVarDump
+ *           Verify SoftBusRegTransVarDump function, use hidumperHandler use valid param, return
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -225,10 +232,11 @@ HWTEST_F(TransDfxTest, SoftBusRegTransVarDump001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusTransDumpRegisterSession001
- * @tc.desc: Verify SoftBusTransDumpRegisterSession function, use hidumperHandler use valid param, return
- *           SOFTBUS_INVALID_PARAM.
+ * @tc.desc: test SoftBusTransDumpRegisterSession
+ *           Verify SoftBusTransDumpRegisterSession function, use hidumperHandler use valid param, return
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
