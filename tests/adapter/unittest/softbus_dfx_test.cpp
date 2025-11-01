@@ -33,7 +33,8 @@ protected:
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest001
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_BOOL
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_BOOL
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -55,7 +56,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest001, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest002
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_UINT8
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_UINT8
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -77,7 +79,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest002, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest003
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_UINT16
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_UINT16
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -99,7 +102,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest003, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest004
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_INT32
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_INT32
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -121,7 +125,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest004, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest005
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_UINT32
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_UINT32
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -143,7 +148,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest005, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest006
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_UINT64
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_UINT64
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -165,7 +171,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest006, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest007
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_FLOAT
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_FLOAT
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -187,7 +194,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest007, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest008
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_DOUBLE
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_DOUBLE
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -209,7 +217,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest008, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest009
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_STRING
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_STRING
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -231,7 +240,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest009, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest010
- * @tc.desc: ParamType is SOFTBUS_EVT_PARAMTYPE_BUTT
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           ParamType is SOFTBUS_EVT_PARAMTYPE_BUTT
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -253,7 +263,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest010, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest021
- * @tc.desc: evtType is SOFTBUS_EVT_TYPE_STATISTIC
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           evtType is SOFTBUS_EVT_TYPE_STATISTIC
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -275,7 +286,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest021, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest022
- * @tc.desc: evtType is SOFTBUS_EVT_TYPE_SECURITY
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           evtType is SOFTBUS_EVT_TYPE_SECURITY
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -297,7 +309,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest022, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest023
- * @tc.desc: evtType is SOFTBUS_EVT_TYPE_BEHAVIOR
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           evtType is SOFTBUS_EVT_TYPE_BEHAVIOR
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -319,7 +332,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest023, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest024
- * @tc.desc: evtType is SOFTBUS_EVT_TYPE_BUTT
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           evtType is SOFTBUS_EVT_TYPE_BUTT
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -341,7 +355,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest024, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusWriteHisEvtTest031
- * @tc.desc: paramNum is -1
+ * @tc.desc: test SoftbusWriteHisEvt
+ *           paramNum is -1
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -356,7 +371,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest031, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusCreateEvtReportMsgTest001
- * @tc.desc: Create softbus event report message nllptr
+ * @tc.desc: test SoftbusCreateEvtReportMsg
+ *           Create softbus event report message nllptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -370,7 +386,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest001, TestSize.Leve
 
 /*
  * @tc.name: SoftbusCreateEvtReportMsgTest002
- * @tc.desc: Create softbus event report message nllptr
+ * @tc.desc: test SoftbusCreateEvtReportMsg
+ *           Create softbus event report message nllptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -384,7 +401,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest002, TestSize.Leve
 
 /*
  * @tc.name: SoftbusCreateEvtReportMsgTest003
- * @tc.desc: Create softbus event report message nllptr
+ * @tc.desc: test SoftbusCreateEvtReportMsg
+ *           Create softbus event report message nllptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -398,7 +416,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest003, TestSize.Leve
 
 /*
  * @tc.name: SoftbusCreateEvtReportMsgTest004
- * @tc.desc: Create softbus event report message nllptr
+ * @tc.desc: test SoftbusCreateEvtReportMsg
+ *           Create softbus event report message nllptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -413,7 +432,8 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest004, TestSize.Leve
 
 /*
  * @tc.name: SoftbusCreateEvtReportMsgTest005
- * @tc.desc: Create softbus event report message
+ * @tc.desc: test SoftbusCreateEvtReportMsg
+ *           Create softbus event report message
  * @tc.type: FUNC
  * @tc.require: 1
  */

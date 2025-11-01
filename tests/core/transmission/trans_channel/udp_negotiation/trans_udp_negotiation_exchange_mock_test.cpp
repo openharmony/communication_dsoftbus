@@ -40,11 +40,11 @@ void TransUdpNegotiationExchangeMockTest::SetUpTestCase(void) { }
 
 void TransUdpNegotiationExchangeMockTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: TransUnpackMetaTypeSpecificData001
- * @tc.desc: Test the normal process of obtaining the META_SDK type.
+ * @tc.desc: Test the normal process of obtaining the META_SDK type
  * @tc.type: FUNC
- * @tc.require: Simulate LnnGetRemoteNumInfo to set metaType to META_SDK and return success.
+ * @tc.require: Simulate LnnGetRemoteNumInfo to set metaType to META_SDK and return success
  */
 HWTEST_F(TransUdpNegotiationExchangeMockTest, TransUnpackMetaTypeSpecificData001, TestSize.Level1)
 {
@@ -61,11 +61,11 @@ HWTEST_F(TransUdpNegotiationExchangeMockTest, TransUnpackMetaTypeSpecificData001
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransUnpackMetaTypeSpecificData002
- * @tc.desc: Test the normal process of obtaining the META_HA type.
+ * @tc.desc: Test the normal process of obtaining the META_HA type
  * @tc.type: FUNC
- * @tc.require: Simulate LnnGetRemoteNumInfo to set metaType to META_HA and return success.
+ * @tc.require: Simulate LnnGetRemoteNumInfo to set metaType to META_HA and return success
  */
 HWTEST_F(TransUdpNegotiationExchangeMockTest, TransUnpackMetaTypeSpecificData002, TestSize.Level1)
 {
@@ -82,11 +82,11 @@ HWTEST_F(TransUdpNegotiationExchangeMockTest, TransUnpackMetaTypeSpecificData002
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransUnpackMetaTypeSpecificData003
- * @tc.desc: Test the default process after obtaining the META_HA type.
+ * @tc.desc: Test the default process after obtaining the META_HA type
  * @tc.type: FUNC
- * @tc.require: Simulate LnnGetRemoteNumInfo to setting unknown metaType and returning failure.
+ * @tc.require: Simulate LnnGetRemoteNumInfo to setting unknown metaType and returning failure
  */
 HWTEST_F(TransUdpNegotiationExchangeMockTest, TransUnpackMetaTypeSpecificData003, TestSize.Level1)
 {
