@@ -119,7 +119,6 @@ void TransTdcDecryptTest(FuzzedDataProvider &provider)
     if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
         return;
     }
-    uint32_t inLen = provider.ConsumeIntegral<uint8_t>();
     std::string providerIn = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
     char in[SESSION_KEY_LENGTH] = { 0 };
     if (strcpy_s(in, SESSION_KEY_LENGTH, providerIn.c_str()) != EOK) {
@@ -127,7 +126,7 @@ void TransTdcDecryptTest(FuzzedDataProvider &provider)
     }
     char out[UINT8_MAX] = { 0 };
 
-    (void)TransTdcDecrypt(sessionKey, in, inLen, out, nullptr);
+    (void)TransTdcDecrypt(sessionKey, in, SESSION_KEY_LENGTH, out, nullptr);
 }
 
 void TransTdcRecvFirstDataTest(FuzzedDataProvider &provider)
@@ -308,6 +307,31 @@ void TransTdcSendDataTest(FuzzedDataProvider &provider)
     supportTlv = true;
     (void)TransTdcSendData(&lenInfo, supportTlv, fd, len, buf);
 }
+
+void TransTdcParseTlvTest(FuzzedDataProvider &provider)
+{
+    uint32_t bufLen = provider.ConsumeIntegral<uint32_t>();
+    uint32_t headSize = MAGICNUM_SIZE + TLVCOUNT_SIZE;
+    TcpDataTlvPacketHead head;
+    (void)memset_s(&head, sizeof(TcpDataTlvPacketHead), 0, sizeof(TcpDataTlvPacketHead));
+    FillTcpDataTlvPacketHead(provider, &head);
+    char data[MAGICNUM_SIZE + TLVCOUNT_SIZE] = { 0 };
+
+    (void)TransTdcParseTlv(bufLen, data, &head, &headSize);
+}
+
+void TransTdcUnPackAllTlvDataTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    TcpDataTlvPacketHead head;
+    (void)memset_s(&head, sizeof(TcpDataTlvPacketHead), 0, sizeof(TcpDataTlvPacketHead));
+    uint32_t headSize = provider.ConsumeIntegral<uint32_t>();
+    DataBuf node;
+    (void)memset_s(&node, sizeof(DataBuf), 0, sizeof(DataBuf));
+    bool flag = provider.ConsumeBool();
+
+    TransTdcUnPackAllTlvData(channelId, &head, &headSize, &node, &flag);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -334,6 +358,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::PackTcpDataPacketHeadTest(provider);
     OHOS::TransTdcPackAllDataTest(provider);
     OHOS::TransTdcSendDataTest(provider);
-
+    OHOS::TransTdcParseTlvTest(provider);
+    OHOS::TransTdcUnPackAllTlvDataTest(provider);
     return 0;
 }
