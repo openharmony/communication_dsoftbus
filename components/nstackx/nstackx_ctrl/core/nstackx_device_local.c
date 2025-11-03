@@ -669,7 +669,6 @@ static int32_t UpdateLocalDeviceServiceDataV2(uint8_t af, const struct NSTACKX_S
     if (iface != NULL) {
         (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
                        data->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
-        DFINDER_LOGI(TAG, "set service data sucess");
         return NSTACKX_EOK;
     }
 
@@ -678,7 +677,6 @@ static int32_t UpdateLocalDeviceServiceDataV2(uint8_t af, const struct NSTACKX_S
         if (iface != NULL) {
             (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
                            data->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
-            DFINDER_LOGI(TAG, "set service data sucess");
             return NSTACKX_EOK;
         }
     }
@@ -699,7 +697,7 @@ int32_t SetLocalDeviceServiceDataV2(const struct NSTACKX_ServiceData *param, uin
         union InetAddr addr;
         uint8_t af = InetGetAfType(param[i].ip, &addr);
         if (UpdateLocalDeviceServiceDataV2(af, &(param[i])) == NSTACKX_EOK) {
-            DFINDER_LOGI(TAG, "update local device serviceData by param[%u]", i);
+            DFINDER_LOGD(TAG, "update local device serviceData by param[%u]", i);
             ret = NSTACKX_EOK;
         }
     }
