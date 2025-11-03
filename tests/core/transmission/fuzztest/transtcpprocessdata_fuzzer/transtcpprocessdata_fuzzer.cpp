@@ -119,7 +119,6 @@ void TransTdcDecryptTest(FuzzedDataProvider &provider)
     if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
         return;
     }
-    uint32_t inLen = provider.ConsumeIntegral<uint32_t>();
     std::string providerIn = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
     char in[SESSION_KEY_LENGTH] = { 0 };
     if (strcpy_s(in, SESSION_KEY_LENGTH, providerIn.c_str()) != EOK) {
@@ -127,7 +126,7 @@ void TransTdcDecryptTest(FuzzedDataProvider &provider)
     }
     char out[UINT8_MAX] = { 0 };
 
-    (void)TransTdcDecrypt(sessionKey, in, inLen, out, nullptr);
+    (void)TransTdcDecrypt(sessionKey, in, SESSION_KEY_LENGTH, out, nullptr);
 }
 
 void TransTdcRecvFirstDataTest(FuzzedDataProvider &provider)
