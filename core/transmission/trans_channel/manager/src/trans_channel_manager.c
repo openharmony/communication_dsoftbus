@@ -567,8 +567,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
     }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
-        sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
+    if (TransGetLocalDeviceId(mySessionName, appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo get deviceId failed");
         goto EXIT_ERR;
     }
