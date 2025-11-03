@@ -256,7 +256,7 @@ static char *PackAllApplyKey(void)
             AUTH_LOGE(AUTH_CONN, "create json fail");
             break;
         }
-        if (!AuthPackApplyKey(obj, it->node->key, it->node->value)) {
+        if (!AuthPackApplyKey(obj, (char *)it->node->key, (AuthApplyMapValue *)it->node->value)) {
             AUTH_LOGE(AUTH_CONN, "add json object fail");
             cJSON_Delete(obj);
             break;
@@ -329,8 +329,8 @@ static bool AuthPraseApplyKey(const char *applyKey)
     }
     int32_t arraySize = cJSON_GetArraySize(json);
     bool res = true;
-    AuthApplyMap node = { 0 };
-    AuthApplyMapValue value = { 0 };
+    AuthApplyMap node = { {0} };
+    AuthApplyMapValue value = { {0} };
     for (int32_t i = 0; i < arraySize; i++) {
         cJSON *item = cJSON_GetArrayItem(json, i);
         (void)memset_s(&node, sizeof(AuthApplyMap), 0, sizeof(AuthApplyMap));
