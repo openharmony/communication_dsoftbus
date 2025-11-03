@@ -92,13 +92,13 @@ int32_t SchedulerDeinitBroadcastPacked(void)
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
 int32_t DiscCoapProcessDeviceInfoPacked(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock)
+    const DiscInnerCallback discCb)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo) != SOFTBUS_OK) {
-        return DiscCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb, discCbLock);
+        return DiscCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb);
     }
-    return pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb, discCbLock);
+    return pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb);
 }
 
 int32_t DiscCoapAssembleBdataPacked(const unsigned char *capabilityData, uint32_t dataLen, char *businessData,
