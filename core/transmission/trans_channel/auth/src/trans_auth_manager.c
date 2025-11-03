@@ -55,6 +55,8 @@
 #define AUTH_SESSION_KEY "auth session key"
 #define ISHARE_AUTH_SESSION "IShareAuthSession"
 #define DM_PKG_NAME "ohos.distributedhardware.devicemanager.resident"
+#define ISHARE_EXTERNAL_SESSION "IShareEcologyAuthSession"
+#define UDID_HASH_SHORT_LEN 6
 
 const char *g_serviceForAction[] = {
     "IShareAuthSession",
@@ -758,6 +760,33 @@ static void OnDisconnect(int32_t authId)
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
 }
 
+int32_t TransGetLocalDeviceId(const char *mySessionName, AppInfo *appInfo)
+{
+    if (mySessionName == NULL || appInfo == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char localUdid[UDID_BUF_LEN] = {0};
+    int32_t ret =  LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "get local udid failed.");
+    if (strcmp(mySessionName, ISHARE_EXTERNAL_SESSION) == 0) {
+        uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
+        ret = SoftBusGenerateStrHash((unsigned char *)localUdid, strlen(localUdid), (unsigned char *)udidHash);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "generate udid hash failed.");
+
+        char udidString[UDID_BUF_LEN] = { 0 };
+        ret = ConvertBytesToHexString(udidString, UDID_BUF_LEN, (const unsigned char *)udidHash, SHA_256_HASH_LEN);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "ConvertBytesToHexString udid hash failed");
+
+        ret = memcpy_s(appInfo->myData.deviceId, UDID_BUF_LEN, udidString, UDID_HASH_SHORT_LEN);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, ret, TRANS_SVC, "memcpy short udid failed.");
+    } else {
+        ret = strcpy_s(appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId), localUdid);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, ret, TRANS_SVC, "strcpy udid failed.");
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo, bool isClient)
 {
     if (sessionName == NULL || appInfo == NULL) {
@@ -780,9 +809,9 @@ int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo,
         TRANS_LOGE(TRANS_SVC, "TransGetPkgNameBySessionName failed");
         return ret;
     }
-    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
+    ret = TransGetLocalDeviceId(sessionName, appInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "LnnGetLocalStrInfo failed");
+        TRANS_LOGE(TRANS_SVC, "TransGetLocalDeviceId failed");
         return ret;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
