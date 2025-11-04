@@ -228,8 +228,9 @@ static void GetWiFiLocalInfo(void)
 
 /*
  * @tc.name: SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001
- * @tc.desc: SoftbusDumpPrintDynamicNetCap test
+ * @tc.desc: softbus dump print dynamic net capacity test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.Level1)
@@ -251,8 +252,9 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.L
 
 /*
  * @tc.name: SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001
- * @tc.desc: SoftbusDumpPrintNetType test
+ * @tc.desc: softbus dump print net type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001, TestSize.Level1)
@@ -274,8 +276,9 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001, TestSize.Level
 
 /*
  * @tc.name: LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001
- * @tc.desc: Lnn Set Node Data Change Flag test
+ * @tc.desc: lnn set node data change flag test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
@@ -292,8 +295,9 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_SET_DATA_CHANGE_FLAG_Test_001
- * @tc.desc: Lnn Set Data Change Flag test
+ * @tc.desc: lnn set data change flag test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LedgerLaneHubTest, LNN_SET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
@@ -309,8 +313,9 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
- * @tc.desc: Lnn Get Data Change Flag test
+ * @tc.desc: lnn get data change flag test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LedgerLaneHubTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
@@ -325,8 +330,9 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_LOCAL_STR_INFO_Test_001
- * @tc.desc: Lnn Get Local Str Info test
+ * @tc.desc: lnn get local str info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
@@ -349,8 +355,9 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_LOCAL_LEDGER_DELAY_Test_001
- * @tc.desc: Lnn Init Local Ledger Delay test
+ * @tc.desc: lnn Init Local Ledger Delay test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level1)
@@ -360,8 +367,9 @@ HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level
 
 /*
  * @tc.name: LEDGER_GetDistributedLedgerNode_Test_001
- * @tc.desc: Get distributed ledger node info.
+ * @tc.desc: get distributed ledger node info.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FK6J0
  */
 HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.Level1)
@@ -376,8 +384,9 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.L
 
 /*
  * @tc.name: LEDGER_GetDistributedLedgerInfo_Test_001
- * @tc.desc:  test of the LnnGetRemoteStrInfo LnnGetDLNumInfo function
+ * @tc.desc: test of the LnnGetRemoteStrInfo LnnGetDLNumInfo function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FK6J0
  */
 HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.Level1)
@@ -409,8 +418,9 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.L
 
 /*
  * @tc.name: LEDGER_DistributedLedgerChangeName_Test_001
- * @tc.desc:  test of the LnnGetRemoteStrInfo LnnSetDLDeviceInfoName function
+ * @tc.desc: test of the LnnGetRemoteStrInfo LnnSetDLDeviceInfoName function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FK6J0
  */
 HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSize.Level1)
@@ -433,6 +443,7 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSiz
  * @tc.name: LEDGER_LocalLedgerGetInfo_Test_001
  * @tc.desc: Performance test of the LnnGetLocalLedgerStrInfo and NumInfo function.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FK6J0
  */
 HWTEST_F(LedgerLaneHubTest, LEDGER_LocalLedgerGetInfo_Test_001, TestSize.Level1)

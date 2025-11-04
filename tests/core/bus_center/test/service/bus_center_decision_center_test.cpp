@@ -64,6 +64,7 @@ void BusCenterDecisionCenterTest::TearDown() { }
  * @tc.name: LnnDCProcessOnlineState_Test01
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test01, TestSize.Level1)
@@ -80,6 +81,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test01, TestSize.L
  * @tc.name: LnnDCProcessOnlineState_Test02
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test02, TestSize.Level1)
@@ -98,6 +100,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test02, TestSize.L
  * @tc.name: LnnDCProcessOnlineState_Test03
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test03, TestSize.Level1)
@@ -116,6 +119,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test03, TestSize.L
  * @tc.name: LeaveSpecificBrNetworkTest_01
  * @tc.desc: test int endian convert functionp
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_01, TestSize.Level1)
@@ -137,6 +141,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_01, TestSize.Le
  * @tc.name: LeaveSpecificBrNetworkTest_02
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 
@@ -161,6 +166,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_02, TestSize.Le
  * @tc.name: LeaveSpecificBrNetworkTest_03
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_03, TestSize.Level1)
@@ -184,6 +190,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LeaveSpecificBrNetworkTest_03, TestSize.Le
  * @tc.name: HandleBrConnectExceptionTest_01
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_01, TestSize.Level1)
@@ -203,6 +210,7 @@ HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_01, TestSize.
  * @tc.name: HandleBrConnectExceptionTest_02
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_02, TestSize.Level1)
@@ -222,6 +230,7 @@ HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_02, TestSize.
  * @tc.name: HandleBrConnectExceptionTest_03
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_03, TestSize.Level1)
@@ -241,6 +250,7 @@ HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_03, TestSize.
  * @tc.name: HandleBrConnectExceptionTest_04
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_04, TestSize.Level1)
@@ -264,6 +274,7 @@ HWTEST_F(BusCenterDecisionCenterTest, HandleBrConnectExceptionTest_04, TestSize.
  * @tc.name: ClearBrConnectExceptionTest_01
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, ClearBrConnectExceptionTest_01, TestSize.Level1)
@@ -283,6 +294,7 @@ HWTEST_F(BusCenterDecisionCenterTest, ClearBrConnectExceptionTest_01, TestSize.L
  * @tc.name: LnnDCReportConnectExceptionTest_01
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_01, TestSize.Level1)
@@ -299,6 +311,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_01, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_02
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_02, TestSize.Level1)
@@ -320,6 +333,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_02, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_03
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_03, TestSize.Level1)
@@ -336,6 +350,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_03, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_04
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_04, TestSize.Level1)
@@ -352,6 +367,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_04, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_05
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_05, TestSize.Level1)
@@ -368,6 +384,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_05, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_06
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_06, TestSize.Level1)
@@ -384,6 +401,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_06, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_07
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_07, TestSize.Level1)
@@ -400,6 +418,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_07, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_08
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_08, TestSize.Level1)
@@ -416,6 +435,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_08, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_09
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_09, TestSize.Level1)
@@ -432,6 +452,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_09, TestSi
  * @tc.name: LnnDCReportConnectExceptionTest_10
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_10, TestSize.Level1)
@@ -448,6 +469,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCReportConnectExceptionTest_10, TestSi
  * @tc.name: InitDecisionCenterTest_1
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, InitDecisionCenterTest_1, TestSize.Level1)
@@ -461,6 +483,7 @@ HWTEST_F(BusCenterDecisionCenterTest, InitDecisionCenterTest_1, TestSize.Level1)
  * @tc.name: InitDecisionCenterTest_2
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, InitDecisionCenterTest_2, TestSize.Level1)
@@ -478,6 +501,7 @@ HWTEST_F(BusCenterDecisionCenterTest, InitDecisionCenterTest_2, TestSize.Level1)
  * @tc.name: DeinitDecisionCenterTest_1
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, DeinitDecisionCenterTest_1, TestSize.Level1)
@@ -492,6 +516,7 @@ HWTEST_F(BusCenterDecisionCenterTest, DeinitDecisionCenterTest_1, TestSize.Level
  * @tc.name: DeinitDecisionCenterTest_2
  * @tc.desc: test int endian convert function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterDecisionCenterTest, DeinitDecisionCenterTest_2, TestSize.Level1)

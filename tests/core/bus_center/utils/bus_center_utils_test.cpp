@@ -83,6 +83,7 @@ static SoftBusHandler g_buscenterUtilsHandler = {
 * @tc.name: GET_UUID_FROM_FILE_TEST_001
 * @tc.desc: get uuid from file test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, GET_UUID_FROM_FILE_TEST_001, TestSize.Level1)
@@ -120,6 +121,7 @@ HWTEST_F(BusCenterUtilsTest, GET_UUID_FROM_FILE_TEST_001, TestSize.Level1)
 * @tc.name: LNN_GEN_LOCAL_NETWORKID_TEST_001
 * @tc.desc: lnn generate local networkid test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_NETWORKID_TEST_001, TestSize.Level1)
@@ -146,6 +148,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_NETWORKID_TEST_001, TestSize.Level1)
 * @tc.name: LNN_GEN_LOCAL_UUID_TEST_001
 * @tc.desc: lnn generate local uuid test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_UUID_TEST_001, TestSize.Level1)
@@ -167,6 +170,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_UUID_TEST_001, TestSize.Level1)
 * @tc.name: GET_IRK_FROM_FILE_TEST_001
 * @tc.desc: get irk from file test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, GET_IRK_FROM_FILE_TEST_001, TestSize.Level1)
@@ -200,6 +204,7 @@ HWTEST_F(BusCenterUtilsTest, GET_IRK_FROM_FILE_TEST_001, TestSize.Level1)
 * @tc.name: LNN_GEN_LOCAL_IRK_TEST_001
 * @tc.desc: lnn generate local irk test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_IRK_TEST_001, TestSize.Level1)
@@ -223,6 +228,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_IRK_TEST_001, TestSize.Level1)
 * @tc.name: LNN_ENCRYPT_AES_GCM_TEST_001
 * @tc.desc: lnn encrypt aes gcm test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_ENCRYPT_AES_GCM_TEST_001, TestSize.Level1)
@@ -268,6 +274,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_ENCRYPT_AES_GCM_TEST_001, TestSize.Level1)
 * @tc.name: LNN_DECRYPT_AES_GCM_TEST_001
 * @tc.desc: lnn decrypt aes gcm test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_DECRYPT_AES_GCM_TEST_001, TestSize.Level1)
@@ -304,6 +311,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_DECRYPT_AES_GCM_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_SET_TEST_001
 * @tc.desc: lnn map set test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_SET_TEST_001, TestSize.Level1)
@@ -339,6 +347,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_SET_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_GET_TEST_001
 * @tc.desc: lnn map get test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_GET_TEST_001, TestSize.Level1)
@@ -380,6 +389,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_GET_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_ERASE_TEST_001
 * @tc.desc: lnn map erase test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_ERASE_TEST_001, TestSize.Level1)
@@ -420,6 +430,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_ERASE_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_INIT_TEST_001
 * @tc.desc: lnn map init test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_INIT_TEST_001, TestSize.Level1)
@@ -438,6 +449,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_INIT_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_DELETE_TEST_001
 * @tc.desc: lnn map delete test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_DELETE_TEST_001, TestSize.Level1)
@@ -461,6 +473,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_DELETE_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_INIT_ITERATOR_TEST_001
 * @tc.desc: lnn map init iterator test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_INIT_ITERATOR_TEST_001, TestSize.Level1)
@@ -481,6 +494,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_INIT_ITERATOR_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_HAS_NEXT_TEST_001
 * @tc.desc: lnn map has next test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_HAS_NEXT_TEST_001, TestSize.Level1)
@@ -510,6 +524,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_HAS_NEXT_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_DEINIT_ITERATOR_TEST_001
 * @tc.desc: lnn map deinit iterator test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_DEINIT_ITERATOR_TEST_001, TestSize.Level1)
@@ -525,6 +540,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_DEINIT_ITERATOR_TEST_001, TestSize.Level1)
 * @tc.name: DATA_COMPRESS_TEST_001
 * @tc.desc: data compress test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, DATA_COMPRESS_TEST_001, TestSize.Level1)
@@ -553,6 +569,7 @@ HWTEST_F(BusCenterUtilsTest, DATA_COMPRESS_TEST_001, TestSize.Level1)
 * @tc.name: DATA_DE_COMPRESS_TEST_001
 * @tc.desc: data decompress test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, DATA_DE_COMPRESS_TEST_001, TestSize.Level1)
@@ -577,6 +594,7 @@ HWTEST_F(BusCenterUtilsTest, DATA_DE_COMPRESS_TEST_001, TestSize.Level1)
 * @tc.name: LNN_FSM_POST_MESSAGE_DELAY_TEST_001
 * @tc.desc: lnn fsm post message delay test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_FSM_POST_MESSAGE_DELAY_TEST_001, TestSize.Level1)
@@ -607,6 +625,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_FSM_POST_MESSAGE_DELAY_TEST_001, TestSize.Level
 * @tc.name: LNN_FSM_REMOVE_MESSAGE_BY_TYPE_TEST_001
 * @tc.desc: lnn fsm remove message by type test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_FSM_REMOVE_MESSAGE_BY_TYPE_TEST_001, TestSize.Level1)
@@ -638,6 +657,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_FSM_REMOVE_MESSAGE_BY_TYPE_TEST_001, TestSize.L
 * @tc.name: LNN_FSM_REMOVE_MESSAGE_TEST_001
 * @tc.desc: lnn fsm remove message test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_FSM_REMOVE_MESSAGE_TEST_001, TestSize.Level1)
@@ -668,6 +688,7 @@ HWTEST_F(BusCenterUtilsTest, LNN_FSM_REMOVE_MESSAGE_TEST_001, TestSize.Level1)
 * @tc.name: LNN_MAP_NEXT_TEST_001
 * @tc.desc: lnn map next test
 * @tc.type: FUNC
+* @tc.level: Level1
 * @tc.require:
 */
 HWTEST_F(BusCenterUtilsTest, LNN_MAP_NEXT_TEST_001, TestSize.Level1)
