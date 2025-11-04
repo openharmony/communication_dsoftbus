@@ -450,7 +450,7 @@ static void UpdatedByTimeout(RxIface *rxIface, int8_t *updated)
     if (*updated == NSTACKX_TRUE) {
         return;
     }
-    uint32_t diffMs = GetTimeDiffMs(&preTime, &(rxIface->updateTime));
+    uint32_t diffMs = GetTimeDiffMs(&(rxIface->updateTime), &preTime);
     uint32_t timeoutMs = GetNotifyTimeoutMs();
     if (timeoutMs != 0 && diffMs > timeoutMs) {
         *updated = NSTACKX_TRUE;
