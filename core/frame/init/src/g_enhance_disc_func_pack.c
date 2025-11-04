@@ -134,6 +134,24 @@ void DiscCoapUpdateAbilityPacked(uint32_t capability, const char *capabilityData
 }
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
 
+int32_t DiscCoapExtInitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapExtInit) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnDiscEnhanceFuncList->discCoapExtInit();
+}
+
+void DiscCoapExtDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapExtDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->discCoapExtDeinit();
+}
+
 int32_t DiscFillBtypePacked(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
