@@ -896,7 +896,12 @@ static void BleServerWaitStopServerTimeoutHandler(void)
 
 static int32_t GetBleAttrHandle(int32_t module)
 {
-    return (module == MODULE_BLE_NET) ? g_serverState.netCharacteristicHandle : g_serverState.connCharacteristicHandle;
+    int32_t ret = SOFTBUS_OK;
+    ret = SoftBusMutexLock(&g_serverState.lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail, err=%{public}d", ret);
+    ret = (module == MODULE_BLE_NET ? g_serverState.netCharacteristicHandle : g_serverState.connCharacteristicHandle);
+    (void)SoftBusMutexUnlock(&g_serverState.lock);
+    return ret;
 }
 
 int32_t ConnGattServerSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
@@ -1069,10 +1074,14 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
         BleSendGattRsp(&writeCbPara);
     }
 
+    int32_t ret = SoftBusMutexLock(&g_serverState.lock);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BLE, "lock fail, ret=%{public}d", ret);
     if (writeCbPara.attrHandle == g_serverState.netDescriptorHandle ||
         writeCbPara.attrHandle == g_serverState.connDescriptorHandle) {
+        (void)SoftBusMutexUnlock(&g_serverState.lock);
         return;
     }
+    (void)SoftBusMutexUnlock(&g_serverState.lock);
     int32_t underlayerHandle = writeCbPara.connId;
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_SERVER, BLE_GATT);
     if (connection == NULL) {
@@ -1081,7 +1090,8 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
             underlayerHandle);
         return;
     }
-
+    ret = SoftBusMutexLock(&g_serverState.lock);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BLE, "lock fail, ret=%{public}d", ret);
     bool isConnCharacteristic = false;
     if (writeCbPara.attrHandle == g_serverState.netCharacteristicHandle) {
         isConnCharacteristic = false;
@@ -1093,9 +1103,11 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
             "attrHandle=%{public}d, netCharateristicHandle=%{public}d, connCharateristicHandle=%{public}d",
             connection->connectionId, underlayerHandle, writeCbPara.attrHandle, g_serverState.netCharacteristicHandle,
             g_serverState.connCharacteristicHandle);
+        (void)SoftBusMutexUnlock(&g_serverState.lock);
         ConnBleReturnConnection(&connection);
         return;
     }
+    (void)SoftBusMutexUnlock(&g_serverState.lock);
 
     uint32_t valueLen = 0;
     uint8_t *value = ConnGattTransRecv(
