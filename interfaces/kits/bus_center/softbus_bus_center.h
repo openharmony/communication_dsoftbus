@@ -629,8 +629,8 @@ typedef enum {
  * @version 1.0
  */
 struct GroupOwnerConfig {
-    int32_t frequency;         /**< expect p2p frequency */
-    int32_t freqType;    /**< expect frequency type */
+    int32_t frequency;    /**< expect p2p frequency */
+    int32_t freqType;     /**< expect frequency type */
 };
 
 /**
