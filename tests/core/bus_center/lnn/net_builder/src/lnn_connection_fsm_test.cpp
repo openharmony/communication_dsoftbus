@@ -120,6 +120,7 @@ void FsmStopCallback(struct tagLnnConnectionFsm *connFsm) { }
  * @tc.desc: test LnnCreateConnectionFsm with null addr
  * @tc.type: FUNC
  * @tc.require:I5PRUD
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
@@ -132,9 +133,10 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: LNN_START_CONNECTION_FSM_TEST_001
- * @tc.desc: test LnnStartConnectionFsm
+ * @tc.desc: lnn start connection fsm test
  * @tc.type: FUNC
  * @tc.require: I5PRUD
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
@@ -148,9 +150,10 @@ HWTEST_F(LNNConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001
- * @tc.desc: test LnnSendJoinRequestToConnFsm
+ * @tc.desc: lnn send join request to conn fsm test
  * @tc.type: FUNC
  * @tc.require: I5PRUD
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSize.Level1)
 {
@@ -171,7 +174,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
 
 /*
  * @tc.name: LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001
- * @tc.desc: test LnnSendAuthResultMsgToConnFsm
+ * @tc.desc: lnn send auth result msg to conn fsm test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -197,7 +200,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
 
 /*
  * @tc.name: LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001
- * @tc.desc: test LnnSendNotTrustedToConnFsm
+ * @tc.desc: lnn send not trusted to conn fsm test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -213,7 +216,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001, TestSiz
 
 /*
  * @tc.name: LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001
- * @tc.desc: test LnnSendDisconnectMsgToConnFsm
+ * @tc.desc: lnn send disconnect msg to conn fsm test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -227,7 +230,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001, Test
 
 /*
  * @tc.name: LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001
- * @tc.desc: test LnnSendLeaveRequestToConnFsm
+ * @tc.desc: lnn send leave request to conn fsm test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -244,7 +247,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestS
 
 /*
  * @tc.name: LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001
- * @tc.desc: test LnnSendSyncOfflineFinishToConnFsm
+ * @tc.desc: lnn send sync offline finish to conn fsm test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -262,7 +265,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001,
 
 /*
  * @tc.name: LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001
- * @tc.desc: test LnnSendNewNetworkOnlineToConnFsm
+ * @tc.desc: lnn send new network online to conn fsm test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -278,7 +281,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_NEW_NETWORK_ONLINE_TO_CONNFSM_TEST_001, 
 
 /*
  * @tc.name: LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001
- * @tc.desc: test CheckStateMsgCommonArgs
+ * @tc.desc: check state msg common args test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -296,7 +299,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CHECK_STATE_MSG_COMMON_ARGS_TEST_001, TestSiz
 
 /*
  * @tc.name: LNN_REPORT_LNN_RESULT_EVT_TEST_001
- * @tc.desc: test ReportLnnResultEvt
+ * @tc.desc: report lnn result evt test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -314,7 +317,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_REPORT_LNN_RESULT_EVT_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: LNN_POST_PC_ONLINE_UNIQUELY_TEST_001
- * @tc.desc: test PostPcOnlineUniquely
+ * @tc.desc: post pc online uniquely test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -345,7 +348,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_POST_PC_ONLINE_UNIQUELY_TEST_001, TestSize.Le
 
 /*
  * @tc.name: LNN_IS_NODE_INFO_CHANGED_TEST_001
- * @tc.desc: test IsNodeInfoChanged
+ * @tc.desc: is node info changed test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -374,7 +377,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_001
- * @tc.desc: test CleanInvalidConnStateProcess
+ * @tc.desc: clean invalid conn state process test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -394,7 +397,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_001, Te
 
 /*
  * @tc.name: LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002
- * @tc.desc: test CleanInvalidConnStateProcess
+ * @tc.desc: clean invalid conn state process test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -414,7 +417,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002, Te
 
 /*
  * @tc.name: LNN_LEAVE_LNN_IN_ONLINE_TEST_001
- * @tc.desc: test LeaveLNNInOnline
+ * @tc.desc: leave lnn in online test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -439,7 +442,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_LEAVE_LNN_IN_ONLINE_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: LNN_ONLINE_STATE_PROCESS_TEST_001
- * @tc.desc: test OnlineStateProcess
+ * @tc.desc: online state process test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -457,7 +460,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_ONLINE_STATE_PROCESS_TEST_002
- * @tc.desc: test OnlineStateProcess
+ * @tc.desc: online state process test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -475,7 +478,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_002, TestSize.Level
 
 /*
  * @tc.name: LNN_LEAVING_STATE_PROCESS_TEST_001
- * @tc.desc: test LeavingStateProcess
+ * @tc.desc: leaving state process test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -491,7 +494,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: LNN_INIT_CONNECTION_STATE_MACHINE_TEST_001
- * @tc.desc: test InitConnectionStateMachine
+ * @tc.desc: init connection state machine test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -507,7 +510,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_INIT_CONNECTION_STATE_MACHINE_TEST_001, TestS
 
 /*
  * @tc.name: DFX_RECORD_LNN_ONLINE_TYPE_TEST_001
- * @tc.desc: test DfxRecordLnnOnlineType
+ * @tc.desc: dfx record lnn online type test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -556,7 +559,7 @@ HWTEST_F(LNNConnectionFsmTest, DFX_RECORD_LNN_ONLINE_TYPE_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: IS_EMPTY_SHORT_HASH_STR_TEST_001
- * @tc.desc: test IsEmptyShortHashStr
+ * @tc.desc: is empty short hash str test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -585,7 +588,7 @@ HWTEST_F(LNNConnectionFsmTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: GET_UDID_HASH_FOR_DFX_TEST_001
- * @tc.desc: test GetUdidHashForDfx
+ * @tc.desc: get udid hash for dfx test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -615,7 +618,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_UDID_HASH_FOR_DFX_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_PEER_UDID_HASH_TEST_001
- * @tc.desc: test GetPeerUdidHash
+ * @tc.desc: get peer udid hash
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -657,7 +660,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_HASH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_DEV_TYPE_FOR_DFX_TEST_001
- * @tc.desc: test GetDevTypeForDfx
+ * @tc.desc: get dev type for dfx test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -684,7 +687,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_DEV_TYPE_FOR_DFX_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_PEER_UDID_INFO_TEST_001
- * @tc.desc: test GetPeerUdidInfo
+ * @tc.desc: get peer udid info test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -707,7 +710,7 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FILL_DEVICE_BLE_REPORT_EXTRA_TEST_001
- * @tc.desc: test FillDeviceBleReportExtra
+ * @tc.desc: fill device ble report extra test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -751,7 +754,7 @@ HWTEST_F(LNNConnectionFsmTest, FILL_DEVICE_BLE_REPORT_EXTRA_TEST_001, TestSize.L
 
 /*
  * @tc.name: UPDATE_LEAVE_TO_LEDGER_TEST_001
- * @tc.desc: test UpdateLeaveToLedger
+ * @tc.desc: update leave to ledger test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -802,7 +805,7 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_RECOVERY_BROADCAST_KEY_TEST_001
- * @tc.desc: test LnnRecoveryBroadcastKey
+ * @tc.desc: lnn recovery broadcast key test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -836,7 +839,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_RECOVERY_BROADCAST_KEY_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: IS_WIFI_CONNECT_INFO_CHANGED_TEST_001
- * @tc.desc: test IsWifiConnectInfoChanged
+ * @tc.desc: is wifi connect info changed test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -879,7 +882,7 @@ HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001
- * @tc.desc: test LnnIsNeedCleanConnectionFsm
+ * @tc.desc: lnn is need clean connection fsm test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -917,7 +920,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_IS_NEED_CLEAN_CONNECTION_FSM_TEST_001, TestSi
 
 /*
  * @tc.name: SYNC_BR_OFFLINE_TEST_001
- * @tc.desc: test SyncBrOffline
+ * @tc.desc: sync br offline test
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -944,9 +947,10 @@ HWTEST_F(LNNConnectionFsmTest, SYNC_BR_OFFLINE_TEST_001, TestSize.Level1)
 }
 /*
  * @tc.name: UPDATE_DEVICE_INFO_TO_MLPS_TEST_001
- * @tc.desc: test UpdateDeviceInfoToMlps
+ * @tc.desc: update device info to mlps test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Level1)
 {
@@ -966,6 +970,7 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Lev
  * @tc.desc: test LeaveSameIpOnlineDevice with no online info
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_001, TestSize.Level0)
 {
@@ -990,6 +995,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_001, TestSize.Le
  * @tc.desc: test LeaveSameIpOnlineDevice with not online info
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_002, TestSize.Level0)
 {
@@ -1006,6 +1012,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_002, TestSize.Le
  * @tc.desc: test LeaveSameIpOnlineDevice with same info
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_003, TestSize.Level0)
 {
@@ -1035,10 +1042,10 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_003, TestSize.Le
 
 /*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_004
- * @tc.desc: test LeaveSameIpOnlineDevice with two devices have same info
- * online
+ * @tc.desc: test LeaveSameIpOnlineDevice with two devices have same info online
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_004, TestSize.Level0)
 {
@@ -1079,6 +1086,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_004, TestSize.Le
  * @tc.desc: test LeaveSameIpOnlineDevice with null connInfo
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_005, TestSize.Level0)
 {
@@ -1096,6 +1104,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_005, TestSize.Le
  * @tc.desc: test LeaveSameIpOnlineDevice with null IP in connInfo
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_006, TestSize.Level0)
 {
@@ -1117,6 +1126,7 @@ HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_006, TestSize.Le
  * @tc.desc: test ProcessBleOnline with local authentication failed
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_001, TestSize.Level0)
 {
@@ -1138,6 +1148,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_001, TestSize.Level0)
  * @tc.desc: test ProcessBleOnline with device cannot authentication
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_002, TestSize.Level0)
 {
@@ -1159,6 +1170,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_002, TestSize.Level0)
  * @tc.desc: test ProcessBleOnline with remote node is online
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_003, TestSize.Level0)
 {
@@ -1187,6 +1199,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_003, TestSize.Level0)
  * @tc.desc: test ProcessBleOnline with remote node is not online
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_004, TestSize.Level0)
 {
@@ -1215,6 +1228,7 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_004, TestSize.Level0)
  * @tc.desc: test ProcessBleOnline with online failed
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_005, TestSize.Level0)
 {

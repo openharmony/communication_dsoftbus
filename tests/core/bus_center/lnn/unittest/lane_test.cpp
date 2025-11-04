@@ -152,8 +152,9 @@ static void NotifyBrLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkTy
 
 /*
  * @tc.name: LANE_REQ_ID_APPLY_Test_001
- * @tc.desc: apply laneReqId test
+ * @tc.desc: apply lane req id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
@@ -168,8 +169,9 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LANE_REQ_ID_APPLY_Test_002
- * @tc.desc: apply laneReqId test
+ * @tc.desc: apply lane req id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
@@ -197,8 +199,9 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: LANE_LINK_Test_001
- * @tc.desc: LaneLink of wlan5G
+ * @tc.desc: lane link of wlan5G test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
@@ -224,8 +227,9 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LANE_LINK_Test_002
- * @tc.desc: LaneLink of BR
+ * @tc.desc: lane link of BR test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
@@ -248,8 +252,9 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: ADD_LANE_RESOURCE_TO_POOL_Test_001
- * @tc.desc: AddLaneResourceToPool test
+ * @tc.desc: add lane resource to pool test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, ADD_LANE_RESOURCE_TO_POOL_Test_001, TestSize.Level1)
@@ -277,8 +282,9 @@ HWTEST_F(LaneTest, ADD_LANE_RESOURCE_TO_POOL_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001
- * @tc.desc: CheckLaneResourceNumByLinkType test
+ * @tc.desc: check lane resource num by link type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001, TestSize.Level1)
@@ -294,8 +300,9 @@ HWTEST_F(LaneTest, CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001, TestSize.Level
 
 /*
  * @tc.name: UPDATE_LANE_RESOURCE_LANE_ID_Test_001
- * @tc.desc: UpdateLaneResourceLaneId test
+ * @tc.desc: update lane resource lane id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, UPDATE_LANE_RESOURCE_LANE_ID_Test_001, TestSize.Level1)
@@ -313,8 +320,9 @@ HWTEST_F(LaneTest, UPDATE_LANE_RESOURCE_LANE_ID_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: DESTROY_LINK_Test_001
- * @tc.desc: DestroyLink test
+ * @tc.desc: destroy link test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LaneTest, DESTROY_LINK_Test_001, TestSize.Level1)
