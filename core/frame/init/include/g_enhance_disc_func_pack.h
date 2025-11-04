@@ -55,6 +55,10 @@ int32_t DiscCoapAssembleCapDataPacked(uint32_t capability, const char *capabilit
 void DiscCoapUpdateAbilityPacked(uint32_t capability, const char *capabilityData, uint32_t dataLen,
     bool isPublish, bool isStart);
 #endif
+
+int32_t DiscCoapExtInitPacked(void);
+void DiscCoapExtDeinitPacked(void);
+
 #endif
 
 int32_t DiscFillBtypePacked(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet);
