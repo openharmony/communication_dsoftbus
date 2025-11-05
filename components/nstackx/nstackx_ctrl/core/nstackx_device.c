@@ -168,6 +168,24 @@ int32_t ReportDiscoveredDevice(const CoapCtxType *coapCtx, const DeviceInfo *dev
 #endif
 }
 
+static bool MatchLocalFilter(const DeviceInfo *deviceInfo)
+{
+    if (deviceInfo->businessType != NSTACKX_BUSINESS_TYPE_STRATEGY) {
+        return false;
+    }
+
+    DeviceInfo *localDev = GetLocalDeviceInfo();
+    if (localDev == NULL || localDev->capabilityBitmapNum == 0) {
+        return false;
+    }
+    for (uint32_t i = 0; ((i < localDev->capabilityBitmapNum) && (i < deviceInfo->capabilityBitmapNum)); i++) {
+        if ((localDev->capabilityBitmap[i] & (deviceInfo->capabilityBitmap[i])) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool MatchDeviceFilter(const DeviceInfo *deviceInfo)
 {
     uint32_t i, ret;
@@ -182,7 +200,7 @@ bool MatchDeviceFilter(const DeviceInfo *deviceInfo)
             return true;
         }
     }
-    return false;
+    return MatchLocalFilter(deviceInfo);
 }
 
 static int32_t SetServiceDataFromDeviceInfo(cJSON *item, const DeviceInfo *deviceInfo)
