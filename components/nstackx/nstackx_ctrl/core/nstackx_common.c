@@ -1117,7 +1117,7 @@ static void NSTACKX_PostEventBlockHander(void *argument)
     }
     if (arg->sem != NULL) {
         SemPost(&(arg->sem->wait));
-        DFINDER_LOGI(TAG, "post event is done");
+        DFINDER_LOGD(TAG, "post event is done");
     }
     if (arg->cb != NULL) {
         arg->cb(arg->arg);
@@ -1161,7 +1161,7 @@ static int32_t NSTACKX_BlockEvtWaitFinish(struct PostEvtBlockArgs *arg, struct N
     if (ret != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "sem wait failed errno %d", GetErrno());
     } else {
-        DFINDER_LOGI(TAG, "sem wait success");
+        DFINDER_LOGD(TAG, "sem wait success");
     }
 
     return ret;
@@ -1191,7 +1191,7 @@ static void NSTACKX_FreeSem(void *arg)
     struct NSTACKX_Sem *sem = (struct NSTACKX_Sem *)arg;
     SemDestroy(&sem->wait);
     free(sem);
-    DFINDER_LOGI(TAG, "free sem end");
+    DFINDER_LOGD(TAG, "free sem end");
 }
 
 static int32_t NSTACKX_PostEventBlock(EventHandle handle, void *arg, FreeArg cb)
@@ -1240,7 +1240,7 @@ static int32_t NSTACKX_PostEventBlock(EventHandle handle, void *arg, FreeArg cb)
         return NSTACKX_EFAILED;
     }
     NSTACKX_FreeSem((void *)sem);
-    DFINDER_LOGI(TAG, "post event success");
+    DFINDER_LOGD(TAG, "post event success");
     return NSTACKX_EOK;
 }
 
