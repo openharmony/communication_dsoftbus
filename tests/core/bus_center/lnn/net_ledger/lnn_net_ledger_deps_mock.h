@@ -114,9 +114,8 @@ public:
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
     virtual int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *networkId, InfoKey key,
         char *info, uint32_t len, int32_t ifIdx) = 0;
-    virtual void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr) = 0;
-    virtual void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr) = 0;
-    virtual void LnnAnonymizeBroadcastCipher(const char *broadcastCipher, uint32_t len, char **anonymizedStr) = 0;
+    virtual void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen,
+        char **anonymizedStr) = 0;
     virtual int32_t LnnUpdateLocalHuksKeyTime(uint64_t huksKeyTime) = 0;
     virtual int32_t LnnGetLocalDevInfoPacked(NodeInfo *deviceInfo) = 0;
     virtual bool IsSupportLpFeaturePacked(void) = 0;
@@ -195,9 +194,7 @@ public:
     MOCK_METHOD4(LnnGetRemoteByteInfo, int32_t (const char *, InfoKey, uint8_t *, uint32_t));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD5(LnnGetRemoteStrInfoByIfnameIdx, int32_t (const char *, InfoKey, char *, uint32_t, int32_t));
-    MOCK_METHOD3(LnnAnonymizeIrk, void (const char *, uint32_t, char **));
-    MOCK_METHOD3(LnnAnonymizePtk, void (const char *, uint32_t, char **));
-    MOCK_METHOD3(LnnAnonymizeBroadcastCipher, void (const char *, uint32_t, char **));
+    MOCK_METHOD4(LnnAnonymizeDeviceStr, void (const char *, uint32_t, uint32_t, char **));
     MOCK_METHOD1(LnnUpdateLocalHuksKeyTime, int32_t (uint64_t));
     MOCK_METHOD1(LnnGetLocalDevInfoPacked, int32_t (NodeInfo *));
     MOCK_METHOD0(IsSupportLpFeaturePacked, bool(void));

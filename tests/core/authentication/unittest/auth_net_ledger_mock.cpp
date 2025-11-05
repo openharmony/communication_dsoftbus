@@ -205,9 +205,9 @@ int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
     return GetNetLedgerInterface()->LnnGetLocalByteInfo(key, info, len);
 }
 
-void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr)
+void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen, char **anonymizedStr)
 {
-    return GetNetLedgerInterface()->LnnAnonymizePtk(ptk, len, anonymizedStr);
+    return GetNetLedgerInterface()->LnnAnonymizeDeviceStr(deviceStr, strLen, defaultLen, anonymizedStr);
 }
 }
 

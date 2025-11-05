@@ -91,6 +91,19 @@ static void LocalLedgerKeyTestPackaged(void)
     EXPECT_EQ(UpdateLocalSparkCheck(nullptr), SOFTBUS_INVALID_PARAM);
 }
 
+static void MockForInitLocalLedger(LocalLedgerDepsInterfaceMock &localLedgerMock)
+{
+    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    ON_CALL(localLedgerMock, GetCommonOsType).WillByDefault(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _))
+        .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
+}
+
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_001
  * @tc.desc: local ledger init test
@@ -1173,14 +1186,17 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_003, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_004, TestSize.Level1)
 {
-    LocalLedgerDepsInterfaceMock localLedgerMock;
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
     EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnUpdateLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED, LnnGenBroadcastCipherInfo());
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED, LnnGenBroadcastCipherInfo());
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
 }
 
 /*
@@ -1222,11 +1238,14 @@ HWTEST_F(LNNLedgerMockTest, UpdateLocalSparkCheck_001, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LnnGenSparkCheck_001, TestSize.Level1)
 {
     NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck(sparkCheck));
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck(sparkCheck));
+    EXPECT_EQ(SOFTBUS_OK, LnnGenSparkCheck(sparkCheck));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
 }
 
 /*
@@ -1258,15 +1277,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_001, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_002, TestSize.Level1)
 {
     NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
-    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
-    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
-    ON_CALL(localLedgerMock, GetCommonOsType).WillByDefault(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
-        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
-    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _))
-        .WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
+    MockForInitLocalLedger(localLedgerMock);
     EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
@@ -1545,5 +1556,145 @@ HWTEST_F(LNNLedgerMockTest, LL_UPDATE_USER_ID_CHECK_SUM_001, TestSize.Level1)
 {
     int32_t ret = LlUpdateUserIdCheckSum(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_ANONYMIZE_CIPHER_INFO_INVALID_PARAM_001
+ * @tc.desc: LnnAnonymizeDeviceStr invalid param check
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_ANONYMIZE_CIPHER_INFO_INVALID_PARAM_001, TestSize.Level1)
+{
+    char cipherStr[PTK_STR_LEN] = {0};
+    char *anonyCipher = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(nullptr, 0, 0, nullptr));
+    AnonymizeFree(anonyCipher);
+    anonyCipher = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(cipherStr, 0, 0, nullptr));
+    AnonymizeFree(anonyCipher);
+    anonyCipher = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(cipherStr, PTK_STR_LEN, 0, nullptr));
+    AnonymizeFree(anonyCipher);
+    anonyCipher = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(cipherStr, LFINDER_IRK_STR_LEN, PTK_DEFAULT_LEN, nullptr));
+    AnonymizeFree(anonyCipher);
+    anonyCipher = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(cipherStr, PTK_STR_LEN, PTK_DEFAULT_LEN, nullptr));
+    AnonymizeFree(anonyCipher);
+    anonyCipher = nullptr;
+}
+
+/*
+ * @tc.name: LNN_ANONYMIZE_PTK_TEST_001
+ * @tc.desc: LnnAnonymizeDeviceStr ptk
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_ANONYMIZE_PTK_TEST_001, TestSize.Level1)
+{
+    char ptkStr[PTK_STR_LEN] = {0};
+    char *anonyPtk = nullptr;
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(ptkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyPtk));
+    AnonymizeFree(anonyPtk);
+    anonyPtk = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(ptkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyPtk));
+    AnonymizeFree(anonyPtk);
+    anonyPtk = nullptr;
+    ptkStr[0] = 1;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(ptkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyPtk));
+    AnonymizeFree(anonyPtk);
+    anonyPtk = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(ptkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyPtk));
+    AnonymizeFree(anonyPtk);
+    anonyPtk = nullptr;
+    EXPECT_CALL(localLedgerMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(ptkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyPtk));
+    AnonymizeFree(anonyPtk);
+    anonyPtk = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(ptkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyPtk));
+    AnonymizeFree(anonyPtk);
+    anonyPtk = nullptr;
+}
+
+/*
+ * @tc.name: LNN_ANONYMIZE_IRK_TEST_001
+ * @tc.desc: LnnAnonymizeDeviceStr irk
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_ANONYMIZE_IRK_TEST_001, TestSize.Level1)
+{
+    char irkStr[LFINDER_IRK_STR_LEN] = {0};
+    char *anonyIrk = nullptr;
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(irkStr, LFINDER_IRK_STR_LEN, LFINDER_IRK_LEN, &anonyIrk));
+    AnonymizeFree(anonyIrk);
+    anonyIrk = nullptr;
+    irkStr[0] = 1;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(irkStr, LFINDER_IRK_STR_LEN, LFINDER_IRK_LEN, &anonyIrk));
+    AnonymizeFree(anonyIrk);
+    anonyIrk = nullptr;
+}
+
+/*
+ * @tc.name: LNN_ANONYMIZE_BROADCAST_KEY_TEST_001
+ * @tc.desc: LnnAnonymizeDeviceStr broadcast key
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_ANONYMIZE_BROADCAST_KEY_TEST_001, TestSize.Level1)
+{
+    char broadCastKeyStr[SESSION_KEY_STR_LEN] = {0};
+    char *anonyBroadCastKey = nullptr;
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(broadCastKeyStr, SESSION_KEY_STR_LEN, SESSION_KEY_LENGTH,
+        &anonyBroadCastKey));
+    AnonymizeFree(anonyBroadCastKey);
+    anonyBroadCastKey = nullptr;
+    broadCastKeyStr[0] = 1;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(broadCastKeyStr, SESSION_KEY_STR_LEN, SESSION_KEY_LENGTH,
+        &anonyBroadCastKey));
+    AnonymizeFree(anonyBroadCastKey);
+    anonyBroadCastKey = nullptr;
+}
+
+/*
+ * @tc.name: LNN_ANONYMIZE_SPARK_CHECK_TEST_001
+ * @tc.desc: LnnAnonymizeDeviceStr sparkCheck
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_ANONYMIZE_SPARK_CHECK_TEST_001, TestSize.Level1)
+{
+    char sparkCheckStr[SPARK_CHECK_STR_LEN] = {0};
+    char *anonySparkCheck = nullptr;
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(sparkCheckStr, SPARK_CHECK_STR_LEN, SPARK_CHECK_LENGTH,
+        &anonySparkCheck));
+    AnonymizeFree(anonySparkCheck);
+    anonySparkCheck = nullptr;
+    sparkCheckStr[0] = 1;
+    EXPECT_NO_FATAL_FAILURE(LnnAnonymizeDeviceStr(sparkCheckStr, SPARK_CHECK_STR_LEN, SPARK_CHECK_LENGTH,
+        &anonySparkCheck));
+    AnonymizeFree(anonySparkCheck);
+    anonySparkCheck = nullptr;
 }
 } // namespace OHOS
