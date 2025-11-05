@@ -32,10 +32,12 @@ public:
     void GetOutput(std::vector<uint8_t> &output) override;
 
 private:
+    bool Read(int &key, uint8_t *&value, size_t &size, uint32_t level);
     ProtocolFormat format_;
     nlohmann::json jsonObject_;
     nlohmann::json::iterator readPos_;
     static constexpr int DEFAULT_CAPACITY = 256;
+    static constexpr int MAX_LEVEL = 32;
     uint8_t data_[DEFAULT_CAPACITY];
 };
 }
