@@ -84,9 +84,7 @@ int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
 const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log);
 int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn);
-void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr);
-void LnnAnonymizeBroadcastCipher(const char *broadcastCipher, uint32_t len, char **anonymizedStr);
-void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr);
+void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen, char **anonymizedStr);
 bool isIfnameIdxInvalid(int32_t ifnameIdx);
 void LnnDumpSparkCheck(const unsigned char *sparkCheck, const char *log);
 #ifdef __cplusplus
