@@ -24,6 +24,7 @@
 #include "kits/c/wifi_p2p.h"
 
 #include "conn_log.h"
+#include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 
 #include "data/interface_info.h"
@@ -109,6 +110,7 @@ int32_t P2pAdapter::GetStationFrequency()
 int32_t P2pAdapter::P2pCreateGroup(const CreateGroupParam &param)
 {
     FreqType type = param.isWideBandSupported ? FREQUENCY_160M : FREQUENCY_DEFAULT;
+    type = param.freqType == SOFTBUS_FREQUENCY_DEFAULT_11AX ? FREQUENCY_80M_11AX : type;
     int32_t ret = Hid2dCreateGroup(param.frequency, type);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret),
         CONN_WIFI_DIRECT, "create group fail, freq=%{public}d, type=%{public}d, error=%{public}d",
