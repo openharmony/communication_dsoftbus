@@ -101,6 +101,9 @@ typedef int32_t (*DistActionInitFunc)(DiscActionUpdateBleCallback *updateAdvCb, 
 typedef void (*DistActionDeinitFunc)(void);
 typedef bool (*IsUnknownDeviceFunc)(const char *bleMacStr);
 
+typedef int32_t (*DiscCoapExtInitFunc)(void);
+typedef void (*DiscCoapExtDeinitFunc)(void);
+
 typedef struct TagDiscEnhanceFuncList {
     DiscTouchBleInitFunc discTouchBleInit;
     DiscShareBleInitFunc discShareBleInit;
@@ -166,6 +169,8 @@ typedef struct TagDiscEnhanceFuncList {
     DistActionInitFunc distActionInit;
     DistActionDeinitFunc distActionDeinit;
     IsUnknownDeviceFunc isUnknownDevice;
+    DiscCoapExtInitFunc discCoapExtInit;
+    DiscCoapExtDeinitFunc discCoapExtDeinit;
 } DiscEnhanceFuncList;
 
 DiscEnhanceFuncList *DiscEnhanceFuncListGet(void);

@@ -619,6 +619,9 @@ static int32_t InitCoapManager(void)
     if (SoftBusMutexInit(&(g_discCoapMgr.lock), &mutexAttr) != SOFTBUS_OK) {
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
     }
+    if (DiscCoapExtInitPacked() != SOFTBUS_OK) {
+        return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
+    }
     return SOFTBUS_OK;
 }
 
@@ -670,6 +673,7 @@ void DiscCoapDeinit(void)
 {
     DeinitCoapManager();
     DiscNstackxDeinit();
+    DiscCoapExtDeinitPacked();
 }
 
 static int CoapPubInfoDump(int fd)
