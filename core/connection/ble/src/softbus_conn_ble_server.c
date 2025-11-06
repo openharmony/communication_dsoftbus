@@ -1085,9 +1085,8 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     int32_t underlayerHandle = writeCbPara.connId;
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_SERVER, BLE_GATT);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BLE,
-            "gatt server callback, request write fail: connection not exist, underlayer handle=%{public}d",
-            underlayerHandle);
+        CONN_LOGE(CONN_BLE, "gatt server callback, request write fail: connection not exist, "
+            "underlayer handle=%{public}d", underlayerHandle);
         return;
     }
     ret = SoftBusMutexLock(&g_serverState.lock);
@@ -1098,11 +1097,10 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     } else if (writeCbPara.attrHandle == g_serverState.connCharacteristicHandle) {
         isConnCharacteristic = true;
     } else {
-        CONN_LOGE(CONN_BLE,
-            "request write fail: not NET or CONN characteristic, connId=%{public}u, underlayerHandle=%{public}d, "
-            "attrHandle=%{public}d, netCharateristicHandle=%{public}d, connCharateristicHandle=%{public}d",
-            connection->connectionId, underlayerHandle, writeCbPara.attrHandle, g_serverState.netCharacteristicHandle,
-            g_serverState.connCharacteristicHandle);
+        CONN_LOGE(CONN_BLE, "request write fail: not NET or CONN characteristic, connId=%{public}u, "
+            "underlayerHandle=%{public}d, attrHandle=%{public}d, netCharateristicHandle=%{public}d, "
+            "connCharateristicHandle=%{public}d", connection->connectionId, underlayerHandle, writeCbPara.attrHandle,
+            g_serverState.netCharacteristicHandle, g_serverState.connCharacteristicHandle);
         (void)SoftBusMutexUnlock(&g_serverState.lock);
         ConnBleReturnConnection(&connection);
         return;

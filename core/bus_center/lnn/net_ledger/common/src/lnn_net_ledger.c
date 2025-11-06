@@ -929,7 +929,7 @@ static int32_t SoftbusDumpPrintIrk(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyIrk = NULL;
-    LnnAnonymizeIrk(peerIrkStr, LFINDER_IRK_STR_LEN, &anonyIrk);
+    LnnAnonymizeDeviceStr(peerIrkStr, LFINDER_IRK_STR_LEN, LFINDER_IRK_LEN, &anonyIrk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IRK", AnonymizeWrapper(anonyIrk));
     AnonymizeFree(anonyIrk);
     (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
@@ -957,7 +957,7 @@ static int32_t SoftbusDumpPrintBroadcastCipher(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyBroadcastCipher = NULL;
-    LnnAnonymizeBroadcastCipher(broadcastCipherStr, SESSION_KEY_STR_LEN, &anonyBroadcastCipher);
+    LnnAnonymizeDeviceStr(broadcastCipherStr, SESSION_KEY_STR_LEN, SESSION_KEY_LENGTH, &anonyBroadcastCipher);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BroadcastCipher", AnonymizeWrapper(anonyBroadcastCipher));
     AnonymizeFree(anonyBroadcastCipher);
     (void)memset_s(broadcastCipher, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
@@ -985,7 +985,7 @@ static int32_t SoftbusDumpPrintRemotePtk(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyRemotePtk = NULL;
-    LnnAnonymizePtk(remotePtkStr, PTK_STR_LEN, &anonyRemotePtk);
+    LnnAnonymizeDeviceStr(remotePtkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyRemotePtk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "RemotePtk", AnonymizeWrapper(anonyRemotePtk));
     AnonymizeFree(anonyRemotePtk);
     (void)memset_s(remotePtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
@@ -1017,7 +1017,7 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_BYTE_CONVERT_FAIL;
     }
     char *anonyLocalPtk = NULL;
-    LnnAnonymizePtk(localPtkStr, PTK_STR_LEN, &anonyLocalPtk);
+    LnnAnonymizeDeviceStr(localPtkStr, PTK_STR_LEN, PTK_DEFAULT_LEN, &anonyLocalPtk);
     SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "LocalPtk", AnonymizeWrapper(anonyLocalPtk));
     AnonymizeFree(anonyLocalPtk);
     (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);

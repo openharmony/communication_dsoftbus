@@ -413,9 +413,13 @@ int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConfli
     char *anonyDevInfo = NULL;
     Anonymize(inputInfo->type == IDENTIFY_TYPE_UDID_HASH ?
         inputInfo->devInfo.udidHash : inputInfo->devInfo.peerDevId, &anonyDevInfo);
-    LNN_LOGE(LNN_LANE, "not found link conflict info by identifyType=%{public}d, devInfo=%{public}s,"
-        " conflictType=%{public}d", inputInfo->type, AnonymizeWrapper(anonyDevInfo), conflictType);
+    char *anonyHashInfo = NULL;
+    Anonymize(hashInfo.devInfo.udidHash, &anonyHashInfo);
+    LNN_LOGE(LNN_LANE, "not found link conflict info by identifyType=%{public}d, devInfo=%{public}s, "
+        "hashInfo=%{public}s, conflictType=%{public}d", inputInfo->type, AnonymizeWrapper(anonyDevInfo),
+        AnonymizeWrapper(anonyHashInfo), conflictType);
     AnonymizeFree(anonyDevInfo);
+    AnonymizeFree(anonyHashInfo);
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
