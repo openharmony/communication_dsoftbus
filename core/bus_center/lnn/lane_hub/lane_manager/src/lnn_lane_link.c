@@ -759,6 +759,32 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
+int32_t FindLaneIdByP2pMac(const char *p2pMac, LaneLinkType type, uint64_t *laneId)
+{
+    if (p2pMac == NULL || type >= LANE_LINK_TYPE_BUTT || laneId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if (strcmp(p2pMac, item->link.linkInfo.p2p.connInfo.remoteMac) == 0 && type == item->link.type) {
+            *laneId = item->laneId;
+            LaneUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    LaneUnlock();
+    char *anonyP2pMac = NULL;
+    Anonymize(p2pMac, &anonyP2pMac);
+    LNN_LOGE(LNN_LANE, "no found, linktype=%{public}d, p2pMac=%{public}s", type, AnonymizeWrapper(anonyP2pMac));
+    AnonymizeFree(anonyP2pMac);
+    return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
+}
+
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource)
 {
     if (info == NULL || resource == NULL) {
