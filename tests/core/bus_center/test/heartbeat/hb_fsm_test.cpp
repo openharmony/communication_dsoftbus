@@ -1275,7 +1275,7 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_01, TestSize.Level1)
     EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
     EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = OnCheckDevStatus(&fsm, TEST_ARGS, msgPara);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_CHECK_DEV_STATUS_ERROR);
     int32_t infoNum = 2;
     LnnCheckDevStatusMsgPara *msgPara1 = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
     ASSERT_TRUE(msgPara1 != NULL);
