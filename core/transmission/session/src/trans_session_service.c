@@ -71,15 +71,14 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "InnerListInit Failed");
         return ret;
     }
-    if (ScenarioManagerGetInstance() == NULL) {
-        TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
-        return SOFTBUS_NO_INIT;
+    if (ScenarioManagerInit() != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_INIT, "ScenarioManager init Failed");
     }
     if (InitSoftbusPagingResPullPacked() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingResPullPacked Failed");
+        TRANS_LOGW(TRANS_INIT, "InitSoftbusPagingResPullPacked Failed");
     }
     if (InitSoftbusPagingPacked() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingPacked Failed");
+        TRANS_LOGW(TRANS_INIT, "InitSoftbusPagingPacked Failed");
     }
     RegisterPermissionChangeCallback();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
