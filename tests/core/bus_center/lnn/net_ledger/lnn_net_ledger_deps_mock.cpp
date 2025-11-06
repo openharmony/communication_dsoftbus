@@ -374,19 +374,9 @@ int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *networkId, InfoKey key,
     return GetNetLedgerDepsInterface()->LnnGetRemoteStrInfoByIfnameIdx(networkId, key, info, len, ifIdx);
 }
 
-void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr)
+void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen, char **anonymizedStr)
 {
-    return GetNetLedgerDepsInterface()->LnnAnonymizeIrk(irk, len, anonymizedStr);
-}
-
-void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr)
-{
-    return GetNetLedgerDepsInterface()->LnnAnonymizePtk(ptk, len, anonymizedStr);
-}
-
-void LnnAnonymizeBroadcastCipher(const char *broadcastCipher, uint32_t len, char **anonymizedStr)
-{
-    return GetNetLedgerDepsInterface()->LnnAnonymizeBroadcastCipher(broadcastCipher, len, anonymizedStr);
+    return GetNetLedgerDepsInterface()->LnnAnonymizeDeviceStr(deviceStr, strLen, defaultLen, anonymizedStr);
 }
 
 int32_t LnnUpdateLocalHuksKeyTime(uint64_t huksKeyTime)
