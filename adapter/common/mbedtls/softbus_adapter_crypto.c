@@ -269,7 +269,8 @@ int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
 int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
     unsigned char *encryptData, uint32_t *encryptLen)
 {
-    if (cipherKey == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL) {
+    if (cipherKey == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL ||
+        inLen >= UINT32_MAX - OVERHEAD_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -289,7 +290,8 @@ int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *inpu
 int32_t SoftBusEncryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
     unsigned char *encryptData, uint32_t *encryptLen, int32_t seqNum)
 {
-    if (cipherKey == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL) {
+    if (cipherKey == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL ||
+        inLen >= UINT32_MAX - OVERHEAD_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusGenerateRandomArray(cipherKey->iv, sizeof(cipherKey->iv)) != SOFTBUS_OK) {
@@ -311,7 +313,7 @@ int32_t SoftBusEncryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned cha
 int32_t SoftBusDecryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
     unsigned char *decryptData, uint32_t *decryptLen)
 {
-    if (cipherKey == NULL || input == NULL || inLen < GCM_IV_LEN || decryptData == NULL || decryptLen == NULL) {
+    if (cipherKey == NULL || input == NULL || inLen <= OVERHEAD_LEN || decryptData == NULL || decryptLen == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
