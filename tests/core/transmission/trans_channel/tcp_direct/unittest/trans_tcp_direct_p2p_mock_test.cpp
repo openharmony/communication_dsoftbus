@@ -245,6 +245,8 @@ HWTEST_F(TransTcpDirectP2pMockTest, GetModuleByHmlIpTest001, TestSize.Level1)
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
     int32_t ret = StartHmlListener(IP, &port, TEST_UDID, LNN_PROTOCOL_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    moudleType = GetModuleByHmlIp(nullptr);
+    EXPECT_EQ(UNUSE_BUTT, moudleType);
     moudleType = GetModuleByHmlIp(IP);
     EXPECT_EQ(DIRECT_CHANNEL_SERVER_HML_START, moudleType);
     EXPECT_CALL(TcpP2pDirectMock, StopBaseListener).WillOnce(Return(SOFTBUS_OK));
@@ -421,7 +423,6 @@ HWTEST_F(TransTcpDirectP2pMockTest, OpenAuthConnTest001, TestSize.Level1)
     int32_t ret = OpenAuthConn(IP, reqId, isMeta, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, AuthGetHmlConnInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(TcpP2pDirectMock, AuthGetPreferConnInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpP2pDirectMock, AuthOpenConn).WillOnce(Return(SOFTBUS_OK));
     ret = OpenAuthConn(IP, reqId, isMeta, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
