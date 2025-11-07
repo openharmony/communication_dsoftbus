@@ -1969,6 +1969,36 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
     return TryGetBrConnInfo(uuid, connInfo);
 }
 
+int32_t AuthDeviceGetPreferConnInfoWithoutSle(const char *uuid, AuthConnInfo *connInfo)
+{
+    if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthLinkType linkList[] = {AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE,
+        AUTH_LINK_TYPE_SESSION_KEY};
+    uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
+    for (uint32_t i = 0; i < linkTypeNum; i++) {
+        if (GetAuthConnInfoByUuid(uuid, linkList[i], connInfo) != SOFTBUS_OK) {
+            continue;
+        }
+        if (linkList[i] == AUTH_LINK_TYPE_BLE) {
+            if (!IsRemoteDeviceSupportBleGuide(uuid, CATEGORY_UUID)) {
+                AUTH_LOGD(AUTH_CONN, "peer device is not support ble");
+                continue;
+            }
+            if (!CheckActiveAuthConnection(connInfo)) {
+                AUTH_LOGD(AUTH_CONN, "auth ble connection not active");
+                continue;
+            }
+        }
+        AUTH_LOGI(AUTH_CONN, "select auth type. i=%{public}d, linkList[i]=%{public}d", i, linkList[i]);
+        return SOFTBUS_OK;
+    }
+    AUTH_LOGI(AUTH_CONN, "no active auth, try br connection");
+    return TryGetBrConnInfo(uuid, connInfo);
+}
+
 int32_t AuthDeviceGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo)
 {
     if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
