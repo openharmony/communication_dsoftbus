@@ -747,6 +747,68 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest025, TestSize.Level1)
     EXPECT_EQ(res, SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: SoftbusGEnhanceTest026
+ * @tc.desc: test htp return when not get enhance
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest026, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int64_t requestId = 1;
+    const char *localMac = "testLocalMac";
+    const char *remoteMac = "testRemoteMac";
+    const char *remoteIp = "testRemoteIp";
+    char sleMac[] = "testSleMac";
+    int64_t flIdentity = 1;
+    int32_t uid = 1;
+    uint32_t macLen = 1;
+    int32_t ret = ClientOpenHtpChannelPacked(channelId, requestId, localMac, remoteMac);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ServerOpenHtpChannelPacked(remoteIp, flIdentity);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ServerUpdateHtpChannelPacked(flIdentity, channelId);
+    bool res = CheckHtpPermissionPacked(uid);
+    EXPECT_FALSE(res);
+    TransD2dQosUnregisterPacked(channelId, sleMac, macLen);
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest027
+ * @tc.desc: test auth return when not get enhance
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest027, TestSize.Level1)
+{
+    const char *ip = "TestIp";
+    char *metaNodeId = const_cast<char *>(TEST_UDID);
+    int32_t len = 1;
+    int32_t ret = AuthMetaGetMetaNodeIdByIpPacked(ip, metaNodeId, len);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    int64_t res = AuthMetaGetIdByIpPacked(ip);
+    EXPECT_EQ(res, AUTH_INVALID_ID);
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest028
+ * @tc.desc: test Lnn return when not get enhance
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest028, TestSize.Level1)
+{
+    const char *peerNetworkId = "testPeerNetworkId";
+    VapChannelInfo channelInfo;
+    int32_t ret = LnnTimeChangeNotifyPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = DcTriggerVirtualLinkPacked(peerNetworkId);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = LnnGetLocalChannelInfoPacked(&channelInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+}
+
 int32_t SchedulerSetBroadcastParamStub(int32_t bcId, const BroadcastParam *bcParam)
 {
     (void)bcId;
@@ -803,12 +865,12 @@ int32_t DiscFillBtypeStub(uint32_t capability, uint32_t allCap, NSTACKX_Discover
 }
  
 /*
- * @tc.name: SoftbusGEnhanceTest026
+ * @tc.name: SoftbusGEnhanceTest029
  * @tc.desc: SoftbusGEnhanceTest function test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest026, TestSize.Level1)
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest029, TestSize.Level1)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     pfnDiscEnhanceFuncList->schedulerSetBroadcastParam = nullptr;

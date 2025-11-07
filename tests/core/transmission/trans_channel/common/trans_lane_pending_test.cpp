@@ -1439,5 +1439,4 @@ HWTEST_F(TransLanePendingTest, TransNotifyLaneQosEventTest001, TestSize.Level1)
     ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, LANE_QOS_BW_HIGH);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-
 } // namespace OHOS
