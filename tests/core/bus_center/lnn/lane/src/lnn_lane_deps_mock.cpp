@@ -523,5 +523,10 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 {
     return GetLaneDepsInterface()->LnnGetNetworkIdByUuid(uuid, buf, len);
 }
+
+int32_t AuthMetaGetConnectionTypeByMetaNodeId(const char *metaNodeId, NetworkConnectionType *connectionType)
+{
+    return GetLaneDepsInterface()->AuthMetaGetConnectionTypeByMetaNodeId(metaNodeId, connectionType);
+}
 }
 } // namespace OHOS
