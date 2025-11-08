@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/**
+/*
  * @file publish_refresh_lnn_demo.c
  *
  * @brief Provides the sample code for device publishes and stop publishes,
@@ -78,7 +78,7 @@ int32_t main(void)
     const char *pkgNameA = "pkgNameA.demo";
     /*
      * 1. Device A calls PublishLNN() to publishes a specified service,
-     * it will returns 0 if the service is successfully published.
+     *    it will returns 0 if the service is successfully published.
      */
     int32_t ret = PublishLNN(pkgNameA, &g_pubInfo, &g_publishCB);
     if (ret == 0) {
@@ -109,7 +109,7 @@ int32_t main(void)
 
     /*
      * 1. Device B calls RefreshLNN() to Subscribes to a specified service,
-     * it will returns 0 if the service subscription is successful.
+     *    it will returns 0 if the service subscription is successful.
      */
     int32_t ret = RefreshLNN(pkgNameB, &g_subInfo, &g_refreshCB);
     if (ret == 0) {

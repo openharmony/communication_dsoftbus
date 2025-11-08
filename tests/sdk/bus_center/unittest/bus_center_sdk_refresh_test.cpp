@@ -96,7 +96,7 @@ static IRefreshCallback g_refreshCb1 = { .OnDeviceFound = TestDeviceFound, .OnDi
 
 static IRefreshCallback g_refreshCb2 = { .OnDeviceFound = TestRangeDeviceFound, .OnDiscoverResult = OnDiscoverResult };
 
-/**
+/*
  * @tc.name: RefreshLNNTest001
  * @tc.desc: Test active discovery mode, use wrong parameters in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -123,7 +123,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName1, g_sInfo3.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest002
  * @tc.desc: Test active discovery mode, use diff freq in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -174,7 +174,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest003
  * @tc.desc: Test passive discovery mode, use diff freq in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -225,7 +225,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest004
  * @tc.desc: Test active discovery mode, use correct parameters in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -251,7 +251,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest005
  * @tc.desc: Test passive discovery mode, use correct parameters in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -277,7 +277,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest006
  * @tc.desc: Test active discovery mode, use wrong parameters in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -305,7 +305,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName1, g_sInfo3.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest007
  * @tc.desc: Test active discovery mode, use diff freq in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -356,7 +356,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest008
  * @tc.desc: Test passive discovery mode, use diff freq in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -407,7 +407,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest009
  * @tc.desc: Test active discovery mode, use wrong Subscribeinfo in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -462,7 +462,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest010
  * @tc.desc: Verify startdiscovery again, Use the same and correct parameters in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -494,7 +494,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest010, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest011
  * @tc.desc: Verify startdiscovery again, Use the same and correct parameters in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -526,7 +526,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest011, TestSize.Level1)
     EXPECT_TRUE(ret == 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest012
  * @tc.desc: Test ble range in BLE, need enable the ranging on peer device.
  * @tc.in: Test module, Test number, Test levels.
@@ -552,7 +552,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest012, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest013
  * @tc.desc: Test ble range in COAP medium, need enable the ranging on peer device.
  * @tc.in: Test module, Test number, Test levels.
@@ -578,7 +578,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest013, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest014
  * @tc.desc: Test ble range in AUTO medium, need enable the ranging on peer device.
  * @tc.in: Test module, Test number, Test levels.
@@ -604,7 +604,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest014, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest015
  * @tc.desc: Test active discovery mode, use correct parameters in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -630,7 +630,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest015, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest016
  * @tc.desc: Test passive discovery mode, use correct parameters in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -656,7 +656,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest016, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest017
  * @tc.desc: Test active discovery mode, use wrong parameters in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -684,7 +684,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest017, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName1, g_sInfo3.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest018
  * @tc.desc: Test active discovery mode, use diff freq in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -730,7 +730,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest018, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest019
  * @tc.desc: Test passive discovery mode, use diff freq in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -776,7 +776,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest019, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest020
  * @tc.desc: Verify startdiscovery again, Use the same and correct parameters in BLE medium.
  * @tc.in: Test module, Test number, Test levels.

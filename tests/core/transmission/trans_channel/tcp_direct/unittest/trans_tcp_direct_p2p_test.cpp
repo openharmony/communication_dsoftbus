@@ -201,9 +201,10 @@ string TestGetMsgPack()
     return data;
 }
 
-/**
+/*
  * @tc.name: StartNewP2pListenerTest001
- * @tc.desc: StartNewP2pListener, use the wrong parameter.
+ * @tc.desc: test StartNewP2pListener
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -221,9 +222,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewP2pListenerTest001, TestSize.Level1)
     StopP2pSessionListener();
 }
 
-/**
+/*
  * @tc.name: NotifyP2pSessionConnClearTest001
- * @tc.desc: NotifyP2pSessionConnClear, use the wrong parameter.
+ * @tc.desc: test NotifyP2pSessionConnClear
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -257,9 +259,10 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
     SoftBusFree(testsessionConnList);
 }
 
-/**
+/*
  * @tc.name: P2pDirectChannelInitTest001
- * @tc.desc: P2pDirectChannelInit, use the wrong parameter.
+ * @tc.desc: test P2pDirectChannelInit
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -271,9 +274,10 @@ HWTEST_F(TransTcpDirectP2pTest, P2pDirectChannelInitTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StartP2pListenerTest001
- * @tc.desc: StartP2pListener, use the wrong parameter.
+ * @tc.desc: test StartP2pListener
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -298,9 +302,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
     StopP2pSessionListener();
 }
 
-/**
+/*
  * @tc.name: VerifyP2pTest001
- * @tc.desc: VerifyP2p, use the wrong parameter.
+ * @tc.desc: test VerifyP2p
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -327,9 +332,10 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: OpenAuthConnTest001
- * @tc.desc: OpenAuthConn, use the wrong parameter.
+ * @tc.desc: test OpenAuthConn
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -350,9 +356,10 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 }
 
-/**
+/*
  * @tc.name: OnVerifyP2pRequestTest001
- * @tc.desc: OnVerifyP2pRequest, use the wrong parameter.
+ * @tc.desc: test OnVerifyP2pRequest
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -382,9 +389,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     OnAuthChannelClose(authHandle);
 }
 
-/**
+/*
  * @tc.name: ConnectSocketDirectPeerTest004
- * @tc.desc: ConnectSocketDirectPeer, use the wrong parameter.sss
+ * @tc.desc: test ConnectSocketDirectPeer
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -394,9 +402,10 @@ HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: OnAuthDataRecvTest001
- * @tc.desc: OnAuthDataRecv, use the wrong parameter.
+ * @tc.desc: test OnAuthDataRecv
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -429,9 +438,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
+/*
  * @tc.name: OpenAuthConntest002
- * @tc.desc: OpenAuthConntest
+ * @tc.desc: Testing the scenario where authentication connection fails
+ *           during direct P2P communication over TCP
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -458,9 +468,10 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
     appInfo = nullptr;
 }
 
-/**
+/*
  * @tc.name: SendVerifyP2pRsp003
- * @tc.desc: SendVerifyP2pRsp.
+ * @tc.desc: Test the function of sending and verifying P2P responses in direct TCP P2P communication
+ *           including handing both successful and failed scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -488,9 +499,10 @@ HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID);
 }
 
-/**
+/*
  * @tc.name: OpenNewAuthConn004
- * @tc.desc: OpenNewAuthConn.
+ * @tc.desc: Test whether opening a new authenticated connection fails
+ *           under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -520,9 +532,10 @@ HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
     conn = nullptr;
 }
 
-/**
+/*
  * @tc.name: StartVerifyP2pInfo005
- * @tc.desc: StartVerifyP2pInfo.
+ * @tc.desc: Test whether the return value of the StartVerifyP2pInfo function meets expectations
+ *           under different authId conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -555,9 +568,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
     conn = nullptr;
 }
 
-/**
+/*
  * @tc.name: StartNewHmlListenerTest001
- * @tc.desc: StartNewHmlListener, use the wrong parameter.
+ * @tc.desc: test StartNewHmlListener
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -577,9 +591,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: StartHmlListenerTest001
- * @tc.desc: StartHmlListener, ListenerList not init.
+ * @tc.desc: test StartHmlListener
+ *           ListenerList not init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -589,9 +604,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: StartHmlListenerTest002
- * @tc.desc: StartHmlListener, ListenerList is init.
+ * @tc.desc: test StartHmlListener
+             ListenerList is init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -610,9 +626,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: StartHmlListenerTest003
- * @tc.desc: StartHmlListener, ListenerList is init.
+ * @tc.desc: test StartHmlListener
+ *           ListenerList is init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -627,9 +644,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest003, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: StartHmlListenerTest004
- * @tc.desc: StartHmlListener, try listener.
+ * @tc.desc: test StartHmlListener
+ *           try listener
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -646,9 +664,11 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest004, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: StartVerifyP2pInfoTest001
- * @tc.desc: StartVerifyP2pInfo
+ * @tc.desc: Test the behavior of the StartVerifyP2pInfo function under specific conditions
+ *           particularly when the input connection type is CONNECT_P2P to verify whether it returns
+ *           the expected error code SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -673,9 +693,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfoTest001, TestSize.Level1)
     conn = nullptr;
 }
 
-/**
+/*
  * @tc.name: OnP2pVerifyChannelClosedTest001
- * @tc.desc: OnP2pVerifyChannelClosed
+ * @tc.desc: Test the function of verifying channel closure
+ *           in direct TCP P2P communication
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -686,9 +707,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyChannelClosedTest001, TestSize.Level1
     EXPECT_TRUE(1);
 }
 
-/**
+/*
  * @tc.name: AddP2pOrHmlTriggerTest001
- * @tc.desc: AddP2pOrHmlTrigger, use hml addr, not found hml ip.
+ * @tc.desc: test AddP2pOrHmlTrigger
+ *           use hml addr, not found hml ip
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -704,9 +726,10 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: AddP2pOrHmlTriggerTest002
- * @tc.desc: AddP2pOrHmlTrigger, not use hml addr, enter AddTrigger return fail.
+ * @tc.desc: test AddP2pOrHmlTrigger
+ *           not use hml addr, enter AddTrigger return fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -722,9 +745,10 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_CONN_FAIL, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetAuthIdByUuidTest001
- * @tc.desc: TransProxyGetAuthIdByUuid test
+ * @tc.desc: test TransProxyGetAuthIdByUuid
+ *           Test whether the function of obtaining the authentication ID via UUID fails
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -737,9 +761,11 @@ HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdByUuidTest001, TestSize.Level
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: StopP2pListenerByRemoteUuidTest001
- * @tc.desc: StopP2pListenerByRemoteUuid.
+ * @tc.desc: Test the functionality of stopping the P2P listener
+ *           particularly stopping the listener via a remote UUID
+ *           and verify the correctness of the related operations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -754,9 +780,10 @@ HWTEST_F(TransTcpDirectP2pTest, StopP2pListenerByRemoteUuidTest001, TestSize.Lev
     StopP2pListenerByRemoteUuid(g_uuid);
 }
 
-/**
+/*
  * @tc.name: ClearHmlListenerByUuidTest001
- * @tc.desc: ClearHmlListenerByUuid.
+ * @tc.desc: Test the functionality of clearing UUID-based HML listeners and verify the behavior of starting
+ *           HML listeners under different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -776,9 +803,10 @@ HWTEST_F(TransTcpDirectP2pTest, ClearHmlListenerByUuidTest001, TestSize.Level1)
     OutputAnonymizeIpAddress(g_ip, g_ip);
 }
 
-/**
+/*
  * @tc.name: OnAuthConnOpenedTest001
- * @tc.desc: OnAuthConnOpened.
+ * @tc.desc: Testing the scenario of authenticating connection establishment
+ *           in direct TCP P2P connections
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -797,9 +825,11 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenedTest001, TestSize.Level1)
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: OnAuthConnOpenedTest002
- * @tc.desc: OnAuthConnOpened.
+ * @tc.desc: Test the behavior of the OnAuthConnOpened function under specific conditions
+ *           particularly when the input requestId and authHandle parameters are provided
+ *           to verify whether it can correctly handle and release resources
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -818,9 +848,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenedTest002, TestSize.Level1)
     OnAuthConnOpened(requestId, authHandle);
 }
 
-/**
+/*
  * @tc.name: OnAuthConnOpenFailedTest001
- * @tc.desc: OnAuthConnOpenFailed.
+ * @tc.desc: Test the handling logic in TCP direct P2P communication
+ *           when the authentication connection fails to open
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -838,9 +869,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenFailedTest001, TestSize.Level1)
     OnAuthConnOpenFailed(requestId, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 }
 
-/**
+/*
  * @tc.name: PackAndSendVerifyP2pRspTest001
- * @tc.desc: PackAndSendVerifyP2pRsp.ip is null
+ * @tc.desc: test PackAndSendVerifyP2pRsp
+ *           ip is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -856,9 +888,10 @@ HWTEST_F(TransTcpDirectP2pTest, PackAndSendVerifyP2pRspTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: PackAndSendVerifyP2pRspTest002
- * @tc.desc: PackAndSendVerifyP2pRsp.
+ * @tc.desc: Test whether the return value of the PackAndSendVerifyP2pRsp function meets
+ *           expectations under different parameter conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -876,9 +909,10 @@ HWTEST_F(TransTcpDirectP2pTest, PackAndSendVerifyP2pRspTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetRemoteUuidByAuthHandleTest001
- * @tc.desc: TransGetRemoteUuidByAuthHandle.
+ * @tc.desc: Test whether the function of obtaining the UUID of a remote device through
+ *           the authentication handle works properly
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -894,9 +928,10 @@ HWTEST_F(TransTcpDirectP2pTest, TransGetRemoteUuidByAuthHandleTest001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: AddHmlTriggerTest001
- * @tc.desc: AddHmlTrigger.
+ * @tc.desc: Test whether the function of adding HML triggers
+ *           under specific conditions meets expectations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -911,9 +946,10 @@ HWTEST_F(TransTcpDirectP2pTest, AddHmlTriggerTest001, TestSize.Level1)
     ClearHmlListenerByUuid(g_uuid);
 }
 
-/**
+/*
  * @tc.name: OnVerifyP2pReplyTest001
- * @tc.desc: OnVerifyP2pReply.
+ * @tc.desc: Test whether the OnVerifyP2pReply function behaves as expected
+ *           under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -940,9 +976,11 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest001, TestSize.Level1)
 }
 
 
-/**
- * @tc.name: GetModuleByHmlIp
- * @tc.desc: test GetModuleByHmlIp001.
+/*
+ * @tc.name: GetModuleByHmlIp001
+ * @tc.desc: Test whether the IP address acquisition module functions
+ *           properly and verify that the processes of creating starting and
+ *           stopping related listeners work as expected
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -957,9 +995,10 @@ HWTEST_F(TransTcpDirectP2pTest, GetModuleByHmlIp001, TestSize.Level1)
     StopHmlListener(DIRECT_CHANNEL_SERVER_HML_START);
 }
 
-/**
+/*
  * @tc.name: ConnectSocketDirectPeerTest002
- * @tc.desc: ConnectSocketDirectPeer
+ * @tc.desc: Test whether the ConnectSocketDirectPeer interface in the direct TCP P2P connection function
+ *           can correctly process parameters and return the expectd results
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -969,9 +1008,11 @@ HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest002, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
- * @tc.name: OnAuthDataRecv
- * @tc.desc: test OnAuthDataRecv001
+/*
+ * @tc.name: OnAuthDataRecv001
+ * @tc.desc: Test the behavior of the OnAuthDataRecv function
+ *           when receiving specific authentication data
+ *           particularly the handling logic when the data length is a negative value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -990,9 +1031,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv001, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
- * @tc.name: OnAuthDataRecv
- * @tc.desc: test OnAuthDataRecv002
+/*
+ * @tc.name: OnAuthDataRecv002
+ * @tc.desc: Test the processing logic for receiving authentication response data from the P2P module
+ *           under the WiFi authentication link type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1009,9 +1051,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv002, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
- * @tc.name: OnAuthDataRecv
- * @tc.desc: test OnAuthDataRecv003
+/*
+ * @tc.name: OnAuthDataRecv003
+ * @tc.desc: Test the behavior of the OnAuthDataRecv function under specific conditions
+ *           particularly the handling logic when the type of authHandle is AUTH_LINK_TYPE_WIFI -1
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1030,9 +1073,11 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv003, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
- * @tc.name: OnAuthDataRecv
- * @tc.desc: test OnAuthDataRecv004
+/*
+ * @tc.name: OnAuthDataRecv004
+ * @tc.desc: Test the behavior of the OnAuthDataRecv function
+ *           under specific conditions to verify its ability to process authentication data
+ *           for the P2P link module
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1051,9 +1096,11 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv004, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
- * @tc.name: OnAuthDataRecv
- * @tc.desc: test OnAuthDataRecv005
+/*
+ * @tc.name: OnAuthDataRecv005
+ * @tc.desc: Test the behavior of the OnAuthDataRecv function
+ *           under specific conditions to verify its ability to process authentication data
+ *           for the P2P listening module
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1072,9 +1119,11 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv005, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
- * @tc.name: OnAuthDataRecv
- * @tc.desc: test OnAuthDataRecv006
+/*
+ * @tc.name: OnAuthDataRecv006
+ * @tc.desc: Test the behavior of the OnAuthDataRecv function
+ *           under specific conditions to verify whether its logic for processing
+ *           authentication data is correct
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1093,9 +1142,10 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv006, TestSize.Level1)
     SoftBusFree(data);
 }
 
-/**
- * @tc.name: TransProxyGetAuthIdByUuid
- * @tc.desc: test TransProxyGetAuthIdByUuid001
+/*
+ * @tc.name: TransProxyGetAuthIdByUuid001
+ * @tc.desc: Test whether the function of obtaining the authentication ID
+ *           using the device UUID has failed
  * @tc.type: FUNC
  * @tc.require:
  */
