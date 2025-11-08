@@ -187,7 +187,7 @@ HWTEST_F(BusCenterSdkDdosTest, DDOS_START_TIME_SYNC_Test_001, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT);
 }
 
-/**
+/*
  * @tc.name: DDOS_PublishLNNTest001
  * @tc.desc: Verify normal case
  * @tc.type: FUNC
@@ -207,7 +207,7 @@ HWTEST_F(BusCenterSdkDdosTest, DDOS_PublishLNNTest001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT);
 }
 
-/**
+/*
  * @tc.name: DDOS_RefreshLNNTest001
  * @tc.desc: Verify normal case
  * @tc.type: FUNC

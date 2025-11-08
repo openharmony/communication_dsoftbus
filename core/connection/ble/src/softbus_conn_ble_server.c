@@ -232,68 +232,68 @@ static void BleServiceAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t s
 
 static int32_t CheckUuidAndSetServiceHandle(const ServiceAddMsgContext *ctx)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     if (ctx->uuid.uuidLen != strlen(SOFTBUS_SERVICE_UUID) ||
         memcmp(ctx->uuid.uuid, SOFTBUS_SERVICE_UUID, ctx->uuid.uuidLen) != 0) {
-        rc = SOFTBUS_CONN_BLE_UNDERLAY_UNKNOWN_SERVICE_ERR;
-        CONN_LOGE(CONN_BLE, "unknow service id, err=%{public}d", rc);
-        return rc;
+        ret = SOFTBUS_CONN_BLE_UNDERLAY_UNKNOWN_SERVICE_ERR;
+        CONN_LOGE(CONN_BLE, "unknow service id, err=%{public}d", ret);
+        return ret;
     }
     if (ctx->status != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "underlay returned status is not success, status=%{public}d", ctx->status);
-        rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVER_ADD_SERVICE_FAIL;
-        return rc;
+        ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVER_ADD_SERVICE_FAIL;
+        return ret;
     }
 
-    rc = SoftBusMutexLock(&g_serverState.lock);
-    if (rc != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", rc);
-        rc = SOFTBUS_LOCK_ERR;
-        return rc;
+    ret = SoftBusMutexLock(&g_serverState.lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", ret);
+        ret = SOFTBUS_LOCK_ERR;
+        return ret;
     }
     g_serverState.serviceHandle = ctx->srvcHandle;
     (void)SoftBusMutexUnlock(&g_serverState.lock);
-    return rc;
+    return ret;
 }
 
 static void BleServiceAddMsgHandler(const ServiceAddMsgContext *ctx)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     do {
         if (CheckUuidAndSetServiceHandle(ctx) != SOFTBUS_OK) {
             break;
         }
 
-        rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_ADDING, BLE_SERVER_STATE_SERVICE_ADDED);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", rc);
+        ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_ADDING, BLE_SERVER_STATE_SERVICE_ADDED);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ret);
             break;
         }
         SoftBusBtUuid uuid = {
             .uuid = (char *)SOFTBUS_CHARA_BLENET_UUID,
             .uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
         };
-        rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
+        ret = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
             SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGW(CONN_BLE, "underlayer add characteristic fail, err=%{public}d", rc);
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR;
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGW(CONN_BLE, "underlayer add characteristic fail, err=%{public}d", ret);
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR;
             break;
         }
-        rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_ADDED, BLE_SERVER_STATE_NET_CHARACTERISTIC_ADDING);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", rc);
+        ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_ADDED, BLE_SERVER_STATE_NET_CHARACTERISTIC_ADDING);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ret);
             break;
         }
     } while (false);
 
-    if (rc != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         ResetServerState();
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, 0, 0, NULL);
-        g_serverEventListener.onServerStarted(BLE_GATT, rc);
+        g_serverEventListener.onServerStarted(BLE_GATT, ret);
     }
 }
 
@@ -328,7 +328,7 @@ static int32_t IsConnCharacterisicAndSetHandle(const CharacteristicAddMsgContext
     CharacterisicHandleServerState *serverState)
 {
     serverState->isConnCharacterisic = false;
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     if (ctx->uuid.uuidLen == strlen(SOFTBUS_CHARA_BLENET_UUID) &&
         memcmp(ctx->uuid.uuid, SOFTBUS_CHARA_BLENET_UUID, ctx->uuid.uuidLen) == 0) {
         serverState->expect = BLE_SERVER_STATE_NET_CHARACTERISTIC_ADDING;
@@ -350,8 +350,8 @@ static int32_t IsConnCharacterisicAndSetHandle(const CharacteristicAddMsgContext
         return SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_FAIL;
     }
 
-    rc = SoftBusMutexLock(&g_serverState.lock);
-    if (rc != SOFTBUS_OK) {
+    ret = SoftBusMutexLock(&g_serverState.lock);
+    if (ret != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
     if (ctx->srvcHandle != g_serverState.serviceHandle) {
@@ -371,17 +371,17 @@ static int32_t IsConnCharacterisicAndSetHandle(const CharacteristicAddMsgContext
 
 static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ctx)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     do {
         CharacterisicHandleServerState serverState = {0};
-        rc = IsConnCharacterisicAndSetHandle(ctx, &serverState);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "IsConnCharacterisicAndSetHandle fail, err=%{public}d", rc);
+        ret = IsConnCharacterisicAndSetHandle(ctx, &serverState);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "IsConnCharacterisicAndSetHandle fail, err=%{public}d", ret);
             break;
         }
-        rc = UpdateBleServerStateInOrder(serverState.expect, serverState.next);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", rc);
+        ret = UpdateBleServerStateInOrder(serverState.expect, serverState.next);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ret);
             break;
         }
 
@@ -389,23 +389,23 @@ static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ct
             .uuid = SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
             .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
         };
-        rc = SoftBusGattsAddDescriptor(
+        ret = SoftBusGattsAddDescriptor(
             ctx->srvcHandle, uuid, SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "underlayer add decriptor fail, err=%{public}d", rc);
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_ADD_ERR;
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "underlayer add decriptor fail, err=%{public}d", ret);
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_ADD_ERR;
             break;
         }
-        rc = UpdateBleServerStateInOrder(serverState.next, serverState.nextNext);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", rc);
+        ret = UpdateBleServerStateInOrder(serverState.next, serverState.nextNext);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ret);
             break;
         }
     } while (false);
-    if (rc != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         ResetServerState();
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, 0, 0, NULL);
-        g_serverEventListener.onServerStarted(BLE_GATT, rc);
+        g_serverEventListener.onServerStarted(BLE_GATT, ret);
     }
 }
 
@@ -435,18 +435,18 @@ static void BleDescriptorAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_
 
 static void BleDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     do {
         if (ctx->uuid.uuidLen != strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID) ||
             memcmp(ctx->uuid.uuid, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID, ctx->uuid.uuidLen) != 0) {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_UNKNOWN_DESCRIPTOR_ERR;
-            CONN_LOGE(CONN_BLE, "unkown desciptor uuid, err=%{public}d", rc);
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_UNKNOWN_DESCRIPTOR_ERR;
+            CONN_LOGE(CONN_BLE, "unkown desciptor uuid, err=%{public}d", ret);
             break;
         }
-        rc = SoftBusMutexLock(&g_serverState.lock);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", rc);
-            rc = SOFTBUS_LOCK_ERR;
+        ret = SoftBusMutexLock(&g_serverState.lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", ret);
+            ret = SOFTBUS_LOCK_ERR;
             break;
         }
         bool isConnDescriptor = false;
@@ -455,19 +455,19 @@ static void BleDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         } else if (g_serverState.connDescriptorHandle == -1) {
             isConnDescriptor = true;
         } else {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_HANDLE_MISMATCH_ERR;
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_HANDLE_MISMATCH_ERR;
         }
         (void)SoftBusMutexUnlock(&g_serverState.lock);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "descriptor handle mismatch, err=%{public}d", rc);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "descriptor handle mismatch, err=%{public}d", ret);
             break;
         }
-        rc = isConnDescriptor ? BleConnDescriptorAddMsgHandler(ctx) : BleNetDescriptorAddMsgHandler(ctx);
+        ret = isConnDescriptor ? BleConnDescriptorAddMsgHandler(ctx) : BleNetDescriptorAddMsgHandler(ctx);
     } while (false);
-    if (rc != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         ResetServerState();
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, 0, 0, NULL);
-        g_serverEventListener.onServerStarted(BLE_GATT, rc);
+        g_serverEventListener.onServerStarted(BLE_GATT, ret);
     }
 }
 
@@ -477,36 +477,36 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         CONN_LOGW(CONN_BLE, "underlayer return status is not success, status=%{public}d", ctx->status);
         return SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_ADD_FAIL;
     }
-    int32_t rc = SoftBusMutexLock(&g_serverState.lock);
-    if (rc != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", rc);
+    int32_t ret = SoftBusMutexLock(&g_serverState.lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", ret);
         return SOFTBUS_LOCK_ERR;
     }
     g_serverState.netDescriptorHandle = ctx->descriptorHandle;
     (void)SoftBusMutexUnlock(&g_serverState.lock);
-    rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_NET_DISCRIPTOR_ADDING, BLE_SERVER_STATE_NET_DISCRIPTOR_ADDED);
-    if (rc != SOFTBUS_OK) {
+    ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_NET_DISCRIPTOR_ADDING, BLE_SERVER_STATE_NET_DISCRIPTOR_ADDED);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ctx->status);
-        return rc;
+        return ret;
     }
     SoftBusBtUuid uuid = {
         .uuid = SOFTBUS_CHARA_BLECONN_UUID,
         .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
     };
-    rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
+    ret = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
         SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
-    if (rc != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "underlayer add characteristic fail, err=%{public}d", rc);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "underlayer add characteristic fail, err=%{public}d", ret);
         return SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR;
     }
-    rc = UpdateBleServerStateInOrder(
+    ret = UpdateBleServerStateInOrder(
         BLE_SERVER_STATE_NET_DISCRIPTOR_ADDED, BLE_SERVER_STATE_CONN_CHARACTERISTIC_ADDING);
-    if (rc != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ctx->status);
-        return rc;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -517,27 +517,27 @@ static int32_t BleConnDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         CONN_LOGW(CONN_BLE, "underlayer return status is not success, status=%{public}d", ctx->status);
         return SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_ADD_FAIL;
     }
-    int32_t rc = SoftBusMutexLock(&g_serverState.lock);
-    if (rc != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", rc);
+    int32_t ret = SoftBusMutexLock(&g_serverState.lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", ret);
         return SOFTBUS_LOCK_ERR;
     }
     g_serverState.connDescriptorHandle = ctx->descriptorHandle;
     (void)SoftBusMutexUnlock(&g_serverState.lock);
-    rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_CONN_DISCRIPTOR_ADDING, BLE_SERVER_STATE_CONN_DISCRIPTOR_ADDED);
-    if (rc != SOFTBUS_OK) {
+    ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_CONN_DISCRIPTOR_ADDING, BLE_SERVER_STATE_CONN_DISCRIPTOR_ADDED);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ctx->status);
-        return rc;
+        return ret;
     }
-    rc = SoftBusGattsStartService(ctx->srvcHandle);
-    if (rc != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "underlayer start service fail, err=%{public}d", rc);
+    ret = SoftBusGattsStartService(ctx->srvcHandle);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "underlayer start service fail, err=%{public}d", ret);
         return SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_START_ERR;
     }
-    rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_CONN_DISCRIPTOR_ADDED, BLE_SERVER_STATE_SERVICE_STARTING);
-    if (rc != SOFTBUS_OK) {
+    ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_CONN_DISCRIPTOR_ADDED, BLE_SERVER_STATE_SERVICE_STARTING);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ctx->status);
-        return rc;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -558,38 +558,38 @@ static void BleServiceStartCallback(int32_t status, int32_t srvcHandle)
 
 static void BleServiceStartMsgHandler(const CommonStatusMsgContext *ctx)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     do {
         if (ctx->status != SOFTBUS_OK) {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_START_FAIL;
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_START_FAIL;
             CONN_LOGW(CONN_BLE, "underlayer return status is not success, status=%{public}d", ctx->status);
             break;
         }
-        rc = SoftBusMutexLock(&g_serverState.lock);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", rc);
-            rc = SOFTBUS_LOCK_ERR;
+        ret = SoftBusMutexLock(&g_serverState.lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "try to lock fail, err=%{public}d", ret);
+            ret = SOFTBUS_LOCK_ERR;
             break;
         }
         int32_t serviceHandle = g_serverState.serviceHandle;
         (void)SoftBusMutexUnlock(&g_serverState.lock);
         if (serviceHandle != ctx->srvcHandle) {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_HANDLE_MISMATCH_ERR;
-            CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, err=%{public}d", rc);
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_HANDLE_MISMATCH_ERR;
+            CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, err=%{public}d", ret);
             break;
         }
-        rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STARTING, BLE_SERVER_STATE_SERVICE_STARTED);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", rc);
+        ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STARTING, BLE_SERVER_STATE_SERVICE_STARTED);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ret);
             break;
         }
     } while (false);
 
-    if (rc != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         ResetServerState();
     }
     ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, 0, 0, NULL);
-    g_serverEventListener.onServerStarted(BLE_GATT, rc);
+    g_serverEventListener.onServerStarted(BLE_GATT, ret);
 }
 
 static void BleServerWaitStartServerTimeoutHandler(void)
@@ -764,45 +764,45 @@ static void BleServiceStopCallback(int32_t status, int32_t srvcHandle)
 
 static void BleServiceStopMsgHandler(CommonStatusMsgContext *ctx)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     do {
         if (ctx->status != SOFTBUS_OK) {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_FAIL;
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_FAIL;
             CONN_LOGW(CONN_BLE, "underlayer return status is not success, status=%{public}d", ctx->status);
             break;
         }
-        rc = SoftBusMutexLock(&g_serverState.lock);
-        if (rc != SOFTBUS_OK) {
+        ret = SoftBusMutexLock(&g_serverState.lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "try to lock fail, status=%{public}d", ctx->status);
-            rc = SOFTBUS_LOCK_ERR;
+            ret = SOFTBUS_LOCK_ERR;
             break;
         }
         int32_t serviceHandle = g_serverState.serviceHandle;
         (void)SoftBusMutexUnlock(&g_serverState.lock);
         if (serviceHandle != ctx->srvcHandle) {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_HANDLE_MISMATCH_ERR;
-            CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, err=%{public}d", rc);
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_HANDLE_MISMATCH_ERR;
+            CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, err=%{public}d", ret);
             break;
         }
-        rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STOPPING, BLE_SERVER_STATE_SERVICE_STOPPED);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", rc);
+        ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STOPPING, BLE_SERVER_STATE_SERVICE_STOPPED);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ret);
             break;
         }
-        rc = SoftBusGattsDeleteService(serviceHandle);
-        if (rc != SOFTBUS_OK) {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_ERR;
-            CONN_LOGE(CONN_BLE, "underlay delete service fail, err=%{public}d", rc);
+        ret = SoftBusGattsDeleteService(serviceHandle);
+        if (ret != SOFTBUS_OK) {
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_ERR;
+            CONN_LOGE(CONN_BLE, "underlay delete service fail, err=%{public}d", ret);
             break;
         }
-        rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STOPPED, BLE_SERVER_STATE_SERVICE_DELETING);
-        if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", rc);
+        ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STOPPED, BLE_SERVER_STATE_SERVICE_DELETING);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update server state fail, err=%{public}d", ret);
             break;
         }
     } while (false);
 
-    if (rc != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         ResetServerState();
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_STOP_SERVER_TIMEOUT, 0, 0, NULL);
         g_serverEventListener.onServerClosed(BLE_GATT, SOFTBUS_OK);
@@ -826,25 +826,25 @@ static void BleServiceDeleteCallback(int32_t status, int32_t srvcHandle)
 
 static void BleServiceDeleteMsgHandler(const CommonStatusMsgContext *ctx)
 {
-    int32_t rc = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     bool isNotifyServerClosed = true;
     do {
         if (ctx->status != SOFTBUS_OK) {
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_FAIL;
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_FAIL;
             CONN_LOGE(CONN_BLE, "underlayer return status is not success, status=%{public}d", ctx->status);
             break;
         }
-        rc = SoftBusMutexLock(&g_serverState.lock);
-        if (rc != SOFTBUS_OK) {
+        ret = SoftBusMutexLock(&g_serverState.lock);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "try to lock fail, status=%{public}d", ctx->status);
-            rc = SOFTBUS_LOCK_ERR;
+            ret = SOFTBUS_LOCK_ERR;
             break;
         }
         if (g_serverState.serviceHandle != ctx->srvcHandle) {
             isNotifyServerClosed = false;
             (void)SoftBusMutexUnlock(&g_serverState.lock);
-            rc = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_HANDLE_MISMATCH_ERR;
-            CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, err=%{public}d", rc);
+            ret = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_HANDLE_MISMATCH_ERR;
+            CONN_LOGE(CONN_BLE, "underlayer srvcHandle mismatch, err=%{public}d", ret);
             break;
         }
         g_serverState.state = BLE_SERVER_STATE_INITIAL;
@@ -861,13 +861,13 @@ static void BleServiceDeleteMsgHandler(const CommonStatusMsgContext *ctx)
         SoftBusUnRegisterGattsCallbacks(uuid);
     } while (false);
 
-    if (rc != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         ResetServerState();
     }
     ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_STOP_SERVER_TIMEOUT, 0, 0, NULL);
     // Non-active service delete, delete callback needs to reports close
     if (isNotifyServerClosed) {
-        g_serverEventListener.onServerClosed(BLE_GATT, rc);
+        g_serverEventListener.onServerClosed(BLE_GATT, ret);
     }
 }
 
@@ -1190,8 +1190,8 @@ static int BleCompareGattServerLooperEventFunc(const SoftBusMessage *msg, void *
 
 static bool BleIsConcernedAttrHandle(int32_t srvcHandle, int32_t attrHandle)
 {
-    int32_t rc = SoftBusMutexLock(&g_serverState.lock);
-    if (rc != SOFTBUS_OK) {
+    int32_t ret = SoftBusMutexLock(&g_serverState.lock);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "try to lock fail, attrHandle=%{public}d", attrHandle);
         return false;
     }

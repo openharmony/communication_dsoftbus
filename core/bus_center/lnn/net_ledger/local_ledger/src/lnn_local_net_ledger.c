@@ -1428,7 +1428,7 @@ static int32_t UpdateLocalFeatureCapability(const void *capability)
     if (capability == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    g_localNetLedger.localInfo.feature |= *(uint64_t *)capability;
+    g_localNetLedger.localInfo.feature = *(uint64_t *)capability;
     return SOFTBUS_OK;
 }
 
@@ -2004,30 +2004,6 @@ static int32_t UpdateLocalUserId(const void *userId)
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateDisplayId(const void *displayId)
-{
-    if (displayId == NULL) {
-        LNN_LOGE(LNN_LEDGER, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    g_localNetLedger.localInfo.displayId = *(uint64_t *)displayId;
-    if (LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "save local device info fail");
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t L1GetDisplayId(void *displayId, uint32_t len)
-{
-    NodeInfo *info = &g_localNetLedger.localInfo;
-    if (displayId == NULL || len != sizeof(uint64_t)) {
-        LNN_LOGE(LNN_LEDGER, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    *((uint64_t *)displayId) = info->displayId;
-    return SOFTBUS_OK;
-}
-
 static int32_t L1GetUserId(void *userId, uint32_t len)
 {
     if (userId == NULL || len != sizeof(int32_t)) {
@@ -2218,7 +2194,6 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
     {BYTE_KEY_SPARK_CHECK, SPARK_CHECK_LENGTH, LlGetSparkCheck, UpdateLocalSparkCheck},
-    {NUM_KEY_DISPLAY_ID, sizeof(uint64_t), L1GetDisplayId, UpdateDisplayId},
 };
 
 static LocalLedgerKeyByIfname g_localKeyByIfnameTable[] = {
@@ -2693,11 +2668,6 @@ int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 }
 
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
-{
-    return LnnSetLocalInfo(key, (void *)&info);
-}
-
-int32_t LnnSetLocalNumU64Info(InfoKey key, uint64_t info)
 {
     return LnnSetLocalInfo(key, (void *)&info);
 }

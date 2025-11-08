@@ -802,7 +802,7 @@ static bool CheckServiceUuidIsMatch(const BcScanFilter *filter, const BroadcastP
 static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayload *bcData)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(bcData != NULL, false, DISC_BROADCAST, "bcData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcData->payload != NULL, false, DISC_BROADCAST, "payload is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGD(bcData->payload != NULL, false, DISC_BROADCAST, "payload is nullptr");
 
     if (bcData->type != BC_DATA_TYPE_SERVICE && bcData->type != BC_DATA_TYPE_MANUFACTURER &&
         bcData->type != BC_DATA_TYPE_SERVICE_UUID) {
@@ -857,7 +857,7 @@ static int32_t BuildBcPayload(const SoftbusBroadcastPayload *srcData, BroadcastP
     DISC_CHECK_AND_RETURN_RET_LOGE(dstData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "dstData is nullptr");
 
     if (srcData->payload == NULL) {
-        DISC_LOGW(DISC_BROADCAST, "payload is null, skip");
+        DISC_LOGD(DISC_BROADCAST, "payload is null, skip");
         return SOFTBUS_OK;
     }
 

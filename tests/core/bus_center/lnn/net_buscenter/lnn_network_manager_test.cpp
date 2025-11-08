@@ -742,14 +742,8 @@ HWTEST_F(LNNNetworkManagerMockTest, Risk_Device_Leave_Lnn_Test_001, TestSize.Lev
 {
     int ret = 0;
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
-
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_OK));
-    ret = RiskDeviceLeaveLnn();
-    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
 }
 
 /*

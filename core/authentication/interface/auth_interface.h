@@ -69,6 +69,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
 int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);
 void AuthCloseConn(AuthHandle authHandle);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
+int32_t AuthGetPreferConnInfoWithoutSle(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient);
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);

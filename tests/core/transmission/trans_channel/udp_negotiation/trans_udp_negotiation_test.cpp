@@ -77,9 +77,10 @@ void TransUdpNegotiationTest::TearDownTestCase(void)
     DiscEventManagerDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest01
- * @tc.desc: Transmission open channel with invalid parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission open channel with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -99,9 +100,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest01, TestSize.Level1)
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }
-/**
+/*
  * @tc.name: TransUdpNegotiationTest02
- * @tc.desc: Transmission open channel with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission open channel with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -120,9 +122,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest02, TestSize.Level1)
     SoftBusFree(connOpt);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest03
- * @tc.desc: Transmission open channel with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission open channel with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -152,9 +155,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest03, TestSize.Level1)
     SoftBusFree(connOpt);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest04
- * @tc.desc: Transmission open channel with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission open channel with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -174,9 +178,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest04, TestSize.Level1)
     SoftBusFree(connOpt);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest05
- * @tc.desc: Transmission close channel with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission close channel with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -196,9 +201,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
     EXPECT_NE(ret,  SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest06
- * @tc.desc: Transmission notify udp channel closed with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission notify udp channel closed with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -215,9 +221,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest06, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest07
- * @tc.desc: Transmission notify udp channel open failed with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission notify udp channel open failed with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -236,9 +243,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest07, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest08
- * @tc.desc: Transmission notify udp channel open failed with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission notify udp channel open failed with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,9 +264,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest08, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest09
- * @tc.desc: Transmission notify udp qos event with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission notify udp qos event with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -274,9 +283,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest09, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest10
- * @tc.desc: Transmission notify udp qos event with wrong parameters.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission notify udp qos event with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -293,9 +303,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest10, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest11
- * @tc.desc: Transmission release udp channel id.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission release udp channel id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -312,9 +323,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest11, TestSize.Level1)
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest12
- * @tc.desc: Transmission udp death callback.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission udp death callback
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -336,9 +348,10 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
     EXPECT_EQ(ret,  SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransDealUdpCheckCollabResult001
- * @tc.desc: Check collab result, invalid channelId.
+ * @tc.desc: test TransDealUdpCheckCollabResult
+ *           Check collab result, invalid channelId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -349,9 +362,10 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 }
 
-/**
+/*
  * @tc.name: TransDealUdpCheckCollabResult002
- * @tc.desc: Check collab result, check result is ok.
+ * @tc.desc: test TransDealUdpCheckCollabResult
+ *           Check collab result, check result is ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -374,9 +388,10 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult002, TestSize.Lev
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
 
-/**
+/*
  * @tc.name: TransDealUdpCheckCollabResult003
- * @tc.desc: Check collab result, check result is err.
+ * @tc.desc: test TransDealUdpCheckCollabResult
+ *           Check collab result, check result is err
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -398,9 +413,10 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult003, TestSize.Lev
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
 
-/**
+/*
  * @tc.name: TransUdpNegotiationTest13
- * @tc.desc: Transmission open channel with usb.
+ * @tc.desc: test TransUdpNegotiation
+ *           Transmission open channel with usb.
  * @tc.type: FUNC
  * @tc.require:
  */

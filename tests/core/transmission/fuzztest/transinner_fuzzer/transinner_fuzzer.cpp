@@ -199,6 +199,7 @@ void TransInnerTdcProcAllTlvDataTest(FuzzedDataProvider &provider)
     info.channelId = provider.ConsumeIntegral<int32_t>();
 
     (void)TransInnerTdcProcAllTlvData(nullptr);
+    (void)TransInnerTdcProcAllTlvData(&info);
 }
 
 void TransTdcProcessInnerDataTest(FuzzedDataProvider &provider)
@@ -208,6 +209,7 @@ void TransTdcProcessInnerDataTest(FuzzedDataProvider &provider)
     info.channelId = provider.ConsumeIntegral<int32_t>();
 
     (void)TransTdcProcessInnerData(nullptr);
+    (void)TransTdcProcessInnerData(&info);
 }
 
 void TransInnerTdcProcAllDataTest(FuzzedDataProvider &provider)
@@ -217,6 +219,7 @@ void TransInnerTdcProcAllDataTest(FuzzedDataProvider &provider)
     info.channelId = provider.ConsumeIntegral<int32_t>();
 
     (void)TransInnerTdcProcAllData(nullptr);
+    (void)TransInnerTdcProcAllData(&info);
 }
 
 void TdcDataReceivedTest(FuzzedDataProvider &provider)
@@ -240,6 +243,8 @@ void DirectChannelOnDataEventTest(FuzzedDataProvider &provider)
     int32_t fd = provider.ConsumeIntegral<int32_t>();
 
     (void)DirectChannelOnDataEvent(module, events, fd);
+    events = SOFTBUS_SOCKET_IN;
+    (void)DirectChannelOnDataEvent(module, events, fd);
 }
 
 void DirectChannelCreateListenerTest(FuzzedDataProvider &provider)
@@ -261,6 +266,8 @@ void TdcSendDataTest(FuzzedDataProvider &provider)
 
     (void)TdcSendData(channelId, nullptr, len);
     len = DATA_BUF_MAX + 1;
+    (void)TdcSendData(channelId, reinterpret_cast<const void *>(data), len);
+    len = DATA_BUF_MAX;
     (void)TdcSendData(channelId, reinterpret_cast<const void *>(data), len);
 }
 
@@ -430,6 +437,8 @@ void ProxyDataRecvHandlerTest(FuzzedDataProvider &provider)
     (void)ProxyDataRecvHandler(channelId, nullptr, len);
     len = sizeof(SliceHead);
     (void)ProxyDataRecvHandler(channelId, data, len);
+    len = sizeof(SliceHead) + 1;
+    (void)ProxyDataRecvHandler(channelId, data, len);
 }
 
 void TransSendDataTest(FuzzedDataProvider &provider)
@@ -470,6 +479,57 @@ void ServerSideSendAckTest(FuzzedDataProvider &provider)
 
     (void)ServerSideSendAck(sessionId, result);
 }
+
+void TransTdcProcessInnerTlvDataTest(FuzzedDataProvider &provider)
+{
+    TransInnerSessionInfo info;
+    (void)memset_s(&info, sizeof(TransInnerSessionInfo), 0, sizeof(TransInnerSessionInfo));
+    TcpDataTlvPacketHead pktHead;
+    (void)memset_s(&pktHead, sizeof(TcpDataTlvPacketHead), 0, sizeof(TcpDataTlvPacketHead));
+    int32_t pkgHeadSize = provider.ConsumeIntegral<int32_t>();
+
+    (void)TransTdcProcessInnerTlvData(nullptr, &pktHead, pkgHeadSize);
+    (void)TransTdcProcessInnerTlvData(&info, &pktHead, pkgHeadSize);
+}
+
+void ClientTransProxySubPacketProcTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    SliceHead head;
+    (void)memset_s(&head, sizeof(SliceHead), 0, sizeof(SliceHead));
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+
+    (void)ClientTransProxySubPacketProc(channelId, &head, data, len);
+}
+
+void TransInnerProxyPackBytesTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    ProxyDataInfo dataInfo;
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    TransInnerSessionInfo info;
+    (void)memset_s(&info, sizeof(TransInnerSessionInfo), 0, sizeof(TransInnerSessionInfo));
+    (void)TransInnerProxyPackBytes(channelId, &dataInfo, &info);
+}
+
+void ProxySendDataTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+    TransInnerSessionInfo info;
+    (void)memset_s(&info, sizeof(TransInnerSessionInfo), 0, sizeof(TransInnerSessionInfo));
+    (void)ProxySendData(channelId, data, len, &info);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -508,6 +568,16 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::DirectChannelOnDataEventTest(provider);
     OHOS::TdcSendDataTest(provider);
     OHOS::ProxyDataRecvHandlerTest(provider);
+    OHOS::TransTdcProcessInnerTlvDataTest(provider);
+    OHOS::TdcDataReceivedTest(provider);
+    OHOS::ClientTransProxyInnerNoSubPacketTlvProcTest(provider);
+    OHOS::ClientTransInnerProxyProcessSessionDataTest(provider);
+    OHOS::ClientTransInnerProxyNoSubPacketProcTest(provider);
+    OHOS::ClientTransInnerProxyFirstSliceProcessTest(provider);
+    OHOS::ClientTransProxyLastSliceProcessTest(provider);
+    OHOS::ClientTransProxySubPacketProcTest(provider);
+    OHOS::TransInnerProxyPackBytesTest(provider);
+    OHOS::ProxySendDataTest(provider);
 
     return 0;
 }

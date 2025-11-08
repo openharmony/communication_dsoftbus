@@ -487,20 +487,22 @@ static int32_t ParseLocalName(const uint8_t *advData, uint8_t advLen, SoftBusBcS
 static int32_t ParsePayload(
     SoftbusBroadcastPayload *data, const uint8_t *advData, uint8_t advLen, uint8_t index, uint8_t len)
 {
-    data->payloadLen = (len < (ID_LEN + 1)) ? 0 : len - ID_LEN - 1;
+    DISC_CHECK_AND_RETURN_RET_LOGE(advLen - index >= ID_LEN + 1,
+        SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "invalid advLen=%{public}u", advLen);
+    DISC_CHECK_AND_RETURN_RET_LOGE(len >= ID_LEN + 1,
+        SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "invalid len=%{public}u", len);
+    data->payloadLen = len - ID_LEN - 1;
+    DISC_CHECK_AND_RETURN_RET_LOGE(data->payloadLen <= advLen - index - ID_LEN - 1, SOFTBUS_BC_ADAPTER_PARSE_FAIL,
+        DISC_BLE_ADAPTER, "invalid payloadLen=%{public}u", data->payloadLen);
+    data->type = BtAdvTypeToSoftbus(advData[index]);
+    data->id = ((uint16_t)advData[index + ID_LEN] << BC_SHIFT_BIT) | (uint16_t)advData[index + ID_LEN - 1];
     if (data->payloadLen == 0) {
         DISC_LOGW(DISC_BLE_ADAPTER, "parse no payload");
         return SOFTBUS_OK;
     }
-    DISC_CHECK_AND_RETURN_RET_LOGE(data->payloadLen >= 0 && index + ID_LEN < advLen,
-        SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse payload failed");
-    data->type = BtAdvTypeToSoftbus(advData[index]);
-    data->id = ((uint16_t)advData[index + ID_LEN] << BC_SHIFT_BIT) | (uint16_t)advData[index + ID_LEN - 1];
     data->payload = (uint8_t *)SoftBusCalloc(data->payloadLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(data->payload != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE_ADAPTER,
         "malloc payload failed");
-    DISC_CHECK_AND_RETURN_RET_LOGE(index + ID_LEN + 1 < advLen, SOFTBUS_BC_ADAPTER_PARSE_FAIL,
-        DISC_BLE_ADAPTER, "advLen is invalid");
     (void)memcpy_s(data->payload, data->payloadLen, &advData[index + ID_LEN + 1], data->payloadLen);
     return SOFTBUS_OK;
 }

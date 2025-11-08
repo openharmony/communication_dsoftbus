@@ -46,7 +46,7 @@ typedef int32_t (*SchedulerDeinitBroadcastFunc)(void);
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
 typedef int32_t (*DiscCoapProcessDeviceInfoFunc)(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock);
+    const DiscInnerCallback discCb);
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 typedef int32_t (*DiscCoapAssembleCapDataFunc)(
     uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData, uint32_t outLen);
@@ -100,6 +100,9 @@ typedef bool (*DistActionProcessConPacketFunc)(DeviceWrapper *wrapperDevice, con
 typedef int32_t (*DistActionInitFunc)(DiscActionUpdateBleCallback *updateAdvCb, DiscInnerCallback *innerCb);
 typedef void (*DistActionDeinitFunc)(void);
 typedef bool (*IsUnknownDeviceFunc)(const char *bleMacStr);
+
+typedef int32_t (*DiscCoapExtInitFunc)(void);
+typedef void (*DiscCoapExtDeinitFunc)(void);
 
 typedef struct TagDiscEnhanceFuncList {
     DiscTouchBleInitFunc discTouchBleInit;
@@ -166,6 +169,8 @@ typedef struct TagDiscEnhanceFuncList {
     DistActionInitFunc distActionInit;
     DistActionDeinitFunc distActionDeinit;
     IsUnknownDeviceFunc isUnknownDevice;
+    DiscCoapExtInitFunc discCoapExtInit;
+    DiscCoapExtDeinitFunc discCoapExtDeinit;
 } DiscEnhanceFuncList;
 
 DiscEnhanceFuncList *DiscEnhanceFuncListGet(void);

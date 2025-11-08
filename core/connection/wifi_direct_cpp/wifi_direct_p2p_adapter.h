@@ -46,14 +46,15 @@ private:
     static inline Initiator initiator_;
 
     static int SetGroupOwnerResult(std::string groupConfig, struct GroupOwnerResult *result);
-    static int CreateGroup(struct GroupOwnerResult *result);
+    static int CreateGroup(const struct GroupOwnerConfig *config, struct GroupOwnerResult *result);
     static int RemoveGroup();
     static int RemoveGroupNotAddReuse();
     static int ReuseP2p();
     static int ReuseGroup(struct GroupOwnerResult *result);
     static void SetIsCreateGroup(bool isCreateGroup);
     static bool GetIsCreateGroup();
-    static int CheckRoleAndProcess(LinkInfo::LinkMode role, struct GroupOwnerResult *result);
+    static int CheckRoleAndProcess(
+        LinkInfo::LinkMode role, const struct GroupOwnerConfig *config, struct GroupOwnerResult *result);
 
     static inline GroupOwnerDestroyListener groupOwnerDestroyListener_;
     static inline bool isCreateGroup_;

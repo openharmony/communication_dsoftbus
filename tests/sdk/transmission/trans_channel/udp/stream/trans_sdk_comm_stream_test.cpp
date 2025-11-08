@@ -41,9 +41,10 @@ void TransSdkCommStreamTest::SetUpTestCase(void)
 void TransSdkCommStreamTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: SendCommStreamTest001
- * @tc.desc: start common stream client, send wrong param.
+ * @tc.desc: start common stream client
+ *           send wrong param
  * @tc.type: FUNC
  * @tc.require: I5KRE8
  */

@@ -92,13 +92,13 @@ int32_t SchedulerDeinitBroadcastPacked(void)
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
 int32_t DiscCoapProcessDeviceInfoPacked(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock)
+    const DiscInnerCallback discCb)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo) != SOFTBUS_OK) {
-        return DiscCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb, discCbLock);
+        return DiscCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb);
     }
-    return pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb, discCbLock);
+    return pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb);
 }
 
 int32_t DiscCoapAssembleBdataPacked(const unsigned char *capabilityData, uint32_t dataLen, char *businessData,
@@ -133,6 +133,24 @@ void DiscCoapUpdateAbilityPacked(uint32_t capability, const char *capabilityData
     return pfnDiscEnhanceFuncList->discCoapUpdateAbility(capability, capabilityData, dataLen, isPublish, isStart);
 }
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
+
+int32_t DiscCoapExtInitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapExtInit) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnDiscEnhanceFuncList->discCoapExtInit();
+}
+
+void DiscCoapExtDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapExtDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->discCoapExtDeinit();
+}
 
 int32_t DiscFillBtypePacked(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
 {
