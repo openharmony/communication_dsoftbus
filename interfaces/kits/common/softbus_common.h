@@ -332,6 +332,18 @@ typedef enum  {
     SLE_PROTOCOL_MAX
 } SleProtocolType;
 
+/**
+ * @brief Enumerates {@link NetworkConnectionType} types of network connection type
+ *
+ */
+typedef enum {
+    CONNECTION_UNKNOWN = 0,
+    CONNECTION_WIFI,
+    CONNECTION_GROUP_OWNER,
+    CONNECTION_HOTSPOT,
+    CONNECTION_MAX
+} NetworkConnectionType;
+
 typedef struct {
     bool hasDeviceKeyId;
     int32_t localDeviceKeyId;
@@ -379,6 +391,7 @@ typedef struct {
             int32_t type;   /**< Session type in int format */
             char ip[IP_STR_MAX_LEN]; /**< IP address in string format */
             char localIp[IP_STR_MAX_LEN]; /**< IP address in string format */
+            NetworkConnectionType connectionType; /**< connection type for softap p2p */
         } session;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
