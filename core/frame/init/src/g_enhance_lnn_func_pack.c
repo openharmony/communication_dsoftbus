@@ -1776,6 +1776,19 @@ int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *local
     return pfnLnnEnhanceFuncList->authMetaGetLocalIpByMetaNodeId(metaNodeId, localIp, len);
 }
 
+int32_t AuthMetaGetConnectionTypeByMetaNodeIdPacked(const char *metaNodeId, NetworkConnectionType *connectionType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetConnectionTypeByMetaNodeId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "func pointer is NULL");
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->authMetaGetConnectionTypeByMetaNodeId(metaNodeId, connectionType);
+}
+
 bool IsSupportMcuFeaturePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();

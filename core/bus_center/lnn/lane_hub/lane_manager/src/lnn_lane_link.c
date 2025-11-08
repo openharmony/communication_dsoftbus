@@ -1052,6 +1052,16 @@ static int32_t ConvertUdidToHexStr(const char *peerUdid, char *udidHashStr, uint
     return SOFTBUS_OK;
 }
 
+static bool IsSoftapP2pGroupOwner(const char *peerUdid)
+{
+    NetworkConnectionType type = CONNECTION_UNKNOWN;
+    if (AuthMetaGetConnectionTypeByMetaNodeIdPacked(peerUdid, &type) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get connType by metaNodeId failed.");
+        return false;
+    }
+    return (type == CONNECTION_GROUP_OWNER);
+}
+
 static int32_t FetchLaneResourceByDevId(const char *peerNetworkId, LaneLinkType type, bool isSameDevice)
 {
     if (peerNetworkId == NULL) {
@@ -1074,6 +1084,9 @@ static int32_t FetchLaneResourceByDevId(const char *peerNetworkId, LaneLinkType 
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (type != item->link.type) {
+            continue;
+        }
+        if (type == LANE_SOFTAP_P2P && !IsSoftapP2pGroupOwner(item->link.peerUdid)) {
             continue;
         }
         if ((!isSameDevice && strcmp(peerUdid, item->link.peerUdid) != 0) ||
@@ -1103,6 +1116,9 @@ static int32_t FetchLaneResourceByDevIdHash(const char *udidHashStr, LaneLinkTyp
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (type != item->link.type) {
+            continue;
+        }
+        if (type == LANE_SOFTAP_P2P && !IsSoftapP2pGroupOwner(item->link.peerUdid)) {
             continue;
         }
         char hashHexStr[UDID_SHORT_HASH_HEXSTR_LEN_TMP + 1] = {0};
