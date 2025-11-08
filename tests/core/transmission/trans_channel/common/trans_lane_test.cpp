@@ -409,6 +409,8 @@ HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
     TransformSessionPreferredToLanePreferred(sessionParam, preferred, nullptr);
     TransformSessionPreferredToLanePreferred(sessionParam, nullptr, nullptr);
     TransformSessionPreferredToLanePreferred(nullptr, preferred, nullptr);
+    bool res = IsDbdSession(nullptr);
+    EXPECT_FALSE(res);
     SoftBusFree(sessionParam);
     SoftBusFree(preferred);
 }

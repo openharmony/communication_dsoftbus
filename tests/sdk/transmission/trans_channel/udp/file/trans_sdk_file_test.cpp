@@ -514,6 +514,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level1)
     UdpChannel *channel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
     ASSERT_TRUE(channel != nullptr);
     GenerateAndAddUdpChannel(channel);
+    FileReceiveListener(channel->dfileId, msgType, nullptr);
     FileReceiveListener(channel->dfileId, msgType, &msgData);
 
     msgData.rate = 1;
@@ -960,6 +961,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest001, TestSize.Level1)
     fileInfo[2].stat = FILE_STAT_NOT_START;
     fileInfo[2].file = (char *)"file3";
     msgData.clearPolicyFileList.fileInfo = fileInfo;
+    FillFileStatusList(nullptr, &event);
+    FillFileStatusList(&msgData, nullptr);
 
     FillFileStatusList(&msgData, &event);
 
@@ -1183,6 +1186,10 @@ HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level1)
     FileListener listener;
     listener.socketSendCallback = MockSocketSendCallback;
     listener.socketRecvCallback = MockSocketRecvCallback;
+    NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, nullptr, &listener);
+    NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, nullptr);
+    NotifySocketRecvResult(socket, DFILE_ON_FILE_LIST_RECEIVED, nullptr, &listener);
+    NotifySocketRecvResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, nullptr);
 
     NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, &listener);
     NotifySocketSendResult(socket, DFILE_ON_FILE_SEND_SUCCESS, &msgData, &listener);

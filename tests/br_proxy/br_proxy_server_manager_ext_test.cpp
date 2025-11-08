@@ -60,6 +60,20 @@ void BrProxyServerManagerExtTest::TearDownTestCase(void)
 }
 
 /**
+ * @tc.name: SetCurrentConnect001
+ * @tc.desc: SetCurrentConnect001, when g_proxyList is nullptr should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerExtTest, SetCurrentConnect001, TestSize.Level1)
+{
+    const char *testBrMac = "testBrMac";
+    const char *testUuid = "testUuid";
+    int32_t ret = SetCurrentConnect(testBrMac, testUuid, true);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
  * @tc.name: BrProxyServerManagerExtTest000
  * @tc.desc: BrProxyServerManagerExtTest000, use the wrong parameter.
  * @tc.type: FUNC
@@ -172,5 +186,29 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     ret1 = TransIsProxyChannelEnabled(0);
     EXPECT_EQ(false, ret1);
     TransRegisterPushHook();
+}
+
+/**
+ * @tc.name: SetCurrentConnect002
+ * @tc.desc: SetCurrentConnect002, when given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerExtTest, SetCurrentConnect002, TestSize.Level1)
+{
+    const char *testBrMac = "testBrMac";
+    const char *testUuid = "testUuid";
+    uint32_t requeset = 1;
+    PrintSession(testBrMac, testUuid);
+    PrintSession(nullptr, testUuid);
+    PrintSession(testBrMac, nullptr);
+    int32_t ret = SetCurrentConnect(testBrMac, nullptr, true);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SetCurrentConnect(nullptr, testUuid, true);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SetCurrentConnect(testBrMac, testUuid, true);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ConnectPeerDevice(testBrMac, testUuid, &requeset);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 }

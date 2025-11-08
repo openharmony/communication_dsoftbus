@@ -892,6 +892,8 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest23, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReadMaxSendMessageSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &value, sizeof(value));
     EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
+    ret = ReadMaxSendMessageSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, nullptr, sizeof(value));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -1358,6 +1360,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest41, TestSize.Level1)
     uint32_t capacity = 1;
     uint32_t num = 1;
     ClientConvertRetVal(socket, &retOut);
+    ClientConvertRetVal(socket, nullptr);
     bool ret = CleanUpTimeoutAuthSession(socket);
     ASSERT_FALSE(ret);
     ClientCheckWaitTimeOut(nullptr, info, socketId, capacity, &num);
@@ -1398,6 +1401,9 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest42, TestSize.Level1)
     ClientUpdateIdleTimeout(nullptr, info, &destroyList);
     ClientUpdateIdleTimeout(&serverNode, nullptr, &destroyList);
     ClientUpdateIdleTimeout(&serverNode, info, nullptr);
+    PrivilegeDestroyAllClientSession(nullptr, &destroyList, g_networkId);
+    PrivilegeDestroyAllClientSession(&serverNode, nullptr, g_networkId);
+    PrivilegeDestroyAllClientSession(&serverNode, &destroyList, nullptr);
     SoftBusFree(sessionParam);
     SoftBusFree(info);
 }
@@ -1431,6 +1437,286 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest44, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     sessionId = 1;
     ret = ClientDeletePagingSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: ReadSessionLinkTypeTest45
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ReadSessionLinkTypeTest45, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t type = 1;
+    uint32_t value = 0;
+    uint32_t valueSize = 1;
+    int32_t ret = ReadSessionLinkType(channelId, type, nullptr, valueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ReadSessionLinkType(channelId, type, &value, valueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    valueSize = sizeof(uint32_t);
+    ret = ReadSessionLinkType(channelId, type, &value, valueSize);
+    EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
+}
+
+/**
+ * @tc.name: RemoveAppIdFromSessionNameTest46
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, RemoveAppIdFromSessionNameTest46, TestSize.Level1)
+{
+    const char *testSessionName = "testSessionName";
+    char testNewSessionName[] = "testNewSessionName";
+    int32_t length = 1;
+    bool ret = RemoveAppIdFromSessionName(nullptr, testNewSessionName, length);
+    EXPECT_FALSE(ret);
+    ret = RemoveAppIdFromSessionName(testSessionName, nullptr, length);
+    EXPECT_FALSE(ret);
+    ret = RemoveAppIdFromSessionName(testSessionName, testNewSessionName, length);
+    EXPECT_FALSE(ret);
+    int32_t res = CreateSocket(nullptr, testNewSessionName);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
+    ret = CreateSocket(testSessionName, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
+}
+
+/**
+ * @tc.name: CreateSessionAttributeBySocketInfoTest47
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: given different datatype should return tmpAttr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, CreateSessionAttributeBySocketInfoTest47, TestSize.Level1)
+{
+    SocketInfo info;
+    bool isEncryptedRawStream;
+    SessionAttribute *ret = CreateSessionAttributeBySocketInfoTrans(nullptr, &isEncryptedRawStream);
+    EXPECT_TRUE(ret == nullptr);
+    ret = CreateSessionAttributeBySocketInfoTrans(&info, nullptr);
+    EXPECT_TRUE(ret == nullptr);
+    info.dataType = DATA_TYPE_MESSAGE;
+    ret = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret != nullptr);
+    SoftBusFree(ret);
+    info.dataType = DATA_TYPE_BYTES;
+    SessionAttribute *ret1 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret1 != nullptr);
+    SoftBusFree(ret1);
+    info.dataType = DATA_TYPE_FILE;
+    SessionAttribute *ret2 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret2 != nullptr);
+    SoftBusFree(ret2);
+    info.dataType = DATA_TYPE_RAW_STREAM;
+    SessionAttribute *ret3 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret3 != nullptr);
+    SoftBusFree(ret3);
+    info.dataType = DATA_TYPE_RAW_STREAM_ENCRYPED;
+    SessionAttribute *ret4 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret4 != nullptr);
+    SoftBusFree(ret4);
+    info.dataType = DATA_TYPE_VIDEO_STREAM;
+    SessionAttribute *ret5 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret5 != nullptr);
+    SoftBusFree(ret5);
+    info.dataType = DATA_TYPE_AUDIO_STREAM;
+    SessionAttribute *ret6 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret6 != nullptr);
+    SoftBusFree(ret6);
+    info.dataType = DATA_TYPE_SLICE_STREAM;
+    SessionAttribute *ret7 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret7 != nullptr);
+    SoftBusFree(ret7);
+    info.dataType = DATA_TYPE_BUTT;
+    SessionAttribute *ret8 = CreateSessionAttributeBySocketInfoTrans(&info, &isEncryptedRawStream);
+    EXPECT_TRUE(ret8 != nullptr);
+    SoftBusFree(ret8);
+}
+
+/**
+ * @tc.name: ClientAddSocketTest48
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientAddSocketTest48, TestSize.Level1)
+{
+    SocketInfo info;
+    int32_t sessionId = 1;
+    SessionEnableStatus enableStatus = ENABLE_STATUS_SUCCESS;
+    int32_t ret = ClientAddSocket(nullptr, &sessionId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientAddSocket(&info, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    bool res = IsContainServiceBySocket(-1);
+    EXPECT_FALSE(res);
+    ret = ClientSetEnableStatusBySocket(-1, enableStatus);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+}
+
+/**
+ * @tc.name: ClientGetSessionIsD2DByChannelIdTest49
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientGetSessionIsD2DByChannelIdTest49, TestSize.Level1)
+{
+    int32_t channelId = -1;
+    int32_t channelType = 1;
+    bool isD2D = true;
+    int32_t ret = ClientGetSessionIsD2DByChannelId(channelId, channelType, &isD2D);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetSessionIsD2DByChannelId(channelId, channelType, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    channelId = 1;
+    ret = ClientGetSessionIsD2DByChannelId(channelId, channelType, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetSessionIsD2DByChannelId(channelId, channelType, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetIsAsyncAndTokenTypeBySessionIdTest50
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, GetIsAsyncAndTokenTypeBySessionIdTest50, TestSize.Level1)
+{
+    int32_t sessionId = -1;
+    bool isAsync = false;
+    int32_t tokenType = 1;
+    int32_t ret = GetIsAsyncAndTokenTypeBySessionId(sessionId, &isAsync, &tokenType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    sessionId = 1;
+    ret = GetIsAsyncAndTokenTypeBySessionId(sessionId, nullptr, &tokenType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetIsAsyncAndTokenTypeBySessionId(sessionId, &isAsync, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ClientGetChannelIdAndTypeBySocketIdTest51
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientGetChannelIdAndTypeBySocketIdTest51, TestSize.Level1)
+{
+    int32_t socketId = 1;
+    int32_t type = 1;
+    int32_t channelId = 1;
+    char *socketName = (char *)SoftBusCalloc(sizeof(SessionInfo));
+    int32_t ret = ClientGetChannelIdAndTypeBySocketId(socketId, nullptr, &channelId, socketName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetChannelIdAndTypeBySocketId(socketId, &type, nullptr, socketName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetChannelIdAndTypeBySocketId(socketId, &type, &channelId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetChannelIdAndTypeBySocketId(socketId, &type, &channelId, socketName);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: SessionTypeConvertTest52
+ * @tc.desc: given different BusinessType return different SessionType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, SessionTypeConvertTest52, TestSize.Level1)
+{
+    BusinessType type = BUSINESS_TYPE_BYTE;
+    SessionType ret = SessionTypeConvert(type);
+    EXPECT_EQ(ret, TYPE_BYTES);
+    type = BUSINESS_TYPE_FILE;
+    ret = SessionTypeConvert(type);
+    EXPECT_EQ(ret, TYPE_FILE);
+    type = BUSINESS_TYPE_D2D_MESSAGE;
+    ret = SessionTypeConvert(type);
+    EXPECT_EQ(ret, TYPE_D2D_MESSAGE);
+    type = BUSINESS_TYPE_D2D_VOICE;
+    ret = SessionTypeConvert(type);
+    EXPECT_EQ(ret, TYPE_D2D_VOICE);
+    type = BUSINESS_TYPE_BUTT;
+    ret = SessionTypeConvert(type);
+    EXPECT_EQ(ret, TYPE_MESSAGE);
+}
+
+/**
+ * @tc.name: ClientForkSocketByIdTest53
+ * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientForkSocketByIdTest53, TestSize.Level1)
+{
+    int32_t socketId = 1;
+    BusinessType type = BUSINESS_TYPE_FILE;
+    int32_t newSocketId = 0;
+    int32_t ret = ClientForkSocketById(socketId, type, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientForkSocketById(socketId, type, &newSocketId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: ClientGetServiceSocketInfoByIdTest54
+ * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientGetServiceSocketInfoByIdTest54, TestSize.Level1)
+{
+    int32_t socketId = 0;
+    ServiceSocketInfo socketInfo;
+    int32_t ret = ClientGetServiceSocketInfoById(socketId, &socketInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSessionInitInfoById(socketId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+    socketId = 1;
+    ret = ClientGetServiceSocketInfoById(socketId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetServiceSocketInfoById(socketId, &socketInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    ret = SetSessionInitInfoById(socketId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: ClientGetServiceSocketInfoByIdTest55
+ * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientGetServiceSocketInfoByIdTest55, TestSize.Level1)
+{
+    int32_t socketId = -1;
+    bool isD2D = true;
+    int32_t sessionType = 1;
+    TransFlowInfo flowInfo;
+    int32_t ret = ClientCheckIsD2DBySessionId(socketId, &isD2D);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetSessionTypeBySocket(socketId, &sessionType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientSetFLTos(socketId, &flowInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    socketId = 1;
+    ret = ClientCheckIsD2DBySessionId(socketId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientGetSessionTypeBySocket(socketId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientSetFLTos(socketId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientCheckIsD2DBySessionId(socketId, &isD2D);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    ret = ClientGetSessionTypeBySocket(socketId, &sessionType);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    ret = ClientSetFLTos(socketId, &flowInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 }

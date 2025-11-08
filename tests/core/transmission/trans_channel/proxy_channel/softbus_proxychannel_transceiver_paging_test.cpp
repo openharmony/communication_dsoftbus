@@ -163,11 +163,15 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckListenResultTest001, Tes
     int32_t num = TEST_FOR_NUM;
     int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = AddWaitListInfo(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     PagingListenCheckInfo checkInfo1 = {
         .businessFlag = false,
         .channelId = TEST_CHANNEL_ID
     };
     CheckResultType res = CheckListenResult(&checkInfo1);
+    EXPECT_EQ(WAIT_LISTEN_CHECK_INVALID, res);
+    res = CheckListenResult(nullptr);
     EXPECT_EQ(WAIT_LISTEN_CHECK_INVALID, res);
     res = CheckListenResult(&checkInfo);
     EXPECT_EQ(WAIT_LISTEN_CHECK_RETRY, res);
@@ -352,6 +356,8 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransCheckPagingListenStateTe
     EXPECT_CALL(PagingMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = TransCheckPagingListenState(&info);
     EXPECT_EQ(SOFTBUS_TRANS_PAGING_ASYNC_FAIL, ret);
+    ret = TransCheckPagingListenState(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // namespace OHOS
 
