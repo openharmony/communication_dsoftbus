@@ -418,32 +418,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
 }
 
 /**
- * @tc.name: PackTdcPacketHeadTest001
- * @tc.desc: PackTdcPacketHead
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, PackTdcPacketHeadTest001, TestSize.Level1)
-{
-    TdcPacketHead data;
-    PackTdcPacketHead(&data);
-    EXPECT_TRUE(1);
-}
-
-/**
- * @tc.name: UnpackTdcPacketHeadTest001
- * @tc.desc: UnpackTdcPacketHead
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, UnpackTdcPacketHeadTest001, TestSize.Level1)
-{
-    TdcPacketHead data;
-    UnpackTdcPacketHead(&data);
-    EXPECT_TRUE(1);
-}
-
-/**
  * @tc.name: SwitchCipherTypeToAuthLinkTypeTest001
  * @tc.desc: SwitchCipherTypeToAuthLinkType
  * @tc.type: FUNC
@@ -451,6 +425,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, UnpackTdcPacketHeadTest001, TestSize.L
  */
 HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkTypeTest001, TestSize.Level1)
 {
+    TdcPacketHead data;
+    PackTdcPacketHead(&data);
+    UnpackTdcPacketHead(&data);
+    UnpackTdcPacketHead(nullptr);
     uint32_t cipherFlag = FLAG_BR;
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_BR);
@@ -466,6 +444,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkTypeTest001,
     cipherFlag = FLAG_WIFI;
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_WIFI);
+
+    cipherFlag = FLAG_SESSION_KEY;
+    linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_SESSION_KEY);
 }
 
 /**
@@ -962,6 +944,42 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     testConn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
+}
+
+/**
+ * @tc.name: CheckServerPermissionTest001
+ * @tc.desc: given fdProtocol is HTP and uid not hold htp will return SOFTBUS_PERMISSION_SERVER_DENIED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, CheckServerPermissionTest001, TestSize.Level1)
+{
+    AppInfo info;
+    info.fdProtocol = LNN_PROTOCOL_HTP;
+    info.myData.uid = 0;
+    char *data = (char *)SoftBusCalloc(sizeof(SessionConn));
+    int32_t ret = CheckServerPermission(&info, data);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_SERVER_DENIED);
+}
+
+/**
+ * @tc.name: GetSessionConnSeqAndFlagByChannelIdTest001
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, GetSessionConnSeqAndFlagByChannelIdTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    SessionConn conn;
+    uint32_t flags = 1;
+    uint64_t seq = 1;
+    int32_t ret = GetSessionConnSeqAndFlagByChannelId(channelId, nullptr, &flags, &seq);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSessionConnSeqAndFlagByChannelId(channelId, &conn, nullptr, &seq);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSessionConnSeqAndFlagByChannelId(channelId, &conn, &flags, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**

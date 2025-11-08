@@ -458,6 +458,10 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest16, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransGetTokenIdBySessionName(sessionNme0, &tokenId);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST, ret);
+    ret = TransGetTokenIdBySessionName(nullptr, &tokenId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetTokenIdBySessionName(sessionNme0, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -676,6 +680,155 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest25, TestSize.Level1)
     EXPECT_NE(SOFTBUS_NO_INIT, ret);
     ret = CheckAndUpdateTimeBySessionName(sessionName, time);
     EXPECT_NE(SOFTBUS_NO_INIT, ret);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: TransSessionManagerTest26
+ * @tc.desc: test TransSessionForEachShowInfo, when g_sessionServerList not create should return SOFTBUS_NO_INIT
+ * @tc.desc: test TransSessionForEachShowInfo, valid param should return SOFTBUS_NO_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest26, TestSize.Level1)
+{
+    char sessionName[] = "testSessionName1";
+    SessionServer *newNode = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(newNode != nullptr);
+    (void)strcpy_s(newNode->sessionName, sizeof(newNode->sessionName), sessionName);
+    newNode->pid = (pid_t)TEST_PID;
+    uint64_t fd = 1;
+    int32_t ret = TransSessionForEachShowInfo(fd);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransSessionForEachShowInfo(fd);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: TransSessionManagerTest27
+ * @tc.desc: test CheckUidAndPid, when g_sessionServerList not create should return false
+ * @tc.desc: test CheckUidAndPid, when sessionName is null should return false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest27, TestSize.Level1)
+{
+    char sessionName[] = "testSessionName1";
+    pid_t callingUid = 1;
+    pid_t callingPid = 1;
+    bool ret = CheckUidAndPid(nullptr, callingUid, callingPid);
+    EXPECT_FALSE(ret);
+    ret = CheckUidAndPid(sessionName, callingUid, callingPid);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: TransSessionManagerTest28
+ * @tc.desc: test TransGetPidAndPkgName, when given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest28, TestSize.Level1)
+{
+    SessionServer pos;
+    char sessionName[] = "testSessionName1";
+    char pkgName[] = "testPkgName1";
+    int32_t callingUid = 1;
+    int32_t callingPid = 1;
+    uint32_t len = 0;
+    int32_t ret = TransGetPidAndPkgName(nullptr, callingUid, &callingPid, pkgName, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetPidAndPkgName(sessionName, callingUid, nullptr, pkgName, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetPidAndPkgName(sessionName, callingUid, &callingPid, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    len = PKG_NAME_SIZE_MAX + 1;
+    ret = TransGetPidAndPkgName(sessionName, callingUid, &callingPid, pkgName, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    len = EXTRA_ACCESS_INFO_LEN_MAX + 1;
+    ret = CheckAccessInfoAndCalloc(&pos, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: TransSessionManagerTest29
+ * @tc.desc: test GetTokenTypeBySessionName, when sessionName not in list should return NO_EXIST
+ * @tc.desc: test GetTokenTypeBySessionName, when sessionName ot tokentype is null should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest29, TestSize.Level1)
+{
+    char sessionName[] = "testSessionName1";
+    int32_t tokenType = 1;
+    SessionServer *newNode = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(newNode != nullptr);
+    (void)strcpy_s(newNode->sessionName, sizeof(newNode->sessionName), sessionName);
+    newNode->pid = (pid_t)TEST_PID;
+    newNode->tokenType = 1;
+    int32_t ret = GetTokenTypeBySessionName(nullptr, &tokenType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = GetTokenTypeBySessionName(sessionName, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = GetTokenTypeBySessionName(sessionName, &tokenType);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST, ret);
+
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = GetTokenTypeBySessionName(sessionName, &tokenType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: TransSessionManagerTest30
+ * @tc.desc: test TransGetPidAndPkgName, when sessionName not in list should return NO_EXIST
+ * @tc.desc: test TransGetPidAndPkgName, when sessionName ot tokenid is null should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest30, TestSize.Level1)
+{
+    char sessionName[] = "testSessionName1";
+    uint64_t tokenId = 1;
+    int32_t callingUid = 1;
+    int32_t callingPid = 1;
+    SessionServer *newNode = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(newNode != nullptr);
+    (void)strcpy_s(newNode->sessionName, sizeof(newNode->sessionName), sessionName);
+    newNode->pid = (pid_t)TEST_PID;
+    newNode->tokenType = 1;
+    int32_t ret = TransGetAclInfoBySessionName(nullptr, &tokenId, &callingUid, &callingPid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetAclInfoBySessionName(sessionName, nullptr, &callingUid, &callingPid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransGetAclInfoBySessionName(sessionName, &tokenId, &callingUid, &callingPid);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST, ret);
+
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransGetAclInfoBySessionName(sessionName, &tokenId, &callingUid, &callingPid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransSessionServerDelItem(sessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
