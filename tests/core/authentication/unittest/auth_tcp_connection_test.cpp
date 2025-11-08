@@ -510,6 +510,28 @@ HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001, TestSize.Lev
 }
 
 /*
+ * @tc.name: ADD_AUTH_TCP_CONN_FD_ITEM_TEST_002
+ * @tc.desc: AddAuthTcpConnFdItem test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_002, TestSize.Level1)
+{
+    int32_t fd = 1;
+
+    int32_t ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ret = AuthTcpConnFdLockInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TryDeleteAuthTcpConnFdItemByConnId(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthTcpConnFdLockDeinit();
+}
+
+/*
  * @tc.name: IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_001
  * @tc.desc: is exist FdItem test.
  * @tc.type: FUNC
