@@ -46,6 +46,7 @@ void StopSocketListening(ListenerModule moduleId);
 int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle);
 bool IsExistAuthTcpConnFdItemByConnId(int32_t fd);
 void DeleteAuthTcpConnFdItemByConnId(int32_t fd);
+int32_t TryDeleteAuthTcpConnFdItemByConnId(int32_t fd);
 int32_t AuthTcpConnFdLockInit(void);
 void AuthTcpConnFdLockDeinit(void);
 bool RequireAuthTcpConnFdListLock(void);

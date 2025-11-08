@@ -373,6 +373,28 @@ void DeleteAuthTcpConnFdItemByConnId(int32_t fd)
     ReleaseAuthTcpConnFdListLock();
 }
 
+int32_t TryDeleteAuthTcpConnFdItemByConnId(int32_t fd)
+{
+    if (!RequireAuthTcpConnFdListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthTcpConnFdListLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    int32_t ret = SOFTBUS_AUTH_NOT_FOUND;
+    AuthTcpConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authTcpConnFdList, AuthTcpConnInstance, node) {
+        if (item->fd != fd) {
+            continue;
+        }
+        AUTH_LOGI(AUTH_CONN, "delete auth tcp conn fd item. fd=%{public}d", fd);
+        ListDelete(&item->node);
+        SoftBusFree(item);
+        ret = SOFTBUS_OK;
+        break;
+    }
+    ReleaseAuthTcpConnFdListLock();
+    return ret;
+}
+
 static bool IsNeededFdControl(ListenerModule module)
 {
     return (module == AUTH || module == AUTH_USB || module == AUTH_RAW_P2P_CLIENT ||
@@ -960,9 +982,14 @@ void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     AUTH_LOGI(AUTH_CONN, "close auth channel, moduleId=%{public}d, id=%{public}d.", moduleId, channelId);
     if (IsNeededFdControl((ListenerModule)moduleId)) {
-        DeleteAuthTcpConnFdItemByConnId(channelId);
+        int32_t ret = TryDeleteAuthTcpConnFdItemByConnId(channelId);
+        if (ret == SOFTBUS_OK) {
+            SocketDisconnectDevice((ListenerModule)moduleId, channelId);
+        }
+        AUTH_LOGI(AUTH_CONN, "TryDeleteAuthTcpConnFdItemByConnId ret=%{public}d", ret);
+    } else {
+        SocketDisconnectDevice((ListenerModule)moduleId, channelId);
     }
-    SocketDisconnectDevice((ListenerModule)moduleId, channelId);
 }
 
 int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
