@@ -28,8 +28,6 @@ extern "C" {
 #ifndef MAGIC_NUMBER
 #define MAGIC_NUMBER 0xBABEFACE
 
-#define DC_DATA_HEAD_SIZE 16
-#define DATA_SEQ_LEN 2
 #define NONCE_LEN 2
 #endif
 

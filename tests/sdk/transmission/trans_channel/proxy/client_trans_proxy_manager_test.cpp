@@ -681,6 +681,29 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Leve
 }
 
 /**
+ * @tc.name: ProxyBuildTlvDataHead003
+ * @tc.desc: ProxyBuildNeedAckTlvData and ProxyBuildTlvDataHead func test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead003, TestSize.Level1)
+{
+    DataHead *pktHead = (DataHead *)SoftBusCalloc(sizeof(DataHead));
+    pktHead->magicNum = 0xBABEFACE;
+    pktHead->tlvCount = 5;
+    bool needAck = true;
+    int32_t tlvBufferSize = 0;
+    int32_t finalSeq = 1;
+    int32_t flag = 0;
+    uint32_t dataLen = 32;
+    int32_t ret = ProxyBuildTlvDataHead(pktHead, finalSeq, flag, dataLen, &tlvBufferSize);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ProxyBuildNeedAckTlvData(pktHead, needAck, TEST_SEQ, &tlvBufferSize);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(pktHead);
+}
+
+/**
  * @tc.name: ProxyBuildTlvDataHead002
  * @tc.desc: ProxyBuildTlvDataHead
  * @tc.type: FUNC

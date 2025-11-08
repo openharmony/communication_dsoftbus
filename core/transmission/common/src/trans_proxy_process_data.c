@@ -137,9 +137,8 @@ int32_t TransProxyPackBytes(
     int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, (const unsigned char *)dataInfo->inData,
         dataInfo->inLen, (unsigned char *)outData, &outLen, seq);
     (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-
+    outData = NULL;
     if (ret != SOFTBUS_OK || outLen != dataInfo->inLen + OVERHEAD_LEN) {
-        outData = NULL;
         SoftBusFree(dataInfo->outData);
         TRANS_LOGE(TRANS_CTRL, "encrypt error, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
@@ -156,7 +155,7 @@ int32_t TransProxyPackBytes(
 static uint8_t *TransProxyPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, uint32_t dataLen)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(pktHead != NULL, NULL, TRANS_CTRL, "invalid param");
-    int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
+    uint32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
     int32_t bufLen = (int32_t)dataLen + newDataHeadSize;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
@@ -215,27 +214,30 @@ static int32_t ProxyBuildTlvDataHead(DataHead *pktHead, int32_t finalSeq, int32_
     }
     pktHead->magicNum = SoftBusHtoLl(MAGIC_NUMBER);
     uint32_t seq = SoftBusHtoLl((uint32_t)finalSeq);
-    uint32_t flags = SoftBusHtoLl((uint32_t)flag);
-    uint32_t dataLens = SoftBusHtoLl(dataLen);
     int32_t ret = TransAssembleTlvData(pktHead, TLV_TYPE_INNER_SEQ, (uint8_t *)&seq, sizeof(seq), tlvBufferSize);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "assemble seq tlv failed, ret=%{public}d", ret);
         ReleaseTlvValueBuffer(pktHead);
         SoftBusFree(pktHead->tlvElement);
+        pktHead->tlvElement = NULL;
         return ret;
     }
+    uint32_t flags = SoftBusHtoLl((uint32_t)flag);
     ret = TransAssembleTlvData(pktHead, TLV_TYPE_FLAG, (uint8_t *)&flags, sizeof(flags), tlvBufferSize);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "assemble flag tlv failed, ret=%{public}d", ret);
         ReleaseTlvValueBuffer(pktHead);
         SoftBusFree(pktHead->tlvElement);
+        pktHead->tlvElement = NULL;
         return ret;
     }
+    uint32_t dataLens = SoftBusHtoLl(dataLen);
     ret = TransAssembleTlvData(pktHead, TLV_TYPE_DATA_LEN, (uint8_t *)&dataLens, sizeof(dataLens), tlvBufferSize);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "assemble dataLen tlv failed, ret=%{public}d", ret);
         ReleaseTlvValueBuffer(pktHead);
         SoftBusFree(pktHead->tlvElement);
+        pktHead->tlvElement = NULL;
         return ret;
     }
     return SOFTBUS_OK;
@@ -253,6 +255,7 @@ static int32_t ProxyBuildNeedAckTlvData(DataHead *pktHead, bool needAck, uint32_
         TRANS_LOGE(TRANS_CTRL, "assemble needAck tlv failed, ret=%{public}d", ret);
         ReleaseTlvValueBuffer(pktHead);
         SoftBusFree(pktHead->tlvElement);
+        pktHead->tlvElement = NULL;
         return ret;
     }
     ret = TransAssembleTlvData(pktHead, TLV_TYPE_DATA_SEQ, (uint8_t *)&dataSeq, sizeof(dataSeq), tlvBufferSize);
@@ -260,6 +263,7 @@ static int32_t ProxyBuildNeedAckTlvData(DataHead *pktHead, bool needAck, uint32_
         TRANS_LOGE(TRANS_CTRL, "assemble dataSeq tlv failed, ret=%{public}d", ret);
         ReleaseTlvValueBuffer(pktHead);
         SoftBusFree(pktHead->tlvElement);
+        pktHead->tlvElement = NULL;
         return ret;
     }
     pktHead->tlvElement -= (PROXY_TLV_ELEMENT * sizeof(TlvElement));
@@ -304,9 +308,9 @@ int32_t TransProxyPackTlvBytes(
     ret = SoftBusEncryptDataWithSeq(&cipherKey, (const unsigned char*)dataInfo->inData,
         dataInfo->inLen, (unsigned char*)outData, &outLen, seq);
     (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    outData = NULL;
     if (ret != SOFTBUS_OK || outLen != dataInfo->inLen + OVERHEAD_LEN) {
         TRANS_LOGE(TRANS_CTRL, "encrypt failed, ret=%{public}d", ret);
-        outData = NULL;
         SoftBusFree(dataInfo->outData);
         dataInfo->outData = NULL;
         return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
@@ -379,7 +383,7 @@ int32_t TransProxyNoSubPacketProc(PacketHead *head, uint32_t len, const char *da
         TRANS_LOGE(TRANS_CTRL, "invalid param, channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (len < sizeof(PacketHead)) {
+    if (len <= sizeof(PacketHead)) {
         TRANS_LOGE(TRANS_CTRL, "check len failed, len=%{public}d", len);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -399,7 +403,7 @@ int32_t TransProxyNoSubPacketProc(PacketHead *head, uint32_t len, const char *da
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     TRANS_LOGD(TRANS_CTRL, "NoSubPacketProc, dataLen=%{public}d, inputLen=%{public}d", head->dataLen, len);
-    if (len <= sizeof(PacketHead) || (head->dataLen != (int32_t)(len - sizeof(PacketHead)))) {
+    if (head->dataLen != (int32_t)(len - sizeof(PacketHead))) {
         TRANS_LOGE(TRANS_CTRL, "dataLen error channelId=%{public}d, len=%{public}d, dataLen=%{public}d",
             channelId, len, head->dataLen);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
@@ -413,12 +417,11 @@ int32_t TransProxyProcessSessionData(ProxyDataInfo *dataInfo, const PacketHead *
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t outLen = 0;
     if (dataHead->dataLen <= OVERHEAD_LEN) {
         TRANS_LOGE(TRANS_CTRL, "invalid data head dataLen=%{public}d", dataHead->dataLen);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    outLen = dataHead->dataLen - OVERHEAD_LEN;
+    uint32_t outLen = dataHead->dataLen - OVERHEAD_LEN;
     dataInfo->outData = (unsigned char *)SoftBusCalloc(outLen);
     if (dataInfo->outData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc fail when process session out data");
@@ -522,7 +525,6 @@ int32_t TransProxyFirstSliceProcess(
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t actualDataLen = 0;
     uint32_t maxDataLen =
         (head->priority == PROXY_CHANNEL_PRIORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
     // The encrypted data length is longer then the actual data length
@@ -532,7 +534,7 @@ int32_t TransProxyFirstSliceProcess(
         TRANS_LOGE(TRANS_CTRL, "invalid sliceNum=%{public}d", head->sliceNum);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
-    actualDataLen = head->sliceNum * SLICE_LEN;
+    uint32_t actualDataLen = head->sliceNum * SLICE_LEN;
     uint32_t maxLen = 0;
     if (supportTlv) {
         maxLen = actualDataLen + PROXY_TLV_PKT_HEAD + OVERHEAD_LEN;
@@ -563,8 +565,7 @@ int32_t TransProxyFirstSliceProcess(
 int32_t TransProxySliceProcessChkPkgIsValid(
     const SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len)
 {
-    (void)data;
-    if (processor == NULL || head == NULL) {
+    if (processor == NULL || head == NULL || data == NULL || len <= 0) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -628,7 +629,7 @@ int32_t TransProxyNormalSliceProcess(
     return SOFTBUS_OK;
 }
 
-static int32_t CheckLenAndCopyData(uint32_t len, uint32_t headSize, const char *data, DataHeadTlvPacketHead *head)
+static int32_t CheckLenAndCopyData(const char *data, uint32_t len, DataHeadTlvPacketHead *head, uint32_t headSize)
 {
     if (len <= headSize) {
         TRANS_LOGE(TRANS_CTRL, "data len not enough, bufLen Less than headSize. len=%{public}u", len);
@@ -652,7 +653,7 @@ int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead
         return SOFTBUS_INVALID_PARAM;
     }
     *headSize += (MAGICNUM_SIZE + TLVCOUNT_SIZE);
-    int32_t res = CheckLenAndCopyData(len, *headSize, data, head);
+    int32_t res = CheckLenAndCopyData(data, len, head, *headSize);
     TRANS_CHECK_AND_RETURN_RET_LOGE(res == SOFTBUS_OK, res, TRANS_CTRL, "checkLenAndCopyData failed");
     errno_t ret = EOK;
     char *temp = (char *)data + MAGICNUM_SIZE + TLVCOUNT_SIZE;
@@ -686,6 +687,7 @@ int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead
                 break;
             default:
                 TRANS_LOGE(TRANS_CTRL, "unknown trans tdc tlv skip, tlvType=%{public}d", *type);
+                temp += *length;
                 continue;
         }
         temp += *length;

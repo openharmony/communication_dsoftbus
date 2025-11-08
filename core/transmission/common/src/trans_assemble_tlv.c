@@ -27,7 +27,7 @@
 
 int32_t TransAssembleTlvData(DataHead *pktHead, uint8_t type, uint8_t *buffer, uint8_t bufferLen, int32_t *bufferSize)
 {
-    if (pktHead == NULL || buffer == NULL || bufferSize == NULL) {
+    if (pktHead == NULL || buffer == NULL || bufferSize == NULL || bufferLen == 0) {
         TRANS_LOGE(TRANS_SDK, "param invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -40,6 +40,7 @@ int32_t TransAssembleTlvData(DataHead *pktHead, uint8_t type, uint8_t *buffer, u
     }
     if (memcpy_s(element->value, bufferLen, buffer, bufferLen) != EOK) {
         SoftBusFree(element->value);
+        element->value == NULL;
         TRANS_LOGE(TRANS_SDK, "memcpy buffer failed.");
         return SOFTBUS_MEM_ERR;
     }
@@ -52,6 +53,10 @@ int32_t TransAssembleTlvData(DataHead *pktHead, uint8_t type, uint8_t *buffer, u
 
 void ReleaseTlvValueBuffer(DataHead *pktHead)
 {
+    if (pktHead == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
+        return;
+    }
     pktHead->tlvElement -= ((pktHead->tlvCount) * sizeof(TlvElement));
     for (int index = 0; index < pktHead->tlvCount; index++) {
         TlvElement *temp = (TlvElement *)pktHead->tlvElement;
