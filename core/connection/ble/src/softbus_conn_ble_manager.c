@@ -321,7 +321,10 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
         }
     }
     if (connection->isUnknownDevice) {
-        CONN_LOGI(CONN_BLE, "is thirdParty device not exchange udid");
+        CONN_LOGI(CONN_BLE, "get thirdParty device udid");
+        if (strcpy_s(info->bleInfo.deviceIdHash, sizeof(info->bleInfo.deviceIdHash), connection->udid) != EOK) {
+            CONN_LOGI(CONN_BLE, "cpy deviceid err");
+        }
         return SOFTBUS_OK;
     }
     status = SoftBusGenerateStrHash(
