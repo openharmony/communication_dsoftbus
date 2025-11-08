@@ -231,6 +231,7 @@ void LnnDeinitDecisionCenterV2Packed(void);
 void SdMgrDeathCallbackPacked(const char *pkgName);
 int32_t AuthMetaGetIpByMetaNodeIdPacked(const char *metaNodeId, char *ip, int32_t len);
 int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len);
+int32_t AuthMetaGetConnectionTypeByMetaNodeIdPacked(const char *metaNodeId, NetworkConnectionType *connectionType);
 bool IsSupportMcuFeaturePacked(void);
 void LnnSendDeviceStateToMcuPacked(void *para);
 int32_t LnnInitMcuPacked(void);
