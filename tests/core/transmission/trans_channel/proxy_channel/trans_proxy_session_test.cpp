@@ -124,6 +124,8 @@ void TransProxySessionTest::TestRegisterNetworkingChannelListener(void)
     listener.onMessageReceived = TransProxySessionTest::TestOnNetworkMessageReceived;
     int32_t ret = TransRegisterNetworkingChannelListener(sessionName, &listener);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransRegisterNetworkingChannelListener(nullptr, &listener);
+    EXPECT_EQ(SOFTBUS_STRCPY_ERR, ret);
 }
 
 /*
@@ -540,6 +542,7 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest003, TestSize.Level1)
     char *payLoad = static_cast<char *>(SoftBusCalloc(32));
     ASSERT_TRUE(payLoad != nullptr);
     (void)strcpy_s(payLoad, 32, "testpayload");
+    TransPagingHandshakeEvent(TEST_NUMBER_256, nullptr);
 
     SoftbusTransProxyNetworkMock networkObj;
     EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoad));

@@ -348,9 +348,15 @@ HWTEST_F(TransClientSessionManagerTest, GetMaxIdleTimeBySocket01, TestSize.Level
     uint32_t optValueValid = 10000;
     ret = SetMaxIdleTimeBySocket(sessionId, optValueValid);
     ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = SetMaxIdleTimeBySocket(0, optValueValid);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     uint32_t getValue = 0;
     ret = GetMaxIdleTimeBySocket(sessionId, &getValue);
     ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = GetMaxIdleTimeBySocket(0, &getValue);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetMaxIdleTimeBySocket(sessionId, nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
@@ -1180,12 +1186,20 @@ HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSiz
     ASSERT_EQ(lifecycle.sessionState, SESSION_STATE_OPENED);
     ret = SetSessionStateBySessionId(1, SESSION_STATE_CANCELLING, 0);
     ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = SetSessionStateBySessionId(-1, SESSION_STATE_CANCELLING, 0);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+    ret = SetSessionStateBySessionId(TRANS_TEST_CHANNEL_ID, SESSION_STATE_CANCELLING, 0);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = GetSocketLifecycleAndSessionNameBySessionId(1, sessionName, &lifecycle);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ASSERT_EQ(lifecycle.sessionState, SESSION_STATE_CANCELLING);
     int32_t osType;
     ret = ClientGetChannelOsTypeBySessionId(1, &osType);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ClientGetChannelOsTypeBySessionId(-1, &osType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientGetChannelOsTypeBySessionId(1, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     (void)ClientTransOnPrivilegeClose(g_networkId);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1648,6 +1662,10 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest52, TestSiz
     const int32_t channelId = 1;
     const int32_t channelType = 1;
     int32_t ret = ClientRegisterRelationChecker(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientTransCheckCollabRelation(nullptr, &sinkInfo, channelId, channelType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientTransCheckCollabRelation(&sourceInfo, nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransCheckCollabRelation(&sourceInfo, &sinkInfo, channelId, channelType);

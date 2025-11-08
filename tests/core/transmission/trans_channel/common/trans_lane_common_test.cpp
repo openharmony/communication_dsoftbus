@@ -575,6 +575,7 @@ HWTEST_F(TransLaneCommonTest, TransOpenChannelSetModule001, TestSize.Level1)
  * @tc.desc: Should return SOFTBUS_INVALID_NUM when TransOpenUdpChannel return SOFTBUS_INVALID_NUM
  * @tc.desc: Should return SOFTBUS_INVALID_NUM when TransProxyOpenProxyChannel return SOFTBUS_INVALID_NUM
  * @tc.desc: Should return SOFTBUS_INVALID_NUM when TransOpenDirectChannel return SOFTBUS_INVALID_NUM
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.desc: Should return SOFTBUS_OK when TransOpenDirectChannel return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
@@ -587,7 +588,11 @@ HWTEST_F(TransLaneCommonTest, TransOpenChannelProc001, TestSize.Level1)
 
     ConnectOption connOpt;
     int32_t channelId = TEST_CHANNEL_ID;
-    int32_t ret = TransOpenChannelProc(type, appInfo, &connOpt, &channelId);
+    int32_t ret = TransOpenChannelProc(type, nullptr, &connOpt, &channelId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransOpenChannelProc(type, appInfo, nullptr, &channelId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransOpenChannelProc(type, appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
 
     NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
@@ -924,6 +929,8 @@ HWTEST_F(TransLaneCommonTest, TransReportBadKeyEvent001, TestSize.Level1)
 HWTEST_F(TransLaneCommonTest, CheckSourceCollabRelationTest001, TestSize.Level1)
 {
     int32_t ret = CheckSourceCollabRelation(nullptr, TEST_PID, TEST_UID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckCollabRelation(nullptr, TEST_PID, TEST_UID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
