@@ -375,4 +375,59 @@ HWTEST_F(BrProxyTest, BrProxyTest0018, TestSize.Level1)
     ret = ClientTransBrProxyDataReceived(CHANNEL_ID, nullptr, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: IsValidSha256Test001
+ * @tc.desc: IsValidSha256Test001, when given invalid param should return false
+ * @tc.desc: IsValidSha256Test001, when given strlen(param) not euqal to 32 should return false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyTest, IsValidSha256Test001, TestSize.Level1)
+{
+    const char *testBrMac = "testBrMac";
+    const char *testUuid = "testUuid111111111111111111111111";
+    bool ret = IsValidSha256(nullptr);
+    EXPECT_FALSE(ret);
+    ret = IsValidSha256(testBrMac);
+    EXPECT_FALSE(ret);
+    ret = IsValidSha256(testUuid);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsPeerDevAddrValidTest001
+ * @tc.desc: IsPeerDevAddrValidTest001, when given invalid param should return false
+ * @tc.desc: IsValidSha256Test001, when given strlen(param) not euqal to 32 should return false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyTest, IsPeerDevAddrValidTest001, TestSize.Level1)
+{
+    const char *testUuid = "testUuid111111111111111111111111";
+    bool ret = IsPeerDevAddrValid(nullptr);
+    EXPECT_FALSE(ret);
+    ret = IsPeerDevAddrValid(testUuid);
+    EXPECT_FALSE(ret);
+    ret = IsUuidValid(nullptr);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ClientTransBrProxyQueryPermissionTest001
+ * @tc.desc: ClientTransBrProxyQueryPermissionTest001, when given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyTest, ClientTransBrProxyQueryPermissionTest001, TestSize.Level1)
+{
+    const char *bundleName = "testBundleName";
+    bool isEmpowered = true;
+    int32_t ret = ClientTransBrProxyQueryPermission(nullptr, &isEmpowered);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientTransBrProxyQueryPermission(bundleName, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = RegisterAccessHook(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
 }

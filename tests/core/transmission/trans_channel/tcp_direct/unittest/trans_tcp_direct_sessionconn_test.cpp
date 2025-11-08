@@ -274,7 +274,7 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcGetIpAndConnectTypeById001, Test
     ret = TransTdcGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN - 1, &connectType);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN - 1, NULL);
+    ret = TransTdcGetIpAndConnectTypeById(channelId, localIp, remoteIp, IP_LEN, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

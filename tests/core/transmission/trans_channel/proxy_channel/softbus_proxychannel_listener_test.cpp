@@ -447,6 +447,8 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelBindTest001, TestSize.Le
     appInfo.appType = APP_TYPE_NORMAL;
     int32_t ret = OnProxyChannelBind(TEST_NUMBER_25, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = OnProxyChannelBind(TEST_NUMBER_25, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     appInfo.appType = APP_TYPE_INNER;
     ret = OnProxyChannelBind(TEST_NUMBER_25, &appInfo);
@@ -558,6 +560,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, GetProxyChannelInfo001, TestSize.Level
     GetProxyChannelInfo(channelId, appInfo, isClient, &info);
     appInfo->peerData.dataLen = -1;
     appInfo->isClient = false;
+    isClient = true;
     GetProxyChannelInfo(channelId, appInfo, isClient, &info);
     appInfo->isD2D = false;
     GetProxyChannelInfo(channelId, appInfo, isClient, &info);
