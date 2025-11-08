@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/**
+/*
  * @file join_lnn_demo.c
  *
  * @brief Provides the sample code for device join and leave lnn

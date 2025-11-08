@@ -99,7 +99,7 @@ static IRefreshCallback g_refreshCb1 = { .OnDeviceFound = TestDeviceFound, .OnDi
 
 static IRefreshCallback g_refreshCb2 = { .OnDeviceFound = TestRangeDeviceFound, .OnDiscoverResult = OnDiscoverResult };
 
-/**
+/*
  * @tc.name: RefreshLNNTest001
  * @tc.desc: Test active discovery mode, use wrong Subscribeinfo in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -154,7 +154,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest002
  * @tc.desc: Test passive discovery mode, use wrong Subscribeinfo in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -209,7 +209,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest002, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest003
  * @tc.desc: Test active discovery mode, use wrong Subscribeinfo in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -264,7 +264,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest003, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest004
  * @tc.desc: Test passive discovery mode, use wrong Subscribeinfo in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -319,7 +319,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest004, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest005
  * @tc.desc: Test active discovery mode, use wrong Subscribeinfo in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -374,7 +374,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest005, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest006
  * @tc.desc: Test passive discovery mode, use wrong Subscribeinfo in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -429,7 +429,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest006, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest007
  * @tc.desc: Test active discovery mode, use wrong Subscribeinfo in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -484,7 +484,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest007, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest008
  * @tc.desc: Test passive discovery mode, use wrong Subscribeinfo in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -539,7 +539,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest008, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest001
  * @tc.desc: Verify stop discovery wrong parameter in BLE medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -560,7 +560,7 @@ HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest002
  * @tc.desc: Verify stop discovery wrong parameter in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -581,7 +581,7 @@ HWTEST_F(BusCenterSdkRefresh, StopRefreshLNNTest002, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest003
  * @tc.desc: Verify stop discovery wrong parameter in AUTO medium.
  * @tc.in: Test module, Test number, Test levels.
