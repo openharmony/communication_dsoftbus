@@ -269,41 +269,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
 }
 
 /*
- * @tc.name: TransProxyGetNewChanSeqTest001
- * @tc.desc: test proxy get new chan seq
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetNewChanSeqTest001, TestSize.Level1)
-{
-    int32_t channelId = TEST_NUMBER_TEN;
-    int32_t ret = TransProxyGetNewChanSeq(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyGetNewChanSeq(TEST_NUMBER_VALID);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
- * @tc.name: TransProxyGetNewChanSeqTest002
- * @tc.desc: test proxy get new chan seq
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetNewChanSeqTest002, TestSize.Level1)
-{
-    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    ASSERT_TRUE(chan != nullptr);
-    chan->channelId = TEST_VALID_CHANNEL_ID;
-    chan->seq = TEST_VALID_SEQ;
-    chan->connId = TEST_VALID_CONN_ID;
-    int32_t ret = TransProxyAddChanItem(chan);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    TransProxyGetNewChanSeq(TEST_VALID_CHANNEL_ID);
-    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
-}
-
-/*
   * @tc.name: TransProxyKeepAlvieChanTest001
   * @tc.desc: test trans proxy get new chanseq
   * @tc.type: FUNC

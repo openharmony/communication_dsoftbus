@@ -1762,7 +1762,7 @@ static int32_t TransProxyUnpackInnerHandshakeMsg(cJSON *root, AppInfo *appInfo, 
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyGetJsonObject(cJSON *root, const char *msg, int32_t len, ProxyChannelInfo *chan)
+static int32_t TransProxyGetJsonObject(cJSON *root, ProxyChannelInfo *chan)
 {
     if (!GetJsonObjectNumberItem(root, JSON_KEY_TYPE, (int32_t *)&(chan->appInfo.appType)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chan->identity, sizeof(chan->identity)) ||
@@ -1795,7 +1795,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
     char sessionKey[BASE64KEY] = { 0 };
     AppInfo *appInfo = &(chan->appInfo);
-    int32_t ret = TransProxyGetJsonObject(root, msg, len, chan);
+    int32_t ret = TransProxyGetJsonObject(root, chan);
     if (ret != SOFTBUS_OK) {
         goto ERR_EXIT;
     }

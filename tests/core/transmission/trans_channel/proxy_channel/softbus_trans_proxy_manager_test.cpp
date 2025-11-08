@@ -180,22 +180,6 @@ HWTEST_F(TransProxyManagerTest, TransProxyCreateChanInfoTest001, TestSize.Level1
 }
 
 /*
- * @tc.name: TransProxyGetNewChanSeqTest001
- * @tc.desc: test proxy get new chan seq
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyManagerTest, TransProxyGetNewChanSeqTest001, TestSize.Level1)
-{
-    int32_t channelId = m_testProxyNormalChannelId;
-    int32_t ret = TransProxyGetNewChanSeq(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransProxyGetNewChanSeq(-1);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
  * @tc.name: TransProxyGetAuthIdTest001
  * @tc.desc: test proxy get auth id
  * @tc.type: FUNC
