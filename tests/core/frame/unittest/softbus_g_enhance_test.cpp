@@ -319,6 +319,8 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest010, TestSize.Level1)
     AuthUpdateKeyIndexPacked(nullptr, 0, 0, 0);
     ret = LnnGenerateLocalPtkPacked(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AuthMetaGetConnectionTypeByMetaNodeIdPacked(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
 /*
