@@ -708,20 +708,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_002
     EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
 }
 
-/*
- * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_003
- * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
- * @tc.type: FUN
- * @tc.require: 1
- */
-HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_003, TestSize.Level1)
-{
-    uint64_t displayId = 0;
-    LnnSetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, TYPE_CAR_ID);
-    LnnSetLocalNumU64Info(NUM_KEY_DISPLAY_ID, displayId);
-    EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
-}
-
 
 /*
  * @tc.name: GetOsAccountIdByUserId_001

@@ -114,10 +114,10 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
     AuthSessionInfo info = { 0 };
     AuthDeviceKeyInfo deviceKey = { 0 };
     const char *fastAuth = "encryptedFastAuth";
-    ParseFastAuthValue(&info, fastAuth, &deviceKey);
-    ParseFastAuthValue(&info, fastAuth, &deviceKey);
-    ParseFastAuthValue(&info, fastAuth, &deviceKey);
-    ParseFastAuthValue(&info, fastAuth, &deviceKey);
+    EXPECT_NO_FATAL_FAILURE(ParseFastAuthValue(&info, fastAuth, &deviceKey));
+    EXPECT_NO_FATAL_FAILURE(ParseFastAuthValue(&info, fastAuth, &deviceKey));
+    EXPECT_NO_FATAL_FAILURE(ParseFastAuthValue(&info, fastAuth, &deviceKey));
+    EXPECT_NO_FATAL_FAILURE(ParseFastAuthValue(&info, fastAuth, &deviceKey));
     EXPECT_CALL(mocker, LnnEncryptAesGcm)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(DoAll(SetArgPointee<2>(nullptr), Return(SOFTBUS_OK)))
@@ -245,11 +245,11 @@ HWTEST_F(AuthSessionJsonMockTest, VERIFY_SESSION_INFO_ID_TYPE_TEST_001, TestSize
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, JSON_AddStringToObject)
         .WillRepeatedly(Return(false));
-    PackWifiSinglePassInfo(&obj, &info);
-    PackWifiSinglePassInfo(&obj, &info);
-    PackWifiSinglePassInfo(&obj, &info);
-    PackWifiSinglePassInfo(&obj, &info);
-    PackWifiSinglePassInfo(&obj, &info);
+    EXPECT_NO_FATAL_FAILURE(PackWifiSinglePassInfo(&obj, &info));
+    EXPECT_NO_FATAL_FAILURE(PackWifiSinglePassInfo(&obj, &info));
+    EXPECT_NO_FATAL_FAILURE(PackWifiSinglePassInfo(&obj, &info));
+    EXPECT_NO_FATAL_FAILURE(PackWifiSinglePassInfo(&obj, &info));
+    EXPECT_NO_FATAL_FAILURE(PackWifiSinglePassInfo(&obj, &info));
     EXPECT_CALL(mocker, JSON_AddStringToObject)
         .WillOnce(Return(false))
         .WillOnce(Return(false))
@@ -289,7 +289,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level
     AuthSessionInfo info = { .connInfo.type = AUTH_LINK_TYPE_WIFI, .isConnectServer = false };
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
-    PackUDIDAbatementFlag(&obj, &info);
+    EXPECT_NO_FATAL_FAILURE(PackUDIDAbatementFlag(&obj, &info));
     int32_t ret = PackDeviceJsonInfo(&info, &obj);
     EXPECT_NE(ret, SOFTBUS_OK);
     info.isConnectServer = true;
@@ -332,18 +332,18 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1
     EXPECT_CALL(mocker, SoftBusGenerateStrHash)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
+    EXPECT_NO_FATAL_FAILURE(UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq));
+    EXPECT_NO_FATAL_FAILURE(UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq));
     EXPECT_EQ(info.normalizedKey, nullptr);
     if (info.normalizedKey != nullptr) {
         SoftBusFree(info.normalizedKey);
     }
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
+    EXPECT_NO_FATAL_FAILURE(UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq));
     EXPECT_EQ(info.normalizedKey, nullptr);
     if (info.normalizedKey != nullptr) {
         SoftBusFree(info.normalizedKey);
     }
-    UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
+    EXPECT_NO_FATAL_FAILURE(UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq));
     EXPECT_EQ(info.normalizedKey, nullptr);
     if (info.normalizedKey != nullptr) {
         SoftBusFree(info.normalizedKey);
@@ -487,16 +487,16 @@ HWTEST_F(AuthSessionJsonMockTest, SET_EXCHANGE_ID_TYPE_AND_VALUE_TEST_001, TestS
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     const char *remoteUuid = "remoteUuidTest";
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, true);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, nullptr, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
-    PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false);
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, true));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, nullptr, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
+    EXPECT_NO_FATAL_FAILURE(PackWifiDirectInfo(&connInfo, &obj, &nodeInfo, remoteUuid, false));
     ret = SetExchangeIdTypeAndValue(&obj, nullptr);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = SetExchangeIdTypeAndValue(nullptr, &info);

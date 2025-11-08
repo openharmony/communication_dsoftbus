@@ -55,7 +55,7 @@ const char *g_groupid = "TEST_GROUP_ID";
 const char *g_errMsg = "error";
 static IServerChannelCallBack *callback = nullptr;
 static SoftBusList *g_transAuthChannelTestList = nullptr;
-
+static constexpr char TEST_SHARE_SESSION[] = "IShareEcologyAuthSession";
 class TransAuthChannelTest : public testing::Test {
 public:
     TransAuthChannelTest()
@@ -1687,5 +1687,27 @@ HWTEST_F(TransAuthChannelTest, TransAuthDestroyChannelListTest001, TestSize.Leve
 
     TransSessionMgrDeinit();
     TransAuthDeinit();
+}
+
+/*
+ * @tc.name: TransGetLocalDeviceIdTest001
+ * @tc.desc: TransGetLocalDeviceId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransGetLocalDeviceIdTest001, TestSize.Level1)
+{
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    EXPECT_NE(appInfo, nullptr);
+    int32_t ret = TransGetLocalDeviceId(nullptr, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransGetLocalDeviceId(TEST_SHARE_SESSION, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransGetLocalDeviceId(TEST_SHARE_SESSION, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransGetLocalDeviceId(g_authSessionName, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

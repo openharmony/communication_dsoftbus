@@ -68,8 +68,10 @@ public:
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
-    virtual void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr) = 0;
+    virtual void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen,
+        char **anonymizedStr) = 0;
 };
+
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
     AuthNetLedgertInterfaceMock();
@@ -106,7 +108,8 @@ public:
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey, uint8_t *, uint32_t));
-    MOCK_METHOD3(LnnAnonymizePtk, void(const char *ptk, uint32_t len, char **anonymizedStr));
+    MOCK_METHOD4(LnnAnonymizeDeviceStr, void(const char *deviceStr, uint32_t strLen, uint32_t defaultLen,
+        char **anonymizedStr));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

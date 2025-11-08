@@ -129,9 +129,10 @@ static ChannelInfo InitChannelInfo()
     return channel;
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelOpenedTest001
- * @tc.desc: trans on udp channel opened test, use the wrong parameter.
+ * @tc.desc: trans on udp channel opened test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -151,9 +152,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelOpenedTest002
- * @tc.desc: trans on udp channel opened test, use the wrong or normal parameter.
+ * @tc.desc: trans on udp channel opened test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -184,9 +186,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelOpenedTest003
- * @tc.desc: trans on udp channel opened test, use the wrong or normal parameter.
+ * @tc.desc: trans on udp channel opened test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -208,9 +211,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelOpenFailedTest001
- * @tc.desc: trans on udp channel opened test, use the wrong or normal parameter.
+ * @tc.desc: trans on udp channel opened test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -224,9 +228,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenFailedTest001, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelClosedTest001
- * @tc.desc: trans on udp channel closed test, use the wrong or normal parameter.
+ * @tc.desc: trans on udp channel closed test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -237,9 +242,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelClosedTest002
- * @tc.desc: trans on udp channel closed test, use the wrong or normal parameter.
+ * @tc.desc: trans on udp channel closed test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -272,9 +278,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest002, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransOnUdpChannelQosEventTest001
- * @tc.desc: trans on udp channel qos event test, use the wrong or normal parameter.
+ * @tc.desc: trans on udp channel qos event test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -286,9 +293,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelQosEventTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransCloseUdpChannelTest001
- * @tc.desc: client trans close udp channel test, use the wrong or normal parameter.
+ * @tc.desc: client trans close udp channel test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -299,9 +307,10 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransUdpChannelSendStreamTest001
- * @tc.desc: trans udp channel send stream test, use the wrong or normal parameter.
+ * @tc.desc: trans udp channel send stream test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -337,9 +346,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransUdpChannelSendFileTest001
- * @tc.desc: trans udp channel send file test, use the wrong or normal parameter.
+ * @tc.desc: trans udp channel send file test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -362,9 +372,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetUdpChannelByFileIdTest001
- * @tc.desc: trans get udp channel by fileid test, use the wrong or normal parameter.
+ * @tc.desc: trans get udp channel by fileid test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -381,9 +392,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest001, TestSize.
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransAddUdpChannelTest001
- * @tc.desc: client trans add udp channel test, use the wrong or normal parameter.
+ * @tc.desc: client trans add udp channel test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -404,9 +416,10 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransAddUdpChannelTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransUdpManagerTest001
- * @tc.desc: client trans udp manager test, use the normal parameter.
+ * @tc.desc: client trans udp manager test
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -419,9 +432,10 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientEmitFileEventTest001
- * @tc.desc: client emit file event test, use the invalid parameter.
+ * @tc.desc: client emit file event test
+ *           use the invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -432,9 +446,10 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientEmitFileEventTest002
- * @tc.desc: client emit file event test, use the invalid parameter.
+ * @tc.desc: client emit file event test
+ *           use the invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -451,9 +466,10 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest002, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransLimitChangeTest
- * @tc.desc: trans limit change test, use the invalid parameter.
+ * @tc.desc: trans limit change test
+ *           use the invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -471,9 +487,9 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransSetUdpChannelTosTest
- * @tc.desc: trans set udp channel tos test.
+ * @tc.desc: trans set udp channel tos test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -484,9 +500,9 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransGetUdpChannelTosTest001
- * @tc.desc: trans get udp channel tos test.
+ * @tc.desc: trans get udp channel tos test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -501,9 +517,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransUdpChannelSendStreamTest002
- * @tc.desc: trans udp channel sendstream test, use the wrong or normal parameter.
+ * @tc.desc: trans udp channel sendstream test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -543,9 +560,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest002, TestSize.L
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpChannelSendFileTest002
- * @tc.desc: trans udp channel sendfile test, use the wrong or normal parameter.
+ * @tc.desc: trans udp channel sendfile test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -598,9 +616,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendFileTest002, TestSize.Lev
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLimitChangeTest002
- * @tc.desc: trans limit change test, use the wrong or normal parameter.
+ * @tc.desc: trans limit change test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -640,9 +659,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest002, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLimitChangeTest003
- * @tc.desc: trans limit change test, use the wrong or normal parameter.
+ * @tc.desc: trans limit change test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -686,9 +706,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransLimitChangeTest003, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: ClientEmitFileEventTest003
- * @tc.desc: client emit file event test, use the wrong or normal parameter.
+ * @tc.desc: client emit file event test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -715,9 +736,10 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level1)
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSetUdpChannelSessionIdTest001
- * @tc.desc: trans set udpchannel sessionid test, use the wrong or normal parameter.
+ * @tc.desc: trans set udpchannel sessionid test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -753,9 +775,10 @@ static void OnRenameFileCb(RenameParam *renameParam)
     return;
 }
 
-/**
+/*
  * @tc.name: TransSetUdpChannelRenameHookTest001
- * @tc.desc: trans set udpchannel rename hook test, use the wrong or normal parameter.
+ * @tc.desc: trans set udpchannel rename hook test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -790,9 +813,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelRenameHookTest001, TestSiz
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSetUdpChannelTosTest001
- * @tc.desc: trans set udpchannel tos test, use the wrong or normal parameter.
+ * @tc.desc: trans set udpchannel tos test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -823,9 +847,10 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelTosTest001, TestSize.Level
     ClientTransUdpMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransGetUdpChannelTosTest002
- * @tc.desc: trans get udpchannel tos test, use the wrong or normal parameter.
+ * @tc.desc: trans get udpchannel tos test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */

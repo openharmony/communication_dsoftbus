@@ -127,7 +127,7 @@ void TransProxyPackBytesTest(FuzzedDataProvider &provider)
     TransProxyPackBytes(channelId, &dataInfo, sessionKey, flag, 0);
 }
 
-void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
+void TransProxyPackTlvDataTest(FuzzedDataProvider &provider)
 {
     DataHead pktHead;
     (void)memset_s(&pktHead, sizeof(DataHead), 0, sizeof(DataHead));
@@ -362,7 +362,7 @@ void TransProxyNormalSliceProcessTest(FuzzedDataProvider &provider)
     (void)TransProxyNormalSliceProcess(&processor, &head, data, len);
 }
 
-void TransProxyParseTlvTest(FuzzedDataProvider &provider)
+void CheckLenAndCopyDataTest(FuzzedDataProvider &provider)
 {
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
     uint32_t headSize = provider.ConsumeIntegral<uint32_t>();
@@ -573,6 +573,132 @@ void TransProxyD2dDataLenCheckTest(FuzzedDataProvider &provider)
         provider.ConsumeIntegralInRange<uint16_t>(BUSINESS_TYPE_D2D_MESSAGE, BUSINESS_TYPE_BUTT));
     (void)TransProxyD2dDataLenCheck(len, type);
 }
+
+void ProxyBuildTlvDataHeadTest(FuzzedDataProvider &provider)
+{
+    DataHead pktHead;
+    (void)memset_s(&pktHead, sizeof(DataHead), 0, sizeof(DataHead));
+    pktHead.magicNum = provider.ConsumeIntegral<uint32_t>();
+    pktHead.tlvCount = provider.ConsumeIntegral<uint8_t>();
+    int32_t finalSeq = provider.ConsumeIntegral<int32_t>();
+    int32_t flag = provider.ConsumeIntegral<int32_t>();
+    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
+    int32_t tlvBufferSize = provider.ConsumeIntegral<int32_t>();
+
+    (void)ProxyBuildTlvDataHead(nullptr, finalSeq, flag, dataLen,  &tlvBufferSize);
+    (void)ProxyBuildTlvDataHead(&pktHead, finalSeq, flag, dataLen,  &tlvBufferSize);
+}
+
+void ProxyBuildNeedAckTlvDataTest(FuzzedDataProvider &provider)
+{
+    DataHead pktHead;
+    (void)memset_s(&pktHead, sizeof(DataHead), 0, sizeof(DataHead));
+    pktHead.magicNum = provider.ConsumeIntegral<uint32_t>();
+    pktHead.tlvCount = provider.ConsumeIntegral<uint8_t>();
+    pktHead.tlvElement = reinterpret_cast<uint8_t *>(SoftBusCalloc(PROXY_TLV_ELEMENT * sizeof(TlvElement)));
+    if (pktHead.tlvElement == nullptr) {
+        return;
+    }
+    bool needAck = provider.ConsumeBool();
+    uint32_t dataSeqs = provider.ConsumeIntegral<uint32_t>();
+    int32_t tlvBufferSize = provider.ConsumeIntegral<int32_t>();
+
+    (void)ProxyBuildNeedAckTlvData(nullptr, needAck, dataSeqs, &tlvBufferSize);
+    (void)ProxyBuildNeedAckTlvData(&pktHead, needAck, dataSeqs, &tlvBufferSize);
+    SoftBusFree(pktHead.tlvElement);
+}
+
+void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
+{
+    ProxyDataInfo dataInfo;
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
+    SessionPktType flag = static_cast<SessionPktType>(
+        provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
+    int32_t seq = provider.ConsumeIntegral<int32_t>();
+    DataHeadTlvPacketHead info;
+    (void)memset_s(&info, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
+    FillDataHeadTlvPacketHead(provider, &info);
+
+    (void)TransProxyPackTlvBytes(nullptr, sessionKey, flag, seq, nullptr);
+    (void)TransProxyPackTlvBytes(&dataInfo, sessionKey, flag, seq, &info);
+}
+
+void SessionPktTypeToProxyIndexTest(FuzzedDataProvider &provider)
+{
+    SessionPktType pktType = static_cast<SessionPktType>(
+        provider.ConsumeIntegral<uint16_t>());
+    (void)SessionPktTypeToProxyIndex(pktType);
+}
+
+void TransProxyPackDataTest(FuzzedDataProvider &provider)
+{
+    ProxyDataInfo dataInfo;
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    uint32_t sliceNum = provider.ConsumeIntegral<uint32_t>();
+    SessionPktType pktType = static_cast<SessionPktType>(
+        provider.ConsumeIntegral<uint16_t>());
+    uint32_t cnt = provider.ConsumeIntegral<uint32_t>();
+    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
+
+    (void)TransProxyPackData(nullptr, sliceNum, pktType, cnt, &dataLen);
+    (void)TransProxyPackData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
+}
+
+void TransProxyParseTlvTest(FuzzedDataProvider &provider)
+{
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    DataHeadTlvPacketHead head;
+    (void)memset_s(&head, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
+    FillDataHeadTlvPacketHead(provider, &head);
+    uint32_t headSize = provider.ConsumeIntegral<uint32_t>();
+
+    (void)TransProxyParseTlv(len, nullptr, &head, &headSize);
+    (void)TransProxyParseTlv(len, data, &head, &headSize);
+}
+
+void TransProxyPackNewHeadD2DDataTest(FuzzedDataProvider &provider)
+{
+    ProxyDataInfo dataInfo;
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    uint32_t sliceNum = provider.ConsumeIntegral<uint32_t>();
+    SessionPktType pktType = static_cast<SessionPktType>(
+        provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
+    uint16_t cnt = provider.ConsumeIntegral<uint16_t>();
+    uint16_t dataLen = provider.ConsumeIntegral<uint16_t>();
+
+    (void)TransProxyPackNewHeadD2DData(nullptr, sliceNum, pktType,  cnt, &dataLen);
+    (void)TransProxyPackNewHeadD2DData(&dataInfo, sliceNum, pktType,  cnt, &dataLen);
+}
+
+void TransProxyD2DFirstNewHeadSliceProcessTest(FuzzedDataProvider &provider)
+{
+    SliceProcessor processor;
+    (void)memset_s(&processor, sizeof(SliceProcessor), 0, sizeof(SliceProcessor));
+    FillSliceProcessor(provider, &processor);
+    SliceHead head;
+    (void)memset_s(&head, sizeof(SliceHead), 0, sizeof(SliceHead));
+    FillSliceHead(provider, &head);
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+    int32_t businessType = provider.ConsumeIntegral<int32_t>();
+
+    (void)TransProxyD2DFirstNewHeadSliceProcess(nullptr, &head, data, len, businessType);
+    (void)TransProxyD2DFirstNewHeadSliceProcess(&processor, &head, data, len, businessType);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -588,7 +714,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransUnPackTlvPackHeadTest(provider);
     OHOS::TransUnPackSliceHeadTest(provider);
     OHOS::TransProxyPackBytesTest(provider);
-    OHOS::TransProxyPackTlvBytesTest(provider);
+    OHOS::TransProxyPackTlvDataTest(provider);
     OHOS::TransProxyCheckSliceHeadTest(provider);
     OHOS::TransProxyNoSubPacketProcTest(provider);
     OHOS::TransProxyProcessSessionDataTest(provider);
@@ -599,7 +725,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxySliceProcessChkPkgIsValidTest(provider);
     OHOS::TransGetActualDataLenTest(provider);
     OHOS::TransProxyNormalSliceProcessTest(provider);
-    OHOS::TransProxyParseTlvTest(provider);
+    OHOS::CheckLenAndCopyDataTest(provider);
     OHOS::TransProxyNoSubPacketTlvProcTest(provider);
     OHOS::TransProxyProcDataTest(provider);
     OHOS::TransProxyPackD2DDataTest(provider);
@@ -608,5 +734,13 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyD2DFirstSliceProcessTest(provider);
     OHOS::TransProxyPackD2DBytesTest(data, size);
     OHOS::TransProxyD2dDataLenCheckTest(provider);
+    OHOS::ProxyBuildTlvDataHeadTest(provider);
+    OHOS::ProxyBuildNeedAckTlvDataTest(provider);
+    OHOS::TransProxyPackTlvBytesTest(provider);
+    OHOS::SessionPktTypeToProxyIndexTest(provider);
+    OHOS::TransProxyPackDataTest(provider);
+    OHOS::TransProxyParseTlvTest(provider);
+    OHOS::TransProxyPackNewHeadD2DDataTest(provider);
+    OHOS::TransProxyD2DFirstNewHeadSliceProcessTest(provider);
     return 0;
 }

@@ -69,9 +69,9 @@ void TransProxyTransceiverTest::TearDownTestCase(void)
     TransProxyManagerDeinit();
 }
 
-/**
+/*
  * @tc.name: TransProxyOpenConnChannelTest001
- * @tc.desc: test proxy open new conn channel.
+ * @tc.desc: test proxy open new conn channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -125,9 +125,9 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyOpenConnChannelTest002
- * @tc.desc: test proxy open exist channel.
+ * @tc.desc: test proxy open exist channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -172,9 +172,9 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize.L
     sleep(1);
 }
 
-/**
+/*
  * @tc.name: TransProxyCloseConnChannelTest001
- * @tc.desc: test proxy close conn channel.
+ * @tc.desc: test proxy close conn channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -200,9 +200,9 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyCloseConnChannelTest001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyCloseConnChannelResetTest001
- * @tc.desc: test proxy dec connInfo ref count.
+ * @tc.desc: test proxy dec connInfo ref count
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -226,9 +226,9 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyCloseConnChannelResetTest001, Test
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetConnInfoByConnIdTest001
- * @tc.desc: test proxy get conn info by conn id.
+ * @tc.desc: test proxy get conn info by conn id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -245,9 +245,9 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyGetConnInfoByConnIdTest001, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyTransSendMsgTest001
- * @tc.desc: test proxy send message.
+ * @tc.desc: test proxy send message
  * @tc.type: FUNC
  * @tc.require:
  */

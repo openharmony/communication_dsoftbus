@@ -1076,4 +1076,27 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransPagingUpdateDataConfigTest001
     ret = TransPagingUpdateDataConfig(&appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: TransDisableConnBrIdleCheckTest001
+ * @tc.desc: TransDisableConnBrIdleCheck
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDisableConnBrIdleCheckTest001, TestSize.Level1)
+{
+    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(proxyChannelInfo != nullptr);
+    proxyChannelInfo->channelId = TEST_CHANNEL_ID;
+    proxyChannelInfo->connId = 99;
+
+    ListAdd(&g_proxyChannelList->list, &(proxyChannelInfo->node));
+
+    SoftbusTransProxyChannelManagerMock mock;
+    EXPECT_CALL(mock, ConnUpdateConnection).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransDisableConnBrIdleCheck(TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&(proxyChannelInfo->node));
+}
 } // namespace OHOS

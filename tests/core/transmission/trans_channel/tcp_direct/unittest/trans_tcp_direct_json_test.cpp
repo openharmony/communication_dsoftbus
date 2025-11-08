@@ -54,9 +54,9 @@ void TransTcpDirectJsonTest::SetUpTestCase(void)
 void TransTcpDirectJsonTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: VerifyP2pPackErrorTest001
- * @tc.desc: notify Verify P2p PackError test.
+ * @tc.desc: notify Verify P2p PackError test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -72,9 +72,9 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackErrorTest001, TestSize.Level1)
     EXPECT_NE(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: VerifyP2pPackErrorTest001
- * @tc.desc: Verify P2p Pack test.
+ * @tc.desc: Verify P2p Pack test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -95,9 +95,9 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackTest001, TestSize.Level1)
     EXPECT_NE(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: VerifyP2pPackErrorTest001
- * @tc.desc: Verify P2p UnPack test.
+ * @tc.desc: Verify P2p UnPack test
  * @tc.type: FUNC
  * @tc.require:
  */

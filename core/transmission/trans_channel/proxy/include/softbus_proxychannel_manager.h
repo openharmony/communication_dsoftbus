@@ -95,6 +95,7 @@ void TransPagingBadKeyRetry(int32_t channelId);
 int32_t TransPagingUpdateDataConfig(AppInfo *info);
 int32_t TransProxyD2dGetSleMac(int32_t channelId, int32_t pid, char *sleMac, uint32_t macLen);
 void TransProxyUnRegQosInfo(uint32_t connId, int32_t channelId, bool isD2d);
+int32_t TransDisableConnBrIdleCheck(int32_t channelId);
 #ifdef __cplusplus
 }
 #endif

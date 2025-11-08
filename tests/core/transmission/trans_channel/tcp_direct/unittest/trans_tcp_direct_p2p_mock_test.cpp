@@ -167,9 +167,10 @@ static cJSON *TestTransCreateJson(void)
     return json;
 }
 
-/**
+/*
  * @tc.name: StartNewP2pListenerTest001
- * @tc.desc: Should return SOFTBUS_OK when given valid param.
+ * @tc.desc: test StartNewP2pListener
+ *           Should return SOFTBUS_OK when given valid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -189,9 +190,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartNewP2pListenerTest001, TestSize.Level1)
     StopP2pSessionListener();
 }
 
-/**
+/*
  * @tc.name: StartNewHmlListenerTest001
- * @tc.desc: Should return SOFTBUS_OK when given valid param..
+ * @tc.desc: test StartNewHmlListener
+ *           Should return SOFTBUS_OK when given valid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -205,9 +207,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartNewHmlListenerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: StartHmlListenerTest001
- * @tc.desc: Should return SOFTBUS_OK when given valid param.
+ * @tc.desc: test StartHmlListener
+ *           Should return SOFTBUS_OK when given valid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -227,9 +230,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartHmlListenerTest001, TestSize.Level1)
     StopHmlListener(moudleType);
 }
 
-/**
+/*
  * @tc.name: GetModuleByHmlIpTest001
- * @tc.desc: Should return SOFTBUS_OK when given valid param.
+ * @tc.desc: test GetModuleByHmlIp
+ *           Should return SOFTBUS_OK when given valid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -249,9 +253,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, GetModuleByHmlIpTest001, TestSize.Level1)
     ClearHmlListenerByUuid(TEST_UDID);
 }
 
-/**
+/*
  * @tc.name: StartP2pListenerTest001
- * @tc.desc: Should return SOFTBUS_OK when given valid param.
+ * @tc.desc: test StartP2pListener
+ *           Should return SOFTBUS_OK when given valid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -273,10 +278,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartP2pListenerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SendAuthDataTest001
- * @tc.desc: Should return SOFTBUS_OK when SendAuthData return SOFTBUS_OK.
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when AuthPostTransData return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when SendAuthData return SOFTBUS_OK
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM
+ *           when AuthPostTransData return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -295,10 +302,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, SendAuthDataTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: VerifyP2pTest001
- * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when VerifyP2pPack return nullptr.
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when AuthPostTransData return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR
+ *           when VerifyP2pPack return nullptr
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM
+ *           when AuthPostTransData return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -334,9 +343,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnAuthConnOpenedTest001
- * @tc.desc: Test OnAuthConnOpened.
+ * @tc.desc: Test OnAuthConnOpened
+ *           use different parameter types
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -391,10 +401,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthConnOpenedTest001, TestSize.Level1)
     OnAuthConnOpened(requestId, authHandle);
 }
 
-/**
+/*
  * @tc.name: OpenAuthConnTest001
- * @tc.desc: Should return SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED when AuthOpenConn return error.
- * @tc.desc: Should return SOFTBUS_OK when AuthOpenConn return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED
+ *           when AuthOpenConn return error
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when AuthOpenConn return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -420,9 +432,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, OpenAuthConnTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: PackAndSendVerifyP2pRspTest001
- * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when VerifyP2pPack return nullptr.
+ * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR
+ *           when VerifyP2pPack return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -460,10 +473,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: PackAndSendVerifyP2pRspTest002
- * @tc.desc: Should return SOFTBUS_OK when AuthPostTransData return SOFTBUS_OK.
- * @tc.desc: Should return SOFTBUS_NOT_FIND when TransProxyPipelineSendMessage return SOFTBUS_NOT_FIND.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when AuthPostTransData return SOFTBUS_OK
+ * @tc.desc: Should return SOFTBUS_NOT_FIND
+ *           when TransProxyPipelineSendMessage return SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -499,9 +514,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest002, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnVerifyP2pRequestTest001
- * @tc.desc: Should return SOFTBUS_TRANS_GET_P2P_INFO_FAILED when TransProxyPipelineSendMessage return error.
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_P2P_INFO_FAILED
+ *           when TransProxyPipelineSendMessage return error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -523,10 +539,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     cJSON_Delete(json);
 }
 
-/**
+/*
  * @tc.name: ConnectSocketDirectPeerTest001
- * @tc.desc: Should return SOFTBUS_OK when ConnOpenClientSocket return SOFTBUS_OK.
- * @tc.desc: Should return error when ConnOpenClientSocket return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when ConnOpenClientSocket return SOFTBUS_OK
+ * @tc.desc: Should return error
+ *           when ConnOpenClientSocket return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -543,10 +561,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, ConnectSocketDirectPeerTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: AddHmlTriggerTest001
- * @tc.desc: Should return SOFTBUS_OK when ConnOpenClientSocket return SOFTBUS_OK.
- * @tc.desc: Should return error when ConnOpenClientSocket return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when ConnOpenClientSocket return SOFTBUS_OK
+ * @tc.desc: Should return error
+ *           when ConnOpenClientSocket return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -580,9 +600,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     TransDelSessionConnById(conn->channelId);
 }
 
-/**
+/*
  * @tc.name: AddP2pOrHmlTriggerTest001
- * @tc.desc: Should return SOFTBUS_OK when AddTrigger return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when AddTrigger return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -597,9 +618,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnVerifyP2pReplyTest001
- * @tc.desc: Should return SOFTBUS_OK when AddTrigger return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when AddTrigger return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -644,9 +666,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest001, TestSize.Level1)
     cJSON_Delete(testJson);
 }
 
-/**
+/*
  * @tc.name: OnVerifyP2pReplyTest002
- * @tc.desc: Should return SOFTBUS_OK when AddTrigger return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when AddTrigger return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -681,9 +704,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest002, TestSize.Level1)
     cJSON_Delete(json);
 }
 
-/**
+/*
  * @tc.name: OnAuthDataRecvTest001
- * @tc.desc: Test OnAuthDataRecv.
+ * @tc.desc: Test OnAuthDataRecv
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -719,9 +743,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthDataRecvTest001, TestSize.Level1)
     OnAuthDataRecv(authHandle, data);
 }
 
-/**
+/*
  * @tc.name: OnAuthChannelCloseTest001
- * @tc.desc: Should return SOFTBUS_OK when AddTrigger return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when AddTrigger return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -738,10 +763,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthChannelCloseTest001, TestSize.Level1)
     OnAuthChannelClose(authHandle);
 }
 
-/**
+/*
  * @tc.name: OpenNewAuthConnTest001
- * @tc.desc: Should return SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED when AuthOpenConn return error.
- * @tc.desc: Should return SOFTBUS_OK when AuthOpenConn return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED
+ *           when AuthOpenConn return error
+ * @tc.desc: Should return SOFTBUS_OK
+ *           when AuthOpenConn return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -768,9 +795,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, OpenNewAuthConnTest001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: OnP2pVerifyMsgReceivedTest001
  * @tc.desc: Test OnP2pVerifyMsgReceived
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -804,9 +832,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnP2pVerifyMsgReceivedTest001, TestSize.Leve
     OnP2pVerifyMsgReceived(channelId, data, len);
 }
 
-/**
+/*
  * @tc.name: StartVerifyP2pInfoTest001
- * @tc.desc: Test OnP2pVerifyMsgReceived when TransProxyPipelineGetChannelIdByNetworkId return INVALID_CHANNEL_ID
+ * @tc.desc: Test OnP2pVerifyMsgReceived
+ *           when TransProxyPipelineGetChannelIdByNetworkId return INVALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -835,9 +864,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: StartVerifyP2pInfoTest002
- * @tc.desc: Test OnP2pVerifyMsgReceived when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
+ * @tc.desc: Test OnP2pVerifyMsgReceived
+ *           when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -863,9 +893,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest002, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: StartVerifyP2pInfoTest003
  * @tc.desc: Test StartVerifyP2pInfo
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -885,9 +916,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest003, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: StartVerifyP2pInfoTest004
  * @tc.desc: Test StartVerifyP2pInfo
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -907,9 +939,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest004, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: StartVerifyP2pInfoTest005
  * @tc.desc: Test StartVerifyP2pInfo
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -930,9 +963,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest005, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: CopyAppInfoFastTransDataTest001
- * @tc.desc: Test OnP2pVerifyMsgReceived when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
+ * @tc.desc: Test OnP2pVerifyMsgReceived
+ *           when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -962,9 +996,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest001, TestSize.Le
     SoftBusFree(appInfo);
 }
 
-/**
- * @tc.name: CopyAppInfoFastTransDataTest
- * @tc.desc: Test CopyAppInfoFastTransDataTest002
+/*
+ * @tc.name: CopyAppInfoFastTransDataTest002
+ * @tc.desc: Test CopyAppInfoFastTransData
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -984,9 +1019,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest002, TestSize.Le
     SoftBusFree(appInfo);
 }
 
-/**
- * @tc.name: CopyAppInfoFastTransDataTest
- * @tc.desc: Test CopyAppInfoFastTransDataTest003
+/*
+ * @tc.name: CopyAppInfoFastTransDataTest003
+ * @tc.desc: Test CopyAppInfoFastTransData
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1005,9 +1041,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest003, TestSize.Le
     SoftBusFree(appInfo);
 }
 
-/**
- * @tc.name: CopyAppInfoFastTransDataTest
- * @tc.desc: Test CopyAppInfoFastTransDataTest003
+/*
+ * @tc.name: CopyAppInfoFastTransDataTest004
+ * @tc.desc: Test CopyAppInfoFastTransData
+ *           use the wrong parms or normal parms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1027,9 +1064,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest004, TestSize.Le
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: BuildSessionConnTest001
- * @tc.desc: Test OnP2pVerifyMsgReceived when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
+ * @tc.desc: Test OnP2pVerifyMsgReceived
+ *           when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1052,9 +1090,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, BuildSessionConnTest001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: StartTransP2pDirectListenerTest001
- * @tc.desc: Test OnP2pVerifyMsgReceived when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
+ * @tc.desc: Test OnP2pVerifyMsgReceived
+ *           when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1084,9 +1123,10 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartTransP2pDirectListenerTest001, TestSize
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: OpenP2pDirectChannelTest001
- * @tc.desc: Test OnP2pVerifyMsgReceived when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
+ * @tc.desc: Test OnP2pVerifyMsgReceived
+ *           when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
  * @tc.type: FUNC
  * @tc.require:
  */

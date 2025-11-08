@@ -110,5 +110,10 @@ void LnnDeleteLinkLedgerInfo(const char *udid)
 {
     return GetLaneListenerDepsInterface()->LnnDeleteLinkLedgerInfo(udid);
 }
+
+int32_t FindLaneIdByP2pMac(const char *p2pMac, LaneLinkType type, uint64_t *laneId)
+{
+    return GetLaneListenerDepsInterface()->FindLaneIdByP2pMac(p2pMac, type, laneId);
+}
 }
 } // namespace OHOS

@@ -611,13 +611,26 @@ typedef struct {
 } GearMode;
 
 /**
+ * @brief set group freq type in creating group.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    SOFTBUS_FREQUENCY_DEFAULT = 0,         /**< support 80M */
+    SOFTBUS_FREQUENCY_160M = 1,            /**< support 160M */
+    SOFTBUS_FREQUENCY_DEFAULT_11AX = 2,    /**< support 80M and 11AX */
+} GroupFreqType;
+
+/**
  * @brief Defines a group owner config.
  *
  * @since 1.0
  * @version 1.0
  */
 struct GroupOwnerConfig {
-    int32_t frequency;        /**< expect p2p frequency */
+    int32_t frequency;    /**< expect p2p frequency */
+    int32_t freqType;     /**< expect frequency type */
 };
 
 /**

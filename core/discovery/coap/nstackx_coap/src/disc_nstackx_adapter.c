@@ -249,10 +249,18 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
 {
     DISC_CHECK_AND_RETURN_LOGE(deviceList != NULL && deviceCount != 0, DISC_COAP, "invalid param.");
     DISC_LOGD(DISC_COAP, "Disc device found, count=%{public}u", deviceCount);
+    int32_t ret = SoftBusMutexLock(&g_discCoapInnerCbLock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "lock cb mutex err");
+    if (g_discCoapInnerCb == NULL) {
+        DISC_LOGE(DISC_COAP, "g_discCoapInnerCb is null");
+        (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
+        return;
+    }
+    const DiscInnerCallback cb = *g_discCoapInnerCb;
+    (void)SoftBusMutexUnlock(&g_discCoapInnerCbLock);
     DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     DISC_CHECK_AND_RETURN_LOGE(discDeviceInfo != NULL, DISC_COAP, "malloc device info failed.");
 
-    int32_t ret;
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
         if (nstackxDeviceInfo == NULL) {
@@ -275,8 +283,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             DISC_LOGW(DISC_COAP, "parse discovery device info failed.");
             continue;
         }
-        ret = DiscCoapProcessDeviceInfoPacked(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb,
-            &g_discCoapInnerCbLock);
+        ret = DiscCoapProcessDeviceInfoPacked(nstackxDeviceInfo, discDeviceInfo, cb);
         if (ret != SOFTBUS_OK) {
             DISC_LOGD(DISC_COAP, "DiscRecv: process device info failed, ret=%{public}d", ret);
         }

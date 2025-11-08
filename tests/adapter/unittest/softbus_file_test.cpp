@@ -42,7 +42,8 @@ void AdaptorDsoftbusFileTest::TearDown() { }
 
 /*
  * @tc.name: SoftBusAdapter_ReadFileTest_001
- * @tc.desc: read file test
+ * @tc.desc: test SoftBusAdapter_ReadFile
+ *           read file test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -67,7 +68,8 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusReadFileTest001, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusAdapter_OpenFileWithPermsTest_001
- * @tc.desc: softbus open file with perms test
+ * @tc.desc: test SoftBusAdapter_OpenFileWithPerms
+ *           softbus open file with perms test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -85,7 +87,8 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusOpenFileWithPermsTest001, TestSize.Leve
 
 /*
  * @tc.name: SoftBusAdapter_PreadFileTest_001
- * @tc.desc: pread file test
+ * @tc.desc: test SoftBusAdapter_PreadFile
+ *           pread file test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -109,7 +112,8 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusPreadFileTest001, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusAdapter_MakeDirTest_001
- * @tc.desc: make dir test
+ * @tc.desc: test SoftBusAdapter_MakeDir
+ *           make dir test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -121,7 +125,8 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusAdapter_GetFileSizeTest_001
- * @tc.desc: make dir test
+ * @tc.desc: test SoftBusAdapter_GetFileSize
+ *           make dir test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -138,7 +143,8 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusAdapter_SoftBusWriteFileFd_001
- * @tc.desc: SoftBusWriteFileFd will return SOFTBUS_FILE_ERR when given invalid param
+ * @tc.desc: test SoftBusAdapter_SoftBusWriteFileFd
+ *           SoftBusWriteFileFd will return SOFTBUS_FILE_ERR when given invalid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -157,7 +163,8 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusWriteFileFd001, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusAdapter_SoftBusAccessFile_001
- * @tc.desc: SoftBusAccessFile will return SOFTBUS_ERR when given invalid param
+ * @tc.desc: test SoftBusAdapter_SoftBusAccessFile
+ *           SoftBusAccessFile will return SOFTBUS_ERR when given invalid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -170,7 +177,8 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusAccessFile, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusAdapter_SoftBusRealPath_001
- * @tc.desc: SoftBusRealPath will return NULL when given invalid param
+ * @tc.desc: test SoftBusAdapter_SoftBusRealPath
+ *           SoftBusRealPath will return NULL when given invalid param
  * @tc.type: FUNC
  * @tc.require:
  */

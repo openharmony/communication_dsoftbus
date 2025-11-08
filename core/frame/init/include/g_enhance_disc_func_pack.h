@@ -48,13 +48,17 @@ int32_t SchedulerDeinitBroadcastPacked(void);
 int32_t DiscCoapAssembleBdataPacked(
     const unsigned char *capabilityData, uint32_t dataLen, char *businessData, uint32_t businessDataLen);
 int32_t DiscCoapProcessDeviceInfoPacked(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
-    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock);
+    const DiscInnerCallback discCb);
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 int32_t DiscCoapAssembleCapDataPacked(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
     uint32_t outLen);
 void DiscCoapUpdateAbilityPacked(uint32_t capability, const char *capabilityData, uint32_t dataLen,
     bool isPublish, bool isStart);
 #endif
+
+int32_t DiscCoapExtInitPacked(void);
+void DiscCoapExtDeinitPacked(void);
+
 #endif
 
 int32_t DiscFillBtypePacked(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet);

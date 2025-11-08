@@ -181,9 +181,10 @@ static void GenerateSessionServer(SessionServer *newNode)
     newNode->pid = 1;
 }
 
-/**
+/*
  * @tc.name: TransUnpackReplyErrInfo001
- * @tc.desc: TransUnpackReplyErrInfo, extern module active publish, stop session whitout start.
+ * @tc.desc: test TransUnpackReplyErrInfo
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -200,9 +201,10 @@ HWTEST_F(TransUdpNegoTest, TransUnpackReplyErrInfo001, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransPackReplyErrInfo001
- * @tc.desc: TransPackReplyErrInfo, extern module active publish, stop session whitout start.
+ * @tc.desc: test TransPackReplyErrInfo
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -221,9 +223,10 @@ HWTEST_F(TransUdpNegoTest, TransPackReplyErrInfo001, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: SendUdpInfo001
- * @tc.desc: SendUdpInfo, extern module active publish, stop session whitout start.
+ * @tc.desc: test SendUdpInfo
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -241,9 +244,10 @@ HWTEST_F(TransUdpNegoTest, SendUdpInfo001, TestSize.Level1)
     cJSON_Delete(replyMsg);
 }
 
-/**
+/*
  * @tc.name: SendReplyErrInfo001
- * @tc.desc: SendReplyErrInfo, extern module active publish, stop session whitout start.
+ * @tc.desc: test SendReplyErrInfo
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -261,9 +265,10 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SendReplyUdpInfo001
- * @tc.desc: SendReplyUdpInfo, extern module active publish, stop session whitout start.
+ * @tc.desc: test SendReplyUdpInfo
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -284,9 +289,10 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SendReplyUdpInfo002
  * @tc.desc: SendReplyUdpInfo test
+ *           use the nullptr parameter return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -297,9 +303,10 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SendReplyUdpInfo003
  * @tc.desc: SendReplyUdpInfo test
+ *           use different parameter types
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -318,9 +325,10 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
 }
 
-/**
+/*
  * @tc.name: TransOnExchangeUdpInfoReply001
- * @tc.desc: TransOnExchangeUdpInfoReply, extern module active publish, stop session whitout start.
+ * @tc.desc: test TransOnExchangeUdpInfoReply
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -351,9 +359,10 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransOnExchangeUdpInfoReply002
- * @tc.desc: TransOnExchangeUdpInfoReply, Trans udp Exchange UdpInfo reply.
+ * @tc.desc: test TransOnExchangeUdpInfoReply
+ *           Trans udp Exchange UdpInfo reply
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -378,9 +387,10 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply002, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransOnExchangeUdpInfoRequest001
- * @tc.desc: TransOnExchangeUdpInfoRequest, extern module active publish, stop session whitout start.
+ * @tc.desc: test TransOnExchangeUdpInfoRequest
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -404,9 +414,10 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransOnExchangeUdpInfoRequest002
- * @tc.desc: TransOnExchangeUdpInfoRequest, Trans udp Exchange UdpInfo requset.
+ * @tc.desc: test TransOnExchangeUdpInfoRequest
+ *           Trans udp Exchange UdpInfo requset
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -433,9 +444,10 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: StartExchangeUdpInfo001
- * @tc.desc: StartExchangeUdpInfo, extern module active publish, stop session whitout start.
+ * @tc.desc: test StartExchangeUdpInfo
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -459,9 +471,10 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: StartExchangeUdpInfo002
- * @tc.desc: StartExchangeUdpInfo, Trans start exchange udp info.
+ * @tc.desc: test StartExchangeUdpInfo
+ *           Trans start exchange udp info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -477,9 +490,10 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StartExchangeUdpInfo003
  * @tc.desc: StartExchangeUdpInfo test
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -503,9 +517,10 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_PACK_INFO_FAILED);
 }
 
-/**
+/*
  * @tc.name: UdpModuleCb001
- * @tc.desc: UdpModuleCb, extern module active publish, stop session whitout start.
+ * @tc.desc: test UdpModuleCb
+ *           extern module active publish, stop session whitout start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -528,9 +543,10 @@ HWTEST_F(TransUdpNegoTest, UdpModuleCb001, TestSize.Level1)
     UdpModuleCb(authHandle, &data);
 }
 
-/**
+/*
  * @tc.name: UdpModuleCb002
- * @tc.desc: UdpModuleCb, Trans udp module callback.
+ * @tc.desc: test UdpModuleCb
+ *           Trans udp module callback
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -559,9 +575,10 @@ HWTEST_F(TransUdpNegoTest, UdpModuleCb002, TestSize.Level1)
     UdpModuleCb(authHandle, &data3);
 }
 
-/**
+/*
  * @tc.name: TransOnExchangeUdpInfo001
- * @tc.desc: TransOnExchangeUdpInfo, Trans dup exchange info.
+ * @tc.desc: test TransOnExchangeUdpInfo
+ *           Trans dup exchange info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -584,9 +601,10 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfo001, TestSize.Level1)
     cJSON_Delete(json);
 }
 
-/**
+/*
  * @tc.name: UdpOnAuthConnOpened001
- * @tc.desc: UdpOnAuthConnOpened, Trans open udp auth connect.
+ * @tc.desc: test UdpOnAuthConnOpened
+ *           Trans open udp auth connect
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -604,9 +622,10 @@ HWTEST_F(TransUdpNegoTest, UdpOnAuthConnOpened001, TestSize.Level1)
     UdpOnAuthConnOpened(channel->requestId, authHandle);
 }
 
-/**
+/*
  * @tc.name: UdpOnAuthConnOpenFailed001
- * @tc.desc: UdpOnAuthConnOpenFailed, Trans open udp auth connect failed.
+ * @tc.desc: test UdpOnAuthConnOpenFailed
+ *           Trans open udp auth connect failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -624,9 +643,10 @@ HWTEST_F(TransUdpNegoTest, UdpOnAuthConnOpenFailed001, TestSize.Level1)
     UdpOnAuthConnOpenFailed(channel->requestId, reason);
 }
 
-/**
+/*
  * @tc.name: UdpOpenAuthConn001
- * @tc.desc: UdpOpenAuthConn, Trans open udp auth connect.
+ * @tc.desc: test UdpOpenAuthConn
+ *           Trans open udp auth connect
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -643,9 +663,10 @@ HWTEST_F(TransUdpNegoTest, UdpOpenAuthConn001, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: OpenAuthConnForUdpNegotiation001
- * @tc.desc: OpenAuthConnForUdpNegotiation, Trans open auth connect for udp negotiation.
+ * @tc.desc: test OpenAuthConnForUdpNegotiation
+ *           Trans open auth connect for udp negotiation
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -666,9 +687,10 @@ HWTEST_F(TransUdpNegoTest, OpenAuthConnForUdpNegotiation001, TestSize.Level1)
     TransDelUdpChannel(channel->info.myData.channelId);
 }
 
-/**
+/*
  * @tc.name: PrepareAppInfoForUdpOpen001
- * @tc.desc: PrepareAppInfoForUdpOpen, Trans prepare appInfo for udp open.
+ * @tc.desc: test PrepareAppInfoForUdpOpen
+ *           Trans prepare appInfo for udp open
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -692,9 +714,10 @@ HWTEST_F(TransUdpNegoTest, PrepareAppInfoForUdpOpen001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransUdpNodeOffLineProc001
- * @tc.desc: TransUdpNodeOffLineProc, Transmission udp Exchange UdpInfo requset.
+ * @tc.desc: test TransUdpNodeOffLineProc
+ *           Transmission udp Exchange UdpInfo requset
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -719,9 +742,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpNodeOffLineProc001, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: NotifyUdpChannelOpened001
- * @tc.desc: NotifyUdpChannelOpened, Trans notify udo channel opened.
+ * @tc.desc: test NotifyUdpChannelOpened
+ *           Trans notify udo channel opened
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -758,9 +782,10 @@ HWTEST_F(TransUdpNegoTest, NotifyUdpChannelOpened001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: NotifyUdpChannelOpenFailed001
- * @tc.desc: NotifyUdpChannelOpenFailed, Trans notify udp channel open failed.
+ * @tc.desc: test NotifyUdpChannelOpenFailed
+ *           Trans notify udp channel open failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -785,9 +810,10 @@ HWTEST_F(TransUdpNegoTest, NotifyUdpChannelOpenFailed001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: GenerateSeq001
- * @tc.desc: GenerateSeq, Trans generate seq.
+ * @tc.desc: test GenerateSeq
+ *           Trans generate seq
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -802,9 +828,10 @@ HWTEST_F(TransUdpNegoTest, GenerateSeq001, TestSize.Level1)
     EXPECT_EQ(ret, ERROR_RET_FIVE);
 }
 
-/**
+/*
  * @tc.name: AcceptUdpChannelAsServer001
- * @tc.desc: AcceptUdpChannelAsServer, Trans accept udp channel as server.
+ * @tc.desc: test AcceptUdpChannelAsServer
+ *           Trans accept udp channel as server
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -828,9 +855,10 @@ HWTEST_F(TransUdpNegoTest, AcceptUdpChannelAsServer001, TestSize.Level1)
     SoftBusFree(authHandle);
 }
 
-/**
+/*
  * @tc.name: AcceptUdpChannelAsClient001
- * @tc.desc: AcceptUdpChannelAsClient, Trans accept udp channel as client.
+ * @tc.desc: test AcceptUdpChannelAsClient
+ *           Trans accept udp channel as client
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -848,9 +876,10 @@ HWTEST_F(TransUdpNegoTest, AcceptUdpChannelAsClient001, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: ProcessUdpChannelState001
- * @tc.desc: ProcessUdpChannelState, Trans process udp channel state.
+ * @tc.desc: test ProcessUdpChannelState
+ *           Trans process udp channel state
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -880,9 +909,10 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: SetPeerDeviceIdByAuth001
- * @tc.desc: SetPeerDeviceIdByAuth, Trans set peer device id by auth.
+ * @tc.desc: test SetPeerDeviceIdByAuth
+ *           Trans set peer device id by auth
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -903,9 +933,10 @@ HWTEST_F(TransUdpNegoTest, SetPeerDeviceIdByAuth001, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: ParseRequestAppInfo001
- * @tc.desc: ParseRequestAppInfo, Trans parse request appInfo.
+ * @tc.desc: test ParseRequestAppInfo
+ *           Trans parse request appInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -959,9 +990,10 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
     SoftBusFree(newNode);
 }
 
-/**
+/*
  * @tc.name: TransPackRequestUdpInfo001
- * @tc.desc: TransPackRequestUdpInfo, Trans exchange udp info request.
+ * @tc.desc: test TransPackRequestUdpInfo
+ *           Trans exchange udp info request
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -986,9 +1018,10 @@ HWTEST_F(TransUdpNegoTest, TransPackRequestUdpInfo001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: ProcessAbnormalUdpChannelState001
- * @tc.desc: ProcessAbnormalUdpChannelState, Trans process abnormal udp channel state.
+ * @tc.desc: test ProcessAbnormalUdpChannelState
+ *           Trans process abnormal udp channel state
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1008,9 +1041,10 @@ HWTEST_F(TransUdpNegoTest, ProcessAbnormalUdpChannelState001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: getCodeType001
- * @tc.desc: getCodeType, Trans get code type.
+ * @tc.desc: test getCodeType
+ *           Trans get code type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1028,9 +1062,10 @@ HWTEST_F(TransUdpNegoTest, getCodeType001, TestSize.Level1)
     EXPECT_EQ(ret, CODE_EXCHANGE_UDP_INFO);
 }
 
-/**
+/*
  * @tc.name: CopyAppInfoFastTransDataTest001
- * @tc.desc: CopyAppInfoFastTransData
+ * @tc.desc: test CopyAppInfoFastTransData
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1051,9 +1086,10 @@ HWTEST_F(TransUdpNegoTest, CopyAppInfoFastTransDataTest001, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: CloseUdpChannelTest001
- * @tc.desc: CloseUdpChannel
+ * @tc.desc: test CloseUdpChannel
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1065,9 +1101,10 @@ HWTEST_F(TransUdpNegoTest, CloseUdpChannelTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransUdpGetChannelAndOpenConnTest001
- * @tc.desc: TransUdpGetChannelAndOpenConn
+ * @tc.desc: test TransUdpGetChannelAndOpenConn
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1079,9 +1116,10 @@ HWTEST_F(TransUdpNegoTest, TransUdpGetChannelAndOpenConnTest001, TestSize.Level1
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransDealUdpChannelOpenResultTest001
- * @tc.desc: TransDealUdpChannelOpenResult
+ * @tc.desc: test TransDealUdpChannelOpenResult
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1106,9 +1144,10 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level1
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransDealUdpChannelOpenResultTest002
- * @tc.desc: TransDealUdpChannelOpenResult
+ * @tc.desc: test TransDealUdpChannelOpenResult
+ *           use the wrong parameter or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */

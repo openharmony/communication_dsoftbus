@@ -165,9 +165,10 @@ static LnnEventExtra invalidExtra = {
     .calleePkg = nullptr,
 };
 
-/**
+/*
  * @tc.name: LnnEventTest001
- * @tc.desc: Test lnn event form size
+ * @tc.desc: test LnnEvent
+ *           Test lnn event form size
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -190,9 +191,10 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, extra);
 }
 
-/**
+/*
  * @tc.name: LnnEventTest002
- * @tc.desc: Test all valid lnn event form items
+ * @tc.desc: test LnnEvent
+ *           Test all valid lnn event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -208,9 +210,10 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, validExtra);
 }
 
-/**
+/*
  * @tc.name: LnnEventTest003
- * @tc.desc: Test all invalid lnn event form items
+ * @tc.desc: test LnnEvent
+ *           Test all invalid lnn event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -225,9 +228,10 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
     LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, invalidExtra);
 }
 
-/**
+/*
  * @tc.name: LnnEventTest004
- * @tc.desc: Test empty lnn event form
+ * @tc.desc: test LnnEvent
+ *           Test empty lnn event form
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -245,9 +249,10 @@ HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
     LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, emptyExtra);
 }
 
-/**
+/*
  * @tc.name: LnnAuditTest001
- * @tc.desc: Test lnn audit form size
+ * @tc.desc: test LnnAudit
+ *           Test lnn audit form size
  * @tc.type: FUNC
  * @tc.require:
  */

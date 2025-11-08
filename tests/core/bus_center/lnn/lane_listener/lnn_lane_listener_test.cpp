@@ -615,16 +615,13 @@ HWTEST_F(LNNLaneListenerTest, UPDATE_LANE_BUSINESS_INFO_ITEM_001, TestSize.Level
 }
 
 /*
-* @tc.name: CREATE_SINK_LINK_INFO_001
-* @tc.desc: CreateSinkLinkInfo
+* @tc.name: WIFI_DIRECT_STATUS_LISTENER_001
+* @tc.desc: on received wifidirect status changed
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
+HWTEST_F(LNNLaneListenerTest, WIFI_DIRECT_STATUS_LISTENER_001, TestSize.Level1)
 {
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    (void)strncpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN);
     NiceMock<LaneDepsInterfaceMock> laneMock;
     EXPECT_CALL(laneMock, LnnGetNetworkIdByUuid)
         .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
@@ -655,20 +652,107 @@ HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDeviceOffline(link.remoteMac, link.remoteIp, link.remoteUuid, localIp));
     EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectConnectedForSink(nullptr));
     EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectConnectedForSink(&link));
+    link.linkType = WIFI_DIRECT_LINK_TYPE_P2P;
     EXPECT_CALL(laneMock, LnnGetNetworkIdByUuid)
-        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
-        .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(nullptr));
     EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+    EXPECT_CALL(listenerMock, FindLaneResourceByLinkType)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+}
+
+/*
+* @tc.name: CREATE_SINK_LINK_INFO_001
+* @tc.desc: CreateSinkLinkInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, CREATE_SINK_LINK_INFO_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUuid)
+        .WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    WifiDirectSinkLink link = {};
+    link.linkType = WIFI_DIRECT_LINK_TYPE_HML;
+    EXPECT_EQ(strcpy_s(link.localIp, IP_LEN, PEER_IP_HML), EOK);
+    EXPECT_EQ(strcpy_s(link.remoteIp, IP_LEN, PEER_IP_P2P), EOK);
+    EXPECT_EQ(strncpy_s(link.remoteUuid, UDID_BUF_LEN, MAC_TEST, MAC_ADDR_STR_LEN), EOK);
+    EXPECT_EQ(strncpy_s(link.remoteMac, MAC_ADDR_STR_LEN, MAC_TEST, MAC_ADDR_STR_LEN), EOK);
     EXPECT_EQ(CreateSinkLinkInfo(nullptr, &linkInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(CreateSinkLinkInfo(&link, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(CreateSinkLinkInfo(&link, &linkInfo), SOFTBUS_OK);
+    EXPECT_EQ(linkInfo.type, LANE_HML_RAW);
+
+    (void)memset_s(link.remoteUuid, sizeof(link.remoteUuid), 0, sizeof(link.remoteUuid));
+    EXPECT_EQ(strncpy_s(link.remoteUuid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN), EOK);
     EXPECT_EQ(CreateSinkLinkInfo(&link, &linkInfo), SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
     EXPECT_EQ(CreateSinkLinkInfo(&link, &linkInfo), SOFTBUS_OK);
+    EXPECT_EQ(linkInfo.type, LANE_HML);
+}
+
+/*
+* @tc.name: WIFI_DIRECT_DISCONNECT_FOR_SINK_001
+* @tc.desc: LnnOnWifiDirectDisconnectedForSink
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, WIFI_DIRECT_DISCONNECT_FOR_SINK_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    WifiDirectSinkLink link = {
+        .linkType = WIFI_DIRECT_LINK_TYPE_HML,
+    };
+    EXPECT_EQ(strncpy_s(link.remoteUuid, UDID_BUF_LEN, PEER_UDID, UDID_BUF_LEN), EOK);
+    NiceMock<LaneListenerDepsInterfaceMock> listenerMock;
+    EXPECT_CALL(listenerMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+    EXPECT_CALL(listenerMock, FindLaneResourceByLinkType)
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+    EXPECT_CALL(listenerMock, FindLaneResourceByLinkType)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+    EXPECT_NO_FATAL_FAILURE(LnnOnWifiDirectDisconnectedForSink(&link));
+}
+
+/*
+* @tc.name: TRY_CLEAR_RES_WITHOUT_UDID_001
+* @tc.desc: TryClearResourceWithoutUdid
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneListenerTest, TRY_CLEAR_RES_WITHOUT_UDID_001, TestSize.Level1)
+{
+    WifiDirectSinkLink link = {
+        .linkType = WIFI_DIRECT_LINK_TYPE_HML,
+    };
+    EXPECT_EQ(strncpy_s(link.remoteMac, MAC_ADDR_STR_LEN, MAC_TEST, MAC_ADDR_STR_LEN), EOK);
+    NiceMock<LaneListenerDepsInterfaceMock> listenerMock;
+    EXPECT_CALL(listenerMock, FindLaneIdByP2pMac).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(TryClearResourceWithoutUdid(&link));
+    EXPECT_CALL(listenerMock, FindLaneIdByP2pMac)
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(TryClearResourceWithoutUdid(&link));
+    EXPECT_CALL(listenerMock, FindLaneIdByP2pMac)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(TryClearResourceWithoutUdid(&link));
+    EXPECT_NO_FATAL_FAILURE(TryClearResourceWithoutUdid(&link));
 }
 
 /*

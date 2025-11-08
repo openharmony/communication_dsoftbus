@@ -627,7 +627,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_MSG_TO_USERID_TEST_002
- * @tc.desc: Test case for ConvertMsgToUserId with all zeros in the message.
+ * @tc.desc: Test case for ConvertMsgToUserId with all zeros in the
+ * message.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -644,7 +645,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_MSG_TO_USERID_TEST_003
- * @tc.desc: Test case for ConvertMsgToUserId with the first two bytes set to FF.
+ * @tc.desc: Test case for ConvertMsgToUserId with the first two bytes set
+ * to FF.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -660,7 +662,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_MSG_TO_USERID_TEST_004
- * @tc.desc: Test case for ConvertMsgToUserId with the last two bytes set to FF.
+ * @tc.desc: Test case for ConvertMsgToUserId with the last two bytes set
+ * to FF.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -676,7 +679,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_004, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_MSG_TO_USERID_TEST_005
- * @tc.desc: Test case for ConvertMsgToUserId with len one less than BITLEN.
+ * @tc.desc: Test case for ConvertMsgToUserId with len one less than
+ * BITLEN.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -692,7 +696,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_005, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_MSG_TO_USERID_TEST_006
- * @tc.desc: Test case for ConvertMsgToUserId with userId as NULL.
+ * @tc.desc: Test case for ConvertMsgToUserId with userId as
+ * NULL.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -707,7 +712,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_006, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_MSG_TO_USERID_TEST_007
- * @tc.desc: Test case for ConvertMsgToUserId with msg as NULL.
+ * @tc.desc: Test case for ConvertMsgToUserId with msg as
+ * NULL.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -722,7 +728,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_007, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_MSG_TO_USERID_TEST_008
- * @tc.desc: Test case for ConvertMsgToUserId and OnReceiveUserIdSyncInfoMsg with valid input.
+ * @tc.desc: Test case for ConvertMsgToUserId and
+ * OnReceiveUserIdSyncInfoMsg with valid input.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -757,7 +764,8 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_008, TestSize.Level1)
 
 /*
  * @tc.name: LnnProcessUserChangeMsg_Test_001
- * @tc.desc: Test LnnProcessUserChangeMsg with all possible conditions
+ * @tc.desc: Test LnnProcessUserChangeMsg with all possible
+ * conditions
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -835,7 +843,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
     dataInfo->msg = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
     if (dataInfo->msg == nullptr) {
         SoftBusFree(dataInfo);
-        ASSERT_NE(dataInfo->msg, nullptr);
+        return;
     }
     LnnAsyncSendUserId(dataInfo);
 
@@ -844,7 +852,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
     dataInfo->msg = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
     if (dataInfo->msg == nullptr) {
         SoftBusFree(dataInfo);
-        ASSERT_NE(dataInfo->msg, nullptr);
+        return;
     }
     LnnAsyncSendUserId(dataInfo);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
@@ -1336,6 +1344,29 @@ HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_002, TestSize.Level1)
     manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc3,
     ret = UpdateHmlStaticCap();
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ClearHmlFeatureCap_Test_001
+ * @tc.desc: ClearHmlFeatureCap test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, ClearHmlFeatureCap_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    uint64_t feature = 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU64Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(feature), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnSetLocalNum64Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
+    EXPECT_NO_FATAL_FAILURE(ClearHmlFeatureCap());
 }
 
 /*

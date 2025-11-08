@@ -592,6 +592,28 @@ static void UpdateLocalFeatureByWifiVspRes()
     LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, localFeatureCap);
 }
 
+static void ClearHmlFeatureCap(void)
+{
+    uint64_t feature = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &feature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local feature failed.");
+        return;
+    }
+    uint64_t oldFeature = feature;
+    if (LnnClearFeatureCapability(&feature, BIT_WIFI_DIRECT_ENHANCE_CAPABILITY) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "clear feature failed.");
+        return;
+    }
+    if (oldFeature == feature) {
+        return;
+    }
+    if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set feature failed.");
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, feature);
+}
+
 static int32_t UpdateHmlStaticCap(void)
 {
     uint32_t staticNetCap = 0;
@@ -620,6 +642,7 @@ static int32_t UpdateHmlStaticCap(void)
             LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
             return ret;
         }
+        ClearHmlFeatureCap();
     }
     if (oldCap == staticNetCap) {
         return SOFTBUS_OK;
