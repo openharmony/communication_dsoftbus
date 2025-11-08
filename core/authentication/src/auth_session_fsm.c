@@ -2103,6 +2103,22 @@ int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
     return SOFTBUS_OK;
 }
 
+static void AuthDisconnectSocket(uint64_t connId)
+{
+    AUTH_LOGI(AUTH_CONN, "connType=%{public}d, connectionId=%{public}u", GetConnType(connId), GetConnId(connId));
+    switch (GetConnType(connId)) {
+        case AUTH_LINK_TYPE_WIFI:
+            SocketDisconnectDevice(AUTH, GetFd(connId));
+            break;
+        case AUTH_LINK_TYPE_USB:
+            SocketDisconnectDevice(AUTH_USB, GetFd(connId));
+            break;
+        default:
+            AUTH_LOGI(AUTH_CONN, "unknown connType");
+            break;
+    }
+}
+
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconnect)
 {
     if (!RequireAuthLock()) {
@@ -2134,8 +2150,8 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
     ReleaseAuthLock();
     if (isNeedDisconnect && !isDisconnected &&
         (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB) &&
-        IsExistAuthTcpConnFdItemByConnId(GetConnId(connId))) {
-        DisconnectAuthDevice(&connId);
+        (TryDeleteAuthTcpConnFdItemByConnId(GetConnId(connId)) == SOFTBUS_OK)) {
+        AuthDisconnectSocket(connId);
     }
     return SOFTBUS_OK;
 }

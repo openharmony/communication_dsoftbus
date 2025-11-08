@@ -874,21 +874,24 @@ void DisconnectAuthDevice(uint64_t *connId)
     AUTH_LOGI(AUTH_CONN, "connType=%{public}d, connectionId=%{public}u", GetConnType(*connId), GetConnId(*connId));
     switch (GetConnType(*connId)) {
         case AUTH_LINK_TYPE_RAW_ENHANCED_P2P:
-            if (TryDeleteAuthTcpConnFdItemByConnId(GetFd(*connId)) == SOFTBUS_OK) {
-                SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, GetFd(*connId));
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
             }
+            SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_WIFI:
-            if (TryDeleteAuthTcpConnFdItemByConnId(GetFd(*connId)) == SOFTBUS_OK) {
-                SocketDisconnectDevice(AUTH, GetFd(*connId));
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
             }
+            SocketDisconnectDevice(AUTH, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_USB:
-            if (TryDeleteAuthTcpConnFdItemByConnId(GetFd(*connId)) == SOFTBUS_OK) {
-                SocketDisconnectDevice(AUTH_USB, GetFd(*connId));
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
             }
+            SocketDisconnectDevice(AUTH_USB, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_BLE:
