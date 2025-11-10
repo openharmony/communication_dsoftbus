@@ -49,11 +49,13 @@ void JsonProtocol::Write(int key, Serializable::ValueType type, const uint8_t *v
 
 bool JsonProtocol::Read(int &key, uint8_t *&value, size_t &size)
 {
-    if (readPos_ == jsonObject_.end()) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "read to end");
-        return false;
-    }
+    return Read(key, value, size, 0);
+}
 
+bool JsonProtocol::Read(int &key, uint8_t *&value, size_t &size, uint32_t level)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(readPos_ != jsonObject_.end(), false, CONN_WIFI_DIRECT, "read to end");
+    CONN_CHECK_AND_RETURN_RET_LOGE(level < MAX_LEVEL, false, CONN_WIFI_DIRECT, "unkown fieled to limit");
     bool found = false;
     std::string jsonKey = readPos_.key();
     for (const auto& [intKey, strKey] : NegotiateMessage::keyStringTable_) {
@@ -65,7 +67,8 @@ bool JsonProtocol::Read(int &key, uint8_t *&value, size_t &size)
     }
     if (!found) {
         CONN_LOGE(CONN_WIFI_DIRECT, "not find key=%{public}s", jsonKey.c_str());
-        return false;
+        readPos_++;
+        return Read(key, value, size, level +1);
     }
 
     bool ret = true;
