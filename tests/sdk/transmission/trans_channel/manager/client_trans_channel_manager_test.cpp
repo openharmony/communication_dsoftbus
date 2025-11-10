@@ -153,6 +153,34 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendBytesTest001, Test
 }
 
 /**
+ * @tc.name: ClientTransChannelAsyncSendBytesTest001
+ * @tc.desc: client trans channel send byte test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelAsyncSendBytesTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    const char *data = "test";
+    uint32_t dataSeq = 1;
+
+    int32_t ret = ClientTransChannelAsyncSendBytes(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH, dataSeq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelAsyncSendBytes(channelId, CHANNEL_TYPE_AUTH, data, 0, dataSeq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelAsyncSendBytes(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH, dataSeq);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
+    ret = ClientTransChannelAsyncSendBytes(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH, dataSeq);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+
+    ret = ClientTransChannelAsyncSendBytes(channelId, CHANNEL_TYPE_TCP_DIRECT, data, TEST_DATA_LENGTH, dataSeq);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
+}
+
+/**
  * @tc.name: ClientTransChannelSendMessageTest001
  * @tc.desc: client trans channel send message test, use the wrong or normal parameter.
  * @tc.type: FUNC

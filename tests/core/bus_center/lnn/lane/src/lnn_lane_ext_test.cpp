@@ -51,6 +51,7 @@ constexpr char PEER_WLAN_ADDR[] = "192.168.30.2";
 constexpr char PEER_MAC[] = "a1:b2:c3:d4:e5:f6";
 constexpr char LOCAL_MAC[] = "a2:b2:c3:d4:e5:f6";
 constexpr char PEER_UDID[] = "111122223333abcdef";
+constexpr char PEER_UDID_HASH[] = "1111222233334444";
 constexpr char LOCAL_UDID[] = "444455556666abcdef";
 constexpr uint64_t LANE_ID_BASE = 1122334455667788;
 constexpr uint16_t PRI = 1;
@@ -1294,5 +1295,127 @@ HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
     ret = ClearLaneResourceByLaneId(LANE_ID_BASE);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_001
+* @tc.desc: FindLaneIdByP2pMac tests return invalid param
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_001, TestSize.Level1)
+{
+    LaneLinkType type = LANE_LINK_TYPE_BUTT;
+    uint64_t laneId = 0;
+    int32_t ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    type = LANE_HML;
+    ret = FindLaneIdByP2pMac(nullptr, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = FindLaneIdByP2pMac(PEER_MAC, type, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_002
+* @tc.desc: FindLaneIdByP2pMac tests resource check
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_002, TestSize.Level1)
+{
+    uint64_t laneId = 0;
+    LaneLinkType type = LANE_SOFTAP_P2P;
+    int32_t ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.remoteMac, IP_LEN, PEER_MAC), EOK);
+    info.type = LANE_HML;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = AddLaneResourceToPool(&info, LANE_ID_BASE, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    ret = FindLaneIdByP2pMac(LOCAL_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    type = LANE_HML;
+    ret = FindLaneIdByP2pMac(LOCAL_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    ret = FindLaneIdByP2pMac(PEER_MAC, type, &laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClearLaneResourceByLaneId(LANE_ID_BASE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LANE_QUERY_OTHER_LANE_RESOURCE_BY_DEV_ID
+* @tc.desc: lane query other lane resource by devId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_DEV_ID, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaGetConnectionTypeByMetaNodeId = AuthMetaGetConnectionTypeByMetaNodeId;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+
+    LaneLinkInfo linkInfo;
+    ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
+    linkInfo.type = LANE_SOFTAP_P2P;
+    ASSERT_EQ(strcpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML), EOK);
+    ASSERT_EQ(strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    EXPECT_EQ(SOFTBUS_OK, AddLaneResourceToPool(&linkInfo, laneId, false));
+
+    DevIdentifyInfo inputInfo = {};
+    inputInfo.type = IDENTIFY_TYPE_DEV_ID;
+    ASSERT_EQ(strcpy_s(inputInfo.devInfo.peerDevId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
+
+    EXPECT_CALL(mock, AuthMetaGetConnectionTypeByMetaNodeId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(CONNECTION_HOTSPOT), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(CONNECTION_GROUP_OWNER), Return(SOFTBUS_OK)));
+    EXPECT_EQ(SOFTBUS_LANE_RESOURCE_NOT_FOUND, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
+    EXPECT_EQ(SOFTBUS_LANE_RESOURCE_NOT_FOUND, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
+    EXPECT_EQ(SOFTBUS_OK, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
+
+    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
+}
+
+/*
+* @tc.name: LANE_QUERY_OTHER_LANE_RESOURCE_BY_UDID_HASH
+* @tc.desc: lane query other lane resource by udidHash
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_UDID_HASH, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaGetConnectionTypeByMetaNodeId = AuthMetaGetConnectionTypeByMetaNodeId;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
+
+    LaneLinkInfo linkInfo;
+    ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
+    linkInfo.type = LANE_SOFTAP_P2P;
+    ASSERT_EQ(strcpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML), EOK);
+    ASSERT_EQ(strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    EXPECT_EQ(SOFTBUS_OK, AddLaneResourceToPool(&linkInfo, laneId, false));
+
+    DevIdentifyInfo inputInfo = {};
+    inputInfo.type = IDENTIFY_TYPE_UDID_HASH;
+    ASSERT_EQ(strcpy_s(inputInfo.devInfo.udidHash, sizeof(inputInfo.devInfo.udidHash), PEER_UDID_HASH), EOK);
+
+    EXPECT_CALL(mock, AuthMetaGetConnectionTypeByMetaNodeId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(CONNECTION_HOTSPOT), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(CONNECTION_GROUP_OWNER), Return(SOFTBUS_OK)));
+    EXPECT_EQ(SOFTBUS_LANE_RESOURCE_NOT_FOUND, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
+    EXPECT_EQ(SOFTBUS_LANE_RESOURCE_NOT_FOUND, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
+    EXPECT_EQ(SOFTBUS_OK, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
+
+    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
 }
 } // namespace OHOS

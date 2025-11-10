@@ -219,6 +219,217 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack004, TestSize.Level
 }
 
 /*
+ * @tc.name: TransAuthChannelMsgPack005
+ * @tc.desc: TransAuthChannelMsgPack test, given invalid LaneLInkType should return SOFTBUS_CREATE_JSON_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack005, TestSize.Level1)
+{
+    cJSON *obj = cJSON_CreateObject();
+    ASSERT_TRUE(obj != nullptr);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    *appInfo = {
+        .myData = {
+            .deviceId = "DEV_001_ABCD1234",
+            .pkgName = "com.example.app.v1.0.0",
+            .sessionName = "my_SESS_2023Q3_7X9B2Y",
+            .dataConfig = SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
+            .apiVersion = API_V1
+        },
+        .peerData = {
+            .sessionName = "peer_name_2023_258X"
+        },
+        .peerNetWorkId = "NET_192.168.1.100_5G",
+        .reqId = "REQ_8877665544332211",
+        .routeType = BT_BR,
+        .linkType = LANE_HML_RAW
+    };
+
+    AuthChannelInterfaceMock authChannelObj;
+    EXPECT_CALL(authChannelObj, AddNumberToJsonObject).Times(5)
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(false));
+    EXPECT_CALL(authChannelObj, AddStringToJsonObject).WillRepeatedly(Return(true));
+    int32_t ret = TransAuthChannelMsgPack(obj, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+
+    cJSON_Delete(obj);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransAuthChannelMsgPack006
+ * @tc.desc: TransAuthChannelMsgPack test, given invalid ip should return SOFTBUS_CREATE_JSON_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack006, TestSize.Level1)
+{
+    cJSON *obj = cJSON_CreateObject();
+    ASSERT_TRUE(obj != nullptr);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    *appInfo = {
+        .myData = {
+            .deviceId = "DEV_001_ABCD1234",
+            .pkgName = "com.example.app.v1.0.0",
+            .sessionName = "my_SESS_2023Q3_7X9B2Y",
+            .dataConfig = SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
+            .apiVersion = API_V1
+        },
+        .peerData = {
+            .sessionName = "peer_name_2023_258X"
+        },
+        .peerNetWorkId = "NET_192.168.1.100_5G",
+        .reqId = "REQ_8877665544332211",
+        .routeType = BT_BR,
+        .linkType = LANE_HML_RAW
+    };
+
+    AuthChannelInterfaceMock authChannelObj;
+    EXPECT_CALL(authChannelObj, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(authChannelObj, AddStringToJsonObject).Times(7)
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
+    .WillOnce(testing::Return(false));
+    int32_t ret = TransAuthChannelMsgPack(obj, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+
+    cJSON_Delete(obj);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransAuthChannelMsgPack007
+ * @tc.desc: TransAuthChannelMsgPack test, given invalid ip should return SOFTBUS_CREATE_JSON_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack007, TestSize.Level1)
+{
+    cJSON *obj = cJSON_CreateObject();
+    ASSERT_TRUE(obj != nullptr);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    *appInfo = {
+        .myData = {
+            .deviceId = "DEV_001_ABCD1234",
+            .pkgName = "com.example.app.v1.0.0",
+            .sessionName = "my_SESS_2023Q3_7X9B2Y",
+            .dataConfig = SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
+            .apiVersion = API_V1
+        },
+        .peerData = {
+            .sessionName = "peer_name_2023_258X"
+        },
+        .peerNetWorkId = "NET_192.168.1.100_5G",
+        .reqId = "REQ_8877665544332211",
+        .routeType = BT_BR,
+        .linkType = LANE_HML_RAW
+    };
+
+    AuthChannelInterfaceMock authChannelObj;
+    EXPECT_CALL(authChannelObj, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(authChannelObj, AddStringToJsonObject).Times(7)
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
+    .WillOnce(testing::Return(false));
+    int32_t ret = TransAuthChannelMsgPack(obj, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+
+    cJSON_Delete(obj);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransAuthChannelMsgPack008
+ * @tc.desc: TransAuthChannelMsgPack test, given invalid peer_ip should return SOFTBUS_CREATE_JSON_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack008, TestSize.Level1)
+{
+    cJSON *obj = cJSON_CreateObject();
+    ASSERT_TRUE(obj != nullptr);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    *appInfo = {
+        .myData = {
+            .deviceId = "DEV_001_ABCD1234",
+            .pkgName = "com.example.app.v1.0.0",
+            .sessionName = "my_SESS_2023Q3_7X9B2Y",
+            .dataConfig = SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
+            .apiVersion = API_V1
+        },
+        .peerData = {
+            .sessionName = "peer_name_2023_258X"
+        },
+        .peerNetWorkId = "NET_192.168.1.100_5G",
+        .reqId = "REQ_8877665544332211",
+        .routeType = BT_BR,
+        .linkType = LANE_HML_RAW
+    };
+
+    AuthChannelInterfaceMock authChannelObj;
+    EXPECT_CALL(authChannelObj, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(authChannelObj, AddStringToJsonObject).Times(8)
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
+    .WillOnce(testing::Return(true)).WillOnce(testing::Return(false));
+    int32_t ret = TransAuthChannelMsgPack(obj, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+
+    cJSON_Delete(obj);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransAuthChannelMsgPack009
+ * @tc.desc: TransAuthChannelMsgPack test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack009, TestSize.Level1)
+{
+    cJSON *obj = cJSON_CreateObject();
+    ASSERT_TRUE(obj != nullptr);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    *appInfo = {
+        .myData = {
+            .deviceId = "DEV_001_ABCD1234",
+            .pkgName = "com.example.app.v1.0.0",
+            .sessionName = "my_SESS_2023Q3_7X9B2Y",
+            .dataConfig = SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
+            .apiVersion = API_V1
+        },
+        .peerData = {
+            .sessionName = "peer_name_2023_258X"
+        },
+        .peerNetWorkId = "NET_192.168.1.100_5G",
+        .reqId = "REQ_8877665544332211",
+        .routeType = BT_BR,
+        .linkType = LANE_HML_RAW
+    };
+
+    AuthChannelInterfaceMock authChannelObj;
+    EXPECT_CALL(authChannelObj, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(authChannelObj, AddStringToJsonObject).WillRepeatedly(Return(true));
+    int32_t ret = TransAuthChannelMsgPack(obj, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    cJSON_Delete(obj);
+    SoftBusFree(appInfo);
+}
+
+/*
  * @tc.name: TransAuthChannelErrorPack001
  * @tc.desc: TransAuthChannelErrorPack test
  * @tc.type: FUNC

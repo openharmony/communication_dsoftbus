@@ -59,6 +59,7 @@ int32_t LnnLoadLocalBroadcastCipherKey(void);
 int32_t AuthMetaPostTransData(int64_t authId, const AuthTransData *dataInfo);
 int32_t AuthMetaGetServerSide(int64_t authId, bool *isServer);
 int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
+int32_t AuthMetaGetConnectionTypeByMetaNodeId(const char *metaNodeId, NetworkConnectionType *connectionType);
 
 #ifdef __cplusplus
 #if __cplusplus

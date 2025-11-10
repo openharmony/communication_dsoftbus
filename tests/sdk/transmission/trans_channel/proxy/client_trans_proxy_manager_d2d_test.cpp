@@ -29,6 +29,7 @@
 
 #define TEST_CHANNEL_ID    (-10)
 #define TEST_DATA_LENGTH_2 100
+#define TEST_LEN 66666
 
 using namespace std;
 using namespace testing;
@@ -526,6 +527,9 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyPackNewHeadAsyncMessageTest001, Test
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyPackNewHeadAsyncMessage(channelId, &dataInfo, nullptr, TRANS_SESSION_MESSAGE, dataSeq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    dataInfo.inLen = TEST_LEN;
+    ret = TransProxyPackNewHeadAsyncMessage(channelId, &dataInfo, &info, TRANS_SESSION_MESSAGE, dataSeq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -551,6 +555,51 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyGenerateIvTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyGenerateIv(sessionKey, &nonce, &cipherKey, &seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyGetD2dPriorityTest001
+ * @tc.desc: given BUSINESS_TYPE_D2D_MESSAGE while return PROXY_CHANNEL_PRIORITY_MESSAGE
+ * @tc.desc: given BUSINESS_TYPE_D2D_VOICE while return PROXY_CHANNEL_PRIORITY_BYTES
+ * @tc.desc: given other types while return PROXY_CHANNEL_PRIORITY_BUTT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyGetD2dPriorityTest001, TestSize.Level1)
+{
+    BusinessType type = BUSINESS_TYPE_D2D_MESSAGE;
+    int32_t ret = ClientTransProxyGetD2dPriority(type);
+    EXPECT_EQ(PROXY_CHANNEL_PRIORITY_MESSAGE, ret);
+    type = BUSINESS_TYPE_D2D_VOICE;
+    ret = ClientTransProxyGetD2dPriority(type);
+    EXPECT_EQ(PROXY_CHANNEL_PRIORITY_BYTES, ret);
+    type = BUSINESS_TYPE_MESSAGE;
+    ret = ClientTransProxyGetD2dPriority(type);
+    EXPECT_EQ(PROXY_CHANNEL_PRIORITY_BUTT, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxySubD2dNeaHeadPacketProcTest001
+ * @tc.desc: given BUSINESS_TYPE_D2D_MESSAGE while return PROXY_CHANNEL_PRIORITY_MESSAGE
+ * @tc.desc: given BUSINESS_TYPE_D2D_VOICE while return PROXY_CHANNEL_PRIORITY_BYTES
+ * @tc.desc: given other types while return PROXY_CHANNEL_PRIORITY_BUTT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyD2DTest, ClientTransProxySubD2dNeaHeadPacketProcTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    D2dSliceHead head;
+    char data[] = "test";
+    uint32_t len = 1;
+    int32_t ret = ClientTransProxySubD2dNeaHeadPacketProc(channelId, nullptr, data, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientTransProxySubD2dNeaHeadPacketProc(channelId, &head, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientTransProxyNewHeadSliceProc(channelId, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientTransProxyNewHeadSliceProc(channelId, data, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**

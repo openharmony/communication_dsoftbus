@@ -687,7 +687,7 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta, Conne
         ret = AuthGetP2pConnInfo(uuid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {
-        ret = AuthGetPreferConnInfo(uuid, &auth, isMeta);
+        ret = AuthGetPreferConnInfoWithoutSle(uuid, &auth, isMeta);
     }
     cb.onConnOpened = OnAuthConnOpened;
     cb.onConnOpenFailed = OnAuthConnOpenFailed;

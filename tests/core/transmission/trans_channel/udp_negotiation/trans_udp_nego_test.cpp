@@ -1037,6 +1037,8 @@ HWTEST_F(TransUdpNegoTest, ProcessAbnormalUdpChannelState001, TestSize.Level1)
     errCode = 0;
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
     ProcessAbnormalUdpChannelState(appInfo, errCode, needClose);
+    errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
+    ProcessAbnormalUdpChannelState(appInfo, errCode, needClose);
 
     SoftBusFree(appInfo);
 }
@@ -1184,5 +1186,71 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level1
     ret = TransDelUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransUdpChannelMgrDeinit();
+}
+
+/*
+ * @tc.name: TransPackExtDeviceRequestInfoTest001
+ * @tc.desc: test TransDealUdpChannelOpenResult
+ *           use the wrong parameter or normal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, TransPackExtDeviceRequestInfoTest001, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    ASSERT_TRUE(msg != nullptr);
+    AppInfo appInfo;
+    int32_t ret = TransPackExtDeviceRequestInfo(nullptr, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransPackExtDeviceRequestInfo(msg, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    ret = TransPackExtDeviceRequestInfo(msg, &appInfo);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
+    ret = TransUnpackExtDeviceRequestInfo(msg, &appInfo);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+    ret = TransPackExtDeviceRequestInfo(msg, &appInfo);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
+    ret = TransUnpackExtDeviceRequestInfo(msg, &appInfo);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
+    appInfo.udpChannelOptType = TYPE_INVALID_CHANNEL;
+    ret = TransPackExtDeviceRequestInfo(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransPackExtDeviceReplyInfoTest001
+ * @tc.desc: test TransPackExtDeviceReplyInfo
+ *           use the wrong parameter or normal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, TransPackExtDeviceReplyInfoTest001, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    ASSERT_TRUE(msg != nullptr);
+    AppInfo appInfo;
+    int32_t ret = TransPackExtDeviceReplyInfo(nullptr, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransPackExtDeviceReplyInfo(msg, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    ret = TransPackExtDeviceReplyInfo(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUnpackExtDeviceReplyInfo(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+    ret = TransPackExtDeviceReplyInfo(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransUnpackExtDeviceReplyInfo(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    appInfo.udpChannelOptType = TYPE_INVALID_CHANNEL;
+    ret = TransPackExtDeviceReplyInfo(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+    ret = TransUnpackExtDeviceReplyInfo(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+    cJSON_Delete(msg);
 }
 } // namespace OHOS

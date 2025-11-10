@@ -504,8 +504,12 @@ static int32_t CreateSinkLinkInfo(const struct WifiDirectSinkLink *link, LaneLin
         return SOFTBUS_STRCPY_ERR;
     }
     linkInfo->linkInfo.p2p.channel = link->channelId;
-    if (strncmp(link->remoteUuid, link->remoteMac, sizeof(link->remoteMac)) == 0) {
-        LNN_LOGI(LNN_STATE, "uuid is invalid, udid will be updated when JoinMetaNode");
+    if (strncmp(link->remoteUuid, link->remoteMac, MAC_ADDR_STR_LEN) == 0) {
+        LNN_LOGI(LNN_STATE, "is passive raw, update udid when refresh relationShip");
+        if (strcpy_s(linkInfo->linkInfo.p2p.connInfo.remoteMac, MAC_ADDR_STR_LEN, link->remoteMac) != EOK) {
+            LNN_LOGE(LNN_LANE, "strcpy udid fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
         linkInfo->type = LANE_HML_RAW;
         return SOFTBUS_OK;
     }
@@ -562,6 +566,20 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     (void)HandleLaneQosChange(&laneLinkInfo);
 }
 
+static void TryClearResourceWithoutUdid(const struct WifiDirectSinkLink *link)
+{
+    if (link->linkType != WIFI_DIRECT_LINK_TYPE_HML) {
+        return;
+    }
+    uint64_t laneId = INVALID_LANE_ID;
+    if (FindLaneIdByP2pMac(link->remoteMac, LANE_HML, &laneId) != SOFTBUS_OK &&
+        FindLaneIdByP2pMac(link->remoteMac, LANE_HML_RAW, &laneId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "find hml lane resource fail");
+        return;
+    }
+    DelLaneResourceByLaneId(laneId, true);
+}
+
 static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *link)
 {
     if (link == NULL) {
@@ -576,6 +594,7 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
     char remoteUdid[UDID_BUF_LEN] = {0};
     if (GetRemoteUdidByUuid(link->remoteUuid, remoteUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get remote udid failed");
+        TryClearResourceWithoutUdid(link);
         return;
     }
     LaneResource resourceItem;

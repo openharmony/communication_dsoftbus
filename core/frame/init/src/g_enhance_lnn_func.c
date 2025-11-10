@@ -266,6 +266,8 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.sdMgrDeathCallback = dlsym(soHandle, "SdMgrDeathCallback");
     g_lnnEnhanceFuncList.authMetaGetIpByMetaNodeId = dlsym(soHandle, "AuthMetaGetIpByMetaNodeId");
     g_lnnEnhanceFuncList.authMetaGetLocalIpByMetaNodeId = dlsym(soHandle, "AuthMetaGetLocalIpByMetaNodeId");
+    g_lnnEnhanceFuncList.authMetaGetConnectionTypeByMetaNodeId = dlsym(soHandle,
+        "AuthMetaGetConnectionTypeByMetaNodeId");
     g_lnnEnhanceFuncList.isSupportMcuFeature = dlsym(soHandle, "IsSupportMcuFeature");
     g_lnnEnhanceFuncList.lnnSendDeviceStateToMcu = dlsym(soHandle, "LnnSendDeviceStateToMcu");
     g_lnnEnhanceFuncList.lnnInitMcu = dlsym(soHandle, "LnnInitMcu");

@@ -68,10 +68,17 @@ void SoftbusProxyChannelMessagePagingTest::TearDownTestCase(void)
 HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransParseMessageHeadTypeTest001, TestSize.Level1)
 {
     uint8_t type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (VERSION_SHIFT << VERSION_SHIFT);
-    int32_t len = TEST_LEN;
+    int32_t len = 0;
     ProxyMessage msg;
     char *data = reinterpret_cast<char *>(&type);
-    int32_t ret = TransParseMessageHeadType(data, len, &msg);
+    int32_t ret = TransParseMessageHeadType(nullptr, len, &msg);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransParseMessageHeadType(data, len, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransParseMessageHeadType(data, len, &msg);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    len = TEST_LEN;
+    ret = TransParseMessageHeadType(data, len, &msg);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
     type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     ret = TransParseMessageHeadType(data, len, &msg);
@@ -127,10 +134,16 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     AppInfo appInfo;
     uint32_t capability;
     char *data = const_cast<char *>(TEST_DATA);
+    int32_t ret = TransPagingUnPackHandshakeMsg(nullptr, &appInfo, &capability);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransPagingUnPackHandshakeMsg(&msg, nullptr, &capability);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(nullptr));
-    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
+    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     bool res = AddStringToJsonObject(root, JSON_KEY_CALLER_ACCOUNT_ID, data);
     EXPECT_EQ(true, res);
@@ -1274,5 +1287,51 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg002
     channelId = TEST_CHANNEL_ID;
     buf = TransProxyPagingPackChannelId(channelId);
     EXPECT_TRUE(buf != nullptr);
+}
+
+/*
+ * @tc.name: TransPagingHandshakeAckBase64Decode001
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingHandshakeAckBase64Decode001, TestSize.Level1)
+{
+    char sessionKey[ORIGIN_LEN_16_BASE64_LENGTH] = { 0 };
+    char nonce[ORIGIN_LEN_16_BASE64_LENGTH] = { 0 };
+    AppInfo appInfo;
+    int32_t ret = TransPagingHandshakeAckBase64Decode(nullptr, nonce, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPagingHandshakeAckBase64Decode(sessionKey, nullptr, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPagingHandshakeAckBase64Decode(sessionKey, nonce, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ProxyMessage msg;
+    uint8_t accountHash = 1;
+    uint8_t udidHash = 1;
+    TransPagingParseMessageEx(nullptr, &accountHash, &udidHash, nonce);
+    TransPagingParseMessageEx(&msg, nullptr, &udidHash, nonce);
+    TransPagingParseMessageEx(&msg, &accountHash, nullptr, nonce);
+    TransPagingParseMessageEx(&msg, &accountHash, &udidHash, nullptr);
+}
+
+/*
+ * @tc.name: TransPagingPackMessage001
+ * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackMessage001, TestSize.Level1)
+{
+    PagingProxyMessage msg;
+    ProxyDataInfo dataInfo;
+    ProxyChannelInfo chan;
+    bool needHash = false;
+    int32_t ret = TransPagingPackMessage(nullptr, &dataInfo, &chan, needHash);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPagingPackMessage(&msg, nullptr, &chan, needHash);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPagingPackMessage(&msg, &dataInfo, nullptr, needHash);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
