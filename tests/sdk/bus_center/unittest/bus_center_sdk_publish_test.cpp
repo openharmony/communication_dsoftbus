@@ -87,7 +87,7 @@ static const IPublishCb g_publishCb = {
     .OnPublishResult = TestOnPublishResult,
 };
 
-/**
+/*
  * @tc.name: PublishLNNTest001
  * @tc.desc: Use new Publish interface, test active publish mode, use wrong parameters in COAP medium.
  * @tc.in: Test module, Test number, Test levels.
@@ -131,7 +131,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest002
  * @tc.desc: Test active publish use new Publish interface, use parameters outside the given range in COAP.
  * @tc.in: Test module, Test number, Test levels.
@@ -178,7 +178,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest003
  * @tc.desc: Test passive publish use new Publish interface, use wrong capa.
  * @tc.in: Test module, Test number, Test levels.
@@ -232,7 +232,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest004
  * @tc.desc: Test passive publish use new Publish interface, use different capabilityData.
  * @tc.in: Test module, Test number, Test levels.
@@ -295,7 +295,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
     SoftBusFree(testInfo.capabilityData);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest005
  * @tc.desc: Use new Publish interface, test Invoke PublishID multiple times, use different PublishID.
  * @tc.in: Test module, Test number, Test levels.
@@ -326,7 +326,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest006
  * @tc.desc: Test active publish use new Publish interface, use different freq under the COAP.
  * @tc.in: Test module, Test number, Test levels.
@@ -376,7 +376,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest006, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest007
  * @tc.desc: Test passive publish use new Publish interface, use different freq under the COAP.
  * @tc.in: Test module, Test number, Test levels.
@@ -426,7 +426,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest007, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest008
  * @tc.desc: Test active publish use new Publish interface, use different freq under the AUTO.
  * @tc.in: Test module, Test number, Test levels.
@@ -476,7 +476,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest008, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest009
  * @tc.desc: Test passive publish use new Publish interface, use different freq under the AUTO.
  * @tc.in: Test module, Test number, Test levels.
@@ -526,7 +526,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest009, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest010
  * @tc.desc: Test new Publish interface, enable the ranging function in COAP.
  * @tc.in: Test module, Test number, Test levels.
@@ -559,7 +559,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest010, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest011
  * @tc.desc: Test new Publish interface, disabling the ranging function in COAP.
  * @tc.in: Test module, Test number, Test levels.
@@ -592,7 +592,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest011, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest012
  * @tc.desc: Test new Publish interface, enable the ranging function in AUTO.
  * @tc.in: Test module, Test number, Test levels.
@@ -625,7 +625,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest012, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest013
  * @tc.desc: Test new Publish interface, disabling the ranging function in AUTO.
  * @tc.in: Test module, Test number, Test levels.
@@ -658,7 +658,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest013, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest014
  * @tc.desc: Test active publish use new Publish interface, use different freq under the BLE.
  * @tc.in: Test module, Test number, Test levels.
@@ -703,7 +703,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest014, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest015
  * @tc.desc: Test passive publish use new Publish interface, use different freq under the BLE.
  * @tc.in: Test module, Test number, Test levels.
@@ -748,7 +748,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest015, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest016
  * @tc.desc: Test new Publish interface , enable the ranging function in BLE.
  * @tc.in: Test module, Test number, Test levels.
@@ -779,7 +779,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest016, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest017
  * @tc.desc: Test new Publish interface, disabling the ranging function in BLE.
  * @tc.in: Test module, Test number, Test levels.
@@ -810,7 +810,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest017, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNN001
  * @tc.desc: Verify use wrong parameters .
  * @tc.in: Test module, Test number, Test levels.
@@ -837,7 +837,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNN002
  * @tc.desc: Verify stoppublish different publishID, invoke multiple times to stop publish.
  * @tc.in: Test module, Test number, Test levels.
@@ -868,7 +868,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNN003
  * @tc.desc: Verify same publishID stoppublish twice.
  * @tc.in: Test module, Test number, Test levels.

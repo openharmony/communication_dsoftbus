@@ -1077,9 +1077,10 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransPagingUpdateDataConfigTest001
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransDisableConnBrIdleCheckTest001
- * @tc.desc: TransDisableConnBrIdleCheck
+ * @tc.desc: Test whether the TransDisableConnBrIdleCheck function behaves correctly
+ *           when disabling connection idle checks
  * @tc.type: FUNC
  * @tc.require:
  */
