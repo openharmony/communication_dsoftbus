@@ -34,6 +34,7 @@ public:
     virtual int32_t ServerIpcSendBrProxyData(int32_t channelId, char *data, uint32_t dataLen) = 0;
     virtual int32_t ServerIpcCloseBrProxy(int32_t channelId) = 0;
     virtual int32_t ServerIpcSetListenerState(int32_t channelId, int32_t type, bool CbEnabled) = 0;
+    virtual int32_t ServerIpcRegisterPushHook(void) = 0;
     virtual int ClientRegisterService(const char *pkgName) = 0;
 };
 
@@ -50,6 +51,7 @@ public:
     MOCK_METHOD3(ServerIpcSendBrProxyData, int32_t (int32_t, char *, uint32_t));
     MOCK_METHOD1(ServerIpcCloseBrProxy, int32_t (int32_t));
     MOCK_METHOD3(ServerIpcSetListenerState, int32_t (int32_t, int32_t, bool));
+    MOCK_METHOD0(ServerIpcRegisterPushHook, int32_t (void));
     MOCK_METHOD1(ClientRegisterService, int (const char *));
 };
 } // namespace OHOS

@@ -994,4 +994,65 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest041, TestSize.Level1)
     result = IsForegroundProcess(&baseInfo);
     EXPECT_FALSE(result);
 }
+
+/*
+ * @tc.name: BrProxyServerManagerTest042
+ * @tc.desc: BrProxyServerManagerTest042
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest042, TestSize.Level1)
+{
+    int32_t ret = SetCurrentConnect(nullptr, nullptr, false);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    const char *brMac = "AA:AA:AA:AA:AA:AA";
+    const char *uuid = "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA";
+    ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    ret = SetCurrentConnect(brMac, uuid, false);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/*
+ * @tc.name: BrProxyServerManagerTest043
+ * @tc.desc: BrProxyServerManagerTest043
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest043, TestSize.Level1)
+{
+#define TMP_LEN 100
+    const char *brMac = "AA:AA:AA:AA:AA:AA";
+    const char *uuid = "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA";
+    uint32_t requestId = 0;
+    int32_t ret = ConnectPeerDevice(brMac, uuid, &requestId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    (void)PrintSession(nullptr, nullptr);
+    (void)PrintSession(brMac, uuid);
+
+    ret = TransOpenBrProxy(brMac, uuid);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    ProxyBaseInfo info = {
+        .brMac = "FF:FF:FF:FF:FF:FF",
+        .uuid = "AAAAAAAA-AAAA-AAAA-AAAA-BBBBBBBBBBBB",
+    };
+    (void)CleanUpDataListWithSameMac(&info, 0, 0);
+    ProxyChannel channel = {
+        .channelId = 0,
+        .brMac = "FF:FF:FF:FF:FF:FF",
+        .requestId = 0,
+        .uuid = "AAAAAAAA-AAAA-AAAA-AAAA-BBBBBBBBBBBB",
+        .send = nullptr,
+        .close = nullptr,
+    };
+    (void)OnDisconnected(&channel, 0);
+    (void)OnReconnected(nullptr, nullptr);
+    char data[TMP_LEN] = "testtesttesttesttest";
+    (void)OnReconnected(data, &channel);
+    (void)NotifyChannelState(brMac, uuid, 0);
+
+    ret = TransSendBrProxyData(0, data, TMP_LEN);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
+}
 }

@@ -81,6 +81,11 @@ int32_t ServerIpcSetListenerState(int32_t channelId, int32_t type, bool CbEnable
     return GetBrProxyExtInterface()->ServerIpcSetListenerState(channelId, type, CbEnabled);
 }
 
+int32_t ServerIpcRegisterPushHook(void)
+{
+    return GetBrProxyExtInterface()->ServerIpcRegisterPushHook();
+}
+
 int ClientRegisterService(const char *pkgName)
 {
     return GetBrProxyExtInterface()->ClientRegisterService(pkgName);
