@@ -322,6 +322,14 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return AuthDeviceGetPreferConnInfo(uuid, connInfo);
 }
 
+int32_t AuthGetPreferConnInfoWithoutSle(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    if (isMeta) {
+        return AuthMetaGetPreferConnInfoPacked(uuid, connInfo);
+    }
+    return AuthDeviceGetPreferConnInfoWithoutSle(uuid, connInfo);
+}
+
 int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {

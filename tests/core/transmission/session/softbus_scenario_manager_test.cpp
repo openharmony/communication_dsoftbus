@@ -44,7 +44,7 @@ public:
 
 void TransScenarioManagerTest::SetUpTestCase(void)
 {
-    ScenarioManagerGetInstance();
+    ScenarioManagerInit();
 }
 
 void TransScenarioManagerTest::TearDownTestCase(void)

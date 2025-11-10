@@ -425,6 +425,28 @@ HWTEST_F(SoftBusServerProxyFrameTest, SetChannelInfoInnerTest, TestSize.Level1)
 }
 
 /*
+ * @tc.name: OnJoinLNNResultInnerTest
+ * @tc.desc: OnJoinLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnJoinLNNResultInnerTest, addrTypeLen not equal to sizeof(ConnectionAddr)
+ * @tc.desc: OnJoinLNNResultInnerTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnJoinLNNResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READUINT_FAILED);
+
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READUINT_FAILED);
+
+    data.WriteInt32(sizeof(ConnectionAddr));
+    EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
+}
+
+/*
  * @tc.name: OnLeaveLNNResultInnerTest
  * @tc.desc: OnLeaveLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnLeaveLNNResultInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -1222,5 +1244,46 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnDataReceivedInnerTest, TestSize.Level1)
     data.WriteUint32(buffer.size());
     data.WriteRawData(buffer.c_str(), buffer.size());
     EXPECT_EQ(g_stub->OnDataReceivedInner(data, reply), SOFTBUS_OK);
+}
+
+static int32_t testCallback(void)
+{
+static int32_t cnt = 0;
+    if (cnt == 0) {
+        cnt++;
+        return SOFTBUS_OK;
+    } else {
+        return SOFTBUS_INVALID_PARAM;
+    }
+}
+
+/*
+ * @tc.name: RestartAuthParaCallbackRegister
+ * @tc.desc: RestartAuthParaCallbackRegister, give invalid para should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: RestartAuthParaCallbackRegister, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, RestartAuthParaCallbackRegisterTest, TestSize.Level1)
+{
+    RestartAuthParaNotify();
+    int32_t ret = RestartAuthParaCallbackRegister(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = RestartAuthParaCallbackRegister(testCallback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RestartAuthParaNotify();
+    RestartAuthParaNotify();
+}
+
+/*
+ * @tc.name: DiscRecoveryPolicyPackedTest
+ * @tc.desc: DiscRecoveryPolicyPackedTest, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, DiscRecoveryPolicyPackedTest, TestSize.Level1)
+{
+    int32_t ret = DiscRecoveryPolicyPacked();
+    EXPECT_NE(ret, SOFTBUS_NO_INIT);
 }
 } // namespace OHOS

@@ -32,6 +32,7 @@ extern "C" {
 #define LANE_REQ_ID_TYPE_SHIFT 28
 #define DB_MAGIC_NUMBER 0x5A5A5A5A
 #define MESH_MAGIC_NUMBER 0xA5A5A5A5
+#define MAC_ADDR_STR_LEN 32
 
 typedef enum {
     LANE_BR = 0x0,
@@ -121,6 +122,7 @@ typedef struct {
     uint16_t protocol;
     char localIp[IP_LEN];
     char peerIp[IP_LEN];
+    char remoteMac[MAC_ADDR_STR_LEN];
 } P2pConnInfo;
 
 typedef struct {

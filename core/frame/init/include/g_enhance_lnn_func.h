@@ -290,6 +290,8 @@ typedef void (*LnnDeinitDecisionCenterV2Func)(void);
 typedef void (*SdMgrDeathCallbackFunc)(const char *pkgName);
 typedef int32_t (*AuthMetaGetIpByMetaNodeIdFunc)(const char *metaNodeId, char *ip, int32_t len);
 typedef int32_t (*AuthMetaGetLocalIpByMetaNodeIdFunc)(const char *metaNodeId, char *localIp, int32_t len);
+typedef int32_t (*AuthMetaGetConnectionTypeByMetaNodeIdFunc)(const char *metaNodeId,
+    NetworkConnectionType *connectionType);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -532,6 +534,7 @@ typedef struct TagLnnEnhanceFuncList {
     // HA interconnection
     AuthMetaGetIpByMetaNodeIdFunc authMetaGetIpByMetaNodeId;
     AuthMetaGetLocalIpByMetaNodeIdFunc authMetaGetLocalIpByMetaNodeId;
+    AuthMetaGetConnectionTypeByMetaNodeIdFunc authMetaGetConnectionTypeByMetaNodeId;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);

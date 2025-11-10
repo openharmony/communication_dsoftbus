@@ -266,6 +266,8 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProcTest004, TestSize.Level1
     TransTdcStopSessionProc((ListenerModule)DIRECT_CHANNEL_SERVER_WIFI);
 
     TransTdcStopSessionProc((ListenerModule)ERRMOUDLE);
+    TransTdcSocketReleaseFd((ListenerModule)ERRMOUDLE, -1);
+    TransTdcSocketReleaseFd((ListenerModule)ERRMOUDLE, 0);
     TransSrvDataListDeinit();
 }
 
@@ -408,10 +410,14 @@ HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
     bool isLegacyOs = false;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
+    int32_t ret = GetCipherFlagByAuthId(authHandle, nullptr, &isAuthServer, isLegacyOs);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetCipherFlagByAuthId(authHandle, &flag, nullptr, isLegacyOs);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     NiceMock<TransTcpDirectCommonInterfaceMock> TransCoreTcpDirectMock;
     EXPECT_CALL(TransCoreTcpDirectMock, AuthMetaGetServerSide).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
-    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
+    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
     authHandle.authId = INVALID_VALUE;
