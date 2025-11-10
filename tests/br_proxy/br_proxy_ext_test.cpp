@@ -311,4 +311,74 @@ HWTEST_F(BrProxyExtTest, IsProxyChannelEnabledTest001, TestSize.Level1)
     ret = IsProxyChannelEnabled(0);
     EXPECT_EQ(false, ret);
 }
+
+/**
+ * @tc.name: RegisterAccessHookTest001
+ * @tc.desc: RegisterAccessHookTest001, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyExtTest, RegisterAccessHookTest001, TestSize.Level1)
+{
+    int32_t ret = RegisterAccessHook(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    PermissonHookCb cb;
+    NiceMock<BrProxyExtInterfaceMock> brProxyExtMock;
+    EXPECT_CALL(brProxyExtMock, ClientStubInit).WillOnce(Return(SOFTBUS_NO_INIT)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = RegisterAccessHook(&cb);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    EXPECT_CALL(brProxyExtMock, ClientRegisterService).WillOnce(Return(SOFTBUS_TRANS_INVALID_CHANNEL_ID))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(brProxyExtMock, ServerIpcRegisterPushHook).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = RegisterAccessHook(&cb);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
+
+    ret = RegisterAccessHook(&cb);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = RegisterAccessHook(&cb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+static int32_t QueryPermissionFail(const char *bundleName, bool *isEmpowered)
+{
+    (void)bundleName;
+    (void)isEmpowered;
+    return SOFTBUS_INVALID_PARAM;
+}
+
+static int32_t QueryPermissionSucc(const char *bundleName, bool *isEmpowered)
+{
+    (void)bundleName;
+    (void)isEmpowered;
+    return SOFTBUS_OK;
+}
+
+/**
+ * @tc.name: ClientTransBrProxyQueryPermissionTest001
+ * @tc.desc: ClientTransBrProxyQueryPermissionTest001, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyExtTest, ClientTransBrProxyQueryPermissionTest001, TestSize.Level1)
+{
+    int32_t ret = ClientTransBrProxyQueryPermission(nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *bundleName = "testbundlename";
+    bool isEmpowered = false;
+    ret = ClientTransBrProxyQueryPermission(bundleName, &isEmpowered);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    g_pushCb.queryPermission = &QueryPermissionFail;
+    ret = ClientTransBrProxyQueryPermission(bundleName, &isEmpowered);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    g_pushCb.queryPermission = &QueryPermissionSucc;
+    ret = ClientTransBrProxyQueryPermission(bundleName, &isEmpowered);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 }
