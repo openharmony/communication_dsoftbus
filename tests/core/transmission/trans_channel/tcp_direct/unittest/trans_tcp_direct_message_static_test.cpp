@@ -119,9 +119,11 @@ AppInfo *TestSetAppInfo()
     return appInfo;
 }
 
-/**
+/*
  * @tc.name: SwitchCipherTypeToAuthLinkType0001
- * @tc.desc: SwitchCipherTypeToAuthLinkType.
+ * @tc.desc: Test whether the function
+ *           SwitchCipherTypeToAuthLinkType can correctly convert different cipher
+ *           to the corresponding AuthLinkType
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -159,9 +161,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, Te
     conn = nullptr;
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpened0002
- * @tc.desc: NotifyChannelOpened.
+ * @tc.desc: Test whether the return value of the NotifyChannelOpened function
+ *           under a specific channel ID meets the expected results
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -174,9 +177,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpened0002, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostFisrtData0003
- * @tc.desc: TransTdcPostFastData.
+ * @tc.desc: Test whether the return value of the TransTdcPostFisrtData function
+ *           meets the expected result under specific conditions
+ *           (expected return value: encryption error SOFTBUS_ENCRYPT_ERR)
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -195,9 +200,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Le
     conn = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransGetLocalConfig0004
- * @tc.desc: TransGetLocalConfig.
+ * @tc.desc: Test the local configuration retrieval function
+ *           of the TCP direct message channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -215,9 +221,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransGetLocalConfig0004, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessDataConfig0005
- * @tc.desc: TransTdcProcessDataConfig.
+ * @tc.desc: Test the behavior and return values of the TransTdcProcessDataConfig function
+ *           under different input conditions to verify if they meet expectations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -239,9 +246,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfig0005, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ProcessMessage0006
- * @tc.desc: ProcessMessage.
+ * @tc.desc: Test the behavior of the ProcessMessage function
+ *           when handling empty data, verifying whether it can correctly return a JSON parsing error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -263,9 +271,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessMessage0006, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusRequestReply0007
- * @tc.desc: OpenDataBusRequestReply.
+ * @tc.desc: Test whether the return value of the OpenDataBusRequestReply function
+ *           meets expectations under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -284,9 +293,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReply0007, TestSize.
     appInfo = nullptr;
 }
 
-/**
+/*
  * @tc.name: GetUuidByChanId0008
- * @tc.desc: GetUuidByChanId.
+ * @tc.desc: Test the behavior of the GetUuidByChanId function
+ *           when given an invalid channel ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -308,9 +318,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetUuidByChanId0008, TestSize.Level1)
 }
 
 
-/**
+/*
  * @tc.name: TransTdcFillDataConfig0009
- * @tc.desc: TransTdcFillDataConfig.
+ * @tc.desc: Test the correctness of the TransTdcFillDataConfig function
+ *           under different service types and data configurations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -340,9 +351,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfig0009, TestSize.L
     appInfo = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransSrvGetDataBufNodeById0010
- * @tc.desc: TransSrvGetDataBufNodeById.
+ * @tc.desc: Test whether the function of obtaining data buffer nodes
+ *           through channel ID is working correctly
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -353,9 +365,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetDataBufNodeById0010, TestSi
     EXPECT_TRUE(node == nullptr || node->data == nullptr);
 }
 
-/**
+/*
  * @tc.name: ProcessReceivedData0011
- * @tc.desc: ProcessReceivedData.
+ * @tc.desc: Test the behavior of the ProcessReceivedData function
+ *           under specific conditions, particularly the return value when the input parameters
+ *           may cause the node to be null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -370,9 +384,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvProcData0012
- * @tc.desc: TransTdcSrvProcData.
+ * @tc.desc: Test the server is data processing functionality in the TCP direct message handling module
+ *           specifically verifying whether the error handling logic is correct under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -387,9 +402,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcUpdateDataBufWInfo0013
- * @tc.desc: TransTdcUpdateDataBufWInfo.
+ * @tc.desc: Test the behavior of the TransTdcUpdateDataBufWInfo function
+ *           under different input conditions，particularly verifying its
+ *           handling of empty buffers and uninitialized states
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -419,7 +436,8 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
 
 /**
  * @tc.name: SwitchCipherTypeToAuthLinkTypeTest001
- * @tc.desc: SwitchCipherTypeToAuthLinkType
+ * @tc.desc: Test whether the function SwitchCipherTypeToAuthLinkType can correctly convert the cipherFlag
+ *           to the corresponding authentication link type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -450,9 +468,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkTypeTest001,
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_SESSION_KEY);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelClosedTest001
- * @tc.desc: NotifyChannelClosed
+ * @tc.desc: Test whether the NotifyChannelClosed function behaves as expected
+ *           under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -465,9 +484,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelClosedTest001, TestSize.L
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenedTest001
- * @tc.desc: NotifyChannelOpened, wrong input
+ * @tc.desc: test NotifyChannelOpened
+ *           use wrong input
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -478,9 +498,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
-/**
+/*
  * @tc.name: SendFailToFlushDeviceTest001
- * @tc.desc: SendFailToFlushDevice
+ * @tc.desc: Test the behavior of calling the SendFailToFlushDevice function
+ *           under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -494,9 +515,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SendFailToFlushDeviceTest001, TestSize
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostFisrtDataTest001
- * @tc.desc: TransTdcPostFastData
+ * @tc.desc: Test the ability to handle exceptions in the fast data transmission function
+ *           during TCP direct message transfer
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -510,9 +532,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtDataTest001, TestSize
     SoftBusFree(con);
 }
 
-/**
+/*
  * @tc.name: FindConfigTypeTest001
- * @tc.desc: FindConfigType, normal input
+ * @tc.desc: test FindConfigType
+ *           use normal input
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -524,9 +547,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, FindConfigTypeTest001, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH);
 }
 
-/**
+/*
  * @tc.name: FindConfigTypeTest002
- * @tc.desc: FindConfigType, wrong input
+ * @tc.desc: test FindConfigType
+ *           use wrong input
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -538,9 +562,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, FindConfigTypeTest002, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_CONFIG_TYPE_MAX);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessDataConfigTest001
- * @tc.desc: TransTdcProcessDataConfig
+ * @tc.desc: Test the behavior and return values of the TransTdcProcessDataConfig function
+ *           under different input conditions to verify if they meet expectations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -568,9 +593,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfigTest001, Test
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostReplyMsgTest001
- * @tc.desc: TransTdcPostReplyMsg
+ * @tc.desc: Test the behavior of the TransTdcPostReplyMsg function
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -584,9 +610,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostReplyMsgTest001, TestSize.
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusRequestReplyTest001
- * @tc.desc: OpenDataBusRequestReply
+ * @tc.desc: Test the OpenDataBusRequestReply function is ability to handle exceptions
+ *           when null pointer parameters are passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -600,9 +627,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSi
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusRequestErrorTest001
- * @tc.desc: OpenDataBusRequestError
+ * @tc.desc: Test whether the return value of the OpenDataBusRequestError function meets expectations
+ *           under specific input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -617,9 +645,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSi
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
-/**
+/*
  * @tc.name: NotifyFastDataRecvTest001
- * @tc.desc: NotifyFastDataRecv
+ * @tc.desc: test NotifyFastDataRecv
+ *           Test the TCP direct message receiving notification function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -638,9 +667,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyFastDataRecvTest001, TestSize.Le
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: TransTdcFillDataConfigTest001
- * @tc.desc: TransTdcFillDataConfig
+ * @tc.desc: Test the function TransTdcFillDataConfig to verify whether its behavior meets expectations
+ *           under different input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -673,9 +703,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSiz
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetDataBufInfoByChannelId001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameter.
+ * @tc.desc: test TransTdcGetDataBufInfoByChannelId
+ *           Should return SOFTBUS_INVALID_PARAM when given invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -696,9 +727,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcGetDataBufInfoByChannelIdTest0
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransTdcUpdateDataBufWInfo0014
- * @tc.desc: Should return SOFTBUS_NO_INIT when dataList is null.
+ * @tc.desc: test TransTdcUpdateDataBufWInfo
+             Should return SOFTBUS_NO_INIT when dataList is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -724,9 +756,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0014, TestSi
     tmp = nullptr;
 }
 
-/**
+/*
  * @tc.name: GetChannelInfoFromConn001
- * @tc.desc: Test when channelId is valid then GetChannelInfoFromConn returns valid ChannelInfo
+ * @tc.desc: test GetChannelInfoFromConn
+ *           Test when channelId is valid then GetChannelInfoFromConn returns valid ChannelInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -776,9 +809,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetChannelInfoFromConn001, TestSize.Le
     EXPECT_EQ(info.dataConfig, conn.appInfo.myData.dataConfig);
 }
 
-/**
+/*
  * @tc.name: GetServerSideIpInfoTest001
- * @tc.desc: GetServerSideIpInfo test
+ * @tc.desc: Test the function of obtaining IP information on the server and client sides
+ *           verify that in the WIFI_P2P routing type scenario, obtaining the server is IP
+ *           information fails, while obtaining the client is IP information succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -797,9 +832,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetServerSideIpInfoTest001, TestSize.L
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: ReleaseSessionConnTest001
- * @tc.desc: ReleaseSessionConn test
+ * @tc.desc: Test the release function of session connections to verify whether session connection resources
+ *           can be correctly released under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -814,9 +850,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ReleaseSessionConnTest001, TestSize.Le
     ReleaseSessionConn(chan);
 }
 
-/**
+/*
  * @tc.name: TransSrvGetSeqAndFlagsByChannelIdTest001
- * @tc.desc: TransSrvGetSeqAndFlagsByChannelId
+ * @tc.desc: Test the behavior of the TransSrvGetSeqAndFlagsByChannelId function
+ *           under different initialization states
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -833,9 +870,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetSeqAndFlagsByChannelIdTest0
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
 }
 
-/**
+/*
  * @tc.name: TransSrvGetSeqAndFlagsByChannelIdTest002
- * @tc.desc: TransSrvGetSeqAndFlagsByChannelId
+ * @tc.desc: Test the function of obtaining serial numbers and flags through channel IDs
+ *           and verify the correctness of the related data processing procedures
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -859,9 +897,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetSeqAndFlagsByChannelIdTest0
     SoftBusFree(conn);
 }
 
-/**
+/*
  * @tc.name: TransDealTdcChannelOpenResultTest001
- * @tc.desc: TransDealTdcChannelOpenResult
+ * @tc.desc: Test the function TransDealTdcChannelOpenResult for handling TCP direct message channel open
+ *           results, examining its behavior and return values under different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -888,9 +927,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: TransDealTdcChannelOpenResultTest001
- * @tc.desc: TransDealTdcChannelOpenResult
+ * @tc.desc: Test the behavior of the function TransDealTdcChannelOpenResult
+ *           which processes TCP direct message channel open results, under different conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -917,9 +957,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, 
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: TransAsyncTcpDirectChannelTaskTest001
- * @tc.desc: TransAsyncTcpDirectChannelTask
+ * @tc.desc: Test the processing logic of asynchronous TCP direct channel tasks to verify task execution
+ *           under different waiting response count states
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -984,7 +1025,8 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetSessionConnSeqAndFlagByChannelIdTes
 
 /**
  * @tc.name: BuildEventExtra001
- * @tc.desc: BuildEventExtra test
+ * @tc.desc: To verify whether the BuildEventExtra function behaves correctly
+ *           under specific input parameters, ensuring that it does not trigger a fatal error or crash
  * @tc.type: FUNC
  * @tc.require:
  */

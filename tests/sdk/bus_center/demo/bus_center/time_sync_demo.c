@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/**
+/*
  * @file time_sync_demo.c
  *
  * @brief Provides the sample code for start the time synchronize with specific target node.

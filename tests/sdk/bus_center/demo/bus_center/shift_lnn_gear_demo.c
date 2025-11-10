@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/**
+/*
  * @file shift_lnn_gear_demo.c
  *
  * @brief Provides the sample code for modify heartbeat parameters and trigger a temporary heartbeat.
