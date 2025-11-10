@@ -48,6 +48,7 @@ void NetBuilderTest::TearDown() { }
  * @tc.name: NET_BUILDER_GEN_ID_Test_001
  * @tc.desc: generate network id interface test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FK6J3
  */
 HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_001, TestSize.Level0)
@@ -64,6 +65,7 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_001, TestSize.Level0)
  * @tc.name: NET_BUILDER_GEN_ID_Test_002
  * @tc.desc: generate uuid interface test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FK6J3
  */
 HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_002, TestSize.Level0)
@@ -83,6 +85,7 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_002, TestSize.Level0)
  * @tc.name: NET_BUILDER_GEN_ID_Test_003
  * @tc.desc: generate irk interface test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
@@ -102,6 +105,7 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
  * @tc.name: NET_BUILDER_CONNECTION_ADDR_Test_001
  * @tc.desc: connection address compare interface test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FK6J2
  */
 HWTEST_F(NetBuilderTest, NET_BUILDER_CONNECTION_ADDR_Test_001, TestSize.Level0)

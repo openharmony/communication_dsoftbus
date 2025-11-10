@@ -60,6 +60,7 @@ void BusCenterIpcTest::TearDown() { }
  * @tc.name: LnnIpcServerJoin
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcServerJoinTest_01, TestSize.Level1)
@@ -84,6 +85,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerJoinTest_01, TestSize.Level1)
  * @tc.name: LnnIpcServerLeave
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_01, TestSize.Level1)
@@ -104,6 +106,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_01, TestSize.Level1)
  * @tc.name: LnnIpcGetAllOnlineNodeInfo
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcGetAllOnlineNodeInfoTest_01, TestSize.Level1)
@@ -120,6 +123,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcGetAllOnlineNodeInfoTest_01, TestSize.Level1)
  * @tc.name: LnnIpcNotifyJoinResult
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcNotifyJoinResultTest_01, TestSize.Level1)
@@ -139,6 +143,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcNotifyJoinResultTest_01, TestSize.Level1)
  * @tc.name: LnnIpcNotifyLeaveResult
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcNotifyLeaveResultTest_01, TestSize.Level1)
@@ -156,6 +161,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcNotifyLeaveResultTest_01, TestSize.Level1)
  * @tc.name: LnnIpcServerLeave
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_02, TestSize.Level1)
@@ -177,6 +183,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_02, TestSize.Level1)
  * @tc.name: LnnIpcServerLeave
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_03, TestSize.Level1)
@@ -199,6 +206,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_03, TestSize.Level1)
  * @tc.name: RemoveRangeRequestInfoByPkgName
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_01, TestSize.Level1)
@@ -215,6 +223,7 @@ HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_01, TestSize.Leve
  * @tc.name: RemoveRangeRequestInfoByPkgName
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_02, TestSize.Level1)
@@ -231,6 +240,7 @@ HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_02, TestSize.Leve
  * @tc.name: RemoveRangeRequestInfoByPkgName
  * @tc.desc: buscenter ipc test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_03, TestSize.Level1)
@@ -251,6 +261,7 @@ HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_03, TestSize.Leve
  * @tc.name: LnnIpcCreateGroupOwnerTest_001
  * @tc.desc: Test the behavior of LnnIpcCreateGroupOwner when pkgName is nullptr.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_001, TestSize.Level0)
@@ -267,6 +278,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_001, TestSize.Level0)
  * @tc.name: LnnIpcCreateGroupOwnerTest_002
  * @tc.desc: Test the behavior of LnnIpcCreateGroupOwner when config is nullptr.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_002, TestSize.Level0)
@@ -283,6 +295,7 @@ HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_002, TestSize.Level0)
  * @tc.name: LnnIpcCreateGroupOwnerTest_003
  * @tc.desc: Test the behavior of LnnIpcCreateGroupOwner when result is nullptr.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_003, TestSize.Level0)

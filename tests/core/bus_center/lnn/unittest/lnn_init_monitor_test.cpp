@@ -50,6 +50,7 @@ void LNNTestSetMonitorInitSuc(void)
         LnnInitDeviceInfoStatusSet(depLeger, DEPS_STATUS_SUCCESS);
     }
 }
+
 int32_t LnnInitMonitorCallbackSuc(void)
 {
     return SOFTBUS_OK;
@@ -59,10 +60,12 @@ int32_t LnnInitMonitorCallbackFailed(void)
 {
     return SOFTBUS_ERR;
 }
+
 /*
  * @tc.name: LnnInitMonitor_Test_001
  * @tc.desc: status set test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5RHYE
  */
 HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_001, TestSize.Level0)
@@ -86,10 +89,12 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_001, TestSize.Level0)
     status = LnnInitDeviceInfoStatusGet(LEDGER_INFO_BUTT);
     EXPECT_EQ(status, DEPS_STATUS_NOT_INIT);
 }
+
 /*
  * @tc.name: LnnInitMonitor_Test_002
  * @tc.desc: status get test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5RHYE
  */
 HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_002, TestSize.Level0)
@@ -111,8 +116,9 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: LnnModuleInitMonitorCheckStart_Test_001
- * @tc.desc: LnnInitModuleNotify API test
+ * @tc.desc: lnn init module notify test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5RHYE
  */
 HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_003, TestSize.Level0)
@@ -139,8 +145,9 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_003, TestSize.Level0)
 
 /*
  * @tc.name: LnnModuleInitMonitorCheckStart_Test_001
- * @tc.desc: LnnInitModuleNotifyWithRetry API test
+ * @tc.desc: lnn init module notify with retry test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5RHYE
  */
 HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_004, TestSize.Level0)
@@ -162,8 +169,9 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_004, TestSize.Level0)
 
 /*
  * @tc.name: LnnModuleInitMonitorCheckStart_Test_001
- * @tc.desc: LnnInitModuleNotifyWithRetry API test
+ * @tc.desc: lnn init module notify with retry test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5RHYE
  */
 HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_005, TestSize.Level0)

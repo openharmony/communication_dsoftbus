@@ -120,7 +120,7 @@ HWTEST_F(NetLedgerTest, LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001, TestSize.Leve
 
 /*
  * @tc.name: DL_GET_Test_001
- * @tc.desc: Dl Get Auth test
+ * @tc.desc: dl get auth test
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -138,7 +138,7 @@ HWTEST_F(NetLedgerTest, DL_GET_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_ADD_META_INFO_Test_001
- * @tc.desc: Lnn Add Meta Info test
+ * @tc.desc: lnn add meta info test
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -152,7 +152,7 @@ HWTEST_F(NetLedgerTest, LNN_ADD_META_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_DELETE_META_INFO_Test_001
- * @tc.desc: Lnn Delete Meta Info test
+ * @tc.desc: lnn delete meta info test
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -166,7 +166,7 @@ HWTEST_F(NetLedgerTest, LNN_DELETE_META_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001
- * @tc.desc: Get All Online And Meta Node Info test
+ * @tc.desc: get all online and meta node info test
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -291,7 +291,7 @@ HWTEST_F(NetLedgerTest, START_CHECK_HUK_KEY_TIME_PROC_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001
- * @tc.desc: Param is illegal and legal
+ * @tc.desc: param is illegal and legal
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -308,7 +308,7 @@ HWTEST_F(NetLedgerTest, LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001, TestS
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_001
- * @tc.desc: Lnn init decision db delay fail
+ * @tc.desc: lnn init decision db delay fail
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -321,7 +321,7 @@ HWTEST_F(NetLedgerTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_IS_POTENTIAL_HOME_GROUP_Test_001
- * @tc.desc: Lnn is potential home group false
+ * @tc.desc: lnn is potential home group false
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -335,7 +335,7 @@ HWTEST_F(NetLedgerTest, LNN_IS_POTENTIAL_HOME_GROUP_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_DEVICE_TRUSTED_Test_001
- * @tc.desc: Device trusted test is false
+ * @tc.desc: device trusted test is false
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -353,7 +353,7 @@ HWTEST_F(NetLedgerTest, IS_DEVICE_TRUSTED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001
- * @tc.desc: Try recovery trusted devInfotable is failed
+ * @tc.desc: try recovery trusted devInfotable is failed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -371,7 +371,7 @@ HWTEST_F(NetLedgerTest, TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001, TestSize.Level
 
 /*
  * @tc.name: GET_ALL_DEV_NUM_Test_001
- * @tc.desc: Get all dev nums is ok
+ * @tc.desc: get all dev nums is ok
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -387,7 +387,7 @@ HWTEST_F(NetLedgerTest, GET_ALL_DEV_NUM_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEV_INFO_Test_001
- * @tc.desc: Delete specific trusted dev info ok
+ * @tc.desc: delete specific trusted dev info ok
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -403,7 +403,7 @@ HWTEST_F(NetLedgerTest, LNN_DELETE_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.
 
 /*
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEV_INFO_Test_001
- * @tc.desc: Delete specific trusted dev info is ok
+ * @tc.desc: delete specific trusted dev info is ok
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -418,7 +418,7 @@ HWTEST_F(NetLedgerTest, LNN_INSERT_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.
 
 /*
  * @tc.name: UPDATE_RECOVERY_DEVICE_INFO_FROM_DB_Test_001
- * @tc.desc: Update recovery device info from db error
+ * @tc.desc: update recovery device info from db error
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
