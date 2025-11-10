@@ -71,6 +71,7 @@ static int32_t LnnCoapFuncTest(void)
  * @tc.name: LNN_PUBLISH_SERVICE_TEST_001
  * @tc.desc: device found test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level1)
@@ -107,6 +108,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_001, TestSize.Level
  * @tc.name: LNN_PUBLISH_SERVICE_TEST_002
  * @tc.desc: lnn publish service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level1)
@@ -137,6 +139,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_PUBLISH_SERVICE_TEST_002, TestSize.Level
  * @tc.name: LNN_UNPUBLISH_SERVICE_TEST_001
  * @tc.desc: lnn unpublish service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Level1)
@@ -166,6 +169,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Lev
  * @tc.name: LNN_START_DISC_DEVICE_TEST_001
  * @tc.desc: lnn start disc device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Level1)
@@ -204,6 +208,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISC_DEVICE_TEST_001, TestSize.Lev
  * @tc.name: LNN_STOP_DISC_DEVICE_TEST_001
  * @tc.desc: lnn stop disc device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Level1)
@@ -233,6 +238,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
  * @tc.name: LNN_START_PUBLISH_TEST_001
  * @tc.desc: lnn start publish test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
@@ -259,6 +265,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_PUBLISH_TEST_001, TestSize.Level1)
  * @tc.name: LNN_START_DISCOVERY_TEST_001
  * @tc.desc: lnn start discovery test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level1)
@@ -285,6 +292,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_DISCOVERY_TEST_001, TestSize.Level
  * @tc.name: LNN_INIT_COAP_DISCOVERY_TEST_001
  * @tc.desc: lnn init coap discovery test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_001, TestSize.Level1)
@@ -297,6 +305,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_001, TestSize.L
  * @tc.name: LNN_INIT_COAP_DISCOVERY_TEST_002
  * @tc.desc: lnn init coap discovery test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_002, TestSize.Level1)
@@ -310,6 +319,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_INIT_COAP_DISCOVERY_TEST_002, TestSize.L
  * @tc.name: LNN_START_COAP_DISCOVERY_TEST_001
  * @tc.desc: lnn start coap discovery test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_DISCOVERY_TEST_001, TestSize.Level1)
@@ -339,6 +349,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_DISCOVERY_TEST_001, TestSize.
  * @tc.name: LNN_START_COAP_PUBLISH_TEST_001
  * @tc.desc: lnn start coap publish test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_PUBLISH_TEST_001, TestSize.Level1)
@@ -363,6 +374,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_PUBLISH_TEST_001, TestSize.Le
  * @tc.name: GET_CONNECT_DEVICE_INFO_TEST_001
  * @tc.desc: get connect device info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, GET_CONNECT_DEVICE_INFO_TEST_001, TestSize.Level1)
@@ -377,6 +389,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, GET_CONNECT_DEVICE_INFO_TEST_001, TestSize.L
  * @tc.name: LNN_CHECK_DISCOVERY_DEVICE_TEST_001
  * @tc.desc: lnn check discovery device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_CHECK_DISCOVERY_DEVICE_TEST_001, TestSize.Level1)
@@ -408,6 +421,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_CHECK_DISCOVERY_DEVICE_TEST_001, TestSiz
  * @tc.name: LNN_CHECK_DISCOVERY_DEVICE_TEST_002
  * @tc.desc: lnn check discovery device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDiscoveryInterfaceTest, LNN_CHECK_DISCOVERY_DEVICE_TEST_002, TestSize.Level1)

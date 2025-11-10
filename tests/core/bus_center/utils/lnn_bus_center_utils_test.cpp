@@ -68,6 +68,7 @@ void LNNConnAddrUtilsTest::TearDown() { }
  * @tc.name: LNN_IS_SAME_CONNECTION_ADDR_Test_001
  * @tc.desc: lnn is same connection addr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
@@ -123,6 +124,7 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Le
  * @tc.name: LNN_CONVERT_ADDR_TO_OPTION_Test_001
  * @tc.desc: lnn convert addr to option test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_ADDR_TO_OPTION_Test_001, TestSize.Level1)
@@ -153,6 +155,7 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_ADDR_TO_OPTION_Test_001, TestSize.Lev
  * @tc.name: LNN_CONVERT_OPTION_TO_ADDR_Test_001
  * @tc.desc: lnn convert option to addr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_OPTION_TO_ADDR_Test_001, TestSize.Level1)
@@ -183,6 +186,7 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVERT_OPTION_TO_ADDR_Test_001, TestSize.Lev
  * @tc.name: LNN_CONV_ADDR_TYPE_TO_DISC_TYPE_Test_001
  * @tc.desc: lnn convert option to addr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONV_ADDR_TYPE_TO_DISC_TYPE_Test_001, TestSize.Level1)
@@ -199,6 +203,7 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONV_ADDR_TYPE_TO_DISC_TYPE_Test_001, TestSiz
  * @tc.name: LNN_DISC_TYPE_TO_CONN_ADDR_TYPE_Test_001
  * @tc.desc: lnn disc type to conn addr type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_DISC_TYPE_TO_CONN_ADDR_TYPE_Test_001, TestSize.Level1)
@@ -213,6 +218,7 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_DISC_TYPE_TO_CONN_ADDR_TYPE_Test_001, TestSiz
  * @tc.name: LNN_CONVER_ADDR_TO_AUTH_CONN_INFO_Test_001
  * @tc.desc: lnn conver addr to auth conn info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVER_ADDR_TO_AUTH_CONN_INFO_Test_001, TestSize.Level1)
@@ -243,6 +249,7 @@ HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVER_ADDR_TO_AUTH_CONN_INFO_Test_001, TestS
  * @tc.name: LNN_CONVER_AUTH_CONN_INFO_TO_ADDR_Test_001
  * @tc.desc: lnn conver addr to auth conn info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNConnAddrUtilsTest, LNN_CONVER_AUTH_CONN_INFO_TO_ADDR_Test_001, TestSize.Level1)

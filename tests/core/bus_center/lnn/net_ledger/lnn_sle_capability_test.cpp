@@ -55,6 +55,7 @@ void LNNSleCapabilityTest::TearDown()
  * @tc.name: SetSleRangeCapToLocalLedgerTest001
  * @tc.desc: test func SetSleRangeCapToLocalLedger branch
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSleCapabilityTest, SetSleRangeCapToLocalLedgerTest001, TestSize.Level1)
@@ -78,6 +79,7 @@ HWTEST_F(LNNSleCapabilityTest, SetSleRangeCapToLocalLedgerTest001, TestSize.Leve
  * @tc.name: SetSleRangeCapToLocalLedgerTest002
  * @tc.desc: test func SetSleRangeCapToLocalLedger branch
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSleCapabilityTest, SetSleRangeCapToLocalLedgerTest002, TestSize.Level1)
@@ -104,6 +106,7 @@ HWTEST_F(LNNSleCapabilityTest, SetSleRangeCapToLocalLedgerTest002, TestSize.Leve
  * @tc.name: SetSleAddrToLocalLedgerTest001
  * @tc.desc: test func SetSleAddrToLocalLedger branch
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSleCapabilityTest, SetSleAddrToLocalLedgerTest001, TestSize.Level1)
@@ -135,6 +138,7 @@ HWTEST_F(LNNSleCapabilityTest, SetSleAddrToLocalLedgerTest001, TestSize.Level1)
  * @tc.name: SleStateChangeEventHandlerTest001
  * @tc.desc: abnormal test func SleStateChangeEventHandler branch
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSleCapabilityTest, SleStateChangeEventHandlerTest001, TestSize.Level1)
@@ -165,8 +169,9 @@ HWTEST_F(LNNSleCapabilityTest, SleStateChangeEventHandlerTest001, TestSize.Level
 
 /*
  * @tc.name: LocalLedgerInitSleCapacityTest001
- * @tc.desc: test func LocalLedgerInitSleCapacity branch
+ * @tc.desc: local ledger init sle capacity test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSleCapabilityTest, LocalLedgerInitSleCapacityTest001, TestSize.Level1)
@@ -190,8 +195,9 @@ HWTEST_F(LNNSleCapabilityTest, LocalLedgerInitSleCapacityTest001, TestSize.Level
 
 /*
  * @tc.name: LnnInitSleInfoTest001
- * @tc.desc: test func LnnInitSleInfo
+ * @tc.desc: lnn init sle info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNSleCapabilityTest, LnnInitSleInfoTest001, TestSize.Level1)

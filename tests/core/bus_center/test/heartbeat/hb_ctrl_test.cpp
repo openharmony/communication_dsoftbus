@@ -62,8 +62,9 @@ void HeartBeatCtrlTest::TearDown() { }
 
 /*
  * @tc.name: LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001
- * @tc.desc: test LnnOfflineTimingByHeartbeat
+ * @tc.desc: lnn offline timing by heartbeat test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.Level1)
@@ -89,8 +90,9 @@ HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.
 
 /*
  * @tc.name: LNN_SHIFT_LNN_GEAR_TEST_001
- * @tc.desc: test LnnShiftLNNGear
+ * @tc.desc: lnn shift lnn gear test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
@@ -122,8 +124,9 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001
- * @tc.desc: test LnnShiftLNNGearWithoutPkgName
+ * @tc.desc: lnn shift lnn gear without pkgName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSize.Level1)
@@ -147,8 +150,9 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSi
 
 /*
  * @tc.name: LNN_INIT_HEARBEAT_TEST_001
- * @tc.desc: test LnnInitHeartbeat
+ * @tc.desc: lnn init heartbeat test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
