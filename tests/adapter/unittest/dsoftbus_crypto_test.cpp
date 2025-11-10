@@ -281,6 +281,12 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusEncryptData001, TestSize.Level0)
     uint32_t encryptLen = 32 + OVERHEAD_LEN;
     ret = SoftBusEncryptData(&cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    inLen = UINT32_MAX - OVERHEAD_LEN;
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    inLen = UINT32_MAX - 1;
+    ret = SoftBusEncryptData(&cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -347,6 +353,14 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusEncryptDataWithSeq001, TestSize.Level0
     ret = SoftBusEncryptDataWithSeq(
         &cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen, seqNum);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    inLen = UINT32_MAX - OVERHEAD_LEN;
+    ret = SoftBusEncryptDataWithSeq(
+        &cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen, seqNum);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    inLen = UINT32_MAX - 1;
+    ret = SoftBusEncryptDataWithSeq(
+        &cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen, seqNum);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -437,6 +451,14 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusDecryptData001, TestSize.Level0)
     ret = SoftBusDecryptData(
         &cipherKey, (unsigned char *)encryptData, encryptLen, (unsigned char *)decryptData, &decryptLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    inLen = OVERHEAD_LEN;
+    ret = SoftBusDecryptData(
+        &cipherKey, (unsigned char *)encryptData, inLen, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    inLen = OVERHEAD_LEN - 1;
+    ret = SoftBusDecryptData(
+        &cipherKey, (unsigned char *)encryptData, inLen, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
