@@ -340,7 +340,7 @@ typedef int32_t (*SoftBusRsaDecryptFunc)(
     const uint8_t *srcData, uint32_t srcDataLen, uint8_t **decryptedData, uint32_t *decryptedDataLen);
 typedef void (*BroadcastDiscEventFunc)(int32_t eventScene, int32_t eventStage, DiscEventExtra *discExtra, int32_t size);
 typedef void (*BroadcastScanEventFunc)(int32_t eventScene, int32_t eventStage, DiscEventExtra *scanExtra, int32_t size);
-typedef const char *(*LnnConvertDLidToUdidFunc)(const char *id, IdCategory type);
+typedef int32_t (*LnnConvertDLidToUdidFunc)(const char *id, IdCategory type, char *udid, uint32_t len);
 typedef void (*LnnNotifyNetlinkStateChangeEventFunc)(NetManagerIfNameState state, const char *ifName);
 typedef SendSyncInfoParam *(*CreateSyncInfoParamFunc)(
     LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);

@@ -246,24 +246,25 @@ int32_t DBinderSoftbusServer::AuthOpenConn(const AuthConnInfo *info, uint32_t re
 
     return authOpenConnFunc_(info, requestId, callback, isMeta);
 }
-const char *DBinderSoftbusServer::LnnConvertDLidToUdid(const char *id, IdCategory type)
+
+int32_t DBinderSoftbusServer::LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
-    CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, "softbus wifi direct instance exit.");
+    CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, SOFTBUS_WIFI_DIRECT_INSTANCE_EXIT);
     if (lnnConvertDLidToUdidFunc_ != nullptr) {
-        return lnnConvertDLidToUdidFunc_(id, type);
+        return lnnConvertDLidToUdidFunc_(id, type, udid, len);
     }
 
     if (!OpenSoftbusServerSo()) {
-        return nullptr;
+        return SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED;
     }
 
     lnnConvertDLidToUdidFunc_ = (LnnConvertDLidToUdidFunc)dlsym(soHandle_, "LnnConvertDLidToUdid");
     if (lnnConvertDLidToUdidFunc_ == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnConvertDLidToUdid fail.");
-        return nullptr;
+        return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
-    return lnnConvertDLidToUdidFunc_(id, type);
+    return lnnConvertDLidToUdidFunc_(id, type, udid, len);
 }
 void DBinderSoftbusServer::AuthStopListening(AuthLinkType type)
 {

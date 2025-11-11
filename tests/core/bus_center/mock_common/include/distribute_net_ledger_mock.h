@@ -41,7 +41,7 @@ public:
     virtual int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info) = 0;
     virtual int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info) = 0;
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
-    virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len) = 0;
     virtual int32_t ConvertBtMacToBinary(const char *, uint32_t, uint8_t *, uint32_t) = 0;
     virtual int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp) = 0;
     virtual int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp) = 0;
@@ -62,7 +62,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteBoolInfo, int32_t(const char *, InfoKey, bool *));
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t(const char *, InfoKey, uint64_t *));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
-    MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
+    MOCK_METHOD4(LnnConvertDLidToUdid, int32_t(const char *, IdCategory, char *, uint32_t));
     MOCK_METHOD4(ConvertBtMacToBinary, int32_t(const char *, uint32_t, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
     MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));

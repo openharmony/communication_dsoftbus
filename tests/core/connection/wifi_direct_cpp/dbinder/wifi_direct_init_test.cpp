@@ -184,8 +184,9 @@ HWTEST_F(WifiDirectInitTest, AuthOpenConn007, TestSize.Level1)
 HWTEST_F(WifiDirectInitTest, LnnConvertDLidToUdid008, TestSize.Level1)
 {
     EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
-    const char *remoteUdid = DBinderSoftbusServer::GetInstance().LnnConvertDLidToUdid(nullptr, CATEGORY_UDID);
-    EXPECT_EQ(remoteUdid, nullptr);
+    char remoteUdid[UDID_BUF_LEN] = { 0 };
+    EXPECT_EQ(DBinderSoftbusServer::GetInstance().LnnConvertDLidToUdid(
+        nullptr, CATEGORY_UDID, remoteUdid, UDID_BUF_LEN), SOFTBUS_INVALID_PARAM);
 }
 
 /*

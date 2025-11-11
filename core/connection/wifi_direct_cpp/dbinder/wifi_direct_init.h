@@ -50,7 +50,7 @@ public:
     void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId);
     uint32_t AuthGenRequestId(void);
     int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta);
-    const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
+    int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len);
     void AuthStopListening(AuthLinkType type);
     int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type,
         const ITransProxyPipelineListener *listener);
@@ -98,7 +98,7 @@ private:
     using AuthGenRequestIdFunc = uint32_t (*)(void);
     using AuthOpenConnFunc = int32_t (*)(const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta);
-    using LnnConvertDLidToUdidFunc = const char *(*)(const char *id, IdCategory type);
+    using LnnConvertDLidToUdidFunc = int32_t (*)(const char *id, IdCategory type, char *udid, uint32_t len);
     using AuthStopListeningFunc = void(*)(AuthLinkType type);
     using TransProxyPipelineRegisterListenerFunc = int32_t (*)(TransProxyPipelineMsgType type,
         const ITransProxyPipelineListener *listener);

@@ -460,9 +460,10 @@ int AuthNegotiateChannel::AssignValueForAuthConnInfo(bool isMeta, bool needUdid,
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_IP_FAILED, CONN_WIFI_DIRECT, "copy ip fail");
     if (needUdid) {
-        const char *remoteUdid = DBinderSoftbusServer::GetInstance().LnnConvertDLidToUdid(param.remoteUuid.c_str(),
-            CATEGORY_UUID);
-        CONN_CHECK_AND_RETURN_RET_LOGE(remoteUdid != nullptr && strlen(remoteUdid) != 0,
+        char remoteUdid[UDID_BUF_LEN] = {0};
+        int32_t result = DBinderSoftbusServer::GetInstance().LnnConvertDLidToUdid(param.remoteUuid.c_str(),
+            CATEGORY_UUID, remoteUdid, UDID_BUF_LEN);
+        CONN_CHECK_AND_RETURN_RET_LOGE(result == SOFTBUS_OK,
             SOFTBUS_CONN_OPEN_CONNECTION_GET_REMOTE_UUID_FAILED, CONN_WIFI_DIRECT, "get remote udid fail");
         ret = strcpy_s(authConnInfo.info.ipInfo.udid, UDID_BUF_LEN, remoteUdid);
         CONN_CHECK_AND_RETURN_RET_LOGE(

@@ -522,9 +522,9 @@ bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
     return GetNetBuilderDepsInterface()->LnnHasDiscoveryType(info, type);
 }
 
-const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
-    return GetNetBuilderDepsInterface()->LnnConvertDLidToUdid(id, type);
+    return GetNetBuilderDepsInterface()->LnnConvertDLidToUdid(id, type, udid, len);
 }
 
 int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)

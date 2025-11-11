@@ -127,13 +127,13 @@ int32_t AuthMetaGetMetaNodeIdByIpPacked(const char *ip, char *metaNodeId, int32_
     return pfnAuthEnhanceFuncList->authMetaGetMetaNodeIdByIp(ip, metaNodeId, len);
 }
 
-const char *AuthMetaGetDeviceIdByMetaNodeIdPacked(const char *metaNodeId)
+int32_t AuthMetaGetDeviceIdByMetaNodeIdPacked(const char *metaNodeId, char *deviceId, uint32_t len)
 {
     AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
     if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetDeviceIdByMetaNodeId) != SOFTBUS_OK) {
-        return NULL;
+        return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnAuthEnhanceFuncList->authMetaGetDeviceIdByMetaNodeId(metaNodeId);
+    return pfnAuthEnhanceFuncList->authMetaGetDeviceIdByMetaNodeId(metaNodeId, deviceId, len);
 }
 
 int32_t AuthMetaGetP2pMacByMetaNodeIdPacked(const char *metaNodeId, char *p2pMacAddr, int32_t len)

@@ -51,7 +51,7 @@ public:
         DeviceLeaveReason leaveReason) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num) = 0;
-    virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len) = 0;
     virtual int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, const uint64_t timestamp) = 0;
     virtual int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight) = 0;
     virtual bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target) = 0;
@@ -82,7 +82,7 @@ public:
     MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
     MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t(char **, uint32_t *));
-    MOCK_METHOD2(LnnConvertDLidToUdid, char*(const char *, IdCategory));
+    MOCK_METHOD4(LnnConvertDLidToUdid, int32_t(const char *, IdCategory, char *, uint32_t));
     MOCK_METHOD2(LnnSetDLHeartbeatTimestamp, int32_t(const char *, const uint64_t));
     MOCK_METHOD3(LnnNotifyMasterElect, int32_t(const char *, const char *, int32_t));
     MOCK_METHOD3(GetJsonObjectNumberItem, bool(const cJSON *, const char * const, int *));
@@ -121,7 +121,7 @@ extern "C" {
     int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason);
     int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
-    const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
+    int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len);
     int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, const uint64_t timestamp);
     int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight);
     bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target);

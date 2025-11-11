@@ -505,7 +505,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_003, TestSize.Le
     EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(NODE_UDID));
+    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessNodeStateChanged(para) == SOFTBUS_OK);
     EXPECT_TRUE(ProcessNodeStateChanged(para1) == SOFTBUS_OK);
     ListDelete(&connFsm->node);
@@ -2271,12 +2271,12 @@ HWTEST_F(LNNNetBuilderMockTest, NotifyStateForSession_Test_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(nullptr));
+    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_NO_FATAL_FAILURE(TryElectAsMasterState("networkId", false));
     EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
         .WillOnce(DoAll(SetArgPointee<1>(*NODE_UDID), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(NODE_UDID));
+    EXPECT_CALL(NetBuilderMock, LnnConvertDLidToUdid).WillOnce(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(TryElectAsMasterState("networkId", false));
 }
 

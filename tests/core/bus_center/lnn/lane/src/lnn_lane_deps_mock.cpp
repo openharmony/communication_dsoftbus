@@ -321,9 +321,9 @@ bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
     return GetLaneDepsInterface()->LnnVisitPhysicalSubnet(callback, data);
 }
 
-const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
-    return GetLaneDepsInterface()->LnnConvertDLidToUdid(id, type);
+    return GetLaneDepsInterface()->LnnConvertDLidToUdid(id, type, udid, len);
 }
 
 ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol)

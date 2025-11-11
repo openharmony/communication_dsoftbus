@@ -65,7 +65,7 @@ public:
     virtual int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,
         int32_t port, ListenerModule *moduleId) = 0;
     virtual int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth) = 0;
-    virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta) = 0;
@@ -161,7 +161,7 @@ public:
     MOCK_METHOD(int32_t, AuthStartListeningForWifiDirect,
         (AuthLinkType, const char *, int32_t, ListenerModule *), (override));
     MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
-    MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
+    MOCK_METHOD4(LnnConvertDLidToUdid, int32_t (const char *, IdCategory, char *udid, uint32_t len));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
     MOCK_METHOD(void, AuthStopListening, (AuthLinkType));
