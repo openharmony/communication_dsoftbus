@@ -501,6 +501,7 @@ if (defined(ohos_lite)) {
     include_dirs += trans_sdk_test_common_inc
     include_dirs += [
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
       "$dsoftbus_root_path/sdk/transmission/ipc/standard/src",
       "$dsoftbus_root_path/sdk/transmission/ipc/standard/include",
       "$dsoftbus_root_path/core/frame/standard/init/include",
