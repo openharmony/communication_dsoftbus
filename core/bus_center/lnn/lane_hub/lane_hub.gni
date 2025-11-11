@@ -48,7 +48,6 @@ if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_lane_mgr) {
     "$core_lane_hub_path/lane_manager/src/lnn_lane_model.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_select.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_query.c",
-
     "$core_lane_hub_path/lane_manager/src/lnn_select_rule.c",
     "$core_lane_hub_path/lane_manager/src/lnn_trans_free_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_trans_lane.c",

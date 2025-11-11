@@ -408,7 +408,7 @@ static int32_t LnnAllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *a
         return SOFTBUS_INVALID_PARAM;
     }
     if (allocInfo->linkList.linkTypeNum >= LANE_LINK_TYPE_BUTT || allocInfo->linkList.linkTypeNum == 0) {
-        LNN_LOGE(LNN_LANE, "laneType is invalid. linkTypeNum=%{public}u", allocInfo->linkList.linkTypeNum);
+        LNN_LOGE(LNN_LANE, "linkTypeNum is invalid. linkTypeNum=%{public}u", allocInfo->linkList.linkTypeNum);
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_laneObject[allocInfo->type] == NULL) {
