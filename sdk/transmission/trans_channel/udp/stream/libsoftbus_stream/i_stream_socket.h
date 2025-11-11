@@ -69,7 +69,7 @@ public:
         std::pair<uint8_t*, uint32_t> sessionKey) = 0;
     virtual bool CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey) = 0;
 
-    virtual void DestroyStreamSocket() = 0;
+    virtual void DestroyStreamSocket(bool isClose = false) = 0;
 
     virtual bool Connect(const IpAndPort &remote) = 0;
     virtual bool Send(std::unique_ptr<IStream> stream) = 0;

@@ -522,7 +522,7 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<u
     return true;
 }
 
-void VtpStreamSocket::DestroyStreamSocket()
+void VtpStreamSocket::DestroyStreamSocket(bool isClose)
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
     std::lock_guard<std::mutex> guard(streamSocketLock_);
@@ -552,7 +552,7 @@ void VtpStreamSocket::DestroyStreamSocket()
 
     if (streamReceiver_ != nullptr) {
         TRANS_LOGI(TRANS_STREAM, "DestroyStreamSocket receiver delete");
-        streamReceiver_->OnStreamStatus(STREAM_CLOSED);
+        streamReceiver_->OnStreamStatus(isClose ? STREAM_CLOSING : STREAM_CLOSED);
         streamReceiver_.reset();
     }
 
@@ -1699,7 +1699,7 @@ void VtpStreamSocket::CreateClientProcessThread()
         const std::string threadName = "OS_cdstyStmSkt";
         pthread_setname_np(pthread_self(), threadName.c_str());
         self->DoStreamRecv();
-        self->DestroyStreamSocket();
+        self->DestroyStreamSocket(true);
         }).detach();
 
     bool &isDestroyed = isDestroyed_;
