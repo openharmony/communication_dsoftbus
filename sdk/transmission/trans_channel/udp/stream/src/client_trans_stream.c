@@ -17,6 +17,8 @@
 
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
+#include "client_trans_statistics.h"
+#include "client_trans_udp_manager.h"
 #include "client_trans_udp_stream_interface.h"
 #include "session.h"
 #include "softbus_error_code.h"
@@ -40,6 +42,22 @@ void RegisterStreamCb(const UdpChannelMgrCb *streamCb)
 void UnregisterStreamCb(void)
 {
     g_udpChannelMgrCb = NULL;
+}
+
+static int32_t TransCloseStreamUdpChannel(int32_t channelId)
+{
+    int32_t sessionId = INVALID_SESSION_ID;
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_UDP, &sessionId, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    DeleteSocketResourceBySocketId(sessionId);
+    ret = ClientTransCloseUdpChannel(channelId, SHUTDOWN_REASON_UNEXPECTED);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d", ret, channelId);
+    }
+    return ret;
 }
 
 static void SetStreamChannelStatus(int32_t channelId, int32_t status)
@@ -67,6 +85,9 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
             break;
         case STREAM_CLOSING:
             TRANS_LOGI(TRANS_STREAM, "dstream closing. channelId=%{public}d", channelId);
+            if (TransCloseStreamUdpChannel(channelId) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_STREAM, "close channelId=%{public}d fail", channelId);
+            }
             break;
         default:
             TRANS_LOGE(TRANS_STREAM, "unsupport stream. channelId=%{public}d, status=%{public}d.", channelId, status);
