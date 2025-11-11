@@ -127,8 +127,12 @@ P2pOperationResult P2pEntity::CreateGroup(const P2pCreateGroupParam &param)
         }
     }
 
+    auto res = operation->promise_.get_future().get();
+    CONN_CHECK_AND_RETURN_RET_LOGE(res.errorCode_ == SOFTBUS_OK, res, CONN_WIFI_DIRECT,
+        "create group fail, errorCode=%{public}d", res.errorCode_);
+    (void)P2pAdapter::SetP2pGroupLiveType(P2pAdapter::P2P_GROUP_KEEP_ALIVE);
     CONN_LOGI(CONN_WIFI_DIRECT, "wait to be done");
-    return operation->promise_.get_future().get();
+    return res;
 }
 
 P2pOperationResult P2pEntity::Connect(const P2pConnectParam &param)
@@ -151,11 +155,8 @@ P2pOperationResult P2pEntity::Connect(const P2pConnectParam &param)
 
 int32_t P2pEntity::ReuseLink()
 {
-    int32_t ret = P2pAdapter::P2pShareLinkReuse();
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    return ret;
+    (void)P2pAdapter::SetP2pGroupLiveType(P2pAdapter::P2P_GROUP_KEEP_ALIVE);
+    return P2pAdapter::P2pShareLinkReuse();
 }
 
 static void SendClientJoinEvent(const std::string &remoteMac, int32_t result)
