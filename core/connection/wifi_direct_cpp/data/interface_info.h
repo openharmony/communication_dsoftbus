@@ -56,6 +56,7 @@ enum class InterfaceInfoKey {
     LISTEN_MODULE = 29,
     LOCAL_CUSTOM_PORT = 30,
     IS_CREATE_GO = 31,
+    NEED_KEEP_P2P_GROUP = 32,
 };
 
 class InterfaceInfo : public Serializable, public InfoContainer<InterfaceInfoKey> {
@@ -143,6 +144,9 @@ public:
 
     void SetIsCreateGo(bool value);
     bool GetIsCreateGo() const;
+
+    void SetNeedKeepP2pGroup(bool value);
+    bool GetNeedKeepP2pGroup() const;
 };
 } // namespace OHOS::SoftBus
 #endif

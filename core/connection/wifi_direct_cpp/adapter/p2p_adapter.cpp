@@ -501,4 +501,13 @@ int32_t P2pAdapter::GetP2pGroupFrequency()
         "get current group info fail, error=%{public}d", ToSoftBusErrorCode(ret));
     return p2pGroupInfo.frequency;
 }
+
+int32_t P2pAdapter::SetP2pGroupLiveType(WifiDirectP2pGroupLiveType type)
+{
+    GroupLiveType groupLiveType = type == P2P_GROUP_STOP_ALIVE ? GROUPSTOPALIVE : GROUPKEEPALIVE;
+    int32_t ret = Hid2dSetGroupType(groupLiveType);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, ToSoftBusErrorCode(ret), CONN_WIFI_DIRECT,
+        "set group live type fail, error=%{public}d", ToSoftBusErrorCode(ret));
+    return SOFTBUS_OK;
+}
 } // namespace OHOS::SoftBus
