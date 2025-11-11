@@ -96,9 +96,9 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     return GetLedgerInterface()->LnnGetTrustedDevInfoFromDb(udidArray, num);
 }
 
-const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
-    return GetLedgerInterface()->LnnConvertDLidToUdid(id, type);
+    return GetLedgerInterface()->LnnConvertDLidToUdid(id, type, udid, len);
 }
 
 int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, const uint64_t timestamp)

@@ -508,11 +508,10 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
     };
     int32_t ret;
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
-    const char *udid = "testuuid";
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     ON_CALL(wifiMock, LnnConnectP2p).WillByDefault(Return(SOFTBUS_LANE_BUILD_LINK_FAIL));
@@ -540,14 +539,13 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
 
     ConnBleConnection *connection = (ConnBleConnection*)SoftBusCalloc(sizeof(ConnBleConnection));
     ASSERT_NE(connection, nullptr);
-    const char *udid = "testuuid";
     NodeInfo *nodeInfo = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
     if (nodeInfo == nullptr) {
         SoftBusFree(connection);
         ASSERT_NE(nodeInfo, nullptr);
     }
     connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
-    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(connection));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     EXPECT_CALL(wifiMock, LnnConnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
@@ -569,14 +567,13 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     LinkRequest reqInfo = {};
     int32_t ret;
-    const char *udid = "testuuid";
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
         .onLaneLinkFail = OnLaneLinkFail,
     };
 
     reqInfo.linkType = LANE_BLE;
-    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(nullptr));
     ON_CALL(mock, LnnGetRemoteStrInfo).WillByDefault(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
@@ -601,7 +598,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     LinkRequest reqInfo = {};
     int32_t ret;
-    const char *udid = "testuuid";
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -614,7 +610,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
         return;
     }
     connection->state = BLE_CONNECTION_STATE_INVALID;
-    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(connection));
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     ON_CALL(mock, LnnGetRemoteNodeInfoById).WillByDefault(Return(SOFTBUS_OK));
@@ -709,7 +705,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_008, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     LinkRequest reqInfo = {};
     int32_t ret;
-    const char *udid = "testuuid";
     const char *bleMac = "127.1.1.1";
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -720,7 +715,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_008, TestSize.Level1)
     if (strcpy_s(reqInfo.peerBleMac, MAX_MAC_LEN, bleMac) != EOK) {
         return;
     }
-    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
@@ -780,7 +775,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     LinkRequest reqInfo = {};
     int32_t ret;
-    const char *udid = "testuuid";
     const char *bleMac = "127.1.1.1";
     LaneLinkCb cb = {
         .onLaneLinkSuccess = OnLaneLinkSuccess,
@@ -800,7 +794,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
     LaneUpdateP2pAddressByIp(ipAddr, networkId);
     ON_CALL(mock, ConnBleGetConnectionByUdid).WillByDefault(Return(connection));
     ON_CALL(mock, ConnBleReturnConnection).WillByDefault(Return());
-    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = BuildLink(&reqInfo, 0, &cb);

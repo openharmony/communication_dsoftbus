@@ -1737,23 +1737,27 @@ void LnnRemoveNode(const char *udid)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
 }
 
-const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
     NodeInfo *info = NULL;
-    const char *udid = NULL;
-    if (id == NULL) {
-        return NULL;
+    const char *tmpUdid = NULL;
+    if (id == NULL || udid == NULL || len < UDID_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
     }
     info = LnnGetNodeInfoById(id, type);
     if (info == NULL) {
-        udid = AuthMetaGetDeviceIdByMetaNodeIdPacked(id);
-        if (udid != NULL) {
-            return udid;
+        if (AuthMetaGetDeviceIdByMetaNodeIdPacked(id, udid, len) == SOFTBUS_OK) {
+            return SOFTBUS_OK;
         }
         LNN_LOGE(LNN_LEDGER, "uuid not find node info.");
-        return NULL;
+        return SOFTBUS_NOT_FIND;
     }
-    return LnnGetDeviceUdid(info);
+    tmpUdid = LnnGetDeviceUdid(info);
+    if (strcpy_s(udid, len, tmpUdid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy id fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
@@ -1772,8 +1776,7 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
     }
     info = LnnGetNodeInfoById(srcId, srcIdType);
     if (info == NULL) {
-        id = AuthMetaGetDeviceIdByMetaNodeIdPacked(srcId);
-        if (id != NULL && strcpy_s(dstIdBuf, dstIdBufLen, id) == EOK) {
+        if (AuthMetaGetDeviceIdByMetaNodeIdPacked(srcId, dstIdBuf, dstIdBufLen) == SOFTBUS_OK) {
             SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             return SOFTBUS_OK;
         }

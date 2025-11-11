@@ -93,9 +93,9 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     return GetDistriLedgerInterface()->LnnGetOnlineStateById(id, type);
 }
 
-const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
-    return GetDistriLedgerInterface()->LnnConvertDLidToUdid(id, type);
+    return GetDistriLedgerInterface()->LnnConvertDLidToUdid(id, type, udid, len);
 }
 
 int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac, uint32_t binMacLen)

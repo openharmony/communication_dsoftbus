@@ -80,7 +80,7 @@ public:
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
     virtual bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data) = 0;
-    virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len) = 0;
     virtual ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid,
         BleProtocolType protocol) = 0;
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
@@ -152,7 +152,7 @@ public:
     MOCK_METHOD1(AuthCloseConn, void (AuthHandle));
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
     MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
-    MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
+    MOCK_METHOD4(LnnConvertDLidToUdid, int32_t (const char *, IdCategory, char *, uint32_t));
     MOCK_METHOD3(ConnBleGetConnectionByUdid, ConnBleConnection *(const char *, const char *, BleProtocolType));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
