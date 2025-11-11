@@ -93,4 +93,48 @@ HWTEST_F(TransBindRequestManagerTest, GetDeniedFlagByPeer001, TestSize.Level1)
     ret = GetDeniedFlagByPeer(g_mySocketName, g_peerSocketName, g_peerNetworkid);
     EXPECT_EQ(false, ret);
 }
+
+/**
+ * @tc.name: FreeBindRequestMessage001
+ * @tc.desc: FreeBindRequestMessageTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransBindRequestManagerTest, FreeBindRequestMessage001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(FreeBindRequestMessage(nullptr));
+}
+
+/**
+ * @tc.name: TransDelTimestampFormList001
+ * @tc.desc: TransDelTimestampFormListTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransBindRequestManagerTest, TransDelTimestampFormList001, TestSize.Level1)
+{
+    if (g_bindRequestList != nullptr) {
+        g_bindRequestList = nullptr;
+    }
+
+    BindRequestParam bindRequestParam;
+    EXPECT_NO_FATAL_FAILURE(TransDelTimestampFormList(&bindRequestParam, 15844733));
+}
+
+/**
+ * @tc.name: TransBindRequestManagerInit001
+ * @tc.desc: TransBindRequestManagerInitTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransBindRequestManagerTest, TransBindRequestManagerInit001, TestSize.Level1)
+{
+    g_bindRequestList = CreateSoftBusList();
+    ASSERT_TRUE(g_bindRequestList != nullptr);
+
+    int32_t ret = TransBindRequestManagerInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DestroySoftBusList(g_bindRequestList);
+    g_bindRequestList = NULL;
+}
 } // OHOS

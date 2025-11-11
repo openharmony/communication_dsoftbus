@@ -1439,4 +1439,154 @@ HWTEST_F(TransLanePendingTest, TransNotifyLaneQosEventTest001, TestSize.Level1)
     ret = TransNotifyLaneQosEvent(TEST_LANE_ID, LANE_OWNER_SELF, LANE_QOS_BW_HIGH);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: DestroyNetworkingReqItemParamTest001
+ * @tc.desc: DestroyNetworkingReqItemParam test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, DestroyNetworkingReqItemParamTest001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(DestroyNetworkingReqItemParam(nullptr));
+
+    TransReqLaneItem laneItem;
+    laneItem.param.peerDeviceId = nullptr;
+    laneItem.param.sessionName = static_cast<const char *>(SoftBusCalloc(TEST_LEN));
+    (void)strcpy_s(const_cast<char *>(laneItem.param.sessionName), TEST_LEN, TEST_SESSION_NAME);
+    EXPECT_NO_FATAL_FAILURE(DestroyNetworkingReqItemParam(&laneItem));
+
+    laneItem.param.peerDeviceId = static_cast<const char *>(SoftBusCalloc(TEST_LEN));
+    (void)strcpy_s(const_cast<char *>(laneItem.param.sessionName), TEST_LEN, TEST_DEVICE_ID);
+    laneItem.param.sessionName = nullptr;
+    EXPECT_NO_FATAL_FAILURE(DestroyNetworkingReqItemParam(&laneItem));
+
+    if (g_reqLanePendingList != nullptr) {
+        g_reqLanePendingList = nullptr;
+    }
+    int32_t channelId = 0;
+    bool isNetWorkingChannel;
+    char sessionName;
+    char peerNetworkId;
+    int32_t ret = TransGetChannelIdByLaneHandle(1, &channelId, &isNetWorkingChannel, &sessionName, &peerNetworkId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransAddInfoByLaneHandleTest001
+ * @tc.desc: TransAddInfoByLaneHandle test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransAddInfoByLaneHandleTest001, TestSize.Level1)
+{
+    if (g_reqLanePendingList != nullptr) {
+        g_reqLanePendingList = nullptr;
+    }
+    NetWorkingChannelInfo info;
+    int32_t ret = TransAddInfoByLaneHandle(&info, TEST_DEVICE_ID, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransAddInfoByLaneHandleTest002
+ * @tc.desc: TransAddInfoByLaneHandle test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransAddInfoByLaneHandleTest002, TestSize.Level1)
+{
+    SoftBusList *list = TestCreateSessionList();
+    EXPECT_NE(list, nullptr);
+    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
+    EXPECT_CALL(TransLanePendingMock, CreateSoftBusList).WillRepeatedly(Return(list));
+    int32_t ret = TransReqLanePendingInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(g_reqLanePendingList != nullptr);
+
+    TransReqLaneItem *item = static_cast<TransReqLaneItem *>(SoftBusCalloc(sizeof(TransReqLaneItem)));
+    ASSERT_TRUE(item != nullptr);
+    item->laneHandle = 1235;
+    ListAdd(&(g_reqLanePendingList->list), &(item->node));
+
+    NetWorkingChannelInfo info = {
+        .channelId = TEST_CHANNEL_ID,
+        .isNetWorkingChannel = false
+    };
+    ret = TransAddInfoByLaneHandle(&info, TEST_DEVICE_ID, 1235);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.isNetWorkingChannel = true;
+    (void)strcpy_s(info.sessionName, SESSION_NAME_SIZE_MAX, TEST_SESSION_NAME);
+    ret = TransAddInfoByLaneHandle(&info, TEST_DEVICE_ID, 1235);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransAddInfoByLaneHandle(&info, TEST_DEVICE_ID, 1234);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransProxyGetAppInfoTest001
+ * @tc.desc: TransProxyGetAppInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest001, TestSize.Level1)
+{
+    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
+    EXPECT_CALL(TransLanePendingMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
+    
+    EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
+
+    AppInfo appInfo;
+    int32_t ret = TransProxyGetAppInfo(TEST_SESSION_NAME, TEST_DEVICE_ID, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransProxyGetAppInfoTest002
+ * @tc.desc: TransProxyGetAppInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest002, TestSize.Level1)
+{
+    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
+    EXPECT_CALL(TransLanePendingMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
+    
+    EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransLanePendingMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND));
+
+    AppInfo appInfo;
+    int32_t ret = TransProxyGetAppInfo(TEST_SESSION_NAME, TEST_DEVICE_ID, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_GET_REMOTE_UUID_ERR);
+}
+
+/**
+ * @tc.name: TransProxyGetAppInfoTest003
+ * @tc.desc: TransProxyGetAppInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest003, TestSize.Level1)
+{
+    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
+    EXPECT_CALL(TransLanePendingMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
+    
+    EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransLanePendingMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    NodeInfo nodeInfo;
+    (void)strcpy_s(nodeInfo.deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, TEST_DEVICE_ID);
+    EXPECT_CALL(TransLanePendingMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(nodeInfo), Return(SOFTBUS_OK)));
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    int32_t ret = TransProxyGetAppInfo(TEST_SESSION_NAME, TEST_DEVICE_ID, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS
