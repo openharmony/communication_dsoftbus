@@ -83,6 +83,9 @@ HWTEST_F(TransLaneManagerTest, GetTransSessionInfoByLane001, TestSize.Level1)
     transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_BLE);
     EXPECT_EQ(DUMPER_LANE_BLE, transDumpLaneLinkType);
 
+    transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_SLE);
+    EXPECT_EQ(DUMPER_LANE_SLE, transDumpLaneLinkType);
+
     transDumpLaneLinkType = ConvertLaneLinkTypeToDumper(LANE_P2P);
     EXPECT_EQ(DUMPER_LANE_P2P, transDumpLaneLinkType);
 
@@ -533,6 +536,10 @@ HWTEST_F(TransLaneManagerTest, ConvertLaneLinkTypeToConnectType001, TestSize.Lev
     EXPECT_EQ(CONNECT_HML, ret);
     ret = ConvertLaneLinkTypeToConnectType(LANE_BLE_REUSE);
     EXPECT_EQ(CONNECT_BLE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_SLE);
+    EXPECT_EQ(CONNECT_SLE, ret);
+    ret = ConvertLaneLinkTypeToConnectType(LANE_SLE_DIRECT);
+    EXPECT_EQ(CONNECT_SLE_DIRECT, ret);
     ret = ConvertLaneLinkTypeToConnectType(LANE_LINK_TYPE_BUTT);
     EXPECT_EQ(CONNECT_TYPE_MAX, ret);
 }
