@@ -2227,9 +2227,21 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_SELECT_05, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(osType), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType)
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
+        .WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
+        .WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &request, &recommendList);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(recommendList.linkType[0], LANE_P2P);
+    ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &request, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(recommendList.linkType[0], LANE_BR);
+    ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &request, &recommendList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(recommendList.linkType[0], LANE_P2P);
 }
 
 /*

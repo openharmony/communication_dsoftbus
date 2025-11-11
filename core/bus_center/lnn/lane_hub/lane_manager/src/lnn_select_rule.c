@@ -839,7 +839,8 @@ static bool IsSupportP2pReuse(const char *networkId)
     }
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    if (FindLaneResourceByLinkType(peerUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
+    if (FindLaneResourceByLinkType(peerUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK &&
+        FindLaneResourceByLinkType(peerUdid, LANE_HML, &resourceItem) != SOFTBUS_OK) {
         LNN_LOGD(LNN_LANE, "p2p not support reuse");
         return false;
     }
