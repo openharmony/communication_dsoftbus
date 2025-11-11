@@ -432,6 +432,7 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
                 TRANS_LOGW(TRANS_SDK, "trans release udp resources failed. channelId=%{public}d", channelId);
             }
             break;
+        case SHUTDOWN_REASON_UNEXPECTED:
         case SHUTDOWN_REASON_LOCAL:
             if (ClosePeerUdpChannel(channelId) != SOFTBUS_OK) {
                 TRANS_LOGW(TRANS_SDK, "trans close peer udp channel failed. channelId=%{public}d", channelId);
