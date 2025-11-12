@@ -1231,4 +1231,64 @@ HWTEST_F(TransChannelManagerTest, TransSetAccessInfo002, TestSize.Level1)
     ret = TransSetAccessInfo(buf, sizeof(buf), callingPid);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
 }
+
+/**
+ * @tc.name: TransAsyncChannelOpenTaskManager001
+ * @tc.desc: TransAsyncChannelOpenTaskManagerTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransAsyncChannelOpenTaskManager001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(TEST_PROXY_CHANNEL_ID, CHANNEL_TYPE_PROXY));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(TEST_PROXY_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(TEST_PROXY_CHANNEL_ID, CHANNEL_TYPE_UDP));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(TEST_PROXY_CHANNEL_ID, CHANNEL_TYPE_AUTH));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(TEST_PROXY_CHANNEL_ID, CHANNEL_TYPE_BUTT));
+}
+
+/**
+ * @tc.name: TransChannelResultLoopMsgHandler001
+ * @tc.desc: TransChannelResultLoopMsgHandlerTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransChannelResultLoopMsgHandler001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(TransChannelResultLoopMsgHandler(nullptr));
+
+    QosTV qosTv;
+    TransEventExtra extra;
+    EXPECT_NO_FATAL_FAILURE(TransSetQosInfo(&qosTv, 12, &extra));
+}
+
+/**
+ * @tc.name: CheckAuthChannelIsExit001
+ * @tc.desc: CheckAuthChannelIsExitTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, CheckAuthChannelIsExit001, TestSize.Level1)
+{
+    int32_t ret = CheckAuthChannelIsExit(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ConnectOption connInfo = {
+        .type = CONNECT_TCP
+    };
+    ret = CheckAuthChannelIsExit(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    
+    connInfo.type = CONNECT_BR;
+    ret = CheckAuthChannelIsExit(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    connInfo.type = CONNECT_BLE;
+    ret = CheckAuthChannelIsExit(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    connInfo.type = CONNECT_HML;
+    ret = CheckAuthChannelIsExit(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NOT_MATCH);
+}
 } // OHOS

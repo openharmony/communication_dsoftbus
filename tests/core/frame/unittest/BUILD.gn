@@ -199,6 +199,7 @@ ohos_unittest("SoftbusGEnhanceTest") {
     "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
     "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/core/transmission/ipc/include",
+    "$dsoftbus_root_path/core/frame/init/src",
   ]
 
   deps = [

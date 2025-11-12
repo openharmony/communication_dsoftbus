@@ -90,6 +90,10 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffline002, TestSize.Level1)
     OnWifiDirectDeviceOffline(peerMac, peerIp, peerUuid, peerIp);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();
+
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_NOT_FIND));
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectDeviceOffline(peerMac, peerIp, peerUuid, peerIp););
 }
 
 /*
@@ -123,5 +127,36 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOnline001, TestSize.Level1)
     OnWifiDirectDeviceOnline(peerMac, peerIp, peerUuid, isSource);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();
+}
+
+/**
+ * @tc.name: FillNodeInfoAsMeta001
+ * @tc.desc: FillNodeInfoAsMetaTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLinkListenerTest, FillNodeInfoAsMeta001, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t ret = FillNodeInfoAsMeta(nullptr, &nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = FillNodeInfoAsMeta("666", nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_NOT_FIND));
+    ret = FillNodeInfoAsMeta("4546", &nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    int32_t osType = OH_OS_TYPE;
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
+    ret = FillNodeInfoAsMeta("1230", &nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    osType = OTHER_OS_TYPE;
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
+    ret = FillNodeInfoAsMeta("1230", &nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

@@ -123,5 +123,10 @@ int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
 {
     return GetTransLanePendingTestInterface()->LnnGetDLAuthCapacity(networkId, authCapacity);
 }
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetTransLanePendingTestInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
 }
 }

@@ -950,4 +950,87 @@ HWTEST_F(TransLaneTest, SetP2pExtConnInfo001, TestSize.Level1)
     int32_t ret = SetP2pExtConnInfo(&p2pInfo, &connOpt);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: TransAddSocketChannelInfo001
+ * @tc.desc: TransAddSocketChannelInfoTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransAddSocketChannelInfo001, TestSize.Level1)
+{
+    int32_t ret = TransAddSocketChannelInfo(nullptr, 1, 1024, 3, CORE_SESSION_STATE_INIT);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_NAME);
+
+    ret = TransAddSocketChannelInfo(g_sessionName, 0, 1024, 3, CORE_SESSION_STATE_INIT);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+}
+
+/**
+ * @tc.name: TransUpdateSocketChannelInfoBySession001
+ * @tc.desc: TransUpdateSocketChannelInfoBySessionTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransUpdateSocketChannelInfoBySession001, TestSize.Level1)
+{
+    int32_t ret = TransUpdateSocketChannelInfoBySession(nullptr, 2, 1024, CHANNEL_TYPE_TCP_DIRECT);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_NAME);
+
+    if (g_socketChannelList != nullptr) {
+        g_socketChannelList = nullptr;
+    }
+    ret = TransUpdateSocketChannelInfoBySession(g_sessionName, 15, 1024, CHANNEL_TYPE_TCP_DIRECT);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/**
+ * @tc.name: TransDeleteSocketChannelInfoBySession001
+ * @tc.desc: TransDeleteSocketChannelInfoBySessionTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransDeleteSocketChannelInfoBySession001, TestSize.Level1)
+{
+    if (g_socketChannelList != nullptr) {
+        g_socketChannelList = nullptr;
+    }
+    int32_t ret = TransDeleteSocketChannelInfoBySession(g_sessionName, 2);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ret = TransSetSocketChannelStateBySession(g_sessionName, 2, CORE_SESSION_STATE_INIT);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ret = TransGetSocketChannelStateByChannel(1024, CHANNEL_TYPE_TCP_DIRECT, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransGetConnectTypeByChannelId001
+ * @tc.desc: TransGetConnectTypeByChannelIdTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransGetConnectTypeByChannelId001, TestSize.Level1)
+{
+    ConnectType connectType;
+    if (g_channelLaneList != nullptr) {
+        g_channelLaneList = nullptr;
+    }
+    int32_t ret = TransGetConnectTypeByChannelId(1024, &connectType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransGetPidFromSocketChannelInfoBySession001
+ * @tc.desc: TransGetPidFromSocketChannelInfoBySessionTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransGetPidFromSocketChannelInfoBySession001, TestSize.Level1)
+{
+    int32_t ret = TransGetPidFromSocketChannelInfoBySession(g_sessionName, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+}
+
 } // namespace OHOS

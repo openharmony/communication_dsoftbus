@@ -531,7 +531,7 @@ static int32_t TransAddInfoByLaneHandle(NetWorkingChannelInfo *info, const char 
         if (item->laneHandle == laneHandle) {
             item->channelId = info->channelId;
             item->isNetWorkingChannel = info->isNetWorkingChannel;
-            if (info->isNetWorkingChannel == false) {
+            if (!info->isNetWorkingChannel) {
                 (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
                 return SOFTBUS_OK;
             }

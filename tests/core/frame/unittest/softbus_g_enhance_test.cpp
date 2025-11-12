@@ -26,7 +26,7 @@
 #include "g_enhance_conn_func.h"
 #include "g_enhance_conn_func_pack.h"
 #include "g_enhance_disc_func.h"
-#include "g_enhance_disc_func_pack.h"
+#include "g_enhance_disc_func_pack.c"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func.h"
@@ -47,6 +47,8 @@ namespace OHOS {
 #define TEST_SHORT_UDID_HASH_HEX_LEN 16
 #define VIRTUAL_DEFAULT_SCORE 60
 #define TEST_PID 1570
+#define TEST_CHANNEL_ID 2531
+#define TEST_REQUEST_ID 1251
 
 static const char *TEST_PKG_NAME = "TEST_PKG_NAME";
 static const char *TEST_UDID = "11223344";
@@ -925,5 +927,108 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest029, TestSize.Level1)
     pfnDiscEnhanceFuncList->discFillBtype = DiscFillBtypeStub;
     ret = DiscFillBtypePacked(0, 0, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest030
+ * @tc.desc: SoftbusGEnhanceTest function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest030, TestSize.Level1)
+{
+    PublishOption pbOption;
+    int32_t ret = BleStartActivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = BleStartPassivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = BleStopActivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = BleStopPassivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    SubscribeOption sbOption;
+    ret = BleStartActiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = BleStartPassiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = BleStopPassiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = BleStopActiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    bool result = BleIsConcern(1);
+    EXPECT_FALSE(result);
+
+    EXPECT_NO_FATAL_FAILURE(BleLinkStatusChanged(LINK_STATUS_UP, 1));
+    EXPECT_NO_FATAL_FAILURE(BleUpdateLocalDeviceInfo(TYPE_LOCAL_DEVICE_NAME));
+    EXPECT_NO_FATAL_FAILURE(PcCollaborationManagerDeinitPacked());
+
+    NSTACKX_NotificationConfig notification;
+    EXPECT_NO_FATAL_FAILURE(DiscCoapReportNotificationPacked(&notification));
+
+    ret = UsbDiscStartActivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = UsbDiscStartPassivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = UsbDiscStopActivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = UsbDiscStopPassivePublish(&pbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = UsbDiscStartActiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = UsbDiscStartPassiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = UsbDiscStopPassiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = UsbDiscStopActiveDiscovery(&sbOption);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    EXPECT_NO_FATAL_FAILURE(UsbDiscLinkStatusChanged(LINK_STATUS_UP, 2));
+    EXPECT_NO_FATAL_FAILURE(UsbDiscUpdateLocalDeviceInfo(TYPE_ACCOUNT));
+    result = UsbDiscIsConcern(1);
+    EXPECT_FALSE(result);
+
+    result = IsUnknownDevicePacked("4E.2q.3F0000.666");
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest031
+ * @tc.desc: SoftbusGEnhanceTest function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest031, TestSize.Level1)
+{
+    int32_t ret = ClientOpenHtpChannelPacked(TEST_CHANNEL_ID, TEST_REQUEST_ID, "12:34:56.00", "00:11:22:33");
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ServerOpenHtpChannelPacked("11:33:56:78", 7788);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_NO_FATAL_FAILURE(ServerUpdateHtpChannelPacked(1588, TEST_CHANNEL_ID));
+
+    bool result = CheckHtpPermissionPacked(123);
+    EXPECT_FALSE(result);
+
+    char sleMac[BT_MAC_LEN];
+    EXPECT_NO_FATAL_FAILURE(TransD2dQosUnregisterPacked(TEST_CHANNEL_ID, sleMac, BT_MAC_LEN));
+
+    ret = AuthMetaGetMetaNodeIdByIpPacked("44:33:22", sleMac, BT_MAC_LEN);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 }

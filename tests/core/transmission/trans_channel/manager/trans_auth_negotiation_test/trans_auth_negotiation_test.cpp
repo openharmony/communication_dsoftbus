@@ -433,6 +433,25 @@ HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo004, TestSize.Leve
 }
 
 /*
+ * @tc.name: ConvertConnInfoToAuthConnInfo005
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test
+ *           use the wrong param expected return failed, and use normal param expected return ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo005, TestSize.Level1)
+{
+    ConnectionInfo connInfo = {
+        .type = CONNECT_SLE,
+        .sleInfo.protocol = SLE_SSAP
+    };
+    (void)strcpy_s(connInfo.sleInfo.address, BT_MAC_LEN, "11:22:33:44:55:66");
+    AuthConnInfo authConnInfo;
+    int32_t ret = ConvertConnInfoToAuthConnInfo(&connInfo, &authConnInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
  * @tc.name: GetAuthConnInfoByConnId001
  * @tc.desc: GetAuthConnInfoByConnId test
  *           use the wrong param expected return failed, and use normal param expected return ok
