@@ -514,6 +514,20 @@ static bool IsNetCapChanged(const LnnConntionInfo *connInfo)
     return oldInfo.netCapacity != connInfo->nodeInfo->netCapacity;
 }
 
+static void CheckRemoteAccountId(NodeInfo *info)
+{
+    int64_t localAccountId = 0;
+    int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &localAccountId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local accountId failed.");
+        return;
+    }
+    if (info->aclState == ACL_NOT_WRITE && localAccountId == info->accountId) {
+        info->accountId = 0;
+        LNN_LOGE(LNN_BUILDER, "online node accountId invalid.");
+    }
+}
+
 static void SetLnnConnNodeInfo(
     LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
 {
@@ -529,6 +543,7 @@ static void SetLnnConnNodeInfo(
     }
     bool isAccountChanged = IsAccountHashChanged(connInfo);
     bool isNetCapChanged = IsNetCapChanged(connInfo);
+    CheckRemoteAccountId(connInfo->nodeInfo);
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     TryTriggerSparkJoinAgain(connInfo, isAccountChanged);
     SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
