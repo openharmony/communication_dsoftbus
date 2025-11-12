@@ -106,5 +106,10 @@ int32_t TransCommonGetLocalConfig(int32_t channelType, int32_t businessType, uin
 {
     return GetTransManagerInterface()->TransCommonGetLocalConfig(channelType, businessType, len);
 }
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetTransManagerInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
 }
 }

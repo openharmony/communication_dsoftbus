@@ -51,6 +51,7 @@ public:
     virtual int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len) = 0;
     virtual int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 
 class TransLanePendingTestInterfaceMock : public TransLanePendingTestInterface {
@@ -78,6 +79,7 @@ public:
     MOCK_METHOD3(TransGetPkgNameBySessionName, int32_t (const char *sessionName, char *pkgName, uint16_t len));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char *networkId, InfoKey key, char *info, uint32_t len));
     MOCK_METHOD2(LnnGetDLAuthCapacity, int32_t (const char *networkId, uint32_t *authCapacity));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
 };
 } // namespace OHOS
 #endif // TRANS_LANE_COMMON_TEST_MOCK_H
