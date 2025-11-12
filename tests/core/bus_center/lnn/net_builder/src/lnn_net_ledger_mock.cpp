@@ -249,6 +249,13 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(
     return SOFTBUS_INVALID_PARAM;
 }
 
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalNum64Info(InfoKey key, int64_t *info)
+{
+    (void)key;
+    *info = 1;
+    return SOFTBUS_OK;
+}
+
 extern "C" {
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
@@ -489,6 +496,11 @@ const char *LnnGetDeviceUdid(const NodeInfo *info)
 int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
 {
     return GetNetLedgerInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
+}
+
+int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
+{
+    return GetNetLedgerInterface()->LnnGetLocalNum64Info(key, info);
 }
 
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)

@@ -966,6 +966,38 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Lev
 }
 
 /*
+ * @tc.name: CHECK_REMOTE_ACCOUNT_ID_TEST_001
+ * @tc.desc: test CheckRemoteAccountId
+ * @tc.type: FUNC
+ * @tc.require:
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, CHECK_REMOTE_ACCOUNT_ID_TEST_001, TestSize.Level0)
+{
+    NodeInfo info = {
+        .aclState = ACL_WRITE_DEFAULT,
+        .accountId = 1,
+    };
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNum64Info).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalNum64Info);
+
+    EXPECT_NO_FATAL_FAILURE(CheckRemoteAccountId(&info));
+    EXPECT_EQ(info.accountId, 1);
+    EXPECT_NO_FATAL_FAILURE(CheckRemoteAccountId(&info));
+    EXPECT_EQ(info.accountId, 1);
+    info.accountId = 2;
+    EXPECT_NO_FATAL_FAILURE(CheckRemoteAccountId(&info));
+    EXPECT_EQ(info.accountId, 2);
+    info.aclState = ACL_NOT_WRITE;
+    EXPECT_NO_FATAL_FAILURE(CheckRemoteAccountId(&info));
+    EXPECT_EQ(info.accountId, 2);
+    info.accountId = 1;
+    EXPECT_NO_FATAL_FAILURE(CheckRemoteAccountId(&info));
+    EXPECT_EQ(info.accountId, 0);
+}
+
+/*
  * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_001
  * @tc.desc: test LeaveSameIpOnlineDevice with no online info
  * @tc.type: FUNC
