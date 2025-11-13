@@ -41,7 +41,7 @@ typedef void (*AuthClearDeviceKeyFunc)(void);
 typedef int32_t (*AuthMetaGetOsTypeByMetaNodeIdFunc)(const char *metaNodeId, int32_t *osType);
 typedef int32_t (*AuthMetaGetMetaTypeByMetaNodeIdFunc)(const char *metaNodeId, int32_t *metaType);
 typedef int32_t (*AuthMetaGetMetaNodeIdByIpFunc)(const char *ip, char *metaNodeId, int32_t len);
-typedef const char *(*AuthMetaGetDeviceIdByMetaNodeIdFunc)(const char *metaNodeId);
+typedef int32_t (*AuthMetaGetDeviceIdByMetaNodeIdFunc)(const char *metaNodeId, char *deviceId, uint32_t len);
 typedef int32_t (*AuthMetaGetP2pMacByMetaNodeIdFunc)(const char *metaNodeId, char *p2pMacAddr, int32_t len);
 typedef bool (*AuthMetaGetMetaValueByMetaNodeIdFunc)(const char *metaNodeId);
 typedef int32_t (*AuthMetaGetFeatureSDKByMetaNodeIdFunc)(const char *metaNodeId, uint64_t *featureSDK);

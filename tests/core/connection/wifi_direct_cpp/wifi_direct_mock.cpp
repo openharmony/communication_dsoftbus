@@ -138,9 +138,9 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGetMetaType(authId, isMetaAuth);
 }
 
-const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
+int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnConvertDLidToUdid(id, type);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnConvertDLidToUdid(id, type, udid, len);
 }
 
 uint32_t AuthGenRequestId(void)
@@ -530,10 +530,10 @@ int32_t OHOS::DBinderSoftbusServer::AuthGetMetaType(int64_t authId, bool *isMeta
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGetMetaType(authId, isMetaAuth);
 }
 
-const char *OHOS::DBinderSoftbusServer::LnnConvertDLidToUdid(const char *id, IdCategory type)
+int32_t OHOS::DBinderSoftbusServer::LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
 {
     (void)lnnConvertDLidToUdidFunc_;
-    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnConvertDLidToUdid(id, type);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnConvertDLidToUdid(id, type, udid, len);
 }
 
 uint32_t OHOS::DBinderSoftbusServer::AuthGenRequestId(void)

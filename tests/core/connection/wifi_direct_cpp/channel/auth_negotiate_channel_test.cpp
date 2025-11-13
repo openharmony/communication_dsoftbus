@@ -208,7 +208,6 @@ HWTEST_F(AuthNegotiateChannelTest, OpenConnection_002, TestSize.Level1)
 {
     AuthNegotiateChannel::OpenParam param;
     param.remoteUuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00112233";
-    const char *udid = "testuuid";
     NiceMock<WifiDirectInterfaceMock> mock;
     EXPECT_CALL(mock, AuthGetMetaType(_, _))
         .WillOnce([](int64_t authId, bool *isMetaAuth) {
@@ -221,7 +220,7 @@ HWTEST_F(AuthNegotiateChannelTest, OpenConnection_002, TestSize.Level1)
             callback->onConnOpened(requestId, handle);
             return SOFTBUS_OK;
         });
-    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     auto channel = NewAuthNegotiateChannel(mock);
     uint32_t authReqId = 0;
     auto ret = channel->OpenConnection(param, channel, authReqId);
