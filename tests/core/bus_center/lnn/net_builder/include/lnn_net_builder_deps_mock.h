@@ -162,7 +162,7 @@ public:
     virtual void LnnDeinitOffline(void);
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type);
-    virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
+    virtual int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len);
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
     virtual int32_t SoftBusGetBtState(void);
     virtual int32_t SoftBusGetBrState(void);
@@ -314,7 +314,7 @@ public:
     MOCK_METHOD0(LnnDeinitOffline, void());
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *, IdCategory, NodeInfo *));
     MOCK_METHOD2(LnnHasDiscoveryType, bool(const NodeInfo *, DiscoveryType));
-    MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
+    MOCK_METHOD4(LnnConvertDLidToUdid, int32_t(const char *, IdCategory, char *, uint32_t));
     MOCK_METHOD2(GetAuthRequest, int32_t(uint32_t, AuthRequest *));
     MOCK_METHOD0(SoftBusGetBtState, int32_t());
     MOCK_METHOD0(SoftBusGetBrState, int32_t());

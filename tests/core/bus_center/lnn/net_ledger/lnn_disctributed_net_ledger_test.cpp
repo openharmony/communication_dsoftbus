@@ -580,9 +580,10 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DLID_TO_UDID_Test_001, TestSize.Level1)
 {
-    EXPECT_TRUE(LnnConvertDLidToUdid(nullptr, CATEGORY_NETWORK_ID) == nullptr);
-    LnnConvertDLidToUdid(NODE1_NETWORK_ID, CATEGORY_NETWORK_ID);
-    EXPECT_TRUE(LnnConvertDLidToUdid(NODE2_NETWORK_ID, CATEGORY_NETWORK_ID) == nullptr);
+    char udid[UDID_BUF_LEN] = { 0 };
+    EXPECT_TRUE(LnnConvertDLidToUdid(nullptr, CATEGORY_NETWORK_ID, udid, UDID_BUF_LEN) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnConvertDLidToUdid(NODE2_NETWORK_ID, CATEGORY_NETWORK_ID, udid, UDID_BUF_LEN - 1) ==
+        SOFTBUS_INVALID_PARAM);
 }
 
 /*

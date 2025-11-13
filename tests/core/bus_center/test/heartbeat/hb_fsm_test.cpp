@@ -410,8 +410,7 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
     EXPECT_CALL(heartbeatFsmMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_STRCPY_ERR));
     EXPECT_CALL(heartbeatFsmMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
     EXPECT_CALL(distriLedgerMock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
-    const char *udid = "testuuid";
-    EXPECT_CALL(distriLedgerMock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
+    EXPECT_CALL(distriLedgerMock, LnnConvertDLidToUdid).WillRepeatedly(Return(SOFTBUS_OK));
     ON_CALL(lnnNetLedgerMock, LnnGetLocalNumU64Info).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = ProcessLostHeartbeat(nullptr, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
