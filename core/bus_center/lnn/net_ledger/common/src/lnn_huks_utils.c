@@ -565,7 +565,12 @@ int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked)
         LNN_LOGE(LNN_LEDGER, "delete ce key fail");
         return ret;
     }
+    if (pthread_mutex_lock(&g_ceParamsLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "gen ce mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     g_isGenCeParams = false;
+    (void)pthread_mutex_unlock(&g_ceParamsLock);
     return SOFTBUS_OK;
 }
 
