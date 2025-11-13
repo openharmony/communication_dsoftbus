@@ -318,6 +318,11 @@ static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
         CONN_LOGI(CONN_COMMON, "TcpOnDataEventSocketOut fail. fd=%{public}d", fd);
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
+    if (tcpInfo.result.OnConnectSuccessed == NULL || tcpInfo.result.OnConnectFailed == NULL) {
+        CONN_LOGW(CONN_COMMON, "result member is null");
+        (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = ConnGetSocketError(fd);
     if (ret != 0) {
         CONN_LOGW(CONN_COMMON, "connect fail. fd=%{public}d, ret=%{public}d", fd, ret);
