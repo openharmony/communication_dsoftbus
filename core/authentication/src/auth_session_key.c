@@ -425,6 +425,7 @@ int32_t EncryptData(
     }
     int32_t index = 0;
     SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     if (GetLatestSessionKey(list, type, &index, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get key fail");
         AUTH_LOGD(AUTH_FSM, "keyLen=%{public}d", sessionKey.len);

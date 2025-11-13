@@ -146,7 +146,7 @@ static int32_t DisableBleSubnet(LnnPhysicalSubnet *subnet)
 static void DestroyBtSubnetManager(LnnPhysicalSubnet *subnet)
 {
     int32_t ret;
-    LnnNetIfType type;
+    LnnNetIfType type = LNN_NETIF_TYPE_UNKNOWN;
 
     LnnGetNetIfTypeByName(subnet->ifName, &type);
     if (subnet->status == LNN_SUBNET_RUNNING) {
