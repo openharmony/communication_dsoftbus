@@ -734,4 +734,32 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
     EXPECT_EQ(TriggerRangeForMsdp(TEST_PKG_NAME, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_NETWORK_SEND_REQUEST_FAILED);
 }
+
+static void NotifyP2pStateChange(int32_t retCode)
+{
+    (void)retCode;
+}
+
+/*
+ * @tc.name: BUS_CENTER_SDK_CREATE_GROUP_OWNER_Test001
+ * @tc.desc: test createGroupOwner
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_CREATE_GROUP_OWNER_Test001, TestSize.Level1)
+{
+    struct GroupOwnerConfig config;
+    struct GroupOwnerResult result;
+    EXPECT_EQ(CreateGroupOwner(nullptr, &config, &result, NotifyP2pStateChange), SOFTBUS_INVALID_PARAM);
+    DestroyGroupOwner(nullptr);
+    EXPECT_EQ(CreateGroupOwner(TEST_PKG_NAME, nullptr, &result, NotifyP2pStateChange), SOFTBUS_INVALID_PARAM);
+    DestroyGroupOwner(TEST_PKG_NAME);
+    EXPECT_EQ(CreateGroupOwner(TEST_PKG_NAME, &config, nullptr, NotifyP2pStateChange), SOFTBUS_INVALID_PARAM);
+    DestroyGroupOwner(TEST_PKG_NAME);
+    EXPECT_EQ(CreateGroupOwner(TEST_PKG_NAME, &config, &result, nullptr), SOFTBUS_INVALID_PARAM);
+    DestroyGroupOwner(TEST_PKG_NAME);
+    EXPECT_EQ(CreateGroupOwner(TEST_PKG_NAME, &config, &result, NotifyP2pStateChange), SOFTBUS_IPC_ERR);
+    DestroyGroupOwner(TEST_PKG_NAME);
+}
 } // namespace OHOS
