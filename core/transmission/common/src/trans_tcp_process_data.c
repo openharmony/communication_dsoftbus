@@ -268,7 +268,8 @@ static int32_t TransTdcParseTlv(uint32_t bufLen, char *data, TcpDataTlvPacketHea
                 break;
             default:
                 TRANS_LOGE(TRANS_CTRL, "unknown trans tdc tlv skip, tlvType=%{public}d", *type);
-                break;
+                temp += *length;
+                continue;
         }
         temp += *length;
         *headSize += (TLV_TYPE_AND_LENGTH * sizeof(uint8_t) + *length);
@@ -326,6 +327,7 @@ void ReleaseDataHeadResource(DataHead *pktHead)
 {
     ReleaseTlvValueBuffer(pktHead);
     SoftBusFree(pktHead->tlvElement);
+    pktHead->tlvElement = NULL;
 }
 
 char *TransTdcPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, uint32_t dataLen)

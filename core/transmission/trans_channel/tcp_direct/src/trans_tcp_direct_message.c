@@ -361,8 +361,6 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->sessionKey = GetCapabilityBit(conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET) ?
         conn->appInfo.sinkSessionKey :
         conn->appInfo.sessionKey;
-    info->myHandleId = conn->appInfo.myHandleId;
-    info->peerHandleId = conn->appInfo.peerHandleId;
     info->peerSessionName = conn->appInfo.peerData.sessionName;
     info->groupId = conn->appInfo.groupId;
     info->isEncrypt = true;
@@ -377,7 +375,6 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->linkType = conn->appInfo.linkType;
     info->dataConfig = conn->appInfo.myData.dataConfig;
     info->timeStart = conn->appInfo.timeStart;
-    info->linkType = conn->appInfo.linkType;
     info->connectType = conn->appInfo.connectType;
     info->osType = conn->appInfo.osType;
     info->tokenType = conn->appInfo.myData.tokenType;
