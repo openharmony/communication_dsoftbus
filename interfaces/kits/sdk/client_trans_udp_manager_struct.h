@@ -66,6 +66,9 @@ typedef struct {
     uint64_t peerTokenId;
     char peerAccountId[ACCOUNT_UID_LEN_MAX];
     char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
+    bool enableMultipath;
+    int32_t srvPort;
+    char srvIp[IP_LEN];
 } UdpChannel;
 
 #ifdef __cplusplus

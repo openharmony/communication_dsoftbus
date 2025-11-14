@@ -16,7 +16,9 @@
 #ifndef NSTACKX_DFILE_ADAPTER_H
 #define NSTACKX_DFILE_ADAPTER_H
 
+#include "lnn_lane_interface_struct.h"
 #include "nstackx_dfile.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +29,19 @@ int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
 
 int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver);
+
+int32_t TransOnFileChannelClientAddSecondPath(const ChannelInfo *channel, int32_t dfileId, uint32_t keyLen);
+
+int32_t TransOnFileChannelServerAddSecondPath(
+    const ChannelInfo *channel, int32_t *filePort, int32_t dfileId, uint32_t keyLen);
+
+int32_t StartNStackXDFileClientV2(const char *peerIp,
+    int32_t peerPort, const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t linkType);
+
+int32_t StartNStackXDFileServerV2(const char *myIp,
+    const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort, int32_t linkType);
+
+int32_t FillDFileParam(NSTACKX_SessionParaMpV2 *para, const char *srvIp, int32_t srvPort);
 #ifdef __cplusplus
 }
 #endif

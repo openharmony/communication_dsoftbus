@@ -39,6 +39,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId);
 
 int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel, bool isReply);
 int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel);
+int32_t TransGetUdpChannelByPeerId(int32_t channelId, UdpChannelInfo *channel);
 int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel);
 
 int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status, bool isReply);

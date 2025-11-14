@@ -42,6 +42,13 @@ bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
 
 int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
+
+int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneAllocInfo *allocInfo,
+    uint64_t laneId, uint32_t *laneHandle, const AppInfo *info);
+
+int32_t TransAsyncGetLaneReserveInfo(
+    const SessionParam *param, uint32_t *laneHandle, uint64_t laneId, const AppInfo *info);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

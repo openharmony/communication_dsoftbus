@@ -37,6 +37,8 @@ int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType);
 
 int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason);
 
+int32_t ClientTransCloseMultiUdpChannel(int32_t channelId, ShutdownReason reason, bool mainChannel);
+
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
     const StreamFrameInfo *param);
 
@@ -63,6 +65,11 @@ int32_t TransUdpChannelSetStreamMultiLayer(int32_t channelId, const void *optVal
 int32_t TransSetUdpChannelTos(int32_t channelId);
 
 int32_t TransGetUdpChannelTos(int32_t channelId, bool *isTosSet);
+
+int32_t TransGetUdpChannelExtraInfo(int32_t channelId, char *srvIp, int32_t *srvPort);
+
+int32_t ClientTransCloseReserveUdpChannel(int32_t channelId,
+    ShutdownReason reason, const char *srvIp, int32_t srvPort, int32_t routeType);
 #ifdef __cplusplus
 }
 #endif

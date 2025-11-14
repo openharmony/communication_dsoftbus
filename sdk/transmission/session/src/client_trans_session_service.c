@@ -1099,6 +1099,44 @@ static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *
     return SOFTBUS_OK;
 }
 
+int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount)
+{
+    #define TRANS_DEFAULT_MIN_BW 0
+    #define LOW_BW                  (384 * 1024)
+    int32_t minBW = 0;
+    bool enableMultipath = false;
+    int32_t dataType = 0;
+    int32_t ret = GetQosValue(qos, qosCount, QOS_TYPE_MIN_BW, &minBW, TRANS_DEFAULT_MIN_BW);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get minBW failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    if (minBW < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid BW, minBW=%{public}d", minBW);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = ClientGetenableMultipathBySocket(socket, &enableMultipath);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get enableMultipath failed, socket=%{public}d failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
+
+    ret = ClientGetDataTypeBySocket(socket, &dataType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get dataType, socket=%{public}d failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
+    if (enableMultipath) {
+        TRANS_LOGI(TRANS_SDK, "set enableMultipath, socket=%{public}d", socket);
+    }
+    if (enableMultipath && (minBW <= LOW_BW || dataType != TYPE_FILE)) {
+        TRANS_LOGE(TRANS_SDK, "check multipath disable, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
+        ClientSetEnableMultipathBySocket(socket, false);
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t CheckSessionCancelState(int32_t socket)
 {
     SocketLifecycleData lifecycle;
@@ -1175,6 +1213,10 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     ret = SetSessionIsAsyncById(socket, isAsync);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_SDK, "set session is async failed, ret=%{public}d", ret);
+    
+    ret = SetMultipathEnable(socket, qos, qosCount);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set multipath is failed, ret=%{public}d", ret);
 
     TransInfo transInfo;
     ret = ClientIpcOpenSession(socket, qos, qosCount, &transInfo, isAsync);

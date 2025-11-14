@@ -100,6 +100,8 @@ static int32_t MessageParcelWriteEx(MessageParcel &data, const ChannelInfo *chan
         }
         WRITE_PARCEL_WITH_RET(data, CString, channel->groupId, SOFTBUS_IPC_ERR);
     }
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isMultiNeg, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->linkedChannelId, SOFTBUS_IPC_ERR);
     return SOFTBUS_OK;
 }
 
@@ -113,6 +115,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
     WRITE_PARCEL_WITH_RET(data, CString, sessionName, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->enableMultipath, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->sessionId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);

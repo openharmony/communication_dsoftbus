@@ -211,6 +211,11 @@ bool IsContainServiceBySocket(int32_t socket)
 {
     return GetManagerInterface()->IsContainServiceBySocket(socket);
 }
+
+int32_t CheckChannelIsReserveByChannelId(int32_t sessionId, int32_t channelId, int32_t *useType)
+{
+    return GetManagerInterface()->CheckChannelIsReserveByChannelId(sessionId, channelId, useType);
+}
 #ifdef __cplusplus
 }
 #endif

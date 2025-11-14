@@ -135,6 +135,8 @@ typedef struct {
     bool isLowLatency;
     bool isFlashLight;
     bool forceGenerateUk;
+    bool enableMultipath;
+    bool isMultiNeg;
     uint16_t fastTransDataSize;
     RouteType routeType;
     StreamType streamType;
@@ -163,7 +165,9 @@ typedef struct {
     int32_t osType;
     int32_t waitOpenReplyCnt;
     uint32_t channelCapability;
+    uint32_t udpChannelCapability;
     int32_t metaType;
+    int32_t linkedChannelId;
     const uint8_t *fastTransData;
     int64_t timeStart;
     int64_t connectedStart;

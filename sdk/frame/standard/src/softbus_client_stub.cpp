@@ -219,11 +219,14 @@ static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
         channel->groupId = (char *)data.ReadCString();
         COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
     }
+    READ_PARCEL_WITH_RET(data, Bool, channel->isMultiNeg, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->linkedChannelId, SOFTBUS_IPC_ERR);
     return SOFTBUS_OK;
 }
 
 static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
 {
+    READ_PARCEL_WITH_RET(data, Bool, channel->enableMultipath, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->sessionId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_IPC_ERR);

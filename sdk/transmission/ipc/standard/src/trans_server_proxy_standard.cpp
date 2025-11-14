@@ -279,6 +279,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     WRITE_PARCEL_WITH_RET(data, CString, param->groupId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     WRITE_PARCEL_WITH_RET(data, Bool, param->isAsync, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, param->sessionId, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Bool, param->enableMultipath, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Uint32, param->actionId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Bool, param->isLowLatency, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Uint64, param->flowInfo.flowSize, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);

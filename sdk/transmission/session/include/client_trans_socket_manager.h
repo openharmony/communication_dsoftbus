@@ -45,6 +45,9 @@ SessionInfo *CreateNewSession(const SessionParam *param);
 NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode,
     const ClientSessionServer *server);
 
+NO_SANITIZE("cfi") DestroyMultiPathSessionInfo *CreateMPDestroySessionNode(SessionInfo *sessionNode,
+    const ClientSessionServer *server, bool mainLaneLinkDown);
+
 NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason);
 
 void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyList);
@@ -57,6 +60,9 @@ SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName);
 void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList);
 
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
+    const char *networkId, int32_t type, ListNode *destroyList);
+
+void ClearClientSessionByNetworkId(const ClientSessionServer *server,
     const char *networkId, int32_t type, ListNode *destroyList);
 
 SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *clientSessionServer);

@@ -349,6 +349,38 @@ int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
+int32_t TransGetUdpChannelByPeerId(int32_t channelId, UdpChannelInfo *channel)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (channel == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.peerData.channelId == channelId) {
+            if (memcpy_s(channel, sizeof(UdpChannelInfo), udpChannelNode, sizeof(UdpChannelInfo)) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+                return SOFTBUS_MEM_ERR;
+            }
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
+}
+
 int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionName,
     uint16_t pkgNameLen, uint16_t sessionNameLen)
 {
@@ -459,9 +491,11 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo, bool isReply
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->seq == seq && udpChannelNode->isReply == isReply) {
             udpChannelNode->isReply = false;
+            uint32_t localUdpChannelCapability = udpChannelNode->info.udpChannelCapability;
             if (memcpy_s(&(udpChannelNode->info), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s UdpChannelInfo failed.");
             }
+            udpChannelNode->info.udpChannelCapability = appInfo->udpChannelCapability & localUdpChannelCapability;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return;
         }

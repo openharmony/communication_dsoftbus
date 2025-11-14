@@ -525,6 +525,11 @@ static void UdpChannelReplyAddItem(uint32_t index, cJSON *msg)
         int32_t channelCapability = TRANS_FUZZ_INT_VAL;
         (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", channelCapability);
     }
+
+    if (CheckAddItem(index, false)) {
+        int32_t udpChannelCapability = TRANS_FUZZ_INT_VAL;
+        (void)AddNumberToJsonObject(msg, "UDP_CHANNEL_CAPABILITY", udpChannelCapability);
+    }
 }
 
 static bool UdpChannelNegMessageReplyFuzzTest(uint32_t index)

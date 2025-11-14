@@ -209,12 +209,19 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
     info.connectType = appInfo->connectType;
+    info.isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
+    info.enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
+    info.linkedChannelId = appInfo->linkedChannelId;
     TransGetLaneIdByChannelId(appInfo->myData.channelId, &info.laneId);
     ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
         (char*)appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get pkg name fail.");
         return ret;
+    }
+
+    if (!info.isServer && info.enableMultipath && CheckNeedReallocSecondLane(info.channelId)) {
+        TransOpenChannelSecond(info.channelId, info.laneId);
     }
     return g_channelCb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
         appInfo->myData.sessionName, &info);
@@ -407,8 +414,11 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
         ReleaseUdpChannelId(appInfo->myData.channelId);
         return SOFTBUS_MEM_ERR;
     }
+    newChannel->info.enableMultipath = appInfo->enableMultipath;
+    newChannel->info.isMultiNeg = appInfo->isMultiNeg;
     newChannel->seq = seq;
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
+    newChannel->info.linkedChannelId = appInfo->linkedChannelId;
     if (memcpy_s(&(newChannel->authHandle), sizeof(AuthHandle), authHandle, sizeof(AuthHandle)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy_s authHandle failed.");
         ReleaseUdpChannelId(appInfo->myData.channelId);
@@ -709,6 +719,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
             TRANS_LOGI(TRANS_CTRL, "not support acl check");
         }
     }
+    appInfo->enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
+    appInfo->isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
 
     if (TransCheckServerPermission(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
         return SOFTBUS_PERMISSION_SERVER_DENIED;
@@ -855,6 +867,17 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         TRANS_LOGE(TRANS_CTRL, "get appinfo failed. ret=%{public}d", ret);
         errDesc = (char *)"peer device session name not create";
         goto ERR_EXIT;
+    }
+    if (info.linkedChannelId > 0) {
+        UdpChannelInfo channel;
+        (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+        ret = TransGetUdpChannelByPeerId(info.linkedChannelId, &channel);
+        if (ret == SOFTBUS_OK) {
+            info.linkedChannelId = channel.info.myData.channelId;
+        } else {
+            TRANS_LOGE(TRANS_CTRL, "get linked channel failed. linkedChannelId=%{public}d",
+                info.linkedChannelId);
+        }
     }
     ret = GetTokenTypeBySessionName(info.myData.sessionName, &info.myData.tokenType);
     if (ret != SOFTBUS_OK) {
