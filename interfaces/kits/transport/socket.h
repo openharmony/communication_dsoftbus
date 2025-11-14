@@ -271,6 +271,21 @@ typedef struct {
      * @version 2.0
      */
     void (*OnMessageSent)(int32_t socket, uint16_t dataSeq, int32_t errCode);
+
+    /**
+     * @brief Called when the multi path state is switching.
+     *
+     * This callback is invoked to notify that data is received.
+     *
+     *
+     * @param socket Indicates the unique socket fd.
+     * @param eventType Indicates the type of the occurred event.
+     * @param eventData Indicates the pointer to the event data.
+     * @param dataLen Indicates the length of the event data.
+     * @since 2.0
+     * @version 2.0
+     */
+    void (*OnEvent)(int32_t socket, MultiPathEventType eventType, const void *eventData, uint32_t dataLen);
 } ISocketListener;
 
 /**

@@ -76,6 +76,9 @@ typedef enum {
     DFILE_ON_SESSION_TRANSFER_RATE,
     DFILE_ON_BIND,
     DFILE_ON_CLEAR_POLICY_FILE_LIST,
+    DFILE_ON_MP_ADD_PATH_CONNECT_FAIL,
+    DFILE_ON_MP_PATHNUM_CHANGE,
+    DFILE_ON_MP_SPEED,
 } DFileMsgType;
 
 enum {
@@ -87,6 +90,7 @@ enum {
     CAPS_ALG_NORATE, // NoRate algorithm
     CAPS_RESUMABLE_TRANS,
     CAPS_ZEROCOPY,
+    CAPS_MULTIPATH_MTP,
     /* add more capability here */
     CAPS_MAX,
 };
@@ -103,6 +107,7 @@ enum {
 #define NSTACKX_CAPS_LINK_SEQUENCE          NBITS(CAPS_LINK_SEQUENCE)
 #define NSTACKX_CAPS_WLAN_CATAGORY          NBITS(CAPS_WLAN_CATAGORY)
 #define NSTACKX_CAPS_MULTIPATH              NBITS(CAPS_MULTIPATH)
+#define NSTACKX_CAPS_MULTIPATH_MTP          NBITS(CAPS_MULTIPATH_MTP)
 
 #define NSTACKX_CAPS_MASK                   (NBITS(CAPS_MAX) - 1)
 
@@ -138,6 +143,23 @@ typedef struct {
     DFileFileStat stat;
 } DFileFileInfo;
 
+typedef enum {
+    DFILE_LINK_WIRELESS,
+    DFILE_LINK_WIRED,
+    DFILE_LINK_MAX,
+} DFileLinkType;
+
+typedef enum {
+    MP_DOUBLE_TO_SINGLE = 0,
+    MP_SINGLE_TO_DOUBLE,
+    MP_CHANGE_TYPE_MAX,
+} DFileChangeType;
+
+typedef struct {
+    DFileLinkType linkType;
+    uint32_t rate;
+} NotifyLinkType;
+
 typedef struct {
     struct {
         const char **files;
@@ -157,6 +179,12 @@ typedef struct {
     int32_t errorCode;
     uint32_t rate;
     struct sockaddr_in sockAddr[NSTACKX_MULTI_PATH_NUM];
+    struct {
+        DFileChangeType changeType;
+        DFileLinkType linkType;
+    } pathNumChange;
+    NotifyLinkType notifyLinkRate[NSTACKX_MULTI_PATH_NUM];
+    uint32_t maxRate;
 } DFileMsg;
 
 typedef struct {
@@ -190,6 +218,13 @@ typedef struct {
     DFileMsgReceiver msgReceiver;
     const char *localInterfaceName;
 } NSTACKX_SessionPara;
+
+typedef struct {
+    struct sockaddr_in *addr;
+    socklen_t addrLen;
+    const char *localInterfaceName;
+    DFileLinkType linkType;
+} NSTACKX_SessionParaMpV2;
 
 typedef void (*DFileLogImpl)(const char *tag, uint32_t level, const char *format, va_list args);
 
@@ -277,6 +312,18 @@ typedef struct {
 NSTACKX_EXPORT int32_t NSTACKX_DFileServer(struct sockaddr_in *localAddr, socklen_t addrLen, const uint8_t *key,
                                            uint32_t keyLen, DFileMsgReceiver msgReceiver);
 
+/*
+ * Create DFile server session V2.
+
+ * param: para - filled with local ip addr, port and family for socket binding
+ *                    the ip addr and port must be host order
+ * param: paraNum - size of para[]
+ * param: key - key for data encrypt or decrypt, should be a 16 bytes string.
+ * param: msgReceiver - event callback for user
+ * return positive session id on success, negative value on failure
+ */
+NSTACKX_EXPORT int32_t NSTACKX_DFileServerMpV2(NSTACKX_SessionParaMpV2 para[], uint8_t paraNum, const uint8_t *key,
+    uint32_t keyLen, DFileMsgReceiver msgReceiver);
 
 /*
  * Create DFile client session.
@@ -291,6 +338,18 @@ NSTACKX_EXPORT int32_t NSTACKX_DFileServer(struct sockaddr_in *localAddr, sockle
  */
 NSTACKX_EXPORT int32_t NSTACKX_DFileClient(struct sockaddr_in *srvAddr, socklen_t addrLen, const uint8_t *key,
                                            uint32_t keyLen, DFileMsgReceiver msgReceiver);
+
+/*
+ * Create DFile client session V2.
+ * param: para - filled with local ip addr, port and family for socket binding
+ *                    the ip addr and port must be host order
+ * param: paraNum - size of para[]
+ * param: key - key for data encrypt or decrypt, should be a 16 bytes string.
+ * param: msgReceiver - event callback for user
+ * return positive session id on success, negative value on failure
+ */
+NSTACKX_EXPORT int32_t NSTACKX_DFileClientMpV2(NSTACKX_SessionParaMpV2 para[], uint8_t paraNum, const uint8_t *key,
+    uint32_t keyLen, DFileMsgReceiver msgReceiver);
 
 /*
  * Create DFile client session on target device.
@@ -433,6 +492,29 @@ typedef struct {
  * @return 0 on success, negative value on failure
  */
 NSTACKX_EXPORT int32_t NSTACKX_DFileSetSessionOpt(int32_t sessionId, const DFileOpt *opt);
+
+
+/*
+ * Use to add new np path with the session which is created by NSTACKX_DFileServerMpV2 or NSTACKX_DFileClientMpV2.
+ * param: sessionId - id of the session.
+ * param: para - filled with local ip addr, port and family for socket binding
+ *                    the ip addr and port must be host order
+ * param: paraNum - size of para[]
+ * param: key - key for data encrypt or decrypt, should be a 16 bytes string.
+ * return 0 on success, negative value on failure
+ */
+NSTACKX_EXPORT int32_t NSTACKX_DFileAddMpPath(int32_t sessionId, NSTACKX_SessionParaMpV2 para[], uint8_t paraNum,
+    const uint8_t *key, uint32_t keyLen);
+
+/*
+ * Use to delete np path with the session which is created by NSTACKX_DFileServerMpV2 or NSTACKX_DFileClientMpV2.
+ * param: sessionId - id of the session.
+ * param: para - filled with local ip addr, port and family for socket binding
+ *                    the ip addr and port must be host order
+ * param: paraNum - size of para[]
+ * return 0 on success, negative value on failure
+ */
+NSTACKX_EXPORT int32_t NSTACKX_RemoveMpPath(int32_t sessionId, NSTACKX_SessionParaMpV2 para[], uint8_t paraNum);
 #ifdef __cplusplus
 }
 #endif

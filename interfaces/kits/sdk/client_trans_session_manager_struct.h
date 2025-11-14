@@ -79,6 +79,18 @@ typedef struct {
     uint32_t count;
 } CachedQosEvent;
 
+typedef enum {
+    MULTIPATH_STRATEGY_PARALLEL,        /**< 并行传输策略 （多径同时传输）*/
+    MULTIPATH_STRATEGY_MASTER_SLAVE,    /**< 主从传输策略  (主路径优先，备用路径容灾) */
+    MULTIPATH_STRATEGY_MAX,             /**< 策略类型上限标记 */
+} MultipathStrategy;
+
+typedef struct {
+    MultiPathEventType event;
+    MutipathEvent eventData;
+    uint32_t dataLen;
+} CachedOnEvent;
+
 typedef struct {
     ListNode node;
     int32_t sessionId;
@@ -121,6 +133,14 @@ typedef struct {
     char peerPagingAccountId[ACCOUNT_UID_LEN_MAX];
     bool isLowLatency;
     TransFlowInfo flowInfo;
+    MultipathStrategy multipathStrategy;
+    bool enableMultipath;
+    int32_t channelIdReserve;
+    ChannelType channelTypeReserve;
+    LinkType linkTypeReserve[LINK_TYPE_MAX];
+    bool isClosingReserve;
+    CachedOnEvent cachedOnEvent;
+    int32_t routeTypeReserve;
 } SessionInfo;
 
 typedef struct {
@@ -179,6 +199,19 @@ typedef struct {
     SocketLifecycleData lifecycle;
 } DestroySessionInfo;
 
+typedef struct {
+    ListNode node;
+    int32_t sessionId;
+    int32_t channelId;
+    ChannelType ChannelType;
+    bool isAsync;
+    bool mainChannel;
+    void (*OnSessionClose)(int sessionId);
+    void (*OnShutdown)(int32_t socket, ShutdownReason reason);
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    char pkgName[PKG_NAME_SIZE_MAX];
+    SocketLifecycleData liftcycle;
+} DestroyMultiPathSessionInfo;
 #ifdef __cplusplus
 }
 #endif
