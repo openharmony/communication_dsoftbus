@@ -40,7 +40,7 @@ int32_t TransAssembleTlvData(DataHead *pktHead, uint8_t type, uint8_t *buffer, u
     }
     if (memcpy_s(element->value, bufferLen, buffer, bufferLen) != EOK) {
         SoftBusFree(element->value);
-        element->value == NULL;
+        element->value = NULL;
         TRANS_LOGE(TRANS_SDK, "memcpy buffer failed.");
         return SOFTBUS_MEM_ERR;
     }
