@@ -62,14 +62,16 @@ int32_t GeneralRegisterListener(IGeneralListener *listener)
 
 int32_t GeneralUnregisterListener(void)
 {
-    if (g_connectionListener == NULL) {
-        CONN_LOGW(CONN_INIT, "listener not registered");
-        return SOFTBUS_OK;
-    }
     int32_t ret = SoftBusMutexLock(&g_connectionListenerLock);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "lock fail");
         return ret;
+    }
+    if (g_connectionListener == NULL) {
+        CONN_LOGW(CONN_INIT, "listener not registered");
+        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+        (void)SoftBusMutexDestroy(&g_connectionListenerLock);
+        return SOFTBUS_OK;
     }
     g_connectionListener = NULL;
     (void)SoftBusMutexUnlock(&g_connectionListenerLock);
@@ -286,12 +288,13 @@ void DataReceived(uint32_t handle, const uint8_t *data, uint32_t len)
 void ConnectionDeathNotify(void)
 {
     CONN_LOGI(CONN_COMMON, "connection death notify");
-    if (g_connectionListener == NULL) {
-        CONN_LOGI(CONN_COMMON, "listener has not registered, no need to notify.");
-        return;
-    }
     if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "lock fail");
+        return;
+    }
+    if (g_connectionListener == NULL) {
+        CONN_LOGI(CONN_COMMON, "listener has not registered, no need to notify.");
+        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
         return;
     }
     if (g_connectionListener->OnConnectionStateChange != NULL) {
