@@ -1694,7 +1694,7 @@ static int BleCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *arg
             return COMPARE_FAILED;
         }
         case BLE_MGR_MSG_PREVENT_TIMEOUT: {
-            if (memcmp(msg->obj, ctx->obj, UDID_BUF_LEN) == 0) {
+            if (ctx->obj != NULL && memcmp(msg->obj, ctx->obj, UDID_BUF_LEN) == 0) {
                 return COMPARE_SUCCESS;
             }
             return COMPARE_FAILED;
