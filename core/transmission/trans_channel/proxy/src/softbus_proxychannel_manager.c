@@ -670,6 +670,7 @@ static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t err
             SoftBusFree((void *)removeNode->appInfo.fastTransData);
         }
         TransProxyUnRegQosInfo(removeNode->connId, removeNode->channelId, removeNode->isD2D);
+        ReleaseProxyChannelId(removeNode->channelId);
         SoftBusFree(removeNode);
     }
 }
@@ -687,7 +688,6 @@ void TransProxyDelByConnId(uint32_t connId)
     ListInit(&proxyChannelList);
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (removeNode->connId == connId) {
-            ReleaseProxyChannelId(removeNode->channelId);
             ListDelete(&(removeNode->node));
             g_proxyChannelList->cnt--;
             ListAdd(&proxyChannelList, &removeNode->node);
@@ -877,28 +877,6 @@ int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanIn
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
-}
-
-int32_t TransProxyGetNewChanSeq(int32_t channelId)
-{
-    ProxyChannelInfo *item = NULL;
-    int32_t seq = 0;
-
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        g_proxyChannelList != NULL, seq, TRANS_CTRL, "g_proxyChannelList is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, seq, TRANS_CTRL, "lock mutex fail!");
-
-    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->channelId == channelId) {
-            seq = item->seq;
-            item->seq++;
-            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return seq;
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return seq;
 }
 
 int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
@@ -2284,13 +2262,13 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             if (disChanInfo == NULL) {
                 SoftBusFree(removeNode);
                 TRANS_LOGE(TRANS_SVC, "SoftBusMalloc failed");
-                return;
+                continue;
             }
             if (memcpy_s(disChanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo)) != EOK) {
                 SoftBusFree(removeNode);
                 SoftBusFree(disChanInfo);
                 TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
-                return;
+                continue;
             }
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
             TransProxyPostDisConnectMsgToLoop(connId, isServer, disChanInfo);

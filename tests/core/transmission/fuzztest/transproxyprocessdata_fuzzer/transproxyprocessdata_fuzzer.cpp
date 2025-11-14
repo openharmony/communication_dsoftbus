@@ -374,11 +374,11 @@ void CheckLenAndCopyDataTest(FuzzedDataProvider &provider)
     DataHeadTlvPacketHead head;
     (void)memset_s(&head, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &head);
-    (void)CheckLenAndCopyData(len, headSize, data, &head);
+    (void)CheckLenAndCopyData(data, len, &head, headSize);
     len = headSize;
-    (void)CheckLenAndCopyData(len, headSize, data, &head);
+    (void)CheckLenAndCopyData(data, len, &head, headSize);
     len += headSize;
-    (void)CheckLenAndCopyData(len, headSize, data, &head);
+    (void)CheckLenAndCopyData(data, len, &head, headSize);
 }
 
 void TransProxyNoSubPacketTlvProcTest(FuzzedDataProvider &provider)

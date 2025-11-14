@@ -43,6 +43,7 @@
 #define PROXY_ACK_SIZE 4
 #define OH_TYPE 10
 #define TLV_TYPE_AND_LENGTH 2
+#define DATA_SEQ_LEN 2
 
 static IClientSessionCallBack g_sessionCb;
 

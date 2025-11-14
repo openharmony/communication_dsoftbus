@@ -285,7 +285,6 @@ void TransProxyGetSendMsgChanInfoTest(FuzzedDataProvider &provider)
     (void)memset_s(&appInfoTemp, sizeof(AppInfo), 0, sizeof(AppInfo));
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     (void)TransProxyGetSendMsgChanInfo(-1, &info2);
-    (void)TransProxyGetNewChanSeq(-1);
     (void)TransProxyGetAuthId(-1, &authHandle);
     (void)TransProxyGetChannelCapaByChanId(-1, &channelCapability);
     (void)TransProxyGetSessionKeyByChanId(-1, sessionKey, SESSION_KEY_LENGTH);
@@ -306,7 +305,6 @@ void TransProxyGetSendMsgChanInfoTest(FuzzedDataProvider &provider)
     (void)TransProxyGetSessionKeyByChanId(info1->channelId, sessionKey, SESSION_KEY_LENGTH);
     (void)TransProxyGetChannelCapaByChanId(info1->channelId, &channelCapability);
     (void)TransProxyGetAuthId(info1->channelId, &authHandle);
-    (void)TransProxyGetNewChanSeq(info1->channelId);
     (void)TransProxyGetSendMsgChanInfo(info1->channelId, &info2);
     (void)TransProxyDelChanByChanId(info1->channelId);
 }

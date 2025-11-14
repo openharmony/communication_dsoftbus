@@ -26,11 +26,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#ifndef MAGIC_NUMBER
-#define MAGIC_NUMBER 0xBABEFACE
 
+#define MAGIC_NUMBER 0xBABEFACE
 #define DC_DATA_HEAD_SIZE 16
-#endif
 
 typedef struct {
     ListNode node;
