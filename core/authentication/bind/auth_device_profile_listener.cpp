@@ -78,16 +78,16 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete failed!");
         return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
-    if (profile.GetLocalUserId() != JudgeDeviceTypeAndGetOsAccountIds()) {
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(profile.GetDeviceId().c_str(), CATEGORY_UDID, &nodeInfo);
+    if (ret == SOFTBUS_OK && nodeInfo.localUserId != 0 && profile.GetLocalUserId() != nodeInfo.localUserId) {
         AUTH_LOGE(AUTH_INIT, "delete deviceprofile not current user");
         if (!DpHasAccessControlProfile(profile.GetDeviceId().c_str(), true, profile.GetLocalUserId())) {
             LnnDeleteSpecificTrustedDevInfo(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
         }
         return SOFTBUS_OK;
     }
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnGetRemoteNodeInfoById(profile.GetDeviceId().c_str(), CATEGORY_UDID, &nodeInfo);
     if (ret == SOFTBUS_OK && nodeInfo.userId != 0 &&
         nodeInfo.userId != profile.GetPeerUserId()) {
         AUTH_LOGE(AUTH_INIT, "no match peer user");

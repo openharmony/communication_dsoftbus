@@ -46,6 +46,7 @@ typedef struct {
     int64_t accountId;
     const char *deviceId;
     int32_t peerUserId;
+    int32_t localUserId;
 } UpdateDpAclParams;
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);
