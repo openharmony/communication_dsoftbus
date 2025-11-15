@@ -55,6 +55,7 @@ InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::k
     { InterfaceInfoKey::LISTEN_MODULE,          Serializable::ValueType::INT       },
     { InterfaceInfoKey::LOCAL_CUSTOM_PORT,      Serializable::ValueType::INT       },
     { InterfaceInfoKey::IS_CREATE_GO,           Serializable::ValueType::BOOL      },
+    { InterfaceInfoKey::NEED_KEEP_P2P_GROUP,    Serializable::ValueType::BOOL      },
 };
 
 void InterfaceInfo::MarshallingString(
@@ -439,5 +440,15 @@ void InterfaceInfo::SetIsCreateGo(bool value)
 bool InterfaceInfo::GetIsCreateGo() const
 {
     return Get(InterfaceInfoKey::IS_CREATE_GO, false);
+}
+
+void InterfaceInfo::SetNeedKeepP2pGroup(bool value)
+{
+    Set(InterfaceInfoKey::NEED_KEEP_P2P_GROUP, value);
+}
+
+bool InterfaceInfo::GetNeedKeepP2pGroup() const
+{
+    return Get(InterfaceInfoKey::NEED_KEEP_P2P_GROUP, false);
 }
 } // namespace OHOS::SoftBus

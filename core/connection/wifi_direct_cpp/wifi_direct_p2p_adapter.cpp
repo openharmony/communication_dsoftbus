@@ -129,6 +129,7 @@ int WifiDirectP2pAdapter::CreateGroup(const struct GroupOwnerConfig *config, str
     }
     ret = InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [groupConfig](InterfaceInfo &interface) {
+            interface.SetNeedKeepP2pGroup(true);
             interface.SetP2pGroupConfig(groupConfig);
             int32_t reuseCount = interface.GetReuseCount();
             interface.SetReuseCount(reuseCount + 1);
@@ -137,7 +138,7 @@ int WifiDirectP2pAdapter::CreateGroup(const struct GroupOwnerConfig *config, str
         });
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "update interface fail, ret=%{public}d", ret);
-        (void)RemoveGroup();
+        (void)RemoveGroupNotAddReuse();
         return ret;
     }
     ret = SetGroupOwnerResult(groupConfig, result);
@@ -178,6 +179,7 @@ int WifiDirectP2pAdapter::RemoveGroup()
         "entity disconnect fail, error=%{public}d", result.errorCode_);
 
     return InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [](InterfaceInfo &interface) {
+        interface.SetNeedKeepP2pGroup(false);
         auto reuseCount = interface.GetReuseCount();
         if (reuseCount == 0) {
             CONN_LOGW(CONN_WIFI_DIRECT, "reuseCnt already 0 and can not be reduced");
@@ -194,12 +196,18 @@ int WifiDirectP2pAdapter::ReuseP2p()
     auto ret = P2pEntity::GetInstance().ReuseLink();
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse p2p group fail, ret=%{public}d", ret);
-    return InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [](InterfaceInfo &interface) {
+    ret = InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [](InterfaceInfo &interface) {
+        interface.SetNeedKeepP2pGroup(true);
         auto reuseCnt = interface.GetReuseCount();
         interface.SetReuseCount(reuseCnt + 1);
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt=%{public}d", interface.GetReuseCount());
         return SOFTBUS_OK;
     });
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "update interface fail, ret=%{public}d", ret);
+        (void)RemoveGroupNotAddReuse();
+    }
+    return ret;
 }
 
 int WifiDirectP2pAdapter::ReuseGroup(struct GroupOwnerResult *result)
