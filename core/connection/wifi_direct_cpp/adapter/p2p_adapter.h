@@ -63,6 +63,11 @@ public:
         std::vector<WifiDirectP2pDeviceInfo> clientDevices;
     };
 
+    enum WifiDirectP2pGroupLiveType {
+        P2P_GROUP_STOP_ALIVE = 0,
+        P2P_GROUP_KEEP_ALIVE = 1,
+    };
+
     static P2pAdapter &GetInstance();
     static int32_t GetChannel5GListIntArray(std::vector<int> &channels);
     static bool IsWifiP2pEnabled();
@@ -94,6 +99,7 @@ public:
     static int GetCoexConflictCode(const char *ifName, int32_t channelId);
     static int GetApChannel();
     static int32_t GetP2pGroupFrequency();
+    static int32_t SetP2pGroupLiveType(WifiDirectP2pGroupLiveType type);
 
 private:
     static constexpr int P2P_GROUP_CONFIG_INDEX_SSID = 0;

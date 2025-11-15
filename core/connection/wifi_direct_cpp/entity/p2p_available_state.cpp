@@ -130,14 +130,17 @@ void P2pAvailableState::OnP2pConnectionChangeEvent(
     }
 
     int reuseCount = 0;
-    InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&reuseCount](const InterfaceInfo &interface) {
+    bool needKeepGroup = false;
+    InterfaceManager::GetInstance().ReadInterface(
+        InterfaceInfo::P2P, [&reuseCount, &needKeepGroup](const InterfaceInfo &interface) {
         reuseCount = interface.GetReuseCount();
+        needKeepGroup = interface.GetNeedKeepP2pGroup() && reuseCount == 1;
         return SOFTBUS_OK;
     });
     auto joiningClientCount = P2pEntity::GetInstance().GetJoiningClientCount();
     CONN_LOGI(
         CONN_WIFI_DIRECT, "joiningClientCount=%{public}zu, reuseCount=%{public}d", joiningClientCount, reuseCount);
-    if (groupInfo->clientDevices.empty() && joiningClientCount == 0 && reuseCount > 0) {
+    if (groupInfo->clientDevices.empty() && joiningClientCount == 0 && reuseCount > 0 && !needKeepGroup) {
         CONN_LOGI(CONN_WIFI_DIRECT, "gc disconnected abnormally");
         P2pAdapter::DestroyGroupParam param{IF_NAME_P2P};
         P2pAdapter::P2pShareLinkRemoveGroup(param);
