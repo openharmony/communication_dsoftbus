@@ -186,7 +186,7 @@ HWTEST_F(WifiDirectInitTest, LnnConvertDLidToUdid008, TestSize.Level1)
     EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
     char remoteUdid[UDID_BUF_LEN] = { 0 };
     EXPECT_EQ(DBinderSoftbusServer::GetInstance().LnnConvertDLidToUdid(
-        nullptr, CATEGORY_UDID, remoteUdid, UDID_BUF_LEN), SOFTBUS_INVALID_PARAM);
+        nullptr, CATEGORY_UDID, remoteUdid, UDID_BUF_LEN), SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
 }
 
 /*
