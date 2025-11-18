@@ -93,7 +93,7 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffline002, TestSize.Level1)
 
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_NOT_FIND));
-    EXPECT_NO_FATAL_FAILURE(OnWifiDirectDeviceOffline(peerMac, peerIp, peerUuid, peerIp););
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectDeviceOffline(peerMac, peerIp, peerUuid, peerIp));
 }
 
 /*
