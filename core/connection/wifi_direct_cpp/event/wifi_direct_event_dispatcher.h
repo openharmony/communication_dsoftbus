@@ -49,6 +49,7 @@ enum class ProcessorTerminateReason {
     SUCCESS,
     FAILURE,
     RETRY,
+    PASSIVE_REUSE,
 };
 
 struct ProcessorTerminate : public std::exception {
