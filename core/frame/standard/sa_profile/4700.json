@@ -6,7 +6,8 @@
             "libpath": "libsoftbus_server.z.so",
             "run-on-create": true,
             "distributed": false,
-            "dump_level": 1
+            "dump_level": 1,
+            "min_hdi_proxy_version": []
         }
     ]
 }

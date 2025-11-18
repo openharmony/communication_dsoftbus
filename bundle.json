@@ -86,7 +86,6 @@
         "kv_store",
         "device_auth",
         "device_info_manager",
-        "drivers_interface_wlan",
         "json",
         "hicollie",
         "hisysevent",
