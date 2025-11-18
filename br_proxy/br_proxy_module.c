@@ -125,6 +125,7 @@ static int32_t AddSessionToList(int32_t sessionId)
     return SOFTBUS_OK;
 
 EXIT_ERR:
+    sem_destroy(info->sem);
     SoftBusFree(info->sem);
 EXIT_FREE_INFO:
     SoftBusFree(info);
