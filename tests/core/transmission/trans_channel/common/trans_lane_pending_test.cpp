@@ -1483,7 +1483,7 @@ HWTEST_F(TransLanePendingTest, TransAddInfoByLaneHandleTest001, TestSize.Level1)
     if (g_reqLanePendingList != nullptr) {
         g_reqLanePendingList = nullptr;
     }
-    NetWorkingChannelInfo info = { };
+    NetWorkingChannelInfo info = {};
     int32_t ret = TransAddInfoByLaneHandle(&info, TEST_DEVICE_ID, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
