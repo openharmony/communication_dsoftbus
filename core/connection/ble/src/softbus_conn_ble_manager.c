@@ -382,6 +382,7 @@ static bool BleReuseConnection(ConnBleDevice *device, ConnBleConnection *connect
         return false;
     }
     BleNotifyDeviceConnectResult(device, connection, 0, true);
+    ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_NEXT_CMD, 0, 0, NULL, 0);
     return true;
 }
 

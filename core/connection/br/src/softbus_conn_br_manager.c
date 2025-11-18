@@ -451,6 +451,7 @@ static bool BrReuseConnection(ConnBrDevice *device, ConnBrConnection *connection
         return false;
     }
     NotifyDeviceConnectResult(device, connection, true, 0);
+    ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_NEXT_CMD, 0, 0, NULL, 0);
     return true;
 }
 
