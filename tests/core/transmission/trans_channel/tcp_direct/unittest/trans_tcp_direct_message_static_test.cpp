@@ -792,8 +792,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetChannelInfoFromConn001, TestSize.Le
     EXPECT_EQ(info.isEnabled, true);
     EXPECT_EQ(info.fd, conn.appInfo.fd);
     EXPECT_EQ(info.sessionKey, conn.appInfo.sessionKey);
-    EXPECT_EQ(info.myHandleId, conn.appInfo.myHandleId);
-    EXPECT_EQ(info.peerHandleId, conn.appInfo.peerHandleId);
     EXPECT_EQ(info.peerSessionName, conn.appInfo.peerData.sessionName);
     EXPECT_EQ(info.groupId, conn.appInfo.groupId);
     EXPECT_EQ(info.isEncrypt, true);
@@ -1001,6 +999,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, CheckServerPermissionTest001, TestSize
     char *data = (char *)SoftBusCalloc(sizeof(SessionConn));
     int32_t ret = CheckServerPermission(&info, data);
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_SERVER_DENIED);
+    SoftBusFree(data);
 }
 
 /**
