@@ -34,11 +34,12 @@ extern "C" {
 #define LNN_LOOPBACK_IFNAME "lo"
 
 // netif type
-#define LNN_NETIF_TYPE_ETH  (0x1)
-#define LNN_NETIF_TYPE_WLAN (0x1 << 1)
-#define LNN_NETIF_TYPE_BR   (0x1 << 2)
-#define LNN_NETIF_TYPE_BLE  (0x1 << 3)
-#define LNN_NETIF_TYPE_USB  (0x1 << 4)
+#define LNN_NETIF_TYPE_UNKNOWN (0x0)
+#define LNN_NETIF_TYPE_ETH     (0x1)
+#define LNN_NETIF_TYPE_WLAN    (0x1 << 1)
+#define LNN_NETIF_TYPE_BR      (0x1 << 2)
+#define LNN_NETIF_TYPE_BLE     (0x1 << 3)
+#define LNN_NETIF_TYPE_USB     (0x1 << 4)
 typedef uint16_t LnnNetIfType;
 
 #define LNN_NETWORK_MAX_PROTOCOL_COUNT 4

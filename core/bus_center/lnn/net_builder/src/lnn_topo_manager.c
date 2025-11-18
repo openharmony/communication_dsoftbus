@@ -457,7 +457,7 @@ static void TryCorrectRelation(const char *networkId, const char *udid, const ch
 static void ProcessTopoUpdateInfo(cJSON *json, const char *networkId, const uint8_t *msg, uint32_t len)
 {
     char udid[UDID_BUF_LEN], peerUdid[UDID_BUF_LEN];
-    uint8_t relation[CONNECTION_ADDR_MAX];
+    uint8_t relation[CONNECTION_ADDR_MAX] = { 0 };
     int32_t value;
     cJSON *item = NULL;
     char localUdid[UDID_BUF_LEN];
