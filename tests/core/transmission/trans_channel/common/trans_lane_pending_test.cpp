@@ -1483,7 +1483,7 @@ HWTEST_F(TransLanePendingTest, TransAddInfoByLaneHandleTest001, TestSize.Level1)
     if (g_reqLanePendingList != nullptr) {
         g_reqLanePendingList = nullptr;
     }
-    NetWorkingChannelInfo info;
+    NetWorkingChannelInfo info = {};
     int32_t ret = TransAddInfoByLaneHandle(&info, TEST_DEVICE_ID, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -1507,7 +1507,9 @@ HWTEST_F(TransLanePendingTest, TransAddInfoByLaneHandleTest002, TestSize.Level1)
     TransReqLaneItem *item = static_cast<TransReqLaneItem *>(SoftBusCalloc(sizeof(TransReqLaneItem)));
     ASSERT_TRUE(item != nullptr);
     item->laneHandle = 1235;
+    (void)SoftBusMutexLock(&(g_reqLanePendingList->lock));
     ListAdd(&(g_reqLanePendingList->list), &(item->node));
+    (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
 
     NetWorkingChannelInfo info = {
         .channelId = TEST_CHANNEL_ID,
