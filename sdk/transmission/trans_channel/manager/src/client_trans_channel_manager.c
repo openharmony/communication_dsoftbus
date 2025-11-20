@@ -86,6 +86,25 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type, int32_t socketI
     return ret;
 }
 
+int32_t ClientTransCloseReserveChannel(
+    int32_t channelId, int32_t type, const char *srvIp, int32_t srvPort, int32_t routeType)
+{
+    if (channelId < 0) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    switch (type) {
+        case CHANNEL_TYPE_UDP:
+            ret = ClientTransCloseReserveUdpChannel(channelId, SHUTDOWN_REASON_LOCAL, srvIp, srvPort, routeType);
+            break;
+        default:
+            TRANS_LOGE(TRANS_SDK, "Invalid type");
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+    return ret;
+}
+
 int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t channelType, const void *data, uint32_t len)
 {
     if ((data == NULL) || (len == 0)) {

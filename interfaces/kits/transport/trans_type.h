@@ -359,6 +359,30 @@ typedef struct {
     uint64_t tokenId;
     int32_t pid;
 } CollabInfo;
+
+typedef enum {
+    EVENT_TYPE_MT_MUTIPATH,
+    EVENT_TYPE_MT_MAX,
+} MultiPathEventType;
+
+typedef enum {
+    TRANSITION_TO_SINGLE_PATH,
+    TRANSITION_TO_DUAL_PATH,
+    TRANSITION_MAX
+} PathTransitionType;
+
+typedef enum {
+    LINK_TYPE_UNKNOWN = 0,
+    LINK_TYPE_WIRED,
+    LINK_TYPE_WIFI,
+    LINK_MEDIUM_TYPE_MAX
+} LinkMediumType;
+
+typedef struct {
+    PathTransitionType transitionType;
+    LinkMediumType linkMediumType;
+    int32_t reason;
+} MutipathEvent;
 #ifdef __cplusplus
 }
 #endif

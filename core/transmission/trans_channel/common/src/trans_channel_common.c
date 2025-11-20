@@ -337,6 +337,15 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
     return SOFTBUS_OK;
 }
 
+static void SetUdpChannelCapability(bool flagBit, uint32_t *value, int32_t offset)
+{
+    if (flagBit) {
+        EnableCapabilityBit(value, offset);
+    } else {
+        DisableCapabilityBit(value, offset);
+    }
+}
+
 int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
@@ -382,6 +391,10 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->isClient = true;
     appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     appInfo->isLowLatency = param->isLowLatency;
+    appInfo->enableMultipath = param->enableMultipath;
+    SetUdpChannelCapability(param->enableMultipath, &appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
+    appInfo->isMultiNeg = param->isMultiNeg;
+    SetUdpChannelCapability(param->isMultiNeg, &appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return SOFTBUS_OK;
 }
@@ -608,6 +621,35 @@ void TransFreeAppInfo(AppInfo *appInfo)
         SoftBusFree((void *)(appInfo->fastTransData));
     }
     SoftBusFree(appInfo);
+}
+
+void TransFreeSessionParam(SessionParam *param)
+{
+    if (param == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    if (param->sessionName != NULL) {
+        SoftBusFree((void *)(param->sessionName));
+        param->sessionName = NULL;
+    }
+    if (param->peerSessionName != NULL) {
+        SoftBusFree((void *)(param->peerSessionName));
+        param->peerSessionName = NULL;
+    }
+    if (param->peerDeviceId != NULL) {
+        SoftBusFree((void *)(param->peerDeviceId));
+        param->peerDeviceId = NULL;
+    }
+    if (param->groupId != NULL) {
+        SoftBusFree((void *)(param->groupId));
+        param->groupId = NULL;
+    }
+    if (param->attr != NULL) {
+        SoftBusFree((void *)(param->attr));
+        param->attr = NULL;
+    }
+    SoftBusFree((void *)param);
 }
 
 void TransFreeLane(uint32_t laneHandle, bool isQosLane, bool isAsync)

@@ -38,10 +38,17 @@ typedef struct {
     int32_t sessionId;
     int32_t channelId;
     int32_t channelType;
+    int32_t channelIdReserve;
+    int32_t channelTypeReserve;
+    uint32_t laneHandleReserve;
     uint32_t laneHandle;
     CoreSessionState state;
+    CoreSessionState stateReserve;
     bool isAsync;
     bool isQosLane;
+    bool enableMultipath;
+    bool isUseReserve;
+    SessionParam param;
 } SocketWithChannelInfo;
 
 static SoftBusList *g_channelLaneList = NULL;
@@ -419,6 +426,11 @@ int32_t TransAddSocketChannelInfo(
     newSocket->laneHandle = INVALID_LANE_REQ_ID;
     newSocket->isQosLane = false;
     newSocket->isAsync = false;
+    newSocket->channelIdReserve = INVALID_CHANNEL_ID;
+    newSocket->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+    newSocket->isUseReserve = false;
+    newSocket->laneHandleReserve = INVALID_LANE_ID;
+    (void)memset_s(&newSocket->param, sizeof(SessionParam), 0, sizeof(SessionParam));
     int32_t tmpUid;
     TransGetUidAndPid(sessionName, &tmpUid, &(newSocket->pid));
 
@@ -447,6 +459,106 @@ int32_t TransAddSocketChannelInfo(
     TRANS_LOGI(TRANS_SVC, "socket lane count is cnt=%{public}d", g_socketChannelList->cnt);
     (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
     return SOFTBUS_OK;
+}
+
+int32_t TransAddSocketChannelInfoMP(
+    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state)
+{
+    TRANS_LOGI(TRANS_SVC, "TransAddSocketChannelInfoMP");
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
+        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
+    }
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_socketChannelList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "socket info manager hasn't init.");
+
+    SocketWithChannelInfo *newSocket = (SocketWithChannelInfo *)SoftBusCalloc(sizeof(SocketWithChannelInfo));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(newSocket != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "socket info calloc failed.");
+    if (strcpy_s(newSocket->sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
+        SoftBusFree(newSocket);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    newSocket->sessionId = sessionId;
+    newSocket->channelId = channelId;
+    newSocket->channelType = channelType;
+    newSocket->state = state;
+    newSocket->laneHandle = INVALID_LANE_REQ_ID;
+    newSocket->isQosLane = false;
+    newSocket->isAsync = false;
+    newSocket->channelIdReserve = INVALID_CHANNEL_ID;
+    newSocket->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+    newSocket->isUseReserve = false;
+    newSocket->laneHandleReserve = INVALID_LANE_ID;
+    newSocket->enableMultipath = true;
+    (void)memset_s(&newSocket->param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    int32_t tmpUid;
+    TransGetUidAndPid(sessionName, &tmpUid, &(newSocket->pid));
+
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        SoftBusFree(newSocket);
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
+    if (socketItem != NULL) {
+        char *tmpName = NULL;
+        Anonymize(sessionName, &tmpName);
+        TRANS_LOGI(
+            TRANS_SVC, "socket lane info has existed. socket=%{public}d, sessionName=%{public}s",
+                sessionId, AnonymizeWrapper(tmpName));
+        AnonymizeFree(tmpName);
+        SoftBusFree(newSocket);
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return SOFTBUS_OK;
+    }
+
+    ListInit(&(newSocket->node));
+    ListAdd(&(g_socketChannelList->list), &(newSocket->node));
+    g_socketChannelList->cnt++;
+    TRANS_LOGI(TRANS_SVC, "socket lane count is cnt=%{public}d", g_socketChannelList->cnt);
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    return SOFTBUS_OK;
+}
+
+int32_t TransUpdateSocketChannelInfo(
+    const char *sessionName, int32_t sessionId, bool isUseReserve)
+{
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_SVC, "Invalid param, sessionName is null");
+        return SOFTBUS_TRANS_INVALID_SESSION_NAME;
+    }
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SVC, "Invalid param, sessionId=%{public}d", sessionId);
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_socketChannelList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "socket info manager hasn't init.");
+
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
+    if (socketItem != NULL) {
+        char *tmpName = NULL;
+        socketItem->isUseReserve = isUseReserve;
+        Anonymize(sessionName, &tmpName);
+        TRANS_LOGI(TRANS_SVC,
+            "socket lane info existed. socket=%{public}d, sessionName=%{public}s, isUseReserve=%{public}d",
+            sessionId, AnonymizeWrapper(tmpName), isUseReserve);
+        AnonymizeFree(tmpName);
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return SOFTBUS_OK;
+    }
+    TRANS_LOGI(TRANS_SVC, "socket lane info not existed.");
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    return SOFTBUS_TRANS_INVALID_SESSION_ID;
 }
 
 static int32_t CheckParamIsValid(const char *sessionName, int32_t sessionId)
@@ -479,8 +591,14 @@ int32_t TransUpdateSocketChannelInfoBySession(
     }
     SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
     if (socketItem != NULL) {
-        socketItem->channelId = channelId;
-        socketItem->channelType = channelType;
+        if (!socketItem->enableMultipath || socketItem->channelId == INVALID_CHANNEL_ID) {
+            socketItem->channelId = channelId;
+            socketItem->channelType = channelType;
+        } else {
+            socketItem->channelIdReserve = channelId;
+            socketItem->channelTypeReserve = channelType;
+        }
+
         (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
         return SOFTBUS_OK;
     }
@@ -506,9 +624,13 @@ int32_t TransUpdateSocketChannelLaneInfoBySession(
     }
     SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
     if (socketItem != NULL) {
-        socketItem->laneHandle = laneHandle;
-        socketItem->isQosLane = isQosLane;
-        socketItem->isAsync = isAsync;
+        if (!socketItem->enableMultipath || socketItem->laneHandle == INVALID_LANE_REQ_ID) {
+            socketItem->laneHandle = laneHandle;
+            socketItem->isQosLane = isQosLane;
+            socketItem->isAsync = isAsync;
+        } else {
+            socketItem->laneHandleReserve = laneHandle;
+        }
         (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
         return SOFTBUS_OK;
     }
@@ -552,6 +674,44 @@ int32_t TransDeleteSocketChannelInfoBySession(const char *sessionName, int32_t s
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t TransDeleteSocketChannelInfoReserveBySession(const char *sessionName, int32_t sessionId)
+{
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = NULL;
+    SocketWithChannelInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(socketItem, next, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
+        if (strcmp(socketItem->sessionName, sessionName) == 0 && socketItem->sessionId == sessionId) {
+            socketItem->channelIdReserve = INVALID_CHANNEL_ID;
+            socketItem->laneHandleReserve = INVALID_LANE_REQ_ID;
+            socketItem->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+            socketItem->stateReserve = CORE_SESSION_STATE_INIT;
+            socketItem->isUseReserve = false;
+
+            (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            char *tmpName = NULL;
+            Anonymize(sessionName, &tmpName);
+            TRANS_LOGI(TRANS_CTRL, "delete socket channel info, sessionName=%{public}s, sessionId=%{public}d",
+                AnonymizeWrapper(tmpName), sessionId);
+            AnonymizeFree(tmpName);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    AnonymizeLogSessionNameWhenNotFound(sessionName, sessionId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t TransDeleteSocketChannelInfoByChannel(int32_t channelId, int32_t channelType)
 {
     if (g_socketChannelList == NULL) {
@@ -565,7 +725,14 @@ int32_t TransDeleteSocketChannelInfoByChannel(int32_t channelId, int32_t channel
     SocketWithChannelInfo *socketItem = NULL;
     SocketWithChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(socketItem, next, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
-        if (socketItem->channelId == channelId && socketItem->channelType == channelType) {
+        if (socketItem->channelIdReserve == channelId && socketItem->channelTypeReserve == channelType) {
+            socketItem->channelIdReserve = INVALID_CHANNEL_ID;
+            socketItem->channelTypeReserve = TYPE_INVALID_CHANNEL;
+            (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            TRANS_LOGI(TRANS_CTRL, "delete mutilpath socket channel info, channelId=%{public}d, channelType=%{public}d",
+                channelId, channelType);
+            return SOFTBUS_OK;
+        } else if (socketItem->channelId == channelId && socketItem->channelType == channelType) {
             ListDelete(&(socketItem->node));
             g_socketChannelList->cnt--;
             SoftBusFree(socketItem);
@@ -636,6 +803,31 @@ int32_t TransSetSocketChannelStateBySession(const char *sessionName, int32_t ses
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t TransSetSocketChannelStateReserveBySession(const char *sessionName, int32_t sessionId, CoreSessionState state)
+{
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
+    if (socketItem != NULL) {
+        socketItem->stateReserve = state;
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    AnonymizeLogSessionNameWhenNotFound(sessionName, sessionId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t TransSetSocketChannelStateByChannel(int32_t channelId, int32_t channelType, CoreSessionState state)
 {
     if (g_socketChannelList == NULL) {
@@ -650,6 +842,10 @@ int32_t TransSetSocketChannelStateByChannel(int32_t channelId, int32_t channelTy
     LIST_FOR_EACH_ENTRY(socketItem, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
         if (socketItem->channelId == channelId && socketItem->channelType == channelType) {
             socketItem->state = state;
+            (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            return SOFTBUS_OK;
+        } else if (socketItem->channelIdReserve == channelId && socketItem->channelTypeReserve == channelType) {
+            TRANS_LOGI(TRANS_SVC, "reserve channel link down, no need set socket state.");
             (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
             return SOFTBUS_OK;
         }
@@ -681,6 +877,35 @@ int32_t TransGetSocketChannelStateBySession(const char *sessionName, int32_t ses
     SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
     if (socketItem != NULL) {
         *state = socketItem->state;
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    AnonymizeLogSessionNameWhenNotFound(sessionName, sessionId);
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t TransGetSocketChannelStateReserveBySession(const char *sessionName, int32_t sessionId, CoreSessionState *state)
+{
+    int32_t ret = CheckParamIsValid(sessionName, sessionId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (state == NULL) {
+        TRANS_LOGE(TRANS_SVC, "Invaild param, state is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
+    if (socketItem != NULL) {
+        *state = socketItem->stateReserve;
         (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
         return SOFTBUS_OK;
     }
@@ -882,4 +1107,306 @@ int32_t TransGetTransLaneInfoByLaneHandle(uint32_t laneHandle, TransLaneInfo *la
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     TRANS_LOGE(TRANS_SVC, "can not find laneInfo by laneHandle=%{public}u", laneHandle);
     return SOFTBUS_NOT_FIND;
+}
+
+static bool IsSingleValidLaneHandle(int32_t laneHandle, int32_t laneHandleReserve)
+{
+    if (laneHandle != INVALID_LANE_REQ_ID && laneHandleReserve == INVALID_LANE_REQ_ID) {
+        return true;
+    }
+    return false;
+}
+
+static SocketWithChannelInfo *GetMultiPathSocketWithSingleLane()
+{
+    // need get lock before
+    SocketWithChannelInfo *socketItem = NULL;
+    LIST_FOR_EACH_ENTRY(socketItem, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
+        TRANS_LOGI(TRANS_SVC, "sessionId=%{public}d, laneHandle=%{public}d, laneHandleReserve=%{public}d",
+            socketItem->sessionId, socketItem->laneHandle, socketItem->laneHandleReserve);
+        if (socketItem->enableMultipath &&
+        IsSingleValidLaneHandle(socketItem->laneHandle, socketItem->laneHandleReserve)) {
+            return socketItem;
+        }
+    }
+    return NULL;
+}
+
+static SocketWithChannelInfo *GetMultiPathSocketByChannelId(int32_t channelId)
+{
+    //need get lock before
+    SocketWithChannelInfo *socketItem = NULL;
+    LIST_FOR_EACH_ENTRY(socketItem, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
+        TRANS_LOGI(TRANS_SVC,
+            "GetMultiPathSocketByChannelId sessionId=%{public}d, laneHandle=%{public}d, laneHandleReserve=%{public}d",
+            socketItem->sessionId, socketItem->laneHandle, socketItem->laneHandleReserve);
+        if (socketItem->enableMultipath && socketItem->channelId == channelId) {
+            TRANS_LOGI(TRANS_SVC, "GetMultiPathSocketByChannelId find mutilpath session");
+            return socketItem;
+        }
+    }
+    return NULL;
+}
+
+int32_t GetPathTransitionTypeByLaneHandle(uint32_t laneHandle, PathTransitionType *transType)
+{
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = NULL;
+    LIST_FOR_EACH_ENTRY(socketItem, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
+        if (socketItem->enableMultipath && (socketItem->laneHandle == laneHandle ||
+            socketItem->laneHandleReserve == laneHandle)) {
+            *transType = TRANSITION_TO_DUAL_PATH;
+            if (IsSingleValidLaneHandle(socketItem->laneHandle, socketItem->laneHandleReserve)) {
+                *transType =TRANSITION_TO_SINGLE_PATH;
+            }
+            (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    *transType = TRANSITION_MAX;
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t TransGetMultiPathSessionId(int32_t *sessionId, int32_t *channelId)
+{
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = GetMultiPathSocketWithSingleLane();
+    if (socketItem != NULL) {
+        *sessionId = socketItem->sessionId;
+        *channelId = socketItem->channelId;
+        TRANS_LOGE(TRANS_INIT, "mutilpath need realloc second lane, sessionId=%{public}d",
+            *sessionId);
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    TRANS_LOGE(TRANS_INIT, "not find mutilpath socket with single valid channel");
+    return SOFTBUS_NOT_FIND;
+}
+
+bool CheckNeedReallocSecondLane(int32_t channelId)
+{
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return false;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *SocketItem = GetMultiPathSocketByChannelId(channelId);
+    if (SocketItem != NULL && SocketItem->laneHandleReserve == INVALID_LANE_REQ_ID) {
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return true;
+    }
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    return false;
+}
+
+static int32_t CopySessionParamIds(const SessionParam *source, SessionParam *target)
+{
+    if (source == NULL || target ==NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *groupId = (char *)SoftBusCalloc(sizeof(char) * GROUP_ID_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(groupId != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc groupId failed");
+    if (source->groupId != NULL && strcpy_s(groupId, GROUP_ID_SIZE_MAX, source->groupId) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "strcopy groupId failed");
+        SoftBusFree(groupId);
+        return SOFTBUS_MEM_ERR;
+    }
+    target->groupId = groupId;
+
+    SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        tmpAttr != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc SessionAttribute failed");
+    if (memcpy_s(tmpAttr, sizeof(SessionAttribute), source->attr, sizeof(SessionAttribute)) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "memcpy_s SessionAttribute failed");
+        SoftBusFree(groupId);
+        SoftBusFree(tmpAttr);
+        return SOFTBUS_MEM_ERR;
+    }
+    target->attr = tmpAttr;
+    target->qosCount = source->qosCount;
+    if ((source->qosCount > 0) &&
+        (memcpy_s(target->qos, sizeof(target->qos), source->qos, sizeof(QosTV) * (source->qosCount)) != EOK)) {
+        SoftBusFree(groupId);
+        SoftBusFree(tmpAttr);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CopySessionParam(const SessionParam *source, SessionParam *target)
+{
+    char *sessionName = (char *)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        sessionName != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc sessionName failed");
+    if (source->sessionName != NULL && strcpy_s(sessionName, SESSION_NAME_SIZE_MAX, source->sessionName) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "strcopy sessionName failed");
+        SoftBusFree(sessionName);
+        return SOFTBUS_MEM_ERR;
+    }
+
+    target->sessionName = sessionName;
+    char *peerSessionName = (char*)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        peerSessionName != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc peerSessionName failed");
+    if (source->peerSessionName != NULL &&
+        strcpy_s(peerSessionName, SESSION_NAME_SIZE_MAX, source->peerSessionName) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "strcopy peerSessionName failed");
+        SoftBusFree(peerSessionName);
+        return SOFTBUS_MEM_ERR;
+    }
+
+    target->peerSessionName = peerSessionName;
+    char *peerDeviceId = (char*)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        peerDeviceId != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc peerDeviceId failed");
+    if (source->peerDeviceId != NULL &&
+        strcpy_s(peerDeviceId, SESSION_NAME_SIZE_MAX, source->peerDeviceId) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "strcopy peerSessionName failed");
+        SoftBusFree(peerDeviceId);
+        return SOFTBUS_MEM_ERR;
+    }
+    target->peerDeviceId = peerDeviceId;
+    target->actionId = source->actionId;
+    return CopySessionParamIds(source, target);
+}
+
+static void TransFreeSessionParamStatic(SessionParam *param)
+{
+    if (param == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    if (param->sessionName != NULL) {
+        SoftBusFree((void *)(param->sessionName));
+        param->sessionName = NULL;
+    }
+    if (param->peerSessionName != NULL) {
+        SoftBusFree((void *)(param->peerSessionName));
+        param->peerSessionName = NULL;
+    }
+    if (param->peerDeviceId != NULL) {
+        SoftBusFree((void *)(param->peerDeviceId));
+        param->peerDeviceId = NULL;
+    }
+    if (param->groupId != NULL) {
+        SoftBusFree((void *)(param->groupId));
+        param->groupId = NULL;
+    }
+    if (param->attr != NULL) {
+        SoftBusFree((void *)(param->attr));
+        param->attr = NULL;
+    }
+    SoftBusFree((void *)param);
+}
+
+int32_t TransAddSessionParamBySessionId(const char *sessionName,
+    int32_t sessionId, const SessionParam *param)
+{
+    if (sessionId == INVALID_SESSION_ID || param == NULL || sessionName == NULL) {
+        TRANS_LOGE(TRANS_INIT, "TransAddSessionParamBySessionId parameter fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = GetSocketWithChannelInfoBySession(sessionName, sessionId);
+    if (socketItem != NULL) {
+        socketItem->param.flowInfo.flowSize = param->flowInfo.flowSize;
+        socketItem->param.flowInfo.sessionType = param->flowInfo.sessionType;
+        socketItem->param.flowInfo.flowQosType = param->flowInfo.flowQosType;
+        if (CopySessionParam(param, &(socketItem->param)) != SOFTBUS_OK) {
+            TransFreeSessionParamStatic(&(socketItem->param));
+            TRANS_LOGE(TRANS_SVC, "copy session param fail.");
+            (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            return SOFTBUS_MEM_ERR;
+        }
+        socketItem->param.isQosLane = param->isQosLane;
+        socketItem->param.isAsync = param->isAsync;
+        socketItem->param.sessionId = param->sessionId;
+        socketItem->param.actionId = param->actionId;
+        socketItem->param.pid = param->pid;
+        socketItem->param.isLowLatency = param->isLowLatency;
+        socketItem->param.enableMultipath = param->enableMultipath;
+
+        char *tmpName = NULL;
+        Anonymize(param->sessionName, &tmpName);
+        TRANS_LOGI(TRANS_CTRL, "TransAddSessionParamBySessionId sessionName=%{public}s, socket=%{public}d,"
+            " actionId=%{public}d, isQosLane=%{public}d, isAsync=%{public}d",
+            AnonymizeWrapper(tmpName), param->sessionId, param->actionId, param->isQosLane, param->isAsync);
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return SOFTBUS_OK;
+    }
+    TRANS_LOGI(TRANS_SVC, "TransAddSessionParamBySessionId sessionId=%{public}d", sessionId);
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t TransGetSessionParamByChannelId(int32_t channelId, SessionParam *param)
+{
+    if (channelId == INVALID_CHANNEL_ID) {
+        TRANS_LOGE(TRANS_INIT, "TransGetSessionParamByChannelId channelId fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = GetMultiPathSocketByChannelId(channelId);
+    if (socketItem != NULL) {
+        param->flowInfo.flowSize = socketItem->param.flowInfo.flowSize;
+        param->flowInfo.sessionType = socketItem->param.flowInfo.sessionType;
+        param->flowInfo.flowQosType = socketItem->param.flowInfo.flowQosType;
+        if (CopySessionParam(&(socketItem->param), param) != SOFTBUS_OK) {
+            TransFreeSessionParamStatic(param);
+            param = NULL;
+            TRANS_LOGE(TRANS_SVC, "copy session param fail.");
+            return SOFTBUS_MEM_ERR;
+        }
+        param->isQosLane = socketItem->param.isQosLane;
+        param->isAsync = socketItem->param.isAsync;
+        param->sessionId = socketItem->param.sessionId;
+        param->actionId = socketItem->param.actionId;
+        param->pid = socketItem->param.pid;
+        param->isLowLatency = socketItem->param.isLowLatency;
+        param->enableMultipath = socketItem->param.enableMultipath;
+        char *tmpName = NULL;
+        Anonymize(param->sessionName, &tmpName);
+        TRANS_LOGI(TRANS_CTRL, "TransAddSessionParamBySessionId sessionName=%{public}s, socket=%{public}d,"
+            " actionId=%{public}d, isQosLane=%{public}d, isAsync=%{public}d",
+            AnonymizeWrapper(tmpName), param->sessionId, param->actionId, param->isQosLane, param->isAsync);
+        (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+        return SOFTBUS_OK;
+    }
+    TRANS_LOGI(TRANS_SVC, "TransAddSessionParamBySessionId channelId=%{public}d", channelId);
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    return SOFTBUS_OK;
 }

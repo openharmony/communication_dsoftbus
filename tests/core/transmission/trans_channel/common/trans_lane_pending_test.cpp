@@ -128,6 +128,21 @@ static SessionParam *TestCreateNewSessionParam()
     return param;
 }
 
+static TransReqLaneItem *TestCreateSessionTransReqLaneItem()
+{
+    TransReqLaneItem *reqLane = static_cast<TransReqLaneItem*>(SoftBusCalloc(sizeof(TransReqLaneItem)));
+    if (reqLane == nullptr) {
+        return nullptr;
+    }
+    reqLane->bSucc = true;
+    reqLane->isFinished = true;
+    reqLane->isNetWorkingChannel = true;
+    reqLane->laneHandle = TEST_NEW_LANE_ID;
+    reqLane->errCode = 0;
+    reqLane->param = *(TestCreateSessionParam());
+    return reqLane;
+}
+
 static SessionParam *TestCreateSessionParamWithPara(const char *sessionName)
 {
     SessionAttribute *attr = reinterpret_cast<SessionAttribute *>(SoftBusCalloc(sizeof(SessionAttribute)));
@@ -459,80 +474,6 @@ HWTEST_F(TransLanePendingTest, TransGetLaneInfo002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransAsyncGetLaneInfoByOption001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid param
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByOption001, TestSize.Level1)
-{
-    SessionParam param;
-    LaneRequestOption requestOption;
-    uint32_t laneHandle;
-    int32_t ret = TransAsyncGetLaneInfoByOption(nullptr, &requestOption, &laneHandle, 0, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransAsyncGetLaneInfoByOption(&param, nullptr, &laneHandle, 0, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransAsyncGetLaneInfoByOption(&param, &requestOption, nullptr, 0, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/*
- * @tc.name: TransAsyncGetLaneInfoByOption002
- * @tc.desc: Should return SOFTBUS_TRANS_GET_LANE_INFO_ERR when GetLaneManager is nullptr
- * @tc.type: FUNC
- * @tc.require:
- */
- HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByOption002, TestSize.Level1)
-{
-    SessionParam *newParam = TestCreateNewSessionParam();
-    ASSERT_TRUE(newParam != nullptr);
-    LaneRequestOption requestOption;
-    uint32_t laneHandle;
-    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillOnce(Return(nullptr));
-    int32_t ret = TransAsyncGetLaneInfoByOption(newParam, &requestOption, &laneHandle, 0, 0);
-    EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
-
-    SoftBusList *tmpList = g_asyncReqLanePendingList;
-    g_asyncReqLanePendingList = nullptr;
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
-    ret = TransAsyncGetLaneInfoByOption(newParam, &requestOption, &laneHandle, 0, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    g_asyncReqLanePendingList = tmpList;
-
-    EXPECT_CALL(TransLanePendingMock, LnnRequestLane).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransAsyncGetLaneInfoByOption(newParam, &requestOption, &laneHandle, 0, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    EXPECT_CALL(TransLanePendingMock, LnnRequestLane).WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
-    CoreSessionState state = CORE_SESSION_STATE_CANCELLING;
-    EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
-    ret =
-        TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransAsyncGetLaneInfoByOption(newParam, &requestOption, &laneHandle, 0, 0);
-    EXPECT_EQ(SOFTBUS_TRANS_STOP_BIND_BY_CANCEL, ret);
-    ret = TransDeleteSocketChannelInfoBySession(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    state = CORE_SESSION_STATE_INIT;
-    ret =
-        TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransAsyncGetLaneInfoByOption(newParam, &requestOption, &laneHandle, 0, 0);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransDeleteSocketChannelInfoBySession(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    SoftBusFree((void *)(newParam->attr));
-    newParam->attr = nullptr;
-    SoftBusFree(newParam);
-    newParam = nullptr;
-}
-
-/*
  * @tc.name: TransAsyncGetLaneInfoByQos001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -680,6 +621,7 @@ HWTEST_F(TransLanePendingTest, CopyAsyncReqItemSessionParamIds001, TestSize.Leve
 HWTEST_F(TransLanePendingTest, TransGetLaneReqItemParamByLaneHandle001, TestSize.Level1)
 {
     SessionParam *newParam = TestCreateNewSessionParam();
+    TransReqLaneItem *newTransReqLaneItem = TestCreateSessionTransReqLaneItem();
     ASSERT_TRUE(newParam != nullptr);
     uint64_t callingTokenId;
     uint64_t firstTokenId;
@@ -689,18 +631,20 @@ HWTEST_F(TransLanePendingTest, TransGetLaneReqItemParamByLaneHandle001, TestSize
 
     SoftBusList *tmpList = g_asyncReqLanePendingList;
     g_asyncReqLanePendingList = nullptr;
-    ret = TransGetLaneReqItemParamByLaneHandle(0, newParam, nullptr, nullptr, nullptr);
+    ret = TransGetLaneReqItemParamByLaneHandle(0, newTransReqLaneItem, nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     g_asyncReqLanePendingList = tmpList;
 
-    ret = TransGetLaneReqItemParamByLaneHandle(0, newParam, &callingTokenId, &firstTokenId, &timeStart);
+    ret = TransGetLaneReqItemParamByLaneHandle(0, newTransReqLaneItem, &callingTokenId, &firstTokenId, &timeStart);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
-    ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, 0, 0);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransGetLaneReqItemParamByLaneHandle(TEST_NEW_LANE_ID, newParam, &callingTokenId, &firstTokenId, &timeStart);
+    ret = TransGetLaneReqItemParamByLaneHandle(TEST_NEW_LANE_ID, newTransReqLaneItem, &callingTokenId, &firstTokenId, &timeStart);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
+    SoftBusFree(newTransReqLaneItem);
     SoftBusFree(newParam);
     newParam = nullptr;
     ret = TransDelLaneReqFromPendingList(TEST_NEW_LANE_ID, true);
@@ -799,7 +743,9 @@ HWTEST_F(TransLanePendingTest, CheckSocketChannelState001, TestSize.Level1)
     ret = TransSetSocketChannelStateBySession(newParam->sessionName, newParam->sessionId,
         CORE_SESSION_STATE_CANCELLING);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, 0, 0);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CheckSocketChannelState(laneHandle, newParam, &extra, LANE_T_BYTE);
     EXPECT_EQ(SOFTBUS_TRANS_STOP_BIND_BY_CANCEL, ret);
@@ -831,7 +777,9 @@ HWTEST_F(TransLanePendingTest, TransOnAsyncLaneSuccess001, TestSize.Level1)
     int32_t ret =
         TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransAddAsyncLaneReqFromPendingList(laneHandle, newParam, 0, 0);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    ret = TransAddAsyncLaneReqFromPendingList(laneHandle, newParam, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     TransOnAsyncLaneSuccess(laneHandle, &connInfo);
@@ -841,7 +789,8 @@ HWTEST_F(TransLanePendingTest, TransOnAsyncLaneSuccess001, TestSize.Level1)
     ret =
         TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransAddAsyncLaneReqFromPendingList(laneHandle, newParam, 0, 0);
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    ret = TransAddAsyncLaneReqFromPendingList(laneHandle, newParam, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     TransOnAsyncLaneSuccess(laneHandle, &connInfo);
@@ -870,7 +819,9 @@ HWTEST_F(TransLanePendingTest, TransOnAsyncLaneFail001, TestSize.Level1)
     laneHandle = TEST_LANE_ID;
     SessionParam *newParam = TestCreateNewSessionParam();
     ASSERT_TRUE(newParam != nullptr);
-    int32_t ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, 0, 0);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    int32_t ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
@@ -880,7 +831,8 @@ HWTEST_F(TransLanePendingTest, TransOnAsyncLaneFail001, TestSize.Level1)
     EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     TransOnAsyncLaneFail(laneHandle, reason);
 
-    ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, 0, 0);
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret =
         TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);

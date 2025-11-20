@@ -82,6 +82,8 @@ int32_t TransCheckServerPermission(const char *mySessionName, const char *peerSe
 
 bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType);
 
+void TransFreeSessionParam(SessionParam *param);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

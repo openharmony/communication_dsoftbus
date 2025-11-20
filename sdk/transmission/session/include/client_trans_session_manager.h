@@ -23,6 +23,13 @@
 extern "C" {
 #endif
 
+typedef enum {
+    CHANNEL_USE_CHOOSE_INIT = 0,
+    CHANNEL_USE_CHOOSE_FIRST,
+    CHANNEL_USE_CHOOSE_SECOND,
+    CHANNEL_USE_CHOOSE_OTHER,
+} ChannelUseChooseState;
+
 int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
 
 /**
@@ -88,11 +95,17 @@ void ClientTransOnUserSwitch(void);
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 
+void ClientTransOnSingleLaneLinkDown(const char *networkId, int32_t routeType);
+
 void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList);
 
 int32_t CheckPermissionState(int32_t sessionId);
 
 void PermissionStateChange(const char *pkgName, int32_t state);
+
+int32_t CheckSingleLaneLinkDownByNetworkId(const char *networkId, bool *singleLinkDown);
+
+int32_t CheckMainChannelLinkDownByChannelId(int32_t sessionId, int32_t channelId, bool *mainChannel);
 
 int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName, uint64_t *timestamp);
 
@@ -172,6 +185,8 @@ int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType);
 
 int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count);
 
+int32_t ClientCacheOnEvent(int32_t socket, MultiPathEventType event, const MutipathEvent *eventData, uint32_t dataLen);
+
 int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQosEvent);
 
 int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *maxIdleTime);
@@ -210,6 +225,46 @@ int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D);
 int32_t ClientGetSessionTypeBySocket(int32_t socket, int32_t *sessionType);
 
 int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo);
+
+int32_t ClearMultiPathSessionInfoByChannel(int32_t sessionId, int32_t channelId);
+
+void HandleMultiPathOnEvent(int32_t channelId, uint8_t changeType, int32_t linkType, int32_t reason);
+
+int32_t ClientSetMultipath(int32_t socket, bool optValue);
+
+int32_t ClientGetMultipath(int32_t socket, void *optValue);
+
+int32_t ClientSetMultipathPolicy(int32_t socket, const void *optValue);
+
+int32_t ClientGetenableMultipathBySocket(int32_t socket, bool *enableMultipath);
+
+int32_t ClientGetDataTypeBySocket(int32_t socket, int* dataType);
+
+int32_t ClientSetEnableMultipathBySocket(int32_t socket, bool enableMultipath);
+
+int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount);
+
+int32_t ClientSetStatusClosingReserveBySocket(int32_t socket, bool isClosingReserve);
+
+int32_t CheckChannelIsReserveByChannelId(int32_t sessionId, int32_t channelId, int32_t *useType);
+
+int32_t GetChannelIdReserveByChannel(int32_t sessionId, int32_t channelId, int32_t *useType);
+
+int32_t GetChannelIdReserveByChannel(int32_t sessionId, int32_t channelId, int32_t *channelIdReserve);
+
+int32_t CheckMultipathBySessionId(int32_t sessionId, bool *multiChannel);
+
+void PrintExtraInfo(SessionInfo *session);
+
+void printSessionBychannelId(int32_t channelId);
+
+void printSessionBysessionId(int32_t sessionId);
+
+bool IsMultiPathSession(const char *sessionName, int32_t *multiPathSessionId);
+
+int32_t UpdateMultiPathSessionInfo(int32_t multiPathSessionId, const ChannelInfo *channel);
+
+int32_t GetFirstChannelIdBySocketId(int32_t sessionId, int32_t *channelId);
 
 #ifdef __cplusplus
 }

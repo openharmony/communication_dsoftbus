@@ -69,6 +69,9 @@ typedef void (*SocketServerStateUpdateFunc)(const char *sessionName);
 typedef int32_t (*RegisterTimeoutCallbackFunc)(int32_t timerFunId, TimerFunCallback callback);
 typedef int32_t (*ClientGetSessionTypeBySocketFunc)(int32_t socket, int32_t *sessionType);
 typedef int32_t (*ClientSetFLTosFunc)(int32_t socket, TransFlowInfo *flowInfo);
+typedef int32_t (*ClientSetMultipathPackedFunc)(int32_t socket, bool optValue);
+typedef int32_t (*ClientGetMultipathPackedFunc)(int32_t socket, void *optValue);
+typedef int32_t (*ClientSetMultipathPolicyPackedFunc)(int32_t socket, const void *optValue);
 
 typedef struct TagClientOpenFuncList {
     CheckPackageNameFunc checkPackageName;
@@ -101,6 +104,9 @@ typedef struct TagClientOpenFuncList {
     RegisterTimeoutCallbackFunc registerTimeoutCallback;
     ClientGetSessionTypeBySocketFunc clientGetSessionTypeBySocket;
     ClientSetFLTosFunc clientSetFLTos;
+    ClientSetMultipathPackedFunc clientSetMultipath;
+    ClientGetMultipathPackedFunc clientGetMultipath;
+    ClientSetMultipathPolicyPackedFunc clientSetMultipathPolicy;
 } ClientOpenFuncList;
 
 #ifdef __cplusplus

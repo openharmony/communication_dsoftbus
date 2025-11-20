@@ -247,6 +247,9 @@
         "StartServiceDiscovery";
         "StopServiceDiscovery";
         "ServiceSocket";
+        "ClientSetMultipath";
+        "ClientGetMultipath";
+        "ClientSetMultipathPolicy";
     local:
         *;
 };

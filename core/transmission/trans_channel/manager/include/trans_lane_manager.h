@@ -51,6 +51,12 @@ int32_t TransGetChannelInfoByLaneHandle(uint32_t laneHandle, int32_t *channelId,
 int32_t TransAddSocketChannelInfo(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state);
 
+int32_t TransAddSocketChannelInfoMP(
+    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state);
+
+int32_t TransUpdateSocketChannelInfo(
+    const char *sessionName, int32_t sessionId, bool isUserReserve);
+
 int32_t TransUpdateSocketChannelInfoBySession(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
 
@@ -79,6 +85,25 @@ int32_t TransGetPidFromSocketChannelInfoBySession(const char *sessionName, int32
 int32_t TransGetConnectTypeByChannelId(int32_t channelId, ConnectType *connectType);
 
 int32_t TransGetTransLaneInfoByLaneHandle(uint32_t laneHandle, TransLaneInfo *laneInfo);
+
+int32_t TransGetMultiPathSessionId(int32_t *sessionId, int32_t *channelId);
+
+int32_t GetPathTransitionTypeByLaneHandle(uint32_t laneHandle, PathTransitionType *transType);
+
+int32_t TransGetSocketChannelStateReserveBySession(const char *sessionName, int32_t SessionId, CoreSessionState *state);
+
+int32_t TransSetSocketChannelStateReserveBySession(const char *sessionName, int32_t SessionId, CoreSessionState state);
+
+bool CheckNeedReallocSecondLane(int32_t channelId);
+
+int32_t TransAddSessionParamBySessionId(const char *sessionName, int32_t sessionId, const SessionParam *param);
+
+int32_t TransGetSessionParamByChannelId(int32_t channelId, SessionParam *param);
+
+int32_t TransDeleteSocketChannelInfoReserveBySession(const char *sessionName, int32_t sessionId);
+
+void printchannelInfoSa(int32_t channelId);
+
 
 #ifdef __cplusplus
 }
