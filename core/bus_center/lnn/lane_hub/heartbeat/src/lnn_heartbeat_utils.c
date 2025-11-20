@@ -337,8 +337,8 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
 
 bool LnnIsSupportBurstFeature(const char *networkId)
 {
-    uint64_t localFeature;
-    uint64_t peerFeature;
+    uint64_t localFeature = 0;
+    uint64_t peerFeature = 0;
 
     if (networkId == NULL) {
         return false;
@@ -354,7 +354,7 @@ bool LnnIsSupportBurstFeature(const char *networkId)
 
 bool LnnIsLocalSupportBurstFeature(void)
 {
-    uint64_t localFeature;
+    uint64_t localFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get local feature fail");
         return false;
