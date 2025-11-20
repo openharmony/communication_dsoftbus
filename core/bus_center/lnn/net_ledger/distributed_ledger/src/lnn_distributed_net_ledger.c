@@ -882,7 +882,7 @@ static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType)
 
 bool LnnIsLocalSupportMcuFeature(void)
 {
-    uint64_t localFeature;
+    uint64_t localFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local feature fail");
         return false;

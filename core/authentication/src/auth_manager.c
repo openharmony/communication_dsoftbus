@@ -1142,7 +1142,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
     }
     /* br and ble, sle NOT long-connection, close connection after auth pass. */
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE) {
-        uint64_t localFeature;
+        uint64_t localFeature = 0;
         int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "ret=%{public}d, local=%{public}" PRIu64, ret, localFeature);
