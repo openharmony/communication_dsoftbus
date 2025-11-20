@@ -558,7 +558,8 @@ static void SetLnnConnNodeInfo(
         connInfo->nodeInfo->feature, localFeature);
     if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
         IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
-        (isNetCapChanged || connInfo->addr.type == CONNECTION_ADDR_BLE)) {
+        ((isNetCapChanged && LnnHasDiscoveryType(connInfo->nodeInfo, DISCOVERY_TYPE_BLE)) ||
+        connInfo->addr.type == CONNECTION_ADDR_BLE)) {
         UpdateDeviceInfoToMlps(connInfo->nodeInfo->deviceInfo.deviceUdid);
     }
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
