@@ -81,6 +81,9 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&(appInfo->channelCapability))) {
         appInfo->channelCapability = 0;
     }
+    if (!GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&(appInfo->udpChannelCapability))) {
+        appInfo->udpChannelCapability = 0;
+    }
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
@@ -137,6 +140,7 @@ static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInf
     (void)GetJsonObjectStringItem(msg, "ACCOUNT_ID", appInfo->peerData.accountId, ACCOUNT_UID_LEN_MAX);
     (void)GetJsonObjectNumber64Item(msg, "SOURCE_ACL_TOKEN_ID", (int64_t *)&appInfo->peerData.tokenId);
     (void)GetJsonObjectStringItem(msg, "SOURCE_ACL_EXTRA_INFO", (appInfo->extraAccessInfo), EXTRA_ACCESS_INFO_LEN_MAX);
+    (void)GetJsonObjectNumberItem(msg, "LINKED_CHANNEL_ID", &appInfo->linkedChannelId);
 }
 
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
@@ -183,6 +187,12 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     uint32_t remoteCapability = 0;
     (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
     appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
+    uint32_t remoteUdpChannelCapability = 0;
+    (void)GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPACILITY", (int32_t *)&remoteUdpChannelCapability);
+    appInfo->udpChannelCapability = remoteUdpChannelCapability & TRANS_UDP_CHANNEL_CAPBILITY;
+    TRANS_LOGW(TRANS_CTRL,
+        "TransUnpackRequestUdpInfo UDP_CHANNEL_CAPABILITY=%{public}u, remoteUdpChannelCapability=%{public}u",
+        appInfo->udpChannelCapability, remoteUdpChannelCapability);
     return SOFTBUS_OK;
 }
 
@@ -246,6 +256,9 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
     (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
     (void)AddBoolToJsonObject(msg, "FORCE_GENERATE_UK", appInfo->forceGenerateUk);
+    (void)AddNumberToJsonObject(msg, "UDP_CHANNEL_CAPABILITY", (int32_t)appInfo->udpChannelCapability);
+    (void)AddNumberToJsonObject(msg, "LINKED_CHANNEL_ID", (int32_t)appInfo->linkedChannelId);
+
     return SOFTBUS_OK;
 }
 
@@ -285,6 +298,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddNumberToJsonObject(msg, "STREAM_TYPE", appInfo->streamType);
     (void)AddNumberToJsonObject(msg, "API_VERSION", (int32_t)appInfo->myData.apiVersion);
     (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
+    (void)AddNumberToJsonObject(msg, "UDP_CHANNEL_CAPABILITY", (int32_t)appInfo->udpChannelCapability);
     return SOFTBUS_OK;
 }
 
@@ -379,6 +393,7 @@ int32_t TransPackExtDeviceRequestInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddStringToJsonObject(msg, "CLIENT_BUS_NAME", appInfo->myData.sessionName);
     (void)AddStringToJsonObject(msg, "PKG_NAME", appInfo->myData.pkgName);
     (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
+    (void)AddNumberToJsonObject(msg, "UDP_CHANNEL_CAPABILITY", (int32_t)appInfo->udpChannelCapability);
     return SOFTBUS_OK;
 }
 
@@ -467,7 +482,9 @@ int32_t TransUnpackExtDeviceRequestInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     appInfo->fileProtocol = 0;
     uint32_t remoteCapability = 0;
+    uint32_t remoteUdpChannelCapability = 0;
     (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
+    (void)GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&remoteUdpChannelCapability);
     int32_t ret = TransUnpackMetaTypeSpecificData(msg, appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Failed to unpack specific data.");
     appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
@@ -502,6 +519,7 @@ int32_t TransPackExtDeviceReplyInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", appInfo->businessType);
     (void)AddNumberToJsonObject(msg, "API_VERSION", (int32_t)appInfo->myData.apiVersion);
     (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
+    (void)AddNumberToJsonObject(msg, "UDP_CHANNEL_CAPABILITY", (int32_t)appInfo->udpChannelCapability);
     return SOFTBUS_OK;
 }
 
@@ -534,6 +552,9 @@ int32_t TransUnpackExtDeviceReplyInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int32_t *)&(appInfo->streamType));
     if (!GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&(appInfo->channelCapability))) {
         appInfo->channelCapability = 0;
+    }
+    if (!GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&(appInfo->udpChannelCapability))) {
+        appInfo->udpChannelCapability = 0;
     }
     return SOFTBUS_OK;
 }

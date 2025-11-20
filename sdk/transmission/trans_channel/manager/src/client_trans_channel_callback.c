@@ -176,13 +176,17 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
     int32_t channelId = channel->channelId;
     int32_t channelType = channel->channelType;
     int32_t openResult = ret;
-
+    TRANS_LOGI(TRANS_SDK, "enableMultipath=%{public}d, isMultiNeg=%{public}d",
+        channel->enableMultipath, channel->isMultiNeg);
     if (channel->isServer) {
         if (channelType == CHANNEL_TYPE_UDP && udpPort > 0) {
             ret = TransSendUdpChannelOpenedDataToCore(channelId, channelType, openResult, udpPort, &accessInfo);
         } else {
             ret = TransSendChannelOpenedDataToCore(channelId, channelType, openResult, &accessInfo);
         }
+    } else if (!channel->isServer && channel->isMultiNeg) {
+        TransSetUdpChannelSessionId(channel->channelId, channel->sessionId);
+        (void)UpdateMultiPathSessionInfo(channel->sessionId, channel);
     }
     if (ret == SOFTBUS_OK) {
         AddSocketResource(sessionName, channel);
@@ -232,7 +236,19 @@ int32_t TransOnChannelLinkDown(const char *networkId, uint32_t routeType)
         ClientTransOnPrivilegeClose(networkId);
         return SOFTBUS_OK;
     }
-    ClientTransOnLinkDown(networkId, routeType);
+    bool singleLinkDown = false;
+    int ret = CheckSingleLaneLinkDownByNetworkId(networkId, &singleLinkDown);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "check is single lane linkdown error.");
+        return ret;
+    }
+    singleLinkDown = false;
+    if (singleLinkDown) {
+        TRANS_LOGI(TRANS_SDK, "multi path session single link down.");
+        ClientTransOnSingleLaneLinkDown(networkId, routeType);
+    } else {
+        ClientTransOnLinkDown(networkId, routeType);
+    }
     return SOFTBUS_OK;
 }
 

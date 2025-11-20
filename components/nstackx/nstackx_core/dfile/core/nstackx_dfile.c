@@ -1200,6 +1200,17 @@ L_ERR_SESSION:
     return NSTACKX_EFAILED;
 }
 
+int32_t NSTACKX_DFileServerMpV2(NSTACKX_SessionParaMpV2 para[], uint8_t paraNum, const uint8_t *key,
+                                           uint32_t keyLen, DFileMsgReceiver msgReceiver)
+{
+    (void)(para);
+    (void)(paraNum);
+    (void)(key);
+    (void)(keyLen);
+    (void)(msgReceiver);
+    return NSTACKX_EOK;
+}
+
 static int32_t DFileSenderInitWithTargetDev(DFileSession *session, const struct sockaddr_in *sockAddr,
                                             uint16_t *connType, const char *localInterface, uint8_t socketIndex)
 {
@@ -1390,6 +1401,17 @@ int32_t NSTACKX_DFileClient(struct sockaddr_in *srvAddr, socklen_t addrLen, cons
     EpollEventPtrInit();
 #endif
     return NSTACKX_DFileClientWithTargetDev(&sessionPara);
+}
+
+int32_t NSTACKX_DFileClientMpV2(NSTACKX_SessionParaMpV2 para[], uint8_t paraNum, const uint8_t *key,
+                                           uint32_t keyLen, DFileMsgReceiver msgReceiver)
+{
+    (void)(para);
+    (void)(paraNum);
+    (void)(key);
+    (void)(keyLen);
+    (void)(msgReceiver);
+    return NSTACKX_EOK;
 }
 
 static inline void ClearPendingFileList(DFileSession *session)
@@ -1651,5 +1673,24 @@ int32_t NSTACKX_DFileSessionGetFileList(int32_t sessionId)
 
 int32_t NSTACKX_DFileSetSessionOpt(int32_t sessionId, const DFileOpt *opt)
 {
+    return NSTACKX_EOK;
+}
+
+int32_t NSTACKX_DFileAddMpPath(int32_t sessionId, NSTACKX_SessionParaMpV2 para[], uint8_t paraNum,
+    const uint8_t *key, uint32_t keyLen)
+{
+    (void)(sessionId);
+    (void)(para);
+    (void)(paraNum);
+    (void)(key);
+    (void)(keyLen);
+    return NSTACKX_EOK;
+}
+
+int32_t NSTACKX_RemoveMpPath(int32_t sessionId, NSTACKX_SessionParaMpV2 para[], uint8_t paraNum)
+{
+    (void)(sessionId);
+    (void)(para);
+    (void)(paraNum);
     return NSTACKX_EOK;
 }

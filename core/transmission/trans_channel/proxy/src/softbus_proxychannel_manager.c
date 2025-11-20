@@ -2376,6 +2376,18 @@ void TransWifiStateChange(const LnnEventBasicInfo *info)
     }
 }
 
+static void TransNotifyNetworkOnline(const LnnEventBasicInfo *info)
+{
+    if ((info == NULL) || (info->event != LNN_EVENT_NODE_NET_TYPE)) {
+        return;
+    }
+    LnnNodeNetTypeInfo *eventInfo = (LnnNodeNetTypeInfo*)info;
+    if (eventInfo->addrType == CONNECTION_ADDR_NCM) {
+        TRANS_LOGI(TRANS_CTRL, "USB onlie, start realloc lnn");
+        TransHandleReallocLnn();
+    }
+}
+
 static void TransNotifySingleNetworkOffLine(const LnnEventBasicInfo *info)
 {
     if ((info == NULL) || (info->event != LNN_EVENT_SINGLE_NETWORK_OFFLINE)) {
@@ -2466,6 +2478,9 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
     ret = LnnRegisterEventHandler(LNN_EVENT_SINGLE_NETWORK_OFFLINE, TransNotifySingleNetworkOffLine);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_INIT, "register TransNotifySingleNetworkOffLine failed.");
+    
+    ret = LnnRegisterEventHandler(LNN_EVENT_NODE_NET_TYPE, TransNotifyNetworkOnline);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register TransNotifyNetworkOnline failed.");
 
     ret = LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, TransNotifyOffLine);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register TransNotifyOffLine failed.");

@@ -45,8 +45,11 @@ typedef struct {
     bool isQosLane;
     bool isAsync;
     uint32_t actionId;
+    uint32_t udpChannelCapability;
     int32_t pid;
     bool isLowLatency;
+    bool enableMultipath;
+    bool isMultiNeg;
 } SessionParam;
 
 typedef struct {

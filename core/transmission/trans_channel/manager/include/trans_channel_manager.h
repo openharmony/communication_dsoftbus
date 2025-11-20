@@ -94,6 +94,10 @@ int32_t TransPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *pe
 int32_t PrivilegeCloseListAddItem(ListNode *privilegeCloseList, int32_t pid, const char *pkgName);
 
 void TransCheckChannelOpenRemoveFromLooper(int32_t channelId);
+
+void TransHandleReallocLnn();
+
+int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

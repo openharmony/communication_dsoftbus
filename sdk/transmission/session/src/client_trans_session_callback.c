@@ -64,6 +64,8 @@ static int32_t FillSessionInfo(SessionInfo *session, const ChannelInfo *channel,
 {
     session->channelId = channel->channelId;
     session->channelType = (ChannelType)channel->channelType;
+    session->routeType = channel->routeType;
+    session->enableMultipath = channel->enableMultipath;
     session->peerPid = channel->peerPid;
     session->peerUid = channel->peerUid;
     session->isServer = channel->isServer;
@@ -562,6 +564,20 @@ int32_t TransOnSessionOpened(
     }
     int32_t sessionId = INVALID_SESSION_ID;
     if (channel->isServer) {
+        int32_t multiPathSessionId = INVALID_SESSION_ID;
+        bool isMultiPathSession = IsMultiPathSession(sessionName, &multiPathSessionId);
+        if (isMultiPathSession) {
+            int32_t ret = UpdateMultiPathSessionInfo(multiPathSessionId, channel);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_SDK, "fill mp session info failed, ret=%{public}d", ret);
+                return ret;
+            }
+            if (channel->channelType == CHANNEL_TYPE_UDP) {
+                TransSetUdpChannelSessionId(channel->channelId, multiPathSessionId);
+            }
+            TRANS_LOGI(TRANS_SDK, "ok");
+            return SOFTBUS_OK;
+        }
         ret = AcceptSessionAsServer(sessionName, channel, flag, &sessionId);
     } else {
         ret = ClientEnableSessionByChannelId(channel, &sessionId);
@@ -616,6 +632,13 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         return ret;
     }
     if (sessionCallback.isSocketListener) {
+        int32_t useType =3;
+        (void)CheckChannelIsReserveByChannelId(sessionId, channelId, &useType);
+        if (useType == 2) {
+            TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, sessionId=%{public}d, useType=%{public}d, set fail",
+                sessionId, channelId, useType);
+            return SOFTBUS_OK;
+        }
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
         bool isAsync = true;
         int ret = ClientGetSessionIsAsyncBySessionId(sessionId, &isAsync);
@@ -920,6 +943,42 @@ int32_t ClientTransOnQos(int32_t channelId, int32_t channelType, QoSEvent event,
     return SOFTBUS_OK;
 }
 
+int32_t ClientTransOnEvent(int32_t channelId, int32_t channelType,
+    MultiPathEventType event, const MutipathEvent *eventData)
+{
+    if (eventData == NULL) {
+        TRANS_LOGE(TRANS_SDK, "eventData is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t socket = INVALID_SESSION_ID;
+    SessionListenerAdapter sessionCallback;
+    bool isServer = false;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &socket, &sessionCallback, &isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get session callback failed channeId=%{public}d", channelId);
+        return ret;
+    }
+    if (!sessionCallback.isSocketListener) {
+        TRANS_LOGI(TRANS_SDK, "not report on event on non-socket session");
+        return SOFTBUS_OK;
+    }
+    if (sessionCallback.socketClient.OnEvent == NULL) {
+        TRANS_LOGD(TRANS_SDK, "listener OnEvent is NULL, sessionId=%{public}d", socket);
+        return SOFTBUS_OK;
+    }
+    int32_t dataLen = sizeof(MutipathEvent);
+    ret = ClientCacheOnEvent(socket, event, eventData, dataLen);
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_TRANS_NO_NEED_CACHE_ON_EVENT) {
+        TRANS_LOGE(TRANS_SDK, "cache on event failed, ret=%{public}d", socket);
+        return ret;
+    } else if (ret == SOFTBUS_TRANS_NO_NEED_CACHE_ON_EVENT) {
+        sessionCallback.socketClient.OnEvent(socket, event, eventData, dataLen);
+        TRANS_LOGE(TRANS_SDK, "report on event to client socket=%{public}d, event=%{public}d", socket, event);
+    }
+    return SOFTBUS_OK;
+}
+
 IClientSessionCallBack *GetClientSessionCb(void)
 {
     g_sessionCb.OnSessionOpened = TransOnSessionOpened;
@@ -935,5 +994,6 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnChannelBind = ClientTransOnChannelBind;
     g_sessionCb.IfChannelForSocket = ClientTransIfChannelForSocket;
     g_sessionCb.OnQos = ClientTransOnQos;
+    g_sessionCb.OnEvent = ClientTransOnEvent;
     return &g_sessionCb;
 }

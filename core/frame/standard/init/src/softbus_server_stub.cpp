@@ -697,6 +697,7 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.groupId = data.ReadCString();
     param.isAsync = data.ReadBool();
     param.sessionId = data.ReadInt32();
+    param.enableMultipath = data.ReadBool();
     param.actionId = data.ReadUint32();
     param.pid = OHOS::IPCSkeleton::GetCallingPid();
     param.isLowLatency = data.ReadBool();

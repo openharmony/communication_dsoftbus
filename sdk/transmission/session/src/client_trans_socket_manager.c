@@ -375,6 +375,8 @@ static bool CheckDMHandleAgingSession(const char *sessionName, const SessionInfo
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
 static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
+    TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, type1=%{public}d, type2=%{public}d, linkDownType=%{public}d",
+        sessionNode->sessionId, sessionNode->routeType, sessionNode->routeTypeReserve, routeType);
     if (connType == TRANS_CONN_ALL) {
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             return false;
@@ -389,6 +391,32 @@ static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, 
     * only when the function OnWifiDirectDeviceOffLine is called can reach this else branch,
     * and routeType is WIFI_P2P, the connType is hml or p2p
     */
+    if (sessionNode->enableMultipath &&
+        (sessionNode->routeTypeReserve == routeType || sessionNode->routeType == routeType)) {
+        TRANS_LOGE(TRANS_SDK, "reserve link down");
+        char srvIp[IP_LEN];
+        int32_t srvPort = -1;
+        int32_t ret = TransGetUdpChannelExtraInfo(sessionNode->channelIdReserve, srvIp, &srvPort);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "TransGetUdpChannelExtraInfo error, ret=%{public}d", ret);
+            return false;
+        }
+        ret = ClientTransCloseReserveChannel(sessionNode->channelIdReserve,
+            sessionNode->channelTypeReserve, srvIp, srvPort, routeType);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "ClientTransCloseReserveChannel error, ret=%{public}d", ret);
+            return false;
+        }
+        TRANS_LOGI(TRANS_SDK, "clear reserveInfo, channelIdReserve=%{public}d, routeTypeReserve=%{public}d",
+            sessionNode->channelIdReserve, sessionNode->routeTypeReserve);
+        sessionNode->channelIdReserve = INVALID_CHANNEL_ID;
+        sessionNode->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+        sessionNode->routeTypeReserve = -1;
+        if (sessionNode->routeTypeReserve == routeType) {
+            return false;
+        }
+    }
+    
     if (sessionNode->routeType != routeType) {
         return false;
     }
@@ -485,6 +513,12 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
         ListAdd(destroyList, &(destroyNode->node));
         SoftBusFree(sessionNode);
     }
+}
+
+void ClearClientSessionByNetworkId(const ClientSessionServer *server,
+    const char *networkId, int32_t type, ListNode *destroyList)
+{
+    return;
 }
 
 SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *clientSessionServer)
@@ -591,6 +625,10 @@ static void ClientInitSession(SessionInfo *session, const SessionParam *param)
     session->lifecycle.sessionState = SESSION_STATE_INIT;
     session->lifecycle.condIsWaiting = false;
     session->actionId = param->actionId;
+    session->multipathStrategy = MULTIPATH_STRATEGY_MAX;
+    session->enableMultipath = false;
+    session->channelIdReserve = INVALID_CHANNEL_ID;
+    session->channelTypeReserve = CHANNEL_TYPE_BUTT;
 }
 
 SessionInfo *CreateNewSocketSession(const SessionParam *param)

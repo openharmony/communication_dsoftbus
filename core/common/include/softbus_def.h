@@ -185,6 +185,8 @@ typedef struct {
     bool isSupportTlv;
     bool isD2D;
     bool isSupportNewHead;
+    bool isMultiNeg;
+    bool enableMultipath;
     int32_t sessionId;
     int32_t pagingId;
     int32_t channelId;
@@ -202,6 +204,7 @@ typedef struct {
     int32_t algorithm;
     int32_t crc;
     int32_t autoCloseTime;
+    int32_t linkedChannelId;
     int myHandleId;
     int peerHandleId;
     int32_t linkType;
