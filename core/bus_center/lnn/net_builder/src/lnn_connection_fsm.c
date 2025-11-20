@@ -532,7 +532,7 @@ static void SetLnnConnNodeInfo(
     LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
 {
     ReportCategory report;
-    uint64_t localFeature;
+    uint64_t localFeature = 0;
     (void)LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
     uint8_t relation[CONNECTION_ADDR_MAX] = { 0 };
     NodeInfo oldInfo;
