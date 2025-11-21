@@ -107,6 +107,8 @@ extern "C" {
 #define GENERAL_SEND_DATA_MAX_LEN 1024
 #define GENERAL_NAME_SIZE_MAX     256
 
+#define MULTIPATH_EVENT_TAG 99
+
 typedef struct {
     SoftBusMutex lock;
     unsigned int cnt;

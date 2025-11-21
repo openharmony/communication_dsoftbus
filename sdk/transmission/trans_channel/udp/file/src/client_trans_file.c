@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "client_trans_file_listener.h"
+#include "client_trans_session_manager.h"
 #include "client_trans_statistics.h"
 #include "file_adapter.h"
 #include "nstackx_dfile.h"
@@ -24,8 +25,8 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "trans_event.h"
 #include "trans_log.h"
-#include "client_trans_session_manager.h"
 
 #define DEFAULT_KEY_LENGTH 32
 
@@ -218,8 +219,7 @@ static void NotifySocketSendResult(
 
 static bool IsParmasValid(DFileMsgType msgType, const DFileMsg *msgData)
 {
-    if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
-        msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
+    if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
         return false;
     }
@@ -269,6 +269,92 @@ static void FileSendErrorEvent(UdpChannel *udpChannel, FileListener *fileListene
     return;
 }
 
+static void NotifySendRate(UdpChannel *udpChannel, DFileMsgType msgType, const DFileMsg *msgData)
+{
+    if (udpChannel == NULL || msgData == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalied param");
+        return;
+    }
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    if (udpChannel->enableMultipath) {
+        extra.multipathTag = MULTIPATH_EVENT_TAG;
+    }
+    extra.channelId = udpChannel->channelId;
+    extra.socketName = udpChannel->info.mySessionName;
+    extra.peerNetworkId = udpChannel->info.peerDeviceId;
+    if (msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
+        extra.fileRate = msgData->rate;
+        TRANS_LOGI(TRANS_SDK, "DFILE_ON_SESSION_TRANSFER_RATE: RATE=%{public}d", extra.fileRate);
+        TRANS_EVENT(EVENT_SCENE_TRANS_FILE_RATE, EVENT_STAGE_TOTAL_RATE, extra);
+        return;
+    }
+    if (msgType == DFILE_ON_MP_SPEED) {
+        if (msgData->notifyLinkRate[0].linkType == DFILE_LINK_WIRELESS) {
+            extra.fileWirelessRate = msgData->notifyLinkRate[0].rate;
+            extra.fileWiredRate = msgData->notifyLinkRate[1].rate;
+        } else {
+            extra.fileWirelessRate = msgData->notifyLinkRate[1].rate;
+            extra.fileWiredRate = msgData->notifyLinkRate[0].rate;
+        }
+        TRANS_LOGI(TRANS_SDK, "DFILE_ON_MP_SPEED: WIRED_RATE=%{public}d, WIRELESS_RATE=%{public}d",
+            extra.fileWirelessRate, extra.fileWiredRate);
+        TRANS_EVENT(EVENT_SCENE_TRANS_FILE_RATE, EVENT_STAGE_CHANNEL_RATE, extra);
+        return;
+    }
+}
+
+static void FileSendListenerEx(UdpChannel *udpChannel, DFileMsgType msgType, const DFileMsg *msgData)
+{
+    if (udpChannel == NULL || msgData == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalied param");
+        return;
+    }
+    FileListener fileListener;
+    (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
+    if (TransGetFileListener(udpChannel->info.mySessionName, &fileListener) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "TransGetFileListener failed, dfileId=%{public}d, type=%{public}d",
+            udpChannel->dfileId, msgType);
+        return;
+    }
+    if (msgType == DFILE_ON_CLEAR_POLICY_FILE_LIST) {
+        if (fileListener.socketSendCallback != NULL) {
+            NotifySocketSendResult(udpChannel->sessionId, msgType, msgData, &fileListener);
+        }
+        TRANS_LOGI(TRANS_SDK, "notify DFILE_ON_CLEAR_POLICY_FILE_LIST success.");
+        return;
+    }
+    int32_t sessionId = -1;
+    if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel->channelId, &sessionId) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, dfileId=%{public}d, type=%{public}d",
+            udpChannel->dfileId, msgType);
+        return;
+    }
+
+    if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
+        TRANS_LOGE(TRANS_SDK, "FileSendErrorEvent, dfileId=%{public}d, type=%{public}d", udpChannel->dfileId, msgType);
+        FileSendErrorEvent(udpChannel, &fileListener, msgData, msgType, sessionId);
+        return;
+    }
+    if (msgType == DFILE_ON_MP_SPEED || msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
+        NotifySendRate(udpChannel, msgType, msgData);
+        return;
+    }
+    if (msgType == DFILE_ON_MP_PATHNUM_CHANGE) {
+        LinkMediumType linkMediumType = ConvertDFileLinkToLinkMedium(msgData->pathNumChange.linkType);
+        enum SoftBusMPErrNo reason = ConvertOnEventReason(
+            msgData->pathNumChange.changeType, msgData->pathNumChange.linkType);
+        HandleMultiPathOnEvent(udpChannel->channelId, msgData->pathNumChange.changeType, linkMediumType, reason);
+        return;
+    }
+    (void)g_udpChannelMgrCb->OnIdleTimeoutReset(sessionId);
+    if (fileListener.socketSendCallback != NULL) {
+        NotifySocketSendResult(sessionId, msgType, msgData, &fileListener);
+    } else {
+        NotifySendResult(sessionId, msgType, msgData, &fileListener);
+    }
+}
+
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
     if (!IsParmasValid(msgType, msgData)) {
@@ -288,52 +374,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
 
-    FileListener fileListener;
-    (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
-    if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "TransGetFileListener failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
-        return;
-    }
-    if (msgType == DFILE_ON_CLEAR_POLICY_FILE_LIST) {
-        if (fileListener.socketSendCallback != NULL) {
-            NotifySocketSendResult(udpChannel.sessionId, msgType, msgData, &fileListener);
-        }
-        TRANS_LOGI(TRANS_SDK, "notify DFILE_ON_CLEAR_POLICY_FILE_LIST success.");
-        return;
-    }
-
-    int32_t sessionId = -1;
-    if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
-        return;
-    }
-
-    if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        TRANS_LOGE(TRANS_SDK, "FileSendErrorEvent, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
-        FileSendErrorEvent(&udpChannel, &fileListener, msgData, msgType, sessionId);
-        return;
-    }
-    if (msgType == DFILE_ON_MP_SPEED) {
-        TRANS_LOGI(TRANS_SDK, "recv msg DFILE_ON_MP_SPEED");
-        TRANS_LOGI(TRANS_SDK, "notifyLinkRate 0 linkType %{public}d rate %{public}d",
-            msgData->notifyLinkRate[0].linkType, msgData->notifyLinkRate[0].rate);
-        TRANS_LOGI(TRANS_SDK, "notifyLinkRate 1 linkType %{public}d rate %{public}d",
-            msgData->notifyLinkRate[1].linkType, msgData->notifyLinkRate[1].rate);
-        return;
-    }
-    if (msgType == DFILE_ON_MP_PATHNUM_CHANGE) {
-        LinkMediumType linkMediumType = ConvertDFileLinkToLinkMedium(msgData->pathNumChange.linkType);
-        enum SoftBusMPErrNo reason = ConvertOnEventReason(
-            msgData->pathNumChange.changeType, msgData->pathNumChange.linkType);
-        HandleMultiPathOnEvent(udpChannel.channelId, msgData->pathNumChange.changeType, linkMediumType, reason);
-        return;
-    }
-    (void)g_udpChannelMgrCb->OnIdleTimeoutReset(sessionId);
-    if (fileListener.socketSendCallback != NULL) {
-        NotifySocketSendResult(sessionId, msgType, msgData, &fileListener);
-    } else {
-        NotifySendResult(sessionId, msgType, msgData, &fileListener);
-    }
+    FileSendListenerEx(&udpChannel, msgType, msgData);
 }
 
 static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData,

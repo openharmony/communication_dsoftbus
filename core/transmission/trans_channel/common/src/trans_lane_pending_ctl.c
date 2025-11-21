@@ -982,6 +982,7 @@ static void TransOnAsyncLaneReserveFail(uint32_t laneHandle, int32_t reason)
     LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&(reqLane.param));
     TransEventExtra extra;
     extra.linkType = LANE_LINK_TYPE_BUTT;
+    extra.multipathTag = MULTIPATH_EVENT_TAG;
     BuildTransEventExtra(&extra, &(reqLane.param), laneHandle, transType, reason);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, extra);
     if (reason == SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT) {
