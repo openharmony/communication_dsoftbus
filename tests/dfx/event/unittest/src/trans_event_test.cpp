@@ -122,6 +122,10 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .localIsDbdc = 1,
         .remoteIsDbdc = 1,
         .conCurrentId = "testConCurrentId",
+        .multipathTag = 1,
+        .fileRate = 1,
+        .fileWirelessRate = 1,
+        .fileWiredRate = 1,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 

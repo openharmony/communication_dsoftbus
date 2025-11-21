@@ -47,6 +47,7 @@ typedef enum {
     EVENT_SCENE_TRANS_REPORT_WIFIINFO = 20,
     EVENT_SCENE_PAGING_CONNECT = 21,
     EVENT_SCENE_TALKIE = 22,
+    EVENT_SCENE_TRANS_FILE_RATE = 23,
 } TransEventScene;
 
 typedef enum {
@@ -98,6 +99,12 @@ typedef enum {
     DEVICE_STATE_NOT_CARE,
     DEVICE_STATE_BUTT,
 } TransDeviceState;
+
+typedef enum {
+    EVENT_STAGE_TOTAL_RATE = 1,
+    EVENT_STAGE_CHANNEL_RATE,
+    EVENT_STATE_BUTT,
+} TransFileRateState;
 
 typedef struct {
     uint8_t talkieFreq;        // TALKIE_FREQ
@@ -163,6 +170,10 @@ typedef struct {
     int32_t localIsDbdc;       // LOCAL_IS_DBDC
     int32_t remoteIsDbdc;      // REMOTE_IS_DBDC
     const char *conCurrentId;  // CONCURRENT_ID
+    int32_t multipathTag;      // MULTIPATH_TAG
+    uint32_t fileRate;         // FILE_RATE
+    uint32_t fileWirelessRate; // FILE_WIRELESS_RATE
+    uint32_t fileWiredRate;    // FILE_WIRED_RATE
 } TransEventExtra;
 
 typedef enum {

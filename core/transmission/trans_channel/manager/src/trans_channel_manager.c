@@ -659,6 +659,7 @@ int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
     TransSetFirstTokenInfo(appInfo, &extra);
     TransSetQosInfo(param->qos, param->qosCount, &extra);
     extra.sessionId = param->sessionId;
+    extra.multipathTag = MULTIPATH_EVENT_TAG;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (param->isQosLane) {
         TRANS_LOGE(TRANS_CTRL, "linkedChannelId=%{public}d, channelId=%{public}d",
