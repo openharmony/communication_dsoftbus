@@ -339,10 +339,19 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
-    char *ret = VerifyP2pPack(g_ip, g_port, nullptr, 0, 0);
+    VerifyP2pInfo info = {
+        .myIp = g_ip,
+        .peerIp = nullptr,
+        .myPort = g_port,
+        .myUid = 0,
+        .protocol = 0,
+        .isMinTp = false,
+    };
+    char *ret = VerifyP2pPack(&info);
     EXPECT_TRUE(ret != nullptr);
 
-    ret = VerifyP2pPack(nullptr, g_port, nullptr, 0, 0);
+    info.myIp = nullptr;
+    ret = VerifyP2pPack(&info);
     EXPECT_TRUE(ret == nullptr);
 }
 
@@ -355,23 +364,27 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
 {
-    char peerIp[IP_LEN] = { 0 };
-    int32_t peerPort;
-    int32_t peerUid;
     string msg = TestGetMsgPack();
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
-
-    char *pack = VerifyP2pPack(g_ip, g_port, nullptr, 0, 0);
+    VerifyP2pInfo info = {
+        .myIp = g_ip,
+        .peerIp = nullptr,
+        .myPort = g_port,
+        .myUid = 0,
+        .protocol = 0,
+        .isMinTp = false,
+    };
+    char *pack = VerifyP2pPack(&info);
     EXPECT_TRUE(pack != nullptr);
-    ProtocolType protocol = 0;
-    int32_t ret = VerifyP2pUnPack(json, peerIp, &peerPort, nullptr, &peerUid);
+    (void)memset_s(&info, sizeof(VerifyP2pInfo), 0, sizeof(VerifyP2pInfo));
+    int32_t ret = VerifyP2pUnPack(json, nullptr, &info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), &g_port, &protocol, &peerUid);
+    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), &info);
     EXPECT_NE(ret, SOFTBUS_NOT_FIND);
 
-    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), &g_port, &protocol, &peerUid);
+    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), &info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }
@@ -746,6 +759,26 @@ HWTEST_F(TransCoreTcpDirectTest, TransDelTcpChannelInfoByChannelId001, TestSize.
     info->channelId = 1;
     info->businessType = BUSINESS_TYPE_BYTE;
     info->fdProtocol = LNN_PROTOCOL_MINTP;
+    info->isServer = false;
+    int32_t ret = TransAddTcpChannelInfo(info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDelTcpChannelInfoByChannelId(info->channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransDelTcpChannelInfoByChannelId002
+ * @tc.desc: test TransDelTcpChannelInfoByChannelId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransDelTcpChannelInfoByChannelId002, TestSize.Level1)
+{
+    TcpChannelInfo *info = (TcpChannelInfo *)SoftBusCalloc(sizeof(TcpChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    info->channelId = 1;
+    info->businessType = BUSINESS_TYPE_BYTE;
+    info->fdProtocol = LNN_PROTOCOL_DETTP;
     info->isServer = false;
     int32_t ret = TransAddTcpChannelInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);

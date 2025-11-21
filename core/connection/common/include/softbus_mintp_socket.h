@@ -32,7 +32,8 @@ typedef struct {
     int32_t offset;
 } MintpTimeSync;
 
-const SocketInterface *GetMintpProtocol(void);
+const SocketInterface *GetMinTpProtocol(void);
+const SocketInterface *GetDetTpProtocol(void);
 int32_t SetMintpSocketMsgSize(int32_t fd);
 int32_t SetMintpSocketTos(int32_t fd, uint32_t tos);
 int32_t SetMintpSocketTransType(int32_t fd, uint32_t transType);

@@ -26,6 +26,17 @@ extern "C" {
 #endif /* __cplusplus */
 #define CODE_VERIFY_P2P 3
 
+typedef struct {
+    const char *myIp;
+    const char *peerIp;
+    int32_t myPort;
+    int32_t myUid;
+    ProtocolType protocol;
+    bool isMinTp;
+    int32_t peerPort;
+    int32_t peerUid;
+} VerifyP2pInfo;
+
 int32_t P2pDirectChannelInit(void);
 
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);

@@ -775,7 +775,6 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthChannelCloseTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pMockTest, OpenNewAuthConnTest001, TestSize.Level1)
 {
-    int32_t newChannelId = TEST_CHANNEL_ID;
     ConnectType type = CONNECT_HML;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
@@ -785,12 +784,12 @@ HWTEST_F(TransTcpDirectP2pMockTest, OpenNewAuthConnTest001, TestSize.Level1)
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, AuthGetHmlConnInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpP2pDirectMock, AuthOpenConn).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
+    int32_t ret = OpenNewAuthConn(appInfo, conn, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     type = CONNECT_P2P;
     EXPECT_CALL(TcpP2pDirectMock, AuthGetP2pConnInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpP2pDirectMock, AuthOpenConn).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
+    ret = OpenNewAuthConn(appInfo, conn, type);
     EXPECT_EQ(SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, ret);
     TransDelSessionConnById(conn->channelId);
     SoftBusFree(appInfo);
@@ -1107,17 +1106,21 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartTransP2pDirectListenerTest001, TestSize
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
+    (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, TEST_UUID, sizeof(TEST_UUID));
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
-    int32_t ret = StartTransP2pDirectListener(type, conn, appInfo);
+    int32_t ret = StartTransP2pDirectListener(type, conn, appInfo, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     type = CONNECT_P2P;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillRepeatedly(Return(false));
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillRepeatedly(Return(port));
-    ret = StartTransP2pDirectListener(type, conn, appInfo);
+    ret = StartTransP2pDirectListener(type, conn, appInfo, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillRepeatedly(Return(true));
-    ret = StartTransP2pDirectListener(type, conn, appInfo);
+    ret = StartTransP2pDirectListener(type, conn, appInfo, false);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    conn->appInfo.businessType = BUSINESS_TYPE_BYTE;
+    ret = StartTransP2pDirectListener(type, conn, appInfo, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(conn);

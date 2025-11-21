@@ -16,10 +16,12 @@
 #ifndef SOFTBUS_TCP_DIRECT_JSON_H
 #define SOFTBUS_TCP_DIRECT_JSON_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "cJSON.h"
 #include "softbus_protocol_def.h"
+#include "trans_tcp_direct_p2p.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -29,9 +31,9 @@ extern "C" {
 
 char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc);
 
-char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol, int32_t myUid);
+char *VerifyP2pPack(VerifyP2pInfo *info);
 
-int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, int32_t *port, ProtocolType *protocol, int32_t *uid);
+int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, VerifyP2pInfo *info);
 
 #ifdef __cplusplus
 #if __cplusplus

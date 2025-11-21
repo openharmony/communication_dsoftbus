@@ -127,13 +127,21 @@ int32_t ConnInitSockets(void)
     }
     CONN_LOGD(CONN_INIT, "usb registed!");
 
-    ret = RegistSocketProtocol(GetMintpProtocol());
+    ret = RegistSocketProtocol(GetMinTpProtocol());
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "regist mintp fail!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
     CONN_LOGD(CONN_INIT, "mintp registed!");
+
+    ret = RegistSocketProtocol(GetDetTpProtocol());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "regist dettp fail!! ret=%{public}" PRId32, ret);
+        (void)SoftBusMutexDestroy(&g_socketsMutex);
+        return ret;
+    }
+    CONN_LOGD(CONN_INIT, "dettp registed!");
 
     ret = RegistSocketProtocol(GetHtpProtocol());
     if (ret != SOFTBUS_OK) {
