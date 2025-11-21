@@ -140,6 +140,10 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.localIsDbdc);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.remoteIsDbdc);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.conCurrentId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.multipathTag);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.fileRate);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.fileWirelessRate);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.fileWiredRate);
     EXPECT_EQ(++index, validSize);
     return true;
 }

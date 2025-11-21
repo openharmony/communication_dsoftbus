@@ -97,8 +97,12 @@ TRANS_ASSIGNER(Int32,  RemoteIsDbac, remoteIsDbac)
 TRANS_ASSIGNER(Int32,  LocalIsDbdc, localIsDbdc)
 TRANS_ASSIGNER(Int32,  RemoteIsDbdc, remoteIsDbdc)
 TRANS_ASSIGNER(String, ConCurrentId, conCurrentId)
+TRANS_ASSIGNER(Int32,  MultipathTag, multipathTag)
+TRANS_ASSIGNER(Int32,  FileRate, fileRate)
+TRANS_ASSIGNER(Int32,  FileWirelessRate, fileWirelessRate)
+TRANS_ASSIGNER(Int32,  FileWiredRate, fileWiredRate)
 
-#define TRANS_ASSIGNER_SIZE 63 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 67 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
     { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
@@ -163,6 +167,10 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "LOCAL_IS_DBDC",       HISYSEVENT_INT32,    TransAssignerLocalIsDbdc     },
     { "REMOTE_IS_DBDC",      HISYSEVENT_INT32,    TransAssignerRemoteIsDbdc    },
     { "CONCURRENT_ID",       HISYSEVENT_STRING,   TransAssignerConCurrentId    },
+    { "MULTIPATH_TAG",       HISYSEVENT_INT32,    TransAssignerMultipathTag    },
+    { "FILE_RATE",           HISYSEVENT_INT32,    TransAssignerFileRate        },
+    { "FILE_WIRELESS_RATE",  HISYSEVENT_INT32,    TransAssignerFileWirelessRate},
+    { "FILE_WIRED_RATE",     HISYSEVENT_INT32,    TransAssignerFileWiredRate   },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
