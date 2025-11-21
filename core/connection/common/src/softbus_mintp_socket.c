@@ -35,6 +35,8 @@
 #define MTP_TRANS_TYPE      10
 #define MTP_TIME_SYNC       11
 #define USER_TIMEOUT_MS     (15 * 1000) // 15s
+#define MINTP_TRANS_TYPE    0
+#define DETTP_TRANS_TYPE    1
 
 struct MtpMacAddr {
     unsigned char addr[6];
@@ -122,11 +124,11 @@ int32_t SetMintpSocketTimeSync(int32_t fd, MintpTimeSync *timeSync)
     return SOFTBUS_OK;
 }
 
-static void SetMintpOption(int32_t fd)
+static void SetMintpOption(int32_t fd, uint32_t transType)
 {
     SetMintpSocketKeepAlive(fd, USER_TIMEOUT_MS);
     SetMintpSocketMsgSize(fd);
-    SetMintpSocketTransType(fd, 1);
+    SetMintpSocketTransType(fd, transType);
 }
 
 static int32_t BindMintp(int32_t domain, int32_t fd, const char *localIp)
@@ -187,7 +189,8 @@ static int32_t OpenMintpServerSocket(const LocalListenerInfo *option)
         ConnShutdownSocket(fd);
         return ret;
     }
-    SetMintpOption(fd);
+    uint32_t transType = option->socketOption.protocol == LNN_PROTOCOL_MINTP ? MINTP_TRANS_TYPE : DETTP_TRANS_TYPE;
+    SetMintpOption(fd, transType);
     CONN_LOGI(CONN_COMMON, "open mintp server socket success, fd=%{public}d.", fd);
     return fd;
 }
@@ -251,7 +254,8 @@ static int32_t OpenMintpClientSocket(const ConnectOption *option, const char *my
         ConnShutdownSocket(fd);
         return ret;
     }
-    SetMintpOption(fd);
+    uint32_t transType = option->socketOption.protocol == LNN_PROTOCOL_MINTP ? MINTP_TRANS_TYPE : DETTP_TRANS_TYPE;
+    SetMintpOption(fd, transType);
     ret = MintpSocketConnect(fd, domain, option);
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
@@ -279,7 +283,7 @@ int32_t GetMintpSockPort(int32_t fd)
     return SoftBusNtoHs(((SoftBusSockAddrIn *)&addr)->sinPort);
 }
 
-static int32_t AcceptMintpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
+static int32_t AcceptClientWithProtocol(int32_t fd, ConnectOption *clientAddr, int32_t *cfd, ProtocolType protocol)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(
         clientAddr != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid param, clientAddr is null");
@@ -294,7 +298,7 @@ static int32_t AcceptMintpClient(int32_t fd, ConnectOption *clientAddr, int32_t 
     }
     clientAddr->type = CONNECT_HML;
     clientAddr->socketOption.port = GetMintpSockPort(*cfd);
-    clientAddr->socketOption.protocol = LNN_PROTOCOL_MINTP;
+    clientAddr->socketOption.protocol = protocol;
     char mtpMac[BT_MAC_LEN] = { 0 };
     ret = ConvertBtMacToStr(mtpMac, sizeof(mtpMac), mtpClientAddr.mac.addr, sizeof(mtpClientAddr.mac.addr));
     if (ret != SOFTBUS_OK) {
@@ -310,15 +314,38 @@ static int32_t AcceptMintpClient(int32_t fd, ConnectOption *clientAddr, int32_t 
     return SOFTBUS_OK;
 }
 
-const SocketInterface *GetMintpProtocol(void)
+static int32_t AcceptMintpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
+{
+    return AcceptClientWithProtocol(fd, clientAddr, cfd, LNN_PROTOCOL_MINTP);
+}
+
+static int32_t AcceptDettpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
+{
+    return AcceptClientWithProtocol(fd, clientAddr, cfd, LNN_PROTOCOL_DETTP);
+}
+
+const SocketInterface *GetMinTpProtocol(void)
 {
     static SocketInterface mintpSocketIntf = {
         .name = "MINTP",
         .type = LNN_PROTOCOL_MINTP,
         .GetSockPort = GetMintpSockPort,
-        .OpenClientSocket = OpenMintpClientSocket,
         .OpenServerSocket = OpenMintpServerSocket,
+        .OpenClientSocket = OpenMintpClientSocket,
         .AcceptClient = AcceptMintpClient,
+    };
+    return &mintpSocketIntf;
+}
+
+const SocketInterface *GetDetTpProtocol(void)
+{
+    static SocketInterface mintpSocketIntf = {
+        .name = "DETTP",
+        .type = LNN_PROTOCOL_DETTP,
+        .GetSockPort = GetMintpSockPort,
+        .OpenServerSocket = OpenMintpServerSocket,
+        .OpenClientSocket = OpenMintpClientSocket,
+        .AcceptClient = AcceptDettpClient,
     };
     return &mintpSocketIntf;
 }

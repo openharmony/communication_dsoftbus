@@ -521,7 +521,7 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
     TcpChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
         if (item->channelId == channelId) {
-            if (item->fdProtocol == LNN_PROTOCOL_MINTP && !item->isServer) {
+            if (item->fdProtocol == LNN_PROTOCOL_DETTP && !item->isServer) {
                 TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
                 (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
             }
@@ -555,7 +555,7 @@ void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
     TcpChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
         if ((strcmp(item->pkgName, pkgName) == 0) && (item->pid == pid)) {
-            if (item->fdProtocol == LNN_PROTOCOL_MINTP && !item->isServer) {
+            if (item->fdProtocol == LNN_PROTOCOL_DETTP && !item->isServer) {
                 TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
                 (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
             }

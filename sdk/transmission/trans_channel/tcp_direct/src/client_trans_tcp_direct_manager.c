@@ -466,7 +466,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
                 "Failed to set keep-alive, warning but do not terminate. channelId=%{public}d, fd=%{public}d",
                 channel->channelId, channel->fd);
         }
-    } else if (channel->fdProtocol != LNN_PROTOCOL_MINTP) {
+    } else if (channel->fdProtocol != LNN_PROTOCOL_DETTP && channel->fdProtocol != LNN_PROTOCOL_MINTP) {
         ret = ClientTransSetTcpOption(channel->fd);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_SDK,
@@ -484,7 +484,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     ListAdd(&g_tcpDirectChannelInfoList->list, &item->node);
     TRANS_LOGI(TRANS_SDK, "add channelId=%{public}d, fd=%{public}d", item->channelId, channel->fd);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-    if (channel->fdProtocol == LNN_PROTOCOL_MINTP && !channel->isServer) {
+    if (channel->fdProtocol == LNN_PROTOCOL_DETTP && !channel->isServer) {
         (void)TransStartTimeSync(channel);
     }
     ret = ClientTransTdcOnSessionOpened(sessionName, channel, accessInfo);
@@ -649,7 +649,7 @@ int32_t TransStopTimeSync(int32_t channelId)
         TRANS_LOGE(TRANS_SDK, "TransTdcGetInfoById failed, channelId=%{public}d", channelId);
         return ret;
     }
-    if (info.detail.fdProtocol != LNN_PROTOCOL_MINTP) {
+    if (info.detail.fdProtocol != LNN_PROTOCOL_DETTP) {
         return SOFTBUS_OK;
     }
     TimeSyncSocketInfo socketInfo;

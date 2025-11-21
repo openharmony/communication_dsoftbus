@@ -66,6 +66,13 @@ config dsoftbus_feature_trans_udp_stream
     help
       Answer Y to enable stream transmission with udp
 
+config dsoftbus_feature_trans_mintp
+    bool "Enable mintp transmission"
+    default n
+    depends n
+    help
+      Answer Y to enable transmission with mintp
+
 comment "Other configuration"
 config dsoftbus_feature_auth_account
     bool "Enable auth account"

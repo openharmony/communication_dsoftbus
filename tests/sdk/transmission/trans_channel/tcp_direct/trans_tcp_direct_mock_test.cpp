@@ -254,6 +254,12 @@ HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level1)
     ret = TransTcpSetTos(&channel, 0);
     EXPECT_EQ(ret, SOFTBUS_TCP_SOCKET_ERR);
 
+    channel.detail.fdProtocol = LNN_PROTOCOL_DETTP;
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, SetMintpSocketTos).WillOnce(Return(-1));
+    ret = TransTcpSetTos(&channel, 0);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
     channel.detail.fdProtocol = LNN_PROTOCOL_MINTP;
     EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(tcpDirectMock, SetMintpSocketTos).WillOnce(Return(-1));

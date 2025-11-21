@@ -58,7 +58,8 @@ HWTEST_F(SoftBusMintpSocketTest, SetMintpSocketTest001, TestSize.Level1)
     MintpTimeSync timeSync;
     ret = SetMintpSocketTimeSync(-1, &timeSync);
     EXPECT_NE(ret, SOFTBUS_OK);
-    SetMintpOption(-1);
+    SetMintpOption(-1, 0);
+    SetMintpOption(-1, 1);
 }
 
 /*
@@ -172,13 +173,31 @@ HWTEST_F(SoftBusMintpSocketTest, GetMintpSockPortTest006, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: AcceptMintpClientTest007
- * @tc.desc: test AcceptMintpClient function
+/**
+ * @tc.name: AcceptDettpClientTest007
+ * @tc.desc: test AcceptDettpClient function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftBusMintpSocketTest, AcceptMintpClientTest007, TestSize.Level1)
+HWTEST_F(SoftBusMintpSocketTest, AcceptDettpClientTest007, TestSize.Level1)
+{
+    int32_t ret = AcceptDettpClient(-1, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ConnectOption clientAddr;
+    ret = AcceptDettpClient(-1, &clientAddr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    int32_t cfd = -1;
+    ret = AcceptDettpClient(-1, &clientAddr, &cfd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: AcceptClientWithProtocolTest008
+ * @tc.desc: test AcceptClientWithProtocol function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMintpSocketTest, AcceptMintpClientTest008, TestSize.Level1)
 {
     int32_t ret = AcceptMintpClient(-1, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -190,15 +209,56 @@ HWTEST_F(SoftBusMintpSocketTest, AcceptMintpClientTest007, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: GetMintpProtocolTest008
- * @tc.desc: test GetMintpProtocol function
+/**
+ * @tc.name: AcceptDettpClientTest009
+ * @tc.desc: test AcceptDettpClient function.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftBusMintpSocketTest, GetMintpProtocolTest008, TestSize.Level1)
+HWTEST_F(SoftBusMintpSocketTest, AcceptDettpClientTest009, TestSize.Level1)
 {
-    const SocketInterface *interface = GetMintpProtocol();
+    ConnectOption clientAddr;
+    int32_t cfd = -1;
+    int32_t ret = AcceptClientWithProtocol(-1, nullptr, nullptr, LNN_PROTOCOL_DETTP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = AcceptClientWithProtocol(-1, &clientAddr, nullptr, LNN_PROTOCOL_DETTP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = AcceptClientWithProtocol(-1, &clientAddr, &cfd, LNN_PROTOCOL_DETTP);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    
+    ret = AcceptClientWithProtocol(-1, nullptr, nullptr, LNN_PROTOCOL_MINTP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = AcceptClientWithProtocol(-1, &clientAddr, nullptr, LNN_PROTOCOL_MINTP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = AcceptClientWithProtocol(-1, &clientAddr, &cfd, LNN_PROTOCOL_MINTP);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: GetDetTpProtocolTest010
+ * @tc.desc: test GetDetTpProtocol function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMintpSocketTest, GetDetTpProtocolTest010, TestSize.Level1)
+{
+    const SocketInterface *interface = GetDetTpProtocol();
+    EXPECT_NE(interface, nullptr);
+}
+
+/**
+ * @tc.name: GetMintpProtocolTest011
+ * @tc.desc: test GetMintpProtocol function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMintpSocketTest, GetMintpProtocolTest011, TestSize.Level1)
+{
+    const SocketInterface *interface = GetMinTpProtocol();
     EXPECT_NE(interface, nullptr);
 }
 } // namespace OHOS

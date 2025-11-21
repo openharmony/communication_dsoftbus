@@ -18,7 +18,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_message.h"
 #include "trans_log.h"
-#include "trans_tcp_direct_p2p.h"
 
 #define MSG_CODE "CODE"
 #define P2P_IP "P2P_IP"
@@ -28,6 +27,7 @@
 #define ERR_DESC "ERR_DESC"
 #define PROTOCOL_TYPE "PROTOCOL_TYPE"
 #define UID "UID"
+#define MIN_TP "MIN_TP"
 
 char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
 {
@@ -51,9 +51,9 @@ char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
     return data;
 }
 
-char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol, int32_t myUid)
+char *VerifyP2pPack(VerifyP2pInfo *info)
 {
-    if (myIp == NULL || myPort <= 0) {
+    if (info == NULL || info->myIp == NULL || info->myPort <= 0) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return NULL;
     }
@@ -62,13 +62,13 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, Protoc
         TRANS_LOGE(TRANS_CTRL, "create object failed");
         return NULL;
     }
-    if (peerIp != NULL) {
-        AddStringToJsonObject(json, PEER_IP, peerIp);
+    if (info->peerIp != NULL) {
+        AddStringToJsonObject(json, PEER_IP, info->peerIp);
     }
-    if (!AddNumberToJsonObject(json, MSG_CODE, CODE_VERIFY_P2P) || !AddStringToJsonObject(json, P2P_IP, myIp) ||
-        !AddNumberToJsonObject(json, P2P_PORT, myPort) ||
-        !AddNumberToJsonObject(json, PROTOCOL_TYPE, (int32_t)protocol) ||
-        !AddNumberToJsonObject(json, UID, myUid)) {
+    if (!AddNumberToJsonObject(json, MSG_CODE, CODE_VERIFY_P2P) || !AddStringToJsonObject(json, P2P_IP, info->myIp) ||
+        !AddNumberToJsonObject(json, P2P_PORT, info->myPort) ||
+        !AddNumberToJsonObject(json, PROTOCOL_TYPE, (int32_t)info->protocol) ||
+        !AddNumberToJsonObject(json, UID, info->myUid) || !AddBoolToJsonObject(json, MIN_TP, info->isMinTp)) {
         cJSON_Delete(json);
         TRANS_LOGE(TRANS_CTRL, "add json object failed");
         return NULL;
@@ -78,9 +78,9 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, Protoc
     return data;
 }
 
-int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, int32_t *port, ProtocolType *protocol, int32_t *uid)
+int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, VerifyP2pInfo *info)
 {
-    if (json == NULL || remoteIp == NULL || port == NULL || protocol == NULL || uid == NULL) {
+    if (json == NULL || remoteIp == NULL || info == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -89,15 +89,19 @@ int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, int32_t *port, Protoc
         TRANS_LOGE(TRANS_CTRL, "peer proc failed: errCode=%{public}d", errCode);
         return errCode;
     }
-    if (!GetJsonObjectNumberItem(json, P2P_PORT, port) || !GetJsonObjectStringItem(json, P2P_IP, remoteIp, IP_LEN)) {
+    if (!GetJsonObjectStringItem(json, P2P_IP, remoteIp, IP_LEN) ||
+        !GetJsonObjectNumberItem(json, P2P_PORT, &info->peerPort)) {
         TRANS_LOGE(TRANS_INIT, "VerifyP2pUnPack get obj fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!GetJsonObjectNumberItem(json, PROTOCOL_TYPE, (int32_t *)protocol)) {
-        *protocol = LNN_PROTOCOL_IP;
+    if (!GetJsonObjectNumberItem(json, PROTOCOL_TYPE, (int32_t *)&info->protocol)) {
+        info->protocol = LNN_PROTOCOL_IP;
     }
-    if (!GetJsonObjectNumberItem(json, UID, uid)) {
-        *uid = -1;
+    if (!GetJsonObjectNumberItem(json, UID, &info->peerUid)) {
+        info->peerUid = -1;
+    }
+    if (!GetJsonObjectBoolItem(json, MIN_TP, &info->isMinTp)) {
+        info->isMinTp = false;
     }
     return SOFTBUS_OK;
 }
