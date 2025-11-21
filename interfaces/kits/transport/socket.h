@@ -198,39 +198,6 @@ typedef struct {
     bool (*OnNegotiate)(int32_t socket, PeerSocketInfo info);
 
     /**
-     * @brief Called when a socket is bind.
-     *
-     * This callback is invoked to verify the socket or initialize resources related to the socket.
-     * When the connection is successful, this callback be called on the server side.
-     * The server side refers to the side that called {@Listen} function.
-     *
-     * When a socket is async bind, client side need implement this interface.
-     *
-     * @param socket Indicates the unique socket fd.
-     * @param info Indicates the information of peer service socket.
-     * @since 2.0
-     * @version 2.0
-     */
-    void (*OnServiceBind)(int32_t socket, ServiceSocketInfo info);
- 
-    /**
-     * @brief Called when a socket is negotiating.
-     *
-     * This callback is invoked to negotiating the socket, this callback be called on the server side.
-     * The server can determine whether to bind the socket based on the negotiation result.
-     *
-     *
-     * @param socket Indicates the unique socket fd.
-     * @param info Indicates the information of peer service socket.
-     * @return If true is returned, it indicates that the negotiation is successful. If this method is not implemented,
-     * the negotiation is successful by default. if false is returned, the negotiation fails and the client is notified
-     * that the connection is rejected.
-     * @since 2.0
-     * @version 2.0
-     */
-    bool (*OnServiceNegotiate)(int32_t socket, ServiceSocketInfo info);
-
-    /**
      * @brief Registration during Bind link establishment.
      *
      * This callback is invoked to notify that data is received.
@@ -286,6 +253,39 @@ typedef struct {
      * @version 2.0
      */
     void (*OnEvent)(int32_t socket, MultiPathEventType eventType, const void *eventData, uint32_t dataLen);
+
+    /**
+     * @brief Called when a socket is bind.
+     *
+     * This callback is invoked to verify the socket or initialize resources related to the socket.
+     * When the connection is successful, this callback be called on the server side.
+     * The server side refers to the side that called {@Listen} function.
+     *
+     * When a socket is async bind, client side need implement this interface.
+     *
+     * @param socket Indicates the unique socket fd.
+     * @param info Indicates the information of peer service socket.
+     * @since 2.0
+     * @version 2.0
+     */
+    void (*OnServiceBind)(int32_t socket, ServiceSocketInfo info);
+ 
+    /**
+     * @brief Called when a socket is negotiating.
+     *
+     * This callback is invoked to negotiating the socket, this callback be called on the server side.
+     * The server can determine whether to bind the socket based on the negotiation result.
+     *
+     *
+     * @param socket Indicates the unique socket fd.
+     * @param info Indicates the information of peer service socket.
+     * @return If true is returned, it indicates that the negotiation is successful. If this method is not implemented,
+     * the negotiation is successful by default. if false is returned, the negotiation fails and the client is notified
+     * that the connection is rejected.
+     * @since 2.0
+     * @version 2.0
+     */
+    bool (*OnServiceNegotiate)(int32_t socket, ServiceSocketInfo info);
 } ISocketListener;
 
 /**
