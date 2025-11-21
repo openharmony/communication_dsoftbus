@@ -1119,9 +1119,14 @@ HWTEST_F(TransSdkTcpDirectTest, TransStopTimeSyncTest001, TestSize.Level1)
     ret = TransStopTimeSync(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    info->detail.fdProtocol = LNN_PROTOCOL_MINTP;
+    info->detail.fdProtocol = LNN_PROTOCOL_DETTP;
     ret = TransStopTimeSync(channelId);
     EXPECT_NE(ret, SOFTBUS_OK);
+
+    info->detail.fdProtocol = LNN_PROTOCOL_MINTP;
+    ret = TransStopTimeSync(channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
