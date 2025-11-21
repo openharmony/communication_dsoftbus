@@ -244,6 +244,8 @@ The DSoftBus directory structure is as follows:
         void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
         void (*OnError)(int32_t socket, int32_t errCode);
         void (*OnBytesSent)(int32_t socket, uint32_t dataSeq, int32_t errCode);
+        void (*OnServiceBind)(int32_t socket, ServiceSocketInfo info);
+        bool (*OnServiceNegotiate)(int32_t socket, ServiceSocketInfo info);
     } ISocketListener;
 
     typedef enum {
