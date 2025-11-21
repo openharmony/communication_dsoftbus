@@ -137,7 +137,9 @@ void SetMintpSocketTimeSyncTest(FuzzedDataProvider &provider)
 void SetMintpOptionTest(FuzzedDataProvider &provider)
 {
     int32_t fd = provider.ConsumeIntegral<int32_t>();
-    (void)SetMintpOption(fd);
+    (void)SetMintpOption(fd, 0);
+
+    (void)SetMintpOption(fd, 1);
 }
 
 void BindMintpTest(FuzzedDataProvider &provider)
@@ -206,6 +208,34 @@ void AcceptMintpClientTest(FuzzedDataProvider &provider)
     (void)AcceptMintpClient(fd, &option, nullptr);
     (void)AcceptMintpClient(fd, &option, &cfd);
 }
+
+void AcceptDettpClientTest(FuzzedDataProvider &provider)
+{
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    FillConnectOption(provider, &option);
+    int32_t fd = provider.ConsumeIntegral<int32_t>();
+    int32_t cfd = 0;
+    (void)AcceptDettpClient(fd, nullptr, &cfd);
+    (void)AcceptDettpClient(fd, &option, nullptr);
+    (void)AcceptDettpClient(fd, &option, &cfd);
+}
+
+void AcceptClientWithProtocolTest(FuzzedDataProvider &provider)
+{
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    FillConnectOption(provider, &option);
+    int32_t fd = provider.ConsumeIntegral<int32_t>();
+    int32_t cfd = 0;
+    (void)AcceptClientWithProtocol(fd, nullptr, &cfd, LNN_PROTOCOL_MINTP);
+    (void)AcceptClientWithProtocol(fd, &option, nullptr, LNN_PROTOCOL_MINTP);
+    (void)AcceptClientWithProtocol(fd, &option, &cfd, LNN_PROTOCOL_MINTP);
+
+    (void)AcceptClientWithProtocol(fd, nullptr, &cfd, LNN_PROTOCOL_DETTP);
+    (void)AcceptClientWithProtocol(fd, &option, nullptr, LNN_PROTOCOL_DETTP);
+    (void)AcceptClientWithProtocol(fd, &option, &cfd, LNN_PROTOCOL_DETTP);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -229,5 +259,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::OpenMintpClientSocketTest(provider);
     OHOS::GetMintpSockPortTest(provider);
     OHOS::AcceptMintpClientTest(provider);
+    OHOS::AcceptDettpClientTest(provider);
+    OHOS::AcceptClientWithProtocolTest(provider);
     return 0;
 }

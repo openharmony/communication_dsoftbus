@@ -61,4 +61,5 @@ declare_args() {
   dsoftbus_feature_linkfinder = false
   dsoftbus_feature_coap = true
   dsoftbus_feature_lnn_usb_ncm = false
+  dsoftbus_feature_trans_mintp = false
 }

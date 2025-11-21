@@ -519,11 +519,10 @@ HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
         return ;
     }
     int32_t ret;
-    int32_t newChannelId = 1;
     ConnectType type = CONNECT_P2P;
 
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
-    ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
+    ret = OpenNewAuthConn(appInfo, conn, type);
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 
     SoftBusFree(appInfo);
@@ -975,6 +974,85 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest001, TestSize.Level1)
     TransDelSessionConnById(channelId);
 }
 
+/**
+ * @tc.name: OnVerifyP2pReplyTest002
+ * @tc.desc: OnVerifyP2pReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest002, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    uint32_t requestId = 12;
+    int32_t channelId = 123;
+    int64_t req = 1234;
+    conn->requestId = requestId;
+    conn->channelId = channelId;
+    conn->req = req;
+    conn->appInfo.businessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int64_t authId = 1234;
+    char myIp[] = "192.168.8.1";
+    char peerIp[] = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF01";
+    VerifyP2pInfo info = {
+        .myIp = myIp,
+        .peerIp = peerIp,
+        .myPort = g_port,
+        .myUid = 0,
+        .protocol = LNN_PROTOCOL_MINTP,
+        .isMinTp = true,
+    };
+    char* pack = VerifyP2pPack(&info);
+    EXPECT_TRUE(pack != nullptr);
+    cJSON *json = cJSON_Parse(pack);
+    EXPECT_TRUE(json != nullptr);
+    ret = OnVerifyP2pReply(authId, req, json);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    cJSON_Delete(json);
+    TransDelSessionConnById(channelId);
+}
+
+/**
+ * @tc.name: OnVerifyP2pReplyTest003
+ * @tc.desc: OnVerifyP2pReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest003, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    uint32_t requestId = 12;
+    int32_t channelId = 123;
+    int64_t req = 1234;
+    conn->requestId = requestId;
+    conn->channelId = channelId;
+    conn->req = req;
+    conn->appInfo.businessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int64_t authId = 1234;
+    char myIp[] = "192.168.8.1";
+    char peerIp[] = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF01";
+    VerifyP2pInfo info = {
+        .myIp = myIp,
+        .peerIp = peerIp,
+        .myPort = g_port,
+        .myUid = 0,
+        .protocol = LNN_PROTOCOL_MINTP,
+        .isMinTp = false,
+    };
+    char* pack = VerifyP2pPack(&info);
+    EXPECT_TRUE(pack != nullptr);
+    cJSON *json = cJSON_Parse(pack);
+    EXPECT_TRUE(json != nullptr);
+    ret = OnVerifyP2pReply(authId, req, json);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    cJSON_Delete(json);
+    TransDelSessionConnById(channelId);
+}
 
 /*
  * @tc.name: GetModuleByHmlIp001
