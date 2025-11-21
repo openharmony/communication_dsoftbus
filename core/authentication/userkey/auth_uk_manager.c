@@ -1306,6 +1306,32 @@ static int32_t UkMsgHandler(
     return ret;
 }
 
+static int32_t DefaultUserIdFindUk(AuthACLInfo *aclInfo, int32_t *ukId, uint64_t *time)
+{
+    if (aclInfo == NULL || ukId == NULL || time == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local udid fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if ((strcmp(aclInfo->sourceUdid, localUdid) != 0)) {
+        aclInfo->sourceUserId = -1;
+    } else {
+        aclInfo->sinkUserId = -1;
+    }
+    PrintfAuthAclInfo(0, 0, aclInfo);
+    if (GetAccessUkIdSameAccount(aclInfo, ukId, time) != SOFTBUS_OK &&
+        GetAccessUkIdDiffAccountWithUserLevel(aclInfo, ukId, time) != SOFTBUS_OK &&
+        GetAccessUkIdDiffAccount(aclInfo, ukId, time) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "remote default userid get uk by asset fail");
+        return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
 {
     if (acl == NULL || ukId == NULL) {
@@ -1327,7 +1353,8 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
         AUTH_LOGE(AUTH_CONN, "get uk by ukcachelist fail");
         if (GetAccessUkIdSameAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, ukId, &time) != SOFTBUS_OK &&
-            GetAccessUkIdDiffAccount(&aclInfo, ukId, &time) != SOFTBUS_OK) {
+            GetAccessUkIdDiffAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
+            DefaultUserIdFindUk(&aclInfo, ukId, &time) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "get uk by asset fail");
             return SOFTBUS_AUTH_ACL_NOT_FOUND;
         }
