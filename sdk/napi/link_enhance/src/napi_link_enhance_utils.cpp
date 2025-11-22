@@ -25,6 +25,9 @@
 namespace Communication {
 namespace OHOS::Softbus {
 using namespace std;
+
+static constexpr const char *THREAD_NAME = "linkEnhance";
+
 static std::map<int32_t, std::string> napiErrMsgMap {
     {LINK_ENHANCE_PERMISSION_DENIED, "Permission denied."},
     {LINK_ENHANCE_CONNECT_TIMEOUT, "Connect timeout."},
@@ -39,7 +42,7 @@ static std::map<int32_t, std::string> napiErrMsgMap {
 
 int32_t DoInJsMainThread(napi_env env, std::function<void(void)> func)
 {
-    if (napi_send_event(env, func, napi_eprio_high) != napi_ok) {
+    if (napi_send_event(env, func, napi_eprio_high, THREAD_NAME) != napi_ok) {
         COMM_LOGE(COMM_SDK, "send event fail");
         return -1;
     }
