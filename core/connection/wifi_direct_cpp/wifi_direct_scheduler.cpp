@@ -15,6 +15,7 @@
 #include "wifi_direct_scheduler.h"
 #include "command/command_factory.h"
 #include "command/negotiate_command.h"
+#include "data/link_manager.h"
 
 namespace OHOS::SoftBus {
 WifiDirectScheduler& WifiDirectScheduler::GetInstance()
@@ -72,6 +73,12 @@ int WifiDirectScheduler::ConnectDevice(const std::shared_ptr<ConnectCommand> &co
 
 int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback)
 {
+    auto innerLink = LinkManager::GetInstance().GetLinkById(info.linkId);
+    if (innerLink == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "not find inner link, no need disconnect");
+        callback.onDisconnectSuccess(info.requestId);
+        return SOFTBUS_OK;
+    }
     auto command = CommandFactory::GetInstance().CreateDisconnectCommand(info, callback);
     CONN_LOGI(CONN_WIFI_DIRECT,
         "reqId=%{public}d, pid=%{public}d, linkId=%{public}d, networkId=%{public}s, remoteUuid=%{public}s",
