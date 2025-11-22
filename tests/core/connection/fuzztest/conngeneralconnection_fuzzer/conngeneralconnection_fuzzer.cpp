@@ -17,10 +17,14 @@
 #include "fuzzer/FuzzedDataProvider.h"
 #include "gtest/gtest.h"
 #include "softbus_conn_interface_struct.h"
-
+#include "general_connection_mock.h"
 #include "softbus_conn_general_connection.c"
 #include "softbus_conn_general_negotiation.c"
 #include "softbus_conn_ipc.c"
+
+using namespace testing::ext;
+using namespace testing;
+
 namespace OHOS {
 static struct GeneralConnection *g_generalConnection = NULL;
 static void CreateParam(GeneralConnectionParam &param)
@@ -240,7 +244,7 @@ void ProcessInnerMessageByTypeTest(FuzzedDataProvider &provider)
     ProcessInnerMessageByType(0, GENERAL_CONNECTION_MSG_TYPE_MAX, &info);
 }
 
-void OnCommDisconnected(FuzzedDataProvider &provider)
+void OnCommDisconnectedTest(FuzzedDataProvider &provider)
 {
     ConnectionInfo info = {0};
     OnCommDisconnected(1, &info);
@@ -299,12 +303,31 @@ void GeneralConnectionUnpackTest(FuzzedDataProvider &provider)
     GeneralConnectionUnpackMsg(data.data(), data.size(), &info, GENERAL_CONNECTION_MSG_TYPE_MERGE);
     GeneralConnectionUnpackMsg(data.data(), data.size(), &info, GENERAL_CONNECTION_MSG_TYPE_NORMAL);
 }
+
+void DisconnectTest(FuzzedDataProvider &provider)
+{
+    PrepareConnection(true);
+    if (g_generalConnection == nullptr) {
+        return;
+    }
+    g_generalConnection->info.pid = 1;
+    SaveConnection(g_generalConnection);
+    Disconnect(g_generalConnection->underlayerHandle, 0);
+    Disconnect(g_generalConnection->underlayerHandle, g_generalConnection->info.pid);
+}
 } // namespace OHOS
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     DataGenerator::Write(data, size);
     FuzzedDataProvider provider(data, size);
+    static bool runCoverage = true;
+    if (true) {
+        testing::InitGoogleTest();
+        auto result = RUN_ALL_TESTS();
+        CONN_LOGI(COMM_TEST, "result=%{public}d", result);
+        runCoverage = false;
+    }
     static bool isInit = false;
     if (!isInit) {
         LooperInit();
@@ -317,19 +340,23 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             .onDataReceived = OHOS::OnDataReceivedFuzz,
         };
         RegisterListener(&listener);
+        isInit = true;
     }
 
+    OHOS::GeneralConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
     OHOS::OnCommDataReceivedTest();
     OHOS::SendTest();
     OHOS::ConnectTest(provider);
     OHOS::CreateServerTest(provider);
     OHOS::GetPeerDeviceIdTest(provider);
     OHOS::ProcessInnerMessageByTypeTest(provider);
-    OHOS::OnCommDisconnected(provider);
+    OHOS::OnCommDisconnectedTest(provider);
     OHOS::ClearAllGeneralConnectionTest(provider);
     OHOS::CloseServerTest(provider);
     OHOS::GeneralConnectionPackMsgTest(provider);
     OHOS::GeneralConnectionUnpackTest(provider);
+    OHOS::DisconnectTest(provider);
     sleep(1);
     DataGenerator::Clear();
     return 0;
