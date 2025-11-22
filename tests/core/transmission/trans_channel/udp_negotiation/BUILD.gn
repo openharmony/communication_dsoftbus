@@ -232,7 +232,10 @@ ohos_unittest("TransUdpStaticTest") {
 
 ohos_unittest("TransUdpManagerTest") {
   module_out_path = module_output_path
-  sources = [ "trans_udp_manager_test.cpp" ]
+  sources = [
+    "trans_udp_manager_test.cpp",
+    "mock/trans_udp_manager_mock.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_core_path/adapter/bus_center/include",
@@ -249,6 +252,14 @@ ohos_unittest("TransUdpManagerTest") {
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
     "$dsoftbus_dfx_path/interface/include/form",
     "unittest/common/",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/udp_negotiation/mock",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   ]
 
   deps = [
@@ -261,6 +272,7 @@ ohos_unittest("TransUdpManagerTest") {
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
+    "googletest:gmock",
   ]
 
   if (!is_standard_system) {

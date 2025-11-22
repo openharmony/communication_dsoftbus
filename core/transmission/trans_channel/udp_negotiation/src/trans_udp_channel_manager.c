@@ -15,6 +15,7 @@
 
 #include "trans_udp_channel_manager.h"
 
+#include "bus_center_manager.h"
 #include "common_list.h"
 #include "regex.h"
 #include "securec.h"
@@ -994,4 +995,49 @@ bool CompareSessionName(const char *dstSessionName, const char *srcSessionName)
     bool compare = regexec(&regComp, srcSessionName, 0, NULL, 0) == REG_OK;
     regfree(&regComp);
     return compare;
+}
+
+int32_t TransUdpGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp)
+{
+    UdpChannelInfo channelInfo;
+    (void)memset_s(&channelInfo, sizeof(channelInfo), 0, sizeof(channelInfo));
+    int32_t ret = TransGetUdpChannelById(channelId, &channelInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get udp channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    if (uuid != NULL) {
+        ret = LnnGetRemoteStrInfo(channelInfo.info.peerNetWorkId, STRING_KEY_UUID, uuid, uuidLen);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get peer uuid failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
+            return ret;
+        }
+    }
+    if (needFastWakeUp != NULL) {
+        *needFastWakeUp = channelInfo.needFastWakeUp;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransUdpSetWakeUpInfo(int32_t channelId, bool needFastWakeUp)
+{
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.myData.channelId == channelId) {
+            udpChannelNode->needFastWakeUp = needFastWakeUp;
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "not found udpChannelNode by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
