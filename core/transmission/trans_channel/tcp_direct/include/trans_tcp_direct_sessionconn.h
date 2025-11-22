@@ -65,6 +65,7 @@ typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
     char peerDeviceId[DEVICE_ID_SIZE_MAX];
     char peerIp[IP_LEN];
+    bool needFastWakeUp;
     int64_t timeStart;
     int32_t linkType;
     uint64_t callingTokenId;
@@ -144,6 +145,12 @@ int32_t TransTdcResetReplyCnt(int32_t channelId);
 int32_t TransGetPkgNameByChanId(int32_t channelId, char *pkgName);
 
 int32_t UpdateAccessInfoById(int32_t channelId, const AccessInfo *accessInfo);
+
+int32_t TransGetTdcChannelById(int32_t channelId, TcpChannelInfo *channel);
+
+int32_t TransTdcGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp);
+
+int32_t TransTdcSetWakeUpInfo(int32_t channelId, bool needFastWakeUp);
 #ifdef __cplusplus
 #if __cplusplus
 }

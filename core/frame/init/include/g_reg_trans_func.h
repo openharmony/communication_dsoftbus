@@ -95,6 +95,11 @@ typedef void (*StopHmlListenerFunc)(ListenerModule module);
 typedef int32_t (*CompareStringFunc)(const char *src, const char *dest, bool regexp);
 typedef int32_t (*LoadPermissionJsonFunc)(const char *fileName);
 typedef int32_t (*TransProxyD2dGetSleMacFunc)(int32_t channelId, int32_t pid, char *sleMac, uint32_t macLen);
+typedef uint64_t (*TransAclGetCallingTokenIDFunc)(void);
+typedef void (*TransGetTokenInfoFunc)(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType);
+typedef int32_t (*TransGetWakeUpInfoFunc)(
+    int32_t channelType, int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp);
+typedef int32_t (*TransSetWakeUpInfoFunc)(int32_t channelType, int32_t channelId, bool needFastWakeUp);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -145,6 +150,10 @@ typedef struct TagTransOpenFuncList {
     CompareStringFunc compareString;
     LoadPermissionJsonFunc loadPermissionJson;
     TransProxyD2dGetSleMacFunc transProxyD2dGetSleMac;
+    TransAclGetCallingTokenIDFunc transAclGetCallingTokenID;
+    TransGetTokenInfoFunc transGetTokenInfo;
+    TransGetWakeUpInfoFunc transGetWakeUpInfo;
+    TransSetWakeUpInfoFunc transSetWakeUpInfo;
 } TransOpenFuncList;
 
 #ifdef __cplusplus

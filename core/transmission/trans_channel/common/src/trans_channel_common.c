@@ -908,3 +908,37 @@ bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType)
     }
     return false;
 }
+
+int32_t TransSetWakeUpInfo(int32_t channelType, int32_t channelId, bool needFastWakeUp)
+{
+    int32_t ret = SOFTBUS_OK;
+    switch (channelType) {
+        case CHANNEL_TYPE_TCP_DIRECT:
+            ret = TransTdcSetWakeUpInfo(channelId, needFastWakeUp);
+            break;
+        case CHANNEL_TYPE_UDP:
+            ret = TransUdpSetWakeUpInfo(channelId, needFastWakeUp);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error!", channelType);
+            return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
+    }
+    return ret;
+}
+
+int32_t TransGetWakeUpInfo(int32_t channelType, int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp)
+{
+    int32_t ret = SOFTBUS_OK;
+    switch (channelType) {
+        case CHANNEL_TYPE_TCP_DIRECT:
+            ret = TransTdcGetWakeUpInfo(channelId, uuid, uuidLen, needFastWakeUp);
+            break;
+        case CHANNEL_TYPE_UDP:
+            ret = TransUdpGetWakeUpInfo(channelId, uuid, uuidLen, needFastWakeUp);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error!", channelType);
+            return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
+    }
+    return ret;
+}
