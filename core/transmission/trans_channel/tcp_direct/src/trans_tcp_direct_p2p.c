@@ -1008,9 +1008,11 @@ static bool IsSupportDeterministicTrans(const char *targetNetworkId)
 static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, const AppInfo *appInfo, bool isMinTp)
 {
     conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
+#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
     if (conn->appInfo.businessType == BUSINESS_TYPE_BYTE && isMinTp) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_MINTP;
     }
+#endif
     if (conn->appInfo.isFlashLight) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_HTP;
         int32_t ret = ClientOpenHtpChannelPacked(
