@@ -207,6 +207,7 @@ static int32_t DeleteSessionById(int32_t sessionId)
 
 static int32_t BrProxyWaitCond(int32_t sessionId)
 {
+#define BR_PROXY_MAX_WAIT_COND_TIME 10 // 10s
     if (g_sessionList == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -227,7 +228,7 @@ static int32_t BrProxyWaitCond(int32_t sessionId)
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
             return ret;
         }
-        absTime.sec += 10;
+        absTime.sec += BR_PROXY_MAX_WAIT_COND_TIME;
         ret = SoftBusCondWait(&nodeInfo->cond, &(g_sessionList->lock), &absTime);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "[br_proxy] cond wait failed! sessionId:%{public}d, ret:%{public}d", sessionId, ret);
