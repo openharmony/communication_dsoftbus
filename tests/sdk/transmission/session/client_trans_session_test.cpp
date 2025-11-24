@@ -281,9 +281,10 @@ static void DeleteSessionServerAndSession(const char *sessionName, int32_t sessi
     (void)ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, sessionName);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest01
- * @tc.desc: Transmission sdk session service open session with existed session callback success.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service open session with existed session callback success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -314,9 +315,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest01, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest02
- * @tc.desc: Transmission sdk session service open session with existed session callback error.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service open session with existed session callback error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -351,9 +353,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest02, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest03
- * @tc.desc: Transmission sdk session service creat session server with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service creat session server with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -370,9 +373,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest04
- * @tc.desc: Transmission sdk session service remove session server with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service remove session server with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -386,9 +390,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest05
- * @tc.desc: Transmission sdk session service open session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service open session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -414,9 +419,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest06
- * @tc.desc: Transmission sdk session service convert address string with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service convert address string with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -465,9 +471,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest06, TestSize.Level1)
     SoftBusFree(addrInfo);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest07
- * @tc.desc: Transmission sdk session service is valid addrInfo.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service is valid addrInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -481,9 +488,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest07, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest08
- * @tc.desc: Transmission sdk session service open auth session with different.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service open auth session with different
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -526,9 +534,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest08, TestSize.Level0)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest09
- * @tc.desc: Transmission sdk session service notify auth success with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service notify auth success with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -563,9 +572,11 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest09, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest10
- * @tc.desc: Transmission sdk session service check whether session is opened with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service check whether session is opened
+ *           with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -597,9 +608,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest11
- * @tc.desc: Transmission sdk session service close session with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service close session with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -640,9 +652,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest11, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest12
- * @tc.desc: Transmission sdk session service get my session name with invalid parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service get my session name with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -657,9 +670,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest12, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest13
- * @tc.desc: Transmission sdk session service get peer session name with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service get peer session name with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -683,9 +697,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest13, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest14
- * @tc.desc: Transmission sdk session service get peer device Id with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service get peer device Id with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -709,9 +724,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest14, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest15
- * @tc.desc: Transmission sdk session service judge session server or client.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service judge session server or client
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -731,9 +747,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest15, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest16
- * @tc.desc: Transmission sdk session service set file receive listener with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service set file receive listener with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -757,9 +774,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest16, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest17
- * @tc.desc: Transmission sdk session service set file send listener with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service set file send listener with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -781,9 +799,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest17, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest18
- * @tc.desc: Transmission sdk session service judge whether session is DFS with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service judge whether session is DFS with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -810,9 +829,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest18, TestSize.Level1)
     DeleteSessionServerAndSession(dfsSessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest19
- * @tc.desc: Transmission sdk session service get session key with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service get session key with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -827,9 +847,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest19, TestSize.Level1)
     DeleteSessionServerAndSession(dfsSessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest20
- * @tc.desc: Transmission sdk session service get session handle.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service get session handle
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -844,9 +865,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest20, TestSize.Level1)
     DeleteSessionServerAndSession(dfsSessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest21
- * @tc.desc: Transmission sdk session service disable session listener.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service disable session listener
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -860,9 +882,11 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest21, TestSize.Level1)
     DeleteSessionServerAndSession(dfsSessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest22
- * @tc.desc: Transmission sdk session service read max send bytes size with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service read max send bytes size
+ *           with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -878,9 +902,11 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest22, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest23
- * @tc.desc: Transmission sdk session service read max send message size with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service read max send message size
+ *           with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -896,9 +922,11 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest23, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest24
- * @tc.desc: Transmission sdk session service get session option with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session service get session option
+ *           with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -925,9 +953,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest24, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest25
- * @tc.desc: Transmission sdk session manager lnn offline process with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager lnn offline process with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -949,9 +978,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest25, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest26
- * @tc.desc: Transmission sdk session manager judge session whether session is available.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager judge session whether session is available
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -966,9 +996,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest26, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest27
- * @tc.desc: Transmission sdk session manager get new session server with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get new session server with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -997,9 +1028,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest27, TestSize.Level1)
     EXPECT_TRUE(server == nullptr);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest28
- * @tc.desc: Transmission sdk session manager judge whether parameter is valid with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager judge whether parameter is valid with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1031,9 +1063,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest28, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest29
- * @tc.desc: Transmission sdk session manager create new session with different parameters.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager create new session with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1074,9 +1107,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest29, TestSize.Level1)
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest30
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1102,9 +1136,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest30, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest31
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1134,9 +1169,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest31, TestSize.Level1)
     SoftBusFree(SessionServer);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest32
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1150,9 +1186,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest32, TestSize.Level1)
     EXPECT_TRUE(sessionNode == nullptr);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest33
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1168,9 +1205,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest33, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest34
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test ClientTransCheckHmlIp
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1185,9 +1223,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest34, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest35
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1220,9 +1259,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest35, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest36
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1240,9 +1280,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest36, TestSize.Level1)
     ASSERT_TRUE(info == nullptr);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest37
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1262,9 +1303,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest37, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest38
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1288,9 +1330,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest38, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest39
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1307,9 +1350,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest39, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest40
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1340,9 +1384,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest40, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest41
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1374,9 +1419,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest41, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest42
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1408,9 +1454,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest42, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest43
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test TransClientSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1424,9 +1471,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest43, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionTest44
- * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.desc: test ClientDeletePagingSession
+ *           Transmission sdk session manager get exist session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1440,9 +1488,10 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest44, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: ReadSessionLinkTypeTest45
- * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ReadSessionLinkType
+ *           given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1461,9 +1510,10 @@ HWTEST_F(TransClientSessionTest, ReadSessionLinkTypeTest45, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
 }
 
-/**
+/*
  * @tc.name: RemoveAppIdFromSessionNameTest46
- * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test RemoveAppIdFromSessionName
+ *           given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1484,10 +1534,10 @@ HWTEST_F(TransClientSessionTest, RemoveAppIdFromSessionNameTest46, TestSize.Leve
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
 }
 
-/**
+/*
  * @tc.name: CreateSessionAttributeBySocketInfoTest47
- * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
- * @tc.desc: given different datatype should return tmpAttr
+ * @tc.desc: Verify given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify given different datatype should return tmpAttr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1537,9 +1587,10 @@ HWTEST_F(TransClientSessionTest, CreateSessionAttributeBySocketInfoTest47, TestS
     SoftBusFree(ret8);
 }
 
-/**
+/*
  * @tc.name: ClientAddSocketTest48
- * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ClientAddSocket
+ *           Verify given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1558,9 +1609,10 @@ HWTEST_F(TransClientSessionTest, ClientAddSocketTest48, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
 }
 
-/**
+/*
  * @tc.name: ClientGetSessionIsD2DByChannelIdTest49
- * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ClientGetSessionIsD2DByChannelId
+ *           given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1580,9 +1632,10 @@ HWTEST_F(TransClientSessionTest, ClientGetSessionIsD2DByChannelIdTest49, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetIsAsyncAndTokenTypeBySessionIdTest50
- * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test GetIsAsyncAndTokenTypeBySessionId
+ *           given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1600,9 +1653,10 @@ HWTEST_F(TransClientSessionTest, GetIsAsyncAndTokenTypeBySessionIdTest50, TestSi
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ClientGetChannelIdAndTypeBySocketIdTest51
- * @tc.desc: given invalid param should return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ClientGetChannelIdAndTypeBySocketId
+ *           given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1622,9 +1676,10 @@ HWTEST_F(TransClientSessionTest, ClientGetChannelIdAndTypeBySocketIdTest51, Test
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: SessionTypeConvertTest52
- * @tc.desc: given different BusinessType return different SessionType
+ * @tc.desc: test SessionTypeConvert
+ *           given different BusinessType return different SessionType
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1647,9 +1702,10 @@ HWTEST_F(TransClientSessionTest, SessionTypeConvertTest52, TestSize.Level1)
     EXPECT_EQ(ret, TYPE_MESSAGE);
 }
 
-/**
+/*
  * @tc.name: ClientForkSocketByIdTest53
- * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ClientForkSocketById
+ *           given invalid param return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1664,9 +1720,10 @@ HWTEST_F(TransClientSessionTest, ClientForkSocketByIdTest53, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: ClientGetServiceSocketInfoByIdTest54
- * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ClientGetServiceSocketInfoById
+ *           given invalid param return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1687,9 +1744,10 @@ HWTEST_F(TransClientSessionTest, ClientGetServiceSocketInfoByIdTest54, TestSize.
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: ClientGetServiceSocketInfoByIdTest55
- * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.desc: test ClientGetServiceSocketInfoById
+ *           given invalid param return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
