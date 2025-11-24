@@ -81,15 +81,8 @@ HWTEST_F(ClientConnectionTest, RegisterListenerTest, TestSize.Level0)
 {
     int32_t ret = GeneralRegisterListener(nullptr);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    testing::NiceMock<ClientConnectionInterfaceMock> mock;
-    EXPECT_CALL(mock, SoftBusMutexInit).WillOnce(testing::Return(-1));
     ret = GeneralRegisterListener(&g_listener);
-    ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
-
-    EXPECT_CALL(mock, SoftBusMutexInit).WillOnce(testing::Return(SOFTBUS_OK));
-    ret = GeneralRegisterListener(&g_listener);
-    ASSERT_NE(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
 /*

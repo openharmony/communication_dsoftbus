@@ -322,7 +322,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     DataGenerator::Write(data, size);
     FuzzedDataProvider provider(data, size);
     static bool runCoverage = true;
-    if (true) {
+    if (runCoverage) {
         testing::InitGoogleTest();
         auto result = RUN_ALL_TESTS();
         CONN_LOGI(COMM_TEST, "result=%{public}d", result);
