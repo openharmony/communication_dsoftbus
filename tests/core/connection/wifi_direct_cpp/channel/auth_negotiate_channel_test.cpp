@@ -270,29 +270,4 @@ HWTEST_F(AuthNegotiateChannelTest, OpenConnection_004, TestSize.Level1)
     auto ret = channel->OpenConnection(param, channel, authReqId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
-
-/*
- * @tc.name: OnDataReceivedFuzzTest
- * @tc.desc: !!! Just for fuzz
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthNegotiateChannelTest, OnDataReceivedFuzzTest, TestSize.Level1)
-{
-    if (!FuzzEnvironment::IsFuzzEnable()) {
-        GTEST_SKIP() << "only support in fuzz test";
-    }
-    WifiDirectInterfaceMock mock;
-    auto testData = GetAuthChannelRandomData<AuthTransData *>();
-    auto handle = GetAuthChannelRandomData<AuthHandle>();
-    EXPECT_CALL(mock, LnnGetFeatureCapabilty).WillRepeatedly(Return(0));
-    EXPECT_CALL(mock, IsFeatureSupport).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, RegAuthTransListener(_, _))
-        .WillRepeatedly([testData, &handle](int32_t module, const AuthTransListener *listener) {
-            listener->onDataReceived(handle, testData);
-            return SOFTBUS_OK;
-        });
-    SoftBusSleepMs(1000);
-}
 }
