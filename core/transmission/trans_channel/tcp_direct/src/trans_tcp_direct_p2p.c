@@ -844,7 +844,7 @@ static int32_t SetProtocolStartListener(
             peerInfo->protocol = LNN_PROTOCOL_IP;
         }
     }
-    if (peerInfo->isMinTp) {
+    if (peerInfo->isMinTp && IsHmlIpAddr(myIp)) {
         peerInfo->protocol = LNN_PROTOCOL_MINTP;
     }
     ret = IsHmlIpAddr(myIp) ? StartHmlListener(myIp, myPort, peerUuid, peerInfo->protocol) :
@@ -1005,11 +1005,27 @@ static bool IsSupportDeterministicTrans(const char *targetNetworkId)
     return true;
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
+static bool CheckIsSupportMintp(SessionConn *conn)
+{
+    if (conn->appInfo.businessType != BUSINESS_TYPE_BYTE) {
+        return false;
+    }
+    if (GetDomainByAddr(conn->appInfo.myData.addr) == SOFTBUS_AF_INET6) {
+        return false;
+    }
+    if (!IsHmlIpAddr(conn->appInfo.myData.addr)) {
+        return false;
+    }
+    return true;
+}
+#endif
+
 static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, const AppInfo *appInfo, bool isMinTp)
 {
     conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
 #ifdef DSOFTBUS_FEATURE_TRANS_MINTP
-    if (conn->appInfo.businessType == BUSINESS_TYPE_BYTE && isMinTp) {
+    if (CheckIsSupportMintp(conn) && isMinTp) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_MINTP;
     }
 #endif
@@ -1070,12 +1086,14 @@ static void DegradeToTcpListener(VerifyP2pInfo *info, SessionConn *conn)
         conn->appInfo.isFlashLight = false;
         conn->appInfo.myData.port = 0;
         (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo, false);
+        return;
     }
-    if (!info->isMinTp) {
+    if (conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP && !info->isMinTp) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
         conn->appInfo.myData.port = 0;
         StopHmlListener(conn->listenMod);
         (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo, false);
+        return;
     }
 }
 
