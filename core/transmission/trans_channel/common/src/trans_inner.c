@@ -742,8 +742,6 @@ int32_t TdcSendData(int32_t channelId, const void *data, uint32_t len)
     ret = SetIpTos(info.fd, BYTE_TOS);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "failed to set tos. channelId=%{public}d", channelId);
-        SoftBusFree(buf);
-        return ret;
     }
     ret = TransTdcSendData(&lenInfo, info.supportTlv, info.fd, len, buf);
     if (ret != SOFTBUS_OK) {
