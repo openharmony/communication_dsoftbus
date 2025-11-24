@@ -218,9 +218,10 @@ void ClientTransProxyFileManagerTest::TearDownTestCase(void)
     ClientTransProxyListDeinit();
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxySendFileTest001
- * @tc.desc: client trans proxy send file test, use the wrong parameter.
+ * @tc.desc: client trans proxy send file test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -269,9 +270,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendFileTest001, TestS
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransRecvFileFrameDataTest001
- * @tc.desc: clent trans recv file frame data test, use the wrong parameter.
+ * @tc.desc: clent trans recv file frame data test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -305,9 +307,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyCreateChannelInfoTest001
- * @tc.desc: clent trans recv file frame data test, use the wrong parameter.
+ * @tc.desc: clent trans recv file frame data test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -343,9 +346,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClientTransProxyCreateChannelInfoTest0
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: ClinetTransRecvFileFrameDataTest002
- * @tc.desc: client trans recv file frame data test, use the wrong parameter.
+ * @tc.desc: client trans recv file frame data test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -410,9 +414,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileManagerInitDataTest001
- * @tc.desc: client trans proxy file manager init data test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy file manager init data test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -446,9 +451,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileManagerInitDataTes
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyGetSessionFileLockTest001
- * @tc.desc: client trans proxy get session file lock test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy get session file lock test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -469,9 +475,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest
     DelSessionFileLock(sessionLock);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyCreateSendListenerInfoTest001
- * @tc.desc: client trans proxy create send listener info test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy create send listener info test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -520,9 +527,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
     EXPECT_EQ(nullptr, result);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyGetAndCheckFileSizeTest001
- * @tc.desc: improve branch coverage, use the wrong or normal parameter.
+ * @tc.desc: test improve branch coverage
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -543,9 +551,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAndCheckFileSizeTes
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxySendOneFrameTest001
- * @tc.desc: client trans proxy send one frame test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy send one frame test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -611,9 +620,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, T
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxySendOneFrameTest002
- * @tc.desc: client trans proxy send one frame test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy send one frame test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -644,9 +654,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest002, T
     SoftBusFree(infoRear);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileRecipientInfoTest001
- * @tc.desc: client trans proxy file recipient info test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy file recipient info test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -680,9 +691,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileRecipientInfoTest0
     ClearRecipientResources(&info);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileAckReqAndResDataTest001
- * @tc.desc: client trans proxy file ack req and res data test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy file ack req and res data test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -718,9 +730,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyPackFileDataTest001
- * @tc.desc: client trans proxy pack file data test, use the wrong parameter.
+ * @tc.desc: client trans proxy pack file data test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -761,9 +774,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, T
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, len);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyPackFileDataFrameTest001
- * @tc.desc: client trans proxy pack file data frame test, use normal parameter.
+ * @tc.desc: client trans proxy pack file data frame test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -802,9 +816,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataFrameTest0
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyRetransFileFrameTest001
- * @tc.desc: client trans proxy retrans file frame test, use normal parameter.
+ * @tc.desc: client trans proxy retrans file frame test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -832,9 +847,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest00
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyAckResponseDataHandleTest001
- * @tc.desc: client trans proxy handle response data test, use normal parameter.
+ * @tc.desc: client trans proxy handle response data test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -865,9 +881,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyAckResponseDataHandleT
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyGetFullRecvPathTest001
- * @tc.desc: client trans proxy get full recv path test, use normal parameter.
+ * @tc.desc: client trans proxy get full recv path test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -901,9 +918,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFullRecvPathTest001
     EXPECT_NE(nullptr, result);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyGetDirPathTest001
- * @tc.desc: client trans proxy get dir path test, use normal parameter.
+ * @tc.desc: client trans proxy get dir path test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -929,9 +947,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetDirPathTest001, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyGetAbsFullPathTest001
- * @tc.desc: client trans proxy get path test, use normal parameter.
+ * @tc.desc: client trans proxy get path test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -957,9 +976,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001,
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxySendListenerInfoTest001
- * @tc.desc: client trans proxy add and del SendListenerInfo test, use normal parameter.
+ * @tc.desc: client trans proxy add and del SendListenerInfo test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -984,9 +1004,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest00
     DelSendListenerInfo(info);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileTransStartInfoTest001
- * @tc.desc: client trans proxy pack file start info test, use normal parameter.
+ * @tc.desc: client trans proxy pack file start info test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1015,9 +1036,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileTransStartInfoTest
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyUnFileTransStartInfoTest001
- * @tc.desc: client trans proxy pack file data frame test, use normal parameter.
+ * @tc.desc: client trans proxy pack file data frame test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1063,9 +1085,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUnFileTransStartInfoTe
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileCrcCheckSumTest001
- * @tc.desc: client trans proxy crc check test, use normal parameter.
+ * @tc.desc: client trans proxy crc check test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1101,9 +1124,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileCrcCheckSumTest001
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileToFrameTest001
- * @tc.desc: client trans proxy send file test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy send file test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1139,9 +1163,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest001, Te
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileToFrameTest002
- * @tc.desc: client trans proxy file to frame test, use normal parameter.
+ * @tc.desc: client trans proxy file to frame test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1164,9 +1189,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest002, Te
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyStartSendFileTest001
- * @tc.desc: client trans proxy start send file test, use normal parameter.
+ * @tc.desc: client trans proxy start send file test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1182,9 +1208,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyStartSendFileTest001, 
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyCheckFileTest001
- * @tc.desc: client trans proxy start send file test, use normal parameter.
+ * @tc.desc: client trans proxy start send file test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1197,9 +1224,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckFileTest001, Test
     EXPECT_EQ(false, result);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyPutToRcvListTest001
- * @tc.desc: client trans proxy put to file list test, use normal parameter.
+ * @tc.desc: client trans proxy put to file list test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1225,9 +1253,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPutToRcvListTest001, T
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyRecvRecipientInfoListTest001
- * @tc.desc: client trans proxy recv recipient info test, use normal parameter.
+ * @tc.desc: client trans proxy recv recipient info test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1262,9 +1291,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRecvRecipientInfoListT
     ReleaseRecipientRef(info);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyGetRecipientInfoListTest001
- * @tc.desc: client trans proxy get recipient info test, use normal parameter.
+ * @tc.desc: client trans proxy get recipient info test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1287,9 +1317,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetRecipientInfoListTe
     EXPECT_EQ(nullptr, result);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyWriteEmptyFrameTest001
- * @tc.desc: client trans proxy write empty frame test, use normal parameter.
+ * @tc.desc: client trans proxy write empty frame test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1318,9 +1349,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteEmptyFrameTest001
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyProcessOneFrameCRCTest001
- * @tc.desc: client trans proxy process one frameCRC test, use normal parameter.
+ * @tc.desc: client trans proxy process one frameCRC test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1374,9 +1406,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameCRCTest
     SoftBusFree(emptyBuff);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyProcessOneFrameTest001
- * @tc.desc: client trans proxy process one frame test, use normal parameter.
+ * @tc.desc: client trans proxy process one frame test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1410,9 +1443,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameTest001
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyCrcCheckTest001
- * @tc.desc: client trans proxy process crc check test, use normal parameter.
+ * @tc.desc: client trans proxy process crc check test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1439,9 +1473,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCrcCheckTest001, TestS
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileAckRequestTest001
- * @tc.desc: client trans proxy file ack request test, use normal parameter.
+ * @tc.desc: client trans proxy file ack request test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1471,9 +1506,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckRequestTest001,
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileAckResponseTest001
- * @tc.desc: client trans proxy file ack response test, use normal parameter.
+ * @tc.desc: client trans proxy file ack response test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1515,9 +1551,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyCheckParameterTest001
- * @tc.desc: client trans proxy check parameter test, use normal parameter.
+ * @tc.desc: client trans proxy check parameter test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1535,9 +1572,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckParameterTest001,
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyProcessFileListDataTest001
- * @tc.desc: client trans proxy process file list data test, use normal parameter.
+ * @tc.desc: client trans proxy process file list data test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1552,9 +1590,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessFileListDataTes
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyGetFileInfoTest001
- * @tc.desc: client trans proxy get file info test, use normal parameter.
+ * @tc.desc: client trans proxy get file info test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1587,9 +1626,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileInfoTest001, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyWriteFrameTest001
- * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.desc: client trans proxy write frame to file test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1608,9 +1648,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteFrameTest001, Tes
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyChannelSendFileStreamTest001
- * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.desc: client trans proxy write frame to file test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1625,9 +1666,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxyChannelSendFileStreamTest001, Tes
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxySendFileTransResult001
- * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.desc: client trans proxy write frame to file test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1642,9 +1684,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxySendFileTransResultTest001, TestS
     EXPECT_NE(SOFTBUS_MALLOC_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetUnpackFileTransResultFrame001
- * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.desc: client trans proxy write frame to file test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1677,9 +1720,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxyUnpackFileTransResultFrame001, Te
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyFileAckReqAndResDataTest002
- * @tc.desc: client trans proxy file ack req and res data test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy file ack req and res data test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1729,9 +1773,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyPackFileDataTest002
- * @tc.desc: client trans proxy pack file data test, use the wrong parameter.
+ * @tc.desc: client trans proxy pack file data test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1772,9 +1817,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest002, T
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, len);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyRetransFileFrameTest002
- * @tc.desc: client trans proxy retrans file frame test, use normal parameter.
+ * @tc.desc: client trans proxy retrans file frame test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1812,9 +1858,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest00
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyCalcAllFilesInfoTest001
- * @tc.desc: client trans proxy calc all files info test, use normal parameter.
+ * @tc.desc: client trans proxy calc all files info test
+ *           use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1844,9 +1891,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, Te
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyUpdateFileReceivePathTest001
- * @tc.desc: client trans proxy update file receive path test, use normal and error parameter.
+ * @tc.desc: client trans proxy update file receive path test
+ *           use normal and error parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1866,9 +1914,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathT
     GetRecipientInfo(sessionId);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyCreateFileFromFrameTest001
- * @tc.desc: client trans proxy create file from frame test, use normal and error parameter.
+ * @tc.desc: client trans proxy create file from frame test
+ *           use normal and error parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1894,9 +1943,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateFileFromFrameTes
     ProcessFileFrameData(sessionId, channelId, dataFile, len, type);
 }
 
-/**
+/*
  * @tc.name: ClinetTransProxyChannelSendFileTest001
- * @tc.desc: client trans proxy channel send file test, use normal and error parameter.
+ * @tc.desc: client trans proxy channel send file test
+ *           use normal and error parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1933,9 +1983,10 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyChannelSendFileTest001
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: CheckFrameLengthTest
- * @tc.desc: client trans proxy channel send file test, use normal and error parameter.
+ * @tc.desc: client trans proxy channel send file test
+ *           use normal and error parameter
  * @tc.type: FUNC
  * @tc.require:
  */
