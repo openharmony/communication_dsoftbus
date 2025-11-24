@@ -195,7 +195,7 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
     }
 
     int32_t ret = SOFTBUS_NETWORK_NETIF_STATUS_CHANGED;
-    LnnNetIfType type;
+    LnnNetIfType type = LNN_NETIF_TYPE_UNKNOWN;
     LnnGetNetIfTypeByName(subnet->ifName, &type);
     switch (event) {
         case BT_SUBNET_MANAGER_EVENT_IF_READY:
@@ -220,7 +220,7 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 
 static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self, const char *ifName)
 {
-    LnnNetIfType type;
+    LnnNetIfType type = LNN_NETIF_TYPE_UNKNOWN;
     LnnGetNetIfTypeByName(ifName, &type);
     LnnPhysicalSubnet *subnet = (LnnPhysicalSubnet *)SoftBusCalloc(sizeof(LnnPhysicalSubnet));
     if (subnet == NULL) {
