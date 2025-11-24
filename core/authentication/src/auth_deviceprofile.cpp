@@ -477,7 +477,8 @@ static int32_t GetAccountUid(std::string &uid)
     return SOFTBUS_OK;
 }
 
-static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUserId, int32_t sessionKeyId)
+static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUserId, int32_t sessionKeyId,
+    int32_t localUserId)
 {
     OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
     OHOS::DistributedDeviceProfile::Accesser accesser;
@@ -488,20 +489,21 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
     uint64_t currentTime = SoftBusGetSysTimeMs();
     std::string localUdid(udid);
     accesser.SetAccesserDeviceId(localUdid);
-    accesser.SetAccesserUserId(JudgeDeviceTypeAndGetOsAccountIds());
-    std::string uid;
-    if (GetAccountUid(uid) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "get account uid fail");
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
+    accesser.SetAccesserUserId(userId);
+    if (localUserId > 0 && localUserId != userId) {
+        LNN_LOGE(LNN_STATE, "userId change, no need write acl.");
         return;
     }
+    std::string uid;
+    LNN_CHECK_AND_RETURN_LOGE(GetAccountUid(uid) == SOFTBUS_OK, LNN_STATE, "get account uid fail");
     accesser.SetAccesserAccountId(uid);
     if (sessionKeyId != DEFAULT_USER_KEY_INDEX) {
         accesser.SetAccesserSessionKeyId(sessionKeyId);
         accesser.SetAccesserSKTimeStamp(currentTime);
     }
     char bundleName[MAX_BUNDLE_NAME_LEN] = { 0 };
-    if (GenerateDsoftbusBundleName(peerUdid.c_str(), udid,
-        JudgeDeviceTypeAndGetOsAccountIds(), bundleName) != SOFTBUS_OK) {
+    if (GenerateDsoftbusBundleName(peerUdid.c_str(), udid, userId, bundleName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "generate dsoftbus bundle name fail.");
         return;
     }
@@ -573,7 +575,7 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
             sessionKeyId) != UPDATE_ACL_SUCC
             && UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, DEFAULT_USERID,
             sessionKeyId) != UPDATE_ACL_SUCC) {
-            InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId);
+            InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId, aclParams->localUserId);
         }
     }
 }
@@ -596,7 +598,7 @@ void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteSta
             sessionKeyId) != UPDATE_ACL_SUCC
             && UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, DEFAULT_USERID,
             sessionKeyId) != UPDATE_ACL_SUCC) {
-            InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId);
+            InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId, aclParams->localUserId);
         }
     }
 }

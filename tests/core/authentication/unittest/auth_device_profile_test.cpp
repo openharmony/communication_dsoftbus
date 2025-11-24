@@ -239,9 +239,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mock, SoftBusGetSysTimeMs).WillRepeatedly(Return(0));
     EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
-    InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
+    InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId, 0);
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
+    InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId, 0);
     bool result = IsNotTrustDevice(deviceIdHash);
     EXPECT_FALSE(result);
     std::string uidTest;
