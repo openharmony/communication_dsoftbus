@@ -258,8 +258,7 @@ static int32_t BrProxyPostCond(int32_t sessionId)
         if (nodeInfo->sessionId != sessionId) {
             continue;
         }
-
-        ret = SoftBusCondSignal(&nodeInfo->cond);
+        int32_t ret = SoftBusCondSignal(&nodeInfo->cond);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "[br_proxy] cond signal failed! sessionId:%{public}d, ret:%{public}d", sessionId, ret);
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
