@@ -1020,7 +1020,7 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
         LNN_LOGE(LNN_BUILDER, "parameters is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    LnnNetIfType netifType;
+    LnnNetIfType netifType = LNN_NETIF_TYPE_UNKNOWN;
     int32_t ret = LnnGetNetIfTypeByName(ifName, &netifType);
     if (ret != SOFTBUS_OK) {
         return ret;
