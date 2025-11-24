@@ -1088,11 +1088,12 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
     return SOFTBUS_OK;
 }
 
-static void PackUserId(JsonObj *json, int32_t userId)
+static void PackUserId(JsonObj *json, int32_t userId, NodeInfo *info)
 {
     if (!JSON_AddInt32ToObject(json, USERID, userId)) {
         AUTH_LOGW(AUTH_FSM, "pack userId fail");
     }
+    info->localUserId = userId >= 0 ? userId : 0;
 }
 
 static void PackAuthPreLinkNode(JsonObj *obj, const AuthSessionInfo *info)
@@ -1183,7 +1184,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
     }
     PackCompressInfo(obj, nodeInfo);
     PackFastAuth(obj, (AuthSessionInfo *)info);
-    PackUserId(obj, JudgeDeviceTypeAndGetOsAccountIds());
+    PackUserId(obj, JudgeDeviceTypeAndGetOsAccountIds(), (NodeInfo *)&info->nodeInfo);
     if ((PackNormalizedData(info, obj, nodeInfo, authSeq) != SOFTBUS_OK) || (PackExternalAuthInfo(obj) != SOFTBUS_OK)) {
         JSON_Delete(obj);
         return NULL;

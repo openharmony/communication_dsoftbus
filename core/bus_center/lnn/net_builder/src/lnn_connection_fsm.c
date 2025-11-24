@@ -44,6 +44,7 @@
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_init.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_feature_capability.h"
@@ -439,7 +440,8 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
     UpdateDpAclParams aclParams = {
         .accountId = info->accountId,
         .deviceId = info->deviceInfo.deviceUdid,
-        .peerUserId = info->userId
+        .peerUserId = info->userId,
+        .localUserId = info->localUserId
     };
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
 }
@@ -1252,6 +1254,7 @@ static void FilterRetrieveDeviceInfo(NodeInfo *info)
     info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_CLIENT_SIDE] = 0;
     info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_SERVER_SIDE] = 0;
     info->AuthTypeValue = 0;
+    info->localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     info->aclState = ACL_WRITE_DEFAULT;
     LnnSetWiFiIp(info, LOCAL_IPV6_STR, USB_IF);
     LnnSetWiFiIp(info, LOCAL_IP, WLAN_IF);
