@@ -147,31 +147,4 @@ HWTEST_F(ProxyNegotiateChannelTest, onDataReceived, TestSize.Level1)
     ret = channel->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-
-/*
- * @tc.name: OnDataReceivedFuzzTest
- * @tc.desc: !!! Just for fuzz
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ProxyNegotiateChannelTest, OnDataReceivedFuzzTest, TestSize.Level1)
-{
-    if (!FuzzEnvironment::IsFuzzEnable()) {
-        GTEST_SKIP() << "only support in fuzz test";
-    }
-    WifiDirectInterfaceMock mock;
-    const char *testData = GetProxyChannelRandomData<char *>();
-    EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _))
-        .WillRepeatedly([](const std::string &networkId, InfoKey key, bool *info) {
-            *info = true;
-            return SOFTBUS_OK;
-        });
-    EXPECT_CALL(mock, TransProxyPipelineRegisterListener(_, _))
-        .WillRepeatedly([testData](TransProxyPipelineMsgType type, const ITransProxyPipelineListener *listener) {
-            listener->onDataReceived(CID, testData, strlen(testData));
-            return SOFTBUS_OK;
-        });
-    SoftBusSleepMs(1000);
-}
 }

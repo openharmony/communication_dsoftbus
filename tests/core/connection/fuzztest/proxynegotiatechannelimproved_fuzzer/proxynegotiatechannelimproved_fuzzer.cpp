@@ -15,6 +15,7 @@
 
 #include <fuzzer/FuzzedDataProvider.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <pthread.h>
 
 #include "conn_log.h"
@@ -29,10 +30,10 @@ namespace OHOS {
 static ITransProxyPipelineListener g_proxyListener = {};
 static bool g_alreadyInit = false;
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
-static OHOS::SoftBus::WifiDirectInterfaceMock mock;
 static constexpr int WAIT_CLEAE_TIME = 500;
+static int g_maxCoverageRunTime = 1;
 
-void SetUpEnvironment()
+void SetUpEnvironment(OHOS::SoftBus::WifiDirectInterfaceMock &mock)
 {
     pthread_mutex_lock(&g_lock);
     if (!g_alreadyInit) {
@@ -44,6 +45,7 @@ void SetUpEnvironment()
         EXPECT_CALL(mock, TransProxyPipelineGetUuidByChannelId(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
         EXPECT_CALL(mock, IsFeatureSupport(_, _)).WillRepeatedly(Return(false));
         EXPECT_CALL(mock, LnnGetRemoteBoolInfoIgnoreOnline(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+        EXPECT_CALL(mock, LnnGetLocalStrInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
         OHOS::SoftBus::CoCProxyNegotiateChannel::Init();
         g_alreadyInit = true;
     }
@@ -67,7 +69,16 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         CONN_LOGE(CONN_TEST, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    OHOS::SetUpEnvironment();
+
+    if (OHOS::g_maxCoverageRunTime == 1) {
+        testing::InitGoogleTest();
+        auto result = RUN_ALL_TESTS();
+        OHOS::g_maxCoverageRunTime += 1;
+        CONN_LOGI(CONN_ACTION, "result=%{public}d", result);
+    }
+
+    OHOS::SoftBus::WifiDirectInterfaceMock mock;
+    OHOS::SetUpEnvironment(mock);
     FuzzedDataProvider provider(data, size);
     OHOS::DataReceivedFuzzTest(provider, data, size);
     return SOFTBUS_OK;
