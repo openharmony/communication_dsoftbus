@@ -24,9 +24,6 @@ class ClientConnectionInterface {
 public:
     ClientConnectionInterface() {};
     virtual ~ClientConnectionInterface() {};
-    virtual int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr);
-    virtual int32_t SoftBusMutexLockInner(SoftBusMutex *mutex);
-    virtual int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex);
     virtual int32_t InitSoftBus(const char *pkgName);
     virtual int32_t ServerIpcCreateServer(const char *pkgName, const char *name);
     virtual int32_t ServerIpcRemoveServer(const char *pkgName, const char *name);
@@ -40,9 +37,6 @@ class ClientConnectionInterfaceMock : public ClientConnectionInterface {
 public:
     ClientConnectionInterfaceMock();
     ~ClientConnectionInterfaceMock() override;
-    MOCK_METHOD2(SoftBusMutexInit, int32_t(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr));
-    MOCK_METHOD1(SoftBusMutexLockInner, int32_t(SoftBusMutex *mutex));
-    MOCK_METHOD1(SoftBusMutexUnlockInner, int32_t(SoftBusMutex *mutex));
     MOCK_METHOD1(InitSoftBus, int32_t(const char *pkgName));
     MOCK_METHOD2(ServerIpcCreateServer, int32_t(const char *pkgName, const char *name));
     MOCK_METHOD2(ServerIpcRemoveServer, int32_t(const char *pkgName, const char *name));

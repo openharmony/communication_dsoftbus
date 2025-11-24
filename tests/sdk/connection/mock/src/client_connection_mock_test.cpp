@@ -38,21 +38,6 @@ static ClientConnectionInterfaceMock* GetMock()
 extern "C" {
 #endif
 
-int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
-{
-    return GetMock()->SoftBusMutexInit(mutex, mutexAttr);
-}
-
-int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
-{
-    return GetMock()->SoftBusMutexLockInner(mutex);
-}
-
-int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex)
-{
-    return GetMock()->SoftBusMutexUnlockInner(mutex);
-}
-
 int32_t InitSoftBus(const char *pkgName)
 {
     return GetMock()->InitSoftBus(pkgName);
