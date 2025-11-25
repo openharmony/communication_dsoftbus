@@ -67,6 +67,11 @@ bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_
     return GetTransTcpDirectJsonInterface()->GetJsonObjectInt32Item(json, string, target);
 }
 
+bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target)
+{
+    return GetTransTcpDirectJsonInterface()->GetJsonObjectBoolItem(json, string, target);
+}
+
 void cJSON_Delete(cJSON *json) {}
 }
 }
