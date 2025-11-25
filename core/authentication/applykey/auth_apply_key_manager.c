@@ -492,6 +492,25 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void UserSwitchedHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_USER_SWITCHED) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return;
+    }
+    const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
+    SoftBusUserSwitchState userSwitchState = (SoftBusUserSwitchState)event->status;
+    switch (userSwitchState) {
+        case SOFTBUS_USER_SWITCHED:
+            AUTH_LOGI(AUTH_CONN, "ApplyKeyManager handle SOFTBUS_USER_SWITCHED");
+            ClearAuthApplyMap();
+            AuthRemoveApplyKeyFile();
+            break;
+        default:
+            return;
+    }
+}
+
 int32_t InitApplyKeyManager(void)
 {
     int32_t ret = AuthApplyMapInit();
@@ -502,6 +521,10 @@ int32_t InitApplyKeyManager(void)
     AuthRecoveryApplyKey();
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "regist account change evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "regist user switch evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     return SOFTBUS_OK;
