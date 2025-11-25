@@ -283,11 +283,7 @@ static int32_t ChannelOpened(int32_t sessionId, int32_t channelId, int32_t resul
         TRANS_LOGI(TRANS_SDK, "[br_proxy] ret:%{public}d.", ret);
         return ret;
     }
-    SessionInfo info;
-    ret = GetSessionInfoBySessionId(sessionId, &info);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+
     return BrProxyPostCond(sessionId);
 }
 
