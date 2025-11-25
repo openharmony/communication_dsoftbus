@@ -35,6 +35,7 @@ typedef enum {
 typedef struct {
     bool isMeta;
     bool isReply;
+    bool needFastWakeUp;
     uint8_t tos;
     UdpChannelStatus status;
     uint32_t requestId;
