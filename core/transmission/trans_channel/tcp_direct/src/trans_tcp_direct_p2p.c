@@ -832,27 +832,27 @@ static void DeleteExternalP2pListener(const char *peerUuid)
 }
 
 static int32_t SetProtocolStartListener(
-    VerifyP2pInfo *peerInfo, const char *myIp, int64_t seq, const char *peerUuid, int32_t *myPort)
+    VerifyP2pInfo *info, const char *myIp, int64_t seq, const char *peerUuid, int32_t *myPort)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(peerInfo != NULL && myIp != NULL && peerUuid != NULL && myPort != NULL,
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL && myIp != NULL && peerUuid != NULL && myPort != NULL,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid parm");
     int32_t ret = -1;
-    if (peerInfo->protocol == LNN_PROTOCOL_HTP) {
-        if ((peerInfo->myUid != -1 && !CheckHtpPermissionPacked(peerInfo->myUid)) ||
-            ServerOpenHtpChannelPacked(peerInfo->myIp, seq) != SOFTBUS_OK) {
+    if (info->protocol == LNN_PROTOCOL_HTP) {
+        if ((info->peerUid != -1 && !CheckHtpPermissionPacked(info->peerUid)) ||
+            ServerOpenHtpChannelPacked(info->peerIp, seq) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "start vsp channel failed, degrade to tcp protocol");
-            peerInfo->protocol = LNN_PROTOCOL_IP;
+            info->protocol = LNN_PROTOCOL_IP;
         }
     }
-    if (peerInfo->isMinTp && IsHmlIpAddr(myIp)) {
-        peerInfo->protocol = LNN_PROTOCOL_MINTP;
+    if (info->isMinTp && IsHmlIpAddr(myIp)) {
+        info->protocol = LNN_PROTOCOL_MINTP;
     }
-    ret = IsHmlIpAddr(myIp) ? StartHmlListener(myIp, myPort, peerUuid, peerInfo->protocol) :
+    ret = IsHmlIpAddr(myIp) ? StartHmlListener(myIp, myPort, peerUuid, info->protocol) :
                               StartP2pListener(myIp, myPort, peerUuid);
-    if (peerInfo->protocol == LNN_PROTOCOL_MINTP && ret != SOFTBUS_OK) {
-        peerInfo->isMinTp = false;
-        peerInfo->protocol = LNN_PROTOCOL_IP;
-        ret = StartHmlListener(myIp, myPort, peerUuid, peerInfo->protocol);
+    if (info->protocol == LNN_PROTOCOL_MINTP && ret != SOFTBUS_OK) {
+        info->isMinTp = false;
+        info->protocol = LNN_PROTOCOL_IP;
+        ret = StartHmlListener(myIp, myPort, peerUuid, info->protocol);
         TRANS_LOGW(TRANS_CTRL, "start mintp listener failed, degrade to tcp protocol");
     }
     return ret;
@@ -1006,6 +1006,7 @@ static bool IsSupportDeterministicTrans(const char *targetNetworkId)
 }
 
 #ifdef DSOFTBUS_FEATURE_TRANS_MINTP
+#define DFS_SESSIONNAME "DistributedFileService/mnt/hmdfs/100/account"
 static bool CheckIsSupportMintp(SessionConn *conn)
 {
     if (conn->appInfo.businessType != BUSINESS_TYPE_BYTE) {
@@ -1015,6 +1016,9 @@ static bool CheckIsSupportMintp(SessionConn *conn)
         return false;
     }
     if (!IsHmlIpAddr(conn->appInfo.myData.addr)) {
+        return false;
+    }
+    if (strcmp(conn->appInfo.myData.sessionName, DFS_SESSIONNAME) == 0) {
         return false;
     }
     return true;
