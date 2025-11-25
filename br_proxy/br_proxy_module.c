@@ -228,7 +228,7 @@ static int32_t BrProxyWaitCond(int32_t sessionId)
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
             return ret;
         }
-        if (absTime.sec > INT64_MAX - BR_PROXY_MAX_WAIT_COND_TIME) { 
+        if (absTime.sec > INT64_MAX - BR_PROXY_MAX_WAIT_COND_TIME) {
             TRANS_LOGE(TRANS_SDK, "[br_proxy] time overflow");
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
             return SOFTBUS_INVALID_PARAM;
