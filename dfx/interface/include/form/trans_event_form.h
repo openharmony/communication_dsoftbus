@@ -48,6 +48,7 @@ typedef enum {
     EVENT_SCENE_PAGING_CONNECT = 21,
     EVENT_SCENE_TALKIE = 22,
     EVENT_SCENE_TRANS_FILE_RATE = 23,
+    EVENT_SCENE_FAST_WAKE_UP = 24,
 } TransEventScene;
 
 typedef enum {
@@ -76,6 +77,8 @@ typedef enum {
     EVENT_STAGE_HANDSHAKE_START = 4,
     EVENT_STAGE_HANDSHAKE_REPLY = 5,
     EVENT_STAGE_OPEN_CHANNEL_END = 6,
+    EVENT_SCENE_FAST_WAKE_UP_SINGLE = 7,
+    EVENT_SCENE_FAST_WAKE_UP_PERIODIC = 8,
 } TransEventOpenChannelStage;
 
 typedef enum {
@@ -106,10 +109,17 @@ typedef enum {
     EVENT_STATE_BUTT,
 } TransFileRateState;
 
+typedef enum {
+    WAKE_UP_STATE_DISABLE = 1,
+    WAKE_UP_STATE_ENABLE,
+    WAKE_UP_STATE_BUTT,
+} WakeUpState;
+
 typedef struct {
     uint8_t talkieFreq;        // TALKIE_FREQ
     uint8_t talkieType;        // TALKIE_TYPE
     uint8_t talkieLevel;       // TALKIE_LEVEL
+    uint8_t wakeUpState;       // WAKE_UP_STATE
     int32_t result;            // STAGE_RES
     int32_t errcode;           // ERROR_CODE
     const char *socketName;    // SESSION_NAME

@@ -21,6 +21,7 @@
 #include "softbus_adapter_mem.h"
 #include "trans_udp_channel_manager.c"
 #include "trans_udp_negotiation.h"
+#include "trans_udp_manager_mock.h"
 
 using namespace testing::ext;
 
@@ -35,6 +36,17 @@ namespace OHOS {
 #define INVALID_CHANNEL_REQUETID (23456)
 #define INVALID_CHANNEL_NETWORK (1111)
 static int64_t g_channelId = 0;
+static UdpChannelInfo g_testUdpChannelInfoRes = {
+    .needFastWakeUp = false,
+    .info = {
+        .myData = {
+            .channelId = TEST_CHANNEL_ID,
+        }
+    }
+};
+
+static char g_testUuid[UUID_BUF_LEN];
+static bool g_testNeedFastWakeUp;
 
 class TransUdpManagerTest : public testing::Test {
 public:
@@ -69,13 +81,50 @@ void TransUdpManagerTest::TearDownTestCase(void)
     LnnDeinitBusCenterEvent();
 }
 
+struct TransUdpGetWakeUpInfoTestParam {
+    int32_t channelId;
+    char *uuid;
+    int32_t uuidLen;
+    bool *needFastWakeUp;
+    int32_t transGetUdpChannelByIdMockRes;
+    UdpChannelInfo *channelInfoMockRes;
+    int32_t lnnGetRemoteStrInfoMockRes;
+    int32_t res;
+};
+
+class TransUdpGetWakeUpInfoTest : public testing::TestWithParam<TransUdpGetWakeUpInfoTestParam> {
+public:
+    TransUdpGetWakeUpInfoTest() { };
+    ~TransUdpGetWakeUpInfoTest() { };
+    void SetUp() override
+    {
+        (void)memset_s(&g_testUuid, UUID_BUF_LEN, 0, UUID_BUF_LEN);
+        g_testNeedFastWakeUp = false;
+    }
+    void TearDown() override { }
+};
+
+struct TransUdpSetWakeUpInfoTestParam {
+    int32_t channelId;
+    bool needFastWakeUp;
+    bool listInited;
+    UdpChannelInfo *testChannelInfo;
+    int32_t res;
+};
+
+class TransUdpSetWakeUpInfoTest : public testing::TestWithParam<TransUdpSetWakeUpInfoTestParam> {
+public:
+    TransUdpSetWakeUpInfoTest() { };
+    ~TransUdpSetWakeUpInfoTest() { };
+};
+
 int64_t TestGetChannelId()
 {
     g_channelId++;
     return g_channelId;
 }
 
-UdpChannelInfo* GetPackTest()
+UdpChannelInfo *GetPackTest()
 {
     UdpChannelInfo *Channel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
     if (Channel == nullptr) {
@@ -1331,4 +1380,108 @@ HWTEST_F(TransUdpManagerTest, TransUdpUpdateAccessInfo001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransUdpChannelMgrDeinit();
 }
+
+/**
+ * @tc.name: TransUdpGetWakeUpInfoTest
+ * @tc.desc: test TransGetUdpChannelById in different case.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_P(TransUdpGetWakeUpInfoTest, TransUdpGetWakeUpInfoTest, TestSize.Level1)
+{
+    TransUdpGetWakeUpInfoTestParam testParam = GetParam();
+    int32_t ret = SOFTBUS_OK;
+    UdpChannelInfo *testChannelInfo = NULL;
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    testChannelInfo = new UdpChannelInfo();
+    (void)memcpy_s(testChannelInfo, sizeof(UdpChannelInfo), &g_testUdpChannelInfoRes, sizeof(UdpChannelInfo));
+    ret = TransAddUdpChannel(testChannelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    testing::NiceMock<TransUdpManagerMock> udpManagerMock;
+    if (testParam.uuid != nullptr && testParam.channelId == TEST_CHANNEL_ID) {
+        EXPECT_CALL(udpManagerMock, LnnGetRemoteStrInfo(testing::_, testing::_, testParam.uuid, testParam.uuidLen))
+            .WillOnce(testing::Return(testParam.lnnGetRemoteStrInfoMockRes));
+    }
+
+    ret = TransUdpGetWakeUpInfo(testParam.channelId, testParam.uuid, testParam.uuidLen, testParam.needFastWakeUp);
+    EXPECT_EQ(testParam.res, ret);
+    if (testParam.needFastWakeUp != nullptr) {
+        EXPECT_EQ(testChannelInfo->needFastWakeUp, *testParam.needFastWakeUp);
+    }
+    if (testChannelInfo != nullptr) {
+        ret = TransDelUdpChannel(testChannelInfo->info.myData.channelId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+    TransUdpChannelMgrDeinit();
+}
+
+INSTANTIATE_TEST_SUITE_P(TransUdpGetWakeUpInfoTest, TransUdpGetWakeUpInfoTest, testing::Values(
+    // @tc.desc: test TransUdpGetWakeUpInfoTest ok.
+    TransUdpGetWakeUpInfoTestParam {TEST_CHANNEL_ID, g_testUuid, UUID_BUF_LEN, &g_testNeedFastWakeUp,
+        SOFTBUS_OK, &g_testUdpChannelInfoRes, SOFTBUS_OK, SOFTBUS_OK},
+    // @tc.desc: test TransUdpGetWakeUpInfoTest TransGetUdpChannelById fail.
+    TransUdpGetWakeUpInfoTestParam {-1, g_testUuid, UUID_BUF_LEN, &g_testNeedFastWakeUp,
+        SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, &g_testUdpChannelInfoRes, SOFTBUS_OK, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND},
+    // @tc.desc: test TransUdpGetWakeUpInfoTest uuid is null.
+    TransUdpGetWakeUpInfoTestParam {TEST_CHANNEL_ID, nullptr, UUID_BUF_LEN, &g_testNeedFastWakeUp,
+        SOFTBUS_OK, &g_testUdpChannelInfoRes, SOFTBUS_OK, SOFTBUS_OK},
+    // @tc.desc: test TransUdpGetWakeUpInfoTest LnnGetRemoteStrInfo fail.
+    TransUdpGetWakeUpInfoTestParam {TEST_CHANNEL_ID, g_testUuid, UUID_BUF_LEN, &g_testNeedFastWakeUp,
+        SOFTBUS_OK, &g_testUdpChannelInfoRes, SOFTBUS_INVALID_PARAM, SOFTBUS_INVALID_PARAM}
+));
+
+/**
+ * @tc.name: TransUdpSetWakeUpInfoTest
+ * @tc.desc: test TransSetUdpChannelById in different case.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_P(TransUdpSetWakeUpInfoTest, TransUdpSetWakeUpInfoTest, TestSize.Level1)
+{
+    TransUdpSetWakeUpInfoTestParam testParam = GetParam();
+    int32_t ret = SOFTBUS_OK;
+    UdpChannelInfo *testChannelInfo = NULL;
+    if (!testParam.listInited) {
+        goto PROCESS;
+    }
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (testParam.testChannelInfo == nullptr) {
+        goto PROCESS;
+    }
+
+    testChannelInfo = new UdpChannelInfo();
+    (void)memcpy_s(testChannelInfo, sizeof(UdpChannelInfo), testParam.testChannelInfo, sizeof(UdpChannelInfo));
+    ret = TransAddUdpChannel(testChannelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+PROCESS:
+    ret = TransUdpSetWakeUpInfo(testParam.channelId, testParam.needFastWakeUp);
+    EXPECT_EQ(testParam.res, ret);
+    if (testParam.listInited) {
+        if (testChannelInfo != nullptr) {
+            EXPECT_EQ(testParam.needFastWakeUp, testChannelInfo->needFastWakeUp);
+            ret = TransDelUdpChannel(testChannelInfo->info.myData.channelId);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+        }
+        TransUdpChannelMgrDeinit();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(TransUdpSetWakeUpInfoTest, TransUdpSetWakeUpInfoTest, testing::Values(
+    // @tc.desc: test TransUdpSetWakeUpInfoTest true ok.
+    TransUdpSetWakeUpInfoTestParam {TEST_CHANNEL_ID, true, true, &g_testUdpChannelInfoRes, SOFTBUS_OK},
+    // @tc.desc: test TransUdpSetWakeUpInfoTest false ok.
+    TransUdpSetWakeUpInfoTestParam {TEST_CHANNEL_ID, false, true, &g_testUdpChannelInfoRes, SOFTBUS_OK},
+    // @tc.desc: test TransUdpSetWakeUpInfoTest list not init.
+    TransUdpSetWakeUpInfoTestParam {TEST_CHANNEL_ID, true, false, &g_testUdpChannelInfoRes, SOFTBUS_NO_INIT},
+    // @tc.desc: test TransUdpSetWakeUpInfoTest node not found.
+    TransUdpSetWakeUpInfoTestParam {TEST_CHANNEL_ID, true, true, nullptr, SOFTBUS_TRANS_NODE_NOT_FOUND}
+));
 }

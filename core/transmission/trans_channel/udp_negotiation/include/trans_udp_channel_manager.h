@@ -81,6 +81,10 @@ bool CompareSessionName(const char *dstSessionName, const char *srcSessionName);
 void TransSetUdpChannelMsgType(uint32_t requestId);
 
 int32_t TransUdpUpdateAccessInfo(int32_t channelId, const AccessInfo *accessInfo);
+
+int32_t TransUdpGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp);
+
+int32_t TransUdpSetWakeUpInfo(int32_t channelId, bool needFastWakeUp);
 #ifdef __cplusplus
 }
 #endif

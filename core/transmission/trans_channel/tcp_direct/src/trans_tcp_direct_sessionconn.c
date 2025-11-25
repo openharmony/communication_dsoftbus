@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
@@ -838,4 +839,83 @@ int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
     }
     (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
     return SOFTBUS_OK;
+}
+
+int32_t TransGetTdcChannelById(int32_t channelId, TcpChannelInfo *channel)
+{
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "tcp channel info list hasn't init");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (channel == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&(g_tcpChannelInfoList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    TcpChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &(g_tcpChannelInfoList->list), TcpChannelInfo, node) {
+        if (info->channelId == channelId) {
+            if (memcpy_s(channel, sizeof(TcpChannelInfo), info, sizeof(TcpChannelInfo)) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s TcpChannelInfo failed");
+                (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+                return SOFTBUS_MEM_ERR;
+            }
+            (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+    TRANS_LOGE(TRANS_SVC, "can not find channelInfo by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t TransTdcGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp)
+{
+    TcpChannelInfo channelInfo;
+    (void)memset_s(&channelInfo, sizeof(channelInfo), 0, sizeof(channelInfo));
+    int32_t ret = TransGetTdcChannelById(channelId, &channelInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get tcp channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    if (uuid != NULL) {
+        ret = LnnGetRemoteStrInfo(channelInfo.peerDeviceId, STRING_KEY_UUID, uuid, uuidLen);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get peer uuid failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+            return ret;
+        }
+    }
+    if (needFastWakeUp != NULL) {
+        *needFastWakeUp = channelInfo.needFastWakeUp;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransTdcSetWakeUpInfo(int32_t channelId, bool needFastWakeUp)
+{
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "tcp channel info list hasn't init");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_tcpChannelInfoList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    TcpChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &(g_tcpChannelInfoList->list), TcpChannelInfo, node) {
+        if (info->channelId == channelId) {
+            info->needFastWakeUp = needFastWakeUp;
+            (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+    TRANS_LOGE(TRANS_SVC, "can not find channelInfo by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
 }
