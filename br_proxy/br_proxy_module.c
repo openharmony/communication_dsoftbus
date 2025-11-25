@@ -54,7 +54,7 @@ typedef struct {
     int32_t sessionId;
     int32_t channelId;
     int32_t openResult;
-    sem_t *sem;
+    SoftBusCond cond;
     ListNode node;
 } SessionInfo;
 
@@ -104,14 +104,8 @@ static int32_t AddSessionToList(int32_t sessionId)
         TRANS_LOGE(TRANS_SDK, "[br_proxy] calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    info->sem = (sem_t *)SoftBusCalloc(sizeof(sem_t));
-    if (info->sem == NULL) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] calloc failed");
-        ret = SOFTBUS_LOCK_ERR;
-        goto EXIT_FREE_INFO;
-    }
     info->sessionId = sessionId;
-    sem_init(info->sem, 0, 0);
+    SoftBusCondInit(&info->cond);
     ListInit(&info->node);
     if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
@@ -125,9 +119,7 @@ static int32_t AddSessionToList(int32_t sessionId)
     return SOFTBUS_OK;
 
 EXIT_ERR:
-    sem_destroy(info->sem);
-    SoftBusFree(info->sem);
-EXIT_FREE_INFO:
+    SoftBusCondDestroy(&info->cond);
     SoftBusFree(info);
     return ret;
 }
@@ -176,7 +168,6 @@ static int32_t GetSessionInfoBySessionId(int32_t sessionId, SessionInfo *info)
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
             return SOFTBUS_MEM_ERR;
         }
-        info->sem = nodeInfo->sem;
         (void)SoftBusMutexUnlock(&(g_sessionList->lock));
         return SOFTBUS_OK;
     }
@@ -201,16 +192,88 @@ static int32_t DeleteSessionById(int32_t sessionId)
         if (sessionNode->sessionId != sessionId) {
             continue;
         }
-        sem_destroy(sessionNode->sem);
+        SoftBusCondDestroy(&sessionNode->cond);
         TRANS_LOGI(TRANS_SDK, "[br_proxy] by sessionId:%{public}d delete node success, cnt:%{public}d",
             sessionNode->sessionId, g_sessionList->cnt);
         ListDelete(&sessionNode->node);
-        SoftBusFree(sessionNode->sem);
         SoftBusFree(sessionNode);
         g_sessionList->cnt--;
         (void)SoftBusMutexUnlock(&(g_sessionList->lock));
         return SOFTBUS_OK;
     }
+    (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+    return SOFTBUS_NOT_FIND;
+}
+
+static int32_t BrProxyWaitCond(int32_t sessionId)
+{
+#define BR_PROXY_MAX_WAIT_COND_TIME 10 // 10s
+    if (g_sessionList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_sessionList->list), SessionInfo, node) {
+        if (nodeInfo->sessionId != sessionId) {
+            continue;
+        }
+        SoftBusSysTime absTime = { 0 };
+        int32_t ret = SoftBusGetTime(&absTime);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "[br_proxy] failed! sessionId:%{public}d, ret:%{public}d", sessionId, ret);
+            (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+            return ret;
+        }
+        if (absTime.sec > INT64_MAX - BR_PROXY_MAX_WAIT_COND_TIME) {
+            TRANS_LOGE(TRANS_SDK, "[br_proxy] time overflow");
+            (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+            return SOFTBUS_INVALID_PARAM;
+        }
+        absTime.sec += BR_PROXY_MAX_WAIT_COND_TIME;
+        ret = SoftBusCondWait(&nodeInfo->cond, &(g_sessionList->lock), &absTime);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "[br_proxy] cond wait failed! sessionId:%{public}d, ret:%{public}d", sessionId, ret);
+            (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+            return ret;
+        }
+        (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+        return SOFTBUS_OK;
+    }
+    TRANS_LOGE(TRANS_SDK, "[br_proxy] not find sessionId:%{public}d", sessionId);
+    (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+    return SOFTBUS_NOT_FIND;
+}
+
+static int32_t BrProxyPostCond(int32_t sessionId)
+{
+    if (g_sessionList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_sessionList->list), SessionInfo, node) {
+        if (nodeInfo->sessionId != sessionId) {
+            continue;
+        }
+        int32_t ret = SoftBusCondSignal(&nodeInfo->cond);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "[br_proxy] cond signal failed! sessionId:%{public}d, ret:%{public}d",
+                sessionId, ret);
+            (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+            return ret;
+        }
+        (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+        return SOFTBUS_OK;
+    }
+    TRANS_LOGE(TRANS_SDK, "[br_proxy] not find sessionId:%{public}d", sessionId);
     (void)SoftBusMutexUnlock(&(g_sessionList->lock));
     return SOFTBUS_NOT_FIND;
 }
@@ -225,13 +288,8 @@ static int32_t ChannelOpened(int32_t sessionId, int32_t channelId, int32_t resul
         TRANS_LOGI(TRANS_SDK, "[br_proxy] ret:%{public}d.", ret);
         return ret;
     }
-    SessionInfo info;
-    ret = GetSessionInfoBySessionId(sessionId, &info);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    sem_post(info.sem);
-    return SOFTBUS_OK;
+
+    return BrProxyPostCond(sessionId);
 }
 
 static void OpenProxyChannelExecute(napi_env env, void* data)
@@ -259,18 +317,19 @@ static void OpenProxyChannelExecute(napi_env env, void* data)
     ret = OpenBrProxy(asyncData->sessionId, &channelInfo, &listener);
     asyncData->ret = ret;
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "[br_proxy] ret:%{public}d.", ret);
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] openBrProxy failed! ret:%{public}d.", ret);
+        return;
+    }
+    ret = BrProxyWaitCond(asyncData->sessionId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] BrProxyWaitCond failed! ret:%{public}d.", ret);
+        asyncData->ret = ret;
         return;
     }
     SessionInfo info;
     ret = GetSessionInfoBySessionId(asyncData->sessionId, &info);
     if (ret != SOFTBUS_OK) {
-        asyncData->ret = ret;
-        return;
-    }
-    sem_wait(info.sem);
-    ret = GetSessionInfoBySessionId(asyncData->sessionId, &info);
-    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] GetSessionInfoBySessionId failed! ret:%{public}d.", ret);
         asyncData->ret = ret;
         return;
     }
