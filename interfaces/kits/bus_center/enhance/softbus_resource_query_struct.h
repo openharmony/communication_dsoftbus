@@ -52,6 +52,14 @@ typedef enum {
     IDENTIFY_DEV_BUTT,
 } DevIdentifier;
 
+typedef enum {
+    REUSE_GO_NONE = 0,
+    REUSE_GO_DSOFTBUS,
+    REUSE_GO_NATIVE,
+    REUSE_GO_BOTH,
+    REUSE_GO_BUTT,
+} ReuseGoType;
+
 typedef struct {
     DevIdentifier devIdentifier;
     union {
@@ -59,6 +67,7 @@ typedef struct {
         char peerNetworkId[NETWORK_ID_BUF_LEN];
     } identifyInfo;
     TransDataType dataType[DATA_TYPE_BUTT];
+    ReuseGoType reuseType;
 } SoftBusResourceRequest;
 
 typedef struct {
