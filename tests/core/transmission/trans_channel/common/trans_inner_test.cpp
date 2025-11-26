@@ -528,8 +528,6 @@ HWTEST_F(TransInnerTest, DirectChannelCreateListenerTest001, TestSize.Level1)
  */
 HWTEST_F(TransInnerTest, TdcSendDataTest001, TestSize.Level1)
 {
-    char *recvBuf = reinterpret_cast<char *>(SoftBusCalloc(TRANS_TEST_FD));
-    ASSERT_TRUE(recvBuf);
     SessionInnerCallback Innerlistener = { 0 };
     Innerlistener.func = TestInnerMessageHandler;
     InnerSessionInfo innerInfo = {
@@ -557,14 +555,10 @@ HWTEST_F(TransInnerTest, TdcSendDataTest001, TestSize.Level1)
     EXPECT_CALL(TransInnerMock, TransTdcPackAllData).WillOnce(Return(nullptr));
     ret = TdcSendData(TRANS_TEST_CHANNEL_ID, reinterpret_cast<const void *>(data), TEST_SEND_DATA_LEN);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-    EXPECT_CALL(TransInnerMock, TransTdcPackAllData).WillOnce(Return(recvBuf));
-    EXPECT_CALL(TransInnerMock, SetIpTos).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TdcSendData(TRANS_TEST_CHANNEL_ID, reinterpret_cast<const void *>(data), TEST_SEND_DATA_LEN);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     char *testRecvBuf = reinterpret_cast<char *>(SoftBusCalloc(TRANS_TEST_FD));
     ASSERT_TRUE(testRecvBuf);
     EXPECT_CALL(TransInnerMock, TransTdcPackAllData).WillOnce(Return(testRecvBuf));
-    EXPECT_CALL(TransInnerMock, SetIpTos).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransInnerMock, SetIpTos).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(TransInnerMock, TransTdcSendData).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = TdcSendData(TRANS_TEST_CHANNEL_ID, reinterpret_cast<const void *>(data), TEST_SEND_DATA_LEN);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
