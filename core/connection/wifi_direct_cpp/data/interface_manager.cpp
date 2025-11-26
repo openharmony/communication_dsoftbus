@@ -42,6 +42,7 @@ int InterfaceManager::ReadInterface(InterfaceInfo::InterfaceType type, const Rea
 
 void InterfaceManager::RefreshAddress(InterfaceInfo::InterfaceType type)
 {
+    std::unique_lock lock(lock_);
     if (type == InterfaceInfo::InterfaceType::P2P) {
         interfaces_[type].SetBaseMac(P2pAdapter::GetMacAddress());
     }
