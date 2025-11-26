@@ -32,6 +32,7 @@ public:
     virtual bool GetJsonObjectStringItem(
         const cJSON *json, const char * const string, char *target, uint32_t targetLen) = 0;
     virtual bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target) = 0;
+    virtual bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target) = 0;
 };
 
 class TransTcpDirectJsonInterfaceMock : public TransTcpDirectJsonInterface {
@@ -45,6 +46,7 @@ public:
     MOCK_METHOD4(
         GetJsonObjectStringItem, bool(const cJSON *, const char * const, char *, uint32_t));
     MOCK_METHOD3(GetJsonObjectInt32Item, bool(const cJSON *, const char * const, int32_t *));
+    MOCK_METHOD3(GetJsonObjectBoolItem, bool(const cJSON *, const char * const, bool *));
 };
 
 extern "C" {
