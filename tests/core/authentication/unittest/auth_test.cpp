@@ -960,6 +960,32 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: AUTH_DEVICE_GET_PREFER_CONN_INFO_WITHOUT_SLE_Test_001
+ * @tc.desc: auth device get prefer conn info without sle test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_WITHOUT_SLE_Test_001, TestSize.Level1)
+{
+    char uuid[TEST_DATA_LEN] = "testdata";
+    AuthConnInfo connInfo;
+    int32_t ret;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    ret = AuthDeviceGetPreferConnInfoWithoutSle(nullptr, &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    uuid[0] = '\0';
+    ret = AuthDeviceGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), &connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    uuid[0] = '1';
+    ret = AuthDeviceGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthDeviceGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), &connInfo);
+    EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: AUTH_DEVICE_POST_TRANS_DATA_Test_001
  * @tc.desc: auth device post trans data test
  * @tc.type: FUNC
@@ -1096,6 +1122,40 @@ HWTEST_F(AuthTest, AUTH_GET_PREFER_CONNINFO_Test_001, TestSize.Level1)
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, true);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: AUTH_GET_PREFER_CONNINFO_WITHOUT_SLE_Test_001
+ * @tc.desc: auth get prefer connInfo without sle test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_GET_PREFER_CONNINFO_WITHOUT_SLE_Test_001, TestSize.Level1)
+{
+    char uuid[TEST_DATA_LEN] = "testdata";
+    AuthConnInfo connInfo;
+    int32_t ret;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    ret = AuthGetPreferConnInfoWithoutSle(nullptr, &connInfo, false);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthGetPreferConnInfoWithoutSle(nullptr, &connInfo, true);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = AuthGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), nullptr, false);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), nullptr, true);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    uuid[0] = '\0';
+    ret = AuthGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), &connInfo, false);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), &connInfo, true);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    uuid[0] = '1';
+    ret = AuthGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), &connInfo, false);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = AuthGetPreferConnInfoWithoutSle(const_cast<const char *>(uuid), &connInfo, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
