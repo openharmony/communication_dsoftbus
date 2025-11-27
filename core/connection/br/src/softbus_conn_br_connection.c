@@ -163,6 +163,10 @@ static int32_t StartBrClientConnect(ConnBrConnection *connection, const char *an
     BtSocketConnectionCallback callback = {
         .connStateCb = BrConnectStatusCallback,
     };
+    if (connection->isDisableBrFrequentConnectControl) {
+        ret = g_sppDriver->UpdatePriority(binaryAddr, CONN_BR_CONNECT_PRIORITY_NO_REFUSE_FREQUENT_CONNECT);
+        CONN_LOGW(CONN_BR, "update priority finish, ret=%{public}d", ret);
+    }
     int32_t socketHandle = g_sppDriver->Connect(UUID, binaryAddr, &callback);
     if (socketHandle <= INVALID_SOCKET_HANDLE) {
         CONN_LOGE(CONN_BR, "underlayer bluetooth connect fail, connId=%{public}u, address=%{public}s",
@@ -351,6 +355,7 @@ ConnBrConnection *ConnBrCreateConnection(const char *addr, ConnSideType side, in
     connection->ackTimeoutCount = 0;
     connection->retryCount = 0;
     connection->enableIdleCheck = true;
+    connection->isDisableBrFrequentConnectControl = false;
     return connection;
 }
 

@@ -54,6 +54,7 @@ typedef struct {
     ListNode requests;
     uint32_t connectionId;
     uint32_t waitTimeoutDelay;
+    bool isDisableBrFrequentConnectControl;
     struct {
         uint32_t keepAliveBleRequestId;
         uint32_t keepAliveBleConnectionId;
@@ -74,6 +75,7 @@ typedef struct {
     uint32_t requestId;
     uint32_t connectionId;
     ConnectResult result;
+    bool isDisableBrFrequentConnectControl;
 } ConnBrConnectRequestContext;
 
 typedef struct {
