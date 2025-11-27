@@ -834,4 +834,13 @@ int WifiDirectUtils::GetLocalScreenStatus()
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get screen state fail, ret=%{public}d", ret);
     return result ? WIFI_DIRECT_SCREEN_ON : WIFI_DIRECT_SCREEN_OFF;
 }
+
+int32_t WifiDirectUtils::ConvertPassiveErrorCode(int32_t code)
+{
+    if (code > SOFTBUS_CONN_SHORT_RANGE_BASE && code <= SOFTBUS_CONN_PASSIVE_TYPE_HML_NUM_LIMITED_CONFLICT) {
+        // active code convert passive errorcode offset is 1
+        code += 1;
+    }
+    return code;
+}
 } // namespace OHOS::SoftBus
