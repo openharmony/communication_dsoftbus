@@ -45,6 +45,12 @@ typedef struct {
     char name[BR_NAME_LEN];
 } BluetoothRemoteDevice;
 
+typedef enum {
+    CONN_BR_CONNECT_PRIORITY_DEFAULT = 0x00,
+    CONN_BR_CONNECT_PRIORITY_NON_PREEMPTIBLE = 0x01,
+    CONN_BR_CONNECT_PRIORITY_NO_REFUSE_FREQUENT_CONNECT = 0x10,
+} ConnBrConnectPriority;
+
 typedef struct tagSppSocketDriver {
     void (*Init)(const struct tagSppSocketDriver* this_p);
     int32_t (*OpenSppServer)(const char *name, int32_t nameLen, const char *uuid, int32_t isSecure);
@@ -58,6 +64,7 @@ typedef struct tagSppSocketDriver {
     int32_t (*Write)(int32_t clientFd, const uint8_t *buf, const int32_t length);
     int32_t (*Read)(int32_t clientFd, uint8_t *buf, const int32_t length);
     int32_t (*GetRemoteDeviceInfo)(int32_t clientFd, const BluetoothRemoteDevice* device);
+    int32_t (*UpdatePriority)(const BT_ADDR mac, ConnBrConnectPriority priority);
 } SppSocketDriver;
 
 typedef struct {

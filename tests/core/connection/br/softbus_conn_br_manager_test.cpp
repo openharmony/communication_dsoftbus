@@ -1379,4 +1379,17 @@ HWTEST_F(ConnectionBrConnectionTest, WaitNegotiationClosingTimeoutHandler, TestS
     WaitNegotiationClosingTimeoutHandler(brConnection->connectionId);
     EXPECT_EQ(BR_CONNECTION_STATE_CLOSED, brConnection->state);
 }
+
+HWTEST_F(ConnectionBrConnectionTest, DisableBrFrequentConnectControl, TestSize.Level1)
+{
+    InitBrManager();
+    const char *mac = "11:22:33:44:66:88";
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_CLIENT, 0);
+    ASSERT_NE(nullptr, connection);
+    connection->isDisableBrFrequentConnectControl = true;
+    int32_t ret = ConnBrSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ret = ConnBrConnect(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+}
 } // namespace OHOS
