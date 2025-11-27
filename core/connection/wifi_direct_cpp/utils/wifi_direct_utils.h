@@ -113,6 +113,7 @@ public:
     static std::string RemoteDeviceIdToMac(const std::string &remoteDeviceId);
     static std::string RemoteMacToDeviceId(const std::string &remoteMac);
     static int GetLocalScreenStatus();
+    static int32_t ConvertPassiveErrorCode(int32_t code);
 
 private:
     static inline std::mutex serialParallelLock_;

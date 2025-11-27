@@ -746,4 +746,20 @@ HWTEST_F(WifiDirectUtilsTest, CompareIgnoreCaseTest, TestSize.Level1)
     WifiDirectUtils::ParallelFlowEnter();
     WifiDirectUtils::ParallelFlowExit();
 }
+
+/*
+ * @tc.name: ConvertPassiveErrorCode
+ * @tc.desc: test ConvertPassiveErrorCode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, ConvertPassiveErrorCodeTest, TestSize.Level1)
+{
+    int32_t code = SOFTBUS_CONN_ACTIVE_TYPE_NO_CONFLICT;
+    EXPECT_EQ(SOFTBUS_CONN_PASSIVE_TYPE_NO_CONFLICT, WifiDirectUtils::ConvertPassiveErrorCode(code));
+    code = SOFTBUS_CONN_P2P_GO_NO_EXIST;
+    EXPECT_EQ(SOFTBUS_CONN_P2P_GO_NO_EXIST, WifiDirectUtils::ConvertPassiveErrorCode(code));
+    code = SOFTBUS_CONN_NEARBY_CONTROL_CHANNEL_CONNECT_FAILED;
+    EXPECT_EQ(SOFTBUS_CONN_NEARBY_CONTROL_CHANNEL_CONNECT_FAILED, WifiDirectUtils::ConvertPassiveErrorCode(code));
+}
 } // namespace OHOS::SoftBus
