@@ -130,7 +130,6 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001,
     RegisterToDp(&g_deviceProfilePara);
     AuthToDeviceProfile::TrustDeviceProfile profile;
     AuthDeviceProfileListenerInterfaceMock mocker;
-    EXPECT_CALL(mocker, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(0));
     int32_t ret = listener->OnTrustDeviceProfileDelete(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
