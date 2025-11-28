@@ -24,6 +24,7 @@
 #include "command/processor_selector_factory.h"
 #include "conn_event.h"
 #include "conn_log.h"
+#include "data/interface_manager.h"
 #include "data/link_manager.h"
 #include "dfx/duration_statistic.h"
 #include "dfx/wifi_direct_dfx.h"
@@ -762,6 +763,18 @@ static void NotifyRefreshNfcData(void)
     g_onRefreshNfcData();
 }
 
+static bool IsSoftbusCreateGo(void)
+{
+    bool isCreateGo = false;
+    OHOS::SoftBus::InterfaceManager::GetInstance().ReadInterface(
+        OHOS::SoftBus::InterfaceInfo::P2P, [&isCreateGo](const OHOS::SoftBus::InterfaceInfo &interface) {
+        isCreateGo = interface.GetIsCreateGo();
+        return SOFTBUS_OK;
+    });
+    CONN_LOGI(CONN_WIFI_DIRECT, "go creator type is %{public}d", isCreateGo);
+    return isCreateGo;
+}
+
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .allocateListenerModuleId = AllocateListenerModuleId,
@@ -822,6 +835,8 @@ static struct WifiDirectManager g_manager = {
     
     .registerRefreshNfcDataListener = RegisterRefreshNfcDataListener,
     .notifyRefreshNfcData = NotifyRefreshNfcData,
+
+    .isSoftbusCreateGo = IsSoftbusCreateGo,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)
