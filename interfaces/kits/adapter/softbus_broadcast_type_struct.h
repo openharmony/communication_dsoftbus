@@ -408,6 +408,7 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     uint8_t localName[BC_LOCAL_NAME_LEN_MAX];
+    char advDevName[BC_LOCAL_NAME_LEN_MAX];
     BcMacAddr addr;
     int8_t *deviceName;
     bool nameTruncated;

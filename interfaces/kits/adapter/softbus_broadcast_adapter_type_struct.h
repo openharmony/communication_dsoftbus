@@ -122,6 +122,7 @@ typedef struct {
     uint8_t addrType;
     SoftbusMacAddr addr;
     uint8_t localName[SOFTBUS_LOCAL_NAME_LEN_MAX];
+    char advDevName[SOFTBUS_LOCAL_NAME_LEN_MAX];
     bool nameTruncated;
     int8_t *deviceName;
     SoftbusBroadcastData data;
