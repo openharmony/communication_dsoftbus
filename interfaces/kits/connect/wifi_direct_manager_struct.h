@@ -110,6 +110,8 @@ struct WifiDirectManager {
 
     void (*registerRefreshNfcDataListener)(OnRefreshNfcData onRefreshNfcData);
     void (*notifyRefreshNfcData)(void);
+
+    bool (*isSoftbusCreateGo)(void);
 };
 
 #ifdef __cplusplus
