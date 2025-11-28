@@ -481,6 +481,11 @@ static int32_t ParseLocalName(const uint8_t *advData, uint8_t advLen, SoftBusBcS
         DISC_LOGE(DISC_BLE_ADAPTER, "copy local name failed");
         return SOFTBUS_MEM_ERR;
     }
+    if (dst->advDevName[0] == '\0' &&
+        memcpy_s(dst->advDevName, sizeof(dst->advDevName), &advData[index + 1], len - 1) != EOK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "copy adv device name failed");
+        return SOFTBUS_MEM_ERR;
+    }
     return SOFTBUS_OK;
 }
 
