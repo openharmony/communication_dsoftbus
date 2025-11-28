@@ -262,6 +262,9 @@ static bool IsNoneLinkByType(enum WifiDirectLinkType linkType)
 static void OnForceDisconnectSuccess(uint32_t requestId)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect succ, reqId=%{public}u", requestId);
+    std::lock_guard lock(g_promiseMaplock);
+    CONN_CHECK_AND_RETURN_LOGW(g_promiseMap.find(requestId) != g_promiseMap.end(),
+        CONN_WIFI_DIRECT, "force disconnect timed out, the promise has been cleared");
     g_promiseMap[requestId]->set_value(SOFTBUS_OK);
 }
 
@@ -269,9 +272,13 @@ static void OnForceDisconnectFailure(uint32_t requestId, int32_t reason)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "wifidirect force disconnect fail, reqId=%{public}u, reason=%{public}d",
         requestId, reason);
+    std::lock_guard lock(g_promiseMaplock);
+    CONN_CHECK_AND_RETURN_LOGW(g_promiseMap.find(requestId) != g_promiseMap.end(),
+        CONN_WIFI_DIRECT, "force disconnect timed out, the promise has been cleared");
     g_promiseMap[requestId]->set_value(reason);
 }
 
+static constexpr int FORCE_DISCONNECT_TIME_OUT = 10;
 static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkType)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "linkType=%{public}d", wifiDirectLinkType);
@@ -317,8 +324,9 @@ static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkT
         g_promiseMap.erase(info.requestId);
         return ret;
     }
-    int32_t result = SOFTBUS_OK;
-    result = g_promiseMap[info.requestId]->get_future().get();
+    auto future = g_promiseMap[info.requestId]->get_future();
+    auto status = future.wait_for(std::chrono::seconds(FORCE_DISCONNECT_TIME_OUT));
+    int32_t result = status == std::future_status::ready ? future.get() : SOFTBUS_CONN_FORCE_DISCONNECT_TIME_OUT;
     CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect reqId=%{public}d reason=%{public}d", info.requestId, result);
     std::lock_guard lock(g_promiseMaplock);
     g_promiseMap.erase(info.requestId);
