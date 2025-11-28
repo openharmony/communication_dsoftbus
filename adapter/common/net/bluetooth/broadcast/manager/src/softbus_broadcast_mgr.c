@@ -716,11 +716,15 @@ static int32_t BuildBcInfoCommon(const SoftBusBcScanResult *reportData, Broadcas
     bcInfo->rssi = reportData->rssi;
     bcInfo->addrType = reportData->addrType;
 
-    int32_t ret = memcpy_s(bcInfo->addr.addr, BC_ADDR_MAC_LEN, reportData->addr.addr, SOFTBUS_ADDR_MAC_LEN);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_BROADCAST, "memcpy addr failed");
+    errno_t ret = memcpy_s(bcInfo->addr.addr, BC_ADDR_MAC_LEN, reportData->addr.addr, SOFTBUS_ADDR_MAC_LEN);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, DISC_BROADCAST, "memcpy addr failed");
 
     ret = memcpy_s(bcInfo->localName, BC_LOCAL_NAME_LEN_MAX, reportData->localName, SOFTBUS_LOCAL_NAME_LEN_MAX);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_BROADCAST, "memcpy localName failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, DISC_BROADCAST, "memcpy localName failed");
+
+    ret = memcpy_s(bcInfo->advDevName, sizeof(bcInfo->advDevName),
+        reportData->advDevName, sizeof(reportData->advDevName));
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, DISC_BROADCAST, "memcpy advName failed");
 
     return SOFTBUS_OK;
 }
