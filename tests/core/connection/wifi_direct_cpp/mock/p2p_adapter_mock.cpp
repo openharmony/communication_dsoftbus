@@ -171,5 +171,15 @@ int32_t P2pAdapter::GetP2pGroupFrequency()
 {
     return P2pAdapterMock::GetMock()->GetP2pGroupFrequency();
 }
+
+void P2pAdapter::RegisterFastWakeUp(const FastWakeUpHook &fastWakeUp)
+{
+    return P2pAdapterMock::GetMock()->RegisterFastWakeUp(fastWakeUp);
+}
+
+int32_t P2pAdapter::FastWakeUp(const std::string &remoteMac, int32_t level)
+{
+    return P2pAdapterMock::GetMock()->FastWakeUp(remoteMac, level);
+}
 } // namespace OHOS::SoftBus
 // namespace OHOS::SoftBus

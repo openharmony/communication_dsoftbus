@@ -100,6 +100,10 @@ public:
     static int GetApChannel();
     static int32_t GetP2pGroupFrequency();
     static int32_t SetP2pGroupLiveType(WifiDirectP2pGroupLiveType type);
+    
+    using FastWakeUpHook = std::function<int32_t(const std::string &, int32_t)>;
+    static void RegisterFastWakeUp(const FastWakeUpHook &fastWakeUp);
+    static int32_t FastWakeUp(const std::string &remoteMac, int32_t level);
 
 private:
     static constexpr int P2P_GROUP_CONFIG_INDEX_SSID = 0;
@@ -110,6 +114,7 @@ private:
     static constexpr int P2P_GROUP_CONFIG_INDEX_MAX = 5;
 
     static inline GetCoexConflictCodeHook getCoexConflictCodeHook_;
+    static inline FastWakeUpHook fastWakeUpHook_;
 };
 } // namespace OHOS::SoftBus
 #endif
