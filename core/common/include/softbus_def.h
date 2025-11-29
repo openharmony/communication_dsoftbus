@@ -241,6 +241,12 @@ typedef struct {
     int64_t peerServiceId;
 } ChannelInfo;
 
+typedef enum {
+    FULL_WAKE_UP_LEVEL = 0, /**< full wake up. */
+    HALF_WAKE_UP_LEVEL,     /**< half wake up. */
+    WAKE_UP_LEVEL_BUTT,
+} WakeUpLevel;
+
 #ifdef __cplusplus
 #if __cplusplus
 }
