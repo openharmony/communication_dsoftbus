@@ -482,6 +482,18 @@ int P2pAdapter::GetCoexConflictCode(const char *ifName, int32_t channelId)
     return getCoexConflictCodeHook_(ifName, channelId);
 }
 
+void P2pAdapter::RegisterFastWakeUp(const FastWakeUpHook &fastWakeUp)
+{
+    fastWakeUpHook_ = fastWakeUp;
+}
+
+int32_t P2pAdapter::FastWakeUp(const std::string &remoteMac, int32_t level)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(fastWakeUpHook_ != nullptr, SOFTBUS_NOT_IMPLEMENT, CONN_WIFI_DIRECT,
+        "not support");
+    return fastWakeUpHook_(remoteMac, level);
+}
+
 int P2pAdapter::GetApChannel()
 {
     auto hotSpotActive = IsHotspotActive();

@@ -59,6 +59,9 @@ public:
     using GetCoexConflictCodeHook = std::function<int(const char *, int32_t)>;
     MOCK_METHOD(void, Register, (const GetCoexConflictCodeHook &));
     MOCK_METHOD(int, GetCoexConflictCode, (const char *, int32_t));
+    using FastWakeUpHook = std::function<int32_t(const std::string &, int32_t)>;
+    MOCK_METHOD(void, RegisterFastWakeUp, (const FastWakeUpHook &));
+    MOCK_METHOD(int32_t, FastWakeUp, (const std::string &, int32_t));
     MOCK_METHOD(int, GetApChannel, ());
     MOCK_METHOD(int32_t, GetP2pGroupFrequency, ());
 

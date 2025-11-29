@@ -783,6 +783,20 @@ static bool IsSoftbusCreateGo(void)
     return isCreateGo;
 }
 
+static int32_t FastWakeUpByUuid(const char *remoteUuid, WakeUpLevel level)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(remoteUuid != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "listener is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(level >= FULL_WAKE_UP_LEVEL && level < WAKE_UP_LEVEL_BUTT, SOFTBUS_INVALID_PARAM,
+        CONN_WIFI_DIRECT, "invalid level: %d", level);
+    std::string macAddrStr;
+    OHOS::SoftBus::LinkManager::GetInstance().ProcessIfPresent(
+        OHOS::SoftBus::InnerLink::LinkType::HML, remoteUuid, [&macAddrStr](OHOS::SoftBus::InnerLink &innerLink) {
+            macAddrStr = innerLink.GetRemoteBaseMac();
+        });
+    CONN_CHECK_AND_RETURN_RET_LOGW(!macAddrStr.empty(), SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "get mac fail");
+    return OHOS::SoftBus::P2pAdapter::FastWakeUp(macAddrStr, level);
+}
+
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .allocateListenerModuleId = AllocateListenerModuleId,
@@ -845,6 +859,7 @@ static struct WifiDirectManager g_manager = {
     .notifyRefreshNfcData = NotifyRefreshNfcData,
 
     .isSoftbusCreateGo = IsSoftbusCreateGo,
+    .fastWakeUpByUuid = FastWakeUpByUuid,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)
