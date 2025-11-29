@@ -638,6 +638,7 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
     }
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
+        DestroyCnnCodeKey(key);
         return INVALID_CONNECTION_CODE_VALUE;
     }
     short *ptr = (short *)LnnMapGet(&g_distributedNetLedger.cnnCode.connectionCode, key);
@@ -647,9 +648,10 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
         DestroyCnnCodeKey(key);
         return INVALID_CONNECTION_CODE_VALUE;
     }
+    short ret = *ptr;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     DestroyCnnCodeKey(key);
-    return (*ptr);
+    return ret;
 }
 
 static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
