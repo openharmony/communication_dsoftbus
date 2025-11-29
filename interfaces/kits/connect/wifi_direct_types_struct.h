@@ -21,6 +21,7 @@
 #include <stddef.h>
 
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "wifi_direct_defines_struct.h"
 #include "wifi_direct_error_code_struct.h"
 
@@ -196,12 +197,6 @@ enum StatisticVirtualLinkType {
     STATISTIC_LINK_VIRTUAL = 1,
     STATISTIC_LINK_VIRTUAL_TO_REAL = 2,
 };
-
-typedef enum {
-    FULL_WAKE_UP_LEVEL = 0, /**< full wake up. */
-    HALF_WAKE_UP_LEVEL,     /**< half wake up. */
-    WAKE_UP_LEVEL_BUTT,
-} WakeUpLevel;
 
 struct WifiDirectDfxInfo {
     enum StatisticLinkType linkType;
