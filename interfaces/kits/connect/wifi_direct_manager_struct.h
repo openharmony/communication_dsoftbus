@@ -112,6 +112,7 @@ struct WifiDirectManager {
     void (*notifyRefreshNfcData)(void);
 
     bool (*isSoftbusCreateGo)(void);
+    int32_t (*fastWakeUpByUuid)(const char *remoteUuid, WakeUpLevel level);
 };
 
 #ifdef __cplusplus
