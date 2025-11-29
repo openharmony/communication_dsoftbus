@@ -28,6 +28,7 @@ void HandleDelayDestroyLink(SoftBusMessage *msg);
 void HandelNotifyFreeLaneResult(SoftBusMessage *msg);
 int32_t FreeLane(uint32_t laneReqId);
 void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo);
+void ReleaseUndeliverableLink(uint32_t laneReqId, uint64_t laneId);
 
 #ifdef __cplusplus
 }
