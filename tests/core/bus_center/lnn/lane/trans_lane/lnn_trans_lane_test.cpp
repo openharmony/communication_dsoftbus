@@ -1359,4 +1359,32 @@ HWTEST_F(LNNTransLaneMockTest, INIT_CONTROL_PLANE_TEST_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(DeinitControlPlanePacked());
     EXPECT_NO_FATAL_FAILURE(UpdateLocalDeviceInfoToMlpsPacked(&localInfo));
 }
+
+/*
+* @tc.name: LNN_RELEASE_UNDELIVERABLE_LINK_001
+* @tc.desc: ReleaseUndeliverableLink
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_RELEASE_UNDELIVERABLE_LINK_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    NiceMock<TransLaneDepsInterfaceMock> transLaneMock;
+    NiceMock<LnnWifiAdpterInterfaceMock> lnnMock;
+    uint32_t laneReqId = 1;
+    LaneResource resourceItem = {
+        .link.type = LANE_HML_RAW,
+    };
+    EXPECT_CALL(transLaneMock, FindLaneResourceByLaneId)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(resourceItem), Return(SOFTBUS_OK)));
+    EXPECT_CALL(transLaneMock, DestroyLink)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUdid)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(LaneDepsInterfaceMock::ActionOfLnnGetNetworkIdByUdid);
+    EXPECT_CALL(lnnMock, RemoveAuthSessionServer).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(ReleaseUndeliverableLink(laneReqId, LANE_ID_BASE));
+    EXPECT_NO_FATAL_FAILURE(ReleaseUndeliverableLink(laneReqId, LANE_ID_BASE));
+}
 } // namespace OHOS
