@@ -1777,4 +1777,36 @@ HWTEST_F(TransClientSessionTest, ClientGetServiceSocketInfoByIdTest55, TestSize.
     ret = ClientSetFLTos(socketId, &flowInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
+
+/**
+ * @tc.name: PrintCollabInfo001
+ * @tc.desc: test PrintCollabInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, PrintCollabInfo001, TestSize.Level1)
+{
+    CollabInfo info = {
+        .pid = 11380,
+        .userId = 12345,
+        .tokenId = 0X123456789ABCDE
+    };
+    (void)strcpy_s(info.deviceId, DEVICE_ID_LEN_MAX, "device-12345");
+    (void)strcpy_s(info.accountId, ACCOUNT_UID_LEN_MAX, "account-67890");
+
+    EXPECT_NO_FATAL_FAILURE(PrintCollabInfo(&info, nullptr));
+    EXPECT_NO_FATAL_FAILURE(PrintCollabInfo(nullptr, "source"));
+    EXPECT_NO_FATAL_FAILURE(PrintCollabInfo(&info, "sourece"));
+}
+
+/**
+ * @tc.name: PrintAnonymizedString001
+ * @tc.desc: test PrintAnonymizedString
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, PrintAnonymizedString001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(PrintAnonymizedString(nullptr, "deviceId", "sink"));
+}
 }

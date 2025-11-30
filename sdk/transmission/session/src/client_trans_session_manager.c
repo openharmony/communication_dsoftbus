@@ -1763,7 +1763,6 @@ void ClientTransOnSingleLaneLinkDown(const char *networkId, int32_t routeType)
             TRANS_LOGD(TRANS_SDK, "cast plus sessionname is different");
             continue;
         }
-        ClearClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     UnlockClientSessionServerList();
 }
