@@ -518,16 +518,8 @@ void TransProxyProcessD2DDataTest(FuzzedDataProvider &provider)
         SoftBusFree(dataInfo.outData);
         dataInfo.outData = nullptr;
     }
-    ret = TransProxyProcessD2DData(&dataInfo, nullptr, data, businessType);
-    if (ret == SOFTBUS_OK) {
-        SoftBusFree(dataInfo.outData);
-        dataInfo.outData = nullptr;
-    }
-    ret = TransProxyProcessD2DData(&dataInfo, &dataHead, nullptr, businessType);
-    if (ret == SOFTBUS_OK) {
-        SoftBusFree(dataInfo.outData);
-        dataInfo.outData = nullptr;
-    }
+    (void)TransProxyProcessD2DData(&dataInfo, nullptr, data, businessType);
+    (void)TransProxyProcessD2DData(&dataInfo, &dataHead, nullptr, businessType);
     (void)TransProxyProcessD2DData(nullptr, &dataHead, data, businessType);
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = TransProxyProcessD2DData(&dataInfo, &dataHead, data, businessType);
@@ -553,7 +545,7 @@ void TransProxyProcessD2DDataTest(FuzzedDataProvider &provider)
         SoftBusFree(dataInfo.outData);
         dataInfo.outData = nullptr;
     }
- }
+}
 
 void TransProxyDecryptD2DDataTest(const uint8_t *data, size_t size)
 {
