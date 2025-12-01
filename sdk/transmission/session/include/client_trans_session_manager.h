@@ -185,8 +185,6 @@ int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType);
 
 int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count);
 
-int32_t ClientCacheOnEvent(int32_t socket, MultiPathEventType event, const MutipathEvent *eventData, uint32_t dataLen);
-
 int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQosEvent);
 
 int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *maxIdleTime);
