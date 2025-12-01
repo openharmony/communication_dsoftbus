@@ -24,6 +24,8 @@
 #include "softbus_proxychannel_manager.h"
 #include "trans_proxy_process_data.c"
 
+#define SLICE_TEST_COUNT 10
+
 namespace OHOS {
 class TransProxyProcessData {
 public:
@@ -479,14 +481,15 @@ void TransProxyPackD2DDataTest(FuzzedDataProvider &provider)
 {
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    dataInfo.outLen = provider.ConsumeIntegral<uint32_t>();
+    dataInfo.outLen = provider.ConsumeIntegralInRange<uint32_t>((uint32_t)SHORT_SLICE_LEN, 
+                                                                (uint32_t)(SHORT_SLICE_LEN * SLICE_TEST_COUNT));
     dataInfo.outData = reinterpret_cast<uint8_t *>(SoftBusCalloc(dataInfo.outLen));
     if (dataInfo.outData == nullptr) {
         return;
     }
-    uint32_t sliceNum = provider.ConsumeIntegral<uint32_t>();
-    uint32_t cnt = provider.ConsumeIntegral<uint32_t>();
-    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
+    uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SHORT_SLICE_LEN - 1)) / (uint32_t)SHORT_SLICE_LEN;
+    uint32_t cnt = provider.ConsumeIntegralInRange<uint32_t>(0, sliceNum - 1);
+    uint32_t dataLen = 0;
     SessionPktType pktType = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
     (void)TransProxyPackD2DData(nullptr, sliceNum, pktType, cnt, &dataLen);
@@ -705,17 +708,23 @@ void TransProxyPackDataTest(FuzzedDataProvider &provider)
 {
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    uint32_t sliceNum = provider.ConsumeIntegral<uint32_t>();
+    dataInfo.outLen = provider.ConsumeIntegralInRange<uint32_t>((uint32_t)SLICE_LEN, 
+                                                                (uint32_t)(SLICE_LEN * SLICE_TEST_COUNT));
+    dataInfo.outData = reinterpret_cast<uint8_t *>(SoftBusCalloc(dataInfo.outLen));
+    if (dataInfo.outData == nullptr) {
+        return;
+    }
+    uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SLICE_LEN - 1)) / (uint32_t)SLICE_LEN;
+    uint32_t cnt = provider.ConsumeIntegralInRange<uint32_t>(0, sliceNum - 1);
+    uint32_t dataLen = 0;
     SessionPktType pktType = static_cast<SessionPktType>(
         provider.ConsumeIntegral<uint16_t>());
-    uint32_t cnt = provider.ConsumeIntegral<uint32_t>();
-    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
-
     uint8_t *sliceData = TransProxyPackData(nullptr, sliceNum, pktType, cnt, &dataLen);
-    SoftBusFree(sliceData);
     sliceData = TransProxyPackData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
     SoftBusFree(sliceData);
     sliceData = nullptr;
+    SoftBusFree(dataInfo.outData);
+    dataInfo.outData = nullptr;
 }
 
 void TransProxyParseTlvTest(FuzzedDataProvider &provider)
@@ -729,8 +738,8 @@ void TransProxyParseTlvTest(FuzzedDataProvider &provider)
     DataHeadTlvPacketHead head;
     (void)memset_s(&head, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &head);
-    uint32_t headSize = provider.ConsumeIntegral<uint32_t>();
-    head.tlvCount = provider.ConsumeIntegral<uint8_t>();
+    uint32_t headSize = 0;
+    len = MAGICNUM_SIZE + TLVCOUNT_SIZE + headSize;
 
     (void)TransProxyParseTlv(len, nullptr, &head, &headSize);
     (void)TransProxyParseTlv(len, data, &head, &headSize);
@@ -744,7 +753,7 @@ void TransProxyPackNewHeadD2DDataTest(FuzzedDataProvider &provider)
     SessionPktType pktType = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
     uint16_t cnt = provider.ConsumeIntegral<uint16_t>();
-    uint16_t dataLen = provider.ConsumeIntegral<uint16_t>();
+    uint16_t dataLen = 0;
 
     (void)TransProxyPackNewHeadD2DData(nullptr, sliceNum, pktType,  cnt, &dataLen);
     (void)TransProxyPackNewHeadD2DData(&dataInfo, sliceNum, pktType,  cnt, &dataLen);
