@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "trans_proxy_process_data.h": "c",
-        "softbus_adapter_crypto.h": "c"
-    }
-}
