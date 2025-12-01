@@ -1080,7 +1080,9 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
     TransReqInfo reqInfo;
     (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
     if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
+        LNN_LOGE(LNN_LANE, "lane reqInfo not found, release current link");
+        ReleaseUndeliverableLink(laneReqId, laneId);
+        (void)DelLaneResourceByLaneId(laneId, false);
         return;
     }
     LaneProfile profile;

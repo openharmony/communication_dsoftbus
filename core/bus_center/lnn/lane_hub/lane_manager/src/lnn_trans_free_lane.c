@@ -312,3 +312,11 @@ void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo)
         LnnDisconnectP2p(networkId, laneReqId);
     }
 }
+
+void ReleaseUndeliverableLink(uint32_t laneReqId, uint64_t laneId)
+{
+    int32_t ret = FreeLaneLink(laneReqId, laneId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "release link fail, laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
+    }
+}
