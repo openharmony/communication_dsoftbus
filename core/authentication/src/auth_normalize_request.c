@@ -28,7 +28,7 @@
 
 static ListNode g_normalizeRequestList = { &g_normalizeRequestList, &g_normalizeRequestList };
 
-static uint32_t GetSameRequestNum(char *udidHash)
+static uint32_t GetSameRequestNum(const char *udidHash)
 {
     uint32_t num = 0;
     NormalizeRequest *item = NULL;
@@ -75,6 +75,26 @@ static int32_t GetNotifyRequestListByUdidHash(char *udidHash, NormalizeRequest *
     return SOFTBUS_OK;
 }
 
+static int32_t GetNotifyRequestPriorityByUdidHash(const char *udidHash, NormalizeRequest *request)
+{
+    if (udidHash == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "udidHash is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    NormalizeRequest *item = NULL;
+    NormalizeRequest *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_normalizeRequestList, NormalizeRequest, node) {
+        if (strncmp(item->udidHash, udidHash, UDID_SHORT_HASH_STR) != 0 || item->isNeedNotifyVerify) {
+            continue;
+        }
+        *request = *item;
+        item->isNeedNotifyVerify = true;
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_NOT_FIND;
+}
+
 static int32_t FindAndDelNormalizeRequest(int64_t authSeq, NormalizeRequest *request)
 {
     if (request == NULL) {
@@ -108,6 +128,24 @@ static int32_t GetNormalizeRequestList(
         return SOFTBUS_AUTH_INNER_ERR;
     }
     int32_t ret = GetNotifyRequestListByUdidHash(request->udidHash, requests, num);
+    ReleaseAuthLock();
+    return ret;
+}
+
+static int32_t GetNormalizeRequestPriority(int64_t authSeq, NormalizeRequest *request)
+{
+    NormalizeRequest delRequest = { 0 };
+
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_HICHAIN, "RequireAuthLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (FindAndDelNormalizeRequest(authSeq, &delRequest) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "not found normalize request");
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_INNER_ERR;
+    }
+    int32_t ret = GetNotifyRequestPriorityByUdidHash(delRequest.udidHash, request);
     ReleaseAuthLock();
     return ret;
 }
@@ -173,7 +211,7 @@ void NotifyNormalizeRequestSuccess(int64_t authSeq, bool isSupportNego)
     NormalizeRequest request = { 0 };
     uint32_t num = 0;
     if (GetNormalizeRequestList(authSeq, &request, &requests, &num) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_HICHAIN, "get hichain request fail: authSeq=%{public}" PRId64, authSeq);
+        AUTH_LOGE(AUTH_HICHAIN, "get hichain request fail: authSeq=%{public}" PRId64, authSeq);
         return;
     }
     if (num == 0 || requests == NULL) {
@@ -194,21 +232,14 @@ void NotifyNormalizeRequestSuccess(int64_t authSeq, bool isSupportNego)
 void NotifyNormalizeRequestFail(int64_t authSeq, int32_t ret)
 {
     (void)ret;
-    NormalizeRequest *requests = NULL;
     NormalizeRequest request = { 0 };
-    uint32_t num = 0;
-    if (GetNormalizeRequestList(authSeq, &request, &requests, &num) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_HICHAIN, "get hichain request fail: authSeq=%{public}" PRId64, authSeq);
+
+    if (GetNormalizeRequestPriority(authSeq, &request) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get hichain request fail: authSeq=%{public}" PRId64, authSeq);
         return;
     }
-    if (num == 0 || requests == NULL) {
+    if (AuthNotifyRequestVerify(request.authSeq) == SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_HICHAIN, "continue auth, authSeq=%{public}" PRId64, request.authSeq);
         return;
     }
-    for (uint32_t i = 0; i < num; i++) {
-        if (AuthNotifyRequestVerify(requests[i].authSeq) == SOFTBUS_OK) {
-            AUTH_LOGI(AUTH_HICHAIN, "continue auth, authSeq=%{public}" PRId64, requests[i].authSeq);
-            break;
-        }
-    }
-    SoftBusFree(requests);
 }
