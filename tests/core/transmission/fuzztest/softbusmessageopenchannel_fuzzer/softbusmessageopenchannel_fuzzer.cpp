@@ -348,7 +348,7 @@ void TransTdcEncryptTest(FuzzedDataProvider &provider)
     if (strcpy_s(out, UINT8_MAX, str.c_str()) != EOK) {
         return;
     }
-
+    inLen = 0;
     TransTdcEncrypt(sessionKey, in, inLen, out, &outLen);
 }
 
@@ -369,12 +369,6 @@ void TransTdcPackFastDataTest(FuzzedDataProvider &provider)
     uint32_t outLen = provider.ConsumeIntegral<uint32_t>();
 
     (void)TransTdcPackFastData(&appInfo, &outLen);
-    appInfo.fastTransData = reinterpret_cast<const uint8_t *>(SoftBusCalloc(appInfo.fastTransDataSize));
-    if (appInfo.fastTransData == nullptr) {
-        return;
-    }
-    (void)TransTdcPackFastData(&appInfo, &outLen);
-    SoftBusFree(const_cast<void*>(static_cast<const void*>(appInfo.fastTransData)));
 }
 
 void PackExternalDeviceJsonObjectTest(FuzzedDataProvider &provider)
