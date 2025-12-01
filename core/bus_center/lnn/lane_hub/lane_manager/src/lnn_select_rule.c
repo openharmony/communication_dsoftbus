@@ -1163,16 +1163,12 @@ static int32_t AllowSelectNoCapLink(const char *networkId)
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_LANE, "networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
-    if (IsRemoteLegacy(networkId)) {
-        return SOFTBUS_NOT_IMPLEMENT;
-    }
     char udid[UDID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, sizeof(udid));
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get udid err");
         return ret;
     }
-
     uint64_t curTime = SoftBusGetSysTimeMs();
     LinkLedgerInfo info;
     (void)memset_s(&info, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
@@ -1215,7 +1211,7 @@ static void DecideLinksWithDynamicCapa(const char *networkId, LaneLinkType *link
             LNN_LOGI(LNN_LANE, "available linkType=%{public}d", linkList[i]);
             continue;
         }
-        if (ret == SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP && linkList[i] == LANE_HML) {
+        if (ret == SOFTBUS_LANE_REMOTE_NO_WIFI_DIRECT_CAP) {
             remoteNoCapList[remoteNoCapNum++] = linkList[i];
             LNN_LOGI(LNN_LANE, "remote dynamic cap disable, linkType=%{public}d", linkList[i]);
             continue;
