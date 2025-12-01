@@ -86,8 +86,8 @@ typedef enum {
 } MultipathStrategy;
 
 typedef struct {
-    MultiPathEventType event;
-    MutipathEvent eventData;
+    SocketEventType event;
+    MultipathEvent eventData;
     uint32_t dataLen;
 } CachedOnEvent;
 

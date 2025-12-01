@@ -361,9 +361,9 @@ typedef struct {
 } CollabInfo;
 
 typedef enum {
-    EVENT_TYPE_MT_MUTIPATH,
-    EVENT_TYPE_MT_MAX,
-} MultiPathEventType;
+    EVENT_TYPE_MUTIPATH,
+    EVENT_TYPE_END,
+} SocketEventType;
 
 typedef enum {
     TRANSITION_TO_SINGLE_PATH,
@@ -382,7 +382,7 @@ typedef struct {
     PathTransitionType transitionType;
     LinkMediumType linkMediumType;
     int32_t reason;
-} MutipathEvent;
+} MultipathEvent;
 #ifdef __cplusplus
 }
 #endif
