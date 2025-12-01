@@ -521,6 +521,9 @@ HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
     int32_t ret;
     ConnectType type = CONNECT_P2P;
 
+    ret = OpenNewAuthConn(appInfo, nullptr, type);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
     ret = OpenNewAuthConn(appInfo, conn, type);
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
@@ -1235,6 +1238,68 @@ HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdByUuid001, TestSize.Level1)
     conn->authHandle.authId = 1;
     int32_t ret = TransProxyGetAuthIdByUuid(conn);
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: SetProtocolStartListener
+ * @tc.desc: test SetProtocolStartListener001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, SetProtocolStartListener001, TestSize.Level1)
+{
+    VerifyP2pInfo info = { 0 };
+    int32_t seq = 0;
+    int32_t ret = SetProtocolStartListener(nullptr, nullptr, seq, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    int32_t myPort = 0;
+    info.peerUid = 0;
+    info.protocol = LNN_PROTOCOL_HTP;
+    info.isMinTp = true;
+    ret = SetProtocolStartListener(&info, hmlAddr, seq, g_uuid, &myPort);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED, ret);
+    ClearHmlListenerByUuid(g_uuid);
+}
+
+/**
+ * @tc.name: ConnectSocketByProtocol
+ * @tc.desc: test ConnectSocketByProtocol001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, ConnectSocketByProtocol001, TestSize.Level1)
+{
+    VerifyP2pInfo info = { 0 };
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_NE(conn, nullptr);
+
+    int32_t ret = ConnectSocketByProtocol(nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    conn->appInfo.fdProtocol = LNN_PROTOCOL_HTP;
+    info.protocol = LNN_PROTOCOL_IP;
+    DegradeToTcpListener(&info, conn);
+    ret = ConnectSocketByProtocol(&info, conn);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    conn->appInfo.fdProtocol = LNN_PROTOCOL_DETTP;
+    conn->appInfo.isLowLatency = true;
+    info.protocol = LNN_PROTOCOL_DETTP;
+    conn->appInfo.businessType = BUSINESS_TYPE_BYTE;
+    ret = ConnectSocketByProtocol(&info, conn);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    conn->appInfo.fdProtocol = LNN_PROTOCOL_MINTP;
+    info.isMinTp = false;
+    DegradeToTcpListener(&info, conn);
+    ret = ConnectSocketByProtocol(&info, conn);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
+    ret = ConnectSocketByProtocol(&info, conn);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     SoftBusFree(conn);
 }
 }
