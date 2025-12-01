@@ -481,8 +481,8 @@ void TransProxyPackD2DDataTest(FuzzedDataProvider &provider)
 {
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    dataInfo.outLen = provider.ConsumeIntegralInRange<uint32_t>((uint32_t)SHORT_SLICE_LEN, 
-                                                                (uint32_t)(SHORT_SLICE_LEN * SLICE_TEST_COUNT));
+    dataInfo.outLen = provider.ConsumeIntegralInRange<uint32_t>(
+        (uint32_t)SHORT_SLICE_LEN, (uint32_t)(SHORT_SLICE_LEN * SLICE_TEST_COUNT));
     dataInfo.outData = reinterpret_cast<uint8_t *>(SoftBusCalloc(dataInfo.outLen));
     if (dataInfo.outData == nullptr) {
         return;
@@ -708,8 +708,8 @@ void TransProxyPackDataTest(FuzzedDataProvider &provider)
 {
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    dataInfo.outLen = provider.ConsumeIntegralInRange<uint32_t>((uint32_t)SLICE_LEN, 
-                                                                (uint32_t)(SLICE_LEN * SLICE_TEST_COUNT));
+    dataInfo.outLen = provider.ConsumeIntegralInRange<uint32_t>(
+        (uint32_t)SLICE_LEN, (uint32_t)(SLICE_LEN * SLICE_TEST_COUNT));
     dataInfo.outData = reinterpret_cast<uint8_t *>(SoftBusCalloc(dataInfo.outLen));
     if (dataInfo.outData == nullptr) {
         return;
