@@ -43,7 +43,7 @@ typedef struct {
     int32_t (*IfChannelForSocket)(const char *sessionName, bool *isSocket);
     int32_t (*OnQos)(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
     int32_t (*OnEvent)(int32_t channelId, int32_t channelType,
-        MultiPathEventType event, const MutipathEvent *eventData);
+        SocketEventType event, const void *eventData, uint32_t dataLen);
 } IClientSessionCallBack;
 
 IClientSessionCallBack *GetClientSessionCb(void);

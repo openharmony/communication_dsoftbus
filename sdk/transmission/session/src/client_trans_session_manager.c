@@ -3275,40 +3275,6 @@ int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, ui
     return SOFTBUS_OK;
 }
 
-int32_t ClientCacheOnEvent(int32_t socket, MultiPathEventType event, const MutipathEvent *eventData, uint32_t dataLen)
-{
-    if (socket <= 0 || eventData == NULL || dataLen == 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t ret = LockClientSessionServerList();
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
-        return ret;
-    }
-
-    ClientSessionServer *serverNode = NULL;
-    SessionInfo *sessionNode = NULL;
-    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
-        UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "session not found. socket=%{public}d", socket);
-        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
-    }
-    TRANS_LOGI(TRANS_SDK, "socket=%{public}d, sessionState=%{public}d", socket, sessionNode->lifecycle.sessionState);
-    if (sessionNode->lifecycle.sessionState == SESSION_STATE_CALLBACK_FINISHED) {
-        UnlockClientSessionServerList();
-        return SOFTBUS_TRANS_NO_NEED_CACHE_ON_EVENT;
-    }
-    sessionNode->cachedOnEvent.event = event;
-    sessionNode->cachedOnEvent.eventData.transitionType = eventData->transitionType;
-    sessionNode->cachedOnEvent.eventData.linkMediumType = eventData->linkMediumType;
-    sessionNode->cachedOnEvent.eventData.reason = eventData->reason;
-    sessionNode->cachedOnEvent.dataLen = dataLen;
-    UnlockClientSessionServerList();
-    TRANS_LOGI(TRANS_SDK, "cache on event sucess, socket=%{public}d", socket);
-    return SOFTBUS_OK;
-}
-
 int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQosEvent)
 {
     if (socket <= 0 || cachedQosEvent == NULL) {
@@ -3832,7 +3798,7 @@ void HandleMultiPathOnEvent(int32_t channelId, uint8_t changeType, int32_t linkT
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return;
     }
-    MutipathEvent eventData = {
+    MultipathEvent eventData = {
         .transitionType = changeType ? TRANSITION_TO_DUAL_PATH : TRANSITION_TO_SINGLE_PATH,
         .linkMediumType = (LinkMediumType)linkType,
         .reason = reason
@@ -3846,7 +3812,8 @@ void HandleMultiPathOnEvent(int32_t channelId, uint8_t changeType, int32_t linkT
         TRANS_LOGE(TRANS_SDK, "get channel type error, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return;
     }
-    ret = GetClientSessionCb()->OnEvent(channelId, channelType, EVENT_TYPE_MT_MUTIPATH, &eventData);
+    ret = GetClientSessionCb()->OnEvent(
+        channelId, channelType, EVENT_TYPE_MUTIPATH, (const void *)&eventData, sizeof(MultipathEvent));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "handle on event error, ret=%{public}d", ret);
         return;
