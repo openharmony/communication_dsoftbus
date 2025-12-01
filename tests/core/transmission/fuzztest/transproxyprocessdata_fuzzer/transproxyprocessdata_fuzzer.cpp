@@ -140,10 +140,9 @@ void TransProxyPackTlvDataTest(FuzzedDataProvider &provider)
 
     int32_t tlvBufferSize = provider.ConsumeIntegral<int8_t>();
     uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
-    uint8_t *buf = TransProxyPackTlvData(nullptr, tlvBufferSize, dataLen);
-    SoftBusFree(buf);
+    (void)TransProxyPackTlvData(nullptr, tlvBufferSize, dataLen);
     dataLen = -(MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize);
-    buf = TransProxyPackTlvData(&pktHead, tlvBufferSize, dataLen);
+    uint8_t *buf = TransProxyPackTlvData(&pktHead, tlvBufferSize, dataLen);
     SoftBusFree(buf);
     buf = nullptr;
 }
@@ -719,8 +718,8 @@ void TransProxyPackDataTest(FuzzedDataProvider &provider)
     uint32_t dataLen = 0;
     SessionPktType pktType = static_cast<SessionPktType>(
         provider.ConsumeIntegral<uint16_t>());
-    uint8_t *sliceData = TransProxyPackData(nullptr, sliceNum, pktType, cnt, &dataLen);
-    sliceData = TransProxyPackData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
+    (void)TransProxyPackData(nullptr, sliceNum, pktType, cnt, &dataLen);
+    uint8_t *sliceData = TransProxyPackData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
     SoftBusFree(sliceData);
     sliceData = nullptr;
     SoftBusFree(dataInfo.outData);
