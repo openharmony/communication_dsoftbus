@@ -399,16 +399,8 @@ HWTEST_F(LNNSelectRuleTest, LNN_SELECT_NO_CAP_LINK_001, TestSize.Level1)
         DoAll(SetArgPointee<LANE_MOCK_PARAM2>(hmlFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, LnnGetRemoteNumU64Info).WillRepeatedly(
         DoAll(SetArgPointee<LANE_MOCK_PARAM3>(hmlFeatureCap), Return(SOFTBUS_OK)));
-
-    EXPECT_CALL(laneLinkMock, LnnGetOsTypeByNetworkId).WillRepeatedly(
-        DoAll(SetArgPointee<LANE_MOCK_PARAM2>(HO_OS_TYPE), Return(SOFTBUS_OK)));
-    int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_USB_STATIC_CAP);
-
-    EXPECT_CALL(laneLinkMock, LnnGetOsTypeByNetworkId).WillRepeatedly(
-        DoAll(SetArgPointee<LANE_MOCK_PARAM2>(OH_OS_TYPE), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
+    int32_t ret = DecideAvailableLane(NODE_NETWORK_ID, &selectParam, &linkList);
     EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_USB_STATIC_CAP);
 }
 
@@ -442,8 +434,6 @@ HWTEST_F(LNNSelectRuleTest, LNN_SELECT_NO_CAP_LINK_002, TestSize.Level1)
         DoAll(SetArgPointee<LANE_MOCK_PARAM2>(hmlFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, LnnGetRemoteNumU64Info).WillRepeatedly(
         DoAll(SetArgPointee<LANE_MOCK_PARAM3>(hmlFeatureCap), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, LnnGetOsTypeByNetworkId).WillRepeatedly(
-        DoAll(SetArgPointee<LANE_MOCK_PARAM2>(OH_OS_TYPE), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, LnnGetRemoteStrInfo).WillRepeatedly(
         DoAll(SetArrayArgument<LANE_MOCK_PARAM3>(PEER_UDID, PEER_UDID + UDID_BUF_LEN), Return(SOFTBUS_OK)));
 
