@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,9 +60,6 @@ SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName);
 void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList);
 
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
-    const char *networkId, int32_t type, ListNode *destroyList);
-
-void ClearClientSessionByNetworkId(const ClientSessionServer *server,
     const char *networkId, int32_t type, ListNode *destroyList);
 
 SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *clientSessionServer);

@@ -515,12 +515,6 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
     }
 }
 
-void ClearClientSessionByNetworkId(const ClientSessionServer *server,
-    const char *networkId, int32_t type, ListNode *destroyList)
-{
-    return;
-}
-
 SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *clientSessionServer)
 {
     if (clientSessionServer == NULL) {
@@ -1102,17 +1096,32 @@ int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationCh
     return SOFTBUS_OK;
 }
 
-static void PrintCollabInfo(const CollabInfo *info, char *role)
+static void PrintAnonymizedString(const char *input, const char *lable, const char *role)
 {
-    char *tmpDeviceId = NULL;
-    char *tmpAccountId = NULL;
-    Anonymize(info->deviceId, &tmpDeviceId);
-    Anonymize(info->accountId, &tmpAccountId);
-    TRANS_LOGI(TRANS_SDK, "%{public}s deviceId=%{public}s", role, AnonymizeWrapper(tmpDeviceId));
-    AnonymizeFree(tmpDeviceId);
+    char *anonymizedStr = NULL;
+
+    Anonymize(input, &anonymizedStr);
+    if (anonymizedStr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "%{public}s: %{public}s=<anonymized failed>", role, lable);
+        return;
+    }
+
+    TRANS_LOGI(TRANS_SDK, "%{public}s: %{public}s=%{public}s", role, lable, AnonymizeWrapper(anonymizedStr));
+    AnonymizeFree(anonymizedStr);
+}
+
+static void PrintCollabInfo(const CollabInfo *info, const char *role)
+{
+    if (info == NULL || role == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+
+    PrintAnonymizedString(info->deviceId, "deviceId", role);
+    PrintAnonymizedString(info->accountId, "accountId", role);
+
     TRANS_LOGI(TRANS_SDK, "%{public}s userId=%{public}d", role, info->userId);
     TRANS_LOGI(TRANS_SDK, "%{public}s pid=%{public}d", role, info->pid);
-    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}s", role, AnonymizeWrapper(tmpAccountId));
     TRANS_LOGI(TRANS_SDK, "%{public}s tokenId=%{public}" PRIu64, role, info->tokenId);
 }
 
