@@ -267,8 +267,6 @@ void TdcSendDataTest(FuzzedDataProvider &provider)
     (void)TdcSendData(channelId, nullptr, len);
     len = DATA_BUF_MAX + 1;
     (void)TdcSendData(channelId, reinterpret_cast<const void *>(data), len);
-    len = DATA_BUF_MAX;
-    (void)TdcSendData(channelId, reinterpret_cast<const void *>(data), len);
 }
 
 static void FillDataHeadTlvPacketHead(FuzzedDataProvider &provider, DataHeadTlvPacketHead *data)
