@@ -76,6 +76,10 @@
 #define CREATE_ACTIONS_STR "create"
 #define ACTIONS_SPLIT ","
 
+/* rpc sa key*/
+#define SA_ID_STR "SA_ID"
+#define SA_UID_STR "SA_UID"
+
 #define DBINDER_SERVICE_NAME "DBinderService"
 #define DBINDER_BUS_NAME_PREFIX "DBinder"
 #define DBINDER_PACKAGE_NAME "DBinderBus"
@@ -90,6 +94,7 @@ typedef struct {
 static SoftBusList *g_permissionEntryList = NULL;
 static SoftBusList *g_lnnPermissionEntryList = NULL;
 static SoftBusList *g_dynamicPermissionList = NULL;
+static SoftBusList *g_rpcSaPermissionList = NULL;
 static char g_permissonJson[PERMISSION_JSON_LEN];
 static char g_lnnPermissonJson[PERMISSION_JSON_LEN];
 
@@ -674,6 +679,24 @@ void DeinitPermissionJson(void)
     g_permissionEntryList = NULL;
 }
 
+void DeinitRpcSaPermissionJson(void)
+{
+    if (g_rpcSaPermissionList == NULL) {
+        return;
+    }
+    COMM_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_rpcSaPermissionList->lock) == SOFTBUS_OK, COMM_PERM, "lock failed.");
+    RpcSaPermissionEntry *item = NULL;
+    RpcSaPermissionEntry *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_rpcSaPermissionList->list), RpcSaPermissionEntry, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    (void)SoftBusMutexUnlock(&g_rpcSaPermissionList->lock);
+    DestroySoftBusList(g_rpcSaPermissionList);
+    g_rpcSaPermissionList = NULL;
+}
+
 SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,
     const char *pkgName, uint32_t actions)
 {
@@ -710,7 +733,7 @@ static int32_t CheckPidAndUidDynamic(const SoftBusPermissionEntry *pe, const Sof
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
+int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem, bool isDynamicPermission)
 {
     if (sessionName == NULL || pItem == NULL) {
         COMM_LOGE(COMM_PERM, "INVALID PARAM");
@@ -719,7 +742,6 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     int permType;
     SoftBusPermissionEntry *pe = NULL;
     char *tmpName = NULL;
-    bool isDynamicPermission = CheckDBinder(sessionName);
     SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
     if (permissionList == NULL) {
         COMM_LOGE(COMM_PERM, "permissionList is NULL");
@@ -949,4 +971,110 @@ int32_t DeleteDynamicPermission(const char *sessionName)
     }
     (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
     return SOFTBUS_NOT_FIND;
+}
+
+static RpcSaPermissionEntry *ProcessRpcSaPermissionEntry(cJSON *object)
+{
+    if (object == NULL) {
+        COMM_LOGE(COMM_PERM, "object is null.");
+        return NULL;
+    }
+    RpcSaPermissionEntry *permissionEntry = (RpcSaPermissionEntry *)SoftBusCalloc(sizeof(RpcSaPermissionEntry));
+    if (permissionEntry == NULL) {
+        COMM_LOGE(COMM_PERM, "permission entry calloc fail.");
+        return NULL;
+    }
+    ListInit(&permissionEntry->node);
+    char value[TEMP_STR_MAX_LEN] = {0};
+    if (!GetJsonObjectStringItem(object, PROCESS_NAME, permissionEntry->processName, PROCESS_NAME_SIZE_MAX)) {
+        SoftBusFree(permissionEntry);
+        COMM_LOGE(COMM_PERM, "get json processName failed.");
+        return NULL;
+    }
+    if (!GetJsonObjectStringItem(object, SA_ID_STR, value, TEMP_STR_MAX_LEN)) {
+        SoftBusFree(permissionEntry);
+        COMM_LOGE(COMM_PERM, "get json saId failed.");
+        return NULL;
+    }
+    permissionEntry->saId = atoi(value);
+    if (!GetJsonObjectStringItem(object, SA_UID_STR, value, TEMP_STR_MAX_LEN)) {
+        SoftBusFree(permissionEntry);
+        COMM_LOGE(COMM_PERM, "get json saUid failed.");
+        return NULL;
+    }
+    permissionEntry->saUid = atoi(value);
+    return permissionEntry;
+}
+
+int32_t LoadRpcPermissionJson(const char *fileName)
+{
+    if (fileName == NULL) {
+        COMM_LOGE(COMM_PERM, "fileName is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char buf[PERMISSION_JSON_LEN] = { 0 };
+    int32_t ret = ReadConfigJson(fileName, buf);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (g_rpcSaPermissionList == NULL) {
+        g_rpcSaPermissionList = CreateSoftBusList();
+        if (g_rpcSaPermissionList == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+    }
+    cJSON *jsonArray = cJSON_Parse(buf);
+    if (jsonArray == NULL) {
+        COMM_LOGE(COMM_PERM, "parse failed. fileName=%{private}s", fileName);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    int itemNum = cJSON_GetArraySize(jsonArray);
+    if (itemNum <= 0) {
+        cJSON_Delete(jsonArray);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (SoftBusMutexLock(&g_rpcSaPermissionList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "lock fail.");
+        cJSON_Delete(jsonArray);
+        return SOFTBUS_LOCK_ERR;
+    }
+    RpcSaPermissionEntry *pe = NULL;
+    for (int index = 0; index < itemNum; index++) {
+        cJSON *permissionEntryObeject = cJSON_GetArrayItem(jsonArray, index);
+        pe = ProcessRpcSaPermissionEntry(permissionEntryObeject);
+        if (pe != NULL) {
+            ListNodeInsert(&g_rpcSaPermissionList->list, &pe->node);
+            g_rpcSaPermissionList->cnt++;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_rpcSaPermissionList->lock);
+    cJSON_Delete(jsonArray);
+    return SOFTBUS_OK;
+}
+
+int32_t CheckRpcPermissionEntry(int32_t callingUid, const char *sessionName, const char *processName)
+{
+    if (sessionName == NULL || processName == NULL) {
+        COMM_LOGE(COMM_PERM, "INVALID PARAM");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        g_rpcSaPermissionList != NULL, SOFTBUS_INVALID_PARAM, COMM_PERM, "permissionList is NULL");
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_rpcSaPermissionList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_PERM, "lock failed.");
+
+    RpcSaPermissionEntry *pe = NULL;
+    LIST_FOR_EACH_ENTRY(pe, &g_rpcSaPermissionList->list, RpcSaPermissionEntry, node) {
+        if (callingUid == pe->saUid && strcmp(pe->processName, processName) == 0) {
+            (void)SoftBusMutexUnlock(&g_rpcSaPermissionList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_rpcSaPermissionList->lock);
+
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    COMM_LOGE(COMM_PERM, "sessionName=%{public}s not found", tmpName);
+    AnonymizeFree(tmpName);
+    return SOFTBUS_PERMISSION_DENIED;
 }

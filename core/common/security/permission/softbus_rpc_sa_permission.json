@@ -1,0 +1,37 @@
+[
+  {
+    "PROCESS_NAME": "distributedsched",
+    "SA_ID": "1401",
+    "SA_UID": "5522"
+  },
+  {
+    "PROCESS_NAME": "dhardware",
+    "SA_ID": "4801",
+    "SA_UID": "3056"
+  },
+  {
+    "PROCESS_NAME": "token_sync_service",
+    "SA_ID": "3504",
+    "SA_UID": "3020"
+  },
+  {
+    "PROCESS_NAME": "d-bms",
+    "SA_ID": "402",
+    "SA_UID": "6000"
+  },
+  {
+    "PROCESS_NAME": "distributedfiledaemon",
+    "SA_ID": "5201",
+    "SA_UID": "1009"
+  },
+  {
+    "PROCESS_NAME": "av_session",
+    "SA_ID": "3010",
+    "SA_UID": "6700"
+  },
+  {
+    "PROCESS_NAME": "samgr",
+    "SA_ID": "0",
+    "SA_UID": "5555"
+  }
+]

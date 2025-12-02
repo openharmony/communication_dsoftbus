@@ -45,6 +45,10 @@ if (defined(ohos_lite)) {
     sources = [ "$dsoftbus_core_path/common/security/permission/softbus_lnn_permission.json" ]
     outputs = [ "$root_out_dir/etc/softbus_lnn_permission.json" ]
   }
+  copy("rpc_permission_json") {
+    sources = [ "$dsoftbus_core_path/common/security/permission/softbus_rpc_sa_permission.json" ]
+    outputs = [ "$root_out_dir/etc/softbus_rpc_sa_permission.json" ]
+  }
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_server_frame") {
       defines += AUTH_SERVER_DEFINES
@@ -244,6 +248,7 @@ if (defined(ohos_lite)) {
       deps += [
         ":permission_json",
         ":lnn_permission_json",
+        ":rpc_permission_json",
 
         # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
         # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
@@ -318,6 +323,13 @@ if (defined(ohos_lite)) {
   }
   ohos_prebuilt_etc("softbus_permission_json") {
     source = "$dsoftbus_root_path/core/common/security/permission/softbus_trans_permission.json"
+    install_enable = true
+    relative_install_dir = "communication/softbus"
+    part_name = "dsoftbus"
+    subsystem_name = "communication"
+  }
+  ohos_prebuilt_etc("softbus_rpc_sa_permission_json") {
+    source = "$dsoftbus_root_path/core/common/security/permission/softbus_rpc_sa_permission.json"
     install_enable = true
     relative_install_dir = "communication/softbus"
     part_name = "dsoftbus"
@@ -404,6 +416,7 @@ if (defined(ohos_lite)) {
     deps += [
       ":softbus_permission_json",
       ":softbus_lnn_permission_json",
+      ":softbus_rpc_sa_permission_json",
       ":softbus_server.rc",
 
       # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
