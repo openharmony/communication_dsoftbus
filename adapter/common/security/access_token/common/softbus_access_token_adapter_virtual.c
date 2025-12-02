@@ -129,3 +129,11 @@ bool SoftBusCheckIsSystemAppByUid(uint64_t tokenId, pid_t uid)
     (void)uid;
     return false;
 }
+
+int32_t SoftBusGetNativeProcessName(uint64_t tokenId, char *processName, int32_t processNameLen)
+{
+    (void)tokenId;
+    (void)processName;
+    (void)processNameLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
