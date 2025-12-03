@@ -1558,7 +1558,7 @@ static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     }
     linkInfo.type = LANE_P2P_REUSE;
     char ipAddr[MAX_SOCKET_ADDR_LEN];
-    uint16_t port;
+    uint16_t port = 0;
     if (!LaneGetP2PReuseMac(reqInfo->peerNetworkId, ipAddr, MAX_SOCKET_ADDR_LEN, &port)) {
         LNN_LOGE(LNN_LANE, "p2p resue get addr failed");
         return SOFTBUS_LANE_NOT_FOUND;
@@ -1903,9 +1903,10 @@ static int32_t LaneLinkOfSoftApP2p(uint32_t reqId, const LinkRequest *reqInfo, c
 {
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    if (strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, reqInfo->peerNetworkId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "copy udid error");
-        return SOFTBUS_STRCPY_ERR;
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID,
+        linkInfo.peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     int32_t ret = AuthMetaGetIpByMetaNodeIdPacked(
         reqInfo->peerNetworkId, linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN);
