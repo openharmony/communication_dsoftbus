@@ -59,11 +59,11 @@ static void UdpChannelStatistic(UdpChannelInfo *node, bool isAdd)
     }
     if (!isAdd) {
         g_businessTypeAudit.fileChannelCnt -= node->info.businessType == BUSINESS_TYPE_FILE ? 1:0;
-        g_businessTypeAudit.fileChannelCnt = g_businessTypeAudit.fileChannelCnt < 0 ?
-            0:g_businessTypeAudit.fileChannelCnt;
+        g_businessTypeAudit.fileChannelCnt =
+            g_businessTypeAudit.fileChannelCnt < 0 ? 0 : g_businessTypeAudit.fileChannelCnt;
         g_businessTypeAudit.streamChannelCnt -= node->info.businessType == BUSINESS_TYPE_STREAM ? 1:0;
-        g_businessTypeAudit.streamChannelCnt = g_businessTypeAudit.streamChannelCnt < 0 ?
-            0:g_businessTypeAudit.streamChannelCnt;
+        g_businessTypeAudit.streamChannelCnt =
+            g_businessTypeAudit.streamChannelCnt < 0 ? 0 : g_businessTypeAudit.streamChannelCnt;
         (void)SoftBusMutexUnlock(&g_businessTypeAudit.lock);
         return;
     }

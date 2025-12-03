@@ -1503,7 +1503,7 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
     }
     int ret;
     static uint64_t startTimestamp = 0;
-    uint32_t actualDataLen = 0;  
+    uint32_t actualDataLen = 0;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
