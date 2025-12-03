@@ -49,13 +49,21 @@ static SoftBusList *g_udpChannelMgr = NULL;
 
 static void UdpChannelStatistic(UdpChannelInfo *node, bool isAdd)
 {
+    if (node == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "node is null!");
+        return;
+    }
     if (SoftBusMutexLock(&(g_businessTypeAudit.lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
         return;
     }
     if (!isAdd) {
         g_businessTypeAudit.fileChannelCnt -= node->info.businessType == BUSINESS_TYPE_FILE ? 1:0;
+        g_businessTypeAudit.fileChannelCnt = g_businessTypeAudit.fileChannelCnt < 0 ?
+            0:g_businessTypeAudit.fileChannelCnt;
         g_businessTypeAudit.streamChannelCnt -= node->info.businessType == BUSINESS_TYPE_STREAM ? 1:0;
+        g_businessTypeAudit.streamChannelCnt = g_businessTypeAudit.streamChannelCnt < 0 ?
+            0:g_businessTypeAudit.streamChannelCnt;
         (void)SoftBusMutexUnlock(&g_businessTypeAudit.lock);
         return;
     }
