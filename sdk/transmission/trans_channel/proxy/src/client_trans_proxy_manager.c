@@ -32,6 +32,8 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 #include "trans_assemble_tlv.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
 #include "trans_proxy_process_data.h"
@@ -1456,8 +1458,6 @@ static int32_t ClientTransProxySubD2dNeaHeadPacketProc(
     return ret;
 }
 
-#include "trans_event_form.h"
-#include "trans_event.h"
 static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen,
     uint64_t startTimestamp, uint64_t endTimestamp)
 {
