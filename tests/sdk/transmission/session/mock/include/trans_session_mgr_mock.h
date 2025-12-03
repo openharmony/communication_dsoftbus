@@ -64,6 +64,8 @@ public:
     virtual int32_t ClientGetServiceSocketInfoById(int32_t socket, ServiceSocketInfo *socketInfo) = 0;
     virtual bool IsContainServiceBySocket(int32_t socket) = 0;
     virtual int32_t CheckChannelIsReserveByChannelId(int32_t sessionId, int32_t channelId, int32_t *useType) = 0;
+    virtual void SessionInfoReport(int32_t sessionId) = 0;
+    virtual int32_t SetStartTimestampBySessionId(int32_t sessionId) = 0;
 };
 
 class TransSessionMgrMock : public TransSessionMgrInterface {
@@ -109,6 +111,8 @@ public:
     MOCK_METHOD2(ClientGetServiceSocketInfoById, int32_t(int32_t socket, ServiceSocketInfo *socketInfo));
     MOCK_METHOD1(IsContainServiceBySocket, bool(int32_t socket));
     MOCK_METHOD3(CheckChannelIsReserveByChannelId, int32_t(int32_t sessionId, int32_t channelId, int32_t *useType));
+    MOCK_METHOD1(SessionInfoReport, void(int32_t sessionId));
+    MOCK_METHOD1(SetStartTimestampBySessionId, int32_t(int32_t sessionId));
 
     static int32_t ActionOfClientGetDataConfigByChannelId(
         int32_t channelId, int32_t channelType, uint32_t *dataConfig);

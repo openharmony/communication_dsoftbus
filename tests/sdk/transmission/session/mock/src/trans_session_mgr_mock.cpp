@@ -216,6 +216,16 @@ int32_t CheckChannelIsReserveByChannelId(int32_t sessionId, int32_t channelId, i
 {
     return GetManagerInterface()->CheckChannelIsReserveByChannelId(sessionId, channelId, useType);
 }
+
+void SessionInfoReport(int32_t sessionId)
+{
+    return GetManagerInterface()->SessionInfoReport(sessionId);
+}
+ 
+int32_t SetStartTimestampBySessionId(int32_t sessionId)
+{
+    return GetManagerInterface()->SetStartTimestampBySessionId(sessionId);
+}
 #ifdef __cplusplus
 }
 #endif
