@@ -126,6 +126,11 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .fileRate = 1,
         .fileWirelessRate = 1,
         .fileWiredRate = 1,
+        .bytesRate = 1,
+        .fileChannelCnt = 1,
+        .streamChannelCnt = 1,
+        .dataLen = 1,
+        .sessionDuration = 1,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
