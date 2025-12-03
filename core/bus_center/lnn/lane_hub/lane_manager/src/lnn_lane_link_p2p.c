@@ -1694,6 +1694,7 @@ static void OnAuthConnOpened(uint32_t authRequestId, AuthHandle authHandle)
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
     struct WifiDirectConnectInfo info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.requestId = GetWifiDirectManager()->getRequestId();
     info.negoChannel.type = NEGO_CHANNEL_AUTH;
     info.negoChannel.handle.authHandle = authHandle;
@@ -1836,6 +1837,7 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
 {
     LNN_LOGI(LNN_LANE, "proxy opened. channelRequestId=%{public}d, channelId=%{public}d", channelRequestId, channelId);
     struct WifiDirectConnectInfo info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.requestId = GetWifiDirectManager()->getRequestId();
     info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     info.negoChannel.type = NEGO_CHANNEL_COC;
@@ -2120,7 +2122,7 @@ static int32_t GetWlanInfo(const char *networkId, LaneLinkInfo *linkInfo)
         LNN_LOGE(LNN_LANE, "get remote wlan ip fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    int32_t port;
+    int32_t port = 0;
     if (LnnGetRemoteNumInfoByIfnameIdx(networkId, NUM_KEY_SESSION_PORT, &port, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote wlan port fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;

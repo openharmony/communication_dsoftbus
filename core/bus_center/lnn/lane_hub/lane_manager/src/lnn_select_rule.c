@@ -175,6 +175,7 @@ static int32_t DelWifiDirectExtCapInfo(const char *peerUdid)
 int32_t GetWlanLinkedFrequency(void)
 {
     LnnWlanLinkedInfo info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     int32_t ret = LnnGetWlanLinkedInfoPacked(&info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linked info fail, reason=%{public}d", ret);

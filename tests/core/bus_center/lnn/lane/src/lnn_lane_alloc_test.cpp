@@ -1504,6 +1504,8 @@ HWTEST_F(LNNLaneAllocTest, LNN_ALLOC_TARGET_LANE_TEST_03, TestSize.Level1)
     uint32_t laneHandle = laneManager->lnnGetLaneHandle(LANE_TYPE_TRANS);
     EXPECT_NE(laneHandle, INVALID_LANE_REQ_ID);
 
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
+    EXPECT_CALL(laneDepMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->authMetaGetIpByMetaNodeId = nullptr;
     allocInfo.linkList.linkType[0] = LANE_SOFTAP_P2P;
@@ -1520,6 +1522,14 @@ HWTEST_F(LNNLaneAllocTest, LNN_ALLOC_TARGET_LANE_TEST_03, TestSize.Level1)
     ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+
+    g_listenerCbForSoftApP2p.onLaneAllocFail = OnLaneAllocFailNoExcept2;
+    EXPECT_CALL(laneDepMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    SetIsNeedCondWait();
+    ret = laneManager->lnnAllocTargetLane(laneHandle, &allocInfo, &g_listenerCbForSoftApP2p);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+    g_listenerCbForSoftApP2p.onLaneAllocFail = OnLaneAllocFailNoExcept3;
 }
 
 /*
