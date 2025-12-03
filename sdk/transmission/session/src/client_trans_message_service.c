@@ -143,6 +143,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     }
     (void)ClientResetIdleTimeoutById(sessionId);
     UpdateChannelStatistics(sessionId, len);
+    AbnormalDataLenAudit(sessionId, len);
     return ClientTransChannelSendBytes(channelId, channelType, data, len);
 }
 

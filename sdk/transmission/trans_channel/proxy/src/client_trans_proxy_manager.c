@@ -1456,6 +1456,30 @@ static int32_t ClientTransProxySubD2dNeaHeadPacketProc(
     return ret;
 }
 
+#include "trans_event_form.h"
+#include "trans_event.h"
+static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen,
+    uint64_t startTimestamp, uint64_t endTimestamp)
+{
+    #define DATA_LEN_1MB (1 * 1024 * 1024) // 1MB
+    #define DATA_LEN_1KB (1 * 1024) // 1KB
+    #define SEC_TO_MILLISEC (1000)
+    if (dataLen < DATA_LEN_1MB) {
+        return;
+    }
+    uint64_t useTime = startTimestamp > endTimestamp ?
+        (UINT64_MAX - startTimestamp + endTimestamp):(endTimestamp - startTimestamp);
+    if (useTime == 0) {
+        return;
+    }
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    extra.channelId = channelId;
+    extra.dataLen = dataLen;
+    extra.bytesRate = (dataLen * SEC_TO_MILLISEC)/(DATA_LEN_1KB * useTime);  // KB/s
+    TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
+}
+
 static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *head, const char *data, uint32_t len)
 {
     if (g_channelSliceProcessorList == NULL) {
@@ -1478,11 +1502,15 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
         return SOFTBUS_INVALID_PARAM;
     }
     int ret;
+    static uint64_t startTimestamp = 0;
+    uint32_t actualDataLen = 0;  
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
+        startTimestamp = SoftBusGetSysTimeMs();
     } else if (head->sliceNum == head->sliceSeq + 1) {
         ret = ClientTransProxyLastSliceProcess(processor, head, data, len, channelId);
+        actualDataLen = processor->dataLen + len;
     } else {
         ret = TransProxyNormalSliceProcess(processor, head, data, len);
     }
@@ -1490,6 +1518,13 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
     SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     if (ret != SOFTBUS_OK) {
         TransProxyClearProcessor(processor);
+        startTimestamp = 0;
+        return ret;
+    }
+    if (head->sliceNum == head->sliceSeq + 1) {
+        uint64_t endTimestamp = SoftBusGetSysTimeMs();
+        DfxReceiveRateStatistic(channelId, actualDataLen, startTimestamp, endTimestamp);
+        startTimestamp = 0;
     }
     return ret;
 }
