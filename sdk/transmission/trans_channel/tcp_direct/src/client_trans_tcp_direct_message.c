@@ -32,6 +32,8 @@
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
 #include "trans_tcp_process_data.h"
@@ -648,10 +650,38 @@ static int32_t TransTdcProcessData(int32_t channelId)
     return ret;
 }
 
+static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen)
+{
+    #define DATA_LEN_1M (1 * 1024 * 1024) // 1MB
+    #define SEC_TO_MILLISEC (1000)
+    if (dataLen < DATA_LEN_1M) {
+        return;
+    }
+    TcpDirectChannelInfo channel;
+    if (TransTdcGetInfoById(channelId, &channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get channelInfo failed. channelId=%{public}d", channelId);
+        return;
+    }
+    uint64_t startTimestamp = channel.timestamp;
+    uint64_t endTimestamp = SoftBusGetSysTimeMs();
+    uint64_t useTime = startTimestamp > endTimestamp ?
+        (UINT64_MAX - startTimestamp + endTimestamp):(endTimestamp - startTimestamp);
+    if (useTime == 0) {
+        return;
+    }
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    extra.channelId = channelId;
+    extra.dataLen = dataLen;
+    extra.bytesRate = (dataLen * SEC_TO_MILLISEC)/(DATA_LEN_1M * useTime);
+    TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
+}
+
 static int32_t TransTdcProcAllTlvData(int32_t channelId)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_tcpDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is NULL");
     while (1) {
+        TransTdcSetTimestamp(channelId, SoftBusGetSysTimeMs());
         SoftBusMutexLock(&g_tcpDataList->lock);
         TcpDataTlvPacketHead pktHead = { 0 };
         uint32_t newPktHeadSize = 0;
@@ -668,6 +698,8 @@ static int32_t TransTdcProcAllTlvData(int32_t channelId)
             return ret;
         }
         (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
+        DfxReceiveRateStatistic(channelId, pktHead.dataLen);
+        TransTdcSetTimestamp(channelId, 0);
         ret = TransTdcProcessTlvData(channelId, &pktHead, newPktHeadSize);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "data received failed");
     }
