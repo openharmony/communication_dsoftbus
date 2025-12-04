@@ -944,7 +944,7 @@ int32_t ClientTransOnQos(int32_t channelId, int32_t channelType, QoSEvent event,
 }
 
 int32_t ClientTransOnEvent(int32_t channelId, int32_t channelType,
-    MultiPathEventType event, const MutipathEvent *eventData)
+    SocketEventType event, const void *eventData, uint32_t dataLen)
 {
     if (eventData == NULL) {
         TRANS_LOGE(TRANS_SDK, "eventData is NULL");
@@ -963,19 +963,14 @@ int32_t ClientTransOnEvent(int32_t channelId, int32_t channelType,
         TRANS_LOGI(TRANS_SDK, "not report on event on non-socket session");
         return SOFTBUS_OK;
     }
-    if (sessionCallback.socketClient.OnEvent == NULL) {
+    ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
+
+    if (listener->OnEvent == NULL) {
         TRANS_LOGD(TRANS_SDK, "listener OnEvent is NULL, sessionId=%{public}d", socket);
         return SOFTBUS_OK;
     }
-    int32_t dataLen = sizeof(MutipathEvent);
-    ret = ClientCacheOnEvent(socket, event, eventData, dataLen);
-    if (ret != SOFTBUS_OK && ret != SOFTBUS_TRANS_NO_NEED_CACHE_ON_EVENT) {
-        TRANS_LOGE(TRANS_SDK, "cache on event failed, ret=%{public}d", socket);
-        return ret;
-    } else if (ret == SOFTBUS_TRANS_NO_NEED_CACHE_ON_EVENT) {
-        sessionCallback.socketClient.OnEvent(socket, event, eventData, dataLen);
-        TRANS_LOGE(TRANS_SDK, "report on event to client socket=%{public}d, event=%{public}d", socket, event);
-    }
+    listener->OnEvent(socket, event, eventData, dataLen);
+    TRANS_LOGI(TRANS_SDK, "report on event to client socket=%{public}d, event=%{public}d", socket, event);
     return SOFTBUS_OK;
 }
 
