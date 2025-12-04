@@ -217,6 +217,7 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
         return NULL;
     }
     item->channelId = channel->channelId;
+    item->timestamp = 0;
     item->detail.fd = channel->fd;
     item->detail.channelType = channel->channelType;
     item->detail.isLowLatency = channel->isLowLatency;
