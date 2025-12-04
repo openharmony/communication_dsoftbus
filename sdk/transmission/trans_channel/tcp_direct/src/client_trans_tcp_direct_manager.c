@@ -40,6 +40,30 @@
 
 static SoftBusList *g_tcpDirectChannelInfoList = NULL;
 
+void TransTdcSetTimestamp(int32_t channelId, uint64_t timestamp)
+{
+    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    TcpDirectChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
+        if (item->channelId != channelId) {
+            continue;
+        }
+        if (timestamp == 0) {
+            item->timestamp = 0;
+        } else {
+            item->timestamp = (item->timestamp == 0) ? timestamp : item->timestamp;
+        }
+        (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+    TRANS_LOGE(TRANS_SDK, "not find, channelId=%{public}d", channelId);
+    return;
+}
+
 static bool CheckInfoAndMutexLock(TcpDirectChannelInfo *info)
 {
     if (info == NULL) {
