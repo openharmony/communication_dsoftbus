@@ -544,6 +544,26 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
     }
 }
 
+/**
+ * @tc.name: PublishLNNTest003
+ * @tc.desc: Verify wrong parameter
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require: I5I7B9
+ */
+HWTEST_F(BusCenterSdkTest, PublishLNNTest003, TestSize.Level0)
+{
+    int32_t ret;
+    g_pInfo.medium = (ExchangeMedium)(NFC + 1);
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+
+    g_pInfo.medium = (ExchangeMedium)(-1);
+    ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
+    EXPECT_TRUE(ret != 0);
+    g_pInfo.medium = COAP;
+}
+
 /*
  * @tc.name: RefreshLNNTest001
  * @tc.desc: Verify wrong parameter
@@ -631,6 +651,27 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
         ret = StopRefreshLNN(TEST_PKG_NAME_1, tmpId3);
         EXPECT_TRUE(ret == SOFTBUS_OK);
     }
+}
+
+/**
+ * @tc.name: RefreshLNNTest003
+ * @tc.desc: Verify wrong parameter
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require: I5I7B9
+ */
+HWTEST_F(BusCenterSdkTest, RefreshLNNTest003, TestSize.Level0)
+{
+    int32_t ret;
+
+    g_sInfo.medium = (ExchangeMedium)(NFC + 1);
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+
+    g_sInfo.medium = (ExchangeMedium)(-1);
+    ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
+    EXPECT_TRUE(ret != 0);
+    g_sInfo.medium = COAP;
 }
 
 /*

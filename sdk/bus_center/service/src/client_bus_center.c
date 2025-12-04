@@ -88,7 +88,7 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
         LNN_LOGE(LNN_STATE, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if ((info->medium < AUTO) || (info->medium > COAP)) {
+    if (((info->medium < AUTO) || (info->medium > COAP)) && (info->medium != NFC)) {
         LNN_LOGE(LNN_STATE, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -122,7 +122,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
         LNN_LOGE(LNN_STATE, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if ((info->medium < AUTO) || (info->medium > USB)) {
+    if (((info->medium < AUTO) || (info->medium > USB)) && (info->medium != NFC)) {
         LNN_LOGE(LNN_STATE, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }

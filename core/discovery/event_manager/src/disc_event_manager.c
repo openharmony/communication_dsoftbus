@@ -35,6 +35,9 @@ int32_t DiscEventManagerInit(void)
     ret = DiscPcCollaborationEventInitPacked();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init pc collaboration event failed");
 
+    ret = DiscShareNfcEventInitPacked();
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init share nfc event failed");
+
     DISC_LOGI(DISC_INIT, "disc event manager init succ");
     return SOFTBUS_OK;
 }
@@ -46,5 +49,6 @@ void DiscEventManagerDeinit(void)
     DiscTouchBleEventDeinitPacked();
     DiscOopBleEventDeinitPacked();
     DiscPcCollaborationEventDeinitPacked();
+    DiscShareNfcEventDeinitPacked();
 }
 

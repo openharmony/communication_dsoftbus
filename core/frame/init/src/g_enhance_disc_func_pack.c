@@ -469,6 +469,42 @@ void DiscOopBleEventDeinitPacked(void)
     return pfnDiscEnhanceFuncList->discOopBleEventDeinit();
 }
 
+int32_t DiscShareNfcEventInitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discShareNfcEventInit) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnDiscEnhanceFuncList->discShareNfcEventInit();
+}
+
+void DiscShareNfcEventDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discShareNfcEventDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->discShareNfcEventDeinit();
+}
+
+DiscoveryNfcDispatcherInterface *DiscShareNfcInitPacked(DiscInnerCallback *discInnerCb)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discShareNfcInit) != SOFTBUS_OK) {
+        return NULL;
+    }
+    return pfnDiscEnhanceFuncList->discShareNfcInit(discInnerCb);
+}
+
+void DiscShareNfcDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    if (DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discShareNfcDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnDiscEnhanceFuncList->discShareNfcDeinit();
+}
+
 static int32_t UsbDiscStartActivePublish(const PublishOption *option)
 {
     (void)option;

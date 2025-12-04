@@ -64,6 +64,8 @@ HWTEST_F(DiscLogTest, DiscLogTest001, TestSize.Level0)
         DISC_EVENT, ++discDomainBase, "DiscEvent"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
         DISC_VIRLINK, ++discDomainBase, "DiscVirLink"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
+        DISC_NFC, 0xd0057a8, "DiscNfc"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_TEST, DOMAIN_ID_TEST, "DiscTest"));
 }
 

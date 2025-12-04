@@ -867,7 +867,28 @@ int32_t DiscFillBtypeStub(uint32_t capability, uint32_t allCap, NSTACKX_Discover
     (void)discSet;
     return SOFTBUS_OK;
 }
- 
+
+int32_t DiscShareNfcEventInitStub(void)
+{
+    return SOFTBUS_OK;
+}
+
+void DiscShareNfcEventDeinitStub(void)
+{
+    return;
+}
+
+DiscoveryNfcDispatcherInterface *DiscShareNfcInitStub(DiscInnerCallback *discCb)
+{
+    (void)discCb;
+    return NULL;
+}
+
+void DiscShareNfcDeinitStub(void)
+{
+    return;
+}
+
 /*
  * @tc.name: SoftbusGEnhanceTest029
  * @tc.desc: SoftbusGEnhanceTest function test
@@ -1030,5 +1051,40 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest031, TestSize.Level1)
 
     ret = AuthMetaGetMetaNodeIdByIpPacked("44:33:22", sleMac, BT_MAC_LEN);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest032
+ * @tc.desc: SoftbusGEnhanceTest function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest032, TestSize.Level1)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    pfnDiscEnhanceFuncList->discShareNfcEventInit = nullptr;
+    uint32_t ret = DiscShareNfcEventInitPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    pfnDiscEnhanceFuncList->discShareNfcEventInit = DiscShareNfcEventInitStub;
+    ret = DiscShareNfcEventInitPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    pfnDiscEnhanceFuncList->discShareNfcEventDeinit = nullptr;
+    DiscShareNfcEventDeinitPacked();
+    pfnDiscEnhanceFuncList->discShareNfcEventDeinit = DiscShareNfcEventDeinitStub;
+    DiscShareNfcEventDeinitPacked();
+
+    pfnDiscEnhanceFuncList->discShareNfcInit = nullptr;
+    DiscInnerCallback discCb = {0};
+    DiscoveryNfcDispatcherInterface *ret1 = DiscShareNfcInitPacked(&discCb);
+    EXPECT_EQ(ret1, NULL);
+    pfnDiscEnhanceFuncList->discShareNfcInit = DiscShareNfcInitStub;
+    ret1 = DiscShareNfcInitPacked(&discCb);
+    EXPECT_EQ(ret1, NULL);
+
+    pfnDiscEnhanceFuncList->discShareNfcDeinit = nullptr;
+    DiscShareNfcDeinitPacked();
+    pfnDiscEnhanceFuncList->discShareNfcDeinit = DiscShareNfcDeinitStub;
+    DiscShareNfcDeinitPacked();
 }
 }

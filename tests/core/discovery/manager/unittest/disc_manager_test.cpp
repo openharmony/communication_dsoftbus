@@ -444,6 +444,10 @@ HWTEST_F(DiscManagerTest, DiscPublishTest006, TestSize.Level1)
     discPublishTestAbstractInfo001.medium = COAP;
     DiscPublishTestAbstract001(MODULE_LNN, &discPublishTestAbstractInfo001);
     DiscPublishTestAbstract001(MODULE_CONN, &discPublishTestAbstractInfo001);
+
+    discPublishTestAbstractInfo001.medium = NFC;
+    DiscPublishTestAbstract001(MODULE_LNN, &discPublishTestAbstractInfo001);
+    DiscPublishTestAbstract001(MODULE_CONN, &discPublishTestAbstractInfo001);
 }
 
 PublishInfo discPublishTestAbstractInfo002 = { .publishId = TEST_PUBLISHINNER_ID,
@@ -490,6 +494,9 @@ HWTEST_F(DiscManagerTest, DiscPublishTest007, TestSize.Level1)
     DiscPublishTestAbstract002(MODULE_LNN, &discPublishTestAbstractInfo002);
 
     discPublishTestAbstractInfo002.medium = BLE;
+    DiscPublishTestAbstract002(MODULE_LNN, &discPublishTestAbstractInfo002);
+
+    discPublishTestAbstractInfo002.medium = NFC;
     DiscPublishTestAbstract002(MODULE_LNN, &discPublishTestAbstractInfo002);
 
     discPublishTestAbstractInfo002.medium = AUTO;
@@ -653,6 +660,9 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest006, TestSize.Level1)
 
     discStartScanTestAbstractInfo001.medium = BLE;
     DiscStartScanTestAbstract001(MODULE_LNN, &discStartScanTestAbstractInfo001, (DiscModule)TEST_ERRO_MOUDULE2);
+
+    discStartScanTestAbstractInfo001.medium = NFC;
+    DiscStartScanTestAbstract001(MODULE_LNN, &discStartScanTestAbstractInfo001, (DiscModule)TEST_ERRO_MOUDULE2);
 }
 
 /*
@@ -796,6 +806,9 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest005, TestSize.Level1)
     discStartAdvertiseTestAbstractInfo001.medium = BLE;
     DiscStartAdvertiseTestAbstract001(MODULE_LNN, &discStartAdvertiseTestAbstractInfo001);
 
+    discStartAdvertiseTestAbstractInfo001.medium = NFC;
+    DiscStartAdvertiseTestAbstract001(MODULE_LNN, &discStartAdvertiseTestAbstractInfo001);
+
     discStartAdvertiseTestAbstractInfo001.medium = AUTO;
     DiscStartAdvertiseTestAbstract001(MODULE_LNN, &discStartAdvertiseTestAbstractInfo001);
 
@@ -867,6 +880,10 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest006, TestSize.Level1)
     DiscStartAdvertiseTestAbstract002(MODULE_CONN, &discStartAdvertiseTestAbstractInfo002);
 
     discStartAdvertiseTestAbstractInfo002.medium = COAP;
+    DiscStartAdvertiseTestAbstract002(MODULE_LNN, &discStartAdvertiseTestAbstractInfo002);
+    DiscStartAdvertiseTestAbstract002(MODULE_CONN, &discStartAdvertiseTestAbstractInfo002);
+
+    discStartAdvertiseTestAbstractInfo002.medium = NFC;
     DiscStartAdvertiseTestAbstract002(MODULE_LNN, &discStartAdvertiseTestAbstractInfo002);
     DiscStartAdvertiseTestAbstract002(MODULE_CONN, &discStartAdvertiseTestAbstractInfo002);
 }
@@ -1027,6 +1044,9 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest006, TestSize.Level1)
     DiscSubscribeTestAbstract001(MODULE_LNN, &discSubscribeTestAbstractInfo001);
 
     discSubscribeTestAbstractInfo001.medium = AUTO;
+    DiscSubscribeTestAbstract001(MODULE_LNN, &discSubscribeTestAbstractInfo001);
+
+    discSubscribeTestAbstractInfo001.medium = NFC;
     DiscSubscribeTestAbstract001(MODULE_LNN, &discSubscribeTestAbstractInfo001);
 
     discSubscribeTestAbstractInfo001.medium = COAP;
@@ -1191,6 +1211,10 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest007, TestSize.Level1)
     DiscUnpublishTestAbstract001(MODULE_CONN, &discUnpublishTestAbstractInfo001);
 
     discUnpublishTestAbstractInfo001.medium = COAP;
+    DiscUnpublishTestAbstract001(MODULE_LNN, &discUnpublishTestAbstractInfo001);
+    DiscUnpublishTestAbstract001(MODULE_LNN, &discUnpublishTestAbstractInfo001);
+
+    discUnpublishTestAbstractInfo001.medium = NFC;
     DiscUnpublishTestAbstract001(MODULE_LNN, &discUnpublishTestAbstractInfo001);
     DiscUnpublishTestAbstract001(MODULE_LNN, &discUnpublishTestAbstractInfo001);
 }
@@ -1634,6 +1658,44 @@ HWTEST_F(DiscManagerTest, PublishServiceTest008, TestSize.Level1)
 
     publishServiceTestAbstractInfo.mode = DISCOVER_MODE_ACTIVE;
     PublishServiceTestAbstract001(&publishServiceTestAbstractInfo);
+
+    publishServiceTestAbstractInfo.mode = DISCOVER_MODE_ACTIVE;
+    publishServiceTestAbstractInfo.medium = NFC;
+    PublishServiceTestAbstract001(&publishServiceTestAbstractInfo);
+ 
+    publishServiceTestAbstractInfo.mode = DISCOVER_MODE_ACTIVE;
+    PublishServiceTestAbstract001(&publishServiceTestAbstractInfo);
+}
+
+/**
+ * @tc.name: PublishServiceTest009
+ * @tc.desc: Test extern module active publish, use wrong Medium and Freq Under the NFC.
+ * @tc.type: FUNC
+ * @tc.require: The DiscPublishService operates normally.
+ */
+HWTEST_F(DiscManagerTest, PublishServiceTest009, TestSize.Level1)
+{
+    PublishInfo testInfo = { .publishId = TEST_PUBLISH_ID,
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = NFC,
+        .freq = MID,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = sizeof("capdata2") };
+ 
+    DiscMgrInit();
+ 
+    testInfo.medium = (ExchangeMedium)(AUTO - 1);
+    int32_t ret = DiscPublishService("pkgname1", &testInfo, 0);
+    TEST_ASSERT_TRUE(ret != 0);
+    testInfo.medium = COAP;
+ 
+    testInfo.freq = (ExchangeFreq)(LOW - 1);
+    ret = DiscPublishService("pkgname1", &testInfo, 0);
+    TEST_ASSERT_TRUE(ret != 0);
+    testInfo.freq = LOW;
+ 
+    DiscMgrDeinit();
 }
 
 /*
@@ -1795,6 +1857,9 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest005, TestSize.Level1)
     startDiscoveryTestAbstractInfo002.medium = BLE;
     StartDiscoveryTestAbstract002(&startDiscoveryTestAbstractInfo002);
 
+    startDiscoveryTestAbstractInfo002.medium = NFC;
+    StartDiscoveryTestAbstract002(&startDiscoveryTestAbstractInfo002);
+
     startDiscoveryTestAbstractInfo002.medium = AUTO;
     StartDiscoveryTestAbstract002(&startDiscoveryTestAbstractInfo002);
 }
@@ -1862,11 +1927,20 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest006, TestSize.Level1)
     startDiscoveryTestAbstractInfo001.medium = BLE;
     StartDiscoveryTestAbstract001(&startDiscoveryTestAbstractInfo001);
 
+    startDiscoveryTestAbstractInfo001.medium = NFC;
+    StartDiscoveryTestAbstract001(&startDiscoveryTestAbstractInfo001);
+
     startDiscoveryTestAbstractInfo001.mode = DISCOVER_MODE_PASSIVE;
     startDiscoveryTestAbstractInfo001.medium = COAP;
     StartDiscoveryTestAbstract001(&startDiscoveryTestAbstractInfo001);
 
     startDiscoveryTestAbstractInfo001.medium = BLE;
+    StartDiscoveryTestAbstract001(&startDiscoveryTestAbstractInfo001);
+
+    startDiscoveryTestAbstractInfo001.medium = COAP;
+    StartDiscoveryTestAbstract001(&startDiscoveryTestAbstractInfo001);
+ 
+    startDiscoveryTestAbstractInfo001.medium = NFC;
     StartDiscoveryTestAbstract001(&startDiscoveryTestAbstractInfo001);
 
     startDiscoveryTestAbstractInfo001.mode = DISCOVER_MODE_ACTIVE;
@@ -2167,7 +2241,12 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest005, TestSize.Level1)
     stopDiscoveryTestAbstractInfo001.mode = DISCOVER_MODE_PASSIVE;
     StopDiscoveryTestAbstract001(&stopDiscoveryTestAbstractInfo001);
 
+    stopDiscoveryTestAbstractInfo001.medium = NFC;
+    StopDiscoveryTestAbstract001(&stopDiscoveryTestAbstractInfo001);
+
     stopDiscoveryTestAbstractInfo001.mode = DISCOVER_MODE_ACTIVE;
+    StopDiscoveryTestAbstract001(&stopDiscoveryTestAbstractInfo001);
+
     stopDiscoveryTestAbstractInfo001.medium = AUTO;
     StopDiscoveryTestAbstract001(&stopDiscoveryTestAbstractInfo001);
 

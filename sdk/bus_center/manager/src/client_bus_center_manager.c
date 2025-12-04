@@ -74,6 +74,7 @@ typedef struct {
     int32_t nodeStateCbListCnt;
     IPublishCb publishCb;
     IRefreshCallback refreshCb;
+    IRefreshCallback refreshNfcCb;
     IDataLevelCb dataLevelCb;
     IRangeCallback rangeCb;
     GroupOwnerDestroyListener groupOwnerDestroyCb;
@@ -98,6 +99,8 @@ static BusCenterClient g_busCenterClient = {
     .publishCb.OnPublishResult = NULL,
     .refreshCb.OnDeviceFound = NULL,
     .refreshCb.OnDiscoverResult = NULL,
+    .refreshNfcCb.OnDeviceFound = NULL,
+    .refreshNfcCb.OnDiscoverResult = NULL,
     .dataLevelCb.onDataLevelChanged = NULL,
     .isInit = false,
     .rangeCb.onRangeResult = NULL,
@@ -1149,7 +1152,15 @@ int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId)
 
 int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
 {
-    g_busCenterClient.refreshCb = *cb;
+    if (info == NULL || info->capability == NULL || strlen(info->capability) == 0) {
+        LNN_LOGE(LNN_STATE, "param is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(g_capabilityMap[NFC_SHARE_CAPABILITY_BITMAP].capability, info->capability) == 0) {
+        g_busCenterClient.refreshNfcCb = *cb;
+    } else {
+        g_busCenterClient.refreshCb = *cb;
+    }
     int32_t ret = ServerIpcRefreshLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server RefreshLNNInner failed, ret=%{public}d", ret);
@@ -1642,8 +1653,13 @@ void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
 
 void LnnOnRefreshDeviceFound(const void *device)
 {
-    if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
-        g_busCenterClient.refreshCb.OnDeviceFound((const DeviceInfo *)device);
+    const DeviceInfo *deviceInfo = (const DeviceInfo *)device;
+    if ((deviceInfo != NULL) && (deviceInfo->capabilityBitmap[0] & (1U << NFC_SHARE_CAPABILITY_BITMAP)) != 0) {
+        if (g_busCenterClient.refreshNfcCb.OnDeviceFound != NULL) {
+            g_busCenterClient.refreshNfcCb.OnDeviceFound(deviceInfo);
+        }
+    } else if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
+        g_busCenterClient.refreshCb.OnDeviceFound(deviceInfo);
     }
 }
 
