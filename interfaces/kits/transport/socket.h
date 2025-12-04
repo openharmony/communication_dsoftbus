@@ -240,7 +240,7 @@ typedef struct {
     void (*OnMessageSent)(int32_t socket, uint16_t dataSeq, int32_t errCode);
 
     /**
-     * @brief Called when the multi path state is switching.
+     * @brief Called when .
      *
      * This callback is invoked to notify that data is received.
      *
@@ -252,7 +252,7 @@ typedef struct {
      * @since 2.0
      * @version 2.0
      */
-    void (*OnEvent)(int32_t socket, MultiPathEventType eventType, const void *eventData, uint32_t dataLen);
+    void (*OnEvent)(int32_t socket, SocketEventType eventType, const void *eventData, uint32_t dataLen);
 
     /**
      * @brief Called when a socket is bind.
