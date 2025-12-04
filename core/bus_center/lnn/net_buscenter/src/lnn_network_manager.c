@@ -57,8 +57,10 @@
 #define LNN_DEFAULT_IF_NAME_USB_WWAN  "wwan0"
 
 #define LNN_CHECK_OOBE_DELAY_LEN        (5 * 60 * 1000LL)
+#define LNN_CHECK_OOBE_DELAY_LEN_MIN    (5 * 1000LL)
 #define LNN_RESTART_DISCOVERY_DELAY_LEN (5 * 1000LL)
 
+static uint32_t RETRY_COUNT = 10;
 static SoftBusMutex g_dataShareLock;
 static bool g_isDataShareInit = false;
 
@@ -421,15 +423,19 @@ static void NetOOBEStateEventHandler(const LnnEventBasicInfo *info)
 static void RetryCheckOOBEState(void *para)
 {
     (void)para;
+    static uint32_t g_count = 0;
 
     if (!IsOOBEState()) {
+        g_count = 0;
         LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
         LnnNotifyOOBEStateChangeEvent(SOFTBUS_OOBE_END);
         LnnNotifyDeviceRiskStateChangeEvent();
     } else {
+        uint64_t delayTime = (g_count >= RETRY_COUNT) ? LNN_CHECK_OOBE_DELAY_LEN : LNN_CHECK_OOBE_DELAY_LEN_MIN;
         LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay. delay=%{public}" PRIu64 "ms",
-            (uint64_t)LNN_CHECK_OOBE_DELAY_LEN);
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryCheckOOBEState, NULL, LNN_CHECK_OOBE_DELAY_LEN);
+            (uint64_t)delayTime);
+        g_count++;
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryCheckOOBEState, NULL, delayTime);
     }
 }
 
