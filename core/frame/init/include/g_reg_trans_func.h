@@ -100,6 +100,7 @@ typedef void (*TransGetTokenInfoFunc)(uint64_t callingId, char *tokenName, int32
 typedef int32_t (*TransGetWakeUpInfoFunc)(
     int32_t channelType, int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp);
 typedef int32_t (*TransSetWakeUpInfoFunc)(int32_t channelType, int32_t channelId, bool needFastWakeUp);
+typedef int32_t (*LoadRpcPermissionJsonFunc)(const char *fileName);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -154,6 +155,7 @@ typedef struct TagTransOpenFuncList {
     TransGetTokenInfoFunc transGetTokenInfo;
     TransGetWakeUpInfoFunc transGetWakeUpInfo;
     TransSetWakeUpInfoFunc transSetWakeUpInfo;
+    LoadRpcPermissionJsonFunc loadRpcPermissionJson;
 } TransOpenFuncList;
 
 #ifdef __cplusplus

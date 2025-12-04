@@ -374,5 +374,19 @@ bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
     }
     return false;
 }
+
+// only native services can be called.
+int32_t SoftBusGetNativeProcessName(uint64_t tokenId, char *processName, int32_t processNameLen)
+{
+    COMM_CHECK_AND_RETURN_RET_LOGE(processName != NULL, SOFTBUS_INVALID_PARAM, COMM_ADAPTER, "invalid param");
+    NativeTokenInfo tokenInfo;
+    int32_t ret = AccessTokenKit::GetNativeTokenInfo(tokenId, tokenInfo);
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        ret == RET_SUCCESS, SOFTBUS_PERMISSION_DENIED, COMM_ADAPTER, "get tokenInfo fail");
+
+    ret = strcpy_s(processName, processNameLen, tokenInfo.processName.c_str());
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, COMM_ADAPTER, "copy processName fail");
+    return SOFTBUS_OK;
+}
 }
 } // namespace OHOS

@@ -54,6 +54,7 @@ bool SoftBusCheckIsAccess(void);
 bool SoftBusSaCanUseDeviceKey(uint64_t tokenId);
 bool SoftBusCheckIsSystemAppByUid(uint64_t tokenId, pid_t uid);
 bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName);
+int32_t SoftBusGetNativeProcessName(uint64_t tokenId, char *processName, int32_t processNameLen);
 #ifdef __cplusplus
 #if __cplusplus
 }

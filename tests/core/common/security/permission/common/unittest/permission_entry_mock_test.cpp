@@ -24,6 +24,8 @@
 using namespace testing::ext;
 
 namespace {
+constexpr int32_t TEST_UID = 4321;
+
 struct PermissionParam {
     int32_t permType;
     int32_t uid;
@@ -39,7 +41,7 @@ static int32_t TestCheckPermissionEntry(const PermissionParam &param)
         CreatePermissionItem(param.permType, param.uid, param.pid, param.pkgName, param.actions);
     COMM_CHECK_AND_RETURN_RET_LOGE(permItem != nullptr, SOFTBUS_MALLOC_ERR, COMM_TEST, "create perm item failed");
 
-    int32_t ret = CheckPermissionEntry(param.sessionName, permItem);
+    int32_t ret = CheckPermissionEntry(param.sessionName, permItem, false);
     SoftBusFree(permItem);
     return ret;
 }
@@ -182,5 +184,117 @@ HWTEST_F(PermissionEntryMockTest, TestCheckPermissionEntry002, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
 
     DeinitPermissionJson();
+}
+
+/*
+ * @tc.name: LoadRpcPermissionJson001
+ * @tc.desc: LoadRpcPermissionJson test invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson001, TestSize.Level0)
+{
+    DeinitRpcSaPermissionJson();
+    int32_t ret = SOFTBUS_OK;
+    ret = LoadRpcPermissionJson(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    DeinitRpcSaPermissionJson();
+}
+
+/*
+ * @tc.name: LoadRpcPermissionJson002
+ * @tc.desc: LoadRpcPermissionJson test valid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson002, TestSize.Level0)
+{
+    const char *permConfig = R"([{
+        "PROCESS_NAME": "testProcessName",
+        "SA_ID": "1234",
+        "SA_UID": "4321"
+    }])";
+    int32_t ret = LoadRpcPermissionJson(permConfig);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeinitRpcSaPermissionJson();
+}
+
+/*
+ * @tc.name: LoadRpcPermissionJson003
+ * @tc.desc: LoadRpcPermissionJson test invalid SA_UID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson003, TestSize.Level0)
+{
+    const char *permConfig = R"([{
+        "PROCESS_NAME": "testProcessName",
+        "SA_ID": "1234",
+    }])";
+    int32_t ret = LoadRpcPermissionJson(permConfig);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    DeinitRpcSaPermissionJson();
+}
+
+/*
+ * @tc.name: LoadRpcPermissionJson004
+ * @tc.desc: LoadRpcPermissionJson test invalid format
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson004, TestSize.Level0)
+{
+    const char *permConfig = R"([{
+        "PROCESS_NAME": "testProcessName",
+        "SA_ID": "1234",
+    )";
+    int32_t ret = LoadRpcPermissionJson(permConfig);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    DeinitRpcSaPermissionJson();
+}
+
+/*
+ * @tc.name: CheckRpcPermissionEntryTest001
+ * @tc.desc: test invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryMockTest, CheckRpcPermissionEntryTest001, TestSize.Level1)
+{
+    int32_t ret = CheckRpcPermissionEntry(0, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    char testSessionName[] = "testSessionName";
+    ret = CheckRpcPermissionEntry(0, testSessionName, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CheckRpcPermissionEntryTest002
+ * @tc.desc: test invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryMockTest, CheckRpcPermissionEntryTest002, TestSize.Level1)
+{
+    const char *permConfig = R"([{
+        "PROCESS_NAME": "testProcessName",
+        "SA_ID": "1234",
+        "SA_UID": "4321"
+    }])";
+    int32_t ret = LoadRpcPermissionJson(permConfig);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    char testSessionName[] = "testSessionName";
+    char testProcessName[] = "testProcessName";
+    ret = CheckRpcPermissionEntry(TEST_UID, testSessionName, testProcessName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = CheckRpcPermissionEntry(0, testSessionName, testProcessName);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+
+    ret = CheckRpcPermissionEntry(TEST_UID, testProcessName, testSessionName);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    DeinitRpcSaPermissionJson();
 }
 } // namespace OHOS

@@ -33,6 +33,7 @@
 namespace {
     const char *PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_trans_permission.json";
     const char *LNN_PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_lnn_permission.json";
+    const char *RPC_SA_PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_rpc_sa_permission.json";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
 }
@@ -49,12 +50,17 @@ int32_t TransPermissionInit(void)
         COMM_LOGI(COMM_PERM, "load trans permission json fail");
         return ret;
     }
+    ret = LoadRpcPermissionJson(RPC_SA_PERMISSION_JSON_FILE);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGW(COMM_PERM, "load rpc sa permission json fail");
+    }
     return InitDynamicPermission();
 }
 
 void TransPermissionDeinit(void)
 {
     DeinitPermissionJson();
+    DeinitRpcSaPermissionJson();
 }
 
 int32_t CheckLnnPermission(const char *interfaceName, const char *processName)
@@ -96,11 +102,28 @@ int32_t CheckTransPermission(
         COMM_LOGI(COMM_PERM, "pItem is null");
         return SOFTBUS_MALLOC_ERR;
     }
-    int32_t ret = CheckPermissionEntry(sessionName, pItem);
+    bool isDynamicPermission = CheckDBinder(sessionName);
+    int32_t ret = SOFTBUS_OK;
+    if (isDynamicPermission && SoftBusCheckIsSystemService(callingFullTokenId)) {
+        char processName[PROCESS_NAME_SIZE_MAX] = { 0 };
+        ret = SoftBusGetNativeProcessName(callingFullTokenId, processName, PROCESS_NAME_SIZE_MAX);
+        if (ret != SOFTBUS_OK) {
+            COMM_LOGE(COMM_PERM, "get process name fail.");
+            SoftBusFree(pItem);
+            goto EXIT_ERR;
+        }
+        ret = CheckRpcPermissionEntry(callingUid, sessionName, processName);
+        if (ret != SOFTBUS_OK) {
+            SoftBusFree(pItem);
+            goto EXIT_ERR;
+        }
+    }
+    ret = CheckPermissionEntry(sessionName, pItem, isDynamicPermission);
     SoftBusFree(pItem);
     if (ret >= SYSTEM_APP) {
         return SOFTBUS_OK;
     }
+EXIT_ERR:
     Anonymize(sessionName, &tmpName);
     COMM_LOGE(COMM_PERM, "permission denied, permType=%{public}d, ret=%{public}d, sessionName=%{public}s, \
         callingUid=%{public}d, callingPid=%{public}d", permType, ret, tmpName, callingUid, callingPid);
