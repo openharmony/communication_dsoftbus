@@ -691,27 +691,23 @@ static bool IsDeviceStrLenValid(uint32_t strLen)
         strLen == SPARK_CHECK_STR_LEN);
 }
 
-static int32_t CheckDeviceStrValid(const char *deviceStr, uint32_t strLen, uint32_t defaultLen, bool *isValidStr)
+static int32_t CheckDeviceStrValid(const char *deviceStr, uint32_t strLen, char **anonymizedStr)
 {
-    unsigned char *emptyByte = (unsigned char *)SoftBusCalloc(defaultLen);
-    if (emptyByte == NULL) {
-        LNN_LOGE(LNN_LEDGER, "calloc emptyByte fail");
-        return SOFTBUS_MALLOC_ERR;
-    }
     char *emptyStr = (char *)SoftBusCalloc(strLen);
     if (emptyStr == NULL) {
         LNN_LOGE(LNN_LEDGER, "calloc emptyStr fail");
-        SoftBusFree(emptyByte);
         return SOFTBUS_MALLOC_ERR;
     }
-    if (ConvertBytesToHexString(emptyStr, strLen, emptyByte, defaultLen) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
-        SoftBusFree(emptyByte);
+    if (memset_s(emptyStr, strLen - 1, '0', strLen - 1) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memset emptyStr fail");
         SoftBusFree(emptyStr);
-        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+        return SOFTBUS_MEM_ERR;
     }
-    SoftBusFree(emptyByte);
-    *isValidStr = (memcmp(deviceStr, emptyStr, strLen) != 0);
+    if (strcmp(deviceStr, emptyStr) == 0) {
+        Anonymize(deviceStr, anonymizedStr);
+        SoftBusFree(emptyStr);
+        return SOFTBUS_INVALID_PARAM;
+    }
     SoftBusFree(emptyStr);
     return SOFTBUS_OK;
 }
@@ -723,14 +719,9 @@ void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defa
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return;
     }
-    bool isValidStr = false;
-    int32_t ret = CheckDeviceStrValid(deviceStr, strLen, defaultLen, &isValidStr);
+    int32_t ret = CheckDeviceStrValid(deviceStr, strLen, anonymizedStr);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "check invalid str fail, ret=%{public}d.", ret);
-        return;
-    }
-    if (!isValidStr) {
-        Anonymize(deviceStr, anonymizedStr);
+        LNN_LOGE(LNN_LEDGER, "check valid str fail, ret=%{public}d.", ret);
         return;
     }
     uint8_t strHash[SHA_256_HASH_LEN] = { 0 };
