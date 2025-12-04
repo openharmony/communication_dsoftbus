@@ -59,7 +59,7 @@ HWTEST_F(PermissionEntryTest, StrIsEmptyTest001, TestSize.Level0)
     const char *sessionName = "";
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
     ASSERT_TRUE(pItem != nullptr);
-    ret = CheckPermissionEntry(sessionName, pItem);
+    ret = CheckPermissionEntry(sessionName, pItem, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -91,25 +91,25 @@ HWTEST_F(PermissionEntryTest, CheckPermissionEntryTest001, TestSize.Level0)
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
     ASSERT_TRUE(pItem != nullptr);
 
-    ret = CheckPermissionEntry(nullptr, pItem);
+    ret = CheckPermissionEntry(nullptr, pItem, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = CheckPermissionEntry(g_sessionName, nullptr);
+    ret = CheckPermissionEntry(g_sessionName, nullptr, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pItem->permType = NATIVE_APP;
-    ret = CheckPermissionEntry(sessionName, nullptr);
+    ret = CheckPermissionEntry(sessionName, nullptr, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pItem->permType = NORMAL_APP;
     pItem->actions = ACTION_CREATE;
     pItem->pkgName = nullptr;
 
-    ret = CheckPermissionEntry(sessionName, pItem);
+    ret = CheckPermissionEntry(sessionName, pItem, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pItem->pkgName = sessionName;
-    ret = CheckPermissionEntry(sessionNameNormal, pItem);
+    ret = CheckPermissionEntry(sessionNameNormal, pItem, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

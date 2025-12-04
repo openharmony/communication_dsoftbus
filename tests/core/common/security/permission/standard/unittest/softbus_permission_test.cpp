@@ -86,6 +86,22 @@ HWTEST_F(SoftbusPermissionTest, CheckTransPermissionTest001, TestSize.Level0)
 }
 
 /*
+ * @tc.name: CheckTransPermissionTest002
+ * @tc.desc: check trans permission test, use the valid parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, CheckTransPermissionTest002, TestSize.Level0)
+{
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    char testSessionName[] = "testSessionName";
+    char testPkgName[] = "testPkgName";
+    int32_t ret = CheckTransPermission(callingUid, callingPid, testPkgName, testSessionName, ACTION_OPEN);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+}
+
+/*
  * @tc.name: CheckTransSecLevelTest001
  * @tc.desc: check trans sec level test, use the wrong or normal parameter
  * @tc.type: FUNC
@@ -484,5 +500,32 @@ HWTEST_F(SoftbusPermissionTest, LnnInitPermissionTest001, TestSize.Level1)
 {
     int32_t ret = LnnInitPermission();
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SoftBusGetNativeProcessNameTest001
+ * @tc.desc: SoftBusGetNativeProcessName func test invalid tokenId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, SoftBusGetNativeProcessNameTest001, TestSize.Level1)
+{
+    char processName[PROCESS_NAME_SIZE_MAX] = { 0 };
+    uint64_t tokenId = 0;
+    int32_t ret = SoftBusGetNativeProcessName(tokenId, processName, PROCESS_NAME_SIZE_MAX);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+}
+
+/*
+ * @tc.name: SoftBusGetNativeProcessNameTest002
+ * @tc.desc: SoftBusGetNativeProcessName func test invalid processName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, SoftBusGetNativeProcessNameTest002, TestSize.Level1)
+{
+    uint64_t tokenId = 0;
+    int32_t ret = SoftBusGetNativeProcessName(tokenId, nullptr, PROCESS_NAME_SIZE_MAX);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

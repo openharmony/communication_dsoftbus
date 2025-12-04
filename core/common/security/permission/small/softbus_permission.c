@@ -96,7 +96,8 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     if (pItem == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    int32_t ret = CheckPermissionEntry(sessionName, pItem);
+    bool isDynamicPermission = CheckDBinder(sessionName);
+    int32_t ret = CheckPermissionEntry(sessionName, pItem, isDynamicPermission);
     SoftBusFree(pItem);
     if (ret >= SYSTEM_APP) {
         return SOFTBUS_OK;

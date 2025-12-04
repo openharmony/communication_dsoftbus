@@ -372,4 +372,93 @@ HWTEST_F(PermissionEntrystaticTest, DynamicPermissionTest001, TestSize.Level1)
     ret = DeleteDynamicPermission(sessionName);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: ProcessRpcSaPermissionEntry001
+ * @tc.desc: ProcessRpcSaPermissionEntry test null param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry001, TestSize.Level0)
+{
+    RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(nullptr);
+    EXPECT_TRUE(ret == NULL);
+}
+
+/*
+ * @tc.name: ProcessRpcSaPermissionEntry002
+ * @tc.desc: ProcessRpcSaPermissionEntry test vaild param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry002, TestSize.Level0)
+{
+    const char *permConfig = R"([{
+        "PROCESS_NAME": "testProcessName",
+        "SA_ID": "1234",
+        "SA_UID": "4321"
+    }])";
+    cJSON *msg = cJSON_Parse(permConfig);
+    cJSON *object = cJSON_GetArrayItem(msg, 0);
+    RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
+    EXPECT_FALSE(ret == NULL);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: ProcessRpcSaPermissionEntry003
+ * @tc.desc: test without PROCESS_NAME
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry003, TestSize.Level0)
+{
+    const char *permConfig = R"([{
+        "SA_ID": "1234",
+        "SA_UID": "4312"
+    }])";
+    cJSON *msg = cJSON_Parse(permConfig);
+    cJSON *object = cJSON_GetArrayItem(msg, 0);
+    RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
+    EXPECT_TRUE(ret == NULL);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: ProcessRpcSaPermissionEntry004
+ * @tc.desc: test without SA_ID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry004, TestSize.Level0)
+{
+    const char *permConfig = R"([{
+        "PROCESS_NAME": "testProcessName",
+        "SA_UID": "4312"
+    }])";
+    cJSON *msg = cJSON_Parse(permConfig);
+    cJSON *object = cJSON_GetArrayItem(msg, 0);
+    RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
+    EXPECT_TRUE(ret == NULL);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: ProcessRpcSaPermissionEntry005
+ * @tc.desc: test without SA_UID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry005, TestSize.Level0)
+{
+    const char *permConfig = R"([{
+        "PROCESS_NAME": "testProcessName",
+        "SA_ID": "1234"
+    }])";
+    cJSON *msg = cJSON_Parse(permConfig);
+    cJSON *object = cJSON_GetArrayItem(msg, 0);
+    RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
+    EXPECT_TRUE(ret == NULL);
+    cJSON_Delete(msg);
+}
 } // namespace OHOS
