@@ -189,8 +189,12 @@ static void AccountUpdateProcess(uint8_t *localAccountHash, uint8_t *accountHash
     }
 }
 
-static int32_t GenerateDefaultAccountStrHash(unsigned char *accountHash)
+static int32_t GenerateDefaultAccountStrHash(unsigned char *accountHash, uint32_t len)
 {
+    if (len != SHA_256_HASH_LEN) {
+        LNN_LOGE(LNN_STATE, "get invalid param length");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
         DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash));
     if (ret != SOFTBUS_OK) {
@@ -214,7 +218,7 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     if (LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGW(LNN_STATE, "OnAccountChanged get account account hash fail");
         isDefaultAccount = true;
-        if (GenerateDefaultAccountStrHash(accountHash) != SOFTBUS_OK) {
+        if (GenerateDefaultAccountStrHash(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
             return;
         }
     }
@@ -225,7 +229,7 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
         return;
     }
     if (!IsSameAccountGroupDevice() && !isDefaultAccount) {
-        if (GenerateDefaultAccountStrHash(accountHash) != SOFTBUS_OK) {
+        if (GenerateDefaultAccountStrHash(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
             return;
         }
         AccountUpdateProcess(localAccountHash, accountHash, accountId, reason);
