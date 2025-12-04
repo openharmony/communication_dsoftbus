@@ -285,20 +285,22 @@ static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen,
     uint64_t startTimestamp, uint64_t endTimestamp)
 {
     #define DATA_LEN_1M (1 * 1024 * 1024) // 1MB
+    #define DATA_LEN_4M (4 * 1024 * 1024) // 4MB
     #define SEC_TO_MILLISEC (1000)
-    if (dataLen < DATA_LEN_1M) {
+    if (dataLen < DATA_LEN_1M || dataLen > DATA_LEN_4M) {
         return;
     }
     uint64_t useTime = startTimestamp > endTimestamp ?
         (UINT64_MAX - startTimestamp + endTimestamp):(endTimestamp - startTimestamp);
-    if (useTime == 0) {
+    if (useTime == 0 || useTime > (UINT64_MAX >> 20)) { // 20: Preevent overflow when DATA_LEN_1M * useTime
         return;
     }
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     extra.channelId = channelId;
     extra.dataLen = dataLen;
-    extra.bytesRate = (dataLen * SEC_TO_MILLISEC)/(DATA_LEN_1M * useTime);
+    uint64_t tempDataLen = (uint64_t)dataLen;
+    extra.bytesRate = (tempDataLen * SEC_TO_MILLISEC)/(DATA_LEN_1M * useTime);
     TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
 }
 
