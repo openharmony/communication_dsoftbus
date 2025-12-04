@@ -280,9 +280,9 @@ int32_t TransDelUdpChannel(int32_t channelId)
             }
             (void)memset_s(udpChannelNode->info.sessionKey, sizeof(udpChannelNode->info.sessionKey), 0,
                 sizeof(udpChannelNode->info.sessionKey));
+            UdpChannelStatistic(udpChannelNode, false);
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
-            UdpChannelStatistic(udpChannelNode, false);
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
         }
