@@ -25,6 +25,7 @@
 #include "disc_manager.h"
 #include "softbus_error_code.h"
 #include "usb_mock.h"
+#include "nfc_mock.h"
 
 using namespace testing::ext;
 using testing::Return;
@@ -74,6 +75,8 @@ public:
         coapMock.SetupStub();
         UsbMock usbMock;
         usbMock.SetupStub();
+        NfcMock nfcMock;
+        nfcMock.SetupStub();
         EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
     }
 
@@ -85,6 +88,8 @@ public:
         coapMock.SetupStub();
         UsbMock usbMock;
         usbMock.SetupStub();
+        NfcMock nfcMock;
+        nfcMock.SetupStub();
         DiscMgrDeinit();
     }
 
@@ -135,6 +140,9 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
     UsbMock usbMock;
     usbMock.SetupStub();
     EXPECT_CALL(usbMock, DiscUsbDispatcherInit).WillRepeatedly(Return(nullptr));
+    NfcMock nfcMock;
+    nfcMock.SetupStub();
+    EXPECT_CALL(nfcMock, DiscNfcDispatcherInit).WillRepeatedly(Return(nullptr));
 
     EXPECT_NE(DiscMgrInit(), SOFTBUS_OK);
     DiscMgrDeinit();
@@ -942,6 +950,8 @@ HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
     coapMock.SetupStub();
     UsbMock usbMock;
     usbMock.SetupStub();
+    NfcMock nfcMock;
+    nfcMock.SetupStub();
 
     EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
     DiscMgrDeinit();

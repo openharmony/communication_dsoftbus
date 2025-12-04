@@ -19,6 +19,7 @@
 #include "disc_manager.h"
 #include "disc_interface.h"
 #include "disc_ble_dispatcher.h"
+#include "disc_nfc_dispatcher.h"
 #include "disc_usb_dispatcher.h"
 #include "disc_ble_utils_struct.h"
 #include "nstackx.h"
@@ -87,11 +88,13 @@ int32_t DiscVLinkBleEventInitPacked(void);
 int32_t DiscTouchBleEventInitPacked(void);
 int32_t DiscOopBleEventInitPacked(void);
 int32_t DiscPcCollaborationEventInitPacked(void);
+int32_t DiscShareNfcEventInitPacked(void);
 void DiscPcCollaborationEventDeinitPacked(void);
 void DiscTouchBleEventDeinitPacked(void);
 void DiscApproachBleEventDeinitPacked(void);
 void DiscVLinkBleEventDeinitPacked(void);
 void DiscOopBleEventDeinitPacked(void);
+void DiscShareNfcEventDeinitPacked(void);
 DiscoveryUsbDispatcherInterface *DiscUsbInitPacked(DiscInnerCallback *discInnerCb);
 void DiscUsbDeinitPacked(void);
 
@@ -104,6 +107,8 @@ bool DistActionProcessConPacketPacked(DeviceWrapper *wrapperDevice, const uint8_
 int32_t DistActionInitPacked(DiscActionUpdateBleCallback *updateAdvCb, DiscInnerCallback *innerCb);
 void DistActionDeinitPacked(void);
 bool IsUnknownDevicePacked(const char *bleMacAddr);
+DiscoveryNfcDispatcherInterface *DiscShareNfcInitPacked(DiscInnerCallback *discInnerCb);
+void DiscShareNfcDeinitPacked(void);
 #ifdef __cplusplus
 }
 #endif
