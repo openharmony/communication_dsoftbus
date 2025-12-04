@@ -1458,13 +1458,17 @@ static int32_t ClientTransProxySubD2dNeaHeadPacketProc(
     return ret;
 }
 
-static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen,
+static void DfxReceiveRateStatistic(int32_t channelId, int32_t priority, uint32_t dataLen,
     uint64_t startTimestamp, uint64_t endTimestamp)
 {
     #define DATA_LEN_1MB (1 * 1024 * 1024) // 1MB
     #define DATA_LEN_4MB (4 * 1024 * 1024) // 4MB
     #define DATA_LEN_1KB (1 * 1024) // 1KB
     #define SEC_TO_MILLISEC (1000)
+
+    if (priority != PROXY_CHANNEL_PRIORITY_BYTES) {
+        return;
+    }
     if (dataLen < DATA_LEN_1MB || dataLen > DATA_LEN_4MB) {
         return;
     }
@@ -1504,15 +1508,16 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
         return SOFTBUS_INVALID_PARAM;
     }
     int ret;
-    static uint64_t startTimestamp = 0;
-    uint32_t actualDataLen = 0;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
-        startTimestamp = SoftBusGetSysTimeMs();
+        processor->timestamp = SoftBusGetSysTimeMs();
     } else if (head->sliceNum == head->sliceSeq + 1) {
+        uint32_t actualDataLen = processor->dataLen + len;
+        uint64_t startTimestamp = processor->timestamp;
+        uint64_t endTimestamp = SoftBusGetSysTimeMs();
         ret = ClientTransProxyLastSliceProcess(processor, head, data, len, channelId);
-        actualDataLen = processor->dataLen + len;
+        DfxReceiveRateStatistic(channelId, index, actualDataLen, startTimestamp, endTimestamp);
     } else {
         ret = TransProxyNormalSliceProcess(processor, head, data, len);
     }
@@ -1520,13 +1525,6 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
     SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     if (ret != SOFTBUS_OK) {
         TransProxyClearProcessor(processor);
-        startTimestamp = 0;
-        return ret;
-    }
-    if (head->sliceNum == head->sliceSeq + 1) {
-        uint64_t endTimestamp = SoftBusGetSysTimeMs();
-        DfxReceiveRateStatistic(channelId, actualDataLen, startTimestamp, endTimestamp);
-        startTimestamp = 0;
     }
     return ret;
 }
