@@ -58,7 +58,7 @@ static void DiscFeatureRegisterEnhanceFunc(void *soHandle)
     return;
 }
 
-int32_t DiscRegisterEnhanceFunc(void *soHandle)
+static void DiscRegisterInitEnhanceFunc(void *soHandle)
 {
     g_discEnhanceFuncList.discTouchBleInit = dlsym(soHandle, "DiscTouchBleInit");
     g_discEnhanceFuncList.discShareBleInit = dlsym(soHandle, "DiscShareBleInit");
@@ -86,6 +86,15 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discOopBleEventDeinit = dlsym(soHandle, "DiscOopBleEventDeinit");
     g_discEnhanceFuncList.discPcCollaborationBleInit = dlsym(soHandle, "DiscPcCollaborationBleInit");
     g_discEnhanceFuncList.discPcCollaborationEventInit = dlsym(soHandle, "DiscPcCollaborationEventInit");
+    g_discEnhanceFuncList.discShareNfcEventInit = dlsym(soHandle, "DiscShareNfcEventInit");
+    g_discEnhanceFuncList.discShareNfcEventDeinit = dlsym(soHandle, "DiscShareNfcEventDeinit");
+    g_discEnhanceFuncList.discShareNfcInit = dlsym(soHandle, "DiscShareNfcInit");
+    g_discEnhanceFuncList.discShareNfcDeinit = dlsym(soHandle, "DiscShareNfcDeinit");
+}
+
+int32_t DiscRegisterEnhanceFunc(void *soHandle)
+{
+    DiscRegisterInitEnhanceFunc(soHandle);
 
     g_discEnhanceFuncList.distUpdatePublishParam = dlsym(soHandle, "DistUpdatePublishParam");
     g_discEnhanceFuncList.distDiscoveryStartActionPreLink = dlsym(soHandle, "DistDiscoveryStartActionPreLink");

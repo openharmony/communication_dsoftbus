@@ -21,6 +21,7 @@
 #include "disc_ble_utils_struct.h"
 #include "disc_interface_struct.h"
 #include "disc_manager_struct.h"
+#include "disc_nfc_dispatcher_struct.h"
 #include "disc_usb_dispatcher_struct.h"
 #include "disc_virlink_adapter_struct.h"
 #include "nstackx_struct.h"
@@ -63,17 +64,21 @@ typedef DiscoveryBleDispatcherInterface *(*DiscApproachBleInitFunc)(DiscInnerCal
 typedef DiscoveryBleDispatcherInterface *(*DiscVLinkBleInitFunc)(DiscInnerCallback *discInnerCb);
 typedef DiscoveryUsbDispatcherInterface *(*DiscUsbInitFunc)(DiscInnerCallback *discInnerCb);
 typedef DiscoveryBleDispatcherInterface *(*DiscPcCollaborationInitFunc)(DiscInnerCallback *discInnerCb);
+typedef DiscoveryNfcDispatcherInterface *(*DiscShareNfcInitFunc)(DiscInnerCallback *discInnerCb);
 typedef void (*DiscVLinkBleDeinitFunc)(void);
 typedef void (*DiscTouchBleDeinitFunc)(void);
 typedef void (*DiscApproachBleDeinitFunc)(void);
 typedef void (*DiscShareBleDeinitFunc)(void);
 typedef void (*DiscUsbDeinitFunc)(void);
+typedef void (*DiscShareNfcDeinitFunc)(void);
 typedef int32_t (*DiscApproachBleEventInitFunc)(void);
 typedef int32_t (*DiscVLinkBleEventInitFunc)(void);
 typedef int32_t (*DiscTouchBleEventInitFunc)(void);
+typedef int32_t (*DiscShareNfcEventInitFunc)(void);
 typedef void (*DiscApproachBleEventDeinitFunc)(void);
 typedef void (*DiscVLinkBleEventDeinitFunc)(void);
 typedef void (*DiscTouchBleEventDeinitFunc)(void);
+typedef void (*DiscShareNfcEventDeinitFunc)(void);
 typedef void (*DiscCoapReportNotificationFunc)(const NSTACKX_NotificationConfig *notification);
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
 typedef int32_t (*DiscCoapFillServiceDataFunc)(const PublishOption *option,
@@ -116,9 +121,11 @@ typedef struct TagDiscEnhanceFuncList {
     DiscApproachBleEventInitFunc discApproachBleEventInit;
     DiscVLinkBleEventInitFunc discVLinkBleEventInit;
     DiscTouchBleEventInitFunc discTouchBleEventInit;
+    DiscShareNfcEventInitFunc discShareNfcEventInit;
     DiscApproachBleEventDeinitFunc discApproachBleEventDeinit;
     DiscVLinkBleEventDeinitFunc discVLinkBleEventDeinit;
     DiscTouchBleEventDeinitFunc discTouchBleEventDeinit;
+    DiscShareNfcEventDeinitFunc discShareNfcEventDeinit;
     
     DiscCoapReportNotificationFunc discCoapReportNotification;
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
@@ -171,6 +178,9 @@ typedef struct TagDiscEnhanceFuncList {
     IsUnknownDeviceFunc isUnknownDevice;
     DiscCoapExtInitFunc discCoapExtInit;
     DiscCoapExtDeinitFunc discCoapExtDeinit;
+
+    DiscShareNfcInitFunc discShareNfcInit;
+    DiscShareNfcDeinitFunc discShareNfcDeinit;
 } DiscEnhanceFuncList;
 
 DiscEnhanceFuncList *DiscEnhanceFuncListGet(void);

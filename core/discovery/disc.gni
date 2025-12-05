@@ -16,6 +16,7 @@ import("../../core/discovery/coap/disc_coap.gni")
 import("../../core/discovery/event_manager/disc_event_manager.gni")
 import("../../core/discovery/usb/disc_usb.gni")
 import("../../core/discovery/virlink/disc_virlink.gni")
+import("../../core/discovery/nfc/disc_nfc.gni")
 import("../../dsoftbus.gni")
 
 DISC_SERVER_DEFINES = []
@@ -76,3 +77,7 @@ disc_server_external_deps += usb_disc_external_deps
 disc_server_src += disc_virlink_src
 disc_server_inc += disc_virlink_inc
 disc_server_deps += disc_virlink_deps
+
+disc_server_src += nfc_disc_src
+disc_server_inc += nfc_disc_inc
+disc_server_deps += nfc_disc_deps

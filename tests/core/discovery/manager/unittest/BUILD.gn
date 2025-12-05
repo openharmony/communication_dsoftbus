@@ -57,6 +57,7 @@ ohos_unittest("DiscManagerMockTest") {
     "coap_mock.cpp",
     "disc_manager_mock_test.cpp",
     "usb_mock.cpp",
+    "nfc_mock.cpp",
   ]
 
   include_dirs = [
@@ -77,6 +78,7 @@ ohos_unittest("DiscManagerMockTest") {
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_core_path/discovery/ble/approach_ble/include",
     "$dsoftbus_core_path/discovery/ble/virtual_link_ble/include",
+    "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include"
   ]
 
   deps = [
