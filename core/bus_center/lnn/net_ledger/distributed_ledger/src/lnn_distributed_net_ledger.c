@@ -1746,8 +1746,13 @@ int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32
     if (id == NULL || udid == NULL || len < UDID_BUF_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     info = LnnGetNodeInfoById(id, type);
     if (info == NULL) {
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         if (AuthMetaGetDeviceIdByMetaNodeIdPacked(id, udid, len) == SOFTBUS_OK) {
             return SOFTBUS_OK;
         }
@@ -1756,9 +1761,11 @@ int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32
     }
     tmpUdid = LnnGetDeviceUdid(info);
     if (strcpy_s(udid, len, tmpUdid) != EOK) {
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         LNN_LOGE(LNN_LEDGER, "copy id fail");
         return SOFTBUS_STRCPY_ERR;
     }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
 
