@@ -73,6 +73,7 @@ typedef struct {
     // connect process status
     SoftBusList *connectProcessStatus;
     bool enableIdleCheck;
+    bool isDisableBrFrequentConnectControl;
 } ConnBrConnection;
 
 typedef struct {

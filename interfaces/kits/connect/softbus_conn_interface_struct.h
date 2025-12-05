@@ -197,6 +197,7 @@ struct BrOption {
     uint32_t connectionId;
     ConnSideType sideType;
     uint32_t waitTimeoutDelay;
+    bool isDisableBrFrequentConnectControl;
 };
 
 struct BleOption {

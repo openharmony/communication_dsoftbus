@@ -145,6 +145,38 @@ static int32_t GetSppServerPort(int serverId)
     return SocketGetScn(serverId);
 }
 
+static BtSocketPriority ConverPriority(ConnBrConnectPriority priority)
+{
+    BtSocketPriority btSocketPriority;
+    switch (priority) {
+        case CONN_BR_CONNECT_PRIORITY_DEFAULT:
+            btSocketPriority = OHOS_SOCKET_PRIORITY_DEFAULT;
+            break;
+        case CONN_BR_CONNECT_PRIORITY_NON_PREEMPTIBLE:
+            btSocketPriority = OHOS_SOCKET_PRIORITY_NON_PREEMPTIBLE;
+            break;
+        case CONN_BR_CONNECT_PRIORITY_NO_REFUSE_FREQUENT_CONNECT:
+            btSocketPriority = OHOS_SOCKET_PRIORITY_NO_REFUSE_FREQUENT_CONNECT;
+            break;
+        default:
+            btSocketPriority = OHOS_SOCKET_PRIORITY_DEFAULT;
+            break;
+    }
+    return btSocketPriority;
+}
+
+static int32_t UpdatePriority(const BT_ADDR mac, ConnBrConnectPriority priority)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(mac != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "mac is invalid value");
+    BdAddr bdAddr;
+    (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
+    if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, mac, BT_ADDR_LEN) != EOK) {
+        CONN_LOGE(CONN_BR, "memcpy_s failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SetConnectionPriority(&bdAddr, ConverPriority(priority));
+}
+
 static SppSocketDriver g_sppSocketDriver = {
     .Init = Init,
     .OpenSppServer = OpenSppServer,
@@ -157,7 +189,8 @@ static SppSocketDriver g_sppSocketDriver = {
     .Write = Write,
     .Read = Read,
     .GetRemoteDeviceInfo = GetRemoteDeviceInfo,
-    .GetSppServerPort = GetSppServerPort
+    .GetSppServerPort = GetSppServerPort,
+    .UpdatePriority = UpdatePriority,
 };
 
 bool IsAclConnected(const BT_ADDR mac)
