@@ -373,5 +373,7 @@ HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level1)
     int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     UnregisterStreamCb();
+#define TEST_NORMALCHANNELID 12
+    NotifyStreamChannelConnectedEvent(TEST_NORMALCHANNELID);
 }
 } // OHOS
