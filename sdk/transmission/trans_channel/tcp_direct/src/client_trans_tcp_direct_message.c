@@ -654,6 +654,7 @@ static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen)
 {
     #define DATA_LEN_1M (1 * 1024 * 1024) // 1MB
     #define SEC_TO_MILLISEC (1000)
+    #define FIRST_PKG_USED_TIME 30 // 30ms
     if (dataLen < DATA_LEN_1M) {
         return;
     }
@@ -666,9 +667,7 @@ static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen)
     uint64_t endTimestamp = SoftBusGetSysTimeMs();
     uint64_t useTime = startTimestamp > endTimestamp ?
         (UINT64_MAX - startTimestamp + endTimestamp):(endTimestamp - startTimestamp);
-    if (useTime == 0) {
-        return;
-    }
+    useTime += FIRST_PKG_USED_TIME;
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     extra.channelId = channelId;
