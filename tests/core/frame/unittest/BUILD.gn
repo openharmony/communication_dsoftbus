@@ -200,6 +200,7 @@ ohos_unittest("SoftbusGEnhanceTest") {
     "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/core/transmission/ipc/include",
     "$dsoftbus_root_path/core/frame/init/src",
+    "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include"
   ]
 
   deps = [

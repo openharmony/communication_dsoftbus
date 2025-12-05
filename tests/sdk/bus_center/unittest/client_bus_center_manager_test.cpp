@@ -483,6 +483,101 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: REFRESH_LNN_INNER_Test_002
+ * @tc.desc: refresh lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_002, TestSize.Level1)
+{
+    SubscribeInfo info;
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    cb.OnDiscoverResult = OnDiscoverResultCb;
+    (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
+    info.subscribeId = LNN_SUBSCRIBE_ID;
+    info.mode = DISCOVER_MODE_PASSIVE;
+    info.medium = COAP;
+    info.freq = HIGH;
+    info.isSameAccount = false;
+    info.isWakeRemote = false;
+    info.capability = CAPABILITY;
+    info.capabilityData = const_cast<unsigned char *>(CAPABILITY_DATA);
+    info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char *>(CAPABILITY_DATA)));
+
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcRefreshLNN(_, _))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+
+    LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
+    LnnOnRefreshDeviceFound(nullptr);
+    EXPECT_EQ(RefreshLNNInner(nullptr, &info, &cb), SOFTBUS_SERVER_NOT_INIT);
+
+    LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
+    LnnOnRefreshDeviceFound(nullptr);
+    EXPECT_TRUE(RefreshLNNInner(nullptr, &info, &cb) == SOFTBUS_OK);
+
+    info.capability = g_capabilityMap[NFC_SHARE_CAPABILITY_BITMAP].capability;
+    printf("client_bus_center_manager_testinfo.capability: %s", info.capability);
+
+    LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
+    LnnOnRefreshDeviceFound(nullptr);
+    EXPECT_TRUE(RefreshLNNInner(nullptr, &info, &cb) == SOFTBUS_OK);
+
+    DeviceInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    deviceInfo.capabilityBitmap[0] = 1U << NFC_SHARE_CAPABILITY_BITMAP;
+    LnnOnRefreshDeviceFound(&deviceInfo);
+
+    g_busCenterClient.refreshNfcCb.OnDeviceFound = nullptr;
+    LnnOnRefreshDeviceFound(&deviceInfo);
+
+    deviceInfo.capabilityBitmap[0] = 0;
+    g_busCenterClient.refreshCb.OnDeviceFound = OnDeviceFoundCb;
+    LnnOnRefreshDeviceFound(&deviceInfo);
+
+    g_busCenterClient.refreshCb.OnDeviceFound = nullptr;
+    LnnOnRefreshDeviceFound(&deviceInfo);
+}
+
+/*
+ * @tc.name: REFRESH_LNN_INNER_Test_003
+ * @tc.desc: refresh lnn inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_003, TestSize.Level1)
+{
+    SubscribeInfo info;
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    cb.OnDiscoverResult = OnDiscoverResultCb;
+    EXPECT_EQ(RefreshLNNInner(nullptr, nullptr, &cb), SOFTBUS_INVALID_PARAM);
+    (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
+    info.subscribeId = LNN_SUBSCRIBE_ID;
+    info.mode = DISCOVER_MODE_PASSIVE;
+    info.medium = COAP;
+    info.freq = HIGH;
+    info.isSameAccount = false;
+    info.isWakeRemote = false;
+    info.capability = nullptr;
+    info.capabilityData = const_cast<unsigned char *>(CAPABILITY_DATA);
+    info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char *>(CAPABILITY_DATA)));
+    EXPECT_EQ(RefreshLNNInner(nullptr, nullptr, &cb), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(RefreshLNNInner(nullptr, &info, &cb), SOFTBUS_INVALID_PARAM);
+    info.capability = "";
+    EXPECT_EQ(RefreshLNNInner(nullptr, nullptr, &cb), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(RefreshLNNInner(nullptr, &info, &cb), SOFTBUS_INVALID_PARAM);
+
+    g_busCenterClient.refreshCb.OnDeviceFound = OnDeviceFoundCb;
+    LnnOnRefreshDeviceFound(nullptr);
+
+    g_busCenterClient.refreshCb.OnDeviceFound = nullptr;
+    LnnOnRefreshDeviceFound(nullptr);
+}
+
+/*
  * @tc.name: STOP_REFRESH_LNN_INNER_Test_001
  * @tc.desc: stop refresh lnn inner test
  * @tc.type: FUNC

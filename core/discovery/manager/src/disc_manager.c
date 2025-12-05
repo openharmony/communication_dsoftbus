@@ -22,6 +22,7 @@
 #include "disc_coap.h"
 #include "disc_event.h"
 #include "disc_log.h"
+#include "disc_nfc_dispatcher.h"
 #include "disc_usb_dispatcher.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -115,6 +116,7 @@ static SoftBusList *g_discoveryInfoList = NULL;
 static DiscoveryFuncInterface *g_discCoapInterface = NULL;
 static DiscoveryFuncInterface *g_discBleInterface = NULL;
 static DiscoveryFuncInterface *g_discUsbInterface = NULL;
+static DiscoveryFuncInterface *g_discNfcInterface = NULL;
 
 static DiscInnerCallback g_discMgrMediumCb;
 
@@ -336,6 +338,10 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageNa
             ret = CallSpecificInterfaceFunc(&(info->option), g_discUsbInterface, info->mode, type);
             DfxCallInterfaceByMedium(info, packageName, type, ret);
             return ret;
+        case NFC:
+            ret = CallSpecificInterfaceFunc(&(info->option), g_discNfcInterface, info->mode, type);
+            DfxCallInterfaceByMedium(info, packageName, type, ret);
+            return ret;
         default:
             return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
     }
@@ -472,7 +478,7 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
     DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
+    DISC_CHECK_AND_RETURN_RET_LOGW((info->medium >= AUTO && info->medium <= COAP) || (info->medium == NFC),
         SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq < FREQ_BUTT,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
@@ -513,7 +519,7 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
     DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= USB,
+    DISC_CHECK_AND_RETURN_RET_LOGW((info->medium >= AUTO && info->medium <= USB) || (info->medium == NFC),
         SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "medium is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq < FREQ_BUTT,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
@@ -1407,6 +1413,7 @@ int32_t DiscMgrInit(void)
     g_discCoapInterface = DiscCoapInit(&g_discMgrMediumCb);
     g_discBleInterface = DiscBleInit(&g_discMgrMediumCb);
     g_discUsbInterface = DiscUsbDispatcherInit(&g_discMgrMediumCb);
+    g_discNfcInterface = DiscNfcDispatcherInit(&g_discMgrMediumCb);
 
     DISC_CHECK_AND_RETURN_RET_LOGE(g_discBleInterface != NULL || g_discCoapInterface != NULL ||
         g_discUsbInterface != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT, "ble coap and usb init failed");
@@ -1440,10 +1447,12 @@ void DiscMgrDeinit(void)
     g_discCoapInterface = NULL;
     g_discBleInterface = NULL;
     g_discUsbInterface = NULL;
+    g_discNfcInterface = NULL;
 
     DiscCoapDeinit();
     DiscBleDeinit();
     DiscUsbDispatcherDeinit();
+    DiscNfcDispatcherDeinit();
 
     g_isInited = false;
     DISC_LOGI(DISC_INIT, "disc manager deinit success");

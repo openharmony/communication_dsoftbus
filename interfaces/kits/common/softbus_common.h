@@ -295,6 +295,7 @@ typedef enum {
     CONNECTION_ADDR_SESSION_WITH_KEY, /**< Session with key */
     CONNECTION_ADDR_SLE,      /**< SLE */
     CONNECTION_ADDR_NCM,      /**< USB NCM */
+    CONNECTION_ADDR_NFC,      /**< NFC */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 
@@ -427,6 +428,8 @@ typedef enum {
     USB = 3,
     /** HiLink */
     COAP1 = 4,
+    /** NFC */
+    NFC = 5,
     MEDIUM_BUTT
 } ExchangeMedium;
 
@@ -489,7 +492,9 @@ typedef enum {
     /**Raise Hand capability */
     RAISE_HAND_CAPABILITY_BITMAP,
     /**Pc Collaboration capability */
-    PC_COLLABORATION_BITMAP
+    PC_COLLABORATION_BITMAP,
+    /**nfc capability */
+    NFC_SHARE_CAPABILITY_BITMAP
 } DataBitMap;
 
 typedef struct {
@@ -527,8 +532,10 @@ static const CapabilityMap g_capabilityMap[] = {
     {TOUCH_CAPABILITY_BITMAP, (char *)"touch"},
     {OOP_CAPABILITY_BITMAP, (char *)"oop"},
     {OH_APPROACH_CAPABILITY_BITMAP, (char *)"oh_approach"},
+    {SD_CAPABILITY_BITMAP, (char *)"sd"},
     {RAISE_HAND_CAPABILITY_BITMAP, (char *)"raiseHand"},
-    {PC_COLLABORATION_BITMAP, (char *)"pcCollaboration"}
+    {PC_COLLABORATION_BITMAP, (char *)"pcCollaboration"},
+    {NFC_SHARE_CAPABILITY_BITMAP, (char *)"nfc_share"}
 };
 
 /**
