@@ -223,10 +223,10 @@ DiscoveryFuncInterface *DiscNfcDispatcherInit(DiscInnerCallback *discInnerCb)
         return NULL;
     }
 
-    if (SoftBusMutexLock(&g_nfcDispatchersLock) != SOFTBUS_OK) {     
+    if (SoftBusMutexLock(&g_nfcDispatchersLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_INIT, "g_nfcDispatchersLock lock fail");
         DiscShareNfcDeinitPacked();
-        (void)SoftBusMutexDestroy(&g_nfcDispatchersLock); 
+        (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
         return NULL;
     }
     g_nfcDispatchers[dispatcherSize++] = nfcInterface;
