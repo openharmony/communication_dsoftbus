@@ -15,6 +15,8 @@
 
 #include "client_trans_stream.h"
 
+#include <securec.h>
+
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_statistics.h"
@@ -60,6 +62,42 @@ static int32_t TransCloseStreamUdpChannel(int32_t channelId)
     return ret;
 }
 
+static void NotifyStreamChannelConnectedEvent(int32_t channelId)
+{
+    if (channelId < 0) {
+        TRANS_LOGE(TRANS_STREAM, "Invalid param");
+        return;
+    }
+    int32_t sessionId = INVALID_SESSION_ID;
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_UDP, &sessionId, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_STREAM, "get sessionId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return;
+    }
+    bool isServer = false;
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    ret = ClientGetSessionCallbackAdapterById(sessionId, &sessionCallback, &isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_STREAM, "get socket callback failed, channelId=%{public}d,"
+            "ret=%{public}d", channelId, ret);
+        return;
+    }
+    if (!sessionCallback.isSocketListener) {
+        TRANS_LOGI(TRANS_STREAM, "not report on event on non-socket session");
+        return;
+    }
+    ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
+    if (listener->OnEvent != NULL) {
+        int32_t eventData = SOFTBUS_OK;
+        listener->OnEvent(sessionId, EVENT_TYPE_STREAM_CONNECTED, (const void *)&eventData, sizeof(int32_t));
+        TRANS_LOGD(TRANS_STREAM, "report on event to client sessionId=%{public}d, event=%{public}d", sessionId,
+            EVENT_TYPE_STREAM_CONNECTED);
+        return;
+    }
+    TRANS_LOGE(TRANS_STREAM, "OnEvent is NULL");
+}
+
 static void SetStreamChannelStatus(int32_t channelId, int32_t status)
 {
     if (g_udpChannelMgrCb == NULL) {
@@ -70,6 +108,7 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
     switch (status) {
         case STREAM_CONNECTED:
             TRANS_LOGI(TRANS_STREAM, "dstream connected. channelId=%{public}d", channelId);
+            NotifyStreamChannelConnectedEvent(channelId);
             break;
         case STREAM_CLOSED:
             TRANS_LOGI(TRANS_STREAM, "dstream closed. channelId=%{public}d", channelId);

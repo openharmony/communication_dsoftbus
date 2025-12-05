@@ -362,6 +362,7 @@ typedef struct {
 
 typedef enum {
     EVENT_TYPE_MULTIPATH,
+    EVENT_TYPE_STREAM_CONNECTED,
     EVENT_TYPE_END,
 } SocketEventType;
 
