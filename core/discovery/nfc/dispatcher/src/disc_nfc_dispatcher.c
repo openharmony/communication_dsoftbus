@@ -215,16 +215,21 @@ DiscoveryFuncInterface *DiscNfcDispatcherInit(DiscInnerCallback *discInnerCb)
     DISC_LOGI(DISC_INIT, "DiscNfcDispatcherInit");
     int32_t dispatcherSize = 0;
 
-    DISC_CHECK_AND_RETURN_RET_LOGE(dispatcherSize < ARRAY_SIZE(g_nfcDispatchers), NULL,
-        DISC_INIT, "nfc dispatchers exceed max size");
+    if (dispatcherSize >= ARRAY_SIZE(g_nfcDispatchers)) {
+        (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
+        DISC_LOGE(DISC_INIT, "nfc dispatchers exceed max size");
+        return NULL;
+    }
     DiscoveryNfcDispatcherInterface *nfcInterface = DiscShareNfcInitPacked(discInnerCb);
     if (nfcInterface == NULL) {
+        (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
         DfxRecordNfcInitEnd(EVENT_STAGE_NFC_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
         DISC_LOGE(DISC_INIT, "DiscNfcInit err");
         return NULL;
     }
 
     if (SoftBusMutexLock(&g_nfcDispatchersLock) != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
         DISC_LOGE(DISC_INIT, "g_nfcDispatchersLock lock fail");
         DiscShareNfcDeinitPacked();
         return NULL;
