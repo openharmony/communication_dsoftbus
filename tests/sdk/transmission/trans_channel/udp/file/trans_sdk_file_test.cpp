@@ -1055,7 +1055,7 @@ void InitDFileMsg(DFileMsg *msgData)
     msgData->transferUpdate.bytesTransferred = 0;
     msgData->transferUpdate.totalBytes = 0;
     msgData->transferUpdate.transId = 0;
-    msgData->rate = 0;
+    msgData->rate = 1;
 }
 
 /*
@@ -1186,23 +1186,24 @@ HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level1)
     FileListener listener;
     listener.socketSendCallback = MockSocketSendCallback;
     listener.socketRecvCallback = MockSocketRecvCallback;
-    NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, nullptr, &listener);
-    NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, nullptr);
-    NotifySocketRecvResult(socket, DFILE_ON_FILE_LIST_RECEIVED, nullptr, &listener);
-    NotifySocketRecvResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, nullptr);
+    EXPECT_NO_FATAL_FAILURE(NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, nullptr, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, nullptr));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_FILE_LIST_RECEIVED, nullptr, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, nullptr));
 
-    NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, &listener);
-    NotifySocketSendResult(socket, DFILE_ON_FILE_SEND_SUCCESS, &msgData, &listener);
-    NotifySocketSendResult(socket, DFILE_ON_FILE_SEND_FAIL, &msgData, &listener);
-    NotifySocketSendResult(socket, DFILE_ON_CLEAR_POLICY_FILE_LIST, &msgData, &listener);
-    NotifySocketSendResult(socket, DFILE_ON_CONNECT_FAIL, &msgData, &listener);
+    EXPECT_NO_FATAL_FAILURE(NotifySocketSendResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketSendResult(socket, DFILE_ON_FILE_SEND_SUCCESS, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketSendResult(socket, DFILE_ON_FILE_SEND_FAIL, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketSendResult(socket, DFILE_ON_CLEAR_POLICY_FILE_LIST, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketSendResult(socket, DFILE_ON_CONNECT_FAIL, &msgData, &listener));
 
-    NotifySocketRecvResult(socket, DFILE_ON_FILE_LIST_RECEIVED, &msgData, &listener);
-    NotifySocketRecvResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, &listener);
-    NotifySocketRecvResult(socket, DFILE_ON_FILE_RECEIVE_SUCCESS, &msgData, &listener);
-    NotifySocketRecvResult(socket, DFILE_ON_FILE_RECEIVE_FAIL, &msgData, &listener);
-    NotifySocketRecvResult(socket, DFILE_ON_CLEAR_POLICY_FILE_LIST, &msgData, &listener);
-    NotifySocketRecvResult(socket, DFILE_ON_CONNECT_FAIL, &msgData, &listener);
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_FILE_LIST_RECEIVED, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_TRANS_IN_PROGRESS, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_FILE_RECEIVE_SUCCESS, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_FILE_RECEIVE_FAIL, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_CLEAR_POLICY_FILE_LIST, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_SESSION_TRANSFER_RATE, &msgData, &listener));
+    EXPECT_NO_FATAL_FAILURE(NotifySocketRecvResult(socket, DFILE_ON_CONNECT_FAIL, &msgData, &listener));
 }
 
 /*

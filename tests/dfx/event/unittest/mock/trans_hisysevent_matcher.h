@@ -144,6 +144,12 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.fileRate);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.fileWirelessRate);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.fileWiredRate);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.bytesRate);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.fileChannelCnt);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.streamChannelCnt);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.dataLen);
+    MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.sessionDuration);
+
     EXPECT_EQ(++index, validSize);
     return true;
 }

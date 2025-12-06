@@ -141,6 +141,7 @@ typedef struct {
     bool isClosingReserve;
     CachedOnEvent cachedOnEvent;
     int32_t routeTypeReserve;
+    uint64_t startTimestamp;
 } SessionInfo;
 
 typedef struct {

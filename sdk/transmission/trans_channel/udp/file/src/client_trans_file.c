@@ -422,6 +422,8 @@ static void NotifySocketRecvResult(
         TRANS_LOGE(TRANS_SDK, "param invalid");
         return;
     }
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     FileEvent event;
     (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
     switch (msgType) {
@@ -440,6 +442,11 @@ static void NotifySocketRecvResult(
         case DFILE_ON_CLEAR_POLICY_FILE_LIST:
             event.type = FILE_EVENT_TRANS_STATUS;
             break;
+        case DFILE_ON_SESSION_TRANSFER_RATE:
+            extra.fileRate = msgData->rate;
+            TRANS_LOGI(TRANS_SDK, "DFILE_ON_SESSION_TRANSFER_RATE: RATE=%{public}d MB/s", extra.fileRate);
+            TRANS_EVENT(EVENT_SCENE_TRANS_FILE_RATE, EVENT_STAGE_AVERAGE_RATE, extra);
+            return;
         default:
             return;
     }

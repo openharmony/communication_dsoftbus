@@ -49,6 +49,7 @@ typedef enum {
     EVENT_SCENE_TALKIE = 22,
     EVENT_SCENE_TRANS_FILE_RATE = 23,
     EVENT_SCENE_FAST_WAKE_UP = 24,
+    EVENT_SCENE_SESSION_INFO = 25,
 } TransEventScene;
 
 typedef enum {
@@ -94,6 +95,16 @@ typedef enum {
 } TransEventStreamStage;
 
 typedef enum {
+    EVENT_STAGE_GENERAL_SESSION_INFO = 1,
+    EVENT_STAGE_FILE_STEAM_STATISTIC = 2,
+} TransEventSessionInfo;
+ 
+typedef enum {
+    EVENT_STAGE_ABNORMAL_DATA_SEND = 1,
+    EVENT_STAGE_DATA_SEND_RATE = 2,
+} TransEventSendData;
+
+typedef enum {
     DEVICE_STATE_INVALID = 1,
     DEVICE_STATE_LOCAL_BT_HALF_OFF,
     DEVICE_STATE_REMOTE_BT_HALF_OFF,
@@ -104,8 +115,9 @@ typedef enum {
 } TransDeviceState;
 
 typedef enum {
-    EVENT_STAGE_TOTAL_RATE = 1,
-    EVENT_STAGE_CHANNEL_RATE,
+    EVENT_STAGE_TOTAL_RATE = 1,     // Total data rate in multipath scenarios
+    EVENT_STAGE_CHANNEL_RATE,       // Data rate of a single channel in multipath scenarios
+    EVENT_STAGE_AVERAGE_RATE,       // Average data rate in non-multipath scenarios
     EVENT_STATE_BUTT,
 } TransFileRateState;
 
@@ -184,6 +196,11 @@ typedef struct {
     uint32_t fileRate;         // FILE_RATE
     uint32_t fileWirelessRate; // FILE_WIRELESS_RATE
     uint32_t fileWiredRate;    // FILE_WIRED_RATE
+    uint32_t bytesRate;
+    int32_t fileChannelCnt;
+    int32_t streamChannelCnt;
+    int32_t dataLen;
+    uint64_t sessionDuration;    // SESSION_DURATION
 } TransEventExtra;
 
 typedef enum {

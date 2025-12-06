@@ -468,6 +468,9 @@ static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
         TRANS_LOGE(TRANS_SDK, "Get session lifecycle failed, ret=%{public}d", ret);
         return ret;
     }
+    if (!channel->isServer) {
+        (void)SetStartTimestampBySessionId(sessionId);
+    }
 
     if (channel->isServer) {
         return HandleServerOnNegotiate(sessionId, tokenType, &sessionCallback.socketServer, channel, sinkAccessInfo);
@@ -679,7 +682,9 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     } else {
         (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     }
-
+    if (!isServer) {
+        SessionInfoReport(sessionId);
+    }
     SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
     (void)ClientGetChannelBySessionId(sessionId, NULL, NULL, &enableStatus);
     TRANS_LOGI(TRANS_SDK, "trigger session close callback");

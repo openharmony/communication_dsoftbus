@@ -35,6 +35,8 @@
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 #include "trans_split_serviceid.h"
@@ -2966,6 +2968,97 @@ void DelSessionStateClosing(void)
         g_closingIdNum--;
     }
     UnlockClientSessionServerList();
+}
+
+void AbnormalDataLenAudit(int32_t sessionId, uint32_t len)
+{
+    #define ABNORMAL_DATA_LEN (1 * 1024 * 1024) // 1MB
+    if (len < ABNORMAL_DATA_LEN) {
+        return;
+    }
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId=%{public}d", sessionId);
+        return;
+    }
+ 
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. sessionId=%{public}d", sessionId);
+        return;
+    }
+    if (sessionNode->channelType != CHANNEL_TYPE_PROXY) {
+        UnlockClientSessionServerList();
+        return;
+    }
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    extra.sessionId = sessionId;
+    extra.dataLen = len;
+    UnlockClientSessionServerList();
+    TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_ABNORMAL_DATA_SEND, extra);
+}
+ 
+void SessionInfoReport(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId =%{public}d", sessionId);
+        return;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
+        return;
+    }
+ 
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    extra.sessionId = sessionId;
+    extra.channelType = sessionNode->channelType;
+    extra.businessType = sessionNode->businessType;
+    uint64_t endTimestamp = SoftBusGetSysTimeMs();
+    uint64_t startTimestamp = sessionNode->startTimestamp;
+    extra.sessionDuration =
+        endTimestamp < startTimestamp ? (UINT64_MAX - startTimestamp + endTimestamp):(endTimestamp - startTimestamp);
+    UnlockClientSessionServerList();
+    TRANS_EVENT(EVENT_SCENE_SESSION_INFO, EVENT_STAGE_GENERAL_SESSION_INFO, extra);
+}
+ 
+int32_t SetStartTimestampBySessionId(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId =%{public}d", sessionId);
+        return SOFTBUS_TRANS_INVALID_SESSION_ID;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    sessionNode->startTimestamp = SoftBusGetSysTimeMs();
+ 
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
 }
 
 int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState, int32_t optional)
