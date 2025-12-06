@@ -108,7 +108,7 @@ TRANS_ASSIGNER(Int32,  StreamChannelCnt, streamChannelCnt)
 TRANS_ASSIGNER(Int32,  DataLen, dataLen)
 TRANS_ASSIGNER(Uint64,  SessionDuration, sessionDuration)
 
-#define TRANS_ASSIGNER_SIZE 67 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 73 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
     { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
