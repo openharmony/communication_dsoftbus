@@ -101,8 +101,13 @@ TRANS_ASSIGNER(Int32,  MultipathTag, multipathTag)
 TRANS_ASSIGNER(Int32,  FileRate, fileRate)
 TRANS_ASSIGNER(Int32,  FileWirelessRate, fileWirelessRate)
 TRANS_ASSIGNER(Int32,  FileWiredRate, fileWiredRate)
+TRANS_ASSIGNER(Int32,  BytesRate, bytesRate)
+TRANS_ASSIGNER(Int32,  FileChannelCnt, fileChannelCnt)
+TRANS_ASSIGNER(Int32,  StreamChannelCnt, streamChannelCnt)
+TRANS_ASSIGNER(Int32,  DataLen, dataLen)
+TRANS_ASSIGNER(Uint64,  SessionDuration, sessionDuration)
 
-#define TRANS_ASSIGNER_SIZE 67 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 72 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
     { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
@@ -171,6 +176,11 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "FILE_RATE",           HISYSEVENT_INT32,    TransAssignerFileRate        },
     { "FILE_WIRELESS_RATE",  HISYSEVENT_INT32,    TransAssignerFileWirelessRate},
     { "FILE_WIRED_RATE",     HISYSEVENT_INT32,    TransAssignerFileWiredRate   },
+    { "BYTES_RATE",          HISYSEVENT_INT32,    TransAssignerBytesRate       },
+    { "FILE_CHANNEL_CNT",    HISYSEVENT_INT32,    TransAssignerFileChannelCnt  },
+    { "STREAM_CHANNEL_CNT",  HISYSEVENT_INT32,    TransAssignerStreamChannelCnt},
+    { "DATA_LEN",            HISYSEVENT_INT32,    TransAssignerDataLen         },
+    { "SESSION_DURATION",    HISYSEVENT_UINT64,   TransAssignerSessionDuration },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 

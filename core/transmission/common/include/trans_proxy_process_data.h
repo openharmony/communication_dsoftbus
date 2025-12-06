@@ -58,6 +58,7 @@ typedef struct {
     int32_t dataLen;
     int32_t bufLen;
     char *data;
+    uint64_t timestamp;
 } SliceProcessor;
 
 typedef struct {

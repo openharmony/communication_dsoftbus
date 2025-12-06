@@ -148,6 +148,7 @@ ohos_unittest("TransTcpDirectTest") {
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
@@ -199,6 +200,7 @@ ohos_unittest("TransTcpDirectMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 

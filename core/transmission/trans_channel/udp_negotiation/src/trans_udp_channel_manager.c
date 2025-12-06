@@ -29,13 +29,61 @@
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 #include "trans_udp_negotiation.h"
 #include "trans_uk_manager.h"
 
 #define MAX_WAIT_CONNECT_TIME 15
 
+
+struct UdpChannelAudit {
+    int32_t fileChannelCnt;
+    int32_t streamChannelCnt;
+    SoftBusMutex lock;
+};
+ 
+struct UdpChannelAudit g_businessTypeAudit;
 static SoftBusList *g_udpChannelMgr = NULL;
+
+static void UdpChannelStatistic(UdpChannelInfo *node, bool isAdd)
+{
+    if (node == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "node is null!");
+        return;
+    }
+    if (SoftBusMutexLock(&(g_businessTypeAudit.lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return;
+    }
+    if (!isAdd) {
+        g_businessTypeAudit.fileChannelCnt -= node->info.businessType == BUSINESS_TYPE_FILE ? 1:0;
+        g_businessTypeAudit.fileChannelCnt =
+            g_businessTypeAudit.fileChannelCnt < 0 ? 0 : g_businessTypeAudit.fileChannelCnt;
+        g_businessTypeAudit.streamChannelCnt -= node->info.businessType == BUSINESS_TYPE_STREAM ? 1:0;
+        g_businessTypeAudit.streamChannelCnt =
+            g_businessTypeAudit.streamChannelCnt < 0 ? 0 : g_businessTypeAudit.streamChannelCnt;
+        (void)SoftBusMutexUnlock(&g_businessTypeAudit.lock);
+        return;
+    }
+ 
+    if (g_businessTypeAudit.fileChannelCnt < 0 || g_businessTypeAudit.streamChannelCnt < 0) {
+        (void)SoftBusMutexUnlock(&g_businessTypeAudit.lock);
+        return;
+    }
+ 
+    g_businessTypeAudit.fileChannelCnt += node->info.businessType == BUSINESS_TYPE_FILE ? 1:0;
+    g_businessTypeAudit.streamChannelCnt += node->info.businessType == BUSINESS_TYPE_STREAM ? 1:0;
+ 
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    extra.fileChannelCnt = g_businessTypeAudit.fileChannelCnt;
+    extra.streamChannelCnt = g_businessTypeAudit.streamChannelCnt;
+ 
+    (void)SoftBusMutexUnlock(&g_businessTypeAudit.lock);
+    TRANS_EVENT(EVENT_SCENE_SESSION_INFO, EVENT_STAGE_FILE_STEAM_STATISTIC, extra);
+}
 
 SoftBusList *GetUdpChannelMgrHead(void)
 {
@@ -105,7 +153,7 @@ static void TransUdpTimerProc(void)
             ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
             ListDelete(&(udpChannel->node));
             g_udpChannelMgr->cnt--;
-
+            UdpChannelStatistic(udpChannel, false);
             ListAdd(&udpTmpChannelList, &(udpChannel->node));
         }
     }
@@ -129,6 +177,15 @@ int32_t TransUdpChannelMgrInit(void)
     int32_t ret = RegisterTimeoutCallback(SOFTBUS_UDP_CHANNEL_TIMER_FUN, TransUdpTimerProc);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_INIT, "register udp channel time out callback failed.");
+    
+    g_businessTypeAudit.fileChannelCnt = 0;
+    g_businessTypeAudit.streamChannelCnt = 0;
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&g_businessTypeAudit.lock, &mutexAttr) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "init lock failed");
+        return SOFTBUS_TRANS_INIT_FAILED;
+    }
 
     return SOFTBUS_OK;
 }
@@ -194,7 +251,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     ListAdd(&(g_udpChannelMgr->list), &(channel->node));
     TRANS_LOGI(TRANS_CTRL, "add channelId=%{public}" PRId64, channelId);
     g_udpChannelMgr->cnt++;
-
+    UdpChannelStatistic(channel, true);
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     TRANS_LOGI(TRANS_CTRL, "add udp channel success. channelId=%{public}" PRId64, channelId);
     return SOFTBUS_OK;
@@ -223,6 +280,7 @@ int32_t TransDelUdpChannel(int32_t channelId)
             }
             (void)memset_s(udpChannelNode->info.sessionKey, sizeof(udpChannelNode->info.sessionKey), 0,
                 sizeof(udpChannelNode->info.sessionKey));
+            UdpChannelStatistic(udpChannelNode, false);
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -273,7 +331,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
             ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
             ListDelete(&(udpChannel->node));
             g_udpChannelMgr->cnt--;
-
+            UdpChannelStatistic(udpChannel, false);
             ListAdd(&udpDeleteChannelList, &(udpChannel->node));
         }
     }

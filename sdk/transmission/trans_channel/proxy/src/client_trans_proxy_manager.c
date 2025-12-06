@@ -32,6 +32,8 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 #include "trans_assemble_tlv.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
 #include "trans_proxy_process_data.h"
@@ -1456,6 +1458,34 @@ static int32_t ClientTransProxySubD2dNeaHeadPacketProc(
     return ret;
 }
 
+static void DfxReceiveRateStatistic(int32_t channelId, int32_t priority, uint32_t dataLen,
+    uint64_t startTimestamp, uint64_t endTimestamp)
+{
+    #define DATA_LEN_1MB (1 * 1024 * 1024) // 1MB
+    #define DATA_LEN_4MB (4 * 1024 * 1024) // 4MB
+    #define DATA_LEN_1KB (1 * 1024) // 1KB
+    #define SEC_TO_MILLISEC (1000)
+
+    if (priority != PROXY_CHANNEL_PRIORITY_BYTES) {
+        return;
+    }
+    if (dataLen < DATA_LEN_1MB || dataLen > DATA_LEN_4MB) {
+        return;
+    }
+    uint64_t useTime = startTimestamp > endTimestamp ?
+        (UINT64_MAX - startTimestamp + endTimestamp):(endTimestamp - startTimestamp);
+    if (useTime == 0 || useTime > (UINT64_MAX >> 10)) { // 10:Prevent overflow when DATA_LEN_1KB * useTime
+        return;
+    }
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    extra.channelId = channelId;
+    extra.dataLen = dataLen;
+    uint64_t tempDataLen = (uint64_t)dataLen;
+    extra.bytesRate = (tempDataLen * SEC_TO_MILLISEC)/(DATA_LEN_1KB * useTime);  // KB/s
+    TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
+}
+
 static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *head, const char *data, uint32_t len)
 {
     if (g_channelSliceProcessorList == NULL) {
@@ -1481,8 +1511,13 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
+        processor->timestamp = SoftBusGetSysTimeMs();
     } else if (head->sliceNum == head->sliceSeq + 1) {
+        uint32_t actualDataLen = processor->dataLen + len;
+        uint64_t startTimestamp = processor->timestamp;
+        uint64_t endTimestamp = SoftBusGetSysTimeMs();
         ret = ClientTransProxyLastSliceProcess(processor, head, data, len, channelId);
+        DfxReceiveRateStatistic(channelId, index, actualDataLen, startTimestamp, endTimestamp);
     } else {
         ret = TransProxyNormalSliceProcess(processor, head, data, len);
     }
