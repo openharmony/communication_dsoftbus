@@ -37,7 +37,6 @@ extern "C" {
 TRANS_ASSIGNER(Uint8, TalkieFreq, talkieFreq)
 TRANS_ASSIGNER(Uint8, TalkieType, talkieType)
 TRANS_ASSIGNER(Uint8, TalkieLevel, talkieLevel)
-TRANS_ASSIGNER(Uint8, WakeUpState, wakeUpState)
 TRANS_ASSIGNER(Errcode, Result, result)
 TRANS_ASSIGNER(Errcode, Errcode, errcode)
 TRANS_ASSIGNER(AnonymizeString, SocketName, socketName)
@@ -108,12 +107,11 @@ TRANS_ASSIGNER(Int32,  StreamChannelCnt, streamChannelCnt)
 TRANS_ASSIGNER(Int32,  DataLen, dataLen)
 TRANS_ASSIGNER(Uint64,  SessionDuration, sessionDuration)
 
-#define TRANS_ASSIGNER_SIZE 73 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 72 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
     { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
     { "TALKIE_LEVEL",        HISYSEVENT_UINT8,    TransAssignerTalkieLevel     },
-    { "WAKEUP_STATE",        HISYSEVENT_UINT8,    TransAssignerWakeUpState     },
     { "STAGE_RES",           HISYSEVENT_INT32,    TransAssignerResult          },
     { "ERROR_CODE",          HISYSEVENT_INT32,    TransAssignerErrcode         },
     { "SOCKET_NAME",         HISYSEVENT_STRING,   TransAssignerSocketName      },
