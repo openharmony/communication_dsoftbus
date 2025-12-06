@@ -2977,7 +2977,7 @@ void AbnormalDataLenAudit(int32_t sessionId, uint32_t len)
         return;
     }
     if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid sessionId =%{public}d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId=%{public}d", sessionId);
         return;
     }
  
@@ -2990,7 +2990,7 @@ void AbnormalDataLenAudit(int32_t sessionId, uint32_t len)
     SessionInfo *sessionNode = NULL;
     if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
         UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "socket not found. sessionId=%{public}d", sessionId);
         return;
     }
     if (sessionNode->channelType != CHANNEL_TYPE_PROXY) {
