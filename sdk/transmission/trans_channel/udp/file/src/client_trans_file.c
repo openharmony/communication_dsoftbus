@@ -446,7 +446,7 @@ static void NotifySocketRecvResult(
             extra.fileRate = msgData->rate;
             TRANS_LOGI(TRANS_SDK, "DFILE_ON_SESSION_TRANSFER_RATE: RATE=%{public}d MB/s", extra.fileRate);
             TRANS_EVENT(EVENT_SCENE_TRANS_FILE_RATE, EVENT_STAGE_AVERAGE_RATE, extra);
-            break;
+            return;
         default:
             return;
     }
