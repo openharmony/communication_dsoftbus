@@ -40,7 +40,7 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
         .socketName = "testSocket",
         .dataType = 0, // invalid
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 18;  //result errcode socketName firstTokenId
+    constexpr int32_t VALID_EXTRA_SIZE = 19;  //result errcode socketName firstTokenId
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -212,7 +212,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
-            TransInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+            TransInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE + 1)))
         .Times(1);
     TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_ACTIVE, EVENT_STAGE_CLOSE_CHANNEL, invalidExtra);
 }
@@ -231,7 +231,7 @@ HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
-            TransInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+            TransInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE + 1)))
         .Times(1);
     TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, emptyExtra);
 }
@@ -335,7 +335,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .btFlow = 17,
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 33;
+    constexpr int32_t VALID_EXTRA_SIZE = 34;
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
@@ -355,7 +355,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .calleePkg = "testCalleePkg",
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE1 = 23;
+    constexpr int32_t VALID_EXTRA_SIZE1 = 24;
     HiSysEventMock mock1;
     EXPECT_CALL(mock1,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
@@ -372,7 +372,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .calleePkg = "testCalleePkg",
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE2 = 21;
+    constexpr int32_t VALID_EXTRA_SIZE2 = 22;
     HiSysEventMock mock2;
     EXPECT_CALL(mock2,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
@@ -388,7 +388,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .calleePkg = "testCalleePkg",
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE3 = 20;
+    constexpr int32_t VALID_EXTRA_SIZE3 = 21;
     HiSysEventMock mock3;
     EXPECT_CALL(mock3,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
