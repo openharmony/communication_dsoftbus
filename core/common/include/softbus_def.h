@@ -247,6 +247,18 @@ typedef enum {
     WAKE_UP_LEVEL_BUTT,
 } WakeUpLevel;
 
+typedef enum {
+    SINGLE_WAKE_UP_MODE,   /**< single wake up. */
+    PERIODIC_WAKE_UP_MODE, /**< periodic wake up. */
+    WAKE_UP_MODE_BUTT,
+} WakeUpMode;
+
+typedef struct {
+    WakeUpMode mode;   /**< wake up mode. */
+    WakeUpLevel level; /**< wake up level. */
+    bool isEnabled;    /**< enable the wake up capability. */
+} TransWakeUpOnParam;
+
 #ifdef __cplusplus
 #if __cplusplus
 }
