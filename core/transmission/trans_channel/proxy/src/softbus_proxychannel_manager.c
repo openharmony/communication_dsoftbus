@@ -1505,6 +1505,80 @@ static int32_t TransServerProxyChannelOpened(ProxyChannelInfo *chan, TransEventE
     return SOFTBUS_OK;
 }
 
+static int32_t CopyAppInfoFastTransData(ProxyChannelInfo *chan, const AppInfo *appInfo)
+{
+    if (chan == NULL || appInfo == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
+        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+        if (fastTransData == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
+            appInfo->fastTransDataSize) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
+            SoftBusFree(fastTransData);
+            return SOFTBUS_MEM_ERR;
+        }
+        chan->appInfo.fastTransData = fastTransData;
+    }
+    return SOFTBUS_OK;
+}
+
+static void ReleaseFastTransData(AppInfo *appInfo)
+{
+    if (appInfo != NULL && appInfo->fastTransData != NULL) {
+        SoftBusFree((void *)(appInfo->fastTransData));
+    }
+}
+
+static int32_t TransProxySaveAndOnOpen(ProxyChannelInfo *chan, int32_t channelId, TransEventExtra *extra)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (chan == NULL || extra == NULL) {
+        ret = SOFTBUS_INVALID_PARAM;
+        goto EXIT_RELEASE;
+    }
+    TransCreateConnByConnId(chan->connId, (bool)chan->isServer);
+    ProxyChannelInfo tmpChan;
+    (void)memset_s(&tmpChan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    if (memcpy_s(&tmpChan, sizeof(ProxyChannelInfo), chan, sizeof(ProxyChannelInfo)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
+        ret = SOFTBUS_MEM_ERR;
+        goto EXIT_RELEASE;
+    }
+    ret = CopyAppInfoFastTransData(&(tmpChan), &(chan->appInfo));
+    if (ret != SOFTBUS_OK) {
+        goto EXIT_RELEASE;
+    }
+    ret = TransProxyAddChanItem(chan);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
+        goto EXIT_RELEASE;
+    }
+    if (tmpChan.appInfo.appType == APP_TYPE_NORMAL) {
+        ret = CheckCollabRelation(&(tmpChan.appInfo), tmpChan.channelId, CHANNEL_TYPE_PROXY);
+        if (ret == SOFTBUS_OK) {
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
+            ReleaseFastTransData(&(tmpChan.appInfo));
+            return SOFTBUS_OK;
+        } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
+            (void)TransProxyAckHandshake(tmpChan.connId, &tmpChan, ret);
+            TransProxyDelChanByChanId(channelId);
+            ReleaseFastTransData(&(tmpChan.appInfo));
+            return ret;
+        }
+    }
+    ret = TransServerProxyChannelOpened(&tmpChan, extra, channelId);
+    ReleaseFastTransData(&(tmpChan.appInfo));
+    return ret;
+EXIT_RELEASE:
+    ReleaseProxyChannelId(channelId);
+    ReleaseChannelInfo(chan);
+    return ret;
+}
+
 void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
 {
     SoftBusHitraceChainBegin("TransProxyProcessHandshakeMsg");
@@ -1538,26 +1612,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
-    TransCreateConnByConnId(chan->connId, (bool)chan->isServer);
-    if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
-        ReleaseProxyChannelId(proxyChannelId);
-        ReleaseChannelInfo(chan);
-        goto EXIT_ERR;
-    }
-    if (chan->appInfo.appType == APP_TYPE_NORMAL) {
-        ret = CheckCollabRelation(&(chan->appInfo), chan->channelId, CHANNEL_TYPE_PROXY);
-        if (ret == SOFTBUS_OK) {
-            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
-            SoftBusHitraceChainEnd();
-            return;
-        } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
-            (void)TransProxyAckHandshake(chan->connId, chan, ret);
-            TransProxyDelChanByChanId(proxyChannelId);
-            goto EXIT_ERR;
-        }
-    }
-    ret = TransServerProxyChannelOpened(chan, &extra, proxyChannelId);
+    ret = TransProxySaveAndOnOpen(chan, proxyChannelId, &extra);
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -2055,24 +2110,6 @@ void TransProxyOnMessageReceived(const ProxyMessage *msg)
             break;
         }
     }
-}
-
-static int32_t CopyAppInfoFastTransData(ProxyChannelInfo *chan, const AppInfo *appInfo)
-{
-    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
-        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
-        if (fastTransData == NULL) {
-            return SOFTBUS_MALLOC_ERR;
-        }
-        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
-            appInfo->fastTransDataSize) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
-            SoftBusFree(fastTransData);
-            return SOFTBUS_MEM_ERR;
-        }
-        chan->appInfo.fastTransData = fastTransData;
-    }
-    return SOFTBUS_OK;
 }
 
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
