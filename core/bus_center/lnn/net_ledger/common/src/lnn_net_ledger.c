@@ -258,27 +258,26 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 
 static void LnnSetLocalFeature(void)
 {
-    uint64_t feature = 0;
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &feature) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set feature fail");
-        return;
-    }
-    if (IsSupportLpFeaturePacked()) {
-        feature |= 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
+    FeatureOption addFeature = {.isAdd = true, .featureSet = 0};
+    FeatureOption deleteFeature = {.isAdd = false, .featureSet = 0};
+    bool isSupportMcu = IsSupportMcuFeaturePacked();
+    if (IsSupportLpFeaturePacked() && (!isSupportMcu)) {
+        (void)LnnSetFeatureCapability(&addFeature.featureSet, BIT_BLE_SUPPORT_LP_HEARTBEAT);
     }
     if (LnnIsSupportLpSparkFeaturePacked() && LnnIsFeatureSupportDetailPacked()) {
-        feature |= 1 << BIT_SUPPORT_LP_SPARK_CAPABILITY;
-        (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
+        (void)LnnSetFeatureCapability(&deleteFeature.featureSet, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
+        if (!isSupportMcu) {
+            (void)LnnSetFeatureCapability(&addFeature.featureSet, BIT_SUPPORT_LP_SPARK_CAPABILITY);
+        }
     }
-    if (IsSupportMcuFeaturePacked()) {
+    if (isSupportMcu) {
         LNN_LOGI(LNN_LEDGER, "set mcu lp capacity");
-        feature |= 1 << BIT_BLE_SUPPORT_LP_MCU_CAPABILITY;
-        (void)LnnClearFeatureCapability(&feature, BIT_BLE_SUPPORT_LP_HEARTBEAT);
-        (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_LP_SPARK_CAPABILITY);
+        (void)LnnSetFeatureCapability(&addFeature.featureSet, BIT_BLE_SUPPORT_LP_MCU_CAPABILITY);
+        (void)LnnSetFeatureCapability(&deleteFeature.featureSet, BIT_BLE_SUPPORT_LP_HEARTBEAT);
+        (void)LnnSetFeatureCapability(&deleteFeature.featureSet, BIT_SUPPORT_LP_SPARK_CAPABILITY);
     }
-    if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set feature fail");
-    }
+    (void)LnnSetLocalByteInfo(NUM_KEY_FEATURE_CAPA, (uint8_t *)&addFeature, sizeof(FeatureOption));
+    (void)LnnSetLocalByteInfo(NUM_KEY_FEATURE_CAPA, (uint8_t *)&deleteFeature, sizeof(FeatureOption));
 }
 
 static void ProcessLocalDeviceInfo(void)

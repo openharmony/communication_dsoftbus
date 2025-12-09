@@ -31,6 +31,7 @@ public:
         DeviceLeaveReason leaveReason) = 0;
     virtual int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId) = 0;
     virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
+    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
 };
 
 class LnnNetBuilderInterfaceMock : public LnnNetBuilderInterface {
@@ -41,6 +42,7 @@ public:
     MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD2(LnnSetDLConnUserId, int32_t(const char *networkId, int32_t userId));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
+    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_MOCK_H

@@ -547,71 +547,28 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
     SendNetCapabilityToRemote(netCapability, 0, true);
 }
 
-static int32_t GetEnhancedFLFeature(uint64_t *feature)
+static int32_t UpdateLocalFeatureByWifiVspRes(void)
 {
-    if (feature == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getVspCapabilityCode == NULL) {
         LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
     VspCapabilityCode vspCapability = GetWifiDirectManager()->getVspCapabilityCode();
-    LNN_LOGI(LNN_BUILDER, "GetEnhancedFLFeature vspCap=%{public}d", vspCapability);
-    int32_t ret;
+    LNN_LOGI(LNN_BUILDER, "get enhanced FL feature vspCap=%{public}d", vspCapability);
+    int32_t ret = SOFTBUS_OK;
     if (CONN_VSP_SUPPORT == vspCapability) {
-        ret = LnnSetFeatureCapability(feature, BIT_FL_CAPABILITY);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "set feature capability failed, ret=%{public}d.", ret);
-            return ret;
-        }
+        FeatureOption feature = {.isAdd = true, .featureSet = 0};
+        (void)LnnSetFeatureCapability(&feature.featureSet, BIT_FL_CAPABILITY);
+        ret = LnnSetLocalByteInfo(NUM_KEY_FEATURE_CAPA, (uint8_t *)&feature, sizeof(FeatureOption));
     }
-    return SOFTBUS_OK;
-}
-
-static void UpdateLocalFeatureByWifiVspRes()
-{
-    uint64_t localFeatureCap = 0;
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeatureCap) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "wifi service FL feature, get local feature cap failed");
-        return;
-    }
-    uint64_t oldFeature = localFeatureCap;
-    if (GetEnhancedFLFeature(&localFeatureCap) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get local fl feature fail");
-        // fall-through
-    }
-    if (oldFeature == localFeatureCap) {
-        return;
-    }
-    int32_t ret = LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, localFeatureCap);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set localFeatureCap failed, ret=%{public}d.", ret);
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, localFeatureCap);
+    return ret;
 }
 
 static void ClearHmlFeatureCap(void)
 {
-    uint64_t feature = 0;
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &feature) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get local feature failed.");
-        return;
-    }
-    uint64_t oldFeature = feature;
-    if (LnnClearFeatureCapability(&feature, BIT_WIFI_DIRECT_ENHANCE_CAPABILITY) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "clear feature failed.");
-        return;
-    }
-    if (oldFeature == feature) {
-        return;
-    }
-    if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set feature failed.");
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, feature);
+    FeatureOption feature = {.isAdd = false, .featureSet = 0};
+    (void)LnnSetFeatureCapability(&feature.featureSet, BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
+    (void)LnnSetLocalByteInfo(NUM_KEY_FEATURE_CAPA, (uint8_t *)&feature, sizeof(FeatureOption));
 }
 
 static int32_t UpdateHmlStaticCap(void)
@@ -664,7 +621,7 @@ static void OnHmlServiceStart(void *state)
     }
     SoftBusHmlState *curState = (SoftBusHmlState *)state;
     if (*curState == CONN_HML_ENABLED) {
-        UpdateLocalFeatureByWifiVspRes();
+        (void)UpdateLocalFeatureByWifiVspRes();
     }
     SoftBusFree(curState);
 }
@@ -694,7 +651,7 @@ static void WifiServiceOnStartHandle(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "invalid param.");
         return;
     }
-    UpdateLocalFeatureByWifiVspRes();
+    (void)UpdateLocalFeatureByWifiVspRes();
 }
 
 static bool IsSupportApCoexist(const char *coexistCap)
