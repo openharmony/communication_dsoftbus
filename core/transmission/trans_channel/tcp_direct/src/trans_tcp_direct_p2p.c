@@ -1314,14 +1314,14 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         ret = TransProxyGetAuthIdByUuid(conn);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get auth id failed");
         conn->requestId = REQUEST_INVALID;
-        VerifyP2pInfo info = {
-            .myIp = conn->appInfo.myData.addr,
-            .peerIp = NULL,
-            .myPort = conn->appInfo.myData.port,
-            .myUid = conn->appInfo.myData.uid,
-            .protocol = conn->appInfo.fdProtocol,
-            .isMinTp = false,
-        };
+        VerifyP2pInfo info = { 0 };
+        info.myIp = conn->appInfo.myData.addr;
+        info.myPort = conn->appInfo.myData.port;
+        info.myUid = conn->appInfo.myData.uid;
+        info.protocol = conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP ? LNN_PROTOCOL_IP : conn->appInfo.fdProtocol;
+#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
+        info.isMinTp = conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP && CheckIsSupportMintp(conn);
+#endif
         char *msg = VerifyP2pPack(&info);
         if (msg == NULL) {
             TRANS_LOGE(TRANS_CTRL, "verify p2p pack failed");
