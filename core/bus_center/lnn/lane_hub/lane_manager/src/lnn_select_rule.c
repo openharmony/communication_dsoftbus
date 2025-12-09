@@ -724,16 +724,20 @@ static void DecideLinksWithLegacy(const char *networkId, const LaneSelectParam *
 static bool IsNeedUpdateHmlPriority(LaneLinkType *linkList, uint32_t *linksNum)
 {
     if (linkList == NULL || *linksNum > LANE_LINK_TYPE_BUTT || *linksNum <= 0) {
-        LNN_LOGE(LNN_LANE, "linkList is null or invalid linksNum, upadate hml priority.");
+        LNN_LOGE(LNN_LANE, "linkList is null or invalid linksNum, update hml priority.");
         return true;
     }
+    bool hmlExist = false;
     for (uint32_t i = 0; i < *linksNum; i++) {
         if (linkList[i] == LANE_USB) {
-            LNN_LOGI(LNN_LANE, "lane usb is in preferList, don't upadate hml priority.");
+            LNN_LOGI(LNN_LANE, "lane usb is in preferList, don't update hml priority.");
             return false;
         }
+        if (linkList[i] == LANE_HML) {
+            hmlExist = true;
+        }
     }
-    return true;
+    return hmlExist;
 }
 
 static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *request,
@@ -744,7 +748,7 @@ static void UpdateHmlPriority(const char *peerNetWorkId, const LaneSelectParam *
         return;
     }
     if (!IsNeedUpdateHmlPriority(linkList, linksNum)) {
-        LNN_LOGI(LNN_LANE, "lane usb in link list, no need update hml priority.");
+        LNN_LOGI(LNN_LANE, "no need update hml priority.");
         return;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
