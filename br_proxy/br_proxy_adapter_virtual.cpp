@@ -27,3 +27,8 @@ extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t user
 {
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
+{
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

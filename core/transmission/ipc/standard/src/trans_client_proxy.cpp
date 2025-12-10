@@ -15,6 +15,7 @@
 
 #include "trans_client_proxy.h"
 
+#include "br_proxy_server_manager.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_client_info_manager.h"
 #include "trans_client_proxy_standard.h"
@@ -309,7 +310,7 @@ int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId,
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
- 
+    ApplyForUnrestricted(channelId);
     return clientProxy->OnBrProxyOpened(channelId, brMac, uuid, reason);
 }
  
@@ -326,7 +327,7 @@ int32_t ClientIpcBrProxyReceivedData(const char *pkgName, int32_t channelId, con
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
- 
+    ApplyForUnrestricted(channelId);
     return clientProxy->OnBrProxyDataRecv(channelId, data, len);
 }
  
@@ -343,7 +344,7 @@ int32_t ClientIpcBrProxyStateChanged(const char *pkgName, int32_t channelId, int
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
- 
+    ApplyForUnrestricted(channelId);
     return clientProxy->OnBrProxyStateChanged(channelId, channelState);
 }
 
