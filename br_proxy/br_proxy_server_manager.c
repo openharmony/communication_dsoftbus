@@ -1132,7 +1132,7 @@ static void GetDataFromList(ProxyBaseInfo *baseInfo, uint8_t **data, uint32_t *r
             strcmp(baseInfo->uuid, nodeInfo->uuid) != 0) {
             continue;
         }
-        *data = (uint8_t *) SoftBusCalloc(nodeInfo->dataLen * sizeof(uint8_t));
+        *data = (uint8_t *)SoftBusCalloc(nodeInfo->dataLen * sizeof(uint8_t));
         if (*data == NULL) {
             TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed!");
             (void)SoftBusMutexUnlock(&(g_dataList->lock));
