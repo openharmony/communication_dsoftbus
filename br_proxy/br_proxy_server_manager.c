@@ -302,6 +302,7 @@ static int32_t BrProxyServerInit(void)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] init proxy list failed");
         return SOFTBUS_CREATE_LIST_ERR;
     }
+    DynamicLoadInit();
 
     static bool lockInited = false;
     if (lockInited) {
@@ -1131,7 +1132,7 @@ static void GetDataFromList(ProxyBaseInfo *baseInfo, uint8_t **data, uint32_t *r
             strcmp(baseInfo->uuid, nodeInfo->uuid) != 0) {
             continue;
         }
-        *data = (uint8_t *)SoftBusCalloc(nodeInfo->dataLen * sizeof(uint8_t));
+        *data = (uint8_t *) SoftBusCalloc(nodeInfo->dataLen * sizeof(uint8_t));
         if (*data == NULL) {
             TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed!");
             (void)SoftBusMutexUnlock(&(g_dataList->lock));
@@ -1154,6 +1155,26 @@ static void GetDataFromList(ProxyBaseInfo *baseInfo, uint8_t **data, uint32_t *r
     }
     (void)SoftBusMutexUnlock(&(g_dataList->lock));
     return;
+}
+
+int32_t ApplyForUnrestricted(int32_t channelId)
+{
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] enter, channelId:%{public}d", channelId);
+    ServerBrProxyChannelInfo info;
+    int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret:%{public}d, channelId:%{public}d", ret, channelId);
+        return ret;
+    }
+
+    BrProxyInfo proxyInfo;
+    ret = GetBrProxy(info.proxyInfo.brMac, info.proxyInfo.uuid, &proxyInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get brproxy failed. ret:%{public}d", ret);
+        return ret;
+    }
+
+    return BrProxyUnrestricted(proxyInfo.bundleName, info.callingPid, info.callingUid);
 }
 
 static void CleanUpDataListWithSameMac(ProxyBaseInfo *baseInfo, int32_t channelId, pid_t pid)
@@ -1214,20 +1235,12 @@ static void DealDataWhenForeground(ProxyBaseInfo *baseInfo, const uint8_t *data,
 
 static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data, uint32_t dataLen)
 {
-    #define MIN_INTERVAL_TIME 5
     int32_t ret = ServerAddDataToList(baseInfo, data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] add to datalist failed. ret:%{public}d", ret);
         return;
     }
-    static SoftBusSysTime lastTime = {0};
-    SoftBusSysTime currentTime = {0};
-    (void)SoftBusGetTime(&currentTime);
-    int64_t secDiff = currentTime.sec - lastTime.sec;
- 
-    if (currentTime.sec >= lastTime.sec && secDiff < MIN_INTERVAL_TIME) {
-        return;
-    }
+
     BrProxyInfo info;
     ret = GetBrProxy(baseInfo->brMac, baseInfo->uuid, &info);
     if (ret != SOFTBUS_OK) {
@@ -1240,7 +1253,6 @@ static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data,
         TRANS_LOGE(TRANS_SVC, "[br_proxy] pull up hap failed. ret:%{public}d", ret);
         return;
     }
-    lastTime = currentTime;
 }
 
 static void DealWithDataRecv(ProxyBaseInfo *baseInfo, const uint8_t *data, uint32_t dataLen)

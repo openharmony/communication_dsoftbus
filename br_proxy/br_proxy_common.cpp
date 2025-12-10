@@ -23,7 +23,9 @@
 #include "ipc_skeleton.h"
 #include "lnn_ohos_account_adapter.h"
 #include "message_handler.h"
+#include "power_mgr_client.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
 #include "trans_log.h"
 
@@ -34,89 +36,123 @@
 #endif
  
 using namespace OHOS;
-
 typedef int32_t (*GetAbilityNameFunc)(char *abilityName, int32_t userId, uint32_t abilityNameLen,
     std::string bundleName, int32_t *appIndex);
 typedef int32_t (*StartAbilityFunc)(const char *bundleName, const char *abilityName, int32_t appIndex);
-static void* g_abilityMgrHandle = nullptr;
-static StartAbilityFunc g_startAbilityFunc = nullptr;
-static GetAbilityNameFunc g_getAbilityName = nullptr;
+typedef int32_t (*UnrestrictedFunc)(const char *bundleName, pid_t pid, pid_t uid);
+
+struct SymbolLoader{
+    void *handle;
+    StartAbilityFunc startAbility;
+    GetAbilityNameFunc getAbilityName;
+    UnrestrictedFunc unrestricted;
+};
+
 static int32_t BrProxyLoopInit(void);
+
+static SoftBusMutex g_lock;
+static std::shared_ptr<OHOS::PowerMgr::RunningLock> g_powerMgr;
+static SymbolLoader g_symbolLoader = { 0 };
+
+static int32_t LoadSymbol(SymbolLoader *loader, bool *load)
+{
+    if (loader->handle != nullptr) {
+        *load = false;
+        return SOFTBUS_OK;
+    }
+    void *handle = dlopen(BR_PROXY_ADAPTER_PATH, RTLD_LAZY);
+    if (handle == nullptr) {
+        return SOFTBUS_NETWORK_DLOPEN_FAILED;
+    }
+
+    StartAbilityFunc startAbility = (StartAbilityFunc)dlsym(handle, "StartAbility");
+    GetAbilityNameFunc getAbilityName = (GetAbilityNameFunc)dlsym(handle, "ProxyChannelMgrGetAbilityName");
+    UnrestrictedFunc unrestricted = (UnrestrictedFunc)dlsym(handle, "Unrestricted");
+    if (startAbility == nullptr || getAbilityName == nullptr || unrestricted == nullptr) {
+        dlclose(handle);
+        return SOFTBUS_NETWORK_DLSYM_FAILED;
+    }
+
+    loader->handle = handle;
+    loader->getAbilityName = getAbilityName;
+    loader->startAbility = startAbility;
+    loader->unrestricted = unrestricted;
+
+    *load = true;
+    return SOFTBUS_OK;
+}
+
+static void CleanupSymbolIfNeed(SymbolLoader *loader, bool load)
+{
+    if (!load) {
+        return;
+    }
+    if (loader->handle != nullptr) {
+        dlclose(loader->handle);
+        loader->handle = nullptr;
+    }
+
+    loader->getAbilityName = nullptr;
+    loader->startAbility = nullptr;
+    loader->unrestricted = nullptr;
+}
 
 static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const char *abilityName, int32_t appIndex)
 {
-    if (bundleName == nullptr || abilityName == nullptr) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] bundle name is invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(abilityName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] ability name is invalid");
+
     int32_t ret = BrProxyLoopInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] BrProxyLoopInit failed! ret=%{public}d", ret);
+
+    ret = SoftBusMutexLock(&g_lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    bool load = false;
+    ret = LoadSymbol(&g_symbolLoader, &load);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] BrProxyLoopInit failed! ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] load sysmbol failed, ret=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lock);
         return ret;
     }
-    if (g_abilityMgrHandle == nullptr) {
-        g_abilityMgrHandle = dlopen(BR_PROXY_ADAPTER_PATH, RTLD_LAZY);
+    ret = g_symbolLoader.startAbility(bundleName, abilityName, appIndex);
+    if (ret != SOFTBUS_OK) {
+        CleanupSymbolIfNeed(&g_symbolLoader, load);
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] startAbility failed, ret=%{public}d", ret);
     }
-    if (g_abilityMgrHandle == nullptr) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlopen failed!");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    g_startAbilityFunc = (StartAbilityFunc)dlsym(g_abilityMgrHandle, "StartAbility");
-    if (g_startAbilityFunc == nullptr) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlsym failed!");
-        dlclose(g_abilityMgrHandle);
-        g_abilityMgrHandle = nullptr;
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    return g_startAbilityFunc(bundleName, abilityName, appIndex);
+    // ATTENTION: symbol will be cleanup  delay as callback is needed
+    (void)SoftBusMutexUnlock(&g_lock);
+    return ret;
 }
 
 static int32_t GetAbilityName(char *abilityName, int32_t userId, uint32_t abilityNameLen,
     std::string bundleName, int32_t *appIndex)
 {
-    if (abilityName == nullptr || appIndex == nullptr) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(abilityName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] ability name is invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appIndex != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] app index is invalid");
 
-    if (g_abilityMgrHandle == nullptr) {
-        g_abilityMgrHandle = dlopen(BR_PROXY_ADAPTER_PATH, RTLD_LAZY);
-    }
-    if (g_abilityMgrHandle == nullptr) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlopen failed!");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    int32_t ret = SoftBusMutexLock(&g_lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
 
-    g_getAbilityName = (GetAbilityNameFunc)dlsym(g_abilityMgrHandle, "ProxyChannelMgrGetAbilityName");
-    if (g_getAbilityName == nullptr) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlsym failed!");
-        dlclose(g_abilityMgrHandle);
-        g_abilityMgrHandle = nullptr;
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t ret = g_getAbilityName(abilityName, userId, abilityNameLen, bundleName, appIndex);
+    bool load = false;
+    ret = LoadSymbol(&g_symbolLoader, &load);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret = %{public}d", ret);
-        dlclose(g_abilityMgrHandle);
-        g_abilityMgrHandle = nullptr;
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] load sysmbol failed, error=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lock);
         return ret;
     }
-    if (g_abilityMgrHandle != nullptr) {
-        dlclose(g_abilityMgrHandle);
-        g_abilityMgrHandle = nullptr;
-    }
-    return SOFTBUS_OK;
+
+    ret = g_symbolLoader.getAbilityName(abilityName, userId, abilityNameLen, bundleName, appIndex);
+    CleanupSymbolIfNeed(&g_symbolLoader, load);
+    (void)SoftBusMutexUnlock(&g_lock);
+    return ret;
 }
 
 void BrProxyDynamicLoaderDeInit()
 {
-    if (g_abilityMgrHandle != nullptr) {
-        dlclose(g_abilityMgrHandle);
-        g_abilityMgrHandle = nullptr;
-    }
+    int32_t ret = SoftBusMutexLock(&g_lock);
+    TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    CleanupSymbolIfNeed(&g_symbolLoader, true);
+    (void)SoftBusMutexUnlock(&g_lock);
 }
 
 extern "C" int32_t PullUpHap(const char *bundleName, const char *abilityName, int32_t appIndex)
@@ -260,5 +296,58 @@ static int32_t BrProxyLoopInit(void)
     }
     g_brProxyLooperHandler.HandleMessage = BrProxyLoopMsgHandler;
     g_hasInit.store(true);
+    return SOFTBUS_OK;
+}
+
+int32_t DynamicLoadInit()
+{
+    static bool flag = false;
+    if (flag) {
+        return SOFTBUS_OK;
+    }
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&g_lock, &mutexAttr) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] init lock failed");
+        return SOFTBUS_TRANS_INIT_FAILED;
+    }
+    g_powerMgr = OHOS::PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("softbus_server_brproxy",
+                OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND);
+    flag = true;
+    return SOFTBUS_OK;
+}
+
+int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] bundle name is invalid");
+
+    int32_t ret = SoftBusMutexLock(&g_lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    bool load = false;
+    ret = LoadSymbol(&g_symbolLoader, &load);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] load sysmbol failed, error=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lock);
+        return ret;
+    }
+    ret = g_symbolLoader.unrestricted(bundleName, pid, uid);
+    CleanupSymbolIfNeed(&g_symbolLoader, load);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] unrestricted failed, error=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lock);
+        return ret;
+    }
+
+    if (g_powerMgr == nullptr) {
+        g_powerMgr = OHOS::PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("softbus_server_brproxy",
+                OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    }
+    if (g_powerMgr != nullptr) {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] Anti-sleep begin");
+        g_powerMgr->Lock(5000); // 5000ms
+    } else {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get g_powerMgr failed");
+    }
+    (void)SoftBusMutexUnlock(&g_lock);
     return SOFTBUS_OK;
 }

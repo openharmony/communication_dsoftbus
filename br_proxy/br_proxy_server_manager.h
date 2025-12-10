@@ -32,6 +32,7 @@ int32_t TransRegisterPushHook();
 void BrProxyClientDeathClearResource(pid_t callingPid);
 bool IsBrProxy(const char *bundleName);
 void CloseAllConnect();
+int32_t ApplyForUnrestricted(int32_t channelId);
 
 #ifdef __cplusplus
 }
