@@ -99,14 +99,18 @@ static void CleanupSymbolIfNeed(SymbolLoader *loader, bool load)
 
 static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const char *abilityName, int32_t appIndex)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] bundle name is invalid");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(abilityName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] ability name is invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr, SOFTBUS_INVALID_PARAM,
+        TRANS_SVC, "[br_proxy] bundle name is invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(abilityName != nullptr, SOFTBUS_INVALID_PARAM,
+        TRANS_SVC, "[br_proxy] ability name is invalid");
 
     int32_t ret = BrProxyLoopInit();
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] BrProxyLoopInit failed! ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_SVC, "[br_proxy] BrProxyLoopInit failed! ret=%{public}d", ret);
 
     ret = SoftBusMutexLock(&g_lock);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
     bool load = false;
     ret = LoadSymbol(&g_symbolLoader, &load);
     if (ret != SOFTBUS_OK) {
@@ -127,11 +131,14 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
 static int32_t GetAbilityName(char *abilityName, int32_t userId, uint32_t abilityNameLen,
     std::string bundleName, int32_t *appIndex)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(abilityName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] ability name is invalid");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(appIndex != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] app index is invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(abilityName != nullptr, SOFTBUS_INVALID_PARAM,
+        TRANS_SVC, "[br_proxy] ability name is invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appIndex != nullptr, SOFTBUS_INVALID_PARAM,
+        TRANS_SVC, "[br_proxy] app index is invalid");
 
     int32_t ret = SoftBusMutexLock(&g_lock);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
 
     bool load = false;
     ret = LoadSymbol(&g_symbolLoader, &load);
@@ -319,10 +326,12 @@ int32_t DynamicLoadInit()
 
 int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr, SOFTBUS_INVALID_PARAM, TRANS_SVC, "[br_proxy] bundle name is invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr, SOFTBUS_INVALID_PARAM,
+        TRANS_SVC, "[br_proxy] bundle name is invalid");
 
     int32_t ret = SoftBusMutexLock(&g_lock);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
     bool load = false;
     ret = LoadSymbol(&g_symbolLoader, &load);
     if (ret != SOFTBUS_OK) {
