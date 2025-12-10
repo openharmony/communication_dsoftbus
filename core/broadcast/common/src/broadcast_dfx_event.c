@@ -41,7 +41,7 @@ void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *
             extra.costTime = discExtra[i].costTime;
             discExtra[i].startTime = stamptime;
         }
-        DISC_LOGI(DISC_BLE, "capa=%{public}d, discType=%{public}d, broadcastType=%{public}d, minInterval=%{public}d, "
+        DISC_LOGD(DISC_BLE, "capa=%{public}d, discType=%{public}d, broadcastType=%{public}d, minInterval=%{public}d, "
             "maxInterval=%{public}d, succCnt=%{public}d, failCnt=%{public}d, "
             "costTime=%{public}" PRId64 ", Scene=%{public}d",
             extra.capabilityBit, extra.discType, extra.broadcastType, extra.minInterval, extra.maxInterval,
@@ -62,7 +62,7 @@ void BroadcastScanEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *
         extra.capabilityBit = scanExtra[i].capabilityBit;
         extra.scanType = scanExtra[i].scanType;
         extra.scanCount = scanExtra[i].scanCount;
-        DISC_LOGI(DISC_BLE, "capa = %{public}d, scanType = %{public}d, scanCount = %{public}d, Scene=%{public}d",
+        DISC_LOGD(DISC_BLE, "capa = %{public}d, scanType = %{public}d, scanCount = %{public}d, Scene=%{public}d",
             extra.capabilityBit, extra.scanType, extra.scanCount, eventScene);
         DISC_EVENT(eventScene, eventStage, extra);
     }
