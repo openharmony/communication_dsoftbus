@@ -303,6 +303,11 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
+    if (CheckMDMControl()) {
+        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        return NapiGetUndefinedRet(env);
+    }
+
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
     if (connection == nullptr) {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);

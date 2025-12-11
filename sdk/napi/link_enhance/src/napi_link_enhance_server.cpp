@@ -269,6 +269,11 @@ napi_value NapiLinkEnhanceServer::Start(napi_env env, napi_callback_info info)
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
+
+    if (CheckMDMControl()) {
+        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        return NapiGetUndefinedRet(env);
+    }
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
