@@ -1005,10 +1005,11 @@ static bool IsSupportDeterministicTrans(const char *targetNetworkId)
     return true;
 }
 
-#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
-#define DFS_SESSIONNAME "DistributedFileService/mnt/hmdfs/100/account"
 static bool CheckIsSupportMintp(SessionConn *conn)
 {
+#ifndef DSOFTBUS_FEATURE_TRANS_MINTP
+    return false;
+#endif
     if (conn->appInfo.businessType != BUSINESS_TYPE_BYTE) {
         return false;
     }
@@ -1018,21 +1019,22 @@ static bool CheckIsSupportMintp(SessionConn *conn)
     if (!IsHmlIpAddr(conn->appInfo.myData.addr)) {
         return false;
     }
+#define DFS_SESSIONNAME "DistributedFileService/mnt/hmdfs/100/account"
     if (strcmp(conn->appInfo.myData.sessionName, DFS_SESSIONNAME) == 0) {
+        return false;
+    }
+    if (conn->appInfo.osType != OH_OS_TYPE) {
         return false;
     }
     return true;
 }
-#endif
 
 static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, const AppInfo *appInfo, bool isMinTp)
 {
     conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
-#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
     if (CheckIsSupportMintp(conn) && isMinTp) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_MINTP;
     }
-#endif
     if (conn->appInfo.isFlashLight) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_HTP;
         int32_t ret = ClientOpenHtpChannelPacked(
@@ -1319,9 +1321,7 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         info.myPort = conn->appInfo.myData.port;
         info.myUid = conn->appInfo.myData.uid;
         info.protocol = conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP ? LNN_PROTOCOL_IP : conn->appInfo.fdProtocol;
-#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
         info.isMinTp = conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP && CheckIsSupportMintp(conn);
-#endif
         char *msg = VerifyP2pPack(&info);
         if (msg == NULL) {
             TRANS_LOGE(TRANS_CTRL, "verify p2p pack failed");
