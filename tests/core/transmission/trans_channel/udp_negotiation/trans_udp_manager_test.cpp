@@ -1398,6 +1398,7 @@ HWTEST_P(TransUdpGetWakeUpInfoTest, TransUdpGetWakeUpInfoTest, TestSize.Level1)
 
     testChannelInfo = new UdpChannelInfo();
     (void)memcpy_s(testChannelInfo, sizeof(UdpChannelInfo), &g_testUdpChannelInfoRes, sizeof(UdpChannelInfo));
+    testChannelInfo->info.linkType = LANE_HML;
     ret = TransAddUdpChannel(testChannelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
