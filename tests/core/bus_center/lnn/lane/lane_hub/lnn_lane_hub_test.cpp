@@ -56,7 +56,8 @@ void LNNLaneHubTest::TearDown()
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_TEST_001
-* @tc.desc: LnnInitLaneHub test
+* @tc.desc: Verify whether the LnnInitLaneHub function can successfully initialize the Lane Hub module
+*           when all dependencies are functioning properly
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -79,7 +80,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_TEST_002
-* @tc.desc: LnnInitLaneHub test
+* @tc.desc: Verify whether LnnInitLaneHub correctly passes the error code SOFTBUS_NO_INIT to the caller
+*           when the InitLane function returns SOFTBUS_NO_INIT
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -94,7 +96,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_002, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_TEST_003
-* @tc.desc: LnnInitLaneHub test
+* @tc.desc: Verify that when the LnnInitQos function returns SOFTBUS_NO_INIT, the LnnInitLaneHub function can
+*           correctly handle it and return the same error code
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -112,7 +115,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_003, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_TEST_004
-* @tc.desc: LnnInitLaneHub test
+* @tc.desc: Verify whether LnnInitLaneHub can correctly return the SOFTBUS_NO_INIT error code
+*           when LnnInitTimeSync initialization fails
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -131,7 +135,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_004, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_TEST_005
-* @tc.desc: LnnInitLaneHub test
+* @tc.desc: Verify whether LnnInitLaneHub can correctly return the SOFTBUS_NO_INIT error code
+*           when LnnInitHeartbeat initialization fails
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -151,7 +156,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_005, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_TEST_006
-* @tc.desc: LnnInitLaneHub test
+* @tc.desc: Verify whether the LnnInitLaneHub function can correctly return SOFTBUS_NO_INIT
+*           when InitControlPlanePacked returns SOFTBUS_NO_INIT
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -172,7 +178,7 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_006, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_TEST_007
-* @tc.desc: LnnInitLaneHub test
+* @tc.desc: Test the initialization function of the LnnInitLaneHub function
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -194,7 +200,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_007, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_DELAY_TEST_001
-* @tc.desc: LnnInitLaneHubDelay test
+* @tc.desc: Test and verify whether LnnInitLaneHubDelay correctly
+*           returns the expected success status code SOFTBUS_OK when called
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -209,7 +216,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_DELAY_TEST_001, TestSize.Level1)
 
 /*
 * @tc.name: LNN_INIT_LANE_HUB_DELAY_TEST_002
-* @tc.desc: LnnInitLaneHubDelay test
+* @tc.desc: Verify whether the LnnInitLaneHubDelay function can correctly handle and return the same error code
+*           when LnnStartHeartbeatFrameDelay returns SOFTBUS_NO_INIT
 * @tc.type: FUNC
 * @tc.require:
 */

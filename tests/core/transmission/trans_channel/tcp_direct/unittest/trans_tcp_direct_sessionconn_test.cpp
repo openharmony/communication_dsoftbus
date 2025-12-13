@@ -169,9 +169,10 @@ AppInfo *TestSetAppInfo()
     return appInfo;
 }
 
-/**
+/*
  * @tc.name: GetTcpChannelInfoLock
- * @tc.desc: test GetTcpChannelInfoLock001
+ * @tc.desc: Verify whether the behavior of acquiring the TCP channel information lock meets expectations
+ *           in both cases where the TCP channel information list is uninitialized and initialized
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -188,9 +189,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetTcpChannelInfoLock001, TestSize.Level
     ReleaseTcpChannelInfoLock();
 }
 
-/**
+/*
  * @tc.name: GetSessionConnByRequestId
- * @tc.desc: test GetSessionConnByRequestId001
+ * @tc.desc: Verify whether the GetSessionConnByRequestId function correctly returns a null pointer
+ *           when the request ID is invalid or no corresponding session connection is found
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -201,9 +203,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetSessionConnByRequestId001, TestSize.L
     EXPECT_EQ(conn, nullptr);
 }
 
-/**
+/*
  * @tc.name: GetSessionConnByReq
- * @tc.desc: test GetSessionConnByReq001
+ * @tc.desc: Verify whether the GetSessionConnByReq function correctly returns a null pointer
+ *           when the request ID is invalid or no corresponding session connection is found
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -214,9 +217,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetSessionConnByReq001, TestSize.Level1)
     EXPECT_EQ(conn, nullptr);
 }
 
-/**
+/*
  * @tc.name: SetAppInfoById
- * @tc.desc: test SetAppInfoById001
+ * @tc.desc: Verify that when calling the SetAppInfoById interface, the interface can correctly return
+ *           the expected error code when a lock error SOFTBUS_LOCK_ERR occurs
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -229,9 +233,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, SetAppInfoById001, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: UpdateAccessInfoById
- * @tc.desc: test UpdateAccessInfoById001
+ * @tc.desc: Ensure that the UpdateAccessInfoById function correctly returns the SOFTBUS_INVALID_PARAM error code
+ *           when an empty pointer or incomplete parameters are passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -249,9 +254,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, UpdateAccessInfoById001, TestSize.Level1
     SoftBusFree(accessInfo);
 }
 
-/**
+/*
  * @tc.name: GetAuthIdByChanId
- * @tc.desc: test GetAuthIdByChanId001
+ * @tc.desc: Verify the correctness of the GetAuthIdByChanId function
+ *           under different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -276,9 +282,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetAuthIdByChanId001, TestSize.Level1)
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: GetAuthHandleByChanId
- * @tc.desc: test GetAuthHandleByChanId001
+ * @tc.desc: Test whether the GetAuthHandleByChanId function returns the expected values
+ *           under different input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -293,9 +300,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetAuthHandleByChanId001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_AUTH_HANDLE_FAILED);
 }
 
-/**
+/*
  * @tc.name: CreateTcpChannelInfo
- * @tc.desc: test CreateTcpChannelInfo001
+ * @tc.desc: Test the behavior of the Create TcpChannelInfo function under different input conditions, specifically
+ *           verifying whether it returns nullptr when the input parameters are incomplete or invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -325,9 +333,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, CreateTcpChannelInfo001, TestSize.Level1
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetIpAndConnectTypeById
- * @tc.desc: test TransTdcGetIpAndConnectTypeById001
+ * @tc.desc: Verify whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -350,9 +359,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcGetIpAndConnectTypeById001, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetIpAndConnectTypeById
- * @tc.desc: test TransTdcGetIpAndConnectTypeById002
+ * @tc.desc: Test the function of obtaining IP addresses and connection types through channel IDs, and verify
+ *           the correctness of adding, querying, and deleting TCP channel information
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -386,9 +396,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcGetIpAndConnectTypeById002, Test
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SetSessionConnStatusById
- * @tc.desc: test SetSessionConnStatusById001
+ * @tc.desc: Verify whether the behavior of the SetSessionConnStatusById function meets expectations
+ *           under different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -415,9 +426,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, SetSessionConnStatusById001, TestSize.Le
     TransDelSessionConnById(conn->channelId);
 }
 
-/**
+/*
  * @tc.name: IsTdcRecoveryTransLimit
- * @tc.desc: test IsTdcRecoveryTransLimit001
+ * @tc.desc: Verify whether the return value of the IsTdcRecoveryTransLimit function meets expectations
+ *           under different TCP channel information management scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -443,9 +455,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, IsTdcRecoveryTransLimit001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetChannelIdsByAuthIdAndStatus
- * @tc.desc: test GetChannelIdsByAuthIdAndStatus001
+ * @tc.desc: Verify the correctness of the GetChannelIdsByAuthIdAndStatus function
+ *           under various boundary conditions and normal conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -475,9 +488,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetChannelIdsByAuthIdAndStatus001, TestS
     TransDelSessionConnById(conn->channelId);
 }
 
-/**
+/*
  * @tc.name: TransGetPidByChanId
- * @tc.desc: test TransGetPidByChanId001
+ * @tc.desc: Test the function of obtaining process IDs through channel IDs to verify
+ *           whether the returned values meet expectations under different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -508,9 +522,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransGetPidByChanId001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransGetPidByChanId
- * @tc.desc: test TransGetPidByChanId002
+ * @tc.desc: Verify whether the TransGetPidByChanId function can correctly return the error code
+ *           SOFTBUS_TRANS_INVALID_CHANNEL_ID when an invalid channel ID is passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -535,9 +550,11 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransGetPidByChanId002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransGetPidByChanId
- * @tc.desc: test TransGetPidByChanId003
+ * @tc.desc: Verify that the TransGetPidByChanId function can correctly return the error code
+ *           SOFTBUS_TRANS_INVALID_CHANNEL_ID when an invalid channel ID is passed in the scenario of a direct
+ *           TCP session connection
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -562,9 +579,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransGetPidByChanId003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransGetPkgNameByChanId
- * @tc.desc: test TransGetPkgNameByChanId001
+ * @tc.desc: Test the function of obtaining the package name through the channel ID to verify
+ *           whether the returned results meet expectations in different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -594,9 +612,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransGetPkgNameByChanId001, TestSize.Lev
 }
 
 
-/**
+/*
  * @tc.name: TransTdcUpdateReplyCnt
- * @tc.desc: test TransTdcUpdateReplyCnt001
+ * @tc.desc: Verify whether calling the TransTdcUpdateReplyCnt function returns the expected error code
+ *           SOFTBUS_NOT_FIND when the session connection is in the authentication channel state
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -612,9 +631,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcUpdateReplyCnt001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: TransTdcUpdateReplyCnt
- * @tc.desc: test TransTdcUpdateReplyCnt002
+ * @tc.desc: Verify whether calling the TransTdcUpdateReplyCnt function can correctly update the reply counter
+ *           under a specific session connection state, and ensure the correctness of the entire process
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -633,9 +653,11 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcUpdateReplyCnt002, TestSize.Leve
     TransDelSessionConnById(conn->channelId);
 }
 
-/**
+/*
  * @tc.name: TransTdcResetReplyCnt
- * @tc.desc: test TransTdcResetReplyCnt001
+ * @tc.desc: Verify whether the reply counter for a specified channel can be correctly reset
+ *           when the TransTdcResetReplyCnt function is called in a TCP direct session connection, and ensure
+ *           the correctness and stability of the entire process
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -654,9 +676,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcResetReplyCnt001, TestSize.Level
     TransDelSessionConnById(conn->channelId);
 }
 
-/**
+/*
  * @tc.name: TransTdcResetReplyCnt
- * @tc.desc: test TransTdcResetReplyCnt002
+ * @tc.desc: Test whether the function of resetting the reply counter in a TCP direct session connection returns
+ *           the expected error code under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -672,9 +695,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcResetReplyCnt002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: TransTcpGetPrivilegeCloseList
- * @tc.desc: test TransTcpGetPrivilegeCloseList001
+ * @tc.desc: Verify whether the TransTcpGetPrivilegeCloseList function can correctly
+ *           return the list of TCP connections that meet the criteria when given a tokenId and pid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -698,9 +722,10 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTcpGetPrivilegeCloseList001, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransTcpGetPrivilegeCloseList
- * @tc.desc: test TransTcpGetPrivilegeCloseList002
+ * @tc.desc: Verify that the TransTcpGetPrivilegeCloseList function correctly returns the expected result
+ *           SOFTBUS_OK when given the tokenId and pid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -714,9 +739,11 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTcpGetPrivilegeCloseList002, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetTdcChannelByIdTest
- * @tc.desc: test TransGetTdcChannelById in different case.
+ * @tc.desc: test TransGetTdcChannelById in different case
+ *           It tests the behavior of obtaining TCP channel information
+ *           under different scenarios through parameterized testing
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -769,9 +796,10 @@ INSTANTIATE_TEST_SUITE_P(TransGetTdcChannelByIdTest, TransGetTdcChannelByIdTest,
         nullptr, SOFTBUS_NOT_FIND, g_testNullTcpChannelInfo}
 ));
 
-/**
+/*
  * @tc.name: TransTdcGetWakeUpInfoTest
- * @tc.desc: test TransGetTdcChannelById in different case.
+ * @tc.desc: Used to verify the correctness of the TransTdcGetWakeUpInfo function during development, ensuring it
+ *           works as expected under various input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -818,9 +846,10 @@ INSTANTIATE_TEST_SUITE_P(TransTdcGetWakeUpInfoTest, TransTdcGetWakeUpInfoTest, t
         SOFTBUS_OK, &g_testTcpChannelInfoRes, SOFTBUS_INVALID_PARAM, SOFTBUS_INVALID_PARAM}
 ));
 
-/**
+/*
  * @tc.name: TransTdcSetWakeUpInfoTest
- * @tc.desc: test TransSetTdcChannelById in different case.
+ * @tc.desc: Used to test the functionality of the TransTdcSetWakeUpInfo function. The main purpose of this function
+ *           is to set the wake-up information for the TCP channel, including whether fast wake-up is required
  * @tc.type: FUNC
  * @tc.require:
  */

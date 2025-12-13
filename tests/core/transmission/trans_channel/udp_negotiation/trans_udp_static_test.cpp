@@ -64,9 +64,11 @@ IServerChannelCallBack *TestTransServerGetChannelCb(void)
     return &g_testchannelCallBack;
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest001
- * @tc.desc: NotifyUdpChannelBind test.
+ * @tc.desc: NotifyUdpChannelBind test
+ *           Test the binding and closing functions of the UDP channel to verify whether the return values meet
+ *           expectations under different parameter conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -92,9 +94,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest001, TestSize.Level1)
     TransUdpChannelDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest002
- * @tc.desc: ProcessUdpChannelState test.
+ * @tc.desc: ProcessUdpChannelState test
+ *           Verify whether the initialization, state handling, and resource release processes of the UDP channel
+ *           during the shutdown operation meet expectations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -115,9 +119,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest002, TestSize.Level1)
     TransUdpChannelDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest003
- * @tc.desc: CloseUdpChannel test.
+ * @tc.desc: CloseUdpChannel test
+ *           Verify whether the initialization, shutdown, and resource release of the UDP channel
+ *           under normal procedures meet expectations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -135,9 +141,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest003, TestSize.Level1)
     TransUdpChannelDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest004
- * @tc.desc: TransSetUdpConnectTypeByAuthType test.
+ * @tc.desc: TransSetUdpConnectTypeByAuthType test
+ *           Test whether the UDP connection type is correctly converted
+ *           according to the authentication type settings
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -158,9 +166,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest004, TestSize.Level1)
     EXPECT_EQ(CONNECT_HML, connectType);
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest005
- * @tc.desc: CheckAuthConnStatus test.
+ * @tc.desc: CheckAuthConnStatus test
+ *           Verify the correctness and stability of the UDP channel management module in scenarios
+ *           such as abnormal state detection, channel lifecycle management, and resource reclamation
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -184,9 +194,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest005, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest006
- * @tc.desc: UpdOpenAuthConn test.
+ * @tc.desc: UpdOpenAuthConn test
+ *           Verify whether the UpdOpenAuthConn function can correctly reject connection requests
+ *           or return the expected error status under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -200,9 +212,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest006, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest007
- * @tc.desc: ReportUdpRequestHandShakeReplyEvent test.
+ * @tc.desc: ReportUdpRequestHandShakeReplyEvent test
+ *           Verify whether the handshake response event is reported correctly when the UDP channel is open
+ *           and check whether the returned results and error codes meet the expected criteria
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -223,9 +237,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest007, TestSize.Level1)
     EXPECT_EQ(errCode, extra.errcode);
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest008
- * @tc.desc: ReportUdpRequestHandShakeStartEvent test.
+ * @tc.desc: ReportUdpRequestHandShakeStartEvent test
+ *           Verify the correctness of handshake event reports and results status in scenarios where the UDP
+ *           channel is opened and closed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -255,9 +271,11 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest008, TestSize.Level1)
     info = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest009
- * @tc.desc: CopyAppInfoFastTransData test.
+ * @tc.desc: CopyAppInfoFastTransData test
+ *           Verify the ability of the CopyAppInfoFastTransData function to correctly copy application information
+ *           in fast transmission data over a UDP channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -277,9 +295,9 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest009, TestSize.Level1)
     newChannel = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransUdpStaticTest010
- * @tc.desc: CopyAppInfoFastTransData test.
+ * @tc.desc: To verify whether the GenerateSeq function behaves as expected under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */

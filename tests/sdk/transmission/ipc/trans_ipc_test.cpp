@@ -66,9 +66,10 @@ void TransIpcStandardTest::TearDownTestCase(void)
 {
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterServiceTest001
- * @tc.desc: SoftbusRegisterService, use the wrong parameter.
+ * @tc.desc: Verify that the service registration function works properly and returns the expected results
+ *           when given specific parameters
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -88,9 +89,10 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level1)
     SoftBusFree(pubInfo);
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterServiceTest002
- * @tc.desc: SoftbusRegisterService, use the wrong parameter.
+ * @tc.desc: Verify that various methods related to node management and data synchronization in the TransServerProxy
+ *           class can be correctly executed and return the expected results
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -132,9 +134,10 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: CreateSessionServerTest001
- * @tc.desc: CreateSessionServer, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -151,9 +154,10 @@ HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
-/**
+/*
  * @tc.name: RemoveSessionServerTest001
- * @tc.desc: RemoveSessionServer, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -170,9 +174,10 @@ HWTEST_F(TransIpcStandardTest, RemoveSessionServerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
-/**
+/*
  * @tc.name: OpenSessionTest001
- * @tc.desc: OpenSession, use the wrong parameter.
+ * @tc.desc: Verify whether the OpenSession method can correctly return the expected error codes
+ *           under different parameter combinations
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -219,9 +224,9 @@ HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: OpenAuthSessionTest001
- * @tc.desc: OpenAuthSession, use the wrong parameter.
+ * @tc.desc: Verify the method error handling capability under different input parameter condititons
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -245,9 +250,10 @@ HWTEST_F(TransIpcStandardTest, OpenAuthSessionTest001, TestSize.Level1)
     SoftBusFree(addrInfo);
 }
 
-/**
+/*
  * @tc.name: NotifyAuthSuccessTest001
- * @tc.desc: NotifyAuthSuccess, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -264,9 +270,10 @@ HWTEST_F(TransIpcStandardTest, NotifyAuthSuccessTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
-/**
+/*
  * @tc.name: CloseChannelTest001
- * @tc.desc: CloseChannel, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -279,9 +286,10 @@ HWTEST_F(TransIpcStandardTest, CloseChannelTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
-/**
+/*
  * @tc.name: SendMessageTest001
- * @tc.desc: SendMessage, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -300,9 +308,10 @@ HWTEST_F(TransIpcStandardTest, SendMessageTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_REMOTE_NULL);
 }
 
-/**
+/*
  * @tc.name: QosReportTest001
- * @tc.desc: SendMessage, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -321,9 +330,10 @@ HWTEST_F(TransIpcStandardTest, QosReportTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
-/**
+/*
  * @tc.name: StreamStatsTest001
- * @tc.desc: StreamStats, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -345,9 +355,10 @@ HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level1)
     SoftBusFree(statsData);
 }
 
-/**
+/*
  * @tc.name: RippleStatsTest0011
- * @tc.desc: RippleStats, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -369,9 +380,10 @@ HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level1)
     SoftBusFree(statsData);
 }
 
-/**
+/*
  * @tc.name: GrantPermissionTest001
- * @tc.desc: GrantPermission, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -385,9 +397,10 @@ HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: RemovePermissionTest001
- * @tc.desc: RemovePermission, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -401,9 +414,9 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
-/**
+/*
  * @tc.name: ServerIpcCreateSessionServerTest001
- * @tc.desc: ServerIpcCreateSessionServer, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcCreateSessionServer function under different input conditions
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -427,9 +440,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Lev
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcRemoveSessionServerTest001
- * @tc.desc: ServerIpcRemoveSessionServer, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcRemoveSessionServer function under different scenarios
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -453,9 +466,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Lev
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcOpenSessionTest001
- * @tc.desc: ServerIpcOpenSession, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcOpenSession function under different parameter combinations
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -514,9 +527,10 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: ServerIpcOpenAuthSessionTest001
- * @tc.desc: ServerIpcOpenAuthSession, use the wrong parameter.
+ * @tc.desc: Verify whether the ServerIpcOpenAuthSession function behaves as expected
+ *           under different input conditions
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -545,9 +559,10 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenAuthSessionTest001, TestSize.Level1)
     SoftBusFree(addrInfo);
 }
 
-/**
+/*
  * @tc.name: ServerIpcNotifyAuthSuccessTest001
- * @tc.desc: ServerIpcNotifyAuthSuccess, use the wrong parameter.
+ * @tc.desc: Verify whether the ServerIpcNotifyAuthSuccess function correctly returns the expected error code
+ *           when using an invalid channelId and authentication channel type
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -563,9 +578,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcNotifyAuthSuccessTest001, TestSize.Level
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcCloseChannelTest001
- * @tc.desc: ServerIpcCloseChannel, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcCloseChannel function under different scenarios
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -588,9 +603,10 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level1)
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcCloseChannelWithStatisticsTest001
- * @tc.desc: ServerIpcCloseChannelWithStatistics, use the wrong parameter.
+ * @tc.desc: Verify whether the function can correctly return the SOFTBUS_INVALID_PARAM error code
+ *           when an invalid channelId is passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -606,9 +622,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelWithStatisticsTest001, TestS
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ServerIpcSendMessageTest001
- * @tc.desc: ServerIpcSendMessage, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcSendMessage function under different initialization states
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -628,9 +644,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcSendMessageTest001, TestSize.Level1)
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcQosReportTest001
- * @tc.desc: ServerIpcQosReport, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcQosReport function under different initialization states
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -652,9 +668,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcQosReportTest001, TestSize.Level1)
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcStreamStatsTest001
- * @tc.desc: ServerIpcStreamStats, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcStreamStats function under different initialization states
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -674,9 +690,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcStreamStatsTest001, TestSize.Level1)
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcRippleStatsTest001
- * @tc.desc: ServerIpcRippleStats, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcRippleStats function under different initialization states
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -696,9 +712,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level1)
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcGrantPermissionTest001
- * @tc.desc: ServerIpcGrantPermission, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcGrantPermission function under different initialization states
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -721,9 +737,9 @@ HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level1)
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcRemovePermissionTest001
- * @tc.desc: ServerIpcRemovePermission, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcRemovePermission function under different scenarios
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -744,9 +760,10 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level1
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ServerIpcEvaluateQosTest001
- * @tc.desc: SendMessage, use the wrong parameter.
+ * @tc.desc: Verify the function error handling capability
+ *           when parameters are invalid or there is insufficient permission
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -773,9 +790,10 @@ HWTEST_F(TransIpcStandardTest, ServerIpcEvaluateQosTest001, TestSize.Level1)
     ASSERT_TRUE(qos == nullptr);
 }
 
-/**
+/*
  * @tc.name: ServerIpcPrivilegeCloseChannel001
- * @tc.desc: ServerIpcPrivilegeCloseChannel, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ServerIpcPrivilegeCloseChannel function
+ *           under different parameter conditions
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
