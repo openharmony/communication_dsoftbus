@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "auth_interface_struct.h"
+#include "lnn_lane_interface_struct.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -784,6 +785,7 @@ HWTEST_P(TransTdcGetWakeUpInfoTest, TransTdcGetWakeUpInfoTest, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     tcpInfoNode = new TcpChannelInfo(); // release in TransDelTcpChannelInfoByChannelId
     (void)memcpy_s(tcpInfoNode, sizeof(TcpChannelInfo), testParam.channelInfoMockRes, sizeof(TcpChannelInfo));
+    tcpInfoNode->linkType = LANE_HML;
     ret = TransAddTcpChannelInfo(tcpInfoNode);
     EXPECT_EQ(SOFTBUS_OK, ret);
     testing::NiceMock<TransTcpDirectSessionConnMock> sessionconnMock;
