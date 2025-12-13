@@ -166,9 +166,10 @@ static const IPublishCb g_publishCb = {
     .OnPublishResult = TestOnPublishResult,
 };
 
-/**
+/*
  * @tc.name: PublishLNNTest001
- * @tc.desc: Test for invalid parameters
+ * @tc.desc: Verify whether the function can correctly return an error code
+ *           when a null pointer parameter is passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -184,11 +185,12 @@ HWTEST_F(DiscSdkTest, PublishLNNTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest002
- * @tc.desc: Test for invalid packageName.
+ * @tc.desc: To verify whether the PublishLNN function behaves as expected
+ *           when an incorrect package name is passed
  * @tc.type: FUNC
- * @tc.require:The PublishLNN operates normally.
+ * @tc.require:The PublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, PublishLNNTest002, TestSize.Level1)
 {
@@ -197,9 +199,11 @@ HWTEST_F(DiscSdkTest, PublishLNNTest002, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest003
- * @tc.desc: Test for invalid PublishInfo
+ * @tc.desc: Used to test the parameter validation function of the PublishLNN function. It verifies
+ *           whether the function can correctly identify and return the error code SOFTBUS_INVALID_PARAM
+ *           by intentionally passing invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -250,9 +254,9 @@ HWTEST_F(DiscSdkTest, PublishLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest004
- * @tc.desc: Test GetPublishId and PublishLNN to see if they are running properly.
+ * @tc.desc: Test GetPublishId and PublishLNN to see if they are running properly
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -274,11 +278,12 @@ HWTEST_F(DiscSdkTest, PublishLNNTest004, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName_1, g_pInfo1.publishId);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest005
- * @tc.desc: Test different freq with passive CoAP publish.
+ * @tc.desc: Verify whether the local network discovery function can work properly
+ *           when publishing and stopping publishing at different frequencies
  * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, PublishLNNTest005, TestSize.Level1)
 {
@@ -316,11 +321,11 @@ HWTEST_F(DiscSdkTest, PublishLNNTest005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest006
- * @tc.desc: Test different freq with passive BLE publish.
+ * @tc.desc: Test different freq with passive BLE publish
  * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, PublishLNNTest006, TestSize.Level1)
 {
@@ -361,11 +366,11 @@ HWTEST_F(DiscSdkTest, PublishLNNTest006, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest007
- * @tc.desc: Test different capability with passive CoAP publish.
+ * @tc.desc: Test different capability with passive CoAP publish
  * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, PublishLNNTest007, TestSize.Level1)
 {
@@ -417,11 +422,11 @@ HWTEST_F(DiscSdkTest, PublishLNNTest007, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest008
  * @tc.desc: Test different capability with passive BLE publish: dvKit, castPlus, osdCapability
  * @tc.type: FUNC
- * @tc.require: The PublishLNN and StopPublishLNN operates normally.
+ * @tc.require: The PublishLNN and StopPublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, PublishLNNTest008, TestSize.Level1)
 {
@@ -452,9 +457,10 @@ HWTEST_F(DiscSdkTest, PublishLNNTest008, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest001
- * @tc.desc: Test for invalid parameters
+ * @tc.desc: Verify whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when the input parameter is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -470,11 +476,12 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest002
- * @tc.desc: Test for invalid packageName.
+ * @tc.desc: Ensure that the RefreshLNN function correctly returns an error code
+ *           when an invalid package name is passed
  * @tc.type: FUNC
- * @tc.require:The PublishLNN operates normally.
+ * @tc.require:The PublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, RefreshLNNTest002, TestSize.Level1)
 {
@@ -483,9 +490,10 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest002, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest003
- * @tc.desc: Test for invalid SubscribeInfo.
+ * @tc.desc: Verify whether the function can correctly return the SOFTBUS_INVALID_PARAM error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -541,9 +549,9 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest004
- * @tc.desc: Verify the RefreshLNN normal case.
+ * @tc.desc: Used to test the correctness of the LNN refresh fucntion
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -565,11 +573,11 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest004, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, g_sInfo1.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest005
- * @tc.desc: Test different freq with passive CoAP discovery.
+ * @tc.desc: Test different freq with passive CoAP discovery
  * @tc.type: FUNC
- * @tc.require: The RefreshLNN and StopRefreshLNN operates normally.
+ * @tc.require: The RefreshLNN and StopRefreshLNN operates normally
  */
 HWTEST_F(DiscSdkTest, RefreshLNNTest005, TestSize.Level1)
 {
@@ -607,11 +615,11 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest006
- * @tc.desc: Test different freq with passive BLE discovery.
+ * @tc.desc: Test different freq with passive BLE discovery
  * @tc.type: FUNC
- * @tc.require: The RefreshLNN and StopRefreshLNN operates normally.
+ * @tc.require: The RefreshLNN and StopRefreshLNN operates normally
  */
 HWTEST_F(DiscSdkTest, RefreshLNNTest006, TestSize.Level1)
 {
@@ -652,11 +660,11 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest006, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest007
- * @tc.desc: Test different capability with passive CoAP discovery.
+ * @tc.desc: Test different capability with passive CoAP discovery
  * @tc.type: FUNC
- * @tc.require: The RefreshLNN and StopRefreshLNN operates normally.
+ * @tc.require: The RefreshLNN and StopRefreshLNN operates normally
  */
 HWTEST_F(DiscSdkTest, RefreshLNNTest007, TestSize.Level1)
 {
@@ -704,11 +712,11 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest007, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest008
  * @tc.desc: Test different capability with passive BLE discovery: dvKit, castPlus, osdCapability
  * @tc.type: FUNC
- * @tc.require: The RefreshLNN and StopRefreshLNN operates normally.
+ * @tc.require: The RefreshLNN and StopRefreshLNN operates normally
  */
 HWTEST_F(DiscSdkTest, RefreshLNNTest008, TestSize.Level1)
 {
@@ -735,11 +743,12 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest008, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest009
- * @tc.desc: Test usb capability with passive usb discovery
+ * @tc.desc: USB media communication capability for testing the refresh function of local network nodes
+ *           in passive discovery mode
  * @tc.type: FUNC
- * @tc.require: The RefreshLNN and StopRefreshLNN operates normally.
+ * @tc.require: The RefreshLNN and StopRefreshLNN operates normally
  */
 HWTEST_F(DiscSdkTest, RefreshLNNTest009, TestSize.Level1)
 {
@@ -755,9 +764,9 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest009, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNNTest001
- * @tc.desc: Verify StopPublishLNN invalid parameter.
+ * @tc.desc: Test the behavior of the StopPublishLNN function under different error conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -774,9 +783,9 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNNTest002
- * @tc.desc: Verify PublishLNN and StopPublishLNN normal case.
+ * @tc.desc: Verify PublishLNN and StopPublishLNN normal case
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -796,9 +805,9 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNNTest003
- * @tc.desc: Verify PublishLNN and StopPublishLNN same parameter again.
+ * @tc.desc: Verify PublishLNN and StopPublishLNN same parameter again
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -812,11 +821,11 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNNTest004
- * @tc.desc: Test different freq with stop passive CoAP publish.
+ * @tc.desc: Test different freq with stop passive CoAP publish
  * @tc.type: FUNC
- * @tc.require: The StopPublishLNN operates normally.
+ * @tc.require: The StopPublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, StopPublishLNNTest004, TestSize.Level1)
 {
@@ -849,11 +858,11 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopPublishLNNTest005
- * @tc.desc: Test different freq with stop passive BLE publish.
+ * @tc.desc: Test different freq with stop passive BLE publish
  * @tc.type: FUNC
- * @tc.require: The StopPublishLNN operates normally.
+ * @tc.require: The StopPublishLNN operates normally
  */
 HWTEST_F(DiscSdkTest, StopPublishLNNTest005, TestSize.Level1)
 {
@@ -889,9 +898,10 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest005, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest001
- * @tc.desc: Verify StopRefreshLNN invalid parameter.
+ * @tc.desc: To test the behavior of the StopRefreshLNN function
+ *           under different parameter conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -907,9 +917,10 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest002
- * @tc.desc: test under normal conditions.
+ * @tc.desc: test StopRefreshLNN
+ *           test under normal conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -929,9 +940,9 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest003
- * @tc.desc: Verify RefreshLNN and StopRefreshLNN same parameter again.
+ * @tc.desc: Verify RefreshLNN and StopRefreshLNN same parameter again
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -945,9 +956,9 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest004
- * @tc.desc:Test different freq with stop passive CoAP discovery.
+ * @tc.desc: Test different freq with stop passive CoAP discovery
  * @tc.type: FUNC
  * @tc.require: The StopRefreshLNN operates normally
  */
@@ -983,9 +994,9 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: StopRefreshLNNTest005
- * @tc.desc:Test different freq with stop passive BLE discovery.
+ * @tc.desc: Test different freq with stop passive BLE discovery
  * @tc.type: FUNC
  * @tc.require: The StopRefreshLNN operates normally
  */
@@ -1023,7 +1034,7 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest005, TestSize.Level1)
     EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
-/**
+/*
  * @tc.name:DiscRecoveryPublishTest01
  * @tc.desc: Test recovery publish.
  * @tc.in: Test module, Test number, Test levels.
@@ -1061,7 +1072,7 @@ HWTEST_F(DiscSdkTest, DiscRecoveryPublishTest01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name:DiscRecoverySubscribeTest01
  * @tc.desc: Test recovery subscribe.
  * @tc.in: Test module, Test number, Test levels.
