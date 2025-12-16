@@ -15,6 +15,7 @@
 #include <securec.h>
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
+#include "allow_type.h"
 #include "bundle_mgr_interface.h"
 #include "iservice_registry.h"
 #include "res_sched_client.h"
@@ -125,12 +126,12 @@ extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
     auto resourceRequest = OHOS::sptr<OHOS::DevStandbyMgr::ResourceRequest>(
         new OHOS::DevStandbyMgr::ResourceRequest()
     );
-    resourceRequest->SetAllowType(1);
+    resourceRequest->SetAllowType(OHOS::DevStandbyMgr::AllowType::NETWORK);
     resourceRequest->SetUid(uid);
-    resourceRequest->SetName(bundleName);
-    resourceRequest->SetDuration(10); // 10s
+    resourceRequest->SetName("softbus_server");
+    resourceRequest->SetDuration(5); // 5s
     resourceRequest->SetReason("brproxy");
-    resourceRequest->SetReasonCode(OHOS::DevStandbyMgr::ReasonCodeEnum::REASON_APP_API);
+    resourceRequest->SetReasonCode(OHOS::DevStandbyMgr::ReasonCodeEnum::REASON_NATIVE_API);
     int32_t ret = OHOS::DevStandbyMgr::StandbyServiceClient::GetInstance().ApplyAllowResource(resourceRequest);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] ApplyAllowResource failed! ret=%{public}d", ret);

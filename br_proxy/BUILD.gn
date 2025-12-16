@@ -54,7 +54,8 @@ ohos_shared_library("br_proxy_adapter") {
     debug = false
   }
   sources = []
-  if (is_standard_system) {
+  if (is_standard_system && (!defined(global_parts_info) ||
+    defined(global_parts_info.resourceschedule_device_standby))) {
     sources += [
       "br_proxy_adapter.cpp",
     ]
@@ -63,7 +64,6 @@ ohos_shared_library("br_proxy_adapter") {
     ]
     external_deps = [
       "c_utils:utils",
-      "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
