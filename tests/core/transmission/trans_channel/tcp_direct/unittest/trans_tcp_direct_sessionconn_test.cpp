@@ -785,7 +785,7 @@ HWTEST_P(TransTdcGetWakeUpInfoTest, TransTdcGetWakeUpInfoTest, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     tcpInfoNode = new TcpChannelInfo(); // release in TransDelTcpChannelInfoByChannelId
     (void)memcpy_s(tcpInfoNode, sizeof(TcpChannelInfo), testParam.channelInfoMockRes, sizeof(TcpChannelInfo));
-    tcpInfoNode->linkType = LANE_HML;
+    tcpInfoNode->connectType = CONNECT_HML;
     ret = TransAddTcpChannelInfo(tcpInfoNode);
     EXPECT_EQ(SOFTBUS_OK, ret);
     testing::NiceMock<TransTcpDirectSessionConnMock> sessionconnMock;
