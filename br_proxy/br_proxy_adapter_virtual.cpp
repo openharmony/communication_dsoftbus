@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+#include <string>
+#include <unistd.h>
 #include "softbus_error_code.h"
-
-using namespace OHOS;
 
 extern "C" int32_t StartAbility(const char *bundleName, const char *abilityName)
 {
