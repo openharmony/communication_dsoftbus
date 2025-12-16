@@ -64,6 +64,7 @@ ohos_shared_library("br_proxy_adapter") {
     ]
     external_deps = [
       "c_utils:utils",
+      "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
