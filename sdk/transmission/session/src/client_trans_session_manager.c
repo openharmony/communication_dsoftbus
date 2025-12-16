@@ -3828,12 +3828,6 @@ int32_t CheckMainChannelLinkDownByChannelId(int32_t sessionId, int32_t channelId
     return ret;
 }
 
-int32_t CheckSingleLaneLinkDownByNetworkId(const char *networkId, bool *singleLinkDown)
-{
-    int32_t ret = 0;
-    return ret;
-}
-
 static int32_t GetChannelTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t *channelType)
 {
     if (sessionId < 0 || channelType == NULL) {
