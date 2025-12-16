@@ -41,7 +41,7 @@ typedef int32_t (*GetAbilityNameFunc)(char *abilityName, int32_t userId, uint32_
 typedef int32_t (*StartAbilityFunc)(const char *bundleName, const char *abilityName, int32_t appIndex);
 typedef int32_t (*UnrestrictedFunc)(const char *bundleName, pid_t pid, pid_t uid);
 
-struct SymbolLoader{
+struct SymbolLoader {
     void *handle;
     StartAbilityFunc startAbility;
     GetAbilityNameFunc getAbilityName;
@@ -319,7 +319,7 @@ int32_t DynamicLoadInit()
         return SOFTBUS_TRANS_INIT_FAILED;
     }
     g_powerMgr = OHOS::PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("softbus_server_brproxy",
-                OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND);
+        OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND);
     flag = true;
     return SOFTBUS_OK;
 }
@@ -349,7 +349,7 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
 
     if (g_powerMgr == nullptr) {
         g_powerMgr = OHOS::PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("softbus_server_brproxy",
-                OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+            OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
     }
     if (g_powerMgr != nullptr) {
         TRANS_LOGI(TRANS_SVC, "[br_proxy] Anti-sleep begin");
