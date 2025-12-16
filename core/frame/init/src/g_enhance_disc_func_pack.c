@@ -384,10 +384,6 @@ int32_t DiscCoapFillServiceDataPacked(const PublishOption *option, char *outData
 }
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
 
-
-
-
-
 int32_t DiscApproachBleEventInitPacked(void)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();

@@ -35,12 +35,15 @@ public:
     {
         TRANS_LOGI(TRANS_SVC, "[br_proxy] OnAbilityConnectDone");
         OHOS::AAFwk::AbilityManagerClient::GetInstance()->ReleaseCall(this, element);
+        (void)remoteObject;
+        (void)resultCode;
     }
  
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element,
                                 int resultCode) override
     {
         TRANS_LOGI(TRANS_SVC, "[br_proxy] OnAbilityDisconnectDone");
+        (void)resultCode;
     }
 };
 
