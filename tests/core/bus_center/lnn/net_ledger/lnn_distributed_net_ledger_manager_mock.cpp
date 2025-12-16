@@ -37,39 +37,9 @@ static LnnDistributedNetLedgerManagerInterfaceMock *GetLnnDistributedNetLedgerMa
 }
 
 extern "C" {
-NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
-{
-    return GetLnnDistributedNetLedgerManagerInterface()->LnnGetNodeInfoById(id, type);
-}
-
 int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo)
 {
     return GetLnnDistributedNetLedgerManagerInterface()->LnnSaveRemoteDeviceInfo(deviceInfo);
-}
-
-int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
-{
-    return GetLnnDistributedNetLedgerManagerInterface()->LnnSetWifiDirectAddr(info, wifiDirectAddr);
-}
-
-int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
-{
-    return GetLnnDistributedNetLedgerManagerInterface()->SoftBusGenerateStrHash(str, len, hash);
-}
-
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
-{
-    return GetLnnDistributedNetLedgerManagerInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
-}
-
-bool LnnIsNodeOnline(const NodeInfo *info)
-{
-    return GetLnnDistributedNetLedgerManagerInterface()->LnnIsNodeOnline(info);
-}
-
-NodeInfo *GetNodeInfoFromMap(const DoubleHashMap *map, const char *id)
-{
-    return GetLnnDistributedNetLedgerManagerInterface()->GetNodeInfoFromMap(map, id);
 }
 
 int32_t LnnRetrieveDeviceInfo(const char *udidHash, NodeInfo *deviceInfo)

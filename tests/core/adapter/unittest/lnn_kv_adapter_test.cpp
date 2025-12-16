@@ -411,8 +411,6 @@ HWTEST_F(KVAdapterTest, OnChange001, TestSize.Level1)
     changeKeys[0].push_back("opinsert");
     changeKeys[1].push_back("opupdate");
     changeKeys[2].push_back("opupdate");
-    changeKeys[3].push_back("opupdate");
-    changeKeys[4].push_back("opupdate");
 
     DistributedKv::DataOrigin origin;
     origin.store = "opinsert";

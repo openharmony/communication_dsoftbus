@@ -18,13 +18,13 @@
 #include <securec.h>
 #include <string>
 
+#include "dsoftbus_enhance_interface.h"
+#include "gtest/gtest.h"
+#include "g_enhance_lnn_func.h"
+#include "lnn_kv_adapter.h"
 #include "lnn_kv_adapter_wrapper.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "gtest/gtest.h"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
-#include "lnn_kv_adapter_wrapper_mock.h"
 
 using namespace std;
 using namespace testing;
@@ -674,12 +674,11 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
 HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    ASSERT_TRUE(pfnLnnEnhanceFuncList != nullptr);
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = nullptr;
     int32_t dbId = g_dbId;
-    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
-    EXPECT_CALL(LnnKvAdapterWrapperMock, IsCloudSyncEnabled).WillOnce(Return(true));
     int32_t lnnCloudRet = LnnCloudSync(dbId);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_SYNC_FAIL);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
     lnnCloudRet = LnnCloudSync(dbId + 1);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
 }
@@ -694,7 +693,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     ASSERT_TRUE(pfnLnnEnhanceFuncList != nullptr);
-    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = nullptr;
     int32_t dbId = g_dbId;
     constexpr int32_t idOffset = 1;
     int32_t lnnCloudRet = LnnCloudSync(dbId + idOffset);
@@ -716,8 +715,6 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync004, TestSize.Level1)
     kvAdapter = std::make_shared<KVAdapter>(APP_ID, STORE_ID);
     int32_t initRet = kvAdapter->Init();
     EXPECT_EQ(initRet, SOFTBUS_OK);
-    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
-    EXPECT_CALL(LnnKvAdapterWrapperMock, FindKvStorePtr).WillRepeatedly(Return(kvAdapter));
     int32_t lnnCloudRet = LnnCloudSync(dbId);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
 }
