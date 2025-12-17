@@ -54,7 +54,8 @@ ohos_shared_library("br_proxy_adapter") {
     debug = false
   }
   sources = []
-  if (is_standard_system) {
+  if (is_standard_system && (!defined(global_parts_info) ||
+    defined(global_parts_info.resourceschedule_device_standby))) {
     sources += [
       "br_proxy_adapter.cpp",
     ]
@@ -69,6 +70,8 @@ ohos_shared_library("br_proxy_adapter") {
       "bundle_framework:appexecfwk_core",
       "ipc:ipc_single",
       "samgr:samgr_proxy",
+      "resource_schedule_service:ressched_client",
+      "device_standby:standby_innerkits",
     ]
   } else {
     sources += [ "br_proxy_adapter_virtual.cpp" ]
