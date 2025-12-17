@@ -884,8 +884,8 @@ int32_t TransTdcGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bo
         TRANS_LOGE(TRANS_SVC, "get tcp channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
     }
-    if (channelInfo.linkType != LANE_HML && channelInfo.linkType != LANE_HML_RAW) {
-        TRANS_LOGE(TRANS_SVC, "channel linkType=%{public}d not support", channelInfo.linkType);
+    if (channelInfo.connectType != CONNECT_HML) {
+        TRANS_LOGE(TRANS_SVC, "channel connectType=%{public}d not support", channelInfo.connectType);
         return SOFTBUS_TRANS_FAST_WAKE_UP_FAIL;
     }
     if (uuid != NULL) {
