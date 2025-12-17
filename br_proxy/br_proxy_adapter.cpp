@@ -15,9 +15,13 @@
 #include <securec.h>
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
+#include "allow_type.h"
 #include "bundle_mgr_interface.h"
 #include "iservice_registry.h"
+#include "res_sched_client.h"
+#include "res_type.h"
 #include "softbus_error_code.h"
+#include "standby_service_client.h"
 #include "system_ability_definition.h"
 #include "trans_log.h"
 
@@ -96,5 +100,42 @@ extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t user
     }
     *appIndex = abilityInfos[0].appIndex;
     TRANS_LOGI(TRANS_SVC, "[br_proxy] get appIndex:%{public}d", *appIndex);
+    return SOFTBUS_OK;
+}
+
+extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
+{
+    if (bundleName == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] bundleName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] pid:%{public}d, uid:%{public}d", pid, uid);
+    #define SOFTBUS_SERVER_SA_ID 4700
+    uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_SA_CONTROL_APP_EVENT;
+    int64_t status = OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_START_APP;
+    std::unordered_map<std::string, std::string> payload;
+    payload.emplace("saId", std::to_string(SOFTBUS_SERVER_SA_ID));
+    payload.emplace("saName", "softbus_server");
+    payload.emplace("pid", std::to_string(pid));
+    payload.emplace("uid", std::to_string(uid));
+    payload.emplace("bundleName", bundleName);
+    payload.emplace("isDelay", "1");
+    payload.emplace("delayTime", "10000"); // 10000ms
+    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, status, payload);
+   
+    auto resourceRequest = OHOS::sptr<OHOS::DevStandbyMgr::ResourceRequest>(
+        new OHOS::DevStandbyMgr::ResourceRequest()
+    );
+    resourceRequest->SetAllowType(OHOS::DevStandbyMgr::AllowType::NETWORK);
+    resourceRequest->SetUid(uid);
+    resourceRequest->SetName("softbus_server");
+    resourceRequest->SetDuration(5); // 5s
+    resourceRequest->SetReason("brproxy");
+    resourceRequest->SetReasonCode(OHOS::DevStandbyMgr::ReasonCodeEnum::REASON_NATIVE_API);
+    int32_t ret = OHOS::DevStandbyMgr::StandbyServiceClient::GetInstance().ApplyAllowResource(resourceRequest);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] ApplyAllowResource failed! ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
