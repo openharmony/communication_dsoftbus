@@ -91,6 +91,7 @@ void NapiCallFunction(napi_env env, napi_ref callbackRef, napi_value *argv, size
 int32_t ConvertToJsErrcode(int32_t err);
 void HandleSyncErr(const napi_env &env, int32_t errCode);
 bool CheckAccessToken(void);
+bool CheckMDMControl(void);
 } // namespace Softbus
 } // namespace Communication
 #endif /* NAPI_SOFTBUS_LINK_ENHANCE_UTILS_H_ */
