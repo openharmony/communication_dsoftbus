@@ -1359,7 +1359,7 @@ static void UpdateScannerFilter(bool isStopScan)
 static void StartScaner()
 {
     if (!CheckScanner()) {
-        DISC_LOGI(DISC_BLE, "no need to start scanner");
+        DISC_LOGD(DISC_BLE, "no need to start scanner");
         (void)StopScaner();
         return;
     }
@@ -1538,7 +1538,6 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
         SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
     uint32_t oldCap = g_bleInfoManager[index].capBitMap[0];
     g_bleOldCap = oldCap;
-    int32_t oldRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     if (isStart) {
         int32_t status = RegisterCapability(&g_bleInfoManager[index], &regOption);
         if (status != SOFTBUS_OK) {
@@ -1554,13 +1553,9 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     if ((index != (BLE_PUBLISH | BLE_ACTIVE)) && newCap != oldCap) {
         g_bleInfoManager[index].needUpdateCap = true;
     }
-    int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     BleEventExtraInit();
-    DISC_LOGI(DISC_BLE, "isStart=%{public}d, publishFlags=%{public}d, "
-        "activeFlags=%{public}d, oldCap=%{public}d, newCap=%{public}d, "
-        "oldRangingRefCount=%{public}d, newRangingRefCount=%{public}d, needUpdateCap=%{public}d",
-        isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount, newRangingRefCount,
-        g_bleInfoManager[index].needUpdateCap);
+    DISC_LOGI(DISC_BLE, "(%{public}d, %{public}d, %{public}d), Cap=%{public}d, needUpdateCap=%{public}d",
+        isStart, publishFlags, activeFlags, newCap, g_bleInfoManager[index].needUpdateCap);
 
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
@@ -2345,7 +2340,7 @@ static void ProcessStopAction(SoftBusMessage *msg, bool isDisc)
 {
     DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "msg is null");
     bool needStop = (bool)msg->arg1;
-    DISC_CHECK_AND_RETURN_LOGW(needStop, DISC_BLE, "ignore");
+    DISC_CHECK_AND_RETURN_LOGD(needStop, DISC_BLE, "ignore");
     g_needActionListen = false;
     int32_t ret = SOFTBUS_OK;
     if (isDisc) {
