@@ -370,7 +370,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     if (msgType == DFILE_ON_CONNECT_SUCCESS) {
         SocketAccessInfo accessInfo = { 0 };
         g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId, &accessInfo);
-        TRANS_LOGE(TRANS_SDK, "msgType failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
+        TRANS_LOGI(TRANS_SDK, "dfile connect success, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
 
