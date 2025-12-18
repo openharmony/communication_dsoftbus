@@ -183,9 +183,10 @@ void ClientTransProxyManagerTest::TearDownTestCase(void)
     TransClientDeinit();
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyInitTest
- * @tc.desc: client trans proxy init test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy init test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -195,9 +196,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyOnChannelOpenedTest
- * @tc.desc: client trans proxy on channel opened test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy on channel opened test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -211,9 +213,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyOnDataReceivedTest
- * @tc.desc: client trans proxy on data received test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy on data received test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -227,9 +230,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyOnDataReceivedTest001
- * @tc.desc: client trans proxy on data received test. test wrong slice head or packet head
+ * @tc.desc: client trans proxy on data received test
+ *           test wrong slice head or packet head
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -289,9 +293,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyOnDataReceivedTest002
- * @tc.desc: client trans proxy on data received test. test wrong slice data
+ * @tc.desc: client trans proxy on data received test
+ *           test wrong slice data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -347,9 +352,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ClientTransProxyCloseChannel(channelId);
 }
 
-/**
+/*
  * @tc.name: TransProxyChannelSendBytesTest
- * @tc.desc: client trans proxy end bytes test
+ * @tc.desc: TransProxyChannelSendBytes test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -377,9 +383,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.L
     ClientTransProxyCloseChannel(channelId);
 }
 
-/**
+/*
  * @tc.name: TransProxyChannelSendMessageTest
- * @tc.desc: client trans proxy end bytes test
+ * @tc.desc: TransProxyChannelSendMessage test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -407,9 +414,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize
     ClientTransProxyCloseChannel(channelId);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyErrorCallBackTest
- * @tc.desc: client trans proxy error callback test, use the wrong or normal parameter.
+ * @tc.desc: client trans proxy error callback test
+ *           use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -438,9 +446,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyCloseChannelTest
- * @tc.desc: client trans proxy close channel test, use the normal parameter.
+ * @tc.desc: client trans proxy close channel test
+ *           use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -454,9 +463,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest, TestSize
     ClientTransProxyCloseChannel(channelId);
 }
 
-/**
+/*
  * @tc.name: TransProxyChannelSendFileTest
- * @tc.desc: trans proxy channel send file test, use the wrong parameter.
+ * @tc.desc: trans proxy channel send file test
+ *           use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -476,10 +486,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyGetInfoByChannelIdTest
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo is null.
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid parameter.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo is null
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -495,10 +505,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, Te
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackAndSendDataTest
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo or data is null.
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED when given invalid parameter.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo or data is null
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED when given invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -519,10 +529,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
 
-/**
- * @tc.name: ClientTransProxyGetLinkTypeByChannelId
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given linkType or data is null.
- * @tc.desc: Should return SOFTBUS_NOT_FIND when get link type failed.
+/*
+ * @tc.name: ClientTransProxyGetLinkTypeByChannelIdTest
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given linkType or data is null
+ * @tc.desc: Should return SOFTBUS_NOT_FIND when get link type failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -536,9 +546,11 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetActualDataLen
- * @tc.desc: TransGetActualDataLen test.
+ * @tc.desc: Ensure that the TransGetActualDataLen function correctly calculates the actual data length
+ *           when processing the header information of the data slice, and returns the corresponding error code
+ *           when the input is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -572,9 +584,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransGetActualDataLenTest, TestSize.Level1
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, TransGetActualDataLen(&head, &actualDataLen));
 }
 
-/**
+/*
  * @tc.name: ProxyBuildNeedAckTlvData001
- * @tc.desc: ProxyBuildNeedAckTlvData
+ * @tc.desc: Verify whether the function can correctly return the predefined error code SOFTBUS_INVALID_PARAM
+ *           when the input parameter is an invalid pointer
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -585,9 +598,10 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ProxyBuildTlvDataHead001
- * @tc.desc: ProxyBuildTlvDataHead
+ * @tc.desc: Test whether the ProxyBuildTlvDataHead function returns the correct value
+ *           under specific parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -599,9 +613,10 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyProcSendMsgAck001
- * @tc.desc: ClientTransProxyProcSendMsgAck
+ * @tc.desc: Test the ClientTransProxyProcSendMsgAck functions error handling capability
+ *           under different input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -621,9 +636,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcSendMsgAck001, TestSiz
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyBytesNotifySession001
- * @tc.desc: ClientTransProxyBytesNotifySession
+ * @tc.desc: Test whether the return value of the ClientTransProxyBytesNotifySession function meets expectations
+ *           under different flag parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -646,9 +662,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession001, Tes
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyProcData001
- * @tc.desc: ClientTransProxyProcData
+ * @tc.desc: Test the ClientTransProxyProcData functions error handling capability
+ *           under different data lengths
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -666,9 +683,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcData001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
 }
 
-/**
+/*
  * @tc.name: ProxyBuildNeedAckTlvData002
- * @tc.desc: ProxyBuildNeedAckTlvData
+ * @tc.desc: Verify whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when it receives invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -680,9 +698,12 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildNeedAckTlvData002, TestSize.Leve
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ProxyBuildTlvDataHead003
  * @tc.desc: ProxyBuildNeedAckTlvData and ProxyBuildTlvDataHead func test
+ *           Verify the correctness and reliability of the ProxyBuildNeedAckTlvData and ProxyBuildTlvDataHead
+ *           functions when constructing TLV data headers, ensuring they return the expected results
+ *           under different parameter combinations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -703,9 +724,10 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead003, TestSize.Level1)
     SoftBusFree(pktHead);
 }
 
-/**
+/*
  * @tc.name: ProxyBuildTlvDataHead002
- * @tc.desc: ProxyBuildTlvDataHead
+ * @tc.desc: Verify whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when the input parameter of the ProxyBuildTlvDataHead function is an invalid value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -717,9 +739,10 @@ HWTEST_F(ClientTransProxyManagerTest, ProxyBuildTlvDataHead002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyParseTlv001
- * @tc.desc: TransProxyParseTlv
+ * @tc.desc: Test the behavior and return values of the TransProxyParseTlv function
+ *           under different input conditions to verify if they meet expectations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -738,9 +761,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyParseTlv001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyGetOsTypeByChannelId001
- * @tc.desc: ClientTransProxyGetOsTypeByChannelId
+ * @tc.desc: Verify whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when the input parameter is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -751,9 +775,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetOsTypeByChannelId001, T
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyOnChannelOpened001
- * @tc.desc: ClientTransProxyOnChannelOpened
+ * @tc.desc: Verify whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -774,9 +799,11 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSi
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxySendBytesAck001
- * @tc.desc: ClientTransProxySendBytesAck
+ * @tc.desc: Verify whether the function can correctly return the SOFTBUS_INVALID_PARAM error code
+ *           when the ClientTransProxyBytesNotifySession function is called and the parameters do not meet
+ *           the expected requirements
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -793,9 +820,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxySendBytesAck001, TestSize.
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyBytesNotifySession002
- * @tc.desc: ClientTransProxyBytesNotifySession
+ * @tc.desc: Verify whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when the parameters are abnormal
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -816,9 +844,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyBytesNotifySession002, Tes
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyNotifySession001
- * @tc.desc: ClientTransProxyNotifySession
+ * @tc.desc: Test the ClientTransProxyNotifySession function to verify whether its behavior and return values meet
+ *           expectations under different parameter combinations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -844,9 +873,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNotifySession001, TestSize
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyProcessSessionData001
- * @tc.desc: ClientTransProxyProcessSessionData
+ * @tc.desc: Test whether the return value of the ClientTransProxyProcessSessionData function meets expectations
+ *           under different data lengths and sequence numbers
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -865,9 +895,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcessSessionData001, Tes
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: ClientTransProxyNoSubPacketTlvProc001
- * @tc.desc: ClientTransProxyNoSubPacketTlvProc
+ * @tc.desc: Test the ClientTransProxyNoSubPacketTlvProc functions error handling capability
+ 8           under different input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -894,9 +925,10 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyNoSubPacketTlvProc001, Tes
     SoftBusFree(magicData);
 }
 
-/**
+/*
  * @tc.name: TransProxySliceProcessChkPkgIsValid001
- * @tc.desc: TransProxySliceProcessChkPkgIsValid
+ * @tc.desc: Verify whether the error handling logic of the TransProxySliceProcessChkPkgIsValid function is correct
+ *           under different conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -933,9 +965,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxySliceProcessChkPkgIsValid001, Te
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL, ret);
 }
 
-/**
+/*
  * @tc.name: IsValidCheckoutProcess001
- * @tc.desc: IsValidCheckoutProcess
+ * @tc.desc: Test whether the return value of the IsValidCheckoutProcess function
+ *           under a specific channel ID meets the expected result
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -946,9 +979,10 @@ HWTEST_F(ClientTransProxyManagerTest, IsValidCheckoutProcess001, TestSize.Level1
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackTlvBytes
- * @tc.desc: ClientTransProxyPackTlvBytes
+ * @tc.desc: Test the behavior and return values of the ClientTransProxyPackTlvBytes function
+ *           under different input parameter conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -969,9 +1003,10 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackTlvBytes, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
 
-/**
+/*
  * @tc.name: SessionPktTypeToProxyIndex001
- * @tc.desc: SessionPktTypeToProxyIndex
+ * @tc.desc: Test whether the SessionPktTypeToProxyIndex function can correctly map session data packets of different
+ *           types to the corresponding proxy channel priority indices
  * @tc.type: FUNC
  * @tc.require:
  */
