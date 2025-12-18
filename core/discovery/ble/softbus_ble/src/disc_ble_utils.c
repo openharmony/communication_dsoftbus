@@ -331,7 +331,7 @@ static int32_t SpliceDisplayName(DeviceWrapper *device)
     char *hyphen = NULL;
     bool isSameAccount = false;
     bool isZH = IsZHLanguage();
-    char accountHash[MAX_ACCOUNT_HASH_LEN];
+    char accountHash[SHORT_USER_ID_HASH_LEN] = {0};
     if (!LnnIsDefaultOhosAccount()) {
         DiscBleGetShortUserIdHash((uint8_t *)accountHash, SHORT_USER_ID_HASH_LEN);
         if (memcmp(device->info->accountHash, accountHash, SHORT_USER_ID_HASH_LEN) == 0) {
