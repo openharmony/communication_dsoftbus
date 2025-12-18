@@ -36,11 +36,7 @@ ohos_unittest("LnnKVAdapterTest") {
 
 ohos_unittest("LnnKVAdapterWrapperTest") {
   module_out_path = module_output_path
-  sources = [
-    "unittest/lnn_kv_adapter_wrapper_test.cpp",
-    "unittest/lnn_kv_adapter_wrapper_mock.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
-  ]
+  sources = [ "unittest/lnn_kv_adapter_wrapper_test.cpp" ]
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -54,17 +50,15 @@ ohos_unittest("LnnKVAdapterWrapperTest") {
     "$dsoftbus_root_path/tests/interface/enhance",
   ]
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
-  external_deps = [
-    "googletest:gmock",
-  ]
+  external_deps = [ "googletest:gmock" ]
   if (dsoftbus_feature_lnn_cloud_sync) {
     external_deps += [
-    "dsoftbus:softbus_client",
-    "kv_store:distributeddata_inner",
+      "dsoftbus:softbus_client",
+      "kv_store:distributeddata_inner",
     ]
   }
 }
@@ -104,9 +98,9 @@ ohos_unittest("LnnSettingdataEventMonitorTest") {
       "googletest:gmock_main",
       "googletest:gtest_main",
       "hilog:libhilog",
+      "init:libbegetutil",
       "kv_store:distributeddata_inner",
       "samgr:samgr_proxy",
-      "init:libbegetutil",
     ]
   }
   if (is_standard_system && has_ces_part) {
@@ -174,9 +168,9 @@ ohos_unittest("LNNOhosAccountTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
@@ -397,16 +391,16 @@ group("unittest") {
   deps = [
     ":AdapterDsoftbusRsaCryptoTest",
     ":LNNKvStoreLaunchListenerTest",
-    ":LNNOhosAccountTest",
     ":LNNOhosAccountMockTest",
+    ":LNNOhosAccountTest",
     ":LnnSaStatusMonitorTest",
   ]
   if (dsoftbus_feature_lnn_cloud_sync) {
     deps += [
       ":LnnKVAdapterTest",
       ":LnnKVAdapterWrapperTest",
+      ":LnnOhosAccountAdapterTest",
       ":LnnSettingdataEventMonitorTest",
-      ":LnnOhosAccountAdapterTest",      
     ]
   }
   if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {
