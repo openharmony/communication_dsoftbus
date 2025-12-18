@@ -84,6 +84,8 @@ void LNNTimeSyncTest::TearDown() {}
 /*
  * @tc.name: TryUpdateTimeSyncReqInfo_Test01
  * @tc.desc: try updata time sync req info
+ *           Attempt to update the precision and period parameters in the time
+ *           synchronization request information structure TimeSyncReqInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -104,7 +106,7 @@ HWTEST_F(LNNTimeSyncTest, TryUpdateTimeSyncReqInfo_Test01, TestSize.Level1)
 
 /*
  * @tc.name: ProcessStartTimeSyncRequest_Test01
- * @tc.desc: process start time sync req info
+ * @tc.desc: Test boundary conditions for the time synchronization request processing function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -124,7 +126,8 @@ HWTEST_F(LNNTimeSyncTest, ProcessStartTimeSyncRequest_Test01, TestSize.Level1)
 
 /*
  * @tc.name: ProcessStopTimeSyncRequest_Test01
- * @tc.desc: process stop time sync req info
+ * @tc.desc: Test the behavior of the ProcessStopTimeSyncRequest function
+ *           when handling stop time synchronization requests
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -142,7 +145,8 @@ HWTEST_F(LNNTimeSyncTest, ProcessStopTimeSyncRequest_Test01, TestSize.Level1)
 
 /*
  * @tc.name: ProcessTimeSyncComplete_Test01
- * @tc.desc: process sync req info result
+ * @tc.desc: Verify whether the system can correctly handle various boundary conditions and exceptional situations
+ *           when time synchronization is completed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -159,7 +163,8 @@ HWTEST_F(LNNTimeSyncTest, ProcessTimeSyncComplete_Test01, TestSize.Level1)
 
 /*
  * @tc.name: CheckTimeSyncReqInfo_Test01
- * @tc.desc: check time sync req info
+ * @tc.desc: Verify whether the CheckTimeSyncReqInfo fucntion correctly returns false
+ *           when LnnGetRemoteStrInfo returns an incalid parameter error
  * @tc.type: FUNC
  * @tc.require:
  */

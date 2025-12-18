@@ -48,9 +48,10 @@ public:
     void TearDown() override { }
 };
 
-/**
+/*
  * @tc.name: SocketName001
- * @tc.desc: call Socket function with different socket name.
+ * @tc.desc: Test the Socket function ability to handle errors
+ *           under different invalid input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -83,9 +84,10 @@ HWTEST_F(TransClientSocketServiceTest, SocketName001, TestSize.Level1)
     ASSERT_EQ(socketId, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SocketPeerName001
- * @tc.desc: call Socket function with different socket peerName.
+ * @tc.desc: Verify whether the socket function can correctly return an error code
+ *           when the socket name length does not meet the requirements
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -112,9 +114,10 @@ HWTEST_F(TransClientSocketServiceTest, SocketPeerName001, TestSize.Level1)
     ASSERT_EQ(socketId, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SocketPeerNetworkId001
- * @tc.desc: call Socket function with different socket peerNetworkId.
+ * @tc.desc: Verify whether the function can correctly return an error code
+ *           when the length of peerNetworkId does not meet the requirements
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -141,9 +144,10 @@ HWTEST_F(TransClientSocketServiceTest, SocketPeerNetworkId001, TestSize.Level1)
     ASSERT_EQ(socketId, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SocketPkgName001
- * @tc.desc: call Socket function with different socket pkgName.
+ * @tc.desc: test whether the function can correctly return an error code
+ *           when the package name parameter of the socket is an invalid value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -176,9 +180,10 @@ HWTEST_F(TransClientSocketServiceTest, SocketPkgName001, TestSize.Level1)
     ASSERT_EQ(socketId, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SocketPkgName001
- * @tc.desc: call Socket function with different data type.
+ * @tc.desc: Verify whether the system correctly returns the expected error code
+ *           when attempting to create sockets of different data types
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -197,9 +202,10 @@ HWTEST_F(TransClientSocketServiceTest, DataType001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: DfsBind001
- * @tc.desc: call DfsBind function with invalid socket or listener.
+ * @tc.desc: Verify the behavior of the DfsBind function under different input parameters, especially
+ *           the return values when the parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -221,9 +227,9 @@ static void OnShutdown(int32_t socket, ShutdownReason reason)
     return;
 }
 
-/**
+/*
  * @tc.name: DfsBind002
- * @tc.desc: call DfsBind function with offline socket.
+ * @tc.desc: test call DfsBind function with offline socket
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -234,9 +240,10 @@ HWTEST_F(TransClientSocketServiceTest, DfsBind002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: SetSocketOpt001
- * @tc.desc: call SetSocketOpt function with with invalid parameter.
+ * @tc.desc: Verify the behavior of the DfsBind function under different input parameters, especially
+ *           the return values when the parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -263,9 +270,10 @@ HWTEST_F(TransClientSocketServiceTest, SetSocketOpt001, TestSize.Level1)
     ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetSocketOpt001
- * @tc.desc: call GetSocketOpt function with with invalid parameter.
+ * @tc.desc: Verify whether the function correctly handles invalid parameters and whether it executes properly
+ *           when the parameters are valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -292,9 +300,9 @@ HWTEST_F(TransClientSocketServiceTest, GetSocketOpt001, TestSize.Level1)
     ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetSocketOpt002
- * @tc.desc: call GetSocketOpt function with with valid parameter.
+ * @tc.desc: test call GetSocketOpt function with with valid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -313,9 +321,9 @@ HWTEST_F(TransClientSocketServiceTest, GetSocketOpt002, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 
-/**
+/*
  * @tc.name: RegisterRelationChecker001
- * @tc.desc: call RegisterRelationChecker function with with invalid parameter.
+ * @tc.desc: test call RegisterRelationChecker function with with invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -325,9 +333,10 @@ HWTEST_F(TransClientSocketServiceTest, RegisterRelationChecker001, TestSize.Leve
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SetCommonSocketOpt001
- * @tc.desc: call SetCommonSocketOpt function with with invalid parameter.
+ * @tc.desc: verify that the function return values meet expectations
+ *           under various boundary conditions and error scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,9 +373,10 @@ HWTEST_F(TransClientSocketServiceTest, SetCommonSocketOpt001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetCommonSocketOpt001
- * @tc.desc: call GetCommonSocketOpt function with with invalid parameter.
+ * @tc.desc: The error handling capabilities of these functions
+ *           under different parameter combinations were verified
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -403,9 +413,9 @@ HWTEST_F(TransClientSocketServiceTest, GetCommonSocketOpt001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: BindAsync001
- * @tc.desc: call BindAsync function with with valid parameter.
+ * @tc.desc: test call BindAsync function with with valid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -431,9 +441,9 @@ HWTEST_F(TransClientSocketServiceTest, BindAsync001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: EvaluateQos001
- * @tc.desc: call EvaluateQos function with with valid parameter.
+ * @tc.desc: test call EvaluateQos function with with valid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -449,9 +459,9 @@ HWTEST_F(TransClientSocketServiceTest, EvaluateQos001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetMtuSize001
- * @tc.desc: call GetMtuSize function with with valid parameter.
+ * @tc.desc: test call GetMtuSize function with with valid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -463,9 +473,9 @@ HWTEST_F(TransClientSocketServiceTest, GetMtuSize001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: PrivilegeShutdown001
- * @tc.desc: call PrivilegeShutdown function with with valid parameter.
+ * @tc.desc: test call PrivilegeShutdown function with with valid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -481,9 +491,9 @@ HWTEST_F(TransClientSocketServiceTest, PrivilegeShutdown001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
-/**
+/*
  * @tc.name: SetAccessInfo001
- * @tc.desc: call SetAccessInfo function with with valid parameter.
+ * @tc.desc: test call SetAccessInfo function with with valid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -499,9 +509,10 @@ HWTEST_F(TransClientSocketServiceTest, SetAccessInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
  
-/**
+/*
  * @tc.name: GetSocketOpt003
- * @tc.desc: call GetSocketOpt function with with valid parameter.
+ * @tc.desc: Verify whether these two functions return the expected SOFTBUS_NOT_IMPLEMENT error code
+ *           when using the OPT_LEVEL_SOFTBUS and OPT_TYPE_MAX_BUFFER options
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -520,9 +531,9 @@ HWTEST_F(TransClientSocketServiceTest, GetSocketOpt003, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
  
-/**
+/*
  * @tc.name: RegisterRelationChecker002
- * @tc.desc: call RegisterRelationChecker function with with invalid parameter.
+ * @tc.desc: test call RegisterRelationChecker function with with invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -532,9 +543,9 @@ HWTEST_F(TransClientSocketServiceTest, RegisterRelationChecker002, TestSize.Leve
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ServiceSocketPeerNetworkId001
- * @tc.desc: call ServiceSocket function with with invalid parameter.
+ * @tc.desc: test the behavior of the ServiceSocket function under different input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
