@@ -42,13 +42,6 @@ void HandelNotifyFreeLaneResult(SoftBusMessage *msg)
     NotifyFreeLaneResult(laneReqId, errCode);
 }
 
-static void ReportLaneEvent(uint32_t laneHandle, LnnEventLaneStage stage, int32_t retCode)
-{
-    UpdateLaneEventInfo(laneHandle, EVENT_LANE_STAGE,
-        LANE_PROCESS_TYPE_UINT32, (void *)(&stage));
-    ReportLaneEventInfo(laneHandle, retCode);
-}
-
 static uint64_t GetCostTime(uint64_t triggerLinkTime)
 {
     uint64_t currentSysTime = SoftBusGetSysTimeMs();
@@ -67,18 +60,17 @@ static void UpdateLaneEventWithFreeLinkTime(uint32_t laneHandle)
         LNN_LOGE(LNN_LANE, "get laneProcess fail, laneHandle=%{public}u", laneHandle);
         return;
     }
-    uint64_t freeLinkTime = GetCostTime(laneProcess.laneProcessList64Bit[EVENT_FREE_LINK_TIME]);
-    UpdateLaneEventInfo(laneHandle, EVENT_FREE_LINK_TIME,
-        LANE_PROCESS_TYPE_UINT64, (void *)(&freeLinkTime));
+    uint64_t freeLinkTime = GetCostTime(laneProcess.laneProcessList64Bit[EVENT_COST_TIME]);
+    UpdateLaneEventInfo(laneHandle, EVENT_COST_TIME, LANE_PROCESS_TYPE_UINT64, (void *)(&freeLinkTime));
 }
 
 static void ReportLaneEventWithFreeLinkInfo(uint32_t laneReqId, int32_t errCode)
 {
     UpdateLaneEventWithFreeLinkTime(laneReqId);
     if (errCode == SOFTBUS_OK) {
-        ReportLaneEvent(laneReqId, EVENT_STAGE_LANE_FREE_SUCC, errCode);
+        (void)ReportLaneEventInfo(EVENT_STAGE_LANE_FREE, laneReqId, errCode);
     } else {
-        ReportLaneEvent(laneReqId, EVENT_STAGE_LANE_FREE_FAIL, errCode);
+        (void)ReportLaneEventInfo(EVENT_STAGE_LANE_FREE, laneReqId, errCode);
     }
 }
 
@@ -120,7 +112,7 @@ static void AsyncNotifyWhenDelayFree(uint32_t laneReqId)
     TransReqInfo reqInfo;
     (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
     UpdateLaneEventWithFreeLinkTime(laneReqId);
-    ReportLaneEvent(laneReqId, EVENT_STAGE_LANE_FREE_SUCC, SOFTBUS_OK);
+    (void)ReportLaneEventInfo(EVENT_STAGE_LANE_FREE, laneReqId, SOFTBUS_OK);
     if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get trans req info fail");
         return;
@@ -249,7 +241,7 @@ static void InitFreeLaneProcess(uint32_t laneReqId, uint64_t freeLinkStartTime)
     LaneProcess processInfo;
     (void)memset_s(&processInfo, sizeof(LaneProcess), 0, sizeof(LaneProcess));
     processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE] = laneReqId;
-    processInfo.laneProcessList64Bit[EVENT_FREE_LINK_TIME] = freeLinkStartTime;
+    processInfo.laneProcessList64Bit[EVENT_COST_TIME] = freeLinkStartTime;
     TransReqInfo reqInfo;
     (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
     if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
@@ -276,6 +268,7 @@ int32_t FreeLane(uint32_t laneReqId)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "update notify info fail, ret=%{public}d", ret);
         FreeLaneReqId(laneReqId);
+        ReportLaneEventWithFreeLinkInfo(laneReqId, ret);
         return ret;
     }
     TransReqInfo transReqInfo;
@@ -284,6 +277,7 @@ int32_t FreeLane(uint32_t laneReqId)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get transReqInfo fail, ret=%{public}d", ret);
         FreeLaneReqId(laneReqId);
+        ReportLaneEventWithFreeLinkInfo(laneReqId, ret);
         return ret;
     }
     LaneType type = (LaneType)(laneReqId >> LANE_REQ_ID_TYPE_SHIFT);

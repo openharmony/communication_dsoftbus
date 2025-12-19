@@ -319,7 +319,7 @@ static void DfxReportSelectLaneResult(uint32_t laneReqId, const LaneAllocInfo *a
     if (LnnGetRemoteNumInfo(allocInfo->networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) == SOFTBUS_OK) {
         extra.onlineType = discoveryType;
     }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
+    LNN_EVENT(EVENT_SCENE_LANE, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
 }
 
 static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)

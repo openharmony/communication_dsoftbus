@@ -26,8 +26,7 @@ extern "C" {
 #endif
 
 typedef enum {
-    EVENT_LANE_STAGE = 0x0,         // the lane state when report lane event info
-    EVENT_LANE_HANDLE,              // lane handle
+    EVENT_LANE_HANDLE = 0x0,        // lane handle
     EVENT_LANE_LINK_TYPE,           // lane link type
     EVENT_LANE_MIN_BW,              // qos info lane min bw
     EVENT_LANE_MAX_LANE_LATENCY,    // qos info lane max lane latency
@@ -42,14 +41,17 @@ typedef enum {
     EVENT_HML_REUSE,                // is HML retry
     EVENT_WIFI_DETECT_STATE,        // wifi detect state
     EVENT_DELAY_FREE,               // is delay free
+    EVENT_WIFI_DIRECT_REUSE,        // is wifi direct reuse
+    EVENT_BUILD_RETRY,              // is build link retry
+    EVENT_NO_CAP_ALLOC_LANE,        // alloc lane with no cap
+    EVENT_OS_TYPE,                  // os type
     EVENT_32_BIT_MAX,               // max index for lane event type 32-bit array
 } LaneEventType32Bit;
 
 typedef enum {
     EVENT_LANE_ID = 0x0,            // lane id
-    EVENT_BUILD_LINK_TIME,          // lane build link time
+    EVENT_COST_TIME,                // cost time
     EVENT_WIFI_DETECT_TIME,         // wifi detect time
-    EVENT_FREE_LINK_TIME,           // lane free link time
     EVENT_64_BIT_MAX,               // max index for lane event type 64-bit array
 } LaneEventType64Bit;
 
@@ -75,7 +77,8 @@ typedef struct {
 int32_t CreateLaneEventInfo(const LaneProcess *processInfo);
 int32_t UpdateLaneEventInfo(uint32_t laneHandle, uint32_t eventType, LaneProcessValueType valueType, void *arg);
 int32_t GetLaneEventInfo(uint32_t laneHandle, LaneProcess *laneProcess);
-int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result);
+int32_t ReportLaneEventInfo(LnnEventLaneStage stage, uint32_t laneHandle, int32_t result);
+void ReportLaneEventBuildLinkResult(uint32_t laneReqId, LaneLinkType type, uint64_t buildLinkTime, int32_t reason);
 int32_t InitLaneEvent(void);
 void DeinitLaneEvent(void);
 

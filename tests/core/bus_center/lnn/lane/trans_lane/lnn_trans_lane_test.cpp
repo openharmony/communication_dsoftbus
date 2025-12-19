@@ -62,6 +62,7 @@ void LNNTransLaneMockTest::SetUpTestCase()
     (void)SoftBusMutexInit(&g_lock, nullptr);
     (void)SoftBusCondInit(&g_cond);
     LnnInitLnnLooper();
+    (void)InitLaneEvent();
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     LaneInterface *transObj = TransLaneGetInstance();
@@ -71,6 +72,7 @@ void LNNTransLaneMockTest::SetUpTestCase()
 
 void LNNTransLaneMockTest::TearDownTestCase()
 {
+    DeinitLaneEvent();
     LnnDeinitLnnLooper();
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
@@ -1386,5 +1388,97 @@ HWTEST_F(LNNTransLaneMockTest, LNN_RELEASE_UNDELIVERABLE_LINK_001, TestSize.Leve
     EXPECT_CALL(lnnMock, RemoveAuthSessionServer).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(ReleaseUndeliverableLink(laneReqId, LANE_ID_BASE));
     EXPECT_NO_FATAL_FAILURE(ReleaseUndeliverableLink(laneReqId, LANE_ID_BASE));
+}
+
+/*
+* @tc.name: LNN_DFX_REPORT_NO_CAP_ALLOC_LANE_TEST_001
+* @tc.desc: lnn dfx report no cap alloc lane with hml
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_DFX_REPORT_NO_CAP_ALLOC_LANE_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LaneInterface *transObj = TransLaneGetInstance();
+    ASSERT_TRUE(transObj != nullptr);
+    LaneAllocInfo allocInfo = {
+        .type = LANE_TYPE_TRANS,
+    };
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LanePreferredLinkList recommendLinkList = {};
+    recommendLinkList.linkTypeNum = 0;
+    recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_HML;
+    EXPECT_CALL(laneMock, SelectExpectLanesByQos)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_INVALID_PARAM)));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_INVALID_PARAM)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_DFX_REPORT_NO_CAP_ALLOC_LANE_TEST_002
+* @tc.desc: lnn dfx report no cap alloc lane with p2p
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_DFX_REPORT_NO_CAP_ALLOC_LANE_TEST_002, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LaneInterface *transObj = TransLaneGetInstance();
+    ASSERT_TRUE(transObj != nullptr);
+    LaneAllocInfo allocInfo = {
+        .type = LANE_TYPE_TRANS,
+    };
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LanePreferredLinkList recommendLinkList = {};
+    recommendLinkList.linkTypeNum = 0;
+    recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_P2P;
+    EXPECT_CALL(laneMock, SelectExpectLanesByQos)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_INVALID_PARAM)));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_INVALID_PARAM)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = transObj->allocLaneByQos(LANE_REQ_ID_ONE, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: ALLOC_LANE_BY_SPECIFIED_LINK_TEST_001
+* @tc.desc: alloc lane by specified link fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, ALLOC_LANE_BY_SPECIFIED_LINK_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    LaneInterface *transObj = TransLaneGetInstance();
+    ASSERT_TRUE(transObj != nullptr);
+    uint32_t laneReqId = LANE_REQ_ID_ONE;
+    LaneAllocInfo allocInfo = {
+        .type = LANE_TYPE_TRANS,
+        .extendInfo.isSpecifiedLink = true,
+        .extendInfo.linkType = LANE_LINK_TYPE_MAX,
+    };
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
+    int32_t ret = transObj->allocLaneByQos(laneReqId, &allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+    EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = transObj->allocLaneByQos(laneReqId, &allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 }
 } // namespace OHOS
