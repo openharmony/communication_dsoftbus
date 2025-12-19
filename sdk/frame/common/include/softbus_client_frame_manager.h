@@ -27,6 +27,7 @@ extern "C" {
 int32_t InitSoftBus(const char *pkgName);
 int32_t CheckPackageName(const char *pkgName);
 uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len);
+void FreeClientPkgName(void);
 
 #ifdef __cplusplus
 }
