@@ -871,26 +871,12 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     (void)memset_s(&deviceKey, sizeof(deviceKey), 0, sizeof(deviceKey));
 }
 
-static bool JudgeIsSameAccount(const char *accountHash)
+int32_t GetLocalUdidShortHash(char *localUdidHash)
 {
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
-    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get local account hash fail");
-        return false;
+    if (localUdidHash == NULL) {
+        AUTH_LOGE(AUTH_FSM, "localUdidHash is null");
+        return SOFTBUS_INVALID_PARAM;
     }
-
-    uint8_t peerAccountHash[SHA_256_HASH_LEN] = { 0 };
-    if (ConvertHexStringToBytes(peerAccountHash, SHA_256_HASH_LEN, accountHash, strlen(accountHash)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "convert peer account hash to bytes fail");
-        return false;
-    }
-
-    return (memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == 0) &&
-        (!LnnIsDefaultOhosAccount());
-}
-
-static int32_t GetLocalUdidShortHash(char *localUdidHash)
-{
     char udid[UDID_BUF_LEN] = { 0 };
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get local udid fail");
@@ -919,31 +905,6 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "account hash not found");
         return;
     }
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnGetLocalNodeInfoSafe(&nodeInfo);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get node info fail");
-        return;
-    }
-    info->isSameAccount = JudgeIsSameAccount(info->accountHash);
-    char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get local udid short hash fail");
-        return;
-    }
-    char *udidShortHash = info->isSameAccount ? localUdidHash : info->udidShortHash;
-    char *credList = NULL;
-    ret = AuthIdServiceQueryCredential(info->userId, udidShortHash, info->accountHash, info->isSameAccount, &credList);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "query credential fail");
-        return;
-    }
-    info->credId = IdServiceGetCredIdFromCredList(nodeInfo.userId, credList);
-    if (info->credId == NULL) {
-        AUTH_LOGE(AUTH_FSM, "get cred id fail");
-    }
-    IdServiceDestroyCredentialList(&credList);
 }
 
 static void PackCompressInfo(JsonObj *obj, const NodeInfo *info)

@@ -434,53 +434,16 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
 {
     AuthHichainInterfaceMock hichainMock;
     AuthSessionInfo info = { 0 };
-    const char *credID = "1234";
-
     JsonObj *obj = JSON_CreateObject();
     EXPECT_NE(obj, NULL);
 
     EXPECT_CALL(hichainMock, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    EXPECT_CALL(hichainMock, LnnGetLocalNodeInfoSafe)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, LnnGetLocalByteInfo)
-        .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(false));
-    EXPECT_CALL(hichainMock, LnnGetLocalStrInfo)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, AuthIdServiceQueryCredential)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, IdServiceGetCredIdFromCredList)
-        .WillOnce(Return(NULL))
-        .WillRepeatedly(Return((char *)credID));
-    EXPECT_CALL(hichainMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, IdServiceDestroyCredentialList).Times(2);
-
     UnpackExternalAuthInfo(obj, &info);
     EXPECT_EQ(info.credId, NULL);
 
     info.authVersion = (AuthVersion)2; // AUTH_VERSION_V2
     UnpackExternalAuthInfo(obj, &info);
     EXPECT_EQ(info.credId, NULL);
-
-    UnpackExternalAuthInfo(obj, &info);
-    EXPECT_EQ(info.credId, NULL);
-
-    UnpackExternalAuthInfo(obj, &info);
-    EXPECT_EQ(info.credId, NULL);
-
-    UnpackExternalAuthInfo(obj, &info);
-    EXPECT_EQ(info.credId, NULL);
-
-    UnpackExternalAuthInfo(obj, &info);
-    EXPECT_EQ(info.credId, NULL);
-
-    UnpackExternalAuthInfo(obj, &info);
-    EXPECT_NE(info.credId, NULL);
 
     JSON_Delete(obj);
 }
