@@ -29,6 +29,7 @@ extern "C" {
 char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq);
 int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info, int64_t authSeq);
 bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen);
+int32_t GetLocalUdidShortHash(char *localUdidHash);
 
 #ifdef __cplusplus
 #if __cplusplus
