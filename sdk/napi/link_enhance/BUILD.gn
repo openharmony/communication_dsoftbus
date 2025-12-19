@@ -49,11 +49,6 @@ ohos_shared_library("linkenhance") {
     "napi:ace_napi",
   ]
 
-  if (softbus_os_account) {
-    defines += [ "SOFTBUS_OS_ACCOUNT"]
-    external_deps += [ "os_account:os_account_innerkits" ]
-  }
-
   relative_install_dir = "module/distributedsched"
 
   subsystem_name = "communication"

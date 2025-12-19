@@ -62,6 +62,7 @@
 #define SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME "SERVER_UNREG_RANGE_CB_FOR_MSDP"
 
 const char *g_limitPkgName = "ohos.distributedschedule.dms";
+static const std::string CONSTRAINT = "constraint.distributed.transmission.outgoing";
 
 #define READ_PARCEL_WITH_RET(parcel, type, data, retVal)        \
     do {                                                        \
@@ -471,6 +472,24 @@ static int32_t TransCheckSystemAppList(pid_t callingUid)
         return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
     }
     return SOFTBUS_OK;
+}
+
+static bool CheckMDMControl()
+{
+    std::vector<int32_t> ids;
+    ErrCode err = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (err != ERR_OK || ids.empty()) {
+        COMM_LOGE(COMM_SDK, "query id failed, err=%{public}d", err);
+        return false;
+    }
+
+    int32_t activeAccountId = ids[0];
+    bool isMDMControl = false;
+    err = AccountSA::OsAccountManager::CheckOsAccountConstraintEnabled(
+        activeAccountId, CONSTRAINT, isMDMControl);
+    COMM_CHECK_AND_RETURN_RET_LOGE(err == ERR_OK, false, COMM_SDK,
+        "check account constraint failed, err=%{public}d", err);
+    return isMDMControl;
 }
 #endif
 
@@ -2155,6 +2174,13 @@ static int32_t CheckPkgName(const char *pkgName)
 
 int32_t SoftBusServerStub::CreateServerInner(MessageParcel &data, MessageParcel &reply)
 {
+#ifdef SUPPORT_BUNDLENAME
+    if (CheckMDMControl()) {
+        COMM_LOGE(COMM_SVC, "MDM control, not allow");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+#endif
+
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
@@ -2201,6 +2227,12 @@ int32_t SoftBusServerStub::RemoveServerInner(MessageParcel &data, MessageParcel 
 
 int32_t SoftBusServerStub::ConnectInner(MessageParcel &data, MessageParcel &reply)
 {
+#ifdef SUPPORT_BUNDLENAME
+    if (CheckMDMControl()) {
+        COMM_LOGE(COMM_SVC, "MDM control, not allow");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+#endif
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
