@@ -45,7 +45,8 @@ void CommonCoreNetworkTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: SoftBusChannelToFrequencyTest001
- * @tc.desc: core common network channel to frequency test
+ * @tc.desc: Verify SoftBusChannelToFrequency returns correct frequency for valid channel
+ *           core common network channel to frequency test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -66,7 +67,8 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusChannelToFrequencyTest001, TestSize.Level
 
 /*
  * @tc.name: SoftBusFrequencyToChannelTest001
- * @tc.desc: core common network frequency to channel test
+ * @tc.desc: Verify SoftBusFrequencyToChannel returns correct channel for valid frequency
+ *           core common network frequency to channel test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -87,7 +89,8 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusFrequencyToChannelTest001, TestSize.Level
 
 /*
  * @tc.name: SoftBusBandCheckTest001
- * @tc.desc: core common network band check test
+ * @tc.desc: Verify SoftBusIs5GBand and SoftBusIs2GBand return correct results for valid frequency
+ *           core common network band check test
  * @tc.type: FUNC
  * @tc.require:
  */

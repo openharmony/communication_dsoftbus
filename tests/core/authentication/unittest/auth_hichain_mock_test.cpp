@@ -52,7 +52,8 @@ void AuthHichainMockTest::TearDown() { }
 
 /*
  * @tc.name: GEN_DEVICE_LEVEL_PARAM_TEST_001
- * @tc.desc: test GenDeviceLevelParam
+ * @tc.desc: Verify GenDeviceLevelParam returns nullptr in multiple failure scenarios
+ *           cJSON_CreateObject fails, AddStringToJsonObject fails, cJSON_PrintUnformatted fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -92,7 +93,8 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_TRANSMIT_TEST_001
- * @tc.desc: test OnTransmit
+ * @tc.desc: Verify OnTransmit returns false when AuthSessionPostAuthData returns SOFTBUS_INVALID_PARAM
+ *           and true when it returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -114,7 +116,8 @@ HWTEST_F(AuthHichainMockTest, ON_TRANSMIT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_DEVICE_SIDE_FLAG_TEST_001
- * @tc.desc: test GetDeviceSideFlag
+ * @tc.desc: Verify GetDeviceSideFlag returns SOFTBUS_LOCK_ERR SOFTBUS_AUTH_NOT_FOUND
+ *           and SOFTBUS_OK in different scenarios; ProcessAuthFailCallBack executes without fatal errors
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -155,7 +158,8 @@ HWTEST_F(AuthHichainMockTest, GET_DEVICE_SIDE_FLAG_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CHECK_ERR_RETURN_VALIDITY_TEST_001
- * @tc.desc: test CheckErrReturnValidity
+ * @tc.desc: Verify CheckErrReturnValidity returns SOFTBUS_PARSE_JSON_ERR; NotifyPcAuthFail executes without
+ *           fatal errors for different error codes and parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -179,8 +183,8 @@ HWTEST_F(AuthHichainMockTest, CHECK_ERR_RETURN_VALIDITY_TEST_001, TestSize.Level
     EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(TEST_AUTH_SEQ, errCode, errorReturn));
 }
 
-/*
- * @tc.desc: test OnRequest
+/* @tc.name: ON_REQUEST_TEST_001
+ * @tc.desc: Verify OnRequest returns nullptr in multiple failure scenarios
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -232,7 +236,8 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_REQUEST_TEST_002
- * @tc.desc: OnRequest test
+ * @tc.desc: Verify OnRequest returns nullptr in failure scenarios cJSON_PrintUnformatted fails authSeq=0
+ *           AddStringToJsonObject fails and non-nullptr when all operations succeed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -296,7 +301,8 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_UDID_HASH_TEST_001
- * @tc.desc: test GetUdidHash
+ * @tc.desc: Verify GetUdidHash returns SOFTBUS_INVALID_PARAM and SOFTBUS_OK in different scenarios;
+ *           DeletePcRestrictNode executes without fatal errors
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -334,7 +340,8 @@ HWTEST_F(AuthHichainMockTest, GET_UDID_HASH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: HICHAIN_START_AUTH_TEST_001
- * @tc.desc: test HichainStartAuth
+ * @tc.desc: Verify HichainStartAuth returns SOFTBUS_CREATE_JSON_ERR; OnDeviceBound executes
+ *           without fatal errors for different parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -372,7 +379,9 @@ HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_EXTERNAL_AUTH_INFO_001
- * @tc.desc: test PackExternalAuthInfo
+ * @tc.desc: Verify PackExternalAuthInfo returns SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR SOFTBUS_CREATE_JSON_ERR
+ *           SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR and SOFTBUS_OK in different scenarios
+ * @tc.type: FUNC
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -425,7 +434,8 @@ HWTEST_F(AuthHichainMockTest, PACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
 
 /*
  * @tc.name: UNPACK_EXTERNAL_AUTH_INFO_001
- * @tc.desc: test UnpackExternalAuthInfo
+ * @tc.desc: Verify UnpackExternalAuthInfo sets info.credId to NULL for different AuthVersion values
+ *           when JSON_GetStringFromObject fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

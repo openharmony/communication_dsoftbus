@@ -49,7 +49,7 @@ void PermissionEntryTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: StrIsEmptyTest001
- * @tc.desc: str is empty test, use the wrong or normal parameter
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for CheckPermissionEntry when sessionName is empty
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -65,7 +65,7 @@ HWTEST_F(PermissionEntryTest, StrIsEmptyTest001, TestSize.Level0)
 
 /*
  * @tc.name: LoadPermissionJsonTest001
- * @tc.desc: load permission json test, use the wrong or normal parameter
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for LoadPermissionJson when input json is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -79,7 +79,7 @@ HWTEST_F(PermissionEntryTest, LoadPermissionJsonTest001, TestSize.Level0)
 
 /*
  * @tc.name: CheckPermissionEntryTest001
- * @tc.desc: check permission entry test, use the wrong or normal parameter
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for CheckPermissionEntry when input sessionName is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -115,7 +115,7 @@ HWTEST_F(PermissionEntryTest, CheckPermissionEntryTest001, TestSize.Level0)
 
 /*
  * @tc.name: PermIsSecLevelPublicTest001
- * @tc.desc: perm is sec level public test, use the wrong or normal parameter
+ * @tc.desc: Return false for PermIsSecLevelPublic when input sessionName is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -136,7 +136,7 @@ HWTEST_F(PermissionEntryTest, PermIsSecLevelPublicTest001, TestSize.Level0)
 
 /*
  * @tc.name: AddDynamicPermissionTest001
- * @tc.desc: add dynamic permission test, use the wrong or normal parameter
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for AddDynamicPermission when input sessionName is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -163,7 +163,7 @@ HWTEST_F(PermissionEntryTest, AddDynamicPermissionTest001, TestSize.Level0)
 
 /*
  * @tc.name: DeleteDynamicPermissionTest001
- * @tc.desc: delete dynamic permission test, use the wrong parameter
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for DeleteDynamicPermission when input sessionName is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -179,7 +179,7 @@ HWTEST_F(PermissionEntryTest, DeleteDynamicPermissionTest001, TestSize.Level0)
 
 /*
  * @tc.name: LoadLnnPermissionJsonTest001
- * @tc.desc: fun param error
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for LoadLnnPermissionJson when input json is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -194,7 +194,8 @@ HWTEST_F(PermissionEntryTest, LoadLnnPermissionJsonTest001, TestSize.Level1)
 
 /*
  * @tc.name: CheckLnnPermissionEntryTest001
- * @tc.desc: fun param error
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for CheckLnnPermissionEntry
+ *           when input interfaceName or processName is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
