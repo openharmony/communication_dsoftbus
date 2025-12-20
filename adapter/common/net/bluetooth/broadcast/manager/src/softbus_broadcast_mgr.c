@@ -480,7 +480,7 @@ static void BcStartBroadcastingCallback(BroadcastProtocol protocol, int32_t adap
                 adapterBcId, managerId);
             continue;
         }
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d,"
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, bcId=%{public}d, status=%{public}d,"
             "c=%{public}u", GetSrvType(bcManager->srvType), managerId, adapterBcId, status, callCount++);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
             if (!bcManager->isAdvertising) {
@@ -548,7 +548,7 @@ static void BcUpdateBroadcastingCallback(BroadcastProtocol protocol, int32_t ada
             SoftBusMutexUnlock(&g_bcLock);
             continue;
         }
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d",
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, BcId=%{public}d, status=%{public}d",
             GetSrvType(bcManager->srvType), managerId, adapterBcId, status);
         BroadcastCallback callback = *(bcManager->bcCallback);
         SoftBusMutexUnlock(&g_bcLock);
@@ -571,7 +571,7 @@ static void BcSetBroadcastingCallback(BroadcastProtocol protocol, int32_t adapte
             continue;
         }
         static uint32_t callCount = 0;
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d,"
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, BcId=%{public}d, status=%{public}d,"
             "c=%{public}u", GetSrvType(bcManager->srvType), managerId, adapterBcId, status, callCount++);
         BroadcastCallback callback = *(bcManager->bcCallback);
         SoftBusMutexUnlock(&g_bcLock);
@@ -593,7 +593,7 @@ static void BcSetBroadcastingParamCallback(BroadcastProtocol protocol, int32_t a
             continue;
         }
         static uint32_t callCount = 0;
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d,"
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, BcId=%{public}d,"
             "status=%{public}d, c=%{public}u", GetSrvType(bcManager->srvType),
             managerId, adapterBcId, status, callCount++);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
@@ -617,7 +617,7 @@ static void BcEnableBroadcastingCallback(BroadcastProtocol protocol, int32_t ada
             continue;
         }
         static uint32_t callCount = 0;
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d,"
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, BcId=%{public}d,"
             "status=%{public}d, c=%{public}u", GetSrvType(bcManager->srvType),
             managerId, adapterBcId, status, callCount++);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
@@ -642,7 +642,7 @@ static void BcDisableBroadcastingCallback(BroadcastProtocol protocol, int32_t ad
             continue;
         }
         static uint32_t callCount = 0;
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d,"
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, BcId=%{public}d,"
             "status=%{public}d, c=%{public}u", GetSrvType(bcManager->srvType),
             managerId, adapterBcId, status, callCount++);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
@@ -674,7 +674,7 @@ static void BcOnStartScanCallback(BroadcastProtocol protocol, int32_t adapterSca
             scanManager->scanCallback == NULL || scanManager->scanCallback->OnStartScanCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterScanId=%{public}d, "
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, ScanId=%{public}d, "
             "status=%{public}d", GetSrvType(scanManager->srvType), managerId, adapterScanId, status);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
             scanManager->isScanning = true;
@@ -693,10 +693,12 @@ static void BcStopScanCallback(BroadcastProtocol protocol, int32_t adapterScanId
             scanManager->scanCallback == NULL || scanManager->scanCallback->OnStopScanCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterScanId=%{public}d, "
-            "status=%{public}d", GetSrvType(scanManager->srvType), managerId, adapterScanId, status);
+        
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
             scanManager->isScanning = false;
+        } else {
+            DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}u, ScanId=%{public}d, "
+                "status=%{public}d", GetSrvType(scanManager->srvType), managerId, adapterScanId, status);
         }
 
         scanManager->scanCallback->OnStopScanCallback((int32_t)managerId, status);
@@ -1660,9 +1662,7 @@ static int32_t DeleteFilterByIndex(int32_t listenerId, SoftBusBcScanFilter **ada
         BroadcastProtocol protocol = scanManager->protocol;
         ret = g_interface[protocol]->SetScanParams(scanManager->adapterScanId, adapterParam,
             *adapterFilter, filterSize, SOFTBUS_SCAN_FILTER_CMD_DELETE);
-        if (ret == SOFTBUS_OK) {
-            g_firstSetIndex[filterIndex] = false;
-        }
+        g_firstSetIndex[filterIndex] = false;
     }
 
     return ret;
@@ -2086,14 +2086,17 @@ static void StartBroadcastingWaitSignal(int32_t bcId, SoftBusMutex *mutex, int64
     if (SoftBusCondWaitSec(sec, bcId, mutex) == SOFTBUS_OK) {
         return;
     }
-    DISC_LOGW(DISC_BROADCAST, "wait signal failed, srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
-        "call StopBroadcast", GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
+    DISC_LOGW(DISC_BROADCAST, "wait failed, srvType=%{public}s, bcId=%{public}d",
+        GetSrvType(g_bcManager[bcId].srvType), bcId);
     SoftBusMutexUnlock(mutex);
     int32_t ret = g_interface[g_bcManager[bcId].protocol]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
-    DISC_LOGW(DISC_BROADCAST, "StopBroadcasting ret=%{public}d", ret);
+
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(mutex) == SOFTBUS_OK, DISC_BROADCAST, "bcLock mutex error");
     ret = SoftBusCondWaitSec(sec, bcId, mutex);
-    DISC_LOGW(DISC_BROADCAST, "wait signal ret=%{public}d", ret);
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGW(DISC_BROADCAST, "wait stop failed=%{public}d", ret);
+    }
+
     g_bcManager[bcId].isAdvertising = false;
 }
 
@@ -2165,7 +2168,6 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     }
 
     if (g_bcManager[bcId].isAdvertising && !g_bcManager[bcId].isStarted) {
-        DISC_LOGW(DISC_BROADCAST, "wait condition managerId=%{public}d", bcId);
         StartBroadcastingWaitSignal(bcId, &g_bcLock, BC_WAIT_TIME_SEC);
     }
 
@@ -2179,9 +2181,8 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     }
     SoftbusBroadcastParam adapterParam;
     ConvertBcParams(protocol, param, &adapterParam);
-    DISC_LOGI(DISC_BROADCAST, "start service srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
-        "c=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId,
-        g_bcManager[bcId].adapterBcId, callCount++);
+    DISC_LOGI(DISC_BROADCAST, "start bc srvType=%{public}s, bcId=%{public}d, "
+        "c=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId, callCount++);
     BroadcastCallback callback = *(g_bcManager[bcId].bcCallback);
     SoftBusMutexUnlock(&g_bcLock);
     ret = g_interface[protocol]->StartBroadcasting(g_bcManager[bcId].adapterBcId, &adapterParam, &softbusBcData);
@@ -2214,7 +2215,6 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
 
 int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter update bc");
     DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invald param");
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invald packet");
 
@@ -2229,8 +2229,6 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
 
 int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
 {
-    static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "enter set bc data, bcId=%{public}d, c=%{public}u", bcId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param packet");
 
     int32_t ret = SoftBusMutexLock(&g_bcLock);
@@ -2254,9 +2252,9 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_NOT_BROADCASTING;
     }
-    DISC_LOGI(DISC_BROADCAST, "replace BroadcastPacket srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
-        "c=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId,
-        callCount++);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BROADCAST, "replace bc srvType=%{public}s, bcId=%{public}d,"
+        "c=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId, callCount++);
     SoftbusBroadcastData softbusBcData = {0};
     ret = BuildSoftbusBroadcastData(protocol, packet, &softbusBcData);
     if (ret != SOFTBUS_OK) {
@@ -2398,8 +2396,6 @@ int32_t PerformSetBroadcastingParam(int32_t bcId, SoftbusBroadcastParam *softbus
 
 int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param)
 {
-    static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "enter set bc Param, bcId=%{public}d, c=%{public}u", bcId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param");
 
     int32_t ret = SoftBusMutexLock(&g_bcLock);
@@ -2423,9 +2419,9 @@ int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_NOT_BROADCASTING;
     }
-    DISC_LOGI(DISC_BROADCAST, "replace BroadcastParam srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
-        "c=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId,
-        callCount++);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BROADCAST, "replace param srvType=%{public}s, bcId=%{public}d, "
+        "c=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId, callCount++);
     SoftbusBroadcastParam softbusBcParam = {};
     ConvertBcParams(protocol, param, &softbusBcParam);
     g_bcManager[bcId].isDisableCb = false;
@@ -2539,8 +2535,8 @@ static int32_t PerformNormalStartScan(BroadcastProtocol protocol,
         DISC_BROADCAST, "no filter");
     DumpBcScanFilter(adapterFilter, filterSize);
 
-    DISC_LOGI(DISC_BROADCAST, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d, "
-        "interval=%{public}hu, window=%{public}hu, c=%{public}u",
+    DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}d, scanId=%{public}d,"
+        "(%{public}hu, %{public}hu), c=%{public}u",
         GetSrvType(g_scanManager[listenerId].srvType), listenerId,
         g_scanManager[listenerId].adapterScanId, adapterParam->scanInterval,
         adapterParam->scanWindow, (*callCount)++);
@@ -2586,7 +2582,7 @@ static int32_t ProcessFliterChanged(int32_t listenerId, SoftBusBcScanParams *ada
     ScanManager *scanManager = &g_scanManager[listenerId];
     BroadcastProtocol protocol = scanManager->protocol;
     if (scanManager->isScanning) {
-        DISC_LOGI(DISC_BROADCAST, "listenerId=%{public}d, srvType=%{public}s", listenerId,
+        DISC_LOGI(DISC_BROADCAST, "lId=%{public}d, srvType=%{public}s", listenerId,
             GetSrvType(scanManager->srvType));
         if (scanManager->addSize == 0 && scanManager->deleteSize == 0) {
             DISC_LOGI(DISC_BROADCAST, "scanId=%{public}d (%{public}hu, %{public}hu)",
@@ -2711,8 +2707,8 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_BC_MGR_INVALID_LISN_ID;
     }
-    DISC_LOGI(DISC_BROADCAST, "enter start scan, listenerId=%{public}d, c=%{public}u, srvType=%{public}s",
-        listenerId, callCount++, GetSrvType(g_scanManager[listenerId].srvType));
+    DISC_LOGI(DISC_BROADCAST, "start scan, lId=%{public}d, srvType=%{public}s, c=%{public}u",
+        listenerId, GetSrvType(g_scanManager[listenerId].srvType), callCount++);
 
     BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
 
@@ -2774,7 +2770,7 @@ int32_t StopScan(int32_t listenerId)
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_INVALID_PARAM;
     }
-    DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d, c=%{public}u",
+    DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}d, scanId=%{public}d, c=%{public}u",
         GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId, callCount);
     if (!g_scanManager[listenerId].isScanning) {
         DISC_LOGI(DISC_BROADCAST, "listenerId is not scanning. listenerId=%{public}d", listenerId);
@@ -2883,7 +2879,7 @@ static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter
 
 int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum)
 {
-    DISC_LOGD(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
+    DISC_LOGD(DISC_BROADCAST, "set scan filter, filterNum=%{public}d", filterNum);
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "param is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum == 0) || (filterNum > MAX_FILTER_SIZE)),
         SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
