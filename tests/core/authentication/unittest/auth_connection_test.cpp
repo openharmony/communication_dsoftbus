@@ -268,7 +268,7 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_REQUEST_ID_TEST_001, TestSize.
 
 /*
  * @tc.name: NOTIFY_CLIENT_CONNECTED_TEST_001
- * @tc.desc: Verify that NotifyClientConnected correctly triggers the onConnectResult callback for registered listeners.
+ * @tc.desc: Verify that NotifyClientConnected correctly triggers the onConnectResult callback for registered listeners
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

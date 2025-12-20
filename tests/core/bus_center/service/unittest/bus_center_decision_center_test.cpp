@@ -75,7 +75,8 @@ void BusCenterDecisionTest::TearDown(void)
 
 /*
 * @tc.name: BusCenterDecisionTest001
-* @tc.desc: decision report connect exception test
+* @tc.desc: Verify LnnDCReportConnectException executes without fatal failure when reporting connect exception with
+            CONNECT_BR and CONNECT_P2P type ConnectOption
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -92,7 +93,8 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest002
-* @tc.desc: decision clear connect exception test
+* @tc.desc: Verify LnnDCClearConnectException executes without fatal failure when clearing connect exception with
+            CONNECT_BR and CONNECT_P2P type ConnectOption
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -109,7 +111,8 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest002, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest003
-* @tc.desc: decision process online state test
+* @tc.desc: Verify LnnDCProcessOnlineState executes without fatal failure when processing online state with
+            CONNECT_BR and CONNECT_P2P type ConnectOption
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -128,7 +131,7 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest003, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest004
-* @tc.desc: init decision center test
+* @tc.desc: Verify InitDecisionCenter returns SOFTBUS_INVALID_PARAM when CreateSoftBusList returns nullptr
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -143,7 +146,7 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest004, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest005
-* @tc.desc: init decision center test
+* @tc.desc: Verify InitDecisionCenter returns SOFTBUS_OK when CreateSoftBusList returns valid SoftBusList
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -169,7 +172,8 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest005, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest006
-* @tc.desc: init decision center test
+* @tc.desc: Verify InitDecisionCenter returns SOFTBUS_OK when CreateSoftBusList returns valid SoftBusList
+            and LnnEnhanceFuncListGet returns valid LnnEnhanceFuncList
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -195,7 +199,8 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest006, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest007
-* @tc.desc: init decision center test
+* @tc.desc: Verify InitDecisionCenter returns SOFTBUS_OK when CreateSoftBusList returns valid SoftBusList
+            and LnnEnhanceFuncListGet returns valid LnnEnhanceFuncList with registAuthTransListener set to nullptr
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1

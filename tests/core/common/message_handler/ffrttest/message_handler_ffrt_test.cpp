@@ -216,7 +216,8 @@ static void DeInitTestFfrtLooper(void)
 
 /*
  * @tc.name: LooperCreateDestroyTest001
- * @tc.desc: test create and destroy looper with buscenter_lp
+ * @tc.desc: Verify CreateNewLooper returns nullptr for null/overlong names; successful creation destruction
+ *           and message posting with BusCenter_Lp looper
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -260,7 +261,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateDestroyTest001, TestSize.Level1)
 
 /*
  * @tc.name: LnnPostFfrtMsgTest001
- * @tc.desc: test msg handle with lnn_lp, wait signal before destroy
+ * @tc.desc: Verify LnnPostFfrtMsg returns SOFTBUS_OK for valid parameters;
+ *           test msg handle with lnn_lp, wait signal before destroy
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -279,7 +281,8 @@ HWTEST_F(MessageHandlerFfrtTest, LnnPostFfrtMsgTest001, TestSize.Level1)
 
 /*
  * @tc.name: LooperCreateLnnLpTest002
- * @tc.desc: test msg handle with lnn_lp, no wait signal before destroy
+ * @tc.desc: Verify CreateNewLooper returns nullptr for null/overlong names; successful creation destruction
+ *           and message posting with Lnn_Lp looper, no wait signal before destroy
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -300,7 +303,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest002, TestSize.Level1)
 
 /*
  * @tc.name: LooperCreateLnnLpTest003
- * @tc.desc: test destroy looper after batch post msg
+ * @tc.desc: Verify CreateNewLooper returns nullptr for null/overlong names; successful creation destruction
+ *           and message posting with Lnn_Lp looper, destroy looper after batch post msg
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -324,7 +328,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest003, TestSize.Level1)
 
 /*
  * @tc.name: LooperCreateLnnLpTest004
- * @tc.desc: test destroy looper after batch post msg and remove
+ * @tc.desc: Verify CreateNewLooper returns nullptr for null/overlong names; successful creation destruction
+ *           and message posting with Lnn_Lp looper, destroy looper after batch post msg and remove
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -352,7 +357,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest004, TestSize.Level1)
 
 /*
  * @tc.name: LooperCreateLnnLpTest005
- * @tc.desc: test lnn looper msg handle with delay, multi post
+ * @tc.desc: Verify CreateNewLooper returns nullptr for null/overlong names; successful creation destruction
+ *           and message posting with Lnn_Lp looper, test msg handle with delay, multi post
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -379,7 +385,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateLnnLpTest005, TestSize.Level1)
 
 /*
  * @tc.name: LooperRemoveMsgTest001
- * @tc.desc: test custom remove msg, match target msg, post delay 200ms
+ * @tc.desc: Verify TestFfrtRemoveMsgCustom removes custom messages correctly
+ *           test custom remove msg, match target msg, post delay 200ms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -412,7 +419,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperRemoveMsgTest001, TestSize.Level1)
 
 /*
  * @tc.name: LooperRemoveMsgTest002
- * @tc.desc: test custom remove msg, not match target msg, post delay 200ms
+ * @tc.desc: Verify TestFfrtRemoveMsgCustom removes custom messages correctly
+ *           test custom remove msg, not match target msg, post delay 200ms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -441,7 +449,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperRemoveMsgTest002, TestSize.Level1)
 
 /*
  * @tc.name: LooperRemoveMsgTest003
- * @tc.desc: test remove msg without custom, post delay 200ms
+ * @tc.desc: Verify TestFfrtRemoveMsg removes messages correctly
+ *           test remove msg without custom, post delay 200ms
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -463,7 +472,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperRemoveMsgTest003, TestSize.Level1)
 
 /*
  * @tc.name: LooperFreeMsgTest001
- * @tc.desc: test free msg custom
+ * @tc.desc: Verify TestFfrtFreeMessage frees custom messages correctly
+ *           test free msg custom
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -487,7 +497,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperFreeMsgTest001, TestSize.Level1)
 
 /*
  * @tc.name: LooperFreeMsgTest002
- * @tc.desc: test free msg without custom
+ * @tc.desc: Verify TestFfrtFreeMessage frees messages correctly
+ *           test free msg without custom
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -509,7 +520,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperFreeMsgTest002, TestSize.Level1)
 
 /*
  * @tc.name: LooperSetDumpable001
- * @tc.desc: test SetLooperDumpable
+ * @tc.desc: Verify SetLooperDumpable sets looper dumpable correctly
+ *           test SetLooperDumpable
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -529,7 +541,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperSetDumpable001, TestSize.Level1)
 
 /*
  * @tc.name: LooperCreateByNameTest001
- * @tc.desc: test looper name with qos_perception_handler
+ * @tc.desc: Verify InitTestFfrtLooperByName creates looper with correct name
+ *           test looper name with qos_perception_handler
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -556,7 +569,8 @@ HWTEST_F(MessageHandlerFfrtTest, LooperCreateByNameTest001, TestSize.Level1)
 
 /*
  * @tc.name: LooperCreateByNameTest002
- * @tc.desc: test looper name with nullptr
+ * @tc.desc: Verify InitTestFfrtLooperByName creates looper with correct name
+ *           test looper name with nullptr
  * @tc.type: FUNC
  * @tc.require:
  */

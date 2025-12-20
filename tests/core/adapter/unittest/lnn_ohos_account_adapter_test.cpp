@@ -55,7 +55,8 @@ void LnnOhosAccountAdapterTest::TearDown(void) { }
 
 /*
  * @tc.name: GetCurrentAccount_001
- * @tc.desc: test with different parameters for the current account
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when account pointer is nullptr
+ *           and SOFTBUS_AUTH_INNER_ERR when not in same account group device
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -70,7 +71,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_001, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_002
- * @tc.desc: test with different parameters for the current account
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when in
+ *           same account group but querying Ohos account info fails
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -87,7 +89,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_002, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_003
- * @tc.desc: test with different parameters for the current account
+ * @tc.desc: Return SOFTBUS_OK when in same account group and Ohos account name is empty
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -105,7 +107,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_003, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_004
- * @tc.desc: test with different parameters for the current account
+ * @tc.desc: Return SOFTBUS_OK when in same account group and Ohos account name is default account name
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -123,7 +125,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_004, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_005
- * @tc.desc: test with different parameters for the current account
+ * @tc.desc: Return SOFTBUS_OK when in same account group and Ohos account name is alphabetic string
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -141,7 +143,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_005, TestSize.Level1)
 
 /*
  * @tc.name: GetCurrentAccount_006
- * @tc.desc: test with different parameters for the current account
+ * @tc.desc: Return SOFTBUS_OK when in same account group and Ohos account name is numeric string
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -159,7 +161,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_006, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountUid_InvalidParam01
- * @tc.desc: GetOsAccountUid invalid param test
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountUid buffer is nullptr
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -173,7 +175,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam01, TestSize.Lev
 
 /*
  * @tc.name: GetOsAccountUid_InvalidParam02
- * @tc.desc: GetOsAccountUid invalid param test
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when len pointer is nullptr
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -187,8 +189,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam02, TestSize.Lev
 
 /*
  * @tc.name: GetOsAccountUid_InvalidParam03
- * @tc.desc: GetOsAccountUid invalid param test
- * @tc.type: FUN
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when idLen is 0 and non-invalid when idLen is ACCOUNT_UID_STR_LEN
  * @tc.require: 1
  */
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam03, TestSize.Level1)
@@ -206,7 +207,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam03, TestSize.Lev
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_001
- * @tc.desc: GetOsAccountUidByUserId invalid param test
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountUid buffer is nullptr
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -221,7 +222,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_001, TestSize.L
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_002
- * @tc.desc: GetOsAccountUidByUserId invalid param test
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when len pointer is nullptr
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -236,7 +237,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_002, TestSize.L
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_003
- * @tc.desc: GetOsAccountUidByUserId invalid param test
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when idLen is 0
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -252,7 +253,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_003, TestSize.L
 
 /*
  * @tc.name: GetOsAccountUidByUserId_Test_004
- * @tc.desc: GetOsAccountUidByUserId invalid param test
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is 0
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -268,7 +269,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_Test_004, TestSize.L
 
 /*
  * @tc.name: GetOsAccountId_001
- * @tc.desc: test for invalid param passed through the GetOsAccountId
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountInfo buffer is nullptr idLen is 0 or len pointer is nullptr
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -287,7 +288,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_001, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_002
- * @tc.desc: test for invalid param passed through the GetOsAccountId
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED with valid parameters for GetOsAccountId
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -305,7 +306,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_003
- * @tc.desc: test for invalid param passed through the GetOsAccountId
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when QueryOhosAccountInfo returns
+ *           failure with valid parameters
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -327,7 +329,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_004
- * @tc.desc: test for invalid param passed through the GetOsAccountId
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when Ohos account name is empty with valid parameters
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -351,7 +353,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountId_005
- * @tc.desc: test for invalid param passed through the GetOsAccountId
+ * @tc.desc: Return SOFTBUS_MEM_ERR when Ohos account name is "ohosAnonymousName" and len is 17 with
+ *           valid buffer and idLen
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -375,7 +378,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_005, TestSize.Level1)
 
 /*
  * @tc.name: GetOsAccountUidByUserId_001
- * @tc.desc: GetOsAccountUidByUserId Invalid Param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when idLen is 0 with valid accountInfo buffer len pointer and userId
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -394,7 +397,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_001, TestSize.Level1
 
 /*
  * @tc.name: GetOsAccountUidByUserId_002
- * @tc.desc: GetOsAccountUidByUserId Failed
+ * @tc.desc: Return -1 when Ohos account name is "teatsa" with valid userId accountInfo buffer idLen and len
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -415,7 +418,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_002, TestSize.Level1
 
 /*
  * @tc.name: GetOsAccountUidByUserId_003
- * @tc.desc:  GetOsAccountUidByUserId Failed
+ * @tc.desc: Return -1 when Ohos account name is "ohosAnonymousName" with
+ *           valid userId accountInfo buffer idLen and len
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -436,7 +440,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_003, TestSize.Level1
 
 /*
  * @tc.name: GetOsAccountIdByUserId_Test_001
- * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is 0 with valid id buffer and len pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -453,7 +457,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_Test_001, TestSize.Le
 
 /*
  * @tc.name: GetOsAccountIdByUserId_Test_002
- * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when id buffer is nullptr with valid userId and len pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -466,7 +470,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_Test_002, TestSize.Le
 
 /*
  * @tc.name: GetOsAccountIdByUserId_Test_003
- * @tc.desc: GetOsAccountIdByUserId Get Account Info FailInfo
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when getting account info fails with
+ *           valid userId id buffer and len
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -484,7 +489,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_Test_003, TestSize.Le
 
 /*
  * @tc.name: GetOsAccountIdByUserId_Test_004
- * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when id buffer is nullptr with valid userId and len
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -498,7 +503,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_Test_004, TestSize.Le
 
 /*
  * @tc.name: GetOsAccountIdByUserId_Test_005
- * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when len pointer is nullptr with valid userId and id buffer pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -512,7 +517,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_Test_005, TestSize.Le
 
 /*
  * @tc.name: GetOsAccountIdByUserId_Test_006
- * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is 0 with valid id buffer pointer and len
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -527,7 +532,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_Test_006, TestSize.Le
 
 /*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001
- * @tc.desc: GetOsAccountIdByUserId invalid param and expected return Failed
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is 0 and id buffer is nullptr with valid size pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -540,7 +545,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001, TestS
 
 /*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002
- * @tc.desc: GetOsAccountIdByUserId invalid param and expected return Failed
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is 0 and size pointer is nullptr with valid id buffer pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -553,7 +558,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002, TestS
 
 /*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003
- * @tc.desc: GetOsAccountIdByUserId invalid param and expected return Failed
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is -1 with null id buffer and valid size pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -568,7 +573,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003, TestS
 
 /*
  * @tc.name: GET_OS_ACCOUNT_TEST_001
- * @tc.desc: GetOsAccountUid Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountUid buffer is nullptr with valid idLen and size pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -581,7 +586,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_OS_ACCOUNT_TEST_002
- * @tc.desc: GetOsAccountUid Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when idLen is 0 with valid accountUid buffer and size pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -596,7 +601,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_OS_ACCOUNT_TEST_003
- * @tc.desc: GetOsAccountUid Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when size pointer is nullptr with valid accountUid buffer and idLen
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -610,7 +615,9 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001
- * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountId buffer is nullptr with idLen as ACCOUNT_UID_LEN_MAX-1
+ *           size pointer and userId 0
+ * @tc.type: FUN
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -624,7 +631,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002
- * @tc.desc: GetOsAccountUid Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when size pointer is nullptr with valid accountId
+ *           buffer idLen as ACCOUNT_UID_LEN_MAX-1 and userId 0
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -639,7 +647,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003
- * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when idLen is 0 with valid accountId buffer size pointer and userId 0
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -655,7 +663,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004
- * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is -1 with valid accountId buffer
+ *           idLen as ACCOUNT_UID_LEN_MAX-1 and size pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -671,7 +680,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004, Test
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005
- * @tc.desc: GetOsAccountUidByUserId Failed with invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is 0 with valid accountId buffer
+ *           idLen as ACCOUNT_UID_LEN_MAX-1 and size pointer
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -687,7 +697,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005, Test
 
 /*
  * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_001
- * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.desc: Execute JudgeDeviceTypeAndGetOsAccountIds normally without fatal errors
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -698,7 +708,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_001
 
 /*
  * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_002
- * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.desc: Execute JudgeDeviceTypeAndGetOsAccountIds normally without
+ *           fatal errors after setting device type to TYPE_CAR_ID
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -711,7 +722,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_002
 
 /*
  * @tc.name: GetOsAccountIdByUserId_001
- * @tc.desc: GetOsAccountIdByUserId Account Info Empty
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when
+ *           Ohos account name is empty and in same account group
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -736,7 +748,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_001, TestSize.Level0)
 
 /*
  * @tc.name: GetOsAccountIdByUserId_002
- * @tc.desc: GetOsAccountIdByUserId Default Account Name
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when Ohos account name is
+ *           default account name and in same account group
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -762,7 +775,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_002, TestSize.Level0)
 
 /*
  * @tc.name: GetOsAccountUidByUserId_004
- * @tc.desc: GetOsAccountUidByUserId Success
+ * @tc.desc: Return SOFTBUS_OK and verify accountInfo matches expected UID when GetOsAccountDistributedInfo succeeds
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -789,7 +802,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_004, TestSize.Level0
 
 /*
  * @tc.name: GetOsAccountUidByUserId_005
- * @tc.desc: GetOsAccountUidByUserId idLen too small
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when idLen is too small to hold the UID
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -817,7 +830,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_005, TestSize.Level0
 
 /*
  * @tc.name: GetOsAccountUidByUserId_006
- * @tc.desc: GetOsAccountUidByUserId Fail with Empty Account Name
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountInfo buffer is nullptr idLen is 0 and Ohos account name is empty
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -841,7 +854,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_006, TestSize.Level0
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_001
- * @tc.desc: GetOsAccountUidByUserId Fail with Default Account Name
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountInfo buffer is nullptr idLen is 0
+ *           and Ohos account name is default account name
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -865,7 +879,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_001, TestSize.
 
 /*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_002
- * @tc.desc: GetOsAccountUidByUserId Fail with Default Account Name
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for multiple invalid parameter combinations
+ *           null buffer zero idLen null len pointer zero userId
  * @tc.type: FUN
  * @tc.require: 1
  */

@@ -61,8 +61,9 @@ void AuthApplyKeyManagerTest::SetUp() { }
 void AuthApplyKeyManagerTest::TearDown() { }
 
 /*
- * @tc.name: AuthApplyKeyManagerTest001
- * @tc.desc: Verify that AuthApplyKeyManager can be initialized and deinitialized successfully.
+ * @tc.name: AUTH_APPLY_KEY_MANAGER_INIT_Test_001
+ * @tc.desc: Verify that AuthInsertApplyKey AuthDeleteApplyKey and GetApplyKeyByBusinessInfo return SOFTBUS_NO_INIT
+ *           when ApplyKeyManager is uninitialized; non-fatal execution for recovery deinit and clear function
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -83,7 +84,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_INIT_Test_001, TestSize
 
 /*
  * @tc.name: AUTH_APPLY_KEY_MANAGER_Test_001
- * @tc.desc: Verify that apply keys can be inserted, retrieved, and deleted successfully.
+ * @tc.desc: Verify successful insertion retrieval and deletion of apply keys after initializing ApplyKeyManager
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

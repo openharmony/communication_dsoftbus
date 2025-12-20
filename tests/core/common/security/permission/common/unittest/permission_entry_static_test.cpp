@@ -46,8 +46,9 @@ void PermissionEntrystaticTest::SetUpTestCase(void) { }
 void PermissionEntrystaticTest::TearDownTestCase(void) { }
 
 /*
- * @tc.name: GetPeMapValueTest001
- * @tc.desc: get pe map value test, use the wrong parameter
+ * @tc.name: GetPeMapValue001
+ * @tc.desc: Verify GetPeMapValue returns UNKNOWN_VALUE for invalid parameter
+ *           Get pe map value test, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -61,7 +62,8 @@ HWTEST_F(PermissionEntrystaticTest, GetPeMapValue001, TestSize.Level0)
 
 /*
  * @tc.name: StrStartWithTest001
- * @tc.desc: str start with test, use the wrong or normal parameter
+ * @tc.desc: Verify StrStartWith returns false for invalid parameter
+ *           Str start with test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -83,7 +85,8 @@ HWTEST_F(PermissionEntrystaticTest, StrStartWithTest001, TestSize.Level0)
 
 /*
  * @tc.name: ProcessAppInfoTest001
- * @tc.desc: process app info test, use the wrong or normal parameter
+ * @tc.desc: Verify ProcessAppInfo returns nullptr for invalid parameter
+ *           Process app info test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -97,7 +100,8 @@ HWTEST_F(PermissionEntrystaticTest, ProcessAppInfoTest001, TestSize.Level0)
 
 /*
  * @tc.name: ProcessPermissionEntryTest001
- * @tc.desc: process permission entry test, use the wrong or normal parameter
+ * @tc.desc: Verify ProcessPermissionEntry returns nullptr for invalid parameter
+ *           Process permission entry test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -115,7 +119,8 @@ HWTEST_F(PermissionEntrystaticTest, ProcessPermissionEntryTest001, TestSize.Leve
 
 /*
  * @tc.name: CompareStringTest001
- * @tc.desc: compare string test, use the wrong or normal parameter
+ * @tc.desc: Verify CompareString returns SOFTBUS_INVALID_PARAM for invalid parameter
+ *           Compare string test, use the wrong or normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -132,7 +137,7 @@ HWTEST_F(PermissionEntrystaticTest, CompareStringTest001, TestSize.Level0)
 
 /*
  * @tc.name: GetPermTypeTest001
- * @tc.desc: get perm type test, use the wrong or normal parameter
+ * @tc.desc: Verify GetPermType returns SOFTBUS_INVALID_PARAM for invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -186,7 +191,7 @@ HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest001, TestSize.Level0)
 
 /*
  * @tc.name: GetPermTypeTest002
- * @tc.desc: get perm type test, use the wrong or normal parameter
+ * @tc.desc: Verify GetPermType returns SOFTBUS_INVALID_PARAM for invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -241,7 +246,7 @@ HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest002, TestSize.Level0)
 
 /*
  * @tc.name: CheckPermissionAppInfoTest001
- * @tc.desc: check permission appinfo test, use the wrong or normal parameter
+ * @tc.desc: Verify CheckPermissionAppInfo returns SOFTBUS_INVALID_PARAM for invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -274,7 +279,7 @@ HWTEST_F(PermissionEntrystaticTest, CheckPermissionAppInfoTest001, TestSize.Leve
 
 /*
  * @tc.name: CheckDBinderTest001
- * @tc.desc: check dbinder test, use the wrong or normal parameter
+ * @tc.desc: Verify CheckDBinder returns false for invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -299,7 +304,7 @@ HWTEST_F(PermissionEntrystaticTest, CheckDBinderTest001, TestSize.Level0)
 
 /*
  * @tc.name: HaveGrantedPermissionTest001
- * @tc.desc: have graned permission test, use the wrong or normal parameter
+ * @tc.desc: Verify HaveGrantedPermission returns false for invalid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -319,7 +324,7 @@ HWTEST_F(PermissionEntrystaticTest, HaveGrantedPermissionTest001, TestSize.Level
 
 /*
  * @tc.name: NewDynamicPermissionEntryTest001
- * @tc.desc: have graned permission test, use the wrong or normal parameter
+ * @tc.desc: Verify NewDynamicPermissionEntry returns true for valid parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -352,7 +357,8 @@ HWTEST_F(PermissionEntrystaticTest, NewDynamicPermissionEntryTest001, TestSize.L
 
 /*
  * @tc.name: DynamicPermissionTest001
- * @tc.desc: call AddDynamicPermission and DeleteDynamicPermission
+ * @tc.desc: Verify AddDynamicPermission returns SOFTBUS_INVALID_PARAM for null sessionName or invalid UID/PID
+ *           DeleteDynamicPermission returns SOFTBUS_INVALID_PARAM for null sessionName or invalid sessionName
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -375,7 +381,7 @@ HWTEST_F(PermissionEntrystaticTest, DynamicPermissionTest001, TestSize.Level1)
 
 /*
  * @tc.name: ProcessRpcSaPermissionEntry001
- * @tc.desc: ProcessRpcSaPermissionEntry test null param
+ * @tc.desc: Return NULL when ProcessRpcSaPermissionEntry is called with null cJSON object parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -387,7 +393,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry001, TestSize.Lev
 
 /*
  * @tc.name: ProcessRpcSaPermissionEntry002
- * @tc.desc: ProcessRpcSaPermissionEntry test vaild param
+ * @tc.desc: Return non-NULL RpcSaPermissionEntry when ProcessRpcSaPermissionEntry is called with valid cJSON object
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -407,7 +413,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry002, TestSize.Lev
 
 /*
  * @tc.name: ProcessRpcSaPermissionEntry003
- * @tc.desc: test without PROCESS_NAME
+ * @tc.desc: Return NULL when ProcessRpcSaPermissionEntry is called with cJSON object without PROCESS_NAME field
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -426,7 +432,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry003, TestSize.Lev
 
 /*
  * @tc.name: ProcessRpcSaPermissionEntry004
- * @tc.desc: test without SA_ID
+ * @tc.desc: Return NULL when ProcessRpcSaPermissionEntry is called with cJSON object without SA_ID field
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -445,7 +451,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry004, TestSize.Lev
 
 /*
  * @tc.name: ProcessRpcSaPermissionEntry005
- * @tc.desc: test without SA_UID
+ * @tc.desc: Return NULL when ProcessRpcSaPermissionEntry is called with cJSON object without SA_UID field
  * @tc.type: FUNC
  * @tc.require:
  */
