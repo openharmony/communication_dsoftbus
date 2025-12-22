@@ -1272,7 +1272,7 @@ static int32_t TransUdpGetChannelAndOpenConn(int32_t channelId)
         sizeof(udpChannel.info.sessionKey));
     (void)memset_s(udpChannel.info.sinkSessionKey, sizeof(udpChannel.info.sinkSessionKey), 0,
         sizeof(udpChannel.info.sinkSessionKey));
-        if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udp channel by channel id failed. channelId=%{public}d", channelId);
         ReleaseUdpChannelId(channelId);
         return ret;
