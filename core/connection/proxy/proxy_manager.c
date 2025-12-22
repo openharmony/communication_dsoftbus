@@ -900,8 +900,8 @@ static void OnProxyAclStateChanged(
         CONN_PROXY, "ignore state=%{public}d", aclState);
     CONN_CHECK_AND_RETURN_LOGW(btAddr != NULL, CONN_PROXY, "addr is null");
     char address[BT_MAC_LEN] = { 0 };
-    int32_t status = ConvertBtMacToStr(address, BT_MAC_LEN, btAddr->addr, BT_ADDR_LEN);
-    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_PROXY, "convert binary mac address to string fail");
+    int32_t ret = ConvertBtMacToStr(address, BT_MAC_LEN, btAddr->addr, BT_ADDR_LEN);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_PROXY, "convert binary mac address to string fail");
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, address, BT_MAC_LEN);
     CONN_LOGW(CONN_PROXY, "state=%{public}d, addr=%{public}s", aclState, anomizeAddress);
@@ -913,7 +913,7 @@ static void OnProxyAclStateChanged(
         return;
     }
     context->state = aclState;
-    int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_ACL_STATE_CHANGE, 0, 0, context, 0);
+    ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_ACL_STATE_CHANGE, 0, 0, context, 0);
     if (ret < 0) {
         CONN_LOGE(CONN_PROXY, "post msg fail, error=%{public}d", ret);
         SoftBusFree(context);
