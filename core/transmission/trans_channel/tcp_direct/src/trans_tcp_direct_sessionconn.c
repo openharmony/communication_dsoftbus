@@ -360,6 +360,8 @@ void TransDelSessionConnById(int32_t channelId)
             }
             (void)memset_s(item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey), 0,
                 sizeof(item->appInfo.sessionKey));
+            (void)memset_s(item->appInfo.sinkSessionKey, sizeof(item->appInfo.sinkSessionKey), 0,
+                sizeof(item->appInfo.sinkSessionKey));            
             SoftBusFree(item);
             g_sessionConnList->cnt--;
             ReleaseSessionConnLock();
