@@ -166,6 +166,35 @@ typedef struct {
     const char *callerPkg;       // HOST_PKG
 } DiscEventExtra;
 
+typedef struct {
+    const char *serverType;      // SERVER_TYPE
+    int32_t isOn;                // BROADCAST_STATUS
+    int32_t advHandle;           // ADV_HANDLE
+    int32_t minInterval;         // MIN_INTERVAL
+    int32_t maxInterval;         // MAX_INTERVAL
+    uint64_t startTime;          // BROADCAST_START_TIME
+} DiscEventBcManagerExtra;
+
+typedef struct {
+    int32_t discType;            // DISC_TYPE
+    int32_t minInterval;         // MIN_INTERVAL
+    int32_t maxInterval;         // MAX_INTERVAL
+    int32_t broadcastType;       // BROADCAST_TYPE
+    int32_t capabilityBit;       // CAPABILITY_BIT
+    int32_t successCnt;          // SUCCESS_COUNT
+    int32_t failCnt;             // FAIL_COUNT
+    int32_t isOn;                // BROADCAST_STATUS
+    uint64_t costTime;           // COST_TIME
+    uint64_t startTime;          // BROADCAST_START_TIME
+    uint64_t stopTime;           // BROADCAST_STOP_TIME
+} DiscEventDiscExtra;
+
+typedef struct {
+    int32_t scanCount;           // SCAN_COUNT
+    int32_t scanType;            // SCAN_TYPE
+    int32_t capabilityBit;       // CAPABILITY_BIT
+} DiscEventScanExtra;
+
 typedef enum {
     ALARM_SCENE_DISC_RESERVED = 1,
 } DiscAlarmScene;

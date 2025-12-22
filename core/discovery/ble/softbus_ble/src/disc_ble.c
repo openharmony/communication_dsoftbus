@@ -215,8 +215,8 @@ static DiscBleListener g_bleListener = {
     .scanListenerId = -1
 };
 
-static DiscEventExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
-static DiscEventExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
+static DiscEventDiscExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
+static DiscEventScanExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
 static uint32_t g_bleOldCap = 0;
 static uint32_t g_handleId = 0;
 static bool g_needActionListen = false;

@@ -17,7 +17,7 @@
 #include "disc_log.h"
 #include "softbus_adapter_timer.h"
  
-void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *discExtra, int32_t size)
+void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventDiscExtra *discExtra, int32_t size)
 {
     if (discExtra == NULL) {
         DISC_LOGE(DISC_BLE, "scanExtra is null");
@@ -50,7 +50,7 @@ void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *
     }
 }
  
-void BroadcastScanEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *scanExtra, int32_t size)
+void BroadcastScanEvent(int32_t eventScene, int32_t eventStage, DiscEventScanExtra *scanExtra, int32_t size)
 {
     if (scanExtra == NULL) {
         DISC_LOGE(DISC_BLE, "scanExtra is null");
