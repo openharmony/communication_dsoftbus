@@ -906,6 +906,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         TRANS_LOGE(TRANS_CTRL, "TransProxyCreateChanInfo err");
         ReleaseProxyChannelId(chanNewId);
         (void)memset_s(chan->appInfo.sessionKey, sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
+        (void)memset_s(chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0, sizeof(chan->appInfo.sinkSessionKey));
         SoftBusFree(chan);
         return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED;
     }
@@ -1188,6 +1189,8 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode)
     (void)OnProxyChannelOpenFailed(channelId, &(channelInfo->appInfo), errCode);
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
+    (void)memset_s(channelInfo->appInfo.sinkSessionKey, sizeof(channelInfo->appInfo.sinkSessionKey), 0,
+        sizeof(channelInfo->appInfo.sinkSessionKey));
     SoftBusFree(channelInfo);
     TransProxyDelChanByChanId(channelId);
 }
@@ -1223,6 +1226,8 @@ void TransProxyNegoSessionKeySucc(int32_t channelId)
     }
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
+    (void)memset_s(channelInfo->appInfo.sinkSessionKey, sizeof(channelInfo->appInfo.sinkSessionKey), 0,
+        sizeof(channelInfo->appInfo.sinkSessionKey));
     SoftBusFree(channelInfo);
 }
 

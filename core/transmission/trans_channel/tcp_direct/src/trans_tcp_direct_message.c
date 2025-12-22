@@ -339,6 +339,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
     SetIpTos(conn->appInfo.fd, FAST_MESSAGE_TOS);
     if (ConnSendSocketData(conn->appInfo.fd, buffer, bufferLen, 0) != (int)bufferLen) {
         SendFailToFlushDevice(conn);
@@ -593,6 +594,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
     }
 
     (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+    (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
     return NotifyChannelOpenFailedBySessionConn(&conn, errCode);
 }
 
@@ -739,10 +741,12 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     if ((fastDataSize > 0 && (conn.appInfo.fastTransDataSize == fastDataSize)) || conn.appInfo.fastTransDataSize == 0) {
         ret = NotifyChannelOpened(channelId);
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
     } else {
         ret = TransTdcPostFastData(&conn);
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "tdc send fast data failed");
         ret = NotifyChannelOpened(channelId);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
@@ -1104,6 +1108,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
             TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
         }
         (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+        (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
         (void)TransDelTcpChannelInfoByChannelId(channelId);
         TransDelSessionConnById(channelId);
         CloseHtpChannelPacked(channelId);
@@ -1169,6 +1174,7 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
         SOFTBUS_WIFI_DIRECT_INIT_FAILED, TRANS_CTRL, "GetWifiDirectManager failed");
     ret = mgr->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid));
     (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
+    (void)memset_s(appInfo.sinkSessionKey, sizeof(appInfo.sinkSessionKey), 0, sizeof(appInfo.sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         AuthConnInfo connInfo;
         TRANS_LOGI(TRANS_CTRL, "protoclType=%{public}d", appInfo.protocol);
@@ -1528,6 +1534,7 @@ static void TransProcessAsyncOpenTdcChannelFailed(SessionConn *conn, int32_t ope
         TRANS_LOGE(TRANS_CTRL, "OpenDataBusRequestError error");
     }
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
     TransCleanTdcSource(conn->channelId);
     CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
 }
@@ -1537,6 +1544,7 @@ static int32_t HandleTdcChannelOpenedReply(
 {
     int32_t ret = HandleDataBusReply(conn, channelId, extra, flags, seq);
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
     (void)memset_s(
         conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
     TransDelSessionConnById(channelId);
@@ -1582,6 +1590,7 @@ static void HandleTdcGenUkResult(uint32_t requestId, int32_t ukId, int32_t reaso
         (void)memset_s(
             conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
         (void)NotifyChannelClosed(&conn.appInfo, channelId);
         TransProcessAsyncOpenTdcChannelFailed(&conn, reason, seq, flags);
         (void)TransUkRequestDeleteItem(requestId);
@@ -1599,6 +1608,7 @@ static void HandleTdcGenUkResult(uint32_t requestId, int32_t ukId, int32_t reaso
     (void)memset_s(
         conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
     (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+    (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
 }
 
 static void OnTdcGenUkSuccess(uint32_t requestId, int32_t ukId)
