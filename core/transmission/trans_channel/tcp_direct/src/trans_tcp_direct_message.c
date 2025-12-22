@@ -842,6 +842,8 @@ static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
     if (ret != SOFTBUS_OK) {
         (void)memset_s(
             conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+        (void)memset_s(
+            conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "UnpackRequest error");
         return NULL;
@@ -1589,7 +1591,6 @@ static void HandleTdcGenUkResult(uint32_t requestId, int32_t ukId, int32_t reaso
         (void)memset_s(
             conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-        (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
         (void)NotifyChannelClosed(&conn.appInfo, channelId);
         TransProcessAsyncOpenTdcChannelFailed(&conn, reason, seq, flags);
         (void)TransUkRequestDeleteItem(requestId);
@@ -1607,7 +1608,6 @@ static void HandleTdcGenUkResult(uint32_t requestId, int32_t ukId, int32_t reaso
     (void)memset_s(
         conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
     (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-    (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
 }
 
 static void OnTdcGenUkSuccess(uint32_t requestId, int32_t ukId)
@@ -1744,6 +1744,8 @@ void TransAsyncTcpDirectChannelTask(int32_t channelId)
         }
         (void)memset_s(
             connInfo.appInfo.sessionKey, sizeof(connInfo.appInfo.sessionKey), 0, sizeof(connInfo.appInfo.sessionKey));
+        (void)memset_s(
+            connInfo.appInfo.sinkSessionKey, sizeof(connInfo.appInfo.sinkSessionKey), 0, sizeof(connInfo.appInfo.sinkSessionKey));
         (void)NotifyChannelClosed(&connInfo.appInfo, channelId);
         TransCleanTdcSource(channelId);
         CloseTcpDirectFd(connInfo.listenMod, connInfo.appInfo.fd);
