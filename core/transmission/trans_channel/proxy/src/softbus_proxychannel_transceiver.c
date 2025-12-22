@@ -319,6 +319,9 @@ void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan)
             (void)memset_s(
                 (void *)chan->appInfo.sessionKey,
                 sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
+            (void)memset_s(
+                (void *)chan->appInfo.sinkSessionKey,
+                sizeof(chan->appInfo.sinkSessionKey), 0, sizeof(chan->appInfo.sinkSessionKey));
             SoftBusFree((void *)chan);
         }
         return;
