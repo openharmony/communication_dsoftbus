@@ -176,12 +176,12 @@ int32_t ProxyBrConnect(struct ProxyConnection *connection, const ProxyBrConnectS
         "calloc fail, connId=%{public}u", connection->channelId);
     ctx->channelId = connection->channelId;
     ctx->callback = *callback;
-    int32_t status = ConnStartActionAsync(ctx, ProxyBrClientConnect, NULL);
-    if (status != SOFTBUS_OK) {
+    int32_t ret = ConnStartActionAsync(ctx, ProxyBrClientConnect, NULL);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "start connect thread fail, connId=%{public}u, error=%{public}d",
-            connection->channelId, status);
+            connection->channelId, ret);
         SoftBusFree(ctx);
-        return status;
+        return ret;
     }
     return SOFTBUS_OK;
 }

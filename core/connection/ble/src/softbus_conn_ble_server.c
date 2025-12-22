@@ -622,12 +622,9 @@ static void BleConnectServerCallback(int32_t underlayerHandle, const SoftBusBtAd
         underlayerHandle, btAddr->addr[0], btAddr->addr[4], btAddr->addr[5]);
 
     char address[BT_MAC_LEN] = { 0 };
-    int32_t status = ConvertBtMacToStr(address, BT_MAC_LEN, btAddr->addr, BT_ADDR_LEN);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE,
-            "convert binary mac address to string fail, "
-            "address=%{public}02X:*:*:*:%{public}02X:%{public}02X, error=%{public}d",
-            status, btAddr->addr[0], btAddr->addr[4], btAddr->addr[5]);
+    int32_t ret = ConvertBtMacToStr(address, BT_MAC_LEN, btAddr->addr, BT_ADDR_LEN);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGW(CONN_BLE, "convert binary mac address to string fail, error=%{public}d", ret);
         return;
     }
 
@@ -647,10 +644,10 @@ static void BleConnectServerCallback(int32_t underlayerHandle, const SoftBusBtAd
         SoftBusGattsDisconnect(*btAddr, underlayerHandle);
         return;
     }
-    status = ConnBleSaveConnection(connection);
-    if (status != SOFTBUS_OK) {
+    ret = ConnBleSaveConnection(connection);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "save connection fail, disconnect this connection, address=%{public}s, err=%{public}d",
-            anomizeAddress, status);
+            anomizeAddress, ret);
         ConnBleReturnConnection(&connection);
         SoftBusGattsDisconnect(*btAddr, underlayerHandle);
         return;

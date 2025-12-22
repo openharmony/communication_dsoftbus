@@ -126,7 +126,7 @@ static int32_t ConstructParamAndOpenProxyChannel(uint32_t requestId, uint64_t ti
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest001, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest001 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest001 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, RegisterHfpListener).WillOnce(Return(-1))
         .WillRepeatedly(ProxyChannelMock::ActionOfRegisterHfpListener);
@@ -143,7 +143,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest001, TestSize.Level1)
 
     ret = GetProxyChannelManager()->generateRequestId();
     EXPECT_NE(ret, -1);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest001 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest001 out");
 }
 
 /*
@@ -154,7 +154,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest001, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest002, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest002 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest002 in");
     int32_t ret = GetProxyChannelManager()->openProxyChannel(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -185,7 +185,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest002, TestSize.Level1)
     };
     ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest002 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest002 out");
 }
 
 /*
@@ -196,7 +196,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest002, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest003, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest003 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest003 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Read).WillOnce(ProxyChannelMock::ActionOfRead).WillOnce(Return(-1));
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
@@ -224,7 +224,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest003, TestSize.Level1)
     SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1);
     EXPECT_NE(g_channelId, 0);
     EXPECT_NE(g_recvDataLen, 0);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest003 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest003 out");
 }
 
 /*
@@ -235,7 +235,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest003, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest004, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest004 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest004 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillOnce(Return(-1)).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillOnce(Return(-1)).WillOnce(Return(BR_READ_SOCKET_CLOSED))
@@ -265,7 +265,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     sleep(2);
     EXPECT_NE(g_recvDataLen, 0);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest004 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest004 out");
 }
 
 /*
@@ -276,7 +276,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest004, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest005, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest005 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest005 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillOnce(ProxyChannelMock::ActionOfRead1);
@@ -315,7 +315,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest005, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(GetProxyChannelManager()->proxyChannelRequestInfo, nullptr);
     EXPECT_EQ(g_disconnectReason, SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest005 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest005 out");
 }
 
 /*
@@ -326,7 +326,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest005, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest006, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest006 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest006 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
@@ -349,7 +349,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest006, TestSize.Level1)
     ProxyChannelMock::InjectHfpConnectionChanged(addr, SOFTBUS_HFP_CONNECTED);
     sleep(2);
     EXPECT_NE(g_channelId, channelId);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest006 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest006 out");
 }
 
 /*
@@ -360,7 +360,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest006, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest007, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest007 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest007 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
@@ -397,7 +397,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest007, TestSize.Level1)
     ProxyChannelMock::InjectHfpConnectionChanged(addr, SOFTBUS_HFP_CONNECTED);
     sleep(1);
     EXPECT_EQ(g_channelId, 0);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest007 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest007 out");
 }
 
 static void ProxyChannelDereference(struct ProxyConnection *proxyConnection)
@@ -458,7 +458,7 @@ static void ConstructProxyConnectionList(void)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest008, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest008 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest008 in");
     ConstructProxyChannelRequestInfo();
     ProxyChannelMock::InjectBtStateChanged(0, SOFTBUS_BLE_STATE_TURN_OFF);
     sleep(1);
@@ -492,7 +492,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest008, TestSize.Level1)
     EXPECT_EQ(g_connectFailedReason, 0);
     EXPECT_EQ(g_disconnectReason, SOFTBUS_CONN_BLUETOOTH_OFF);
     EXPECT_EQ(IsListEmpty(&GetProxyChannelManager()->proxyConnectionList->list), true);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest008 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest008 out");
 }
 
 /*
@@ -503,7 +503,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest008, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest009, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest009 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest009 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
@@ -527,7 +527,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest009, TestSize.Level1)
     ProxyChannelMock::InjectHfpConnectionChanged(addr, SOFTBUS_HFP_CONNECTED);
     sleep(1);
     EXPECT_EQ(g_channelId, 0);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest009 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest009 out");
 }
 
 /*
@@ -538,7 +538,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest009, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest010, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest010 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest010 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
@@ -560,7 +560,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest010, TestSize.Level1)
     ProxyChannelMock::InjectHfpConnectionChanged(addr, SOFTBUS_HFP_CONNECTED);
     sleep(1);
     EXPECT_EQ(g_channelId, 0);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest010 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest010 out");
 }
 
 /*
@@ -571,7 +571,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest010, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest011, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest011 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest011 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillOnce(ProxyChannelMock::ActionOfConnect).
         WillOnce(ProxyChannelMock::ActionOfConnect1).WillOnce(ProxyChannelMock::ActionOfConnect2).
@@ -619,7 +619,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest011, TestSize.Level1)
     sleep(1);
     EXPECT_EQ(g_connectFailedReason, SOFTBUS_CONN_BR_UNPAIRED);
     EXPECT_NE(g_disconnectReason, SOFTBUS_CONN_BR_UNPAIRED);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest011 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest011 out");
 }
 
 /*
@@ -630,7 +630,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest011, TestSize.Level1)
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest012, TestSize.Level1)
 {
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest012 start");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest012 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillOnce(ProxyChannelMock::ActionOfConnect1).
         WillOnce(Return(UNDERLAYER_HANDLE));
@@ -645,6 +645,6 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest012, TestSize.Level1)
     ret = ConstructParamAndOpenProxyChannel(1, CONNECT_TIMEOUT1);
     sleep(1);
     EXPECT_NE(g_channelId, 0);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest012 end");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest012 out");
 }
 }
