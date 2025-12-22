@@ -126,7 +126,7 @@ static bool SetNameByServiceId(char **dest, const char* name, uint32_t destLen)
 static bool GenerateNameByServiceId(SocketInfo *socketInfo, ServiceSocketInfo info)
 {
     char pkgName[PKG_NAME_SIZE_MAX];
-    int32_t ret = sprintf_s(pkgName, PKG_NAME_SIZE_MAX, "pkg_%u_%u", getpid(), getuid());
+    int32_t ret = sprintf_s(pkgName, PKG_NAME_SIZE_MAX, "pkg_%d_%u", getpid(), getuid());
     if (ret < 0 || ret >= (int32_t)sizeof(pkgName)) {
         TRANS_LOGE(TRANS_SDK, "pkgName err");
         return false;
