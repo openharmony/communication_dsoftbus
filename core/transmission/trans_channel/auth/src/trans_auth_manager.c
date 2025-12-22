@@ -1603,6 +1603,8 @@ static void TransAuthDestroyChannelList(const ListNode *destroyList)
         }
         (void)memset_s(destroyNode->appInfo.sessionKey, sizeof(destroyNode->appInfo.sessionKey), 0,
             sizeof(destroyNode->appInfo.sessionKey));
+        (void)memset_s(destroyNode->appInfo.sinkSessionKey, sizeof(destroyNode->appInfo.sinkSessionKey), 0,
+            sizeof(destroyNode->appInfo.sinkSessionKey));
         SoftBusFree(destroyNode);
     }
     return;

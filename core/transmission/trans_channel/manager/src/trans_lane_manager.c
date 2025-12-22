@@ -110,6 +110,7 @@ static int32_t TransLaneChannelForEachShowInfo(int32_t fd)
     }
 
     (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
+    (void)memset_s(appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey), 0, sizeof(appInfo->sinkSessionKey));
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     SoftBusFree(appInfo);
     return SOFTBUS_OK;

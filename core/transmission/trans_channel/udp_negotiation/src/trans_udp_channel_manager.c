@@ -126,6 +126,8 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
         }
         (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
             sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
+            sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
     }
 }
@@ -213,6 +215,8 @@ void TransUdpChannelMgrDeinit(void)
         }
         (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
             sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
+            sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
     }
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
@@ -281,6 +285,8 @@ int32_t TransDelUdpChannel(int32_t channelId)
             }
             (void)memset_s(udpChannelNode->info.sessionKey, sizeof(udpChannelNode->info.sessionKey), 0,
                 sizeof(udpChannelNode->info.sessionKey));
+            (void)memset_s(udpChannelNode->info.sinkSessionKey, sizeof(udpChannelNode->info.sinkSessionKey), 0,
+                sizeof(udpChannelNode->info.sinkSessionKey));
             UdpChannelStatistic(udpChannelNode, false);
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
@@ -307,6 +313,8 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
         }
         (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
             sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
+            sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
     }
 }
