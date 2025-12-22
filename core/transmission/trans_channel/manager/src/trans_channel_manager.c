@@ -513,6 +513,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     ret = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId));
     (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
+    (void)memset_s(appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey), 0, sizeof(appInfo->sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
@@ -1012,6 +1013,7 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
     AppInfo appInfo;
     ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
     (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
+    (void)memset_s(appInfo.sinkSessionKey, sizeof(appInfo.sinkSessionKey), 0, sizeof(appInfo.sinkSessionKey));
     if (ret != SOFTBUS_OK && (ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
         ret = TransGetPidByChanId(channelId, channelType, &curChannelPid);
     }
