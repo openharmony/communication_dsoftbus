@@ -1556,7 +1556,6 @@ static void HandleUdpGenUkResult(uint32_t requestId, int32_t ukId, int32_t reaso
     (void)memset_s(
         channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0, sizeof(channel.info.sinkSessionKey));
     (void)memset_s(channel.info.sessionKey, sizeof(channel.info.sessionKey), 0, sizeof(channel.info.sessionKey));
-    (void)memset_s(channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0, sizeof(channel.info.sinkSessionKey));
     (void)TransUkRequestDeleteItem(requestId);
 }
 

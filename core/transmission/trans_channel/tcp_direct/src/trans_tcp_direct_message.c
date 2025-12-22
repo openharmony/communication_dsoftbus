@@ -1544,7 +1544,6 @@ static int32_t HandleTdcChannelOpenedReply(
 {
     int32_t ret = HandleDataBusReply(conn, channelId, extra, flags, seq);
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
-    (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
     (void)memset_s(
         conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
     TransDelSessionConnById(channelId);
