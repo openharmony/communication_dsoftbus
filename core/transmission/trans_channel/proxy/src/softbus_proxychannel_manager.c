@@ -1955,9 +1955,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         msg->msgHead.myId, msg->msgHead.peerId, msg->msgHead.cipher);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset identity fail");
-        SoftBusFree(info);
-        SoftBusHitraceChainEnd();
-        return;
+        goto EXIT;
     }
 
     info->peerId = msg->msgHead.peerId;
@@ -1965,9 +1963,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
 
     if (TransProxyGetAppInfoById(info->myId, &(info->appInfo)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fail to get peer data info");
-        SoftBusFree(info);
-        SoftBusHitraceChainEnd();
-        return;
+        goto EXIT;
     }
 
     if (TransProxyGetReqIdAndStatus(info->myId, &info->reqId, &info->status) != SOFTBUS_OK) {
@@ -1999,7 +1995,6 @@ EXIT:
         sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
     SoftBusHitraceChainEnd();
-    return;
 }
 
 void TransProxyProcessKeepAlive(const ProxyMessage *msg)
