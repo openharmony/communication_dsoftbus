@@ -287,10 +287,16 @@ HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level1)
 HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData001, TestSize.Level1)
 {
     int32_t newPkgHeadSize = PKG_HEAD_SIZE;
-    const char *buf = "test";
+    // will free in line 298
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     uint32_t outLen = DATA_SIZE;
+    TcpDirectChannelInfo channel;
     int32_t ret = TransSetTosSendData(nullptr, const_cast<char *>(buf), newPkgHeadSize, 0, outLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND));
+    ret = TransSetTosSendData(&channel, const_cast<char *>(buf), newPkgHeadSize, 0, outLen);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
 }
 
 /**

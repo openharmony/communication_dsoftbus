@@ -90,6 +90,22 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest000, TestSize.Level1)
 }
 
 /*
+ * @tc.name: GetChannelIdFromServerListTest001
+ * @tc.desc: will return SOFTBUS_NOT_FIND when g_serverList is empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, GetChannelIdFromServerListTest001, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    int32_t ret = GetChannelIdFromServerList(&channelId);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    ret = GetNewChannelId(&channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    CloseAllConnect();
+}
+
+/*
  * @tc.name: BrProxyServerManagerTest001
  * @tc.desc: BrProxyServerManagerTest001, use the Normal parameter
  * @tc.type: FUNC
