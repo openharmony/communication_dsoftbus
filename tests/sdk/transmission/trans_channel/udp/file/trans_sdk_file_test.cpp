@@ -391,6 +391,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level1)
     ret = TransOnFileChannelOpened(sessionName, channelInfo, nullptr, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    ret = TransOnFileChannelOpened(sessionName, nullptr, nullptr, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
@@ -1091,6 +1094,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest004, TestSize.Level1)
 
     NotifySendResult(sessionId, msgType, nullptr, nullptr);
 
+    NotifySendResult(sessionId, msgType, &msgData, nullptr);
+
     msgType = DFILE_ON_FILE_SEND_SUCCESS;
     NotifySendResult(sessionId, msgType, &msgData, listener);
 
@@ -1136,6 +1141,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level1)
     listener->socketRecvCallback = MockSocketRecvCallback;
 
     NotifyRecvResult(sessionId, msgType, nullptr, nullptr);
+
+    NotifyRecvResult(sessionId, msgType, &msgData, nullptr);
 
     msgType = DFILE_ON_FILE_LIST_RECEIVED;
     NotifyRecvResult(sessionId, msgType, &msgData, listener);
@@ -1248,5 +1255,84 @@ HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level1)
     msgData.errorCode = NSTACKX_NOTSUPPORT;
     FillFileEventErrorCode(&msgData, &event);
     ASSERT_EQ(NSTACKX_NOTSUPPORT, event.errorCode);
+}
+
+/*
+ * @tc.name: ConvertDFileLinkToLinkMediumTest
+ * @tc.desc: convert dfilelink to linkmedium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, ConvertDFileLinkToLinkMediumTest, TestSize.Level1)
+{
+    LinkMediumType linkmediumtype = ConvertDFileLinkToLinkMedium(DFILE_LINK_WIRELESS);
+    EXPECT_EQ(linkmediumtype, LINK_TYPE_WIFI);
+
+    linkmediumtype = ConvertDFileLinkToLinkMedium(DFILE_LINK_WIRED);
+    EXPECT_EQ(linkmediumtype, LINK_TYPE_WIRED);
+
+    linkmediumtype = ConvertDFileLinkToLinkMedium(DFILE_LINK_MAX);
+    EXPECT_EQ(linkmediumtype, LINK_TYPE_UNKNOWN);
+}
+
+/*
+ * @tc.name: ConvertOnEventReasonTest
+ * @tc.desc: convert on event reason test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, ConvertOnEventReasonTest, TestSize.Level1)
+{
+    SoftBusMPErrNo softbusErrNo = ConvertOnEventReason(1, DFILE_LINK_WIRELESS);
+    EXPECT_EQ(softbusErrNo, MP_HML_LINK_ON);
+
+    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_WIRELESS);
+    EXPECT_EQ(softbusErrNo, MP_HML_LINK_DOWN);
+
+    softbusErrNo = ConvertOnEventReason(1, DFILE_LINK_WIRED);
+    EXPECT_EQ(softbusErrNo, MP_USB_LINK_ON);
+
+    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_WIRELESS);
+    EXPECT_EQ(softbusErrNo, MP_USB_LINK_DOWN);
+
+    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_MAX);
+    EXPECT_EQ(softbusErrNo, MP_UNKNOWN_REASON);
+}
+
+/*
+ * @tc.name: NotifySendRateTest
+ * @tc.desc: convert on event reason test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, NotifySendRateTest, TestSize.Level1)
+{
+    UdpChannel udpChannel;
+    DFileMsgType msgType = DFILE_ON_BIND;
+    EXPECT_NO_FATAL_FAILURE(NotifySendRate(nullptr, msgType, nullptr));
+    EXPECT_NO_FATAL_FAILURE(NotifySendRate(&udpChannel, msgType, nullptr));
+    EXPECT_NO_FATAL_FAILURE(FileSendListenerEx(nullptr, msgType, nullptr));
+    EXPECT_NO_FATAL_FAILURE(FileSendListenerEx(&udpChannel, msgType, nullptr));
+}
+
+/*
+ * @tc.name: ConvertRouteToDFileLinkTypeTest
+ * @tc.desc: convert Route to DfilelinkType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, ConvertRouteToDFileLinkTypeTest, TestSize.Level1)
+{
+    DFileLinkType linktype = ConvertRouteToDFileLinkType(WIFI_USB);
+    EXPECT_EQ(linktype, DFILE_LINK_WIRED);
+
+    linktype = ConvertRouteToDFileLinkType(WIFI_STA);
+    EXPECT_EQ(linktype, DFILE_LINK_WIRELESS);
+
+    linktype = ConvertRouteToDFileLinkType(WIFI_P2P);
+    EXPECT_EQ(linktype, DFILE_LINK_WIRELESS);
+
+    linktype = ConvertRouteToDFileLinkType(BT_SLE);
+    EXPECT_EQ(linktype, DFILE_LINK_MAX);
 }
 }
