@@ -1186,7 +1186,8 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     }
 EXIT:
     (void)memset_s(info.appInfo.sessionKey, sizeof(info.appInfo.sessionKey), 0, sizeof(info.appInfo.sessionKey));
-    (void)memset_s(info.appInfo.sinkSessionKey, sizeof(info.appInfo.sinkSessionKey), 0, sizeof(info.appInfo.sinkSessionKey));
+    (void)memset_s(info.appInfo.sinkSessionKey, sizeof(info.appInfo.sinkSessionKey), 0,
+        sizeof(info.appInfo.sinkSessionKey));
     SoftBusHitraceChainEnd();
     return;
 }
@@ -1994,7 +1995,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     TransProxyProcessResetMsgHelper(info, msg);
 EXIT:
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
     SoftBusHitraceChainEnd();
     return;
@@ -2027,7 +2029,8 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 
     TransProxyAckKeepalive(info);
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2055,7 +2058,8 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
         return;
     }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2076,7 +2080,8 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
 
     OnProxyChannelMsgReceived(info->channelId, &(info->appInfo), msg->data, msg->dataLen);
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2278,7 +2283,8 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         TransProxyUpdateBlePriority(channelId, info->connId, BLE_PRIORITY_BALANCED);
     }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     TransProxyPostResetPeerMsgToLoop(info);
     return SOFTBUS_OK;
 }
@@ -2554,7 +2560,8 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc err");
     int32_t ret = TransProxyGetChanByChanId(chanId, chan);
     (void)memset_s(chan->appInfo.sessionKey, sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
-    (void)memset_s(chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0, sizeof(chan->appInfo.sinkSessionKey));
+    (void)memset_s(chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0,
+        sizeof(chan->appInfo.sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channel info by chanId failed. chanId=%{public}d", chanId);
         SoftBusFree(chan);
