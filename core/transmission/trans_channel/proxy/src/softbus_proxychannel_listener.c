@@ -480,7 +480,8 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
 
     ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
     return ret;
 }

@@ -808,7 +808,8 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
     TransUpdateUdpChannelInfo(seq, &(channel.info), true);
     ret = ProcessUdpChannelState(&(channel.info), false, &authHandle, seq);
     (void)memset_s(channel.info.sessionKey, sizeof(channel.info.sessionKey), 0, sizeof(channel.info.sessionKey));
-    (void)memset_s(channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0, sizeof(channel.info.sinkSessionKey));
+    (void)memset_s(channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0,
+        sizeof(channel.info.sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
             "process udp channelId=%{public}" PRId64 " failed, close peer", channel.info.myData.channelId);
@@ -1101,7 +1102,8 @@ static int32_t CheckAuthConnStatus(const uint32_t requestId)
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
     (void)memset_s(channel.info.sessionKey, sizeof(channel.info.sessionKey), 0, sizeof(channel.info.sessionKey));
-    (void)memset_s(channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0, sizeof(channel.info.sinkSessionKey));
+    (void)memset_s(channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0,
+        sizeof(channel.info.sinkSessionKey));
     return channel.errCode;
 }
 
@@ -1345,7 +1347,8 @@ int32_t TransCloseUdpChannel(int32_t channelId)
 
     ret = TransGetUdpChannelById(channelId, &channel);
     (void)memset_s(channel.info.sessionKey, sizeof(channel.info.sessionKey), 0, sizeof(channel.info.sessionKey));
-    (void)memset_s(channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0, sizeof(channel.info.sinkSessionKey));
+    (void)memset_s(channel.info.sinkSessionKey, sizeof(channel.info.sinkSessionKey), 0,
+        sizeof(channel.info.sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udp channel by channel id failed. channelId=%{public}d", channelId);
         return ret;

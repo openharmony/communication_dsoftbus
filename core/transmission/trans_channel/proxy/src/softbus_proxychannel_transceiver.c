@@ -888,12 +888,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     }
     int32_t ret;
     ProxyConnInfo conn;
-    int32_t chanNewId = INVALID_CHANNEL_ID;
-    if (*channelId != INVALID_CHANNEL_ID) {
-        chanNewId = *channelId;
-    } else {
-        chanNewId = GenerateChannelId(false);
-    }
+    int32_t chanNewId = (*channelId != INVALID_CHANNEL_ID) ? *channelId : GenerateChannelId(false);
     if (chanNewId <= INVALID_CHANNEL_ID) {
         TRANS_LOGE(TRANS_CTRL, "proxy channelId is invalid");
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
@@ -909,7 +904,8 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         TRANS_LOGE(TRANS_CTRL, "TransProxyCreateChanInfo err");
         ReleaseProxyChannelId(chanNewId);
         (void)memset_s(chan->appInfo.sessionKey, sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
-        (void)memset_s(chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0, sizeof(chan->appInfo.sinkSessionKey));
+        (void)memset_s(chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0,
+            sizeof(chan->appInfo.sinkSessionKey));
         SoftBusFree(chan);
         return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED;
     }
