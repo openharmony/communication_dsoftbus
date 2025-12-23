@@ -579,6 +579,8 @@ static void TransPagingProcessResetMsg(const ProxyMessage *msg)
     OnProxyChannelClosed(info->channelId, &(info->appInfo));
 EXIT:
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
     return;
 }
