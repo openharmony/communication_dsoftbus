@@ -339,16 +339,16 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest014, TestSize.Level1)
     (void) strcpy_s(info.peerBRUuid, sizeof(info.peerBRUuid), TEST_UUID);
     ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    bool result = IsSessionExist(nullptr, TEST_UUID);
+    bool result = IsSessionExist(nullptr, TEST_UUID, 0);
     EXPECT_FALSE(result);
-    result = IsSessionExist(VALID_BR_MAC, nullptr);
+    result = IsSessionExist(VALID_BR_MAC, nullptr, 0);
     EXPECT_FALSE(result);
     SoftBusList* temp = g_serverList;
     g_serverList = NULL;
-    result = IsSessionExist(VALID_BR_MAC, TEST_UUID);
+    result = IsSessionExist(VALID_BR_MAC, TEST_UUID, 0);
     EXPECT_FALSE(result);
     g_serverList = temp;
-    result = IsSessionExist(VALID_BR_MAC, TEST_UUID);
+    result = IsSessionExist(VALID_BR_MAC, TEST_UUID, 0);
     EXPECT_TRUE(result);
     ret = ServerDeleteChannelFromList(CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1024,14 +1024,11 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest043, TestSize.Level1)
 #define TMP_LEN 100
     const char *brMac = "AA:AA:AA:AA:AA:AA";
     const char *uuid = "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA";
-    uint32_t requestId = 0;
-    int32_t ret = ConnectPeerDevice(brMac, uuid, &requestId);
-    EXPECT_NE(SOFTBUS_OK, ret);
 
     (void)PrintSession(nullptr, nullptr);
     (void)PrintSession(brMac, uuid);
 
-    ret = TransOpenBrProxy(brMac, uuid);
+    int32_t ret = TransOpenBrProxy(brMac, uuid);
     EXPECT_NE(SOFTBUS_OK, ret);
     ProxyBaseInfo info = {
         .brMac = "FF:FF:FF:FF:FF:FF",
