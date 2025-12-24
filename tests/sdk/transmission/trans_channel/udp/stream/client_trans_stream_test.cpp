@@ -368,6 +368,7 @@ HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level1)
  */
 HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level1)
 {
+    int32_t channelId = -1;
     RegisterStreamCb(&g_testUdpChannelCb);
     OnQosEvent(TEST_CHANNELID, TEST_CHANNELID, TEST_CHANNELID, nullptr);
     int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
@@ -375,5 +376,6 @@ HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level1)
     UnregisterStreamCb();
 #define TEST_NORMALCHANNELID 12
     NotifyStreamChannelConnectedEvent(TEST_NORMALCHANNELID);
+    NotifyStreamChannelConnectedEvent(channelId);
 }
 } // OHOS
