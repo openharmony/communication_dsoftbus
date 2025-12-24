@@ -189,6 +189,32 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
 }
 
 /**
+ * @tc.name: OnDataReceivedTest001
+ * @tc.desc: return when given invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerExtTest, OnDataReceivedTest001, TestSize.Level1)
+{
+    ProxyChannel *channel = reinterpret_cast<ProxyChannel *>(SoftBusCalloc(sizeof(ProxyChannel)));
+    ASSERT_NE(channel, nullptr);
+    uint8_t *data = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(ProxyChannel)));
+    ASSERT_NE(data, nullptr);
+    char *addr = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyChannel)));
+    ASSERT_NE(addr, nullptr);
+    uint32_t dataLen = 0;
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(nullptr, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(channel, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(channel, data, 0));
+    dataLen = BR_PROXY_SEND_MAX_LEN + 1;
+    EXPECT_NO_FATAL_FAILURE(OnReconnected(addr, nullptr));
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(channel, data, dataLen));
+    SoftBusFree(channel);
+    SoftBusFree(data);
+    SoftBusFree(addr);
+}
+
+/**
  * @tc.name: SetCurrentConnect002
  * @tc.desc: SetCurrentConnect002, when given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
