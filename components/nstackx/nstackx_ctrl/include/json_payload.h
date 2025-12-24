@@ -45,9 +45,16 @@ extern "C" {
 #endif
 
 struct DeviceInfo;
+struct DiscoverInfo {
+    uint8_t af;
+    const char *localIpStr;
+    uint8_t isBroadcast;
+    uint8_t businessType;
+    const char *serviceData;
+    const NSTACKX_ResponseSettings *responseSettings;
+};
 
-char *PrepareServiceDiscover(uint8_t af, const char *localIpStr,
-    uint8_t isBroadcast, uint8_t businessType, const char *serviceData);
+char *PrepareServiceDiscover(const struct DiscoverInfo *info);
 int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
 char *PrepareServiceNotification(void);
 int32_t ParseServiceNotification(const uint8_t *buf, NSTACKX_NotificationConfig *config);
