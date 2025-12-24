@@ -252,22 +252,22 @@ static int32_t CollectModuleFdEvent(SoftbusListenerNode *node, ListNode *list)
 
 static int32_t OnGetAllFdEvent(ListNode *list)
 {
-    int32_t status = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
     for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
         SoftbusListenerNode *node = GetListenerNode(module);
         if (node == NULL) {
             continue;
         }
-        status = CollectModuleFdEvent(node, list);
+        ret = CollectModuleFdEvent(node, list);
         ReturnListenerNode(&node);
-        if (status != SOFTBUS_OK) {
+        if (ret != SOFTBUS_OK) {
             ReleaseFdNode(list);
             CONN_LOGE(CONN_COMMON, "collect wait event fd set fail: module=%{public}d, error=%{public}d",
-                module, status);
+                module, ret);
             break;
         }
     }
-    return status;
+    return ret;
 }
 
 static int32_t InitBaseListenerLock(void)

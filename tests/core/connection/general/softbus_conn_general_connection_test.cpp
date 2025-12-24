@@ -243,7 +243,7 @@ void GeneralConnectionTest::SetUp(void)
 */
 HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test init start");
+    CONN_LOGI(CONN_BLE, "test init in");
     const char *pkgName = "testName";
     ClearGeneralConnection(pkgName, 0);
     ConnUnSetConnectCallback(MODULE_BLE_GENERAL);
@@ -254,7 +254,7 @@ HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
     manager->closeServer(&param);
     g_ConnectCallback = GeneralConnectionInterfaceMock::GetConnectCallbackMock();
     ASSERT_NE(g_ConnectCallback, nullptr);
-    CONN_LOGI(CONN_BLE, "test init end");
+    CONN_LOGI(CONN_BLE, "test init out");
 }
 
 /*
@@ -265,7 +265,7 @@ HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
 */
 HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test createServer start");
+    CONN_LOGI(CONN_BLE, "test createServer in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
     GeneralConnectionParam param = {0};
@@ -304,7 +304,7 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
     ret = strcpy_s(param.bundleName, GENERAL_NAME_LEN, "testBundleName0");
     EXPECT_EQ(ret, EOK);
     manager->closeServer(&param);
-    CONN_LOGI(CONN_BLE, "test createServer end");
+    CONN_LOGI(CONN_BLE, "test createServer out");
 }
 
 /*
@@ -315,7 +315,7 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
 */
 HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test connect start");
+    CONN_LOGI(CONN_BLE, "test connect in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
     GeneralConnectionParam param = {0};
@@ -350,7 +350,7 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
     ret = manager->connect(&param, addr);
     EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_CONNECT_FAILED);
     manager->cleanupGeneralConnection(param.pkgName, param.pid);
-    CONN_LOGI(CONN_BLE, "test connect end");
+    CONN_LOGI(CONN_BLE, "test connect out");
 }
 
 /*
@@ -361,7 +361,7 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
 */
 HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test send start");
+    CONN_LOGI(CONN_BLE, "test send in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     ASSERT_NE(manager, nullptr);
     GeneralConnectionParam param = {
@@ -408,7 +408,7 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(data);
     SoftBusFree(buff);
-    CONN_LOGI(CONN_BLE, "test send end");
+    CONN_LOGI(CONN_BLE, "test send out");
 }
 
 /*
@@ -419,7 +419,7 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
 */
 HWTEST_F(GeneralConnectionTest, TestRecv, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test recv start");
+    CONN_LOGI(CONN_BLE, "test recv in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
     GeneralConnectionParam param = {
@@ -453,7 +453,7 @@ HWTEST_F(GeneralConnectionTest, TestRecv, TestSize.Level1)
     g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
     SoftBusFree(data);
     FreeOutData(dataRecv);
-    CONN_LOGI(CONN_BLE, "test recv end");
+    CONN_LOGI(CONN_BLE, "test recv out");
 }
 
 /*
@@ -464,7 +464,7 @@ HWTEST_F(GeneralConnectionTest, TestRecv, TestSize.Level1)
 */
 HWTEST_F(GeneralConnectionTest, TestGetPeerDeviceId, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test get peer deviceId start");
+    CONN_LOGI(CONN_BLE, "test get peer deviceId in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     ASSERT_NE(manager, nullptr);
     
@@ -477,7 +477,7 @@ HWTEST_F(GeneralConnectionTest, TestGetPeerDeviceId, TestSize.Level1)
 
     ret = manager->getPeerDeviceId(g_handle, addr, BT_MAC_LEN, 0, 0);
     EXPECT_NE(ret, SOFTBUS_OK);
-    CONN_LOGI(CONN_BLE, "test get peer deviceId end");
+    CONN_LOGI(CONN_BLE, "test get peer deviceId out");
 }
 
 /*
@@ -488,7 +488,7 @@ HWTEST_F(GeneralConnectionTest, TestGetPeerDeviceId, TestSize.Level1)
 */
 HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test on connect disconnect start");
+    CONN_LOGI(CONN_BLE, "test on connect disconnect in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     ASSERT_NE(manager, nullptr);
 
@@ -527,7 +527,7 @@ HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
     
     g_ConnectCallback->OnDisconnected(connectionId, &infos);
     SoftBusFree(data->buf);
-    CONN_LOGI(CONN_BLE, "test on connect disconnect end");
+    CONN_LOGI(CONN_BLE, "test on connect disconnect out");
 }
 
 /*
@@ -538,7 +538,7 @@ HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
 */
 HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test recv new connection start ");
+    CONN_LOGI(CONN_BLE, "test recv new connection in ");
     NiceMock<GeneralConnectionInterfaceMock> mock;
     EXPECT_CALL(mock, ConnBlePostBytesMock).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -564,7 +564,7 @@ HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
     manager->createServer(&param);
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
     EXPECT_EQ(g_isRecvNewConnection, true);
-    CONN_LOGI(CONN_BLE, "test recv new connection end");
+    CONN_LOGI(CONN_BLE, "test recv new connection out");
 
     // test recv merge message
     GeneralConnectionInfo info1 = {
@@ -584,7 +584,7 @@ HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
  */
 HWTEST_F(GeneralConnectionTest, TestDataReceivedFuzzTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "TestDataReceivedFuzzTest start ");
+    CONN_LOGI(CONN_BLE, "TestDataReceivedFuzzTest in");
     NiceMock<GeneralConnectionInterfaceMock> mock;
     EXPECT_CALL(mock, ConnBlePostBytesMock).WillRepeatedly(Return(SOFTBUS_OK));
     uint32_t handle = GetConnGeneralRandomData<uint32_t>();

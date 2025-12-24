@@ -351,6 +351,8 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         }
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0,
+            sizeof(conn.appInfo.sinkSessionKey));
         DelTrigger(module, fd, READ_TRIGGER);
         (void)NotifyChannelOpenFailed(channelId, errCode);
         TransDelSessionConnById(channelId);
@@ -452,6 +454,8 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
         ProcessSocketExceptionEvent(conn, fd);
     }
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0,
+        sizeof(conn->appInfo.sinkSessionKey));
     SoftBusFree(conn);
     return ret;
 }
