@@ -903,7 +903,7 @@ static int32_t ConnectPeerDevice(const char *brMac, const char *uuid, uint32_t *
     }
     ret = ServerAddChannelToList(brMac, uuid, channelId, *requestId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SCV, "[br_proxy] failed, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
         return ret;
     }
     ret = proxyMgr->openProxyChannel(&param, &g_channelOpen);
