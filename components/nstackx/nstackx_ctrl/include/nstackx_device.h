@@ -194,6 +194,7 @@ uint8_t GetIfaceType(const char *ifname);
 int32_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, const DeviceInfo *deviceInfo);
 int32_t GetNotifyDeviceInfo(NSTACKX_DeviceInfo *notifyDevice, const DeviceInfo *deviceInfo);
 
+bool IsShareCapBit(const DeviceInfo *info);
 #ifdef __cplusplus
 }
 #endif

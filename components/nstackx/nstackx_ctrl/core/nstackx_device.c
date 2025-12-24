@@ -59,6 +59,7 @@
 #define NSTACKX_P2P_WLAN_INTERFACE_NAME_PREFIX "p2p-wlan0-"
 #define NSTACKX_USB_INTERFACE_NAME_PREFIX "rndis0"
 #define NSTACKX_DEFAULT_VER "1.0.0.0"
+#define NSTACKX_SHARE_BIT (0x0100)
 
 /*
  * Reserved info JSON format:
@@ -116,6 +117,18 @@ int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
     return NSTACKX_EOK;
 }
 
+bool IsShareCapBit(const DeviceInfo *info)
+{
+    uint32_t capabilityBitmap = info->capabilityBitmap[0] | info->capabilityBitmap[1];
+    if ((info->businessType == NSTACKX_BUSINESS_TYPE_NULL) &&
+        (info->seq.seqType == DFINDER_SEQ_TYPE_NONE) &&
+        ((capabilityBitmap & NSTACKX_SHARE_BIT) != 0)) {
+        DFINDER_LOGD(TAG, "recv unknow seq number, report remote device info, but not auto reponse coap!");
+        return true;
+    }
+    return false;
+}
+
 #ifdef DFINDER_SAVE_DEVICE_LIST
 static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const DeviceInfo *deviceInfo,
     uint8_t forceUpdate, uint8_t receiveBcast)
@@ -135,6 +148,9 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
     }
     if (!receiveBcast && (ShouldAutoReplyUnicast(deviceInfo->businessType) != NSTACKX_TRUE)) {
         return updated ? DeviceInfoNotify(deviceInfo) : NSTACKX_EOK;
+    }
+    if (receiveBcast && IsShareCapBit(deviceInfo)) {
+        return DeviceInfoNotify(deviceInfo);
     }
     if (updated || forceUpdate) {
         DFINDER_LOGD(TAG, "updated is: %hhu, forceUpdate is: %hhu", updated, forceUpdate);
