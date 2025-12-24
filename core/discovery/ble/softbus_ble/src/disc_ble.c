@@ -759,9 +759,9 @@ static SoftBusBtStateListener g_stateChangedListener = {
 
 static int32_t GetMaxExchangeFreq(void)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
     int32_t maxFreq = 0;
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        maxFreq, DISC_BLE, "lock failed");
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         for (uint32_t index = 0; index < BLE_INFO_COUNT; index++) {
             maxFreq = (maxFreq > g_bleInfoManager[index].freq[pos]) ? maxFreq : g_bleInfoManager[index].freq[pos];
@@ -790,17 +790,20 @@ static int32_t DiscBleGetCustData(DeviceInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "info is nullptr");
 
-    uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
+    DiscBleInfo passiveBleInfo = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE];
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     uint32_t pos = 0;
     for (pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
-        if (CheckCapBitMapExist(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap, pos)) {
+        if (CheckCapBitMapExist(CAPABILITY_NUM, passiveBleInfo.capBitMap, pos)) {
             break;
         }
     }
     DISC_CHECK_AND_RETURN_RET_LOGD(
         pos < CAPABILITY_MAX_BITNUM, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "not find capBitMap");
-    cJSON *json = cJSON_ParseWithLength((const char *)g_bleInfoManager[infoIndex].capabilityData[pos],
-        g_bleInfoManager[infoIndex].capDataLen[pos]);
+    cJSON *json = cJSON_ParseWithLength((const char *)passiveBleInfo.capabilityData[pos],
+        passiveBleInfo.capDataLen[pos]);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "parse cJSON failed");
 
     char custData[DISC_MAX_CUST_DATA_LEN] = {0};
@@ -883,8 +886,7 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL,
         DISC_BLE, "MatchRecvMessage failed");
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
-        info->capabilityBitmap[pos] =
-        activeBleInfo.capBitMap[pos] | passiveCapBitMap[pos];
+        info->capabilityBitmap[pos] = activeBleInfo.capBitMap[pos] | passiveCapBitMap[pos];
     }
     if (DiscBleGetCustData(info) != SOFTBUS_OK) {
         DISC_LOGW(DISC_BLE, "get custData failed");
