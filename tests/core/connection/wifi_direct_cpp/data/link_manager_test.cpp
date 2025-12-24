@@ -55,7 +55,7 @@ HWTEST_F(LinkManagerTest, AllocateLinkId, TestSize.Level1)
  */
 HWTEST_F(LinkManagerTest, CheckOnlyVirtualLink, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "CheckOnlyVirtualLink enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "CheckOnlyVirtualLink in");
     std::string remoteDeviceId("0123456789ABCDEF");
     auto ret = LinkManager::GetInstance().ProcessIfAbsent(
         InnerLink::LinkType::HML, remoteDeviceId, [](InnerLink &link) {
@@ -86,7 +86,7 @@ HWTEST_F(LinkManagerTest, CheckOnlyVirtualLink, TestSize.Level1)
     EXPECT_FALSE(ret);
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
-    CONN_LOGI(CONN_WIFI_DIRECT, "CheckOnlyVirtualLink exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "CheckOnlyVirtualLink out");
 }
 
 /*
@@ -285,7 +285,7 @@ HWTEST_F(LinkManagerTest, RemoveLinks, TestSize.Level1)
  */
 HWTEST_F(LinkManagerTest, RemoveLinkByDeviceIdIfInnerlinkEmptyTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdIfInnerlinkEmptyTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdIfInnerlinkEmptyTest in");
     std::string remoteDeviceId("0123456789ABCDEF");
     auto result = LinkManager::GetInstance().ProcessIfPresent(
         InnerLink::LinkType::HML, remoteDeviceId, [] (InnerLink &innerlink) {
@@ -297,7 +297,7 @@ HWTEST_F(LinkManagerTest, RemoveLinkByDeviceIdIfInnerlinkEmptyTest, TestSize.Lev
         InnerLink::LinkType::HML, remoteDeviceId, [] (InnerLink &innerlink) {
         });
     EXPECT_FALSE(result);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdIfInnerlinkEmptyTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdIfInnerlinkEmptyTest out");
 }
 
 /*
@@ -308,7 +308,7 @@ HWTEST_F(LinkManagerTest, RemoveLinkByDeviceIdIfInnerlinkEmptyTest, TestSize.Lev
  */
 HWTEST_F(LinkManagerTest, RemoveLinkByDeviceIdTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdTest in");
     std::string remoteDeviceId("0123456789ABCDEF");
     LinkManager::GetInstance().ProcessIfAbsent(
         InnerLink::LinkType::HML, remoteDeviceId, [&remoteDeviceId] (InnerLink &link) {
@@ -328,7 +328,7 @@ HWTEST_F(LinkManagerTest, RemoveLinkByDeviceIdTest, TestSize.Level1)
         InnerLink::LinkType::HML, remoteDeviceId, [] (InnerLink &link) {
         });
     EXPECT_FALSE(result);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByDeviceIdTest out");
 }
 
 /*
@@ -339,7 +339,7 @@ HWTEST_F(LinkManagerTest, RemoveLinkByDeviceIdTest, TestSize.Level1)
  */
 HWTEST_F(LinkManagerTest, RemoveLinkByMacIfInnerlinkEmptyTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacIfInnerlinkEmptyTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacIfInnerlinkEmptyTest in");
     std::string remoteMac("11:11:**:**:11:11");
     auto result = LinkManager::GetInstance().ProcessIfPresent(
         remoteMac, [] (InnerLink &innerlink) {});
@@ -349,7 +349,7 @@ HWTEST_F(LinkManagerTest, RemoveLinkByMacIfInnerlinkEmptyTest, TestSize.Level1)
     result = LinkManager::GetInstance().ProcessIfPresent(
         remoteMac, [] (InnerLink &innerlink) {});
     EXPECT_FALSE(result);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacIfInnerlinkEmptyTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacIfInnerlinkEmptyTest out");
 }
 
 /*
@@ -360,7 +360,7 @@ HWTEST_F(LinkManagerTest, RemoveLinkByMacIfInnerlinkEmptyTest, TestSize.Level1)
  */
 HWTEST_F(LinkManagerTest, RemoveLinkByMacTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacTest in");
     std::string remoteDeviceId("0123456789ABCDEF");
     std::string remoteMac("11:11:**:**:11:11");
     LinkManager::GetInstance().ProcessIfAbsent(
@@ -382,7 +382,7 @@ HWTEST_F(LinkManagerTest, RemoveLinkByMacTest, TestSize.Level1)
         remoteMac, [] (InnerLink &link) {
         });
     EXPECT_FALSE(result);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RemoveLinkByMacTest out");
 }
 
 /*
@@ -393,12 +393,12 @@ HWTEST_F(LinkManagerTest, RemoveLinkByMacTest, TestSize.Level1)
  */
 HWTEST_F(LinkManagerTest, RefreshAuthHandleIfInnerlinkEmptyTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleIfInnerlinkEmptyTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleIfInnerlinkEmptyTest in");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     std::string remoteDeviceId("0123456789ABCDEF");
     auto result = LinkManager::GetInstance().RefreshAuthHandle(remoteDeviceId, nullptr);
     EXPECT_FALSE(result);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleIfInnerlinkEmptyTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleIfInnerlinkEmptyTest out");
 }
 
 /*
@@ -409,7 +409,7 @@ HWTEST_F(LinkManagerTest, RefreshAuthHandleIfInnerlinkEmptyTest, TestSize.Level1
  */
 HWTEST_F(LinkManagerTest, RefreshAuthHandleTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleTest in");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     std::string remoteDeviceId("0123456789ABCDEF");
     LinkManager::GetInstance().ProcessIfAbsent(
@@ -421,7 +421,7 @@ HWTEST_F(LinkManagerTest, RefreshAuthHandleTest, TestSize.Level1)
     auto result = LinkManager::GetInstance().RefreshAuthHandle(remoteDeviceId, nullptr);
     EXPECT_TRUE(result);
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshAuthHandleTest out");
 }
 
 /*
@@ -432,12 +432,12 @@ HWTEST_F(LinkManagerTest, RefreshAuthHandleTest, TestSize.Level1)
  */
 HWTEST_F(LinkManagerTest, GetRemoteMacByRemoteDeviceIdIfInnerlinkEmptyTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdIfInnerlinkEmptyTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdIfInnerlinkEmptyTest in");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     std::string remoteDeviceId("0123456789ABCDEF");
     auto result = LinkManager::GetInstance().GetRemoteMacByRemoteDeviceId(remoteDeviceId);
     EXPECT_TRUE(result == "");
-    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdIfInnerlinkEmptyTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdIfInnerlinkEmptyTest out");
 }
 
 /*
@@ -448,7 +448,7 @@ HWTEST_F(LinkManagerTest, GetRemoteMacByRemoteDeviceIdIfInnerlinkEmptyTest, Test
  */
 HWTEST_F(LinkManagerTest, GetRemoteMacByRemoteDeviceIdTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdTest enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdTest in");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     std::string remoteDeviceId("0123456789ABCDEF");
     std::string remoteMac("11:11:**:**:11:11");
@@ -461,6 +461,6 @@ HWTEST_F(LinkManagerTest, GetRemoteMacByRemoteDeviceIdTest, TestSize.Level1)
     auto result = LinkManager::GetInstance().GetRemoteMacByRemoteDeviceId(remoteDeviceId);
     ASSERT_STREQ(result.c_str(), remoteMac.c_str());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
-    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdTest exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdTest out");
 }
 } // namespace OHOS::SoftBus

@@ -376,7 +376,7 @@ HWTEST_F(WifiDirectManagerCppTest, NotifyPtkSyncResultTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest001, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 in");
     std::string remoteUuid("0123456789ABCDEF");
     std::string remoteMac("11:11:11:11:11:11");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
@@ -390,7 +390,7 @@ HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest001, TestSize.Level1)
     auto link = LinkManager::GetInstance().GetReuseLink(WIFI_DIRECT_LINK_TYPE_HML, remoteMac);
 
     EXPECT_EQ(link, nullptr);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 out");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
@@ -402,7 +402,7 @@ HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest001, TestSize.Level1)
  */
 HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest002, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest002 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest002 in");
     std::string remoteUuid("0123456789ABCDEF");
     std::string remoteMac("11:11:11:11:11:11");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
@@ -423,7 +423,7 @@ HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest002, TestSize.Level1)
     auto link = LinkManager::GetInstance().GetReuseLink(WIFI_DIRECT_LINK_TYPE_HML, remoteMac);
 
     EXPECT_NE(link, nullptr);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest002 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest002 out");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
@@ -435,11 +435,11 @@ HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest002, TestSize.Level1)
  */
 HWTEST_F(WifiDirectManagerCppTest, ForceDisconnectDeviceSync001, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 in");
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     auto result = ForceDisconnectDeviceSync(WIFI_DIRECT_LINK_TYPE_HML);
     EXPECT_EQ(result, SOFTBUS_OK);
-    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 out");
 }
 
 static int g_frequency = -1;
@@ -456,14 +456,14 @@ static void FrequencyChangedListener(int32_t frequency)
  */
 HWTEST_F(WifiDirectManagerCppTest, NotifyFrequencyChanged, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged in");
     NotifyFrequencyChanged(0);
     EXPECT_EQ(g_frequency, -1);
 
     AddFrequencyChangedListener(FrequencyChangedListener);
     NotifyFrequencyChanged(0);
     EXPECT_EQ(g_frequency, 0);
-    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged out");
 }
 
 /*
@@ -474,7 +474,7 @@ HWTEST_F(WifiDirectManagerCppTest, NotifyFrequencyChanged, TestSize.Level1)
  */
 HWTEST_F(WifiDirectManagerCppTest, GetHmlLinkCount, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount in");
     std::string remoteDeviceIdConnected("0123456789ABCDEF");
     LinkManager::GetInstance().ProcessIfAbsent(
         InnerLink::LinkType::HML, remoteDeviceIdConnected, [](InnerLink &link) {
@@ -492,6 +492,6 @@ HWTEST_F(WifiDirectManagerCppTest, GetHmlLinkCount, TestSize.Level1)
 
     auto ret = GetHmlLinkCount();
     EXPECT_EQ(ret, 1);
-    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount out");
 }
 } // namespace OHOS::SoftBus

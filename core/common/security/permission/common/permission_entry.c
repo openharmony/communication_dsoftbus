@@ -95,7 +95,6 @@ static SoftBusList *g_permissionEntryList = NULL;
 static SoftBusList *g_lnnPermissionEntryList = NULL;
 static SoftBusList *g_dynamicPermissionList = NULL;
 static SoftBusList *g_rpcSaPermissionList = NULL;
-static char g_permissonJson[PERMISSION_JSON_LEN];
 
 static PeMap g_peMap[] = {
     {SYSTEM_APP_STR, SYSTEM_APP},
@@ -440,21 +439,23 @@ static bool HaveGrantedPermission(const char *sessionName)
 
 int32_t LoadPermissionJson(const char *fileName)
 {
-    if (fileName == NULL) {
-        COMM_LOGE(COMM_PERM, "fileName is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t ret = ReadConfigJson(fileName, g_permissonJson);
+    COMM_CHECK_AND_RETURN_RET_LOGE(fileName != NULL, SOFTBUS_INVALID_PARAM, COMM_PERM, "fileName is null.");
+    char *permissonBuf = (char *)SoftBusCalloc(PERMISSION_JSON_LEN);
+    COMM_CHECK_AND_RETURN_RET_LOGE(permissonBuf != NULL, SOFTBUS_MALLOC_ERR, COMM_PERM, "malloc failed.");
+    int32_t ret = ReadConfigJson(fileName, permissonBuf);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(permissonBuf);
         return ret;
     }
     if (g_permissionEntryList == NULL) {
         g_permissionEntryList = CreateSoftBusList();
         if (g_permissionEntryList == NULL) {
+            SoftBusFree(permissonBuf);
             return SOFTBUS_MALLOC_ERR;
         }
     }
-    cJSON *jsonArray = cJSON_Parse(g_permissonJson);
+    cJSON *jsonArray = cJSON_Parse(permissonBuf);
+    SoftBusFree(permissonBuf);
     if (jsonArray == NULL) {
         COMM_LOGE(COMM_PERM, "parse failed. fileName=%{private}s", fileName);
         return SOFTBUS_PARSE_JSON_ERR;
@@ -464,14 +465,13 @@ int32_t LoadPermissionJson(const char *fileName)
         cJSON_Delete(jsonArray);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    int index;
     SoftBusPermissionEntry *pe = NULL;
     if (SoftBusMutexLock(&g_permissionEntryList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "lock fail.");
         cJSON_Delete(jsonArray);
         return SOFTBUS_LOCK_ERR;
     }
-    for (index = 0; index < itemNum; index++) {
+    for (int index = 0; index < itemNum; index++) {
         cJSON *permissionEntryObeject = cJSON_GetArrayItem(jsonArray, index);
         pe = ProcessPermissionEntry(permissionEntryObeject);
         if (pe != NULL) {
@@ -1012,22 +1012,23 @@ static RpcSaPermissionEntry *ProcessRpcSaPermissionEntry(cJSON *object)
 
 int32_t LoadRpcPermissionJson(const char *fileName)
 {
-    if (fileName == NULL) {
-        COMM_LOGE(COMM_PERM, "fileName is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    char buf[PERMISSION_JSON_LEN] = { 0 };
-    int32_t ret = ReadConfigJson(fileName, buf);
+    COMM_CHECK_AND_RETURN_RET_LOGE(fileName != NULL, SOFTBUS_INVALID_PARAM, COMM_PERM, "fileName is null.");
+    char *permissonBuf = (char *)SoftBusCalloc(PERMISSION_JSON_LEN);
+    COMM_CHECK_AND_RETURN_RET_LOGE(permissonBuf != NULL, SOFTBUS_MALLOC_ERR, COMM_PERM, "malloc failed.");
+    int32_t ret = ReadConfigJson(fileName, permissonBuf);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(permissonBuf);
         return ret;
     }
     if (g_rpcSaPermissionList == NULL) {
         g_rpcSaPermissionList = CreateSoftBusList();
         if (g_rpcSaPermissionList == NULL) {
+            SoftBusFree(permissonBuf);
             return SOFTBUS_MALLOC_ERR;
         }
     }
-    cJSON *jsonArray = cJSON_Parse(buf);
+    cJSON *jsonArray = cJSON_Parse(permissonBuf);
+    SoftBusFree(permissonBuf);
     if (jsonArray == NULL) {
         COMM_LOGE(COMM_PERM, "parse failed. fileName=%{private}s", fileName);
         return SOFTBUS_PARSE_JSON_ERR;
