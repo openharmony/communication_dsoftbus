@@ -33,7 +33,7 @@
 
 #define ENFORCING 1
 
-#define PERMISSION_JSON_LEN 20000
+#define PERMISSION_JSON_LEN 10000
 #define TEMP_STR_MAX_LEN 128
 
 /* permission entry key */
@@ -95,7 +95,6 @@ static SoftBusList *g_permissionEntryList = NULL;
 static SoftBusList *g_lnnPermissionEntryList = NULL;
 static SoftBusList *g_dynamicPermissionList = NULL;
 static SoftBusList *g_rpcSaPermissionList = NULL;
-static char g_lnnPermissonJson[PERMISSION_JSON_LEN];
 
 static PeMap g_peMap[] = {
     {SYSTEM_APP_STR, SYSTEM_APP},
@@ -534,28 +533,31 @@ static LnnPermissionEntry *ProcessLnnPermission(cJSON *object)
 
 int32_t LoadLnnPermissionJson(const char *fileName)
 {
-    if (fileName == NULL) {
-        COMM_LOGE(COMM_PERM, "fileName is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t ret = ReadConfigJson(fileName, g_lnnPermissonJson);
+    COMM_CHECK_AND_RETURN_RET_LOGE(fileName != NULL, SOFTBUS_INVALID_PARAM, COMM_PERM, "fileName is NULL");
+    char *lnnPermissionJson = (char *)SoftBusCalloc(PERMISSION_JSON_LEN);
+    COMM_CHECK_AND_RETURN_RET_LOGE(lnnPermissionJson != NULL, SOFTBUS_MALLOC_ERR, COMM_PERM, "calloc failed");
+    int32_t ret = ReadConfigJson(fileName, lnnPermissionJson);
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(lnnPermissionJson);
         return ret;
     }
     if (g_lnnPermissionEntryList == NULL) {
         g_lnnPermissionEntryList = CreateSoftBusList();
         if (g_lnnPermissionEntryList == NULL) {
+            SoftBusFree(lnnPermissionJson);
             return SOFTBUS_MALLOC_ERR;
         }
     }
-    cJSON *jsonArray = cJSON_Parse(g_lnnPermissonJson);
+    cJSON *jsonArray = cJSON_Parse(lnnPermissionJson);
     if (jsonArray == NULL) {
+        SoftBusFree(lnnPermissionJson);
         COMM_LOGE(COMM_PERM, "parse failed. fileName=%{public}s", fileName);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     int32_t itemNum = cJSON_GetArraySize(jsonArray);
     if (itemNum <= 0) {
         cJSON_Delete(jsonArray);
+        SoftBusFree(lnnPermissionJson);
         COMM_LOGE(COMM_PERM, "joinarray is empty");
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -563,6 +565,7 @@ int32_t LoadLnnPermissionJson(const char *fileName)
     if (SoftBusMutexLock(&g_lnnPermissionEntryList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "lock fail.");
         cJSON_Delete(jsonArray);
+        SoftBusFree(lnnPermissionJson);
         return SOFTBUS_LOCK_ERR;
     }
     for (int32_t index = 0; index < itemNum; index++) {
@@ -575,6 +578,7 @@ int32_t LoadLnnPermissionJson(const char *fileName)
     }
     (void)SoftBusMutexUnlock(&g_lnnPermissionEntryList->lock);
     cJSON_Delete(jsonArray);
+    SoftBusFree(lnnPermissionJson);
     return SOFTBUS_OK;
 }
 
