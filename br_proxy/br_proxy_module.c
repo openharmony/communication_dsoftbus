@@ -224,6 +224,7 @@ static int32_t BrProxyWaitCond(int32_t sessionId)
             continue;
         }
         if (nodeInfo->condFlag) {
+            TRANS_LOGI(TRANS_SDK, "[br_proxy] signal has been triggered! sessionId:%{public}d", sessionId);
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
             return SOFTBUS_OK;
         }
@@ -240,11 +241,12 @@ static int32_t BrProxyWaitCond(int32_t sessionId)
             return SOFTBUS_INVALID_PARAM;
         }
         absTime.sec += BR_PROXY_MAX_WAIT_COND_TIME;
+        TRANS_LOGI(TRANS_SDK, "[br_proxy] start wait cond signal! sessionId:%{public}d", sessionId);
         ret = SoftBusCondWait(&nodeInfo->cond, &(g_sessionList->lock), &absTime);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "[br_proxy] cond wait failed! sessionId:%{public}d, ret:%{public}d", sessionId, ret);
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
-            return ret;
+            return SOFTBUS_CONN_OPEN_PROXY_TIMEOUT;  // Operation failed or Connection timed out.
         }
         (void)SoftBusMutexUnlock(&(g_sessionList->lock));
         return SOFTBUS_OK;
@@ -277,6 +279,7 @@ static int32_t BrProxyPostCond(int32_t sessionId)
             (void)SoftBusMutexUnlock(&(g_sessionList->lock));
             return ret;
         }
+        TRANS_LOGI(TRANS_SDK, "[br_proxy] cond signal success! sessionId:%{public}d", sessionId);
         (void)SoftBusMutexUnlock(&(g_sessionList->lock));
         return SOFTBUS_OK;
     }
