@@ -594,7 +594,7 @@ static int32_t ServerDeleteProxyFromList(const char *brMac, const char *uuid)
     return SOFTBUS_NOT_FIND;
 }
 
-static bool IsSessionExist(const char *brMac, const char *uuid)
+static bool IsSessionExist(const char *brMac, const char *uuid, uint32_t requestId)
 {
     if (brMac == NULL || uuid == NULL || g_serverList == NULL) {
         return false;
@@ -608,6 +608,7 @@ static bool IsSessionExist(const char *brMac, const char *uuid)
         if (strcmp(nodeInfo->proxyInfo.brMac, brMac) != 0 || strcmp(nodeInfo->proxyInfo.uuid, uuid) != 0) {
             continue;
         }
+        nodeInfo->requestId = requestId;
         (void)SoftBusMutexUnlock(&(g_serverList->lock));
         return true;
     }
@@ -620,7 +621,7 @@ static int32_t ServerAddChannelToList(const char *brMac, const char *uuid, int32
     if (brMac == NULL || uuid == NULL || g_serverList == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (IsSessionExist(brMac, uuid)) {
+    if (IsSessionExist(brMac, uuid, requestId)) {
         TRANS_LOGI(TRANS_SVC, "[br_proxy] the session is reopen");
         return SOFTBUS_OK;
     }
@@ -875,6 +876,7 @@ static OpenProxyChannelCallback g_channelOpen = {
     .onOpenFail = onOpenFail,
 };
 
+static int32_t GetChannelId(const char *mac, const char *uuid, int32_t *channelId);
 static int32_t ConnectPeerDevice(const char *brMac, const char *uuid, uint32_t *requestId)
 {
     ProxyChannelManager *proxyMgr = GetProxyChannelManager();
@@ -893,8 +895,20 @@ static int32_t ConnectPeerDevice(const char *brMac, const char *uuid, uint32_t *
 
     param.timeoutMs = BR_PROXY_MAX_WAIT_TIME_MS;
     TRANS_LOGI(TRANS_SVC, "[br_proxy] open br, requestId=%{public}d", *requestId);
-    int32_t ret = proxyMgr->openProxyChannel(&param, &g_channelOpen);
+
+    int32_t channelId = 0;
+    int32_t ret = GetChannelId(brMac, uuid, &channelId);
     if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ret = ServerAddChannelToList(brMac, uuid, channelId, *requestId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = proxyMgr->openProxyChannel(&param, &g_channelOpen);
+    if (ret != SOFTBUS_OK) {
+        (void)ServerDeleteChannelFromList(channelId);
         TRANS_LOGE(TRANS_SVC, "[br_proxy] openProxyChannel failed, ret=%{public}d", ret);
         return ret;
     }
@@ -973,18 +987,6 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
     uint32_t requestId = 0;
     ret = ConnectPeerDevice(brMac, uuid, &requestId);
     if (ret != SOFTBUS_OK) {
-        (void)ServerDeleteProxyFromList(brMac, uuid);
-        return ret;
-    }
-    int32_t channelId = 0;
-    ret = GetChannelId(brMac, uuid, &channelId);
-    if (ret != SOFTBUS_OK) {
-        (void)ServerDeleteProxyFromList(brMac, uuid);
-        return ret;
-    }
-    ret = ServerAddChannelToList(brMac, uuid, channelId, requestId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
         (void)ServerDeleteProxyFromList(brMac, uuid);
         return ret;
     }
@@ -1226,14 +1228,14 @@ static void DealDataWhenForeground(ProxyBaseInfo *baseInfo, const uint8_t *data,
 {
     pid_t pid = 0;
     int32_t channelId = 0;
-    int32_t ret = SelectClient(baseInfo, &pid, &channelId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] select pid failed! ret:%{public}d", ret);
-        return;
-    }
-    ret = ServerAddDataToList(baseInfo, data, dataLen);
+    int32_t ret = ServerAddDataToList(baseInfo, data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] add data to list failed! ret:%{public}d", ret);
+        return;
+    }
+    ret = SelectClient(baseInfo, &pid, &channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] select pid failed! ret:%{public}d", ret);
         return;
     }
     CleanUpDataListWithSameMac(baseInfo, channelId, pid);
@@ -1335,7 +1337,7 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] Update ConnectState failed! ret=%{public}d", ret);
         return;
     }
-    if (IsSessionExist(channel->brMac, channel->uuid)) {
+    if (IsSessionExist(channel->brMac, channel->uuid, channel->requestId)) {
         ServerBrProxyChannelInfo info = {0};
         ret = GetChannelInfo(channel->brMac, channel->uuid, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
         if (ret != SOFTBUS_OK) {

@@ -84,17 +84,9 @@ static int32_t LoadSymbol(SymbolLoader *loader, bool *load)
 
 static void CleanupSymbolIfNeed(SymbolLoader *loader, bool load)
 {
-    if (!load) {
-        return;
-    }
-    if (loader->handle != nullptr) {
-        dlclose(loader->handle);
-        loader->handle = nullptr;
-    }
-
-    loader->getAbilityName = nullptr;
-    loader->startAbility = nullptr;
-    loader->unrestricted = nullptr;
+    (void)loader;
+    (void)load;
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] can ignore");
 }
 
 static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const char *abilityName, int32_t appIndex)
