@@ -23,16 +23,10 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
-#ifdef SOFTBUS_OS_ACCOUNT
-#include "os_account_manager.h"
-#endif
-
-using namespace OHOS;
 namespace Communication {
 namespace OHOS::Softbus {
 using namespace std;
 
-static const string CONSTRAINT = "constraint.distributed.transmission.outgoing";
 static constexpr const char *THREAD_NAME = "linkEnhance";
 
 static std::map<int32_t, std::string> napiErrMsgMap {
@@ -242,28 +236,6 @@ bool CheckAccessToken(void)
         COMM_LOGW(COMM_SDK, "no access token");
     }
     return isAccessToken;
-}
-
-bool CheckMDMControl()
-{
-#ifdef SOFTBUS_OS_ACCOUNT
-    std::vector<int32_t> ids;
-    ErrCode err = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (err != ERR_OK || ids.empty()) {
-        COMM_LOGE(COMM_SDK, "query id failed, err=%{public}d", err);
-        return false;
-    }
-
-    int32_t activeAccountId = ids[0];
-    bool isMDMControl = false;
-    err = AccountSA::OsAccountManager::CheckOsAccountConstraintEnabled(
-        activeAccountId, CONSTRAINT, isMDMControl);
-    CONN_CHECK_AND_RETURN_RET_LOGE(err == ERR_OK, false, COMM_SDK,
-        "check account constraint failed, err=%{public}d", err);
-    return isMDMControl;
-#else
-    return false;
-#endif
 }
 } // namespace Softbus
 } // namespace Communication
