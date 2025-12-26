@@ -2013,6 +2013,9 @@ static int32_t CopyResponseSettings(NSTACKX_ResponseSettings *dupResponseSetting
         DFINDER_LOGE(TAG, "remoteIp strncpy failed");
         return NSTACKX_EINVAL;
     }
+    dupResponseSettings->capBitmapNum = responseSettings->capBitmapNum;
+    (void)memcpy_s(dupResponseSettings->capBitmap, sizeof(uint32_t) * NSTACKX_MAX_CAPABILITY_NUM,
+        responseSettings->capBitmap, sizeof(uint32_t) * NSTACKX_MAX_CAPABILITY_NUM);
     return NSTACKX_EOK;
 }
 
@@ -2040,6 +2043,15 @@ static int32_t CheckResponseSettings(const NSTACKX_ResponseSettings *responseSet
         DFINDER_LOGE(TAG, "remoteIp is error, no terminator");
         return NSTACKX_EINVAL;
     }
+    if (responseSettings->capBitmapNum > NSTACKX_MAX_CAPABILITY_NUM) {
+        DFINDER_LOGE(TAG, "capBitmapNum is error, no terminator");
+        return NSTACKX_EINVAL;
+    }
+    if (responseSettings->capBitmapNum == 0) {
+        DFINDER_LOGW(TAG, "capBitmapNum set %u, will use the previously configured ability values",
+            responseSettings->capBitmapNum);
+    }
+
     return NSTACKX_EOK;
 }
 
@@ -2054,8 +2066,8 @@ int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSetting
         return NSTACKX_EINVAL;
     }
 
-    DFINDER_LOGI(TAG, "response settings, business type: %hu, local network name: %s",
-        responseSettings->businessType, responseSettings->localNetworkName);
+    DFINDER_LOGI(TAG, "response settings, business type: %hu, local network name: %s, capBitmapNum: %u",
+        responseSettings->businessType, responseSettings->localNetworkName, responseSettings->capBitmapNum);
 
     NSTACKX_ResponseSettings *dupResponseSettings = malloc(sizeof(NSTACKX_ResponseSettings));
     if (dupResponseSettings == NULL) {
