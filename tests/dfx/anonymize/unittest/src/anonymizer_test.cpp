@@ -40,6 +40,8 @@ const char *TEST_PLAIN_IP_TWO = "10.11.12.13";
 const char *TEST_ANONYMIZED_IP_TWO = "10.11.12.**";
 const char *TEST_PLAIN_IP_THREE = "10.11.12.133";
 const char *TEST_ANONYMIZED_IP_THREE = "10.11.12.***";
+const char *TEST_PLAIN_IP_CIDR = "10.0.0.0/32";
+const char *TEST_ANONYMIZED_IP_CIDR = "10.0.0.****";
 const uint32_t DEVICE_NAME_MAX_LEN = 128;
 } // namespace
 
@@ -197,6 +199,55 @@ HWTEST_F(AnonymizerTest, AnonymizeTest009, TestSize.Level0)
 
     Anonymize(TEST_PLAIN_IP_THREE, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_IP_THREE, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeTestIpCidr
+ * @tc.desc: Test anonymize ip
+ * @tc.type: FUNC
+ * @tc.require: I8DW1W
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTestIpCidr, TestSize.Level0)
+{
+    char *anonymizedStr = nullptr;
+    Anonymize(TEST_PLAIN_IP_CIDR, &anonymizedStr);
+    EXPECT_STREQ(TEST_ANONYMIZED_IP_CIDR, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr1[] = "255.255.255.255/322";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr1, &anonymizedStr));
+    EXPECT_STREQ("255.**********5/322", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr2[] = "255.255.255.255/";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr2, &anonymizedStr));
+    EXPECT_STREQ("255.********255/", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr3[] = "255.255.255.255//2";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr3, &anonymizedStr));
+    EXPECT_STREQ("255.*********55//2", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr4[] = "255.255.1.1/8";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr4, &anonymizedStr));
+    EXPECT_STREQ("255.255.1.***", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr5[] = "255.255.1.1/24";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr5, &anonymizedStr));
+    EXPECT_STREQ("255.255.1.****", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr6[] = "255.255.1.1/245";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr6, &anonymizedStr));
+    EXPECT_STREQ("255********/245", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr7[] = "255.255.1/.1";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr7, &anonymizedStr));
+    EXPECT_STREQ("255******/.1", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
 
