@@ -38,7 +38,8 @@ void MockSoftBusTimer(void) { }
 
 /*
  * @tc.name: SoftBusUtilsTest_CreateSoftBusList_001
- * @tc.desc: Normal destroy softbus list test
+ * @tc.desc: Verify CreateSoftBusList returns non-nullptr and DestroySoftBusList
+ *           executes successfully for normal softbus list destruction
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -51,7 +52,8 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_DestroySoftBusList_001, TestSize.Lev
 
 /*
  * @tc.name: SoftBusUtilsTest_CreateSoftBusList_001
- * @tc.desc: Error register timeout callback test
+ * @tc.desc: Verify RegisterTimeoutCallback returns SOFTBUS_INVALID_PARAM when callback is nullptr
+ *           or timerFunId is out of valid range
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -74,7 +76,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_001, TestSiz
 
 /*
  * @tc.name: SoftBusUtilsTest_RegisterTimeoutCallback_002
- * @tc.desc: Normal register timeout callback test
+ * @tc.desc: Verify RegisterTimeoutCallback works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -95,7 +97,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_002, TestSiz
 
 /*
  * @tc.name: SoftBusUtilsTest_UnRegisterTimeoutCallback
- * @tc.desc: Normal unregister timeout callback test
+ * @tc.desc: Verify UnRegisterTimeoutCallback works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -116,7 +118,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_UnRegisterTimeoutCallback, TestSize.
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftBusTimerInit_001
- * @tc.desc: Normal timer init
+ * @tc.desc: Verify SoftBusTimerInit works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -131,7 +133,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftBusTimerInit_001, TestSize.Level
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftBusTimerDeInit_001
- * @tc.desc: Normal timer deinit
+ * @tc.desc: Verify SoftBusTimerDeInit works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -144,7 +146,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftBusTimerDeInit_001, TestSize.Lev
 
 /*
  * @tc.name: SoftBusUtilsTest_ConvertHexStringToBytes_001
- * @tc.desc: Parameter error when convert hex string to bytes
+ * @tc.desc: Verify ConvertHexStringToBytes returns SOFTBUS_INVALID_PARAM when input parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -189,7 +191,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSiz
 
 /*
  * @tc.name: SoftBusUtilsTest_ConvertHexStringToBytes_002
- * @tc.desc: Normal convert hex string to bytes
+ * @tc.desc: Verify ConvertHexStringToBytes works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -210,7 +212,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
 
 /*
  * @tc.name: SoftBusUtilsTest_ConvertBytesToHexString_001
- * @tc.desc: Parameter error when convert bytes to hex string
+ * @tc.desc: Verify ConvertBytesToHexString returns SOFTBUS_INVALID_PARAM when input parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -239,7 +241,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
 
 /*
  * @tc.name: SoftBusUtilsTest_ConvertBytesToHexString_002
- * @tc.desc: Normal convert bytes to hex string
+ * @tc.desc: Verify ConvertBytesToHexString works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -258,7 +260,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_002, TestSiz
 
 /*
  * @tc.name: SoftBusUtilsTest_GenerateRandomStr_001
- * @tc.desc: Parameter error when generate random string
+ * @tc.desc: Verify GenerateRandomStr returns SOFTBUS_INVALID_PARAM when input parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -277,7 +279,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_GenerateRandomStr_001, TestSize.Leve
 
 /*
  * @tc.name: SoftBusUtilsTest_IsValidString_001
- * @tc.desc: Check string valid
+ * @tc.desc: Verify IsValidString returns false when input parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -302,7 +304,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_IsValidString_001, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_001
- * @tc.desc: Parameter error when convert bt mac to binary
+ * @tc.desc: Verify ConvertBtMacToBinary returns SOFTBUS_INVALID_PARAM when input parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -318,7 +320,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
 
 /*
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_001
- * @tc.desc: Parameter error when convert binary to bt mac
+ * @tc.desc: Verify ConvertBtMacToStr returns SOFTBUS_INVALID_PARAM when input parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -334,7 +336,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_001, TestSize.Leve
 
 /*
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_002
- * @tc.desc: Normal convert binary to bt mac
+ * @tc.desc: Verify ConvertBtMacToStr works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -353,7 +355,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_002, TestSize.Leve
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_001
- * @tc.desc: Test softbus event error code
+ * @tc.desc: Verify SoftbusErrorCodeStandard works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -366,7 +368,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_001, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_002
- * @tc.desc: Test disc event error code
+ * @tc.desc: Verify SoftbusErrorCodeStandard works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -379,7 +381,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_002, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_003
- * @tc.desc: Test conn event error code
+ * @tc.desc: Verify SoftbusErrorCodeStandard works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -392,7 +394,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_003, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_004
- * @tc.desc: Test auth event error code
+ * @tc.desc: Verify SoftbusErrorCodeStandard works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -405,7 +407,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_004, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_005
- * @tc.desc: Test lnn event error code
+ * @tc.desc: Verify SoftbusErrorCodeStandard works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -418,7 +420,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_005, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_006
- * @tc.desc: Test trans event error code
+ * @tc.desc: Verify SoftbusErrorCodeStandard works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -431,7 +433,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize001
- * @tc.desc: Test CalculateMbsTruncateSize with null str
+ * @tc.desc: Verify CalculateMbsTruncateSize works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -451,7 +453,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize002
- * @tc.desc: Test CalculateMbsTruncateSize with ascii str
+ * @tc.desc: Verify CalculateMbsTruncateSize works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -473,7 +475,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
 
 /*
  * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize003
- * @tc.desc: Test CalculateMbsTruncateSize with utf-8 str
+ * @tc.desc: Verify CalculateMbsTruncateSize works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -496,7 +498,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
 
 /*
  * @tc.name: AddNumberToSocketName001
- * @tc.desc: Test Add Number To Socket Name
+ * @tc.desc: Verify AddNumberToSocketName works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */

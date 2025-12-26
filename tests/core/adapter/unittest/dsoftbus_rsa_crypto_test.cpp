@@ -67,7 +67,7 @@ void AdapterDsoftbusRsaCryptoTest::TearDown() { }
 
 /*
  * @tc.name: SoftBusGetPublicKey001
- * @tc.desc: parameters are Legal
+ * @tc.desc: All parameters are legal including valid public key buffer and standard key length
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -81,7 +81,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusGetPublicKey001, TestSize.Level0)
 
 /*
  * @tc.name: SoftBusGetPublicKey002
- * @tc.desc: parameter is nullptr
+ * @tc.desc: Public key buffer parameter is nullptr
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -94,7 +94,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusGetPublicKey002, TestSize.Level0)
 
 /*
  * @tc.name: SoftBusGetPublicKey003
- * @tc.desc: len is illegal
+ * @tc.desc: Key length parameter is illegal with value 0
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -108,7 +108,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusGetPublicKey003, TestSize.Level0)
 
 /*
  * @tc.name: SoftBusRsaEncrypt001
- * @tc.desc: parameters are Legal
+ * @tc.desc: All parameters are legal including valid source data public key encrypted data buffer and length pointers
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -134,7 +134,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaEncrypt001, TestSize.Level0)
 
 /*
  * @tc.name: SoftBusRsaEncrypt002
- * @tc.desc: parameter is nullptr
+ * @tc.desc: Individual parameters are nullptr including source data public key encrypted data buffer and length pointer
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -165,7 +165,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaEncrypt002, TestSize.Level0)
 
 /*
  * @tc.name: SoftBusRsaEncrypt003
- * @tc.desc: srcDataLen is illegal
+ * @tc.desc: Source data length parameter is illegal with value 0
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -191,7 +191,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaEncrypt003, TestSize.Level0)
 
 /*
  * @tc.name: SoftBusRsaDecrypt002
- * @tc.desc: parameter is nullptr
+ * @tc.desc: Individual parameters are nullptr including encrypted data decrypted data buffer and length pointer
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -226,7 +226,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt002, TestSize.Level0)
 
 /*
  * @tc.name: SoftBusRsaDecrypt003
- * @tc.desc: inDatalen is illegal
+ * @tc.desc: Encrypted data length parameter is illegal with value 0
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */
@@ -260,7 +260,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
 
 /*
  * @tc.name: DataBusNativeVirtual001
- * @tc.desc: function
+ * @tc.desc: Verify normal return of NotifyNearBy series functions with legal parameters
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -302,7 +302,8 @@ static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct 
 
 /*
  * @tc.name: HksDecrypt001
- * @tc.desc: parameters are Legal
+ * @tc.desc: All parameters are legal including valid key alias param sets
+ *           source data encrypted data and decrypted data blobs
  * @tc.type: FUNC
  * @tc.require: I5OHDE
  */

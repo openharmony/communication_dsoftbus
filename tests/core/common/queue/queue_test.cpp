@@ -45,7 +45,8 @@ void CommonCoreQueueTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: QueueInitTest001
- * @tc.desc: core common QueueInit invalid param test
+ * @tc.desc: Verify QueueInit returns QUEUE_INVAL for nullptr queue or invalid size
+ *           core common QueueInit invalid param test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -62,7 +63,8 @@ HWTEST_F(CommonCoreQueueTest, QueueInitTest001, TestSize.Level1)
 
 /*
  * @tc.name: QueueSizeCalcTest001
- * @tc.desc: core common QueueSizeCalc invalid param test
+ * @tc.desc: Verify QueueSizeCalc returns QUEUE_INVAL for nullptr queueSize or invalid size
+ *           core common QueueSizeCalc invalid param test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -77,7 +79,8 @@ HWTEST_F(CommonCoreQueueTest, QueueSizeCalcTest001, TestSize.Level1)
 
 /*
  * @tc.name: QueueCountGetTest001
- * @tc.desc: core common QueueCountGet invalid param test
+ * @tc.desc: Verify QueueCountGet returns QUEUE_INVAL for nullptr queue or nullptr count
+ *           core common QueueCountGet invalid param test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -93,7 +96,8 @@ HWTEST_F(CommonCoreQueueTest, QueueCountGetTest001, TestSize.Level1)
 
 /*
  * @tc.name: CreateQueueTest001
- * @tc.desc: core common CreateQueueTest invalid param test
+ * @tc.desc: Verify CreateQueue returns nullptr for invalid size
+ *           core common CreateQueueTest invalid param test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -108,7 +112,8 @@ HWTEST_F(CommonCoreQueueTest, CreateQueueTest001, TestSize.Level1)
 
 /*
  * @tc.name: CreateQueueTest002
- * @tc.desc: core common CreateQueue success test
+ * @tc.desc: Verify CreateQueue returns valid queue for valid size
+ *           core common CreateQueue success test
  * @tc.type: FUNC
  * @tc.require:
  */

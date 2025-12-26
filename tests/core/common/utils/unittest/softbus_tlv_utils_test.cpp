@@ -91,7 +91,8 @@ static void TLvFeatureTest(uint8_t tSize, uint8_t lSize, vector<TlvFrame> &testc
 
 /*
  * @tc.name: TlvUtilsNormalUsage
- * @tc.desc: TlvUtilsNormalUsage test
+ * @tc.desc: Verify TLV utility functions work correctly with various test cases including single/multiple TLV frames
+ *           and different type length combinations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -127,7 +128,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsNormalUsage, TestSize.Level0)
 
 /*
  * @tc.name: TlvUtilsPackTlvTest
- * @tc.desc: TlvUtilsPackTlvTest
+ * @tc.desc: Verify TlvUtilsPackTlv works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -192,7 +193,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackTlvTest, TestSize.Level0)
 
 /*
  * @tc.name: TlvUtilsUnpackTlvTest
- * @tc.desc: TlvUtilsUnpackTlvTest
+ * @tc.desc: Verify TlvUtilsUnpackTlv works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -247,7 +248,7 @@ typedef struct {
 
 /*
  * @tc.name: TlvUtilsPackNumberTest
- * @tc.desc: TlvUtilsPackNumberTest
+ * @tc.desc: Verify TlvUtilsPackNumber works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -297,7 +298,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackNumberTest, TestSize.Level0)
 
 /*
  * @tc.name: TlvUtilsUnpackNumberTest
- * @tc.desc: TlvUtilsUnpackNumberTest
+ * @tc.desc: Verify TlvUtilsUnpackNumber works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -346,7 +347,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsUnpackNumberTest, TestSize.Level0)
 
 /*
  * @tc.name: GetTlvMemberWithBuffer
- * @tc.desc: GetTlvMemberWithBuffer
+ * @tc.desc: Verify GetTlvMemberWithBuffer works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -396,7 +397,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithBufferTest, TestSize.Level
 
 /*
  * @tc.name: TlvUtilsExceptionDataTest
- * @tc.desc: TlvUtilsExceptionDataTest
+ * @tc.desc: Verify TlvUtilsExceptionDataTest works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
