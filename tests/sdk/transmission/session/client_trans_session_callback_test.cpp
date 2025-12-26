@@ -263,9 +263,10 @@ static void RelesseChannInfo(ChannelInfo *channel)
     channel = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest01
- * @tc.desc: Transmission sdk session callback accept session as server with different parameters.
+ * @tc.desc: Transmission sdk session callback accept session
+ *           as server with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -296,9 +297,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest01, TestS
     RelesseChannInfo(channel);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest02
- * @tc.desc: Transmission sdk session callback get session callback by channe id with different parameters.
+ * @tc.desc: Transmission sdk session callback get session callback by channe id
+ *           with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -332,9 +334,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest02, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest03
- * @tc.desc: Transmission sdk session callback on session opened with invalid parameters.
+ * @tc.desc: Transmission sdk session callback on session opened
+ *           with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -375,9 +378,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest04
- * @tc.desc: Transmission sdk session callback on session opened with different parameters.
+ * @tc.desc: Transmission sdk session callback on session opened
+ *           with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -412,9 +416,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest04, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest05
- * @tc.desc: Transmission sdk session callback on session closed.
+ * @tc.desc: Transmission sdk session callback on session closed
+ *           test the client session callback function at the transport layer
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -439,9 +444,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest06
- * @tc.desc: Transmission sdk session callback process receive file data with different parameter.
+ * @tc.desc: Transmission sdk session callback process receive file data
+ *           with different parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -468,9 +474,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest06, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest07
- * @tc.desc: Transmission sdk session callback on data received with different parameter.
+ * @tc.desc: Transmission sdk session callback on data received
+ *           with different parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -517,9 +524,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest07, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest08
- * @tc.desc: Transmission sdk session callback on stream received with different parameter.
+ * @tc.desc: Transmission sdk session callback on stream received
+ *           with different parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -547,9 +555,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest08, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest09
- * @tc.desc: Transmission sdk session callback on stream received no callback.
+ * @tc.desc: Transmission sdk session callback on stream received no callback
+ *           test the client session callback function at the transport layer
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -582,9 +591,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest09, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest10
- * @tc.desc: Transmission sdk session callback on qos with different parameter.
+ * @tc.desc: Transmission sdk session callback on qos
+ *           with different parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -613,9 +623,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest10, TestS
     SoftBusFree(tvList);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest11
- * @tc.desc: Transmission sdk session callback on qos no callback.
+ * @tc.desc: Transmission sdk session callback on qos no callback
+ *           test the client session callback function at the transport layer
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -649,9 +660,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest11, TestS
     SoftBusFree(tvList);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest12
- * @tc.desc: Transmission sdk session callback on session open failed with no callback.
+ * @tc.desc: Transmission sdk session callback on session open failed with no callback
+ *           test the client session callback function at the transport layer
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -682,9 +694,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest12, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest13
- * @tc.desc: Transmission sdk session callback on data received with different parameter.
+ * @tc.desc: Transmission sdk session callback on data received with different parameter
+ *           test the client session callback function at the transport layer
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -734,9 +747,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest13, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest14
- * @tc.desc: HandleAsyncBindSuccess not found session.
+ * @tc.desc: Verify whether the function can correctly return the expected error code
+ *           when a null pointer parameter is passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -748,9 +762,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest14, TestS
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest15
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Test the behavior of the HandleSyncBindSuccess function
+ *           under different session states
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -767,9 +782,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest15, TestS
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest16
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Test the behavior of the GetSocketCallbackAdapterByChannelId function
+ *           under different parameter conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -810,9 +826,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest16, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest17
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Test the behavior of the GetSocketCallbackAdapterByUdpChannelId function
+ *           under different parameter conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -855,9 +872,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest17, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest18
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Verify whether the behavior of the TransOnBindSuccess function
+ *           meets expectations under different conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -889,9 +907,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest18, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest19
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Verify that the behavior of interfaces such as session negotiation and session management
+ *           meets expectations in different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -928,9 +947,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest19, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest20
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: HandleSyncBindSuccess not found session
+ *           test client session callback functionality
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -952,9 +972,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest20, TestS
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest21
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Verify whether the function can correctly return the expected error code
+ *           when an invalid channelType is passed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -967,9 +988,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest21, TestS
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest22
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Test the client session channel management function
+ *           especially focusing on operations related to socket channels
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1001,9 +1023,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest22, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: TransClientSessionCallbackTest23
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Test the client session callback functionality at the transport layer
+ *           particularly the handling of Qos events and multipath events
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1037,9 +1060,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestS
     SoftBusFree(sessionParam);
 }
 
-/**
+/*
  * @tc.name: SetTimerTest001
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Test the timer setting function and its related
+ *           cancellation function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1054,9 +1078,10 @@ HWTEST_F(TransClientSessionCallbackTest, SetTimerTest001, TestSize.Level1)
     CancelTimer(DFX_TIMERS_S);
 }
 
-/**
+/*
  * @tc.name: SoftBusGetSelfTokenIdTest001
- * @tc.desc: HandleSyncBindSuccess not found session.
+ * @tc.desc: Verify the error handling capability of these functions
+ *           when the parameters are NULL, as well as the return values under normal conditions
  * @tc.type: FUNC
  * @tc.require:
  */

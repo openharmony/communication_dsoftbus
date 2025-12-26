@@ -54,7 +54,7 @@ void LNNLaneCommCapaTest::TearDown()
 }
 
 /*
-* @tc.name: LNNLaneCommCapaTest
+* @tc.name: LnnCommCapaTest001
 * @tc.desc: Verify whether the method can correctly return the expected error code
 *           when invalid parameters are passed
 * @tc.type: FUNC
@@ -71,7 +71,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_COMM_CAPA_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNNLaneCommCapaTest
+* @tc.name: LnnCommCapaTest002
 * @tc.desc: Tested the verification logic for static and dynamic network capabilities
 *           under different link types
 * @tc.type: FUNC
@@ -107,7 +107,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_COMM_CAPA_002, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnBrCommCapaCheckTest001
  * @tc.desc: Verify that the return results of static and dynamic network capability check functions meet expectations
  *           under different network capability configurations
  * @tc.type: FUNC
@@ -150,7 +150,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_BR_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnSleCommCapaCheckTest001
  * @tc.desc: Verify that the return results of the check fucntion meet expectations
  *           under different network capability configurations
  * @tc.type: FUNC
@@ -193,7 +193,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_SLE_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnBleCommCapaCheckTest001
  * @tc.desc: Verify that the return results of static and dynamic network capability check functions meet expectations
  *           under different network capability configurations
  * @tc.type: FUNC
@@ -236,7 +236,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_BLE_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnP2PCommCapaCheckTest001
  * @tc.desc: Verify that the return results of static and dynamic network capability check functions meet expectations
  *           under different network capability configurations
  * @tc.type: FUNC
@@ -283,7 +283,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_P2P_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnHMLCommCapaCheckTest001
  * @tc.desc: Test the communication capability check function related to HML in the LNN module
  * @tc.type: FUNC
  * @tc.require:
@@ -329,7 +329,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_HML_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: Lnn24GCommCapaCheckTest001
  * @tc.desc: Test the 2.4G wifi network communication capability check function
  * @tc.type: FUNC
  * @tc.require:
@@ -382,7 +382,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_24G_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: Lnn5GCommCapaCheckTest001
  * @tc.desc: Test the 5G wifi network communication capability check function
  * @tc.type: FUNC
  * @tc.require:
@@ -435,7 +435,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_5G_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnETHCommCapaCheckTest001
  * @tc.desc: Test the ETH network communication capability check function
  * @tc.type: FUNC
  * @tc.require:
@@ -483,7 +483,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_ETH_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnCocCommCapaCheckTest001
  * @tc.desc: Test the COC network communication capability check function
  * @tc.type: FUNC
  * @tc.require:
@@ -527,7 +527,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_COC_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNNLaneCommCapaTest
+* @tc.name: SetRemoteDynamicNetCapTest001
 * @tc.desc: Verify that the function can correctly handle various scenarios without crashing
 *           under different input conditions and depending on the return values of the function
 * @tc.type: FUNC
@@ -559,7 +559,7 @@ HWTEST_F(LNNLaneCommCapaTest, SetRemoteDynamicNetCapTest001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNNLaneCommCapaTest
+ * @tc.name: LnnUSBCommCapaCheckTest001
  * @tc.desc: Test the network capability check function related to USB communication
  * @tc.type: FUNC
  * @tc.require:

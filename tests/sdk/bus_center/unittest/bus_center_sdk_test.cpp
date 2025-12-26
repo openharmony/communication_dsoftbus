@@ -200,6 +200,8 @@ static IRangeCallback g_bleRangeCb1 = { .onRangeResult = nullptr, .onRangeStateC
 /*
  * @tc.name: BUS_CENTER_SDK_Join_Lnn_Test_001
  * @tc.desc: bus center JoinLNN interface exception test
+ *           Verify whether the function can correctly return an error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -216,6 +218,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Join_Lnn_Test_001, TestSize.Level0)
 /*
  * @tc.name: BUS_CENTER_SDK_Leave_Lnn_Test_001
  * @tc.desc: bus center LeaveLNN interface exception test
+ *           Verify whether the function can correctly return an error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -266,6 +270,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_002, TestSize.Level0)
 /*
  * @tc.name: BUS_CENTER_SDK_STATE_CB_Test_003
  * @tc.desc: bus center node state callback reg param check
+ *           To test the boundary conditions and error handling for the device status
+ *           callback registration or unregistration function in the buscenter module
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -300,6 +306,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_003, TestSize.Level0)
 /*
  * @tc.name: BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001
  * @tc.desc: get all node info interface test
+ *           The GetAllNodeDeviceInfo function is used to obtain information about all node devices
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -326,6 +333,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_ALL_NODE_INFO_Test_001, TestSize.L
 /*
  * @tc.name: BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001
  * @tc.desc: get local info interface test
+ *           Test the function of obtaining local node device information
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -345,6 +353,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize
 /*
  * @tc.name: BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001
  * @tc.desc: get node key info interface test
+ *           Test the function of obtaining key node information in the Buscenter SDK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -404,6 +413,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
 /*
  * @tc.name: BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_002
  * @tc.desc: get node key info(screen status) interface test
+ *           Test the function of obtaining key information about node devices in the buscenter SDK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -426,7 +436,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_002, TestSize.L
 
 /*
  * @tc.name: BUS_CENTER_SDK_START_TIME_SYNC_Test_001
- * @tc.desc: start time sync interface test
+ * @tc.desc: Verified whether the return values
+ *           under different parameter combinations meet expectations
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -459,7 +470,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_TIME_SYNC_Test_002, TestSize.Lev
 
 /*
  * @tc.name: PublishLNNTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Test the behavior of the PublishLNN function
+ *           under various abnormal input conditions
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -506,7 +518,8 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest001, TestSize.Level0)
 
 /*
  * @tc.name: PublishLNNTest002
- * @tc.desc: Verify normal case
+ * @tc.desc: Test the correctness of the LNN publishing function
+ *           in the buscenter module
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9 I5PTUS
@@ -544,9 +557,10 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest002, TestSize.Level0)
     }
 }
 
-/**
+/*
  * @tc.name: PublishLNNTest003
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Test whether the function correctly returns an error code
+ *           when an invalid ExchangeMedium enumeration value is passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -566,7 +580,8 @@ HWTEST_F(BusCenterSdkTest, PublishLNNTest003, TestSize.Level0)
 
 /*
  * @tc.name: RefreshLNNTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Test the behavior of the RefreshLNN function
+ *           under various abnormal input conditions
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -615,7 +630,8 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest001, TestSize.Level0)
 
 /*
  * @tc.name: RefreshLNNTest002
- * @tc.desc: Verify normal case
+ * @tc.desc: Test the correctness of the LNN refresh function
+ *           in the BusCenter module
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9 I5PTUS
@@ -653,9 +669,10 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest002, TestSize.Level0)
     }
 }
 
-/**
+/*
  * @tc.name: RefreshLNNTest003
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: Test whether the fucntion can correctly handle and return an error code
+ *           when an invalid ExchangeMedium enumeration values is passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5I7B9
@@ -676,7 +693,8 @@ HWTEST_F(BusCenterSdkTest, RefreshLNNTest003, TestSize.Level0)
 
 /*
  * @tc.name: SET_NODE_DATA_CHANGE_FLAG_INNER_Test001
- * @tc.desc: Set Node Data Change Flag Inner
+ * @tc.desc: Verify whether the function can correctly return an error code indicating parameters
+ *           when a null pointer is passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -692,7 +710,8 @@ HWTEST_F(BusCenterSdkTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test001, TestSize.Lev
 
 /*
  * @tc.name: SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001
- * @tc.desc: ServerIpcSetNodeDataChangeFlag Result
+ * @tc.desc: Verify whether the function can correctly return an error code indicating parameters
+ *           when a null pointer is passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -708,8 +727,9 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_FLAG_Test001, TestSiz
 }
 
 /*
- * @tc.name: SERVER_IPC_SET_NODE_DATA_CHANGE_Test001
- * @tc.desc: Meta Node On Leave Result
+ * @tc.name: SERVER_IPC_SET_NODE_DATA_CHANGE_Test002
+ * @tc.desc: Verify whether the function can correctly return an error code indicating parameters
+ *           when a null pointer is passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -726,7 +746,8 @@ HWTEST_F(BusCenterSdkTest, SERVER_IPC_SET_NODE_DATA_CHANGE_Test002, TestSize.Lev
 
 /*
  * @tc.name: BUS_CENTER_SDK_PARAM_CHECK_Test001
- * @tc.desc: test sdk parm check
+ * @tc.desc: Verify whether the function can correctly return an error code indicating parameters
+ *           when a null pointer is passed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -749,7 +770,8 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_PARAM_CHECK_Test001, TestSize.Level1)
 
 /*
  * @tc.name: BUS_CENTER_SDK_TRIGGER_RANGE_Test001
- * @tc.desc: test sdk parm check
+ * @tc.desc: Used to test the function related to "Trigger Range"
+ *           in the BusCenter SDK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -783,7 +805,8 @@ static void NotifyP2pStateChange(int32_t retCode)
 
 /*
  * @tc.name: BUS_CENTER_SDK_CREATE_GROUP_OWNER_Test001
- * @tc.desc: test createGroupOwner
+ * @tc.desc: Verify whether the CreateGroupOwner function can correctly handle error conditions and return
+ *           the expected error codes when different parameters are invalid
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
