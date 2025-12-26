@@ -53,7 +53,7 @@ void SoftbusPermissionACLTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: TransCheckClientAccessControl001
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for TransCheckClientAccessControl when input networkId is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -65,7 +65,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl001, TestSize.Le
 
 /*
  * @tc.name: TransCheckClientAccessControl002
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Return SOFTBUS_OK for TransCheckClientAccessControl when input networkId is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -81,7 +81,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl002, TestSize.Le
 
 /*
  * @tc.name: TransCheckClientAccessControl003
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Return SOFTBUS_OK for TransCheckClientAccessControl when input networkId is valid and token type is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -101,7 +101,8 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl003, TestSize.Le
 
 /*
  * @tc.name: TransCheckClientAccessControl004
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for TransCheckClientAccessControl when input networkId is valid
+ *           and token type is HAP and IsOsAccountForegroundAdapter return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -129,7 +130,8 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl004, TestSize.Le
 
 /*
  * @tc.name: TransCheckClientAccessControl005
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Verify TransCheckClientAccessControl returns SOFTBUS_TRANS_BACKGROUND_USER_DENIED when
+ *           networkId is valid, token type is HAP and IsOsAccountForegroundAdapter returns false
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -157,7 +159,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl005, TestSize.Le
 
 /*
  * @tc.name: TransCheckClientAccessControl006
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Verify TransCheckClientAccessControl returns SOFTBUS_INVALID_PARAM when LnnGetLocalStrInfo fails
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,7 +189,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl006, TestSize.Le
 
 /*
  * @tc.name: TransCheckClientAccessControl007
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Verify TransCheckClientAccessControl returns SOFTBUS_INVALID_PARAM when LnnGetRemoteStrInfo fails
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -219,7 +221,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl007, TestSize.Le
 
 /*
  * @tc.name: TransCheckClientAccessControl008
- * @tc.desc: test function TransCheckClientAccessControl parameters
+ * @tc.desc: Verify TransCheckClientAccessControl returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -252,7 +254,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl008, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl001
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM for TransCheckServerAccessControl when input AppInfo is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -264,7 +266,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl001, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl002
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_OK when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -278,7 +280,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl002, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl003
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_INVALID_PARAM when TransGetTokenIdBySessionName fails
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -296,7 +298,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl003, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl004
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_OK when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -317,7 +319,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl004, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl005
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_TRANS_CROSS_LAYER_DENIED when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -338,7 +340,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl005, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl006
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_TRANS_CROSS_LAYER_DENIED when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -359,7 +361,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl006, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl007
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_TRANS_CROSS_LAYER_DENIED when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -381,7 +383,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl007, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl008
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_INVALID_PARAM when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -405,7 +407,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl008, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl009
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_INVALID_PARAM when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -436,7 +438,8 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl009, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl010
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_TRANS_BACKGROUND_USER_DENIED
+ *           when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -466,7 +469,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl010, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl011
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_ERR when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -498,7 +501,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl011, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl012
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_ERR when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -532,7 +535,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl012, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl013
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_OK when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -569,7 +572,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl013, TestSize.Le
 
 /*
  * @tc.name: TransCheckServerAccessControl014
- * @tc.desc: test function TransCheckServerAccessControl parameters
+ * @tc.desc: Verify TransCheckServerAccessControl returns SOFTBUS_OK when input AppInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */

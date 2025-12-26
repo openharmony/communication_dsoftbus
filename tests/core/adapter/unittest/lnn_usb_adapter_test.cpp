@@ -46,7 +46,9 @@ void LnnUsbAdapterTest::TearDown() { }
 
 /*
  * @tc.name: LnnUsbAdapterTest_001
- * @tc.desc: StartUsbNcmAdapter
+ * @tc.desc: Return SOFTBUS_OK when mode is 1 and SOFTBUS_NETWORK_USB_MODE_INVALID
+ *           when mode is 100 for StartUsbNcmAdapter
+ * @tc.type: FUNC
  * @tc.type: FUNC
  * @tc.require: 1
  */

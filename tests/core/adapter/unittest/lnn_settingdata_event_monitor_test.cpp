@@ -90,7 +90,8 @@ static bool IsZHLanguage(void)
 
 /*
 * @tc.name: LnnGetSettingDeviceNameTest003
-* @tc.desc: Lnn get setting DeviceName test
+* @tc.desc: Return SOFTBUS_OK or SOFTBUS_NOT_IMPLEMENT for LnnGetDeviceDisplayName
+            verify concatenated device name with internal/external string based on Chinese language check
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -115,7 +116,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSiz
 
 /*
  * @tc.name: LnnGetSettingDeviceNameTest004
- * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when nickName parameter is nullptr for LnnGetDeviceDisplayName
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -129,7 +130,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest004, TestSiz
 
 /*
  * @tc.name: LnnGetSettingDeviceNameTest005
- * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when defaultName parameter is nullptr for LnnGetDeviceDisplayName
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -143,7 +144,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest005, TestSiz
 
 /*
  * @tc.name: LnnGetSettingDeviceNameTest006
- * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.desc: Return SOFTBUS_INVALID_PARAM when deviceName buffer is nullptr for LnnGetDeviceDisplayName
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -156,7 +157,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest006, TestSiz
 
 /*
  * @tc.name: LnnGetSettingDeviceNameTest007
- * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.desc: Return SOFTBUS_STRCPY_ERR when len parameter is 0 for LnnGetDeviceDisplayName
  * @tc.type: FUNC
  * @tc.require: 1
  */

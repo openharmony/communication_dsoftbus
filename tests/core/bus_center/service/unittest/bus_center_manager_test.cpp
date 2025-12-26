@@ -71,7 +71,7 @@ void BusCenterManagerTest::TearDown(void)
 
 /*
 * @tc.name: BusCenterManagerTest001
-* @tc.desc: bus center deinit looper test
+* @tc.desc: Verify LnnDeinitLnnLooper executes successfully when GetLooper returns nullptr
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -85,7 +85,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest001, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest002
-* @tc.desc: bus center init looper test
+* @tc.desc: Verify LnnInitLnnLooper returns SOFTBUS_INVALID_PARAM when CreateNewLooper returns nullptr
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -100,7 +100,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest002, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest003
-* @tc.desc: bus center server init test
+* @tc.desc: Verify BusCenterServerInit returns SOFTBUS_INVALID_PARAM when CreateNewLooper returns nullptr
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -115,7 +115,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest003, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest004
-* @tc.desc: bus center server init test
+* @tc.desc: Verify BusCenterServerInit returns SOFTBUS_INVALID_PARAM when LnnInitMetaNode returns SOFTBUS_INVALID_PARAM
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -147,7 +147,8 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest005
-* @tc.desc: bus center server init test
+* @tc.desc: Verify BusCenterServerInit returns SOFTBUS_HUKS_INIT_FAILED when LnnInitNetLedger
+*           returns SOFTBUS_HUKS_INIT_FAILED
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -198,7 +199,8 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest006
-* @tc.desc: bus center server init test
+* @tc.desc: Verify BusCenterServerInit returns SOFTBUS_HUKS_INIT_FAILED when LnnInitLaneHub
+*           returns SOFTBUS_HUKS_INIT_FAILED
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -237,7 +239,8 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest007
-* @tc.desc: bus center server init test
+* @tc.desc: Verify BusCenterServerInit returns SOFTBUS_HUKS_INIT_FAILED when LnnInitLaneHub
+            returns SOFTBUS_HUKS_INIT_FAILED
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -253,7 +256,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest007, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterManagerTest008
-* @tc.desc: init lane looper test
+* @tc.desc: Verify LnnInitLaneLooper returns SOFTBUS_LOOPER_ERR when CreateNewLooper returns nullptr
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1
@@ -272,7 +275,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest008, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterServerInitTest001
-* @tc.desc: LnnInitPermission fun init error
+* @tc.desc: Verify BusCenterServerInit returns SOFTBUS_INVALID_PARAM when LnnInitPermission fails
 * @tc.type: FUNC
 * @tc.level: Level1
 * @tc.require: 1

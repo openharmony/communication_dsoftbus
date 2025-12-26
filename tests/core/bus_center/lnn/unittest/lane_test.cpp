@@ -152,7 +152,8 @@ static void NotifyBrLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkTy
 
 /*
  * @tc.name: LANE_REQ_ID_APPLY_Test_001
- * @tc.desc: apply lane req id test
+ * @tc.desc: Verify lnnGetLaneHandle returns non-INVALID_LANE_REQ_ID for LANE_TYPE_TRANS and the
+ *           returned laneReqId contains correct laneType; FreeLaneReqId executes successfully
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG
@@ -169,7 +170,8 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LANE_REQ_ID_APPLY_Test_002
- * @tc.desc: apply lane req id test
+ * @tc.desc: Verify lnnGetLaneHandle returns INVALID_LANE_REQ_ID for LANE_TYPE_CTRL and the
+ *           FreeLaneReqId executes successfully
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG
@@ -199,7 +201,7 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: LANE_LINK_Test_001
- * @tc.desc: lane link of wlan5G test
+ * @tc.desc: Verify lane link of wlan5G works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG
@@ -227,7 +229,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LANE_LINK_Test_002
- * @tc.desc: lane link of BR test
+ * @tc.desc: Verify lane link of BR works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG
@@ -252,7 +254,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: ADD_LANE_RESOURCE_TO_POOL_Test_001
- * @tc.desc: add lane resource to pool test
+ * @tc.desc: Verify AddLaneResourceToPool works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG
@@ -282,7 +284,7 @@ HWTEST_F(LaneTest, ADD_LANE_RESOURCE_TO_POOL_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001
- * @tc.desc: check lane resource num by link type test
+ * @tc.desc: Verify CheckLaneResourceNumByLinkType works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG
@@ -300,7 +302,7 @@ HWTEST_F(LaneTest, CHECK_LANE_RESOURCE_NUM_BY_LINK_TYPE_Test_001, TestSize.Level
 
 /*
  * @tc.name: UPDATE_LANE_RESOURCE_LANE_ID_Test_001
- * @tc.desc: update lane resource lane id test
+ * @tc.desc: Verify UpdateLaneResourceLaneId works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG
@@ -320,7 +322,7 @@ HWTEST_F(LaneTest, UPDATE_LANE_RESOURCE_LANE_ID_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: DESTROY_LINK_Test_001
- * @tc.desc: destroy link test
+ * @tc.desc: Verify DestroyLink works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5FBFG

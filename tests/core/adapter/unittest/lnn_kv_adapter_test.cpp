@@ -63,7 +63,7 @@ void KVAdapterTest::TearDown()
 
 /*
  * @tc.name: Init001
- * @tc.desc: Init succeed
+ * @tc.desc: Initialization operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -75,7 +75,7 @@ HWTEST_F(KVAdapterTest, Init001, TestSize.Level1)
 
 /*
  * @tc.name: UnInit001
- * @tc.desc: UnInit succeed
+ * @tc.desc: Deinitialization operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -86,7 +86,7 @@ HWTEST_F(KVAdapterTest, UnInit001, TestSize.Level1)
 
 /*
  * @tc.name: Put001
- * @tc.desc: Put succeed
+ * @tc.desc: Single key-value storage operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -97,7 +97,7 @@ HWTEST_F(KVAdapterTest, Put001, TestSize.Level1)
 
 /*
  * @tc.name: Put002
- * @tc.desc: Put failed, Param is invalid
+ * @tc.desc: Single key-value storage fails due to invalid parameters including empty key and empty value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -109,7 +109,7 @@ HWTEST_F(KVAdapterTest, Put002, TestSize.Level1)
 
 /*
  * @tc.name: Put003
- * @tc.desc: Put failed, kvDBPtr is null
+ * @tc.desc: Single key-value storage fails because kv database pointer is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -121,7 +121,8 @@ HWTEST_F(KVAdapterTest, Put003, TestSize.Level1)
 
 /*
  * @tc.name: Put004
- * @tc.desc: Put first if
+ * @tc.desc: Verify single key-value storage results for different key-value combinations
+ *           legal combinations succeed while overlong key-value and empty value fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -150,7 +151,7 @@ HWTEST_F(KVAdapterTest, Put004, TestSize.Level1)
 
 /*
  * @tc.name: PutBatch001
- * @tc.desc: PutBatch succeed
+ * @tc.desc: Batch key-value storage operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -164,7 +165,8 @@ HWTEST_F(KVAdapterTest, PutBatch001, TestSize.Level1)
 
 /*
  * @tc.name: PutBatch002
- * @tc.desc: PutBatch failed, Param is invalid
+ * @tc.desc: Batch key-value storage fails due to invalid parameters including
+ *           empty map and map exceeding maximum capacity
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -181,7 +183,7 @@ HWTEST_F(KVAdapterTest, PutBatch002, TestSize.Level1)
 
 /*
  * @tc.name: PutBatch003
- * @tc.desc: PutBatch failed, kvDBPtr is null
+ * @tc.desc: Batch key-value storage fails because kv database pointer is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -196,7 +198,7 @@ HWTEST_F(KVAdapterTest, PutBatch003, TestSize.Level1)
 
 /*
  * @tc.name: Delete001
- * @tc.desc: Delete succeed
+ * @tc.desc: Single key-value deletion operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -208,7 +210,7 @@ HWTEST_F(KVAdapterTest, Delete001, TestSize.Level1)
 
 /*
  * @tc.name: Delete002
- * @tc.desc: Delete failed, kvDBPtr is null
+ * @tc.desc: Single key-value deletion fails because kv database pointer is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -221,7 +223,7 @@ HWTEST_F(KVAdapterTest, Delete002, TestSize.Level1)
 
 /*
  * @tc.name: DeleteByPrefix001
- * @tc.desc: DeleteByPrefix succeed
+ * @tc.desc: Key-value deletion by prefix operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -234,7 +236,7 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix001, TestSize.Level1)
 
 /*
  * @tc.name: DeleteByPrefix002
- * @tc.desc: DeleteByPrefix failed, kvDBPtr is null
+ * @tc.desc: Key-value deletion by prefix fails because kv database pointer is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -248,7 +250,7 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix002, TestSize.Level1)
 
 /*
  * @tc.name: DeleteByPrefix003
- * @tc.desc: DeleteByPrefix failed, keyPrefix is empty
+ * @tc.desc: Key-value deletion by prefix fails because prefix string is empty
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -272,7 +274,7 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix004, TestSize.Level1)
 
 /*
  * @tc.name: Get001
- * @tc.desc: Get succeed
+ * @tc.desc: Single key-value query operation succeeds and verifies the correctness of returned value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -286,7 +288,7 @@ HWTEST_F(KVAdapterTest, Get001, TestSize.Level1)
 
 /*
  * @tc.name: Get002
- * @tc.desc: Get failed, kvDBPtr is null
+ * @tc.desc: Single key-value query fails because kv database pointer is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -300,7 +302,7 @@ HWTEST_F(KVAdapterTest, Get002, TestSize.Level1)
 
 /*
  * @tc.name: SetCloudAbility001
- * @tc.desc: SetCloudAbility succeed
+ * @tc.desc: Cloud synchronization capability setting operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -311,7 +313,7 @@ HWTEST_F(KVAdapterTest, SetCloudAbility001, TestSize.Level1)
 
 /*
  * @tc.name: SetCloudAbility002
- * @tc.desc: SetCloudAbility failed, kvDBPtr is null
+ * @tc.desc: Cloud synchronization capability setting fails because kv database pointer is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -323,7 +325,7 @@ HWTEST_F(KVAdapterTest, SetCloudAbility002, TestSize.Level1)
 
 /*
  * @tc.name: RegisterDataChangeListener001
- * @tc.desc: RegisterDataChangeListener failed, cloud sync disabled
+ * @tc.desc: Data change listener registration fails because cloud synchronization function is disabled
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -335,7 +337,7 @@ HWTEST_F(KVAdapterTest, RegisterDataChangeListener001, TestSize.Level1)
 
 /*
  * @tc.name: DeRegisterDataChangeListener001
- * @tc.desc: DeRegisterDataChangeListener failed, cloud sync disabled
+ * @tc.desc: Data change listener deregistration fails because cloud synchronization function is disabled
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -346,7 +348,7 @@ HWTEST_F(KVAdapterTest, DeRegisterDataChangeListener001, TestSize.Level1)
 
 /*
  * @tc.name: CloudSync001
- * @tc.desc: CloudSync failed, cloud sync disabled
+ * @tc.desc: Cloud synchronization operation succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -357,7 +359,7 @@ HWTEST_F(KVAdapterTest, CloudSync001, TestSize.Level1)
 
 /*
  * @tc.name: CloudSyncCallback002
- * @tc.desc: CloudSyncCallback failed, Status code is ERROR
+ * @tc.desc: Cloud synchronization callback execution fails with error status code
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -371,7 +373,7 @@ HWTEST_F(KVAdapterTest, CloudSyncCallback002, TestSize.Level1)
 
 /*
  * @tc.name: DeleteDataChangeListener001
- * @tc.desc: DeleteDataChangeListener is ok
+ * @tc.desc: Callbacks related to data change listener deletion execute normally without fatal errors
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -387,7 +389,7 @@ HWTEST_F(KVAdapterTest, DeleteDataChangeListener001, TestSize.Level1)
 
 /*
  * @tc.name: DeleteKvStore001
- * @tc.desc: DeleteKvStore is SOFTBUS_OK
+ * @tc.desc: KV storage instance deletion operation returns success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -401,7 +403,7 @@ HWTEST_F(KVAdapterTest, DeleteKvStore001, TestSize.Level1)
 
 /*
  * @tc.name: OnChange001
- * @tc.desc: OnChange is ok
+ * @tc.desc: Data change callback function executes normally without fatal errors
  * @tc.type: FUNC
  * @tc.require:
  */
