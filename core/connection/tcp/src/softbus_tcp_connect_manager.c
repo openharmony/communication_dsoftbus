@@ -59,6 +59,7 @@ typedef struct TcpConnInfoNode {
     uint32_t requestId;
     ConnectStatistics statistics;
     ConnectionInfo info;
+    bool resultIsUsed;
 } TcpConnInfoNode;
 
 static SoftBusList *g_tcpConnInfoList = NULL;
@@ -71,6 +72,7 @@ static void DelAllConnInfo(ListenerModule moduleId);
 static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr);
 static int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd);
 static int TcpConnectInfoDump(int fd);
+static void SetResultIsUsed(int32_t fd);
 
 static void DfxRecordTcpConnectFail(uint32_t pId, ConnectOption *option, TcpConnInfoNode *tcpInfo,
     ConnectStatistics *statistics, int32_t reason)
@@ -202,6 +204,21 @@ static void DelTcpConnNode(uint32_t connectionId)
     }
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     CONN_LOGE(CONN_COMMON, "ConnectionId not found. connId=%{public}08x", connectionId);
+    return;
+}
+
+static void SetResultIsUsed(int32_t fd)
+{
+    CONN_CHECK_AND_RETURN_LOGE(g_tcpConnInfoList, CONN_COMMON, "global connection list is null");
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_tcpConnInfoList->lock) == SOFTBUS_OK, CONN_COMMON, "lock fail");
+    TcpConnInfoNode *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
+        if (item->info.socketInfo.fd == fd) {
+            item->resultIsUsed = true;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     return;
 }
 
@@ -339,6 +356,7 @@ static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
     CONN_LOGI(CONN_COMMON, "notfiy connect ok. reqId=%{public}d", tcpInfo.requestId);
     (void)DelTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, WRITE_TRIGGER);
     (void)AddTrigger((ListenerModule)(tcpInfo.info.socketInfo.moduleId), fd, READ_TRIGGER);
+    SetResultIsUsed(fd);
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     DfxRecordTcpConnectSuccess(DEFAULT_PID, &tcpInfo, &tcpInfo.statistics);
     tcpInfo.result.OnConnectSuccessed(tcpInfo.requestId, tcpInfo.connectionId, &tcpInfo.info);
@@ -486,6 +504,7 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
     tcpConnInfoNode->info.socketInfo.fd = fd;
     tcpConnInfoNode->info.socketInfo.moduleId = option->socketOption.moduleId;
     tcpConnInfoNode->statistics = statistics;
+    tcpConnInfoNode->resultIsUsed = false;
     if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "AddTcpConnInfo fail");
         SoftBusFree(tcpConnInfoNode);
@@ -605,7 +624,12 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
         ListDelete(&item->node);
         (void)DelTrigger((ListenerModule)(item->info.socketInfo.moduleId), item->info.socketInfo.fd, RW_TRIGGER);
         ConnShutdownSocket(item->info.socketInfo.fd);
-        g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
+        if (item->result.OnConnectFailed == NULL || item->resultIsUsed) {
+            g_tcpConnCallback->OnDisconnected(item->connectionId, &item->info);
+            SoftBusFree(item);
+            continue;
+        }
+        item->result.OnConnectFailed(item->requestId, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
         SoftBusFree(item);
     }
     return SOFTBUS_OK;
