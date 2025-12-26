@@ -38,7 +38,7 @@ static std::map<int32_t, std::string> napiErrMsgMap {
     {LINK_ENHANCE_CONNECTIONS_EXCEEDS, "The number of connection exceeds the limit."},
     {LINK_ENHANCE_CONNECTION_NOT_READY, "Connection is not ready."},
     {LINK_ENHANCE_PARAMETER_INVALID, "Invalid parameter."},
-    {LINK_ENHANCE_INTERVAL_ERR, "Internal error."},
+    {LINK_ENHANCE_INTERNAL_ERR, "Internal error."},
 };
 
 int32_t DoInJsMainThread(napi_env env, std::function<void(void)> func)
@@ -209,7 +209,7 @@ int32_t ConvertToJsErrcode(int32_t err)
         case SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX:
             return LINK_ENHANCE_SERVERS_EXCEEDS;
         default:
-            return LINK_ENHANCE_INTERVAL_ERR;
+            return LINK_ENHANCE_INTERNAL_ERR;
     }
 }
 

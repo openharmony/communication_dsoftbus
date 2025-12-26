@@ -33,6 +33,8 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 
+#define SOFTBUS_NAME_MAX_LEN 255
+
 namespace Communication {
 namespace OHOS::Softbus {
 
