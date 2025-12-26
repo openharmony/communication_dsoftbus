@@ -1413,6 +1413,27 @@ static int32_t TransStartTimeSync(SessionConn *conn)
     return ret;
 }
 
+static void UpdateHmlModule(const char *ip, const char *peerUuid, ListenerModule *listenMod)
+{
+    if (ip == NULL || peerUuid == NULL || listenMod == NULL || !IsHmlIpAddr(ip)) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    HmlListenerInfo *item = NULL;
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_hmlListenerList->list, HmlListenerInfo, node) {
+        if (strncmp(item->myIp, ip, IP_LEN) == 0 && strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
+            *listenMod = item->moudleType;
+            (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+}
+
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
@@ -1445,6 +1466,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         TRANS_LOGE(TRANS_CTRL, "start listener fail");
         goto EXIT_ERR;
     }
+    UpdateHmlModule(conn->appInfo.myData.addr, appInfo->peerData.deviceId, &(conn->listenMod));
     conn->isMeta = (appInfo->osType == OTHER_OS_TYPE) ? true : TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
 
     ret = TransTdcAddSessionConn(conn);
