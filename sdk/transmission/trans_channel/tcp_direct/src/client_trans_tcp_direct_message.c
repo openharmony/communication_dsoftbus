@@ -650,7 +650,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     return ret;
 }
 
-static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen)
+static void DfxReceiveRateStatistic(int32_t channelId, int32_t dataLen)
 {
     #define DATA_LEN_1M (1 * 1024 * 1024) // 1MB
     #define SEC_TO_MILLISEC (1000)

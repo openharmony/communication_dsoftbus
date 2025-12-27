@@ -2970,7 +2970,7 @@ void DelSessionStateClosing(void)
     UnlockClientSessionServerList();
 }
 
-void AbnormalDataLenAudit(int32_t sessionId, uint32_t len)
+void AbnormalDataLenAudit(int32_t sessionId, int32_t len)
 {
     #define ABNORMAL_DATA_LEN (1 * 1024 * 1024) // 1MB
     if (len < ABNORMAL_DATA_LEN) {
