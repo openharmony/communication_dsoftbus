@@ -1352,4 +1352,28 @@ HWTEST_F(TransTcpDirectP2pTest, CheckIsSupportMintp002, TestSize.Level1)
     ret = CheckIsSupportMintp(&conn);
     EXPECT_EQ(false, ret);
 }
+
+/**
+ * @tc.name: UpdateHmlModule001
+ * @tc.desc: Test the function UpdateHmlModule abnormal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, UpdateHmlModule001, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = StartHmlListener(g_ip, &g_port, g_peerUuid, LNN_PROTOCOL_IP);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED, ret);
+    ListenerModule moduleType = UNUSE_BUTT;
+    UpdateHmlModule(g_ip, g_peerUuid, &moduleType);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    UpdateHmlModule(g_ip, g_peerUuid, nullptr);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    UpdateHmlModule(g_ip, nullptr, &moduleType);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    UpdateHmlModule(nullptr, g_peerUuid, &moduleType);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    StopHmlListener(DIRECT_CHANNEL_SERVER_HML_START);
+}
 }
