@@ -628,7 +628,7 @@ uint32_t GetDiscCapability(void)
 {
     int32_t ret = SoftBusMutexLock(&(g_discCoapMgr.lock));
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, DISC_COAP, "g_discCoapMgr.subscribeInfo mutex lock failed");
+        SOFTBUS_LOCK_ERR, DISC_COAP, "mutex lock failed");
     uint32_t allcap = g_discCoapMgr.subscribeInfo.allCap[0];
     (void)SoftBusMutexUnlock(&(g_discCoapMgr.lock));
     return allcap;
@@ -638,7 +638,7 @@ uint32_t GetDiscPublishCapability(void)
 {
     int32_t ret = SoftBusMutexLock(&(g_discCoapMgr.lock));
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, DISC_COAP, "g_discCoapMgr.publishInfo mutex lock failed");
+        SOFTBUS_LOCK_ERR, DISC_COAP, "mutex lock failed");
     uint32_t allcap = g_discCoapMgr.publishInfo.allCap[0];
     (void)SoftBusMutexUnlock(&(g_discCoapMgr.lock));
     return allcap;
