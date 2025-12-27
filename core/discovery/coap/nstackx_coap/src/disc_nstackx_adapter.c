@@ -114,7 +114,8 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings,
         capabilityBitmap[0] &= (~(0x1 << (SHARE_CAPABILITY_BITMAP % INT32_MAX_BIT_NUM)));
     }
     settings->capBitmapNum = CAPABILITY_NUM;
-    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(settings->capBitmap, sizeof(settings->capBitmap), capabilityBitmap, sizeof(capabilityBitmap)) == EOK,
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(settings->capBitmap, sizeof(settings->capBitmap),
+        capabilityBitmap, sizeof(capabilityBitmap)) == EOK,
         SOFTBUS_STRCPY_ERR, DISC_COAP, "copy capBitMap failed");
     return SOFTBUS_OK;
 EXIT:
