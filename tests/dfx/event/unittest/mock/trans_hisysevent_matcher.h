@@ -80,6 +80,7 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraUint8Param(params, index, extra.talkieFreq);
     MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.talkieType);
     MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.talkieLevel);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.channelStatus);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.result);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
     MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.socketName);

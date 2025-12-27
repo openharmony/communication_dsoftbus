@@ -62,6 +62,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .talkieFreq = 1,
         .talkieType = 1,
         .talkieLevel = 1,
+        .channelStatus = 1,
         .result = 1,
         .errcode = 2,
         .socketName = "testSocketName",

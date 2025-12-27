@@ -37,6 +37,7 @@ extern "C" {
 TRANS_ASSIGNER(Uint8, TalkieFreq, talkieFreq)
 TRANS_ASSIGNER(Uint8, TalkieType, talkieType)
 TRANS_ASSIGNER(Uint8, TalkieLevel, talkieLevel)
+TRANS_ASSIGNER(Uint8, ChannelStatus, channelStatus)
 TRANS_ASSIGNER(Errcode, Result, result)
 TRANS_ASSIGNER(Errcode, Errcode, errcode)
 TRANS_ASSIGNER(AnonymizeString, SocketName, socketName)
@@ -112,6 +113,7 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
     { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
     { "TALKIE_LEVEL",        HISYSEVENT_UINT8,    TransAssignerTalkieLevel     },
+    { "CHANNEL_STATUS",      HISYSEVENT_UINT8,    TransAssignerChannelStatus   },
     { "STAGE_RES",           HISYSEVENT_INT32,    TransAssignerResult          },
     { "ERROR_CODE",          HISYSEVENT_INT32,    TransAssignerErrcode         },
     { "SOCKET_NAME",         HISYSEVENT_STRING,   TransAssignerSocketName      },
