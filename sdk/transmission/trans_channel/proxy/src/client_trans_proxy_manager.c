@@ -1458,7 +1458,7 @@ static int32_t ClientTransProxySubD2dNeaHeadPacketProc(
     return ret;
 }
 
-static void DfxReceiveRateStatistic(int32_t channelId, int32_t priority, uint32_t dataLen,
+static void DfxReceiveRateStatistic(int32_t channelId, int32_t priority, int32_t dataLen,
     uint64_t startTimestamp, uint64_t endTimestamp)
 {
     #define DATA_LEN_1MB (1 * 1024 * 1024) // 1MB
@@ -1486,7 +1486,7 @@ static void DfxReceiveRateStatistic(int32_t channelId, int32_t priority, uint32_
     TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
 }
 
-static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *head, const char *data, uint32_t len)
+static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *head, const char *data, int32_t len)
 {
     if (g_channelSliceProcessorList == NULL) {
         TRANS_LOGE(TRANS_SDK, "TransProxySubPacketProc not init");

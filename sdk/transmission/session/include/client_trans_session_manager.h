@@ -154,7 +154,7 @@ inline bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
     return (qos == NULL) ? (qosCount == 0) : (qosCount <= QOS_TYPE_BUTT);
 }
 
-void AbnormalDataLenAudit(int32_t sessionId, uint32_t len);
+void AbnormalDataLenAudit(int32_t sessionId, int32_t len);
  
 void SessionInfoReport(int32_t sessionId);
  
