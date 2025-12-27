@@ -41,7 +41,7 @@ static napi_status CheckCreateServerParams(napi_env env, napi_callback_info info
         COMM_LOGE(COMM_SDK, "unexpect string");
         return napi_string_expected;
     }
-    if (name.length() == 0) {
+    if (name.length() == 0 || name.length() > SOFTBUS_NAME_MAX_LEN) {
         COMM_LOGE(COMM_SDK, "invalid name");
         return napi_invalid_arg;
     }
@@ -272,12 +272,12 @@ napi_value NapiLinkEnhanceServer::Start(napi_env env, napi_callback_info info)
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
-        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceServer *enhanceServer = NapiGetEnhanceServer(env, info);
     if (enhanceServer == nullptr) {
-        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
     int32_t ret = GeneralCreateServer(PKG_NAME.c_str(), enhanceServer->name_.c_str());
