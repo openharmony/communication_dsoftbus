@@ -18,10 +18,13 @@
 #include <unistd.h>
 
 #include "br_proxy.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_stub_interface.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_server_proxy.h"
 
 typedef struct {
@@ -33,6 +36,7 @@ typedef struct {
     IBrProxyListener listener;
     bool enableDataRecv;
     bool enableStateChange;
+    int64_t timeStart;
 } ClientBrProxyChannelInfo;
 
 static SoftBusList *g_clientList = NULL;
@@ -268,6 +272,7 @@ static int32_t ClientAddChannelToList(int32_t sessionId, BrProxyChannelInfo *cha
         return SOFTBUS_MALLOC_ERR;
     }
     info->sessionId = sessionId;
+    info->timeStart = GetSoftbusRecordTimeMillis();
     if (strcpy_s(info->peerBRMacAddr, sizeof(info->peerBRMacAddr), channelInfo->peerBRMacAddr) != EOK ||
         strcpy_s(info->peerBRUuid, sizeof(info->peerBRUuid), channelInfo->peerBRUuid) != EOK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] copy brMac or uuid failed");
@@ -512,6 +517,11 @@ int32_t OpenBrProxy(int32_t sessionId, BrProxyChannelInfo *channelInfo, IBrProxy
     ret = ServerIpcOpenBrProxy(channelInfo->peerBRMacAddr, channelInfo->peerBRUuid);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_TRANS_SESSION_OPENING) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc open brproxy failed! ret=%{public}d", ret);
+        TransEventExtra extra = {
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED,
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
         return ret;
     }
     if (ret == SOFTBUS_TRANS_SESSION_OPENING) {
@@ -544,7 +554,7 @@ int32_t CloseBrProxy(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t SendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
+int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
 {
     if (!IsChannelValid(channelId)) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
@@ -555,8 +565,15 @@ int32_t SendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
     }
     int32_t ret = ServerIpcSendBrProxyData(channelId, data, dataLen);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc brproxy send failed! ret:%{public}d, channelId:%{public}d",
-            ret, channelId);
+        TRANS_LOGE(
+            TRANS_SDK, "[br_proxy] ipc brproxy send failed! ret:%{public}d, channelId:%{public}d", ret, channelId);
+        TransEventExtra extra = {
+            .channelId = channelId,
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED,
+            .dataLen = dataLen,
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_SEND_DATA, extra);
         return ret;
     }
     return SOFTBUS_OK;
@@ -626,6 +643,13 @@ int32_t ClientTransBrProxyChannelChange(int32_t channelId, int32_t errCode)
     }
     if (info.enableStateChange && info.listener.onChannelStatusChanged != NULL) {
         info.listener.onChannelStatusChanged(channelId, SoftbusErrConvertChannelState(errCode));
+        TransEventExtra extra = {
+            .channelId = info.channelId,
+            .errcode = errCode,
+            .result = EVENT_STAGE_RESULT_OK,
+            .channelStatus = SoftbusErrConvertChannelState(errCode),
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CHANNEL_STATUS, extra);
     } else {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] receiveChannelStatus is off, listener is null");
     }
@@ -656,6 +680,15 @@ int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const c
     TRANS_LOGI(TRANS_SDK, "[br_proxy] sessionId:%{public}d.", info.sessionId);
     if (info.listener.onChannelOpened != NULL) {
         info.listener.onChannelOpened(info.sessionId, channelId, result);
+        int64_t timeStart = info.timeStart;
+        int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
+        TransEventExtra extra = {
+            .channelId = info.channelId,
+            .errcode = result,
+            .result = (result == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
+            .costTime = (result == SOFTBUS_OK) ? (int32_t)timeDiff : 0,
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
     }
     return SOFTBUS_OK;
 }
