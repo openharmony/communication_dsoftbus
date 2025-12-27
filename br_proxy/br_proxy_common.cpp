@@ -27,6 +27,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 
 #ifdef __aarch64__
@@ -114,6 +116,11 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
     if (ret != SOFTBUS_OK) {
         CleanupSymbolIfNeed(&g_symbolLoader, load);
         TRANS_LOGE(TRANS_SVC, "[br_proxy] startAbility failed, ret=%{public}d", ret);
+        TransEventExtra extra = {
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED,
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
     }
     // ATTENTION: symbol will be cleanup  delay as callback is needed
     (void)SoftBusMutexUnlock(&g_lock);
@@ -203,6 +210,11 @@ extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
     int32_t ret = GetAbilityName(abilityName, userId, abilityNameLen, hapTokenInfoRes.bundleName, appIndex);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get abilityName failed, ret=%{public}d", ret);
+        TransEventExtra extra = {
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED,
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
         return ret;
     }
 
@@ -336,6 +348,11 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] unrestricted failed, error=%{public}d", ret);
         (void)SoftBusMutexUnlock(&g_lock);
+        TransEventExtra extra = {
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED,
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
         return ret;
     }
 
