@@ -122,7 +122,7 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     AnonymizeFree(anonymizedName);
     AnonymizeFree(anonymizedId);
     AnonymizeFree(anonymizedIp);
-    if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType) != SOFTBUS_OK) {
+    if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType, false) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "send response failed");
         return SOFTBUS_DISCOVER_COAP_SEND_RSP_FAIL;
     }

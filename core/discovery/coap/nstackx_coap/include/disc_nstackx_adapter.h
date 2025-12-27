@@ -61,7 +61,7 @@ void DiscCoapModifyNstackThread(LinkStatus status, int32_t ifnameIdx);
 void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx);
 void DiscCoapUpdateDevName(void);
 void DiscCoapUpdateAccount(void);
-int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType);
+int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType, bool isRemoveShareCap);
 
 #ifdef __cplusplus
 #if __cplusplus

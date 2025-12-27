@@ -26,6 +26,7 @@
 #include "bus_center_manager.h"
 #include "disc_coap_capability_public.h"
 #include "disc_coap_parser.h"
+#include "disc_coap.h"
 #include "disc_log.h"
 #include "g_enhance_disc_func_pack.h"
 #include "lnn_ohos_account.h"
@@ -79,7 +80,8 @@ static DiscLinkInfo g_linkInfo[MAX_IF + 1] = {
 };
 
 #if defined(DSOFTBUS_FEATURE_DISC_LNN_COAP) || defined(DSOFTBUS_FEATURE_DISC_SHARE_COAP)
-static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
+static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings,
+    const DeviceInfo *deviceInfo, uint8_t bType, bool isRemoveShareCap)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(settings != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "settings is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(deviceInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "deviceInfo is nullptr");
@@ -105,27 +107,37 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
         DISC_LOGE(DISC_COAP, "copy disc response settings remote IP failed");
         goto EXIT;
     }
+    uint32_t capabilityBitmap[CAPABILITY_NUM] = {0};
+    capabilityBitmap[0] = GetDiscPublishCapability();
+    if (isRemoveShareCap) {
+        DISC_LOGI(DISC_COAP, "remove share capability");
+        capabilityBitmap[0] &= (~(0x1 << (SHARE_CAPABILITY_BITMAP % INT32_MAX_BIT_NUM)));
+    }
+    settings->capBitmapNum = CAPABILITY_NUM;
+    DISC_CHECK_AND_RETURN_RET_LOGE(memcpy_s(settings->capBitmap, sizeof(settings->capBitmap),
+        capabilityBitmap, sizeof(capabilityBitmap)) == EOK,
+        SOFTBUS_STRCPY_ERR, DISC_COAP, "copy capBitMap failed");
     return SOFTBUS_OK;
 EXIT:
     return SOFTBUS_STRCPY_ERR;
 }
 #endif /* DSOFTBUS_FEATURE_DISC_LNN_COAP || DSOFTBUS_FEATURE_DISC_SHARE_COAP */
 
-int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
+int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType, bool isRemoveShareCap)
 {
 #if defined(DSOFTBUS_FEATURE_DISC_LNN_COAP) || defined(DSOFTBUS_FEATURE_DISC_SHARE_COAP)
     DISC_CHECK_AND_RETURN_RET_LOGE(deviceInfo, SOFTBUS_INVALID_PARAM, DISC_COAP, "DiscRsp devInfo is null");
     NSTACKX_ResponseSettings *settings = (NSTACKX_ResponseSettings *)SoftBusCalloc(sizeof(NSTACKX_ResponseSettings));
     DISC_CHECK_AND_RETURN_RET_LOGE(settings, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc disc response settings failed");
 
-    int32_t ret = FillRspSettings(settings, deviceInfo, bType);
+    int32_t ret = FillRspSettings(settings, deviceInfo, bType, isRemoveShareCap);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "fill nstackx response settings failed");
         SoftBusFree(settings);
         return ret;
     }
 
-    DISC_LOGI(DISC_COAP, "send rsp with bType=%{public}u", bType);
+    DISC_LOGI(DISC_COAP, "send rsp with bType=%{public}u isRemoveShareCap=%{public}d", bType, isRemoveShareCap);
     ret = NSTACKX_SendDiscoveryRsp(settings);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
