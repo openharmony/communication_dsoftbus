@@ -308,29 +308,29 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapSendRsp001, TestSize.Level1)
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = DiscCoapSendRsp(nullptr, 0);
+    ret = DiscCoapSendRsp(nullptr, 0, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     DeviceInfo devInfo = {};
-    ret = DiscCoapSendRsp(&devInfo, 0);
+    ret = DiscCoapSendRsp(&devInfo, 0, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     DiscCoapRecordLinkStatus(LINK_STATUS_UP, WLAN_IF);
     strcpy_s(devInfo.addr[0].info.ip.ip, IP_STR_MAX_LEN, "test");
-    ret = DiscCoapSendRsp(&devInfo, 0);
+    ret = DiscCoapSendRsp(&devInfo, 0, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     strcpy_s(devInfo.addr[0].info.ip.ip, IP_STR_MAX_LEN, "fe80::1111:2222:3333:4444");
-    ret = DiscCoapSendRsp(&devInfo, 0);
+    ret = DiscCoapSendRsp(&devInfo, 0, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     DiscCoapRecordLinkStatus(LINK_STATUS_DOWN, WLAN_IF);
     DiscCoapRecordLinkStatus(LINK_STATUS_UP, USB_IF);
-    ret = DiscCoapSendRsp(&devInfo, 0);
+    ret = DiscCoapSendRsp(&devInfo, 0, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     strcpy_s(devInfo.addr[0].info.ip.ip, IP_STR_MAX_LEN, "192.168.1.1");
-    ret = DiscCoapSendRsp(&devInfo, 0);
+    ret = DiscCoapSendRsp(&devInfo, 0, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     DiscNstackxDeinit();
