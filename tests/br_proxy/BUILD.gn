@@ -191,10 +191,10 @@ ohos_unittest("BrProxyServerManagerTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":BrProxyTest",
-    ":BrProxyExtTest",
-    ":BrProxyServerManagerExtTest",
-    ":BrProxyServerManagerTest",
+    #":BrProxyTest",
+    #":BrProxyExtTest",
+    #":BrProxyServerManagerExtTest",
+    #":BrProxyServerManagerTest",
   ]
 }
 

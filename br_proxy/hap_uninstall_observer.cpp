@@ -23,6 +23,7 @@
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::EventFwk;
+constexpr const char* APP_INDEX = "appIndex";
 class HapUninstallObserver : public CommonEventSubscriber {
 public:
     explicit HapUninstallObserver(const CommonEventSubscribeInfo &sp) : CommonEventSubscriber(sp) {}
@@ -36,8 +37,10 @@ public:
             wantAction == CommonEventSupport::COMMON_EVENT_BUNDLE_REMOVED ||
             wantAction == CommonEventSupport::COMMON_EVENT_PACKAGE_FULLY_REMOVED) {
             std::string bundleName = want.GetBundle();
+            int32_t appIndex = want.GetIntParam(APP_INDEX, 0);
+            TRANS_LOGI(TRANS_SVC, "[br_proxy] index=%{public}d", appIndex);
             if (IsBrProxy(bundleName.c_str())) {
-                CloseAllConnect();
+                CloseAllConnect(appIndex);
             }
         }
     }
