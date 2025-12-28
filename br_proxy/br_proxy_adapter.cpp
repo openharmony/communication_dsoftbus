@@ -17,6 +17,7 @@
 #include "ability_manager_client.h"
 #include "allow_type.h"
 #include "bundle_mgr_interface.h"
+#include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -51,17 +52,17 @@ public:
     }
 };
 
-
-extern "C" int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t appIndex)
+extern "C" int32_t StartAbility(const char *bundleName, const char *abilityName,
+    int32_t appIndex, int32_t userId)
 {
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] appIndex:%{public}d", appIndex);
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] appIndex:%{public}d, userId:%{public}d", appIndex, userId);
     OHOS::AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
     want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
     sptr<AAFwk::IAbilityConnection> abilityConnection = new BrProxyAbility();
     std::string errMsg = "error";
     return OHOS::AAFwk::AbilityManagerClient::GetInstance()->
-        StartAbilityByCallWithErrMsg(want, abilityConnection, nullptr, -1, errMsg);
+        StartAbilityByCallWithErrMsg(want, abilityConnection, nullptr, userId, errMsg);
 }
 
 static sptr<AppExecFwk::IBundleMgr> GetBundleMgr()
@@ -101,8 +102,14 @@ extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t user
     if (strcpy_s(abilityName, abilityNameLen, abilityInfos[0].name.c_str()) != EOK) {
         return SOFTBUS_STRCPY_ERR;
     }
-    *appIndex = abilityInfos[0].appIndex;
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] get appIndex:%{public}d", *appIndex);
+    pid_t callerUid = IPCSkeleton::GetCallingUid();
+    std::string name;
+    ret = bundleMgr->GetNameAndIndexForUid(callerUid, name, *appIndex);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] get appIndex failed! uid:%{public}d", callerUid);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] get appIndex:%{public}d, uid:%{public}d", *appIndex, callerUid);
     return SOFTBUS_OK;
 }
 
@@ -112,7 +119,6 @@ extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] bundleName is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] pid:%{public}d, uid:%{public}d", pid, uid);
     #define SOFTBUS_SERVER_SA_ID 4700
     uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_SA_CONTROL_APP_EVENT;
     int64_t status = OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_START_APP;
