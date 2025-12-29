@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,26 @@ int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
 int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex)
 {
     return GetBusCenterManagerInterface()->SoftBusMutexUnlockInner(mutex);
+}
+int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result)
+{
+    return GetBusCenterManagerInterface()->ServerIpcCreateGroupOwner(pkgName, config, result);
+}
+
+void ServerIpcDestroyGroupOwner(const char *pkgName)
+{
+    return GetBusCenterManagerInterface()->ServerIpcDestroyGroupOwner(pkgName);
+}
+
+int32_t CheckPackageName(const char *pkgName)
+{
+    return GetBusCenterManagerInterface()->CheckPackageName(pkgName);
+}
+
+int32_t InitSoftBus(const char *pkgName)
+{
+    return GetBusCenterManagerInterface()->InitSoftBus(pkgName);
 }
 } // extern "C"
 } // namespace OHOS
