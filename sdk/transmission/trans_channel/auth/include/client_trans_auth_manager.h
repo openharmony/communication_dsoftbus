@@ -33,7 +33,7 @@ int32_t ClientTransAuthOnChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 int32_t ClientTransAuthOnDataReceived(int32_t channelId, const void *data, uint32_t len, SessionPktType type);
 
-void ClientTransAuthCloseChannel(int32_t channelId, ShutdownReason reason);
+void ClientTransAuthCloseChannel(int32_t channelId);
 
 int32_t TransAuthChannelSendBytes(int32_t channelId, const void *data, uint32_t len);
 

@@ -77,7 +77,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type, int32_t socketI
             ret = ClientTransCloseUdpChannel(channelId, SHUTDOWN_REASON_LOCAL);
             break;
         case CHANNEL_TYPE_AUTH:
-            ClientTransAuthCloseChannel(channelId, SHUTDOWN_REASON_LOCAL);
+            ClientTransAuthCloseChannel(channelId);
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "Invalid type");
