@@ -324,7 +324,7 @@ static void CoapResponseServiceDiscovery(const char *remoteUrl, const coap_conte
     coap_pdu_t *response, const DeviceInfo *info)
 {
     if (remoteUrl != NULL) {
-        if (IsShareCapBit(info)) {
+        if (IsSeqNoneType(info)) {
             return;
         }
         if (ShouldAutoReplyUnicast(info->businessType) == NSTACKX_TRUE) {
