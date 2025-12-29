@@ -707,14 +707,19 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level1)
 HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level1)
 {
     int32_t port = 5683;
-    int32_t ret = CreateServerSocketByIpv4("127.0.0.1", port);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = CreateServerSocketByIpv4("127.0.0.1", port, capabilityValue);
     EXPECT_TRUE(ret);
 
-    ret = CreateServerSocketByIpv4("280567565", port);
+    ret = CreateServerSocketByIpv4("280567565", port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 
-    ret = CreateServerSocketByIpv4("127.0.0.1", 0);
+    ret = CreateServerSocketByIpv4("127.0.0.1", 0, capabilityValue);
     EXPECT_TRUE(ret);
+
+    capabilityValue = NSTACKX_WLAN_CAT_TCP;
+    ret = CreateServerSocketByIpv4("280567565", port, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 }
 
 /*
@@ -726,17 +731,17 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level1)
 HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level1)
 {
     uint8_t key = 215;
-    uint32_t keyLen = 8;
     int32_t filePort = 25;
-    int32_t ret = StartNStackXDFileServer(nullptr, &key, keyLen, g_fileMsgRecviver, &filePort);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = StartNStackXDFileServer(nullptr, &key, g_fileMsgRecviver, &filePort, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, nullptr);
+    ret = StartNStackXDFileServer("127.0.0.1", &key, g_fileMsgRecviver, nullptr, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ConnInitSockets();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    (void)StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
+    (void)StartNStackXDFileServer("127.0.0.1", &key, g_fileMsgRecviver, &filePort, capabilityValue);
     ConnDeinitSockets();
 }
 
@@ -813,14 +818,19 @@ HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level1)
 HWTEST_F(TransSdkFileTest, TransFileTest016, TestSize.Level1)
 {
     int32_t port = 5683;
-    int32_t ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port, capabilityValue);
     EXPECT_TRUE(ret);
 
-    ret = CreateServerSocketByIpv6("280567565", port);
+    ret = CreateServerSocketByIpv6("280567565", port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 
-    ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", 0);
+    ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", 0, capabilityValue);
     EXPECT_TRUE(ret);
+
+    capabilityValue = NSTACKX_WLAN_CAT_TCP;
+    ret = CreateServerSocketByIpv6("280567565", port, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 }
 
 /*
@@ -833,19 +843,20 @@ HWTEST_F(TransSdkFileTest, TransFileTest017, TestSize.Level1)
 {
     int32_t port = 5683;
     int32_t fd = 1;
-    int32_t ret = CreateServerSocket(nullptr, &fd, &port);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = CreateServerSocket(nullptr, &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", nullptr, &port);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", nullptr, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, nullptr);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, nullptr, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, &port);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
-    ret = CreateServerSocket("280567565", &fd, &port);
+    ret = CreateServerSocket("280567565", &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
-    ret = CreateServerSocket("127.0.0.1", &fd, &port);
+    ret = CreateServerSocket("127.0.0.1", &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
