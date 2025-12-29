@@ -24,8 +24,8 @@
 extern "C" {
 #endif
 
-int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
-    uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort);
+int32_t StartNStackXDFileServer(
+    const char *myIp, const uint8_t *key, DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue);
 
 int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
     uint32_t keyLen, DFileMsgReceiver msgReceiver);
@@ -33,13 +33,13 @@ int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint
 int32_t TransOnFileChannelClientAddSecondPath(const ChannelInfo *channel, int32_t dfileId, uint32_t keyLen);
 
 int32_t TransOnFileChannelServerAddSecondPath(
-    const ChannelInfo *channel, int32_t *filePort, int32_t dfileId, uint32_t keyLen);
+    const ChannelInfo *channel, int32_t *filePort, int32_t dfileId, uint32_t capabilityValue);
 
 int32_t StartNStackXDFileClientV2(const char *peerIp,
     int32_t peerPort, const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t linkType);
 
-int32_t StartNStackXDFileServerV2(const char *myIp,
-    const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort, int32_t linkType);
+int32_t StartNStackXDFileServerV2(
+    const char *myIp, const uint8_t *key, DFileMsgReceiver msgReceiver, int32_t *filePort, int32_t linkType, uint32_t capabilityValue);
 
 int32_t FillDFileParam(NSTACKX_SessionParaMpV2 *para, const char *srvIp, int32_t srvPort);
 #ifdef __cplusplus
