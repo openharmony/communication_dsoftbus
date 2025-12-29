@@ -117,8 +117,8 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
         CleanupSymbolIfNeed(&g_symbolLoader, load);
         TRANS_LOGE(TRANS_SVC, "[br_proxy] startAbility failed, ret=%{public}d", ret);
         TransEventExtra extra = {
-            .errcode = ret,
             .result = EVENT_STAGE_RESULT_FAILED,
+            .errcode = ret,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
     }
@@ -211,8 +211,8 @@ extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get abilityName failed, ret=%{public}d", ret);
         TransEventExtra extra = {
-            .errcode = ret,
             .result = EVENT_STAGE_RESULT_FAILED,
+            .errcode = ret,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
         return ret;
@@ -349,8 +349,8 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] unrestricted failed, error=%{public}d", ret);
         (void)SoftBusMutexUnlock(&g_lock);
         TransEventExtra extra = {
-            .errcode = ret,
             .result = EVENT_STAGE_RESULT_FAILED,
+            .errcode = ret,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
         return ret;
