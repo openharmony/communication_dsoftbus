@@ -116,7 +116,7 @@ static bool IsValidCidr(const char *cidrStr, uint32_t cidrStrlen,  uint32_t slas
     if (slash == NULL) {
         return false;
     }
-    uint32_t cidrNumber = atoi(slash + 1);
+    int32_t cidrNumber = atoi(slash + 1);
     if (cidrNumber < 0 || cidrNumber > NUM_CIDR_MAX) {
         return false;
     }
