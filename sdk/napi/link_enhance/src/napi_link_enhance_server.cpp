@@ -41,7 +41,7 @@ static napi_status CheckCreateServerParams(napi_env env, napi_callback_info info
         COMM_LOGE(COMM_SDK, "unexpect string");
         return napi_string_expected;
     }
-    if (name.length() == 0 || name.length() > SOFTBUS_NAME_MAX_LEN) {
+    if (name.length() == 0) {
         COMM_LOGE(COMM_SDK, "invalid name");
         return napi_invalid_arg;
     }
@@ -284,6 +284,11 @@ napi_value NapiLinkEnhanceServer::Start(napi_env env, napi_callback_info info)
     if (ret != 0) {
         COMM_LOGE(COMM_SDK, "create server fail, ret=%{public}d", ret);
         int32_t errCode = ConvertToJsErrcode(ret);
+        if (errCode == LINK_ENHANCE_PARAMETER_INVALID) {
+            napi_throw_error(env, std::to_string(errCode).c_str(),
+                "check whether the length of the name input when calling the createServer interface is valid");
+            return NapiGetUndefinedRet(env);
+        }
         HandleSyncErr(env, errCode);
     }
     return NapiGetUndefinedRet(env);
