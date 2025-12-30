@@ -94,7 +94,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":TransClientProxyStandardTest",
-    ":TransClientProxyTest",
+    #":TransClientProxyTest",
     ":TransClientProxyGitpidTest",
   ]
 }

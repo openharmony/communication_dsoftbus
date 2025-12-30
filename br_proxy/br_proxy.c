@@ -556,6 +556,7 @@ int32_t CloseBrProxy(int32_t channelId)
 
 int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
 {
+    TRANS_LOGI(TRANS_SDK, "[br_proxy] channelId:%{public}d, datalen:%{public}d", channelId, dataLen);
     if (!IsChannelValid(channelId)) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }
