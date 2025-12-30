@@ -366,7 +366,7 @@ int32_t ClientIpcQueryPermission(const char *pkgName, const char *bundleName, bo
 
 int32_t BrProxyRemoveObject(const char *pkgName)
 {
-    while(1) {
+    while (1) {
         sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
         if (clientObject == nullptr) {
             break;
