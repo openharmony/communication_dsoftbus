@@ -131,6 +131,8 @@ typedef struct {
     bool isOccupied;
 
     bool isUnknownDevice;
+    bool isMtuExchange;
+    bool isBasicInfoExchange;
 } ConnBleConnection;
 
 typedef struct {

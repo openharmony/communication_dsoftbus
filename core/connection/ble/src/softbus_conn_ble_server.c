@@ -680,6 +680,7 @@ static void BleMtuChangeCallback(int32_t underlayerHandle, int32_t mtu)
     }
     connection->mtu = (uint32_t)mtu;
     connection->state = BLE_CONNECTION_STATE_MTU_SETTED;
+    connection->isMtuExchange = true;
     (void)SoftBusMutexUnlock(&connection->lock);
     g_serverEventListener.onServerAccepted(connection->connectionId);
     ConnBleReturnConnection(&connection);
