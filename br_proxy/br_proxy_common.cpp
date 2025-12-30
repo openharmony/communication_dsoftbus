@@ -40,7 +40,8 @@
 using namespace OHOS;
 typedef int32_t (*GetAbilityNameFunc)(char *abilityName, int32_t userId, uint32_t abilityNameLen,
     std::string bundleName, int32_t *appIndex);
-typedef int32_t (*StartAbilityFunc)(const char *bundleName, const char *abilityName, int32_t appIndex);
+typedef int32_t (*StartAbilityFunc)(const char *bundleName, const char *abilityName,
+    int32_t appIndex, int32_t userId);
 typedef int32_t (*UnrestrictedFunc)(const char *bundleName, pid_t pid, pid_t uid);
 
 struct SymbolLoader {
@@ -112,7 +113,8 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
         (void)SoftBusMutexUnlock(&g_lock);
         return ret;
     }
-    ret = g_symbolLoader.startAbility(bundleName, abilityName, appIndex);
+    int32_t userId =  GetActiveOsAccountIds();
+    ret = g_symbolLoader.startAbility(bundleName, abilityName, appIndex, userId);
     if (ret != SOFTBUS_OK) {
         CleanupSymbolIfNeed(&g_symbolLoader, load);
         TRANS_LOGE(TRANS_SVC, "[br_proxy] startAbility failed, ret=%{public}d", ret);
