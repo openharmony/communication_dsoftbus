@@ -26,6 +26,7 @@
 #include "wifi_direct_defines_struct.h"
 
 #define IPPROTO_HTP        201
+#define SOL_HTP            300
 #define HTP_ADDR_TYPE_MAC  0
 #define HTP_ADDR_TYPE_IPV4 1
 #define HTP_ADDR_TYPE_IPV6 2
@@ -223,13 +224,18 @@ int32_t ConnSetHtpKeepalive(int32_t fd, int32_t aliveTime)
         CONN_LOGE(CONN_COMMON, "invalid aliveTime=%{public}d", aliveTime);
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t rc = SoftBusSocketSetOpt(fd, IPPROTO_HTP, HTP_KEEPIDLE, &aliveTime, sizeof(aliveTime));
-    if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set HTP_KEEPALIVE fail, fd=%{public}d, aliveTime=%{public}d, ret=%{public}d.",
-            fd, aliveTime, rc);
+    int32_t ret = ConnSetHtpKeepaliveState(fd);
+    if (ret != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "set SO_KEEPALIVE fail, ret=%{public}d", ret);
         return SOFTBUS_ADAPTER_ERR;
     }
-    return ConnSetHtpKeepaliveState(fd);
+    ret = SoftBusSocketSetOpt(fd, SOL_HTP, HTP_KEEPIDLE, &aliveTime, sizeof(aliveTime));
+    if (ret != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "set HTP_KEEPALIVE fail, fd=%{public}d, aliveTime=%{public}d, ret=%{public}d.",
+            fd, aliveTime, ret);
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    return SOFTBUS_ADAPTER_OK;
 }
 
 const SocketInterface *GetHtpProtocol(void)
