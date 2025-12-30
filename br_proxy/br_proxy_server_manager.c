@@ -647,8 +647,6 @@ static bool IsSessionExist(const char *brMac, const char *uuid, uint32_t request
             (needPid && nodeInfo->callingPid != callerPid)) {
             continue;
         }
-        nodeInfo->callingUid = GetCallerUid();
-        nodeInfo->callingTokenId = GetCallerTokenId();
         nodeInfo->requestId = requestId;
         (void)SoftBusMutexUnlock(&(g_serverList->lock));
         return true;
@@ -998,19 +996,16 @@ static int32_t GetChannelId(const char *mac, const char *uuid, int32_t *channelI
     BrProxyInfo *nodeInfo = NULL;
     BrProxyInfo *nodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(nodeInfo, nodeNext, &(g_proxyList->list), BrProxyInfo, node) {
-        if (strcmp(nodeInfo->proxyInfo.brMac, mac) != 0 || strcmp(nodeInfo->proxyInfo.uuid, uuid) != 0 ||
-            nodeInfo->appIndex != appIndex) {
+        if (strcmp(nodeInfo->proxyInfo.brMac, mac) != 0 || strcmp(nodeInfo->proxyInfo.uuid, uuid) != 0) {
             continue;
         }
-        if (nodeInfo->isEnable) {
-            *channelId = nodeInfo->channelId;
-            (void)SoftBusMutexUnlock(&(g_proxyList->lock));
-            TRANS_LOGI(TRANS_SVC, "[br_proxy] channelId:%{public}d is exist, appIndex:%{public}d!",
-                *channelId, appIndex);
-            return SOFTBUS_OK;
-        } else {
-            TRANS_LOGI(TRANS_SVC, "[br_proxy] can not get channelId, appIndex:%{public}d!", appIndex);
-            break;
+        if (!nodeInfo->isConnected) {
+            TRANS_LOGI(TRANS_SVC, "[br_proxy] appIndex:%{public}d do not need close channel", nodeInfo->appIndex);
+            continue;
+        }
+        if (nodeInfo->channel.close != NULL) {
+            nodeInfo->channel.close(&nodeInfo->channel);
+            TRANS_LOGI(TRANS_SVC, "[br_proxy] appIndex:%{public}d close channel!", nodeInfo->appIndex);
         }
     }
     (void)SoftBusMutexUnlock(&(g_proxyList->lock));
