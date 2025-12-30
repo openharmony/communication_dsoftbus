@@ -50,6 +50,8 @@ void ConnBleOccupy(ConnBleConnection *connection);
 // NOTICE: MUST ONLY used in ble connection inner module
 void ConnBleInnerComplementDeviceId(ConnBleConnection *connection);
 
+void ConnBleRemoveExchangeBasicInfoTimeoutEvent(ConnBleConnection *connection);
+
 int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEventListener *listener);
 
 #ifdef __cplusplus

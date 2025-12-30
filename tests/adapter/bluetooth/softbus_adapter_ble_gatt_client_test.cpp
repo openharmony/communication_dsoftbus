@@ -61,6 +61,7 @@ public:
     static StRecordCtx registNotificationCtx;
     static IntRecordCtx configureMtuSizeCtx;
     static GattcNotifyRecordCtx notificationReceiveCtx;
+    static RecordCtx serviceChangedCtx;
 };
 
 static SoftBusGattcCallback *GetStubGattcCallback();
@@ -437,6 +438,7 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle001, TestSize.Level3)
     int32_t mtu = 512;
     ASSERT_EQ(SoftbusGattcConfigureMtuSize(clientId, mtu), SOFTBUS_OK);
     gattClientCallback->configureMtuSizeCb(clientId, mtu, OHOS_BT_STATUS_SUCCESS);
+    gattClientCallback->serviceChangeCb(clientId);
     ASSERT_TRUE(configureMtuSizeCtx.Expect(clientId, OHOS_BT_STATUS_SUCCESS, mtu));
 }
 
@@ -636,6 +638,7 @@ StRecordCtx AdapterBleGattClientTest::serviceCompleteStateCtx("ServiceCompleteCa
 StRecordCtx AdapterBleGattClientTest::registNotificationCtx("RegistNotificationCallback");
 IntRecordCtx AdapterBleGattClientTest::configureMtuSizeCtx("ConfigureMtuSizeCallback");
 GattcNotifyRecordCtx AdapterBleGattClientTest::notificationReceiveCtx("NotificationReceiveCallback");
+RecordCtx AdapterBleGattClientTest::serviceChangedCtx("OnServiceChanged");
 
 void StubConnectionStateCallback(int32_t clientId, int32_t connState, int32_t status)
 {
@@ -662,6 +665,11 @@ void StubConfigureMtuSizeCallback(int32_t clientId, int32_t mtuSize, int32_t sta
     AdapterBleGattClientTest::configureMtuSizeCtx.Update(clientId, status, mtuSize);
 }
 
+void StubServiceChangedCallback(int32_t clientId)
+{
+    AdapterBleGattClientTest::serviceChangedCtx.Update(clientId);
+}
+
 static SoftBusGattcCallback *GetStubGattcCallback()
 {
     static SoftBusGattcCallback callback = {
@@ -670,6 +678,7 @@ static SoftBusGattcCallback *GetStubGattcCallback()
         .registNotificationCallback = StubRegistNotificationCallback,
         .notificationReceiveCallback = StubNotificationReceiveCallback,
         .configureMtuSizeCallback = StubConfigureMtuSizeCallback,
+        .onServiceChanged = StubServiceChangedCallback,
     };
     return &callback;
 }
