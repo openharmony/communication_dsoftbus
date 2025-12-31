@@ -141,7 +141,6 @@ typedef struct {
     uint8_t talkieType;        // TALKIE_TYPE
     uint8_t talkieLevel;       // TALKIE_LEVEL
     uint8_t wakeUpState;       // WAKE_UP_STATE
-    uint8_t channelStatus;     // BR_PROXY_CHANNEL_STATUS
     int32_t result;            // STAGE_RES
     int32_t errcode;           // ERROR_CODE
     const char *socketName;    // SESSION_NAME
@@ -211,6 +210,7 @@ typedef struct {
     int32_t streamChannelCnt;
     int32_t dataLen;
     uint64_t sessionDuration;    // SESSION_DURATION
+    uint8_t channelStatus;     // BR_PROXY_CHANNEL_STATUS
 } TransEventExtra;
 
 typedef enum {
