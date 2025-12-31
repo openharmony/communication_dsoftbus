@@ -672,7 +672,7 @@ static void DfxReceiveRateStatistic(int32_t channelId, int32_t dataLen)
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     extra.channelId = channelId;
     extra.dataLen = dataLen;
-    extra.bytesRate = (dataLen * SEC_TO_MILLISEC)/(DATA_LEN_1M * useTime);
+    extra.bytesRate = (uint32_t)(((uint64_t)dataLen * SEC_TO_MILLISEC)/(useTime * DATA_LEN_1M));
     TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
 }
 
