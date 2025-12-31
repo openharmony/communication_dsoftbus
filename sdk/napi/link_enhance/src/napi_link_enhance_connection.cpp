@@ -52,7 +52,7 @@ static napi_status CheckCreateConnectionParams(napi_env env, napi_callback_info 
         return napi_string_expected;
     }
 
-    if (deviceId.length() == 0 || name.length() == 0 || name.length() > SOFTBUS_NAME_MAX_LEN) {
+    if (deviceId.length() == 0 || name.length() == 0) {
         COMM_LOGE(COMM_SDK, "name or deviceId is null");
         return napi_invalid_arg;
     }
@@ -320,6 +320,11 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
     if (handle <= 0) {
         COMM_LOGE(COMM_SDK, "connect fail, err=%{public}d", handle);
         int32_t errcode = ConvertToJsErrcode(handle);
+        if (errcode == LINK_ENHANCE_PARAMETER_INVALID) {
+            napi_throw_error(env, std::to_string(errcode).c_str(),
+                "check whether the length of the name input when calling the createConnection interface is valid");
+            return NapiGetUndefinedRet(env);
+        }
         HandleSyncErr(env, errcode);
         return NapiGetUndefinedRet(env);
     }
