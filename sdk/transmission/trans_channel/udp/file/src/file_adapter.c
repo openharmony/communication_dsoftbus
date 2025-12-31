@@ -26,6 +26,8 @@
 #include "softbus_socket.h"
 #include "trans_log.h"
 
+#define DEFAULT_KEY_LENGTH 32
+
 static int SetReuseAddr(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, sizeof(on));
@@ -46,7 +48,7 @@ static int SetReusePort(int fd, int on)
     return SOFTBUS_OK;
 }
 
-static int CreateServerSocketByIpv4(const char *ip, int port)
+static int CreateServerSocketByIpv4(const char *ip, int port, uint32_t capabilityValue)
 {
     SoftBusSockAddrIn addr;
     int32_t ret = Ipv4AddrToAddrIn(&addr, ip, port);
@@ -56,9 +58,13 @@ static int CreateServerSocketByIpv4(const char *ip, int port)
     }
 
     int fd;
-
-    ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
-        SOFTBUS_SOCK_CLOEXEC, 0, &fd);
+    if (capabilityValue != NSTACKX_WLAN_CAT_TCP) {
+        ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_NONBLOCK |
+            SOFTBUS_SOCK_CLOEXEC, 0, &fd);
+    } else {
+        ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
+            SOFTBUS_SOCK_CLOEXEC, 0, &fd);
+    }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "create socket error, ret=%{public}d.", ret);
         return ret;
@@ -88,7 +94,7 @@ static int CreateServerSocketByIpv4(const char *ip, int port)
     return fd;
 }
 
-static int CreateServerSocketByIpv6(const char *ip, int port)
+static int CreateServerSocketByIpv6(const char *ip, int port, uint32_t capabilityValue)
 {
     SoftBusSockAddrIn6 addr;
     int32_t ret = Ipv6AddrToAddrIn(&addr, ip, port);
@@ -98,8 +104,13 @@ static int CreateServerSocketByIpv6(const char *ip, int port)
     }
 
     int fd;
-    ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
-        SOFTBUS_SOCK_CLOEXEC, 0, &fd);
+    if (capabilityValue != NSTACKX_WLAN_CAT_TCP) {
+        ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_NONBLOCK |
+            SOFTBUS_SOCK_CLOEXEC, 0, &fd);
+    } else {
+        ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
+            SOFTBUS_SOCK_CLOEXEC, 0, &fd);
+    }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "create socket error, ret=%{public}d.", ret);
         return ret;
@@ -129,7 +140,7 @@ static int CreateServerSocketByIpv6(const char *ip, int port)
     return fd;
 }
 
-static int32_t CreateServerSocket(const char *ip, int32_t *fd, int32_t *port)
+static int32_t CreateServerSocket(const char *ip, int32_t *fd, int32_t *port, uint32_t capabilityValue)
 {
     if (ip == NULL || fd == NULL || port == NULL) {
         TRANS_LOGE(TRANS_FILE, "invalid param.");
@@ -138,9 +149,9 @@ static int32_t CreateServerSocket(const char *ip, int32_t *fd, int32_t *port)
 
     int32_t socketFd = -1;
     if (GetDomainByAddr(ip) == SOFTBUS_AF_INET6) {
-        socketFd = CreateServerSocketByIpv6(ip, 0);
+        socketFd = CreateServerSocketByIpv6(ip, 0, capabilityValue);
     } else {
-        socketFd = CreateServerSocketByIpv4(ip, 0);
+        socketFd = CreateServerSocketByIpv4(ip, 0, capabilityValue);
     }
 
     if (socketFd < 0) {
@@ -206,7 +217,7 @@ static int32_t InitSockAddrIn6ByIpPort(const char *ip, int32_t port, struct sock
 }
 
 int32_t StartNStackXDFileServer(
-    const char *myIp, const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort)
+    const char *myIp, const uint8_t *key, DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue)
 {
     if (myIp == NULL || filePort == NULL) {
         TRANS_LOGE(TRANS_FILE, "invalid param.");
@@ -214,7 +225,7 @@ int32_t StartNStackXDFileServer(
     }
     int32_t port = -1;
     int32_t fd = -1;
-    int32_t ret = CreateServerSocket(myIp, &fd, &port);
+    int32_t ret = CreateServerSocket(myIp, &fd, &port, capabilityValue);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "failed to start tcp server for getting port");
         return ret;
@@ -229,7 +240,8 @@ int32_t StartNStackXDFileServer(
             return ret;
         }
         socklen_t addrLen = sizeof(struct sockaddr_in6);
-        sessionId = NSTACKX_DFileServer((struct sockaddr_in *)&localAddr, addrLen, key, keyLen, msgReceiver);
+        sessionId = NSTACKX_DFileServer(
+            (struct sockaddr_in *)&localAddr, addrLen, key, DEFAULT_KEY_LENGTH, msgReceiver);
     } else {
         struct sockaddr_in localAddr = { 0 };
         ret = InitSockAddrInByIpPort(myIp, port, &localAddr);
@@ -239,7 +251,8 @@ int32_t StartNStackXDFileServer(
             return ret;
         }
         socklen_t addrLen = sizeof(struct sockaddr_in);
-        sessionId = NSTACKX_DFileServer((struct sockaddr_in *)&localAddr, addrLen, key, keyLen, msgReceiver);
+        sessionId = NSTACKX_DFileServer(
+            (struct sockaddr_in *)&localAddr, addrLen, key, DEFAULT_KEY_LENGTH, msgReceiver);
     }
     *filePort = port;
     TransTdcReleaseFd(fd);
@@ -294,13 +307,13 @@ int32_t StartNStackXDFileClient(
     return sessionId;
 }
 
-int32_t TransOnFileChannelServerAddSecondPath(const ChannelInfo *channel, int32_t *filePort,
-    int32_t dfileId, uint32_t keyLen)
+int32_t TransOnFileChannelServerAddSecondPath(
+    const ChannelInfo *channel, int32_t *filePort, int32_t dfileId, uint32_t capabilityValue)
 {
     int32_t sessionId = -1;
     int32_t port = -1;
     int32_t fd = -1;
-    int32_t ret = CreateServerSocket(channel->myIp, &fd, &port);
+    int32_t ret = CreateServerSocket(channel->myIp, &fd, &port, capabilityValue);
     DFileLinkType type = DFILE_LINK_MAX;
     if (channel->linkType == LANE_USB) {
         type = DFILE_LINK_WIRED;
@@ -323,7 +336,7 @@ int32_t TransOnFileChannelServerAddSecondPath(const ChannelInfo *channel, int32_
         para[0].linkType = type;
         
         int32_t paraNum = sizeof(para) / sizeof(para[0]);
-        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (uint8_t *)channel->sessionKey, keyLen);
+        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH);
     } else {
         struct sockaddr_in localAddr = { 0 };
         ret = InitSockAddrInByIpPort(channel->myIp, port, &localAddr);
@@ -339,7 +352,7 @@ int32_t TransOnFileChannelServerAddSecondPath(const ChannelInfo *channel, int32_
         para[0].linkType = type;
         
         int32_t paraNum = sizeof(para) / sizeof(para[0]);
-        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (uint8_t *)channel->sessionKey, keyLen);
+        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH);
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "NSTACK_DFileAddMpPath error, ret=%{public}d", ret);
@@ -410,7 +423,7 @@ int32_t TransOnFileChannelClientAddSecondPath(const ChannelInfo *channel, int32_
 }
 
 int32_t StartNStackXDFileServerV2(const char *myIp, const uint8_t *key,
-    uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t *filePort, int32_t linkType)
+    DFileMsgReceiver msgReceiver, int32_t *filePort, int32_t linkType, uint32_t capabilityValue)
 {
     TRANS_LOGI(TRANS_FILE, "enter StartNStackXDFileServerV2...");
     if (myIp == NULL || filePort == NULL) {
@@ -426,7 +439,7 @@ int32_t StartNStackXDFileServerV2(const char *myIp, const uint8_t *key,
         type = DFILE_LINK_WIRELESS;
     }
     TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", type);
-    int32_t ret = CreateServerSocket(myIp, &fd, &port);
+    int32_t ret = CreateServerSocket(myIp, &fd, &port, capabilityValue);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "failed to start tcp server for getting port");
         return ret;
@@ -447,7 +460,7 @@ int32_t StartNStackXDFileServerV2(const char *myIp, const uint8_t *key,
         para[0].linkType = type;
 
         int32_t paraNum = sizeof(para) / sizeof(para[0]);
-        sessionId = NSTACKX_DFileServerMpV2(para, paraNum, key, keyLen, msgReceiver);
+        sessionId = NSTACKX_DFileServerMpV2(para, paraNum, key, DEFAULT_KEY_LENGTH, msgReceiver);
     } else {
         struct sockaddr_in localAddr = { 0 };
         ret = InitSockAddrInByIpPort(myIp, port, &localAddr);
@@ -463,7 +476,7 @@ int32_t StartNStackXDFileServerV2(const char *myIp, const uint8_t *key,
         para[0].linkType = type;
         
         int32_t paraNum = sizeof(para) / sizeof(para[0]);
-        sessionId = NSTACKX_DFileServerMpV2(para, paraNum, key, keyLen, msgReceiver);
+        sessionId = NSTACKX_DFileServerMpV2(para, paraNum, key, DEFAULT_KEY_LENGTH, msgReceiver);
     }
     *filePort = port;
     TransTdcReleaseFd(fd);
