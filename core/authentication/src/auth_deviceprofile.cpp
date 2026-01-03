@@ -388,11 +388,17 @@ static int32_t InsertDpAclWithBundleName(const OHOS::DistributedDeviceProfile::A
     }
     accesser.SetAccesserBundleName(std::string(bundleName));
     accessControlProfile.SetAccesser(accesser);
+    if (accessee.GetAccesseeAccountId().empty()) {
+        accessee.SetAccesseeAccountId(accesser.GetAccesserAccountId());
+        accessControlProfile.SetAccessee(accessee);
+    }
     ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
         LNN_LOGE(LNN_STATE, "PutAccessControlProfile failed, ret=%{public}d", ret);
         return SOFTBUS_AUTH_INSERT_ACL_FAIL;
     }
+    LNN_LOGI(LNN_STATE, "update dp same account succ, GetAccesser=%{public}s, GetAccessee=%{public}s",
+        accesser.dump().c_str(), accessee.dump().c_str());
     return SOFTBUS_OK;
 }
 
@@ -400,7 +406,8 @@ static UpdateDpAclResult UpdateDpAclWithInvalidBundleName(
     OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile)
 {
     std::string bundleName = aclProfile.GetAccesser().GetAccesserBundleName();
-    if (bundleName.length() == 0 && InsertDpAclWithBundleName(aclProfile) == SOFTBUS_OK) {
+    std::string accountId = aclProfile.GetAccessee().GetAccesseeAccountId();
+    if ((bundleName.length() == 0 || accountId.empty()) && (InsertDpAclWithBundleName(aclProfile) == SOFTBUS_OK)) {
         int32_t controlId = aclProfile.GetAccessControlId();
         int32_t ret = DpClient::GetInstance().DeleteAccessControlProfile(controlId);
         LNN_LOGW(LNN_STATE, "DeleteAccessControlProfile ret=%{public}d", ret);
