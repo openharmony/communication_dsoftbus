@@ -50,7 +50,7 @@ struct ProxyChannel {
     char brMac[BT_MAC_MAX_LEN];
     char uuid[UUID_STRING_LEN];
     int32_t (*send)(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen);
-    void (*close)(struct ProxyChannel *channel);
+    void (*close)(struct ProxyChannel *channel, bool isClearReconnectEvent);
 };
 
 struct ProxyConnection {
@@ -88,6 +88,7 @@ typedef struct {
     uint64_t timeoutMs;
     OpenProxyChannelCallback result;
     bool isAclConnected;
+    bool isSupportHfp;
     ListNode node;
 } ProxyConnectInfo;
 

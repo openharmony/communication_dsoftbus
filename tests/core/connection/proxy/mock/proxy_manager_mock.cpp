@@ -44,9 +44,9 @@ void InitProxyChannelManagerWrapper(void)
     return ProxyChannelMock::GetMock()->InitProxyChannelManagerWrapper();
 }
 
-bool IsPairedDevice(const char *addr, bool isRealMac)
+bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp)
 {
-    return ProxyChannelMock::GetMock()->IsPairedDevice(addr, isRealMac);
+    return ProxyChannelMock::GetMock()->IsPairedDevice(addr, isRealMac, isSupportHfp);
 }
 
 int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr)
@@ -122,6 +122,14 @@ int32_t ProxyChannelMock::ActionOfConnect2(const char *uuid, const BT_ADDR mac, 
     GetProxyChannelManager()->proxyChannelRequestInfo = connectInfo;
     sleep(1);
     return UNDERLAYER_HANDLE;
+}
+
+bool ProxyChannelMock::ActionOfIsPairedDevice(const char *addr,  bool isRealMac, bool *isSupportHfp)
+{
+    if (isSupportHfp != nullptr) {
+        *isSupportHfp = true;
+    }
+    return true;
 }
 
 int32_t SoftBusGetBrState(void)

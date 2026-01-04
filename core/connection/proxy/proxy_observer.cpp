@@ -123,7 +123,29 @@ static std::string ConvertRealMacToHashMac(const std::string addr)
     return std::string(hashAddrStr).substr(SHA_256_HASH_LEN, SHA_256_HASH_LEN);
 }
 
-bool IsPairedDevice(const char *addr, bool isRealMac)
+static bool CompareIgnoreCase(const std::string &left, const std::string &right)
+{
+    std::string leftLower = left;
+    std::transform(left.begin(), left.end(), leftLower.begin(), ::tolower);
+
+    std::string rightLower = right;
+    std::transform(right.begin(), right.end(), rightLower.begin(), ::tolower);
+    return leftLower.compare(rightLower) == 0;
+}
+
+static bool IsSupportHfp(const OHOS::Bluetooth::BluetoothRemoteDevice& device)
+{
+    std::vector<std::string> uuids;
+    device.GetDeviceUuids(uuids);
+    for (const std::string& uuid : uuids) {
+        if (CompareIgnoreCase(uuid, OHOS::Bluetooth::BLUETOOTH_UUID_HFP_HF)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(addr != nullptr, false, CONN_PROXY, "addr is null");
     std::vector<OHOS::Bluetooth::BluetoothRemoteDevice> remoteDeviceLists;
@@ -137,6 +159,9 @@ bool IsPairedDevice(const char *addr, bool isRealMac)
         if (state == OHOS::Bluetooth::PAIR_PAIRED &&
             ((isRealMac && StrCmpIgnoreCase(device.GetDeviceAddr().c_str(), addr) == 0) ||
             (!isRealMac && StrCmpIgnoreCase(ConvertRealMacToHashMac(device.GetDeviceAddr()).c_str(), addr) == 0))) {
+            if (isSupportHfp != nullptr) {
+                *isSupportHfp = IsSupportHfp(device);
+            }
             return true;
         }
     }
