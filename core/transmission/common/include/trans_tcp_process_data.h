@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "common_list.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "trans_assemble_tlv.h"
@@ -76,6 +77,7 @@ typedef struct {
 } EncrptyInfo;
 
 int32_t TransTdcRecvFirstData(int32_t channelId, char *recvBuf, int32_t *recvLen, int32_t fd, size_t len);
+int32_t TransTdcRecvMtpMsg(int32_t channelId, int32_t fd, SoftBusMsgHdr *msg, int32_t *recvLen);
 int32_t TransTdcUnPackAllData(int32_t channelId, DataBuf *node, bool *flag);
 int32_t TransTdcUnPackData(int32_t channelId, const char *sessionKey, char *plain, uint32_t *plainLen, DataBuf *node);
 int32_t TransTdcUnPackAllTlvData(

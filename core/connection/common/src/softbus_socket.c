@@ -278,6 +278,41 @@ ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
     return OnRecvData(fd, buf, len, timeout, 0);
 }
 
+static ssize_t OnRecvMsg(int32_t fd, SoftBusMsgHdr *msg, int timeout, int flags)
+{
+    if (fd < 0 || msg == NULL) {
+        CONN_LOGE(CONN_COMMON, "invalid params. fd=%{public}d", fd);
+        return -1;
+    }
+
+    if (timeout != 0) {
+        int err = WaitEvent(fd, SOFTBUS_SOCKET_IN, timeout);
+        if (err < 0) {
+            CONN_LOGE(CONN_COMMON, "recv msg wait event err=%{public}d", err);
+            return err;
+        }
+    }
+
+    ssize_t rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketRecvMsg(fd, msg, flags));
+    if (rc == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
+        CONN_LOGW(CONN_COMMON, "recv msg socket EAGAIN");
+        rc = 0;
+    } else if (rc == 0) {
+        CONN_LOGE(CONN_COMMON, "recv msg fail, peer close connection, fd=%{public}d", fd);
+        rc = -1;
+    } else if (rc < 0) {
+        CONN_LOGE(CONN_COMMON, "recv msg fail fd=%{public}d, errno=%{public}d(%{public}s), rc=%{public}zd",
+            fd, errno, strerror(errno), rc);
+        rc = -1;
+    }
+    return rc;
+}
+
+ssize_t ConnRecvSocketMsg(int32_t fd, SoftBusMsgHdr *msg, int32_t timeout, int flags)
+{
+    return OnRecvMsg(fd, msg, timeout, flags);
+}
+
 void ConnCloseSocket(int32_t fd)
 {
     if (fd >= 0) {

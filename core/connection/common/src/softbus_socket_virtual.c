@@ -121,6 +121,16 @@ ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+ssize_t ConnRecvSocketMsg(int32_t fd, SoftBusMsgHdr *msg, int32_t timeout, int flags)
+{
+    (void)fd;
+    (void)msg;
+    (void)timeout;
+    (void)flags;
+    CONN_LOGE(CONN_COMMON, "not support");
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t GetDomainByAddr(const char *addr)
 {
     (void)addr;
