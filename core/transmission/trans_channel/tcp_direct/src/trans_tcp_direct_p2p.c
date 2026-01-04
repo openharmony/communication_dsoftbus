@@ -927,13 +927,15 @@ static int32_t ConnectSocketDirectPeer(const char *addr, int32_t port, const cha
         TRANS_LOGE(TRANS_CTRL, "strcpy_s failed! ret=%{public}" PRId32, ret);
         return SOFTBUS_STRCPY_ERR;
     }
-    struct WifiDirectManager *pManager = GetWifiDirectManager();
-    if (pManager != NULL && pManager->getLocalAndRemoteMacByRemoteIp != NULL) {
-        ret = pManager->getLocalAndRemoteMacByRemoteIp(
-            addr, options.socketOption.localMac, MAC_MAX_LEN, options.socketOption.remoteMac, MAC_MAX_LEN);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
-            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+    if (protocolType == LNN_PROTOCOL_HTP) {
+        struct WifiDirectManager *pManager = GetWifiDirectManager();
+        if (pManager != NULL && pManager->getLocalAndRemoteMacByRemoteIp != NULL) {
+            ret = pManager->getLocalAndRemoteMacByRemoteIp(
+                addr, options.socketOption.localMac, MAC_MAX_LEN, options.socketOption.remoteMac, MAC_MAX_LEN);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+            }
         }
     }
     return ConnOpenClientSocket(&options, bindAddr, true);

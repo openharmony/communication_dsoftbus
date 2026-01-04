@@ -1789,8 +1789,10 @@ HWTEST_F(TransClientSessionTest, PrintCollabInfo001, TestSize.Level1)
     CollabInfo info = {
         .pid = 11380,
         .userId = 12345,
-        .tokenId = 0X123456789ABCDE
+        .tokenId = TRANS_TEST_MAX_LENGTH
     };
+    memset_s(info.deviceId, DEVICE_ID_LEN_MAX, 0, DEVICE_ID_LEN_MAX);
+    memset_s(info.accountId, ACCOUNT_UID_LEN_MAX, 0, ACCOUNT_UID_LEN_MAX);
     (void)strcpy_s(info.deviceId, DEVICE_ID_LEN_MAX, "device-12345");
     (void)strcpy_s(info.accountId, ACCOUNT_UID_LEN_MAX, "account-67890");
 

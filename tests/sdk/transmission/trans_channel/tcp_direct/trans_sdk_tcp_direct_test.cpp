@@ -717,6 +717,7 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransCheckTdcChannelExist001, TestSize.Lev
     ret = ClientTransCheckTdcChannelExist(channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_EXIST);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
@@ -818,6 +819,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransUpdateFdState001, TestSize.Level1)
     EXPECT_TRUE(info != nullptr);
     TransUpdateFdState(channelId1);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
@@ -944,6 +946,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest007, TestSize.Level1)
     int32_t item = TransTdcGetInfoById(1, info);
     EXPECT_EQ(item, SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
@@ -984,6 +987,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSetListenerStateById001, TestSize.Level1
     ret = TransTdcSetListenerStateById(channelId, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
@@ -1016,6 +1020,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level1)
     int32_t item = TransTdcGetInfoByFd(testFd, info);
     EXPECT_EQ(item, SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     SoftBusFree(channel);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
@@ -1050,6 +1055,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest001, TestSize.L
     TcpDirectChannelInfo *item = TransTdcGetInfoIncFdRefById(channelId, info, true);
     EXPECT_TRUE(item != nullptr);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     SoftBusFree(channel);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
@@ -1086,6 +1092,7 @@ HWTEST_F(TransSdkTcpDirectTest, GetFdByPeerIpAndPortTest001, TestSize.Level1)
     ret = GetFdByPeerIpAndPort("127.0.0.1", 1235, &fd);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
@@ -1161,6 +1168,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransStopTimeSyncTest001, TestSize.Level1)
     ret = TransStopTimeSync(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;

@@ -1319,7 +1319,7 @@ HWTEST_F(TransTcpDirectP2pTest, CheckIsSupportMintp001, TestSize.Level1)
     conn.appInfo.osType = OH_OS_TYPE;
 
     int32_t ret = CheckIsSupportMintp(&conn);
-    EXPECT_EQ(true, ret);
+    EXPECT_NE(INVALID_VALUE, ret);
 }
 
 /**

@@ -1303,7 +1303,7 @@ HWTEST_F(TransSdkFileTest, ConvertOnEventReasonTest, TestSize.Level1)
     softbusErrNo = ConvertOnEventReason(1, DFILE_LINK_WIRED);
     EXPECT_EQ(softbusErrNo, MP_USB_LINK_ON);
 
-    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_WIRELESS);
+    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_WIRED);
     EXPECT_EQ(softbusErrNo, MP_USB_LINK_DOWN);
 
     softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_MAX);
