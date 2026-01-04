@@ -1555,6 +1555,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByChannelIdTest001, TestSi
 {
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(nullptr != chan);
+    ProxyChannelInfo *chanTest = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chanTest);
     chan->channelId = TEST_PARSE_MESSAGE_CHANNEL;
     chan->reqId = TEST_VALID_REQ;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
@@ -1563,8 +1565,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByChannelIdTest001, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t channelId = TEST_PARSE_MESSAGE_CHANNEL;
 
-    ret = TransProxyDelByChannelId(channelId, chan);
+    ret = TransProxyDelByChannelId(channelId, chanTest);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(chanTest);
 }
 
 /*@
@@ -1669,6 +1672,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByChannelIdTest004, TestSi
 {
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(nullptr != chan);
+    ProxyChannelInfo *chanTest = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chanTest);
     chan->channelId = TEST_PARSE_MESSAGE_CHANNEL;
     chan->reqId = TEST_VALID_REQ;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
@@ -1677,8 +1682,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByChannelIdTest004, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t channelId = TEST_PARSE_MESSAGE_CHANNEL;
 
-    ret = TransProxyDelByChannelId(channelId, chan);
+    ret = TransProxyDelByChannelId(channelId, chanTest);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(chanTest);
 }
 
 /*
@@ -2154,6 +2160,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, Tes
 {
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(nullptr != chan);
+    ProxyChannelInfo *chanTest = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chanTest);
     chan->channelId = TEST_PARSE_MESSAGE_CHANNEL;
     chan->reqId = TEST_VALID_REQ;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
@@ -2170,8 +2178,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, Tes
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyDelByChannelId(channelId, chan);
+    ret = TransProxyDelByChannelId(channelId, chanTest);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(chanTest);
 }
 
 /*
@@ -2188,6 +2197,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
 
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(chan != nullptr);
+    ProxyChannelInfo *chanTest = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chanTest);
     chan->channelId = TEST_VALID_CHANNEL_ID;
     chan->reqId = TEST_VALID_REQ;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
@@ -2199,8 +2210,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
     ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 
-    ret = TransProxyDelByChannelId(channelId, chan);
+    ret = TransProxyDelByChannelId(channelId, chanTest);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(chanTest);
 }
 
 /*
@@ -2213,6 +2225,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, Tes
 {
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(chan != nullptr);
+    ProxyChannelInfo *chanTest = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chanTest);
     chan->channelId = TEST_VALID_CHANNEL_ID;
     int32_t ret = TransProxyAddChanItem(chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -2220,8 +2234,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, Tes
     TransCheckChannelOpenToLooperDelay(TEST_VALID_CHANNEL_ID, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
     ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
-    ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chan);
+    ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chanTest);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(chanTest);
 }
 
 /*
