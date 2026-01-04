@@ -638,20 +638,20 @@ HWTEST_F(TransClientProxyTest, ClientIpcBrProxyOpenedTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t reason = 1;
+    int32_t pid = 1;
 
-    int32_t ret = ClientIpcBrProxyOpened(nullptr, channelId, nullptr, nullptr, reason);
+    int32_t ret = ClientIpcBrProxyOpened(pid, channelId, nullptr, nullptr, reason);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    const char *pkgName = "testName";
-    ret = ClientIpcBrProxyOpened(pkgName, channelId, nullptr, nullptr, reason);
+    ret = ClientIpcBrProxyOpened(pid, channelId, nullptr, nullptr, reason);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     const char *uuid = "testUuid";
-    ret = ClientIpcBrProxyOpened(nullptr, channelId, nullptr, uuid, reason);
+    ret = ClientIpcBrProxyOpened(pid, channelId, nullptr, uuid, reason);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     const char *brMac = "11:22:33:44"; // test value
-    ret = ClientIpcBrProxyOpened(nullptr, channelId, brMac, nullptr, reason);
+    ret = ClientIpcBrProxyOpened(pid, channelId, brMac, uuid, reason);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -665,16 +665,13 @@ HWTEST_F(TransClientProxyTest, ClientIpcBrProxyReceivedDataTest001, TestSize.Lev
 {
     int32_t channelId = 1;
     uint32_t len = 1;
+    int32_t pid = 1;
 
-    int32_t ret = ClientIpcBrProxyReceivedData(nullptr, channelId, nullptr, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    const char *pkgName = "testName";
-    ret = ClientIpcBrProxyReceivedData(pkgName, channelId, nullptr, len);
+    int32_t ret = ClientIpcBrProxyReceivedData(pid, channelId, nullptr, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     uint8_t data = 1;
-    ret = ClientIpcBrProxyReceivedData(pkgName, channelId, &data, len);
+    ret = ClientIpcBrProxyReceivedData(pid, channelId, &data, len);
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -688,12 +685,9 @@ HWTEST_F(TransClientProxyTest, ClientIpcBrProxyStateChangedTest001, TestSize.Lev
 {
     int32_t channelId = 1;
     int32_t channelState = 1;
+    int32_t pid = 1;
 
-    int32_t ret = ClientIpcBrProxyStateChanged(nullptr, channelId, channelState);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    const char *pkgName = "testName";
-    ret = ClientIpcBrProxyStateChanged(pkgName, channelId, channelState);
+    int32_t ret = ClientIpcBrProxyStateChanged(pid, channelId, channelState);
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
