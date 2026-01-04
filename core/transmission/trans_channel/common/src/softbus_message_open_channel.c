@@ -635,7 +635,7 @@ static int32_t TransUnpackHASpecificData(const cJSON *msg, AppInfo *appInfo)
         int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH, &len,
             (unsigned char *)sessionKey, strlen(sessionKey));
         (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-        if (len != SESSION_KEY_LENGTH) {
+        if (ret != SOFTBUS_OK || len != SESSION_KEY_LENGTH) {
             TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%{public}d, len=%{public}zu", ret, len);
             return SOFTBUS_PARSE_JSON_ERR;
         }

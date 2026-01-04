@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 int32_t TransTdcRecvData(int32_t channelId);
+int32_t TransTdcRecvMsg(int32_t channelId);
 
 int32_t TransDataListInit(void);
 void TransDataListDeinit(void);
