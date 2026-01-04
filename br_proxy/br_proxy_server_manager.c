@@ -179,7 +179,7 @@ static int32_t CloseAllBrProxy()
     BrProxyInfo *nodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(nodeInfo, nodeNext, &(g_proxyList->list), BrProxyInfo, node) {
         if (nodeInfo->isEnable && nodeInfo->channel.close != NULL) {
-            nodeInfo->channel.close(&nodeInfo->channel);
+            nodeInfo->channel.close(&nodeInfo->channel, true);
         }
         ListDelete(&nodeInfo->node);
         SoftBusFree(nodeInfo);
@@ -1004,7 +1004,7 @@ static int32_t GetChannelId(const char *mac, const char *uuid, int32_t *channelI
             continue;
         }
         if (nodeInfo->channel.close != NULL) {
-            nodeInfo->channel.close(&nodeInfo->channel);
+            nodeInfo->channel.close(&nodeInfo->channel, true);
             TRANS_LOGI(TRANS_SVC, "[br_proxy] appIndex:%{public}d close channel!", nodeInfo->appIndex);
         }
     }
@@ -1080,7 +1080,7 @@ int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall)
         }
     }
     if (info.channel.close != NULL) {
-        info.channel.close(&info.channel);
+        info.channel.close(&info.channel, true);
         TRANS_LOGE(TRANS_SVC, "[br_proxy] close channel");
     }
     TransBrProxyRemoveObject();
