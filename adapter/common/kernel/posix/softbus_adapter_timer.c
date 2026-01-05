@@ -215,6 +215,16 @@ uint64_t SoftBusGetSysTimeMs(void)
     return (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
 }
 
+uint64_t SoftBusGetTimeMs(void)
+{
+    struct timespec time = {0};
+    if (clock_gettime(CLOCK_MONOTONIC, &time) != 0) {
+        COMM_LOGI(COMM_ADAPTER, "get time fail");
+        return 0;
+    }
+    return (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_nsec / (US_PER_MSECOND * NS_PER_USECOND);
+}
+
 const char *SoftBusFormatTimestamp(uint64_t timestamp)
 {
     uint32_t milliseconds = timestamp % MS_PER_SECOND;

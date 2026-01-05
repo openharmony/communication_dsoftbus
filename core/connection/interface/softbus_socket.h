@@ -70,6 +70,7 @@ int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, 
 
 ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout);
 ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout);
+ssize_t ConnRecvSocketMsg(int32_t fd, SoftBusMsgHdr *msg, int32_t timeout, int flags);
 void ConnCloseSocket(int32_t fd);
 void ConnShutdownSocket(int32_t fd);
 int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount);
