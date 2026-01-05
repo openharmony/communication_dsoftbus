@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+#include <string>
+#include <unistd.h>
 #include "softbus_error_code.h"
-
-using namespace OHOS;
 
 extern "C" int32_t StartAbility(const char *bundleName, const char *abilityName)
 {
@@ -24,6 +25,11 @@ extern "C" int32_t StartAbility(const char *bundleName, const char *abilityName)
 
 extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t userId,
     uint32_t abilityNameLen, std::string bundleName)
+{
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
 {
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

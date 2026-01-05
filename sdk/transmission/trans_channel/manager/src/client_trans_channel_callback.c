@@ -236,19 +236,7 @@ int32_t TransOnChannelLinkDown(const char *networkId, uint32_t routeType)
         ClientTransOnPrivilegeClose(networkId);
         return SOFTBUS_OK;
     }
-    bool singleLinkDown = false;
-    int ret = CheckSingleLaneLinkDownByNetworkId(networkId, &singleLinkDown);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "check is single lane linkdown error.");
-        return ret;
-    }
-    singleLinkDown = false;
-    if (singleLinkDown) {
-        TRANS_LOGI(TRANS_SDK, "multi path session single link down.");
-        ClientTransOnSingleLaneLinkDown(networkId, routeType);
-    } else {
-        ClientTransOnLinkDown(networkId, routeType);
-    }
+    ClientTransOnLinkDown(networkId, routeType);
     return SOFTBUS_OK;
 }
 

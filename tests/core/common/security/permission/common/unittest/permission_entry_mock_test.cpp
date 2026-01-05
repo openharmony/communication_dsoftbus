@@ -77,7 +77,7 @@ public:
 
 /*
  * @tc.name: TestCheckPermissionEntry001
- * @tc.desc: TestCheckPermissionEntry test
+ * @tc.desc: Verify TestCheckPermissionEntry returns NATIVE_APP for valid permission TestCheckPermissionEntry test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -132,7 +132,7 @@ HWTEST_F(PermissionEntryMockTest, TestCheckPermissionEntry001, TestSize.Level0)
 
 /*
  * @tc.name: TestCheckPermissionEntry002
- * @tc.desc: TestCheckPermissionEntry test
+ * @tc.desc: Verify TestCheckPermissionEntry returns SYSTEM_APP for valid permission TestCheckPermissionEntry test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -188,7 +188,8 @@ HWTEST_F(PermissionEntryMockTest, TestCheckPermissionEntry002, TestSize.Level0)
 
 /*
  * @tc.name: LoadRpcPermissionJson001
- * @tc.desc: LoadRpcPermissionJson test invalid param
+ * @tc.desc: Verify LoadRpcPermissionJson returns SOFTBUS_INVALID_PARAM for
+ *           nullptr json LoadRpcPermissionJson test invalid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -203,7 +204,7 @@ HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson001, TestSize.Level0)
 
 /*
  * @tc.name: LoadRpcPermissionJson002
- * @tc.desc: LoadRpcPermissionJson test valid param
+ * @tc.desc: Verify LoadRpcPermissionJson returns SOFTBUS_OK for valid json LoadRpcPermissionJson test valid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -221,7 +222,8 @@ HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson002, TestSize.Level0)
 
 /*
  * @tc.name: LoadRpcPermissionJson003
- * @tc.desc: LoadRpcPermissionJson test invalid SA_UID
+ * @tc.desc: Verify LoadRpcPermissionJson returns SOFTBUS_PARSE_JSON_ERR for invalid SA_UID
+ *           LoadRpcPermissionJson test invalid SA_UID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -238,7 +240,8 @@ HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson003, TestSize.Level0)
 
 /*
  * @tc.name: LoadRpcPermissionJson004
- * @tc.desc: LoadRpcPermissionJson test invalid format
+ * @tc.desc: Verify LoadRpcPermissionJson returns SOFTBUS_PARSE_JSON_ERR for invalid format
+ *           LoadRpcPermissionJson test invalid format
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -255,7 +258,8 @@ HWTEST_F(PermissionEntryMockTest, LoadRpcPermissionJson004, TestSize.Level0)
 
 /*
  * @tc.name: CheckRpcPermissionEntryTest001
- * @tc.desc: test invalid param
+ * @tc.desc: Verify CheckRpcPermissionEntry returns SOFTBUS_INVALID_PARAM for invalid param
+ *           CheckRpcPermissionEntry test invalid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -271,7 +275,8 @@ HWTEST_F(PermissionEntryMockTest, CheckRpcPermissionEntryTest001, TestSize.Level
 
 /*
  * @tc.name: CheckRpcPermissionEntryTest002
- * @tc.desc: test invalid param
+ * @tc.desc: Verify CheckRpcPermissionEntry returns SOFTBUS_OK for valid param
+ *           CheckRpcPermissionEntry test valid param
  * @tc.type: FUNC
  * @tc.require:
  */

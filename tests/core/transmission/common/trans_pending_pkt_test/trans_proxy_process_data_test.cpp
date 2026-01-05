@@ -43,7 +43,7 @@ void TransProxyProcessDataTest::SetUpTestCase(void)
 
 void TransProxyProcessDataTest::TearDownTestCase(void)
 {
-     std::cout << "test end out" << std::endl;
+    std::cout << "test end out" << std::endl;
 }
 
 /*

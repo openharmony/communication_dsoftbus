@@ -27,6 +27,8 @@
 #define COMMON_STRING_MAX_LEN 128
 #define WIDE_CHAR_MAX_LEN 8
 #define HALF_STR_NUM 2
+#define NUM_CIDR_MAX 32
+#define NUM_LEN_CIDR_MAX 2
 
 typedef struct {
     bool (*Matcher)(const char *, uint32_t);
@@ -105,35 +107,62 @@ static bool MatchEmpty(const char *str, uint32_t len)
     return len == 0;
 }
 
+static bool IsValidCidr(const char *cidrStr, uint32_t cidrStrlen,  uint32_t slashIndex)
+{
+    if (cidrStr == NULL || (cidrStrlen - slashIndex - 1) < 1 || (cidrStrlen - slashIndex - 1) > NUM_LEN_CIDR_MAX) {
+        return false;
+    }
+    char *slash = strchr(cidrStr, '/');
+    if (slash == NULL) {
+        return false;
+    }
+    int32_t cidrNumber = atoi(slash + 1);
+    if (cidrNumber < 0 || cidrNumber > NUM_CIDR_MAX) {
+        return false;
+    }
+    return true;
+}
+
 static bool MatchIpAddr(const char *str, uint32_t len)
 {
     static const uint32_t DOT_NUM_MAX = 3;
     static const int32_t NUM_LEN_MAX = 3;
     static const int32_t NUM_LEN_MIN = 1;
-    static const uint32_t IP_ADDR_MAX_LEN = 15;
+    static const uint32_t IP_ADDR_MAX_LEN = 18;
 
     if (len > IP_ADDR_MAX_LEN) {
         return false;
     }
-
+    bool cidrFlag = false;
+    uint32_t slashIndex = len;
     for (uint32_t i = 0; i < len; ++i) {
+        if (cidrFlag && !IsNum(str[i])) {
+            return false;
+        }
+        if (str[i] == '/' && !cidrFlag) {
+            slashIndex = i;
+            cidrFlag = true;
+            continue;
+        }
         if (!IsNum(str[i]) && !IsDot(str[i])) {
             return false;
         }
     }
-
+    if (cidrFlag && !IsValidCidr(str, len, slashIndex)) {
+        return false;
+    }
     int32_t numLen = 0;
     int32_t posPrevDot = -1;
     int32_t posNextDot = -1;
     for (uint32_t dotNum = 0; dotNum < DOT_NUM_MAX; ++dotNum) {
-        posNextDot = FindChar(SYMBOL_DOT, str, len, posPrevDot + 1);
+        posNextDot = FindChar(SYMBOL_DOT, str, slashIndex, posPrevDot + 1);
         numLen = posNextDot - posPrevDot - 1;
         if (numLen < NUM_LEN_MIN || numLen > NUM_LEN_MAX) {
             return false;
         }
         posPrevDot = posNextDot;
     }
-    numLen = (int32_t)len - posPrevDot - 1;
+    numLen = (int32_t)slashIndex - posPrevDot - 1;
     if (numLen < NUM_LEN_MIN || numLen > NUM_LEN_MAX) {
         return false;
     }

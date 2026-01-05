@@ -391,6 +391,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level1)
     ret = TransOnFileChannelOpened(sessionName, channelInfo, nullptr, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    ret = TransOnFileChannelOpened(sessionName, nullptr, nullptr, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
@@ -704,14 +707,19 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level1)
 HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level1)
 {
     int32_t port = 5683;
-    int32_t ret = CreateServerSocketByIpv4("127.0.0.1", port);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = CreateServerSocketByIpv4("127.0.0.1", port, capabilityValue);
     EXPECT_TRUE(ret);
 
-    ret = CreateServerSocketByIpv4("280567565", port);
+    ret = CreateServerSocketByIpv4("280567565", port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 
-    ret = CreateServerSocketByIpv4("127.0.0.1", 0);
+    ret = CreateServerSocketByIpv4("127.0.0.1", 0, capabilityValue);
     EXPECT_TRUE(ret);
+
+    capabilityValue = NSTACKX_WLAN_CAT_TCP;
+    ret = CreateServerSocketByIpv4("280567565", port, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 }
 
 /*
@@ -723,17 +731,17 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level1)
 HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level1)
 {
     uint8_t key = 215;
-    uint32_t keyLen = 8;
     int32_t filePort = 25;
-    int32_t ret = StartNStackXDFileServer(nullptr, &key, keyLen, g_fileMsgRecviver, &filePort);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = StartNStackXDFileServer(nullptr, &key, g_fileMsgRecviver, &filePort, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, nullptr);
+    ret = StartNStackXDFileServer("127.0.0.1", &key, g_fileMsgRecviver, nullptr, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ConnInitSockets();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    (void)StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
+    (void)StartNStackXDFileServer("127.0.0.1", &key, g_fileMsgRecviver, &filePort, capabilityValue);
     ConnDeinitSockets();
 }
 
@@ -810,14 +818,19 @@ HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level1)
 HWTEST_F(TransSdkFileTest, TransFileTest016, TestSize.Level1)
 {
     int32_t port = 5683;
-    int32_t ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", port, capabilityValue);
     EXPECT_TRUE(ret);
 
-    ret = CreateServerSocketByIpv6("280567565", port);
+    ret = CreateServerSocketByIpv6("280567565", port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 
-    ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", 0);
+    ret = CreateServerSocketByIpv6("3FFF:FFFF:0000:0000:0000:0000:0000:0000", 0, capabilityValue);
     EXPECT_TRUE(ret);
+
+    capabilityValue = NSTACKX_WLAN_CAT_TCP;
+    ret = CreateServerSocketByIpv6("280567565", port, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 }
 
 /*
@@ -830,19 +843,20 @@ HWTEST_F(TransSdkFileTest, TransFileTest017, TestSize.Level1)
 {
     int32_t port = 5683;
     int32_t fd = 1;
-    int32_t ret = CreateServerSocket(nullptr, &fd, &port);
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = CreateServerSocket(nullptr, &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", nullptr, &port);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", nullptr, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, nullptr);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, nullptr, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, &port);
+    ret = CreateServerSocket("3FFF:FFFF:0000:0000:0000:0000:0000:0000", &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
-    ret = CreateServerSocket("280567565", &fd, &port);
+    ret = CreateServerSocket("280567565", &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
-    ret = CreateServerSocket("127.0.0.1", &fd, &port);
+    ret = CreateServerSocket("127.0.0.1", &fd, &port, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
@@ -1091,6 +1105,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest004, TestSize.Level1)
 
     NotifySendResult(sessionId, msgType, nullptr, nullptr);
 
+    NotifySendResult(sessionId, msgType, &msgData, nullptr);
+
     msgType = DFILE_ON_FILE_SEND_SUCCESS;
     NotifySendResult(sessionId, msgType, &msgData, listener);
 
@@ -1136,6 +1152,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level1)
     listener->socketRecvCallback = MockSocketRecvCallback;
 
     NotifyRecvResult(sessionId, msgType, nullptr, nullptr);
+
+    NotifyRecvResult(sessionId, msgType, &msgData, nullptr);
 
     msgType = DFILE_ON_FILE_LIST_RECEIVED;
     NotifyRecvResult(sessionId, msgType, &msgData, listener);
@@ -1248,5 +1266,84 @@ HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level1)
     msgData.errorCode = NSTACKX_NOTSUPPORT;
     FillFileEventErrorCode(&msgData, &event);
     ASSERT_EQ(NSTACKX_NOTSUPPORT, event.errorCode);
+}
+
+/*
+ * @tc.name: ConvertDFileLinkToLinkMediumTest
+ * @tc.desc: convert dfilelink to linkmedium
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, ConvertDFileLinkToLinkMediumTest, TestSize.Level1)
+{
+    LinkMediumType linkmediumtype = ConvertDFileLinkToLinkMedium(DFILE_LINK_WIRELESS);
+    EXPECT_EQ(linkmediumtype, LINK_TYPE_WIFI);
+
+    linkmediumtype = ConvertDFileLinkToLinkMedium(DFILE_LINK_WIRED);
+    EXPECT_EQ(linkmediumtype, LINK_TYPE_WIRED);
+
+    linkmediumtype = ConvertDFileLinkToLinkMedium(DFILE_LINK_MAX);
+    EXPECT_EQ(linkmediumtype, LINK_TYPE_UNKNOWN);
+}
+
+/*
+ * @tc.name: ConvertOnEventReasonTest
+ * @tc.desc: convert on event reason test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, ConvertOnEventReasonTest, TestSize.Level1)
+{
+    SoftBusMPErrNo softbusErrNo = ConvertOnEventReason(1, DFILE_LINK_WIRELESS);
+    EXPECT_EQ(softbusErrNo, MP_HML_LINK_ON);
+
+    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_WIRELESS);
+    EXPECT_EQ(softbusErrNo, MP_HML_LINK_DOWN);
+
+    softbusErrNo = ConvertOnEventReason(1, DFILE_LINK_WIRED);
+    EXPECT_EQ(softbusErrNo, MP_USB_LINK_ON);
+
+    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_WIRED);
+    EXPECT_EQ(softbusErrNo, MP_USB_LINK_DOWN);
+
+    softbusErrNo = ConvertOnEventReason(0, DFILE_LINK_MAX);
+    EXPECT_EQ(softbusErrNo, MP_UNKNOWN_REASON);
+}
+
+/*
+ * @tc.name: NotifySendRateTest
+ * @tc.desc: convert on event reason test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, NotifySendRateTest, TestSize.Level1)
+{
+    UdpChannel udpChannel;
+    DFileMsgType msgType = DFILE_ON_BIND;
+    EXPECT_NO_FATAL_FAILURE(NotifySendRate(nullptr, msgType, nullptr));
+    EXPECT_NO_FATAL_FAILURE(NotifySendRate(&udpChannel, msgType, nullptr));
+    EXPECT_NO_FATAL_FAILURE(FileSendListenerEx(nullptr, msgType, nullptr));
+    EXPECT_NO_FATAL_FAILURE(FileSendListenerEx(&udpChannel, msgType, nullptr));
+}
+
+/*
+ * @tc.name: ConvertRouteToDFileLinkTypeTest
+ * @tc.desc: convert Route to DfilelinkType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, ConvertRouteToDFileLinkTypeTest, TestSize.Level1)
+{
+    DFileLinkType linktype = ConvertRouteToDFileLinkType(WIFI_USB);
+    EXPECT_EQ(linktype, DFILE_LINK_WIRED);
+
+    linktype = ConvertRouteToDFileLinkType(WIFI_STA);
+    EXPECT_EQ(linktype, DFILE_LINK_WIRELESS);
+
+    linktype = ConvertRouteToDFileLinkType(WIFI_P2P);
+    EXPECT_EQ(linktype, DFILE_LINK_WIRELESS);
+
+    linktype = ConvertRouteToDFileLinkType(BT_SLE);
+    EXPECT_EQ(linktype, DFILE_LINK_MAX);
 }
 }

@@ -53,7 +53,8 @@ void SoftbusPermissionTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: IsValidPkgNameTest001
- * @tc.desc: is valid pkgname test, use the wrong or normal parameter
+ * @tc.desc: Verify IsValidPkgName returns SOFTBUS_INVALID_PARAM when
+ *           pkgName is nullptr and SOFTBUS_OK when pkgName is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -70,7 +71,7 @@ HWTEST_F(SoftbusPermissionTest, IsValidPkgNameTest001, TestSize.Level0)
 
 /*
  * @tc.name: CheckTransPermissionTest001
- * @tc.desc: check trans permission test, use the wrong parameter
+ * @tc.desc: Verify CheckTransPermission returns SOFTBUS_PERMISSION_DENIED when input parameters are invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -87,7 +88,7 @@ HWTEST_F(SoftbusPermissionTest, CheckTransPermissionTest001, TestSize.Level0)
 
 /*
  * @tc.name: CheckTransPermissionTest002
- * @tc.desc: check trans permission test, use the valid parameter
+ * @tc.desc: Verify CheckTransPermission returns SOFTBUS_PERMISSION_DENIED when input parameters are valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -103,7 +104,8 @@ HWTEST_F(SoftbusPermissionTest, CheckTransPermissionTest002, TestSize.Level0)
 
 /*
  * @tc.name: CheckTransSecLevelTest001
- * @tc.desc: check trans sec level test, use the wrong or normal parameter
+ * @tc.desc: Verify CheckTransSecLevel returns SOFTBUS_INVALID_PARAM when sessionName
+ *           is nullptr and SOFTBUS_OK when sessionName is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -122,7 +124,7 @@ HWTEST_F(SoftbusPermissionTest, CheckTransSecLevelTest001, TestSize.Level0)
 
 /*
  * @tc.name: CheckDiscPermissionTest001
- * @tc.desc: check disc permission test, use the wrong or normal parameter
+ * @tc.desc: Verify CheckDiscPermission returns false when uid is not SYSTEM_UID and pkgName is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -143,7 +145,8 @@ HWTEST_F(SoftbusPermissionTest, CheckDiscPermissionTest001, TestSize.Level0)
 
 /*
  * @tc.name: GrantTransPermissionTest001
- * @tc.desc: grant trans permission test, use the wrong parameter
+ * @tc.desc: Verify GrantTransPermission returns SOFTBUS_INVALID_PARAM when
+ *           uid is not SYSTEM_UID and sessionName is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -157,7 +160,7 @@ HWTEST_F(SoftbusPermissionTest, GrantTransPermissionTest001, TestSize.Level0)
 
 /*
  * @tc.name: RemoveTransPermissionTest001
- * @tc.desc: remove trans permission test, use the wrong parameter
+ * @tc.desc: Verify RemoveTransPermission returns SOFTBUS_NOT_FIND when sessionName is not found
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -171,7 +174,7 @@ HWTEST_F(SoftbusPermissionTest, RemoveTransPermissionTest001, TestSize.Level0)
 
 /*
  * @tc.name: CheckDynamicPermissionTest001
- * @tc.desc: check dynamic permission test, use the wrong parameter
+ * @tc.desc: Verify CheckDynamicPermission returns SOFTBUS_PERMISSION_DENIED when input parameter is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -184,7 +187,7 @@ HWTEST_F(SoftbusPermissionTest, CheckDynamicPermissionTest001, TestSize.Level0)
 
 /*
  * @tc.name:CheckDmsServerPermissionTest001
- * @tc.desc: check dms server permission test, use the wrong parameter
+ * @tc.desc: Verify CheckDmsServerPermission returns SOFTBUS_PERMISSION_DENIED when input parameter is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -197,7 +200,7 @@ HWTEST_F(SoftbusPermissionTest, CheckDmsServerPermissionTest001, TestSize.Level0
 
 /*
  * @tc.name:SoftBusCheckIsSystemService001
- * @tc.desc: SoftBusCheckIsSystemService test
+ * @tc.desc: Verify SoftBusCheckIsSystemService returns true when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -213,7 +216,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsSystemService001, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCheckIsNormalApp001
- * @tc.desc: SoftBusCheckIsNormalApp test
+ * @tc.desc: Verify SoftBusCheckIsNormalApp returns false when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -227,7 +230,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp001, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCheckIsNormalApp002
- * @tc.desc: SoftBusCheckIsNormalApp test
+ * @tc.desc: Verify SoftBusCheckIsNormalApp returns false when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -241,7 +244,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp002, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCheckIsNormalApp003
- * @tc.desc: SoftBusCheckIsNormalApp test
+ * @tc.desc: Verify SoftBusCheckIsNormalApp returns false when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -255,7 +258,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp003, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCheckIsNormalApp004
- * @tc.desc: SoftBusCheckIsNormalApp test
+ * @tc.desc: Verify SoftBusCheckIsNormalApp returns false when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -272,7 +275,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp004, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCheckIsAccessAndRecordAccessToken001
- * @tc.desc: SoftBusCheckIsAccessAndRecordAccessToken test
+ * @tc.desc: Verify SoftBusCheckIsAccessAndRecordAccessToken returns false when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -286,7 +289,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsAccessAndRecordAccessToken001, Tes
 
 /*
  * @tc.name:SoftBusCalcPermType001
- * @tc.desc: SoftBusCalcPermType test
+ * @tc.desc: Verify SoftBusCalcPermType returns SELF_APP when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -302,7 +305,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCalcPermType001, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCalcPermType002
- * @tc.desc: SoftBusCalcPermType test
+ * @tc.desc: Verify SoftBusCalcPermType returns TOKEN_TYPE_BUTT when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -318,7 +321,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCalcPermType002, TestSize.Level0)
 
 /*
  * @tc.name:PermStateChangeCallback001
- * @tc.desc: PermStateChangeCallback test
+ * @tc.desc: Verify PermStateChangeCallback returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -338,7 +341,7 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback001, TestSize.Level0)
 
 /*
  * @tc.name:PermStateChangeCallback002
- * @tc.desc: PermStateChangeCallback test
+ * @tc.desc: Verify PermStateChangeCallback returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -359,7 +362,7 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback002, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusRegisterDataSyncPermission001
- * @tc.desc: SoftBusRegisterDataSyncPermission test
+ * @tc.desc: Verify SoftBusRegisterDataSyncPermission returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -371,7 +374,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusRegisterDataSyncPermission001, TestSize.L
 
 /*
  * @tc.name:SoftBusUnRegisterDataSyncPermission001
- * @tc.desc: SoftBusUnRegisterDataSyncPermission test
+ * @tc.desc: Verify SoftBusUnRegisterDataSyncPermission returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -382,7 +385,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusUnRegisterDataSyncPermission001, TestSize
 
 /*
  * @tc.name:SoftBusGetTokenNameByTokenType001
- * @tc.desc: SoftBusGetTokenNameByTokenType test
+ * @tc.desc: Verify SoftBusGetTokenNameByTokenType returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -394,7 +397,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusGetTokenNameByTokenType001, TestSize.Leve
 
 /*
  * @tc.name:SoftBusGetTokenNameByTokenType002
- * @tc.desc: SoftBusGetTokenNameByTokenType test
+ * @tc.desc: Verify SoftBusGetTokenNameByTokenType returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -409,7 +412,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusGetTokenNameByTokenType002, TestSize.Leve
 
 /*
  * @tc.name:SoftBusGetTokenNameByTokenType003
- * @tc.desc: SoftBusGetTokenNameByTokenType test
+ * @tc.desc: Verify SoftBusGetTokenNameByTokenType returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -424,7 +427,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusGetTokenNameByTokenType003, TestSize.Leve
 
 /*
  * @tc.name:SoftBusCheckIsCollabApp001
- * @tc.desc: SoftBusCheckIsCollabApp test
+ * @tc.desc: Verify SoftBusCheckIsCollabApp returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -437,7 +440,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsCollabApp001, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCheckIsCollabApp002
- * @tc.desc: SoftBusCheckIsCollabApp test
+ * @tc.desc: Verify SoftBusCheckIsCollabApp returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -454,7 +457,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsCollabApp002, TestSize.Level0)
 
 /*
  * @tc.name:SoftBusCheckIsCollabApp003
- * @tc.desc: SoftBusCheckIsCollabApp test
+ * @tc.desc: Verify SoftBusCheckIsCollabApp returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -471,7 +474,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsCollabApp003, TestSize.Level0)
 
 /*
  * @tc.name:CheckLnnPermissionTest001
- * @tc.desc: CheckLnnPermission param error
+ * @tc.desc: Verify CheckLnnPermission returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -492,7 +495,7 @@ HWTEST_F(SoftbusPermissionTest, CheckLnnPermissionTest001, TestSize.Level1)
 
 /*
  * @tc.name:LnnInitPermissionTest001
- * @tc.desc: LnnInitPermission func test
+ * @tc.desc: Verify LnnInitPermission returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -504,7 +507,7 @@ HWTEST_F(SoftbusPermissionTest, LnnInitPermissionTest001, TestSize.Level1)
 
 /*
  * @tc.name: SoftBusGetNativeProcessNameTest001
- * @tc.desc: SoftBusGetNativeProcessName func test invalid tokenId
+ * @tc.desc: Verify SoftBusGetNativeProcessName returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -518,7 +521,7 @@ HWTEST_F(SoftbusPermissionTest, SoftBusGetNativeProcessNameTest001, TestSize.Lev
 
 /*
  * @tc.name: SoftBusGetNativeProcessNameTest002
- * @tc.desc: SoftBusGetNativeProcessName func test invalid processName
+ * @tc.desc: Verify SoftBusGetNativeProcessName returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */

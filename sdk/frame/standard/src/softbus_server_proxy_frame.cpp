@@ -197,6 +197,7 @@ void ClientDeathProcTask(void)
     }
     if (cnt == CYCLE_NUMBER_MAX) {
         COMM_LOGE(COMM_SDK, "server proxy init reached the maximum count=%{public}d", cnt);
+        FreeClientPkgName();
         return;
     }
     TransServerProxyInit();
@@ -239,9 +240,9 @@ int32_t ClientStubInit(void)
 
 int ClientRegisterService(const char *pkgName)
 {
-    if (g_serverProxy == nullptr) {
-        COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
-        return SOFTBUS_INVALID_PARAM;
+    if (ServerProxyInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "ServerProxyInit failed");
+        return SOFTBUS_NO_INIT;
     }
     OHOS::sptr<OHOS::SoftBusServerProxyFrame> serverProxyFrame =
         new (std::nothrow) OHOS::SoftBusServerProxyFrame(g_serverProxy);

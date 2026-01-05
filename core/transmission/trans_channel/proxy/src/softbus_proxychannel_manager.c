@@ -594,6 +594,8 @@ void TransProxyDelChanByChanId(int32_t chanlId)
             }
             (void)memset_s(item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey), 0,
                 sizeof(item->appInfo.sessionKey));
+            (void)memset_s(item->appInfo.sinkSessionKey, sizeof(item->appInfo.sinkSessionKey), 0,
+                sizeof(item->appInfo.sinkSessionKey));
             SoftBusFree(item);
             g_proxyChannelList->cnt--;
             break;
@@ -1184,6 +1186,8 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     }
 EXIT:
     (void)memset_s(info.appInfo.sessionKey, sizeof(info.appInfo.sessionKey), 0, sizeof(info.appInfo.sessionKey));
+    (void)memset_s(info.appInfo.sinkSessionKey, sizeof(info.appInfo.sinkSessionKey), 0,
+        sizeof(info.appInfo.sinkSessionKey));
     SoftBusHitraceChainEnd();
     return;
 }
@@ -1392,6 +1396,7 @@ void TransProxyProcessHandshakeAuthMsg(const ProxyMessage *msg)
     AppInfo appInfo;
     int32_t ret = TransProxyGetAppInfoByChanId(msg->msgHead.myId, &appInfo);
     (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
+    (void)memset_s(appInfo.sinkSessionKey, sizeof(appInfo.sinkSessionKey), 0, sizeof(appInfo.sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         return;
     }
@@ -1950,9 +1955,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         msg->msgHead.myId, msg->msgHead.peerId, msg->msgHead.cipher);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset identity fail");
-        SoftBusFree(info);
-        SoftBusHitraceChainEnd();
-        return;
+        goto EXIT;
     }
 
     info->peerId = msg->msgHead.peerId;
@@ -1960,9 +1963,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
 
     if (TransProxyGetAppInfoById(info->myId, &(info->appInfo)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fail to get peer data info");
-        SoftBusFree(info);
-        SoftBusHitraceChainEnd();
-        return;
+        goto EXIT;
     }
 
     if (TransProxyGetReqIdAndStatus(info->myId, &info->reqId, &info->status) != SOFTBUS_OK) {
@@ -1990,9 +1991,10 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     TransProxyProcessResetMsgHelper(info, msg);
 EXIT:
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
     SoftBusHitraceChainEnd();
-    return;
 }
 
 void TransProxyProcessKeepAlive(const ProxyMessage *msg)
@@ -2022,6 +2024,8 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 
     TransProxyAckKeepalive(info);
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2049,6 +2053,8 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
         return;
     }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2069,6 +2075,8 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
 
     OnProxyChannelMsgReceived(info->channelId, &(info->appInfo), msg->data, msg->dataLen);
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2199,6 +2207,8 @@ void TransProxyOpenProxyChannelSuccess(int32_t channelId)
     }
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
+    (void)memset_s(channelInfo->appInfo.sinkSessionKey, sizeof(channelInfo->appInfo.sinkSessionKey), 0,
+        sizeof(channelInfo->appInfo.sinkSessionKey));
     AuthConnInfo authConnInfo;
     (void)memset_s(&authConnInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     int32_t ret = GetAuthConnInfoByConnId(channelInfo->connId, &authConnInfo);
@@ -2268,6 +2278,8 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         TransProxyUpdateBlePriority(channelId, info->connId, BLE_PRIORITY_BALANCED);
     }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
+    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
+        sizeof(info->appInfo.sinkSessionKey));
     TransProxyPostResetPeerMsgToLoop(info);
     return SOFTBUS_OK;
 }
@@ -2292,6 +2304,8 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
         removeNode->appInfo.fastTransData = NULL;
         (void)memset_s(removeNode->appInfo.sessionKey, sizeof(removeNode->appInfo.sessionKey), 0,
             sizeof(removeNode->appInfo.sessionKey));
+        (void)memset_s(removeNode->appInfo.sinkSessionKey, sizeof(removeNode->appInfo.sinkSessionKey), 0,
+            sizeof(removeNode->appInfo.sinkSessionKey));
         if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             isServer = removeNode->isServer;
@@ -2541,6 +2555,8 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc err");
     int32_t ret = TransProxyGetChanByChanId(chanId, chan);
     (void)memset_s(chan->appInfo.sessionKey, sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
+    (void)memset_s(chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0,
+        sizeof(chan->appInfo.sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channel info by chanId failed. chanId=%{public}d", chanId);
         SoftBusFree(chan);
@@ -2610,6 +2626,8 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
         }
         (void)memset_s(destroyNode->appInfo.sessionKey, sizeof(destroyNode->appInfo.sessionKey), 0,
             sizeof(destroyNode->appInfo.sessionKey));
+        (void)memset_s(destroyNode->appInfo.sinkSessionKey, sizeof(destroyNode->appInfo.sinkSessionKey), 0,
+            sizeof(destroyNode->appInfo.sinkSessionKey));
         SoftBusFree(destroyNode);
     }
     return;

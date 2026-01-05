@@ -57,11 +57,13 @@ static int32_t GetIsClientInfoById(int32_t channelId, int32_t channelType, bool 
     if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
         ret = GetAppInfoById(channelId, &appInfo);
         (void)memset_s(appInfo.sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        (void)memset_s(appInfo.sinkSessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get appInfo failed");
         *isClient = appInfo.isClient;
         return SOFTBUS_OK;
     }
     (void)memset_s(appInfo.sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    (void)memset_s(appInfo.sinkSessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     ret = TransProxyGetAppInfoById(channelId, &appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get appInfo failed");
     *isClient = appInfo.isClient;

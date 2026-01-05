@@ -45,7 +45,8 @@ void LnnSaStatusMonitorTest::TearDown() { }
 
 /*
  * @tc.name: LNN_INIT_SA_STATUS_MONITOR_001
- * @tc.desc: test
+ * @tc.desc: Execute LnnInitSaStatusMonitor and LnnDeInitSaStatusMonitor normally
+ *           without fatal errors when LnnAsyncCallbackDelayHelper returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -59,7 +60,8 @@ HWTEST_F(LnnSaStatusMonitorTest, LNN_INIT_SA_STATUS_MONITOR_001, TestSize.Level1
 
 /*
  * @tc.name: LNN_INIT_SA_STATUS_MONITOR_002
- * @tc.desc: test
+ * @tc.desc: Execute LnnInitSaStatusMonitor and LnnDeInitSaStatusMonitor normally without
+ *           fatal errors when LnnAsyncCallbackDelayHelper returns SOFTBUS_ERR
  * @tc.type: FUNC
  * @tc.require:
  */

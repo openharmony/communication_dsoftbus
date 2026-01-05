@@ -19,6 +19,7 @@
 #include "common_list.h"
 #include "regex.h"
 #include "securec.h"
+#include "lnn_lane_interface_struct.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
@@ -125,6 +126,8 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
         }
         (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
             sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
+            sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
     }
 }
@@ -212,6 +215,8 @@ void TransUdpChannelMgrDeinit(void)
         }
         (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
             sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
+            sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
     }
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
@@ -280,6 +285,8 @@ int32_t TransDelUdpChannel(int32_t channelId)
             }
             (void)memset_s(udpChannelNode->info.sessionKey, sizeof(udpChannelNode->info.sessionKey), 0,
                 sizeof(udpChannelNode->info.sessionKey));
+            (void)memset_s(udpChannelNode->info.sinkSessionKey, sizeof(udpChannelNode->info.sinkSessionKey), 0,
+                sizeof(udpChannelNode->info.sinkSessionKey));
             UdpChannelStatistic(udpChannelNode, false);
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
@@ -306,6 +313,8 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
         }
         (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
             sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
+            sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
     }
 }
@@ -1063,6 +1072,10 @@ int32_t TransUdpGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bo
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "get udp channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
+    }
+    if (channelInfo.info.linkType != LANE_HML && channelInfo.info.linkType != LANE_HML_RAW) {
+        TRANS_LOGE(TRANS_SVC, "channel linkType=%{public}d not support", channelInfo.info.linkType);
+        return SOFTBUS_TRANS_FAST_WAKE_UP_FAIL;
     }
     if (uuid != NULL) {
         ret = LnnGetRemoteStrInfo(channelInfo.info.peerNetWorkId, STRING_KEY_UUID, uuid, uuidLen);

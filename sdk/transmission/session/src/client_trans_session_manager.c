@@ -2970,7 +2970,7 @@ void DelSessionStateClosing(void)
     UnlockClientSessionServerList();
 }
 
-void AbnormalDataLenAudit(int32_t sessionId, uint32_t len)
+void AbnormalDataLenAudit(int32_t sessionId, int32_t len)
 {
     #define ABNORMAL_DATA_LEN (1 * 1024 * 1024) // 1MB
     if (len < ABNORMAL_DATA_LEN) {
@@ -3823,12 +3823,6 @@ int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo)
 }
 
 int32_t CheckMainChannelLinkDownByChannelId(int32_t sessionId, int32_t channelId, bool *mainChannel)
-{
-    int32_t ret = 0;
-    return ret;
-}
-
-int32_t CheckSingleLaneLinkDownByNetworkId(const char *networkId, bool *singleLinkDown)
 {
     int32_t ret = 0;
     return ret;

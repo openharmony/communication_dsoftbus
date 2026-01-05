@@ -20,6 +20,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
+#include "lnn_lane_interface_struct.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
@@ -359,6 +360,8 @@ void TransDelSessionConnById(int32_t channelId)
             }
             (void)memset_s(item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey), 0,
                 sizeof(item->appInfo.sessionKey));
+            (void)memset_s(item->appInfo.sinkSessionKey, sizeof(item->appInfo.sinkSessionKey), 0,
+                sizeof(item->appInfo.sinkSessionKey));
             SoftBusFree(item);
             g_sessionConnList->cnt--;
             ReleaseSessionConnLock();
@@ -882,6 +885,10 @@ int32_t TransTdcGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bo
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "get tcp channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
+    }
+    if (channelInfo.connectType != CONNECT_HML) {
+        TRANS_LOGE(TRANS_SVC, "channel connectType=%{public}d not support", channelInfo.connectType);
+        return SOFTBUS_TRANS_FAST_WAKE_UP_FAIL;
     }
     if (uuid != NULL) {
         ret = LnnGetRemoteStrInfo(channelInfo.peerDeviceId, STRING_KEY_UUID, uuid, uuidLen);

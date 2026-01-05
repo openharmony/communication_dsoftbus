@@ -48,8 +48,9 @@ void DsoftbusOtherTest::SetUp(void) { }
 void DsoftbusOtherTest::TearDown(void) { }
 
 /*
- * @tc.name: GetCommonDevInfoTest001
- * @tc.desc: value is nullptr
+ * @tc.name: GetCommonDevInfo001
+ * @tc.desc: Input valid value buffer and sufficient length, verify successful
+ *           return when retrieving different types of device info
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -68,8 +69,9 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo001, TestSize.Level0)
 }
 
 /*
- * @tc.name: GetCommonDevInfoTest002
- * @tc.desc: value is nullptr
+ * @tc.name: GetCommonDevInfo002
+ * @tc.desc:Value is nullptr, verify invalid parameter return
+ *          when retrieving different types of device info
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -93,8 +95,8 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo002, TestSize.Level0)
 }
 
 /*
- * @tc.name: GetCommonDevInfoTest003
- * @tc.desc: len is illegal
+ * @tc.name: GetCommonDevInfo003
+ * @tc.desc: Len is 0, verify return results when retrieving device name and UDID
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -110,8 +112,9 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo003, TestSize.Level0)
 }
 
 /*
- * @tc.name: GetCommonDevInfoTest004
- * @tc.desc: value is illegal
+ * @tc.name: GetCommonDevInfo004
+ * @tc.desc: Input valid value buffer and sufficient length,
+ *           verify return results when retrieving device name and UDID
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -128,7 +131,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, TestSize.Level0)
 
 /*
  * @tc.name: GetCommonDevInfoTest005
- * @tc.desc: value is illegal
+ * @tc.desc: verify invalid parameter return when retrieving device name
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -141,7 +144,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfoTest005, TestSize.Level0)
 
 /*
  * @tc.name: GetCommonOsVersionTest001
- * @tc.desc: value is illegal
+ * @tc.desc: Output buffer for OS version is nullptr, verify invalid parameter return
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -154,7 +157,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonOsVersionTest001, TestSize.Level0)
 
 /*
  * @tc.name: GetCommonDeviceVersionTest001
- * @tc.desc: value is illegal
+ * @tc.desc: Output buffer for device version is nullptr, verify invalid parameter return
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -167,7 +170,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDeviceVersionTest001, TestSize.Level0)
 
 /*
  * @tc.name: GetCommonDeviceProductIdTest001
- * @tc.desc: value is illegal
+ * @tc.desc: Output buffer for device product ID is nullptr, verify invalid parameter return
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -180,7 +183,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDeviceProductIdTest001, TestSize.Level0)
 
 /*
  * @tc.name: GetCommonDeviceModelNameTest001
- * @tc.desc: value is illegal
+ * @tc.desc: Output buffer for device model name is nullptr, verify invalid parameter return
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -193,7 +196,7 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDeviceModelNameTest001, TestSize.Level0)
 
 /*
  * @tc.name: GetDeviceSecurityLevelTest001
- * @tc.desc: value is illegal
+ * @tc.desc: Pointer for device security level is nullptr, verify invalid parameter return
  * @tc.type: FUNC
  * @tc.require: 1
  */

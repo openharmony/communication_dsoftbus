@@ -370,7 +370,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     if (msgType == DFILE_ON_CONNECT_SUCCESS) {
         SocketAccessInfo accessInfo = { 0 };
         g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId, &accessInfo);
-        TRANS_LOGE(TRANS_SDK, "msgType failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
+        TRANS_LOGI(TRANS_SDK, "dfile connect success, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
 
@@ -597,12 +597,12 @@ int32_t TransOnFileChannelOpened(
 
         bool isMultiNeg = channel->isMultiNeg;
         if (!channel->enableMultipath) {
-            fileSession = StartNStackXDFileServer(channel->myIp, (uint8_t *)channel->sessionKey,
-                DEFAULT_KEY_LENGTH, FileReceiveListener, filePort);
+            fileSession = StartNStackXDFileServer(
+                channel->myIp, (uint8_t *)channel->sessionKey, FileReceiveListener, filePort, capabilityValue);
         } else if (!isMultiNeg && channel->enableMultipath) {
             TRANS_LOGI(TRANS_FILE, "enter StartNStackXDFileServerV2");
-            fileSession = StartNStackXDFileServerV2(channel->myIp, (uint8_t *)channel->sessionKey,
-                DEFAULT_KEY_LENGTH, FileReceiveListener, filePort, channel->linkType);
+            fileSession = StartNStackXDFileServerV2(
+                channel->myIp, (uint8_t *)channel->sessionKey, FileReceiveListener, filePort, channel->linkType, capabilityValue);
         } else {
             UdpChannel udpChannel;
             (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
@@ -615,7 +615,7 @@ int32_t TransOnFileChannelOpened(
             TRANS_LOGI(TRANS_FILE, "enter TransOnFileChannelServerAddSecondPath, channelId=%{public}d,"
                 "firstchannel=%{public}d, sessionId=%{public}d, dfileId=%{public}d",
                 channel->channelId, channel->linkedChannelId,channel->sessionId, udpChannel.dfileId);
-            fileSession = TransOnFileChannelServerAddSecondPath(channel, filePort, udpChannel.dfileId, DEFAULT_KEY_LENGTH);
+            fileSession = TransOnFileChannelServerAddSecondPath(channel, filePort, udpChannel.dfileId, capabilityValue);
         }
         
         if (fileSession < 0) {

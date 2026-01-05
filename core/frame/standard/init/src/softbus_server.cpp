@@ -677,7 +677,11 @@ int32_t SoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint
 
 int32_t SoftBusServer::OpenBrProxy(const char *brMac, const char *uuid)
 {
-    return TransOpenBrProxy(brMac, uuid);
+    int32_t ret = TransOpenBrProxy(brMac, uuid);
+    if (ret != SOFTBUS_OK) {
+        TransBrProxyRemoveObject();
+    }
+    return ret;
 }
  
 int32_t SoftBusServer::CloseBrProxy(int32_t channelId)

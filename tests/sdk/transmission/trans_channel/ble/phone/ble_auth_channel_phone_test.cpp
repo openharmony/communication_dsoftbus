@@ -179,9 +179,10 @@ static int32_t TestRemoveSessionServer()
     return ret;
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.desc: The complete process of initiating an authentication session on the mobile devices has been verified
+ *           including functions such as session creation data transmission and session termination
  * @tc.type: FUNC
  * @tc.require:
  */

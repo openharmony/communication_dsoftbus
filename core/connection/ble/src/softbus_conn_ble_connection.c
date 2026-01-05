@@ -145,6 +145,8 @@ ConnBleConnection *ConnBleCreateConnection(
     connection->underlayerFastConnectFailedScanFailure = false;
     connection->isOccupied = false;
     connection->isNeedSetIdleTimeout = true;
+    connection->isMtuExchange = false;
+    connection->isBasicInfoExchange = false;
     SoftBusList *list = CreateSoftBusList();
     if (list == NULL) {
         CONN_LOGE(CONN_BLE, "create softbus list fail");
@@ -754,13 +756,13 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
     }
     connection->featureBitSet = (ConnBleFeatureBitSet)(baseInfo.feature);
     connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
+    connection->isBasicInfoExchange = true;
     (void)SoftBusMutexUnlock(&connection->lock);
 
     // revert current side role is peer side role
-    int32_t expectedPeerType = connection->side == CONN_SIDE_CLIENT ? 2 : 1;
-    if (expectedPeerType != baseInfo.type) {
-        CONN_LOGW(CONN_BLE, "parse basic info, the role of connection is mismatch, "
-            "expectedPeerType=%{public}d, actualPeerType=%{public}d", expectedPeerType, baseInfo.type);
+    int32_t type = connection->side == CONN_SIDE_CLIENT ? 2 : 1;
+    if (type != baseInfo.type) {
+        CONN_LOGW(CONN_BLE, "role mismatch, expectedType=%{public}d, actualType=%{public}d", type, baseInfo.type);
     }
     ConnEventExtra extra = {
         .connectionId = (int32_t)connection->connectionId,
@@ -1066,6 +1068,12 @@ static void RetryServerStatConsistentHandler(void)
     g_serverCoordination.actual =
         (expect == BLE_SERVER_STATE_STARTED ? BLE_SERVER_STATE_STARTING : BLE_SERVER_STATE_STOPPING);
     (void)SoftBusMutexUnlock(&g_serverCoordination.lock);
+}
+
+void ConnBleRemoveExchangeBasicInfoTimeoutEvent(ConnBleConnection *connection)
+{
+    ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_EXCHANGE_BASIC_INFO_TIMEOUT,
+        connection->connectionId, 0, NULL);
 }
 
 static void BasicInfoExchangeTimeoutHandler(uint32_t connectionId)

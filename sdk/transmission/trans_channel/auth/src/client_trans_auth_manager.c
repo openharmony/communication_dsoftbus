@@ -84,14 +84,11 @@ int32_t ClientTransAuthOnDataReceived(int32_t channelId, const void *data, uint3
     return SOFTBUS_OK;
 }
 
-void ClientTransAuthCloseChannel(int32_t channelId, ShutdownReason reason)
+void ClientTransAuthCloseChannel(int32_t channelId)
 {
     TRANS_LOGI(TRANS_SDK, "TransCloseAuthChannel, channelId=%{public}d", channelId);
     if (ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_AUTH) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "server ipc close err. channelId=%{public}d", channelId);
-    }
-    if (ClientTransAuthOnChannelClosed(channelId, reason) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "server auth close err. channelId=%{public}d", channelId);
     }
 }
 

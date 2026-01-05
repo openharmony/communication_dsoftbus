@@ -64,6 +64,7 @@ void LnnHeartBeatDeviceRiskTest::TearDown()
 /*
  * @tc.name: RiskDeviceLeaveLnnTest001
  * @tc.desc: use abnomal parameter
+ *           Test the behavior of the RiskDeviceLeaveLnn function under different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -84,6 +85,8 @@ HWTEST_F(LnnHeartBeatDeviceRiskTest, RiskDeviceLeaveLnnTest001, TestSize.Level1)
 /*
  * @tc.name: HbDeviceRiskStateEventHandlerTest001
  * @tc.desc: use abnomal parameter
+ *           Test whether the function HbDeviceRiskStateEventHandler correctly handles events
+ *           under different device risk states
  * @tc.type: FUNC
  * @tc.require:
  */

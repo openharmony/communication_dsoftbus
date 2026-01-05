@@ -27,6 +27,8 @@ pid_t GetCallerUid();
 uint32_t GetCallerTokenId();
 int32_t CheckPushPermission();
 void BrProxyPostDcloseMsgToLooperDelay(uint32_t delayTime);
+int32_t DynamicLoadInit();
+int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid);
 
 #ifdef __cplusplus
 }

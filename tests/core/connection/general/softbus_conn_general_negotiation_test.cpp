@@ -52,7 +52,7 @@ void GeneralNegotiationTest::TearDown(void) { }
 */
 HWTEST_F(GeneralNegotiationTest, TestGeneralConnectionPackMsg1, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test TestGeneralConnectionPackMsg1 start");
+    CONN_LOGI(CONN_BLE, "test TestGeneralConnectionPackMsg1 in");
     GeneralConnectionInfo info;
     const char *name = "testGeneralPackMsgName";
     int32_t ret = strcpy_s(info.name, GENERAL_NAME_LEN, name);
@@ -112,7 +112,7 @@ HWTEST_F(GeneralNegotiationTest, TestGeneralConnectionPackMsg1, TestSize.Level1)
 */
 HWTEST_F(GeneralNegotiationTest, TestGeneralConnectionPackMsg2, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "test TestGeneralConnectionPackMsg2 start");
+    CONN_LOGI(CONN_BLE, "test TestGeneralConnectionPackMsg2 in");
     GeneralConnectionInfo info;
     const char *name = "testGeneralPackMsgName";
     int32_t ret = strcpy_s(info.name, GENERAL_NAME_LEN, name);

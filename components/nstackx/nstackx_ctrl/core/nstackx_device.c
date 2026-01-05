@@ -116,6 +116,16 @@ int32_t DeviceInfoNotify(const DeviceInfo *deviceInfo)
     return NSTACKX_EOK;
 }
 
+bool IsSeqNoneType(const DeviceInfo *info)
+{
+    if ((info->businessType == NSTACKX_BUSINESS_TYPE_NULL) &&
+        (info->seq.seqType == DFINDER_SEQ_TYPE_NONE)) {
+        DFINDER_LOGD(TAG, "recv unknow seq number, report remote device info, but not auto reponse coap!");
+        return true;
+    }
+    return false;
+}
+
 #ifdef DFINDER_SAVE_DEVICE_LIST
 static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const DeviceInfo *deviceInfo,
     uint8_t forceUpdate, uint8_t receiveBcast)
@@ -135,6 +145,9 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
     }
     if (!receiveBcast && (ShouldAutoReplyUnicast(deviceInfo->businessType) != NSTACKX_TRUE)) {
         return updated ? DeviceInfoNotify(deviceInfo) : NSTACKX_EOK;
+    }
+    if (receiveBcast && IsSeqNoneType(deviceInfo)) {
+        return DeviceInfoNotify(deviceInfo);
     }
     if (updated || forceUpdate) {
         DFINDER_LOGD(TAG, "updated is: %hhu, forceUpdate is: %hhu", updated, forceUpdate);

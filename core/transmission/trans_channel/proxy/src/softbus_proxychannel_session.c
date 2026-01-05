@@ -112,6 +112,8 @@ static int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *
     }
     (void)memset_s(chanInfo->appInfo.sessionKey, sizeof(chanInfo->appInfo.sessionKey), 0,
         sizeof(chanInfo->appInfo.sessionKey));
+    (void)memset_s(chanInfo->appInfo.sinkSessionKey, sizeof(chanInfo->appInfo.sinkSessionKey), 0,
+        sizeof(chanInfo->appInfo.sinkSessionKey));
     int32_t ret = TransProxyTransDataSendMsg(chanInfo, data, len, flags);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "send msg fail, len=%{public}u, flags=%{public}d, ret=%{public}d", len, flags, ret);

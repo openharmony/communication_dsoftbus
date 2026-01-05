@@ -161,9 +161,10 @@ void TransSdkTcpDirectTest::TearDownTestCase(void)
     TransTdcManagerDeinit();
 }
 
-/**
+/*
  * @tc.name: ClientTransTdcOnChannelOpenedTest001
- * @tc.desc: ClientTransTdcOnChannelOpened, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -183,9 +184,10 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.L
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcCloseChannelTest002
- * @tc.desc: TransTdcCloseChannel, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -210,9 +212,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest002, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetSessionKeyTest003
- * @tc.desc: TransTdcGetSessionKey, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -239,9 +242,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetSessionKeyTest003, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetHandleTest004
- * @tc.desc: TransTdcGetHandle, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -268,9 +272,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetHandleTest004, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransDisableSessionListenerTest005
- * @tc.desc: TransDisableSessionListener, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -305,9 +310,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest005, TestSize.Lev
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetInfoByIdTest006
- * @tc.desc: TransTdcGetInfoById, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -337,9 +343,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest006, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetInfoByFdTest007
- * @tc.desc: TransTdcGetInfoByFd, use the wrong parameter.
+ * @tc.desc: Test the behavior of the TransTdcGetInfoByFd function
+ *           under different exceptional conditions
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -369,9 +376,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetInfoByIdWithIncSeqTest008
- * @tc.desc: TransTdcGetInfoIncFdRefById, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -401,9 +409,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest008, TestSize.L
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: ClientTransTdcSetCallBackTest009
- * @tc.desc: ClientTransTdcSetCallBack, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -416,9 +425,10 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcSetCallBackTest009, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: ClientTransTdcOnSessionOpenedTest0010
- * @tc.desc: ClientTransTdcOnSessionOpened, use the wrong parameter.
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -447,9 +457,10 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionOpenedTest0010, TestSize.
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: ClientTransTdcOnSessionClosedTest0011
- * @tc.desc: ClientTransTdcOnSessionClosed, use the wrong parameter.
+ * @tc.desc: Test the TCP direct connection module related functions
+ *           in session closure scenarios
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -470,9 +481,10 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionClosedTest0011, TestSize.
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransTdcCreateListenerTest0012
- * @tc.desc: TransTdcCreateListener, use the wrong parameter.
+ * @tc.desc: Test the parameter validation and normal listener creation functionality
+ *           of the TransTdcCreateListener function
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -486,9 +498,9 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerTest0012, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransTdcReleaseFdTest0013
- * @tc.desc: TransTdcReleaseFd, use the wrong parameter.
+ * @tc.desc: Test the functionality and behavior of the TransTdcReleaseFd function
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -502,9 +514,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcReleaseFdTest0013, TestSize.Level1)
     EXPECT_TRUE(g_fd == fd);
 }
 
-/**
+/*
  * @tc.name: TransTdcStopReadTest0014
- * @tc.desc: TransTdcStopRead, use the wrong parameter.
+ * @tc.desc: Test the functionality and boundary conditions of the TransTdcStopRead function
+ *           in the TCP direct connection module
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -522,9 +535,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcStopReadTest0014, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: ClientTransTdcOnChannelOpenFailedTest0015
- * @tc.desc: ClientTransTdcOnChannelOpenFailed, use the wrong parameter.
+ * @tc.desc: Test the behavior of the ClientTransTdcOnChannelOpenFailed function
+ *           under different channelId inputs
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -540,9 +554,10 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenFailedTest0015, TestS
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransDataListInitTest0016
- * @tc.desc: TransDataListInit, use the wrong parameter.
+ * @tc.desc: Test the operations related to the data buffer list
+ *           including initialization adding nodes and deleting nodes
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -569,9 +584,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransDataListInitTest0016, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcSendBytesTest0017
- * @tc.desc: TransTdcSendBytes, use the wrong parameter.
+ * @tc.desc: Test the behavior of the TransTdcSendBytes function in the TCP direct connection module
+ *           under various boundary conditions
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -600,9 +616,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcSendMessageTest0018
- * @tc.desc: TransTdcSendMessage, use the wrong parameter.
+ * @tc.desc: Test the behavior of the TransTdcSendMessage funtion in the TCP direct connection module
+ *           under different scenarios
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -631,9 +648,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendMessageTest0018, TestSize.Level1)
     SoftBusFree(channel);
 }
 
-/**
+/*
  * @tc.name: TransTdcRecvDataTest0019
- * @tc.desc: TransTdcRecvData, use the wrong parameter.
+ * @tc.desc: Test the behavior of receiving data over a direct TCP connection
+ *           under different initialization states
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -658,9 +676,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcRecvDataTest0019, TestSize.Level1)
     TransDataListDeinit();
 }
 
-/**
- * @tc.name: TransTdcCreateListenerWithoutAddTriggerTest002
- * @tc.desc: TransTdcCreateListenerWithoutAddTrigger, use the wrong paramter
+/*
+ * @tc.name: TransTdcCreateListenerWithoutAddTriggerTest0020
+ * @tc.desc: Test whether the function can successfully create a lister without adding a trigger and
+ *           return the expected success status code SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -671,9 +690,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCreateListenerWithoutAddTriggerTest0020,
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: ClientTransCheckTdcChannelExist001
- * @tc.desc: ClientTransCheckTdcChannelExist, use the wrong parameter.
+ * @tc.desc: Test the functionality of the ClientTransCheckTdcChannelExist fucntion which is used to check
+ *           whether a TCP direct cinnection channel already exists
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -697,14 +717,16 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransCheckTdcChannelExist001, TestSize.Lev
     ret = ClientTransCheckTdcChannelExist(channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_EXIST);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcDelChannelInfo001
- * @tc.desc: TransTdcDelChannelInfo, use the wrong parameter.
+ * @tc.desc: Test the correctness of the fucntion for deleting TCP direct connection
+ *           channel information
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -733,9 +755,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo001, TestSize.Level1)
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcDelChannelInfo002
- * @tc.desc: TransTdcDelChannelInfo, use the wrong parameter.
+ * @tc.desc: Test the TransTdcDelChannelInfo function ability to handle
+ *           exception branches in the scenario of direct TCP connection
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -759,9 +782,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcDelChannelInfo002, TestSize.Level1)
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransUpdateFdState001
- * @tc.desc: TransUpdateFdState, use the wrong parameter.
+ * @tc.desc: The function of TransUpdateFdState is to update the file
+ *           descriptor state of the TCP direct connection channel
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -795,14 +819,16 @@ HWTEST_F(TransSdkTcpDirectTest, TransUpdateFdState001, TestSize.Level1)
     EXPECT_TRUE(info != nullptr);
     TransUpdateFdState(channelId1);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcCloseChannelTest003
- * @tc.desc: TransTdcCloseChannel, use the wrong parameter.
+ * @tc.desc: Testing the abnormal branch handling of the TCP direct channel
+ *           closure function
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -835,9 +861,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest003, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransDisableSessionListenerTest006
- * @tc.desc: TransDisableSessionListener, use the wrong parameter.
+ * @tc.desc: Test the behavior of the TranDisableSessionListener function in a direct
+ *           TCP connection scenario
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -867,9 +894,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest006, TestSize.Lev
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransDisableSessionListenerTest007
- * @tc.desc: TransDisableSessionListener, use the wrong parameter.
+ * @tc.desc: Verify that the function correctly disables the corresponding session listener
+ *           when a valid channelId is passed
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -894,9 +922,10 @@ HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest007, TestSize.Lev
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransTdcGetInfoByIdTest007
- * @tc.desc: TransTdcGetInfoById, use the wrong parameter.
+ * @tc.desc: The function of TransTdcGetInfoById is to retrieve the corresponding channel information
+ *           from the TCP direct channel information list based on the channelId
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -917,14 +946,16 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest007, TestSize.Level1)
     int32_t item = TransTdcGetInfoById(1, info);
     EXPECT_EQ(item, SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcSetListenerStateById001
- * @tc.desc: TransTdcSetListenerStateById, use the wrong parameter.
+ * @tc.desc: The function of TransTdcGetInfoById is to retrieve the corresponding channel information from the
+ *           TCP direct channel information list based on the channelId
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -956,14 +987,16 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSetListenerStateById001, TestSize.Level1
     ret = TransTdcSetListenerStateById(channelId, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcGetInfoByFdTest001
- * @tc.desc: TransTdcGetInfoByFd, use the wrong parameter.
+ * @tc.desc: The function TransTdcGetInfoByFd retrieves the corresponding channel information from
+ *           the TCP direct channel information list using a file descriptor
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -987,15 +1020,18 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest001, TestSize.Level1)
     int32_t item = TransTdcGetInfoByFd(testFd, info);
     EXPECT_EQ(item, SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     SoftBusFree(channel);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransTdcGetInfoByIdWithIncSeqTest001
- * @tc.desc: TransTdcGetInfoIncFdRefById, use the wrong parameter.
+ * @tc.desc: The function TransTdcGetInfoIncFdRefById is used to obtain TCP direct channel information based
+ *           on the channelId and increment the reference count of the file descriptor
+ *           during the retrieval process
  * @tc.type: FUNC
  * @tc.require:I5HQGA
  */
@@ -1019,15 +1055,17 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest001, TestSize.L
     TcpDirectChannelInfo *item = TransTdcGetInfoIncFdRefById(channelId, info, true);
     EXPECT_TRUE(item != nullptr);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     SoftBusFree(channel);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: GetFdByPeerIpAndPortTest001
- * @tc.desc: test GetFdByPeerIpAndPort function.
+ * @tc.desc: The function GetFdByPeerIpAndPort is used to find the corresponding file descriptor in the TCP direct
+ *           channel list based on the given peer IP address and port number
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1054,14 +1092,16 @@ HWTEST_F(TransSdkTcpDirectTest, GetFdByPeerIpAndPortTest001, TestSize.Level1)
     ret = GetFdByPeerIpAndPort("127.0.0.1", 1235, &fd);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransStartTimeSyncTest001
- * @tc.desc: test TransStartTimeSync function.
+ * @tc.desc: Verify whether the behaviors of the TransStartTimeSync and OnTimeSyncResultByIp
+ *           functions meet expectations under different input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1090,9 +1130,10 @@ HWTEST_F(TransSdkTcpDirectTest, OnTimeSyncResultByIpTest001, TestSize.Level1)
     OnTimeSyncResultByIp(&info, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransStopTimeSyncTest001
- * @tc.desc: test TransStopTimeSync function.
+ * @tc.desc: The main purpose of the TransStopTimeSync function is to stop the time synchronization feature
+ *           on a TCP direct connection
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1127,6 +1168,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransStopTimeSyncTest001, TestSize.Level1)
     ret = TransStopTimeSync(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
+    ListDelete(&info->node);
     SoftBusFree(info);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;

@@ -53,7 +53,7 @@ namespace OHOS {
 #define MY_PORT 6000
 
 static const char *g_addr = "192.168.8.119";
-static const char *hmlAddr = "172.30.1.2";
+static const char *g_hmlAddr = "172.30.1.2";
 static const char *g_ip = "192.168.8.1";
 static const char *g_localIp = "127.0.0.1";
 static int32_t g_port = 6000;
@@ -1085,7 +1085,7 @@ HWTEST_F(TransTcpDirectP2pTest, GetModuleByHmlIp001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest002, TestSize.Level1)
 {
-    int32_t ret = ConnectSocketDirectPeer(hmlAddr, g_port, g_localIp, 0);
+    int32_t ret = ConnectSocketDirectPeer(g_hmlAddr, g_port, g_localIp, 0);
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -1258,7 +1258,7 @@ HWTEST_F(TransTcpDirectP2pTest, SetProtocolStartListener001, TestSize.Level1)
     info.peerUid = 0;
     info.protocol = LNN_PROTOCOL_HTP;
     info.isMinTp = true;
-    ret = SetProtocolStartListener(&info, hmlAddr, seq, g_uuid, &myPort);
+    ret = SetProtocolStartListener(&info, g_hmlAddr, seq, g_uuid, &myPort);
     EXPECT_EQ(SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED, ret);
     ClearHmlListenerByUuid(g_uuid);
 }
@@ -1301,5 +1301,79 @@ HWTEST_F(TransTcpDirectP2pTest, ConnectSocketByProtocol001, TestSize.Level1)
     ret = ConnectSocketByProtocol(&info, conn);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: CheckIsSupportMintp001
+ * @tc.desc: Test that the function returns true when businessType is BUSINESS_TYPE_BYTE,
+ *           conn.appInfo.myData.addr is of IPv4 type and conn.appInfo.osType is OH_OS_TYPE.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, CheckIsSupportMintp001, TestSize.Level1)
+{
+    SessionConn conn = { 0 };
+
+    conn.appInfo.businessType = BUSINESS_TYPE_BYTE;
+    ASSERT_TRUE(EOK == memcpy_s(conn.appInfo.myData.addr, IP_LEN, g_hmlAddr, (strlen(g_hmlAddr) + 1)));
+    conn.appInfo.osType = OH_OS_TYPE;
+
+    int32_t ret = CheckIsSupportMintp(&conn);
+    EXPECT_NE(INVALID_VALUE, ret);
+}
+
+/**
+ * @tc.name: CheckIsSupportMintp002
+ * @tc.desc: Test the behavior of the CheckIsSupportMintp function abnormal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, CheckIsSupportMintp002, TestSize.Level1)
+{
+    SessionConn conn = { 0 };
+
+    conn.appInfo.businessType = BUSINESS_TYPE_BYTE;
+    int32_t ret = CheckIsSupportMintp(&conn);
+    EXPECT_EQ(false, ret);
+
+    ASSERT_TRUE(EOK == memcpy_s(conn.appInfo.myData.addr, IP_LEN, g_hmlAddr, (strlen(g_hmlAddr) + 1)));
+    conn.appInfo.osType = HO_OS_TYPE;
+    ret = CheckIsSupportMintp(&conn);
+    EXPECT_EQ(false, ret);
+
+#define DFS_SESSIONNAME "DistributedFileService/mnt/hmdfs/100/account"
+    ASSERT_TRUE(EOK ==
+        memcpy_s(
+            conn.appInfo.myData.sessionName, SESSION_NAME_MAX_LEN, DFS_SESSIONNAME, (strlen(DFS_SESSIONNAME) + 1)));
+    ret = CheckIsSupportMintp(&conn);
+    EXPECT_EQ(false, ret);
+
+    conn.appInfo.businessType = BUSINESS_TYPE_BUTT;
+    ret = CheckIsSupportMintp(&conn);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: UpdateHmlModule001
+ * @tc.desc: Test the function UpdateHmlModule abnormal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, UpdateHmlModule001, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = StartHmlListener(g_ip, &g_port, g_peerUuid, LNN_PROTOCOL_IP);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED, ret);
+    ListenerModule moduleType = UNUSE_BUTT;
+    UpdateHmlModule(g_ip, g_peerUuid, &moduleType);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    UpdateHmlModule(g_ip, g_peerUuid, nullptr);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    UpdateHmlModule(g_ip, nullptr, &moduleType);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    UpdateHmlModule(nullptr, g_peerUuid, &moduleType);
+    EXPECT_EQ(UNUSE_BUTT, moduleType);
+    StopHmlListener(DIRECT_CHANNEL_SERVER_HML_START);
 }
 }

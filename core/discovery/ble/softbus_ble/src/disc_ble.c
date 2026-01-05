@@ -215,8 +215,8 @@ static DiscBleListener g_bleListener = {
     .scanListenerId = -1
 };
 
-static DiscEventExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
-static DiscEventExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
+static DiscEventDiscExtra g_bleDiscExtra[MAX_DISC_EVENT] = {};
+static DiscEventScanExtra g_bleScanExtra[MAX_SCAN_EVENT] = {};
 static uint32_t g_bleOldCap = 0;
 static uint32_t g_handleId = 0;
 static bool g_needActionListen = false;
@@ -311,15 +311,20 @@ static void UpdateInfoManager(int adv, bool needUpdate)
     SoftBusMutexUnlock(&g_bleInfoLock);
 }
 
-static int32_t GetNeedUpdateAdvertiser(int32_t adv)
+static bool GetNeedUpdateAdvertiser(int32_t adv)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        false, DISC_BLE, "lock failed");
+    bool result = false;
     if (adv == NON_ADV_ID) {
-        return g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate ||
+        result = g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].needUpdate ||
             g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdate;
     } else {
-        return g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate ||
+        result = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate ||
             g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdate;
     }
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
+    return result;
 }
 
 static void UpdateScannerInfoManager(bool needUpdateCap)
@@ -334,9 +339,13 @@ static void UpdateScannerInfoManager(bool needUpdateCap)
 
 static bool GetNeedUpdateScanner(void)
 {
-    return g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap ||
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        false, DISC_BLE, "lock failed");
+    bool result = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].needUpdateCap ||
         g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdateCap ||
         g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdateCap;
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
+    return result;
 }
 
 static void BleAdvEnableCallback(int channel, int status)
@@ -492,6 +501,19 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
     }
 }
 
+static bool IsSameAccount(uint32_t pos)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        false, DISC_BLE, "lock failed");
+    bool isSameAccount = false;
+    if (g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] ||
+        g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[pos]) {
+        isSameAccount = true;
+    }
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
+    return isSameAccount;
+}
+
 static bool ProcessHashAccount(DeviceInfo *foundInfo)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(foundInfo != NULL, false, DISC_BLE, "foundInfo is nullptr");
@@ -501,8 +523,7 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
         if (!CheckCapBitMapExist(CAPABILITY_NUM, foundInfo->capabilityBitmap, pos)) {
             continue;
         }
-        if (!(g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[pos] ||
-            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[pos])) {
+        if (!IsSameAccount(pos)) {
             return true;
         }
         uint8_t accountIdHash[SHORT_USER_ID_HASH_LEN] = {0};
@@ -739,39 +760,50 @@ static SoftBusBtStateListener g_stateChangedListener = {
 static int32_t GetMaxExchangeFreq(void)
 {
     int32_t maxFreq = 0;
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        maxFreq, DISC_BLE, "lock failed");
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         for (uint32_t index = 0; index < BLE_INFO_COUNT; index++) {
             maxFreq = (maxFreq > g_bleInfoManager[index].freq[pos]) ? maxFreq : g_bleInfoManager[index].freq[pos];
         }
     }
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     return maxFreq;
 }
 
 static bool GetWakeRemote(void)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        false, DISC_BLE, "lock failed");
+    bool result = false;
     for (uint32_t index = 0; index < CAPABILITY_MAX_BITNUM; index++) {
         if (g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isWakeRemote[index]) {
-            return true;
+            result = true;
+            break;
         }
     }
-    return false;
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
+    return result;
 }
 
 static int32_t DiscBleGetCustData(DeviceInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "info is nullptr");
 
-    uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
+    DiscBleInfo passiveBleInfo = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE];
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     uint32_t pos = 0;
     for (pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
-        if (CheckCapBitMapExist(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap, pos)) {
+        if (CheckCapBitMapExist(CAPABILITY_NUM, passiveBleInfo.capBitMap, pos)) {
             break;
         }
     }
     DISC_CHECK_AND_RETURN_RET_LOGD(
         pos < CAPABILITY_MAX_BITNUM, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "not find capBitMap");
-    cJSON *json = cJSON_ParseWithLength((const char *)g_bleInfoManager[infoIndex].capabilityData[pos],
-        g_bleInfoManager[infoIndex].capDataLen[pos]);
+    cJSON *json = cJSON_ParseWithLength((const char *)passiveBleInfo.capabilityData[pos],
+        passiveBleInfo.capDataLen[pos]);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "parse cJSON failed");
 
     char custData[DISC_MAX_CUST_DATA_LEN] = {0};
@@ -796,8 +828,23 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
 
     (void)memset_s(info, sizeof(DeviceInfo), 0x0, sizeof(DeviceInfo));
     uint32_t infoIndex = BLE_SUBSCRIBE | BLE_ACTIVE;
-    DISC_CHECK_AND_RETURN_RET_LOGE(!CheckBitMapEmpty(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap),
-        SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "all capbit is zero");
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
+    if (CheckBitMapEmpty(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap)) {
+        DISC_LOGE(DISC_BLE, "all capbit is zero");
+        (void)SoftBusMutexUnlock(&g_bleInfoLock);
+        return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
+    }
+    bool isSameAccount = false;
+    bool isWakeRemote = false;
+    for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
+        isSameAccount = isSameAccount ? isSameAccount : g_bleInfoManager[infoIndex].isSameAccount[pos];
+        isWakeRemote = isWakeRemote ? isWakeRemote : g_bleInfoManager[infoIndex].isWakeRemote[pos];
+    }
+    for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
+        info->capabilityBitmap[pos] = g_bleInfoManager[infoIndex].capBitMap[pos];
+    }
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     if (DiscBleGetDeviceIdHash((uint8_t *)info->devId, DISC_MAX_DEVICE_ID_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
@@ -805,12 +852,6 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         DISC_LOGE(DISC_BLE, "get deviceName failed");
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
-    bool isSameAccount = false;
-    bool isWakeRemote = false;
-    for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
-        isSameAccount = isSameAccount ? isSameAccount : g_bleInfoManager[infoIndex].isSameAccount[pos];
-        isWakeRemote = isWakeRemote ? isWakeRemote : g_bleInfoManager[infoIndex].isWakeRemote[pos];
-    }
     (void)memset_s(info->accountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
     if (isSameAccount) {
         if (!LnnIsDefaultOhosAccount()) {
@@ -818,9 +859,6 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         } else {
             DISC_LOGW(DISC_BLE, "Account not logged in during same account check");
         }
-    }
-    for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
-        info->capabilityBitmap[pos] = g_bleInfoManager[infoIndex].capBitMap[pos];
     }
     return SOFTBUS_OK;
 }
@@ -838,24 +876,24 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
         DISC_LOGE(DISC_BLE, "get deviceName failed");
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
+    DiscBleInfo passiveBleInfo = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE];
+    DiscBleInfo activeBleInfo = g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE];
+    SoftBusMutexUnlock(&g_bleInfoLock);
     uint32_t passiveCapBitMap[CAPABILITY_NUM] = {0};
-    int32_t ret = MatchRecvMessage(g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap,
-        passiveCapBitMap, CAPABILITY_NUM);
+    int32_t ret = MatchRecvMessage(passiveBleInfo.capBitMap, passiveCapBitMap, CAPABILITY_NUM);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL,
         DISC_BLE, "MatchRecvMessage failed");
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
-        info->capabilityBitmap[pos] =
-        g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[pos] | passiveCapBitMap[pos];
+        info->capabilityBitmap[pos] = activeBleInfo.capBitMap[pos] | passiveCapBitMap[pos];
     }
-    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
     if (DiscBleGetCustData(info) != SOFTBUS_OK) {
         DISC_LOGW(DISC_BLE, "get custData failed");
     }
 
-    int32_t activeCnt = g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].rangingRefCnt;
-    int32_t passiveCnt = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].rangingRefCnt;
-    SoftBusMutexUnlock(&g_bleInfoLock);
+    int32_t activeCnt = activeBleInfo.rangingRefCnt;
+    int32_t passiveCnt = passiveBleInfo.rangingRefCnt;
     info->range = activeCnt + passiveCnt;
 
     DISC_CHECK_AND_RETURN_RET_LOGE(!CheckBitMapEmpty(CAPABILITY_NUM, info->capabilityBitmap),
@@ -1359,7 +1397,7 @@ static void UpdateScannerFilter(bool isStopScan)
 static void StartScaner()
 {
     if (!CheckScanner()) {
-        DISC_LOGI(DISC_BLE, "no need to start scanner");
+        DISC_LOGD(DISC_BLE, "no need to start scanner");
         (void)StopScaner();
         return;
     }
@@ -1538,7 +1576,6 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
         SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed.");
     uint32_t oldCap = g_bleInfoManager[index].capBitMap[0];
     g_bleOldCap = oldCap;
-    int32_t oldRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     if (isStart) {
         int32_t status = RegisterCapability(&g_bleInfoManager[index], &regOption);
         if (status != SOFTBUS_OK) {
@@ -1554,13 +1591,9 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     if ((index != (BLE_PUBLISH | BLE_ACTIVE)) && newCap != oldCap) {
         g_bleInfoManager[index].needUpdateCap = true;
     }
-    int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     BleEventExtraInit();
-    DISC_LOGI(DISC_BLE, "isStart=%{public}d, publishFlags=%{public}d, "
-        "activeFlags=%{public}d, oldCap=%{public}d, newCap=%{public}d, "
-        "oldRangingRefCount=%{public}d, newRangingRefCount=%{public}d, needUpdateCap=%{public}d",
-        isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount, newRangingRefCount,
-        g_bleInfoManager[index].needUpdateCap);
+    DISC_LOGI(DISC_BLE, "(%{public}d, %{public}d, %{public}d), Cap=%{public}d, needUpdateCap=%{public}d",
+        isStart, publishFlags, activeFlags, newCap, g_bleInfoManager[index].needUpdateCap);
 
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
@@ -2345,7 +2378,7 @@ static void ProcessStopAction(SoftBusMessage *msg, bool isDisc)
 {
     DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "msg is null");
     bool needStop = (bool)msg->arg1;
-    DISC_CHECK_AND_RETURN_LOGW(needStop, DISC_BLE, "ignore");
+    DISC_CHECK_AND_RETURN_LOGD(needStop, DISC_BLE, "ignore");
     g_needActionListen = false;
     int32_t ret = SOFTBUS_OK;
     if (isDisc) {
@@ -2426,6 +2459,8 @@ static void DiscFreeBleScanFilter(BcScanFilter *filter, uint8_t filterSize)
 static bool GetScanFilterWakeRemote(uint8_t filterType, uint32_t capBitMapPos)
 {
     bool isWakeRemote = false;
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        false, DISC_BLE, "lock failed");
     if (filterType == CON_FILTER_TYPE) {
         uint32_t infoIndex = BLE_SUBSCRIBE | BLE_ACTIVE;
         isWakeRemote = g_bleInfoManager[infoIndex].isWakeRemote[capBitMapPos];
@@ -2433,12 +2468,15 @@ static bool GetScanFilterWakeRemote(uint8_t filterType, uint32_t capBitMapPos)
         uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
         isWakeRemote = g_bleInfoManager[infoIndex].isWakeRemote[capBitMapPos];
     }
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     return isWakeRemote;
 }
 
 static bool GetScanFilterSameAccount(uint8_t filterType, uint32_t capBitMapPos)
 {
     bool isSameAccount = false;
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
+        false, DISC_BLE, "lock failed");
     if (filterType == CON_FILTER_TYPE) {
         uint32_t infoIndex = BLE_SUBSCRIBE | BLE_ACTIVE;
         isSameAccount = g_bleInfoManager[infoIndex].isSameAccount[capBitMapPos];
@@ -2446,6 +2484,7 @@ static bool GetScanFilterSameAccount(uint8_t filterType, uint32_t capBitMapPos)
         uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
         isSameAccount = g_bleInfoManager[infoIndex].isSameAccount[capBitMapPos];
     }
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     return isSameAccount;
 }
 

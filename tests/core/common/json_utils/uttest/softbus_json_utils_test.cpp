@@ -47,9 +47,8 @@ void SoftbusJsonUtilsTest::SetUpTestCase(void) { }
 void SoftbusJsonUtilsTest::TearDownTestCase(void) { }
 
 /*
- * @tc.name: NullJsonTest
- * @tc.desc: test GetStringItemByJsonObject
- *           When the json parameter is nullptr the return value is SOFTBUS_INVALID_PARAM
+ * @tc.name: GetStringItemByJsonObject001
+ * @tc.desc: Verify GetStringItemByJsonObject returns SOFTBUS_INVALID_PARAM when json is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -61,9 +60,8 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
- * @tc.desc: test GetStringItemByJsonObject
- *           When the string parameter is nullptr the return value is SOFTBUS_INVALID_PARAM
+ * @tc.name: GetStringItemByJsonObject002
+ * @tc.desc: Verify GetStringItemByJsonObject returns SOFTBUS_INVALID_PARAM when string is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -77,9 +75,8 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
- * @tc.desc: test GetStringItemByJsonObject
- *           When the target parameter is nullptr the return value is SOFTBUS_INVALID_PARAM
+ * @tc.name: GetStringItemByJsonObject003
+ * @tc.desc: Verify GetStringItemByJsonObject returns SOFTBUS_INVALID_PARAM when target is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -92,7 +89,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetStringItemByJsonObject004
  * @tc.desc: test GetStringItemByJsonObject
  *           Test returns SOFTBUS_PARSE_JSON_ERR
  *           when the specified string does not exist in the json object
@@ -109,7 +106,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject004, TestSize.Level1)
 }
 
 /*
- * @tc.name: StringTooLongTest
+ * @tc.name: GetStringItemByJsonObject005
  * @tc.desc: test GetStringItemByJsonObject
  *           Returns SOFTBUS_INVALID_PARAM
  *           when the string length in the json object is greater than the targetLen
@@ -128,7 +125,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject005, TestSize.Level1)
 }
 
 /*
- * @tc.name: SuccessTest
+ * @tc.name: GetStringItemByJsonObject006
  * @tc.desc: test GetStringItemByJsonObject
  *           Returns SOFTBUS_INVALID_PARAM
  *           when the string length in the json object is greater than the targetLen
@@ -146,7 +143,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetStringItemByJsonObject006, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: GetJsonObjectStringItem001
  * @tc.desc: test GetJsonObjectStringItem
  *           Returns false when the param is nullptr and targetLen less then result length
  * @tc.type: FUNC
@@ -170,7 +167,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectStringItem001, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: GetJsonObjectNumberItem001
  * @tc.desc: test GetJsonObjectNumberItem
  *           Returns false when the param is nullptr
  * @tc.type: FUNC
@@ -195,7 +192,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumberItem001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: GetJsonObjectSignedNumberItem001
  * @tc.desc: test GetJsonObjectSignedNumberItem
  *           Returns false if json parameter is nullptr
  * @tc.type: FUNC
@@ -209,7 +206,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumberItem001, TestSize.Level1
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetJsonObjectSignedNumberItem002
  * @tc.desc: test GetJsonObjectSignedNumberItem
  *           Returns false if string argument is nullptr
  * @tc.type: FUNC
@@ -225,7 +222,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumberItem002, TestSize.Level1
 }
 
 /*
- * @tc.name: NullTargetTest
+ * @tc.name: GetJsonObjectSignedNumberItem003
  * @tc.desc: test GetJsonObjectSignedNumberItem
  *           Returns false if target argument is nullptr
  * @tc.type: FUNC
@@ -240,7 +237,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumberItem003, TestSize.Level1
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetJsonObjectSignedNumberItem004
  * @tc.desc: test GetJsonObjectSignedNumberItem
  *           Returns false if the entry specified by string does not exist for the json object
  * @tc.type: FUNC
@@ -256,7 +253,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumberItem004, TestSize.Level1
 }
 
 /*
- * @tc.name: ValidStringTest
+ * @tc.name: GetJsonObjectSignedNumberItem005
  * @tc.desc: test GetJsonObjectSignedNumberItem
  *           Returns success when the item specified by the string parameter exists in the json object
  * @tc.type: FUNC
@@ -274,7 +271,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumberItem005, TestSize.Level1
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: GetJsonObjectDoubleItem001
  * @tc.desc: test GetJsonObjectDoubleItem
  *           Returns false if json parameter is nullptr
  * @tc.type: FUNC
@@ -288,7 +285,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectDoubleItem001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetJsonObjectDoubleItem002
  * @tc.desc: test GetJsonObjectDoubleItem
  *           Returns false if string parameter is nullptr
  * @tc.type: FUNC
@@ -304,7 +301,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectDoubleItem002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullTargetTest
+ * @tc.name: GetJsonObjectDoubleItem003
  * @tc.desc: test GetJsonObjectDoubleItem
  *           Returns false if target parameter is nullptr
  * @tc.type: FUNC
@@ -319,7 +316,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectDoubleItem003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetJsonObjectDoubleItem004
  * @tc.desc: test GetJsonObjectDoubleItem
  *           Returns false if the entry specified by string does not exist for the json object
  * @tc.type: FUNC
@@ -335,7 +332,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectDoubleItem004, TestSize.Level1)
 }
 
 /*
- * @tc.name: ValidStringTest
+ * @tc.name: GetJsonObjectDoubleItem005
  * @tc.desc: test GetJsonObjectDoubleItem
  *           Returns success when the item specified by the string parameter exists in the json object
  * @tc.type: FUNC
@@ -353,7 +350,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectDoubleItem005, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: GetJsonObjectNumber16Item005
  * @tc.desc: test GetJsonObjectNumber16Item
  *           Returns false when the param is nullptr
  * @tc.type: FUNC
@@ -378,7 +375,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumber16Item005, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: GetJsonObjectNumber64Item001
  * @tc.desc: test GetJsonObjectNumber64Item
  *           Returns false if json parameter is nullptr
  * @tc.type: FUNC
@@ -392,7 +389,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumber64Item001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetJsonObjectNumber64Item002
  * @tc.desc: test GetJsonObjectNumber64Item
  *           Returns false if string parameter is nullptr
  * @tc.type: FUNC
@@ -408,7 +405,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumber64Item002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullTargetTest
+ * @tc.name: GetJsonObjectNumber64Item003
  * @tc.desc: test GetJsonObjectNumber64Item
  *           Returns false if target parameter is nullptr
  * @tc.type: FUNC
@@ -423,7 +420,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumber64Item003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetJsonObjectNumber64Item004
  * @tc.desc: test GetJsonObjectNumber64Item
  *           Returns false if the entry specified by string does not exist for the json object
  * @tc.type: FUNC
@@ -439,7 +436,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumber64Item004, TestSize.Level1)
 }
 
 /*
- * @tc.name: ValidStringTest
+ * @tc.name: GetJsonObjectNumber64Item005
  * @tc.desc: test GetJsonObjectNumber64Item
  *           Returns success when the item specified by the string parameter exists in the json object
  * @tc.type: FUNC
@@ -456,7 +453,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumber64Item005, TestSize.Level1)
 }
 
 /*
- * @tc.name: ValidStringTest
+ * @tc.name: GetJsonObjectNumber64Item006
  * @tc.desc: test GetJsonObjectNumber64Item
  *           Returns success when the item specified by the string parameter exists in the json object
  * @tc.type: FUNC
@@ -474,7 +471,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectNumber64Item006, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: GetJsonObjectSignedNumber64Item001
  * @tc.desc: test GetJsonObjectSignedNumber64Item
  *           When the json parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -488,7 +485,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumber64Item001, TestSize.Leve
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetJsonObjectSignedNumber64Item002
  * @tc.desc: test GetJsonObjectSignedNumber64Item
  *           When the string parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -504,7 +501,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumber64Item002, TestSize.Leve
 }
 
 /*
- * @tc.name: NullTargetTest
+ * @tc.name: GetJsonObjectSignedNumber64Item003
  * @tc.desc: test GetJsonObjectSignedNumber64Item
  *           When the target parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -519,7 +516,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumber64Item003, TestSize.Leve
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetJsonObjectSignedNumber64Item004
  * @tc.desc: test GetJsonObjectSignedNumber64Item
  *           Test returns false when the specified string does not exist in the json object
  * @tc.type: FUNC
@@ -535,7 +532,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumber64Item004, TestSize.Leve
 }
 
 /*
- * @tc.name: ValidString
+ * @tc.name: GetJsonObjectSignedNumber64Item005
  * @tc.desc: test GetJsonObjectSignedNumber64Item
  *           Returns true when the string length in the json object is greater than the targetLen
  * @tc.type: FUNC
@@ -553,7 +550,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectSignedNumber64Item005, TestSize.Leve
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: GetJsonObjectInt32Item001
  * @tc.desc: test GetJsonObjectInt32Item
  *           Returns false when the param is nullptr
  * @tc.type: FUNC
@@ -578,7 +575,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectInt32Item001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: GetJsonObjectBoolItem001
  * @tc.desc: test GetJsonObjectBoolItem
  *           Returns false if json parameter is nullptr
  * @tc.type: FUNC
@@ -592,7 +589,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectBoolItem001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetJsonObjectBoolItem002
  * @tc.desc: test GetJsonObjectBoolItem
  *           Returns false if string parameter is nullptr
  * @tc.type: FUNC
@@ -608,7 +605,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectBoolItem002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullTargetTest
+ * @tc.name: GetJsonObjectBoolItem003
  * @tc.desc: test GetJsonObjectBoolItem
  *           Returns false if target parameter is nullptr
  * @tc.type: FUNC
@@ -623,7 +620,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectBoolItem003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetJsonObjectBoolItem004
  * @tc.desc: test GetJsonObjectBoolItem
  *           Returns false if the entry specified by string does not exist for the json object
  * @tc.type: FUNC
@@ -639,7 +636,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectBoolItem004, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: AddStringToJsonObject001
  * @tc.desc: test AddStringToJsonObject
  *           Returns false when the param is nullptr
  * @tc.type: FUNC
@@ -660,7 +657,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddStringToJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: AddNumber16ToJsonObject001
  * @tc.desc: test AddNumber16ToJsonObject
  *           Returns false when the param is nullptr
  * @tc.type: FUNC
@@ -679,7 +676,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddNumber16ToJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: AddNumberToJsonObject001
  * @tc.desc: test AddNumberToJsonObject
  *           Returns false when the param is nullptr
  * @tc.type: FUNC
@@ -698,7 +695,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddNumberToJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: AddNumber64ToJsonObject001
  * @tc.desc: test AddNumber64ToJsonObject
  *           When the json parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -713,7 +710,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddNumber64ToJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: AddNumber64ToJsonObject002
  * @tc.desc: test AddNumber64ToJsonObject
  *           When the string parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -729,7 +726,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddNumber64ToJsonObject002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullTargetTest
+ * @tc.name: AddNumber64ToJsonObject003
  * @tc.desc: test AddNumber64ToJsonObject
  *           When the target parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -750,7 +747,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddNumber64ToJsonObject003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidParamTest
+ * @tc.name: AddDoubleToJsonObject001
  * @tc.desc: test AddDoubleToJsonObject
  *           Returns false when the param is nullptr
  * @tc.type: FUNC
@@ -771,7 +768,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddDoubleToJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: AddBoolToJsonObject001
  * @tc.desc: test AddBoolToJsonObject
  *           Returns false if json parameter is nullptr
  * @tc.type: FUNC
@@ -784,7 +781,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddBoolToJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: AddBoolToJsonObject002
  * @tc.desc: test AddBoolToJsonObject
  *           Returns false if string parameter is nullptr
  * @tc.type: FUNC
@@ -799,7 +796,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddBoolToJsonObject002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullTargetTest
+ * @tc.name: AddBoolToJsonObject003
  * @tc.desc: test AddBoolToJsonObject
  *           Returns false if target parameter is nullptr
  * @tc.type: FUNC
@@ -814,7 +811,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddBoolToJsonObject003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: AddBoolToJsonObject004
  * @tc.desc: test AddBoolToJsonObject
  *           Returns false when cJSON_AddItemToObject returns false
  * @tc.type: FUNC
@@ -831,7 +828,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddBoolToJsonObject004, TestSize.Level1)
 }
 
 /*
- * @tc.name: ValidStringTest
+ * @tc.name: AddBoolToJsonObject005
  * @tc.desc: test AddBoolToJsonObject
  *           Returns success when the item specified by the string parameter exists in the json object
  * @tc.type: FUNC
@@ -846,7 +843,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddBoolToJsonObject005, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: GetDynamicStringItemByJsonObject001
  * @tc.desc: test GetDynamicStringItemByJsonObject
  *           When the json parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -861,7 +858,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetDynamicStringItemByJsonObject001, TestSize.Lev
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetDynamicStringItemByJsonObject002
  * @tc.desc: test GetDynamicStringItemByJsonObject
  *           When the string parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -877,7 +874,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetDynamicStringItemByJsonObject002, TestSize.Lev
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetDynamicStringItemByJsonObject003
  * @tc.desc: test GetDynamicStringItemByJsonObject
  *           When the target parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -894,7 +891,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetDynamicStringItemByJsonObject003, TestSize.Lev
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetDynamicStringItemByJsonObject004
  * @tc.desc: test GetDynamicStringItemByJsonObject
  *           Test returns false when the specified string does not exist in the json object
  * @tc.type: FUNC
@@ -912,7 +909,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetDynamicStringItemByJsonObject004, TestSize.Lev
 }
 
 /*
- * @tc.name: StringTooLongTest
+ * @tc.name: GetDynamicStringItemByJsonObject005
  * @tc.desc: test GetDynamicStringItemByJsonObject
  *           Returns SOFTBUS_INVALID_PARAM
  *           when the string length in the json object is greater than the targetLen
@@ -932,7 +929,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetDynamicStringItemByJsonObject005, TestSize.Lev
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: AddIntArrayToJsonObject001
  * @tc.desc: test AddIntArrayToJsonObject
  *           When the json parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -948,7 +945,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: AddIntArrayToJsonObject002
  * @tc.desc: test AddIntArrayToJsonObject
  *           When the string parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -965,7 +962,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: AddIntArrayToJsonObject003
  * @tc.desc: test AddIntArrayToJsonObject
  *           When the target parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -982,7 +979,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: AddIntArrayToJsonObject004
  * @tc.desc: test AddIntArrayToJsonObject
  *           Test returns false when the specified string does not exist in the json object
  * @tc.type: FUNC
@@ -1000,7 +997,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject004, TestSize.Level1)
 }
 
 /*
- * @tc.name: StringTooLongTest
+ * @tc.name: AddIntArrayToJsonObject005
  * @tc.desc: test AddIntArrayToJsonObject
  *           Returns SOFTBUS_INVALID_PARAM
  *           when the string length in the json object is greater than the targetLen
@@ -1019,7 +1016,7 @@ HWTEST_F(SoftbusJsonUtilsTest, AddIntArrayToJsonObject005, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullJsonTest
+ * @tc.name: GetJsonObjectIntArrayItem001
  * @tc.desc: test GetJsonObjectIntArrayItem
  *           When the json parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -1033,7 +1030,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectIntArrayItem001, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetJsonObjectIntArrayItem002
  * @tc.desc: test GetJsonObjectIntArrayItem
  *           When the string parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -1049,7 +1046,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectIntArrayItem002, TestSize.Level1)
 }
 
 /*
- * @tc.name: NullStringTest
+ * @tc.name: GetJsonObjectIntArrayItem003
  * @tc.desc: test GetJsonObjectIntArrayItem
  *           When the target parameter is nullptr, the return value is SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -1064,7 +1061,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectIntArrayItem003, TestSize.Level1)
 }
 
 /*
- * @tc.name: InvalidStringTest
+ * @tc.name: GetJsonObjectIntArrayItem004
  * @tc.desc: test GetJsonObjectIntArrayItem
  *           Test returns false
  *           when the specified string does not exist in the json object
@@ -1081,7 +1078,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectIntArrayItem004, TestSize.Level1)
 }
 
 /*
- * @tc.name: StringTooLongTest
+ * @tc.name: GetJsonObjectIntArrayItem005
  * @tc.desc: test GetJsonObjectIntArrayItem
  *           Returns SOFTBUS_INVALID_PARAM
  *           when the string length in the json object is greater than the targetLen
@@ -1099,7 +1096,7 @@ HWTEST_F(SoftbusJsonUtilsTest, GetJsonObjectIntArrayItem005, TestSize.Level1)
 }
 
 /*
- * @tc.name: SuccessTest
+ * @tc.name: GetJsonObjectIntArrayItem006
  * @tc.desc: test GetJsonObjectIntArrayItem
  *           Returns SOFTBUS_INVALID_PARAM
  *           when the string length in the json object is greater than the targetLen
