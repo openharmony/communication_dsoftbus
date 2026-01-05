@@ -149,6 +149,29 @@ int32_t TransTdcRecvFirstData(int32_t channelId, char *recvBuf, int32_t *recvLen
     return SOFTBUS_OK;
 }
 
+int32_t TransTdcRecvMtpMsg(int32_t channelId, int32_t fd, SoftBusMsgHdr *msg, int32_t *recvLen)
+{
+    if (msg == NULL || msg->msg_iovlen <= 0 || msg->msg_iov == NULL || recvLen == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (msg->msg_iov->iov_len == 0 || msg->msg_iov->iov_len > g_dataBufferMaxLen) {
+        TRANS_LOGE(TRANS_CTRL,
+            "len invalid, channelId=%{public}d, len=%{public}zu", channelId, msg->msg_iov->iov_len);
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *recvLen = ConnRecvSocketMsg(fd, msg, 0, MSG_RX_TIMESTAMP);
+    if (*recvLen < 0) {
+        int32_t socketErrCode = GetErrCodeBySocketErr(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
+        TRANS_LOGE(TRANS_CTRL, "client recv data failed, channelId=%{public}d, recvlen=%{public}d, errCode=%{public}d",
+            channelId, *recvLen, socketErrCode);
+        return socketErrCode;
+    } else if (*recvLen == 0) {
+        return SOFTBUS_DATA_NOT_ENOUGH;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransTdcUnPackAllData(int32_t channelId, DataBuf *node, bool *flag)
 {
     if (node == NULL || flag == NULL) {

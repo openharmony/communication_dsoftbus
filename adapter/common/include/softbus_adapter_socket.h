@@ -99,6 +99,7 @@ extern "C" {
 #define SOFTBUS_FD_SETSIZE SOFTBUS_FD_SETSIZE_
 
 #define IPV6_MESSAGE_TOS 0xA8
+#define MSG_RX_TIMESTAMP 4
 typedef SoftBusSysTime SoftBusSockTimeOut;
 /* netinet/in.h */
 typedef struct {
@@ -133,6 +134,12 @@ typedef struct {
     SoftBusIn6Addr sin6Addr; /* Ipv6 address */
     uint32_t sin6ScopeId; /* Ipv6 scope id */
 } SoftBusSockAddrIn6;
+
+typedef struct iovec SoftBusIovec;
+
+typedef struct msghdr SoftBusMsgHdr;
+
+typedef struct cmsghdr SoftBusCMsgHdr;
 #pragma pack ()
 
 typedef struct {
@@ -168,6 +175,7 @@ int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int
 int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t flags);
 int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t flags, SoftBusSockAddr *fromAddr,
     int32_t *fromAddrLen);
+int32_t SoftBusSocketRecvMsg(int32_t socketFd, SoftBusMsgHdr *msg, int32_t flags);
 
 
 int32_t SoftBusSocketShutDown(int32_t socketFd, int32_t how);

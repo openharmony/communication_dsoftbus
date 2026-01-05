@@ -46,6 +46,9 @@
 #define MESSAGE_TOS 0xC0
 #define MAGICNUM_SIZE sizeof(uint32_t)
 #define TLVCOUNT_SIZE sizeof(uint8_t)
+#define MS_PER_SECOND 1000
+#define US_PER_MSECOND 1000
+#define NS_PER_USECOND 1000
 
 static SoftBusList *g_tcpDataList = NULL;
 
@@ -664,9 +667,11 @@ static void DfxReceiveRateStatistic(int32_t channelId, int32_t dataLen)
         return;
     }
     uint64_t startTimestamp = channel.timestamp;
-    uint64_t endTimestamp = SoftBusGetSysTimeMs();
-    uint64_t useTime = startTimestamp > endTimestamp ?
-        (UINT64_MAX - startTimestamp + endTimestamp):(endTimestamp - startTimestamp);
+    uint64_t endTimestamp = SoftBusGetTimeMs();
+    if (startTimestamp > endTimestamp) {
+        return;
+    }
+    uint64_t useTime = endTimestamp - startTimestamp;
     useTime += FIRST_PKG_USED_TIME;
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
@@ -676,11 +681,13 @@ static void DfxReceiveRateStatistic(int32_t channelId, int32_t dataLen)
     TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
 }
 
-static int32_t TransTdcProcAllTlvData(int32_t channelId)
+static int32_t TransTdcProcAllTlvData(int32_t channelId, bool isMinTp)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_tcpDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is NULL");
     while (1) {
-        TransTdcSetTimestamp(channelId, SoftBusGetSysTimeMs());
+        if (!isMinTp) {
+            TransTdcSetTimestamp(channelId, SoftBusGetTimeMs());
+        }
         SoftBusMutexLock(&g_tcpDataList->lock);
         TcpDataTlvPacketHead pktHead = { 0 };
         uint32_t newPktHeadSize = 0;
@@ -697,8 +704,10 @@ static int32_t TransTdcProcAllTlvData(int32_t channelId)
             return ret;
         }
         (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
-        DfxReceiveRateStatistic(channelId, pktHead.dataLen);
-        TransTdcSetTimestamp(channelId, 0);
+        if (!isMinTp) {
+            DfxReceiveRateStatistic(channelId, pktHead.dataLen);
+            TransTdcSetTimestamp(channelId, 0);
+        }
         ret = TransTdcProcessTlvData(channelId, &pktHead, newPktHeadSize);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "data received failed");
     }
@@ -831,7 +840,79 @@ int32_t TransTdcRecvData(int32_t channelId)
     ret = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_TCP_DIRECT, &supportTlv, NULL);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "fail to get support tlv");
     if (supportTlv) {
-        return TransTdcProcAllTlvData(channelId);
+        return TransTdcProcAllTlvData(channelId, false);
+    }
+    return TransTdcProcAllData(channelId);
+}
+
+static void TransTdcReceiveMtpRate(int32_t channelId, SoftBusMsgHdr *msg, int32_t recvLen)
+{
+    if (msg == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    uint64_t now = 0;
+    SoftBusCMsgHdr *cmsg = NULL;
+    for (cmsg = (SoftBusCMsgHdr *)CMSG_FIRSTHDR((struct msghdr *)msg); cmsg != NULL;
+        cmsg = (SoftBusCMsgHdr *)CMSG_NXTHDR((struct msghdr *)msg, cmsg)) {
+        if (cmsg != NULL && cmsg->cmsg_level == SOL_SOCKET && cmsg->cmsg_type == SO_TIMESTAMP) {
+            struct timespec *ts = (struct timespec *)CMSG_DATA(cmsg);
+            now = (uint64_t)ts->tv_sec * MS_PER_SECOND + (uint64_t)ts->tv_nsec / (US_PER_MSECOND * NS_PER_USECOND);
+        }
+    }
+    if (now == 0) {
+        TRANS_LOGE(TRANS_SDK, "get now time fail.");
+        return;
+    }
+    TransTdcSetTimestamp(channelId, now);
+    DfxReceiveRateStatistic(channelId, recvLen);
+    TransTdcSetTimestamp(channelId, 0);
+}
+
+int32_t TransTdcRecvMsg(int32_t channelId)
+{
+    int32_t recvLen = 0;
+    int32_t fd = -1;
+    size_t len = 0;
+    SoftBusMsgHdr msg;
+    (void)memset_s(&msg, sizeof(SoftBusMsgHdr), 0, sizeof(SoftBusMsgHdr));
+    char ctrlBuf[CMSG_SPACE(sizeof(struct timespec))] = {0};
+    int32_t ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get Tdc data buf by channelId=%{public}d failed, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    SoftBusIovec iov;
+    (void)memset_s(&iov, sizeof(SoftBusIovec), 0, sizeof(SoftBusIovec));
+    iov.iov_base = SoftBusCalloc(len);
+    if (iov.iov_base == NULL) {
+        TRANS_LOGE(TRANS_SDK, "client tdc malloc failed. channelId=%{public}d, len=%{public}zu", channelId, len);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    iov.iov_len = len;
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = ctrlBuf;
+    msg.msg_controllen = sizeof(ctrlBuf);
+    ret = TransTdcRecvMtpMsg(channelId, fd, &msg, &recvLen);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(msg.msg_iov->iov_base);
+        return ret;
+    }
+    ret = TransClientUpdateTdcDataBufWInfo(channelId, (char *)msg.msg_iov->iov_base, recvLen);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(msg.msg_iov->iov_base);
+        TRANS_LOGE(TRANS_SDK, "client update data buf failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    SoftBusFree(msg.msg_iov->iov_base);
+    msg.msg_iov->iov_base = NULL;
+    TransTdcReceiveMtpRate(channelId, &msg, recvLen);
+    bool supportTlv = false;
+    ret = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_TCP_DIRECT, &supportTlv, NULL);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "fail to get support tlv");
+    if (supportTlv) {
+        return TransTdcProcAllTlvData(channelId, true);
     }
     return TransTdcProcAllData(channelId);
 }

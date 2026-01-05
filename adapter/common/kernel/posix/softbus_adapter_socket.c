@@ -419,6 +419,23 @@ int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t
     return ret;
 }
 
+int32_t SoftBusSocketRecvMsg(int32_t socketFd, SoftBusMsgHdr *msg, int32_t flags)
+{
+    if (msg == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "msg is null");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
+    int32_t ret = recvmsg(socketFd, (struct msghdr *)msg, flags);
+    if (ret < 0) {
+        COMM_LOGE(COMM_ADAPTER, "recv msg socketFd=%{public}d, errno=%{public}s, ret=%{public}d",
+            socketFd, strerror(errno), ret);
+        return GetErrorCode();
+    }
+
+    return ret;
+}
+
 int32_t SoftBusSocketShutDown(int32_t socketFd, int32_t how)
 {
     int32_t ret = shutdown(socketFd, how);
