@@ -37,10 +37,10 @@ static BrProxyInterface *GetBrProxyInterface()
 }
 
 extern "C" {
-int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId,
+int32_t ClientIpcBrProxyOpened(int32_t pid, int32_t channelId,
     const char *brMac, const char *uuid, int32_t reason)
 {
-    return GetBrProxyInterface()->ClientIpcBrProxyOpened(pkgName, channelId, brMac, uuid, reason);
+    return GetBrProxyInterface()->ClientIpcBrProxyOpened(pid, channelId, brMac, uuid, reason);
 }
 
 int32_t ConnectPeerDevice(BrProxyChannelInfo *channelInfo, uint32_t *requestId)

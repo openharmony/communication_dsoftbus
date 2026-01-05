@@ -149,6 +149,7 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.streamChannelCnt);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.dataLen);
     MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.sessionDuration);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.channelStatus);
 
     EXPECT_EQ(++index, validSize);
     return true;
@@ -200,6 +201,10 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
     EXPECT_EQ(params[index].v.i64, extra.remoteP2pChannel);
+    num = 71;
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.channelStatus);
     EXPECT_EQ(++index, validSize);
     return true;
 }

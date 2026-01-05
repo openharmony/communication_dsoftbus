@@ -22,7 +22,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 typedef struct {
     ListNode node;
@@ -132,6 +132,6 @@ void DestroyPagingId(void);
 int32_t ClientDeletePagingSession(int32_t sessionId);
 
 #ifdef __cplusplus
-}
-#endif
-#endif // CLIENT_TRANS_SESSION_OPERATE_H
+} /* extern "C" */
+#endif /* __cplusplus */
+#endif /* CLIENT_TRANS_SESSION_OPERATE_H */

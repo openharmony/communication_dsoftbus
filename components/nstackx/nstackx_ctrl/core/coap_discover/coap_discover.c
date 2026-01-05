@@ -247,10 +247,23 @@ static int32_t CoapSetUri(uint8_t af, char *uri, size_t len, const char *ip, con
     return NSTACKX_EOK;
 }
 
-static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint8_t businessType)
+static void DiscoverInfoInit(struct DiscoverInfo *info, CoapCtxType *ctx, uint8_t isBroadcast,
+    uint8_t businessType, const NSTACKX_ResponseSettings *responseSettings)
 {
-    char *data = PrepareServiceDiscover(GetLocalIfaceAf(ctx->iface), GetLocalIfaceIpStr(ctx->iface),
-        NSTACKX_FALSE, businessType, GetLocalIfaceServiceData(ctx->iface));
+    info->af = GetLocalIfaceAf(ctx->iface);
+    info->localIpStr = GetLocalIfaceIpStr(ctx->iface);
+    info->isBroadcast = isBroadcast;
+    info->businessType = businessType;
+    info->serviceData = GetLocalIfaceServiceData(ctx->iface);
+    info->responseSettings = responseSettings;
+}
+
+static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl,
+    uint8_t businessType, const NSTACKX_ResponseSettings *responseSettings)
+{
+    struct DiscoverInfo info;
+    DiscoverInfoInit(&info, ctx, NSTACKX_FALSE, businessType, responseSettings);
+    char *data = PrepareServiceDiscover(&info);
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare service discover data fail when send response");
         return NSTACKX_EFAILED;
@@ -308,13 +321,16 @@ static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **rem
 }
 
 static void CoapResponseServiceDiscovery(const char *remoteUrl, const coap_context_t *currCtx,
-    coap_pdu_t *response, uint8_t businessType)
+    coap_pdu_t *response, const DeviceInfo *info)
 {
     if (remoteUrl != NULL) {
-        if (ShouldAutoReplyUnicast(businessType) == NSTACKX_TRUE) {
+        if (IsSeqNoneType(info)) {
+            return;
+        }
+        if (ShouldAutoReplyUnicast(info->businessType) == NSTACKX_TRUE) {
             CoapCtxType *ctx = CoapGetCoapCtxType(currCtx);
             if (ctx != NULL) {
-                (void)CoapResponseService(ctx, remoteUrl, businessType);
+                (void)CoapResponseService(ctx, remoteUrl, info->businessType, NULL);
             } else {
                 DFINDER_LOGW(TAG, "can not get corresponding context to send coap response");
             }
@@ -374,7 +390,7 @@ static int32_t HndPostServiceDiscoverEx(coap_session_t *session, const coap_pdu_
         DFINDER_LOGD(TAG, "remote dev in mode %hhu, local dev will not reply", deviceInfo->mode);
         goto L_ERR;
     }
-    CoapResponseServiceDiscovery(remoteUrl, currCtx, response, deviceInfo->businessType);
+    CoapResponseServiceDiscovery(remoteUrl, currCtx, response, deviceInfo);
 
     ret = NSTACKX_EOK;
 L_ERR:
@@ -662,8 +678,9 @@ static int32_t CoapPostServiceDiscoverEx(CoapCtxType *ctx)
         return NSTACKX_EFAILED;
     }
 
-    char *data = PrepareServiceDiscover(GetLocalIfaceAf(ctx->iface), GetLocalIfaceIpStr(ctx->iface), NSTACKX_TRUE,
-        GetLocalDeviceBusinessType(), GetLocalIfaceServiceData(ctx->iface));
+    struct DiscoverInfo info;
+    DiscoverInfoInit(&info, ctx, NSTACKX_TRUE, GetLocalDeviceBusinessType(), NULL);
+    char *data = PrepareServiceDiscover(&info);
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare json failed");
         return NSTACKX_EFAILED;
@@ -1365,7 +1382,7 @@ static int32_t SendDiscoveryRspEx(CoapCtxType *ctx, const NSTACKX_ResponseSettin
         return NSTACKX_EFAILED;
     }
     IncreaseUcastSequenceNumber(GetLocalIfaceAf((const struct LocalIface *)ctx->iface));
-    return CoapResponseService(ctx, remoteUrl, responseSettings->businessType);
+    return CoapResponseService(ctx, remoteUrl, responseSettings->businessType, responseSettings);
 }
 
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)

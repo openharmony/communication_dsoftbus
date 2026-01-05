@@ -277,7 +277,7 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv001, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleTransTest, GattTransRecv003, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "GattTransRecv003, start");
+    CONN_LOGI(CONN_BLE, "GattTransRecv003, in");
     uint8_t *data = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     uint32_t connectionId = 1;
     uint32_t outLen = 0;
@@ -325,7 +325,7 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv003, TestSize.Level1)
     data = (uint8_t *)&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
-    CONN_LOGI(CONN_BLE, "GattTransRecv003, end");
+    CONN_LOGI(CONN_BLE, "GattTransRecv003, out");
 }
 
 /*
@@ -338,7 +338,7 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv003, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleTransTest, GattTransRecv004, TestSize.Level1)
 {
-    CONN_LOGI(CONN_BLE, "GattTransRecv004, start");
+    CONN_LOGI(CONN_BLE, "GattTransRecv004, in");
     uint8_t *data = static_cast<uint8_t *>(malloc(sizeof(uint8_t)));
     uint32_t connectionId = 1;
     uint32_t outLen = 0;
@@ -372,7 +372,7 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv004, TestSize.Level1)
     data = (uint8_t *)&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_NE(nullptr, value);
-    CONN_LOGI(CONN_BLE, "GattTransRecv004, end");
+    CONN_LOGI(CONN_BLE, "GattTransRecv004, out");
 }
 /*
 * @tc.name: ConnBleTransConfigPostLimit

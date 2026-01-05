@@ -43,7 +43,7 @@ public:
  */
 HWTEST_F(WifiDirectDfxTest, ReportConnEventExtraTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ReportConnEventExtraTest start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ReportConnEventExtraTest in");
     WifiDirectInterfaceMock wifiDirectInterfaceMock;
     EXPECT_CALL(wifiDirectInterfaceMock, LnnSetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -74,7 +74,7 @@ HWTEST_F(WifiDirectDfxTest, ReportConnEventExtraTest, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.connectType = static_cast<WifiDirectConnectType>(-1);
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
-    CONN_LOGI(CONN_WIFI_DIRECT, "ReportConnEventExtraTest end");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ReportConnEventExtraTest out");
 }
 
 /*
@@ -85,7 +85,7 @@ HWTEST_F(WifiDirectDfxTest, ReportConnEventExtraTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectDfxTest, SetBootLinkTypeTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "SetBootLinkTypeTest start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "SetBootLinkTypeTest in");
     WifiDirectInterfaceMock wifiDirectInterfaceMock;
     EXPECT_CALL(wifiDirectInterfaceMock, LnnSetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = false;
@@ -115,7 +115,7 @@ HWTEST_F(WifiDirectDfxTest, SetBootLinkTypeTest, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.dfxInfo.bootLinkType = STATISTIC_BLE_AND_ACTION;
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
-    CONN_LOGI(CONN_WIFI_DIRECT, "SetBootLinkTypeTest end");
+    CONN_LOGI(CONN_WIFI_DIRECT, "SetBootLinkTypeTest out");
 }
 
 /*
@@ -126,7 +126,7 @@ HWTEST_F(WifiDirectDfxTest, SetBootLinkTypeTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectDfxTest, ReportReceiveAuthLinkMsgTest, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ReportReceiveAuthLinkMsgTest start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ReportReceiveAuthLinkMsgTest in");
     WifiDirectInterfaceMock wifiDirectInterfaceMock;
     EXPECT_CALL(wifiDirectInterfaceMock, LnnSetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -140,6 +140,6 @@ HWTEST_F(WifiDirectDfxTest, ReportReceiveAuthLinkMsgTest, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::ReportReceiveAuthLinkMsg(negotiateMessage, remoteDeviceId));
     negotiateMessage.SetMessageType(NegotiateMessageType::CMD_CONN_V2_REQ_1);
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::ReportReceiveAuthLinkMsg(negotiateMessage, remoteDeviceId));
-    CONN_LOGI(CONN_WIFI_DIRECT, "ReportReceiveAuthLinkMsgTest end");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ReportReceiveAuthLinkMsgTest out");
 }
 } // namespace OHOS::SoftBus

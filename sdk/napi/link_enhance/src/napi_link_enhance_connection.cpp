@@ -296,7 +296,7 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
     if (!CheckAccessToken()) {
@@ -305,14 +305,14 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
     if (connection == nullptr) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
     Address address = {
         .addrType = CONNECTION_ADDR_BLE,
     };
     if (strcpy_s(address.addr.ble.mac, BT_MAC_LEN, connection->deviceId_.c_str()) != 0) {
-        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
 
@@ -320,6 +320,11 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
     if (handle <= 0) {
         COMM_LOGE(COMM_SDK, "connect fail, err=%{public}d", handle);
         int32_t errcode = ConvertToJsErrcode(handle);
+        if (errcode == LINK_ENHANCE_PARAMETER_INVALID) {
+            napi_throw_error(env, std::to_string(errcode).c_str(),
+                "check whether the length of the name input when calling the createConnection interface is valid");
+            return NapiGetUndefinedRet(env);
+        }
         HandleSyncErr(env, errcode);
         return NapiGetUndefinedRet(env);
     }
@@ -483,7 +488,7 @@ napi_value NapiLinkEnhanceConnection::SendData(napi_env env, napi_callback_info 
     uint8_t *data = (uint8_t *)SoftBusCalloc(dataLen);
     if (data == nullptr || memcpy_s(data, dataLen, bufferData, dataLen) != EOK) {
         SoftBusFree(data);
-        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
     COMM_LOGI(COMM_SDK, "napi send handle=%{public}u, len=%{public}u", connection->handle_, (uint32_t)dataLen);

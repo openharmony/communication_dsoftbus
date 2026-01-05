@@ -118,13 +118,13 @@ static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo, cons
     return NSTACKX_EOK;
 }
 
-static int32_t AddCapabilityBitmap(cJSON *data, const DeviceInfo *deviceInfo)
+static int32_t AddCapabilityBitmap(cJSON *data, uint32_t capabilityBitmapNum, const uint32_t *capabilityBitmap)
 {
     cJSON *capabilityArray = NULL;
     cJSON *capability = NULL;
     uint32_t i;
 
-    if (deviceInfo->capabilityBitmapNum == 0) {
+    if (capabilityBitmapNum == 0) {
         return NSTACKX_EOK;
     }
 
@@ -133,8 +133,8 @@ static int32_t AddCapabilityBitmap(cJSON *data, const DeviceInfo *deviceInfo)
         goto L_END_JSON;
     }
 
-    for (i = 0; i < deviceInfo->capabilityBitmapNum; i++) {
-        capability = cJSON_CreateNumber(deviceInfo->capabilityBitmap[i]);
+    for (i = 0; i < capabilityBitmapNum; i++) {
+        capability = cJSON_CreateNumber(capabilityBitmap[i]);
         if (capability == NULL || !cJSON_AddItemToArray(capabilityArray, capability)) {
             cJSON_Delete(capability);
             goto L_END_JSON;
@@ -149,6 +149,18 @@ static int32_t AddCapabilityBitmap(cJSON *data, const DeviceInfo *deviceInfo)
 L_END_JSON:
     cJSON_Delete(capabilityArray);
     return NSTACKX_EFAILED;
+}
+
+static int32_t AddCapabilityBitmapData(cJSON *data, const struct DiscoverInfo *info, const DeviceInfo *deviceInfo)
+{
+    const uint32_t *capabilityBitmap = deviceInfo->capabilityBitmap;
+    uint32_t capabilityBitmapNum = deviceInfo->capabilityBitmapNum;
+    if (info->responseSettings != NULL && info->responseSettings->capBitmapNum != 0) {
+        capabilityBitmap = info->responseSettings->capBitmap;
+        capabilityBitmapNum = info->responseSettings->capBitmapNum;
+    }
+
+    return AddCapabilityBitmap(data, capabilityBitmapNum, capabilityBitmap);
 }
 
 static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint8_t isBroadcast, uint8_t businessType)
@@ -427,8 +439,7 @@ static int JsonAddStr(cJSON *data, const char *key, const char *value)
     return NSTACKX_EOK;
 }
 
-static char *PrepareServiceDiscoverEx(uint8_t af, const char *locaIpStr, uint8_t isBroadcast, uint8_t businessType,
-    const char *serviceData)
+static char *PrepareServiceDiscoverEx(const struct DiscoverInfo *info)
 {
     cJSON *data = cJSON_CreateObject();
     if (data == NULL) {
@@ -438,24 +449,25 @@ static char *PrepareServiceDiscoverEx(uint8_t af, const char *locaIpStr, uint8_t
 
     char *formatString = NULL;
     const DeviceInfo *deviceInfo = GetLocalDeviceInfo();
-    if ((AddDeviceJsonData(data, deviceInfo, serviceData) != NSTACKX_EOK) ||
-        (JsonAddStr(data, JSON_DEVICE_WLAN_IP, locaIpStr) != NSTACKX_EOK) ||
-        (AddCapabilityBitmap(data, deviceInfo) != NSTACKX_EOK) ||
-        (AddBusinessJsonData(data, deviceInfo, isBroadcast, businessType) != NSTACKX_EOK) ||
-        (AddSequenceNumber(data, af, isBroadcast) != NSTACKX_EOK)) {
+    if ((AddDeviceJsonData(data, deviceInfo, info->serviceData) != NSTACKX_EOK) ||
+        (JsonAddStr(data, JSON_DEVICE_WLAN_IP, info->localIpStr) != NSTACKX_EOK) ||
+        (AddCapabilityBitmapData(data, info, deviceInfo) != NSTACKX_EOK) ||
+        (AddBusinessJsonData(data, deviceInfo, info->isBroadcast, info->businessType) != NSTACKX_EOK) ||
+        (AddSequenceNumber(data, info->af, info->isBroadcast) != NSTACKX_EOK)) {
         DFINDER_LOGE(TAG, "Add json data failed");
         goto L_END_JSON;
     }
 
-    if (isBroadcast) {
+    if (info->isBroadcast) {
         char coapUriBuffer[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
-        if (af == AF_INET &&
-            sprintf_s(coapUriBuffer, sizeof(coapUriBuffer), "coap://%s/" COAP_DEVICE_DISCOVER_URI, locaIpStr) < 0) {
+        if (info->af == AF_INET &&
+            sprintf_s(coapUriBuffer, sizeof(coapUriBuffer),
+                      "coap://%s/" COAP_DEVICE_DISCOVER_URI, info->localIpStr) < 0) {
             DFINDER_LOGE(TAG, "format coap device discover uri failed");
             goto L_END_JSON;
         }
-        if (af == AF_INET6 && sprintf_s(coapUriBuffer, sizeof(coapUriBuffer),
-            "coap://[%s]/" COAP_DEVICE_DISCOVER_URI, locaIpStr) < 0) {
+        if (info->af == AF_INET6 && sprintf_s(coapUriBuffer, sizeof(coapUriBuffer),
+            "coap://[%s]/" COAP_DEVICE_DISCOVER_URI, info->localIpStr) < 0) {
             DFINDER_LOGE(TAG, "format coap device discover uri failed");
             goto L_END_JSON;
         }
@@ -478,10 +490,14 @@ L_END_JSON:
     return formatString;
 }
 
-char *PrepareServiceDiscover(uint8_t af, const char *localIpStr, uint8_t isBroadcast, uint8_t businessType,
-    const char *serviceData)
+char *PrepareServiceDiscover(const struct DiscoverInfo *info)
 {
-    char *str = PrepareServiceDiscoverEx(af, localIpStr, isBroadcast, businessType, serviceData);
+    if (info == NULL || info->localIpStr == NULL) {
+        DFINDER_LOGE(TAG, "invalid params info");
+        return NULL;
+    }
+
+    char *str = PrepareServiceDiscoverEx(info);
     if (str == NULL) {
         DFINDER_LOGE(TAG, "prepare service discover ex failed");
         IncStatistics(STATS_PREPARE_SD_MSG_FAILED);

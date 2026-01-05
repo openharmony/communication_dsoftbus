@@ -69,7 +69,8 @@ HWTEST_F(BrProxyServerManagerExtTest, SetCurrentConnect001, TestSize.Level1)
 {
     const char *testBrMac = "testBrMac";
     const char *testUuid = "testUuid";
-    int32_t ret = SetCurrentConnect(testBrMac, testUuid, true);
+    int32_t appIndex = DEFAULT_APPINDEX;
+    int32_t ret = SetCurrentConnect(testBrMac, testUuid, appIndex, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -98,7 +99,8 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest000, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
     ret = CloseAllBrProxy();
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
-    CloseAllConnect();
+    int32_t appIndex = DEFAULT_APPINDEX;
+    CloseAllConnect(appIndex);
     UserSwitchedHandler(nullptr);
     RegisterUserSwitchEvent();
     ret1 = PermissionCheckPass(nullptr);
@@ -109,25 +111,24 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest000, TestSize.L
     EXPECT_EQ(SOFTBUS_CREATE_LIST_ERR, ret);
     ret = ServerAddDataToList(nullptr, nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret1 = IsBrProxyEnable(0);
-    EXPECT_EQ(false, ret1);
-    ret = GetBrProxy(nullptr, nullptr, nullptr);
+    uint32_t requeset = 1;
+    ret = GetBrProxy(nullptr, nullptr, requeset, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = UpdateBrProxy(nullptr, nullptr, nullptr, false, channelId);
+    ret = UpdateBrProxy(nullptr, appIndex, nullptr, false, channelId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = UpdateConnectState(nullptr, nullptr, true);
+    ret = UpdateConnectState(nullptr, nullptr, appIndex, true, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret1 = IsBrProxyExist(nullptr, nullptr);
+    ret1 = TryToUpdateBrProxy(nullptr, nullptr, nullptr);
     EXPECT_EQ(false, ret1);
     ret = GetCallerInfoAndVerifyPermission(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = ServerAddProxyToList(nullptr, nullptr);
+    ret = ServerAddProxyToList(nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = ServerDeleteProxyFromList(nullptr, nullptr);
+    ret = ServerDisableProxyFromList(nullptr, nullptr, appIndex);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
-    ret1 = IsSessionExist(nullptr, nullptr);
+    ret1 = IsSessionExist(nullptr, nullptr, 0, false);
     EXPECT_EQ(false, ret1);
-    ret = ServerAddChannelToList(nullptr, nullptr, CHANNEL_ID, 0);
+    ret = ServerAddChannelToList(nullptr, nullptr, CHANNEL_ID, 0, appIndex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -148,7 +149,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     ret = GetChannelInfo(nullptr, nullptr, CHANNEL_ID, 0, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
     onOpenSuccess(0, nullptr);
-    ret = GetChannelId(nullptr, nullptr, nullptr);
+    ret = GetChannelId(nullptr, nullptr, nullptr, DEFAULT_APPINDEX);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransOpenBrProxy(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -164,7 +165,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     bool ret1 = IsForegroundProcess(nullptr);
     EXPECT_EQ(false, ret1);
     DealDataWhenForeground(nullptr, nullptr, 0);
-    DealWithDataRecv(nullptr, nullptr, 0);
+    DealWithDataRecv(nullptr, nullptr, 0, 0);
     OnDataReceived(nullptr, nullptr, 0);
     OnDisconnected(nullptr, 0);
     OnReconnected(nullptr, nullptr);
@@ -189,6 +190,32 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
 }
 
 /**
+ * @tc.name: OnDataReceivedTest001
+ * @tc.desc: return when given invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerExtTest, OnDataReceivedTest001, TestSize.Level1)
+{
+    ProxyChannel *channel = reinterpret_cast<ProxyChannel *>(SoftBusCalloc(sizeof(ProxyChannel)));
+    ASSERT_NE(channel, nullptr);
+    uint8_t *data = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(ProxyChannel)));
+    ASSERT_NE(data, nullptr);
+    char *addr = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyChannel)));
+    ASSERT_NE(addr, nullptr);
+    uint32_t dataLen = 0;
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(nullptr, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(channel, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(channel, data, 0));
+    dataLen = BR_PROXY_SEND_MAX_LEN + 1;
+    EXPECT_NO_FATAL_FAILURE(OnReconnected(addr, nullptr));
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(channel, data, dataLen));
+    SoftBusFree(channel);
+    SoftBusFree(data);
+    SoftBusFree(addr);
+}
+
+/**
  * @tc.name: SetCurrentConnect002
  * @tc.desc: SetCurrentConnect002, when given invalid param should return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -199,16 +226,17 @@ HWTEST_F(BrProxyServerManagerExtTest, SetCurrentConnect002, TestSize.Level1)
     const char *testBrMac = "testBrMac";
     const char *testUuid = "testUuid";
     uint32_t requeset = 1;
+    int32_t appIndex = DEFAULT_APPINDEX;
     PrintSession(testBrMac, testUuid);
     PrintSession(nullptr, testUuid);
     PrintSession(testBrMac, nullptr);
-    int32_t ret = SetCurrentConnect(testBrMac, nullptr, true);
+    int32_t ret = SetCurrentConnect(testBrMac, nullptr, appIndex, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = SetCurrentConnect(nullptr, testUuid, true);
+    ret = SetCurrentConnect(nullptr, testUuid, appIndex, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = SetCurrentConnect(testBrMac, testUuid, true);
+    ret = SetCurrentConnect(testBrMac, testUuid, appIndex, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = ConnectPeerDevice(testBrMac, testUuid, &requeset);
+    ret = ConnectPeerDevice(testBrMac, testUuid, &requeset, appIndex);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 }

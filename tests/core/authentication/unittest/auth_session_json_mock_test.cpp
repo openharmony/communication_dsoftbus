@@ -1294,4 +1294,20 @@ HWTEST_F(AuthSessionJsonMockTest, FillBroadcastCipherKey_TEST_001, TestSize.Leve
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(SOFTBUS_OK, FillBroadcastCipherKey(&cipherKey, &info));
 }
+
+/*
+ * @tc.name: GetLocalUdidShortHash_TEST_001
+ * @tc.desc: test func GetLocalUdidShortHash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, GetLocalUdidShortHash_TEST_001, TestSize.Level1)
+{
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = 0;
+    char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    ret = GetLocalUdidShortHash(localUdidHash);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+}
 } // namespace OHOS

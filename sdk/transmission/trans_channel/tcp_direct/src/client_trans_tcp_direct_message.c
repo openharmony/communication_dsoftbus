@@ -650,7 +650,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     return ret;
 }
 
-static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen)
+static void DfxReceiveRateStatistic(int32_t channelId, int32_t dataLen)
 {
     #define DATA_LEN_1M (1 * 1024 * 1024) // 1MB
     #define SEC_TO_MILLISEC (1000)
@@ -672,7 +672,7 @@ static void DfxReceiveRateStatistic(int32_t channelId, uint32_t dataLen)
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     extra.channelId = channelId;
     extra.dataLen = dataLen;
-    extra.bytesRate = (dataLen * SEC_TO_MILLISEC)/(DATA_LEN_1M * useTime);
+    extra.bytesRate = (uint32_t)(((uint64_t)dataLen * SEC_TO_MILLISEC)/(useTime * DATA_LEN_1M));
     TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
 }
 

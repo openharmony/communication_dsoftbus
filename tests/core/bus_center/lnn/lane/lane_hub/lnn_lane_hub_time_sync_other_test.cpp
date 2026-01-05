@@ -68,7 +68,8 @@ static SoftBusLooper g_Looper = {
 
 /*
  * @tc.name: LnnTimeSyncManager_Test01
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Verify the creation, update, and deletion functions of time synchronization requests, as well as
+ *           the operations to start and stop time synchronization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -105,7 +106,8 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test01, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test02
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Verify the creation, update, and deletion functions of time synchronization requests, as well as
+ *           the operations to start and stop time synchronization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -142,7 +144,8 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test02, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test03
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Verify the creation, update, and deletion functions of time synchronization requests, as well as
+ *           the operations to start and stop time synchronization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -179,7 +182,8 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test03, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test04
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Verify that operations sucn as creating, updating, and deleting time synchronization requests
+ *           are correctly executed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -216,7 +220,7 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test04, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test05
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Test the behavior of the time synchronization manager under specific conditions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -238,7 +242,8 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test05, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test06
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Test the fucntionality of the time synchronization manager, particularly the
+ *           processing flow of time synchronization requests
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -269,7 +274,8 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test06, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test07
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Verify the processing flow of time synchronization requests, including
+ *           initialization, request processing, result notification, and de-initialization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -301,7 +307,8 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test07, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test08
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Verify the correctness of creating, processing, and
+ *           releasing resources for time synchronization requests
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -336,7 +343,8 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test08, TestSize.Level1)
 
 /*
  * @tc.name: LnnTimeSyncManager_Test9
- * @tc.desc: lnn time sync manager
+ * @tc.desc: Test the functionality of the time synchronization manager, particularly
+ *           the processing flow of time synchronization requests
  * @tc.type: FUNC
  * @tc.require:
  */

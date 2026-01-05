@@ -169,6 +169,18 @@ static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, 
     cb.notificationReceiveCallback(clientId, &notify, status);
 }
 
+static void GattcServiceChangeCallback(int32_t clientId)
+{
+    CONN_LOGI(CONN_BLE, "clientId=%{public}d", clientId);
+    SoftBusGattcCallback cb = { 0 };
+    GetGattcCallback(clientId, &cb);
+    if (cb.onServiceChanged == NULL) {
+        CONN_LOGE(CONN_BLE, "get callback fail");
+        return;
+    }
+    cb.onServiceChanged(clientId);
+}
+
 int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "cb is null");
@@ -182,6 +194,8 @@ int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
         "RegistNotificationCallback is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(cb->serviceCompleteCallback != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ServiceCompleteCallback is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(cb->onServiceChanged != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "onServiceChanged is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(clientId >= 0, SOFTBUS_INVALID_PARAM, CONN_BLE, "clientId < 0");
     CONN_CHECK_AND_RETURN_RET_LOGE(g_softBusGattcManager != NULL, SOFTBUS_INVALID_PARAM,
         CONN_BLE, "GattcManager is null");
@@ -569,6 +583,7 @@ int32_t InitSoftbusAdapterClient(void)
     g_btGattClientCallbacks.configureMtuSizeCb = GattcConfigureMtuSizeCallback;
     g_btGattClientCallbacks.registerNotificationCb = GattcRegisterNotificationCallback;
     g_btGattClientCallbacks.notificationCb = GattcNotificationCallback;
+    g_btGattClientCallbacks.serviceChangeCb = GattcServiceChangeCallback;
     return SOFTBUS_OK;
 }
 

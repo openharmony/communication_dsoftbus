@@ -132,7 +132,7 @@ static int32_t ClientRegisterPkgName(const char *pkgName)
     return SOFTBUS_OK;
 }
 
-static void FreeClientPkgName(void)
+void FreeClientPkgName(void)
 {
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "lock init failed");

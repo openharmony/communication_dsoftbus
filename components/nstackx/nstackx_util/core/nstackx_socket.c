@@ -244,6 +244,7 @@ static int32_t CreateUdpServer(Socket *serverSocket, const struct sockaddr_in *s
         LOGE(TAG, "sockAddr is null");
         return NSTACKX_EFAILED;
     }
+    int32_t reuse = 1;
     struct sockaddr_in localAddr;
     socklen_t len = sizeof(localAddr);
     serverSocket->sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -254,6 +255,11 @@ static int32_t CreateUdpServer(Socket *serverSocket, const struct sockaddr_in *s
 
     if (SetSocketNonBlock(serverSocket->sockfd) != NSTACKX_EOK) {
         LOGE(TAG, "set socket nonblock failed");
+        goto FAIL_SOCKET;
+    }
+
+    if (setsockopt(serverSocket->sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) != 0) {
+        LOGE(TAG, "Failed to set server socket! error :%d", GetErrno());
         goto FAIL_SOCKET;
     }
 

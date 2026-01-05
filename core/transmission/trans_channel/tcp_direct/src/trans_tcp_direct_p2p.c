@@ -927,13 +927,15 @@ static int32_t ConnectSocketDirectPeer(const char *addr, int32_t port, const cha
         TRANS_LOGE(TRANS_CTRL, "strcpy_s failed! ret=%{public}" PRId32, ret);
         return SOFTBUS_STRCPY_ERR;
     }
-    struct WifiDirectManager *pManager = GetWifiDirectManager();
-    if (pManager != NULL && pManager->getLocalAndRemoteMacByRemoteIp != NULL) {
-        ret = pManager->getLocalAndRemoteMacByRemoteIp(
-            addr, options.socketOption.localMac, MAC_MAX_LEN, options.socketOption.remoteMac, MAC_MAX_LEN);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
-            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+    if (protocolType == LNN_PROTOCOL_HTP) {
+        struct WifiDirectManager *pManager = GetWifiDirectManager();
+        if (pManager != NULL && pManager->getLocalAndRemoteMacByRemoteIp != NULL) {
+            ret = pManager->getLocalAndRemoteMacByRemoteIp(
+                addr, options.socketOption.localMac, MAC_MAX_LEN, options.socketOption.remoteMac, MAC_MAX_LEN);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+            }
         }
     }
     return ConnOpenClientSocket(&options, bindAddr, true);
@@ -1005,10 +1007,11 @@ static bool IsSupportDeterministicTrans(const char *targetNetworkId)
     return true;
 }
 
-#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
-#define DFS_SESSIONNAME "DistributedFileService/mnt/hmdfs/100/account"
 static bool CheckIsSupportMintp(SessionConn *conn)
 {
+#ifndef DSOFTBUS_FEATURE_TRANS_MINTP
+    return false;
+#endif
     if (conn->appInfo.businessType != BUSINESS_TYPE_BYTE) {
         return false;
     }
@@ -1018,21 +1021,22 @@ static bool CheckIsSupportMintp(SessionConn *conn)
     if (!IsHmlIpAddr(conn->appInfo.myData.addr)) {
         return false;
     }
+#define DFS_SESSIONNAME "DistributedFileService/mnt/hmdfs/100/account"
     if (strcmp(conn->appInfo.myData.sessionName, DFS_SESSIONNAME) == 0) {
+        return false;
+    }
+    if (conn->appInfo.osType != OH_OS_TYPE) {
         return false;
     }
     return true;
 }
-#endif
 
 static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, const AppInfo *appInfo, bool isMinTp)
 {
     conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
-#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
     if (CheckIsSupportMintp(conn) && isMinTp) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_MINTP;
     }
-#endif
     if (conn->appInfo.isFlashLight) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_HTP;
         int32_t ret = ClientOpenHtpChannelPacked(
@@ -1319,9 +1323,7 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         info.myPort = conn->appInfo.myData.port;
         info.myUid = conn->appInfo.myData.uid;
         info.protocol = conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP ? LNN_PROTOCOL_IP : conn->appInfo.fdProtocol;
-#ifdef DSOFTBUS_FEATURE_TRANS_MINTP
         info.isMinTp = conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP && CheckIsSupportMintp(conn);
-#endif
         char *msg = VerifyP2pPack(&info);
         if (msg == NULL) {
             TRANS_LOGE(TRANS_CTRL, "verify p2p pack failed");
@@ -1413,6 +1415,27 @@ static int32_t TransStartTimeSync(SessionConn *conn)
     return ret;
 }
 
+static void UpdateHmlModule(const char *ip, const char *peerUuid, ListenerModule *listenMod)
+{
+    if (ip == NULL || peerUuid == NULL || listenMod == NULL || !IsHmlIpAddr(ip)) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    HmlListenerInfo *item = NULL;
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_hmlListenerList->list, HmlListenerInfo, node) {
+        if (strncmp(item->myIp, ip, IP_LEN) == 0 && strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
+            *listenMod = item->moudleType;
+            (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+}
+
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
@@ -1445,6 +1468,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         TRANS_LOGE(TRANS_CTRL, "start listener fail");
         goto EXIT_ERR;
     }
+    UpdateHmlModule(conn->appInfo.myData.addr, appInfo->peerData.deviceId, &(conn->listenMod));
     conn->isMeta = (appInfo->osType == OTHER_OS_TYPE) ? true : TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
 
     ret = TransTdcAddSessionConn(conn);

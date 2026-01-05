@@ -15,6 +15,7 @@
 
 #include "trans_client_proxy.h"
 
+#include "br_proxy_server_manager.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_client_info_manager.h"
 #include "trans_client_proxy_standard.h"
@@ -295,55 +296,54 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
         sourceInfo, sinkInfo->pid != -1, sinkInfo, transInfo->channelId, transInfo->channelType);
 }
 
-int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId,
+#define COMM_PKGNAME_BRPROXY "BrProxyPkgName"
+int32_t ClientIpcBrProxyOpened(int32_t pid, int32_t channelId,
     const char *brMac, const char *uuid, int32_t reason)
 {
-    if (pkgName == nullptr || brMac == nullptr) {
+    if (uuid == nullptr || brMac == nullptr) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
  
-    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject =
+        SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(COMM_PKGNAME_BRPROXY, pid);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
- 
+    ApplyForUnrestricted(channelId);
     return clientProxy->OnBrProxyOpened(channelId, brMac, uuid, reason);
 }
  
-int32_t ClientIpcBrProxyReceivedData(const char *pkgName, int32_t channelId, const uint8_t *data, uint32_t len)
+int32_t ClientIpcBrProxyReceivedData(int32_t pid, int32_t channelId, const uint8_t *data, uint32_t len)
 {
-    if (pkgName == nullptr || data == nullptr) {
+    if (data == nullptr) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
  
-    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject =
+        SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(COMM_PKGNAME_BRPROXY, pid);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
- 
+    ApplyForUnrestricted(channelId);
     return clientProxy->OnBrProxyDataRecv(channelId, data, len);
 }
  
-int32_t ClientIpcBrProxyStateChanged(const char *pkgName, int32_t channelId, int32_t channelState)
+int32_t ClientIpcBrProxyStateChanged(int32_t pid, int32_t channelId, int32_t channelState)
 {
-    if (pkgName == nullptr) {
-        TRANS_LOGE(TRANS_SDK, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
- 
-    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<IRemoteObject> clientObject =
+        SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(COMM_PKGNAME_BRPROXY, pid);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
- 
+    ApplyForUnrestricted(channelId);
     return clientProxy->OnBrProxyStateChanged(channelId, channelState);
 }
 
@@ -362,4 +362,19 @@ int32_t ClientIpcQueryPermission(const char *pkgName, const char *bundleName, bo
     }
  
     return clientProxy->OnBrProxyQueryPermission(bundleName, isEmpowered);
+}
+
+int32_t BrProxyRemoveObject(const char *pkgName)
+{
+    while (1) {
+        sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+        if (clientObject == nullptr) {
+            break;
+        }
+        int32_t pid;
+        std::string name;
+        int32_t ret = SoftbusClientInfoManager::GetInstance().SoftbusRemoveService(clientObject, name, &pid);
+        TRANS_LOGI(TRANS_SDK, "[br_proxy] pkgName=%{public}s, pid=%{public}d, ret=%{public}d", name.c_str(), pid, ret);
+    }
+    return SOFTBUS_OK;
 }

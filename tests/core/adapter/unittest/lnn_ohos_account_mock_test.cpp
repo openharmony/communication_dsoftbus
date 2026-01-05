@@ -55,8 +55,9 @@ void LNNOhosAccountMockTest::SetUp() { }
 void LNNOhosAccountMockTest::TearDown() { }
 
 /*
- * @tc.name: LNN_INIT_OHOS_ACCOUNT
- * @tc.desc: InitOhosAccount generate default str hash fail
+ * @tc.name: LNN_INIT_OHOS_ACCOUNT_001
+ * @tc.desc: Return non-SOFTBUS_OK when SoftBusGenerateStrHash fails with
+ *           SOFTBUS_INVALID_PARAM during LnnInitOhosAccount
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -73,7 +74,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_001, TestSize.Level1)
 
  /*
  * @tc.name: LNN_INIT_OHOS_ACCOUNT_002
- * @tc.desc: LnnInitOhosAccount_ShouldReturnSuccess_WhenAccountInfoIsAvailable
+ * @tc.desc: Return SOFTBUS_OK when account info is available with successful
+ *           GetCurrentAccount LnnGetOhosAccountInfo and GetOsAccountUid calls
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -97,7 +99,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_002, TestSize.Level0) {
 
 /*
  * @tc.name: LNN_INIT_OHOS_ACCOUNT_003
- * @tc.desc: LnnInitOhosAccount_ShouldReturnSuccess_WhenAccountInfoIsUnavailable
+ * @tc.desc: Return SOFTBUS_OK when account info is unavailable (LnnGetOhosAccountInfo returns SOFTBUS_ERR)
+ *           but other operations succeed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -122,7 +125,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_003, TestSize.Level0)
 
 /*
  * @tc.name: LNN_INIT_OHOS_ACCOUNT_004
- * @tc.desc: LnnInitOhosAccount_ShouldReturnError_WhenGenerateStrHashFails
+ * @tc.desc: Return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR when SoftBusGenerateStrHash fails
+ *           with SOFTBUS_ERR during LnnInitOhosAccount
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -138,7 +142,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_004, TestSize.Level0) {
 
 /*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
- * @tc.desc: OnAccountChanged get local account hash fail
+ * @tc.desc: Return true for LnnIsDefaultOhosAccount when LnnGetLocalByteInfo fails
+ *           with SOFTBUS_INVALID_PARAM during LnnUpdateOhosAccount
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -154,7 +159,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
- * @tc.desc:  generate default str hash fail
+ * @tc.desc: Update account successfully when LnnUpdateOhosAccount is called with UPDATE_ACCOUNT_ONLY reason
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -171,7 +176,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_002, TestSize.Level1)
 
 /*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_003
- * @tc.desc: LnnUpdateOhosAccount_ShouldUpdateAccount_WhenReasonIsUpdateAccountOnly
+ * @tc.desc: Use default account UID when GetOsAccountUid fails with SOFTBUS_ERR during LnnUpdateOhosAccount
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -197,7 +202,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_003, TestSize.Level0) {
 
 /*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_004
- * @tc.desc: LnnUpdateOhosAccount_ShouldUseDefaultAccountUid_WhenGetOsAccountUidFails
+ * @tc.desc: Use default account UID when GetOsAccountUid fails with SOFTBUS_ERR during LnnUpdateOhosAccount
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -230,7 +235,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_004, TestSize.Level0) {
 
 /*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_006
- * @tc.desc: LnnUpdateOhosAccount_ShouldNotUpdateAccount_WhenAccountHashNotChanged
+ * @tc.desc: Not update account when account hash remains unchanged during
+ *           LnnUpdateOhosAccount with UPDATE_ACCOUNT_ONLY reason
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -275,7 +281,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_006, TestSize.Level0)
 
 /*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
- * @tc.desc:  generate default str hash fail
+ * @tc.desc: Return false for LnnIsDefaultOhosAccount when SoftBusGenerateStrHash
+ *           fails with SOFTBUS_INVALID_PARAM during LnnOnOhosAccountLogout
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -290,8 +297,9 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_001, TestSize.Level1
 }
 
 /*
- * @tc.name: LnnOnOhosAccountLogoutTest_002
- * @tc.desc:  LnnOnOhosAccountLogout_ShouldGenerateHashAndSetAccountHash_WhenCalled
+ * @tc.name: LNN_ON_OHOS_ACCOUNT_LOGOUT_002
+ * @tc.desc: Generate hash and set account hash successfully when LnnOnOhosAccountLogout
+ *           is called with successful dependent operations
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -306,8 +314,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_002, TestSize.Level0
 }
 
 /*
- * @tc.name: LnnOnOhosAccountLogoutTest_003
- * @tc.desc:  LnnOnOhosAccountLogout_ShouldLogErrorAndReturn_WhenGenerateHashFail
+ * @tc.name: LNN_ON_OHOS_ACCOUNT_LOGOUT_003
+ * @tc.desc: Log error and return when SoftBusGenerateStrHash fails with SOFTBUS_ERR during LnnOnOhosAccountLogout
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -320,8 +328,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_003, TestSize.Level0
 }
 
 /*
- * @tc.name: LnnOnOhosAccountLogoutTest_004
- * @tc.desc:  LnnOnOhosAccountLogout_ShouldSetDefaultAccountUid_WhenGetOsAccountUidFail
+ * @tc.name: LNN_ON_OHOS_ACCOUNT_LOGOUT_004
+ * @tc.desc: Set default account UID when GetOsAccountUid fails with SOFTBUS_ERR during LnnOnOhosAccountLogout
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -338,7 +346,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_004, TestSize.Level0
 
 /*
  * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
- * @tc.desc:  get local accountHash fail
+ * @tc.desc: Return true for LnnIsDefaultOhosAccount when LnnGetLocalByteInfo fails with SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -352,7 +360,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_001, TestSize.Level
 
 /*
  * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
- * @tc.desc:  generate default str hash fail
+ * @tc.desc: Return false for LnnIsDefaultOhosAccount when SoftBusGenerateStrHash fails with SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -367,7 +375,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_002, TestSize.Level
 
 /*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_001
- * @tc.desc: get local num info fail
+ * @tc.desc: Return SOFTBUS_OK for LnnJudgeDeviceTypeAndGetOsAccountInfo
+ *           on multiple calls with valid hash buffer and length
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -383,7 +392,8 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO
  
 /*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_002
- * @tc.desc: get ohos account info fail
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED on first call and SOFTBUS_OK on
+ *           second when LnnGetOhosAccountInfo first fails then succeeds
  * @tc.type: FUNC
  * @tc.require:
  */

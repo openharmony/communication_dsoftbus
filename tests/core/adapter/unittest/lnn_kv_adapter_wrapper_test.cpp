@@ -18,13 +18,13 @@
 #include <securec.h>
 #include <string>
 
+#include "dsoftbus_enhance_interface.h"
+#include "gtest/gtest.h"
+#include "g_enhance_lnn_func.h"
+#include "lnn_kv_adapter.h"
 #include "lnn_kv_adapter_wrapper.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "gtest/gtest.h"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
-#include "lnn_kv_adapter_wrapper_mock.h"
 
 using namespace std;
 using namespace testing;
@@ -69,8 +69,8 @@ void KVAdapterWrapperTest::SetUp() { }
 void KVAdapterWrapperTest::TearDown() { }
 
 /*
- * @tc.name: LnnPutDBData
- * @tc.desc: LnnPutDBData
+ * @tc.name: LnnPutDBData001
+ * @tc.desc: Verify whether LnnPutDBData can correctly handle both valid and invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -101,8 +101,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LnnDeleteDBData
- * @tc.desc: LnnDeleteDBData
+ * @tc.name: LnnDelete001
+ * @tc.desc: Verify whether LnnDeleteDBData can correctly delete data and handle invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -124,8 +124,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnDelete001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LnnDeleteDBDataByPrefix
- * @tc.desc: LnnDeleteDBDataByPrefix
+ * @tc.name: LnnDeleteByPrefix001
+ * @tc.desc: Verify whether LnnDeleteDBDataByPrefix can correctly delete data by prefix and handle invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -155,8 +155,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteByPrefix001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LnnGetDBData
- * @tc.desc: LnnGetDBData
+ * @tc.name: LnnGet001
+ * @tc.desc: Verify whether LnnGetDBData can correctly retrieve data and handle invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -166,7 +166,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
     LnnUnRegisterDataChangeListener(dbId);
     LnnUnRegisterDataChangeListener(dbId + 1);
     dbId = g_dbId;
-    LnnUnRegisterDataChangeListener(dbId);
+LnnUnRegisterDataChangeListener(dbId);
     string keyStr = "aaa";
     string valueStr = "aaa";
     char *value = nullptr;
@@ -185,8 +185,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LnnSubcribeKvStoreService
- * @tc.desc: LnnSubcribeKvStoreService
+ * @tc.name: LnnSubcribeKvStoreService001
+ * @tc.desc: Verify whether LnnSubcribeKvStoreService can correctly subscribe to KV store service
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -246,7 +246,6 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin, T
     int32_t ret = LnnCreateKvAdapter(&dbId, appId, appIdLen, storeId, storeIdLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
-
 /*
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
  * @tc.desc: Test LnnCreateKvAdapter with appIdLen being greater than MAX_STRING_LEN
@@ -427,7 +426,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_Dbid_LessThanMin, TestSize.Level1)
 {
     int32_t dbId = MIN_DBID_COUNT - 1;
     const char *key = "validKey";
-    int32_t keyLen = strlen(key);
+int32_t keyLen = strlen(key);
     const char *value = "validValue";
     int32_t valueLen = strlen(value);
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);
@@ -546,7 +545,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_LessThanMin, TestSize.Level1)
 
 /*
  * @tc.name: LnnGetDBData_KeyLen_GreaterThanMax
- * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify whether LnnGetDBData can correctly return SOFTBUS_INVALID_PARAM
+ *           when keyLen is greater than MAX_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -563,7 +563,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_GreaterThanMax, TestSize.Leve
 
 /*
  * @tc.name: LnnGetDBData_Dbid_LessThanMin
- * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify whether LnnGetDBData can correctly return SOFTBUS_INVALID_PARAM
+ *           when dbId is less than MIN_DBID_COUNT
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -667,26 +668,27 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
 
 /*
  * @tc.name: LnnCloudSync001
- * @tc.desc: LnnCloudSync
+ * @tc.desc: Verify LnnCloudSync return results under different conditions
+ *          cloud sync disabled returns SOFTBUS_KV_CLOUD_DISABLED invalid dbId returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    ASSERT_TRUE(pfnLnnEnhanceFuncList != nullptr);
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = nullptr;
     int32_t dbId = g_dbId;
-    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
-    EXPECT_CALL(LnnKvAdapterWrapperMock, IsCloudSyncEnabled).WillOnce(Return(true));
     int32_t lnnCloudRet = LnnCloudSync(dbId);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_SYNC_FAIL);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
     lnnCloudRet = LnnCloudSync(dbId + 1);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
 }
 
 /*
  * @tc.name: LnnCloudSync002
- * @tc.desc: test LnnCloudSync param invalid
+ * @tc.desc: Verify LnnCloudSync returns SOFTBUS_INVALID_PARAM when
+ *           using invalid dbId with cloud sync disabled
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -694,7 +696,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     ASSERT_TRUE(pfnLnnEnhanceFuncList != nullptr);
-    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = nullptr;
     int32_t dbId = g_dbId;
     constexpr int32_t idOffset = 1;
     int32_t lnnCloudRet = LnnCloudSync(dbId + idOffset);
@@ -703,7 +705,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
 
 /*
  * @tc.name: LnnCloudSync004
- * @tc.desc: LnnCloudSync cloud_disabled
+ * @tc.desc: Verify LnnCloudSync returns SOFTBUS_KV_CLOUD_DISABLED when
+ *           cloud sync is disabled after successful KV adapter creation and initialization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -716,15 +719,13 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync004, TestSize.Level1)
     kvAdapter = std::make_shared<KVAdapter>(APP_ID, STORE_ID);
     int32_t initRet = kvAdapter->Init();
     EXPECT_EQ(initRet, SOFTBUS_OK);
-    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
-    EXPECT_CALL(LnnKvAdapterWrapperMock, FindKvStorePtr).WillRepeatedly(Return(kvAdapter));
     int32_t lnnCloudRet = LnnCloudSync(dbId);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
 }
 
 /*
  * @tc.name: LnnDeleteDBDataByNull
- * @tc.desc: LnnDeleteDBData Invalid Param
+ * @tc.desc: Verify LnnPutDBData returns SOFTBUS_INVALID_PARAM when key parameter is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -738,7 +739,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByNull, TestSize.Level1)
 
 /*
  * @tc.name: LnnGetDBDataByKey
- * @tc.desc: LnnGetDBData  Invalid Param
+ * @tc.desc: Verify LnnGetDBData returns SOFTBUS_INVALID_PARAM when key parameter is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -752,7 +753,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBDataByKey, TestSize.Level1)
 
 /*
  * @tc.name: LnnDeleteDBDataByInvalid
- * @tc.desc: LnnDeleteDBDataByPrefix  Invalid Param
+ * @tc.desc: Verify whether LnnDeleteDBDataByPrefix can correctly return
+ *           the expected error code when invalid parameters are passed
  * @tc.type: FUNC
  * @tc.require:
  */

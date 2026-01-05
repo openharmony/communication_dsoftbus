@@ -23,8 +23,8 @@
 extern "C" {
 #endif
 
-void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *extra, int32_t size);
-void BroadcastScanEvent(int32_t eventScene, int32_t eventStage, DiscEventExtra *extra, int32_t size);
+void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventDiscExtra *extra, int32_t size);
+void BroadcastScanEvent(int32_t eventScene, int32_t eventStage, DiscEventScanExtra *extra, int32_t size);
  
 #ifdef __cplusplus
 }

@@ -301,6 +301,8 @@ typedef struct {
     char *businessData;                                     /* business data in unicast: {"bData":"xxx"} */
     uint32_t length;                                        /* the length of business data, include '\0' */
     uint8_t businessType;                                   /* service identify */
+    uint32_t capBitmapNum;                                  /* number of capability sets */
+    uint32_t capBitmap[NSTACKX_MAX_CAPABILITY_NUM];         /* set of capabilities */
 } NSTACKX_ResponseSettings;
 
 #ifdef ENABLE_USER_LOG

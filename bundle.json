@@ -114,7 +114,9 @@
         "usb_manager",
         "selinux_adapter",
         "time_service",
-        "napi"
+        "napi",
+        "resource_schedule_service",
+        "device_standby"
       ],
       "third_party": [
         "cJSON",

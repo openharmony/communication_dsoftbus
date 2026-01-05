@@ -31,7 +31,9 @@ bool TransIsProxyChannelEnabled(int32_t uid);
 int32_t TransRegisterPushHook();
 void BrProxyClientDeathClearResource(pid_t callingPid);
 bool IsBrProxy(const char *bundleName);
-void CloseAllConnect();
+void CloseAllConnect(int32_t appIndex);
+int32_t ApplyForUnrestricted(int32_t channelId);
+void TransBrProxyRemoveObject();
 
 #ifdef __cplusplus
 }

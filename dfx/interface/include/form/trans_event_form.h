@@ -50,6 +50,7 @@ typedef enum {
     EVENT_SCENE_TRANS_FILE_RATE = 23,
     EVENT_SCENE_FAST_WAKE_UP = 24,
     EVENT_SCENE_SESSION_INFO = 25,
+    EVENT_SCENE_TRANS_BR_PROXY = 26,
 } TransEventScene;
 
 typedef enum {
@@ -127,6 +128,14 @@ typedef enum {
     WAKE_UP_STATE_BUTT,
 } WakeUpState;
 
+typedef enum {
+    EVENT_STAGE_OPEN_CHANNEL = 1,
+    EVENT_STAGE_SEND_DATA = 2,
+    EVENT_STAGE_CHANNEL_STATUS = 3,
+    EVENT_STAGE_INTERNAL_STATE = 4,
+    EVENT_STAGE_RECV_DATA = 5,
+} TransEventBrProxy;
+
 typedef struct {
     uint8_t talkieFreq;        // TALKIE_FREQ
     uint8_t talkieType;        // TALKIE_TYPE
@@ -201,6 +210,7 @@ typedef struct {
     int32_t streamChannelCnt;
     int32_t dataLen;
     uint64_t sessionDuration;    // SESSION_DURATION
+    uint8_t channelStatus;     // BR_PROXY_CHANNEL_STATUS
 } TransEventExtra;
 
 typedef enum {

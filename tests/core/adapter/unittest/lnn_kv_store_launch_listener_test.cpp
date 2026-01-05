@@ -50,8 +50,9 @@ void LNNKvStoreLaunchListenerTest::SetUp(void) { }
 void LNNKvStoreLaunchListenerTest::TearDown(void) { }
 
 /*
- * @tc.name: OnAddSystemAbility
- * @tc.desc: check DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID
+ * @tc.name: ON_ADD_SYSTEM_ABILITY_001
+ * @tc.desc: Verify LnnInitCloudSyncModule is called once when OnAddSystemAbility receives
+ *           DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID and call OnRemoveSystemAbility with the same ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -65,8 +66,9 @@ HWTEST_F(LNNKvStoreLaunchListenerTest, ON_ADD_SYSTEM_ABILITY_001, TestSize.Level
 }
 
 /*
- * @tc.name: OnAddSystemAbility
- * @tc.desc: check not DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID
+ * @tc.name: ON_ADD_SYSTEM_ABILITY_002
+ * @tc.desc: Verify LnnInitCloudSyncModule is not called when OnAddSystemAbility receives an ID other
+ *           than DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID and call OnRemoveSystemAbility with the same non-target ID
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -64,7 +64,7 @@ void Sqlite3UtilsTest::TearDown()
 
 /*
  * @tc.name: Open_Database_Test_001
- * @tc.desc: open database test
+ * @tc.desc: Verify OpenDatabase returns SOFTBUS_INVALID_PARAM when input DbContext pointer is nullptr
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -77,7 +77,8 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_01, TestSize.Level0)
 
 /*
  * @tc.name: Open_Database_Test_002
- * @tc.desc: open database test
+ * @tc.desc: Verify OpenDatabase returns SOFTBUS_OK and initializes non-nullptr DbContext
+ *           CloseDatabase returns SOFTBUS_OK for valid DbContext
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -92,7 +93,8 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_02, TestSize.Level0)
 
 /*
  * @tc.name: Open_Database_Test_003
- * @tc.desc: open database test
+ * @tc.desc: Verify OpenDatabase and CloseDatabase work correctly in repeated open-close cycles with
+ *           SOFTBUS_OK return and non-nullptr DbContext
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -110,7 +112,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_03, TestSize.Level0)
 
 /*
  * @tc.name: Create_Table_Test_001
- * @tc.desc: create table test
+ * @tc.desc: Verify CreateTable returns SOFTBUS_INVALID_PARAM when input DbContext pointer is nullptr
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -124,7 +126,8 @@ HWTEST_F(Sqlite3UtilsTest, Create_Table_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Create_Table_Test_002
- * @tc.desc: create table test
+ * @tc.desc: Verify CreateTable returns SOFTBUS_OK and initializes table TABLE_TRUSTED_DEV_INFO
+ *           DeleteTable returns SOFTBUS_OK for valid DbContext
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -148,7 +151,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_Table_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: Create_and_Encrypt_Database_Test_001
- * @tc.desc: create and encrypt database test
+ * @tc.desc: Verify CreateDatabase and EncryptedDb work correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -173,7 +176,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_001, TestSize.Level0
 
 /*
  * @tc.name: Create_and_Encrypt_Database_Test_002
- * @tc.desc: create and encrypt database test
+ * @tc.desc: Verify CreateDatabase and EncryptedDb work correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -210,7 +213,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_002, TestSize.Level0
 
 /*
  * @tc.name: Create_and_Encrypt_Database_Test_003
- * @tc.desc: create and encrypt database test
+ * @tc.desc: Verify CreateDatabase and EncryptedDb work correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -249,7 +252,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_003, TestSize.Level0
 
 /*
  * @tc.name: Create_and_Encrypt_Database_Test_004
- * @tc.desc: create and encrypt database test
+ * @tc.desc: Verify CreateDatabase and EncryptedDb work correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -288,7 +291,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_004, TestSize.Level0
 
 /*
  * @tc.name: Create_and_Encrypt_Database_Test_005
- * @tc.desc: create and encrypt database test
+ * @tc.desc: Verify CreateDatabase and EncryptedDb work correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -328,7 +331,7 @@ HWTEST_F(Sqlite3UtilsTest, Create_and_Encrypt_Database_Test_005, TestSize.Level0
 
 /*
  * @tc.name: Insert_data_Inerface_Test_001
- * @tc.desc: insert data interface test
+ * @tc.desc: Verify InsertRecord works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -351,7 +354,7 @@ HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Insert_data_Inerface_Test_002
- * @tc.desc: insert data interface test
+ * @tc.desc: Verify InsertRecord works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -376,7 +379,7 @@ HWTEST_F(Sqlite3UtilsTest, Insert_data_Inerface_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: Remove_data_Inerface_Test_001
- * @tc.desc: remove data interface test
+ * @tc.desc: Verify RemoveAllRecord works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -400,7 +403,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Remove_data_Inerface_Test_002
- * @tc.desc: remove data interface test
+ * @tc.desc: Verify RemoveRecordByKey works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -424,7 +427,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: Remove_data_Inerface_Test_003
- * @tc.desc: remove data interface test
+ * @tc.desc: Verify RemoveRecordByKey works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -448,7 +451,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_data_Inerface_Test_003, TestSize.Level0)
 
 /*
  * @tc.name: Query_data_Inerface_Test_001
- * @tc.desc: query data interface test
+ * @tc.desc: Verify QueryRecordByKey works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -476,7 +479,7 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Query_data_Inerface_Test_002
- * @tc.desc: query data interface test
+ * @tc.desc: Verify QueryRecordByKey works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -507,7 +510,7 @@ HWTEST_F(Sqlite3UtilsTest, Query_data_Inerface_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: Open_and_Close_Transaction_Test_001
- * @tc.desc: open and close transaction test
+ * @tc.desc: Verify OpenTransaction and CloseTransaction works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -529,7 +532,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Open_and_Close_Transaction_Test_002
- * @tc.desc: open and close transaction test
+ * @tc.desc: Verify OpenTransaction and CloseTransaction works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require: I5PIFW
  */
@@ -559,7 +562,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_and_Close_Transaction_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: Open_Database_Test_001
- * @tc.desc: open database test
+ * @tc.desc: Verify OpenDatabase works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -577,7 +580,7 @@ HWTEST_F(Sqlite3UtilsTest, Open_Database_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Insert_Record_Test_001
- * @tc.desc: insert record test
+ * @tc.desc: Verify InsertRecord works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -593,7 +596,7 @@ HWTEST_F(Sqlite3UtilsTest, Insert_Record_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Close_Database_Test_001
- * @tc.desc: close database test
+ * @tc.desc: Verify CloseDatabase works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -608,7 +611,7 @@ HWTEST_F(Sqlite3UtilsTest, Close_Database_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Db_Password_Test_001
- * @tc.desc: db password test
+ * @tc.desc: Verify EncryptedDb works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -636,7 +639,7 @@ HWTEST_F(Sqlite3UtilsTest, Db_Password_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: Remove_Record_Key_001
- * @tc.desc: remove record key
+ * @tc.desc: Verify RemoveRecordByKey works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -660,7 +663,7 @@ HWTEST_F(Sqlite3UtilsTest, Remove_Record_Key_001, TestSize.Level0)
 
 /*
  * @tc.name: Get_Query_Result_001
- * @tc.desc: Get Record Key test
+ * @tc.desc: Verify GetQueryResultColText works correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -693,7 +696,8 @@ HWTEST_F(Sqlite3UtilsTest, Get_Query_Result_001, TestSize.Level0)
 
 /*
  * @tc.name: Bind_Para_Test_001
- * @tc.desc: bind para test
+ * @tc.desc: Verify BindParaInt, BindParaInt64, BindParaDouble, BindParaText works
+ *           correctly with valid input parameters
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -272,18 +272,23 @@ napi_value NapiLinkEnhanceServer::Start(napi_env env, napi_callback_info info)
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
-        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceServer *enhanceServer = NapiGetEnhanceServer(env, info);
     if (enhanceServer == nullptr) {
-        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
+        HandleSyncErr(env, LINK_ENHANCE_INTERNAL_ERR);
         return NapiGetUndefinedRet(env);
     }
     int32_t ret = GeneralCreateServer(PKG_NAME.c_str(), enhanceServer->name_.c_str());
     if (ret != 0) {
         COMM_LOGE(COMM_SDK, "create server fail, ret=%{public}d", ret);
         int32_t errCode = ConvertToJsErrcode(ret);
+        if (errCode == LINK_ENHANCE_PARAMETER_INVALID) {
+            napi_throw_error(env, std::to_string(errCode).c_str(),
+                "check whether the length of the name input when calling the createServer interface is valid");
+            return NapiGetUndefinedRet(env);
+        }
         HandleSyncErr(env, errCode);
     }
     return NapiGetUndefinedRet(env);

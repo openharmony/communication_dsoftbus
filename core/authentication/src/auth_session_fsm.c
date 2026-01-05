@@ -21,6 +21,7 @@
 #include "auth_connection.h"
 #include "auth_deviceprofile.h"
 #include "auth_hichain.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_normalize_request.h"
@@ -43,6 +44,8 @@
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_ohos_account_adapter.h"
+#include "lnn_ohos_account.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -1359,6 +1362,58 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
 }
 
+static bool JudgeIsSameAccount(const char *accountHash)
+{
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local account hash fail");
+        return false;
+    }
+
+    uint8_t peerAccountHash[SHA_256_HASH_LEN] = { 0 };
+    if (ConvertHexStringToBytes(peerAccountHash, SHA_256_HASH_LEN, accountHash, strlen(accountHash)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert peer account hash to bytes fail");
+        return false;
+    }
+
+    return (memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == 0) &&
+        (!LnnIsDefaultOhosAccount());
+}
+
+static void GetCredTypeByCredId(AuthSessionInfo *info)
+{
+    if (info->authVersion < AUTH_VERSION_V2) {
+        AUTH_LOGD(AUTH_FSM, "lower version dont need unpack auth info");
+        return;
+    }
+
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetLocalNodeInfoSafe(&nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get node info fail");
+        return;
+    }
+    info->isSameAccount = JudgeIsSameAccount(info->accountHash);
+    char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local udid short hash fail");
+        return;
+    }
+    char *udidShortHash = info->isSameAccount ? localUdidHash : info->udidShortHash;
+    char *credList = NULL;
+    ret = AuthIdServiceQueryCredential(info->userId, udidShortHash, info->accountHash, info->isSameAccount, &credList);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "query credential fail");
+        return;
+    }
+    info->credId = IdServiceGetCredIdFromCredList(nodeInfo.userId, credList);
+    if (info->credId == NULL) {
+        AUTH_LOGE(AUTH_FSM, "get cred id fail");
+    }
+    IdServiceDestroyCredentialList(&credList);
+}
+
 static void DeviceAuthStateEnter(FsmStateMachine *fsm)
 {
     if (fsm == NULL) {
@@ -1381,6 +1436,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
         }
         return;
     }
+    GetCredTypeByCredId(info);
     if (!info->isServer) {
         ret = ProcessClientAuthState(authFsm);
     }

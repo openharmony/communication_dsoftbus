@@ -51,7 +51,7 @@ static void NotifyP2pStateChange(int32_t retCode)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest001, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest001 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest001 in");
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [](InterfaceInfo &interface) {
             interface.SetIsEnable(true);
@@ -81,7 +81,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest001, TestSize.Level1)
     destroyResult.errorCode_ = SOFTBUS_OK;
     EXPECT_CALL(entityMock, Disconnect).WillOnce(Return(destroyResult));
     WifiDirectP2pAdapter::GetInstance()->ConnDestroyGoOwner("");
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest001 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest001 out");
 }
 
 /*
@@ -92,7 +92,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest001, TestSize.Level1)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest002, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest002 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest002 in");
     P2pAdapterMock adapterMock;
     P2pEntityMock entityMock;
     EXPECT_CALL(adapterMock, GetRecommendChannel).WillOnce(Return(36));
@@ -115,7 +115,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest002, TestSize.Level1)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest003, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest003 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest003 in");
     P2pAdapterMock adapterMock;
     EXPECT_CALL(adapterMock, GetRecommendChannel).WillOnce(Return(36));
     EXPECT_CALL(adapterMock, GetCoexConflictCode).WillOnce(Return(SOFTBUS_CONN_ACTIVE_TYPE_STA_P2P_HML_55_CONFLICT));
@@ -124,7 +124,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest003, TestSize.Level1)
     struct GroupOwnerResult result{};
     auto ret = WifiDirectP2pAdapter::GetInstance()->ConnCreateGoOwner("", &config, &result, NotifyP2pStateChange);
     EXPECT_EQ(ret, SOFTBUS_CONN_ACTIVE_TYPE_STA_P2P_HML_55_CONFLICT);
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest003 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest003 out");
 }
 
 /*
@@ -135,7 +135,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest003, TestSize.Level1)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest004, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest004 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest004 in");
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [](InterfaceInfo &interface) {
             interface.SetIsCreateGo(true);
@@ -159,7 +159,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest004, TestSize.Level1)
     destroyResult.errorCode_ = SOFTBUS_OK;
     EXPECT_CALL(entityMock, Disconnect).WillOnce(Return(destroyResult));
     WifiDirectP2pAdapter::GetInstance()->ConnDestroyGoOwner("");
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest004 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest004 out");
 }
 
 /*
@@ -170,14 +170,14 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest004, TestSize.Level1)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest005, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest005 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest005 in");
     P2pEntityMock entityMock;
     EXPECT_CALL(entityMock, ReuseLink).WillOnce(Return(SOFTBUS_CONN_CREATE_GROUP_FAILED));
     const struct GroupOwnerConfig config{};
     struct GroupOwnerResult result{};
     auto ret = WifiDirectP2pAdapter::GetInstance()->ConnCreateGoOwner("", &config, &result, NotifyP2pStateChange);
     EXPECT_EQ(ret, SOFTBUS_CONN_CREATE_GROUP_FAILED);
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest005 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest005 out");
 }
 
 /*
@@ -188,7 +188,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest005, TestSize.Level1)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest006, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest006 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest006 in");
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [](InterfaceInfo &interface) {
             interface.SetIsCreateGo(false);
@@ -199,7 +199,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest006, TestSize.Level1)
     struct GroupOwnerResult result{};
     auto ret = WifiDirectP2pAdapter::GetInstance()->ConnCreateGoOwner("", &config, &result, NotifyP2pStateChange);
     EXPECT_EQ(ret, SOFTBUS_CONN_GO_IS_NOT_CREATED_SOFTBUS);
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest006 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest006 out");
 }
 
 /*
@@ -210,7 +210,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest006, TestSize.Level1)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest007, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest007 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest007 in");
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [](InterfaceInfo &interface) {
             interface.SetRole(LinkInfo::LinkMode::GC);
@@ -221,7 +221,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest007, TestSize.Level1)
     struct GroupOwnerResult result{};
     auto ret = WifiDirectP2pAdapter::GetInstance()->ConnCreateGoOwner("", &config, &result, NotifyP2pStateChange);
     EXPECT_EQ(ret, SOFTBUS_CONN_P2P_ROLE_IS_GC);
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest007 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest007 out");
 }
 
 /*
@@ -232,7 +232,7 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest007, TestSize.Level1)
  */
 HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest008, TestSize.Level1)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest008 enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest008 in");
     InterfaceManager::GetInstance().UpdateInterface(
         InterfaceInfo::P2P, [](InterfaceInfo &interface) {
             interface.SetRole(LinkInfo::LinkMode::STA);
@@ -243,6 +243,6 @@ HWTEST_F(WifiDirectP2pAdapterTest, ConnCreateGoOwnerTest008, TestSize.Level1)
     struct GroupOwnerResult result{};
     auto ret = WifiDirectP2pAdapter::GetInstance()->ConnCreateGoOwner("", &config, &result, NotifyP2pStateChange);
     EXPECT_EQ(ret, SOFTBUS_CONN_P2P_ROLE_INVALID);
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest008 exit");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnCreateGoOwnerTest008 out");
 }
 } // namespace OHOS::SoftBus
