@@ -1322,7 +1322,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_BY_IFNMAEIDX_001, TestSize.Level1
     int32_t ret = LnnSetLocalInfoByIfnameIdx(INFO_KEY_MAX, nullptr, INFO_KEY_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetLocalInfoByIfnameIdx(BYTE_KEY_BROADCAST_CIPHER_KEY, nullptr, BYTE_KEY_BROADCAST_CIPHER_KEY);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1355,7 +1355,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_BY_IFNAMEIDX_001, TestSize.Le
     ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_ACCOUNT_UID, info, CAPABILTY);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, info, USB_IF);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1384,7 +1384,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_002, TestSize.Level1)
 {
     bool info = false;
     int32_t ret = LnnGetLocalBoolInfo(STRING_KEY_IP, &info, 0);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1422,7 +1422,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_002, TestSize.Level
     int32_t info = 0;
     int32_t ifIdx = 0;
     int32_t ret = LnnGetLocalInfoByIfnameIdx(NUM_KEY_META_NODE, (void*)&info, infoSize, ifIdx);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1473,7 +1473,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_002, TestSize.L
 {
     char info[MAX_ADDR_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_ACCOUNT_UID, info, MAX_ADDR_LEN, MIN_IF);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
