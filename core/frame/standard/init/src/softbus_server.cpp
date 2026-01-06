@@ -164,6 +164,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
                 return SOFTBUS_MEM_ERR;
             }
             connOpt.brOption.waitTimeoutDelay = OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS;
+            connOpt.brOption.isDisableBrFrequentConnectControl = true;
             break;
         default:
             COMM_LOGE(COMM_SVC, "connect type error");
