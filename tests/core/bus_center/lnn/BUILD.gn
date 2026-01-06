@@ -3896,6 +3896,7 @@ ohos_unittest("LNNFeatureCapabilityMockTest") {
 }
 
 ohos_unittest("LNNNetLedgerTest") {
+  testonly = true
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_test.cpp",
