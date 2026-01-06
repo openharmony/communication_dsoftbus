@@ -42,9 +42,9 @@ void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
     return HeartBeatCtrlDepsInterface()->LnnNotifyNetworkStateChanged(state);
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
-    return HeartBeatCtrlDepsInterface()->AuthFlushDevice(uuid);
+    return HeartBeatCtrlDepsInterface()->AuthFlushDevice(uuid, type);
 }
 
 int32_t SoftBusGetBtState(void)

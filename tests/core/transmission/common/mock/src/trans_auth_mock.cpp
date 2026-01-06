@@ -81,9 +81,9 @@ uint32_t AuthGenRequestId(void)
     return GetTransAuthInterface()->AuthGenRequestId();
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
-    return GetTransAuthInterface()->AuthFlushDevice(uuid);
+    return GetTransAuthInterface()->AuthFlushDevice(uuid, type);
 }
 
 void AuthHandleLeaveLNN(AuthHandle authHandle)

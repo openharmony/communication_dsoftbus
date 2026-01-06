@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "auth_interface_struct.h"
 #include "bus_center_event.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
@@ -32,7 +33,7 @@ public:
     virtual ~HeartBeatCtrlDepsInterface() {};
 
     virtual void LnnNotifyNetworkStateChanged(SoftBusNetworkState state) = 0;
-    virtual int32_t AuthFlushDevice(const char *uuid) = 0;
+    virtual int32_t AuthFlushDevice(const char *uuid, AuthLinkType type) = 0;
     virtual int32_t SoftBusGetBtState(void) = 0;
     virtual int32_t SoftBusGetBrState(void) = 0;
     virtual void RestartCoapDiscovery(void) = 0;
@@ -50,7 +51,7 @@ public:
     ~HeartBeatCtrlDepsInterfaceMock() override;
 
     MOCK_METHOD1(LnnNotifyNetworkStateChanged, void(SoftBusNetworkState));
-    MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
+    MOCK_METHOD2(AuthFlushDevice, int32_t(const char *, AuthLinkType));
     MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
     MOCK_METHOD0(SoftBusGetBrState, int32_t(void));
     MOCK_METHOD0(RestartCoapDiscovery, void(void));
