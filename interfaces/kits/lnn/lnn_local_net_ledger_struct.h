@@ -56,6 +56,11 @@ typedef enum {
     UPDATE_SLE_CAP = 256,
 } StateVersionChangeReason;
 
+typedef struct {
+    bool isAdd;
+    uint64_t featureSet;
+} FeatureOption;
+
 #ifdef __cplusplus
 }
 #endif

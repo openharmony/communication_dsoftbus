@@ -1425,10 +1425,24 @@ static int32_t UpdateLocalNetCapability(const void *capability)
 
 static int32_t UpdateLocalFeatureCapability(const void *capability)
 {
-    if (capability == NULL) {
+    FeatureOption *featureOption = (FeatureOption *)capability;
+    if (featureOption == NULL || (featureOption->featureSet >= (0x1LLU << BIT_FEATURE_COUNT)) ||
+        featureOption->featureSet == 0) {
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    g_localNetLedger.localInfo.feature = *(uint64_t *)capability;
+    uint64_t oldFeature = g_localNetLedger.localInfo.feature;
+    if (featureOption->isAdd) {
+        g_localNetLedger.localInfo.feature |= featureOption->featureSet;
+    } else {
+        g_localNetLedger.localInfo.feature &= (~(featureOption->featureSet));
+    }
+    if (oldFeature == g_localNetLedger.localInfo.feature) {
+        LNN_LOGI(LNN_LEDGER, "not need update feature");
+        return SOFTBUS_NOT_NEED_UPDATE;
+    }
+    LNN_LOGI(LNN_LEDGER, "local feature changed=%{public}" PRIu64 "->%{public}" PRIu64, oldFeature,
+            g_localNetLedger.localInfo.feature);
     return SOFTBUS_OK;
 }
 
