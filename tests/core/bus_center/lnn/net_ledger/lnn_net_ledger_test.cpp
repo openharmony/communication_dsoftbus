@@ -49,14 +49,11 @@ void LNNNetLedgerMockTest::TearDown() { }
 HWTEST_F(LNNNetLedgerMockTest, LnnSetLocalFeatureTest001, TestSize.Level0)
 {
     NiceMock<LnnNetLedgerInterfaceMock> netLedgerMock;
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU64Info)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(LnnSetLocalFeature());
     EXPECT_CALL(netLedgerMock, IsSupportLpFeaturePacked).WillOnce(Return(true)).WillRepeatedly(Return(false));
     EXPECT_CALL(netLedgerMock, LnnIsSupportLpSparkFeaturePacked).WillOnce(Return(true)).WillRepeatedly(Return(false));
     EXPECT_CALL(netLedgerMock, LnnClearFeatureCapability).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNum64Info)
+    EXPECT_CALL(netLedgerMock, LnnSetFeatureCapability).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnSetLocalByteInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(LnnSetLocalFeature());

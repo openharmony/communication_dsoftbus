@@ -70,6 +70,17 @@ int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
     return GetLnnNetLedgerInterface()->LnnClearFeatureCapability(feature, capaBit);
 }
 
+int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
+{
+    return GetLnnNetLedgerInterface()->LnnSetFeatureCapability(feature, capaBit);
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetLnnNetLedgerInterface()->LnnSetLocalByteInfo(key, info, len);
+}
+
+
 bool IsSupportMcuFeaturePacked(void)
 {
     return false;
