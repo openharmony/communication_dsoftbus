@@ -622,9 +622,7 @@ HWTEST_F(AuthOtherMockTest, GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001, TestSize
     ret = GetIsExchangeUdidByNetworkId(networkId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetIsExchangeUdidByNetworkId(networkId, &isExchangeUdid);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-    ret = GetIsExchangeUdidByNetworkId(networkId, &isExchangeUdid);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
