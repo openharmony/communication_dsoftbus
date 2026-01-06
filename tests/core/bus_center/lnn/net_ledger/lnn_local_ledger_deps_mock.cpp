@@ -962,9 +962,9 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     return GetLocalLedgerDepsInterface()->LnnIsNeedCleanConnectionFsm(nodeInfo, type);
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
-    return GetLocalLedgerDepsInterface()->AuthFlushDevice(uuid);
+    return GetLocalLedgerDepsInterface()->AuthFlushDevice(uuid, type);
 }
 
 int32_t LnnPutDBData(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen)

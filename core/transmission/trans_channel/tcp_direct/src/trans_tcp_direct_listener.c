@@ -347,6 +347,14 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
 
         if (ret != SOFTBUS_OK || !conn.serverSide) {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+            char *anonyUuid = NULL;
+            Anonymize(conn.appInfo.peerData.deviceId, &anonyUuid);
+            if (AuthFlushDevice(conn.appInfo.peerData.deviceId, (AuthLinkType)conn.authHandle.type) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "flush device failed, deviceid=%{public}s", AnonymizeWrapper(anonyUuid));
+            } else {
+                TRANS_LOGE(TRANS_CTRL, "flush device success, deviceid=%{public}s", AnonymizeWrapper(anonyUuid));
+            }
+            AnonymizeFree(anonyUuid);
         } else {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         }

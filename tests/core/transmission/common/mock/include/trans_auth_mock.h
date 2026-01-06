@@ -41,7 +41,7 @@ public:
     virtual void UnregGroupChangeListener(void) = 0;
 
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual int32_t AuthFlushDevice(const char *uuid) = 0;
+    virtual int32_t AuthFlushDevice(const char *uuid, AuthLinkType type) = 0;
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
 
     virtual int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port) = 0;
@@ -113,7 +113,7 @@ public:
     MOCK_METHOD0(UnregGroupChangeListener, void ());
 
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
-    MOCK_METHOD1(AuthFlushDevice, int32_t (const char *));
+    MOCK_METHOD2(AuthFlushDevice, int32_t (const char *, AuthLinkType));
     MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(AuthStartListening, int32_t (AuthLinkType, const char *, int32_t));
     MOCK_METHOD1(AuthStopListening, void (AuthLinkType));

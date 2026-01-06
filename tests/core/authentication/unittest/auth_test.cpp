@@ -898,13 +898,15 @@ HWTEST_F(AuthTest, AUTH_FLUSH_DEVICE_Test_001, TestSize.Level1)
     char uuid[TEST_DATA_LEN] = "testdata";
     int32_t ret;
 
-    ret = AuthFlushDevice(nullptr);
+    ret = AuthFlushDevice(nullptr, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '\0';
-    ret = AuthFlushDevice(const_cast<const char *>(uuid));
+    ret = AuthFlushDevice(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
-    ret = AuthFlushDevice(const_cast<const char *>(uuid));
+    ret = AuthFlushDevice(const_cast<const char *>(uuid), AUTH_LINK_TYPE_MAX);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthFlushDevice(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 

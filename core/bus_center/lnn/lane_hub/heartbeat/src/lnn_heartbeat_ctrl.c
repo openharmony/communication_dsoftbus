@@ -1270,7 +1270,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
     DfxRecordTriggerTime(DM_TRIGGER, EVENT_STAGE_LNN_SHIFT_GEAR);
-    int32_t ret = AuthFlushDevice(uuid);
+    int32_t ret = AuthFlushDevice(uuid, AUTH_LINK_TYPE_WIFI);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_INVALID_PARAM) {
         LNN_LOGI(LNN_HEART_BEAT, "tcp flush failed, wifi will offline");
         return LnnRequestLeaveSpecific(targetNetworkId, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT);
@@ -1317,7 +1317,7 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
             continue;
         }
         (void)LnnConvertDlId(info[i].networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
-        if (AuthFlushDevice(uuid) != SOFTBUS_OK) {
+        if (AuthFlushDevice(uuid, AUTH_LINK_TYPE_WIFI) != SOFTBUS_OK) {
             char *anonyUuid = NULL;
             Anonymize(uuid, &anonyUuid);
             LNN_LOGE(LNN_HEART_BEAT, "tcp flush failed, wifi will offline, uuid=%{public}s",

@@ -81,9 +81,9 @@ int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool is
 {
     return GetAuthInterface()->AuthGetIdByConnInfo(connInfo, isServer, isMeta);
 }
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
-    return GetAuthInterface()->AuthFlushDevice(uuid);
+    return GetAuthInterface()->AuthFlushDevice(uuid, type);
 }
 int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
 {

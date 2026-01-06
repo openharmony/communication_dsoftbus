@@ -49,9 +49,10 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
     return;
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
     (void)uuid;
+    (void)type;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
