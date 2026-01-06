@@ -50,5 +50,10 @@ int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum
 {
     return GetLnnNetBuilderInterface()->LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
 }
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetLnnNetBuilderInterface()->LnnSetLocalByteInfo(key, info, len);
+}
 }
 } // namespace OHOS
