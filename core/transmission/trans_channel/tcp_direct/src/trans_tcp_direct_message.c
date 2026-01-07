@@ -297,7 +297,7 @@ static void SendFailToFlushDevice(SessionConn *conn)
         Anonymize(conn->appInfo.peerData.deviceId, &tmpId);
         TRANS_LOGE(TRANS_CTRL, "send data fail, do Authflushdevice deviceId=%{public}s", AnonymizeWrapper(tmpId));
         AnonymizeFree(tmpId);
-        if (AuthFlushDevice(conn->appInfo.peerData.deviceId) != SOFTBUS_OK) {
+        if (AuthFlushDevice(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "tcp flush failed, wifi will offline");
             LnnRequestLeaveSpecific(conn->appInfo.peerNetWorkId, CONNECTION_ADDR_WLAN, DEVICE_LEAVE_REASON_DEFAULT);
         }

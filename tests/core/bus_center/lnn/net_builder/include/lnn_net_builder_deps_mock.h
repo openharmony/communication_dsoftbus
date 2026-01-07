@@ -152,7 +152,7 @@ public:
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
     virtual bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type);
-    virtual int32_t AuthFlushDevice(const char *uuid);
+    virtual int32_t AuthFlushDevice(const char *uuid, AuthLinkType type);
     virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight);
     virtual int32_t LnnInitFastOffline(void);
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
@@ -341,7 +341,7 @@ public:
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
     MOCK_METHOD3(AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool(const NodeInfo *, ConnectionAddrType));
-    MOCK_METHOD1(AuthFlushDevice, int32_t(const char *uuid));
+    MOCK_METHOD2(AuthFlushDevice, int32_t(const char *uuid, AuthLinkType type));
     MOCK_METHOD0(IsSupportLpFeature, bool());
     MOCK_METHOD0(LnnNotifyLocalNetworkIdChanged, void());
     MOCK_METHOD(bool, LnnIsDefaultOhosAccount, (), (override));

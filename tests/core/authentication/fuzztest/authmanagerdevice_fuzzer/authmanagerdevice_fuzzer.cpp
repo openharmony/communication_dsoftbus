@@ -162,7 +162,7 @@ bool AuthDeviceManagerFuzzTest(FuzzedDataProvider &provider)
     int32_t index = provider.ConsumeIntegral<int32_t>();
     AuthDeviceGetAuthHandleByIndex(udid.c_str(), info.isServer, index, &authHandle);
     OnDisconnected(info.connId, &connInfo);
-    AuthFlushDevice(uuid.c_str());
+    AuthFlushDevice(uuid.c_str(), AUTH_LINK_TYPE_WIFI);
     DelAuthManagerByConnectionId(info.connId);
     DelAuthManager(auth, info.connInfo.type);
     return true;
