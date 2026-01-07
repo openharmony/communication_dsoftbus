@@ -1870,8 +1870,12 @@ static int32_t SetLocalTcpKeepalive(const char *uuid, ModeCycle cycle)
     return ret;
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
+    if (type != AUTH_LINK_TYPE_WIFI) {
+        AUTH_LOGE(AUTH_CONN, "invalid type");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (uuid == NULL || uuid[0] == '\0') {
         AUTH_LOGE(AUTH_CONN, "uuid is empty");
         return SOFTBUS_INVALID_PARAM;

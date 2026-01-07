@@ -217,9 +217,9 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     return HeartBeatCtrlStaticInterface()->LnnGetOnlineStateById(id, type);
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
-    return HeartBeatCtrlStaticInterface()->AuthFlushDevice(uuid);
+    return HeartBeatCtrlStaticInterface()->AuthFlushDevice(uuid, type);
 }
 
 int32_t LnnHbStrategyInit(void)

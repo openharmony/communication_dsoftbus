@@ -76,7 +76,7 @@ public:
     virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
     virtual void LnnDumpLocalBasicInfo(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
-    virtual int32_t AuthFlushDevice(const char *uuid) = 0;
+    virtual int32_t AuthFlushDevice(const char *uuid, AuthLinkType type) = 0;
     virtual int32_t LnnHbStrategyInit(void) = 0;
     virtual void LnnBleHbUnregDataLevelChangeCb(void) = 0;
     virtual int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
@@ -132,7 +132,7 @@ public:
     MOCK_METHOD3(LnnSetGearModeBySpecificType, int32_t(const char *, const GearMode *, LnnHeartbeatType));
     MOCK_METHOD0(LnnDumpLocalBasicInfo, void(void));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
-    MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
+    MOCK_METHOD2(AuthFlushDevice, int32_t(const char *, AuthLinkType));
     MOCK_METHOD0(LnnHbStrategyInit, int32_t(void));
     MOCK_METHOD0(LnnBleHbUnregDataLevelChangeCb, void(void));
     MOCK_METHOD2(LnnStopOfflineTimingStrategy, int32_t(const char *, ConnectionAddrType));

@@ -215,7 +215,7 @@ public:
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
     virtual bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type);
-    virtual int32_t AuthFlushDevice(const char *uuid);
+    virtual int32_t AuthFlushDevice(const char *uuid, AuthLinkType type);
     virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight);
     virtual int32_t LnnInitFastOffline(void);
     virtual void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal);
@@ -453,7 +453,7 @@ public:
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
     MOCK_METHOD3(AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool(const NodeInfo *, ConnectionAddrType));
-    MOCK_METHOD1(AuthFlushDevice, int32_t(const char *uuid));
+    MOCK_METHOD2(AuthFlushDevice, int32_t(const char *uuid, AuthLinkType type));
     MOCK_METHOD5(
         LnnPutDBData, int32_t(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen));
     MOCK_METHOD1(LnnCloudSync, int32_t(int32_t dbId));

@@ -266,7 +266,7 @@ static void FlushDeviceInfo(const LnnConnectionFsm *connFsm)
     }
     char uuid[UUID_BUF_LEN] = {0};
     (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
-    (void)AuthFlushDevice(uuid);
+    (void)AuthFlushDevice(uuid, AUTH_LINK_TYPE_WIFI);
 }
 
 int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)

@@ -131,7 +131,7 @@ bool AuthFlushDeviceFuzzTest()
         SoftBusFree(uuid);
         return false;
     }
-    AuthFlushDevice(uuid);
+    AuthFlushDevice(uuid, AUTH_LINK_TYPE_WIFI);
     SoftBusFree(uuid);
     return true;
 }

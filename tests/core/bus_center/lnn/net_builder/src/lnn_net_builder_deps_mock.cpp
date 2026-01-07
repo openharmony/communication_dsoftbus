@@ -678,9 +678,9 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
     return GetNetBuilderDepsInterface()->LnnIsNeedCleanConnectionFsm(nodeInfo, type);
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type)
 {
-    return GetNetBuilderDepsInterface()->AuthFlushDevice(uuid);
+    return GetNetBuilderDepsInterface()->AuthFlushDevice(uuid, type);
 }
 
 bool IsSupportLpFeature(void)

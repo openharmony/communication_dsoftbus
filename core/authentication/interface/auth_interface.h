@@ -38,7 +38,7 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *aut
 int32_t AuthStartConnVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthConnCallback *connCallback,
     AuthVerifyModule module, bool isFastAuth);
 void AuthHandleLeaveLNN(AuthHandle authHandle);
-int32_t AuthFlushDevice(const char *uuid);
+int32_t AuthFlushDevice(const char *uuid, AuthLinkType type);
 int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle);
 
 int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
