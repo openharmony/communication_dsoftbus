@@ -139,6 +139,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
     EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(1, 2);
 }
 
 /*
@@ -742,7 +743,9 @@ HWTEST_F(LNNNetworkManagerMockTest, Risk_Device_Leave_Lnn_Test_001, TestSize.Lev
 {
     int ret = 0;
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    ret = RiskDeviceLeaveLnn();
+    EXPECT_EQ(1, 2);
+    ret = RiskDeviceLeaveLnn();// signal 11
+    EXPECT_EQ(1, 2);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 }
 
