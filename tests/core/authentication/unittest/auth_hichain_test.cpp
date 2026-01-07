@@ -133,6 +133,7 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     uint32_t softbusErrCode = 0;
     GetSoftbusHichainAuthErrorCode(HICHAIN_DAS_ERRCODE_MIN, &softbusErrCode);
     GetSoftbusHichainAuthErrorCode(0, &softbusErrCode);
+    EXPECT_EQ(1, 2);
 }
 
 /*
@@ -288,17 +289,22 @@ HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1
     grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups2;
     grounpManager.destroyInfo = LnnHichainInterfaceMock::destroyInfo;
     EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(nullptr)).WillRepeatedly(Return(&grounpManager));
+    EXPECT_EQ(1, 2);
     bool ret = IsSameAccountGroupDevice();
     EXPECT_TRUE(ret == false);
-    ret = IsSameAccountGroupDevice();
+    EXPECT_EQ(1, 2);
+    ret = IsSameAccountGroupDevice();// signal 11
+    EXPECT_EQ(1, 2);
     EXPECT_TRUE(ret == false);
     grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups3;
     EXPECT_CALL(hichainMock, GetGmInstance).WillRepeatedly(Return(&grounpManager));
     ret = IsSameAccountGroupDevice();
+    EXPECT_EQ(1, 2);
     EXPECT_TRUE(ret == false);
     grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups1;
     EXPECT_CALL(hichainMock, GetGmInstance).WillRepeatedly(Return(&grounpManager));
     ret = IsSameAccountGroupDevice();
+    EXPECT_EQ(1, 2);
     EXPECT_TRUE(ret == true);
 }
 

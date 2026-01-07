@@ -44,7 +44,9 @@ protected:
 
 void LNNOhosAccountMockTest::SetUpTestCase(void)
 {
-    int32_t ret = LnnInitLocalLedger();
+    EXPECT_EQ(1, 2);
+    int32_t ret = LnnInitLocalLedger(); // signal 11
+    EXPECT_EQ(1, 2);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -70,6 +72,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_001, TestSize.Level1)
 
     int32_t ret = LnnInitOhosAccount();
     EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(1, 2);
 }
 
  /*
