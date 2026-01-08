@@ -1424,22 +1424,22 @@ int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t le
     return pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid(uuid, localPtk, len);
 }
 
-int32_t RegistAuthTransListenerPacked(void)
+int32_t LnnInitSleRangePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->registAuthTransListener) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnInitSLeRange) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
-    return pfnLnnEnhanceFuncList->registAuthTransListener();
+    return pfnLnnEnhanceFuncList->lnnInitSLeRange();
 }
 
-int32_t UnregistAuthTransListenerPacked(void)
+void LnnDeinitSleRangePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->unregistAuthTransListener) != SOFTBUS_OK) {
-        return SOFTBUS_OK;
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitSleRange) != SOFTBUS_OK) {
+        return;
     }
-    return pfnLnnEnhanceFuncList->unregistAuthTransListener();
+    pfnLnnEnhanceFuncList->lnnDeinitSleRange();
 }
 
 int32_t LnnStartRangePacked(const RangeConfig *config)

@@ -217,7 +217,7 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest007, TestSize.Level1)
     NiceMock<BusCenterDecisionCenterDepsInterfaceMock> BusCenterDecisionMock;
     EXPECT_CALL(BusCenterDecisionMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(BusCenterDecisionMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&g_lnnEnhanceFuncListTest));
-    g_lnnEnhanceFuncListTest.registAuthTransListener = nullptr;
+    g_lnnEnhanceFuncListTest.lnnInitSLeRange = nullptr;
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
