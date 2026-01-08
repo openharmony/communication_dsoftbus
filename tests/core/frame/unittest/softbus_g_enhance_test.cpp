@@ -578,10 +578,9 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest015, TestSize.Level1)
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest016, TestSize.Level1)
 {
-    int32_t ret = RegistAuthTransListenerPacked();
+    int32_t ret = LnnInitSleRangePacked();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = UnregistAuthTransListenerPacked();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitSleRangePacked());
     ret = LnnStartRangePacked(nullptr);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnStopRangePacked(nullptr);

@@ -38,8 +38,8 @@ void Register1stPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnDcSubscribe = dlsym(soHandle, "LnnDcSubscribe");
     g_lnnEnhanceFuncList.lnnDcUnsubscribe = dlsym(soHandle, "LnnDcUnsubscribe");
     g_lnnEnhanceFuncList.lnnDcDispatchEvent = dlsym(soHandle, "LnnDcDispatchEvent");
-    g_lnnEnhanceFuncList.registAuthTransListener = dlsym(soHandle, "RegistAuthTransListener");
-    g_lnnEnhanceFuncList.unregistAuthTransListener = dlsym(soHandle, "UnregistAuthTransListener");
+    g_lnnEnhanceFuncList.lnnInitSLeRange = dlsym(soHandle, "LnnInitSleRange");
+    g_lnnEnhanceFuncList.lnnDeinitSleRange = dlsym(soHandle, "LnnDeinitSleRange");
     g_lnnEnhanceFuncList.lnnUnregSleRangeCb = dlsym(soHandle, "LnnUnregSleRangeCb");
     g_lnnEnhanceFuncList.lnnStopRange = dlsym(soHandle, "LnnStopRange");
     g_lnnEnhanceFuncList.lnnStartRange = dlsym(soHandle, "LnnStartRange");
