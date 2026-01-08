@@ -1513,7 +1513,7 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
         processor->timestamp = SoftBusGetSysTimeMs();
     } else if (head->sliceNum == head->sliceSeq + 1) {
-        uint32_t actualDataLen = processor->dataLen + len;
+        uint32_t actualDataLen = (uint32_t)processor->dataLen + (uint32_t)len;
         uint64_t startTimestamp = processor->timestamp;
         uint64_t endTimestamp = SoftBusGetSysTimeMs();
         ret = ClientTransProxyLastSliceProcess(processor, head, data, len, channelId);
