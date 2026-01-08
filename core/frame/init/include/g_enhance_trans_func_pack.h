@@ -38,7 +38,7 @@ void DeInitSoftbusPagingResPullPacked(void);
 int32_t InitSoftbusPagingPacked(void);
 void DeInitSoftbusPagingPacked(void);
 void TransPagingDeathCallbackPacked(const char *pkgName, int32_t pid);
-bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info);
+bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info);
 int32_t TransPagingGetPidAndDataByFlgPacked(
     bool isClient, uint32_t businessFlag, int32_t *pid, char *data, uint32_t *len);
 int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag);

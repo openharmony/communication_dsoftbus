@@ -36,7 +36,7 @@ public:
     virtual int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg) = 0;
     virtual int32_t TransProxyGetChannelByCheckInfo(
         const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient) = 0;
-    virtual bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info) = 0;
+    virtual bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info) = 0;
     virtual int32_t TransProxyPagingChannelOpened(ProxyChannelInfo *chan) = 0;
     virtual int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
@@ -51,7 +51,7 @@ public:
     MOCK_METHOD3(TransPagingParseMessage, int32_t (char *data, int32_t len, ProxyMessage *msg));
     MOCK_METHOD3(TransProxyGetChannelByCheckInfo, int32_t (
         const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient));
-    MOCK_METHOD1(TransHasAndUpdatePagingListenPacked, bool (ProxyChannelInfo *info));
+    MOCK_METHOD1(TransPagingHasListenAndGetInfoPacked, bool (ProxyChannelInfo *info));
     MOCK_METHOD1(TransProxyPagingChannelOpened, int32_t (ProxyChannelInfo *chan));
     MOCK_METHOD2(TransPagingAckHandshake, int32_t (ProxyChannelInfo *chan, int32_t retCode));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *looper, LnnAsyncCallbackFunc callback,

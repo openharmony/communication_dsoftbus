@@ -126,13 +126,13 @@ void TransPagingDeathCallbackPacked(const char *pkgName, int32_t pid)
     return pfnTransEnhanceFuncList->transPagingDeathCallback(pkgName, pid);
 }
 
-bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info)
+bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
-    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transHasAndUpdatePagingListen) != SOFTBUS_OK) {
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transPagingHasListenAndGetInfo) != SOFTBUS_OK) {
         return true;
     }
-    return pfnTransEnhanceFuncList->transHasAndUpdatePagingListen(info);
+    return pfnTransEnhanceFuncList->transPagingHasListenAndGetInfo(info);
 }
 
 int32_t TransPagingGetPidAndDataByFlgPacked(

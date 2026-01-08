@@ -696,7 +696,7 @@ static int32_t TransProxyPagingChannelOpened(ProxyChannelInfo *chan)
 static int32_t TransProxyPagingCheckListen(ProxyChannelInfo *chan)
 {
     int32_t ret = SOFTBUS_OK;
-    if (TransHasAndUpdatePagingListenPacked(chan)) {
+    if (TransPagingHasListenAndGetInfoPacked(chan)) {
         TRANS_LOGE(TRANS_CTRL, "has listen start callback, businessFlag=%{public}u",
             chan->appInfo.peerData.businessFlag);
         ret = TransProxyPagingChannelOpened(chan);
@@ -807,7 +807,7 @@ void TransWaitListenResult(const PagingListenCheckInfo *checkInfo, int32_t reaso
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (!TransHasAndUpdatePagingListenPacked(&chan)) {
+    if (!TransPagingHasListenAndGetInfoPacked(&chan)) {
         ret = SOFTBUS_TRANS_PAGING_LIST_NOT_INIT;
         goto EXIT_ERR;
     }
