@@ -124,9 +124,9 @@ int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
     return GetSoftbusProxychannelMessagePagingInterface()->TransPagingAckHandshake(chan, retCode);
 }
 
-bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info)
+bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info)
 {
-    return GetSoftbusProxychannelMessagePagingInterface()->TransHasAndUpdatePagingListenPacked(info);
+    return GetSoftbusProxychannelMessagePagingInterface()->TransPagingHasListenAndGetInfoPacked(info);
 }
 
 int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo)
