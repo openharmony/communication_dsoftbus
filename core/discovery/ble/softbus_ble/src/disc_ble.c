@@ -1521,22 +1521,21 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
     return SOFTBUS_OK;
 }
 
-static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
+static void UnregisterCapability(DiscBleInfo *info, const DiscBleOption *option)
 {
     DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_BLE, "info is nullptr");
     DISC_CHECK_AND_RETURN_LOGE(option != NULL, DISC_BLE, "option is nullptr");
 
-    uint32_t *optionCapBitMap = NULL;
-    bool ranging = false;
+    BleOption bleOption;
+    (void)memset_s(&bleOption, sizeof(BleOption), 0, sizeof(BleOption));
     if (option->publishOption != NULL) {
-        optionCapBitMap = option->publishOption->capabilityBitmap;
-        optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
-        ranging = option->publishOption->ranging;
+        bleOption.optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(option->publishOption->capabilityBitmap[0]);
+        bleOption.ranging = option->publishOption->ranging;
     } else {
-        optionCapBitMap = option->subscribeOption->capabilityBitmap;
-        optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(optionCapBitMap[0]);
-        ranging = false;
+        bleOption.optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(option->subscribeOption->capabilityBitmap[0]);
+        bleOption.ranging = false;
     }
+    uint32_t *optionCapBitMap = bleOption.optionCapBitMap;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (!CheckCapBitMapExist(CAPABILITY_NUM, optionCapBitMap, pos) ||
             !CheckCapBitMapExist(CAPABILITY_NUM, info->capBitMap, pos)) {
@@ -1554,7 +1553,7 @@ static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
         info->isWakeRemote[pos] = false;
         info->freq[pos] = -1;
     }
-    if (ranging && info->rangingRefCnt > 0) {
+    if (bleOption.ranging && info->rangingRefCnt > 0) {
         info->rangingRefCnt -= 1;
         info->needUpdate = true;
     }
@@ -1690,7 +1689,8 @@ static bool GetStopIsTakeHmlInfo(uint8_t publishFlags, uint8_t activeFlags,
     DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, false, DISC_BLE, "invalid param");
     // stop castplus passive publish
     if (funcCode == UNPUBLISH_SERVICE && publishFlags == BLE_PUBLISH && activeFlags == BLE_PASSIVE) {
-        return IsCastCapExist(BLE_PUBLISH | BLE_PASSIVE);
+        PublishOption *pubOption = (PublishOption *)option;
+        return CheckCapBitMapExist(CAPABILITY_NUM, pubOption->capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
     }
 
     // stop castplus active discovery
@@ -1715,15 +1715,20 @@ static bool GetStopIsTakeHmlInfo(uint8_t publishFlags, uint8_t activeFlags,
     return false;
 }
 
-static void UpdateCustData(int32_t funcCode)
+static void UpdateCustData(int32_t funcCode, const void *option, bool isStart)
 {
-    DISC_CHECK_AND_RETURN_LOGD(funcCode == PUBLISH_PASSIVE_SERVICE, DISC_BLE, "no need process");
-
+    DISC_CHECK_AND_RETURN_LOGD(funcCode == PUBLISH_PASSIVE_SERVICE || funcCode == UNPUBLISH_SERVICE,
+        DISC_BLE, "no need process");
+    DISC_CHECK_AND_RETURN_LOGE(option != NULL, DISC_BLE, "option is null");
     // only check castplus capability passive publish
     uint32_t mode = BLE_PUBLISH | BLE_PASSIVE;
-    bool isCastPublishReg = IsCastCapExist(mode);
-    DISC_CHECK_AND_RETURN_LOGD(isCastPublishReg, DISC_BLE, "castplus publish not start");
-
+    PublishOption *pubOption = (PublishOption *)option;
+    bool isCastPublish = CheckCapBitMapExist(CAPABILITY_NUM, pubOption->capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
+    DISC_CHECK_AND_RETURN_LOGD(isCastPublish, DISC_BLE, "castplus publish not start");
+    if (!isStart) {
+        (void)DistUpdatePublishParamPacked(NULL, NULL, isStart);
+        return;
+    }
     int32_t ret = SoftBusMutexLock(&g_bleInfoLock);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed.");
     cJSON *json = cJSON_ParseWithLength((const char *)g_bleInfoManager[mode].capabilityData[CAST_CAP_POS],
@@ -1740,7 +1745,7 @@ static void UpdateCustData(int32_t funcCode)
         DISC_LOGW(DISC_BLE, "get extCust from json failed");
     }
     cJSON_Delete(json);
-    ret = DistUpdatePublishParamPacked(castplus, extCust);
+    ret = DistUpdatePublishParamPacked(castplus, extCust, true);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "update param failed");
 }
 
@@ -1766,8 +1771,8 @@ static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t ac
     }
     if (isStart) {
         processHml = GetStartIsTakeHmlInfo(funcCode);
-        UpdateCustData(funcCode);
     }
+    UpdateCustData(funcCode, option, isStart);
     SoftBusMessage *msg = CreateBleHandlerMsg(funcCode, processHml, 0, NULL);
     if (msg == NULL) {
         DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, SOFTBUS_MALLOC_ERR);
