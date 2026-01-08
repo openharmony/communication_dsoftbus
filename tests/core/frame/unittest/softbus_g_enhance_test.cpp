@@ -83,7 +83,7 @@ HWTEST_F(SoftbusGEnhanceTest, InitSoftbusPagingPacked001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     DeInitSoftbusPagingPacked();
     TransPagingDeathCallbackPacked(TEST_PKG_NAME, TEST_PID);
-    TransHasAndUpdatePagingListenPacked(&info);
+    TransPagingHasListenAndGetInfoPacked(&info);
 }
 
 /*
@@ -629,7 +629,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest018, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     DeInitSoftbusPagingPacked();
     TransPagingDeathCallbackPacked(TEST_PKG_NAME, TEST_PID);
-    TransHasAndUpdatePagingListenPacked(&info);
+    TransPagingHasListenAndGetInfoPacked(&info);
 }
 
 /*

@@ -910,7 +910,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyPagingCheckListenTest00
 {
     ProxyChannelInfo chan;
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(ProxyPagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransProxyPagingCheckListen(&chan);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -933,7 +933,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyPagingCheckListenTest00
 {
     ProxyChannelInfo chan;
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(false));
+    EXPECT_CALL(ProxyPagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(false));
     EXPECT_CALL(ProxyPagingMock, TransCheckPagingListenState).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransProxyPagingCheckListen(&chan);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -1083,7 +1083,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
     EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(ProxyPagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
@@ -1131,7 +1131,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
     EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(ProxyPagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillRepeatedly(DoAll(
         SetArgPointee<2>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, TransPagingUpdatePidAndData).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1164,9 +1164,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransWaitListenResult001, TestSiz
     EXPECT_CALL(ProxyPagingMock, TransProxyGetChannelByCheckInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     TransWaitListenResult(&checkInfo, reason);
     EXPECT_CALL(ProxyPagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillOnce(Return(false));
+    EXPECT_CALL(ProxyPagingMock, TransPagingHasListenAndGetInfoPacked).WillOnce(Return(false));
     TransWaitListenResult(&checkInfo, reason);
-    EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(ProxyPagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     TransWaitListenResult(&checkInfo, reason);
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillRepeatedly(DoAll(

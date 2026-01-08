@@ -51,7 +51,7 @@ public:
     virtual int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len) = 0;
     virtual int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer) = 0;
     virtual int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode) = 0;
-    virtual bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info) = 0;
+    virtual bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info) = 0;
     virtual int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo) = 0;
     virtual int32_t TransReversePullUpPacked(
         const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName) = 0;
@@ -103,7 +103,7 @@ public:
     MOCK_METHOD4(TransPagingUpdatePidAndData, int32_t (int32_t channelId, int32_t pid, char *data, uint32_t len));
     MOCK_METHOD3(OnProxyChannelOpened, int32_t (int32_t channelId, const AppInfo *appInfo, unsigned char isServer));
     MOCK_METHOD2(TransPagingAckHandshake, int32_t (ProxyChannelInfo *chan, int32_t retCode));
-    MOCK_METHOD1(TransHasAndUpdatePagingListenPacked, bool (ProxyChannelInfo *info));
+    MOCK_METHOD1(TransPagingHasListenAndGetInfoPacked, bool (ProxyChannelInfo *info));
     MOCK_METHOD1(TransCheckPagingListenState, int32_t (const PagingListenCheckInfo *checkInfo));
     MOCK_METHOD3(TransReversePullUpPacked, int32_t (
         const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName));
