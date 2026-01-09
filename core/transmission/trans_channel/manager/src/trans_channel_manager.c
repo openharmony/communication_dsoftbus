@@ -505,13 +505,12 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo->channelType);
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
+    (void)TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     if (state == CORE_SESSION_STATE_CANCELLING) {
         goto EXIT_CANCEL;
     }
     TransSetSocketChannelStateBySession(param->sessionName, param->sessionId, CORE_SESSION_STATE_LAN_COMPLETE);
-    ret = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
-        &(transInfo->channelId));
+    ret = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt, &(transInfo->channelId));
     (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
     (void)memset_s(appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey), 0, sizeof(appInfo->sinkSessionKey));
     if (ret != SOFTBUS_OK) {
@@ -524,7 +523,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         param->sessionName, param->sessionId, transInfo->channelId, transInfo->channelType) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL,
             GetSoftbusRecordTimeMillis() - appInfo->timeStart);
-        TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
+        (void)TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
     TransSetSocketChannelStateByChannel(
@@ -532,7 +531,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     if (TransLaneMgrAddLane(transInfo, &connInfo, laneHandle, param->isQosLane, &appInfo->myData) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL,
             GetSoftbusRecordTimeMillis() - appInfo->timeStart);
-        TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
+        (void)TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
     AddChannelStatisticsInfo(transInfo->channelId, transInfo->channelType);
@@ -951,20 +950,19 @@ int32_t TransCloseChannelWithStatistics(int32_t channelId, int32_t channelType, 
     return SOFTBUS_OK;
 }
 
-int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
-    int32_t msgType)
+int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
     int32_t ret = SOFTBUS_OK;
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             TRANS_LOGI(TRANS_MSG,
                 "send msg auth channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
-            ret = TransSendAuthMsg(channelId, (char*)data, (int32_t)len);
+            ret = TransSendAuthMsg(channelId, (char *)data, (int32_t)len);
             break;
         case CHANNEL_TYPE_PROXY:
             TRANS_LOGD(TRANS_MSG,
                 "send msg proxy channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
-            ret = TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
+            ret = TransProxyPostSessionData(channelId, (unsigned char *)data, len, (SessionPktType)msgType);
             break;
         default:
             TRANS_LOGE(TRANS_MSG,
@@ -1066,7 +1064,7 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
     }
 }
 
-int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
+int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t *connId)
 {
     int32_t ret;
 

@@ -183,7 +183,7 @@ HWTEST_F(TransProxyProcessDataTest, ProxyBuildTlvDataHead002, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusCalloc).WillOnce(testing::Return(nullptr));
     int32_t ret = ProxyBuildTlvDataHead(&pktHead, 1, 1, 12, &tlvBufferSize);
     EXPECT_EQ(pktHead.tlvElement, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_MALLOC_ERR);
 }
 
 /*

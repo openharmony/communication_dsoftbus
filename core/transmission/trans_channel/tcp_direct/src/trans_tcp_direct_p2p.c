@@ -556,7 +556,7 @@ static int32_t VerifyP2p(AuthHandle authHandle, int64_t seq, VerifyP2pInfo *info
     char *msg = VerifyP2pPack(info);
     if (msg == NULL) {
         TRANS_LOGE(TRANS_CTRL, "verifyp2p pack fail");
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, (int64_t)seq, msg);
     cJSON_free(msg);
@@ -1063,7 +1063,7 @@ static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, 
 static int32_t ConnectSocketByProtocol(const VerifyP2pInfo *info, SessionConn *conn)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL && conn != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid parm");
-    int fd = -1;
+    int32_t fd = -1;
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP) {
         fd = ConnectSocketDirectPeer(
             conn->appInfo.peerData.addr, conn->appInfo.peerData.port, conn->appInfo.myData.addr, LNN_PROTOCOL_HTP);

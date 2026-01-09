@@ -115,7 +115,7 @@ static int32_t CheckBusinessTypeAndOsTypeBySessionId(int32_t sessionId, int32_t 
 int SendBytes(int sessionId, const void *data, unsigned int len)
 {
     if (data == NULL || len == 0) {
-        TRANS_LOGW(TRANS_BYTES, "Invalid param");
+        TRANS_LOGE(TRANS_BYTES, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -172,8 +172,7 @@ int32_t SendBytesAsync(int32_t socket, uint32_t dataSeq, const void *data, uint3
     }
     int ret = CheckPermissionState(socket);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_BYTES,
-            "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
+        TRANS_LOGE(TRANS_BYTES, "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
         return ret;
     }
 
@@ -221,8 +220,7 @@ int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uin
     }
     int ret = CheckPermissionState(socket);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_BYTES,
-            "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
+        TRANS_LOGE(TRANS_BYTES, "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
         return ret;
     }
     int32_t channelId = INVALID_CHANNEL_ID;
@@ -248,14 +246,14 @@ int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uin
     return ClientTransChannelAsyncSendMessage(channelId, channelType, data, len, dataSeq);
 }
 
-int SendMessage(int sessionId, const void *data, unsigned int len)
+int32_t SendMessage(int sessionId, const void *data, unsigned int len)
 {
     TRANS_LOGI(TRANS_MSG, "sessionId=%{public}d, len=%{public}d", sessionId, len);
     if (data == NULL || len == 0) {
-        TRANS_LOGW(TRANS_MSG, "Invalid param");
+        TRANS_LOGE(TRANS_MSG, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = CheckPermissionState(sessionId);
+    int32_t ret = CheckPermissionState(sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "SendMessage no permission, ret=%{public}d", ret);
         return ret;
@@ -291,13 +289,13 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     return ClientTransChannelSendMessage(channelId, channelType, data, len);
 }
 
-int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+int32_t SendStream(int32_t sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     if ((data == NULL) || (ext == NULL) || (param == NULL)) {
-        TRANS_LOGW(TRANS_STREAM, "Invalid param");
+        TRANS_LOGE(TRANS_STREAM, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = CheckPermissionState(sessionId);
+    int32_t ret = CheckPermissionState(sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "SendStream no permission, ret=%{public}d", ret);
         return ret;
@@ -357,17 +355,17 @@ static int32_t SetSchemaCallbackPacked(FileSchema fileSchema, const char *sFileL
     return pfnClientEnhanceFuncList->setSchemaCallback(fileSchema, sFileList, fileCnt);
 }
 
-int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+int32_t SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     if ((sFileList == NULL) || (fileCnt == 0)) {
-        TRANS_LOGW(TRANS_FILE, "Invalid param");
+        TRANS_LOGE(TRANS_FILE, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = CheckPermissionState(sessionId);
+    int32_t ret = CheckPermissionState(sessionId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_FILE,  "SendFile no permission, sessionId=%{public}d, ret=%{public}d", sessionId, ret);
 
-    FileSchemaListener *fileSchemaListener = (FileSchemaListener*)SoftBusCalloc(sizeof(FileSchemaListener));
+    FileSchemaListener *fileSchemaListener = (FileSchemaListener *)SoftBusCalloc(sizeof(FileSchemaListener));
     if (fileSchemaListener == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }

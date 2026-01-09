@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -408,5 +408,21 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackFirstData001, TestSize.Level1)
     }
     cJSON_Delete(json);
     cJSON_Delete(json1);
+}
+
+/*
+ * @tc.name: TransPackMetaTypeSpecificData001
+ * @tc.desc: test TransPackMetaTypeSpecificData.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelTest, TransPackMetaTypeSpecificData001, TestSize.Level1)
+{
+    AppInfo appInfo = {
+        .metaType = META_HA + META_SDK
+    };
+
+    int32_t ret = TransPackMetaTypeSpecificData(&appInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
 }
 } // OHOS
