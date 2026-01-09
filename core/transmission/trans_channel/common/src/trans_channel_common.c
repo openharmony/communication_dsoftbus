@@ -301,7 +301,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
             TRANS_LOGE(TRANS_CTRL, "not support send fast data");
             return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
         }
-        appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
+        appInfo->fastTransData = (uint8_t *)SoftBusCalloc(param->attr->fastTransDataSize);
         if (appInfo->fastTransData == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
