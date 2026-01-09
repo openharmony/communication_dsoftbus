@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 
 namespace OHOS {
 sptr<IRemoteObject> g_remoteProxy = nullptr;
+sptr<IRemoteObject> g_oldRemoteProxy = nullptr;
 uint32_t g_getSystemAbilityId = 2;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 static sptr<IRemoteObject> GetSystemAbility()
@@ -64,6 +65,12 @@ int32_t BusCenterServerProxy::BusCenterServerProxyStandardInit(void)
         LNN_LOGE(LNN_EVENT, "get system ability fail");
         return SOFTBUS_SERVER_NOT_INIT;
     }
+    if (g_remoteProxy == g_oldRemoteProxy) {
+        LNN_LOGW(LNN_EVENT, "no need update");
+        g_remoteProxy.clear();
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    g_oldRemoteProxy = g_remoteProxy;
     return SOFTBUS_OK;
 }
 
@@ -372,8 +379,9 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
     }
     MessageParcel reply;
     MessageOption option;
-    if (g_remoteProxy->SendRequest(SERVER_GET_LOCAL_DEVICE_INFO, data, reply, option) != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed");
+    int32_t ret = g_remoteProxy->SendRequest(SERVER_GET_LOCAL_DEVICE_INFO, data, reply, option);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
         return SOFTBUS_IPC_ERR;
     }
     void *nodeInfo = const_cast<void *>(reply.ReadRawData(infoTypeLen));
