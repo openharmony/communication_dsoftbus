@@ -135,12 +135,6 @@ bool IsHeartbeatEnable(void)
     bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
     bool isDeviceRisk = g_hbConditionState.deviceRiskState == SOFTBUS_DEVICE_IS_RISK;
 
-    LNN_LOGI(LNN_INIT,
-        "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
-        "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
-        "request=%{public}d, init check=%{public}d, deviceRisk=%{public}d",
-        isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
-        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc, isDeviceRisk);
     return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
         (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
         isInitCheckSuc && !isDeviceRisk;
@@ -1123,12 +1117,34 @@ static void HbTryRecoveryNetwork(void)
     HbConditionChanged(true);
 }
 
+static void DumpHeartbeatEnableInfo(void)
+{
+    bool isBtOn = ((g_hbConditionState.btState != SOFTBUS_BLE_TURN_OFF) &&
+        (g_hbConditionState.btState != SOFTBUS_BT_UNKNOWN));
+    bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
+    bool isLogIn = g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN;
+    bool isBackground = g_hbConditionState.backgroundState == SOFTBUS_USER_BACKGROUND;
+    bool isNightMode = g_hbConditionState.nightModeState == SOFTBUS_NIGHT_MODE_ON;
+    bool isOOBEEnd =
+        g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
+    bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
+    bool isDeviceRisk = g_hbConditionState.deviceRiskState == SOFTBUS_DEVICE_IS_RISK;
+
+    LNN_LOGI(LNN_INIT,
+        "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
+        "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
+        "request=%{public}d, init check=%{public}d, deviceRisk=%{public}d",
+        isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
+        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc, isDeviceRisk);
+}
+
 static void PeriodDumpLocalInfo(void *para)
 {
     (void)para;
 
     LnnDumpLocalBasicInfo();
     (void)IsHeartbeatEnable();
+    DumpHeartbeatEnableInfo();
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), PeriodDumpLocalInfo, NULL, HB_PERIOD_DUMP_LOCAL_INFO_LEN);
 }
 
