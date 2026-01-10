@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -388,6 +388,12 @@ NO_SANITIZE("cfi") static int32_t TransOnServiceNegotiate(int32_t socket, const 
 static int32_t HandleServerOnNegotiate(int32_t socket, int32_t tokenType, const ISocketListener *socketCallback,
     const ChannelInfo *channel, SocketAccessInfo *localAccessInfo)
 {
+    if (socketCallback->OnBind == NULL || channel == NULL) {
+        TRANS_LOGE(TRANS_SDK, "OnBind exception, terminating this call, socket=%{public}d", socket);
+        (void)ClientDeleteSocketSession(socket);
+        return SOFTBUS_TRANS_SERVER_NOT_LISTEN;
+    }
+
     bool isContain = IsContainServiceBySocket(socket);
     int32_t ret =
         isContain ? TransOnServiceNegotiate(socket, socketCallback) : TransOnNegotiate(socket, socketCallback);
