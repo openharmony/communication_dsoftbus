@@ -190,12 +190,15 @@ ohos_unittest("BrProxyServerManagerTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":BrProxyTest",
-    ":BrProxyExtTest",
-    ":BrProxyServerManagerExtTest",
-    ":BrProxyServerManagerTest",
-  ]
+  deps = []
+  if (dsoftbus_feature_trans_br_proxy == true) {
+    deps += [
+      ":BrProxyTest",
+      ":BrProxyExtTest",
+      ":BrProxyServerManagerExtTest",
+      ":BrProxyServerManagerTest",
+    ]
+  }
 }
 
 group("fuzztest") {
