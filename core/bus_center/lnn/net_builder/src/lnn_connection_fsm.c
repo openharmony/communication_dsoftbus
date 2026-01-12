@@ -234,7 +234,7 @@ void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
         SetLnnTriggerInfo(timeStamp, 1, extra.triggerReason);
     }
     LNN_EVENT(EVENT_SCENE_LNN, stage, extra);
-    LNN_LOGI(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=1",
+    LNN_LOGD(LNN_HEART_BEAT, "triggerTime=%{public}" PRId64 ", triggerReason=%{public}d, deviceCnt=1",
         timeStamp, extra.triggerReason);
 }
 
