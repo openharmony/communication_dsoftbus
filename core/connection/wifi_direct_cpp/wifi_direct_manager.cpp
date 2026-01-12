@@ -124,6 +124,8 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P ||
+        OHOS::SoftBus::WifiDirectUtils::SupportHml(), SOFTBUS_NOT_IMPLEMENT, CONN_WIFI_DIRECT, "not support hml");
 
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));

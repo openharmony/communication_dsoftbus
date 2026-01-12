@@ -82,8 +82,8 @@ ohos_unittest("ConnClientConnectionMockTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":ConnClientConnectionMockTest",
-    ":ConnClientConnectionTest",
-  ]
+  deps = [ ":ConnClientConnectionMockTest" ]
+  if (dsoftbus_feature_conn_general) {
+    deps += [ ":ConnClientConnectionTest" ]
+  }
 }
