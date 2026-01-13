@@ -262,7 +262,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     return SOFTBUS_OK;
 }
 
-static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOption *clientAddr)
+static int32_t TdcOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(cfd >= 0 && clientAddr != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
         "invalid param, cfd=%{public}d", cfd);
@@ -376,7 +376,7 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
     TransSrvDelDataBufNode(channelId);
 }
 
-static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
+static int32_t ProcessSocketInEvent(SessionConn *conn, int32_t fd)
 {
     int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId, conn->authHandle.type);
     if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
@@ -389,7 +389,7 @@ static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
     return ret;
 }
 
-static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
+static int32_t ProcessSocketOutEvent(SessionConn *conn, int32_t fd)
 {
     int32_t ret = SOFTBUS_TCP_SOCKET_ERR;
     if (conn->serverSide) {
@@ -424,7 +424,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
     return ret;
 }
 
-static void ProcessSocketExceptionEvent(SessionConn *conn, int fd)
+static void ProcessSocketExceptionEvent(SessionConn *conn, int32_t fd)
 {
     TRANS_LOGE(TRANS_CTRL, "exception occurred.");
     DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
@@ -433,7 +433,7 @@ static void ProcessSocketExceptionEvent(SessionConn *conn, int fd)
     TransSrvDelDataBufNode(conn->channelId);
 }
 
-static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
+static int32_t TdcOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     (void)module;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
@@ -482,7 +482,7 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
     };
 
     TRANS_LOGI(TRANS_CTRL, "set listener for module=%{public}d.", module);
-    int serverPort = StartBaseListener(info, &sessionListener);
+    int32_t serverPort = StartBaseListener(info, &sessionListener);
     return serverPort;
 }
 

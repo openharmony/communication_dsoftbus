@@ -46,8 +46,8 @@
 #include "trans_server_proxy.h"
 #include "trans_split_serviceid.h"
 
-typedef int (*SessionOptionRead)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
-typedef int (*SessionOptionWrite)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
+typedef int (*SessionOptionRead)(int32_t channelId, int32_t type, void *value, uint32_t valueSize);
+typedef int (*SessionOptionWrite)(int32_t channelId, int32_t type, void *value, uint32_t valueSize);
 
 typedef struct {
     bool canRead;
@@ -60,7 +60,7 @@ typedef struct {
     ConfigType configType;
 } ConfigTypeMap;
 
-static bool IsValidSessionId(int sessionId)
+static bool IsValidSessionId(int32_t sessionId)
 {
     if (sessionId <= 0) {
         TRANS_LOGE(TRANS_SDK, "invalid sessionId=%{public}d", sessionId);
@@ -943,7 +943,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
         }
     }
     uint64_t timestamp = 0;
-    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName, &timestamp);
+    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char *)newSessionName, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
@@ -1101,8 +1101,8 @@ static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *
 
 int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount)
 {
-    #define TRANS_DEFAULT_MIN_BW 0
-    #define LOW_BW                  (384 * 1024)
+#define TRANS_DEFAULT_MIN_BW 0
+#define LOW_BW               (384 * 1024)
     int32_t minBW = 0;
     bool enableMultipath = false;
     int32_t dataType = 0;

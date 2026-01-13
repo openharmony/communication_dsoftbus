@@ -433,7 +433,7 @@ int32_t TransAddSocketChannelInfo(
     newSocket->laneHandleReserve = INVALID_LANE_ID;
     (void)memset_s(&newSocket->param, sizeof(SessionParam), 0, sizeof(SessionParam));
     int32_t tmpUid;
-    TransGetUidAndPid(sessionName, &tmpUid, &(newSocket->pid));
+    (void)TransGetUidAndPid(sessionName, &tmpUid, &(newSocket->pid));
 
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
@@ -1266,7 +1266,7 @@ static int32_t CopySessionParam(const SessionParam *source, SessionParam *target
     }
 
     target->sessionName = sessionName;
-    char *peerSessionName = (char*)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
+    char *peerSessionName = (char *)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         peerSessionName != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc peerSessionName failed");
     if (source->peerSessionName != NULL &&
@@ -1277,7 +1277,7 @@ static int32_t CopySessionParam(const SessionParam *source, SessionParam *target
     }
 
     target->peerSessionName = peerSessionName;
-    char *peerDeviceId = (char*)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
+    char *peerDeviceId = (char *)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         peerDeviceId != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc peerDeviceId failed");
     if (source->peerDeviceId != NULL &&

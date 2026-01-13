@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -829,6 +829,64 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest30, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransGetAclInfoBySessionName(sessionName, &tokenId, &callingUid, &callingPid);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: TransListCopyTest001
+ * @tc.desc: test TransListCopy, when sessionServerList is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransListCopyTest001, TestSize.Level1)
+{
+    int32_t ret = TransListCopy(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/*
+ * @tc.name: CheckAccessInfoAndCallocTest001
+ * @tc.desc: test CheckAccessInfoAndCalloc
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, CheckAccessInfoAndCallocTest001, TestSize.Level1)
+{
+    SessionServer pos;
+    pos.accessInfo .extraAccessInfo = static_cast<char *>(SoftBusCalloc(EXTRA_ACCESS_INFO_LEN_MAX));
+    ASSERT_TRUE(pos.accessInfo .extraAccessInfo != nullptr);
+    int32_t ret = CheckAccessInfoAndCalloc(&pos, EXTRA_ACCESS_INFO_LEN_MAX);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: GetAccessInfoBySessionNameTest001
+ * @tc.desc: test GetAccessInfoBySessionName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, GetAccessInfoBySessionNameTest001, TestSize.Level1)
+{
+    char sessionName[] = "wanna.yeel.sessionName";
+    SessionServer *newNode = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(newNode != nullptr);
+    (void)strcpy_s(newNode->sessionName, sizeof(newNode->sessionName), sessionName);
+
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    int32_t userId = TEST_PID;
+    uint64_t tokenId = TEST_PID;
+    char businessAccountId[] = "testBusinessAccountId";
+    char extraAccessInfo[] = "testExtraAccessInfo";
+    ret = GetAccessInfoBySessionName("sessionName.test", &userId, &tokenId, businessAccountId, extraAccessInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
 
     ret = TransSessionServerDelItem(sessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
