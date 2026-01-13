@@ -520,7 +520,7 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
         .result = EVENT_STAGE_RESULT_FAILED,
     };
     if (connection->protocol == BLE_GATT) {
-        extra.connProtocol = BLE_GATT,
+        extra.connProtocol = BLE_GATT;
         CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_END, extra);
         g_generalConnectionListener.onConnectFailed(&connection->info, connection->generalId, reason);
         ConnRemoveGeneralConnection(connection);
