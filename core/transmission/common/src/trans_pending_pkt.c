@@ -306,8 +306,6 @@ int32_t DelPendingPacket(int32_t channelId, int32_t type)
         if (item->channelId == channelId) {
             item->status = PACKAGE_STATUS_CANCELED;
             SoftBusCondSignal(&item->cond);
-            (void)SoftBusMutexUnlock(&pendingList->lock);
-            return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&pendingList->lock);
