@@ -239,11 +239,11 @@ static bool ScenarioManagerAddIfaceNameByLocalMac(ScenarioManager *manager,
     return true;
 }
 
-static char *ScenarioManagerFindIfaceNameByLocalMac(const char *localMac)
+static const char *ScenarioManagerFindIfaceNameByLocalMac(const char *localMac)
 {
     // it's fake, gona replaced by wifi interface
-    static char *LOCAL_MAC_1 = "18:65";
-    static char *LOCAL_MAC_2 = "82:13";
+    static const char *LOCAL_MAC_1 = "18:65";
+    static const char *LOCAL_MAC_2 = "82:13";
     if (strcmp(localMac, LOCAL_MAC_1) == 0) {
         return "en0";
     } else if (strcmp(localMac, LOCAL_MAC_2) == 0) {
@@ -278,8 +278,7 @@ static bool ScenarioManagerCheckAndUpdateIfaceName(ScenarioManager *manager, con
     return result;
 }
 
-static void ScenarioManagerAddBusinessType(ScenarioManager *manager,
-    ScenarioItem *scenarioItem, BusinessCounter *counter, int32_t businessType)
+static void ScenarioManagerAddBusinessType(ScenarioItem *scenarioItem, BusinessCounter *counter, int32_t businessType)
 {
     switch (businessType) {
         case SM_FILE_TYPE:
@@ -308,8 +307,7 @@ static void ScenarioManagerAddBusinessType(ScenarioManager *manager,
         scenarioItem->totalVideoCount);
 }
 
-static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
-    ScenarioItem *scenarioItem, BusinessCounter *counter, int32_t businessType)
+static void ScenarioManagerDelBusinessType(ScenarioItem *scenarioItem, BusinessCounter *counter, int32_t businessType)
 {
     int32_t *singleCount = NULL;
     int32_t *itemCount = NULL;
@@ -366,8 +364,7 @@ static int32_t ScenarioManagerGetBitPosByBusinessType(int32_t businessType)
     return bitPos;
 }
 
-static bool ScenarioManagerIsBusinesExisted(ScenarioManager *manager,
-    ScenarioItem *item, int32_t businessType)
+static bool ScenarioManagerIsBusinesExisted(ScenarioItem *item, int32_t businessType)
 {
     TRANS_LOGI(TRANS_CTRL,
         "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
@@ -438,7 +435,7 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
     } else {
         TRANS_LOGI(TRANS_CTRL, "finalType=%{public}d, bitPos=%{public}d", finalType, bitPos);
         if (SoftbusIsBitmapSet(&finalType, bitPos) &&
-            !ScenarioManagerIsBusinesExisted(manager, item, info->businessType)) {
+            !ScenarioManagerIsBusinesExisted(item, info->businessType)) {
             SoftbusBitmapClr(&finalType, bitPos);
             item->finalType = finalType;
             TRANS_LOGI(TRANS_CTRL, "finalType=%{public}d, bitPos=%{public}d", finalType, bitPos);
@@ -450,7 +447,7 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
     if (notify) {
         TRANS_LOGI(TRANS_CTRL,
             "current businessType of finalType=%{public}d", item->finalType);
-        const char* ifaceName = "chba";
+        const char *ifaceName = "chba";
         // do notify here
         NotifyWifi(ifaceName, item->localMac, item->peerMac, item->finalType, info->businessType);
     }
@@ -500,7 +497,7 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
         TRANS_LOGI(TRANS_CTRL, "businessCounter already exist");
     }
     ScenarioManagerDoNotifyIfNeed(manager, info, true);
-    ScenarioManagerAddBusinessType(manager, scenarioItem, counter, info->businessType);
+    ScenarioManagerAddBusinessType(scenarioItem, counter, info->businessType);
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
     if (localScenarioCount == NULL) {
         TRANS_LOGE(TRANS_CTRL, "failed to apply for memory");
@@ -538,7 +535,7 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
         (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
         return SOFTBUS_NOT_FIND;
     }
-    ScenarioManagerDelBusinessType(manager, scenarioItem, counter, info->businessType);
+    ScenarioManagerDelBusinessType(scenarioItem, counter, info->businessType);
     if (counter->totalCount <= 0) {
         TRANS_LOGE(TRANS_CTRL, "error, delete a counter form list!");
         ListDelete(&counter->node);

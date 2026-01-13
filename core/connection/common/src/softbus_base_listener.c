@@ -1182,7 +1182,6 @@ static void RemoveBadFd(void)
     }
 }
 
-
 static void *WatchTask(void *arg)
 {
     const char *name = "Watch_Tsk";

@@ -117,7 +117,7 @@ int32_t TransTdcDecrypt(const char *sessionKey, const char *in, uint32_t inLen, 
         TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
         return SOFTBUS_MEM_ERR;
     }
-    int32_t ret = SoftBusDecryptData(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen);
+    int32_t ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "dectypt data fail ret=%{public}d", ret);
@@ -475,8 +475,8 @@ int32_t TransTdcEncryptWithSeq(const char *sessionKey, int32_t seqNum, EncrptyIn
         TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
         return SOFTBUS_MEM_ERR;
     }
-    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char*)info->in, info->inLen,
-        (unsigned char*)info->out, info->outLen, seqNum);
+    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char *)info->in, info->inLen,
+        (unsigned char *)info->out, info->outLen, seqNum);
     if (memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memset cipherKey failed.");
         return SOFTBUS_MEM_ERR;

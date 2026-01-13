@@ -89,16 +89,19 @@ ohos_unittest("TransScenarioManagerTest") {
   include_dirs = [
     "$dsoftbus_core_path/common/include",
     "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/session/src",
   ]
 
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "wifi:wifi_sdk",
   ]
 }
 

@@ -99,5 +99,31 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const
 }
 
 void cJSON_Delete(cJSON *json){ }
+
+int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
+{
+    return GetMessageOpenChannelInterface()->LnnGetRemoteNumInfo(networkId, key, info);
+}
+
+int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen)
+{
+    return GetMessageOpenChannelInterface()->SoftBusEncryptData(cipherKey, input, inLen, encryptData, encryptLen);
+}
+
+int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
+{
+    return GetMessageOpenChannelInterface()->LnnGetNetworkIdByUuid(uuid, buf, len);
+}
+
+void GetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetMessageOpenChannelInterface()->GetOsTypeByNetworkId(networkId, osType);
+}
+
+bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target)
+{
+    return GetMessageOpenChannelInterface()->GetJsonObjectBoolItem(json, string, target);
+}
 }
 }

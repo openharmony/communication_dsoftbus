@@ -58,7 +58,7 @@ void ReleaseTlvValueBuffer(DataHead *pktHead)
         return;
     }
     pktHead->tlvElement -= ((pktHead->tlvCount) * sizeof(TlvElement));
-    for (int index = 0; index < pktHead->tlvCount; index++) {
+    for (int32_t index = 0; index < pktHead->tlvCount; index++) {
         TlvElement *temp = (TlvElement *)pktHead->tlvElement;
         SoftBusFree(temp->value);
         temp->value = NULL;

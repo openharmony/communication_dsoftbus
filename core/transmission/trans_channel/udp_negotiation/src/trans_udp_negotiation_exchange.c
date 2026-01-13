@@ -70,10 +70,10 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
     (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
     (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
-    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int *)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int32_t *)&(appInfo->businessType));
     (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
 
-    int code = CODE_EXCHANGE_UDP_INFO;
+    int32_t code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
         appInfo->fileProtocol = APP_INFO_UDP_FILE_PROTOCOL;
@@ -162,7 +162,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 
     TransGetCommonUdpInfoFromJson(msg, appInfo);
 
-    int code = CODE_EXCHANGE_UDP_INFO;
+    int32_t code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
         appInfo->fileProtocol = APP_INFO_UDP_FILE_PROTOCOL;
@@ -302,7 +302,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
-int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char *errDesc)
+int32_t TransPackReplyErrInfo(cJSON *msg, int32_t errCode, const char *errDesc)
 {
     TRANS_LOGI(TRANS_CTRL, "pack reply error info in negotiation.");
     if (msg == NULL || errDesc == NULL) {
@@ -478,7 +478,7 @@ int32_t TransUnpackExtDeviceRequestInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int32_t *)&(appInfo->udpConnType));
     (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
-    int code = CODE_EXCHANGE_UDP_INFO;
+    int32_t code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     appInfo->fileProtocol = 0;
     uint32_t remoteCapability = 0;
@@ -543,11 +543,11 @@ int32_t TransUnpackExtDeviceReplyInfo(const cJSON *msg, AppInfo *appInfo)
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
-    int code = CODE_EXCHANGE_UDP_INFO;
+    int32_t code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     appInfo->fileProtocol = 0;
     (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
-    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int *)&(appInfo->businessType));
+    (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int32_t *)&(appInfo->businessType));
     (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
     (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int32_t *)&(appInfo->streamType));
     if (!GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&(appInfo->channelCapability))) {

@@ -1254,7 +1254,7 @@ static void ConstructProxyChannelInfo(
 {
     // always be client when communicating with WinPC
     chan->isServer = (msg->msgHead.cipher & CS_MODE) == 0 ? 0 : 1;
-    if (chan->isServer == 0) {
+    if (!chan->isServer) {
         chan->deviceTypeIsWinpc = true;
     }
     chan->status = PROXY_CHANNEL_STATUS_COMPLETED;
@@ -1545,7 +1545,7 @@ static int32_t TransProxySaveAndOnOpen(ProxyChannelInfo *chan, int32_t channelId
         ret = SOFTBUS_INVALID_PARAM;
         goto EXIT_RELEASE;
     }
-    TransCreateConnByConnId(chan->connId, (bool)chan->isServer);
+    TransCreateConnByConnId(chan->connId, chan->isServer);
     ProxyChannelInfo tmpChan;
     (void)memset_s(&tmpChan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
     if (memcpy_s(&tmpChan, sizeof(ProxyChannelInfo), chan, sizeof(ProxyChannelInfo)) != EOK) {
@@ -1596,14 +1596,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         msg->msgHead.peerId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "proxy handshake calloc failed.");
+        TRANS_LOGE(TRANS_CTRL, "proxy handshake calloc failed.");
         SoftBusHitraceChainEnd();
         return;
     }
     int32_t ret = TransProxyFillChannelInfo(msg, chan);
     if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED ||
-         ret == SOFTBUS_PERMISSION_SERVER_DENIED) && (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
-        TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
+        ret == SOFTBUS_PERMISSION_SERVER_DENIED) && (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
+        TRANS_LOGW(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }
     char tmpSocketName[SESSION_NAME_SIZE_MAX] = { 0 };
     NodeInfo nodeInfo;
@@ -1725,8 +1725,7 @@ static AuthGenUkCallback proxyAuthGenUkCallback = {
     .onGenFailed = OnProxyGenUkFailed,
 };
 
-static int32_t TransHandleProxyChanelOpened(
-    int32_t channelId, ProxyChannelInfo *chan, const AccessInfo *accessInfo)
+static int32_t TransHandleProxyChannelOpened(int32_t channelId, ProxyChannelInfo *chan, const AccessInfo *accessInfo)
 {
     if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
         if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&
@@ -1803,7 +1802,7 @@ int32_t TransDealProxyChannelOpenResult(
         TransProxyFastDataRecv(&chan);
     }
     chan.appInfo.myHandleId = 0;
-    return TransHandleProxyChanelOpened(channelId, &chan, accessInfo);
+    return TransHandleProxyChannelOpened(channelId, &chan, accessInfo);
 }
 
 static int32_t TransCheckProxyChannelOpenStatus(int32_t channelId, int32_t *curCount)

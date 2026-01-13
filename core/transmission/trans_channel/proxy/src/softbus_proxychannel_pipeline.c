@@ -371,7 +371,7 @@ int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
     return SOFTBUS_OK;
 }
 
-static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
+static int32_t TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
     if (uuid == NULL) {

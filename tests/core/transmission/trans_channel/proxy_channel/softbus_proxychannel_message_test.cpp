@@ -1092,10 +1092,10 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, Tes
     memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo.fastTransDataSize = 1;
     int32_t ret = PackHandshakeMsgForFastData(&appInfo, root);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
     appInfo.fastTransDataSize = 0;
     ret = PackHandshakeMsgForFastData(&appInfo, root);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
 }
 
 /*

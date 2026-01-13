@@ -1011,7 +1011,7 @@ int32_t ClientSetEnableMultipathBySocket(int32_t socket, bool enableMultipath)
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetDataTypeBySocket(int32_t socket, int* dataType)
+int32_t ClientGetDataTypeBySocket(int32_t socket, int32_t *dataType)
 {
     if (socket < 0) {
         TRANS_LOGE(TRANS_INIT, "invalid socket=%{public}d", socket);
@@ -2294,9 +2294,8 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
         return ret;
     }
 
-    SessionAttribute tmpAttr;
-    (void)memset_s(&tmpAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
-    SessionParam param;
+    SessionAttribute tmpAttr = { 0 };
+    SessionParam param = { 0 };
     FillSessionParam(&param, &tmpAttr, serverNode, sessionNode);
     UnlockClientSessionServerList();
 

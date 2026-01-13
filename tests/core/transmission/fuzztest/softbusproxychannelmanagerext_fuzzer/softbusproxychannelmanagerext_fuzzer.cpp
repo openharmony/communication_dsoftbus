@@ -385,7 +385,7 @@ void CheckAndGenerateSinkSessionKeyTest(FuzzedDataProvider &provider)
     }
 }
 
-void TransHandleProxyChanelOpenedTest(FuzzedDataProvider &provider)
+void TransHandleProxyChannelOpenedTest(FuzzedDataProvider &provider)
 {
     ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
@@ -415,7 +415,7 @@ void TransHandleProxyChanelOpenedTest(FuzzedDataProvider &provider)
     }
     accessInfo.extraAccessInfo = extraAccessInfo;
     int32_t openResult = provider.ConsumeIntegral<int32_t>();
-    (void)TransHandleProxyChanelOpened(info->channelId, info, &accessInfo);
+    (void)TransHandleProxyChannelOpened(info->channelId, info, &accessInfo);
     int32_t pid = provider.ConsumeIntegral<int32_t>();
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     (void)TransDealProxyChannelOpenResult(channelId, openResult, &accessInfo, pid);
@@ -873,7 +873,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransPagingHandshakeUnPackErrMsgTest(provider);
     OHOS::SelectRouteTypeTest(provider);
     OHOS::CheckAndGenerateSinkSessionKeyTest(provider);
-    OHOS::TransHandleProxyChanelOpenedTest(provider);
+    OHOS::TransHandleProxyChannelOpenedTest(provider);
     OHOS::TransProxyUpdateBlePriorityTest(provider);
     OHOS::TransWifiStateChangeTest(provider);
     OHOS::TransProxyGetNameByChanIdTest(provider);

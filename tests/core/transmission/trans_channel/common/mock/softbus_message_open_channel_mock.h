@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #define SOFT_MESSAGE_OPEN_CHANNEL_MOCK_H
 
 #include <gmock/gmock.h>
+#include "bus_center_info_key_struct.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_message_open_channel.h"
 
 namespace OHOS {
@@ -40,6 +42,12 @@ public:
     virtual bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target) = 0;
     virtual int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
         size_t *olen, const unsigned char *src, size_t slen) = 0;
+    virtual int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info) = 0;
+    virtual int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+        unsigned char *encryptData, uint32_t *encryptLen) = 0;
+    virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
+    virtual void GetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
+    virtual bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target);
 };
 
 class SoftbusMessageOpenChannelInterfaceMock : public SoftbusMessageOpenChannelInterface {
@@ -60,6 +68,12 @@ public:
     MOCK_METHOD3(GetJsonObjectInt32Item, bool(const cJSON *, const char * const, int32_t *));
     MOCK_METHOD3(GetJsonObjectNumber16Item, bool(const cJSON *, const char * const, uint16_t *));
     MOCK_METHOD5(SoftBusBase64Decode, int32_t (unsigned char *, size_t, size_t *, const unsigned char *, size_t));
+    MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char *networkId, InfoKey key, int32_t *info));
+    MOCK_METHOD5(SoftBusEncryptData, int32_t (AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+        unsigned char *encryptData, uint32_t *encryptLen));
+    MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *uuid, char *buf, uint32_t len));
+    MOCK_METHOD2(GetOsTypeByNetworkId, void (const char *networkId, int32_t *osType));
+    MOCK_METHOD3(GetJsonObjectBoolItem, bool (const cJSON *json, const char * const string, bool *target));
 };
 extern "C" {
     void cJSON_Delete(cJSON *json);

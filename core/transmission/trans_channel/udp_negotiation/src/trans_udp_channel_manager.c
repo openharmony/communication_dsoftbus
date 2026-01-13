@@ -319,7 +319,7 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
     }
 }
 
-void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
+void TransCloseUdpChannelByNetWorkId(const char *netWorkId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
     if ((g_udpChannelMgr == NULL) || (netWorkId == NULL)) {

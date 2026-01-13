@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@
 
 #define TEST_CHANNEL_ID 1027
 #define TEST_TDC_PID 3284
+#define TEST_TDC_FASTDATA_SIZE 125
 
 using namespace testing::ext;
 
@@ -139,7 +140,8 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, Te
     uint32_t cipherFlagBle = FLAG_BLE;
     uint32_t cipherFlagP2p = FLAG_P2P;
     uint32_t cipherFlagWifi = FLAG_WIFI;
-    uint32_t cipherFlagEnhance = FLAG_ENHANCE_P2P;;
+    uint32_t cipherFlagSle = FLAG_SLE;
+    uint32_t cipherFlagEnhance = FLAG_ENHANCE_P2P;
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlagBr);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_BR);
@@ -155,6 +157,9 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, Te
 
     linkType = SwitchCipherTypeToAuthLinkType(cipherFlagWifi);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_WIFI);
+
+    linkType = SwitchCipherTypeToAuthLinkType(cipherFlagSle);
+    EXPECT_EQ(linkType, AUTH_LINK_TYPE_SESSION_KEY);
 
     SendFailToFlushDevice(conn);
     SoftBusFree(conn);
@@ -1032,5 +1037,41 @@ HWTEST_F(TransTcpDirectMessageStaticTest, GetSessionConnSeqAndFlagByChannelIdTes
 HWTEST_F(TransTcpDirectMessageStaticTest, BuildEventExtra001, TestSize.Level1)
 {
     EXPECT_NO_FATAL_FAILURE(BuildEventExtra(2688));
+}
+
+/**
+ * @tc.name: SetByteChannelTos001
+ * @tc.desc: test SetByteChannelTos when businessType is BUSINESS_TYPE_BYTE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, SetByteChannelTos001, TestSize.Level1)
+{
+    AppInfo info = {
+        .businessType = BUSINESS_TYPE_BYTE,
+        .channelType = CHANNEL_TYPE_TCP_DIRECT,
+        .fd = 123
+    };
+
+    EXPECT_NO_FATAL_FAILURE(SetByteChannelTos(&info));
+}
+
+/**
+ * @tc.name: ReleaseSessionConn002
+ * @tc.desc: test ReleaseSessionConn when conn is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, ReleaseSessionConn002, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(ReleaseSessionConn(nullptr));
+
+    SessionConn *chan = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->appInfo.fastTransData = const_cast<const uint8_t *>(
+        static_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t) * TEST_TDC_FASTDATA_SIZE)));
+    ASSERT_TRUE(chan->appInfo.fastTransData != nullptr);
+
+    EXPECT_NO_FATAL_FAILURE(ReleaseSessionConn(chan));
 }
 }
