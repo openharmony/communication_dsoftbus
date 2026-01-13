@@ -33,6 +33,15 @@ conn_common_src = [
 ]
 
 if (dsoftbus_feature_conn_tcp_comm) {
+  if (dsoftbus_feature_trans_htp) {
+    conn_common_src += [
+      "$dsoftbus_root_path/core/connection/common/src/softbus_htp_socket.c",
+    ]
+  } else {
+    conn_common_src += [
+      "$dsoftbus_root_path/core/connection/common/src/softbus_htp_socket_virtual.c",
+    ]
+  }
   conn_common_src += [
     "$dsoftbus_root_path/core/connection/common/src/softbus_base_listener.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_datahead_transform.c",
@@ -40,7 +49,6 @@ if (dsoftbus_feature_conn_tcp_comm) {
     "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_usb_tcp_socket.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_mintp_socket.c",
-    "$dsoftbus_root_path/core/connection/common/src/softbus_htp_socket.c",
   ]
   if (defined(ohos_lite) && ohos_kernel_type == "liteos_m") {
     conn_common_src += [ "$dsoftbus_root_path/core/connection/common/src/softbus_select_event_implement.c" ]
