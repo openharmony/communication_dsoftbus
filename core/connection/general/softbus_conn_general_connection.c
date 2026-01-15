@@ -454,7 +454,7 @@ static int32_t SetConnectionDeviceId(struct GeneralConnection *generalConnection
 
 static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *info)
 {
-    (void)info;
+    CONN_CHECK_AND_RETURN_LOGE(info != NULL, CONN_BLE, "info is null");
     struct GeneralConnection *generalConnection = GetGeneralConnectionByReqId(requestId);
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "get connection fail");
     int32_t status = SOFTBUS_OK;
@@ -482,7 +482,7 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
         ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
             generalConnection->generalId, 0, NULL);
         ConnEventExtra extra = {
-            .connProtocol = BLE_GATT,
+            .connProtocol = info->bleinfo.protocol,
             .requestId = requestId,
             .errcode = status,
             .result = EVENT_STAGE_RESULT_FAILED,
