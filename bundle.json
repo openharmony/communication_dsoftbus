@@ -44,6 +44,7 @@
       "dsoftbus_feature_conn_hv2",
       "dsoftbus_feature_conn_hv2c",
       "dsoftbus_feature_conn_action",
+      "dsoftbus_feature_conn_general",
       "dsoftbus_feature_conn_legacy_im",
       "dsoftbus_feature_conn_legacy_data",
       "dsoftbus_feature_trans_udp_file",
