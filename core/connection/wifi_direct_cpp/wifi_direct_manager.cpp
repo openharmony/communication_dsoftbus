@@ -560,6 +560,16 @@ static void NotifyConnectedForSink(const struct WifiDirectSinkLink *link)
     }
 }
 
+static void NotifyVirtualLinkStateChange(VirtualLinkState virtualLinkState, const char *remoteUuid)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    for (auto listener : g_listeners) {
+        if (listener.onVirtualLinkStateChange != nullptr) {
+            listener.onVirtualLinkStateChange(virtualLinkState, remoteUuid);
+        }
+    }
+}
+
 static void NotifyDisconnectedForSink(const struct WifiDirectSinkLink *link)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
@@ -580,6 +590,13 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     auto link = OHOS::SoftBus::LinkManager::GetInstance().GetReuseLink(linkType, remoteUuid);
     if (link == nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
+        return true;
+    }
+    // The eyeglasses wake up the virtual link through a guidance channel.
+    if (link->GetLinkPowerMode() == LOW_POWER &&
+        (OHOS::SoftBus::WifiDirectUtils::GetDeviceType() == TYPE_GLASS_ID ||
+            OHOS::SoftBus::WifiDirectUtils::GetDeviceType(remoteNetworkId) == TYPE_GLASS_ID)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "glasses scenario, need negotiate channel");
         return true;
     }
     if (link->GetNegotiateChannel() == nullptr) {
@@ -844,6 +861,7 @@ static struct WifiDirectManager g_manager = {
     .notifyPtkSyncResult = NotifyPtkSyncResult,
     .notifyPtkMismatch = NotifyPtkMismatch,
     .notifyHmlState = NotifyHmlState,
+    .notifyVirtualLinkStateChange = NotifyVirtualLinkStateChange,
     .getRemoteIpByRemoteMac = GetRemoteIpByRemoteMac,
 
     .addFrequencyChangedListener = AddFrequencyChangedListener,

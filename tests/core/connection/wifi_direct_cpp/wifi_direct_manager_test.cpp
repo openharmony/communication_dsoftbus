@@ -287,14 +287,11 @@ HWTEST_F(WifiDirectManagerCppTest, WifiDirectStatusListenerTest, TestSize.Level1
     struct WifiDirectStatusListener listener1 = { 0 };
     g_listeners.push_back(listener1);
     EXPECT_NO_FATAL_FAILURE(NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource));
-
     EXPECT_NO_FATAL_FAILURE(NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str()));
-
     EXPECT_NO_FATAL_FAILURE(NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC));
-
     EXPECT_NO_FATAL_FAILURE(NotifyConnectedForSink(&sinkLink));
-
     EXPECT_NO_FATAL_FAILURE(NotifyDisconnectedForSink(&sinkLink));
+    EXPECT_NO_FATAL_FAILURE(NotifyVirtualLinkStateChange(CONN_VIRTUAL_LINK_STATE_ENTER_VIRTUAL, remoteUuid.c_str()));
 
     struct WifiDirectStatusListener listener2 = {
         .onDeviceOnLine = [](const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource) {},
@@ -303,17 +300,15 @@ HWTEST_F(WifiDirectManagerCppTest, WifiDirectStatusListenerTest, TestSize.Level1
         .onLocalRoleChange = [](enum WifiDirectRole oldRole, enum WifiDirectRole newRole) {},
         .onConnectedForSink = [](const struct WifiDirectSinkLink *link) {},
         .onDisconnectedForSink = [](const struct WifiDirectSinkLink *link) {},
+        .onVirtualLinkStateChange = [](VirtualLinkState virtualLinkState, const char *remoteUuid) {},
     };
     g_listeners.push_back(listener2);
     EXPECT_NO_FATAL_FAILURE(NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource));
-
     EXPECT_NO_FATAL_FAILURE(NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str()));
-
     EXPECT_NO_FATAL_FAILURE(NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC));
-
     EXPECT_NO_FATAL_FAILURE(NotifyConnectedForSink(&sinkLink));
-
     EXPECT_NO_FATAL_FAILURE(NotifyDisconnectedForSink(&sinkLink));
+    EXPECT_NO_FATAL_FAILURE(NotifyVirtualLinkStateChange(CONN_VIRTUAL_LINK_STATE_ENTER_VIRTUAL, remoteUuid.c_str()));
 }
 
 /*
@@ -493,5 +488,117 @@ HWTEST_F(WifiDirectManagerCppTest, GetHmlLinkCount, TestSize.Level1)
     auto ret = GetHmlLinkCount();
     EXPECT_EQ(ret, 1);
     CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount out");
+}
+
+/*
+ * @tc.name: PreferNegotiateChannelTest
+ * @tc.desc: PreferNegotiateChannel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, PreferNegotiateChannelTest, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "PreferNegotiateChannelTest in");
+    std::string remoteNetworkId("1234567890");
+    char uuid[UUID_BUF_LEN] = "0123456789ABCDEF";
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo(_, _, _, _))
+        .WillRepeatedly([&uuid](const std::string &netWorkId, InfoKey key, char *info, uint32_t len) {
+            if (strcpy_s(info, UUID_BUF_LEN, uuid) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            return SOFTBUS_OK;
+        });
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [](InnerLink &link) {
+        link.SetNegotiateChannel(std::make_shared<AuthNegotiateChannel>(AuthHandle {0, 0}));
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    LinkManager::GetInstance().Dump();
+
+    WifiDirectConnectInfo info;
+    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+    info.negoChannel.type = NEGO_CHANNEL_AUTH;
+    info.negoChannel.handle.authHandle.type = AUTH_LINK_TYPE_BR;
+    (void)strcpy_s(info.remoteNetworkId, sizeof(info.remoteNetworkId), remoteNetworkId.c_str());
+    WifiDirectConnectCallback callback;
+    callback.onConnectFailure = nullptr;
+    callback.onConnectSuccess = nullptr;
+
+    ConnectCommand connectCommand1(info, callback);
+    EXPECT_NO_FATAL_FAILURE(connectCommand1.PreferNegotiateChannel());
+
+    info.negoChannel.handle.authHandle.type = AUTH_LINK_TYPE_BLE;
+    ConnectCommand connectCommand2(info, callback);
+    EXPECT_NO_FATAL_FAILURE(connectCommand2.PreferNegotiateChannel());
+
+    info.negoChannel.type = NEGO_CHANNEL_ACTION;
+    info.negoChannel.handle.authHandle.type = AUTH_LINK_TYPE_BLE;
+    ConnectCommand connectCommand3(info, callback);
+    EXPECT_NO_FATAL_FAILURE(connectCommand3.PreferNegotiateChannel());
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    CONN_LOGI(CONN_WIFI_DIRECT, "PreferNegotiateChannelTest out");
+}
+
+/*
+ * @tc.name: IsNegotiateChannelNeedTest
+ * @tc.desc: IsNegotiateChannelNeed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, IsNegotiateChannelNeedTest, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "IsNegotiateChannelNeedTest in");
+    std::string remoteNetworkId("1234567890");
+    char uuid[UUID_BUF_LEN] = "0123456789ABCDEF";
+    std::string remoteMac("10:dc:b6:90:84:82");
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo(_, _, _, _))
+        .WillRepeatedly([&uuid](const std::string &netWorkId, InfoKey key, char *info, uint32_t len) {
+            if (strcpy_s(info, UUID_BUF_LEN, uuid) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            return SOFTBUS_OK;
+        });
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [&remoteMac](InnerLink &link) {
+        link.SetLinkPowerMode(DEFAULT_POWER);
+        link.SetRemoteBaseMac(remoteMac);
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    auto ret = GetWifiDirectManager()->isNegotiateChannelNeeded(remoteNetworkId.c_str(), WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_TRUE(ret);
+
+    LinkManager::GetInstance().ProcessIfPresent(remoteMac.c_str(), [](InnerLink &link) {
+        link.SetLinkPowerMode(LOW_POWER);
+    });
+    ret = GetWifiDirectManager()->isNegotiateChannelNeeded(remoteNetworkId.c_str(), WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_TRUE(ret);
+
+    EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<2>(TYPE_GLASS_ID), Return(SOFTBUS_INVALID_PARAM)));
+    ret = GetWifiDirectManager()->isNegotiateChannelNeeded(remoteNetworkId.c_str(), WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_TRUE(ret);
+
+    EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_INVALID_PARAM)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<2>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
+    ret = GetWifiDirectManager()->isNegotiateChannelNeeded(remoteNetworkId.c_str(), WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_TRUE(ret);
+
+    EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<2>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
+    ret = GetWifiDirectManager()->isNegotiateChannelNeeded(remoteNetworkId.c_str(), WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_TRUE(ret);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    CONN_LOGI(CONN_WIFI_DIRECT, "IsNegotiateChannelNeedTest out");
 }
 } // namespace OHOS::SoftBus
