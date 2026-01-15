@@ -482,7 +482,7 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
         ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
             generalConnection->generalId, 0, NULL);
         ConnEventExtra extra = {
-            .connProtocol = info->bleinfo.protocol,
+            .connProtocol = info->bleInfo.protocol,
             .requestId = requestId,
             .errcode = status,
             .result = EVENT_STAGE_RESULT_FAILED,
