@@ -32,6 +32,7 @@
 #include "g_enhance_trans_func.h"
 #include "g_enhance_disc_func.h"
 #include "g_enhance_adapter_func.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "g_enhance_auth_func.h"
 #include "instant_statistics.h"
 #include "lnn_async_callback_utils.h"
@@ -75,6 +76,7 @@ static void ServerModuleDeinit(void)
     BusCenterServerDeinit();
     AuthDeinit();
     SoftBusTimerDeInit();
+    SoftbusMcuTimerDeinitPacked();
     LooperDeinit();
     SoftBusHiDumperDeinit();
     DeinitSoftbusSysEvt();
@@ -253,6 +255,10 @@ void InitSoftBusServer(void)
     if (SoftBusTimerInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus timer init failed.");
         return;
+    }
+
+    if (SoftbusMcuTimerInitPacked() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "mcu timer init failed.");
     }
 
     if (LooperInit() != SOFTBUS_OK) {
