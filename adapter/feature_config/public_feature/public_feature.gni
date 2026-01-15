@@ -31,6 +31,7 @@ declare_args() {
   dsoftbus_feature_conn_hv2 = false
   dsoftbus_feature_conn_hv2c = false
   dsoftbus_feature_conn_action = false
+  dsoftbus_feature_conn_general = true
   dsoftbus_feature_conn_legacy_im = false
   dsoftbus_feature_conn_legacy_data = false
 

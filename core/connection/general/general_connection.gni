@@ -22,7 +22,13 @@ general_connection_inc += [
   "$dsoftbus_root_path/core/connection/general",
 ]
 
-general_connection_src += [
-  "$dsoftbus_root_path/core/connection/general/softbus_conn_general_connection.c",
-  "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negotiation.c",
-]
+if (dsoftbus_feature_conn_general) {
+  general_connection_src += [
+    "$dsoftbus_root_path/core/connection/general/softbus_conn_general_connection.c",
+    "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negotiation.c",
+  ]
+} else {
+  general_connection_src += [
+    "$dsoftbus_root_path/core/connection/general/softbus_conn_general_connection_virtual.c",
+  ]
+}
