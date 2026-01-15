@@ -38,6 +38,7 @@ typedef enum {
     EVENT_SCENE_LEAVE_LNN = 3,
     EVENT_SCENE_LANE = 4,
     EVENT_SCENE_DDOS = 5,
+    EVENT_SCENE_SPARK_LINK = 6,
 } LnnEventScene;
 
 typedef enum {
@@ -80,12 +81,19 @@ typedef enum {
 
 typedef enum {
     EVENT_STAGE_LANE_CONFLICT = 1,
-    EVENT_STAGE_LANE_DECIDE_FAIL,
-    EVENT_STAGE_LANE_BUILD_SUCC,
-    EVENT_STAGE_LANE_BUILD_FAIL,
-    EVENT_STAGE_LANE_FREE_SUCC,
-    EVENT_STAGE_LANE_FREE_FAIL,
+    EVENT_STAGE_LANE_ALLOC,
+    EVENT_STAGE_LANE_FREE,
+    EVENT_STAGE_LANE_LINK_BUILD,
+    EVENT_STAGE_LANE_BUTT,
 } LnnEventLaneStage;
+
+typedef enum {
+    EVENT_STAGE_SPARK_GROUP_BUILD = 1,
+    EVENT_STAGE_SPARK_LINK_SEND_DATA,
+    EVENT_STAGE_SPARK_LINK_SEND_RESULT,
+    EVENT_STAGE_SPARK_LINK_MAX_NODE_NUM,
+    EVENT_STAGE_SPARK_LINK_BUTT,
+} LnnEventSparkLinkStage;
 
 typedef enum {
     EVENT_STAGE_DDOS_THRESHOLD = 1,
@@ -190,7 +198,6 @@ typedef struct {
     int32_t idCount;            // ID_COUNT
     int32_t userCount;          // UESR_COUNT
     int32_t totalCount;         // TOTAL_COUNT
-    uint32_t laneStage;          // LANE_STAGE
     uint32_t laneHandle;         // LANE_HANDLE
     uint32_t rttLevel;           // RTT_LEVEL
     uint32_t transType;          // TRANS_TYPE
@@ -199,10 +206,14 @@ typedef struct {
     uint32_t isGuideRetry;       // IS_GUIDE_RETRY
     uint32_t wifiDetectState;    // WIFI_DETECT_STATE
     uint64_t wifiDetectTime;     // WIFI_DETECT_TIME
-    uint64_t buildLinkTime;      // BUILD_LINK_TIME
+    uint64_t costTime;           // COST_TIME
     uint32_t isHmlReuse;         // IS_HML_REUSE
     uint32_t isDelayFree;        // IS_DELAY_FREE
-    uint64_t freeLinkTime;       // FREE_LINK_TIME
+    uint32_t isBuildRetry;       // IS_BUILD_RETRY
+    uint32_t isNoCapAlloc;       // IS_NO_CAP_ALLOC_LANE
+    uint8_t sourceType;          // SPARK_SEND_SOURCE_TYPE
+    uint8_t dataType;            // SPARK_SEND_DATA_TYPE
+    uint8_t isReliable;          // SPARK_SEND_IS_RELIABLE
     const char *peerDeviceInfo; // PEER_DEV_INFO
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC

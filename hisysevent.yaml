@@ -163,7 +163,6 @@ BUSCENTER_BEHAVIOR:
   ID_COUNT: { type: INT32, desc: same id count}
   USER_COUNT: { type: INT32, desc: same user count}
   TOTAL_COUNT: { type: INT32, desc: total count}
-  LANE_STAGE: { type: INT32, desc: lane stage }
   LANE_HANDLE: { type: INT32, desc: lane handle }
   QOS_RTT_LEVEL: { type: INT32, desc: lane qos info rtt level }
   TRANS_TYPE: { type: INT32, desc: lane trans type }
@@ -172,10 +171,14 @@ BUSCENTER_BEHAVIOR:
   IS_GUIDE_RETRY: { type: INT32, desc: lane is guide retry }
   WIFI_DETECT_STATE: { type: INT32, desc: lane wifi detect state }
   WIFI_DETECT_TIME: { type: INT64, desc: lane wifi detect time }
-  BUILD_LINK_TIME: { type: INT64, desc: lane build link time }
+  COST_TIME: { type: UINT64, desc: cost time }
   IS_HML_REUSE: { type: INT32, desc: lane is hml reuse }
   IS_DELAY_FREE: { type: INT32, desc: lane is delay free }
-  FREE_LINK_TIME: { type: INT64, desc: lane free link time }
+  IS_BUILD_RETRY: { type: UINT32, desc: lane is build retry }
+  IS_NO_CAP_ALLOC: { type: UINT32, desc: lane is no cap alloc }
+  SOURCE_TYPE: { type: UINT8, desc: spark link send source type }
+  DATA_TYPE: { type: UINT8, desc: spark link send data type }
+  IS_RELIABLE: { type: UINT8, desc: spark link send data is reliable }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }

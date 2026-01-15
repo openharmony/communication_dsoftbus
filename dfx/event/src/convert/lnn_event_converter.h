@@ -76,7 +76,6 @@ LNN_ASSIGNER(Int32, RecordCnt, recordCnt)
 LNN_ASSIGNER(Int32, IdCount, idCount)
 LNN_ASSIGNER(Int32, UserCount, userCount)
 LNN_ASSIGNER(Int32, TotalCount, totalCount)
-LNN_ASSIGNER(Uint32, LaneStage, laneStage)
 LNN_ASSIGNER(Uint32, LaneHandle, laneHandle)
 LNN_ASSIGNER(Errcode, RttLevel, rttLevel)
 LNN_ASSIGNER(Errcode, TransType, transType)
@@ -85,10 +84,14 @@ LNN_ASSIGNER(Errcode, RemoteDynamicCap, remoteDynamicCap)
 LNN_ASSIGNER(Errcode, IsGuideRetry, isGuideRetry)
 LNN_ASSIGNER(Errcode, WifiDetectState, wifiDetectState)
 LNN_ASSIGNER(Uint64, WifiDetectTime, wifiDetectTime)
-LNN_ASSIGNER(Uint64, BuildLinkTime, buildLinkTime)
+LNN_ASSIGNER(Uint64, CostTime, costTime)
 LNN_ASSIGNER(Errcode, IsHmlReuse, isHmlReuse)
 LNN_ASSIGNER(Errcode, IsDelayFree, isDelayFree)
-LNN_ASSIGNER(Uint64, FreeLinkTime, freeLinkTime)
+LNN_ASSIGNER(Errcode, IsBuildRetry, isBuildRetry)
+LNN_ASSIGNER(Errcode, IsNoCapAlloc, isNoCapAlloc)
+LNN_ASSIGNER(Errcode, SourceType, sourceType)
+LNN_ASSIGNER(Errcode, DataType, dataType)
+LNN_ASSIGNER(Errcode, IsReliable, isReliable)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -104,7 +107,7 @@ LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 69 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 72 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",           HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -148,7 +151,6 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "ID_COUNT",             HISYSEVENT_INT32,  LnnAssignerIdCount          },
     { "UESR_COUNT",           HISYSEVENT_INT32,  LnnAssignerUserCount        },
     { "TOTAL_COUNT",          HISYSEVENT_INT32,  LnnAssignerTotalCount       },
-    { "LANE_STAGE",           HISYSEVENT_UINT32, LnnAssignerLaneStage        },
     { "LANE_HANDLE",          HISYSEVENT_UINT32, LnnAssignerLaneHandle       },
     { "QOS_RTT_LEVEL",        HISYSEVENT_UINT32, LnnAssignerRttLevel         },
     { "TRANS_TYPE",           HISYSEVENT_UINT32, LnnAssignerTransType        },
@@ -157,10 +159,14 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "IS_GUIDE_RETRY",       HISYSEVENT_UINT32, LnnAssignerIsGuideRetry     },
     { "WIFI_DETECT_STATE",    HISYSEVENT_UINT32, LnnAssignerWifiDetectState  },
     { "WIFI_DETECT_TIME",     HISYSEVENT_UINT64, LnnAssignerWifiDetectTime   },
-    { "BUILD_LINK_TIME",      HISYSEVENT_UINT64, LnnAssignerBuildLinkTime    },
+    { "COST_TIME",            HISYSEVENT_UINT64, LnnAssignerCostTime         },
     { "IS_HML_REUSE",         HISYSEVENT_UINT32, LnnAssignerIsHmlReuse       },
     { "IS_DELAY_FREE",        HISYSEVENT_UINT32, LnnAssignerIsDelayFree      },
-    { "FREE_LINK_TIME",       HISYSEVENT_UINT64, LnnAssignerFreeLinkTime     },
+    { "IS_BUILD_RETRY",       HISYSEVENT_UINT32, LnnAssignerIsBuildRetry     },
+    { "IS_NO_CAP_ALLOC",      HISYSEVENT_UINT32, LnnAssignerIsNoCapAlloc     },
+    { "SOURCE_TYPE",          HISYSEVENT_UINT8,  LnnAssignerSourceType       },
+    { "DATA_TYPE",            HISYSEVENT_UINT8,  LnnAssignerDataType         },
+    { "IS_RELIABLE",          HISYSEVENT_UINT8,  LnnAssignerIsReliable       },
     { "PEER_DEV_INFO",        HISYSEVENT_STRING, LnnAssignerPeerDeviceInfo   },
     { "PEER_IP",              HISYSEVENT_STRING, LnnAssignerPeerIp           },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, LnnAssignerPeerBrMac        },

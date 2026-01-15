@@ -61,10 +61,10 @@ int32_t CreateLaneEventInfo(const LaneProcess *processInfo)
         LNN_LOGE(LNN_LANE, "processInfo calloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (memcpy_s(info->laneProcessList32Bit, EVENT_32_BIT_MAX, processInfo->laneProcessList32Bit, EVENT_32_BIT_MAX) !=
-            EOK ||
-        memcpy_s(info->laneProcessList64Bit, EVENT_64_BIT_MAX, processInfo->laneProcessList64Bit, EVENT_64_BIT_MAX) !=
-            EOK ||
+    if (memcpy_s(info->laneProcessList32Bit, sizeof(info->laneProcessList32Bit), processInfo->laneProcessList32Bit,
+        sizeof(processInfo->laneProcessList32Bit)) != EOK ||
+        memcpy_s(info->laneProcessList64Bit, sizeof(info->laneProcessList64Bit), processInfo->laneProcessList64Bit,
+        sizeof(processInfo->laneProcessList64Bit)) != EOK ||
         memcpy_s(info->peerNetWorkId, NETWORK_ID_BUF_LEN, processInfo->peerNetWorkId, NETWORK_ID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "copy processInfo fail");
         SoftBusFree(info);
@@ -159,33 +159,27 @@ int32_t GetLaneEventInfo(uint32_t laneHandle, LaneProcess *laneProcess)
     return SOFTBUS_OK;
 }
 
-int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result)
+static bool IsNoCapAlloc(LaneLinkType linkType, bool isNoCapAlloc)
 {
-    if (laneHandle == INVALID_LANE_REQ_ID) {
-        LNN_LOGE(LNN_LANE, "laneHandle is invalid parameter");
+    return (linkType == LANE_HML || linkType == LANE_P2P) && isNoCapAlloc;
+}
+
+int32_t ReportLaneEventInfo(LnnEventLaneStage stage, uint32_t laneHandle, int32_t result)
+{
+    if (stage >= EVENT_STAGE_LANE_BUTT || laneHandle == INVALID_LANE_REQ_ID) {
+        LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LaneEventLock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "lane lock fail");
-        return SOFTBUS_LOCK_ERR;
+    LaneProcess info;
+    (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    int32_t ret = GetLaneEventInfo(laneHandle, &info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lane event info fail, ret=%{public}d", ret);
+        return ret;
     }
-    LaneProcess info = { 0 };
-    LaneProcess *laneProcess = NULL;
-    laneProcess = GetLaneEventWithoutLock(laneHandle);
-    if (laneProcess == NULL) {
-        LaneEventUnLock();
-        return SOFTBUS_LANE_NOT_FOUND;
-    }
-    if (memcpy_s(&info, sizeof(LaneProcess), laneProcess, sizeof(LaneProcess)) != EOK) {
-        LNN_LOGE(LNN_LANE, "memcpy LaneProcess fail");
-        LaneEventUnLock();
-        return SOFTBUS_MEM_ERR;
-    }
-    LaneEventUnLock();
     LnnEventExtra extra = {
-        .result = EVENT_STAGE_RESULT_OK,
+        .result = (result == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
         .errcode = result,
-        .laneStage = info.laneProcessList32Bit[EVENT_LANE_STAGE],
         .laneHandle = info.laneProcessList32Bit[EVENT_LANE_HANDLE],
         .laneId = info.laneProcessList64Bit[EVENT_LANE_ID],
         .laneLinkType = (int32_t)info.laneProcessList32Bit[EVENT_LANE_LINK_TYPE],
@@ -202,13 +196,37 @@ int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result)
         .isGuideRetry = info.laneProcessList32Bit[EVENT_GUIDE_RETRY],
         .wifiDetectState = info.laneProcessList32Bit[EVENT_WIFI_DETECT_STATE],
         .wifiDetectTime = info.laneProcessList64Bit[EVENT_WIFI_DETECT_TIME],
-        .buildLinkTime = info.laneProcessList64Bit[EVENT_BUILD_LINK_TIME],
+        .costTime = info.laneProcessList64Bit[EVENT_COST_TIME],
+        .isWifiDirectReuse = info.laneProcessList32Bit[EVENT_WIFI_DIRECT_REUSE],
         .isHmlReuse = info.laneProcessList32Bit[EVENT_HML_REUSE],
         .isDelayFree = info.laneProcessList32Bit[EVENT_DELAY_FREE],
-        .freeLinkTime = info.laneProcessList64Bit[EVENT_FREE_LINK_TIME],
+        .isBuildRetry = info.laneProcessList32Bit[EVENT_BUILD_RETRY],
+        .isNoCapAlloc = (uint32_t)IsNoCapAlloc((LaneLinkType)info.laneProcessList32Bit[EVENT_LANE_LINK_TYPE],
+            (bool)info.laneProcessList32Bit[EVENT_NO_CAP_ALLOC_LANE]),
+        .osType = (int32_t)info.laneProcessList32Bit[EVENT_OS_TYPE],
     };
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
+    LNN_EVENT(EVENT_SCENE_LANE, stage, extra);
     return DeleteLaneEventInfo(laneHandle);
+}
+
+void ReportLaneEventBuildLinkResult(uint32_t laneReqId, LaneLinkType type, uint64_t buildLinkTime, int32_t reason)
+{
+    LnnEventExtra extra = {
+        .result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
+        .errcode = reason,
+        .laneLinkType = type,
+        .costTime = buildLinkTime,
+    };
+    LaneProcess laneProcess;
+    (void)memset_s(&laneProcess, sizeof(LaneProcess), 0, sizeof(LaneProcess));
+    if (GetLaneEventInfo(laneReqId, &laneProcess) == SOFTBUS_OK) {
+        if (type == LANE_HML || type == LANE_P2P) {
+            extra.guideType = (int32_t)laneProcess.laneProcessList32Bit[EVENT_GUIDE_TYPE];
+            extra.isWifiDirectReuse = laneProcess.laneProcessList32Bit[EVENT_WIFI_DIRECT_REUSE];
+        }
+        extra.osType = (int32_t)laneProcess.laneProcessList32Bit[EVENT_OS_TYPE];
+    }
+    LNN_EVENT(EVENT_SCENE_LANE, EVENT_STAGE_LANE_LINK_BUILD, extra);
 }
 
 int32_t InitLaneEvent(void)

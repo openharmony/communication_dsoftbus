@@ -41,6 +41,7 @@ constexpr int32_t AUTHID = 2;
 constexpr int32_t AUTHTYPE = 2;
 constexpr int32_t AUTH_REQ_ID = 112;
 constexpr int32_t REQUEST_ID = 1;
+constexpr int32_t P2P_REQUEST_ID = 3;
 constexpr int32_t ACTION_ADDR = 1;
 constexpr int32_t GUIDE_TYPE_NUMBERS_ONE = 1;
 constexpr int32_t GUIDE_TYPE_NUMBERS_TWO = 2;
@@ -304,7 +305,7 @@ HWTEST_F(LNNLaneLinkP2pTest, ON_CONN_OPENED_FOR_DISCONNECT_TEST_001, TestSize.Le
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_NO_FATAL_FAILURE(OnConnOpenedForDisconnect(REQID, authHandle));
 
-    EXPECT_NO_FATAL_FAILURE(HandleGuideChannelRetry(LANEREQID, LANE_HML, REASON));
+    EXPECT_NO_FATAL_FAILURE(HandleGuideChannelRetry(LANEREQID, LANE_HML, AUTH_LINK_TYPE_MAX, REASON));
     EXPECT_EQ(InitGuideChannelLooper(), SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(HandleActionTriggerError(REQID));
 }
@@ -532,5 +533,118 @@ HWTEST_F(LNNLaneLinkP2pTest, OPEN_ACTION_TO_CONN_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = OpenActionToConn(&request, LANEREQID, &callback);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/*
+* @tc.name: UPDATE_REASON_TEST_001
+* @tc.desc: UpdateReason test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, UPDATE_REASON_TEST_001, TestSize.Level1)
+{
+    int32_t ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_CHANNEL_BUTT, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_ACTIVE_AUTH_NEGO, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_ACTIVE_BR_NEGO, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_PROXY_AUTH_NEGO, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_NEW_AUTH_NEGO, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_BLE_TRIGGER, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_ACTION_TRIGGER, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_ACTION_TRIGGER_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_SPARKLINK_TRIGGER, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_SPARKLINK_TRIGGER_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_MAX, LANE_ACTIVE_AUTH_TRIGGER, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_WIFI, LANE_ACTIVE_AUTH_TRIGGER, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_AUTH_WIFI_TRIGGER_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_BLE, LANE_ACTIVE_AUTH_TRIGGER, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_AUTH_BLE_TRIGGER_TIMEOUT);
+    ret = UpdateReason(AUTH_LINK_TYPE_BR, LANE_ACTIVE_AUTH_TRIGGER, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_CONN_HV2_AUTH_BR_TRIGGER_TIMEOUT);
+}
+
+/*
+* @tc.name: UPDATE_GUIDE_CHANNEL_ERR_CODE_TEST_001
+* @tc.desc: UpdateFirstGuideChannelErrCode test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, UPDATE_GUIDE_CHANNEL_ERR_CODE_TEST_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(UpdateFirstGuideChannelErrCode(P2P_REQUEST_ID,
+        SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT));
+    LinkRequest linkRequest = {
+        .linkType = LANE_HML,
+    };
+    LaneLinkCb callback = {nullptr};
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQUEST_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(UpdateFirstGuideChannelErrCode(P2P_REQUEST_ID,
+        SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT));
+    WdGuideInfo guideInfo = {
+        .laneReqId = LANEREQID,
+        .request.linkType = LANE_HML,
+        .guideIdx = LANE_CHANNEL_BUTT,
+        .guideList[0] = LANE_ACTIVE_AUTH_TRIGGER,
+    };
+    ret = AddGuideInfoItem(&guideInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(UpdateFirstGuideChannelErrCode(P2P_REQUEST_ID,
+        SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT));
+    EXPECT_NO_FATAL_FAILURE(DelGuideInfoItem(LANEREQID, LANE_HML));
+    guideInfo.guideIdx = 0;
+    ret = AddGuideInfoItem(&guideInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(UpdateFirstGuideChannelErrCode(P2P_REQUEST_ID,
+        SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT));
+    WdGuideInfo guideInfoRet = {0};
+    ret = GetGuideInfo(LANEREQID, LANE_HML, &guideInfoRet);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    int32_t errCode = guideInfoRet.firstGuideErrCode;
+    EXPECT_EQ(SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT, errCode);
+    EXPECT_NO_FATAL_FAILURE(DelGuideInfoItem(LANEREQID, LANE_HML));
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQUEST_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: GET_FIRST_GUIDE_TYPE_AND_ERR_CODE_TEST_001
+* @tc.desc: GetFirstGuideTypeAndErrCode test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, GET_FIRST_GUIDE_TYPE_AND_ERR_CODE_TEST_001, TestSize.Level1)
+{
+    WdGuideType guideType = LANE_CHANNEL_BUTT;
+    int32_t guideErrCode = SOFTBUS_INVALID_PARAM;
+    int32_t ret = GetFirstGuideTypeAndErrCode(LANEREQID, LANE_HML, &guideType, &guideErrCode);
+    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
+    WdGuideInfo guideInfo = {
+        .laneReqId = LANEREQID,
+        .request.linkType = LANE_HML,
+        .guideIdx = 0,
+        .guideList[0] = LANE_BLE_TRIGGER,
+        .firstGuideErrCode = SOFTBUS_OK,
+    };
+    ret = AddGuideInfoItem(&guideInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = GetFirstGuideTypeAndErrCode(LANEREQID, LANE_HML, &guideType, &guideErrCode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(guideErrCode, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DelGuideInfoItem(LANEREQID, LANE_HML));
+    guideInfo.firstGuideErrCode = SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT;
+    ret = AddGuideInfoItem(&guideInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = GetFirstGuideTypeAndErrCode(LANEREQID, LANE_HML, &guideType, &guideErrCode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(guideType, LANE_BLE_TRIGGER);
+    EXPECT_EQ(guideErrCode, SOFTBUS_CONN_HV2_BLE_TRIGGER_TIMEOUT);
+    EXPECT_NO_FATAL_FAILURE(DelGuideInfoItem(LANEREQID, LANE_HML));
 }
 }
