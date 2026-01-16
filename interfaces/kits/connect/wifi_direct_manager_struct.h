@@ -29,6 +29,7 @@ struct WifiDirectStatusListener {
     void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
     void (*onConnectedForSink)(const struct WifiDirectSinkLink *link);
     void (*onDisconnectedForSink)(const struct WifiDirectSinkLink *link);
+    void (*onVirtualLinkStateChange)(VirtualLinkState virtualLinkState, const char *remoteUuid);
 };
 
 typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
@@ -94,6 +95,7 @@ struct WifiDirectManager {
     void (*notifyPtkSyncResult)(const char *remoteDeviceId, int result);
     void (*notifyPtkMismatch)(const char *remoteNetworkId, uint32_t len, int32_t reason);
     void (*notifyHmlState)(SoftBusHmlState state);
+    void (*notifyVirtualLinkStateChange)(VirtualLinkState virtualLinkState, const char *remoteUuid);
     int32_t (*getRemoteIpByRemoteMac)(const char *remoteMac, char *remoteIp, int32_t remoteIpSize);
 
     /* for virtual connection */

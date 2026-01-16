@@ -495,6 +495,7 @@ void InnerLink::Dump() const
     object["NEGOTIATION_CHANNEL"] = channel_ != nullptr;
     object["LOCAL_CUSTOM_PORT"] = GetLocalCustomPort();
     object["REMOTE_CUSTOM_PORT"] = GetRemoteCustomPort();
+    object["POWER_MODE"] = GetLinkPowerMode();
 
     auto linkIdArrayObject = nlohmann::json::array();
     for (const auto &[key, value] : linkIds_) {
