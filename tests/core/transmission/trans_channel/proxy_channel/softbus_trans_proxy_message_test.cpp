@@ -522,6 +522,11 @@ HWTEST_F(TransProxyMessageTest, PackHandshakeMsgForFastData001, TestSize.Level1)
     appInfo.routeType = BT_BR;
     appInfo.businessType = BUSINESS_TYPE_MESSAGE;
 
+    TransCommInterfaceMock commMock;
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
+
     int32_t ret = PackHandshakeMsgForFastData(&appInfo, root);
     ASSERT_NE(ret, SOFTBUS_MALLOC_ERR);
 

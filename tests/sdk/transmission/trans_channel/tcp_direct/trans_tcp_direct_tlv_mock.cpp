@@ -95,5 +95,32 @@ int32_t SetMintpSocketTos(int32_t fd, uint32_t tos)
 {
     return GetTransTcpDirectInterface()->SetMintpSocketTos(fd, tos);
 }
+
+int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
+{
+    return GetTransTcpDirectInterface()->SetPendingPacket(channelId, seqNum, type);
+}
+
+ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
+{
+    return GetTransTcpDirectInterface()->ConnSendSocketData(fd, buf, len, timeout);
+}
+
+int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount)
+{
+    return GetTransTcpDirectInterface()->ConnSetTcpKeepalive(fd, seconds, keepAliveIntvl, keepAliveCount);
+}
+
+int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millsec)
+{
+    return GetTransTcpDirectInterface()->ConnSetTcpUserTimeOut(fd, millsec);
+}
+
+int32_t StartTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo,
+    TimeSyncAccuracy accuracy, TimeSyncPeriod period, ITimeSyncCbWithSocket *cbWithSocket)
+{
+    return GetTransTcpDirectInterface()->StartTimeSyncWithSocketInner(
+        pkgName, socketInfo, accuracy, period, cbWithSocket);
+}
 }
 }
