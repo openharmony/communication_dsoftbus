@@ -291,11 +291,17 @@ static void HbSleStateEventHandler(const LnnEventBasicInfo *info)
 
 static void HbUpdateEnableStatusToMcu(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "local support mcu feature=%{public}d", LnnIsLocalSupportMcuFeature());
-    if (LnnIsLocalSupportMcuFeature() && g_enableStateMcu != IsHeartbeatEnableForMcu()) {
-        g_enableStateMcu = IsHeartbeatEnableForMcu();
-        LnnNotifyLpMcuInit(g_enableStateMcu);
+    bool isBleEnable = IsHeartbeatEnableForMcu();
+
+    if (!LnnIsLocalSupportMcuFeature()) {
+        return;
     }
+    if (isBleEnable == g_enableStateMcu) {
+        return;
+    }
+    g_enableStateMcu = isBleEnable;
+    SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
+    LnnNotifyLpMcuInit(state, 0);
 }
 
 static void HbConditionChanged(bool isOnlySetState)
@@ -357,7 +363,7 @@ static void RequestEnableDiscovery(void *para)
 {
     (void)para;
     if (!g_hbConditionState.isRequestDisable) {
-        LNN_LOGI(LNN_HEART_BEAT, "ble has been enabled, don't need  restore enabled");
+        LNN_LOGI(LNN_HEART_BEAT, "ble has been enabled, don't need restore enabled");
         return;
     }
     g_hbConditionState.isRequestDisable = false;
@@ -384,11 +390,11 @@ static void RequestDisableDiscovery(int64_t timeout)
     HbConditionChanged(false);
 }
 
-static int32_t SameAccountDevDisableDiscoveryProcess(void)
+static int32_t SameAccountDevDisableDiscoveryProcess(bool hasMcuRequestDisable)
 {
     bool addrType[CONNECTION_ADDR_MAX] = {false};
     addrType[CONNECTION_ADDR_BLE] = true;
-    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, hasMcuRequestDisable) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "leave ble network fail");
     }
     return LnnSyncBleOfflineMsgPacked();
@@ -396,7 +402,14 @@ static int32_t SameAccountDevDisableDiscoveryProcess(void)
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter");
+    if (LnnIsLocalSupportMcuFeature()) {
+        SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
+        LnnNotifyLpMcuInit(state, strategy);
+        if (strategy == SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY) {
+            SameAccountDevDisableDiscoveryProcess(true);
+        }
+        return;
+    }
     switch (strategy) {
         case REQUEST_DISABLE_BLE_DISCOVERY:
             RequestDisableDiscovery(timeout);
@@ -406,7 +419,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             break;
         case SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY:
             RequestDisableDiscovery(INVALID_DELAY_TIME);
-            SameAccountDevDisableDiscoveryProcess();
+            SameAccountDevDisableDiscoveryProcess(false);
             break;
         case SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY:
             RequestEnableDiscovery(NULL);

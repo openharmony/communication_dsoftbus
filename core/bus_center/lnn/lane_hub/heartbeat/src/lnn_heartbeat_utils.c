@@ -153,7 +153,7 @@ static bool HbHasActiveP2pConnection(const char *networkId)
 
 static bool HbHasActiveHmlConnection(const char *networkId)
 {
-    NodeInfo info;
+    NodeInfo info = { 0 };
     char myIp[IP_LEN] = { 0 };
     struct WifiDirectManager *pManager = GetWifiDirectManager();
     if (pManager == NULL) {

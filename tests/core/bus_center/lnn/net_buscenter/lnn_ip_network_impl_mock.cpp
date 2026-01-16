@@ -364,9 +364,9 @@ bool LnnVisitNetif(VisitNetifCallback callback, void *data)
     return GetLnnIpNetworkImplInterface()->LnnVisitNetif(callback, data);
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
-    return GetLnnIpNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen);
+    return GetLnnIpNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
 }
 
 int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len)
