@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -536,6 +536,7 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_INVALID_OBJECT,
     SOFTBUS_TRANS_SESSION_TIME_NOT_EQUAL,
     SOFTBUS_TRANS_FAST_WAKE_UP_FAIL,
+    SOFTBUS_TRANS_SERVER_NOT_LISTEN,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
