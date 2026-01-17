@@ -29,6 +29,7 @@
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
+#include "lnn_distributed_net_ledger_common.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
@@ -681,6 +682,27 @@ static bool AuthCheckSessionKey(AuthHandle *authHandle)
     return res;
 }
 
+static bool IsNeedJudgeTimeOut(const AuthConnInfo *info)
+{
+    if (info->type != AUTH_LINK_TYPE_BR) {
+        return true;
+    }
+    int32_t localDevTypeId = 0;
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local deviceType fail, ret=%{public}d", ret);
+        return true;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    ret = LnnGetRemoteNodeInfoByKey(info->info.brInfo.brMac, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get remote node info fail, ret=%{public}d", ret);
+        return true;
+    }
+    return (localDevTypeId != TYPE_GLASS_ID && nodeInfo.deviceInfo.deviceTypeId != TYPE_GLASS_ID);
+}
+
 int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback)
 {
     if (info == NULL || !CheckAuthConnCallback(callback)) {
@@ -707,7 +729,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
         case AUTH_LINK_TYPE_BR:
             /* fall-through */
         case AUTH_LINK_TYPE_BLE:
-            judgeTimeOut = true;
+            judgeTimeOut = IsNeedJudgeTimeOut(info);
             authHandle.authId = GetActiveAuthIdByConnInfo(info, judgeTimeOut);
             if (authHandle.authId != AUTH_INVALID_ID && AuthCheckSessionKey(&authHandle)) {
                 return AuthStartReconnectDevice(authHandle, info, requestId, callback);
