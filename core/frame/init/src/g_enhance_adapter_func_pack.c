@@ -127,3 +127,21 @@ void SoftbusSleAdapterDeInitPacked(void)
     }
     return pfnAdapterEnhanceFuncList->softbusSleAdapterDeInit();
 }
+
+int32_t SoftbusMcuTimerInitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softbusMcuTimerInit) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAdapterEnhanceFuncList->softbusMcuTimerInit();
+}
+
+void SoftbusMcuTimerDeinitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit();
+}

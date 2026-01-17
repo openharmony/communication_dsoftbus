@@ -39,6 +39,8 @@ void SoftBusUnregRangeCbPacked(SoftBusRangeModule module);
 void RegisterRadarCbForOpenSrcPacked(void *callback);
 void SoftbusSleAdapterInitPacked(void);
 void SoftbusSleAdapterDeInitPacked(void);
+int32_t SoftbusMcuTimerInitPacked(void);
+void SoftbusMcuTimerDeinitPacked(void);
 #ifdef __cplusplus
 }
 #endif

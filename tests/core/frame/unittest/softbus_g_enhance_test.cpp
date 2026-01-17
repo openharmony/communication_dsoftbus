@@ -1087,4 +1087,38 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest032, TestSize.Level1)
     pfnDiscEnhanceFuncList->discShareNfcDeinit = DiscShareNfcDeinitStub;
     DiscShareNfcDeinitPacked();
 }
+
+int32_t SoftbusMcuTimerInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+void SoftbusMcuTimerDeinit(void)
+{
+    return;
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest033
+ * @tc.desc: SoftbusMcuTimerInitPacked and SoftbusMcuTimerDeinitPacked test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest033, TestSize.Level1)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    pfnAdapterEnhanceFuncList->softbusMcuTimerInit = nullptr;
+    int32_t ret = SoftbusMcuTimerInitPacked();
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    pfnAdapterEnhanceFuncList->softbusMcuTimerInit = SoftbusMcuTimerInit;
+    ret = SoftbusMcuTimerInitPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit = nullptr;
+    EXPECT_NO_FATAL_FAILURE(SoftbusMcuTimerDeinitPacked());
+
+    pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit = SoftbusMcuTimerDeinit;
+    EXPECT_NO_FATAL_FAILURE(SoftbusMcuTimerDeinitPacked());
+}
 }
