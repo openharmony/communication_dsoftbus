@@ -34,6 +34,7 @@ constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
 constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 10000;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_LATENCY = 2500;
 constexpr uint32_t HIGH_BW = 160 * 1024 * 1024;
+constexpr uint32_t LOW_BW = 384 * 1024;
 constexpr uint32_t LOCAL_NUM = 8192;
 constexpr uint32_t ROM_NUM = 8;
 constexpr uint32_t ROM_NUM2 = 2;
