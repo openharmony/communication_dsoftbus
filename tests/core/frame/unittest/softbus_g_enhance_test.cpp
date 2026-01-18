@@ -609,7 +609,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest017, TestSize.Level1)
     EXPECT_FALSE(ret);
     ret = TransCheckP2pOnlyPacked(TEST_PKG_NAME);
     EXPECT_FALSE(ret);
-    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME);
+    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME, TEST_NETWORK_ID);
     EXPECT_FALSE(ret);
     int32_t res = LoadTransPermissionJsonPacked();
     EXPECT_EQ(res, SOFTBUS_OK);
@@ -745,7 +745,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest025, TestSize.Level1)
     EXPECT_FALSE(ret);
     ret = TransCheckP2pOnlyPacked(TEST_PKG_NAME);
     EXPECT_FALSE(ret);
-    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME);
+    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME, TEST_NETWORK_ID);
     EXPECT_FALSE(ret);
     int32_t res = LoadTransPermissionJsonPacked();
     EXPECT_EQ(res, SOFTBUS_OK);

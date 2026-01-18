@@ -1634,7 +1634,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
-    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName)) {
+    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName, param->peerDeviceId)) {
         TRANS_LOGE(TRANS_SVC, "trigger begin");
         DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
@@ -1685,7 +1685,7 @@ int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneA
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
-    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName)) {
+    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName, param->peerDeviceId)) {
         TRANS_LOGE(TRANS_SVC, "trigger begin");
         DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
