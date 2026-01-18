@@ -55,7 +55,7 @@ typedef bool (*IsInWhitelistFunc)(const char *app);
 typedef bool (*CheckAuthChannelSessionNameValidFunc)(const char *sessionName);
 typedef bool (*TransCheckNetworkDelegateFunc)(const char *sessionName);
 typedef bool (*TransCheckP2pOnlyFunc)(const char *sessionName);
-typedef bool (*TransCheckDcTriggerVirtualLinkFunc)(const char *sessionName);
+typedef bool (*TransCheckDcTriggerVirtualLinkFunc)(const char *sessionName, const char *peerNetworkId);
 typedef int32_t (*LoadTransPermissionJsonFunc)(void);
 typedef void (*TransD2dQosUnregisterFunc)(int32_t channelId, char *sleMac, uint32_t macLen);
 
