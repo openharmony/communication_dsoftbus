@@ -15,6 +15,7 @@
 
 #include "disc_ble.h"
 
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -130,6 +131,7 @@ typedef enum {
 
 typedef struct {
     bool isAdvertising;
+    _Atomic bool isRspDataEmpty;
     int32_t channel;
     DeviceInfo deviceInfo;
     int32_t (*GetDeviceInfo)(DeviceInfo *info);
@@ -366,6 +368,7 @@ static void BleAdvDisableCallback(int channel, int status)
         for (int32_t i = 0; i < NUM_ADVERTISER; i++) {
             if (g_bleAdvertiser[i].channel == channel) {
                 g_bleAdvertiser[i].isAdvertising = false;
+                atomic_store_explicit(&(g_bleAdvertiser[i].isRspDataEmpty), true, memory_order_release);
                 DISC_LOGI(DISC_BLE, "disable ble advertiser adv=%{public}d", i);
             }
         }
@@ -1047,6 +1050,24 @@ static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastD
     return SOFTBUS_OK;
 }
 
+static void AssembleDeviceNameWithPending(DeviceInfo *info, BroadcastData *broadcastData, int32_t advId)
+{
+    uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen - 1;
+    uint32_t validLen = (strlen(info->devName) + 1 > remainLen) ? remainLen : strlen(info->devName) + 1;
+    char deviceName[DISC_MAX_DEVICE_NAME_LEN] = {0};
+    if (DiscBleGetDeviceName(deviceName, validLen) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "get deviceName failed");
+    }
+    uint32_t deviceNameLen = strlen(deviceName) + 1;
+    if (validLen + broadcastData->dataLen <= ADV_DATA_MAX_LEN &&
+        deviceNameLen != DISC_MAX_DEVICE_NAME_LEN &&
+        !atomic_load_explicit(&(g_bleAdvertiser[advId].isRspDataEmpty), memory_order_acquire)) {
+        deviceNameLen += remainLen - RESP_DATA_MAX_LEN - validLen + 1;
+        atomic_store_explicit(&(g_bleAdvertiser[advId].isRspDataEmpty), false, memory_order_release);
+    }
+    (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)deviceName, deviceNameLen);
+}
+
 static int32_t GetBroadcastData(DiscBleAdvertiser *advertiser, int32_t advId, BroadcastData *broadcastData)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(advertiser != NULL && broadcastData != NULL,
@@ -1077,13 +1098,9 @@ static int32_t GetBroadcastData(DiscBleAdvertiser *advertiser, int32_t advId, Br
         DistGetActionParamPacked(&advertiser->action);
         AssembleActionTlv(advertiser, broadcastData);
     }
-    uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen - 1;
-    uint32_t validLen = (strlen(info->devName) + 1 > remainLen) ? remainLen : strlen(info->devName) + 1;
-    char deviceName[DISC_MAX_DEVICE_NAME_LEN] = {0};
-    if (DiscBleGetDeviceName(deviceName, validLen) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "get deviceName failed");
-    }
-    (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)deviceName, strlen(deviceName) + 1);
+    // The issue where an empty B package cannot be updated due to chip avoidance is resolved.
+    // Therefore, when an empty B package needs to be updated, the device name is added to the B package.
+    AssembleDeviceNameWithPending(info, broadcastData, advId);
 
     DISC_LOGD(DISC_BLE, "broadcastData->dataLen=%{public}d", broadcastData->dataLen);
     return SOFTBUS_OK;
@@ -1245,6 +1262,15 @@ static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
     }
 }
 
+static void updateIsRspDataEmpty(uint16_t payloadLen, int32_t adv)
+{
+    if (payloadLen == 0) {
+        atomic_store_explicit(&(g_bleAdvertiser[adv].isRspDataEmpty), true, memory_order_release);
+    } else {
+        atomic_store_explicit(&(g_bleAdvertiser[adv].isRspDataEmpty), false, memory_order_release);
+    }
+}
+
 static int32_t StartAdvertiser(int32_t adv)
 {
     DISC_LOGD(DISC_BLE, "enter");
@@ -1270,6 +1296,7 @@ static int32_t StartAdvertiser(int32_t adv)
     ret = BuildBleConfigAdvData(&packet, &broadcastData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL,
         DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
+    (void)updateIsRspDataEmpty(packet.rspData.payloadLen, adv);
     BroadcastParam advParam = {};
     BuildAdvParam(&advParam);
 
@@ -1329,6 +1356,7 @@ static int32_t UpdateAdvertiser(int32_t adv)
     ret = BuildBleConfigAdvData(&packet, &broadcastData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL,
         DISC_BLE, "BuildBleConfigAdvData failed, ret=%{public}d", ret);
+    (void)updateIsRspDataEmpty(packet.rspData.payloadLen, adv);
     BroadcastParam advParam = {0};
     BuildAdvParam(&advParam);
     ret = SchedulerUpdateBroadcast(advertiser->channel, &advParam, &packet);
@@ -1983,6 +2011,7 @@ static int32_t InitAdvertiser(void)
 
     for (uint32_t i = 0; i < NUM_ADVERTISER; i++) {
         g_bleAdvertiser[i].isAdvertising = false;
+        atomic_store_explicit(&(g_bleAdvertiser[i].isRspDataEmpty), true, memory_order_release);
     }
     g_bleAdvertiser[CON_ADV_ID].GetDeviceInfo = GetConDeviceInfo;
     g_bleAdvertiser[CON_ADV_ID].channel = conChannel;
