@@ -256,7 +256,7 @@ bool TransCheckP2pOnlyPacked(const char *sessionName)
     return pfnTransEnhanceFuncList->transCheckP2pOnly(sessionName);
 }
 
-bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName)
+bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName, const char *peerNetworkId)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
     if (pfnTransEnhanceFuncList == NULL) {
@@ -265,7 +265,7 @@ bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName)
     if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink) != SOFTBUS_OK) {
         return false;
     }
-    return pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink(sessionName);
+    return pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink(sessionName, peerNetworkId);
 }
 
 int32_t LoadTransPermissionJsonPacked(void)
