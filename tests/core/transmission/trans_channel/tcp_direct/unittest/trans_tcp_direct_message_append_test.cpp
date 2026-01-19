@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "softbus_conn_interface.h"
 #include "softbus_server_frame.h"
 #include "trans_tcp_direct_listener.c"
-#include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_message.h"
@@ -2008,5 +2007,35 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetCipherFlagByAuthIdTest0011, TestSiz
     EXPECT_CALL(TcpMessageMock, AuthGetConnInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SwitchAuthLinkTypeToFlagType
+ * @tc.desc: Obtain the flag based on AuthLinkType, and then obtain the AuthLinkType based on the flag.
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(TransTcpDirectMessageAppendTest, SwitchAuthLinkTypeToFlagType, TestSize.Level1)
+{
+    uint32_t cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BR);
+    EXPECT_EQ(AUTH_LINK_TYPE_BR, SwitchCipherTypeToAuthLinkType(cipherFlag));
+
+    cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_BLE);
+    EXPECT_EQ(AUTH_LINK_TYPE_BLE, SwitchCipherTypeToAuthLinkType(cipherFlag));
+
+    cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_SLE);
+    EXPECT_EQ(AUTH_LINK_TYPE_SESSION_KEY, SwitchCipherTypeToAuthLinkType(cipherFlag));
+
+    cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_P2P);
+    EXPECT_EQ(AUTH_LINK_TYPE_P2P, SwitchCipherTypeToAuthLinkType(cipherFlag));
+
+    cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_ENHANCED_P2P);
+    EXPECT_EQ(AUTH_LINK_TYPE_ENHANCED_P2P, SwitchCipherTypeToAuthLinkType(cipherFlag));
+
+    cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_SESSION_KEY);
+    EXPECT_EQ(AUTH_LINK_TYPE_SESSION_KEY, SwitchCipherTypeToAuthLinkType(cipherFlag));
+
+    cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_WIFI);
+    EXPECT_EQ(AUTH_LINK_TYPE_WIFI, SwitchCipherTypeToAuthLinkType(cipherFlag));
 }
 }
