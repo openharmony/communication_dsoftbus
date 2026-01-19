@@ -134,7 +134,6 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
     (void)strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID, strlen(NODE1_NETWORK_ID));
     (void)strncpy_s(info.connectInfo.macAddr, MAC_LEN, NODE1_BT_MAC, strlen(NODE1_BT_MAC));
     EXPECT_EQ(REPORT_NONE, LnnAddOnlineNode(&info));
-    EXPECT_EQ(1, 2);
 }
 
 /*
@@ -1827,33 +1826,19 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DISTRIBUTED_LEDGER_Test_001, TestSize
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo oldInfo;
     (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_EQ(1, 2);
     EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(nullptr, &oldInfo));
-    EXPECT_EQ(1, 2);
     EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(&newInfo, nullptr));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, strcpy_s(newInfo.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, strcpy_s(newInfo.softBusVersion, VERSION_MAX_LEN, SOFTBUS_VERSION));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, strcpy_s(newInfo.connectInfo.macAddr, MAC_LEN, NODE1_BT_MAC));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, strcpy_s(newInfo.deviceInfo.osVersion, OS_VERSION_BUF_LEN, SOFTBUS_VERSION));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, strcpy_s(newInfo.p2pInfo.p2pMac, MAC_LEN, P2P_MAC));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "newpeerIrk", strlen("newpeerIrk")));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, memcpy_s(newInfo.rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN, "12345", strlen("12345")));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, memcpy_s(newInfo.cipherInfo.key, SESSION_KEY_LENGTH, "samekey", strlen("samekey")));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, memcpy_s(newInfo.cipherInfo.iv, BROADCAST_IV_LEN, "samekeyIv", strlen("samekeyIv")));
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(EOK, strcpy_s(oldInfo.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID));
-    EXPECT_EQ(1, 2);
-    EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(&newInfo, &oldInfo));// signal 11
-    EXPECT_EQ(1, 2);
+    EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(&newInfo, &oldInfo));
 }
 
 /*

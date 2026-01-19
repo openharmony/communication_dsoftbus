@@ -54,15 +54,11 @@ void LNNOhosAccountTest::TearDown() { }
 HWTEST_F(LNNOhosAccountTest, LNN_GET_OHOS_ACCOUNT_INFO_001, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
-    EXPECT_EQ(1, 2);
-    ret = LnnGetOhosAccountInfo(nullptr, SHA_256_HASH_LEN); // signal 11
-    EXPECT_EQ(1, 2);
+    ret = LnnGetOhosAccountInfo(nullptr, SHA_256_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     uint8_t accountHash[SHA_256_HASH_LEN - 1] = { 0 };
-    EXPECT_EQ(1, 2);
     ret = LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN - 1);
-    EXPECT_EQ(1, 2);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

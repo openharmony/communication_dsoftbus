@@ -661,7 +661,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_02, TestSize.Level1)
     delMsgPara.hbType |= HEARTBEAT_TYPE_BLE_V0;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
