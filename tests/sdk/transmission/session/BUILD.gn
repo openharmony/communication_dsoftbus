@@ -114,6 +114,12 @@ ohos_unittest("TransClientSessionManagerExTest") {
 }
 
 ohos_unittest("TransClientSessionServiceTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "$dsoftbus_root_path/tests/cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
   sources = [ "client_trans_session_service_test.cpp" ]
 
