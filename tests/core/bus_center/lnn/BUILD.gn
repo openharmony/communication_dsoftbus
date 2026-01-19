@@ -2994,6 +2994,42 @@ ohos_unittest("LNNTransLaneMockTest") {
   }
 }
 
+ohos_unittest("LNNTransLaneExtTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/trans_lane/lnn_trans_lane_ext_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/trans_lane/lnn_trans_lane_ext_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("LNNDiscoveryInterfaceTest") {
   module_out_path = module_output_path
   sources = [
@@ -3984,6 +4020,7 @@ group("unittest") {
       ":LNNLaneLinkWifiDirectTest",
       ":LNNLaneListenerTest",
       ":LNNLaneMockTest",
+      ":LNNTransLaneExtTest",
       ":LNNTransLaneMockTest",
       ":LaneTest",
     ]
