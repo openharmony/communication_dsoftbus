@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@ using namespace OHOS;
 
 namespace {
 sptr<BusCenterServerProxy> g_serverProxy = nullptr;
+sptr<IRemoteObject> g_oldServerProxy = nullptr;
 uint32_t g_getSystemAbilityId = 2;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 std::mutex g_mutex;
@@ -72,11 +73,16 @@ int32_t BusCenterServerProxyInit(void)
         LNN_LOGE(LNN_EVENT, "Get remote softbus object failed");
         return SOFTBUS_SERVER_NOT_INIT;
     }
+    if (object == g_oldServerProxy) {
+        LNN_LOGW(LNN_EVENT, "no need update");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
     g_serverProxy = new (std::nothrow) BusCenterServerProxy(object);
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "Create bus center server proxy failed");
         return SOFTBUS_SERVER_NOT_INIT;
     }
+    g_oldServerProxy = object;
     int32_t ret = g_serverProxy->BusCenterServerProxyStandardInit();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "Create bus center server proxy standard failed");
