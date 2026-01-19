@@ -66,6 +66,12 @@ ohos_unittest("TransSdkTcpDirectTest") {
 }
 
 ohos_unittest("TransSessionTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "$dsoftbus_root_path/tests/cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
   sources = [ "trans_session_test.cpp" ]
 
