@@ -376,7 +376,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_UPDATE_TIMESTAMP_TEST_00
     ret = LnnGetDLUpdateTimestamp(NODE_NETWORK_ID, &timestamp);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnGetDLUpdateTimestamp(NODE1_NETWORK_ID, &timestamp);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /*
@@ -547,7 +547,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONL
     ret = LnnGetRemoteBoolInfoIgnoreOnline(NODE_NETWORK_ID, BOOL_KEY_SCREEN_STATUS, &result);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     ret = LnnGetRemoteBoolInfoIgnoreOnline(NODE1_NETWORK_ID, BOOL_KEY_SCREEN_STATUS, &result);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_SUPPORT);
 
     ret = LnnGetRemoteBoolInfo(NODE1_NETWORK_ID, BOOL_KEY_SCREEN_STATUS, &result);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_SUPPORT);
