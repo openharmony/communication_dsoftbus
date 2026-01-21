@@ -229,6 +229,16 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (module == AUTH_P2P) {
+        CONN_LOGI(CONN_COMMON, "recv p2p conned. cfd=%{public}d", cfd);
+        int32_t ret = TcpConnSetKeepalive(cfd, true);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "set keepalive fail, ret=%{public}d", ret);
+            ConnShutdownSocket(cfd);
+            return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
+        }
+    }
+
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
         CONN_LOGE(CONN_COMMON, "malloc fail");
