@@ -602,13 +602,13 @@ void DiscUsbDeinitPacked(void)
     return pfnDiscEnhanceFuncList->discUsbDeinit();
 }
 
-int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust)
+int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust, bool isStart)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
 
     int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distUpdatePublishParam);
     DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_BLE, "not find DistUpdatePublishParam");
-    return pfnDiscEnhanceFuncList->distUpdatePublishParam(cust, extCust);
+    return pfnDiscEnhanceFuncList->distUpdatePublishParam(cust, extCust, isStart);
 }
 
 int32_t DistDiscoveryStartActionPreLinkPacked(void)
