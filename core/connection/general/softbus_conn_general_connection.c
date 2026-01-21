@@ -429,9 +429,9 @@ static int32_t SetConnectionDeviceId(struct GeneralConnection *generalConnection
     generalConnection->isSupportNetWorkIdExchange = (bleConnection->protocol == BLE_COC || isSupportNetWorkIdExchange);
     int32_t ret = EOK;
     if (generalConnection->isSupportNetWorkIdExchange) {
-        ret = memcpy_s(generalConnection->networkId, NETWORK_ID_BUF_LEN, bleConnection->networkId, NETWORK_ID_BUF_LEN);
+        ret = strcpy_s(generalConnection->networkId, NETWORK_ID_BUF_LEN, bleConnection->networkId);
     } else {
-        ret = memcpy_s(generalConnection->udid, UDID_BUF_LEN, bleConnection->udid, UDID_BUF_LEN);
+        ret = strcpy_s(generalConnection->udid, UDID_BUF_LEN, bleConnection->udid);
     }
     if (ret != EOK) {
         CONN_LOGE(CONN_BLE, "server copy networkId fail, generalId=%{public}u", generalConnection->generalId);
