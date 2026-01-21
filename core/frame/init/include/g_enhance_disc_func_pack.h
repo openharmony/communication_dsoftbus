@@ -98,7 +98,7 @@ void DiscShareNfcEventDeinitPacked(void);
 DiscoveryUsbDispatcherInterface *DiscUsbInitPacked(DiscInnerCallback *discInnerCb);
 void DiscUsbDeinitPacked(void);
 
-int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust);
+int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust, bool isStart);
 int32_t DistDiscoveryStartActionPreLinkPacked(void);
 int32_t DistDiscoveryStopActionPreLinkPacked(void);
 int32_t DistPublishStopActionPreLinkPacked(void);
