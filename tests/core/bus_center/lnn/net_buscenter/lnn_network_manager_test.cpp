@@ -22,7 +22,6 @@
 #include "lnn_network_manager.h"
 #include "lnn_network_manager_mock.h"
 #include "lnn_physical_subnet_manager.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_trans_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -741,7 +740,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
 HWTEST_F(LNNNetworkManagerMockTest, Risk_Device_Leave_Lnn_Test_001, TestSize.Level1)
 {
     int ret = 0;
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 }
@@ -761,6 +761,8 @@ HWTEST_F(LNNNetworkManagerMockTest, Net_Device_Risk_State_Event_Handler_001, Tes
     event->status = SOFTBUS_DEVICE_IS_RISK;
 
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, LnnStopPublish).WillRepeatedly(Return());
+    EXPECT_CALL(managerMock, LnnStopDiscovery).WillRepeatedly(Return());
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 

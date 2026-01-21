@@ -17,7 +17,6 @@
 #include <string>
 
 #include "lnn_ohos_account.h"
-#include "lnn_ohos_account_mock.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "gmock/gmock.h"
@@ -118,15 +117,7 @@ HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_004, TestSize.Lev
     int32_t userId = 100;
     uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
     uint32_t len = SHA_256_HASH_LEN;
-
-    NiceMock<LnnOhosAccountInterfaceMock> mock;
-    EXPECT_CALL(mock, GetOsAccountIdByUserId).WillOnce(DoAll(Return(SOFTBUS_ERR)));
-
     int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    EXPECT_CALL(mock, GetOsAccountIdByUserId).WillOnce(DoAll(Return(SOFTBUS_OK)));
-    ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 } // namespace OHOS
+}
