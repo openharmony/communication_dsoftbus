@@ -386,7 +386,7 @@ static int32_t TransOnServiceNegotiate(int32_t socket, const ISocketListener *so
 static int32_t HandleServerOnNegotiate(int32_t socket, int32_t tokenType, const ISocketListener *socketCallback,
     const ChannelInfo *channel, SocketAccessInfo *localAccessInfo)
 {
-    if (socketCallback->OnBind == NULL || channel == NULL) {
+    if (socketCallback == NULL || socketCallback->OnBind == NULL || channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "OnBind exception, terminating this call, socket=%{public}d", socket);
         (void)ClientDeleteSocketSession(socket);
         return SOFTBUS_TRANS_SERVER_NOT_LISTEN;
