@@ -1085,6 +1085,28 @@ static int32_t ConnectSocketByProtocol(const VerifyP2pInfo *info, SessionConn *c
     return fd;
 }
 
+static bool CheckNeedStopMintp(const SessionConn *conn)
+{
+    if (conn == NULL) {
+        return false;
+    }
+    HmlListenerInfo *item = NULL;
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return false;
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_hmlListenerList->list, HmlListenerInfo, node) {
+        if (strncmp(item->myIp, conn->appInfo.myData.addr, IP_LEN) == 0 &&
+            strncmp(item->peerUuid, conn->appInfo.peerData.deviceId, UUID_BUF_LEN) == 0 &&
+            item->moudleType == conn->listenMod && item->protocol == conn->appInfo.fdProtocol) {
+            (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+            return true;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+    return false;
+}
+
 static void DegradeToTcpListener(VerifyP2pInfo *info, SessionConn *conn)
 {
     TRANS_CHECK_AND_RETURN_LOGE(info != NULL && conn != NULL, TRANS_CTRL, "invalid parm");
@@ -1097,9 +1119,11 @@ static void DegradeToTcpListener(VerifyP2pInfo *info, SessionConn *conn)
         return;
     }
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_MINTP && !info->isMinTp) {
+        if (CheckNeedStopMintp(conn)) {
+            StopHmlListener(conn->listenMod);
+        }
         conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
         conn->appInfo.myData.port = 0;
-        StopHmlListener(conn->listenMod);
         (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo, false);
         return;
     }
