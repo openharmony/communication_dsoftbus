@@ -2142,6 +2142,7 @@ HWTEST_F(LNNDisctributedLedgerTest, DlGetDeviceSparkCheck_Test_001, TestSize.Lev
  * @tc.name: LnnSetDLDeviceSparkCheck_Test_001
  * @tc.desc: LnnSetDLDeviceSparkCheck
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceSparkCheck_Test_001, TestSize.Level1)
@@ -2152,5 +2153,20 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceSparkCheck_Test_001, TestSize.
     EXPECT_EQ(LnnSetDLDeviceSparkCheck(devUdid, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnSetDLDeviceSparkCheck(devUdid, sparkCheck), SOFTBUS_NOT_FIND);
     EXPECT_EQ(LnnSetDLDeviceSparkCheck(NODE1_UDID, sparkCheck), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnIsRemoteSupportAuthCapBit_Test_001
+ * @tc.desc: LnnIsRemoteSupportAuthCapBit test param error
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnIsRemoteSupportAuthCapBit_Test_001, TestSize.Level1)
+{
+    bool ret = LnnIsRemoteSupportAuthCapBit(nullptr, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE);
+    EXPECT_FALSE(ret);
+    ret = LnnIsRemoteSupportAuthCapBit(NODE1_NETWORK_ID, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS

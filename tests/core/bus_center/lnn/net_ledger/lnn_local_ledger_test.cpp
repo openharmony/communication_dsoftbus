@@ -1697,4 +1697,19 @@ HWTEST_F(LNNLedgerMockTest, LNN_ANONYMIZE_SPARK_CHECK_TEST_001, TestSize.Level1)
     AnonymizeFree(anonySparkCheck);
     anonySparkCheck = nullptr;
 }
+
+/*
+ * @tc.name: UPDATE_LOCAL_FEATURE_CAPABILITY_TEST_001
+ * @tc.desc: UpdateLocalFeatureCapability ok
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_FEATURE_CAPABILITY_TEST_001, TestSize.Level1)
+{
+    g_localNetLedger.localInfo.feature &= (~(BIT_SUPPORT_LP_SPARK_CAPABILITY));
+    FeatureOption featureOption = {.isAdd = true, .featureSet = BIT_SUPPORT_LP_SPARK_CAPABILITY};
+    int32_t ret = UpdateLocalFeatureCapability((void *)(&featureOption));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS

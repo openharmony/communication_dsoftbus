@@ -403,5 +403,20 @@ int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 {
     return GetNetLedgerDepsInterface()->LnnClearFeatureCapability(feature, capaBit);
 }
+
+bool LnnIsFeatureSupportDetailPacked(void)
+{
+    return GetNetLedgerDepsInterface()->LnnIsFeatureSupportDetailPacked();
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetNetLedgerDepsInterface()->LnnSetLocalByteInfo(key, info, len);
+}
+
+int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
+{
+    return GetNetLedgerDepsInterface()->LnnSetFeatureCapability(feature, capaBit);
+}
 } // extern "C"
 } // namespace OHOS
