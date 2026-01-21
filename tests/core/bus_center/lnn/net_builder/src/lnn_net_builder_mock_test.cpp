@@ -2368,4 +2368,70 @@ HWTEST_F(LNNNetBuilderMockTest, OnReAuthVerifyPassed_Test_001, TestSize.Level1)
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
+
+/*
+ * @tc.name: ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_002
+ * @tc.desc: on lnn prodecc not trusted msg delay test
+ * test
+ * @tc.type: FUNC
+ * @tc.require:
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_002, TestSize.Level1)
+{
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    void *para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para1));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(true));
+    void *para2 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para2));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    void *para3 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para3));
+}
+
+/*
+ * @tc.name: LNN_PROCESS_COMPLETE_NOT_TRUSTED_MSG_TEST_002
+ * @tc.desc: lnn process complete not trusted msg test
+ * @tc.type: FUNC
+ * @tc.require:
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNNetBuilderMockTest, LNN_PROCESS_COMPLETE_NOT_TRUSTED_MSG_TEST_002, TestSize.Level1)
+{
+    char jsonStr[] = "{\"1\":10}";
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    LnnProcessCompleteNotTrustedMsg(
+        LNN_INFO_TYPE_NOT_TRUSTED, NODE_NETWORK_ID, reinterpret_cast<uint8_t *>(jsonStr), strlen(jsonStr) + 1);
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(true));
+    LnnProcessCompleteNotTrustedMsg(
+        LNN_INFO_TYPE_NOT_TRUSTED, NODE_NETWORK_ID, reinterpret_cast<uint8_t *>(jsonStr), strlen(jsonStr) + 1);
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    LnnProcessCompleteNotTrustedMsg(
+        LNN_INFO_TYPE_NOT_TRUSTED, NODE_NETWORK_ID, reinterpret_cast<uint8_t *>(jsonStr), strlen(jsonStr) + 1);
+}
+
+/*
+ * @tc.name: ANALYSIS_JSON_PARSE_TEST_001
+ * @tc.desc: AnalysisJsonParse test param error
+ * @tc.type: FUNC
+ * @tc.require:
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNNetBuilderMockTest, ANALYSIS_JSON_PARSE_TEST_001, TestSize.Level1)
+{
+    const uint8_t msg[2] = {0};
+    int64_t authSeq[DISCOVERY_TYPE_COUNT] = {0};
+    int32_t ret = AnalysisJsonParse(nullptr, 1, authSeq);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AnalysisJsonParse(msg, 1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

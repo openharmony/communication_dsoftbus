@@ -2385,3 +2385,30 @@ bool IsRemoteDeviceSupportBleGuide(const char *id, IdCategory type)
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return true;
 }
+
+
+bool LnnIsRemoteSupportAuthCapBit(cont char *networkid, AuthCapability capaBit)
+{
+    if (networkid == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return false;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkid, CATEGORY_NETWORK_ID);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return false;
+    }
+    uint32_t authCapacity = nodeInfo->authCapacity;
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkid, &anonyNetworkId);
+    LNN_LOGI(LNN_LEDGER, "peer networkid=%{pubilc}s, authCapacity=%{pubilc}u, capaBit=%{pubilc}d",
+        AnonymizeWrapper(anonyNetworkId), authCapacity, capaBit);
+    AnonymizeFree(anonyNetworkId);
+    return ((authCapacity & (1 << (uint32_t)capaBit)) != 0);
+}

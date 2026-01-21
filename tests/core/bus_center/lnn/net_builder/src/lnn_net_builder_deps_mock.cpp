@@ -783,5 +783,10 @@ bool IsSameAccountId(int64_t accountId)
 {
     return GetNetBuilderDepsInterface()->IsSameAccountId(accountId);
 }
+
+bool LnnIsRemoteSupportAuthCapBit(cont char *networkid, AuthCapability capaBit);
+{
+    return GetNetBuilderDepsInterface()->LnnIsRemoteSupportAuthCapBit(networkId, capaBit);
+}
 } // extern "C"
 } // namespace OHOS

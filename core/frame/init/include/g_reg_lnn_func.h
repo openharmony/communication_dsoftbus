@@ -89,6 +89,7 @@ typedef struct TagLnnOpenFuncList {
     LnnGetDLBleDirectTimestampFunc lnnGetDLBleDirectTimestamp;
     LnnGetDLUpdateTimestampFunc lnnGetDLUpdateTimestamp;
     LnnSetDLBleDirectTimestampFunc lnnSetDLBleDirectTimestamp;
+    LnnIsRemoteSupportAuthCapBitFunc lnnIsRemoteSupportAuthCapBit;
     LnnSetDLConnCapabilityFunc lnnSetDLConnCapability;
     LnnAddMetaInfoFunc lnnAddMetaInfo;
     LnnDeleteMetaInfoFunc lnnDeleteMetaInfo;
