@@ -899,7 +899,7 @@ bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType)
             return strcmp(pkgName, ISHARE_PKG_NAME) == 0;
         }
         case META_SDK: {
-            return strcmp(pkgName, CAST_PKG_NAME) == 0;
+            return strcmp(pkgName, CAST_PKG_NAME) == 0 || strcmp(pkgName, ISHARE_PKG_NAME) == 0;
         }
         default: {
             TRANS_LOGE(TRANS_CTRL, "invalid metaType=%{public}d", metaType);
