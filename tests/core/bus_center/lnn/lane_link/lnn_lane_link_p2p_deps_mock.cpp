@@ -41,5 +41,10 @@ LnnEnhanceFuncList *LnnEnhanceFuncListGet(void)
 {
     return GetLaneLinkP2pDepsInterface()->LnnEnhanceFuncListGet();
 }
+
+bool IsEnhancedWifiDirectSupported(const char *networkId)
+{
+    return GetLaneLinkP2pDepsInterface()->IsEnhancedWifiDirectSupported(networkId);
+}
 }
 } // namespace OHOS
