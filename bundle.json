@@ -116,7 +116,8 @@
         "time_service",
         "napi",
         "resource_schedule_service",
-        "device_standby"
+        "device_standby",
+        "runtime_core"
       ],
       "third_party": [
         "cJSON",
@@ -134,7 +135,8 @@
         "base_group":[],
         "fwk_group":[
           "//foundation/communication/dsoftbus/sdk:softbus_client",
-          "//foundation/communication/dsoftbus/br_proxy:br_proxy"
+          "//foundation/communication/dsoftbus/br_proxy:br_proxy",
+          "//foundation/communication/dsoftbus/br_proxy/taihe:proxychannelmanager_taihe"
         ],
         "service_group":[
           "//foundation/communication/dsoftbus/core:softbus_server",
@@ -346,6 +348,9 @@
             ],
             "header_base": "//foundation/communication/dsoftbus/dfx/interface/include"
           }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/br_proxy/taihe:proxychannelmanager_taihe_idl"
         }
       ],
       "test": [
