@@ -138,7 +138,7 @@ public:
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     virtual int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager);
     virtual int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr);
-    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
+    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable);
     virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num,
         LnnSyncInfoMsgComplete complete);
     virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
@@ -283,7 +283,7 @@ public:
     MOCK_METHOD2(LnnNotifyLeaveResult, void(const char *, int32_t));
     MOCK_METHOD2(LnnPeerHasExchangeDiscoveryType, bool(const NodeInfo *, DiscoveryType));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t(LnnEventType, LnnEventHandler));
-    MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t));
+    MOCK_METHOD3(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t, bool));
     MOCK_METHOD2(LnnSetSupportDiscoveryType, int32_t(char *, const char *));
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD2(LnnVisitNetif, bool(VisitNetifCallback, void *));

@@ -112,15 +112,15 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Level0)
 {
     const bool type[CONNECTION_ADDR_MAX] = { true, true, true, true, true };
-    int32_t ret = LnnRequestLeaveByAddrType(type, CONNECTION_ADDR_MAX);
+    int32_t ret = LnnRequestLeaveByAddrType(type, CONNECTION_ADDR_MAX, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnRequestLeaveByAddrType(nullptr, TYPE_LENTH);
+    ret = LnnRequestLeaveByAddrType(nullptr, TYPE_LENTH, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = LnnRequestLeaveByAddrType(type, TYPE_LEN);
+    ret = LnnRequestLeaveByAddrType(type, TYPE_LEN, false);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    ret = LnnRequestLeaveByAddrType(type, TYPE_LENTH);
+    ret = LnnRequestLeaveByAddrType(type, TYPE_LENTH, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
