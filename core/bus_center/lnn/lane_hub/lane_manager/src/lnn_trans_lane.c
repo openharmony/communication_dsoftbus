@@ -95,7 +95,7 @@ typedef struct {
     uint32_t bandWidth;
     uint64_t triggerLinkTime;
     uint64_t availableLinkTime;
-    uint64_t startBuildLinkTime[LANE_LINK_TYPE_BUTT];
+    uint64_t singleLinkTime[LANE_LINK_TYPE_BUTT];
     char peerBleMac[MAX_MAC_LEN];
     LaneTransType transType;
     ProtocolType acceptableProtocols;
@@ -230,13 +230,9 @@ static uint64_t GetBuildLinkTime(uint32_t laneReqId, LaneLinkType linkType)
         Unlock();
         return 0;
     }
-    uint64_t startBuildLinkTime = nodeInfo->startBuildLinkTime[linkType];
-    if (nodeInfo->linkRetryIdx < nodeInfo->listNum &&
-        nodeInfo->linkList->linkType[nodeInfo->linkRetryIdx] == LANE_P2P && linkType == LANE_HML) {
-        startBuildLinkTime = nodeInfo->startBuildLinkTime[LANE_P2P];
-    }
+    uint64_t startBuildTime = nodeInfo->singleLinkTime[linkType];
     Unlock();
-    return startBuildLinkTime > 0 ? GetCostTime(startBuildLinkTime) : 0;
+    return startBuildTime > 0 ? GetCostTime(startBuildTime) : 0;
 }
 
 static void LinkSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
@@ -247,7 +243,7 @@ static void LinkSuccess(uint32_t laneReqId, LaneLinkType linkType, const LaneLin
         return;
     }
     uint64_t buildLinkTime = GetBuildLinkTime(laneReqId, linkType);
-    ReportLaneEventBuildLinkResult(laneReqId, linkType, buildLinkTime, SOFTBUS_OK);
+    ReportLaneEventBuildLinkResult(laneReqId, linkInfo->type, buildLinkTime, SOFTBUS_OK);
     RemoveLinkTimeoutMessage(laneReqId, linkType);
     LaneLinkInfo *linkParam = (LaneLinkInfo *)SoftBusCalloc(sizeof(LaneLinkInfo));
     if (linkParam == NULL) {
@@ -355,8 +351,7 @@ static int32_t TriggerLink(uint32_t laneReqId, TransOption *request,
     linkNode->availableLinkTime = DEFAULT_LINK_LATENCY;
     linkNode->isCompleted = false;
     linkNode->isInnerCalled = request->isInnerCalled;
-    (void)memset_s(linkNode->startBuildLinkTime, sizeof(linkNode->startBuildLinkTime), 0,
-        sizeof(linkNode->startBuildLinkTime));
+    (void)memset_s(linkNode->singleLinkTime, sizeof(linkNode->singleLinkTime), 0, sizeof(linkNode->singleLinkTime));
     InitStatusList(linkNode);
     ListInit(&linkNode->node);
     if (Lock() != SOFTBUS_OK) {
@@ -513,6 +508,7 @@ static int32_t TriggerLinkWithQos(uint32_t laneReqId, const LaneAllocInfo *alloc
     linkNode->triggerLinkTime = SoftBusGetSysTimeMs();
     linkNode->availableLinkTime = allocInfo->qosRequire.maxLaneLatency != 0 ?
         allocInfo->qosRequire.maxLaneLatency : DEFAULT_LINK_LATENCY;
+    (void)memset_s(linkNode->singleLinkTime, sizeof(linkNode->singleLinkTime), 0, sizeof(linkNode->singleLinkTime));
     linkNode->isCompleted = false;
     InitStatusList(linkNode);
     ListInit(&linkNode->node);
@@ -1314,7 +1310,7 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         }
         nodeInfo->linkRetryIdx++;
         nodeInfo->statusList[requestInfo.linkType].status = BUILD_LINK_STATUS_BUILDING;
-        nodeInfo->startBuildLinkTime[requestInfo.linkType] = SoftBusGetSysTimeMs();
+        nodeInfo->singleLinkTime[requestInfo.linkType] = SoftBusGetSysTimeMs();
         Unlock();
         uint64_t delayMillis = (uint64_t)g_laneLatency[requestInfo.linkType];
         (void)PostLinkTimeoutMessage(laneReqId, requestInfo.linkType, delayMillis);
