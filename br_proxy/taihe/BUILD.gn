@@ -1,0 +1,92 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
+import("../../dsoftbus.gni")
+
+subsystem_name = "communication"
+part_name = "dsoftbus"
+taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
+
+copy_taihe_idl("proxychannelmanager_taihe_idl") {
+  sources = [ "idl/ohos.distributedsched.proxyChannelManager.taihe" ]
+}
+
+ohos_taihe("run_proxychannelmanager_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":proxychannelmanager_taihe_idl" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.distributedsched.proxyChannelManager.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.distributedsched.proxyChannelManager.abi.c",
+  ]
+}
+
+taihe_shared_library("proxychannelmanager_taihe_native") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  part_name = "$part_name"
+  subsystem_name = "$subsystem_name"
+  sources = get_target_outputs(":run_proxychannelmanager_taihe")
+  include_dirs = [
+    "$dsoftbus_root_path/br_proxy/common/include",
+    "$dsoftbus_root_path/br_proxy",
+  ]
+  sources += [
+    "src/ani_constructor.cpp",
+    "src/ohos.distributedsched.proxyChannelManager.impl.cpp",
+  ]
+  deps = [
+    ":run_proxychannelmanager_taihe",
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/br_proxy:br_proxy_utils",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/sdk:softbus_client",
+  ]
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
+}
+
+generate_static_abc("proxychannelmanager_taihe_ani") {
+  base_url = "$taihe_generated_file_path"
+  files = [
+    "$taihe_generated_file_path/@ohos.distributedsched.proxyChannelManager.ets",
+  ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/proxyChannelManager_taihe_ani.abc"
+  dependencies = [ ":run_proxychannelmanager_taihe" ]
+}
+
+ohos_prebuilt_etc("proxychannelmanager_abc_etc") {
+  source = "$target_out_dir/proxychannelmanager_taihe_ani.abc"
+  module_install_dir = "framework"
+  subsystem_name = "$subsystem_name"
+  part_name = "$part_name"
+  deps = [ ":proxychannelmanager_taihe_ani" ]
+}
+
+group("proxychannelmanager_taihe") {
+  deps = [
+    ":proxychannelmanager_abc_etc",
+    ":proxychannelmanager_taihe_native",
+  ]
+}

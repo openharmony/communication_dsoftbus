@@ -28,6 +28,7 @@ ohos_shared_library("proxychannelmanager") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/br_proxy:br_proxy_utils",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/sdk:softbus_client",
     "$dsoftbus_root_path/core/frame:softbus_server",
@@ -84,9 +85,36 @@ ohos_shared_library("br_proxy_adapter") {
   part_name = "dsoftbus"
 }
 
+ohos_shared_library("br_proxy_utils") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = [
+    "br_proxy_session_manager.c",
+    "common/src/br_proxy_error_code.c",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  include_dirs = [ "common/include" ]
+  subsystem_name = "communication"
+  part_name = "dsoftbus"
+}
+
 group("br_proxy") {
     deps = [
-      ":proxychannelmanager",
       ":br_proxy_adapter",
+      ":br_proxy_utils",
+      ":proxychannelmanager",
     ]
 }
