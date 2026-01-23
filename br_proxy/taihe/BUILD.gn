@@ -72,7 +72,7 @@ generate_static_abc("proxychannelmanager_taihe_ani") {
     "$taihe_generated_file_path/@ohos.distributedsched.proxyChannelManager.ets",
   ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/proxyChannelManager_taihe_ani.abc"
+  device_dst_file = "/system/framework/proxychannelmanager_taihe_ani.abc"
   dependencies = [ ":run_proxychannelmanager_taihe" ]
 }
 
