@@ -53,7 +53,7 @@ static int32_t NfcDispatchPublishOption(const PublishOption *option, DiscoverMod
     DiscoveryFuncInterface *interface = FindNfcFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_NFC,
-            "dispatch publish action failed: no implement support capability. capabilityBitmap=%{public}u",
+            "dispatch publish action fail: no implement support capability. capabilityBitmap=%{public}u",
             option->capabilityBitmap[0]);
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
@@ -73,7 +73,7 @@ static int32_t NfcDispatchPublishOption(const PublishOption *option, DiscoverMod
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
             DISC_LOGE(DISC_NFC,
-                "dispatch publish action failed: unsupport type. type=%{public}d, capability=%{public}u",
+                "dispatch publish action fail: unsupport type. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL;
     }
@@ -85,7 +85,7 @@ static int32_t NfcDispatchSubscribeOption(const SubscribeOption *option, Discove
     DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_NFC, "option is null");
     DiscoveryFuncInterface *interface = FindNfcFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        DISC_LOGE(DISC_NFC, "dispatch subcribe action failed: no implement support capability.");
+        DISC_LOGE(DISC_NFC, "dispatch subcribe action fail: no implement support capability.");
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
             .errcode = SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL,
@@ -103,7 +103,7 @@ static int32_t NfcDispatchSubscribeOption(const SubscribeOption *option, Discove
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
-            DISC_LOGE(DISC_NFC, "dispatch subcribe action failed: unsupport. type=%{public}d, capability=%{public}u",
+            DISC_LOGE(DISC_NFC, "dispatch subcribe action fail: unsupport. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL;
     }

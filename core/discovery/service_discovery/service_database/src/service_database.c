@@ -58,7 +58,7 @@ static void ReleaseServiceInfoItem(ServiceInfoItem *itemNode)
 static void RemoveAllServiceInfo(SoftBusList *list)
 {
     DISC_CHECK_AND_RETURN_LOGE(list != NULL, DISC_ABILITY, "invalid list");
-    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&(list->lock)) == SOFTBUS_OK, DISC_ABILITY, "lock list failed");
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&(list->lock)) == SOFTBUS_OK, DISC_ABILITY, "lock list fail");
     if (list->cnt == 0) {
         DISC_LOGI(DISC_ABILITY, "no serviceInfo in list, no need remove");
         (void)SoftBusMutexUnlock(&(list->lock));
@@ -84,7 +84,7 @@ int32_t GetAllServiceInfos(ServiceInfo *infos, uint32_t *cnt)
     SoftBusList *list = g_serviceInfoList;
     DISC_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, DISC_ABILITY, "invalid list");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(list->lock)) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        DISC_ABILITY, "lock list failed");
+        DISC_ABILITY, "lock list fail");
 
     if (list->cnt == 0) {
         *cnt = list->cnt;
@@ -108,7 +108,7 @@ int32_t GetAllServiceInfos(ServiceInfo *infos, uint32_t *cnt)
             break;
         }
         if (memcpy_s(&infos[idx], sizeof(ServiceInfo), itemNode->serviceInfo, sizeof(ServiceInfo)) != EOK) {
-            DISC_LOGE(DISC_ABILITY, "memcpy service info failed");
+            DISC_LOGE(DISC_ABILITY, "memcpy service info fail");
             (void)SoftBusMutexUnlock(&(list->lock));
             return SOFTBUS_MEM_ERR;
         }
@@ -126,7 +126,7 @@ int32_t GetServiceInfo(int64_t serviceId, ServiceInfo *info)
     SoftBusList *list = g_serviceInfoList;
     DISC_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, DISC_ABILITY, "invalid list");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(list->lock)) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        DISC_ABILITY, "lock list failed");
+        DISC_ABILITY, "lock list fail");
 
     ServiceInfoItem *itemNode = NULL;
     LIST_FOR_EACH_ENTRY(itemNode, &(list->list), ServiceInfoItem, node) {
@@ -134,7 +134,7 @@ int32_t GetServiceInfo(int64_t serviceId, ServiceInfo *info)
             continue;
         }
         if (memcpy_s(info, sizeof(ServiceInfo), itemNode->serviceInfo, sizeof(ServiceInfo)) != EOK) {
-            DISC_LOGE(DISC_ABILITY, "memcpy service info failed");
+            DISC_LOGE(DISC_ABILITY, "memcpy service info fail");
             (void)SoftBusMutexUnlock(&(list->lock));
             return SOFTBUS_MEM_ERR;
         }
@@ -164,14 +164,14 @@ static int32_t CheckServiceInfo(const ServiceInfo *info)
 int32_t AddServiceInfo(const ServiceInfo *info)
 {
     int32_t ret = CheckServiceInfo(info);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "check info failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "check info fail");
 
     SoftBusList *list = g_serviceInfoList;
     DISC_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, DISC_ABILITY, "invalid list");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(list->lock)) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        DISC_ABILITY, "lock list failed");
+        DISC_ABILITY, "lock list fail");
     if (list->cnt > DISC_SERVICE_MAX_NUM) {
-        DISC_LOGE(DISC_ABILITY, "reach the max num of service, add failed");
+        DISC_LOGE(DISC_ABILITY, "reach the max num of service, add fail");
         (void)SoftBusMutexUnlock(&(list->lock));
         return SOFTBUS_DISCOVER_SD_ADD_SERVICE_FAILED;
     }
@@ -188,14 +188,14 @@ int32_t AddServiceInfo(const ServiceInfo *info)
 
     itemNode = (ServiceInfoItem *)SoftBusCalloc(sizeof(ServiceInfoItem));
     if (itemNode == NULL) {
-        DISC_LOGE(DISC_ABILITY, "calloc item node failed");
+        DISC_LOGE(DISC_ABILITY, "calloc item node fail");
         (void)SoftBusMutexUnlock(&(list->lock));
         return SOFTBUS_MEM_ERR;
     }
 
     itemNode->serviceInfo = (ServiceInfo *)SoftBusCalloc(sizeof(ServiceInfo));
     if (itemNode->serviceInfo == NULL) {
-        DISC_LOGE(DISC_ABILITY, "calloc service info failed");
+        DISC_LOGE(DISC_ABILITY, "calloc service info fail");
         ReleaseServiceInfoItem(itemNode);
         (void)SoftBusMutexUnlock(&(list->lock));
         return SOFTBUS_MEM_ERR;
@@ -203,7 +203,7 @@ int32_t AddServiceInfo(const ServiceInfo *info)
 
     ListInit(&itemNode->node);
     if (memcpy_s(itemNode->serviceInfo, sizeof(ServiceInfo), info, sizeof(ServiceInfo)) != EOK) {
-        DISC_LOGE(DISC_ABILITY, "memcpy service info failed");
+        DISC_LOGE(DISC_ABILITY, "memcpy service info fail");
         ReleaseServiceInfoItem(itemNode);
         (void)SoftBusMutexUnlock(&(list->lock));
         return SOFTBUS_MEM_ERR;
@@ -218,13 +218,13 @@ int32_t AddServiceInfo(const ServiceInfo *info)
 int32_t UpdateServiceInfo(const ServiceInfo *info)
 {
     int32_t ret = CheckServiceInfo(info);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "check info failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "check info fail");
 
     ret = RemoveServiceInfo(info->serviceId);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "remove ServiceInfo failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "remove ServiceInfo fail");
 
     ret = AddServiceInfo(info);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "add ServiceInfo failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_ABILITY, "add ServiceInfo fail");
 
     return ret;
 }
@@ -234,7 +234,7 @@ int32_t RemoveServiceInfo(int64_t serviceId)
     SoftBusList *list = g_serviceInfoList;
     DISC_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, DISC_ABILITY, "invalid list");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(list->lock)) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        DISC_ABILITY, "lock list failed");
+        DISC_ABILITY, "lock list fail");
 
     ServiceInfoItem *itemNode = NULL;
     ServiceInfoItem *next = NULL;
@@ -261,7 +261,7 @@ int32_t ServiceDatabaseInit(void)
 
     g_serviceInfoList = CreateSoftBusList();
     DISC_CHECK_AND_RETURN_RET_LOGE(g_serviceInfoList != NULL, SOFTBUS_DISCOVER_SD_INIT_FAIL, DISC_INIT,
-        "init service info list failed");
+        "init service info list fail");
 
     g_isDBInited = true;
     DISC_LOGI(DISC_INIT, "service database init success");

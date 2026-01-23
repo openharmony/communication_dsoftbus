@@ -40,7 +40,7 @@ static std::string ReadSystemParameter(const char *paramKey)
     if (ret > 0) {
         return param;
     }
-    DISC_LOGE(DISC_INIT, "GetParameter failed");
+    DISC_LOGE(DISC_INIT, "GetParameter fail");
     return "";
 }
 
