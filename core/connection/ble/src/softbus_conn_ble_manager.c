@@ -1829,7 +1829,7 @@ static int32_t BleDisconnectDevice(uint32_t connectionId)
 
     int32_t ret =
         ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_DISCONNECT_REQUEST, connectionId, 0, NULL, 0);
-    CONN_LOGI(CONN_BLE, "ble disconnect device, connId=%{public}u, addr=%{public}s, ret=%{public}d",
+    CONN_LOGI(CONN_BLE, "ble disconnect device, connId=%{public}u, addr=%{public}s, err=%{public}d",
         connectionId, animizeAddress, ret);
     return ret;
 }
@@ -2027,13 +2027,13 @@ static void OnBtStateChanged(int listenerId, int state)
     int32_t ret = SOFTBUS_OK;
     if (state == SOFTBUS_BLE_STATE_TURN_ON) {
         ret = ConnBleStartServer();
-        CONN_LOGI(CONN_BLE, "ble manager receive bt on event, start server, ret=%{public}d", ret);
+        CONN_LOGI(CONN_BLE, "ble manager receive bt on event, start server, err=%{public}d", ret);
         return;
     }
 
     if (state == SOFTBUS_BLE_STATE_TURN_OFF) {
         ret = ConnBleStopServer();
-        CONN_LOGI(CONN_BLE, "ble manager receive bt off event, stop server, ret=%{public}d", ret);
+        CONN_LOGI(CONN_BLE, "ble manager receive bt off event, stop server, err=%{public}d", ret);
         BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
         if (ctx == NULL) {
             CONN_LOGE(CONN_BLE,

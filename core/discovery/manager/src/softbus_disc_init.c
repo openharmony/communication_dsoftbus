@@ -30,12 +30,12 @@ int32_t DiscOpenFuncInit(void *soHandle)
 
     ret = SoftBusDlsym(soHandle, "DiscRegisterOpenFunc", (void**)&discRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "dlsym DiscRegisterOpenFunc failed, ret=%d", ret);
+        COMM_LOGE(COMM_SVC, "dlsym DiscRegisterOpenFunc fail, ret=%d", ret);
         return SOFTBUS_NETWORK_DLSYM_FAILED;
     }
 
     if (discRegisterOpenfunc() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "DiscRegisterOpenFunc return failed, ret=%d", ret);
+        COMM_LOGE(COMM_SVC, "DiscRegisterOpenFunc return fail, ret=%d", ret);
         return SOFTBUS_NETWORK_DISC_OPEN_FUNC_INIT_FAILED;
     }
 
