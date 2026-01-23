@@ -62,7 +62,7 @@ typedef struct LocalDevice_ {
 } LocalDevice;
 
 static LocalDevice g_localDevice;
-
+char g_localNotification[NSTACKX_MAX_NOTIFICATION_DATA_LEN] = {0};
 #define LOCAL_DEVICE_OFFLINE_DEFERRED_DURATION 5000 /* Defer local device offline event, 5 seconds */
 
 #define NSTACKX_DEFAULT_DEVICE_NAME "nStack Device"
@@ -140,6 +140,7 @@ void LocalDeviceDeinit(void)
 int LocalDeviceInit(EpollDesc epollfd)
 {
     (void)memset_s(&g_localDevice, sizeof(g_localDevice), 0, sizeof(g_localDevice));
+    (void)memset_s(&g_localNotification, sizeof(g_localNotification), 0, sizeof(g_localNotification));
     g_localDevice.timer = TimerStart(epollfd, 0, NSTACKX_FALSE, LocalDeviceTimeout, NULL);
     if (g_localDevice.timer == NULL) {
         DFINDER_LOGE(TAG, "timer init failed");
@@ -751,7 +752,7 @@ int SetLocalDeviceBusinessData(const char *data, bool unicast)
 
 int32_t LocalizeNotificationMsg(const char *msg)
 {
-    if (strcpy_s(g_localDevice.deviceInfo.notification, NSTACKX_MAX_NOTIFICATION_DATA_LEN, msg) != EOK) {
+    if (strcpy_s(g_localNotification, NSTACKX_MAX_NOTIFICATION_DATA_LEN, msg) != EOK) {
         DFINDER_LOGE(TAG, "copy notification msg to local dev failed");
         return NSTACKX_EFAILED;
     }
@@ -870,6 +871,11 @@ DeviceInfo *GetLocalDeviceInfo(void)
 const char *GetLocalDeviceNetworkName(void)
 {
     return g_localDevice.deviceInfo.networkName;
+}
+
+const char *GetLocalNotification(void)
+{
+    return g_localNotification;
 }
 
 const char *GetLocalIfaceIpStr(const struct LocalIface *iface)
