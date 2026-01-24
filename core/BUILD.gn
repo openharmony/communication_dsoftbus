@@ -30,6 +30,7 @@ if (defined(ohos_lite)) {
     deps = [
       "frame:softbus_server",
       "../sdk/napi/link_enhance:linkenhance",
+      "../sdk/taihe:linkEnhance_taihe",
       ]
   }
 }
