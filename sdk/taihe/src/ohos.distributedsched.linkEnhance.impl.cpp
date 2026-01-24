@@ -17,6 +17,7 @@
 #include "ohos.distributedsched.linkEnhance.impl.hpp"
 #include "stdexcept"
 #include <thread>
+#include "conn_log.h"
 #include "napi_link_enhance_error_code.h"
 #include "securec.h"
 #include "softbus_access_token_adapter.h"
@@ -235,7 +236,7 @@ public:
         Address address = {
             .addrType = CONNECTION_ADDR_BLE,
         };
-        if (strcpy_s(address.addr.ble.mac, BT_MAC_LEN, this->deviceId_.c_str()) != 0) {
+        if (strcpy_s(address.addr.ble.mac, BT_MAC_LEN, this->deviceId_.c_str()) != EOK) {
             ThrowException(LINK_ENHANCE_INTERNAL_ERR);
             return;
         }
