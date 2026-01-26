@@ -21,6 +21,7 @@
 
 #include "bus_center_manager.h"
 #include "dsoftbus_enhance_interface.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_connection_addr_utils.h"
@@ -101,8 +102,8 @@ void LNNDisctributedLedgerTest::SetUp()
     info.heartbeatTimestamp = TIME_STAMP;
     info.deviceInfo.osType = HO_OS_TYPE;
 
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
 }
 
@@ -123,9 +124,6 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
-
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     info.discoveryType = DISCOVERY_TYPE;
@@ -133,6 +131,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
     (void)strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE1_UDID, strlen(NODE1_UDID));
     (void)strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID, strlen(NODE1_NETWORK_ID));
     (void)strncpy_s(info.connectInfo.macAddr, MAC_LEN, NODE1_BT_MAC, strlen(NODE1_BT_MAC));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(REPORT_NONE, LnnAddOnlineNode(&info));
 }
 
@@ -145,7 +145,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Level1)
 {
-    static InfoKey keyStringTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_UUID,
+    static InfoKey keyStringTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_UUID,
         STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_MASTER_NODE_UDID, STRING_KEY_P2P_MAC,
         STRING_KEY_P2P_GO_MAC, STRING_KEY_NODE_ADDR, STRING_KEY_OFFLINE_CODE, STRING_KEY_WIFIDIRECT_ADDR };
     char buf[UDID_BUF_LEN] = { 0 };
@@ -161,6 +161,9 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
         ret = LnnGetRemoteStrInfo(NODE1_NETWORK_ID, keyStringTable[i], buf, UDID_BUF_LEN);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
+    EXPECT_EQ(LnnGetRemoteStrInfo(NODE1_NETWORK_ID, STRING_KEY_DEV_UDID, buf, UDID_BUF_LEN), SOFTBUS_OK);
+    EXPECT_EQ(LnnGetRemoteStrInfo(NODE2_NETWORK_ID, STRING_KEY_DEV_UDID, buf, UDID_BUF_LEN),
+        SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
     for (i = 0; i < sizeof(keyStringTable) / sizeof(InfoKey); i++) {
         ret = LnnGetRemoteStrInfo(NODE2_NETWORK_ID, keyStringTable[i], buf, UDID_BUF_LEN);
         EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
@@ -316,9 +319,9 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Leve
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     pfnLnnEnhanceFuncList->lnnSaveRemoteDeviceInfo = LnnSaveRemoteDeviceInfo;
 
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     NodeInfo newInfo;
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -1483,8 +1486,8 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_IsAvailableMeta_Test_004, TestSize.Level
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
 
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -1577,8 +1580,8 @@ HWTEST_F(LNNDisctributedLedgerTest, GET_AND_SAVE_REMOTE_DEVICE_INFO_ID_Test_001,
     EXPECT_EQ(EOK, strcpy_s(deviceInfo.remotePtk, PTK_DEFAULT_LEN, "oldPtk"));
     info.netCapacity = 15;
     info.accountId = 100;
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(GetAndSaveRemoteDeviceInfo(&deviceInfo, &info));
 }
 
@@ -1789,7 +1792,7 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DEVICE_NAME_TO_DLEDGER_Test_001, Test
  */
 HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DEV_BASIC_INFO_TO_DLEDGER_Test_001, TestSize.Level1)
 {
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
     NodeInfo newInfo;
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(EOK, strcpy_s(newInfo.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID));
@@ -1807,9 +1810,10 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DEV_BASIC_INFO_TO_DLEDGER_Test_001, T
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
     oldInfo.discoveryType = 4;
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
-    EXPECT_CALL(mock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfoFromDb)
+        .WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
-    EXPECT_CALL(mock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
 }
 
@@ -1826,6 +1830,8 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DISTRIBUTED_LEDGER_Test_001, TestSize
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo oldInfo;
     (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(nullptr, &oldInfo));
     EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(&newInfo, nullptr));
     EXPECT_EQ(EOK, strcpy_s(newInfo.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID));
@@ -2018,8 +2024,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceNickName_Test_001, TestSize.Le
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDlPtk_Test_001, TestSize.Level1)
 {
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> LnnDisctributedNetLedgerMock;
-    EXPECT_CALL(LnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     const char *remotePtk = "remotePtkTest";
     const char *networkId = NODE1_NETWORK_ID;
     EXPECT_EQ(LnnSetDlPtk(nullptr, remotePtk), false);
@@ -2061,8 +2067,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLBleDirectTimestamp_Test_001, TestSiz
 {
     const char *networkId = NODE1_NETWORK_ID;
     uint64_t timestamp = 22222;
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> LnnDisctributedNetLedgerMock;
-    EXPECT_CALL(LnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(LnnSetDLBleDirectTimestamp(networkId, timestamp), SOFTBUS_OK);
     uint32_t connCapability = 33;
     int32_t ret = LnnSetDLConnCapability(networkId, connCapability);
@@ -2080,8 +2086,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLConnUserIdCheckSum_Test_001, TestSiz
 {
     const char *networkId = NODE1_NETWORK_ID;
     int32_t userIdCheckSum = 100;
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> LnnDisctributedNetLedgerMock;
-    EXPECT_CALL(LnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(LnnSetDLConnUserIdCheckSum(nullptr, userIdCheckSum), SOFTBUS_INVALID_PARAM);
     int32_t ret = LnnSetDLConnUserIdCheckSum(networkId, userIdCheckSum);
     EXPECT_TRUE(ret == SOFTBUS_OK || ret == SOFTBUS_NOT_IMPLEMENT);
@@ -2098,8 +2104,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLConnUserId_Test_001, TestSize.Level1
 {
     const char *networkId = NODE1_NETWORK_ID;
     int32_t userId = 1;
-    NiceMock<LnnDisctributedNetLedgerInterfaceMock> LnnDisctributedNetLedgerMock;
-    EXPECT_CALL(LnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(LnnSetDLConnUserId(nullptr, userId), SOFTBUS_INVALID_PARAM);
     int32_t ret = LnnSetDLConnUserId(networkId, userId);
     EXPECT_TRUE(ret == SOFTBUS_OK || ret == SOFTBUS_NOT_IMPLEMENT);
