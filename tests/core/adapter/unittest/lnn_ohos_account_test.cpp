@@ -48,6 +48,7 @@ void LNNOhosAccountTest::TearDown() { }
  * @tc.name: LNN_GET_OHOS_ACCOUNT_INFO_001
  * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountHash is nullptr or len is not equal to SHA_256_HASH_LEN
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNOhosAccountTest, LNN_GET_OHOS_ACCOUNT_INFO_001, TestSize.Level1)
@@ -65,6 +66,7 @@ HWTEST_F(LNNOhosAccountTest, LNN_GET_OHOS_ACCOUNT_INFO_001, TestSize.Level1)
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_001
  * @tc.desc: Return SOFTBUS_INVALID_PARAM when accountHash buffer is nullptr with valid userId and len
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_001, TestSize.Level1)
@@ -80,6 +82,7 @@ HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_001, TestSize.Lev
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_002
  * @tc.desc: Return SOFTBUS_INVALID_PARAM when len is 0 with valid userId and accountHash buffer
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_002, TestSize.Level1)
@@ -95,6 +98,7 @@ HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_002, TestSize.Lev
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_003
  * @tc.desc: Return SOFTBUS_INVALID_PARAM when userId is 0 with valid accountHash buffer and len
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_003, TestSize.Level1)
@@ -110,6 +114,7 @@ HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_003, TestSize.Lev
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_004
  * @tc.desc: Return SOFTBUS_ERR when GetOsAccountIdByUserId fails and SOFTBUS_OK when GetOsAccountIdByUserId succeeds
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_004, TestSize.Level1)

@@ -51,6 +51,7 @@ void AdapterDsoftbusNetworkTest::TearDown() { }
  * @tc.name: CreateNetlinkSocket
  * @tc.desc: softbus network test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AdapterDsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1)
@@ -84,6 +85,7 @@ HWTEST_F(AdapterDsoftbusNetworkTest, CreateNetlinkSocketTest001, TestSize.Level1
  * @tc.name: ProcessAddrEvent
  * @tc.desc: softbus network test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AdapterDsoftbusNetworkTest, ProcessAddrEventTest001, TestSize.Level1)
@@ -113,6 +115,7 @@ HWTEST_F(AdapterDsoftbusNetworkTest, ProcessAddrEventTest001, TestSize.Level1)
  * @tc.name: LnnOnBtStateChanged
  * @tc.desc: softbus network test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AdapterDsoftbusNetworkTest, LnnOnBtStateChangedTest001, TestSize.Level1)

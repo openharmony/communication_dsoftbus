@@ -650,6 +650,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GET_CREDID_FROM_LIST_001, TestSize
  * @tc.desc: Verify that IdServiceIsPotentialTrustedDevice correctly determines if a device is
  *           potentially trusted, handling null or invalid UDID and account ID inputs.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_IS_POTENTIAL_TRUSTED_DEVICE_001, TestSize.Level1)
@@ -677,6 +678,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_IS_POTENTIAL_TRUSTED_DEVICE_001, T
  * @tc.desc: Verify that GetCredInfoFromJson successfully extracts credential information from a
  *           JSON string, handling invalid JSON and valid credential data.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, GET_CRED_INFO_FROM_JSON_001, TestSize.Level1)
@@ -697,6 +699,7 @@ HWTEST_F(AuthHichainIdServiceTest, GET_CRED_INFO_FROM_JSON_001, TestSize.Level1)
  * @tc.name: IS_LOCAL_CRED_001
  * @tc.desc: Verify that IsLocalCredInfo returns false when unable to retrieve the local UDID.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, IS_LOCAL_CRED_001, TestSize.Level1)
@@ -716,6 +719,7 @@ HWTEST_F(AuthHichainIdServiceTest, IS_LOCAL_CRED_001, TestSize.Level1)
  * @tc.desc: Verify that IdServiceRegCredMgr returns an error when InitDeviceAuthService fails
  *           during credential manager registration.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_REG_CRE_MGR_001, TestSize.Level1)
@@ -734,6 +738,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_REG_CRE_MGR_001, TestSize.Level1)
  * @tc.desc: Verify that IdServiceRegCredMgr successfully registers the credential manager when
  *           InitDeviceAuthService succeeds.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_REG_CRE_MGR_002, TestSize.Level1)

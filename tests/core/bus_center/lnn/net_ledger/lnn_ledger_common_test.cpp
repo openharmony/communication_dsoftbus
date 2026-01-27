@@ -291,6 +291,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_001, TestSize.Level1)
  * @tc.name: LNN_SET_STATIC_NET_CAPA_002
  * @tc.desc: test LNN set staticNetCapa
  * @tc.type: FUNC LnnSetStaticNetCap
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_002, TestSize.Level1)
@@ -1173,6 +1174,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_001
  * @tc.desc: LNN get local str by ifname test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_001, TestSize.Level1)
@@ -1199,6 +1201,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_001, TestSize.Level
  * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_003
  * @tc.desc: LNN get local num by ifname test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_003, TestSize.Level1)

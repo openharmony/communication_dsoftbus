@@ -68,6 +68,7 @@ void BusCenterHeartbeatSdkTest::TearDown()
  * @tc.name: Shift_Lnn_Gear_Test_001
  * @tc.desc: heart beat parameter adjust test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5HMXC
  */
 HWTEST_F(BusCenterHeartbeatSdkTest, Shift_Lnn_Gear_Test_001, TestSize.Level1)
