@@ -1845,9 +1845,14 @@ static int32_t CheckAndStopScan(BroadcastProtocol protocol, int32_t listenerId)
 {
     int32_t liveListenerId = -1;
     int32_t ret;
+    ScanManager *scanManager = &g_scanManager[listenerId];
     bool needUpdate = CheckNeedUpdateScan(listenerId, &liveListenerId);
     if (!needUpdate) {
         DISC_LOGD(DISC_BROADCAST, "stop scanId=%{public}d", g_scanManager[listenerId].adapterScanId);
+        for (int i = 0; i < scanManager->deleteSize; i++) {
+            int filterIndex = scanManager->deleted[i];
+            g_firstSetIndex[filterIndex] = false;
+        }
         ret = g_interface[protocol]->StopScan(g_scanManager[listenerId].adapterScanId);
         if (ret != SOFTBUS_OK) {
             g_scanManager[listenerId].scanCallback->OnStopScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
@@ -1858,12 +1863,17 @@ static int32_t CheckAndStopScan(BroadcastProtocol protocol, int32_t listenerId)
         int32_t filterSize = 0;
         SoftBusBcScanFilter *adapterFilter = NULL;
         g_scanManager[listenerId].isScanning = false;
-        ret = GetScanFiltersForOneListener(listenerId, &adapterFilter, &filterSize);
-        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "get bc scan filters failed");
-        DumpBcScanFilter(adapterFilter, filterSize);
         SoftBusBcScanParams adapterParam;
         BuildSoftBusBcScanParams(&(g_scanManager[listenerId].param), &adapterParam);
         CheckScanFreq(liveListenerId, &adapterParam);
+        if (scanManager->deleteSize > 0) {
+            DeleteFilterByIndex(listenerId, &adapterFilter, &adapterParam, scanManager->deleteSize);
+            ReleaseSoftBusBcScanFilter(adapterFilter, scanManager->deleteSize);
+            adapterFilter = NULL;
+        }
+        ret = GetScanFiltersForOneListener(listenerId, &adapterFilter, &filterSize);
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "get bc scan filters failed");
+        DumpBcScanFilter(adapterFilter, filterSize);
         ret = g_interface[protocol]->SetScanParams(g_scanManager[listenerId].adapterScanId, &adapterParam,
             adapterFilter, filterSize, SOFTBUS_SCAN_FILTER_CMD_DELETE);
 
