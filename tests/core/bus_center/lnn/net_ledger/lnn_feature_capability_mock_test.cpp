@@ -50,6 +50,7 @@ void LNNFeatureCapabilityMockTest::TearDown()
  * @tc.name: SetSparkGroupFearureTest001
  * @tc.desc: test SetSparkGroupFearure branch
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNFeatureCapabilityMockTest, SetSparkGroupFeatureTest001, TestSize.Level1)

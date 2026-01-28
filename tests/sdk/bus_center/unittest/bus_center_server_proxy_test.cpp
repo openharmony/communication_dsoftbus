@@ -47,6 +47,7 @@ void BusCenterServerProxyTest::TearDown() { }
  * @tc.desc: test ServerIpcGetAllOnlineNodeInfo
  *           ServerIpcGetAllOnlineNodeInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllOnlineNodeInfo_TEST_001, TestSize.Level1)
@@ -64,6 +65,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllOnlineNodeInfo_TEST_001, TestS
  * @tc.desc: test ServerIpcGetLocalDeviceInfo
  *           ServerIpcGetLocalDeviceInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetLocalDeviceInfo_TEST_001, TestSize.Level1)
@@ -80,6 +82,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetLocalDeviceInfo_TEST_001, TestSiz
  * @tc.desc: test ServerIpcGetNodeKeyInfo
  *           ServerIpcGetNodeKeyInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetNodeKeyInfo_TEST_001, TestSize.Level1)
@@ -99,6 +102,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetNodeKeyInfo_TEST_001, TestSize.Le
  * @tc.desc: test ServerIpcSetNodeDataChangeFlag
  *           ServerIpcSetNodeDataChangeFlag return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcSetNodeDataChangeFlag_TEST_001, TestSize.Level1)
@@ -115,6 +119,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcSetNodeDataChangeFlag_TEST_001, Test
  * @tc.desc: test ServerIpcRegDataLevelChangeCb
  *           ServerIpcRegDataLevelChangeCb return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcRegDataLevelChangeCb_TEST_001, TestSize.Level1)
@@ -129,6 +134,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcRegDataLevelChangeCb_TEST_001, TestS
  * @tc.desc: test ServerIpcUnregDataLevelChangeCb
  *           ServerIpcUnregDataLevelChangeCb return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcUnregDataLevelChangeCb_TEST_001, TestSize.Level1)
@@ -143,6 +149,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcUnregDataLevelChangeCb_TEST_001, Tes
  * @tc.desc: test ServerIpcJoinLNN
  *           ServerIpcJoinLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcJoinLNN_TEST_001, TestSize.Level1)
@@ -159,6 +166,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcJoinLNN_TEST_001, TestSize.Level1)
  * @tc.desc: test ServerIpcLeaveLNN
  *           ServerIpcLeaveLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcLeaveLNN_TEST_001, TestSize.Level1)
@@ -174,6 +182,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcLeaveLNN_TEST_001, TestSize.Level1)
  * @tc.desc: test ServerIpcStartTimeSync
  *           ServerIpcStartTimeSync return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStartTimeSync_TEST_001, TestSize.Level1)
@@ -191,6 +200,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStartTimeSync_TEST_001, TestSize.Lev
  * @tc.desc: test ServerIpcStopTimeSync
  *           ServerIpcStopTimeSync return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStopTimeSync_TEST_001, TestSize.Level1)
@@ -206,6 +216,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopTimeSync_TEST_001, TestSize.Leve
  * @tc.desc: test ServerIpcPublishLNN
  *           ServerIpcPublishLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcPublishLNN_TEST_001, TestSize.Level1)
@@ -221,6 +232,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcPublishLNN_TEST_001, TestSize.Level1
  * @tc.desc: test ServerIpcStopPublishLNN
  *           ServerIpcStopPublishLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStopPublishLNN_TEST_001, TestSize.Level1)
@@ -236,6 +248,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopPublishLNN_TEST_001, TestSize.Le
  * @tc.desc: test ServerIpcRefreshLNN
  *           ServerIpcRefreshLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcRefreshLNN_TEST_001, TestSize.Level1)
@@ -251,6 +264,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcRefreshLNN_TEST_001, TestSize.Level1
  * @tc.desc: test ServerIpcStopRefreshLNN
  *           ServerIpcStopRefreshLNN return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcStopRefreshLNN_TEST_001, TestSize.Level1)
@@ -266,6 +280,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopRefreshLNN_TEST_001, TestSize.Le
  * @tc.desc: test ServerIpcActiveMetaNode
  *           ServerIpcActiveMetaNode return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcActiveMetaNode_TEST_001, TestSize.Level1)
@@ -283,6 +298,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcActiveMetaNode_TEST_001, TestSize.Le
  * @tc.desc: test ServerIpcDeactiveMetaNode
  *           ServerIpcDeactiveMetaNode return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcDeactiveMetaNode_TEST_001, TestSize.Level1)
@@ -298,6 +314,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcDeactiveMetaNode_TEST_001, TestSize.
  * @tc.desc: test ServerIpcGetAllMetaNodeInfo
  *           ServerIpcGetAllMetaNodeInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllMetaNodeInfo_TEST_001, TestSize.Level1)
@@ -315,6 +332,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllMetaNodeInfo_TEST_001, TestSiz
  * @tc.desc: test ServerIpcShiftLNNGear
  *           ServerIpcShiftLNNGear return value is equal to SOFTBUS_SERVER_NOT_INIT
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcShiftLNNGear_TEST_001, TestSize.Level1)
@@ -332,6 +350,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcShiftLNNGear_TEST_001, TestSize.Leve
  * @tc.desc: test ServerIpcSyncTrustedRelationShip
  *           ServerIpcSyncTrustedRelationShip return value is equal to SOFTBUS_TRANS_PROXY_REMOTE_NULL
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyTest, ServerIpcSyncTrustedRelationShip_TEST_001, TestSize.Level1)
@@ -342,5 +361,4 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcSyncTrustedRelationShip_TEST_001, Te
     int32_t ret = ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
-
 } // namespace OHOS

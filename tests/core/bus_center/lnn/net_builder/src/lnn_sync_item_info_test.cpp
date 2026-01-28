@@ -110,6 +110,7 @@ HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level
  * @tc.name: LNN_SEND_TRANS_REQ_TEST_001
  * @tc.desc: test LnnSendTransReq
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:I5PRUD
  */
 HWTEST_F(LNNSyncInfoItemTest, LNN_SEND_TRANS_REQ_TEST_001, TestSize.Level1)
@@ -212,6 +213,7 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_BR_OFFLINE_TEST_001, TestSize.Level1
  * @tc.name: FILL_TARGET_WIFI_CONFIG_TEST_001
  * @tc.desc: test FillTargetWifiConfig
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:I5PRUD
  */
 HWTEST_F(LNNSyncInfoItemTest, FILL_TARGET_WIFI_CONFIG_TEST_001, TestSize.Level1)

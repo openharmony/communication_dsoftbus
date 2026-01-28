@@ -86,6 +86,7 @@ static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t returnRet)
  * @tc.name: LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001
  * @tc.desc: test LnnNotifyDiscoveryDevice
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level0)
@@ -107,6 +108,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
  * @tc.name: LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001
  * @tc.desc: test LnnRequestLeaveByAddrType
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Level0)
@@ -128,6 +130,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
  * @tc.name: LNN_REQUEST_LEAVE_SPECIFIC_TEST_001
  * @tc.desc: test LnnRequestLeaveSpecific
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0)
@@ -147,6 +150,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0
  * @tc.name: LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001
  * @tc.desc: test LnnRequestLeaveInvalidConn
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Level0)
@@ -163,6 +167,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Le
  * @tc.name: LNN_REQUEST_CLEAN_CONN_FSM_TEST_001
  * @tc.desc: test LnnRequestCleanConnFsm
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0)
@@ -179,6 +184,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0
  * @tc.name: LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001
  * @tc.desc: test LnnNotifyNodeStateChanged
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Level0)
@@ -198,6 +204,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Lev
  * @tc.name: LNN_NOTIFY_MASTER_ELECT_TEST_001
  * @tc.desc: test LnnNotifyMasterElect
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
@@ -217,6 +224,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
  * @tc.name: LNN_UPDATE_NODE_ADDR_TEST_001
  * @tc.desc: test LnnUpdateNodeAddr
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)

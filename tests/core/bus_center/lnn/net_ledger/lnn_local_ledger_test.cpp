@@ -1272,6 +1272,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_001, TestSize.Level1)
  * @tc.name: LNN_LOAD_BROADCAST_CIPHER_INFO_002
  * @tc.desc: LnnLoadBroadcastCipherInfo process sparkCheck
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_002, TestSize.Level1)
