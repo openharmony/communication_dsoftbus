@@ -958,11 +958,11 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Lev
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
 
     ON_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    ON_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillByDefault(Return(false));
 
     const char *udid = "udidTest";
-    UpdateDeviceInfoToMlps(udid);
-    UpdateDeviceInfoToMlps(udid);
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceInfoToMlps(udid));
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceInfoToMlps(udid));
 }
 
 /*
