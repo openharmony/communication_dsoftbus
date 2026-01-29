@@ -371,7 +371,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithBufferTest, TestSize.Level
     int32_t ret = SetTlvBinary(obj, tlvBytes, sizeof(tlvBytes));
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    uint8_t mac[6]; // 6: mac size
+    uint8_t mac[6] = {0}; // 6: mac size
     ret = GetTlvMemberWithSpecifiedBuffer(obj, type1, mac, sizeof(mac));
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(memcmp(value1, mac, sizeof(mac)), 0);
@@ -386,7 +386,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithBufferTest, TestSize.Level
     EXPECT_EQ(memcmp(value2, name, nameSize), 0);
 
     uint32_t empty = 0;
-    uint8_t emptyBuf[16]; // 16: not use
+    uint8_t emptyBuf[16] = {0}; // 16: not use
     ret = GetTlvMemberWithEstimatedBuffer(obj, type3, emptyBuf, &empty);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(empty, 0);
@@ -416,5 +416,289 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsExceptionDataTest, TestSize.Level0)
 
     DestroyTlvObject(obj);
     COMM_LOGI(COMM_UTILS, "===TlvUtilsExceptionDataTest end");
+}
+
+/*
+ * @tc.name: TlvUtilsCreateTlvObject_InvalidTSize
+ * @tc.desc: Verify CreateTlvObject returns nullptr when tSize is invalid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsCreateTlvObject_InvalidTSize, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(0, UINT8_T); // Invalid tSize
+    EXPECT_EQ(obj, nullptr);
+    obj = CreateTlvObject(UINT32_T + 1, UINT8_T); // Invalid tSize
+    EXPECT_EQ(obj, nullptr);
+}
+
+/*
+ * @tc.name: TlvUtilsCreateTlvObject_InvalidLSize
+ * @tc.desc: Verify CreateTlvObject returns nullptr when lSize is invalid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsCreateTlvObject_InvalidLSize, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, 0); // Invalid lSize
+    EXPECT_EQ(obj, nullptr);
+    obj = CreateTlvObject(UINT8_T, UINT32_T + 1); // Invalid lSize
+    EXPECT_EQ(obj, nullptr);
+}
+
+/*
+ * @tc.name: TlvUtilsDestroyTlvObject_Null
+ * @tc.desc: Verify DestroyTlvObject handles nullptr gracefully
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsDestroyTlvObject_Null, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(nullptr));
+}
+
+/*
+ * @tc.name: TlvUtilsAddTlvMember_NullObj
+ * @tc.desc: Verify AddTlvMember returns SOFTBUS_INVALID_PARAM when obj is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsAddTlvMember_NullObj, TestSize.Level1)
+{
+    int32_t ret = AddTlvMember(nullptr, 1, 4, reinterpret_cast<const uint8_t *>("test"));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TlvUtilsAddTlvMember_InvalidLength
+ * @tc.desc: Verify AddTlvMember returns SOFTBUS_INVALID_PARAM when length is invalid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsAddTlvMember_InvalidLength, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = AddTlvMember(obj, 1, MAX_VALUE_LENGTH + 1, reinterpret_cast<const uint8_t *>("test"));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsAddTlvMember_NullValueWithLength
+ * @tc.desc: Verify AddTlvMember returns SOFTBUS_INVALID_PARAM when value is nullptr but length > 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsAddTlvMember_NullValueWithLength, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = AddTlvMember(obj, 1, 4, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsGetTlvMember_NotFound
+ * @tc.desc: Verify GetTlvMember returns SOFTBUS_NOT_FIND when type is not found
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMember_NotFound, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    uint32_t length = 0;
+    uint8_t *value = nullptr;
+    int32_t ret = GetTlvMember(obj, 999, &length, &value);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsGetTlvBinary_NoMembers
+ * @tc.desc: Verify GetTlvBinary returns SOFTBUS_NOT_FIND when object has no members
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvBinary_NoMembers, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    uint8_t *output = nullptr;
+    uint32_t outputSize = 0;
+    int32_t ret = GetTlvBinary(obj, &output, &outputSize);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsGetTlvBinary_NullParams
+ * @tc.desc: Verify GetTlvBinary returns SOFTBUS_INVALID_PARAM when parameters are nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvBinary_NullParams, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    uint8_t *output = nullptr;
+    uint32_t outputSize = 0;
+    int32_t ret = GetTlvBinary(nullptr, &output, &outputSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetTlvBinary(obj, nullptr, &outputSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetTlvBinary(obj, &output, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsSetTlvBinary_InvalidSize
+ * @tc.desc: Verify SetTlvBinary returns SOFTBUS_INVALID_DATA_HEAD when inputSize is invalid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsSetTlvBinary_InvalidSize, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    uint8_t input[] = {0x01, 0x04};
+    int32_t ret = SetTlvBinary(obj, input, MAX_TLV_BINARY_LENGTH + 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_DATA_HEAD);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsSetTlvBinary_NullParams
+ * @tc.desc: Verify SetTlvBinary returns SOFTBUS_INVALID_PARAM when parameters are nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsSetTlvBinary_NullParams, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    uint8_t input[] = {0x01, 0x04};
+    int32_t ret = SetTlvBinary(nullptr, input, sizeof(input));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetTlvBinary(obj, nullptr, sizeof(input));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsGetTlvMemberWithSpecifiedBuffer_SizeMismatch
+ * @tc.desc: Verify GetTlvMemberWithSpecifiedBuffer returns SOFTBUS_INVALID_PARAM when size doesn't match
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithSpecifiedBuffer_SizeMismatch, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    AddTlvMember(obj, 1, 4, reinterpret_cast<const uint8_t *>("test"));
+    uint8_t buffer[10] = {0};
+    int32_t ret = GetTlvMemberWithSpecifiedBuffer(obj, 1, buffer, 10); // Wrong size
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsGetTlvMemberWithEstimatedBuffer_NullParams
+ * @tc.desc: Verify GetTlvMemberWithEstimatedBuffer returns SOFTBUS_INVALID_PARAM when parameters are nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithEstimatedBuffer_NullParams, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    uint8_t buffer[10] = {0};
+    uint32_t size = 0;
+    int32_t ret = GetTlvMemberWithEstimatedBuffer(nullptr, 1, buffer, &size);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetTlvMemberWithEstimatedBuffer(obj, 1, nullptr, &size);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetTlvMemberWithEstimatedBuffer(obj, 1, buffer, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsAddGetTlvMemberU8
+ * @tc.desc: Verify AddTlvMemberU8 and GetTlvMemberU8 work correctly
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsAddGetTlvMemberU8, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = AddTlvMemberU8(obj, 1, 0xAB);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint8_t value;
+    ret = GetTlvMemberU8(obj, 1, &value);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(value, 0xAB);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsAddGetTlvMemberU16
+ * @tc.desc: Verify AddTlvMemberU16 and GetTlvMemberU16 work correctly
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsAddGetTlvMemberU16, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = AddTlvMemberU16(obj, 1, 0xABCD);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint16_t value;
+    ret = GetTlvMemberU16(obj, 1, &value);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(value, 0xABCD);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsAddGetTlvMemberU32
+ * @tc.desc: Verify AddTlvMemberU32 and GetTlvMemberU32 work correctly
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsAddGetTlvMemberU32, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = AddTlvMemberU32(obj, 1, 0xABCD1234);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint32_t value;
+    ret = GetTlvMemberU32(obj, 1, &value);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(value, 0xABCD1234u);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
+}
+
+/*
+ * @tc.name: TlvUtilsAddGetTlvMemberU64
+ * @tc.desc: Verify AddTlvMemberU64 and GetTlvMemberU64 work correctly
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsAddGetTlvMemberU64, TestSize.Level1)
+{
+    TlvObject *obj = CreateTlvObject(UINT8_T, UINT8_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = AddTlvMemberU64(obj, 1, 0xABCD1234567890EF);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint64_t value;
+    ret = GetTlvMemberU64(obj, 1, &value);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(value, 0xABCD1234567890EF);
+    EXPECT_NO_FATAL_FAILURE(DestroyTlvObject(obj));
 }
 } // namespace OHOS
