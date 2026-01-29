@@ -2265,6 +2265,37 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam002, TestSize.Level1
 }
 
 /*
+ * @tc.name: BroadcastSetAdvDeviceParam003
+ * @tc.desc: BroadcastSetAdvDeviceParam003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam003 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetScanCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    g_baseFuzzPos = 0;
+    uint8_t type = GetData<uint8_t>();
+    LpScanParam lpScanParam = BuildLpScanParam();
+    lpScanParam.listenerId = bcId;
+    LpBroadcastParam lpBcParam;
+    BuildLpBroadcastParam(&lpBcParam);
+
+    EXPECT_FALSE(BroadcastSetAdvDeviceParam(static_cast<LpServerType>(type), &lpBcParam, &lpScanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam003 end ----");
+}
+
+/*
  * @tc.name: BroadcastEnableSyncDataToLpDevice001
  * @tc.desc: BroadcastEnableSyncDataToLpDevice001
  * @tc.type: FUNC
