@@ -191,8 +191,8 @@ ohos_unittest("BrProxyServerManagerTest") {
   ]
 }
 
-group("unittest") {	 
-  testonly = true 
+group("unittest") {
+  testonly = true
   deps = []
   if (dsoftbus_feature_trans_br_proxy == true) {
     deps += [
