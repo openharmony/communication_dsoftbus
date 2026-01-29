@@ -518,8 +518,8 @@ int32_t OpenBrProxy(int32_t sessionId, BrProxyChannelInfo *channelInfo, IBrProxy
     if (ret != SOFTBUS_OK && ret != SOFTBUS_TRANS_SESSION_OPENING) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc open brproxy failed! ret=%{public}d", ret);
         TransEventExtra extra = {
-            .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
         return ret;
@@ -574,9 +574,9 @@ int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
         TRANS_LOGE(
             TRANS_SDK, "[br_proxy] ipc brproxy send failed! ret:%{public}d, channelId:%{public}d", ret, channelId);
         TransEventExtra extra = {
-            .result = EVENT_STAGE_RESULT_FAILED,
-            .errcode = ret,
             .channelId = channelId,
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED,
             .dataLen = dataLen,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_SEND_DATA, extra);
@@ -650,9 +650,9 @@ int32_t ClientTransBrProxyChannelChange(int32_t channelId, int32_t errCode)
     if (info.enableStateChange && info.listener.onChannelStatusChanged != NULL) {
         info.listener.onChannelStatusChanged(channelId, SoftbusErrConvertChannelState(errCode));
         TransEventExtra extra = {
-            .result = EVENT_STAGE_RESULT_OK,
-            .errcode = errCode,
             .channelId = info.channelId,
+            .errcode = errCode,
+            .result = EVENT_STAGE_RESULT_OK,
             .channelStatus = SoftbusErrConvertChannelState(errCode),
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CHANNEL_STATUS, extra);
@@ -689,9 +689,9 @@ int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const c
         int64_t timeStart = info.timeStart;
         int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
         TransEventExtra extra = {
-            .result = (result == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
-            .errcode = result,
             .channelId = info.channelId,
+            .errcode = result,
+            .result = (result == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
             .costTime = (result == SOFTBUS_OK) ? (int32_t)timeDiff : 0,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
