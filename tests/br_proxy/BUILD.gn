@@ -23,6 +23,7 @@ ohos_unittest("BrProxyTest") {
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/br_proxy",
     "$dsoftbus_root_path/br_proxy/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -109,6 +110,7 @@ ohos_unittest("BrProxyServerManagerExtTest") {
   include_dirs = [
     "$dsoftbus_root_path/br_proxy",
     "$dsoftbus_root_path/br_proxy/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -151,6 +153,7 @@ ohos_unittest("BrProxyServerManagerTest") {
   include_dirs = [
     "$dsoftbus_root_path/br_proxy",
     "$dsoftbus_root_path/br_proxy/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -190,15 +193,12 @@ ohos_unittest("BrProxyServerManagerTest") {
 
 group("unittest") {
   testonly = true
-  deps = []
-  if (dsoftbus_feature_trans_br_proxy == true) {
-    deps += [
-      ":BrProxyTest",
-      ":BrProxyExtTest",
-      ":BrProxyServerManagerExtTest",
-      ":BrProxyServerManagerTest",
-    ]
-  }
+  deps = [
+    ":BrProxyTest",
+    ":BrProxyExtTest",
+    ":BrProxyServerManagerExtTest",
+    ":BrProxyServerManagerTest",
+  ]
 }
 
 group("fuzztest") {
