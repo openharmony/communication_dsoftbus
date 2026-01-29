@@ -36,7 +36,7 @@ namespace OHOS {
 #define CHANNEL_ID 5
 #define CHANNEL_ID_ERR 0
 #define SESSION_ID 2
-const char *bundleName = "testbundlename";
+const char *BUNDLE_NAME = "testbundlename";
 
 class BrProxyServerManagerExtTest : public testing::Test {
 public:
@@ -85,7 +85,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest000, TestSize.L
 {
     NiceMock<BrProxyExtInterfaceMock> brProxyExtMock;
     EXPECT_CALL(brProxyExtMock, CreateSoftBusList).WillRepeatedly(Return(nullptr));
-    bool ret1 = IsBrProxy(bundleName);
+    bool ret1 = IsBrProxy(BUNDLE_NAME);
     EXPECT_EQ(false, ret1);
     int32_t ret = GetServerListCount(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
