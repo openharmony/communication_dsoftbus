@@ -123,6 +123,7 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_SET_DISPLAY_NAME, "SetDisplayName"},
     {SERVER_CREATE_GROUP_OWNER, "CreateGroupOwner"},
     {SERVER_DESTROY_GROUP_OWNER, "DestroyGroupOwner"},
+    {SERVER_SET_NODE_KEY_INFO, "SetNodeKeyInfo"},
 };
 
 typedef struct {

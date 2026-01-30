@@ -62,7 +62,8 @@ constexpr uint64_t PROTOCOLS = 1;
 constexpr char LOCAL_NETWORKID[] = "123456LOCAL";
 constexpr char REMOTE_NETWORKID[] = "234567REMOTE";
 constexpr uint32_t BUF_LEN = 128;
-constexpr int32_t KEY_MAX_INDEX = 11;
+constexpr int32_t KEY_MAX_INDEX = NODE_KEY_SERVICE_FIND_CAP + 1;
+constexpr int32_t KEY_EX_MAX_INDEX = NODE_KEY_SERVICE_FIND_CAP_EX + 1;
 constexpr uint16_t DATA_CHANGE_FLAG = 1;
 constexpr char LOCAL_UDID[] = "123456LOCALTEST";
 constexpr char LOCAL_UUID[] = "235999LOCAL";
@@ -965,9 +966,10 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     uint8_t info[BUF_LEN] = { 0 };
+    uint8_t capacity[SERVICE_FIND_CAP_LEN] = { 0 };
     EXPECT_TRUE(LnnGetNodeKeyInfo(nullptr, 0, info, BUF_LEN) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, 0, info, BUF_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, KEY_MAX_INDEX - 1, info, BUF_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, KEY_MAX_INDEX - 1, capacity, SERVICE_FIND_CAP_LEN) == SOFTBUS_OK);
     for (i = 1; i < KEY_MAX_INDEX - 1; i++) {
         EXPECT_TRUE(LnnGetNodeKeyInfo(LOCAL_NETWORKID, i, info, BUF_LEN) == SOFTBUS_OK);
     }
@@ -1005,10 +1007,12 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_003, TestSize.Level1)
 {
     static int32_t nodeKeyInfoLenTable[] = { UDID_BUF_LEN, UUID_BUF_LEN, UDID_BUF_LEN, MAC_LEN, IP_LEN,
         DEVICE_NAME_BUF_LEN, LNN_COMMON_LEN, LNN_COMMON_LEN, SOFTBUS_INVALID_NUM, DATA_CHANGE_FLAG_BUF_LEN,
-        SHORT_ADDRESS_MAX_LEN };
+        SHORT_ADDRESS_MAX_LEN, IP_LEN, LNN_COMMON_LEN, DATA_DEVICE_SCREEN_STATUS_LEN, SOFTBUS_INVALID_NUM,
+        SERVICE_FIND_CAP_LEN };
     EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
     for (int32_t i = 0; i < KEY_MAX_INDEX; i++) {
-        EXPECT_TRUE(LnnGetNodeKeyInfoLen(i) == nodeKeyInfoLenTable[i]);
+        int32_t result = LnnGetNodeKeyInfoLen(i);
+        EXPECT_EQ(result, nodeKeyInfoLenTable[i]);
     }
     LnnDeinitNetLedger();
 }
@@ -1321,5 +1325,25 @@ HWTEST_F(LNNNetLedgerCommonTest, LnnDumpSparkCheck_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnDumpSparkCheck(sparkCheck, "test"));
     sparkCheck[0] = 1;
     EXPECT_NO_FATAL_FAILURE(LnnDumpSparkCheck(sparkCheck, "test"));
+}
+
+/*
+ * @tc.name: LNN_SET_NODE_KEY_INFO_Test_001
+ * @tc.desc: LNN set node key info test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_NODE_KEY_INFO_Test_001, TestSize.Level1)
+{
+    char serviceFindCap[SERVICE_FIND_CAP_LEN] = "123456789";
+    EXPECT_TRUE(LnnInitNetLedger() == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetNodeKeyInfo(nullptr, 0, (uint8_t *)serviceFindCap, strlen(serviceFindCap))
+        == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetNodeKeyInfo(LOCAL_NETWORKID, 0, (uint8_t *)serviceFindCap, strlen(serviceFindCap)) == SOFTBUS_OK);
+    EXPECT_EQ(LnnSetNodeKeyInfo(LOCAL_NETWORKID, KEY_EX_MAX_INDEX, (uint8_t *)serviceFindCap, strlen(serviceFindCap)),
+        SOFTBUS_INVALID_NUM);
+    LnnDeinitNetLedger();
 }
 } // namespace OHOS

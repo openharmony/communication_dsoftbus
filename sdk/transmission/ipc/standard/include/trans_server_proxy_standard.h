@@ -46,6 +46,8 @@ public:
     int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) override;
     int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
         uint32_t len) override;
+    int32_t SetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+        uint32_t len) override;
     int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag) override;
     int32_t RegDataLevelChangeCb(const char *pkgName) override;
     int32_t UnregDataLevelChangeCb(const char *pkgName) override;

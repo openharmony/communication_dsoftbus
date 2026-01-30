@@ -161,6 +161,7 @@ typedef struct {
     unsigned char offlineCode[OFFLINE_CODE_BYTE_SIZE];
     char remotePtk[PTK_DEFAULT_LEN];
     char remoteMetaPtk[PTK_DEFAULT_LEN];
+    char serviceFindCap[SERVICE_FIND_CAP_LEN];
     bool isNeedReSyncDeviceName;
     bool isScreenOn;
     bool initPreventFlag;

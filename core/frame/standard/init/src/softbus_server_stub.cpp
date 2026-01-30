@@ -60,6 +60,7 @@
 #define SERVER_STOP_RANGE_FOR_MSDP_NAME "SERVER_STOP_RANGE_FOR_MSDP"
 #define SERVER_REG_RANGE_CB_FOR_MSDP_NAME "SERVER_REG_RANGE_CB_FOR_MSDP"
 #define SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME "SERVER_UNREG_RANGE_CB_FOR_MSDP"
+#define SERVER_SET_NODE_KEY_INFO_NAME "SERVER_SET_NODE_KEY_INFO"
 
 const char *g_limitPkgName = "ohos.distributedschedule.dms";
 static const std::string CONSTRAINT = "constraint.distributed.transmission.outgoing";
@@ -217,6 +218,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GENERAL_DISCONNECT] = &SoftBusServerStub::DisconnectInner;
     memberFuncMap_[SERVER_GENERAL_SEND] = &SoftBusServerStub::SendInner;
     memberFuncMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = &SoftBusServerStub::GetPeerDeviceIdInner;
+    memberFuncMap_[SERVER_SET_NODE_KEY_INFO] = &SoftBusServerStub::SetNodeKeyInfoInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -276,6 +278,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GENERAL_DISCONNECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GENERAL_SEND] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_SET_NODE_KEY_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -1243,6 +1246,56 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         return SOFTBUS_IPC_ERR;
     }
     SoftBusFree(buf);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SetNodeKeyInfoLen(int32_t key)
+{
+    return LnnSetNodeKeyInfoLen(key);
+}
+
+int32_t SoftBusServerStub::SetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = PermissionVerify(SERVER_SET_NODE_KEY_INFO);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *clientName = data.ReadCString();
+    const char *networkId = data.ReadCString();
+    if (clientName == nullptr || networkId == nullptr) {
+        COMM_LOGE(COMM_SVC, "read clientName or networkId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (strcmp(DM_PACKAGE_NAME, clientName) != 0) {
+        COMM_LOGE(COMM_SVC, "read clientName invalid!");
+        return SOFTBUS_IPC_ERR;
+    }
+    char *anonyNetworkId = nullptr;
+    Anonymize(networkId, &anonyNetworkId);
+    COMM_LOGD(COMM_SVC, "networkId=%{public}s", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
+    int32_t key;
+    READ_PARCEL_WITH_RET(data, Int32, key, SOFTBUS_IPC_ERR);
+    int32_t infoLen = SetNodeKeyInfoLen(key);
+    if (infoLen == SOFTBUS_INVALID_NUM) {
+        COMM_LOGE(COMM_SVC, "get info len failed!");
+        return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
+    }
+    uint32_t len;
+    READ_PARCEL_WITH_RET(data, Uint32, len, SOFTBUS_IPC_ERR);
+    if (len > (uint32_t)infoLen) {
+        COMM_LOGE(COMM_SVC, "invalid param, len=%{public}u, infoLen=%{public}d", len, infoLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    auto rawData = data.ReadRawData(len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read len failed.");
+    uint8_t *buf = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(rawData));
+    ret = SetNodeKeyInfo(clientName, networkId, key, buf, len);
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SVC, "write info length failed!");
+        return SOFTBUS_IPC_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -2523,6 +2576,8 @@ static const char* LabelTransformation(uint32_t code)
         return SERVER_REG_RANGE_CB_FOR_MSDP_NAME;
     } else if (code == SERVER_UNREG_RANGE_CB_FOR_MSDP) {
         return SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME;
+    } else if (code == SERVER_SET_NODE_KEY_INFO) {
+        return SERVER_SET_NODE_KEY_INFO_NAME;
     }
     return nullptr;
 }

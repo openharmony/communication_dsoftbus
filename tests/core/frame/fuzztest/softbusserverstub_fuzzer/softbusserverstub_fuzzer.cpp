@@ -697,6 +697,54 @@ bool GetNodeKeyInfoFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
+bool SetNodeKeyInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size >= INT32_MAX - 1 ||
+        size < INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX + sizeof(int32_t) + sizeof(uint32_t) + SERVICE_FIND_CAP_LEN) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char clientName[INPUT_NAME_SIZE_MAX] = "client-test";
+    char networkId[NETWORKID_SIZE_MAX] = "networkid-test";
+    char capacity[SERVICE_FIND_CAP_LEN] = "capacity-test";
+
+    if (memcpy_s(clientName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    clientName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    if (memcpy_s(networkId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        NETWORKID_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    networkId[NETWORKID_SIZE_MAX - 1] = '\0';
+    offset += NETWORKID_SIZE_MAX;
+    int32_t key = *reinterpret_cast<const int32_t *>(data + offset);
+    offset += sizeof(int32_t);
+    uint32_t len = *reinterpret_cast<const uint32_t *>(data + offset);
+    offset += sizeof(uint32_t);
+    if (memcpy_s(capacity, SERVICE_FIND_CAP_LEN, reinterpret_cast<const char *>(data + offset),
+        SERVICE_FIND_CAP_LEN - 1) != EOK) {
+        return false;
+    }
+
+    MessageParcel datas;
+    datas.WriteCString(clientName);
+    datas.WriteCString(networkId);
+    datas.WriteInt32(key);
+    datas.WriteUint32(len);
+    datas.WriteRawData(capacity, SERVICE_FIND_CAP_LEN);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->SetNodeKeyInfoInner(datas, reply);
+    return true;
+}
+
 bool SetNodeDataChangeFlagFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
@@ -1702,6 +1750,7 @@ bool RunFuzzTestCase(const uint8_t *data, size_t size)
     OHOS::GetAllOnlineNodeInfoFuzzTest(data, size);
     OHOS::GetLocalDeviceInfoFuzzTest(data, size);
     OHOS::GetNodeKeyInfoFuzzTest(data, size);
+    OHOS::SetNodeKeyInfoFuzzTest(data, size);
     OHOS::SetNodeDataChangeFlagFuzzTest(data, size);
     OHOS::StartTimeSyncFuzzTest(data, size);
     OHOS::StopTimeSyncFuzzTest(data, size);

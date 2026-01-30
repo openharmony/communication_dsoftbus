@@ -635,6 +635,11 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uin
     return GetLnnIpNetworkImplInterface()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
 }
 
+int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
+{
+    return GetLnnIpNetworkImplInterface()->LnnSetNodeKeyInfo(networkId, key, info, infoLen);
+}
+
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     return GetLnnIpNetworkImplInterface()->LnnGetLocalDeviceInfo(info);

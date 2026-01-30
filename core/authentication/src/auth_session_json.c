@@ -165,6 +165,7 @@
 #define SLE_RANGE_CAP               "SLE_RANGE_CAP"
 #define SLE_MAC                     "SLE_MAC"
 #define SPARK_CHECK                 "SPARK_CHECK"
+#define SERVICE_FIND_CAP            "SERVICE_FIND_CAP"
 
 #define HAS_CTRL_CHANNEL                 (0x1L)
 #define HAS_CHANNEL_AUTH                 (0x2L)
@@ -1499,6 +1500,13 @@ static void AuthPrintBase64Ptk(const char *ptk)
     AnonymizeFree(anonyPtk);
 }
 
+static void PackServiceFindCap(JsonObj *json, const NodeInfo *info)
+{
+    if (!JSON_AddStringToObject(json, SERVICE_FIND_CAP, info->serviceFindCap)) {
+        AUTH_LOGW(AUTH_FSM, "add service find cap fail");
+    }
+}
+
 static void PackWifiDirectInfo(
     const AuthConnInfo *connInfo, JsonObj *json, const NodeInfo *info, const char *remoteUuid, bool isMetaAuth)
 {
@@ -1864,6 +1872,10 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
     char staticCap[STATIC_CAP_STR_LEN] = { 0 };
     if (!JSON_GetInt32FromOject(json, STATIC_CAP_LENGTH, &info->staticCapLen)) {
         AUTH_LOGE(AUTH_FSM, "get static cap len fail");
+        return;
+    }
+    if (!JSON_GetStringFromObject(json, SERVICE_FIND_CAP, info->serviceFindCap, SERVICE_FIND_CAP_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "get service find cap fail");
         return;
     }
     if (!JSON_GetStringFromObject(json, STATIC_CAP, staticCap, STATIC_CAP_STR_LEN)) {
@@ -2458,7 +2470,7 @@ char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version
         return NULL;
     }
     PackWifiDirectInfo(connInfo, json, nodeInfo, remoteUuid, isMetaAuth);
-
+    PackServiceFindCap(json, nodeInfo);
     if (PackCertificateInfo(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "packCertificateInfo fail");
         JSON_Delete(json);

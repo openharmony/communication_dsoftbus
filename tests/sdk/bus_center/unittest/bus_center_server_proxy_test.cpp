@@ -98,6 +98,25 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetNodeKeyInfo_TEST_001, TestSize.Le
 }
 
 /*
+ * @tc.name: ServerIpcSetNodeKeyInfo_TEST_001
+ * @tc.desc: test ServerIpcSetNodeKeyInfo
+ *           ServerIpcSetNodeKeyInfo return value is equal to SOFTBUS_SERVER_NOT_INIT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyTest, ServerIpcSetNodeKeyInfo_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = "001";
+    const char *networkId = "123";
+    int32_t key = 1;
+    unsigned char array[10] = "123456789";
+    unsigned char *buf = array;
+    uint32_t len = 0;
+    int32_t ret = ServerIpcSetNodeKeyInfo(pkgName, networkId, key, buf, len);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
  * @tc.name: ServerIpcSetNodeDataChangeFlag_TEST_001
  * @tc.desc: test ServerIpcSetNodeDataChangeFlag
  *           ServerIpcSetNodeDataChangeFlag return value is equal to SOFTBUS_SERVER_NOT_INIT

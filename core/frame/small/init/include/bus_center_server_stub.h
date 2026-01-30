@@ -32,6 +32,7 @@ int32_t ServerLeaveMetaNode(IpcIo *req, IpcIo *reply);
 int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply);
+int32_t ServerSetNodeKeyInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerSetNodeDataChangeFlag(IpcIo *req, IpcIo *reply);
 int32_t ServerRegDataLevelChangeCb(IpcIo *req, IpcIo *reply);
 int32_t ServerUnregDataLevelChangeCb(IpcIo *req, IpcIo *reply);

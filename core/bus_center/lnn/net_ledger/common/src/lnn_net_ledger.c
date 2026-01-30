@@ -460,6 +460,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, (bool *)info, NODE_SCREEN_STATUS_LEN);
         case NODE_KEY_STATIC_NETWORK_CAP:
             return LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, (uint32_t *)info);
+        case NODE_KEY_SERVICE_FIND_CAP:
+            return LnnGetLocalStrInfo(STRING_KEY_SERVICE_FIND_CAP, (char *)info, infoLen);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_INVALID_NUM;
@@ -501,6 +503,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteBoolInfo(networkId, BOOL_KEY_SCREEN_STATUS, (bool*)info);
         case NODE_KEY_STATIC_NETWORK_CAP:
             return LnnGetRemoteNumU32Info(networkId, NUM_KEY_STATIC_NET_CAP, (uint32_t *)info);
+        case NODE_KEY_SERVICE_FIND_CAP:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_SERVICE_FIND_CAP, (char *)info, infoLen);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_INVALID_NUM;
@@ -526,6 +530,22 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int key, uint8_t *info, uint32_
         return LnnGetNodeKeyInfoLocal(networkId, key, info, infoLen);
     } else {
         return LnnGetNodeKeyInfoRemote(networkId, key, info, infoLen);
+    }
+}
+
+int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
+{
+    if (networkId == NULL || info == NULL || infoLen == 0 || infoLen > SERVICE_FIND_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "params are null, infoLen=%{public}u", infoLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    switch (key) {
+        case NODE_KEY_SERVICE_FIND_CAP_EX:
+            return LnnSetLocalStrInfo(STRING_KEY_SERVICE_FIND_CAP, (char *)info);
+        default:
+            LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
+            return SOFTBUS_INVALID_NUM;
     }
 }
 
@@ -682,6 +702,19 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return LNN_COMMON_LEN;
         case NODE_KEY_DEVICE_SCREEN_STATUS:
             return DATA_DEVICE_SCREEN_STATUS_LEN;
+        case NODE_KEY_SERVICE_FIND_CAP:
+            return SERVICE_FIND_CAP_LEN;
+        default:
+            LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
+            return SOFTBUS_INVALID_NUM;
+    }
+}
+
+int32_t LnnSetNodeKeyInfoLen(int32_t key)
+{
+    switch (key) {
+        case NODE_KEY_SERVICE_FIND_CAP_EX:
+            return SERVICE_FIND_CAP_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_INVALID_NUM;
@@ -1000,7 +1033,7 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
     }
     char peerUuid[UUID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(nodeInfo->networkId, STRING_KEY_UUID, peerUuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gey peerUuid failed");
+        LNN_LOGE(LNN_LEDGER, "get peerUuid failed");
         return SOFTBUS_NOT_FIND;
     }
     char localPtk[PTK_DEFAULT_LEN] = {0};
@@ -1021,6 +1054,26 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
     AnonymizeFree(anonyLocalPtk);
     (void)memset_s(localPtk, PTK_DEFAULT_LEN, 0, PTK_DEFAULT_LEN);
     (void)memset_s(localPtkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
+    return SOFTBUS_OK;
+}
+
+static int32_t SoftbusDumpPrintServiceFindCap(int fd, NodeBasicInfo *nodeInfo)
+{
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeDeviceInfoKey key = NODE_KEY_SERVICE_FIND_CAP;
+    unsigned char capacity[SERVICE_FIND_CAP_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, capacity, SERVICE_FIND_CAP_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get service find capacity failed");
+        return SOFTBUS_NOT_FIND;
+    }
+
+    char *anonyCapacity = NULL;
+    Anonymize((char *)capacity, &anonyCapacity);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "service_find_cap", AnonymizeWrapper(anonyCapacity));
+    AnonymizeFree(anonyCapacity);
     return SOFTBUS_OK;
 }
 
@@ -1055,6 +1108,9 @@ static void SoftbusDumpDeviceInfo(int fd, NodeBasicInfo *nodeInfo)
     }
     if (SoftbusDumpPrintStaticNetCap(fd, nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintStaticNetCap failed");
+    }
+    if (SoftbusDumpPrintServiceFindCap(fd, nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftbusDumpPrintServiceFindCap failed");
     }
 }
 

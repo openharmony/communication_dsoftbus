@@ -199,6 +199,7 @@ typedef int32_t (*LnnGetLocalByteInfoFunc)(InfoKey key, uint8_t *info, uint32_t 
 typedef int32_t (*LnnGetAllOnlineNodeInfoFunc)(NodeBasicInfo **info, int32_t *infoNum);
 typedef int32_t (*LnnGetOnlineAndOfflineWithinTimeUdidsFunc)(char **udids, int32_t *udidNum, uint64_t timeRange);
 typedef int32_t (*LnnGetNodeKeyInfoFunc)(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
+typedef int32_t (*LnnSetNodeKeyInfoFunc)(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
 typedef int32_t (*LnnGetNetworkIdByUdidFunc)(const char *udid, char *buf, uint32_t len);
 typedef int32_t (*LnnGetNetworkIdByUdidHashFunc)(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len,
     bool needOnline);
