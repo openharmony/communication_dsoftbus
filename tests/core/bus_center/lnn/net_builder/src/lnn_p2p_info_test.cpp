@@ -57,7 +57,8 @@ void LNNP2pInfoTest::TearDown() { }
 
 /*
  * @tc.name: LNN_GET_P2P_INFO_MSG_TEST_001
- * @tc.desc: test LnnGetP2pInfoMsg
+ * @tc.desc: Verify LnnGetP2pInfoMsg gets P2P info message with
+ *           valid P2pInfo structure
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -78,7 +79,8 @@ HWTEST_F(LNNP2pInfoTest, LNN_GET_P2P_INFO_MSG_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_WIFI_DIRECT_ADDR_MSG_TEST_001
- * @tc.desc: test LnnGetWifiDirectAddrMsg
+ * @tc.desc: Verify LnnGetWifiDirectAddrMsg gets wifi direct address
+ *           message with valid NodeInfo
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -94,7 +96,8 @@ HWTEST_F(LNNP2pInfoTest, LNN_GET_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: P2P_INFO_MOCK_TEST_001
- * @tc.desc: test LnnInitLocalP2pInfo
+ * @tc.desc: Verify LnnInitLocalP2pInfo initializes local P2P info
+ *           with null and valid NodeInfo
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -133,7 +136,8 @@ HWTEST_F(LNNP2pInfoTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_PARSE_WIFI_DIRECT_ADDR_MSG_TEST_001
- * @tc.desc: test LnnParseWifiDirectAddrMsg
+ * @tc.desc: Verify LnnParseWifiDirectAddrMsg parses wifi direct
+ *           address message with different formats
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -153,7 +157,8 @@ HWTEST_F(LNNP2pInfoTest, LNN_PARSE_WIFI_DIRECT_ADDR_MSG_TEST_001, TestSize.Level
 
 /*
  * @tc.name: IS_NEED_SYNC_P2P_INFO_TEST_001
- * @tc.desc: test IsNeedSyncP2pInfo
+ * @tc.desc: Verify IsNeedSyncP2pInfo checks if P2P info needs to
+ *           be synced with different OS types
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -179,7 +184,8 @@ HWTEST_F(LNNP2pInfoTest, IS_NEED_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PROCESS_SYNC_P2P_INFO_TEST_001
- * @tc.desc: test ProcessSyncP2pInfo
+ * @tc.desc: Verify ProcessSyncP2pInfo processes P2P info sync with
+ *           different node info states
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -226,7 +232,8 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PROCESS_SYNC_P2P_INFO_TEST_002
- * @tc.desc: test ProcessSyncP2pInfo
+ * @tc.desc: Verify ProcessSyncP2pInfo processes P2P info sync
+ *           with LSA node and valid OS type
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -264,7 +271,8 @@ HWTEST_F(LNNP2pInfoTest, PROCESS_SYNC_P2P_INFO_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001
- * @tc.desc: test OnReceiveWifiDirectSyncAddr
+ * @tc.desc: Verify OnReceiveWifiDirectSyncAddr handles wifi direct
+ *           address sync with null and valid parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -292,7 +300,8 @@ HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_SYNC_P2P_INFO_TEST_001
- * @tc.desc: test LnnSyncP2pInfo
+ * @tc.desc: Verify LnnSyncP2pInfo syncs P2P info asynchronously
+ *           with callback helper
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -311,7 +320,8 @@ HWTEST_F(LNNP2pInfoTest, LNN_SYNC_P2P_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_SYNC_WIFI_DIRECT_ADDR_TEST_001
- * @tc.desc: test LnnSyncWifiDirectAddr
+ * @tc.desc: Verify LnnSyncWifiDirectAddr syncs wifi direct address
+ *           asynchronously with callback helper
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -330,7 +340,8 @@ HWTEST_F(LNNP2pInfoTest, LNN_SYNC_WIFI_DIRECT_ADDR_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_PARSE_P2P_INFO_MSG_TEST_001
- * @tc.desc: test LnnParseP2pInfoMsg
+ * @tc.desc: Verify LnnParseP2pInfoMsg parses P2P info message with
+ *           different JSON formats
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -381,7 +392,8 @@ HWTEST_F(LNNP2pInfoTest, LNN_PARSE_P2P_INFO_MSG_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_RECEIVE_P2P_SYNC_INFO_MSG_TEST_001
- * @tc.desc: test OnReceiveP2pSyncInfoMsg
+ * @tc.desc: Verify OnReceiveP2pSyncInfoMsg handles P2P sync info
+ *           messages with null and valid parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

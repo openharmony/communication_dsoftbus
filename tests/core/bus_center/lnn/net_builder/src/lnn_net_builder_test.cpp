@@ -84,7 +84,8 @@ static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t returnRet)
 
 /*
  * @tc.name: LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001
- * @tc.desc: test LnnNotifyDiscoveryDevice
+ * @tc.desc: Verify LnnNotifyDiscoveryDevice notifies discovered device
+ *           to network builder with valid and invalid parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -106,7 +107,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001
- * @tc.desc: test LnnRequestLeaveByAddrType
+ * @tc.desc: Verify LnnRequestLeaveByAddrType requests leaving with
+ *           different address types and parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -128,7 +130,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_REQUEST_LEAVE_SPECIFIC_TEST_001
- * @tc.desc: test LnnRequestLeaveSpecific
+ * @tc.desc: Verify LnnRequestLeaveSpecific requests leaving specific
+ *           connection with valid and invalid network ID
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -148,7 +151,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0
 
 /*
  * @tc.name: LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001
- * @tc.desc: test LnnRequestLeaveInvalidConn
+ * @tc.desc: Verify LnnRequestLeaveInvalidConn requests leaving
+ *           invalid connection correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -165,7 +169,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Le
 
 /*
  * @tc.name: LNN_REQUEST_CLEAN_CONN_FSM_TEST_001
- * @tc.desc: test LnnRequestCleanConnFsm
+ * @tc.desc: Verify LnnRequestCleanConnFsm cleans connection FSM
+ *           with valid and invalid FSM ID
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -182,7 +187,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0
 
 /*
  * @tc.name: LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001
- * @tc.desc: test LnnNotifyNodeStateChanged
+ * @tc.desc: Verify LnnNotifyNodeStateChanged notifies node state
+ *           changed event to network builder
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -202,7 +208,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_NOTIFY_MASTER_ELECT_TEST_001
- * @tc.desc: test LnnNotifyMasterElect
+ * @tc.desc: Verify LnnNotifyMasterElect notifies master election
+ *           event with valid and invalid parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -222,7 +229,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_UPDATE_NODE_ADDR_TEST_001
- * @tc.desc: test LnnUpdateNodeAddr
+ * @tc.desc: Verify LnnUpdateNodeAddr updates node address with
+ *           null and valid UDID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5PRUD
@@ -244,7 +252,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_SYNC_OFFLINE_COMPLETE_TEST_001
- * @tc.desc: test LnnSyncOfflineComplete
+ * @tc.desc: Verify LnnSyncOfflineComplete syncs offline complete
+ *           with null and valid network ID
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:
@@ -261,7 +270,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_SYNC_OFFLINE_COMPLETE_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_SERVER_LEAVE_TEST_001
- * @tc.desc: test LnnServerLeave
+ * @tc.desc: Verify LnnServerLeave handles server leave with
+ *           null and valid network ID
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:
@@ -280,7 +290,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_LEAVE_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_SERVER_JOIN_TEST_001
- * @tc.desc: test LnnServerJoin
+ * @tc.desc: Verify LnnServerJoin handles server join with null
+ *           and valid connection address
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:
@@ -303,7 +314,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_SERVER_JOIN_EXT_TEST_001
- * @tc.desc: test LnnServerJoinExt
+ * @tc.desc: Verify LnnServerJoinExt handles extended server join
+ *           with null and valid parameters
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:
@@ -326,7 +338,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_SERVER_JOIN_EXT_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: FIND_REQUEST_ID_BY_ADDR_TEST_001
- * @tc.desc: test FindRequestIdByAddr
+ * @tc.desc: Verify FindRequestIdByAddr finds request ID by
+ *           connection address correctly
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:
@@ -344,7 +357,8 @@ HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: FIND_NODE_INFO_BY_RQUESTID_TEST_001
- * @tc.desc: test FindNodeInfoByRquestId
+ * @tc.desc: Verify FindNodeInfoByRquestId finds node info by
+ *           request ID correctly
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:
@@ -361,7 +375,8 @@ HWTEST_F(LNNNetBuilderTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level0
 
 /*
  * @tc.name: LNN_GET_VERIFY_CALLBACK_TEST_001
- * @tc.desc: test three verify callback
+ * @tc.desc: Verify LnnGetVerifyCallback returns valid verify
+ *           callbacks for authentication
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:
@@ -387,7 +402,8 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001
- * @tc.desc: lnn notify auth handle leave lnn test
+ * @tc.desc: Verify LnnNotifyAuthHandleLeaveLNN notifies auth handle
+ *           to leave LNN correctly
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:

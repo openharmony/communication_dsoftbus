@@ -57,7 +57,8 @@ void LNNSyncInfoItemTest::TearDown() { }
 
 /*
  * @tc.name: WIFI_CONNECT_TO_TARGET_AP_TEST_001
- * @tc.desc: test WifiConnectToTargetAp
+ * @tc.desc: Verify WifiConnectToTargetAp connects to target AP with
+ *           different wifi device configurations
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -108,7 +109,8 @@ HWTEST_F(LNNSyncInfoItemTest, WIFI_CONNECT_TO_TARGET_AP_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_SEND_TRANS_REQ_TEST_001
- * @tc.desc: test LnnSendTransReq
+ * @tc.desc: Verify LnnSendTransReq sends transition request with
+ *           null and valid parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:I5PRUD
@@ -141,7 +143,8 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_SEND_TRANS_REQ_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_ONRECEIVE_DEVICE_NAME_TEST_001
- * @tc.desc: test OnReceiveDeviceName
+ * @tc.desc: Verify OnReceiveDeviceName handles device name sync
+ *           with different info types
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -162,7 +165,8 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_DEVICE_NAME_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_ONRECEIVE_TRANS_REQ_MSG_TEST_001
- * @tc.desc: test OnReceiveTransReqMsg
+ * @tc.desc: Verify OnReceiveTransReqMsg handles transition request
+ *           messages with different info types
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -186,7 +190,8 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_TRANS_REQ_MSG_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_ONRECEIVE_BR_OFFLINE_TEST_001
- * @tc.desc: test OnReceiveBrOffline
+ * @tc.desc: Verify OnReceiveBrOffline handles BR offline messages
+ *           with different info types and lengths
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -211,7 +216,8 @@ HWTEST_F(LNNSyncInfoItemTest, LNN_ONRECEIVE_BR_OFFLINE_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: FILL_TARGET_WIFI_CONFIG_TEST_001
- * @tc.desc: test FillTargetWifiConfig
+ * @tc.desc: Verify FillTargetWifiConfig fills target wifi configuration
+ *           with connection data correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:I5PRUD
