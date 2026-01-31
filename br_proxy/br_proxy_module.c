@@ -162,7 +162,7 @@ static int32_t GetChannelInfoParam(napi_env env, napi_value arg, AsyncOpenChanne
         goto EXIT;
     }
     if (napi_get_value_string_utf8(env, peerBRMacAddrValue, NULL, 0, &macLen) != napi_ok ||
-        napi_get_value_string_utf8(env, peerBRUuidValue, NULL, 0, &uuidLen)) {
+        napi_get_value_string_utf8(env, peerBRUuidValue, NULL, 0, &uuidLen) != napi_ok) {
         goto EXIT;
     }
     if (macLen < MAC_MIN_LENGTH || (macLen > MAC_MAX_LENGTH && macLen != MAC_SHA256_LEN)) {
@@ -565,6 +565,7 @@ napi_value SendDataAsync(napi_env env, napi_callback_info info)
     pthread_mutex_lock(&g_taskQueue.mutex);
     QueueNode* node = (QueueNode*)SoftBusCalloc(sizeof(QueueNode));
     if (node == NULL) {
+        pthread_mutex_unlock(&g_taskQueue.mutex);
         napi_throw_error(env, NULL, "Memory allocation failed");
         goto cleanup;
     }
