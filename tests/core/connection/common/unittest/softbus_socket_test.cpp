@@ -35,8 +35,10 @@ using namespace testing::ext;
 using namespace testing;
 using namespace OHOS::SoftBus;
 
+#define SOCKET_PORT_TEST      8080
+
 // Mock SocketInterface for testing
-static int32_t MockGetSockPort(int32_t fd) { return 8080; }
+static int32_t MockGetSockPort(int32_t fd) { return SOCKET_PORT_TEST; }
 static int32_t MockOpenServerSocket(const LocalListenerInfo *option) { return 0; }
 static int32_t MockOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock) { return 100; }
 static int32_t MockAcceptClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd) { return 0; }
