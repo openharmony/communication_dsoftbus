@@ -81,7 +81,6 @@ void SocketTestMock::ClearTestIfAddr()
 
 // Global mock function implementations
 extern "C" {
-
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd)
 {
     auto mock = OHOS::SoftBus::SocketTestMock::GetMock();
