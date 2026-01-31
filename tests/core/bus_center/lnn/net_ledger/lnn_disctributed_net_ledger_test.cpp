@@ -115,7 +115,8 @@ void LNNDisctributedLedgerTest::TearDown()
 
 /*
  * @tc.name: LNN_ADD_ONLINE_NODE_Test_001
- * @tc.desc: lnn add online node test
+ * @tc.desc: Verify LnnAddOnlineNode adds online node to distributed
+ *           ledger with valid node info
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -138,7 +139,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
 
 /*
  * @tc.name: LNN_GET_REMOTE_STRINFO_Test_001
- * @tc.desc: lnn get remote strInfo test
+ * @tc.desc: Verify LnnGetRemoteStrInfo gets remote string info with
+ *           different string key types
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -172,7 +174,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
 
 /*
  * @tc.name: LNN_GET_REMOTE_STRINFO_BY_IFNAME_Test_001
- * @tc.desc: lnn get remote strInfo by ifname test
+ * @tc.desc: Verify LnnGetRemoteStrInfoByIfnameIdx handles invalid parameters
+ *           and returns correct values for valid keys by interface name
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -201,7 +204,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_BY_IFNAME_Test_001, T
 
 /*
  * @tc.name: LNN_GET_REMOTE_NUMNFO_Test_002
- * @tc.desc: lnn get remote num info test
+ * @tc.desc: Verify LnnGetRemoteNumInfo returns SOFTBUS_OK for valid network ID
+ *           and error for invalid network ID
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -225,7 +229,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Lev
 
 /*
  * @tc.name: LNN_GET_REMOTE_NUMNFO_BY_IFNAME_Test_002
- * @tc.desc: lnn get remote num info by ifname test
+ * @tc.desc: Verify LnnGetRemoteNumInfoByIfnameIdx returns SOFTBUS_OK for valid network ID
+ *           and error for invalid network ID by interface name
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -248,7 +253,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_BY_IFNAME_Test_002, Te
 
 /*
  * @tc.name: LNN_GET_REMOTE_BYTEINFO_Test_003
- * @tc.desc: lnn get remote byte info test
+ * @tc.desc: Verify LnnGetRemoteByteInfo handles invalid parameters
+ *           and returns SOFTBUS_OK for valid IRK, public MAC and cipher info
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -290,7 +296,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_003, TestSize.L
 
 /*
  * @tc.name: LNN_GET_CNN_CODE_Test_001
- * @tc.desc: lnn get cnn code test
+ * @tc.desc: Verify LnnGetCnnCode returns INVALID_CONNECTION_CODE_VALUE
+ *           with null or invalid UUID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -308,7 +315,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_CNN_CODE_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_UPDATE_NODE_INFO_Test_001
- * @tc.desc: lnn update node info test
+ * @tc.desc: Verify LnnUpdateNodeInfo updates node info with different
+ *           IRK, device name and returns appropriate status
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1171,7 +1179,8 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_SET_DLWIFIDIRECT_ADDR_Test_001
- * @tc.desc: lnn get lnn relation test
+ * @tc.desc: Verify LnnSetDLWifiDirectAddr sets wifi direct address
+ *           with null and valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1199,7 +1208,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLWIFIDIRECT_ADDR_Test_001, TestSize
 
 /*
  * @tc.name: DLGET_STATIC_CAP_Test_001
- * @tc.desc: dl get static cap test
+ * @tc.desc: Verify DlGetStaticCap returns SOFTBUS_INVALID_PARAM
+ *           with null or invalid buffer size parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1436,7 +1446,7 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_UpdateFileInfo_Test_001, TestSize.Level1
 
 /*
  * @tc.name: Lnn_IsAvailableMeta_Test_001
- * @tc.desc: IsAvailableMeta
+ * @tc.desc: Verify IsAvailableMeta returns false with null network ID
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1449,7 +1459,7 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_IsAvailableMeta_Test_001, TestSize.Level
 
 /*
  * @tc.name: Lnn_IsAvailableMeta_Test_002
- * @tc.desc: IsAvailableMeta
+ * @tc.desc: Verify IsAvailableMeta returns false with invalid network ID
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1463,7 +1473,7 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_IsAvailableMeta_Test_002, TestSize.Level
 
 /*
  * @tc.name: Lnn_IsAvailableMeta_Test_003
- * @tc.desc: IsAvailableMeta
+ * @tc.desc: Verify IsAvailableMeta returns false for non-meta node
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1476,7 +1486,7 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_IsAvailableMeta_Test_003, TestSize.Level
 
 /*
  * @tc.name: Lnn_IsAvailableMeta_Test_004
- * @tc.desc: IsAvailableMeta
+ * @tc.desc: Verify IsAvailableMeta returns true for valid meta node
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

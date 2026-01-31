@@ -117,7 +117,7 @@ void FsmStopCallback(struct tagLnnConnectionFsm *connFsm) { }
 
 /*
  * @tc.name: LNN_CREATE_CONNECTION_FSM_TEST_001
- * @tc.desc: test LnnCreateConnectionFsm with null addr
+ * @tc.desc: Verify LnnCreateConnectionFsm with nullptr addr returns nullptr fsm
  * @tc.type: FUNC
  * @tc.require:I5PRUD
  * @tc.level: Level1
@@ -133,7 +133,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: LNN_START_CONNECTION_FSM_TEST_001
- * @tc.desc: lnn start connection fsm test
+ * @tc.desc: Verify LnnStartConnectionFsm with nullptr connFsm returns SOFTBUS_INVALID_PARAM;
+ *           with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5PRUD
  * @tc.level: Level1
@@ -150,7 +151,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send join request to conn fsm test
+ * @tc.desc: Verify LnnSendJoinRequestToConnFsm sends join request and handles
+ *           AuthStartVerify result correctly
  * @tc.type: FUNC
  * @tc.require: I5PRUD
  * @tc.level: Level1
@@ -174,7 +176,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
 
 /*
  * @tc.name: LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send auth result msg to conn fsm test
+ * @tc.desc: Verify LnnSendAuthResultMsgToConnFsm with nullptr or dead connFsm
+ *           returns SOFTBUS_INVALID_PARAM; with valid parameters returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -200,7 +203,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
 
 /*
  * @tc.name: LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send not trusted to conn fsm test
+ * @tc.desc: Verify LnnSendNotTrustedToConnFsm with nullptr connFsm returns
+ *           SOFTBUS_INVALID_PARAM; with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -230,7 +234,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001, Test
 
 /*
  * @tc.name: LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send leave request to conn fsm test
+ * @tc.desc: Verify LnnSendLeaveRequestToConnFsm with nullptr connFsm returns
+ *           SOFTBUS_INVALID_PARAM; with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -247,7 +252,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestS
 
 /*
  * @tc.name: LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send sync offline finish to conn fsm test
+ * @tc.desc: Verify LnnSendSyncOfflineFinishToConnFsm with nullptr connFsm returns
+ *           SOFTBUS_INVALID_PARAM; with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -967,7 +973,8 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: CHECK_REMOTE_ACCOUNT_ID_TEST_001
- * @tc.desc: test CheckRemoteAccountId
+ * @tc.desc: Verify CheckRemoteAccountId checks and updates accountId based on
+ *           local accountId and aclState correctly
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
