@@ -894,6 +894,10 @@ bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType)
 {
 #define ISHARE_PKG_NAME "ohos.InterConnection.iShare"
 #define CAST_PKG_NAME   "CastEngineService"
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid pkgName.");
+        return false;
+    }
     switch (metaType) {
         case META_HA: {
             return strcmp(pkgName, ISHARE_PKG_NAME) == 0;

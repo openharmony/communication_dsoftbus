@@ -172,14 +172,6 @@ int32_t TransGetUdpChannelTos(int32_t channelId, bool *isTosSet)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t TransGetUdpChannelExtraInfo(int32_t channelId, char *srvIp, int32_t *srvPort)
-{
-    (void)channelId;
-    (void)*srvIp;
-    (void)*srvPort;
-    return SOFTBUS_FUNC_NOT_SUPPORT;
-}
-
 int32_t ClientTransCloseReserveUdpChannel(int32_t channelId,
     ShutdownReason reason, const char *srvIp, int32_t srvPort, int32_t routeType)
 {
@@ -188,5 +180,13 @@ int32_t ClientTransCloseReserveUdpChannel(int32_t channelId,
     (void)*srvIp;
     (void)srvPort;
     (void)routeType;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransGetUdpChannelExtraInfo(int32_t channelId, char *srvIp, int32_t *srvPort)
+{
+    (void)channelId;
+    (void)*srvIp;
+    (void)*srvPort;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
