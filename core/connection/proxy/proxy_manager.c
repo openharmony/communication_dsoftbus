@@ -303,8 +303,8 @@ static void PostEventByAddr(enum BrProxyLooperMsgType msgType, const char *brMac
     }
     char anonymizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anonymizeAddress, BT_MAC_LEN, brMac, BT_MAC_LEN);
-    CONN_LOGI(CONN_PROXY, "post event=%{public}d, addr=%{public}s, delay=%{public}lu",
-        msgType, anonymizeAddress, dalayTimeMs);
+    CONN_LOGI(CONN_PROXY, "post event=%{public}d, addr=%{public}s, delay=%{public}" PRIu64, msgType, anonymizeAddress,
+        dalayTimeMs);
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, msgType, 0, 0, copyAddr, dalayTimeMs);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "post msg err");
@@ -856,7 +856,7 @@ static void AttemptReconnectDevice(char *brAddr)
     ProxyConnectInfo *proxyChannelRequestInfo = CopyProxyConnectInfo(reconnectDeviceInfo);
     CONN_CHECK_AND_RETURN_LOGW(proxyChannelRequestInfo != NULL, CONN_PROXY, "CopyProxyConnectInfo fail");
 
-    CONN_LOGI(CONN_PROXY, "start reconnect reqId=%{public}u, addr=%{public}s, times=%{public}u, delay=%{public}lu",
+    CONN_LOGI(CONN_PROXY, "start reconnect reqId=%{public}u, addr=%{public}s, times=%{public}u, delay=%{public}" PRIu64,
         proxyChannelRequestInfo->requestId, anomizeAddress, reconnectDeviceInfo->innerRetryNum, config.delayMs);
     reconnectDeviceInfo->innerRetryNum += 1;
     proxyChannelRequestInfo->result.onOpenSuccess = OnInnerReConnectSuccess;
