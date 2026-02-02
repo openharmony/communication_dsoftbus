@@ -76,6 +76,7 @@ int32_t TestLnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType ad
  * @tc.name: LNN_INIT_NETWORK_INFO_TEST_001
  * @tc.desc: test LnnInitNetworkInfo
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5PRUD
  */
 HWTEST_F(LNNNetworkInfoTest, LNN_INIT_NETWORK_INFO_TEST_001, TestSize.Level1)

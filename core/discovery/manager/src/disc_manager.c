@@ -164,7 +164,7 @@ static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *de
     }
 
     char *deviceType = SoftBusCalloc(DEVICE_TYPE_SIZE_MAX + 1);
-    DISC_CHECK_AND_RETURN_LOGE(deviceType != NULL, DISC_CONTROL, "SoftBusCalloc failed");
+    DISC_CHECK_AND_RETURN_LOGE(deviceType != NULL, DISC_CONTROL, "SoftBusCalloc fail");
     if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_MAX + 1, DEVICE_TYPE_SIZE_MAX, "%03X", device->devType) >= 0) {
         extra->peerDeviceType = deviceType;
     }
@@ -331,7 +331,7 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageNa
             DfxCallInterfaceByMedium(info, packageName, type, bleRet);
 
             DISC_CHECK_AND_RETURN_RET_LOGE(coapRet == SOFTBUS_OK || bleRet == SOFTBUS_OK,
-                SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL, DISC_CONTROL, "all medium failed");
+                SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL, DISC_CONTROL, "all medium fail");
             return SOFTBUS_OK;
         }
         case USB:
@@ -460,7 +460,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
         }
 
         if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != SOFTBUS_OK) {
-            DISC_LOGE(DISC_CONTROL, "lock failed");
+            DISC_LOGE(DISC_CONTROL, "lock fail");
             return;
         }
         DiscInfo *infoNode = NULL;
@@ -581,7 +581,7 @@ static DiscItem *CreateDiscItem(SoftBusList *serviceList, const char *packageNam
     DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, NULL, DISC_CONTROL, "packageName is nullptr");
 
     DiscItem *itemNode = (DiscItem *)SoftBusCalloc(sizeof(DiscItem));
-    DISC_CHECK_AND_RETURN_RET_LOGE(itemNode != NULL, NULL, DISC_CONTROL, "calloc item node failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(itemNode != NULL, NULL, DISC_CONTROL, "calloc item node fail");
 
     if (strcpy_s(itemNode->packageName, PKG_NAME_SIZE_MAX, packageName) != EOK) {
         SoftBusFree(itemNode);
@@ -606,7 +606,7 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info, int32_t calli
     DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, DISC_CONTROL, "info is nullptr");
 
     DiscInfo *infoNode = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
-    DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, NULL, DISC_CONTROL, "calloc info node failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, NULL, DISC_CONTROL, "calloc info node fail");
 
     ListInit(&(infoNode->node));
     ListInit(&(infoNode->capNode));
@@ -624,12 +624,12 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info, int32_t calli
     if (info->dataLen != 0) {
         option->capabilityData = (uint8_t *)SoftBusCalloc(info->dataLen + 1);
         if (option->capabilityData == NULL) {
-            DISC_LOGE(DISC_CONTROL, "alloc capability data failed");
+            DISC_LOGE(DISC_CONTROL, "alloc capability data fail");
             SoftBusFree(infoNode);
             return NULL;
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
-            DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            DISC_LOGE(DISC_CONTROL, "memcpy_s fail");
             FreeDiscInfo(infoNode, PUBLISH_SERVICE);
             return NULL;
         }
@@ -651,7 +651,7 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info, int32_t c
     DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, DISC_CONTROL, "info is nullptr");
 
     DiscInfo *infoNode = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
-    DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, NULL, DISC_CONTROL, "alloc info node failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, NULL, DISC_CONTROL, "alloc info node fail");
 
     ListInit(&(infoNode->node));
     ListInit(&(infoNode->capNode));
@@ -670,12 +670,12 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info, int32_t c
     if (info->dataLen != 0) {
         option->capabilityData = (uint8_t *)SoftBusCalloc(info->dataLen + 1);
         if (option->capabilityData == NULL) {
-            DISC_LOGE(DISC_CONTROL, "alloc capability data failed");
+            DISC_LOGE(DISC_CONTROL, "alloc capability data fail");
             SoftBusFree(infoNode);
             return NULL;
         }
         if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
-            DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            DISC_LOGE(DISC_CONTROL, "memcpy_s fail");
             FreeDiscInfo(infoNode, SUBSCRIBE_SERVICE);
             return NULL;
         }
@@ -707,7 +707,7 @@ static void DumpDiscInfoList(const DiscItem *itemNode)
             DISC_LOGI(DISC_CONTROL, "info id=%{public}s", dumpStr);
             dumpStrPos = 0;
             itemStrLen = sprintf_s(&dumpStr[dumpStrPos], DUMP_STR_LEN - dumpStrPos, "%d,", infoNode->id);
-            DISC_CHECK_AND_RETURN_LOGW(itemStrLen > 0, DISC_CONTROL, "sprintf_s failed");
+            DISC_CHECK_AND_RETURN_LOGW(itemStrLen > 0, DISC_CONTROL, "sprintf_s fail");
         }
         dumpStrPos += itemStrLen;
     }
@@ -763,7 +763,7 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
     if (exist == false) {
         itemNode = CreateDiscItem(serviceList, packageName, cb, type);
         if (itemNode == NULL) {
-            DISC_LOGE(DISC_CONTROL, "itemNode create failed");
+            DISC_LOGE(DISC_CONTROL, "itemNode create fail");
             return SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE;
         }
 
@@ -871,19 +871,19 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
     DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
 
     int32_t ret = SoftBusMutexLock(&g_publishInfoList->lock);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock fail");
 
     do {
         ret = AddDiscInfoToPublishList(packageName, NULL, info, type);
         if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_CONTROL, "add info to list failed");
+            DISC_LOGE(DISC_CONTROL, "add info to list fail");
             break;
         }
 
         DFX_RECORD_DISC_CALL_START(info, packageName, PUBLISH_FUNC);
         ret = CallInterfaceByMedium(info, packageName, PUBLISH_FUNC);
         if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
+            DISC_LOGE(DISC_CONTROL, "call interface by medium fail");
             ListDelete(&(info->node));
             info->item->infoNum--;
         }
@@ -899,13 +899,13 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
     DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
 
     int32_t ret = SoftBusMutexLock(&g_publishInfoList->lock);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock fail");
 
     DiscInfo *infoNode = NULL;
     do {
         infoNode = RemoveInfoFromPublishList(packageName, publishId, type, callingPid);
         if (infoNode == NULL) {
-            DISC_LOGE(DISC_CONTROL, "delete info from list failed");
+            DISC_LOGE(DISC_CONTROL, "delete info from list fail");
             ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE;
             break;
         }
@@ -913,7 +913,7 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
         DFX_RECORD_DISC_CALL_START(infoNode, packageName, UNPUBLISH_FUNC);
         ret = CallInterfaceByMedium(infoNode, packageName, UNPUBLISH_FUNC);
         if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
+            DISC_LOGE(DISC_CONTROL, "call interface by medium fail");
         }
         FreeDiscInfo(infoNode, type);
     } while (false);
@@ -935,12 +935,12 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
     }
 
     int32_t ret = SoftBusMutexLock(&g_discoveryInfoList->lock);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock fail");
 
     do {
         ret = AddDiscInfoToDiscoveryList(packageName, &callback, info, type);
         if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_CONTROL, "add info to list failed");
+            DISC_LOGE(DISC_CONTROL, "add info to list fail");
             break;
         }
 
@@ -948,7 +948,7 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
         DFX_RECORD_DISC_CALL_START(info, packageName, STARTDISCOVERTY_FUNC);
         ret = CallInterfaceByMedium(info, packageName, STARTDISCOVERTY_FUNC);
         if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
+            DISC_LOGE(DISC_CONTROL, "call interface by medium fail");
             RemoveDiscInfoFromCapabilityList(info, type);
             ListDelete(&(info->node));
             info->item->infoNum--;
@@ -965,13 +965,13 @@ static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, 
     DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
 
     int32_t ret = SoftBusMutexLock(&g_discoveryInfoList->lock);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock fail");
 
     DiscInfo *infoNode = NULL;
     do {
         infoNode = RemoveInfoFromDiscoveryList(packageName, subscribeId, type, callingPid);
         if (infoNode == NULL) {
-            DISC_LOGE(DISC_CONTROL, "delete info from list failed");
+            DISC_LOGE(DISC_CONTROL, "delete info from list fail");
             ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE;
             break;
         }
@@ -979,7 +979,7 @@ static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, 
         DFX_RECORD_DISC_CALL_START(infoNode, packageName, STOPDISCOVERY_FUNC);
         ret = CallInterfaceByMedium(infoNode, packageName, STOPDISCOVERY_FUNC);
         if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
+            DISC_LOGE(DISC_CONTROL, "call interface by medium fail");
         } else {
             DfxRecordStopDiscoveryDevice(packageName, infoNode);
         }
@@ -1000,7 +1000,7 @@ static int32_t InnerSetDiscoveryCallback(const char *packageName, const DiscInne
     DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
 
     if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_CONTROL, "lock failed");
+        DISC_LOGE(DISC_CONTROL, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -1019,7 +1019,7 @@ static int32_t InnerSetDiscoveryCallback(const char *packageName, const DiscInne
         callback.innerCb.OnDeviceFound = cb->OnDeviceFound;
         itemNode = CreateDiscItem(g_discoveryInfoList, packageName, &callback, SUBSCRIBE_INNER_SERVICE);
         if (itemNode == NULL) {
-            DISC_LOGE(DISC_CONTROL, "itemNode create failed");
+            DISC_LOGE(DISC_CONTROL, "itemNode create fail");
             (void)SoftBusMutexUnlock(&(g_discoveryInfoList->lock));
             return SOFTBUS_DISCOVER_MANAGER_ITEM_NOT_CREATE;
         }
@@ -1050,7 +1050,7 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info)
 
     DiscInfo *infoNode = CreateDiscInfoForPublish(info, 0);
     DISC_CHECK_AND_RETURN_RET_LOGW(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE, DISC_CONTROL,
-        "create info failed");
+        "create info fail");
 
     int32_t ret = InnerPublishService(TransferModuleIdToPackageName(moduleId), infoNode, PUBLISH_INNER_SERVICE);
     if (ret != SOFTBUS_OK) {
@@ -1072,7 +1072,7 @@ int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info, int32_t call
 
     DiscInfo *infoNode = CreateDiscInfoForPublish(info, callingPid);
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE, DISC_CONTROL,
-        "create info failed");
+        "create info fail");
 
     int32_t ret = InnerPublishService(TransferModuleIdToPackageName(moduleId), infoNode, PUBLISH_INNER_SERVICE);
     if (ret != SOFTBUS_OK) {
@@ -1105,7 +1105,7 @@ int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info, int32
 
     DiscInfo *infoNode = CreateDiscInfoForSubscribe(info, callingPid);
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE, DISC_CONTROL,
-        "create info failed");
+        "create info fail");
 
     int32_t ret = InnerStartDiscovery(TransferModuleIdToPackageName(moduleId), infoNode, NULL, SUBSCRIBE_INNER_SERVICE);
     if (ret != SOFTBUS_OK) {
@@ -1127,7 +1127,7 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info)
 
     DiscInfo *infoNode = CreateDiscInfoForSubscribe(info, 0);
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE, DISC_CONTROL,
-        "create info failed");
+        "create info fail");
 
     int32_t ret = InnerStartDiscovery(TransferModuleIdToPackageName(moduleId), infoNode, NULL, SUBSCRIBE_INNER_SERVICE);
     if (ret != SOFTBUS_OK) {
@@ -1176,7 +1176,7 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info, int
 
     DiscInfo *infoNode = CreateDiscInfoForPublish(info, callingPid);
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE, DISC_CONTROL,
-        "create info failed");
+        "create info fail");
 
     int32_t ret = InnerPublishService(packageName, infoNode, PUBLISH_SERVICE);
     if (ret != SOFTBUS_OK) {
@@ -1213,7 +1213,7 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
 
     DiscInfo *infoNode = CreateDiscInfoForSubscribe(info, callingPid);
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE, DISC_CONTROL,
-        "create info failed");
+        "create info fail");
 
     int32_t ret = InnerStartDiscovery(packageName, infoNode, cb, SUBSCRIBE_SERVICE);
     if (ret != SOFTBUS_OK) {
@@ -1262,7 +1262,7 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName, int32_t p
 
     IdContainer *container = SoftBusCalloc(sizeof(IdContainer));
     if (container == NULL) {
-        DISC_LOGE(DISC_CONTROL, "container calloc failed");
+        DISC_LOGE(DISC_CONTROL, "container calloc fail");
         return NULL;
     }
 
@@ -1273,13 +1273,13 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName, int32_t p
     uint32_t nameLen = strlen(pkgName) + 1;
     container->pkgName = SoftBusCalloc(nameLen);
     if (container->pkgName == NULL) {
-        DISC_LOGE(DISC_CONTROL, "Container pkgName calloc failed");
+        DISC_LOGE(DISC_CONTROL, "Container pkgName calloc fail");
         SoftBusFree(container);
         return NULL;
     }
 
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
-        DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
+        DISC_LOGE(DISC_CONTROL, "strcpy_s fail");
         SoftBusFree(container->pkgName);
         container->pkgName = NULL;
         SoftBusFree(container);
@@ -1327,7 +1327,7 @@ static void RemoveDiscInfoByPackageName(SoftBusList *itemList, const ServiceType
     ListInit(&ids);
 
     if (SoftBusMutexLock(&itemList->lock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_CONTROL, "lock failed");
+        DISC_LOGE(DISC_CONTROL, "lock fail");
         return;
     }
 
@@ -1347,7 +1347,7 @@ static void RemoveDiscInfoByPackageName(SoftBusList *itemList, const ServiceType
             }
             container = CreateIdContainer(infoNode->id, itemNode->packageName, infoNode->pid);
             if (container == NULL) {
-                DISC_LOGE(DISC_CONTROL, "CreateIdContainer failed");
+                DISC_LOGE(DISC_CONTROL, "CreateIdContainer fail");
                 (void)SoftBusMutexUnlock(&itemList->lock);
                 goto CLEANUP;
             }
@@ -1416,14 +1416,14 @@ int32_t DiscMgrInit(void)
     g_discNfcInterface = DiscNfcDispatcherInit(&g_discMgrMediumCb);
 
     DISC_CHECK_AND_RETURN_RET_LOGE(g_discBleInterface != NULL || g_discCoapInterface != NULL ||
-        g_discUsbInterface != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT, "ble coap and usb init failed");
+        g_discUsbInterface != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT, "ble coap and usb init fail");
 
     g_publishInfoList = CreateSoftBusList();
     DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
-        "init publish info list failed");
+        "init publish info list fail");
     g_discoveryInfoList = CreateSoftBusList();
     if (g_discoveryInfoList == NULL) {
-        DISC_LOGE(DISC_INIT, "init discovery Info List failed");
+        DISC_LOGE(DISC_INIT, "init discovery Info List fail");
         DestroySoftBusList(g_publishInfoList);
         g_publishInfoList = NULL;
         return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
@@ -1464,14 +1464,14 @@ int32_t DiscSetDisplayName(const char *pkgName, const char *nameData, uint32_t l
         (pkgName != NULL && nameData != NULL), SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid param");
     int ret = SOFTBUS_PARSE_JSON_ERR;
     if (memset_s(&g_displayName, sizeof(g_displayName), 0, sizeof(g_displayName)) != EOK) {
-        DISC_LOGE(DISC_CONTROL, "DiscSetDisplayName failed");
+        DISC_LOGE(DISC_CONTROL, "DiscSetDisplayName fail");
         return SOFTBUS_MEM_ERR;
     }
     cJSON *json = cJSON_ParseWithLength(nameData, len);
-    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_CONTROL, "parse cJSON failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_CONTROL, "parse cJSON fail");
 
     if (!GetJsonObjectStringItem(json, JSON_KEY_RAW_NAME, g_displayName.raw, DISPLAY_NAME_BUF_LEN)) {
-        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem raw name failed. displayName=%{public}s", g_displayName.raw);
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem raw name fail. displayName=%{public}s", g_displayName.raw);
         goto CLEANUP;
     }
 
@@ -1481,17 +1481,17 @@ int32_t DiscSetDisplayName(const char *pkgName, const char *nameData, uint32_t l
     }
 
     if (!GetJsonObjectStringItem(json, JSON_KEY_NAME_LEN_18, g_displayName.name18, sizeof(g_displayName.name18))) {
-        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name18 failed. displayName=%{public}s", g_displayName.name18);
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name18 fail. displayName=%{public}s", g_displayName.name18);
         goto CLEANUP;
     }
 
     if (!GetJsonObjectStringItem(json, JSON_KEY_NAME_LEN_21, g_displayName.name21, sizeof(g_displayName.name21))) {
-        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name21 failed. displayName=%{public}s", g_displayName.name21);
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name21 fail. displayName=%{public}s", g_displayName.name21);
         goto CLEANUP;
     }
 
     if (!GetJsonObjectStringItem(json, JSON_KEY_NAME_LEN_24, g_displayName.name24, sizeof(g_displayName.name24))) {
-        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name24 failed. displayName=%{public}s", g_displayName.name24);
+        DISC_LOGE(DISC_CONTROL, "GetJsonObjectStringItem name24 fail. displayName=%{public}s", g_displayName.name24);
         goto CLEANUP;
     }
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);

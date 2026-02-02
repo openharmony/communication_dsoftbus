@@ -95,7 +95,7 @@ static int32_t PackFirstData(const AppInfo *appInfo, cJSON *json)
         TRANS_LOGE(TRANS_CTRL, "add first data failed.");
         SoftBusFree(encodeFastData);
         SoftBusFree(buf);
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     SoftBusFree(encodeFastData);
     SoftBusFree(buf);
@@ -112,11 +112,11 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(json, SESSION_KEY, (char *)encodeSessionKey) ||
         !AddNumberToJsonObject(json, MTU_SIZE, (int32_t)appInfo->myData.dataConfig)) {
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     if (!AddNumberToJsonObject(json, TRANS_CAPABILITY, (int32_t)appInfo->channelCapability)) {
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     char *authState = (char *)appInfo->myData.authState;
@@ -125,7 +125,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
         !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
         !AddStringToJsonObject(json, AUTH_STATE, authState) ||
         !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     (void)AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId);
     (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
@@ -193,7 +193,7 @@ static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
 {
     (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
     int32_t osType = 0;
-    (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+    GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
     if (osType == OH_OS_TYPE) {
         TRANS_LOGW(TRANS_CTRL, "no need get fastData osType=%{public}d", osType);
         return SOFTBUS_OK;
@@ -282,7 +282,7 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
 int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
 {
     if (msg == NULL || appInfo == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     (void)GetJsonObjectStringItem(msg, DEVICE_ID, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
@@ -535,18 +535,18 @@ static int32_t PackExternalDeviceJsonObject(const AppInfo *appInfo, cJSON *json,
         !AddStringToJsonObject(json, BUS_NAME, appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(json, SESSION_KEY, (char *)encodeSessionKey) ||
         !AddNumberToJsonObject(json, MTU_SIZE, (int32_t)appInfo->myData.dataConfig)) {
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     if (!AddNumberToJsonObject(json, TRANS_CAPABILITY, (int32_t)appInfo->channelCapability)) {
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
 
     if (appInfo->myData.apiVersion != API_V1 &&
         (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
         !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
         !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
-        return SOFTBUS_PARSE_JSON_ERR;
+        return SOFTBUS_CREATE_JSON_ERR;
     }
     (void)AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId);
     (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);

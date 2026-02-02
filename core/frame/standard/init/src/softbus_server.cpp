@@ -680,7 +680,7 @@ int32_t SoftBusServer::OpenBrProxy(const char *brMac, const char *uuid)
 {
     int32_t ret = TransOpenBrProxy(brMac, uuid);
     if (ret != SOFTBUS_OK) {
-        TransBrProxyRemoveObject();
+        TransBrProxyRemoveObject(OHOS::IPCSkeleton::GetCallingPid());
     }
     return ret;
 }

@@ -54,9 +54,9 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     return GetLnnBtNetworkImplInterface()->LnnRequestLeaveSpecific(networkId, addrType, leaveReason);
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
-    return GetLnnBtNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen);
+    return GetLnnBtNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
 }
 
 int32_t SoftBusGetBtState(void)

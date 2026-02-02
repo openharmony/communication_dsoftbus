@@ -301,7 +301,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
             TRANS_LOGE(TRANS_CTRL, "not support send fast data");
             return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
         }
-        appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
+        appInfo->fastTransData = (uint8_t *)SoftBusCalloc(param->attr->fastTransDataSize);
         if (appInfo->fastTransData == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
@@ -899,7 +899,7 @@ bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType)
             return strcmp(pkgName, ISHARE_PKG_NAME) == 0;
         }
         case META_SDK: {
-            return strcmp(pkgName, CAST_PKG_NAME) == 0;
+            return strcmp(pkgName, CAST_PKG_NAME) == 0 || strcmp(pkgName, ISHARE_PKG_NAME) == 0;
         }
         default: {
             TRANS_LOGE(TRANS_CTRL, "invalid metaType=%{public}d", metaType);

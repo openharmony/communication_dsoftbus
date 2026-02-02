@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -280,7 +280,9 @@ HWTEST_F(BrProxyTest, BrProxyTest0012, TestSize.Level1)
 {
     int32_t ret = ServerAddChannelToList(VALID_BR_MAC, TEST_UUID, g_validChannelId, g_validRequestId, g_appIndex);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    struct ProxyChannel channel;
+    struct ProxyChannel channel = {
+        .requestId = g_validRequestId,
+    };
     ret = UpdateProxyChannel(INVALID_BR_MAC, TEST_UUID, &channel);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     ret = UpdateProxyChannel(VALID_BR_MAC, TEST_UUID, &channel);

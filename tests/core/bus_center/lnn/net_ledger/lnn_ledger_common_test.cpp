@@ -105,7 +105,8 @@ void LNNNetLedgerCommonTest::TearDown() { }
 
 /*
  * @tc.name: LNN_DEVICE_INFO_Test_001
- * @tc.desc: LNN device info function test
+ * @tc.desc: Verify LNN device info functions including LnnGetDeviceName,
+ *           LnnSetDeviceName and LnnGetDeviceTypeId with different parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -137,7 +138,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_HUKS_UTILS_Test_001
- * @tc.desc: LNN huks utils function test
+ * @tc.desc: Verify LNN huks utils functions including LnnGenerateKeyByHuks
+ *           and LnnGenerateCeKeyByHuks with different parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -156,7 +158,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_NET_CAPABILITY_Test_001
- * @tc.desc: LNN net capability function test
+ * @tc.desc: Verify LnnSetNetCapability and LnnClearNetCapability
+ *           handle null capability pointer correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -289,8 +292,10 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_SET_STATIC_NET_CAPA_002
- * @tc.desc: test LNN set staticNetCapa
+ * @tc.desc: Verify LnnSetStaticNetCap returns SOFTBUS_INVALID_PARAM
+ *           with null capability pointer and SOFTBUS_OK with valid parameters
  * @tc.type: FUNC LnnSetStaticNetCap
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_002, TestSize.Level1)
@@ -336,7 +341,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_003, TestSize.Level1)
 
 /*
  * @tc.name: LNN_NODE_INFO_Test_001
- * @tc.desc: LNN node info function test
+ * @tc.desc: Verify LNN node info functions handle null pointer
+ *           parameters correctly and return expected error codes
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1039,7 +1045,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_Test_001
- * @tc.desc: LNN local key table test
+ * @tc.desc: Verify LNN local key table get functions handle null buffer
+ *           and return correct values for valid string keys
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1171,8 +1178,10 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_005, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_001
- * @tc.desc: LNN get local str by ifname test
+ * @tc.desc: Verify LnnGetLocalStrInfoByIfnameIdx handles null buffer
+ *           and returns correct values for valid string keys by interface name
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_001, TestSize.Level1)
@@ -1197,8 +1206,10 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_001, TestSize.Level
 
 /*
  * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_003
- * @tc.desc: LNN get local num by ifname test
+ * @tc.desc: Verify LnnGetLocalNumInfoByIfnameIdx returns correct values
+ *           for valid numeric keys by interface name
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_003, TestSize.Level1)
@@ -1217,7 +1228,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_003, TestSize.Level
 
 /*
  * @tc.name: LNN_FEATURE_CAPABILTY_001
- * @tc.desc: LNN feature capability test
+ * @tc.desc: Verify LnnSetFeatureCapability and LnnClearFeatureCapability
+ *           handle null pointer and invalid feature bits correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1305,7 +1317,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_DATA_LEVEL_003, TestSize.Level1)
 
 /*
  * @tc.name: LnnDumpSparkCheck_001
- * @tc.desc: LnnDumpSparkCheck test
+ * @tc.desc: Verify LnnDumpSparkCheck handles null pointer parameters
+ *           and correctly processes spark check data
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

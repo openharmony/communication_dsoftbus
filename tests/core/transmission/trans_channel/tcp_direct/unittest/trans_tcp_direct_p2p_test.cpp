@@ -321,7 +321,7 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
     info.myPort = 0;
     info.protocol = LNN_PROTOCOL_IP;
     int32_t ret = VerifyP2p(authHandle, seq, &info);
-    ASSERT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    ASSERT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
 
     NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
     EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
@@ -1375,5 +1375,20 @@ HWTEST_F(TransTcpDirectP2pTest, UpdateHmlModule001, TestSize.Level1)
     UpdateHmlModule(nullptr, g_peerUuid, &moduleType);
     EXPECT_EQ(UNUSE_BUTT, moduleType);
     StopHmlListener(DIRECT_CHANNEL_SERVER_HML_START);
+}
+
+/**
+ * @tc.name: CheckNeedStopMintp001
+ * @tc.desc: Test the function CheckNeedStopMintp abnormal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, CheckNeedStopMintp001, TestSize.Level1)
+{
+    SessionConn conn = { 0 };
+    int32_t ret = CheckNeedStopMintp(&conn);
+    EXPECT_FALSE(ret);
+    ret = CheckNeedStopMintp(nullptr);
+    EXPECT_FALSE(ret);
 }
 }

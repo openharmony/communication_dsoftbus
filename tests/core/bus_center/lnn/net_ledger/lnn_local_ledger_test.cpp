@@ -106,7 +106,8 @@ static void MockForInitLocalLedger(LocalLedgerDepsInterfaceMock &localLedgerMock
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_001
- * @tc.desc: local ledger init test
+ * @tc.desc: Verify LnnInitLocalLedger returns SOFTBUS_NETWORK_LEDGER_INIT_FAILED
+ *           when SoftBusGenerateRandomArray fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -123,7 +124,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_002
- * @tc.desc: local ledger init and deinit test
+ * @tc.desc: Verify LnnInitLocalLedger initializes local ledger successfully
+ *           and LnnDeinitLocalLedger deinitializes it
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -149,7 +151,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_003
- * @tc.desc: local ledger delay init test
+ * @tc.desc: Verify LnnInitLocalLedgerDelay returns SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR
+ *           when GetCommonDevInfo fails and LnnInitOhosAccount returns error
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -165,7 +168,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_004
- * @tc.desc: local ledger init test
+ * @tc.desc: Verify LnnInitLocalLedger returns SOFTBUS_NETWORK_LEDGER_INIT_FAILED
+ *           when GetCommonDevInfo fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -184,7 +188,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_005
- * @tc.desc: local ledger init test
+ * @tc.desc: Verify LnnInitLocalLedger returns SOFTBUS_NETWORK_LEDGER_INIT_FAILED
+ *           when LnnInitLocalP2pInfo returns SOFTBUS_SET_P2P_INFO_FAIL
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -206,7 +211,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_006
- * @tc.desc: local ledger init test
+ * @tc.desc: Verify LnnInitLocalLedger returns SOFTBUS_MEM_ERR
+ *           when SoftBusRegBusCenterVarDump returns SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -229,7 +235,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_007
- * @tc.desc: local ledger init test
+ * @tc.desc: Verify LnnInitLocalLedger returns SOFTBUS_NETWORK_LEDGER_INIT_FAILED
+ *           when GetCommonDevInfo returns SOFTBUS_OK then SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -253,7 +260,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_008
- * @tc.desc: local ledger init test
+ * @tc.desc: Verify LnnInitLocalLedgerDelay returns SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR
+ *           when LnnInitOhosAccount fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -268,7 +276,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
 
 /*
  * @tc.name: LOCAL_LEDGER_MOCK_Test_009
- * @tc.desc: local ledger init test
+ * @tc.desc: Verify LnnInitLocalLedgerDelay returns SOFTBUS_OK
+ *           when all mock functions return successfully
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -286,7 +295,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
 
 /*
  * @tc.name: Local_Ledger_Key_Test_001
- * @tc.desc: local ledger key test
+ * @tc.desc: Verify local ledger key getInfo functions handle null pointer
+ *           and minimum size buffer parameters correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -339,7 +349,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: Local_Ledger_Key_Test_002
- * @tc.desc: local ledger key test
+ * @tc.desc: Verify local ledger key getInfo functions handle invalid
+ *           and minimum size parameters correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -389,7 +400,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: Local_Ledger_Key_Test_003
- * @tc.desc: local ledger key test
+ * @tc.desc: Verify local ledger key getInfo functions handle null pointer
+ *           parameters and LocalLedgerKeyTestPackaged correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -421,7 +433,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
 
 /*
  * @tc.name: Local_Ledger_Key_Test_005
- * @tc.desc: local ledger key test
+ * @tc.desc: Verify LnnInitLocalNodeInfo handles null node info and
+ *           clears BR_DUP_BLE auth capability when P2P info init fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -459,7 +472,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
 
 /*
  * @tc.name: Local_Ledger_Key_Test_006
- * @tc.desc: local ledger key test
+ * @tc.desc: Verify LnnSetLocalUnifiedName returns SOFTBUS_INVALID_PARAM
+ *           with null pointer and UpdateLocalPubMac handles various parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -489,7 +503,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
 
 /*
  * @tc.name: Local_Ledger_Key_Test_007
- * @tc.desc: local ledger key test
+ * @tc.desc: Verify local ledger get functions handle invalid length
+ *           and buffer size parameters correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -530,7 +545,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
 
 /*
  * @tc.name: Local_Ledger_Key_Test_008
- * @tc.desc: local ledger key test
+ * @tc.desc: Verify LnnInitLocalLedger initializes successfully and
+ *           LnnUpdateLocalScreenStatus updates screen status correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -588,7 +604,8 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_STATE_VERSION_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: L1_GET_CONN_SUB_FEATURE_CAPA_Test_001
- * @tc.desc: L1GetConnSubFeatureCapa test
+ * @tc.desc: Verify L1GetConnSubFeatureCapa handles invalid buffer size
+ *           and returns SOFTBUS_OK with valid buffer
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -605,7 +622,8 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_CONN_SUB_FEATURE_CAPA_Test_001, TestSize.Leve
 
 /*
  * @tc.name: L1_GET_WIFI_CFG_Test_001
- * @tc.desc: L1GetWifiCfg test
+ * @tc.desc: Verify L1GetWifiCfg returns SOFTBUS_INVALID_PARAM
+ *           with null pointer or insufficient buffer size
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -829,7 +847,8 @@ HWTEST_F(LNNLedgerMockTest, UPDATEL_1OCAL_CONN_SUB_FEATURE_CAPABILITY_Test_001, 
 
 /*
  * @tc.name: UPDATE_MASGER_NODE_WEIGHT_Test_001
- * @tc.desc: UpdateMasgerNodeWeight test
+ * @tc.desc: Verify UpdateMasgerNodeWeight returns SOFTBUS_INVALID_PARAM
+ *           with null pointer and SOFTBUS_OK with valid parameter
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -843,7 +862,8 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_MASGER_NODE_WEIGHT_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: UPDATE_P2P_ROLE_Test_001
- * @tc.desc: UpdateP2pRole test
+ * @tc.desc: Verify UpdateP2pRole returns SOFTBUS_INVALID_PARAM
+ *           with null pointer and SOFTBUS_OK with valid parameter
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -872,7 +892,8 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_STA_FREQUENCY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LL_GET_DEVICE_SECURITY_LEVEL_Test_001
- * @tc.desc: LlGetDeviceSecurityLevel test
+ * @tc.desc: Verify LlGetDeviceSecurityLevel handles invalid buffer size
+ *           and returns SOFTBUS_OK with valid buffer
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -889,7 +910,8 @@ HWTEST_F(LNNLedgerMockTest, LL_GET_DEVICE_SECURITY_LEVEL_Test_001, TestSize.Leve
 
 /*
  * @tc.name: LL_UPDATE_DEVICE_SECURITY_LEVEL_Test_001
- * @tc.desc: LlUpdateDeviceSecurityLevel test
+ * @tc.desc: Verify LlUpdateDeviceSecurityLevel returns SOFTBUS_INVALID_PARAM
+ *           with null pointer and SOFTBUS_OK with valid parameter
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -973,7 +995,8 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LL_SLE_CAP_Test_001
- * @tc.desc: LL_SLE_CAP_Test_001
+ * @tc.desc: Verify LnnInitLocalLedger initializes SLE range capability and
+ *           address when IsSleEnabled returns true
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1008,7 +1031,8 @@ HWTEST_F(LNNLedgerMockTest, LL_SLE_CAP_Test_001, TestSize.Level1)
 }
 /*
  * @tc.name: L1_GET_HUKS_KEY_TIME_Test_001
- * @tc.desc: L1 get huks key time test
+ * @tc.desc: Verify L1GetHuksKeyTime handles null pointer and
+ *           returns SOFTBUS_OK with valid buffer
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1125,7 +1149,8 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_HUM_U16_INFO_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_001
- * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.desc: Verify LnnGenBroadcastCipherInfo returns SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED
+ *           when LnnLoadLocalBroadcastCipherKeyPacked fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1140,7 +1165,8 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_002
- * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.desc: Verify LnnGenBroadcastCipherInfo returns SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED
+ *           when SoftBusGenerateRandomArray fails for key or IV
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1163,7 +1189,8 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_002, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_003
- * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.desc: Verify LnnGenBroadcastCipherInfo returns SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED
+ *           when LnnUpdateLocalBroadcastCipherKeyPacked fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1201,7 +1228,8 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_004, TestSize.Level1)
 
 /*
  * @tc.name: LlGetSparkCheck_001
- * @tc.desc: LlGetSparkCheck test
+ * @tc.desc: Verify LlGetSparkCheck handles null buffer and invalid size
+ *           and returns SOFTBUS_OK with valid buffer
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1216,7 +1244,8 @@ HWTEST_F(LNNLedgerMockTest, LlGetSparkCheck_001, TestSize.Level1)
 
 /*
  * @tc.name: UpdateLocalSparkCheck_001
- * @tc.desc: UpdateLocalSparkCheck test
+ * @tc.desc: Verify UpdateLocalSparkCheck returns SOFTBUS_INVALID_PARAM
+ *           with null pointer and SOFTBUS_OK with valid buffer
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1230,7 +1259,8 @@ HWTEST_F(LNNLedgerMockTest, UpdateLocalSparkCheck_001, TestSize.Level1)
 
 /*
  * @tc.name: LnnGenSparkCheck_001
- * @tc.desc: LnnGenSparkCheck test
+ * @tc.desc: Verify LnnGenSparkCheck returns SOFTBUS_ENCRYPT_ERR
+ *           when SoftBusGenerateRandomArray fails and SOFTBUS_OK on success
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -1272,6 +1302,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_001, TestSize.Level1)
  * @tc.name: LNN_LOAD_BROADCAST_CIPHER_INFO_002
  * @tc.desc: LnnLoadBroadcastCipherInfo process sparkCheck
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_002, TestSize.Level1)
@@ -1322,7 +1353,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_BY_IFNMAEIDX_001, TestSize.Level1
     int32_t ret = LnnSetLocalInfoByIfnameIdx(INFO_KEY_MAX, nullptr, INFO_KEY_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetLocalInfoByIfnameIdx(BYTE_KEY_BROADCAST_CIPHER_KEY, nullptr, BYTE_KEY_BROADCAST_CIPHER_KEY);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1355,7 +1386,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_BY_IFNAMEIDX_001, TestSize.Le
     ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_ACCOUNT_UID, info, CAPABILTY);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, info, USB_IF);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1384,7 +1415,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_002, TestSize.Level1)
 {
     bool info = false;
     int32_t ret = LnnGetLocalBoolInfo(STRING_KEY_IP, &info, 0);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1422,7 +1453,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_002, TestSize.Level
     int32_t info = 0;
     int32_t ifIdx = 0;
     int32_t ret = LnnGetLocalInfoByIfnameIdx(NUM_KEY_META_NODE, (void*)&info, infoSize, ifIdx);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1473,7 +1504,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_002, TestSize.L
 {
     char info[MAX_ADDR_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_ACCOUNT_UID, info, MAX_ADDR_LEN, MIN_IF);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*

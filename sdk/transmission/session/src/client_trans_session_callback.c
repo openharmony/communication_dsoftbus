@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,8 +105,8 @@ static int32_t FillSessionInfo(SessionInfo *session, const ChannelInfo *channel,
     return FillSessionInfoEx(session, channel);
 }
 
-static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo *channel, uint32_t flag,
-    int32_t *sessionId)
+static int32_t AcceptSessionAsServer(
+    const char *sessionName, const ChannelInfo *channel, uint32_t flag, int32_t *sessionId)
 {
     TRANS_LOGD(TRANS_SDK, "enter.");
     SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
@@ -131,8 +131,8 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     return SOFTBUS_OK;
 }
 
-static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelType,
-    int32_t *sessionId, ISessionListener *listener)
+static int32_t GetSessionCallbackByChannelId(
+    int32_t channelId, int32_t channelType, int32_t *sessionId, ISessionListener *listener)
 {
     if ((channelId < 0) || (sessionId == NULL) || (listener == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -151,11 +151,10 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
-    SessionListenerAdapter *sessionCallback, bool *isServer)
+static int32_t GetSocketCallbackAdapterByChannelId(
+    int32_t channelId, int32_t channelType, int32_t *sessionId, SessionListenerAdapter *sessionCallback, bool *isServer)
 {
-    if ((channelId < 0) || (sessionId == NULL) ||
-        (sessionCallback == NULL) || (isServer == NULL)) {
+    if ((channelId < 0) || (sessionId == NULL) || (sessionCallback == NULL) || (isServer == NULL)) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -167,18 +166,19 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
     }
     ret = ClientGetSessionCallbackAdapterById(*sessionId, sessionCallback, isServer);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get socket callback failed, channelId=%{public}d,"
-            "ret=%{public}d", channelId, ret);
+        TRANS_LOGE(TRANS_SDK,
+            "get socket callback failed, channelId=%{public}d,"
+            "ret=%{public}d",
+            channelId, ret);
         return ret;
     }
     return SOFTBUS_OK;
 }
 
-static int32_t GetSocketCallbackAdapterByUdpChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId,
-    SessionListenerAdapter *sessionCallback, bool *isServer)
+static int32_t GetSocketCallbackAdapterByUdpChannelId(
+    int32_t channelId, int32_t channelType, int32_t *sessionId, SessionListenerAdapter *sessionCallback, bool *isServer)
 {
-    if ((channelId < 0) || (sessionId == NULL) ||
-        (sessionCallback == NULL) || (isServer == NULL)) {
+    if ((channelId < 0) || (sessionId == NULL) || (sessionCallback == NULL) || (isServer == NULL)) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -196,7 +196,7 @@ static int32_t GetSocketCallbackAdapterByUdpChannelId(int32_t channelId, int32_t
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
+static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
 {
     if (socketCallback == NULL || socketCallback->OnBind == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid OnBind callback function");
@@ -214,25 +214,24 @@ NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const IS
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TransOnServiceBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
+static int32_t TransOnServiceBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
 {
     if (socketCallback == NULL || socketCallback->OnServiceBind == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid OnServiceBind callback function");
         return SOFTBUS_INVALID_PARAM;
     }
- 
+
     ServiceSocketInfo info;
     int32_t ret = ClientGetServiceSocketInfoById(sessionId, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Get service socket info failed, ret=%{public}d", ret);
         return ret;
     }
- 
+
     socketCallback->OnServiceBind(sessionId, info);
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi")
 static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socketCallback, int32_t errCode)
 {
     (void)ClientHandleBindWaitTimer(sessionId, 0, TIMER_ACTION_STOP);
@@ -291,7 +290,7 @@ static int32_t HandleAsyncBindSuccess(
     return TransOnServiceBindSuccess(sessionId, socketClient);
 }
 
-NO_SANITIZE("cfi") static int32_t TransOnNegotiate(int32_t socket, const ISocketListener *socketCallback)
+static int32_t TransOnNegotiate(int32_t socket, const ISocketListener *socketCallback)
 {
     if (socketCallback == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid socketCallback socket=%{public}d", socket);
@@ -303,7 +302,7 @@ NO_SANITIZE("cfi") static int32_t TransOnNegotiate(int32_t socket, const ISocket
         return SOFTBUS_OK;
     }
 
-    PeerSocketInfo info = {0};
+    PeerSocketInfo info = { 0 };
     int32_t ret = ClientGetPeerSocketInfoById(socket, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Get peer socket info failed, ret=%{public}d, socket=%{public}d", ret, socket);
@@ -318,7 +317,6 @@ NO_SANITIZE("cfi") static int32_t TransOnNegotiate(int32_t socket, const ISocket
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi")
 static int32_t TransOnNegotiate2(int32_t socket, const ISocketListener *socketCallback, const ChannelInfo *channel,
     SocketAccessInfo *localAccessInfo)
 {
@@ -336,7 +334,7 @@ static int32_t TransOnNegotiate2(int32_t socket, const ISocketListener *socketCa
         TRANS_LOGW(TRANS_SDK, "default access info, no need check acl, socket=%{public}d", socket);
         return SOFTBUS_OK;
     }
-    PeerSocketInfo socketInfo = {0};
+    PeerSocketInfo socketInfo = { 0 };
     int32_t ret = ClientGetPeerSocketInfoById(socket, &socketInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Get peer access info failed, ret=%{public}d, socket=%{public}d", ret, socket);
@@ -358,36 +356,42 @@ static int32_t TransOnNegotiate2(int32_t socket, const ISocketListener *socketCa
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TransOnServiceNegotiate(int32_t socket, const ISocketListener *socketCallback)
+static int32_t TransOnServiceNegotiate(int32_t socket, const ISocketListener *socketCallback)
 {
     if (socketCallback == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid socketCallback socket=%{public}d", socket);
         return SOFTBUS_INVALID_PARAM;
     }
- 
+
     if (socketCallback->OnServiceNegotiate == NULL) {
         TRANS_LOGW(TRANS_SDK, "no OnServiceNegotiate callback function socket=%{public}d", socket);
         return SOFTBUS_OK;
     }
- 
-    ServiceSocketInfo info = {0};
+
+    ServiceSocketInfo info = { 0 };
     int32_t ret = ClientGetServiceSocketInfoById(socket, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "Get service socket info failed, ret=%{public}d, socket=%{public}d", ret, socket);
         return ret;
     }
- 
+
     if (!socketCallback->OnServiceNegotiate(socket, info)) {
         TRANS_LOGW(TRANS_SDK, "The negotiate rejected the socket=%{public}d", socket);
         return SOFTBUS_TRANS_NEGOTIATE_REJECTED;
     }
- 
+
     return SOFTBUS_OK;
 }
 
 static int32_t HandleServerOnNegotiate(int32_t socket, int32_t tokenType, const ISocketListener *socketCallback,
     const ChannelInfo *channel, SocketAccessInfo *localAccessInfo)
 {
+    if (socketCallback == NULL || socketCallback->OnBind == NULL || channel == NULL) {
+        TRANS_LOGE(TRANS_SDK, "OnBind exception, terminating this call, socket=%{public}d", socket);
+        (void)ClientDeleteSocketSession(socket);
+        return SOFTBUS_TRANS_SERVER_NOT_LISTEN;
+    }
+
     bool isContain = IsContainServiceBySocket(socket);
     int32_t ret =
         isContain ? TransOnServiceNegotiate(socket, socketCallback) : TransOnNegotiate(socket, socketCallback);
@@ -493,8 +497,9 @@ static void AnonymizeLogTransOnSessionOpenedInfo(const char *sessionName, const 
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK,
         "TransOnSessionOpened: sessionName=%{public}s, channelId=%{public}d, channelType=%{public}d, flag=%{public}d,"
-        "isServer=%{public}d, type=%{public}d, crc=%{public}d", AnonymizeWrapper(tmpName), channel->channelId,
-        channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
+        "isServer=%{public}d, type=%{public}d, crc=%{public}d",
+        AnonymizeWrapper(tmpName), channel->channelId, channel->channelType, flag, channel->isServer,
+        channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
 }
 
@@ -546,7 +551,6 @@ static int32_t TransOnPagingSessionOpened(const char *sessionName, const Channel
     return TransOnPagingConnectPacked(socket, channel);
 }
 
-NO_SANITIZE("cfi")
 int32_t TransOnSessionOpened(
     const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
 {
@@ -612,7 +616,7 @@ int32_t TransOnSessionOpened(
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     int32_t sessionId = INVALID_SESSION_ID;
     SessionListenerAdapter sessionCallback;
@@ -635,11 +639,11 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         return ret;
     }
     if (sessionCallback.isSocketListener) {
-        int32_t useType =3;
+        int32_t useType = 3;
         (void)CheckChannelIsReserveByChannelId(sessionId, channelId, &useType);
         if (useType == 2) {
-            TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, sessionId=%{public}d, useType=%{public}d, set fail",
-                sessionId, channelId, useType);
+            TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, sessionId=%{public}d, useType=%{public}d, set fail", sessionId,
+                channelId, useType);
             return SOFTBUS_OK;
         }
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
@@ -668,7 +672,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
+int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
@@ -714,8 +718,8 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len,
-    SessionPktType type)
+static int32_t ProcessReceivedFileData(
+    int32_t sessionId, int32_t channelId, const char *data, uint32_t len, SessionPktType type)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     int32_t ret = ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME);
@@ -732,8 +736,7 @@ static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, con
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
-    const void *data, uint32_t len, SessionPktType type)
+int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *data, uint32_t len, SessionPktType type)
 {
     int32_t sessionId;
     SessionListenerAdapter sessionCallback;
@@ -790,8 +793,8 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
-    const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+int32_t TransOnOnStreamRecevied(
+    int32_t channelId, int32_t channelType, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     int32_t sessionId;
     SessionListenerAdapter sessionCallback;
@@ -821,19 +824,18 @@ NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t ch
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
-    int32_t tvCount, const QosTv *tvList)
+int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     int32_t sessionId;
-    ISessionListener listener = {0};
+    ISessionListener listener = { 0 };
     int32_t ret = GetSessionCallbackByChannelId(channelId, channelType, &sessionId, &listener);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_QOS, "get session callback failed");
         return ret;
     }
     if (listener.OnQosEvent == NULL) {
-        TRANS_LOGE(TRANS_QOS, "listener OnQosEvent is NULL, channelId=%{public}d, sessionId=%{public}d",
-                   channelId, sessionId);
+        TRANS_LOGE(
+            TRANS_QOS, "listener OnQosEvent is NULL, channelId=%{public}d, sessionId=%{public}d", channelId, sessionId);
         return SOFTBUS_NO_INIT;
     }
     listener.OnQosEvent(sessionId, eventId, tvCount, tvList);
@@ -948,8 +950,8 @@ int32_t ClientTransOnQos(int32_t channelId, int32_t channelType, QoSEvent event,
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransOnEvent(int32_t channelId, int32_t channelType,
-    SocketEventType event, const void *eventData, uint32_t dataLen)
+int32_t ClientTransOnEvent(
+    int32_t channelId, int32_t channelType, SocketEventType event, const void *eventData, uint32_t dataLen)
 {
     if (eventData == NULL) {
         TRANS_LOGE(TRANS_SDK, "eventData is NULL");

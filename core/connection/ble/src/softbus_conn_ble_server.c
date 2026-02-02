@@ -1073,7 +1073,7 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     }
 
     int32_t ret = SoftBusMutexLock(&g_serverState.lock);
-    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BLE, "lock fail, ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BLE, "lock fail, err=%{public}d", ret);
     if (writeCbPara.attrHandle == g_serverState.netDescriptorHandle ||
         writeCbPara.attrHandle == g_serverState.connDescriptorHandle) {
         (void)SoftBusMutexUnlock(&g_serverState.lock);
@@ -1088,7 +1088,7 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
         return;
     }
     ret = SoftBusMutexLock(&g_serverState.lock);
-    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BLE, "lock fail, ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BLE, "lock fail, err=%{public}d", ret);
     bool isConnCharacteristic = false;
     if (writeCbPara.attrHandle == g_serverState.netCharacteristicHandle) {
         isConnCharacteristic = false;

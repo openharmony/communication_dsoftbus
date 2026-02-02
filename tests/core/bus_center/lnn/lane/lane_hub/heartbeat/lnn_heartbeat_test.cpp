@@ -144,7 +144,8 @@ LnnEventHandler GetEventHandler(LnnEventType type)
 
 /*
  * @tc.name: IpAddrChangeTest01
- * @tc.desc: heart beat SetMediumParam
+ * @tc.desc: This test verifies whether the system can correctly handle an IP address change
+ *           event and adjust the heartbeat mechanism, especially whether the TCP heartbeat is disabled
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -181,7 +182,8 @@ HWTEST_F(HeartBeatEnhanceTest, IpAddrChangeTest01, TestSize.Level1)
 
 /*
  * @tc.name: HbBtStateChangeTest01
- * @tc.desc: BT state changed function
+ * @tc.desc: The enablement status of the heartbeat function under different conditions was tested
+ *           by simulating different events and states
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -246,7 +248,8 @@ HWTEST_F(HeartBeatEnhanceTest, HbBtStateChangeTest01, TestSize.Level1)
 
 /*
  * @tc.name: HbMasterNodeChangeTest01
- * @tc.desc: BT state changed function
+ * @tc.desc: The logic for handling the LNN_EVENT_NODE_MASTER_STATE_CHANGED event was tested
+ *           by simulating dependencies and setting expected behaviors
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -305,7 +308,8 @@ HWTEST_F(HeartBeatEnhanceTest, HbMasterNodeChangeTest01, TestSize.Level1)
 
 /*
  * @tc.name: HbScreenStateChange_Test01
- * @tc.desc: BT state changed function
+ * @tc.desc: The logic for processing the LNN_EVENT_SCREEN_STATE_CHANGED event was tested by simulating dependent
+ *           interfaces, including the screen state being ON, OFF, and UNKNOWN
  * @tc.type: FUNC
  * @tc.require:
  */

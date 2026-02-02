@@ -113,7 +113,7 @@ extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t user
     return SOFTBUS_OK;
 }
 
-extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
+extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid, bool isThaw)
 {
     if (bundleName == nullptr) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] bundleName is null");
@@ -121,17 +121,18 @@ extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
     }
     #define SOFTBUS_SERVER_SA_ID 4700
     uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_SA_CONTROL_APP_EVENT;
-    int64_t status = OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_START_APP;
+    int64_t status = isThaw ? OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_START_APP:
+        OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_STOP_APP;
     std::unordered_map<std::string, std::string> payload;
     payload.emplace("saId", std::to_string(SOFTBUS_SERVER_SA_ID));
     payload.emplace("saName", "softbus_server");
     payload.emplace("pid", std::to_string(pid));
     payload.emplace("uid", std::to_string(uid));
     payload.emplace("bundleName", bundleName);
-    payload.emplace("isDelay", "1");
-    payload.emplace("delayTime", "10000"); // 10000ms
     OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, status, payload);
-   
+    if (!isThaw) {
+        return SOFTBUS_OK;
+    }
     auto resourceRequest = OHOS::sptr<OHOS::DevStandbyMgr::ResourceRequest>(
         new OHOS::DevStandbyMgr::ResourceRequest()
     );

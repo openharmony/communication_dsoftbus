@@ -747,7 +747,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     TransEventExtra *extra, const LaneConnInfo *connInnerInfo)
 {
     TRANS_LOGI(TRANS_SVC, "TransAsyncOpenChannelProc enter. laneHandle=%{public}u", laneHandle);
-    TransInfo transInfo = { .channelId = INVALID_CHANNEL_ID, .channelType = CHANNEL_TYPE_BUTT};
+    TransInfo transInfo = { .channelId = INVALID_CHANNEL_ID, .channelType = CHANNEL_TYPE_BUTT };
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = TransGetConnectOptByConnInfo(connInnerInfo, &connOpt);
@@ -782,14 +782,14 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         appInfo->myData.pkgName, param->sessionName, param->sessionId, &transInfo, appInfo->myData.pid);
     if (ret != SOFTBUS_OK) {
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, appInfo->timeStart);
-        TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
+        (void)TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
         goto EXIT_ERR;
     }
     TransSetSocketChannelStateByChannel(transInfo.channelId, transInfo.channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     if (TransLaneMgrAddLane(&transInfo, connInnerInfo, laneHandle, param->isQosLane, &(appInfo->myData)) !=
         SOFTBUS_OK) {
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, appInfo->timeStart);
-        TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
+        (void)TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
         goto EXIT_ERR;
     }
     AddChannelStatisticsInfo(transInfo.channelId, transInfo.channelType);
@@ -836,7 +836,7 @@ static int32_t CheckSocketChannelState(uint32_t laneHandle, const SessionParam *
     LaneTransType transType)
 {
     CoreSessionState state = CORE_SESSION_STATE_INIT;
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
+    (void)TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     if (state == CORE_SESSION_STATE_CANCELLING) {
         TRANS_LOGI(TRANS_SVC, "cancel state laneHandle=%{public}u", laneHandle);
         TransFreeLane(laneHandle, param->isQosLane, false);
@@ -1572,7 +1572,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
         return SOFTBUS_INVALID_PARAM;
     }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
+    (void)TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     TRANS_CHECK_AND_RETURN_RET_LOGW(state != CORE_SESSION_STATE_CANCELLING, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL,
         TRANS_SVC, "cancel state, return cancel code.");
     TransSetSocketChannelStateBySession(param->sessionName, param->sessionId, CORE_SESSION_STATE_WAIT_LANE);
@@ -1634,12 +1634,12 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
-    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName)) {
+    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName, param->peerDeviceId)) {
         TRANS_LOGE(TRANS_SVC, "trigger begin");
         DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
+    (void)TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     if (state == CORE_SESSION_STATE_CANCELLING) {
         CancelLaneOnWaitLaneState(*laneHandle, param->isQosLane);
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
@@ -1685,12 +1685,12 @@ int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneA
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
-    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName)) {
+    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName, param->peerDeviceId)) {
         TRANS_LOGE(TRANS_SVC, "trigger begin");
         DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
     CoreSessionState stateReserve = CORE_SESSION_STATE_INIT;
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &stateReserve);
+    (void)TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &stateReserve);
     if (stateReserve == CORE_SESSION_STATE_CANCELLING) {
         CancelLaneOnWaitLaneState(*laneHandle, param->isQosLane);
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
@@ -1761,7 +1761,7 @@ int32_t TransAsyncGetLaneInfoByExt(const SessionParam *param, uint32_t *laneHand
         return ret;
     }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
-    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
+    (void)TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     if (state == CORE_SESSION_STATE_CANCELLING) {
         CancelLaneOnWaitLaneState(*laneHandle, param->isQosLane);
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);

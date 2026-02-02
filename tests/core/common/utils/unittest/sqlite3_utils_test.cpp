@@ -741,4 +741,106 @@ HWTEST_F(Sqlite3UtilsTest, Bind_Para_Test_001, TestSize.Level0)
     valuetext1[0] = '1';
     EXPECT_EQ(BindParaText(ctx_1, idx, valuetext1, strlen(valuetext1)), SQLITE_ERROR);
 }
+
+/*
+ * @tc.name: TransactionState_AlreadyOpen_001
+ * @tc.desc: Verify transaction state handling when opening an already open transaction
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Sqlite3UtilsTest, TransactionState_AlreadyOpen_001, TestSize.Level1)
+{
+    DbContext *ctx = nullptr;
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
+    // Opening again should return OK (already open)
+    EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
+    CloseTransaction(ctx, CLOSE_TRANS_COMMIT);
+    EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TransactionState_AlreadyClosed_001
+ * @tc.desc: Verify transaction state handling when closing an already closed transaction
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Sqlite3UtilsTest, TransactionState_AlreadyClosed_001, TestSize.Level1)
+{
+    DbContext *ctx = nullptr;
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
+    EXPECT_EQ(CloseTransaction(ctx, CLOSE_TRANS_COMMIT), SOFTBUS_OK);
+    // Closing again should return OK (already closed)
+    EXPECT_EQ(CloseTransaction(ctx, CLOSE_TRANS_COMMIT), SOFTBUS_OK);
+    EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TransactionState_Rollback_001
+ * @tc.desc: Verify transaction rollback works correctly
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Sqlite3UtilsTest, TransactionState_Rollback_001, TestSize.Level1)
+{
+    DbContext *ctx = nullptr;
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
+    EXPECT_EQ(InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&g_record1), SOFTBUS_OK);
+    EXPECT_EQ(CloseTransaction(ctx, CLOSE_TRANS_ROLLBACK), SOFTBUS_OK);
+    // After rollback, the record should not exist
+    EXPECT_EQ(GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)USER1_ID), 0);
+    EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: BindParaInt64_Valid_001
+ * @tc.desc: Verify BindParaInt64 works correctly with valid context and index
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Sqlite3UtilsTest, BindParaInt64_Valid_001, TestSize.Level1)
+{
+    DbContext *ctx = nullptr;
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
+
+    int64_t value64 = 12345678901234;
+    int32_t result = BindParaInt64(ctx, 1, value64);
+    EXPECT_EQ(result, 1);
+
+    CloseTransaction(ctx, CLOSE_TRANS_ROLLBACK);
+    EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: BindParaDouble_Valid_001
+ * @tc.desc: Verify BindParaDouble works correctly with valid context and index
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Sqlite3UtilsTest, BindParaDouble_Valid_001, TestSize.Level1)
+{
+    DbContext *ctx = nullptr;
+    EXPECT_EQ(OpenDatabase(&ctx), SOFTBUS_OK);
+    EXPECT_EQ(CreateTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(OpenTransaction(ctx), SOFTBUS_OK);
+
+    double valuedouble = 3.14159;
+    int32_t result = BindParaDouble(ctx, 1, valuedouble);
+    EXPECT_EQ(result, 1);
+
+    CloseTransaction(ctx, CLOSE_TRANS_ROLLBACK);
+    EXPECT_EQ(DeleteTable(ctx, TABLE_TRUSTED_DEV_INFO), SOFTBUS_OK);
+    EXPECT_EQ(CloseDatabase(ctx), SOFTBUS_OK);
+}
 } // namespace OHOS

@@ -1002,7 +1002,7 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
         return SOFTBUS_INVALID_PARAM;
     }
     char *anonyNetworkId = NULL;
-    if (LnnIsSupportBurstFeature(networkId)) {
+    if (LnnIsSupportBurstFeature(networkId) || LnnIsLocalSupportMcuFeature()) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "%{public}s support burst, dont't need post offline info",
             AnonymizeWrapper(anonyNetworkId));

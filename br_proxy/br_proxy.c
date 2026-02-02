@@ -712,7 +712,7 @@ bool IsProxyChannelEnabled(int32_t uid)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc get brproxy channel state failed! ret:%{public}d", ret);
     }
-
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] exit uid:%{public}d, %{public}s", uid, isEnable ? "true" : "false");
     return isEnable;
 }
 

@@ -303,12 +303,12 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest005, TestSize.Level1)
     CONN_LOGI(CONN_PROXY, "=================");
     ret = g_channel->send(&proxyChannel, data, sizeof(data));
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-    g_channel->close(&proxyChannel);
+    g_channel->close(&proxyChannel, true);
     sleep(1);
     proxyChannel.channelId = g_channelId;
     ret = g_channel->send(&proxyChannel, data, sizeof(data));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    g_channel->close(&proxyChannel);
+    g_channel->close(&proxyChannel, true);
     sleep(2);
     // test reconnect device is null
     ProxyChannelMock::InjectHfpConnectionChanged(addr, SOFTBUS_HFP_CONNECTED);
@@ -330,7 +330,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest006, TestSize.Level1)
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
-    EXPECT_CALL(mock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, IsPairedDevice).WillRepeatedly(ProxyChannelMock::ActionOfIsPairedDevice);
     int32_t ret = ConstructParamAndOpenProxyChannel(1, CONNECT_TIMEOUT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     sleep(1);
@@ -364,7 +364,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest007, TestSize.Level1)
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
-    EXPECT_CALL(mock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, IsPairedDevice).WillRepeatedly(ProxyChannelMock::ActionOfIsPairedDevice);
 
     // open new proxy channel
     int32_t ret = ConstructParamAndOpenProxyChannel(1, CONNECT_TIMEOUT);
@@ -431,7 +431,7 @@ static void ConstructProxyConnectionList(void)
     CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is NULL");
     ListInit(&proxyConnection->node);
     if (SoftBusMutexInit(&proxyConnection->lock, NULL)!= SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "init lock failed");
+        CONN_LOGE(CONN_PROXY, "init lock fail");
         SoftBusFree(proxyConnection);
         return;
     }
@@ -440,7 +440,7 @@ static void ConstructProxyConnectionList(void)
     proxyConnection->dereference = ProxyChannelDereference;
     int32_t ret = SoftBusMutexLock(&GetProxyChannelManager()->proxyConnectionList->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList failed");
+        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList fail");
         SoftBusMutexDestroy(&proxyConnection->lock);
         SoftBusFree(proxyConnection);
         return;
@@ -646,5 +646,47 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest012, TestSize.Level1)
     sleep(1);
     EXPECT_NE(g_channelId, 0);
     CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest012 out");
+}
+
+/*
+ * @tc.name: ProxyChannelManagerTest012
+ * @tc.desc: test close not reset reconnect event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest013, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest013 in");
+    ProxyChannelMock mock;
+    EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
+    EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
+    EXPECT_CALL(mock, IsPairedDevice).WillRepeatedly(Return(true));
+
+    // open new proxy channel
+    int32_t ret = ConstructParamAndOpenProxyChannel(1, CONNECT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    sleep(1);
+    EXPECT_NE(g_channelId, 0);
+
+    struct ProxyChannel proxyChannel = {
+        .channelId = g_channelId,
+    };
+    g_channelId = 0;
+    g_channel->close(&proxyChannel, false);
+    sleep(1);
+    bool reconnectDeviceExist = false;
+    ProxyConnectInfo *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
+        reconnectDeviceExist = true;
+    }
+    EXPECT_EQ(reconnectDeviceExist, true);
+
+    SoftBusBtAddr btAddr = {
+        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
+    };
+    ProxyChannelMock::InjectBtAclStateChanged(1, &btAddr, SOFTBUS_ACL_STATE_CONNECTED, 0);
+    sleep(1);
+    EXPECT_NE(g_channelId, 0);
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest013 out");
 }
 }

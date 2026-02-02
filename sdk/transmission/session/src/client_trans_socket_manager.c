@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,10 +36,10 @@
 #include "trans_server_proxy.h"
 #include "trans_split_serviceid.h"
 
-#define NETWORK_ID_LEN 7
+#define NETWORK_ID_LEN       7
 #define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
-#define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
-#define SENDBYTES_TIMEOUT_S 20
+#define GET_CONN_TYPE(type)  (((uint32_t)(type) >> 8) & 0xff)
+#define SENDBYTES_TIMEOUT_S  20
 
 #define DISTRIBUTED_DATA_SESSION "distributeddata-default"
 static IFeatureAbilityRelationChecker *g_relationChecker = NULL;
@@ -81,12 +81,8 @@ void TransDataSeqInfoListDeinit(void)
 
 bool IsValidSessionParam(const SessionParam *param)
 {
-    if ((param == NULL) ||
-        (param->sessionName == NULL) ||
-        (param->peerSessionName == NULL) ||
-        (param->peerDeviceId == NULL) ||
-        (param->groupId == NULL) ||
-        (param->attr == NULL)) {
+    if ((param == NULL) || (param->sessionName == NULL) || (param->peerSessionName == NULL) ||
+        (param->peerDeviceId == NULL) || (param->groupId == NULL) || (param->attr == NULL)) {
         return false;
     }
     return true;
@@ -98,7 +94,7 @@ SessionInfo *CreateNewSession(const SessionParam *param)
         TRANS_LOGE(TRANS_SDK, "param is null");
         return NULL;
     }
-    SessionInfo *session = (SessionInfo*)SoftBusCalloc(sizeof(SessionInfo));
+    SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
     if (session == NULL) {
         TRANS_LOGE(TRANS_SDK, "calloc failed");
         return NULL;
@@ -128,8 +124,7 @@ SessionInfo *CreateNewSession(const SessionParam *param)
     return session;
 }
 
-NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode,
-    const ClientSessionServer *server)
+DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server)
 {
     if (sessionNode == NULL || server == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -163,13 +158,13 @@ NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *ses
     if (server->listener.isSocketListener == false) {
         destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
     } else {
-        destroyNode->OnShutdown = sessionNode->isServer ? server->listener.socketServer.OnShutdown :
-            server->listener.socketClient.OnShutdown;
+        destroyNode->OnShutdown =
+            sessionNode->isServer ? server->listener.socketServer.OnShutdown : server->listener.socketClient.OnShutdown;
     }
     return destroyNode;
 }
 
-NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
+void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
 {
     if (destroyList == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -231,8 +226,8 @@ void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyLi
     SoftBusFree(server);
 }
 
-ClientSessionServer *GetNewSessionServer(SoftBusSecType type, const char *sessionName,
-    const char *pkgName, const ISessionListener *listener)
+ClientSessionServer *GetNewSessionServer(
+    SoftBusSecType type, const char *sessionName, const char *pkgName, const ISessionListener *listener)
 {
     if (sessionName == NULL || pkgName == NULL || listener == NULL) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
@@ -388,9 +383,9 @@ static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, 
         return true;
     }
     /*
-    * only when the function OnWifiDirectDeviceOffLine is called can reach this else branch,
-    * and routeType is WIFI_P2P, the connType is hml or p2p
-    */
+     * only when the function OnWifiDirectDeviceOffLine is called can reach this else branch,
+     * and routeType is WIFI_P2P, the connType is hml or p2p
+     */
     if (sessionNode->enableMultipath &&
         (sessionNode->routeTypeReserve == routeType || sessionNode->routeType == routeType)) {
         TRANS_LOGE(TRANS_SDK, "reserve link down");
@@ -401,8 +396,8 @@ static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, 
             TRANS_LOGE(TRANS_SDK, "TransGetUdpChannelExtraInfo error, ret=%{public}d", ret);
             return false;
         }
-        ret = ClientTransCloseReserveChannel(sessionNode->channelIdReserve,
-            sessionNode->channelTypeReserve, srvIp, srvPort, routeType);
+        ret = ClientTransCloseReserveChannel(
+            sessionNode->channelIdReserve, sessionNode->channelTypeReserve, srvIp, srvPort, routeType);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "ClientTransCloseReserveChannel error, ret=%{public}d", ret);
             return false;
@@ -416,12 +411,12 @@ static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, 
             return false;
         }
     }
-    
+
     if (sessionNode->routeType != routeType) {
         return false;
     }
 
-    char myIp[IP_LEN] = {0};
+    char myIp[IP_LEN] = { 0 };
     if (sessionNode->channelType == CHANNEL_TYPE_UDP) {
         if (ClientTransGetUdpIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             return false;
@@ -473,8 +468,8 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
     }
 }
 
-void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
-    const char *networkId, int32_t type, ListNode *destroyList)
+void DestroyClientSessionByNetworkId(
+    const ClientSessionServer *server, const char *networkId, int32_t type, ListNode *destroyList)
 {
     if (server == NULL || networkId == NULL || destroyList == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -689,9 +684,11 @@ int32_t CheckBindSocketInfo(const SessionInfo *session)
         char *anonyNetworkId = NULL;
         Anonymize(session->info.peerSessionName, &anonySessionName);
         Anonymize(session->info.peerDeviceId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK, "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
-            "peerNetworkIdLen=%{public}zu", AnonymizeWrapper(anonySessionName), strlen(session->info.peerSessionName),
-            AnonymizeWrapper(anonyNetworkId), strlen(session->info.peerDeviceId));
+        TRANS_LOGI(TRANS_SDK,
+            "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
+            "peerNetworkIdLen=%{public}zu",
+            AnonymizeWrapper(anonySessionName), strlen(session->info.peerSessionName), AnonymizeWrapper(anonyNetworkId),
+            strlen(session->info.peerDeviceId));
         AnonymizeFree(anonyNetworkId);
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
@@ -705,8 +702,8 @@ int32_t CheckBindSocketInfo(const SessionInfo *session)
     return SOFTBUS_OK;
 }
 
-void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
-    ClientSessionServer *serverNode, SessionInfo *sessionNode)
+void FillSessionParam(
+    SessionParam *param, SessionAttribute *tmpAttr, ClientSessionServer *serverNode, SessionInfo *sessionNode)
 {
     if (param == NULL || tmpAttr == NULL || serverNode == NULL || sessionNode == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -779,8 +776,8 @@ void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
     TRANS_LOGD(TRANS_SDK, "ok");
 }
 
-void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode,
-    int32_t waitOutSocket[], uint32_t capacity, uint32_t *num)
+void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode, int32_t waitOutSocket[],
+    uint32_t capacity, uint32_t *num)
 {
     if (serverNode == NULL || sessionNode == NULL || waitOutSocket == NULL || num == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -902,8 +899,8 @@ int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList)
         uint64_t timestamp = SoftBusGetSysTimeMs();
         int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName, timestamp);
         Anonymize(infoNode->sessionName, &tmpName);
-        TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d",
-            AnonymizeWrapper(tmpName), infoNode->pkgName, ret);
+        TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d", AnonymizeWrapper(tmpName),
+            infoNode->pkgName, ret);
         AnonymizeFree(tmpName);
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
@@ -1086,8 +1083,8 @@ int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationCh
     } else {
         TRANS_LOGI(TRANS_SDK, "overwrite relation checker.");
     }
-    int32_t ret = memcpy_s(g_relationChecker, sizeof(IFeatureAbilityRelationChecker),
-        relationChecker, sizeof(IFeatureAbilityRelationChecker));
+    int32_t ret = memcpy_s(g_relationChecker, sizeof(IFeatureAbilityRelationChecker), relationChecker,
+        sizeof(IFeatureAbilityRelationChecker));
     if (ret != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy_s relationChecker failed, ret=%{public}d", ret);
         return SOFTBUS_MEM_ERR;
@@ -1138,8 +1135,7 @@ int32_t ClientTransCheckCollabRelation(
     }
     int32_t ret = g_relationChecker->CheckCollabRelation(sourceInfo, sinkInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK,
-            "channelId=%{public}d check collaboration relation fail, ret=%{public}d", channelId, ret);
+        TRANS_LOGE(TRANS_SDK, "channelId=%{public}d check collaboration relation fail, ret=%{public}d", channelId, ret);
         PrintCollabInfo(sourceInfo, (char *)"source");
         PrintCollabInfo(sinkInfo, (char *)"sink");
         return SOFTBUS_TRANS_CHECK_RELATION_FAIL;
@@ -1154,7 +1150,7 @@ void DestroyRelationChecker(void)
         return;
     }
     SoftBusFree(g_relationChecker);
-    g_relationChecker= NULL;
+    g_relationChecker = NULL;
 }
 
 int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType)
@@ -1180,7 +1176,7 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
     item->seq = (int32_t)dataSeq;
     item->socketId = socketId;
     item->channelType = channelType;
-    item->isMessage = (businessType == BUSINESS_TYPE_D2D_MESSAGE) ? true :false;
+    item->isMessage = (businessType == BUSINESS_TYPE_D2D_MESSAGE) ? true : false;
     ListInit(&item->node);
     ListAdd(&(g_clientDataSeqInfoList->list), &(item->node));
     TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
@@ -1201,8 +1197,8 @@ int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
         if (item->channelId == channelId && item->seq == (int32_t)dataSeq) {
             ListDelete(&(item->node));
             SoftBusFree(item);
-            TRANS_LOGD(TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u",
-                channelId, dataSeq);
+            TRANS_LOGD(
+                TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
             UnlockClientDataSeqInfoList();
             return SOFTBUS_OK;
         }
@@ -1244,8 +1240,8 @@ static void TransOnBindSentProc(ListNode *timeoutItemList)
             }
             sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
         }
-        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u",
-            item->socketId, item->seq);
+        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u", item->socketId,
+            item->seq);
         ListDelete(&(item->node));
         SoftBusFree(item);
     }

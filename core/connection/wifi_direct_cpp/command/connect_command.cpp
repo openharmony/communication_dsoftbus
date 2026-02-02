@@ -132,6 +132,14 @@ void ConnectCommand::PreferNegotiateChannel()
         return;
     }
 
+    auto negoChannel = info_.info_.negoChannel.type;
+    auto handleType = info_.info_.negoChannel.handle.authHandle.type;
+    if (negoChannel == NEGO_CHANNEL_AUTH && handleType == AUTH_LINK_TYPE_BR) {
+        info_.channel_ = std::make_shared<AuthNegotiateChannel>(info_.info_.negoChannel.handle.authHandle);
+        CONN_LOGI(CONN_WIFI_DIRECT, "prefer input br auth channel");
+        return;
+    }
+
     CONN_LOGI(CONN_WIFI_DIRECT, "prefer inner channel");
     info_.channel_ = innerLink->GetNegotiateChannel();
 }

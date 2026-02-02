@@ -1054,10 +1054,9 @@ HWTEST_F(DiscSdkTest, DiscRecoveryPublishTest01, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata2",
         .dataLen = (unsigned int) strlen("capdata2")
     };
-    BusCenterClientDeinit();
     BusCenterClientInit();
     ret = DiscRecoveryPublish();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1069,7 +1068,7 @@ HWTEST_F(DiscSdkTest, DiscRecoveryPublishTest01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
     ret = DiscRecoveryPublish();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1094,10 +1093,9 @@ HWTEST_F(DiscSdkTest, DiscRecoverySubscribeTest01, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = (unsigned int) strlen("capdata3")
     };
-    BusCenterClientDeinit();
     BusCenterClientInit();
     ret = DiscRecoverySubscribe();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1109,6 +1107,6 @@ HWTEST_F(DiscSdkTest, DiscRecoverySubscribeTest01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
     ret = DiscRecoverySubscribe();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

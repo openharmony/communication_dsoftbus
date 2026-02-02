@@ -446,6 +446,26 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
 }
 
+static void UpdateDeviceInfoToMcu(const char *udid)
+{
+    LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "calloc lp info fail");
+        return;
+    }
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s udid fail");
+        SoftBusFree(info);
+        return;
+    }
+    info->isOnline = true;
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (LnnAsyncCallbackDelayHelper(looper, LnnSendDeviceStateToMcuPacked, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call send mcu device info fail");
+        SoftBusFree(info);
+    }
+}
+
 static void UpdateDeviceInfoToMlps(const char *udid)
 {
     LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
@@ -460,9 +480,7 @@ static void UpdateDeviceInfoToMlps(const char *udid)
     }
     info->isOnline = true;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    LnnAsyncCallbackFunc callback = LnnIsLocalSupportMcuFeature() ? LnnSendDeviceStateToMcuPacked :
-        SendDeviceStateToMlpsPacked;
-    if (LnnAsyncCallbackDelayHelper(looper, callback, (void *)info, 0) != SOFTBUS_OK) {
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "async call send device info fail");
         SoftBusFree(info);
     }
@@ -563,6 +581,8 @@ static void SetLnnConnNodeInfo(
         ((isNetCapChanged && LnnHasDiscoveryType(connInfo->nodeInfo, DISCOVERY_TYPE_BLE)) ||
         connInfo->addr.type == CONNECTION_ADDR_BLE)) {
         UpdateDeviceInfoToMlps(connInfo->nodeInfo->deviceInfo.deviceUdid);
+    } else if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_MCU_CAPABILITY)) {
+        UpdateDeviceInfoToMcu(connInfo->nodeInfo->deviceInfo.deviceUdid);
     }
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
         SetLpKeepAliveStatePacked, NULL, 0) != SOFTBUS_OK) {

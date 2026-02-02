@@ -60,7 +60,8 @@ void LNNHuksUtilsTest::TearDown()
 
 /*
  * @tc.name: Generate_Key_Test_001
- * @tc.desc: generate key test
+ * @tc.desc: Verify LnnGenerateKeyByHuks with valid keyAlias generates key
+ *           successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -76,7 +77,8 @@ HWTEST_F(LNNHuksUtilsTest, Generate_Key_Test_01, TestSize.Level0)
 
 /*
  * @tc.name: Generate_Key_Test_002
- * @tc.desc: generate key twice test
+ * @tc.desc: Verify LnnGenerateKeyByHuks can be called twice with same keyAlias
+ *           and returns SOFTBUS_OK both times
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -93,7 +95,8 @@ HWTEST_F(LNNHuksUtilsTest, Generate_Key_Test_02, TestSize.Level0)
 
 /*
  * @tc.name: Generate_Random_Test_001
- * @tc.desc: generate randowm key test
+ * @tc.desc: Verify LnnGenerateRandomByHuks with valid buffer and size generates
+ *           random key successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -107,7 +110,8 @@ HWTEST_F(LNNHuksUtilsTest, Generate_Random_Test_01, TestSize.Level0)
 
 /*
  * @tc.name: Encrypt_Data_Test_001
- * @tc.desc: encrypt data test
+ * @tc.desc: Verify LnnEncryptDataByHuks with valid keyAlias, inData and outData
+ *           encrypts data successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -130,7 +134,8 @@ HWTEST_F(LNNHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
 
 /*
  * @tc.name: LNN_GENERATE_CEKEY_BY_HUKS_Test_001
- * @tc.desc: keyAlias data is nullptr
+ * @tc.desc: Verify LnnGenerateCeKeyByHuks with nullptr keyAlias returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -144,7 +149,8 @@ HWTEST_F(LNNHuksUtilsTest, LNN_GENERATE_CEKEY_BY_HUKS_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_DELETE_CEKEY_BY_HUKS_Test_001
- * @tc.desc: keyAlias data is nullptr
+ * @tc.desc: Verify LnnDeleteCeKeyByHuks with nullptr keyAlias returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -158,7 +164,8 @@ HWTEST_F(LNNHuksUtilsTest, LNN_DELETE_CEKEY_BY_HUKS_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_001
- * @tc.desc: keyAlias is nullptr
+ * @tc.desc: Verify LnnCeEncryptDataByHuks with nullptr keyAlias returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -189,7 +196,8 @@ HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_001, TestSize.Level0
 
 /*
  * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_002
- * @tc.desc: inData is nullptr
+ * @tc.desc: Verify LnnCeEncryptDataByHuks with nullptr inData returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -220,7 +228,8 @@ HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_002, TestSize.Level0
 
 /*
  * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_003
- * @tc.desc: outData data is nullptr
+ * @tc.desc: Verify LnnCeEncryptDataByHuks with nullptr outData returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -251,7 +260,8 @@ HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_003, TestSize.Level0
 
 /*
  * @tc.name: LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_004
- * @tc.desc: inData size is INVALID_PARAM
+ * @tc.desc: Verify LnnCeEncryptDataByHuks with inData size set to 0 returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -292,7 +302,8 @@ HWTEST_F(LNNHuksUtilsTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_004, TestSize.Level0
 
 /*
  * @tc.name: Decrypt_Data_Test_001
- * @tc.desc: decrypt data test
+ * @tc.desc: Verify LnnDecryptDataByHuks can decrypt data that was encrypted by
+ *           LnnEncryptDataByHuks and returns SOFTBUS_OK with matching plainData
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -324,8 +335,9 @@ HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
 }
 
 /*
- * @tc.name: Generate_Random_Test_02
- * @tc.desc: generate randowm key test
+ * @tc.name: Generate_Random_Test_002
+ * @tc.desc: Verify LnnGenerateRandomByHuks with nullptr buffer returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -337,8 +349,9 @@ HWTEST_F(LNNHuksUtilsTest, Generate_Random_Test_02, TestSize.Level0)
 }
 
 /*
- * @tc.name: CeDecrypt_Data_Test_01
- * @tc.desc: decrypt data param error
+ * @tc.name: CeDecrypt_Data_Test_001
+ * @tc.desc: Verify LnnCeDecryptDataByHuks with nullptr keyAlias, inData or
+ *           outData returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -362,8 +375,9 @@ HWTEST_F(LNNHuksUtilsTest, CeDecrypt_Data_Test_01, TestSize.Level0)
 }
 
 /*
- * @tc.name: CeDecrypt_Data_Test_02
- * @tc.desc: decrypt data param error
+ * @tc.name: CeDecrypt_Data_Test_002
+ * @tc.desc: Verify LnnCeDecryptDataByHuks with valid parameters but keyAlias
+ *           not initialized returns SOFTBUS_HUKS_INIT_FAILED
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -382,8 +396,9 @@ HWTEST_F(LNNHuksUtilsTest, CeDecrypt_Data_Test_02, TestSize.Level0)
 }
 
 /*
- * @tc.name: CeEncrypt_Data_Test_01
- * @tc.desc: encrypt data param error
+ * @tc.name: CeEncrypt_Data_Test_001
+ * @tc.desc: Verify LnnCeEncryptDataByHuks with nullptr keyAlias, inData or
+ *           outData returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -407,8 +422,9 @@ HWTEST_F(LNNHuksUtilsTest, CeEncrypt_Data_Test_01, TestSize.Level0)
 }
 
 /*
- * @tc.name: CeEncrypt_Data_Test_02
- * @tc.desc: encrypt data  error
+ * @tc.name: CeEncrypt_Data_Test_002
+ * @tc.desc: Verify LnnCeEncryptDataByHuks with valid parameters but keyAlias
+ *           not initialized returns SOFTBUS_HUKS_INIT_FAILED
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -427,8 +443,9 @@ HWTEST_F(LNNHuksUtilsTest, CeEncrypt_Data_Test_02, TestSize.Level0)
 }
 
 /*
- * @tc.name: GenerateCeKey_Test_01
- * @tc.desc: generate key param error
+ * @tc.name: GenerateCeKey_Test_001
+ * @tc.desc: Verify LnnGenerateCeKeyByHuks with nullptr keyAlias returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE

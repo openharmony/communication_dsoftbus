@@ -44,6 +44,7 @@
       "dsoftbus_feature_conn_hv2",
       "dsoftbus_feature_conn_hv2c",
       "dsoftbus_feature_conn_action",
+      "dsoftbus_feature_conn_general",
       "dsoftbus_feature_conn_legacy_im",
       "dsoftbus_feature_conn_legacy_data",
       "dsoftbus_feature_trans_udp_file",
@@ -51,6 +52,8 @@
       "dsoftbus_feature_trans_udp",
       "dsoftbus_feature_trans_proxy_file",
       "dsoftbus_feature_trans_qos",
+      "dsoftbus_feature_trans_htp",
+      "dsoftbus_feature_trans_br_proxy",
       "dsoftbus_feature_trans_legacy",
       "dsoftbus_feature_lnn_ble",
       "dsoftbus_feature_lnn_wifi",
@@ -70,7 +73,8 @@
       "dsoftbus_feature_linkfinder",
       "dsoftbus_feature_coap",
       "dsoftbus_feature_lnn_usb_ncm",
-      "dsoftbus_feature_trans_mintp"
+      "dsoftbus_feature_trans_mintp",
+      "dsoftbus_feature_lnn_d2d_auth"
     ],
     "rom": "3000KB",
     "ram": "40MB",
@@ -116,7 +120,8 @@
         "time_service",
         "napi",
         "resource_schedule_service",
-        "device_standby"
+        "device_standby",
+        "runtime_core"
       ],
       "third_party": [
         "cJSON",
@@ -134,7 +139,8 @@
         "base_group":[],
         "fwk_group":[
           "//foundation/communication/dsoftbus/sdk:softbus_client",
-          "//foundation/communication/dsoftbus/br_proxy:br_proxy"
+          "//foundation/communication/dsoftbus/br_proxy:br_proxy",
+          "//foundation/communication/dsoftbus/br_proxy/taihe:proxychannelmanager_taihe"
         ],
         "service_group":[
           "//foundation/communication/dsoftbus/core:softbus_server",
@@ -346,6 +352,9 @@
             ],
             "header_base": "//foundation/communication/dsoftbus/dfx/interface/include"
           }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/br_proxy/taihe:proxychannelmanager_taihe_idl"
         }
       ],
       "test": [

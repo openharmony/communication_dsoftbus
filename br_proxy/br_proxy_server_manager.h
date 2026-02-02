@@ -31,9 +31,9 @@ bool TransIsProxyChannelEnabled(int32_t uid);
 int32_t TransRegisterPushHook();
 void BrProxyClientDeathClearResource(pid_t callingPid);
 bool IsBrProxy(const char *bundleName);
-void CloseAllConnect(int32_t appIndex);
 int32_t ApplyForUnrestricted(int32_t channelId);
-void TransBrProxyRemoveObject();
+void TransBrProxyRemoveObject(int32_t pid);
+void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId);
 
 #ifdef __cplusplus
 }

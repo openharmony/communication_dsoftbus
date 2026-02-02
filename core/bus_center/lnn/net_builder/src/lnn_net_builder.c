@@ -1353,13 +1353,13 @@ int32_t LnnNotifyAuthHandleLeaveLNN(AuthHandle authHandle)
     return SOFTBUS_OK;
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
     if (type == NULL) {
         LNN_LOGE(LNN_BUILDER, "para is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    bool *para = NULL;
+    LeaveMsgByAddrType *para = NULL;
     if (typeLen != CONNECTION_ADDR_MAX) {
         LNN_LOGE(LNN_BUILDER, "invalid typeLen");
         return SOFTBUS_INVALID_PARAM;
@@ -1371,16 +1371,17 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;
     }
-    para = (bool *)SoftBusMalloc(sizeof(bool) * typeLen);
+    para = (LeaveMsgByAddrType *)SoftBusCalloc(sizeof(LeaveMsgByAddrType));
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc leave by addr type msg para failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (memcpy_s(para, sizeof(bool) * typeLen, type, sizeof(bool) * typeLen) != EOK) {
+    if (memcpy_s(para->addrType, sizeof(bool) * CONNECTION_ADDR_MAX, type, sizeof(bool) * typeLen) != EOK) {
         LNN_LOGE(LNN_BUILDER, "memcopy para fail");
         SoftBusFree(para);
         return SOFTBUS_MEM_ERR;
     }
+    para->needCheckHml = hasMcuRequestDisable;
     if (PostBuildMessageToHandler(MSG_TYPE_LEAVE_BY_ADDR_TYPE, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave by addr type message failed");
         SoftBusFree(para);

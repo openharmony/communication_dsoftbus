@@ -60,6 +60,7 @@ void BusCenterServerProxyStandardTest::TearDown() { }
  * @tc.name: SoftbusRegisterService_TEST_001
  * @tc.desc: SoftbusRegisterService return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, SoftbusRegisterService_TEST_001, TestSize.Level1)
@@ -75,6 +76,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, SoftbusRegisterService_TEST_001, Test
  * @tc.name: CreateSessionServer_TEST_001
  * @tc.desc: CreateSessionServer return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, CreateSessionServer_TEST_001, TestSize.Level1)
@@ -91,6 +93,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, CreateSessionServer_TEST_001, TestSiz
  * @tc.name: RemoveSessionServer_TEST_001
  * @tc.desc: RemoveSessionServer return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, RemoveSessionServer_TEST_001, TestSize.Level1)
@@ -107,6 +110,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, RemoveSessionServer_TEST_001, TestSiz
  * @tc.name: OpenSession_TEST_001
  * @tc.desc: OpenSession return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, OpenSession_TEST_001, TestSize.Level1)
@@ -123,6 +127,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, OpenSession_TEST_001, TestSize.Level1
  * @tc.name: OpenAuthSession_TEST_001
  * @tc.desc: OpenAuthSession return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, OpenAuthSession_TEST_001, TestSize.Level1)
@@ -139,6 +144,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, OpenAuthSession_TEST_001, TestSize.Le
  * @tc.name: NotifyAuthSuccess_TEST_001
  * @tc.desc: NotifyAuthSuccess return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, NotifyAuthSuccess_TEST_001, TestSize.Level1)
@@ -155,6 +161,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, NotifyAuthSuccess_TEST_001, TestSize.
  * @tc.name: ReleaseResources_TEST_001
  * @tc.desc: ReleaseResources return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, ReleaseResources_TEST_001, TestSize.Level1)
@@ -170,6 +177,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, ReleaseResources_TEST_001, TestSize.L
  * @tc.name: CloseChannel_TEST_001
  * @tc.desc: CloseChannel return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, CloseChannel_TEST_001, TestSize.Level1)
@@ -187,6 +195,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, CloseChannel_TEST_001, TestSize.Level
  * @tc.name: CloseChannelWithStatistics_TEST_001
  * @tc.desc: CloseChannelWithStatistics return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, CloseChannelWithStatistics_TEST_001, TestSize.Level1)
@@ -205,6 +214,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, CloseChannelWithStatistics_TEST_001, 
  * @tc.name: SendMessage_TEST_001
  * @tc.desc: SendMessage return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, SendMessage_TEST_001, TestSize.Level1)
@@ -223,6 +233,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, SendMessage_TEST_001, TestSize.Level1
  * @tc.name: QosReport_TEST_001
  * @tc.desc: QosReport return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, QosReport_TEST_001, TestSize.Level1)
@@ -241,6 +252,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, QosReport_TEST_001, TestSize.Level1)
  * @tc.name: StreamStats_TEST_001
  * @tc.desc: StreamStats return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, StreamStats_TEST_001, TestSize.Level1)
@@ -258,6 +270,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, StreamStats_TEST_001, TestSize.Level1
  * @tc.name: RippleStats_TEST_001
  * @tc.desc: RippleStats return value is equal to SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, RippleStats_TEST_001, TestSize.Level1)
@@ -275,6 +288,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, RippleStats_TEST_001, TestSize.Level1
  * @tc.name: JoinLNN_TEST_001
  * @tc.desc: JoinLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_001, TestSize.Level1)
@@ -292,6 +306,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_001, TestSize.Level1)
  * @tc.name: JoinLNN_TEST_002
  * @tc.desc: JoinLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_002, TestSize.Level1)
@@ -308,6 +323,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_002, TestSize.Level1)
  * @tc.name: LeaveLNN_TEST_001
  * @tc.desc: LeaveLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, LeaveLNN_TEST_001, TestSize.Level1)
@@ -324,6 +340,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, LeaveLNN_TEST_001, TestSize.Level1)
  * @tc.name: LeaveLNN_TEST_002
  * @tc.desc: LeaveLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, LeaveLNN_TEST_002, TestSize.Level1)
@@ -340,6 +357,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, LeaveLNN_TEST_002, TestSize.Level1)
  * @tc.name: GetAllOnlineNodeInfo_TEST_001
  * @tc.desc: GetAllOnlineNodeInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetAllOnlineNodeInfo_TEST_001, TestSize.Level1)
@@ -358,6 +376,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetAllOnlineNodeInfo_TEST_001, TestSi
  * @tc.name: GetAllOnlineNodeInfo_TEST_002
  * @tc.desc: GetAllOnlineNodeInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetAllOnlineNodeInfo_TEST_002, TestSize.Level1)
@@ -375,6 +394,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetAllOnlineNodeInfo_TEST_002, TestSi
  * @tc.name: GetAllOnlineNodeInfo_TEST_003
  * @tc.desc: GetAllOnlineNodeInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetAllOnlineNodeInfo_TEST_003, TestSize.Level1)
@@ -392,6 +412,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetAllOnlineNodeInfo_TEST_003, TestSi
  * @tc.name: GetLocalDeviceInfo_TEST_001
  * @tc.desc: GetLocalDeviceInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetLocalDeviceInfo_TEST_001, TestSize.Level1)
@@ -409,6 +430,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetLocalDeviceInfo_TEST_001, TestSize
  * @tc.name: GetLocalDeviceInfo_TEST_002
  * @tc.desc: GetLocalDeviceInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetLocalDeviceInfo_TEST_002, TestSize.Level1)
@@ -425,6 +447,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetLocalDeviceInfo_TEST_002, TestSize
  * @tc.name: GetLocalDeviceInfo_TEST_003
  * @tc.desc: GetLocalDeviceInfo return value is equal to SOFTBUS_IPC_ERR
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetLocalDeviceInfo_TEST_003, TestSize.Level1)
@@ -443,6 +466,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetLocalDeviceInfo_TEST_003, TestSize
  * @tc.name: GetNodeKeyInfo_TEST_001
  * @tc.desc: GetNodeKeyInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetNodeKeyInfo_TEST_001, TestSize.Level1)
@@ -462,6 +486,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetNodeKeyInfo_TEST_001, TestSize.Lev
  * @tc.name: GetNodeKeyInfo_TEST_002
  * @tc.desc: GetNodeKeyInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetNodeKeyInfo_TEST_002, TestSize.Level1)
@@ -481,6 +506,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetNodeKeyInfo_TEST_002, TestSize.Lev
  * @tc.name: GetNodeKeyInfo_TEST_003
  * @tc.desc: GetNodeKeyInfo return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, GetNodeKeyInfo_TEST_003, TestSize.Level1)
@@ -499,6 +525,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetNodeKeyInfo_TEST_003, TestSize.Lev
  * @tc.name: RegDataLevelChangeCb_TEST_001
  * @tc.desc: RegDataLevelChangeCb return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, RegDataLevelChangeCb_TEST_003, TestSize.Level1)
@@ -514,6 +541,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, RegDataLevelChangeCb_TEST_003, TestSi
  * @tc.name: UnregDataLevelChangeCb_TEST_001
  * @tc.desc: UnregDataLevelChangeCb return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, UnregDataLevelChangeCb_TEST_001, TestSize.Level1)
@@ -529,6 +557,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, UnregDataLevelChangeCb_TEST_001, Test
  * @tc.name: SetDataLevel_TEST_001
  * @tc.desc: SetDataLevel return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, SetDataLevel_TEST_001, TestSize.Level1)
@@ -544,6 +573,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, SetDataLevel_TEST_001, TestSize.Level
  * @tc.name: RegBleRangeCb_TEST_001
  * @tc.desc: RegisterRangeCallbackForMsdp return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, RegBleRangeCb_TEST_001, TestSize.Level1)
@@ -559,6 +589,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, RegBleRangeCb_TEST_001, TestSize.Leve
  * @tc.name: UnregBleRangeCb_TEST_001
  * @tc.desc: UnregisterRangeCallbackForMsdp return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, UnregBleRangeCb_TEST_001, TestSize.Level1)
@@ -574,6 +605,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, UnregBleRangeCb_TEST_001, TestSize.Le
  * @tc.name: TriggerHbForMeasureDistance_TEST_001
  * @tc.desc: TriggerRangeForMsdp return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, TriggerHbForMeasureDistance_TEST_001, TestSize.Level1)
@@ -589,6 +621,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, TriggerHbForMeasureDistance_TEST_001,
  * @tc.name: StartTimeSync_TEST_001
  * @tc.desc: StartTimeSync return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, StartTimeSync_TEST_001, TestSize.Level1)
@@ -605,6 +638,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, StartTimeSync_TEST_001, TestSize.Leve
  * @tc.name: StartTimeSync_TEST_002
  * @tc.desc: StartTimeSync return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, StartTimeSync_TEST_002, TestSize.Level1)
@@ -621,6 +655,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, StartTimeSync_TEST_002, TestSize.Leve
  * @tc.name: PublishLNN_TEST_001
  * @tc.desc: PublishLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, PublishLNN_TEST_001, TestSize.Level1)
@@ -639,6 +674,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, PublishLNN_TEST_001, TestSize.Level1)
  * @tc.name: PublishLNN_TEST_002
  * @tc.desc: PublishLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, PublishLNN_TEST_002, TestSize.Level1)
@@ -655,6 +691,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, PublishLNN_TEST_002, TestSize.Level1)
  * @tc.name: StopPublishLNN_TEST_001
  * @tc.desc: StopPublishLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, StopPublishLNN_TEST_001, TestSize.Level1)
@@ -670,6 +707,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, StopPublishLNN_TEST_001, TestSize.Lev
  * @tc.name: RefreshLNN_TEST_001
  * @tc.desc: RefreshLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, RefreshLNN_TEST_001, TestSize.Level1)
@@ -688,6 +726,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, RefreshLNN_TEST_001, TestSize.Level1)
  * @tc.name: RefreshLNN_TEST_002
  * @tc.desc: RefreshLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, RefreshLNN_TEST_002, TestSize.Level1)
@@ -704,6 +743,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, RefreshLNN_TEST_002, TestSize.Level1)
  * @tc.name:StopRefreshLNN_TEST_001
  * @tc.desc: StopRefreshLNN return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, StopRefreshLNN_TEST_001, TestSize.Level1)
@@ -719,6 +759,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, StopRefreshLNN_TEST_001, TestSize.Lev
  * @tc.name: DeactiveMetaNode_TEST_001
  * @tc.desc: DeactiveMetaNode return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, DeactiveMetaNode_TEST_001, TestSize.Level1)
@@ -734,6 +775,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, DeactiveMetaNode_TEST_001, TestSize.L
  * @tc.name: ShiftLNNGear_TEST_001
  * @tc.desc: ShiftLNNGear return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, ShiftLNNGear_TEST_001, TestSize.Level1)
@@ -754,6 +796,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, ShiftLNNGear_TEST_001, TestSize.Level
  * @tc.name: ShiftLNNGear_TEST_002
  * @tc.desc: ShiftLNNGear return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, ShiftLNNGear_TEST_002, TestSize.Level1)
@@ -774,6 +817,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, ShiftLNNGear_TEST_002, TestSize.Level
  * @tc.name: ShiftLNNGear_TEST_003
  * @tc.desc: ShiftLNNGear return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, ShiftLNNGear_TEST_003, TestSize.Level1)
@@ -792,6 +836,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, ShiftLNNGear_TEST_003, TestSize.Level
  * @tc.name: EvaluateQos_TEST_001
  * @tc.desc: EvaluateQos return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerProxyStandardTest, EvaluateQos_TEST_001, TestSize.Level1)
@@ -803,5 +848,4 @@ HWTEST_F(BusCenterServerProxyStandardTest, EvaluateQos_TEST_001, TestSize.Level1
     int32_t ret = servertest.EvaluateQos(peerNetworkId, dataType, nullptr, QOSCOUNT);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-
 } // namespace OHOS

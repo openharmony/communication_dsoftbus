@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,25 +42,24 @@ bool IsValidSessionParam(const SessionParam *param);
 
 SessionInfo *CreateNewSession(const SessionParam *param);
 
-NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode,
-    const ClientSessionServer *server);
+DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server);
 
-NO_SANITIZE("cfi") DestroyMultiPathSessionInfo *CreateMPDestroySessionNode(SessionInfo *sessionNode,
-    const ClientSessionServer *server, bool mainLaneLinkDown);
+DestroyMultiPathSessionInfo *CreateMPDestroySessionNode(
+    SessionInfo *sessionNode, const ClientSessionServer *server, bool mainLaneLinkDown);
 
-NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason);
+void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason);
 
 void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyList);
 
-ClientSessionServer *GetNewSessionServer(SoftBusSecType type, const char *sessionName,
-    const char *pkgName, const ISessionListener *listener);
+ClientSessionServer *GetNewSessionServer(
+    SoftBusSecType type, const char *sessionName, const char *pkgName, const ISessionListener *listener);
 
 SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName);
 
 void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList);
 
-void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
-    const char *networkId, int32_t type, ListNode *destroyList);
+void DestroyClientSessionByNetworkId(
+    const ClientSessionServer *server, const char *networkId, int32_t type, ListNode *destroyList);
 
 SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *clientSessionServer);
 
@@ -74,15 +73,15 @@ SessionInfo *CreateNewSocketSession(const SessionParam *param);
 
 int32_t CheckBindSocketInfo(const SessionInfo *session);
 
-void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
-    ClientSessionServer *serverNode, SessionInfo *sessionNode);
+void FillSessionParam(
+    SessionParam *param, SessionAttribute *tmpAttr, ClientSessionServer *serverNode, SessionInfo *sessionNode);
 
 void ClientConvertRetVal(int32_t socket, int32_t *retOut);
 
 void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList);
 
-void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode,
-    int32_t waitOutSocket[], uint32_t capacity, uint32_t *num);
+void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode, int32_t waitOutSocket[],
+    uint32_t capacity, uint32_t *num);
 
 void ClientCleanUpWaitTimeoutSocket(int32_t waitOutSocket[], uint32_t waitOutNum);
 
