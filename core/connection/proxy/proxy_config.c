@@ -32,6 +32,8 @@
 #define POLICY_STAGE_2_FIXED_DELAY_MS (15 * 1000)
 #define POLICY_STAGE_3_FIXED_DELAY_MS (120 * 1000)
 
+#define POLICY_BACKOFF_BASE 2
+
 bool ProxyConfigPolicyIsActive(const struct ProxyConfigPolicy *policy)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(policy != NULL, false, CONN_PROXY, "policy is null");
@@ -65,7 +67,7 @@ static uint64_t BackoffPolicyExecutor(const struct ProxyConfigPolicy *policy, co
     if (info->innerRetryNum == 0) {
         return policy->delayMs;
     }
-    return pow(2, info->innerRetryNum - 1) * policy->value + policy->delayMs;
+    return pow(POLICY_BACKOFF_BASE, info->innerRetryNum - 1) * policy->value + policy->delayMs;
 }
 
 struct ProxyConfigManager *GetProxyConfigManager(void)

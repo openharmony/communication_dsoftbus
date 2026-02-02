@@ -213,7 +213,7 @@ void ProxyChannelMock::InjectProxyConfigDisableRetryConnect()
 void ProxyChannelMock::InjectProxyConfigRestoreRetryConnect()
 {
     auto mgr = GetProxyConfigManager();
-    auto ret = memcpy_s( &mgr->policies, sizeof(mgr->policies),
+    auto ret = memcpy_s(&mgr->policies, sizeof(mgr->policies),
         &ProxyChannelMock::policies, sizeof(ProxyChannelMock::policies));
     if (ret != EOK) {
         ADD_FAILURE() << "copy policy failed, error=" << ret;

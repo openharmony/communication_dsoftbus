@@ -814,7 +814,7 @@ static bool IsTargetDeviceAlreadyConnected(char *brAddr)
 static bool CheckNeedToRetry(char *brAddr, ProxyConnectInfo *reconnectDeviceInfo)
 {
     bool isAclConnected = reconnectDeviceInfo->isAclConnected;
-    CONN_LOGI(CONN_PROXY, "isAclConnected=%{public}d",isAclConnected);
+    CONN_LOGI(CONN_PROXY, "isAclConnected=%{public}d", isAclConnected);
 
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusGetBrState() == BR_ENABLE, false, CONN_PROXY, "br disable");
 
@@ -857,7 +857,7 @@ static void AttemptReconnectDevice(char *brAddr)
     CONN_CHECK_AND_RETURN_LOGW(proxyChannelRequestInfo != NULL, CONN_PROXY, "CopyProxyConnectInfo fail");
 
     CONN_LOGI(CONN_PROXY, "start reconnect reqId=%{public}u, addr=%{public}s, times=%{public}u, delay=%{public}lu",
-    proxyChannelRequestInfo->requestId, anomizeAddress, reconnectDeviceInfo->innerRetryNum, config.delayMs);
+        proxyChannelRequestInfo->requestId, anomizeAddress, reconnectDeviceInfo->innerRetryNum, config.delayMs);
     reconnectDeviceInfo->innerRetryNum += 1;
     proxyChannelRequestInfo->result.onOpenSuccess = OnInnerReConnectSuccess;
     proxyChannelRequestInfo->result.onOpenFail = OnInnerReConnectFailWithRetry;
@@ -934,7 +934,7 @@ static void ProxyRestoreHandler(void)
     ProxyConnectInfo *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         ProxyConnectInfo *proxyChannelRequestInfo = CopyProxyConnectInfo(it);
-        if(proxyChannelRequestInfo == NULL) {
+        if (proxyChannelRequestInfo == NULL) {
             CONN_LOGE(CONN_PROXY, "CopyProxyConnectInfo fail");
             continue;
         }
