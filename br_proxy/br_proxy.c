@@ -763,3 +763,25 @@ int32_t ClientTransBrProxyQueryPermission(const char *bundleName, bool *isEmpowe
 
     return ret;
 }
+
+void BrProxyServiceDeathNotify(void)
+{
+    TRANS_LOGW(TRANS_SDK, "[br_proxy] server die!");
+    if (g_clientList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
+        return;
+    }
+ 
+    if (SoftBusMutexLock(&(g_clientList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        return;
+    }
+    ClientBrProxyChannelInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_clientList->list), ClientBrProxyChannelInfo, node) {
+        if (nodeInfo->enableStateChange && nodeInfo->listener.onChannelStatusChanged != NULL) {
+            TRANS_LOGI(TRANS_SDK, "[br_proxy] server died! channelId=%{public}d", nodeInfo->channelId);
+            nodeInfo->listener.onChannelStatusChanged(nodeInfo->channelId, CHANNEL_EXCEPTION_SOFTWARE_FAILED);
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_clientList->lock));
+}
