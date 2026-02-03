@@ -24,7 +24,6 @@
 #include "common_list.h"
 #include "conn_log.h"
 #include "message_handler.h"
-#include "proxy_manager.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
 #include "softbus_adapter_mem.h"
@@ -32,9 +31,12 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_conn_common.h"
-#include "proxy_connection.h"
-#include "proxy_observer.h"
 #include "wrapper_br_interface.h"
+
+#include "proxy_config.h"
+#include "proxy_connection.h"
+#include "proxy_manager.h"
+#include "proxy_observer.h"
 
 #define READ_SLEEP_TIME 5
 #define UNDERLAYER_HANDLE 1
@@ -90,9 +92,14 @@ public:
     static void InjectBtAclStateChanged(
         int32_t listenerId, const SoftBusBtAddr *btAddr, int32_t aclState, int32_t hciReason);
     static void InjectBtStateChanged(int listenerId, int state);
+    static void InjectProxyConfigDisableRetryConnect();
+    static void InjectProxyConfigRestoreRetryConnect();
+    static void InjectProxyConfigRetryCustomTimes(uint32_t times);
+
     int32_t SoftBusRemoveBtStateListener(int32_t listenerId);
 private:
     static inline std::atomic<ProxyChannelMock *> mock = nullptr;
+    static inline struct ProxyConfigPolicy policies[PROXY_POLICY_MAX_SIZE];
 
     std::mutex mutex_;
     std::condition_variable cv_;

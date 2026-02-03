@@ -108,7 +108,7 @@ static SoftBusMutex g_channelIdLock;
 static void ClearCountInRetryList(pid_t uid);
 static int32_t GetCallerInfoAndVerifyPermission(BrProxyInfo *info);
 static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel);
-static void onOpenFail(uint32_t requestId, int32_t reason);
+static void onOpenFail(uint32_t requestId, int32_t reason, const char *brMac);
 static void OnDataReceived(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen);
 static void OnDisconnected(struct ProxyChannel *channel, int32_t reason);
 static void OnReconnected(char *addr, struct ProxyChannel *channel);
@@ -1061,8 +1061,9 @@ static int32_t SetCurrentConnect(const char *brMac, const char *uuid, uint32_t r
     return SOFTBUS_NOT_FIND;
 }
 
-static void onOpenFail(uint32_t requestId, int32_t reason)
+static void onOpenFail(uint32_t requestId, int32_t reason,  const char *brMac)
 {
+    (void)brMac;
     TRANS_LOGE(TRANS_SVC, "[br_proxy] OpenFail requestId=%{public}d, reason = %{public}d",
         requestId, reason);
     ServerBrProxyChannelInfo info = {0};

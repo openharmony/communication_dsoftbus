@@ -26,32 +26,62 @@ static ProxyListener g_hfpListener = { 0 };
 extern "C" {
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId)
 {
-    return ProxyChannelMock::GetMock()->SoftBusAddBtStateListener(listener, listenerId);
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return -1;
+    }
+    return mocker->SoftBusAddBtStateListener(listener, listenerId);
 }
 
 SppSocketDriver *InitSppSocketDriver(void)
 {
-    return ProxyChannelMock::GetMock()->InitSppSocketDriver();
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return nullptr;
+    }
+    return mocker->InitSppSocketDriver();
 }
 
 int32_t RegisterHfpListener(const ProxyListener listener)
 {
-    return ProxyChannelMock::GetMock()->RegisterHfpListener(listener);
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return -1;
+    }
+    return mocker->RegisterHfpListener(listener);
 }
 
 void InitProxyChannelManagerWrapper(void)
 {
-    return ProxyChannelMock::GetMock()->InitProxyChannelManagerWrapper();
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return;
+    }
+    return mocker->InitProxyChannelManagerWrapper();
 }
 
 bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp)
 {
-    return ProxyChannelMock::GetMock()->IsPairedDevice(addr, isRealMac, isSupportHfp);
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return false;
+    }
+    return mocker->IsPairedDevice(addr, isRealMac, isSupportHfp);
 }
 
 int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr)
 {
-    return ProxyChannelMock::GetMock()->GetRealMac(realAddr, realAddrLen, hashAddr);
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return -1;
+    }
+    return mocker->GetRealMac(realAddr, realAddrLen, hashAddr);
 }
 }
 
@@ -140,8 +170,12 @@ int32_t SoftBusGetBrState(void)
 void ProxyChannelMock::InjectHfpConnectionChanged(std::string addr, int32_t state)
 {
     if (g_hfpListener != nullptr) {
+        CONN_LOGI(CONN_PROXY, "inject hfp event start");
         g_hfpListener(addr.c_str(), state);
+        return;
     }
+    CONN_LOGE(CONN_PROXY, "inject hfp failed, listener is null");
+    ADD_FAILURE() << "inject hfp failed, listener is null";
 }
 
 void ProxyChannelMock::InjectBtAclStateChanged(
@@ -155,13 +189,58 @@ void ProxyChannelMock::InjectBtAclStateChanged(
 void ProxyChannelMock::InjectBtStateChanged(int listenerId, int state)
 {
     if (g_btStateListener->OnBtStateChanged != nullptr) {
+        CONN_LOGI(CONN_PROXY, "inject bt state event start");
         g_btStateListener->OnBtStateChanged(listenerId, state);
+        return;
     }
+    CONN_LOGE(CONN_PROXY, "inject bt state event failed, listener is null");
+    ADD_FAILURE() << "inject bt state event failed, listener is null";
+}
+
+void ProxyChannelMock::InjectProxyConfigDisableRetryConnect()
+{
+    auto mgr = GetProxyConfigManager();
+    auto ret = memcpy_s(&ProxyChannelMock::policies, sizeof(ProxyChannelMock::policies),
+        &mgr->policies, sizeof(mgr->policies));
+    if (ret != EOK) {
+        ADD_FAILURE() << "copy policy failed, error=" << ret;
+    }
+    for (size_t i = 0; i < std::size(mgr->policies); i++) {
+        mgr->policies[i].active = false;
+    }
+}
+
+void ProxyChannelMock::InjectProxyConfigRestoreRetryConnect()
+{
+    auto mgr = GetProxyConfigManager();
+    auto ret = memcpy_s(&mgr->policies, sizeof(mgr->policies),
+        &ProxyChannelMock::policies, sizeof(ProxyChannelMock::policies));
+    if (ret != EOK) {
+        ADD_FAILURE() << "copy policy failed, error=" << ret;
+    }
+}
+
+void ProxyChannelMock::InjectProxyConfigRetryCustomTimes(uint32_t times)
+{
+    auto mgr = GetProxyConfigManager();
+    mgr->policies[0].active = true;
+    mgr->policies[0].value = times;
+    mgr->policies[0].Match = [](auto policy, auto info) {
+        return info->innerRetryNum < policy->value;
+    };
+    mgr->policies[0].Execute = [](auto policy, auto info) {
+        return static_cast<uint64_t>(0);
+    };
 }
 
 static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
-    return ProxyChannelMock::GetMock()->Connect(uuid, mac, connectCallback);
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return  -1;
+    }
+    return mocker->Connect(uuid, mac, connectCallback);
 }
 
 static int32_t DisConnect(int32_t clientFd)
@@ -172,12 +251,30 @@ static int32_t DisConnect(int32_t clientFd)
 
 static int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t len)
 {
-    return ProxyChannelMock::GetMock()->Write(clientFd, buf, len);
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return  -1;
+    }
+    return mocker->Write(clientFd, buf, len);
 }
 
 static int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t len)
 {
-    return ProxyChannelMock::GetMock()->Read(clientFd, buf, len);
+    auto mocker =  ProxyChannelMock::GetMock();
+    if (mocker == nullptr) {
+        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        return  -1;
+    }
+    return mocker->Read(clientFd, buf, len);
+}
+
+static int32_t UpdatePriority(const BT_ADDR mac, ConnBrConnectPriority priority)
+{
+    // do nothing
+    (void)mac;
+    (void)priority;
+    return 0;
 }
 
 static SppSocketDriver g_sppSocketDriver = {
@@ -185,6 +282,7 @@ static SppSocketDriver g_sppSocketDriver = {
     .DisConnect = DisConnect,
     .Write = Write,
     .Read = Read,
+    .UpdatePriority = UpdatePriority,
 };
 
 SppSocketDriver *ProxyChannelMock::ActionOfInitSppSocketDriver(void)
