@@ -127,6 +127,7 @@ bool TransBrProxyStorageRead(TransBrProxyStorage *instance, TransBrProxyStorageI
 
     LoadIfNeed(instance);
     if (!instance->loaded) {
+        SoftBusMutexUnlock(&instance->mutex);
         return false;
     }
 

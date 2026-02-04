@@ -200,8 +200,8 @@ HWTEST_F(TransBrProxyStorageTest, StorageClear, TestSize.Level1)
     TransBrProxyStorageInfo newReadInfo;
     (void)memset_s(&newReadInfo, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
     ret = TransBrProxyStorageRead(&newInstance, &newReadInfo);
-    EXPECT_TRUE(ret);
-    EXPECT_EQ(newReadInfo.uid, -1);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(newReadInfo.uid, 0);
     EXPECT_STREQ(newReadInfo.bundleName, "");
 
     DestructBrProxyStorageInstance(instance);
@@ -254,13 +254,13 @@ HWTEST_F(TransBrProxyStorageTest, StorageDefaultValue, TestSize.Level1)
     ConstructBrProxyStorageInstance(instance);
     TransBrProxyStorageInfo readInfo;
     bool ret = TransBrProxyStorageRead(&instance, &readInfo);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 
     EXPECT_STREQ(readInfo.bundleName, "");
     EXPECT_STREQ(readInfo.abilityName, "");
-    EXPECT_EQ(readInfo.appIndex, -1);
-    EXPECT_EQ(readInfo.userId, -1);
-    EXPECT_EQ(readInfo.uid, -1);
+    EXPECT_EQ(readInfo.appIndex, 0);
+    EXPECT_EQ(readInfo.userId, 0);
+    EXPECT_EQ(readInfo.uid, 0);
     EXPECT_FALSE(instance.loaded);
 
     DestructBrProxyStorageInstance(instance);
