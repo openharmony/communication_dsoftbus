@@ -772,6 +772,29 @@ static int32_t ServerDisableProxyFromList(uint32_t requestId)
     return SOFTBUS_NOT_FIND;
 }
 
+static bool IsPidExist(ProxyBaseInfo *baseInfo, uint32_t requestId, pid_t pid)
+{
+    if (g_serverList == NULL) {
+        return false;
+    }
+    if (SoftBusMutexLock(&(g_serverList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
+        return false;
+    }
+    ServerBrProxyChannelInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_serverList->list), ServerBrProxyChannelInfo, node) {
+        if (strcmp(baseInfo->brMac, nodeInfo->proxyInfo.brMac) != 0 ||
+            strcmp(baseInfo->uuid, nodeInfo->proxyInfo.uuid) != 0 ||
+            nodeInfo->requestId != requestId || nodeInfo->callingPid != pid) {
+            continue;
+        }
+        (void)SoftBusMutexUnlock(&(g_serverList->lock));
+        return true;
+    }
+    (void)SoftBusMutexUnlock(&(g_serverList->lock));
+    return false;
+}
+
 static bool IsSessionExist(const char *brMac, const char *uuid, uint32_t requestId, bool needPid)
 {
     if (brMac == NULL || uuid == NULL || g_serverList == NULL) {
@@ -1517,31 +1540,6 @@ static void CleanUpDataListWithSameMac(ProxyBaseInfo *baseInfo, int32_t channelI
     }
 }
 
-static bool IsForegroundProcess(ProxyBaseInfo *baseInfo, uint32_t requestId)
-{
-    if (g_serverList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
-        return false;
-    }
-    if (SoftBusMutexLock(&(g_serverList->lock)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
-        return false;
-    }
-    ServerBrProxyChannelInfo *nodeInfo = NULL;
-    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_serverList->list), ServerBrProxyChannelInfo, node) {
-        if (strcmp(baseInfo->brMac, nodeInfo->proxyInfo.brMac) != 0 ||
-            strcmp(baseInfo->uuid, nodeInfo->proxyInfo.uuid) != 0 ||
-            nodeInfo->requestId != requestId) {
-            continue;
-        }
-        (void)SoftBusMutexUnlock(&(g_serverList->lock));
-        return true;
-    }
-    (void)SoftBusMutexUnlock(&(g_serverList->lock));
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] is dead");
-    return false;
-}
-
 static void DealDataWhenForeground(ProxyBaseInfo *baseInfo, const uint8_t *data, uint32_t dataLen, uint32_t requestId)
 {
     pid_t pid = 0;
@@ -1582,9 +1580,30 @@ static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data,
     }
 }
 
+static bool IsProcExist(ProxyBaseInfo *baseInfo, uint32_t requestId)
+{
+    if (baseInfo == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] baseInfo is nullptr");
+        return false;
+    }
+    BrProxyInfo info;
+    int32_t ret = GetBrProxy(baseInfo->brMac, baseInfo->uuid, requestId, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get brproxy failed. ret:%{public}d", ret);
+        return false;
+    }
+    pid_t pid = 0;
+    if (CommonGetRunningProcessInformation(info.bundleName, info.userId, info.uid, &pid) &&
+        IsPidExist(baseInfo, requestId, pid)) {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] pid:%{public}d exist, appIndex:%{public}d", pid, info.appIndex);
+        return true;
+    }
+    return false;
+}
+
 static void DealWithDataRecv(ProxyBaseInfo *baseInfo, const uint8_t *data, uint32_t dataLen, uint32_t requestId)
 {
-    bool isForeground = IsForegroundProcess(baseInfo, requestId);
+    bool isForeground = IsProcExist(baseInfo, requestId);
     if (isForeground) {
         DealDataWhenForeground(baseInfo, data, dataLen, requestId);
     } else {
