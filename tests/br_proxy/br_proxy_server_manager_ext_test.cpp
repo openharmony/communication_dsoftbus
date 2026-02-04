@@ -149,7 +149,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
     ret = GetChannelInfo(nullptr, nullptr, CHANNEL_ID, 0, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
-    onOpenSuccess(0, nullptr);
+    OnOpenSuccess(0, nullptr);
     ret = GetChannelId(nullptr, nullptr, nullptr, DEFAULT_APPINDEX);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransOpenBrProxy(nullptr, nullptr);
