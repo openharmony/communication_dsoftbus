@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,9 @@
 #define APPLY_KEY_TRANSMIT_DATA_LEN_MAX 20000
 
 static uint32_t g_uniqueId = 0;
-static uint64_t g_applyKeyDecayTime = 15552000000; // 180 * 24 * 60 * 60 * 1000L
+// ApplyKey decay time: 180 days in milliseconds
+// 180 * 24 * 60 * 60 * 1000 = 15,552,000,000 ms
+static uint64_t g_applyKeyDecayTime = 15552000000;
 static SoftBusList *g_applyKeyNegoList = NULL;
 static SoftBusMutex g_applyKeyNegoListLock;
 
@@ -133,9 +135,7 @@ static void DeInitApplyKeyNegoInstanceList(void)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_applyKeyNegoList->list, ApplyKeyNegoInstance, node) {
         ListDelete(&item->node);
-        (void)memset_s(item->applyKey, sizeof(item->applyKey), 0, sizeof(item->applyKey));
-        (void)memset_s(
-            item->info.peerAccountHash, sizeof(item->info.peerAccountHash), 0, sizeof(item->info.peerAccountHash));
+        (void)memset_s(item, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
         SoftBusFree(item);
     }
     AUTH_LOGI(AUTH_CONN, "deinit applyKeynego instance");
@@ -370,9 +370,7 @@ static void DeleteApplyKeyNegoInstance(uint32_t requestId)
         }
         AUTH_LOGE(AUTH_CONN, "delete applyKeynego instance, requestId=%{public}u", requestId);
         ListDelete(&(item->node));
-        (void)memset_s(item->applyKey, sizeof(item->applyKey), 0, sizeof(item->applyKey));
-        (void)memset_s(
-            item->info.peerAccountHash, sizeof(item->info.peerAccountHash), 0, sizeof(item->info.peerAccountHash));
+        (void)memset_s(item, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
         SoftBusFree(item);
         g_applyKeyNegoList->cnt--;
         ReleaseApplyKeyNegoListLock();
@@ -1301,11 +1299,16 @@ uint32_t GenApplyKeySeq(void)
 bool AuthIsApplyKeyExpired(uint64_t time)
 {
     uint64_t currentTime = SoftBusGetSysTimeMs();
-    if (currentTime < time || currentTime - time > g_applyKeyDecayTime) {
-        AUTH_LOGE(AUTH_CONN, "apply key is expired cannot be used.");
-        return false;
+    if (currentTime < time) {
+        AUTH_LOGE(AUTH_CONN, "apply key time rollback detected");
+        return true;
     }
-    return true;
+    if (currentTime - time > g_applyKeyDecayTime) {
+        AUTH_LOGI(AUTH_CONN, "apply key is expired");
+        return true;
+    }
+
+    return false;
 }
 
 int32_t ApplyKeyNegoInit(void)
