@@ -989,11 +989,11 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest041, TestSize.Level1)
     ProxyBaseInfo baseInfo;
     (void) strcpy_s(baseInfo.brMac, sizeof(baseInfo.brMac), VALID_BR_MAC);
     (void) strcpy_s(baseInfo.uuid, sizeof(baseInfo.uuid), TEST_UUID);
-    bool result = IsForegroundProcess(&baseInfo, 0);
+    bool result = IsProcExist(&baseInfo, 0);
     EXPECT_FALSE(result);
     int32_t ret = BrProxyServerInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo, 0);
+    result = IsProcExist(&baseInfo, 0);
     EXPECT_FALSE(result);
     BrProxyChannelInfo info;
     (void) strcpy_s(info.peerBRMacAddr, sizeof(info.peerBRMacAddr), VALID_BR_MAC);
@@ -1004,21 +1004,21 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest041, TestSize.Level1)
     EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
     ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID, APP_INDEX_TEST);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo, REQUEST_ID);
-    EXPECT_TRUE(result);
+    result = IsProcExist(&baseInfo, REQUEST_ID);
+    EXPECT_FALSE(result);
     BrProxyChannelInfo infoMismatch;
     (void) strcpy_s(infoMismatch.peerBRMacAddr, sizeof(infoMismatch.peerBRMacAddr), "FF:AA:CC:AA:BB:DD");
     (void) strcpy_s(infoMismatch.peerBRUuid, sizeof(infoMismatch.peerBRUuid), "BBBBBBBB-0000-0000-8888-BBBBBBBBBBBB");
     ret = ServerAddChannelToList(
         infoMismatch.peerBRMacAddr, infoMismatch.peerBRUuid, CHANNEL_ID + 1, REQUEST_ID + 1, APP_INDEX_TEST);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo, REQUEST_ID);
-    EXPECT_TRUE(result);
+    result = IsProcExist(&baseInfo, REQUEST_ID);
+    EXPECT_FALSE(result);
     ret = ServerDeleteChannelFromList(CHANNEL_ID);
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = ServerDeleteChannelFromList(CHANNEL_ID + 1);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo, 0);
+    result = IsProcExist(&baseInfo, 0);
     EXPECT_FALSE(result);
 }
 

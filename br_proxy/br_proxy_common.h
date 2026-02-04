@@ -44,6 +44,7 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool i
 int32_t BrProxyPostMsgToLooper(int32_t what, uint64_t arg1, uint64_t arg2, void *obj, uint64_t delayMillis);
 void BrProxyRemoveMsgFromLooper(int32_t what, uint64_t arg1, uint64_t arg2, void *obj);
 int32_t BrProxyLoopInit(void);
+bool CommonGetRunningProcessInformation(const char *bundleName, int32_t userId, pid_t uid, pid_t *pid);
 
 #ifdef __cplusplus
 }
