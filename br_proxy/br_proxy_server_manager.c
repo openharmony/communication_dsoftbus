@@ -93,15 +93,15 @@ static SoftBusList *g_retryList = NULL;
 static SoftBusMutex g_channelIdLock;
 static void ClearCountInRetryList(pid_t uid);
 static int32_t GetCallerInfoAndVerifyPermission(BrProxyInfo *info);
-static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel);
-static void onOpenFail(uint32_t requestId, int32_t reason, const char *brMac);
+static void OnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel);
+static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac);
 static void OnDataReceived(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen);
 static void OnDisconnected(struct ProxyChannel *channel, int32_t reason);
 static void OnReconnected(char *addr, struct ProxyChannel *channel);
 
 static OpenProxyChannelCallback g_channelOpen = {
-    .onOpenSuccess = onOpenSuccess,
-    .onOpenFail = onOpenFail,
+    .onOpenSuccess = OnOpenSuccess,
+    .onOpenFail = OnOpenFail,
 };
 
 static ProxyConnectListener g_channelListener = {
@@ -409,14 +409,14 @@ static int32_t GetNewChannelId(int32_t *channelId)
     if (channelId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    static int32_t g_channelId = 0;
+    static int32_t gChannelId = 0;
     int32_t id = 0;
 
     if (SoftBusMutexLock(&g_channelIdLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get channelId lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    id = ++g_channelId;
+    id = ++gChannelId;
     (void)SoftBusMutexUnlock(&g_channelIdLock);
     *channelId = id;
     return SOFTBUS_OK;
@@ -991,7 +991,7 @@ static void StorageInfo(BrProxyInfo *proxyInfo)
     TransBrProxyStorageWrite(TransBrProxyStorageGetInstance(), &info);
 }
 
-static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
+static void OnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
 {
     TRANS_CHECK_AND_RETURN_LOGE(channel != NULL, TRANS_SVC, "[br_proxy] channel is null");
     char *tmpName = NULL;
@@ -1067,7 +1067,7 @@ static int32_t SetCurrentConnect(const char *brMac, const char *uuid, uint32_t r
     return SOFTBUS_NOT_FIND;
 }
 
-static void onOpenFail(uint32_t requestId, int32_t reason,  const char *brMac)
+static void OnOpenFail(uint32_t requestId, int32_t reason,  const char *brMac)
 {
     (void)brMac;
     TRANS_LOGE(TRANS_SVC, "[br_proxy] OpenFail requestId=%{public}d, reason = %{public}d",

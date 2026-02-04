@@ -26,20 +26,20 @@ namespace OHOS::SoftBus {
 
 class TransBrProxyStorageTest : public testing::Test {
 public:
-    static constexpr char const *TEST_FILE_PATH = "./trans_br_proxy_storage_test.txt";
+    static constexpr char const *testFilePath = "./trans_br_proxy_storage_test.txt";
 
     static void SetUpTestCase() { }
     static void TearDownTestCase() { }
     void SetUp() override { }
     void TearDown() override
     {
-        (void)SoftBusRemoveFile(TEST_FILE_PATH);
+        (void)SoftBusRemoveFile(testFilePath);
     }
 };
 
 void ConstructBrProxyStorageInstance(TransBrProxyStorage &instance)
 {
-    instance.filepath = TransBrProxyStorageTest::TEST_FILE_PATH;
+    instance.filepath = TransBrProxyStorageTest::testFilePath;
     (void)SoftBusMutexInit(&instance.mutex, NULL);
     (void)memset_s(&instance.info, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
     instance.info.userId = -1;
@@ -59,9 +59,9 @@ void ConstructStorageTestInfo(TransBrProxyStorageInfo &info)
     (void)memset_s(&info, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
     (void)strncpy_s(info.bundleName, NAME_MAX_LEN, "com.ohos.softbus.test", NAME_MAX_LEN - 1);
     (void)strncpy_s(info.abilityName, NAME_MAX_LEN, "BrProxyStorageTestAbility", NAME_MAX_LEN - 1);
-    info.appIndex = 888;
-    info.userId = 1001;
-    info.uid = 2002;
+    info.appIndex = 888; // 888:for test case
+    info.userId = 1001; // 1001:for test case
+    info.uid = 2002; // 2002:for test case
 }
 
 bool CheckStorageInfoEqual(const TransBrProxyStorageInfo &src, const TransBrProxyStorageInfo &dst)
