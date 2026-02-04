@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include <cstring>
+#include <securec.h>
 #include "softbus_adapter_file.h"
 
 using namespace testing;
