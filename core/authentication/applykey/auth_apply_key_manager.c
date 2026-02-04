@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,9 +109,9 @@ static int32_t InsertToAuthApplyMap(
     return SOFTBUS_OK;
 }
 
-static int32_t GetNodeFromAuthApplyMap(const char *applyMapKey, AuthApplyMapValue **value)
+static int32_t GetNodeFromAuthApplyMap(const char *applyMapKey, AuthApplyMapValue *value)
 {
-    if (applyMapKey == NULL) {
+    if (applyMapKey == NULL || value == NULL) {
         AUTH_LOGE(AUTH_INIT, "input is invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -120,13 +120,17 @@ static int32_t GetNodeFromAuthApplyMap(const char *applyMapKey, AuthApplyMapValu
         AUTH_LOGE(AUTH_CONN, "SoftBusMutexLock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    uint64_t *ptr = (uint64_t *)LnnMapGet(&g_authApplyMap, applyMapKey);
+    AuthApplyMapValue *ptr = (AuthApplyMapValue *)LnnMapGet(&g_authApplyMap, applyMapKey);
     if (ptr == NULL) {
         AUTH_LOGE(AUTH_CONN, "LnnMapGet fail");
         (void)SoftBusMutexUnlock(&g_authApplyMutex);
         return SOFTBUS_AUTH_APPLY_KEY_NOT_FOUND;
     }
-    *value = (AuthApplyMapValue *)ptr;
+    if (memcpy_s(value, sizeof(AuthApplyMapValue), ptr, sizeof(AuthApplyMapValue)) != EOK) {
+        (void)SoftBusMutexUnlock(&g_authApplyMutex);
+        AUTH_LOGE(AUTH_CONN, "memcpy_s value fail");
+        return SOFTBUS_MEM_ERR;
+    }
     (void)SoftBusMutexUnlock(&g_authApplyMutex);
     return SOFTBUS_OK;
 }
@@ -193,17 +197,17 @@ int32_t GetApplyKeyByBusinessInfo(
         return SOFTBUS_SPRINTF_ERR;
     }
     PrintfRequestBusinessInfo(info, userId);
-    AuthApplyMapValue *value = NULL;
+    AuthApplyMapValue value = { {0} };
     int32_t ret = GetNodeFromAuthApplyMap(key, &value);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "GetNodeFromAuthApplyMap fail");
         return ret;
     }
-    if (memcpy_s(uk, ukLen, value->applyKey, D2D_APPLY_KEY_LEN) != EOK) {
+    if (memcpy_s(uk, ukLen, value.applyKey, D2D_APPLY_KEY_LEN) != EOK) {
         AUTH_LOGE(AUTH_CONN, "memcpy key fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (strcpy_s(accountHash, SHA_256_HEX_HASH_LEN, value->accountHash) != EOK) {
+    if (strcpy_s(accountHash, SHA_256_HEX_HASH_LEN, value.accountHash) != EOK) {
         AUTH_LOGE(AUTH_CONN, "strcpy accountHash fail");
         return SOFTBUS_STRCPY_ERR;
     }
@@ -268,7 +272,6 @@ static char *PackAllApplyKey(void)
     if (msg == NULL) {
         AUTH_LOGE(AUTH_CONN, "cJSON_PrintUnformatted fail");
     }
-    (void)SoftBusMutexUnlock(&g_authApplyMutex);
     cJSON_Delete(jsonArray);
     return msg;
 }
@@ -339,7 +342,7 @@ static bool AuthPraseApplyKey(const char *applyKey)
             break;
         }
         value = node.value;
-        if (AuthIsApplyKeyExpired(value.time) && InsertToAuthApplyMap(node.mapKey, value.applyKey, value.userId,
+        if (!AuthIsApplyKeyExpired(value.time) && InsertToAuthApplyMap(node.mapKey, value.applyKey, value.userId,
             value.time, value.accountHash) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "insert apply key fail");
             res = false;
