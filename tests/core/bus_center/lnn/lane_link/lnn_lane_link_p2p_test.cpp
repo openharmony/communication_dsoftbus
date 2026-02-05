@@ -53,6 +53,10 @@ constexpr uint32_t AUTH_REQUEST_ID = 1;
 constexpr uint32_t P2P_REQ_ID = 0;
 constexpr uint32_t NEW_P2P_REQ_ID = 1;
 
+static SoftBusCond g_cond = {0};
+static SoftBusMutex g_lock = {0};
+static bool g_isNeedCondWait = true;
+
 class LNNLaneLinkP2pTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -64,6 +68,8 @@ public:
 void LNNLaneLinkP2pTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "LNNLaneLinkP2pTest start";
+    (void)SoftBusMutexInit(&g_lock, nullptr);
+    (void)SoftBusCondInit(&g_cond);
     LnnInitLnnLooper();
     EXPECT_EQ(LnnP2pInit(), SOFTBUS_OK);
 }
@@ -72,6 +78,8 @@ void LNNLaneLinkP2pTest::TearDownTestCase()
 {
     LnnDeinitLnnLooper();
     LnnDestroyP2pLinkInfo();
+    (void)SoftBusCondDestroy(&g_cond);
+    (void)SoftBusMutexDestroy(&g_lock);
     GTEST_LOG_(INFO) << "LNNLaneLinkP2pTest end";
 }
 
@@ -81,6 +89,70 @@ void LNNLaneLinkP2pTest::SetUp()
 
 void LNNLaneLinkP2pTest::TearDown()
 {
+}
+
+static void CondSignal(void)
+{
+    if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondSignal SoftBusMutexLock failed";
+        return;
+    }
+    if (SoftBusCondSignal(&g_cond) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondSignal SoftBusCondSignal failed";
+        (void)SoftBusMutexUnlock(&g_lock);
+        return;
+    }
+    g_isNeedCondWait = false;
+    (void)SoftBusMutexUnlock(&g_lock);
+}
+
+static void ComputeWaitForceDownTime(uint32_t waitMillis, SoftBusSysTime *outtime)
+{
+#define USECTONSEC 1000
+    SoftBusSysTime now;
+    (void)SoftBusGetTime(&now);
+    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + (int64_t)waitMillis * USECTONSEC;
+    outtime->sec = time / USECTONSEC / USECTONSEC;
+    outtime->usec = time % (USECTONSEC * USECTONSEC);
+}
+
+static void CondWait(void)
+{
+    if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondWait SoftBusMutexLock failed";
+        return;
+    }
+    if (!g_isNeedCondWait) {
+        GTEST_LOG_(INFO) << "Doesn't need CondWait, g_isNeedCondWait = " << g_isNeedCondWait;
+        (void)SoftBusMutexUnlock(&g_lock);
+        return;
+    }
+    SoftBusSysTime waitTime = {0};
+    uint32_t condWaitTimeout = 3200;
+    ComputeWaitForceDownTime(condWaitTimeout, &waitTime);
+    if (SoftBusCondWait(&g_cond, &g_lock, &waitTime) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "CondWait Timeout end";
+        (void)SoftBusMutexUnlock(&g_lock);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_lock);
+}
+
+static void SetIsNeedCondWait(void)
+{
+    if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
+        GTEST_LOG_(INFO) << "SetIsNeedCondWait SoftBusMutexLock failed";
+        return;
+    }
+    g_isNeedCondWait = true;
+    (void)SoftBusMutexUnlock(&g_lock);
+}
+
+static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType)
+{
+    (void)linkType;
+    GTEST_LOG_(INFO) << "on lane link failed, laneReqId=" << reqId << ", errcode=" << reason;
+    CondSignal();
 }
 
 static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
@@ -1116,5 +1188,103 @@ HWTEST_F(LNNLaneLinkP2pTest, HANDLE_WIFI_DIRECT_CONFLICT_TEST_001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = PostGuideChannelSelectMessage(LANE_REQUEST_ID, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: IS_START_WIFI_DIRECT_RECONNECT_TEST_001
+* @tc.desc: IsStartWifiDirectReconnect test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, IS_START_WIFI_DIRECT_RECONNECT_TEST_001, TestSize.Level1)
+{
+    LinkRequest linkRequest = {
+        .linkType = LANE_HML,
+        .triggerLinkTime = UINT64_MAX,
+    };
+    const LaneLinkCb callback = {0};
+    WdGuideInfo guideInfo = {
+        .laneReqId = LANEREQID,
+        .request.linkType = LANE_HML,
+        .guideIdx = 0,
+        .guideList[0] = LANE_ACTIVE_AUTH_TRIGGER,
+    };
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkP2pMock, IsEnhancedWifiDirectSupported).WillRepeatedly(Return(true));
+    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddGuideInfoItem(&guideInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool result = IsStartWifiDirectReconnect(P2P_REQ_ID, SOFTBUS_CONN_RETRYABLE_FAIL_WITH_CURRENT_GUIDE);
+    EXPECT_FALSE(result);
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    result = IsStartWifiDirectReconnect(P2P_REQ_ID, SOFTBUS_CONN_RETRYABLE_FAIL_WITH_CURRENT_GUIDE);
+    EXPECT_TRUE(result);
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: IS_START_WIFI_DIRECT_RECONNECT_TEST_002
+* @tc.desc: IsStartWifiDirectReconnect test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, IS_START_WIFI_DIRECT_RECONNECT_TEST_002, TestSize.Level1)
+{
+    LinkRequest linkRequest = {
+        .linkType = LANE_HML,
+        .triggerLinkTime = UINT64_MAX,
+    };
+    const LaneLinkCb callback = {
+        .onLaneLinkFail = OnLaneLinkFail,
+    };
+    WdGuideInfo guideInfo = {
+        .laneReqId = LANEREQID,
+        .request.linkType = LANE_HML,
+        .guideIdx = 0,
+        .guideList[0] = LANE_ACTIVE_AUTH_TRIGGER,
+    };
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkP2pMock, IsEnhancedWifiDirectSupported).WillRepeatedly(Return(true));
+    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, NEW_P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddGuideInfoItem(&guideInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool result = IsStartWifiDirectReconnect(NEW_P2P_REQ_ID, SOFTBUS_INVALID_PARAM);
+    EXPECT_FALSE(result);
+    SetIsNeedCondWait();
+    result = IsStartWifiDirectReconnect(NEW_P2P_REQ_ID, SOFTBUS_CONN_PROHIBIT_CREATE_GROUP);
+    EXPECT_TRUE(result);
+    CondWait();
+    ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, NEW_P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddGuideInfoItem(&guideInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SetIsNeedCondWait();
+    result = IsStartWifiDirectReconnect(NEW_P2P_REQ_ID, SOFTBUS_CONN_PROHIBIT_CREATE_GROUP);
+    EXPECT_TRUE(result);
+    CondWait();
+    EXPECT_NO_FATAL_FAILURE(DelGuideInfoItem(LANEREQID, LANE_HML));
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, NEW_P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }
