@@ -15,6 +15,8 @@
 #include <securec.h>
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
+#include "app_mgr_constants.h"
+#include "app_mgr_interface.h"
 #include "allow_type.h"
 #include "bundle_mgr_interface.h"
 #include "ipc_skeleton.h"
@@ -77,6 +79,53 @@ static sptr<AppExecFwk::IBundleMgr> GetBundleMgr()
         return nullptr;
     }
     return iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+}
+
+sptr<AppExecFwk::IAppMgr> GetAppManagerInstance()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] systemAbiliityManager is nullptr");
+        return nullptr;
+    }
+    sptr<IRemoteObject> appObject = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
+    if (appObject == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] appObject is nullptr");
+        return nullptr;
+    }
+    return iface_cast<AppExecFwk::IAppMgr>(appObject);
+}
+
+extern "C" bool GetRunningProcessInformation(const std::string bundleName, int32_t userId, pid_t uid, pid_t *pid)
+{
+    if (pid == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param");
+        return false;
+    }
+    std::vector<AppExecFwk::RunningProcessInfo> infos;
+    sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+    if (appMgr == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] GetAppManagerInstance failed");
+        return false;
+    }
+    int32_t ret = appMgr->GetRunningProcessInformation(bundleName, userId, infos);
+    if (ret != ERR_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] GetRunningProcessInformation failed: %{public}d", ret);
+        return false;
+    }
+    if (infos.size() <= 0) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] RunningProcessInfo size: %{public}zu", infos.size());
+        return false;
+    }
+    for (auto info : infos) {
+        if (info.uid_ == uid && info.processType_ == AppExecFwk::ProcessType::NORMAL) {
+            *pid = info.pid_;
+            return true;
+        }
+    }
+    TRANS_LOGE(TRANS_SVC, "[br_proxy] find infos failed!");
+    return false;
 }
 
 extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t userId, uint32_t abilityNameLen,
