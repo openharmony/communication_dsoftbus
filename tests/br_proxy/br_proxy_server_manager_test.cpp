@@ -415,7 +415,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest017, TestSize.Level1)
     bool ret = TransIsProxyChannelEnabled(uid);
     EXPECT_EQ(ret, true);
     ret = TransIsProxyChannelEnabled(uid);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**
