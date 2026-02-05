@@ -197,7 +197,7 @@ int32_t ReportLaneEventInfo(LnnEventLaneStage stage, uint32_t laneHandle, int32_
         .wifiDetectState = info.laneProcessList32Bit[EVENT_WIFI_DETECT_STATE],
         .wifiDetectTime = info.laneProcessList64Bit[EVENT_WIFI_DETECT_TIME],
         .costTime = info.laneProcessList64Bit[EVENT_COST_TIME],
-        .isWifiDirectReuse = info.laneProcessList32Bit[EVENT_WIFI_DIRECT_REUSE],
+        .isWifiDirectReuse = (int32_t)info.laneProcessList32Bit[EVENT_WIFI_DIRECT_REUSE],
         .isHmlReuse = info.laneProcessList32Bit[EVENT_HML_REUSE],
         .isDelayFree = info.laneProcessList32Bit[EVENT_DELAY_FREE],
         .isBuildRetry = info.laneProcessList32Bit[EVENT_BUILD_RETRY],
@@ -222,7 +222,7 @@ void ReportLaneEventBuildLinkResult(uint32_t laneReqId, LaneLinkType type, uint6
     if (GetLaneEventInfo(laneReqId, &laneProcess) == SOFTBUS_OK) {
         if (type == LANE_HML || type == LANE_P2P) {
             extra.guideType = (int32_t)laneProcess.laneProcessList32Bit[EVENT_GUIDE_TYPE];
-            extra.isWifiDirectReuse = laneProcess.laneProcessList32Bit[EVENT_WIFI_DIRECT_REUSE];
+            extra.isWifiDirectReuse = (int32_t)laneProcess.laneProcessList32Bit[EVENT_WIFI_DIRECT_REUSE];
         }
         extra.osType = (int32_t)laneProcess.laneProcessList32Bit[EVENT_OS_TYPE];
     }
