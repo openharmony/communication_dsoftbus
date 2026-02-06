@@ -140,7 +140,7 @@ HWTEST_F(ProxyConfigTest, ProxyGetRetryConfig, TestSize.Level1)
 
     info.isAclConnected = false;
     info.innerRetryNum = 0;
-    const std::vector<uint64_t> unconditionWant = { 15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000, 15000,
-        15000, 120000, 120000, 120000, 120000, 120000 };
+    const std::vector<uint64_t> unconditionWant = { 15000, 15000, 15000, 15000,
+        120000, 120000, 120000, 120000, 120000 };
     TestPolicy("acl disconnected uncondition", info, unconditionWant, expectFunction);
 }

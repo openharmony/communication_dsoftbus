@@ -34,6 +34,8 @@
 #define OPEN_PROXY_CHANNEL_WAIT_MS 200
 #define ACL_WAIT_HFP_DELAY_MS (10 * 1000)
 
+#define REQUEST_ID_MATCH_ALL 0
+
 typedef struct {
     bool isSuccess;
     uint32_t channelId;
@@ -92,6 +94,9 @@ static uint32_t GenerateRequestId(void)
     int32_t ret = SoftBusMutexLock(&g_reqIdLock);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, PROXY_CHANNEL_MAX_STATE, CONN_PROXY,
         "lock channel fail, error=%{public}d", ret);
+    if (g_reqId == REQUEST_ID_MATCH_ALL) {
+        g_reqId++;
+    }
     uint32_t reqId = g_reqId++;
     SoftBusMutexUnlock(&g_reqIdLock);
     return reqId;
@@ -176,7 +181,7 @@ static void ProxyChannelCloseHandler(uint32_t requestId, char *brAddr)
 
 static void AttemptPostChannelCloseEvent(struct ProxyChannel *channel, bool isClearReconnectEvent)
 {
-    CONN_CHECK_AND_RETURN_LOGD(isClearReconnectEvent, CONN_PROXY, "no need clear reconnect event");
+    CONN_CHECK_AND_RETURN_LOGI(isClearReconnectEvent, CONN_PROXY, "no need clear reconnect event");
     char *copyAddr = (char *)SoftBusCalloc(BT_MAC_MAX_LEN);
     if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_MAX_LEN, channel->brMac) != EOK) {
         CONN_LOGE(CONN_PROXY, "copyAddr fail");
@@ -441,10 +446,13 @@ static bool IsNeedReuseOrWait(ProxyConnectInfo *connectInfo)
         if (StrCmpIgnoreCase(connectInfo->brMac, connectingProxyChannel->brMac) == 0) {
             CONN_LOGI(CONN_PROXY, "wait connect result reqId=%{public}u, isInnerRequest=%{public}d",
                 connectInfo->requestId, connectInfo->isInnerRequest);
-            // wait connect finished and reuse
             if (!connectInfo->isInnerRequest) {
+                // wait connect finished and reuse
                 connectingProxyChannel->result = connectInfo->result;
                 connectingProxyChannel->requestId = connectInfo->requestId;
+            } else {
+                connectInfo->result.onOpenFail(connectInfo->requestId, SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR,
+                    connectInfo->brMac);
             }
         } else {
             connectInfo->result.onOpenFail(connectInfo->requestId, SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR,
@@ -926,6 +934,8 @@ static void ProxyResetHandler(void)
         ResetReconnectEvent(it->requestId, it->brMac);
         it->innerRetryNum = 0;
     }
+    // remove all open proxy channel msg, request is 0 match all
+    ConnRemoveMsgFromLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL, REQUEST_ID_MATCH_ALL, 0, NULL);
 }
 
 static void ProxyRestoreHandler(void)
@@ -1100,6 +1110,10 @@ static int ProxyChannelLooperEventFunc(const SoftBusMessage *msg, void *args)
                 return COMPARE_FAILED;
             }
             ProxyConnectInfo *info = (ProxyConnectInfo *)msg->obj;
+            if (ctx->arg1 == REQUEST_ID_MATCH_ALL) {
+                CONN_LOGW(CONN_PROXY, "match all, request id=%{public}u", info->requestId);
+                return COMPARE_SUCCESS;
+            }
             return (uint64_t)(info->requestId) == ctx->arg1 ? COMPARE_SUCCESS : COMPARE_FAILED;
         }
         case MSG_OPEN_PROXY_CHANNEL_RETRY: {

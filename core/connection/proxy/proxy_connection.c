@@ -104,7 +104,7 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
         .connStateCb = BrConnectCallback,
     };
     (void)g_sppDriver->UpdatePriority(binaryAddr, CONN_BR_CONNECT_PRIORITY_NO_REFUSE_FREQUENT_CONNECT);
-    int32_t socketHandle = g_sppDriver->Connect(connection->proxyChannel.uuid, binaryAddr, &callback);
+    int32_t socketHandle = g_sppDriver->ConnectEncrypt(connection->proxyChannel.uuid, binaryAddr, &callback);
     if (socketHandle < 0) {
         CONN_LOGE(CONN_PROXY, "connect fail, socketHandle=%{public}d", socketHandle);
         char anomizeAddress[BT_MAC_LEN] = { 0 };
