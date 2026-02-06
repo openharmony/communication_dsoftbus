@@ -254,8 +254,26 @@ HWTEST_F(ClientBusCentManagerTest, GET_NODE_KEY_INFO_INNER_Test_001, TestSize.Le
     EXPECT_CALL(busCentManagerMock, ServerIpcGetNodeKeyInfo(_, _, _, _, _))
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen), SOFTBUS_OK);
+    EXPECT_NE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen), SOFTBUS_SERVER_NOT_INIT);
     EXPECT_TRUE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen) == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SET_NODE_KEY_INFO_INNER_Test_001
+ * @tc.desc: set node key info inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, SET_NODE_KEY_INFO_INNER_Test_001, TestSize.Level1)
+{
+    int32_t infoLen = 0;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcSetNodeKeyInfo(_, _, _, _, _))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(SetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_SERVICE_FIND_CAP_EX, nullptr, infoLen),
+        SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_TRUE(SetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_SERVICE_FIND_CAP_EX, nullptr, infoLen) == SOFTBUS_OK);
 }
 
 /*

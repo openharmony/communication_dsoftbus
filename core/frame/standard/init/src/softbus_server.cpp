@@ -228,6 +228,12 @@ int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId
     return LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
 
+int32_t SoftBusServer::SetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len)
+{
+    return LnnIpcSetNodeKeyInfo(pkgName, networkId, key, buf, len);
+}
+
 int32_t SoftBusServer::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     return LnnIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);

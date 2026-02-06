@@ -522,6 +522,62 @@ HWTEST_F(BusCenterServerProxyStandardTest, GetNodeKeyInfo_TEST_003, TestSize.Lev
 }
 
 /*
+ * @tc.name: SetNodeKeyInfo_TEST_001
+ * @tc.desc: SetNodeKeyInfo return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, SetNodeKeyInfo_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = nullptr;
+    const char *networkId = "testNetworkId";
+    unsigned char arr[] = { 0x01, 0x02, 0x03 };
+    unsigned char *buf = arr;
+    uint32_t len = sizeof(arr);
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.SetNodeKeyInfo(pkgName, networkId, KEY, buf, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetNodeKeyInfo_TEST_002
+ * @tc.desc: SetNodeKeyInfo return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, SetNodeKeyInfo_TEST_002, TestSize.Level1)
+{
+    const char *pkgName = "testName";
+    const char *networkId = nullptr;
+    unsigned char arr[] = { 0x01, 0x02, 0x03 };
+    unsigned char *buf = arr;
+    uint32_t len = sizeof(arr);
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.SetNodeKeyInfo(pkgName, networkId, KEY, buf, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetNodeKeyInfo_TEST_003
+ * @tc.desc: SetNodeKeyInfo return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, SetNodeKeyInfo_TEST_003, TestSize.Level1)
+{
+    const char *pkgName = "testName";
+    const char *networkId = "testNetworkId";
+    unsigned char *buf = nullptr;
+    uint32_t len = LEN;
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.SetNodeKeyInfo(pkgName, networkId, KEY, buf, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: RegDataLevelChangeCb_TEST_001
  * @tc.desc: RegDataLevelChangeCb return value is equal to SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC

@@ -128,6 +128,7 @@ typedef struct TagLnnOpenFuncList {
     LnnGetAllOnlineNodeInfoFunc lnnGetAllOnlineNodeInfo;
     LnnGetOnlineAndOfflineWithinTimeUdidsFunc lnnGetOnlineAndOfflineWithinTimeUdids;
     LnnGetNodeKeyInfoFunc lnnGetNodeKeyInfo;
+    LnnSetNodeKeyInfoFunc lnnSetNodeKeyInfo;
     LnnGetNetworkIdByUdidFunc lnnGetNetworkIdByUdid;
     LnnGetNetworkIdByUdidHashFunc lnnGetNetworkIdByUdidHash;
     LnnGetAllMetaNodeInfoFunc lnnGetAllMetaNodeInfo;

@@ -30,6 +30,7 @@ public:
 
 private:
     int32_t GetNodeKeyInfoLen(int32_t key);
+    int32_t SetNodeKeyInfoLen(int32_t key);
     int32_t SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply);
     int32_t SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply);
 
@@ -53,6 +54,7 @@ private:
     int32_t GetAllOnlineNodeInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetLocalDeviceInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetNodeDataChangeFlagInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegDataLevelChangeCbInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregDataLevelChangeCbInner(MessageParcel &data, MessageParcel &reply);

@@ -21,6 +21,7 @@
 #include "client_bus_center_manager.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_common.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -352,7 +353,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize
 
 /*
  * @tc.name: BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001
- * @tc.desc: get node key info interface test
+ * @tc.desc: get local node key info interface test
  *           Test the function of obtaining key node information in the Buscenter SDK
  * @tc.type: FUNC
  * @tc.level: Level1
@@ -361,13 +362,12 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_LOCAL_NODE_INFO_Test_001, TestSize
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.Level0)
 {
     NodeBasicInfo info;
-    NodeBasicInfo *remoteNodeInfo = nullptr;
-    int32_t infoNum = 0;
     char uuid[UUID_BUF_LEN] = { 0 };
     char udid[UDID_BUF_LEN] = { 0 };
     char brMac[BT_MAC_LEN] = { 0 };
     char ipAddr[IP_STR_MAX_LEN] = { 0 };
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
+    char serviceFindCap[SERVICE_FIND_CAP_LEN] = { 0 };
     int32_t netCapacity = 0;
     int32_t netType = 0;
 
@@ -382,32 +382,18 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_001, TestSize.L
     EXPECT_TRUE(
         GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_UUID, (uint8_t *)uuid, UUID_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(strlen(uuid) == (UUID_BUF_LEN - 1));
-
     EXPECT_TRUE(
         GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_BR_MAC, (uint8_t *)brMac, BT_MAC_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_IP_ADDRESS, (uint8_t *)ipAddr, IP_STR_MAX_LEN) ==
         SOFTBUS_OK);
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_DEV_NAME, (uint8_t *)deviceName,
-                    DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
+        DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_CAPABILITY, (uint8_t *)&netCapacity,
-                    LNN_COMMON_LEN) == SOFTBUS_OK);
+        LNN_COMMON_LEN) == SOFTBUS_OK);
     EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_NETWORK_TYPE, (uint8_t *)&netType,
-                    LNN_COMMON_LEN) == SOFTBUS_OK);
-
-    EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
-    for (int32_t i = 0; i < infoNum; i++) {
-        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_BR_MAC, (uint8_t *)brMac,
-                        BT_MAC_LEN) == SOFTBUS_OK);
-        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_IP_ADDRESS,
-                        (uint8_t *)ipAddr, IP_STR_MAX_LEN) == SOFTBUS_OK);
-        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_DEV_NAME,
-                        (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
-        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_CAPABILITY,
-                        (uint8_t *)&netCapacity, LNN_COMMON_LEN) == SOFTBUS_OK);
-        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_TYPE,
-                        (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
-    }
-    FreeNodeInfo(remoteNodeInfo);
+        LNN_COMMON_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_SERVICE_FIND_CAP, (uint8_t *)serviceFindCap,
+        SERVICE_FIND_CAP_LEN) == SOFTBUS_OK);
 }
 
 /*
@@ -432,6 +418,67 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_002, TestSize.L
                         (uint8_t *)&isScreenOn, DATA_DEVICE_SCREEN_STATUS_LEN) == SOFTBUS_OK);
     }
     FreeNodeInfo(remoteNodeInfo);
+}
+
+/*
+ * @tc.name: BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_003
+ * @tc.desc: get remote node key info interface test
+ *           Test the function of obtaining key node information in the Buscenter SDK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require: I5I7B9
+ */
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_GET_NODE_KEY_INFO_Test_003, TestSize.Level0)
+{
+    NodeBasicInfo *remoteNodeInfo = nullptr;
+    int32_t infoNum = 0;
+    char brMac[BT_MAC_LEN] = { 0 };
+    char ipAddr[IP_STR_MAX_LEN] = { 0 };
+    char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
+    char serviceFindCap[SERVICE_FIND_CAP_LEN] = { 0 };
+    int32_t netCapacity = 0;
+    int32_t netType = 0;
+
+    EXPECT_TRUE(GetAllNodeDeviceInfo(TEST_PKG_NAME, &remoteNodeInfo, &infoNum) == SOFTBUS_OK);
+    for (int32_t i = 0; i < infoNum; i++) {
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_BR_MAC, (uint8_t *)brMac,
+                        BT_MAC_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_IP_ADDRESS,
+                        (uint8_t *)ipAddr, IP_STR_MAX_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_DEV_NAME,
+                        (uint8_t *)deviceName, DEVICE_NAME_BUF_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_CAPABILITY,
+                        (uint8_t *)&netCapacity, LNN_COMMON_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_NETWORK_TYPE,
+                        (uint8_t *)&netType, LNN_COMMON_LEN) == SOFTBUS_OK);
+        EXPECT_TRUE(GetNodeKeyInfo(TEST_PKG_NAME, (remoteNodeInfo + i)->networkId, NODE_KEY_SERVICE_FIND_CAP,
+                        (uint8_t *)serviceFindCap, SERVICE_FIND_CAP_LEN) == SOFTBUS_OK);
+    }
+    FreeNodeInfo(remoteNodeInfo);
+}
+
+/*
+ * @tc.name: BUS_CENTER_SDK_SET_NODE_KEY_INFO_Test_001
+ * @tc.desc: set local node key info interface test
+ *           Test the function of obtaining key node information in the Buscenter SDK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require: I5I7B9
+ */
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_SET_NODE_KEY_INFO_Test_001, TestSize.Level0)
+{
+    NodeBasicInfo info;
+    char serviceFindCap[SERVICE_FIND_CAP_LEN] = "1234567891234567891234567891234567891234567891234567891234567890";
+    char serviceFindCap1[] = "123456789";
+    (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+
+    EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(SetNodeKeyInfo(nullptr, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, (uint8_t *)serviceFindCap,
+        strlen(serviceFindCap)) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(SetNodeKeyInfo(nullptr, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, nullptr,
+        strlen(serviceFindCap)) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(SetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, (uint8_t *)serviceFindCap1,
+        strlen(serviceFindCap1)) == SOFTBUS_IPC_ERR);
 }
 
 /*

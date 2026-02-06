@@ -771,6 +771,17 @@ int32_t TransServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networ
     return SOFTBUS_OK;
 }
 
+int32_t TransServerProxy::SetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)key;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t TransServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     (void)pkgName;

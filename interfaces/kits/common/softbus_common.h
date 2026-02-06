@@ -280,6 +280,12 @@ extern "C" {
 #define MAX_KEY_LEN 65
 
 /**
+ * @brief The maximum length of service find capacity.
+ *
+ */
+#define SERVICE_FIND_CAP_LEN 65
+
+/**
  * @brief Enumerates {@link ConnectionAddrType} types of a device that is added to a LNN.
  *
  * @since 1.0

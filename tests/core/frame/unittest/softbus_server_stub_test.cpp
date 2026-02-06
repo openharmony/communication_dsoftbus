@@ -2365,4 +2365,43 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest061, TestSize.Level1)
     ret = softBusServer->SetDisplayNameInner(datas, reply);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
+
+/*
+ * @tc.name: SoftbusServerStubTest062
+ * @tc.desc: Verify the SetNodeKeyInfoInner function part01
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest062, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, LnnIpcSetNodeKeyInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    char test[10] = "test";
+    int32_t key = 13;
+    uint32_t len = 20;
+    MessageParcel datas;
+    MessageParcel reply;
+    int32_t ret = softBusServer->SetNodeKeyInfoInner(datas, reply);
+    ret = softBusServer->SetNodeKeyInfoInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test);
+    ret = softBusServer->SetNodeKeyInfoInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    ret = softBusServer->SetNodeKeyInfoInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    datas.WriteInt32(key);
+    datas.WriteUint32(len);
+    datas.WriteRawData(test, 10);
+    ret = softBusServer->SetNodeKeyInfoInner(datas, reply);
+    EXPECT_NE(SOFTBUS_IPC_ERR, ret);
+}
 }
