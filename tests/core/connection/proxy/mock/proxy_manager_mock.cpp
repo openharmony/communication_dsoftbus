@@ -278,7 +278,7 @@ static int32_t UpdatePriority(const BT_ADDR mac, ConnBrConnectPriority priority)
 }
 
 static SppSocketDriver g_sppSocketDriver = {
-    .Connect = Connect,
+    .ConnectEncrypt = Connect,
     .DisConnect = DisConnect,
     .Write = Write,
     .Read = Read,
