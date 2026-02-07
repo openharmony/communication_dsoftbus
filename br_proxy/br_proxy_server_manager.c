@@ -1234,6 +1234,31 @@ static int32_t GetChannelId(const char *mac, const char *uuid, int32_t *channelI
     return SOFTBUS_OK;
 }
 
+static int32_t GetChannelIdAndUserId(const char *mac, const char *uuid, int32_t *channelId, int32_t *userId)
+{
+    if (mac == NULL || uuid == NULL || channelId == NULL || userId == NULL || g_proxyList == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    BrProxyInfo *nodeInfo = NULL;
+    BrProxyInfo *nodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(nodeInfo, nodeNext, &(g_proxyList->list), BrProxyInfo, node) {
+        if (strcmp(nodeInfo->proxyInfo.brMac, mac) == 0 && strcmp(nodeInfo->proxyInfo.uuid, uuid) == 0) {
+            *channelId = nodeInfo->channelId;
+            *userId = nodeInfo->userId;
+            (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] not find");
+    return SOFTBUS_NOT_FIND;
+}
+
 static void PrintSession(const char *brMac, const char *uuid)
 {
     if (brMac == NULL || uuid == NULL) {
@@ -1270,12 +1295,24 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
         return ret;
     }
-
+    TransEventExtra extra = {0};
     uint32_t requestId = 0;
+    int32_t channelId = 0;
+    int32_t userId = 0;
     ret = ConnectPeerDevice(brMac, uuid, &requestId, appIndex);
+    GetChannelIdAndUserId(brMac, uuid, &channelId, &userId);
+    extra.errcode = ret;
+    extra.channelId = channelId;
+    extra.requestId = requestId;
+    extra.userId = userId;
+    extra.appIndex = appIndex;
     if (ret != SOFTBUS_OK) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
         return ret;
     }
+    extra.result = EVENT_STAGE_RESULT_OK;
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
     PrintSession(brMac, uuid);
     return SOFTBUS_OK;
 }
@@ -1614,7 +1651,7 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
         AnonymizeWrapper(tmpMacName), AnonymizeWrapper(tmpUuidName), reason);
     AnonymizeFree(tmpMacName);
     AnonymizeFree(tmpUuidName);
-
+    TransEventExtra extra = {0};
     ServerBrProxyChannelInfo info = {0};
     int32_t ret = GetChannelInfo(NULL, NULL,
         DEFAULT_INVALID_CHANNEL_ID, channel->requestId, &info);
@@ -1623,6 +1660,11 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
         goto EXIT;
     }
     ClientIpcBrProxyStateChanged(info.callingPid, info.channelId, reason);
+    extra.result = EVENT_STAGE_RESULT_OK;
+    extra.errcode = reason;
+    extra.channelId = channel->channelId;
+    extra.requestId = channel->requestId;
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_DISCONNECT, extra);
 EXIT:
     if (reason == SOFTBUS_CONN_BR_UNPAIRED) {
         CloseAllConnect();
@@ -1653,6 +1695,10 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
     }
     UpdateProxyChannel(channel->brMac, channel->uuid, channel);
     ClientIpcBrProxyStateChanged(info.callingPid, info.channelId, SOFTBUS_OK);
+    TransEventExtra extra = {0};
+    extra.channelId = channel->channelId;
+    extra.requestId = channel->requestId;
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_RECONNECT, extra);
 }
 
 static void SendDataIfExistsInList(int32_t channelId)

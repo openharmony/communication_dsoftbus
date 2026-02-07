@@ -127,6 +127,8 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
         TransEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
+            .userId = userId,
+            .appIndex = appIndex,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
     }
@@ -221,6 +223,8 @@ extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
         TransEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
+            .userId = userId,
+            .appIndex = *appIndex,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
         return ret;
