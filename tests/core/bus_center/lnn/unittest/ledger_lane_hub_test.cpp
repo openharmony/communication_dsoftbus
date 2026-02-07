@@ -228,7 +228,9 @@ static void GetWiFiLocalInfo(void)
 
 /*
  * @tc.name: SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001
- * @tc.desc: softbus dump print dynamic net capacity test
+ * @tc.desc: Verify softbus dump print dynamic net capacity with invalid networkId
+ *           returns SOFTBUS_INVALID_PARAM; with valid local networkId returns
+ *           SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -252,7 +254,8 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.L
 
 /*
  * @tc.name: SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001
- * @tc.desc: softbus dump print net type test
+ * @tc.desc: Verify SoftbusDumpPrintNetType with invalid networkId returns
+ *           SOFTBUS_INVALID_PARAM; with valid local networkId returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -276,7 +279,9 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_TYPE_Test_001, TestSize.Level
 
 /*
  * @tc.name: LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001
- * @tc.desc: lnn set node data change flag test
+ * @tc.desc: Verify LnnSetNodeDataChangeFlag with nullptr networkId returns
+ *           SOFTBUS_INVALID_PARAM; with invalid networkId returns
+ *           SOFTBUS_NETWORK_INVALID_DEV_INFO; with valid local networkId returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -295,7 +300,8 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_SET_DATA_CHANGE_FLAG_Test_001
- * @tc.desc: lnn set data change flag test
+ * @tc.desc: Verify LnnSetDataChangeFlag with nullptr nodeInfo returns
+ *           SOFTBUS_INVALID_PARAM; with valid nodeInfo returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -313,7 +319,8 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_DATA_CHANGE_FLAG_Test_001
- * @tc.desc: lnn get data change flag test
+ * @tc.desc: Verify LnnGetDataChangeFlag with nullptr nodeInfo returns 0;
+ *           with valid nodeInfo returns data change flag value
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -330,7 +337,8 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_LOCAL_STR_INFO_Test_001
- * @tc.desc: lnn get local str info test
+ * @tc.desc: Verify LnnSetLocalStrInfo and LnnGetLocalStrInfo with invalid
+ *           parameters return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -355,7 +363,7 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_LOCAL_LEDGER_DELAY_Test_001
- * @tc.desc: lnn Init Local Ledger Delay test
+ * @tc.desc: Verify LnnInitLocalLedgerDelay executes successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -367,7 +375,8 @@ HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level
 
 /*
  * @tc.name: LEDGER_GetDistributedLedgerNode_Test_001
- * @tc.desc: get distributed ledger node info.
+ * @tc.desc: Verify distributed ledger node management including adding and
+ *           removing online nodes
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J0
@@ -384,7 +393,8 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerNode_Test_001, TestSize.L
 
 /*
  * @tc.name: LEDGER_GetDistributedLedgerInfo_Test_001
- * @tc.desc: test of the LnnGetRemoteStrInfo LnnGetDLNumInfo function
+ * @tc.desc: Verify LnnGetRemoteStrInfo and LnnGetRemoteNumU32Info return correct
+ *           device name, MAC address and network capability for online nodes
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J0
@@ -418,7 +428,8 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.L
 
 /*
  * @tc.name: LEDGER_DistributedLedgerChangeName_Test_001
- * @tc.desc: test of the LnnGetRemoteStrInfo LnnSetDLDeviceInfoName function
+ * @tc.desc: Verify LnnSetDLDeviceInfoName can successfully change device name
+ *           and LnnGetRemoteStrInfo returns the updated name
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J0
@@ -441,7 +452,9 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_DistributedLedgerChangeName_Test_001, TestSiz
 
 /*
  * @tc.name: LEDGER_LocalLedgerGetInfo_Test_001
- * @tc.desc: Performance test of the LnnGetLocalLedgerStrInfo and NumInfo function.
+ * @tc.desc: Verify LnnGetLocalStrInfo and LnnGetLocalNumInfoByIfnameIdx return
+ *           correct local device information including UDID, networkId, UUID,
+ *           device type, device name, BT MAC and network ports
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J0

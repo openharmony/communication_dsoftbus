@@ -2046,6 +2046,26 @@ static int32_t UpdateStaticNetCap(const void *capability)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetServiceFindCap(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != SERVICE_FIND_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "get service find cap param fail.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (strncpy_s((char *)buf, len, info->serviceFindCap, strlen(info->serviceFindCap)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY serviceFindCap ERROR!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateServiceFindCap(const void *capability)
+{
+    return ModifyId(g_localNetLedger.localInfo.serviceFindCap, SERVICE_FIND_CAP_LEN, (char *)capability);
+}
+
 static int32_t LlGetLocalSleRangeCapacity(void *buf, uint32_t len)
 {
     if (buf == NULL || len != sizeof(int32_t)) {
@@ -2171,6 +2191,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_P2P_IP, IP_LEN, LlGetP2pIp, LlUpdateLocalP2pIp},
     {STRING_KEY_SLE_ADDR, MAC_LEN, LlGetLocalSleAddr, LlSetLocalSleAddr},
     {STRING_KEY_ACCOUNT_UID, ACCOUNT_UID_STR_LEN, LlGetLocalAccountUid, LlSetLocalAccountUid},
+    {STRING_KEY_SERVICE_FIND_CAP, SERVICE_FIND_CAP_LEN, LlGetServiceFindCap, UpdateServiceFindCap},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
     {NUM_KEY_FEATURE_CAPA, -1, LlGetFeatureCapa, UpdateLocalFeatureCapability},
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},

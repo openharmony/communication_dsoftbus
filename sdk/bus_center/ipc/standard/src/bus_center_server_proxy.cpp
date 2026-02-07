@@ -162,6 +162,15 @@ int32_t ServerIpcGetNodeKeyInfo(
     return ret;
 }
 
+int32_t ServerIpcSetNodeKeyInfo(
+    const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->SetNodeKeyInfo(pkgName, networkId, key, buf, len);
+    return ret;
+}
+
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,

@@ -36,22 +36,24 @@
 #else
 #define BR_PROXY_ADAPTER_PATH "/system/lib/libbr_proxy_adapter.z.so"
 #endif
- 
+#define COMPARE_SUCCESS 0
+#define COMPARE_FAILED  1
+
 using namespace OHOS;
 typedef int32_t (*GetAbilityNameFunc)(char *abilityName, int32_t userId, uint32_t abilityNameLen,
     std::string bundleName, int32_t *appIndex);
 typedef int32_t (*StartAbilityFunc)(const char *bundleName, const char *abilityName,
     int32_t appIndex, int32_t userId);
-typedef int32_t (*UnrestrictedFunc)(const char *bundleName, pid_t pid, pid_t uid);
+typedef int32_t (*UnrestrictedFunc)(const char *bundleName, pid_t pid, pid_t uid, bool isThaw);
+typedef bool (*GetRunningProcessInformationFunc)(const std::string bundleName, int32_t userId, pid_t uid, pid_t *pid);
 
 struct SymbolLoader {
     void *handle;
     StartAbilityFunc startAbility;
     GetAbilityNameFunc getAbilityName;
     UnrestrictedFunc unrestricted;
+    GetRunningProcessInformationFunc getRunningProcessInformation;
 };
-
-static int32_t BrProxyLoopInit(void);
 
 static SoftBusMutex g_lock;
 static std::shared_ptr<OHOS::PowerMgr::RunningLock> g_powerMgr;
@@ -71,7 +73,10 @@ static int32_t LoadSymbol(SymbolLoader *loader, bool *load)
     StartAbilityFunc startAbility = (StartAbilityFunc)dlsym(handle, "StartAbility");
     GetAbilityNameFunc getAbilityName = (GetAbilityNameFunc)dlsym(handle, "ProxyChannelMgrGetAbilityName");
     UnrestrictedFunc unrestricted = (UnrestrictedFunc)dlsym(handle, "Unrestricted");
-    if (startAbility == nullptr || getAbilityName == nullptr || unrestricted == nullptr) {
+    GetRunningProcessInformationFunc getRunningProcessInformation =
+        (GetRunningProcessInformationFunc)dlsym(handle, "GetRunningProcessInformation");
+    if (startAbility == nullptr || getAbilityName == nullptr || unrestricted == nullptr ||
+        getRunningProcessInformation == nullptr) {
         dlclose(handle);
         return SOFTBUS_NETWORK_DLSYM_FAILED;
     }
@@ -80,6 +85,7 @@ static int32_t LoadSymbol(SymbolLoader *loader, bool *load)
     loader->getAbilityName = getAbilityName;
     loader->startAbility = startAbility;
     loader->unrestricted = unrestricted;
+    loader->getRunningProcessInformation = getRunningProcessInformation;
 
     *load = true;
     return SOFTBUS_OK;
@@ -113,7 +119,7 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
         (void)SoftBusMutexUnlock(&g_lock);
         return ret;
     }
-    int32_t userId =  GetActiveOsAccountIds();
+    int32_t userId =  JudgeDeviceTypeAndGetOsAccountIds();
     ret = g_symbolLoader.startAbility(bundleName, abilityName, appIndex, userId);
     if (ret != SOFTBUS_OK) {
         CleanupSymbolIfNeed(&g_symbolLoader, load);
@@ -236,10 +242,7 @@ extern "C" int32_t CheckPushPermission()
 }
 
 SoftBusHandler g_brProxyLooperHandler = { 0 };
-typedef enum {
-    LOOP_DCLOSE_MSG,
-} BrProxyLoopMsg;
- 
+
 static void BrProxyFreeLoopMsg(SoftBusMessage *msg)
 {
     if (msg != nullptr) {
@@ -249,8 +252,8 @@ static void BrProxyFreeLoopMsg(SoftBusMessage *msg)
         SoftBusFree((void *)msg);
     }
 }
- 
-static SoftBusMessage *BrProxyCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, char *data)
+
+static SoftBusMessage *BrProxyCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, void *data)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == nullptr) {
@@ -262,7 +265,7 @@ static SoftBusMessage *BrProxyCreateLoopMsg(int32_t what, uint64_t arg1, uint64_
     msg->arg2 = arg2;
     msg->handler = &g_brProxyLooperHandler;
     msg->FreeMessage = BrProxyFreeLoopMsg;
-    msg->obj = (void *)data;
+    msg->obj = data;
     return msg;
 }
  
@@ -283,15 +286,60 @@ static void BrProxyLoopMsgHandler(SoftBusMessage *msg)
             BrProxyDynamicLoaderDeInit();
             break;
         }
+        case LOOP_STOP_APP_MSG: {
+            if (msg->obj == nullptr) {
+                return;
+            }
+            StopAppInfo *info = (StopAppInfo *)msg->obj;
+            (void)BrProxyUnrestricted(info->bundleName, info->pid, info->uid, false);
+            break;
+        }
         default:
             break;
     }
 }
- 
+
+static int BrProxyLooperEventCmpFunc(const SoftBusMessage *msg, void *args)
+{
+    SoftBusMessage *ctx = (SoftBusMessage *)args;
+    if (msg->what != ctx->what) {
+        return COMPARE_FAILED;
+    }
+    switch (msg->what) {
+        case LOOP_STOP_APP_MSG: {
+            TRANS_LOGD(TRANS_CTRL, "[br_proxy] romove stop app msg");
+            return COMPARE_SUCCESS;
+        }
+        default:
+            break;
+    }
+    return COMPARE_FAILED;
+}
+
+int32_t BrProxyPostMsgToLooper(int32_t what, uint64_t arg1, uint64_t arg2, void *obj, uint64_t delayMillis)
+{
+    SoftBusMessage *msg = BrProxyCreateLoopMsg(what, arg1, arg2, obj);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(msg != nullptr, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "[br_proxy] msg create failed");
+    g_brProxyLooperHandler.looper->PostMessageDelay(g_brProxyLooperHandler.looper, msg, delayMillis);
+    return SOFTBUS_OK;
+}
+
+void BrProxyRemoveMsgFromLooper(int32_t what, uint64_t arg1, uint64_t arg2, void *obj)
+{
+    SoftBusMessage ctx = {
+        .what = what,
+        .arg1 = arg1,
+        .arg2 = arg2,
+        .obj = obj,
+    };
+    g_brProxyLooperHandler.looper->RemoveMessageCustom(
+        g_brProxyLooperHandler.looper, &g_brProxyLooperHandler, BrProxyLooperEventCmpFunc, &ctx);
+}
+
 static std::atomic<bool> g_hasInit(false);
 static std::mutex g_initMutex;
  
-static int32_t BrProxyLoopInit(void)
+int32_t BrProxyLoopInit(void)
 {
     if (g_hasInit.load()) {
         return SOFTBUS_OK;
@@ -330,8 +378,10 @@ int32_t DynamicLoadInit()
     return SOFTBUS_OK;
 }
 
-int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
+int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool isThaw)
 {
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] pid:%{public}d, uid:%{public}d, %{public}s",
+        pid, uid, isThaw ? "BrProxyThaw" : "BrProxyFreeze");
     TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr, SOFTBUS_INVALID_PARAM,
         TRANS_SVC, "[br_proxy] bundle name is invalid");
 
@@ -345,7 +395,7 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
         (void)SoftBusMutexUnlock(&g_lock);
         return ret;
     }
-    ret = g_symbolLoader.unrestricted(bundleName, pid, uid);
+    ret = g_symbolLoader.unrestricted(bundleName, pid, uid, isThaw);
     CleanupSymbolIfNeed(&g_symbolLoader, load);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] unrestricted failed, error=%{public}d", ret);
@@ -357,7 +407,10 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
         return ret;
     }
-
+    if (!isThaw) {
+        (void)SoftBusMutexUnlock(&g_lock);
+        return SOFTBUS_OK;
+    }
     if (g_powerMgr == nullptr) {
         g_powerMgr = OHOS::PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("softbus_server_brproxy",
             OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
@@ -370,4 +423,25 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid)
     }
     (void)SoftBusMutexUnlock(&g_lock);
     return SOFTBUS_OK;
+}
+
+bool CommonGetRunningProcessInformation(const char *bundleName, int32_t userId, pid_t uid, pid_t *pid)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr && pid != nullptr, false,
+        TRANS_SVC, "[br_proxy] bundle name is invalid");
+    int32_t ret = SoftBusMutexLock(&g_lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false,
+        TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    bool load = false;
+    ret = LoadSymbol(&g_symbolLoader, &load);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] load sysmbol failed, error=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lock);
+        return false;
+    }
+    const std::string stlbundleName = bundleName;
+    bool checkRes = g_symbolLoader.getRunningProcessInformation(stlbundleName, userId, uid, pid);
+    CleanupSymbolIfNeed(&g_symbolLoader, load);
+    (void)SoftBusMutexUnlock(&g_lock);
+    return checkRes;
 }

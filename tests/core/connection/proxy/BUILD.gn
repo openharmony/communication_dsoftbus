@@ -43,10 +43,12 @@ ohos_unittest("ProxyChannelManagerTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/connection/proxy/proxy_config.c",
     "$dsoftbus_root_path/core/connection/proxy/proxy_manager.c",
     "$dsoftbus_root_path/core/connection/proxy/proxy_connection.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
     "$dsoftbus_root_path/tests/core/connection/proxy/mock/proxy_manager_mock.cpp",
+    "proxy_config_test.cpp",
     "proxy_manager_test.cpp",
   ]
 

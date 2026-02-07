@@ -70,9 +70,9 @@ void BrProxyServerManagerTest::TearDownTestCase(void)
 {
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest000
- * @tc.desc: BrProxyServerManagerTest000, use the Normal parameter
+ * @tc.desc: BrProxyServerManagerTest000, use the Normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -103,12 +103,12 @@ HWTEST_F(BrProxyServerManagerTest, GetChannelIdFromServerListTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     ret = GetNewChannelId(&channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    CloseAllConnect(DEFAULT_APPINDEX);
+    CloseAllConnect();
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest001
- * @tc.desc: BrProxyServerManagerTest001, use the Normal parameter
+ * @tc.desc: BrProxyServerManagerTest001, use the Normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -126,9 +126,9 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest002
- * @tc.desc: BrProxyServerManagerTest002, use the normal parameter
+ * @tc.desc: BrProxyServerManagerTest002, use the normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -139,13 +139,13 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = GetNewChannelId(&channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    CloseAllConnect(DEFAULT_APPINDEX);
+    CloseAllConnect();
     LnnEventBasicInfo info;
     info.event = LNN_EVENT_USER_SWITCHED;
     UserSwitchedHandler(&info);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest003
  * @tc.desc: BrProxyServerManagerTest003
  * @tc.type: FUNC
@@ -159,7 +159,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest003, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest004
  * @tc.desc: BrProxyServerManagerTest004
  * @tc.type: FUNC
@@ -188,7 +188,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest005
  * @tc.desc: BrProxyServerManagerTest005
  * @tc.type: FUNC
@@ -221,7 +221,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest006
  * @tc.desc: BrProxyServerManagerTest006
  * @tc.type: FUNC
@@ -233,7 +233,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest006, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest007
  * @tc.desc: BrProxyServerManagerTest007
  * @tc.type: FUNC
@@ -248,7 +248,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest007, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest008
  * @tc.desc: BrProxyServerManagerTest008
  * @tc.type: FUNC
@@ -267,7 +267,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest008, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest009
  * @tc.desc: BrProxyServerManagerTest009
  * @tc.type: FUNC
@@ -275,14 +275,15 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest008, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest009, TestSize.Level1)
 {
-    int32_t ret = UpdateConnectState(nullptr, TEST_UUID, DEFAULT_APPINDEX, true, IS_CONNECTED);
+    struct ProxyChannel channel = {0};
+    int32_t ret = UpdateConnectState(nullptr, TEST_UUID, &channel, IS_CONNECTED);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     g_proxyList = NULL;
-    ret = UpdateConnectState(VALID_BR_MAC, TEST_UUID, DEFAULT_APPINDEX, true, IS_CONNECTED);
+    ret = UpdateConnectState(VALID_BR_MAC, TEST_UUID, &channel, IS_CONNECTED);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest010
  * @tc.desc: BrProxyServerManagerTest010
  * @tc.type: FUNC
@@ -300,7 +301,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest010, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest011
  * @tc.desc: BrProxyServerManagerTest011
  * @tc.type: FUNC
@@ -312,7 +313,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest011, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest012
  * @tc.desc: BrProxyServerManagerTest012
  * @tc.type: FUNC
@@ -330,7 +331,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest012, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest013
  * @tc.desc: BrProxyServerManagerTest013
  * @tc.type: FUNC
@@ -339,11 +340,11 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest012, TestSize.Level1)
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest013, TestSize.Level1)
 {
     g_proxyList = NULL;
-    int32_t ret = ServerDisableProxyFromList(VALID_BR_MAC, TEST_UUID, APP_INDEX_TEST);
+    int32_t ret = ServerDisableProxyFromList(0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest014
  * @tc.desc: BrProxyServerManagerTest014
  * @tc.type: FUNC
@@ -375,7 +376,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest014, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest015
  * @tc.desc: BrProxyServerManagerTest015
  * @tc.type: FUNC
@@ -388,7 +389,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest015, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest016
  * @tc.desc: BrProxyServerManagerTest016
  * @tc.type: FUNC
@@ -402,7 +403,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest016, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest017
  * @tc.desc: BrProxyServerManagerTest017
  * @tc.type: FUNC
@@ -414,10 +415,10 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest017, TestSize.Level1)
     bool ret = TransIsProxyChannelEnabled(uid);
     EXPECT_EQ(ret, true);
     ret = TransIsProxyChannelEnabled(uid);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest018
  * @tc.desc: BrProxyServerManagerTest018
  * @tc.type: FUNC
@@ -434,7 +435,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest018, TestSize.Level1)
     g_retryList = NULL;
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest019
  * @tc.desc: BrProxyServerManagerTest019
  * @tc.type: FUNC
@@ -457,7 +458,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest019, TestSize.Level1)
     g_retryList = NULL;
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest020
  * @tc.desc: BrProxyServerManagerTest020
  * @tc.type: FUNC
@@ -477,7 +478,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest020, TestSize.Level1)
     g_retryList = NULL;
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest021
  * @tc.desc: BrProxyServerManagerTest021
  * @tc.type: FUNC
@@ -498,7 +499,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest021, TestSize.Level1)
     EXPECT_EQ(ret, true);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest022
  * @tc.desc: BrProxyServerManagerTest022
  * @tc.type: FUNC
@@ -512,7 +513,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest022, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest023
  * @tc.desc: BrProxyServerManagerTest023
  * @tc.type: FUNC
@@ -536,7 +537,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest023, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest024
  * @tc.desc: BrProxyServerManagerTest024
  * @tc.type: FUNC
@@ -569,7 +570,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest024, TestSize.Level1)
     EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest025
  * @tc.desc: BrProxyServerManagerTest025
  * @tc.type: FUNC
@@ -597,7 +598,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest025, TestSize.Level1)
     EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest026
  * @tc.desc: BrProxyServerManagerTest026
  * @tc.type: FUNC
@@ -615,7 +616,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest026, TestSize.Level1)
     EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest027
  * @tc.desc: BrProxyServerManagerTest027
  * @tc.type: FUNC
@@ -646,7 +647,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest027, TestSize.Level1)
     EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest028
  * @tc.desc: BrProxyServerManagerTest028
  * @tc.type: FUNC
@@ -658,7 +659,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest028, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest029
  * @tc.desc: BrProxyServerManagerTest029
  * @tc.type: FUNC
@@ -683,7 +684,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest029, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest030
  * @tc.desc: BrProxyServerManagerTest030
  * @tc.type: FUNC
@@ -708,7 +709,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest030, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest031
  * @tc.desc: BrProxyServerManagerTest031
  * @tc.type: FUNC
@@ -716,13 +717,12 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest030, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest031, TestSize.Level1)
 {
-    int32_t appIndex = 1;
-    g_proxyList = NULL;
-    bool ret = IsAppIndexExist(appIndex);
-    EXPECT_FALSE(ret);
+    const char *bundleName = "com.example.test";
+    bool ret = IsBrProxy(bundleName);
+    EXPECT_EQ(false, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest032
  * @tc.desc: BrProxyServerManagerTest032
  * @tc.type: FUNC
@@ -747,7 +747,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest032, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest033
  * @tc.desc: BrProxyServerManagerTest033
  * @tc.type: FUNC
@@ -772,7 +772,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest033, TestSize.Level1)
     EXPECT_EQ(g_serverList->cnt, 0);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest034
  * @tc.desc: BrProxyServerManagerTest034
  * @tc.type: FUNC
@@ -794,7 +794,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest034, TestSize.Level1)
     EXPECT_EQ(result, IS_DISCONNECTED);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest035
  * @tc.desc: BrProxyServerManagerTest035
  * @tc.type: FUNC
@@ -821,7 +821,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest035, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest036
  * @tc.desc: BrProxyServerManagerTest036
  * @tc.type: FUNC
@@ -850,11 +850,11 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest036, TestSize.Level1)
         .uuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
     };
     int32_t channelId = CHANNEL_ID;
-    ret = SelectClient(&info2, &result, &channelId);
+    ret = SelectClient(&info2, &result, &channelId, REQUEST_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest037
  * @tc.desc: BrProxyServerManagerTest037
  * @tc.type: FUNC
@@ -881,11 +881,11 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest037, TestSize.Level1)
         .uuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
     };
     int32_t channelId = CHANNEL_ID;
-    ret = SelectClient(&info2, &result, &channelId);
+    ret = SelectClient(&info2, &result, &channelId, 0);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest038
  * @tc.desc: BrProxyServerManagerTest038
  * @tc.type: FUNC
@@ -914,17 +914,17 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest038, TestSize.Level1)
         .uuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
     };
     int32_t channelId = CHANNEL_ID;
-    ret = SelectClient(&info2, &result, &channelId);
+    ret = SelectClient(&info2, &result, &channelId, 0);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     info2 = {
         .brMac = "FF:AA:CC:AA:BB:CC",
         .uuid = "b",
     };
-    ret = SelectClient(&info2, &result, &channelId);
+    ret = SelectClient(&info2, &result, &channelId, 0);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest039
  * @tc.desc: BrProxyServerManagerTest039
  * @tc.type: FUNC
@@ -963,7 +963,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest039, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest040
  * @tc.desc: BrProxyServerManagerTest040
  * @tc.type: FUNC
@@ -977,7 +977,7 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest040, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: BrProxyServerManagerTest041
  * @tc.desc: BrProxyServerManagerTest041
  * @tc.type: FUNC
@@ -989,11 +989,11 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest041, TestSize.Level1)
     ProxyBaseInfo baseInfo;
     (void) strcpy_s(baseInfo.brMac, sizeof(baseInfo.brMac), VALID_BR_MAC);
     (void) strcpy_s(baseInfo.uuid, sizeof(baseInfo.uuid), TEST_UUID);
-    bool result = IsForegroundProcess(&baseInfo);
+    bool result = IsProcExist(&baseInfo, 0);
     EXPECT_FALSE(result);
     int32_t ret = BrProxyServerInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo);
+    result = IsProcExist(&baseInfo, 0);
     EXPECT_FALSE(result);
     BrProxyChannelInfo info;
     (void) strcpy_s(info.peerBRMacAddr, sizeof(info.peerBRMacAddr), VALID_BR_MAC);
@@ -1004,21 +1004,21 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest041, TestSize.Level1)
     EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
     ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID, APP_INDEX_TEST);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo);
-    EXPECT_TRUE(result);
+    result = IsProcExist(&baseInfo, REQUEST_ID);
+    EXPECT_FALSE(result);
     BrProxyChannelInfo infoMismatch;
     (void) strcpy_s(infoMismatch.peerBRMacAddr, sizeof(infoMismatch.peerBRMacAddr), "FF:AA:CC:AA:BB:DD");
     (void) strcpy_s(infoMismatch.peerBRUuid, sizeof(infoMismatch.peerBRUuid), "BBBBBBBB-0000-0000-8888-BBBBBBBBBBBB");
     ret = ServerAddChannelToList(
         infoMismatch.peerBRMacAddr, infoMismatch.peerBRUuid, CHANNEL_ID + 1, REQUEST_ID + 1, APP_INDEX_TEST);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo);
-    EXPECT_TRUE(result);
+    result = IsProcExist(&baseInfo, REQUEST_ID);
+    EXPECT_FALSE(result);
     ret = ServerDeleteChannelFromList(CHANNEL_ID);
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = ServerDeleteChannelFromList(CHANNEL_ID + 1);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    result = IsForegroundProcess(&baseInfo);
+    result = IsProcExist(&baseInfo, 0);
     EXPECT_FALSE(result);
 }
 

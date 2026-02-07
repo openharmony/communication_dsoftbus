@@ -43,6 +43,7 @@ typedef enum {
     START_PUBLISH_LNN,
     STOP_DISCOVERY_LNN,
     STOP_PUBLISH_LNN,
+    SET_NODE_KEY_INFO,
 } FunID;
 
 typedef struct {
@@ -63,6 +64,7 @@ typedef struct {
 static int32_t OnOnlineNodeInfo(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnLocalDeviceInfo(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnNodeKeyInfo(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnSetNodeKeyInfo(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnActiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnDeactiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnAllMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize);
@@ -84,6 +86,7 @@ static ClientBusCenterStateHandler g_busCenterStateHandler[] = {
     { START_PUBLISH_LNN,       OnStartPublishLnn },
     { STOP_DISCOVERY_LNN,      OnStopDiscoveryLnn},
     { STOP_PUBLISH_LNN,        OnStopPublishLnn  },
+    { SET_NODE_KEY_INFO,       OnSetNodeKeyInfo  },
 };
 
 static IClientProxy *g_serverProxy = NULL;
@@ -107,6 +110,14 @@ static int32_t OnLocalDeviceInfo(Reply *info, IpcIo *reply, uint32_t infoSize)
 }
 
 static int32_t OnNodeKeyInfo(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &infoSize);
+    info->dataLen = infoSize;
+    info->data = (void *)ReadBuffer(reply, infoSize);
+    return SOFTBUS_OK;
+}
+
+static int32_t OnSetNodeKeyInfo(Reply *info, IpcIo *reply, uint32_t infoSize)
 {
     ReadInt32(reply, &infoSize);
     info->dataLen = infoSize;
@@ -355,6 +366,38 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int3
     if (memcpy_s(buf, len, reply.data, reply.dataLen) != EOK) {
         LNN_LOGE(LNN_EVENT, "GetNodeKeyInfo copy node key info failed");
         return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ServerIpcSetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len)
+{
+    if (networkId == NULL || buf == NULL) {
+        LNN_LOGW(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGW(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteString(&request, pkgName);
+    WriteString(&request, networkId);
+    WriteInt32(&request, key);
+    WriteUint32(&request, len);
+    WriteRawData(&request, buf, len);
+    Reply reply = {0};
+    reply.id = SET_NODE_KEY_INFO;
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_NODE_KEY_INFO, &request, &reply,
+        ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "SetNodeKeyInfo invoke failed=%{public}d", ans);
+        return SOFTBUS_NETWORK_PROXY_INVOKE_FAILED;
     }
     return SOFTBUS_OK;
 }

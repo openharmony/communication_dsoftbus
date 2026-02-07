@@ -34,6 +34,8 @@ int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t
 int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
     uint32_t len);
+int32_t ServerIpcSetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len);
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName);
 int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName);

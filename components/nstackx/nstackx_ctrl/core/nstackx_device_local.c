@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "nstackx_device_local.h"
 #include <securec.h>
@@ -68,6 +70,7 @@ char g_localNotification[NSTACKX_MAX_NOTIFICATION_DATA_LEN] = {0};
 #define NSTACKX_DEFAULT_DEVICE_NAME "nStack Device"
 #define NSTACKX_IPV6_MULTICAST_ADDR "FF02::1"
 #define DEFAULT_IFACE_NUM 1
+#define DFINDER_FD_TAG fdsan_create_owner_tag(FDSAN_OWNER_TYPE_FILE, 0xd0057ff)
 
 #define IFACE_COAP_CTX_INIT_MAX_RETRY_TIMES 4
 static const uint32_t g_ifaceCoapCtxRetryBackoffList[IFACE_COAP_CTX_INIT_MAX_RETRY_TIMES] = { 10, 15, 25, 100 };
@@ -796,9 +799,17 @@ void DetectLocalIface(void *arg)
 {
     struct ifconf ifc;
     struct ifreq req[INTERFACE_MAX];
-    int fd = GetInterfaceList(&ifc, req, sizeof(req));
+    int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        DFINDER_LOGE(TAG, "get iface list failed");
+        DFINDER_LOGE(TAG, "create fd failed, errno = %d", errno);
+        return;
+    }
+    fdsan_exchange_owner_tag(fd, 0, DFINDER_FD_TAG);
+    ifc.ifc_len = (int32_t)sizeof(req);
+    ifc.ifc_buf = (char *)req;
+    if (ioctl(fd, SIOCGIFCONF, (char *)(&ifc)) < 0) {
+        DFINDER_LOGE(TAG, "ioctl fail, errno = %d", errno);
+        fdsan_close_with_tag(fd, DFINDER_FD_TAG);
         return;
     }
 
@@ -807,7 +818,7 @@ void DetectLocalIface(void *arg)
         /* get IP of this interface */
         int state = GetInterfaceIP(fd, &req[i]);
         if (state == NSTACKX_EFAILED) {
-            (void)close(fd);
+            fdsan_close_with_tag(fd, DFINDER_FD_TAG);
             return;
         } else if (state == NSTACKX_EINVAL) {
             continue;
@@ -831,7 +842,7 @@ void DetectLocalIface(void *arg)
         (void)memset_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
         (void)AddLocalIface(req[i].ifr_name, serviceData, AF_INET, &addr);
     }
-    (void)close(fd);
+    fdsan_close_with_tag(fd, DFINDER_FD_TAG);
 
     (void)arg;
 }

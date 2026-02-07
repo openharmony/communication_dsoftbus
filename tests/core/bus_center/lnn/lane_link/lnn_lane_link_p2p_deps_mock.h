@@ -26,6 +26,7 @@ public:
     virtual ~LaneLinkP2pDepsInterface() {};
 
     virtual LnnEnhanceFuncList *LnnEnhanceFuncListGet(void) = 0;
+    virtual bool IsEnhancedWifiDirectSupported(const char *networkId) = 0;
 };
 
 class LaneLinkP2pDepsInterfaceMock : public LaneLinkP2pDepsInterface {
@@ -34,6 +35,7 @@ public:
     ~LaneLinkP2pDepsInterfaceMock() override;
 
     MOCK_METHOD0(LnnEnhanceFuncListGet, LnnEnhanceFuncList *(void));
+    MOCK_METHOD1(IsEnhancedWifiDirectSupported, bool (const char *networkId));
 };
 } // namespace OHOS
 #endif // LNN_LANE_LINK_P2P_DEPS_MOCK_H

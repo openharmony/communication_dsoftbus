@@ -293,6 +293,24 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 
+int32_t SetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInfoKeyEx key,
+    uint8_t *info, int32_t infoLen)
+{
+    if (pkgName == NULL || infoLen <= 0) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || info == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return SetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
+}
+
 int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     if (pkgName == NULL) {

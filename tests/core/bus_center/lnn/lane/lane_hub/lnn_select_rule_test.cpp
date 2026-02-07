@@ -34,9 +34,12 @@ constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
 constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 10000;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_LATENCY = 2500;
 constexpr uint32_t HIGH_BW = 160 * 1024 * 1024;
+constexpr uint32_t LOW_BW = 384 * 1024;
 constexpr uint32_t LOCAL_NUM = 8192;
 constexpr uint32_t ROM_NUM = 8;
 constexpr uint32_t ROM_NUM2 = 2;
+constexpr uint32_t LOW_BW_LINKTYPE_NUM = 7;
+constexpr uint32_t LANE_T_RAW_STREAM_TEST_HML_NUM = 2;
 
 class LNNSelectRuleTest : public testing::Test {
 public:
@@ -79,11 +82,12 @@ static int32_t ActionOfLnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, c
 }
 
 /*
-* @tc.name: GET_SUPPORT_BAND_WIDTH_TEST_001
-* @tc.desc: Test the functionality and boundary condition handling of the GetSupprotBandWidth function
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_SUPPORT_BAND_WIDTH_TEST_001
+ * @tc.desc: Test the functionality and boundary condition handling of the GetSupprotBandWidth function
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, GET_SUPPORT_BAND_WIDTH_TEST_001, TestSize.Level1)
 {
     LaneTransType transType = LANE_T_MSG;
@@ -103,12 +107,13 @@ HWTEST_F(LNNSelectRuleTest, GET_SUPPORT_BAND_WIDTH_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_SUPPORT_BAND_WIDTH_TEST_002
-* @tc.desc: Test whether the function correctly returns the supported bandwidth types
-*           when both local and remote devices supprot WIFI P2P connections
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_SUPPORT_BAND_WIDTH_TEST_002
+ * @tc.desc: Test whether the function correctly returns the supported bandwidth types
+ *           when both local and remote devices supprot WIFI P2P connections
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, GET_SUPPORT_BAND_WIDTH_TEST_002, TestSize.Level1)
 {
     LaneTransType transType = LANE_T_MSG;
@@ -125,12 +130,13 @@ HWTEST_F(LNNSelectRuleTest, GET_SUPPORT_BAND_WIDTH_TEST_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_001
-* @tc.desc: Verify whether the function correctly returns an error code
-*           when the parameters are invalid, and check the fucntion behavior under specific conditions
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_001
+ * @tc.desc: Verify whether the function correctly returns an error code
+ *           when the parameters are invalid, and check the fucntion behavior under specific conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_001, TestSize.Level1)
 {
     LaneTransType transType = LANE_T_MSG;
@@ -152,12 +158,13 @@ HWTEST_F(LNNSelectRuleTest, GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_001, TestSize.
 }
 
 /*
-* @tc.name: GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_002
-* @tc.desc: Test whether the GetAllSupportReuseBandWidth function can correctly handle and return the expected result
-*           when GetAllLinkWithDevId returns SOFTBUS_LANE_RESOURCE_NOT_FOUND
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_002
+ * @tc.desc: Test whether the GetAllSupportReuseBandWidth function can correctly handle and return the expected result
+ *           when GetAllLinkWithDevId returns SOFTBUS_LANE_RESOURCE_NOT_FOUND
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_002, TestSize.Level1)
 {
     LaneTransType transType = LANE_T_MSG;
@@ -173,11 +180,12 @@ HWTEST_F(LNNSelectRuleTest, GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_002, TestSize.
 }
 
 /*
-* @tc.name: GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_003
-* @tc.desc: Test retrieve all reconfigurable bandwidth information supported by the specified device
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_003
+ * @tc.desc: Test retrieve all reconfigurable bandwidth information supported by the specified device
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_003, TestSize.Level1)
 {
     LaneTransType transType = LANE_T_MSG;
@@ -199,11 +207,12 @@ HWTEST_F(LNNSelectRuleTest, GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_003, TestSize.
 }
 
 /*
-* @tc.name: LNN_LANE_DECIDE_01
-* @tc.desc: Verify the behavior of the DecideAvailableLane fucntion when the input parameters are invalid
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DECIDE_01
+ * @tc.desc: Verify the behavior of the DecideAvailableLane fucntion when the input parameters are invalid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_01, TestSize.Level1)
 {
     LaneSelectParam request;
@@ -216,12 +225,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_01, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_DECIDE_02
-* @tc.desc: Test whether the function can correctly return the error code SOFTBUS_LANE_WIFI_OFF
-*           when the WIFI status is inactive
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DECIDE_02
+ * @tc.desc: Test whether the function can correctly return the error code SOFTBUS_LANE_WIFI_OFF
+ *           when the WIFI status is inactive
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_02, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> laneLinkMock;
@@ -245,11 +255,12 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_02, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_DECIDE_03
-* @tc.desc: Verify whether the fucntion return values meet expectations under different input conditions
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DECIDE_03
+ * @tc.desc: Verify whether the fucntion return values meet expectations under different input conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_03, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> laneLinkMock;
@@ -291,12 +302,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_03, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_DECIDE_04
-* @tc.desc: Test whether the function correctly returns the expected error code
-*           when wifi is in a semi-active state and no available lane resources are found
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DECIDE_04
+ * @tc.desc: Test whether the function correctly returns the expected error code
+ *           when wifi is in a semi-active state and no available lane resources are found
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_04, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> laneLinkMock;
@@ -320,12 +332,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_04, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_DECIDE_05
-* @tc.desc: Verify whether the function can correctly return the expected error code
-*           when certaion conditions are not met
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DECIDE_05
+ * @tc.desc: Verify whether the function can correctly return the expected error code
+ *           when certaion conditions are not met
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_05, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> laneLinkMock;
@@ -349,12 +362,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_05, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_DECIDE_06
-* @tc.desc: Verify whether the function can correctly return the expected error code
-*           when certaion conditions are not met
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DECIDE_06
+ * @tc.desc: Verify whether the function can correctly return the expected error code
+ *           when certaion conditions are not met
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_06, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> laneLinkMock;
@@ -378,12 +392,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_06, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_NO_CAP_LINK_001
-* @tc.desc: Test whether the link selection function can correctly return the expected error code
-*           when the local device does not have USB static capability
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_NO_CAP_LINK_001
+ * @tc.desc: Test whether the link selection function can correctly return the expected error code
+ *           when the local device does not have USB static capability
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_SELECT_NO_CAP_LINK_001, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> laneLinkMock;
@@ -413,11 +428,12 @@ HWTEST_F(LNNSelectRuleTest, LNN_SELECT_NO_CAP_LINK_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_NO_CAP_LINK_002
-* @tc.desc: Verify whether the function return values meet expectations under different scenarios
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_NO_CAP_LINK_002
+ * @tc.desc: Verify whether the function return values meet expectations under different scenarios
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_SELECT_NO_CAP_LINK_002, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> laneLinkMock;
@@ -461,11 +477,12 @@ HWTEST_F(LNNSelectRuleTest, LNN_SELECT_NO_CAP_LINK_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_SELECT_RULE_01
-* @tc.desc: Test the behavior of the FinalDecideLinkType fucntion under various invalid parameter conditons
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_SELECT_RULE_01
+ * @tc.desc: Test the behavior of the FinalDecideLinkType fucntion under various invalid parameter conditons
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_SELECT_RULE_01, TestSize.Level1)
 {
     LaneLinkType linkList;
@@ -486,12 +503,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_SELECT_RULE_01, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_SELECT_RULE_02
-* @tc.desc: Verify whether the function can correctly select a link type
-*           when both local and remote nodes support that link type
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_SELECT_RULE_02
+ * @tc.desc: Verify whether the function can correctly select a link type
+ *           when both local and remote nodes support that link type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_SELECT_RULE_02, TestSize.Level1)
 {
     LaneLinkType linkList[LANE_LINK_TYPE_BUTT];
@@ -510,12 +528,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_SELECT_RULE_02, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_SELECT_RULE_03
-* @tc.desc: Verify whether the function can correctly process and return the expected results
-*           under different network information retrieval outcomes
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_SELECT_RULE_03
+ * @tc.desc: Verify whether the function can correctly process and return the expected results
+ *           under different network information retrieval outcomes
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_SELECT_RULE_03, TestSize.Level1)
 {
     LaneLinkType linkList;
@@ -548,12 +567,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_SELECT_RULE_03, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_WLAN_LINKED_FREQUENCY_TEST_001
-* @tc.desc: Verify whether the function return values meet expectations
-*           under different WLAN connection statuses
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_WLAN_LINKED_FREQUENCY_TEST_001
+ * @tc.desc: Verify whether the function return values meet expectations
+ *           under different WLAN connection statuses
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, GET_WLAN_LINKED_FREQUENCY_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> linkMock;
@@ -566,12 +586,13 @@ HWTEST_F(LNNSelectRuleTest, GET_WLAN_LINKED_FREQUENCY_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_UPDATE_P2P_AVAILABILITY_001
-* @tc.desc: Verify whether the UpdateP2pAvailability function behaves as expected
-*           under different input parameters
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_UPDATE_P2P_AVAILABILITY_001
+ * @tc.desc: Verify whether the UpdateP2pAvailability function behaves as expected
+ *           under different input parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_UPDATE_P2P_AVAILABILITY_001, TestSize.Level1)
 {
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, UpdateP2pAvailability(nullptr, false));
@@ -579,11 +600,12 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_UPDATE_P2P_AVAILABILITY_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_LANE_CHECK_VALID_LANE_01
-* @tc.desc: Test the behavior of the LaneCheckLinkValid function under different input parameters
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_CHECK_VALID_LANE_01
+ * @tc.desc: Test the behavior of the LaneCheckLinkValid function under different input parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_01, TestSize.Level1)
 {
     const char *networkId = "test";
@@ -600,12 +622,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_01, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_CHECK_VALID_LANE_02
-* @tc.desc: Test whether the function correctly returns the error code "No static ETH capability on the local node"
-*           when the EHT capabilities of the local and remote nodes are the same
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_CHECK_VALID_LANE_02
+ * @tc.desc: Test whether the function correctly returns the error code "No static ETH capability on the local node"
+ *           when the EHT capabilities of the local and remote nodes are the same
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_02, TestSize.Level1)
 {
     NiceMock<LnnSelectRuleInterfaceMock> linkMock;
@@ -619,12 +642,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_02, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_CHECK_VALID_LANE_03
-* @tc.desc: Test whether the function can correctly return the expected error code SOFTBUS_LANE_LOCAL_NO_COC_FEATURE
-*           when certain numerical information on the local and remote nodes meets specific conditions
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_CHECK_VALID_LANE_03
+ * @tc.desc: Test whether the function can correctly return the expected error code SOFTBUS_LANE_LOCAL_NO_COC_FEATURE
+ *           when certain numerical information on the local and remote nodes meets specific conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_03, TestSize.Level1)
 {
     LaneLinkType linkType = LANE_COC_DIRECT;
@@ -644,12 +668,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_03, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_CHECK_VALID_LANE_04
-* @tc.desc: Verify whether the behavior of the LaneCheckLinkValid function is correct
-*           under specific conditions
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_CHECK_VALID_LANE_04
+ * @tc.desc: Verify whether the behavior of the LaneCheckLinkValid function is correct
+ *           under specific conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_04, TestSize.Level1)
 {
     LaneLinkType linkType = LANE_P2P_REUSE;
@@ -664,12 +689,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_04, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_CHECK_VALID_LANE_05
-* @tc.desc: Verify whether the behavior of the LaneCheckLinkValid function meets expectations
-*           under specific conditions
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_CHECK_VALID_LANE_05
+ * @tc.desc: Verify whether the behavior of the LaneCheckLinkValid function meets expectations
+ *           under specific conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_05, TestSize.Level1)
 {
     LaneLinkType linkType = LANE_P2P_REUSE;
@@ -684,12 +710,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_05, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_CHECK_VALID_LANE_06
-* @tc.desc: Verify how the function determines whether a link is valid based on the characteristics of local
-*           and remote nodes when the link type is LANE_P2P_REUSE
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_CHECK_VALID_LANE_06
+ * @tc.desc: Verify how the function determines whether a link is valid based on the characteristics of local
+ *           and remote nodes when the link type is LANE_P2P_REUSE
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_06, TestSize.Level1)
 {
     LaneLinkType linkType = LANE_P2P_REUSE;
@@ -714,12 +741,13 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_CHECK_VALID_LANE_06, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_DECIDEREUSELANE_01
-* @tc.desc: Verified whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
-*           when an empty pointer or invalid parameter is passed
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DECIDEREUSELANE_01
+ * @tc.desc: Verified whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+ *           when an empty pointer or invalid parameter is passed
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_01, TestSize.Level1)
 {
     LaneSelectParam request = {};
@@ -739,8 +767,8 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_01, TestSize.Level1)
 
 /*
 * @tc.name: LNN_LANE_DECIDEREUSELANE_02
-* @tc.desc: The function was verified to correctly handle lane reuse decision logic
-*           under different conditions
+* @tc.desc: Verified whether the function can correctly return the error code SOFTBUS_INVALID_PARAM
+*           when an empty pointer or invalid parameter is passed
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -751,32 +779,144 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_02, TestSize.Level1)
     };
     LanePreferredLinkList laneLinkList = {};
     NiceMock<LnnSelectRuleInterfaceMock> linkMock;
-    EXPECT_CALL(linkMock, LnnGetLocalNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
-
-    EXPECT_CALL(linkMock, FindLaneResourceByLinkType)
-        .WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+ 
+    EXPECT_CALL(linkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
     ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
-
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+ 
     uint32_t brCap = (1 << STATIC_CAP_BIT_BR) | (1 << BIT_BR);
     EXPECT_CALL(linkMock, LnnGetLocalNumU32Info).WillRepeatedly(
         DoAll(SetArgPointee<LANE_MOCK_PARAM2>(brCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info).WillRepeatedly(
         DoAll(SetArgPointee<LANE_MOCK_PARAM3>(brCap), Return(SOFTBUS_OK)));
     ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
-    EXPECT_EQ(ret, SOFTBUS_LANE_TRANS_TYPE_NOT_MATCH);
-
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+ 
     request.transType = LANE_T_MSG;
     ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+ 
+/*
+* @tc.name: LNN_LANE_DECIDEREUSELANE_03
+* @tc.desc: check LnnGetRemoteStrInfo success and error
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_03, TestSize.Level1)
+{
+    LaneSelectParam request = {};
+    LanePreferredLinkList laneLinkList = {};
+    NiceMock<LnnSelectRuleInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+ 
+/*
+* @tc.name: LNN_LANE_DECIDEREUSELANE_04
+* @tc.desc: LANE_T_RAW_STREAM without BR
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_04, TestSize.Level1)
+{
+    LaneSelectParam request = {
+        .transType = LANE_T_RAW_STREAM,
+    };
+    LanePreferredLinkList laneLinkList = {};
+    NiceMock<LnnSelectRuleInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, FindLaneResourceByLinkType)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneLinkList.linkTypeNum, 1);
+    EXPECT_EQ(laneLinkList.linkType[0], LANE_P2P);
+    laneLinkList = {};
+    ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneLinkList.linkTypeNum, LANE_T_RAW_STREAM_TEST_HML_NUM);
+    EXPECT_EQ(laneLinkList.linkType[0], LANE_HML);
+}
+ 
+/*
+* @tc.name: LNN_LANE_DECIDEREUSELANE_05
+* @tc.desc: LOW_BW not support wifi
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_05, TestSize.Level1)
+{
+    LaneSelectParam request = {
+        .qosRequire.minBW = LOW_BW,
+    };
+    LanePreferredLinkList laneLinkList = {};
+    NiceMock<LnnSelectRuleInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneLinkList.linkTypeNum, LOW_BW_LINKTYPE_NUM);
+    EXPECT_EQ(laneLinkList.linkType[0], LANE_HML);
+}
+ 
+/*
+* @tc.name: LNN_LANE_DECIDEREUSELANE_06
+* @tc.desc: LOW_BW only support WLAN_5G
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_06, TestSize.Level1)
+{
+    LaneSelectParam request = {
+        .qosRequire.minBW = LOW_BW,
+    };
+    LanePreferredLinkList laneLinkList = {};
+    NiceMock<LnnSelectRuleInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    uint32_t wifiCap = (1 << BIT_WIFI_5G) | (1 << STATIC_CAP_BIT_WIFI);
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info).WillRepeatedly(DoAll(SetArgPointee<1>(wifiCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info).WillRepeatedly(DoAll(SetArgPointee<2>(wifiCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneLinkList.linkTypeNum, 1);
+    EXPECT_EQ(laneLinkList.linkType[0], LANE_WLAN_5G);
+}
+
+/*
+* @tc.name: LNN_LANE_DECIDEREUSELANE_07
+* @tc.desc: LOW_BW only support WLAN_2P4G
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDEREUSELANE_07, TestSize.Level1)
+{
+    LaneSelectParam request = {
+        .qosRequire.minBW = LOW_BW,
+    };
+    LanePreferredLinkList laneLinkList = {};
+    NiceMock<LnnSelectRuleInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    uint32_t wifiCap = (1 << BIT_WIFI_24G) | (1 << STATIC_CAP_BIT_WIFI);
+    EXPECT_CALL(linkMock, LnnGetLocalNumU32Info).WillRepeatedly(DoAll(SetArgPointee<1>(wifiCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU32Info).WillRepeatedly(DoAll(SetArgPointee<2>(wifiCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND));
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = DecideReuseLane(NODE_NETWORK_ID, &request, &laneLinkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneLinkList.linkTypeNum, 1);
+    EXPECT_EQ(laneLinkList.linkType[0], LANE_WLAN_2P4G);
 }
 } // namespace OHOS

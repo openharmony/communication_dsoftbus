@@ -83,11 +83,14 @@ void LNNLaneSelectTest::TearDown()
 }
 
 /*
-* @tc.name: LNN_SELECT_LANE_001
-* @tc.desc: SelectLane PreProcLaneSelect test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_LANE_001
+ * @tc.desc: The SelectLane function was tested for behavior when the node is offline and
+ *           when the parameters are invalid, by simulating dependency interfaces and
+ *           passing different parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -110,11 +113,14 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_LANE_002
-* @tc.desc: SelectLane
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_LANE_002
+ * @tc.desc: The dependency behavior of the SelectLane function in the LNNLaneSelectTest class
+ *           was simulated using mock objects, and the return values of the SelectLane function
+ *           under different conditions were verified to meet the expected results
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -158,11 +164,14 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_LANE_003
-* @tc.desc: SelectLane, HmlIsExist == true
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_LANE_003
+ * @tc.desc: SelectLane, HmlIsExist == true
+ *           By setting up mock objects and expected behaviors, the function behavior
+ *           under specific conditions was verified to meet the expected outcomes
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_003, TestSize.Level1)
 {
     LaneSelectParam request = {};
@@ -194,11 +203,14 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_LANE_004
-* @tc.desc: SelectLane, HmlIsExist == false && LaneAddHml
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_LANE_004
+ * @tc.desc: SelectLane, HmlIsExist == false && LaneAddHml
+ *           By setting up mock objects and expected behaviors, the function behavior
+ *           under specific conditions was verified to meet the expected outcomes
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_004, TestSize.Level1)
 {
     LaneSelectParam request = {};
@@ -229,11 +241,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_LANE_005
-* @tc.desc: SelectLane
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_LANE_005
+ * @tc.desc: The behavior of the SelectLane function under specific conditions was tested, and the returned
+ *           values were verified to meet the expected results
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_005, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -267,11 +281,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_LANE_006
-* @tc.desc: SelectLane
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_LANE_006
+ * @tc.desc: Mock dependencies and set expected behaviors to test the behavior of the SelectLane function
+ *           under specific conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_006, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -307,7 +323,10 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_006, TestSize.Level1)
 /*
  * @tc.name: LNN_SELECT_LANE_007
  * @tc.desc: lane select fileTransLane by LNN
+ *           Mock dependencies and set expected behaviors to test the behavior of the SelectLane function
+ *           under specific conditions
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_007, TestSize.Level1)
@@ -337,7 +356,10 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_007, TestSize.Level1)
 /*
  * @tc.name: LNN_SELECT_LANE_008
  * @tc.desc: lane select fileTransLane by LNN
+ *           The behavior of the SelectLane function under specific conditions was tested to ensure
+ *           it correctly selects the recommended link type under these conditions
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_008, TestSize.Level1)
@@ -370,7 +392,10 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_008, TestSize.Level1)
 /*
  * @tc.name: LNN_SELECT_LANE_009
  * @tc.desc: selectlane preferlink test
+ *           Simulate the expected behavior of the object, call the SelectLane function, and verify
+ *           the return value and the number of items in the recommendation list
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_009, TestSize.Level1)
@@ -408,7 +433,10 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_009, TestSize.Level1)
 /*
  * @tc.name: LNN_SELECT_LANE_010
  * @tc.desc: selectlane defaultlink test
+ *           The behavior of the SelectLane function under specific conditions was tested, and the return
+ *           value and output parameters were verified to meet the expected results
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_010, TestSize.Level1)
@@ -438,7 +466,10 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_010, TestSize.Level1)
 /*
  * @tc.name: LNN_SELECT_LANE_011
  * @tc.desc: selectlane p2p and add hml success test
+ *           The logic for selecting a P2P channel was verified under the condition of network semi-activation
+ *           and support for wifi Direct enhanced features
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_011, TestSize.Level1)
@@ -473,11 +504,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_LANE_011, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_001
-* @tc.desc: SelectExpectLanesByQos
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_001
+ * @tc.desc: To test the error handling capability of the SelectExpectLanesByQos function
+ *           when invalid parameters are received
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_001, TestSize.Level1)
 {
     LanePreferredLinkList recommendList = {};
@@ -493,11 +526,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_002
-* @tc.desc: SelectExpectLanesByQos
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_002
+ * @tc.desc: Verify whether the function can correctly select the network channel that meets the criteria
+ *           under different network conditions and Qos parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -539,11 +574,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_003
-* @tc.desc: SelectExpectLanesByQos
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_003
+ * @tc.desc: Verify the error handling logic when the function selects a network channel
+ *           under Qos requirements
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_003, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -574,11 +611,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_004
-* @tc.desc: SelectExpectLanesByQos
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_004
+ * @tc.desc: Check whether the function correctly returns the SOFTBUS_LANE_WIFI_OFF error code
+ *           when the wifi is inactive and a low RTT is required
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_004, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -596,11 +635,14 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_005
-* @tc.desc: lane select fileTransLane by qos
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
+ * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_005
+ * @tc.desc: lane select fileTransLane by qos
+ *           Verify whether the function can correctly select communication channels that meet the criteria
+ *           under different Qos parameter settings, such as bandwidth and latency
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require: I5FBFG
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_005, TestSize.Level1)
 {
     LanePreferredLinkList recommendList;
@@ -637,7 +679,9 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_005, TestSize.Level1)
 /*
  * @tc.name: LNN_SELECT_EXPECT_LANES_BY_QOS_006
  * @tc.desc: lane select fileTransLane by qos
+ *           Verify the function of selecting the desired lane under Qos requirements
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: I5FBFG
  */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_006, TestSize.Level1)
@@ -662,11 +706,14 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_006, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001
-* @tc.desc: test adjustLinkPriorityForRtt with wifidirect ext cap
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001
+ * @tc.desc: test adjustLinkPriorityForRtt with wifidirect ext cap
+ *           It verifies whether the system correctly selects the P2P link as the preferred transmission
+ *           method under certain conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> laneMock;
@@ -701,11 +748,14 @@ HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001, TestSize.
 }
 
 /*
-* @tc.name: LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002
-* @tc.desc: test adjustLinkPriorityForRtt with other conditions
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002
+ * @tc.desc: test adjustLinkPriorityForRtt with other conditions
+ *           To verify whether the system correctly selects P2P as the preferred link type
+ *           under certain conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> laneMock;
@@ -740,11 +790,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002, TestSize.
 }
 
 /*
-* @tc.name: LNN_SELECT_AUTH_LANE_TEST_001
-* @tc.desc: SelectAuthLane
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_SELECT_AUTH_LANE_TEST_001
+ * @tc.desc: Test the behavior and error handling capability of the SelectAuthLane function
+ *           under different input parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, LNN_SELECT_AUTH_LANE_TEST_001, TestSize.Level1)
 {
     const char *networkId = "testnetworkid123";
@@ -779,11 +831,13 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_AUTH_LANE_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_ERR_CODE_01
-* @tc.desc: GetErrCodeOfLink
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ERR_CODE_01
+ * @tc.desc: Test the logic of the GetErrCodeOfLink function for returning error codes
+ *           under different network conditions
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneSelectTest, GET_ERR_CODE_01, TestSize.Level1)
 {
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;

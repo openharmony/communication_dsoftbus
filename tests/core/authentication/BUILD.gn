@@ -176,7 +176,6 @@ ohos_unittest("AuthEnhanceMockTest") {
 
   sources = [
     "$dsoftbus_root_path/core/adapter/authentication/src/lnn_extdata_config_virtual.c",
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/bind/auth_device_profile_listener_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_common.c",
@@ -708,6 +707,7 @@ ohos_unittest("AuthHichainTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
+    "unittest/auth_common_mock.cpp",
     "unittest/auth_hichain_test.cpp",
     "unittest/auth_net_ledger_mock.cpp",
   ]
