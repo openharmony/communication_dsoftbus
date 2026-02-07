@@ -225,6 +225,50 @@ ohos_unittest("TransTcpDirectMockTest") {
   }
 }
 
+ohos_unittest("ClientTransTcpDirectMsgMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "client_trans_tcp_direct_message_mock.cpp",
+    "client_trans_tcp_direct_message_mock_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/src",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/dfx/interface/include",
+    "$dsoftbus_root_path/dfx/interface/include/form",
+    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+    "$dsoftbus_root_path/adapter/default_config/spec_config",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -232,5 +276,6 @@ group("unittest") {
     ":TransSessionTest",
     ":TransTcpDirectMockTest",
     ":TransTcpDirectTest",
+    ":ClientTransTcpDirectMsgMockTest",
   ]
 }
