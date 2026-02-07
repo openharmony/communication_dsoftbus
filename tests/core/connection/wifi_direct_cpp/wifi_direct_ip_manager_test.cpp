@@ -654,5 +654,5 @@ HWTEST_F(WifiDirectIpManagerTest, GetInstanceInitialization, TestSize.Level1)
     WifiDirectIpManager &instance1 = WifiDirectIpManager::GetInstance();
     WifiDirectIpManager &instance2 = WifiDirectIpManager::GetInstance();
     EXPECT_EQ(&instance1, &instance2);
-}
+}1
 } // namespace OHOS::SoftBus
