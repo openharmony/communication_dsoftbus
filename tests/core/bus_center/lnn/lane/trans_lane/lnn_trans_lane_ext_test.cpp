@@ -355,10 +355,14 @@ HWTEST_F(LNNTransLaneExtTest, LNN_NOTIFY_FREE_LANE_RESULT_001, TestSize.Level1)
     EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
     g_freeLaneNotified = false;
-    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
-    EXPECT_TRUE(g_freeLaneNotified);
-    g_freeLaneNotified = false;
     EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_LANE_ALLOC_NOT_COMPLETED));
+    EXPECT_TRUE(g_freeLaneNotified);
+
+    reqInfo.isNotified = true;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
     EXPECT_TRUE(g_freeLaneNotified);
 
     reqInfo.hasNotifiedFree = true;
