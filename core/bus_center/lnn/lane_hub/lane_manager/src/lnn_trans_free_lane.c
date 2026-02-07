@@ -122,10 +122,16 @@ void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
             NotifyFreeLaneCallback(&reqInfo, SOFTBUS_OK);
             break;
         }
-        case NOTIFY_TYPE_ALLOC_SUCC_AFTER_FREE:
-            /* fall-through */
+        case NOTIFY_TYPE_ALLOC_SUCC_AFTER_FREE: {
+            LNN_LOGI(LNN_LANE, "free abandoned link only try notify and clear reqInfo, laneReqId=%{public}u, errCode=%{public}d",
+                laneReqId, type, errCode);
+            NotifyFreeLaneCallback(&reqInfo, errCode);
+            DeleteRequestNode(laneReqId);
+            FreeLaneReqId(laneReqId);
+            break;
+        }
         case NOTIFY_TYPE_ALLOC_SUCC_AFTER_CANCEL: {
-            LNN_LOGI(LNN_LANE, "free abandoned link only clear reqInfo, laneReqId=%{public}u, type=%{public}d, "
+            LNN_LOGI(LNN_LANE, "free canceled link only clear reqInfo, laneReqId=%{public}u, type=%{public}d, "
                 "errCode=%{public}d", laneReqId, type, errCode);
             DeleteRequestNode(laneReqId);
             FreeLaneReqId(laneReqId);
