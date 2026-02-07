@@ -124,7 +124,7 @@ void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
         }
         case NOTIFY_TYPE_ALLOC_SUCC_AFTER_FREE: {
             LNN_LOGI(LNN_LANE, "free abandoned link only try notify and clear reqInfo, laneReqId=%{public}u, "
-                errCode=%{public}d", laneReqId, errCode);
+                "errCode=%{public}d", laneReqId, errCode);
             NotifyFreeLaneCallback(&reqInfo, errCode);
             DeleteRequestNode(laneReqId);
             FreeLaneReqId(laneReqId);
