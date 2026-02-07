@@ -32,38 +32,42 @@ static SoftBusMutex g_nfcDispatchersLock;
 
 static DiscoveryFuncInterface *FindNfcFuncInterface(uint32_t capability)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_nfcDispatchersLock) == SOFTBUS_OK, NULL, DISC_INIT, "lock fail");
-    for (uint32_t i = 0; i < ARRAY_SIZE(g_nfcDispatchers); i++) {
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_nfcDispatchersLock) == SOFTBUS_OK, NULL, DISC_NFC,
+        "lock fail");
+    uint32_t dispatcherSize = ARRAY_SIZE(g_nfcDispatchers);
+    for (uint32_t i = 0; i < dispatcherSize; i++) {
         if (g_nfcDispatchers[i] == NULL) {
             continue;
         }
         if (g_nfcDispatchers[i]->IsConcern != NULL && g_nfcDispatchers[i]->IsConcern(capability)) {
-            SoftBusMutexUnlock(&g_nfcDispatchersLock);
+            (void)SoftBusMutexUnlock(&g_nfcDispatchersLock);
             return g_nfcDispatchers[i]->mediumInterface;
         }
     }
-    SoftBusMutexUnlock(&g_nfcDispatchersLock);
+    (void)SoftBusMutexUnlock(&g_nfcDispatchersLock);
     return NULL;
 }
 
-static int32_t NfcDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
-    InterfaceFuncType type)
+static void DfxRecordNfcDispatchFail(DiscAuditScene scene, DiscoverMode mode, int32_t capabilityBitmap, int32_t freq)
+{
+    DiscAuditExtra extra = {
+        .result = DISC_AUDIT_DISCONTINUE,
+        .errcode = SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL,
+        .auditType = AUDIT_EVENT_MSG_ERROR,
+        .discMode = mode,
+        .broadcastFreq = freq,
+        .localCapabilityBitmap = capabilityBitmap,
+    };
+    DISC_AUDIT(scene, extra);
+}
+
+static int32_t NfcDispatchPublishOption(const PublishOption *option, DiscoverMode mode, InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_NFC, "option is null");
     DiscoveryFuncInterface *interface = FindNfcFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        DISC_LOGE(DISC_NFC,
-            "dispatch publish action fail: no implement support capability. capabilityBitmap=%{public}u",
-            option->capabilityBitmap[0]);
-        DiscAuditExtra extra = {
-            .result = DISC_AUDIT_DISCONTINUE,
-            .errcode = SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL,
-            .auditType = AUDIT_EVENT_MSG_ERROR,
-            .discMode = mode,
-            .broadcastFreq = option->freq,
-            .localCapabilityBitmap = option->capabilityBitmap[0],
-        };
-        DISC_AUDIT(AUDIT_SCENE_NFC_PUBLISH, extra);
+        DISC_LOGE(DISC_NFC, "not support capability, capabilityBitmap=%{public}u", option->capabilityBitmap[0]);
+        DfxRecordNfcDispatchFail(AUDIT_SCENE_NFC_PUBLISH, mode, option->capabilityBitmap[0], option->freq);
         return SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL;
     }
     switch (type) {
@@ -73,8 +77,9 @@ static int32_t NfcDispatchPublishOption(const PublishOption *option, DiscoverMod
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
             DISC_LOGE(DISC_NFC,
-                "dispatch publish action fail: unsupport type. type=%{public}d, capability=%{public}u",
+                "dispatch publish action failed: unsupport type. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
+            DfxRecordNfcDispatchFail(AUDIT_SCENE_NFC_PUBLISH, mode, option->capabilityBitmap[0], option->freq);
             return SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL;
     }
 }
@@ -85,16 +90,8 @@ static int32_t NfcDispatchSubscribeOption(const SubscribeOption *option, Discove
     DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_NFC, "option is null");
     DiscoveryFuncInterface *interface = FindNfcFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        DISC_LOGE(DISC_NFC, "dispatch subcribe action fail: no implement support capability.");
-        DiscAuditExtra extra = {
-            .result = DISC_AUDIT_DISCONTINUE,
-            .errcode = SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL,
-            .auditType = AUDIT_EVENT_MSG_ERROR,
-            .discMode = mode,
-            .broadcastFreq = option->freq,
-            .localCapabilityBitmap = option->capabilityBitmap[0],
-        };
-        DISC_AUDIT(AUDIT_SCENE_NFC_SUBSCRIBE, extra);
+        DISC_LOGE(DISC_NFC, "dispatch subcribe action failed: no implement support capability.");
+        DfxRecordNfcDispatchFail(AUDIT_SCENE_NFC_SUBSCRIBE, mode, option->capabilityBitmap[0], option->freq);
         return SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL;
     }
     switch (type) {
@@ -103,8 +100,9 @@ static int32_t NfcDispatchSubscribeOption(const SubscribeOption *option, Discove
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
-            DISC_LOGE(DISC_NFC, "dispatch subcribe action fail: unsupport. type=%{public}d, capability=%{public}u",
+            DISC_LOGE(DISC_NFC, "dispatch subcribe action failed: unsupport. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
+            DfxRecordNfcDispatchFail(AUDIT_SCENE_NFC_SUBSCRIBE, mode, option->capabilityBitmap[0], option->freq);
             return SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL;
     }
 }
@@ -152,25 +150,27 @@ static int32_t NfcDispatchStopPassiveDiscovery(const SubscribeOption *option)
 static void NfcDispatchLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_nfcDispatchersLock) == SOFTBUS_OK, DISC_INIT, "lock fail");
-    for (uint32_t i = 0; i < ARRAY_SIZE(g_nfcDispatchers); i++) {
+    uint32_t dispatcherSize = ARRAY_SIZE(g_nfcDispatchers);
+    for (uint32_t i = 0; i < dispatcherSize; i++) {
         if (g_nfcDispatchers[i] != NULL && g_nfcDispatchers[i]->mediumInterface != NULL &&
             g_nfcDispatchers[i]->mediumInterface->LinkStatusChanged != NULL) {
             g_nfcDispatchers[i]->mediumInterface->LinkStatusChanged(status, ifnameIdx);
         }
     }
-    SoftBusMutexUnlock(&g_nfcDispatchersLock);
+    (void)SoftBusMutexUnlock(&g_nfcDispatchersLock);
 }
 
 static void NfcDispatchUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_nfcDispatchersLock) == SOFTBUS_OK, DISC_INIT, "lock fail");
-    for (uint32_t i = 0; i < ARRAY_SIZE(g_nfcDispatchers); i++) {
+    uint32_t dispatcherSize = ARRAY_SIZE(g_nfcDispatchers);
+    for (uint32_t i = 0; i < dispatcherSize; i++) {
         if (g_nfcDispatchers[i] != NULL && g_nfcDispatchers[i]->mediumInterface != NULL &&
             g_nfcDispatchers[i]->mediumInterface->UpdateLocalDeviceInfo != NULL) {
             g_nfcDispatchers[i]->mediumInterface->UpdateLocalDeviceInfo(type);
         }
     }
-    SoftBusMutexUnlock(&g_nfcDispatchersLock);
+    (void)SoftBusMutexUnlock(&g_nfcDispatchersLock);
 }
 
 static DiscoveryFuncInterface g_discNfcFrameFuncInterface = {
@@ -213,7 +213,6 @@ DiscoveryFuncInterface *DiscNfcDispatcherInit(DiscInnerCallback *discInnerCb)
 
     (void)memset_s(g_nfcDispatchers, sizeof(g_nfcDispatchers), 0, sizeof(g_nfcDispatchers));
     DISC_LOGI(DISC_INIT, "DiscNfcDispatcherInit");
-    int32_t dispatcherSize = 0;
 
     DiscoveryNfcDispatcherInterface *nfcInterface = DiscShareNfcInitPacked(discInnerCb);
     if (nfcInterface == NULL) {
@@ -229,8 +228,9 @@ DiscoveryFuncInterface *DiscNfcDispatcherInit(DiscInnerCallback *discInnerCb)
         (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
         return NULL;
     }
+    int32_t dispatcherSize = 0;
     g_nfcDispatchers[dispatcherSize++] = nfcInterface;
-    SoftBusMutexUnlock(&g_nfcDispatchersLock);
+    (void)SoftBusMutexUnlock(&g_nfcDispatchersLock);
     DfxRecordNfcInitEnd(EVENT_STAGE_NFC_INIT, SOFTBUS_OK);
     return &g_discNfcFrameFuncInterface;
 }
@@ -239,10 +239,11 @@ void DiscNfcDispatcherDeinit(void)
 {
     DISC_LOGI(DISC_INIT, "DiscNfcDispatcherDeinit");
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_nfcDispatchersLock) == SOFTBUS_OK, DISC_INIT, "lock fail");
-    for (uint32_t i = 0; i < ARRAY_SIZE(g_nfcDispatchers); i++) {
+    uint32_t dispatcherSize = ARRAY_SIZE(g_nfcDispatchers);
+    for (uint32_t i = 0; i < dispatcherSize; i++) {
         g_nfcDispatchers[i] = NULL;
     }
-    SoftBusMutexUnlock(&g_nfcDispatchersLock);
+    (void)SoftBusMutexUnlock(&g_nfcDispatchersLock);
 
     DiscShareNfcDeinitPacked();
     (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
