@@ -156,7 +156,7 @@ ohos_unittest("TransAuthChannelMessageTest") {
 group("unittest") {
   testonly = true
   deps = [
-    #":TransAuthChannelTest",
+    ":TransAuthChannelTest",
     ":TransAuthManagerTest",
     ":TransAuthMessageTest",
     ":TransAuthChannelMessageTest",
