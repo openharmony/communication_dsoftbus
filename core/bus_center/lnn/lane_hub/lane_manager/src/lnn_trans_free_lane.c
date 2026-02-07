@@ -105,10 +105,6 @@ static NotifyFreeType GetFreeLaneType(const TransReqInfo *reqInfo, int32_t errCo
 
 void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
 {
-    if (laneReqId == INVALID_LANE_REQ_ID) {
-        LNN_LOGE(LNN_LANE, "invalid parameter");
-        return;
-    }
     TransReqInfo reqInfo;
     (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
     if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
@@ -123,25 +119,21 @@ void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
             break;
         }
         case NOTIFY_TYPE_ALLOC_SUCC_AFTER_FREE: {
-            LNN_LOGI(LNN_LANE, "free abandoned link only try notify and clear reqInfo, laneReqId=%{public}u, "
-                "errCode=%{public}d", laneReqId, errCode);
+            LNN_LOGI(LNN_LANE, "free abandoned link, try notify and free reqInfo, laneReqId=%{public}u", laneReqId);
             NotifyFreeLaneCallback(&reqInfo, errCode);
             DeleteRequestNode(laneReqId);
             FreeLaneReqId(laneReqId);
             break;
         }
         case NOTIFY_TYPE_ALLOC_SUCC_AFTER_CANCEL: {
-            LNN_LOGI(LNN_LANE, "free canceled link only clear reqInfo, laneReqId=%{public}u, type=%{public}d, "
-                "errCode=%{public}d", laneReqId, type, errCode);
+            LNN_LOGI(LNN_LANE, "free canceled link, clear reqInfo, laneReqId=%{public}u", laneReqId);
             DeleteRequestNode(laneReqId);
             FreeLaneReqId(laneReqId);
             break;
         }
-        case NOTIFY_TYPE_UNUSED: {
-            LNN_LOGI(LNN_LANE, "free unused link do nothing, laneReqId=%{public}u, errCode=%{public}d",
-                laneReqId, errCode);
+        case NOTIFY_TYPE_UNUSED:
+            LNN_LOGI(LNN_LANE, "free unused link do nothing, laneReqId=%{public}u", laneReqId);
             break;
-        }
         case NOTIFY_TYPE_NORMAL: {
             LNN_LOGI(LNN_LANE, "notify free lane result, laneReqId=%{public}d, errCode=%{public}d", laneReqId, errCode);
             ReportLaneEventWithFreeLinkInfo(laneReqId, errCode);
