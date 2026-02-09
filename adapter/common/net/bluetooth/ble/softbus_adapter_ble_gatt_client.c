@@ -21,15 +21,14 @@
 #include "c_header/ohos_bt_gatt_client.h"
 
 #include "common_list.h"
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_utils.h"
-
-#include "conn_log.h"
 #include "softbus_type_def.h"
+#include "softbus_utils.h"
 
 #define APP_UUID_LEN      2
 #define INVALID_ID        (-1)
@@ -59,7 +58,7 @@ static void GattcConnectionStateChangedCallback(int clientId, int connectionStat
 {
     CONN_LOGI(CONN_BLE, "clientId=%{public}d, state=%{public}d, status=%{public}d", clientId, connectionState, status);
     if (connectionState != OHOS_STATE_CONNECTED && connectionState != OHOS_STATE_DISCONNECTED) {
-        CONN_LOGI(CONN_BLE, "ignore conn state");
+        CONN_LOGI(CONN_BLE, "connectionState=%{public}d, ignore", connectionState);
         return;
     }
 

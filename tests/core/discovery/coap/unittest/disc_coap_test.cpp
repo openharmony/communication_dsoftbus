@@ -74,6 +74,49 @@ static SubscribeOption g_testSubOption = { .freq = LOW,
 HWTEST_F(DiscCoapTest, CoapPublish001, TestSize.Level1)
 {
     DiscCoapMock discCoapMock;
+    EXPECT_CALL(discCoapMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(discCoapMock, LnnGetLocalStrInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
+    ASSERT_NE(g_discCoapFuncInterface, nullptr);
+
+    g_discCoapFuncInterface->LinkStatusChanged((LinkStatus)(-1), WLAN_IF);
+    int32_t ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
+
+    g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, USB_IF + 1);
+    ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
+
+    g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, WLAN_IF);
+    ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+
+    g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_DOWN, WLAN_IF);
+    ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
+    ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
+
+    g_discCoapFuncInterface = nullptr;
+}
+
+/*
+ * @tc.name: CoapPublish002
+ * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return SOFTBUS_INVALID_PARAM when given nullptr,
+ *           should return SOFTBUS_OK when given valid PublishOption
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscCoapTest, CoapPublish002, TestSize.Level1)
+{
+    DiscCoapMock discCoapMock;
     discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
@@ -103,14 +146,17 @@ HWTEST_F(DiscCoapTest, CoapPublish001, TestSize.Level1)
 }
 
 /*
- * @tc.name: CoapPublish002
+ * @tc.name: CoapPublish003
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
  *           SOFTBUS_INVALID_PARAM when given nullptr g_publishMgr
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, CoapPublish002, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     DiscoveryFuncInterface *tmp = DiscCoapInit(nullptr);
@@ -125,13 +171,13 @@ HWTEST_F(DiscCoapTest, CoapPublish002, TestSize.Level1)
 }
 
 /*
- * @tc.name: CoapPublish003
+ * @tc.name: CoapPublish004
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
  *           not SOFTBUS_OK when given invalid PublishOption.freq
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapPublish004, TestSize.Level1)
 {
     DiscCoapMock discCoapMock;
     discCoapMock.SetupSuccessStub();
@@ -162,14 +208,14 @@ HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
 }
 
 /*
- * @tc.name: CoapPublish004
+ * @tc.name: CoapPublish005
  * @tc.desc: Test DiscCoapPublish and DiscCoapUnpublish should return
  *           SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL when given NSTACKX_INIT_STATE_START g_nstackInitState,
  *           should not return SOFTBUS_OK when given capabilityBitmap {0} and NSTACKX_INIT_STATE_START g_nstackInitState
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscCoapTest, CoapPublish004, TestSize.Level1)
+HWTEST_F(DiscCoapTest, CoapPublish005, TestSize.Level1)
 {
     DiscCoapMock discCoapMock;
     discCoapMock.SetupSuccessStub();
@@ -211,6 +257,9 @@ HWTEST_F(DiscCoapTest, CoapPublish004, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartScan001, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     int32_t ret = g_discCoapFuncInterface->StartScan(nullptr);
@@ -243,6 +292,9 @@ HWTEST_F(DiscCoapTest, CoapStartScan001, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartScan002, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     DiscoveryFuncInterface *tmp = DiscCoapInit(nullptr);
@@ -266,6 +318,9 @@ HWTEST_F(DiscCoapTest, CoapStartScan002, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartScan003, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     int32_t ret = DiscNstackxInit();
@@ -333,6 +388,9 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise001, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartAdvertise002, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     g_discCoapFuncInterface->LinkStatusChanged(LINK_STATUS_UP, 0);
@@ -436,6 +494,9 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise004, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapSubscribe001, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     int32_t ret = g_discCoapFuncInterface->Subscribe(nullptr);
@@ -461,6 +522,9 @@ HWTEST_F(DiscCoapTest, CoapSubscribe001, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapSubscribe002, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     DiscoveryFuncInterface *tmp = DiscCoapInit(nullptr);
@@ -484,6 +548,9 @@ HWTEST_F(DiscCoapTest, CoapSubscribe002, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapSubscribe003, TestSize.Level1)
 {
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
+
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
     int32_t ret = DiscNstackxInit();

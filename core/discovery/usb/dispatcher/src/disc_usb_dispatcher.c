@@ -103,49 +103,41 @@ static int32_t UsbDispatchSubscribeOption(const SubscribeOption *option, Discove
 
 static int32_t UsbDispatchStartActivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_ACTIVE, PUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStartPassivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_PASSIVE, PUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStopActivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_ACTIVE, UNPUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStopPassivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_PASSIVE, UNPUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStartActiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_ACTIVE, STARTDISCOVERTY_FUNC);
 }
 
 static int32_t UsbDispatchStartPassiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STARTDISCOVERTY_FUNC);
 }
 
 static int32_t UsbDispatchStopActiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_ACTIVE, STOPDISCOVERY_FUNC);
 }
 
 static int32_t UsbDispatchStopPassiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 
