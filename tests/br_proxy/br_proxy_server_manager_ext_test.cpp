@@ -127,7 +127,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest000, TestSize.L
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = ServerDisableProxyFromList(0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
-    ret1 = IsSessionExist(nullptr, nullptr, 0, false);
+    ret1 = IsSessionExist(nullptr, nullptr, 0, false, 0);
     EXPECT_EQ(false, ret1);
     ret = ServerAddChannelToList(nullptr, nullptr, CHANNEL_ID, 0, appIndex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);

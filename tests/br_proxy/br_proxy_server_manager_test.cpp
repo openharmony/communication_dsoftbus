@@ -291,13 +291,14 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest009, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest010, TestSize.Level1)
 {
-    int32_t appIndex;
-    bool ret = TryToUpdateBrProxy(nullptr, TEST_UUID, &appIndex);
+    BrProxyInfo inInfo;
+    (void)memset_s(&inInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    bool ret = TryToUpdateBrProxy(nullptr, TEST_UUID, &inInfo);
     EXPECT_FALSE(ret);
-    ret = TryToUpdateBrProxy(VALID_BR_MAC, nullptr, &appIndex);
+    ret = TryToUpdateBrProxy(VALID_BR_MAC, nullptr, &inInfo);
     EXPECT_FALSE(ret);
     g_proxyList = NULL;
-    ret = TryToUpdateBrProxy(VALID_BR_MAC, TEST_UUID, &appIndex);
+    ret = TryToUpdateBrProxy(VALID_BR_MAC, TEST_UUID, &inInfo);
     EXPECT_FALSE(ret);
 }
 
@@ -321,13 +322,16 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest011, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest012, TestSize.Level1)
 {
-    int32_t appIndex;
-    int32_t ret = ServerAddProxyToList(nullptr, TEST_UUID, &appIndex);
+    BrProxyInfo inInfo;
+    (void)memset_s(&inInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    int32_t ret = ServerAddProxyToList(nullptr, TEST_UUID, &inInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = ServerAddProxyToList(VALID_BR_MAC, nullptr, &appIndex);
+    ret = ServerAddProxyToList(VALID_BR_MAC, nullptr, &inInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     g_proxyList = NULL;
-    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &appIndex);
+    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &inInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -361,16 +365,16 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest014, TestSize.Level1)
     EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
     ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID, APP_INDEX_TEST);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    bool result = IsSessionExist(nullptr, TEST_UUID, 0, false);
+    bool result = IsSessionExist(nullptr, TEST_UUID, 0, false, 0);
     EXPECT_FALSE(result);
-    result = IsSessionExist(VALID_BR_MAC, nullptr, 0, false);
+    result = IsSessionExist(VALID_BR_MAC, nullptr, 0, false, 0);
     EXPECT_FALSE(result);
     SoftBusList* temp = g_serverList;
     g_serverList = NULL;
-    result = IsSessionExist(VALID_BR_MAC, TEST_UUID, 0, false);
+    result = IsSessionExist(VALID_BR_MAC, TEST_UUID, 0, false, 0);
     EXPECT_FALSE(result);
     g_serverList = temp;
-    result = IsSessionExist(VALID_BR_MAC, TEST_UUID, 0, false);
+    result = IsSessionExist(VALID_BR_MAC, TEST_UUID, 0, false, CHANNEL_ID);
     EXPECT_TRUE(result);
     ret = ServerDeleteChannelFromList(CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -787,9 +791,10 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest034, TestSize.Level1)
     ASSERT_TRUE(ret == SOFTBUS_OK);
     NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
     EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
-    int32_t appIndex;
-    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &appIndex);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    BrProxyInfo inInfo;
+    (void)memset_s(&inInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &inInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     result = CheckSessionExistByUid(UID_TEST);
     EXPECT_EQ(result, IS_DISCONNECTED);
 }
@@ -1092,7 +1097,6 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest044, TestSize.Level1)
     const char *uuid = "testuuid";
     int32_t channelId = 1;
     int32_t userId = 1;
-    int32_t appIndex = 1;
     int32_t arr = GetChannelIdAndUserId(NULL, uuid, &channelId, &userId);
     EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
     arr = GetChannelIdAndUserId(mac, NULL, &channelId, &userId);
@@ -1107,7 +1111,10 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest044, TestSize.Level1)
     ASSERT_EQ(arr, SOFTBUS_OK);
     NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
     EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
-    arr = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &appIndex);
+    BrProxyInfo info;
+    (void)memset_s(&info, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    info.appIndex = 1;
+    arr = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &info);
     EXPECT_NE(SOFTBUS_OK, arr);
     const char *mac1 = "11:33:44:22:33:88";
     const char *uuid1 = "testuuid1";
