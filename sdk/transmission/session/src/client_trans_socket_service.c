@@ -185,7 +185,7 @@ int32_t ServiceSocket(ServiceSocketInfo info)
         TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%{public}d.", ret);
         goto FREE;
     }
-    TRANS_LOGI(TRANS_SDK, "gererate socketFd start");
+    TRANS_LOGI(TRANS_SDK, "generate socketFd start");
     ret = ClientAddSocket(&socket, &socketFd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
