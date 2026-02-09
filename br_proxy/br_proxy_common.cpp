@@ -216,8 +216,14 @@ extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
         TRANS_LOGE(TRANS_SVC, "[br_proxy] copy bundleName or abilityName failed");
         return SOFTBUS_STRCPY_ERR;
     }
-    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
-    int32_t ret = GetAbilityName(abilityName, userId, abilityNameLen, hapTokenInfoRes.bundleName, appIndex);
+    int32_t uid = GetCallerUid();
+    int32_t userId = 0;
+    int32_t ret = GetOsAccountLocalIdFromUid(uid, &userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get userId failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = GetAbilityName(abilityName, userId, abilityNameLen, hapTokenInfoRes.bundleName, appIndex);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get abilityName failed, ret=%{public}d", ret);
         TransEventExtra extra = {
@@ -296,6 +302,16 @@ static void BrProxyLoopMsgHandler(SoftBusMessage *msg)
             }
             StopAppInfo *info = (StopAppInfo *)msg->obj;
             (void)BrProxyUnrestricted(info->bundleName, info->pid, info->uid, false);
+            break;
+        }
+        case LOOP_BR_PROXY_OPENED_MSG: {
+            if (msg->obj == nullptr) {
+                TRANS_LOGE(TRANS_CTRL, "[br_proxy] LOOP_BR_PROXY_OPENED_MSG msg is nullptr.");
+                return;
+            }
+            BrProxyOpenedInfo *info = static_cast<BrProxyOpenedInfo *>(msg->obj);
+            TransOnBrProxyOpened(info->pid, info->channelId,
+                static_cast<const char *>(info->brMac), static_cast<const char *>(info->uuid));
             break;
         }
         default:
