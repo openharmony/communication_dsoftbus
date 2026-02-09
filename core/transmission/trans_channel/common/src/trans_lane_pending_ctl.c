@@ -405,20 +405,14 @@ static int32_t CopyAsyncReqItemSessionParam(const SessionParam *source, SessionP
 static int32_t TransAddAsyncLaneReqFromPendingList(
     uint32_t laneHandle, const SessionParam *param, const AppInfo *appInfo)
 {
-    if (param == NULL || appInfo == NULL) {
-        TRANS_LOGE(TRANS_SVC, "param or appInfo is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_asyncReqLanePendingList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_NO_INIT;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        (param != NULL && appInfo != NULL), SOFTBUS_INVALID_PARAM, TRANS_SVC, "param or appInfo is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_asyncReqLanePendingList != NULL, SOFTBUS_NO_INIT, TRANS_SVC, "lane pending list no init.");
     TransReqLaneItem *item = (TransReqLaneItem *)SoftBusCalloc(sizeof(TransReqLaneItem));
-    if (item == NULL) {
-        TRANS_LOGE(TRANS_SVC, "malloc lane request item err.");
-        return SOFTBUS_MALLOC_ERR;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        item != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "malloc lane request item err.");
+
     item->errCode = SOFTBUS_MALLOC_ERR;
     item->laneHandle = laneHandle;
     item->bSucc = false;
