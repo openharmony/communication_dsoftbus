@@ -1131,7 +1131,7 @@ int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount)
         TRANS_LOGI(TRANS_SDK, "set enableMultipath, socket=%{public}d", socket);
     }
     if (enableMultipath && (minBW <= LOW_BW || dataType != TYPE_FILE)) {
-        TRANS_LOGE(TRANS_SDK, "check multipath disable, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
+        TRANS_LOGE(TRANS_SDK, "not multipath ability, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
         ClientSetEnableMultipathBySocket(socket, false);
     }
     return SOFTBUS_OK;

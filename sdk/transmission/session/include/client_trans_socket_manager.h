@@ -42,7 +42,8 @@ bool IsValidSessionParam(const SessionParam *param);
 
 SessionInfo *CreateNewSession(const SessionParam *param);
 
-DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server);
+DestroySessionInfo *CreateDestroySessionNode(
+    SessionInfo *sessionNode, const ClientSessionServer *server, LinkDownType linkDownType);
 
 DestroyMultiPathSessionInfo *CreateMPDestroySessionNode(
     SessionInfo *sessionNode, const ClientSessionServer *server, bool mainLaneLinkDown);

@@ -15,7 +15,8 @@
 #ifndef SOFTBUS_DEF_H
 #define SOFTBUS_DEF_H
 
-#include  <pthread.h>
+#include <netinet/in.h>
+#include <pthread.h>
 #include "common_list.h"
 #include "softbus_adapter_thread.h"
 #include "stdint.h"
@@ -258,6 +259,17 @@ typedef struct {
     WakeUpLevel level; /**< wake up level. */
     bool isEnabled;    /**< enable the wake up capability. */
 } TransWakeUpOnParam;
+
+typedef struct {
+    ListNode node;
+    int32_t sessionId;
+    int32_t channelId;
+} ReallocInfo;
+
+typedef struct {
+    struct sockaddr_storage addr;
+    socklen_t addrLen;
+} AddrInfo;
 
 #ifdef __cplusplus
 #if __cplusplus

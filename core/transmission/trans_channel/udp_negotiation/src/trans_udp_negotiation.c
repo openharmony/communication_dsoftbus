@@ -1499,7 +1499,7 @@ static int32_t TransProcessAsyncOpenUdpChannelSuccess(UdpChannelInfo *channel, i
         errDesc = (char *)"send reply udp info error";
         goto ERR_EXIT;
     }
-    if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+    if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN && !channel->info.isMultiNeg) {
         ret = NotifyUdpChannelBind(&channel->info);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "notify bind fail ret=%{public}d, channelId=%{public}d", ret, channelId);

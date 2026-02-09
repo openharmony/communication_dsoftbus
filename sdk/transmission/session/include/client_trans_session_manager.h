@@ -16,6 +16,7 @@
 #ifndef CLIENT_TRANS_SESSION_MANAGER_H
 #define CLIENT_TRANS_SESSION_MANAGER_H
 
+#include <netinet/in.h>
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager_struct.h"
 
@@ -95,15 +96,11 @@ void ClientTransOnUserSwitch(void);
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 
-void ClientTransOnSingleLaneLinkDown(const char *networkId, int32_t routeType);
-
 void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList);
 
 int32_t CheckPermissionState(int32_t sessionId);
 
 void PermissionStateChange(const char *pkgName, int32_t state);
-
-int32_t CheckMainChannelLinkDownByChannelId(int32_t sessionId, int32_t channelId, bool *mainChannel);
 
 int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName, uint64_t *timestamp);
 
@@ -228,8 +225,6 @@ int32_t ClientGetSessionTypeBySocket(int32_t socket, int32_t *sessionType);
 
 int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo);
 
-int32_t ClearMultiPathSessionInfoByChannel(int32_t sessionId, int32_t channelId);
-
 void HandleMultiPathOnEvent(int32_t channelId, uint8_t changeType, int32_t linkType, int32_t reason);
 
 int32_t ClientSetMultipath(int32_t socket, bool optValue);
@@ -250,12 +245,6 @@ int32_t ClientSetStatusClosingReserveBySocket(int32_t socket, bool isClosingRese
 
 int32_t CheckChannelIsReserveByChannelId(int32_t sessionId, int32_t channelId, int32_t *useType);
 
-int32_t GetChannelIdReserveByChannel(int32_t sessionId, int32_t channelId, int32_t *useType);
-
-int32_t GetChannelIdReserveByChannel(int32_t sessionId, int32_t channelId, int32_t *channelIdReserve);
-
-int32_t CheckMultipathBySessionId(int32_t sessionId, bool *multiChannel);
-
 void PrintExtraInfo(SessionInfo *session);
 
 void printSessionBychannelId(int32_t channelId);
@@ -267,6 +256,8 @@ bool IsMultiPathSession(const char *sessionName, int32_t *multiPathSessionId);
 int32_t UpdateMultiPathSessionInfo(int32_t multiPathSessionId, const ChannelInfo *channel);
 
 int32_t GetFirstChannelIdBySocketId(int32_t sessionId, int32_t *channelId);
+
+int32_t SaveAddrInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t addrLen);
 
 #ifdef __cplusplus
 }

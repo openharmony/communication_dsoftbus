@@ -34,8 +34,8 @@ typedef struct {
     int32_t dfileId;
     int32_t type;
     int32_t srvPort;
-    const char *srvIp;
-    uint8_t paraNum;
+    socklen_t addrLen;
+    struct sockaddr_in *addr;
 } ClearMultiPathArgs;
 
 static const UdpChannelMgrCb *g_udpChannelMgrCb = NULL;
@@ -510,6 +510,18 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         TRANS_LOGI(TRANS_SDK, "notify DFILE_ON_CLEAR_POLICY_FILE_LIST success.");
         return;
     }
+    if (msgType == DFILE_ON_MP_SPEED) {
+        TRANS_LOGI(TRANS_SDK, "linkType %{public}d rate %{public}d linkType %{public}d rate %{public}d",
+            msgData->notifyLinkRate[0].linkType, msgData->notifyLinkRate[0].rate,
+            msgData->notifyLinkRate[1].linkType, msgData->notifyLinkRate[1].rate);
+        return;
+    }
+    if (msgType == DFILE_ON_MP_PATHNUM_CHANGE) {
+        LinkMediumType linkMediumType = ConvertDFileLinkToLinkMedium(msgData->pathNumChange.linkType);
+        enum SoftBusMPErrNo reason = ConvertOnEventReason(msgData->pathNumChange.changeType, linkMediumType, reason);
+        HandleMultiPathOnEvent(udpChannel.channelId, msgData->pathNumChange.changeType, linkMediumType, reason);
+        return;
+    }
     int32_t sessionId = -1;
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get sessionId failed");
@@ -578,6 +590,73 @@ static void RenameHook(DFileRenamePara *renamePara)
     TRANS_LOGD(TRANS_FILE, "default rename hook.");
 }
 
+static int32_t TransServerStartDFile(
+    const ChannelInfo *channel, bool *isAddMultipath, int32_t *filePort, uint32_t capabilityValue)
+{
+    if (channel == NULL || isAddMultipath == NULL || filePort == NULL) {
+        TRANS_LOGW(TRANS_FILE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!channel->enableMultipath) {
+        return StartNStackXDFileServer(channel->myIp, (uint8_t *)channel->sessionKey,
+            FileReceiveListener, filePort, capabilityValue);
+    }
+
+    if (!channel->isMultiNeg) {
+        return StartNStackXDFileServerV2(channel, FileReceiveListener, filePort, capabilityValue);
+    }
+    *isAddMultipath = true;
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetUdpChannel(channel->linkedChannelId, &udpChannel);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "get udpChannel failed, channelId=%{public}d", channel->linkedChannelId);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_FILE, "enter TransOnFileChannelServerAddSecondPath, channelId=%{public}d,"
+        "firstchannel=%{public}d, sessionId=%{public}d, dfileId=%{public}d",
+        channel->channelId, channel->linkedChannelId, channel->sessionId, udpChannel.dfileId);
+    AddrInfo addrInfo;
+    (void)memset_s(&addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo));
+    int32_t fileSession = TransOnFileChannelServerAddSecondPath(
+        channel, filePort, udpChannel.dfileId, &addrInfo, capabilityValue);
+    (void)SaveAddrInfo(channel->channelId, &(addrInfo.addr), addrInfo.addrLen);
+    return fileSession;
+}
+
+static int32_t TransClientStartDFile(const ChannelInfo *channel)
+{
+    if (channel == NULL) {
+        TRANS_LOGW(TRANS_FILE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!channel->enableMultipath) {
+        return StartNStackXDFileClient(channel->peerIp, channel->peerPort, (uint8_t *)channel->sessionKey,
+            DEFAULT_KEY_LENGTH, FileSendListener);
+    }
+
+    if (!channel->isMultiNeg) {
+        return StartNStackXDFileClientV2(channel, DEFAULT_KEY_LENGTH, FileSendListener);
+    }
+
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetUdpChannel(channel->linkedChannelId, &udpChannel);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "get udpChannel failed, channelId=%{public}d", channel->linkedChannelId);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_FILE, "enter TransOnFileChannelClientAddSecondPath, channelId=%{public}d,"
+        "firstchannel=%{public}d, sessionId=%{public}d, dfileId=%{public}d",
+        channel->channelId, channel->linkedChannelId, channel->sessionId, udpChannel.dfileId);
+    AddrInfo addrInfo;
+    (void)memset_s(&addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo));
+    int32_t fileSession = TransOnFileChannelClientAddSecondPath(
+        channel, udpChannel.dfileId, DEFAULT_KEY_LENGTH, &addrInfo);
+    (void)SaveAddrInfo(channel->channelId, &(addrInfo.addr), addrInfo.addrLen);
+    return fileSession;
+}
+
 int32_t TransOnFileChannelOpened(
     const char *sessionName, const ChannelInfo *channel, int32_t *filePort, SocketAccessInfo *accessInfo)
 {
@@ -586,37 +665,16 @@ int32_t TransOnFileChannelOpened(
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t fileSession;
-
     uint32_t capabilityValue = channel->isUdpFile ? NSTACKX_WLAN_CAT_DIRECT : NSTACKX_WLAN_CAT_TCP;
     (void)NSTACKX_DFileSetCapabilities(NSTACKX_CAPS_UDP_GSO | NSTACKX_CAPS_WLAN_CATAGORY, capabilityValue);
     if (channel->isServer) {
         FileListener fileListener;
+        bool isAddMultipath = false;
         (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
         int32_t ret = TransGetFileListener(sessionName, &fileListener);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "get file listener failed");
 
-        bool isMultiNeg = channel->isMultiNeg;
-        if (!channel->enableMultipath) {
-            fileSession = StartNStackXDFileServer(
-                channel->myIp, (uint8_t *)channel->sessionKey, FileReceiveListener, filePort, capabilityValue);
-        } else if (!isMultiNeg && channel->enableMultipath) {
-            TRANS_LOGI(TRANS_FILE, "enter StartNStackXDFileServerV2");
-            fileSession = StartNStackXDFileServerV2(
-                channel->myIp, (uint8_t *)channel->sessionKey, FileReceiveListener, filePort, channel->linkType, capabilityValue);
-        } else {
-            UdpChannel udpChannel;
-            (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
-            int32_t ret = TransGetUdpChannel(channel->linkedChannelId, &udpChannel);
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_FILE, "get udpChannel failed, channelId=%{public}d", channel->linkedChannelId);
-                return ret;
-            }
-
-            TRANS_LOGI(TRANS_FILE, "enter TransOnFileChannelServerAddSecondPath, channelId=%{public}d,"
-                "firstchannel=%{public}d, sessionId=%{public}d, dfileId=%{public}d",
-                channel->channelId, channel->linkedChannelId,channel->sessionId, udpChannel.dfileId);
-            fileSession = TransOnFileChannelServerAddSecondPath(channel, filePort, udpChannel.dfileId, capabilityValue);
-        }
+        fileSession = TransServerStartDFile(channel, &isAddMultipath, filePort, capabilityValue);
         
         if (fileSession < 0) {
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
@@ -629,7 +687,7 @@ int32_t TransOnFileChannelOpened(
             *filePort = 0;
             return ret;
         }
-        if (!(isMultiNeg && channel->enableMultipath)) {
+        if (!isAddMultipath) {
             if (UpdateFileRecvPath(channel->channelId, &fileListener, fileSession)) {
                 TRANS_LOGE(TRANS_FILE, "update receive file path failed");
                 NSTACKX_DFileClose(fileSession);
@@ -642,33 +700,12 @@ int32_t TransOnFileChannelOpened(
             }
         }
     } else {
-        bool isMultiNeg = channel->isMultiNeg;
-        if (!channel->enableMultipath) {
-            fileSession = StartNStackXDFileClient(channel->peerIp, channel->peerPort, (uint8_t *)channel->sessionKey,
-                DEFAULT_KEY_LENGTH, FileSendListener);
-        } else if (!isMultiNeg && channel->enableMultipath) {
-            TRANS_LOGI(TRANS_FILE, "enter StartNStackXDFileClientV2");
-            fileSession = StartNStackXDFileClientV2(channel->peerIp, channel->peerPort, (uint8_t *)channel->sessionKey,
-                DEFAULT_KEY_LENGTH, FileSendListener, channel->linkType);
-        } else {
-            UdpChannel udpChannel;
-            (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
-            int32_t ret = TransGetUdpChannel(channel->linkedChannelId, &udpChannel);
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_FILE, "get udpChannel failed, channelId=%{public}d", channel->linkedChannelId);
-                return ret;
-            }
-            TRANS_LOGI(TRANS_FILE, "enter TransOnFileChannelClientAddSecondPath, channelId=%{public}d,"
-                "firstchannel=%{public}d, sessionId=%{public}d, dfileId=%{public}d",
-                channel->channelId, channel->linkedChannelId, channel->sessionId, udpChannel.dfileId);
-            fileSession = TransOnFileChannelClientAddSecondPath(channel, udpChannel.dfileId, DEFAULT_KEY_LENGTH);
-        }
+        fileSession = TransClientStartDFile(channel);
         if (fileSession < 0) {
             TRANS_LOGE(TRANS_FILE, "start file channel as client failed");
             return SOFTBUS_FILE_ERR;
         }
     }
-    TRANS_LOGE(TRANS_FILE, "dfileId=%{public}d", fileSession);
     return fileSession;
 }
 
@@ -677,22 +714,6 @@ static void *TransCloseDFileProcTask(void *args)
     int32_t *dfileId = (int32_t *)args;
     TRANS_LOGI(TRANS_FILE, "rsync close dfileId=%{public}d.", *dfileId);
     NSTACKX_DFileClose(*dfileId);
-    SoftBusFree(dfileId);
-    return NULL;
-}
-
-static void *TransClearDFileProcTask(void *args)
-{
-    int32_t *dfileId = (int32_t *)args;
-    TRANS_LOGI(TRANS_FILE, "rsync clear dfileId=%{public}d.", *dfileId);
-
-    NSTACKX_SessionParaMpV2 para[1];
-    struct sockaddr_in addr = { 0 };
-    para[0].addr = (struct sockaddr_in *)&addr;
-    para[0].addrLen = 0;
-    para[0].linkType = DFILE_LINK_MAX;
-    uint8_t paraNum = 1;
-    NSTACKX_RemoveMpPath(*dfileId, para, paraNum);
     SoftBusFree(dfileId);
     return NULL;
 }
@@ -710,16 +731,22 @@ static DFileLinkType ConvertRouteToDFileLinkType(int32_t routeType)
 
 static void *TransCloseDFileReserveProcTask(void *args)
 {
+    if (args == NULL) {
+        TRANS_LOGW(TRANS_FILE, "Invalid param.");
+        return NULL;
+    }
     ClearMultiPathArgs *dfileArgs = (ClearMultiPathArgs *)args;
     TRANS_LOGI(TRANS_FILE, "rsync clear dfileId=%{public}d.", dfileArgs->dfileId);
 
     NSTACKX_SessionParaMpV2 para[dfileArgs->paraNum];
     (void)FillDFileParam(para, dfileArgs->srvIp, dfileArgs->srvPort);
+    para[0].addr = dfileArgs->addr;
+    para[0].addrLen = dfileArgs->addrLen;
     para[0].linkType = ConvertRouteToDFileLinkType(dfileArgs->type);
     TRANS_LOGI(TRANS_FILE,
-        "remove mp path, dfileId=%{public}d, is wired=%{public}d", dfileArgs->dfileId, dfileArgs->paraNum);
+        "remove mp path, dfileId=%{public}d, is wired=%{public}d", dfileArgs->dfileId, para[0].linkType);
     NSTACKX_RemoveMpPath(dfileArgs->dfileId, para, dfileArgs->paraNum);
-    SoftBusFree((void *)dfileArgs->srvIp);
+    SoftBusFree((void *)dfileArgs->addr);
     SoftBusFree(dfileArgs);
     return NULL;
 }
@@ -749,35 +776,10 @@ void TransCloseFileChannel(int32_t dfileId)
     }
 }
 
-void TransClearFileChannel(int32_t dfileId)
-{
-    TRANS_LOGI(TRANS_FILE, "start clear file channel, dfileId=%{public}d.", dfileId);
-    SoftBusThreadAttr threadAttr;
-    SoftBusThread tid;
-    int32_t ret = SoftBusThreadAttrInit(&threadAttr);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "thread attr init failed, ret=%{public}d.", ret);
-        return;
-    }
-    int32_t *args = (int32_t *)SoftBusCalloc(sizeof(int32_t));
-    if (args == NULL) {
-        TRANS_LOGE(TRANS_FILE, "clear dfile calloc failed. dfileId=%{public}d", dfileId);
-        return;
-    }
-    *args = dfileId;
-    threadAttr.detachState = SOFTBUS_THREAD_DETACH;
-    ret = SoftBusThreadCreate(&tid, &threadAttr, TransClearDFileProcTask, args);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "create closed file thread failed, ret=%{public}d.", ret);
-        SoftBusFree(args);
-        return;
-    }
-}
-
 void TransCloseReserveFileChannel(
-    int32_t dfileId, const char *srvIp, int32_t srvPort, int32_t type)
+    int32_t dfileId, struct sockaddr_storage *addr, socklen_t addrLen, int32_t type)
 {
-    TRANS_LOGI(TRANS_FILE, "start close reserve channel, dfileId=%{public}d, type=%{public}d, srvIp=%{public}s, srvPort=%{public}d", dfileId, type, srvIp, srvPort);
+    TRANS_LOGI(TRANS_FILE, "start close reserve channel, dfileId=%{public}d, type=%{public}d", dfileId, type);
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
@@ -792,21 +794,26 @@ void TransCloseReserveFileChannel(
     }
     args->dfileId = dfileId;
     args->type = type;
-    args->srvPort = srvPort;
     args->paraNum = 1;
-    char *dfileSrvIp = (char *)SoftBusCalloc(sizeof(char) * IP_LEN);
-    if (srvIp != NULL && strcpy_s(dfileSrvIp, IP_LEN, srvIp) != EOK) {
-        TRANS_LOGE(TRANS_SVC, "copy srvIp failed");
-        SoftBusFree((void *)dfileSrvIp);
+    args->addrLen = addrLen;
+    struct sockaddr_storage *localAddr = (struct sockaddr_storage *)SoftBusCalloc(sizeof(struct sockaddr_storage));
+    if (localAddr == NULL) {
+        TRANS_LOGE(TRANS_SVC, "calloc localAddr failed. dfileId=%{public}d", dfileId);
         SoftBusFree(args);
         return;
     }
-    args->srvIp = dfileSrvIp;
+    if (addr != NULL && memcpy_s(localAddr, sizeof(struct sockaddr_storage), addr, addrLen) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "copy srvIp failed");
+        SoftBusFree((void *)localAddr);
+        SoftBusFree(args);
+        return;
+    }
+    args->addr = (struct sockaddr_in *)localAddr;
     threadAttr.detachState = SOFTBUS_THREAD_DETACH;
     ret = SoftBusThreadCreate(&tid, &threadAttr, TransCloseDFileReserveProcTask, args);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "create closed file thread failed, ret=%{public}d.", ret);
-        SoftBusFree((void *)dfileSrvIp);
+        SoftBusFree((void *)localAddr);
         SoftBusFree(args);
         return;
     }

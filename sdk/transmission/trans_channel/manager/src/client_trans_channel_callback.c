@@ -184,7 +184,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         } else {
             ret = TransSendChannelOpenedDataToCore(channelId, channelType, openResult, &accessInfo);
         }
-    } else if (!channel->isServer && channel->isMultiNeg) {
+    } else if (channel->isMultiNeg) {
         TransSetUdpChannelSessionId(channel->channelId, channel->sessionId);
         (void)UpdateMultiPathSessionInfo(channel->sessionId, channel);
     }
