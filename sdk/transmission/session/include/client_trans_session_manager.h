@@ -247,10 +247,6 @@ int32_t CheckChannelIsReserveByChannelId(int32_t sessionId, int32_t channelId, i
 
 void PrintExtraInfo(SessionInfo *session);
 
-void printSessionBychannelId(int32_t channelId);
-
-void printSessionBysessionId(int32_t sessionId);
-
 bool IsMultiPathSession(const char *sessionName, int32_t *multiPathSessionId);
 
 int32_t UpdateMultiPathSessionInfo(int32_t multiPathSessionId, const ChannelInfo *channel);
