@@ -17,9 +17,7 @@
 #define LINK_BROADCAST_MANAGER_STRUCT_H
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 #define WIFI_MAC_SIZE        6
@@ -116,8 +114,6 @@ typedef void (*LinkBroadcastListener)(const char *networkId,
     const LinkBroadcastOption *option, const char *remoteMac);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif
 #endif
 #endif
