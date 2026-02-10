@@ -401,6 +401,23 @@ static void AnonymizeLogSessionNameWhenNotFound(const char *sessionName, int32_t
     AnonymizeFree(tmpName);
 }
 
+static void TransInitSocketBaseInfo(SocketWithChannelInfo *socketItem, bool isMultipathSession)
+{
+    if (socketItem == NULL) {
+        TRANS_LOGE(TRANS_SVC, "Invalid param, socketItem is null");
+        return;
+    }
+    socketItem->laneHandle = INVALID_LANE_REQ_ID;
+    socketItem->isQosLane = false;
+    socketItem->isAsync = false;
+    socketItem->channelIdReserve = INVALID_CHANNEL_ID;
+    socketItem->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+    socketItem->isUseReserve = false;
+    socketItem->laneHandleReserve = INVALID_LANE_REQ_ID;
+    socketItem->enableMultipath = isMultipathSession;
+    (void)memset_s(&socketItem->param, sizeof(SessionParam), 0, sizeof(SessionParam));
+}
+
 int32_t TransAddSocketChannelInfo(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state)
 {
@@ -425,14 +442,7 @@ int32_t TransAddSocketChannelInfo(
     newSocket->channelId = channelId;
     newSocket->channelType = channelType;
     newSocket->state = state;
-    newSocket->laneHandle = INVALID_LANE_REQ_ID;
-    newSocket->isQosLane = false;
-    newSocket->isAsync = false;
-    newSocket->channelIdReserve = INVALID_CHANNEL_ID;
-    newSocket->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
-    newSocket->isUseReserve = false;
-    newSocket->laneHandleReserve = INVALID_LANE_REQ_ID;
-    (void)memset_s(&newSocket->param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    TransInitSocketBaseInfo(newSocket, false);
     int32_t tmpUid;
     (void)TransGetUidAndPid(sessionName, &tmpUid, &(newSocket->pid));
 
@@ -466,15 +476,10 @@ int32_t TransAddSocketChannelInfo(
 int32_t TransAddSocketChannelInfoMultipath(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state)
 {
-    TRANS_LOGI(TRANS_SVC, "enter");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        sessionName != NULL, SOFTBUS_TRANS_INVALID_SESSION_NAME, TRANS_SVC, "Invalid param, sessionName is null.");
-    if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "Invaild param, sessionId=%{public}d", sessionId);
-        return SOFTBUS_TRANS_INVALID_SESSION_ID;
-    }
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        g_socketChannelList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "socket info manager hasn't init.");
+        sessionName != NULL && sessionId > 0, SOFTBUS_INVALID_PARAM, TRANS_SVC, "Invalid param.");
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_socketChannelList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "list not init.");
 
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
@@ -510,15 +515,7 @@ int32_t TransAddSocketChannelInfoMultipath(
     newSocket->channelId = channelId;
     newSocket->channelType = channelType;
     newSocket->state = state;
-    newSocket->laneHandle = INVALID_LANE_REQ_ID;
-    newSocket->isQosLane = false;
-    newSocket->isAsync = false;
-    newSocket->channelIdReserve = INVALID_CHANNEL_ID;
-    newSocket->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
-    newSocket->isUseReserve = false;
-    newSocket->laneHandleReserve = INVALID_LANE_REQ_ID;
-    newSocket->enableMultipath = true;
-    (void)memset_s(&newSocket->param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    TransInitSocketBaseInfo(newSocket, true);
     TransGetUidAndPid(sessionName, NULL, &(newSocket->pid));
 
     ListInit(&(newSocket->node));
