@@ -136,6 +136,7 @@ typedef enum {
 typedef enum {
     MSG_TYPE_GUIDE_CHANNEL_TRIGGER,
     MSG_TYPE_GUIDE_CHANNEL_SELECT,
+    MSG_TYPE_RECONNECT_WITHOUT_GUIDE_CHANGE,
     MSG_TYPE_GUIDE_CHANNEL_BUTT,
 } GuideMsgType;
 
@@ -173,6 +174,7 @@ static SoftBusMutex g_rawLinkLock;
 #define RAW_LINK_CHECK_DELAY           (200)
 #define RAW_LINK_CHECK_NUM             (10)
 #define WIFIDIRECT_RECONNECT_TIMES     (1)
+#define WIFIDIRECT_RECONNECT_DELAY     (3000)
 
 #define DFX_RECORD_LNN_LANE_SELECT_END(laneReqId, lnnConnReqId)                    \
     do {                                                                           \
@@ -1452,6 +1454,22 @@ static int32_t PostGuideChannelSelectMessage(uint32_t laneReqId, const P2pLinkRe
     return SOFTBUS_OK;
 }
 
+static int32_t PostDelayReconnectDeviceMessage(uint32_t p2pRequestId)
+{
+    LNN_LOGI(LNN_LANE, "post delay reconnect device without change msg.");
+    SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        LNN_LOGE(LNN_LANE, "create handler msg failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = MSG_TYPE_RECONNECT_WITHOUT_GUIDE_CHANGE;
+    msg->arg1 = p2pRequestId;
+    msg->handler = &g_guideChannelHandler;
+    msg->obj = NULL;
+    g_guideChannelHandler.looper->PostMessageDelay(g_guideChannelHandler.looper, msg, WIFIDIRECT_RECONNECT_DELAY);
+    return SOFTBUS_OK;
+}
+
 static bool GuideNodeIsExist(uint32_t laneReqId, LaneLinkType linkType)
 {
     if (LinkLock() != 0) {
@@ -1622,28 +1640,45 @@ static void HandleNotSupportP2pError(AsyncResultType type, uint32_t p2pRequestId
     }
 }
 
+static void WifiDirectReconnectDeviceAsync(SoftBusMessage *msg)
+{
+    uint32_t p2pRequestId = (uint32_t)msg->arg1;
+    if (WifiDirectReconnectDevice(p2pRequestId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "reconnect device fail, p2pRequestId=%{public}u", p2pRequestId);
+        NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, SOFTBUS_CONN_PROHIBIT_CREATE_GROUP);
+    }
+}
+
 static bool IsStartWifiDirectReconnect(uint32_t p2pRequestId, int32_t reason)
 {
-    if (reason != SOFTBUS_CONN_RETRYABLE_FAIL_WITH_CURRENT_GUIDE) {
-        return false;
-    }
     P2pLinkReqList reqInfo;
     (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
     if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get p2pLinkReq fail, type=%{public}d, requestId=%{public}u",
-            ASYNC_RESULT_P2P, p2pRequestId);
+        LNN_LOGE(
+            LNN_LANE, "get p2pLinkReq fail, type=%{public}d, requestId=%{public}u", ASYNC_RESULT_P2P, p2pRequestId);
         return false;
     }
     if (reqInfo.p2pInfo.reconnectTimes >= WIFIDIRECT_RECONNECT_TIMES) {
         LNN_LOGE(LNN_LANE, "reconnect device times exceed limit, requestId=%{public}u", p2pRequestId);
         return false;
     }
-    LNN_LOGI(LNN_LANE, "start reconnect device with current guide, p2pRequestId=%{public}u", p2pRequestId);
-    if (WifiDirectReconnectDevice(p2pRequestId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "reconnect device fail, p2pRequestId=%{public}u", p2pRequestId);
-        return false;
+    if (reason == SOFTBUS_CONN_RETRYABLE_FAIL_WITH_CURRENT_GUIDE) {
+        LNN_LOGI(LNN_LANE, "start reconnect device with current guide, p2pRequestId=%{public}u", p2pRequestId);
+        if (WifiDirectReconnectDevice(p2pRequestId) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "reconnect device fail, p2pRequestId=%{public}u", p2pRequestId);
+            return false;
+        }
+        return true;
     }
-    return true;
+    if (reason == SOFTBUS_CONN_PROHIBIT_CREATE_GROUP) {
+        LNN_LOGI(LNN_LANE, "start async reconnect device with current guide, p2pRequestId=%{public}u", p2pRequestId);
+        if (PostDelayReconnectDeviceMessage(p2pRequestId) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "post delay reconnect device without change msg fail.");
+            return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 static void UpdateFirstGuideChannelErrCode(uint32_t p2pRequestId, int32_t reason)
@@ -3082,6 +3117,9 @@ static void GuideChannelMsgHandler(SoftBusMessage *msg)
             break;
         case MSG_TYPE_GUIDE_CHANNEL_SELECT:
             GuideChannelSelect(msg);
+            break;
+        case MSG_TYPE_RECONNECT_WITHOUT_GUIDE_CHANGE:
+            WifiDirectReconnectDeviceAsync(msg);
             break;
         default:
             LNN_LOGE(LNN_LANE, "msg type=%{public}d cannot found", msg->what);
