@@ -675,11 +675,11 @@ int32_t TransOnFileChannelOpened(
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "get file listener failed");
 
         fileSession = TransServerStartDFile(channel, &isAddMultipath, filePort, capabilityValue);
-        
         if (fileSession < 0) {
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
             return SOFTBUS_FILE_ERR;
         }
+        
         ret = g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId, accessInfo);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "udp channel open failed.");
