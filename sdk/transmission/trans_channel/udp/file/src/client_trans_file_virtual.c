@@ -89,11 +89,3 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     (void)isReceiver;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
-
-void TransCloseReserveFileChannel(int32_t dfileId, const char *srvIp, int32_t srvPort, int32_t type)
-{
-    (void)dfileId;
-    (void)*srvIp;
-    (void)srvPort;
-    (void)type;
-}

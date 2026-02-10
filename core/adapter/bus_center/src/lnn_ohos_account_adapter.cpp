@@ -294,3 +294,19 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
     }
     return SOFTBUS_OK;
 }
+
+int32_t GetOsAccountLocalIdFromUid(int32_t uid, int32_t *userId)
+{
+    if (userId == nullptr) {
+        LNN_LOGE(LNN_STATE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t localId = -1;
+    OHOS::ErrCode res = OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, localId);
+    if (res != OHOS::ERR_OK) {
+        LNN_LOGE(LNN_STATE, "get userId fail. res=%{public}d", res);
+        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
+    }
+    *userId = localId;
+    return SOFTBUS_OK;
+}

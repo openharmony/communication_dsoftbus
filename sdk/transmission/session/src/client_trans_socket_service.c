@@ -132,13 +132,13 @@ static bool GenerateNameByServiceId(SocketInfo *socketInfo, ServiceSocketInfo in
         return false;
     }
     char name[PKG_NAME_SIZE_MAX];
-    ret = sprintf_s(name, PKG_NAME_SIZE_MAX, "serviceId_%d", info.serviceId);
+    ret = sprintf_s(name, PKG_NAME_SIZE_MAX, "serviceId_%" PRId64, info.serviceId);
     if (ret < 0 || ret >= (int32_t)sizeof(name)) {
         TRANS_LOGE(TRANS_SDK, "name err");
         return false;
     }
     char peerName[PKG_NAME_SIZE_MAX];
-    ret = sprintf_s(peerName, PKG_NAME_SIZE_MAX, "serviceId_%d", info.peerServiceId);
+    ret = sprintf_s(peerName, PKG_NAME_SIZE_MAX, "serviceId_%" PRId64, info.peerServiceId);
     if (ret < 0 || ret >= (int32_t)sizeof(peerName)) {
         TRANS_LOGE(TRANS_SDK, "peerName err");
         return false;
@@ -185,7 +185,7 @@ int32_t ServiceSocket(ServiceSocketInfo info)
         TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%{public}d.", ret);
         goto FREE;
     }
-    TRANS_LOGI(TRANS_SDK, "gererate socketFd start");
+    TRANS_LOGI(TRANS_SDK, "generate socketFd start");
     ret = ClientAddSocket(&socket, &socketFd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);

@@ -37,7 +37,7 @@
 #include "trans_split_serviceid.h"
 
 #define NETWORK_ID_LEN       7
-#define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
+#define GET_ROUTE_TYPE(type) ((uint32_t)(type)&0xff)
 #define GET_CONN_TYPE(type)  (((uint32_t)(type) >> 8) & 0xff)
 #define SENDBYTES_TIMEOUT_S  20
 

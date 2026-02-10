@@ -16,9 +16,8 @@
 #ifndef CLIENT_TRANS_SESSION_OPERATE_H
 #define CLIENT_TRANS_SESSION_OPERATE_H
 
-#include "inner_socket.h"
-
 #include "client_trans_session_manager.h"
+#include "inner_socket.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,9 +43,6 @@ SessionInfo *CreateNewSession(const SessionParam *param);
 
 DestroySessionInfo *CreateDestroySessionNode(
     SessionInfo *sessionNode, const ClientSessionServer *server, LinkDownType linkDownType);
-
-DestroyMultiPathSessionInfo *CreateMPDestroySessionNode(
-    SessionInfo *sessionNode, const ClientSessionServer *server, bool mainLaneLinkDown);
 
 void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason);
 

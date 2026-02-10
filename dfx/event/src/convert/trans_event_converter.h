@@ -107,8 +107,10 @@ TRANS_ASSIGNER(Int32,  StreamChannelCnt, streamChannelCnt)
 TRANS_ASSIGNER(Int32,  DataLen, dataLen)
 TRANS_ASSIGNER(Uint64,  SessionDuration, sessionDuration)
 TRANS_ASSIGNER(Uint8, ChannelStatus, channelStatus)
+TRANS_ASSIGNER(Errcode,  UserId, userId)
+TRANS_ASSIGNER(Errcode,  AppIndex, appIndex)
 
-#define TRANS_ASSIGNER_SIZE 73 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 75 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
     { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
@@ -183,6 +185,8 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "DATA_LEN",            HISYSEVENT_INT32,    TransAssignerDataLen         },
     { "SESSION_DURATION",    HISYSEVENT_UINT64,   TransAssignerSessionDuration },
     { "CHANNEL_STATUS",      HISYSEVENT_UINT8,    TransAssignerChannelStatus   },
+    { "USER_ID",             HISYSEVENT_INT32,    TransAssignerUserId          },
+    { "APP_INDEX",           HISYSEVENT_INT32,    TransAssignerAppIndex        },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 

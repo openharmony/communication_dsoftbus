@@ -642,8 +642,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
         int32_t useType = CHANNEL_USE_CHOOSE_OTHER;
         (void)CheckChannelIsReserveByChannelId(sessionId, channelId, &useType);
         if (useType == CHANNEL_USE_CHOOSE_SECOND) {
-            TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, sessionId=%{public}d, useType=second",
-                sessionId, channelId);
+            TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, sessionId=%{public}d, useType=second", sessionId, channelId);
             return SOFTBUS_OK;
         }
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
