@@ -439,25 +439,39 @@ static void RemoveProxyChannelByChannelId(uint32_t channelId)
     SoftBusMutexUnlock(&GetProxyChannelManager()->proxyConnectionList->lock);
 }
 
+static void HandleConcurrentConnect(ProxyConnectInfo *connectingProxyChannel, const ProxyConnectInfo *connectInfo)
+{
+    if (StrCmpIgnoreCase(connectInfo->brMac, connectingProxyChannel->brMac) != 0) {
+        CONN_LOGW(CONN_PROXY, "not the same device, reject");
+        connectInfo->result.onOpenFail(
+            connectInfo->requestId, SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR, connectInfo->brMac);
+        return;
+    }
+
+    if (connectInfo->isInnerRequest) {
+        connectInfo->result.onOpenFail(
+            connectInfo->requestId, SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR, connectInfo->brMac);
+        return;
+    }
+
+    // wait connect finished and reuse
+    if (connectingProxyChannel->isInnerRequest) {
+        connectingProxyChannel->result.onOpenFail(connectingProxyChannel->requestId,
+            SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR, connectingProxyChannel->brMac);
+    }
+    connectingProxyChannel->result = connectInfo->result;
+    connectingProxyChannel->requestId = connectInfo->requestId;
+    connectingProxyChannel->isInnerRequest = connectInfo->isInnerRequest;
+}
+
 static bool IsNeedReuseOrWait(ProxyConnectInfo *connectInfo)
 {
     ProxyConnectInfo *connectingProxyChannel = GetProxyChannelManager()->proxyChannelRequestInfo;
     if (connectingProxyChannel != NULL) {
-        if (StrCmpIgnoreCase(connectInfo->brMac, connectingProxyChannel->brMac) == 0) {
-            CONN_LOGI(CONN_PROXY, "wait connect result reqId=%{public}u, isInnerRequest=%{public}d",
-                connectInfo->requestId, connectInfo->isInnerRequest);
-            if (!connectInfo->isInnerRequest) {
-                // wait connect finished and reuse
-                connectingProxyChannel->result = connectInfo->result;
-                connectingProxyChannel->requestId = connectInfo->requestId;
-            } else {
-                connectInfo->result.onOpenFail(connectInfo->requestId, SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR,
-                    connectInfo->brMac);
-            }
-        } else {
-            connectInfo->result.onOpenFail(connectInfo->requestId, SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR,
-                connectInfo->brMac);
-        }
+        CONN_LOGW(CONN_PROXY, "concurrent conflict, connecting=%{public}u/%{public}d, this=%{public}u/%{public}d",
+            connectingProxyChannel->requestId, connectingProxyChannel->isAclConnected, connectInfo->requestId,
+            connectInfo->isAclConnected);
+        HandleConcurrentConnect(connectingProxyChannel, connectInfo);
         return true;
     }
 
@@ -572,12 +586,23 @@ static void RemoveReconnectDeviceInfoByAddrUnsafe(const char *addr)
     }
 }
 
-static void OpenProxyChannelHandler(ProxyConnectInfo *connectInfo)
+static void UpdateRequestIdIfNeed(ProxyConnectInfo *connectInfo)
 {
     ProxyConnectInfo *reconnectDeviceInfo = GetReconnectDeviceInfoByAddrUnsafe(connectInfo->brMac);
-    if (!connectInfo->isInnerRequest && reconnectDeviceInfo != NULL) {
-        reconnectDeviceInfo->requestId = connectInfo->requestId;
+    if (reconnectDeviceInfo == NULL) {
+        return;
     }
+
+    if (!connectInfo->isInnerRequest) {
+        reconnectDeviceInfo->requestId = connectInfo->requestId;
+    } else {
+        connectInfo->requestId = reconnectDeviceInfo->requestId;
+    }
+}
+
+static void OpenProxyChannelHandler(ProxyConnectInfo *connectInfo)
+{
+    UpdateRequestIdIfNeed(connectInfo);
     if (IsNeedReuseOrWait(connectInfo)) {
         return;
     }
@@ -883,11 +908,11 @@ static void AclStateChangedHandler(ProxyChannelAclStateContext *context)
 {
     ProxyConnectInfo *reconnectDeviceInfo = GetReconnectDeviceInfoByAddrUnsafe(context->brMac);
     CONN_CHECK_AND_RETURN_LOGW(reconnectDeviceInfo != NULL, CONN_PROXY, "no reconnect device");
+    reconnectDeviceInfo->innerRetryNum = 0;
     reconnectDeviceInfo->isAclConnected = (context->state == SOFTBUS_ACL_STATE_CONNECTED) ? true : false;
     if (!reconnectDeviceInfo->isAclConnected) {
         return;
     }
-    reconnectDeviceInfo->innerRetryNum = 0;
     ConnRemoveMsgFromLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL_RETRY, 0, 0,
         reconnectDeviceInfo->brMac);
     CONN_LOGI(CONN_PROXY, "isSupportHfp=%{public}d", reconnectDeviceInfo->isSupportHfp);
