@@ -883,6 +883,7 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
         (void)TransDeleteSocketChannelInfoBySession(reqLane.param.sessionName, reqLane.param.sessionId);
         (void)TransDelLaneReqFromPendingList(laneHandle, true);
         TransFreeLane(laneHandle, true, true);
+        ClearSessionParamMemory(&(reqLane.param));
         return;
     }
     ret = CreateAppInfoByParam(laneHandle, &reqLane.param, appInfo);
@@ -890,6 +891,7 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
         TRANS_LOGE(TRANS_SVC, "CreateAppInfoByParam failed");
         TransFreeAppInfo(appInfo);
         TransFreeLane(laneHandle, true, true);
+        ClearSessionParamMemory(&(reqLane.param));
         return;
     }
     appInfo->callingTokenId = callingTokenId;
@@ -1660,7 +1662,7 @@ static int32_t TransDelStateReserve(const SessionParam *param, uint32_t *laneHan
         return SOFTBUS_INVALID_PARAM;
     }
     CoreSessionState stateReserve = CORE_SESSION_STATE_INIT;
-    (void)TransGetSocketChannelStateReserveBySession(param->sessionName, param->sessionId, &stateReserve);
+    TransGetSocketChannelStateReserveBySession(param->sessionName, param->sessionId, &stateReserve);
     if (stateReserve == CORE_SESSION_STATE_CANCELLING) {
         CancelLaneOnWaitLaneState(*laneHandle, param->isQosLane);
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
@@ -1699,8 +1701,6 @@ int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneA
     allocListener.onLaneFreeSuccess = TransOnLaneFreeSuccess;
     allocListener.onLaneFreeFail = TransOnLaneFreeFail;
     allocListener.onLaneQosEvent = TransOnLaneQosEvent;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnReAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
-        TRANS_SVC, "lnnReallocLane is null");
     if (GetLaneManager()->lnnReAllocLane == NULL) {
         TRANS_LOGE(TRANS_SVC, "lnnReAllocLane is null.");
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
