@@ -54,6 +54,7 @@ int32_t ClientTransChannelAsyncSendMessage(int32_t channelId, int32_t channelTyp
 
 int32_t ClientTransCloseReserveChannel(
     int32_t channelId, int32_t channelType, int32_t routeType, int32_t delSecondPath);
+
 #ifdef __cplusplus
 }
 #endif
