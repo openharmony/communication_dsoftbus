@@ -3778,7 +3778,7 @@ int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t GetChannelTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t *channelType)
+int32_t GetChannelTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t *channelType)
 {
     if (sessionId < 0 || channelType == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
@@ -3802,29 +3802,6 @@ static int32_t GetChannelTypeBySessionId(int32_t sessionId, int32_t channelId, i
         *channelType = sessionNode->channelTypeReserve;
     }
     UnlockClientSessionServerList();
-    return SOFTBUS_OK;
-}
-
-static int32_t GetChannelTypeByChannelId(int32_t channelId, int32_t *channelType)
-{
-    UdpChannel channel;
-    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "on udp channel opened memset failed.");
-        return SOFTBUS_MEM_ERR;
-    }
-    int32_t ret = TransGetUdpChannel(channelId, &channel);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK,
-            "get udp channel failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
-        return ret;
-    }
-    TRANS_LOGI(TRANS_SDK, "get udp channel success. channelId=%{public}d, sessionId=%{public}d", channelId, channel.sessionId);
-    ret = GetChannelTypeBySessionId(channel.sessionId, channelId, channelType);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK,
-            "get session failed. sessionId=%{public}d, channelId=%{public}d, ret=%{public}d", channel.sessionId, channelId, ret);
-        return ret;
-    }
     return SOFTBUS_OK;
 }
 
@@ -3928,7 +3905,7 @@ bool IsMultiPathSession(const char *sessionName, int32_t *multipathSessionId)
     ret = GetMultiPathSession(sessionName, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
-        TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, is not a multiPath session", sessionName);
+        TRANS_LOGI(TRANS_SDK, "current session is not a multiPath session");
         return false;
     }
     *multipathSessionId = sessionNode->sessionId;
@@ -3970,9 +3947,10 @@ int32_t UpdateMultiPathSessionInfo(int32_t multipathSessionId, const ChannelInfo
     return SOFTBUS_OK;
 }
 
-int32_t GetFirstChannelIdSocketId(int32_t sessionId, int32_t *channelId)
+int32_t ClientGetReserveChannelBySessionId(
+    int32_t sessionId, int32_t *channelId, int32_t *channelType, int32_t *routeType)
 {
-    if (sessionId == INVALID_SESSION_ID || channelId == NULL) {
+    if (sessionId == INVALID_SESSION_ID || channelId == NULL || channelType == NULL || routeType == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -3992,6 +3970,36 @@ int32_t GetFirstChannelIdSocketId(int32_t sessionId, int32_t *channelId)
         return ret;
     }
     *channelId = sessionNode->channelId;
+    *channelType = sessionNode->channelTypeReserve;
+    *routeType = sessionNode->routeType;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
+int32_t ClientClearReserveChannelBySessionId(int32_t sessionId)
+{
+    if (sessionId == INVALID_SESSION_ID) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    ret = GetSessionById(sessionId, &serverNode, &sessionNode);
+    if (ret != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
+        return ret;
+    }
+    sessionNode->channelIdReserve = INVALID_CHANNEL_ID;
+    sessionNode->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+    sessionNode->routeTypeReserve = -1;
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }
