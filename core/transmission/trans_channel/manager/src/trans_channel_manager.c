@@ -620,6 +620,7 @@ int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
     appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
     appInfo->linkedChannelId = channelId;
     TRANS_LOGI(TRANS_CTRL, "linkedChannelId=%{public}d, channelId=%{public}d", appInfo->linkedChannelId, channelId);
+    TransSetSocketChannelStateReserveBySession(param.sessionName, param.sessionId, CORE_SESSION_STATE_INIT);
     ret = TransUpdateSocketChannelInfo(param->sessionName, param->sessionId, true);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Add socket channel record failed");
