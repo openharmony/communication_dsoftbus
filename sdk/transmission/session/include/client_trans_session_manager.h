@@ -66,6 +66,9 @@ int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType,
 
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing);
 
+int32_t ClientGetSessionIdByChannelIdReserve(
+    int32_t channelIdReserve, int32_t channelTypeReserve, int32_t *sessionId, bool isClosingReserve);
+
 int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D);
 
 int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync);
@@ -251,9 +254,14 @@ bool IsMultiPathSession(const char *sessionName, int32_t *multiPathSessionId);
 
 int32_t UpdateMultiPathSessionInfo(int32_t multiPathSessionId, const ChannelInfo *channel);
 
-int32_t GetFirstChannelIdBySocketId(int32_t sessionId, int32_t *channelId);
+int32_t ClientGetReserveChannelBySessionId(
+    int32_t sessionId, int32_t *channelId, int32_t *channelType, int32_t *routeType);
+
+int32_t ClientClearReserveChannelBySessionId(int32_t sessionId);
 
 int32_t SaveAddrInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t addrLen);
+
+int32_t GetChannelTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t *channelType);
 
 #ifdef __cplusplus
 }
