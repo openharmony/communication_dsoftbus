@@ -872,7 +872,7 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         errDesc = (char *)"peer device session name not create";
         goto ERR_EXIT;
     }
-    if (info.linkedChannelId > 0) {
+    if (info.linkedChannelId >= 0) {
         UdpChannelInfo channel;
         (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
         ret = TransGetUdpChannelByPeerId(info.linkedChannelId, &channel);
