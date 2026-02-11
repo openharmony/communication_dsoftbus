@@ -70,7 +70,9 @@ int32_t TransSetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *
 int32_t TransGetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t *addrLen);
 
 int32_t ClientTransCloseReserveUdpChannel(
-    int32_t channelId, ShutdownReason reason, int32_t srvPort, int32_t routeType, bool delSecondPath);
+    int32_t channelId, ShutdownReason reason, int32_t routeType, bool delSecondPath);
+
+int32_t GetChannelTypeByChannelId(int32_t channelId, int32_t *channelType);
 #ifdef __cplusplus
 }
 #endif
