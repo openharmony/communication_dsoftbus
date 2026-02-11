@@ -125,7 +125,7 @@ SessionInfo *CreateNewSession(const SessionParam *param)
 }
 
 DestroySessionInfo *CreateDestroySessionNode(
-    SessionInfo *sessionNode, const ClientSessionServer *server, linkDownType linkDownType)
+    SessionInfo *sessionNode, const ClientSessionServer *server, LinkDownType linkDownType)
 {
     if (sessionNode == NULL || server == NULL || linkDownType == LINK_DOWN_MAX_NUM_TYPE) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -190,7 +190,7 @@ void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
         int32_t id = destroyNode->sessionId;
         if (destroyNode->linkDownType == MULTIPATH_ONLY_SECOND_CHANNEL ||
             destroyNode->linkDownType == MULTIPATH_BOTH_CHANNEL) {
-            bool delSecondPath = destroyNode->linkDownType == MULTIPATH_ONLY_SECOND_CHANNEL ? true :false;
+            bool delSecondPath = destroyNode->linkDownType == MULTIPATH_ONLY_SECOND_CHANNEL ? true : false;
             (void)ClientTransCloseReserveChannel(
                 destroyNode->channelId, destroyNode->channelType, destroyNode->routeType, delSecondPath);
             ListDelete(&(destroyNode->node));
@@ -405,14 +405,13 @@ static bool ClientTransNeedDelReserve(SessionInfo *sessionNode, int32_t routeTyp
     if (!sessionNode->enableMultipath) {
         return false;
     }
-    TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, type1=%{public}d, type2=%{public}d, linkDownType=%{public}d",
-        sessionNode->sessionId, sessionNode->routeType, sessionNode->routeTypeReserve, routeType);
     if ((sessionNode->routeType == routeType && sessionNode->routeTypeReserve != INVALID_ROUTE_TYPE) ||
         sessionNode->routeTypeReserve == routeType) {
+        TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, type1=%{public}d, type2=%{public}d, linkDownType=%{public}d",
+            sessionNode->sessionId, sessionNode->routeType, sessionNode->routeTypeReserve, routeType);
         *onlyReserveLinkDown = sessionNode->routeType == routeType ? false : true;
         return true;
     }
-    TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d no need delete reserve channel", sessionNode->sessionId);
     return false;
 }
 
@@ -437,8 +436,6 @@ static void ClientTransDelReserveLinkDown(
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
 static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
-    TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, type1=%{public}d, type2=%{public}d, linkDownType=%{public}d",
-        sessionNode->sessionId, sessionNode->routeType, sessionNode->routeTypeReserve, routeType);
     if (connType == TRANS_CONN_ALL) {
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             return false;
