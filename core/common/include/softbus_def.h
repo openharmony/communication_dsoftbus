@@ -242,6 +242,17 @@ typedef struct {
     int64_t peerServiceId;
 } ChannelInfo;
 
+typedef struct {
+    ListNode node;
+    int32_t sessionId;
+    int32_t channelId;
+} ReallocInfo;
+
+typedef struct {
+    struct sockaddr_storage addr;
+    socklen_t addrLen;
+} AddrInfo;
+
 typedef enum {
     FULL_WAKE_UP_LEVEL = 0, /**< full wake up. */
     HALF_WAKE_UP_LEVEL,     /**< half wake up. */
@@ -259,17 +270,6 @@ typedef struct {
     WakeUpLevel level; /**< wake up level. */
     bool isEnabled;    /**< enable the wake up capability. */
 } TransWakeUpOnParam;
-
-typedef struct {
-    ListNode node;
-    int32_t sessionId;
-    int32_t channelId;
-} ReallocInfo;
-
-typedef struct {
-    struct sockaddr_storage addr;
-    socklen_t addrLen;
-} AddrInfo;
 
 #ifdef __cplusplus
 #if __cplusplus
