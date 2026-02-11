@@ -404,7 +404,7 @@ static void AnonymizeLogSessionNameWhenNotFound(const char *sessionName, int32_t
 static void TransInitSocketBaseInfo(SocketWithChannelInfo *socketItem, bool isMultipathSession)
 {
     if (socketItem == NULL) {
-        TRANS_LOGE(TRANS_SVC, "Invalid param, socketItem is null");
+        TRANS_LOGE(TRANS_SVC, "Invaild param, socketItem is null");
         return;
     }
     socketItem->laneHandle = INVALID_LANE_REQ_ID;
@@ -477,13 +477,12 @@ int32_t TransAddSocketChannelInfoMultipath(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        sessionName != NULL && sessionId > 0, SOFTBUS_INVALID_PARAM, TRANS_SVC, "Invalid param.");
+        sessionName != NULL && sessionId > 0, SOFTBUS_INVALID_PARAM, TRANS_SVC, "Invaild param.");
 
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_socketChannelList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "list not init.");
 
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
-        SoftBusFree(newSocket);
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -491,8 +490,7 @@ int32_t TransAddSocketChannelInfoMultipath(
     if (socketItem != NULL) {
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
-        TRANS_LOGI(
-            TRANS_SVC, "socket lane info has existed. socket=%{public}d, sessionName=%{public}s",
+        TRANS_LOGI(TRANS_SVC, "socket lane info has existed. socket=%{public}d, sessionName=%{public}s",
                 sessionId, AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
@@ -734,7 +732,7 @@ int32_t TransDeleteSocketChannelInfoByChannel(int32_t channelId, int32_t channel
                 channelId, channelType);
             return SOFTBUS_OK;
         } else if (socketItem->channelId == channelId && socketItem->channelType == channelType) {
-            ClearSessionParamMemory(&(socketItem->->param));
+            ClearSessionParamMemory(&(socketItem->param));
             ListDelete(&(socketItem->node));
             g_socketChannelList->cnt--;
             SoftBusFree(socketItem);
@@ -765,7 +763,7 @@ int32_t TransDeleteSocketChannelInfoByPid(int32_t pid)
     SocketWithChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(socketItem, next, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
         if (socketItem->pid == pid) {
-            ClearSessionParamMemory(&(socketItem->->param));
+            ClearSessionParamMemory(&(socketItem->param));
             ListDelete(&(socketItem->node));
             g_socketChannelList->cnt--;
             SoftBusFree(socketItem);
@@ -1142,8 +1140,8 @@ static SocketWithChannelInfo *GetMultiPathSocketByChannelId(int32_t channelId)
     SocketWithChannelInfo *socketItem = NULL;
     LIST_FOR_EACH_ENTRY(socketItem, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
         if (socketItem->enableMultipath && socketItem->channelId == channelId) {
-            TRANS_LOGI(TRANS_SVC,
-                "multipath sessionId=%{public}d, laneHandle=%{public}d, laneHandleReserve=%{public}d",
+            TRANS_LOGI(
+                TRANS_SVC, "multipath sessionId=%{public}d, laneHandle=%{public}d, laneHandleReserve=%{public}d",
                 socketItem->sessionId, socketItem->laneHandle, socketItem->laneHandleReserve);
             return socketItem;
         }
@@ -1158,12 +1156,12 @@ void TransGetMultipathReallocList(ListNode *multipathReallocList)
         return;
     }
     if (g_socketChannelList == NULL) {
-        TRANS_LOGE(TRANS_INTI, "socket info manager hasn't init.");
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
         return;
     }
     if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
-        return SOFTBUS_LOCK_ERR;
+        return;
     }
     SocketWithChannelInfo *socketItem;
     LIST_FOR_EACH_ENTRY(socketItem, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
@@ -1201,7 +1199,7 @@ bool CheckNeedReallocSecondLane(int32_t channelId)
     return false;
 }
 
-static int32_t CopySessionParamExtension(const SessionParam *source, SessionParam *target)
+int32_t CopySessionParamExtension(const SessionParam *source, SessionParam *target)
 {
     if (source == NULL || target ==NULL) {
         TRANS_LOGE(TRANS_SVC, "invalid param");
@@ -1257,6 +1255,7 @@ int32_t CopySessionParam(const SessionParam *source, SessionParam *target)
         ClearSessionParamMemory(target);
         return SOFTBUS_MEM_ERR;
     }
+
     if (source->peerSessionName != NULL &&
         strcpy_s(peerSessionName, SESSION_NAME_SIZE_MAX, source->peerSessionName) != EOK) {
         TRANS_LOGE(TRANS_SVC, "strcopy peerSessionName failed");
@@ -1267,6 +1266,12 @@ int32_t CopySessionParam(const SessionParam *source, SessionParam *target)
 
     target->peerSessionName = peerSessionName;
     char *peerDeviceId = (char *)SoftBusCalloc(sizeof(char) * SESSION_NAME_SIZE_MAX);
+    if (peerDeviceId == NULL) {
+        TRANS_LOGE(TRANS_SVC, "SoftBusCalloc peerDeviceId failed");
+        ClearSessionParamMemory(target);
+        return SOFTBUS_MEM_ERR;
+    }
+
     if (source->peerDeviceId != NULL &&
         strcpy_s(peerDeviceId, SESSION_NAME_SIZE_MAX, source->peerDeviceId) != EOK) {
         TRANS_LOGE(TRANS_SVC, "strcopy peerDeviceId failed");
@@ -1372,5 +1377,5 @@ int32_t TransGetSessionParamByChannelId(int32_t channelId, SessionParam *param)
     }
     TRANS_LOGE(TRANS_SVC, "socket info not found. channelId=%{public}d", channelId);
     (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
-    return SOFTBUS_NOT_FOUND;
+    return SOFTBUS_NOT_FIND;
 }
