@@ -220,6 +220,18 @@ bool IsInWhitelistPacked(const char *app)
     return pfnTransEnhanceFuncList->isInWhitelist(app);
 }
 
+bool IsMultipathWhitelistPacked(const char *processName, bool *isWhitelist)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->isMultipathWhitelist) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->isMultipathWhitelist(processName, isWhitelist);
+}
+
 bool CheckAuthChannelSessionNameValidPacked(const char *sessionName)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
