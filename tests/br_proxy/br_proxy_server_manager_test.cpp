@@ -1079,4 +1079,43 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest043, TestSize.Level1)
     ret = TransSendBrProxyData(0, data, TMP_LEN);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
 }
+
+/**
+ * @tc.name: BrProxyServerManagerTest044
+ * @tc.desc: BrProxyServerManagerTest044
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest044, TestSize.Level1)
+{
+    const char *mac = "11:33:44:22:33:56";
+    const char *uuid = "testuuid";
+    int32_t channelId = 1;
+    int32_t userId = 1;
+    int32_t appIndex = 1;
+    int32_t arr = GetChannelIdAndUserId(NULL, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, NULL, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, uuid, NULL, &userId);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, uuid, &channelId, NULL);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+    arr = BrProxyServerInit();
+    ASSERT_EQ(arr, SOFTBUS_OK);
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    arr = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &appIndex);
+    EXPECT_NE(SOFTBUS_OK, arr);
+    const char *mac1 = "11:33:44:22:33:88";
+    const char *uuid1 = "testuuid1";
+    arr = GetChannelIdAndUserId(mac1, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+    arr = GetChannelIdAndUserId(mac, uuid1, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+    arr = GetChannelIdAndUserId(mac, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+}
 }

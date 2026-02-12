@@ -543,6 +543,12 @@ int32_t CloseBrProxy(int32_t channelId)
     if (!IsChannelValid(channelId)) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }
+    TransEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .errcode = SOFTBUS_OK,
+        .channelId = channelId,
+    };
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CLOSE_BR_PROXY, extra);
     (void)ClientRecordListenerState(channelId, DATA_RECEIVE, false);
     (void)ClientRecordListenerState(channelId, CHANNEL_STATE, false);
     int32_t ret = ServerIpcCloseBrProxy(channelId);
