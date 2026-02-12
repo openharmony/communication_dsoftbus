@@ -295,7 +295,7 @@ static int32_t DumpSyncInfoMsgList(const ListNode *srcList, ListNode *dstList)
         }
         LNN_LOGD(LNN_BUILDER, "add node");
         ListInit(&newItem->node);
-        ListNodeInsert(dstList, &newItem->node);
+        ListTailInsert(dstList, &newItem->node);
     }
     return SOFTBUS_OK;
 }
@@ -454,16 +454,16 @@ static void OnChannelOpenFailed(int32_t channelId, const char *peerUuid)
         LNN_LOGI(LNN_BUILDER, "peer device not online");
         return;
     }
-    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
-        LNN_LOGE(LNN_BUILDER, "sync channel opened failed lock fail");
-        return;
-    }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_BUILDER,
         "open channel fail. channelId=%{public}d, networkId=%{public}s",
         channelId, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
+    if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
+        LNN_LOGE(LNN_BUILDER, "sync channel opened failed lock fail");
+        return;
+    }
     info = FindSyncChannelInfoByNetworkId(networkId);
     if (info == NULL || (info->clientChannelId != channelId && info->serverChannelId != channelId)) {
         LNN_LOGE(LNN_BUILDER, "unexpected channel open fail event");
