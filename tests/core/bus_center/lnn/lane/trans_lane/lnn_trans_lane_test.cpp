@@ -168,10 +168,6 @@ void DeinitControlPlane(void)
 {
 }
 
-void TriggerClearSparkGroup(void)
-{
-}
-
 static void SetIsNeedCondWait(void)
 {
     if (SoftBusMutexLock(&g_lock) != SOFTBUS_OK) {
@@ -1354,25 +1350,6 @@ HWTEST_F(LNNTransLaneMockTest, LNN_INIT_MCU_PACKED_TEST_001, TestSize.Level1)
     lnnEnhanceFunc.lnnInitMcu = LnnInitMcuTest;
     ret = LnnInitMcuPacked();
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: TRIGGER_SH_SPARK_GROUP_CLEAR_TEST_001
- * @tc.desc: TriggerClearSparkGroupPacked func test.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNTransLaneMockTest, TRIGGER_SH_SPARK_GROUP_CLEAR_TEST_001, TestSize.Level1)
-{
-    NiceMock<TransLaneDepsInterfaceMock> laneMock;
-    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(nullptr));
-    EXPECT_NO_FATAL_FAILURE(TriggerClearSparkGroupPacked());
-    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
-    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
-    EXPECT_NO_FATAL_FAILURE(TriggerClearSparkGroupPacked());
-
-    lnnEnhanceFunc.triggerClearSparkGroup = TriggerClearSparkGroup;
-    EXPECT_NO_FATAL_FAILURE(TriggerClearSparkGroupPacked());
 }
 
 /*
