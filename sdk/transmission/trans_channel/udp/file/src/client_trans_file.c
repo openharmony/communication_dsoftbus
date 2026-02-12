@@ -778,7 +778,7 @@ void TransCloseFileChannel(int32_t dfileId)
 void TransCloseReserveFileChannel(
     int32_t dfileId, struct sockaddr_storage *addr, socklen_t addrLen, int32_t type)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(addr != NULL, TRANS_FILE, "Invalid addr.");
+    TRANS_CHECK_AND_RETURN_LOGE(addr != NULL, TRANS_FILE, "Invalid addr.");
     TRANS_LOGI(TRANS_FILE, "start close reserve channel, dfileId=%{public}d, type=%{public}d", dfileId, type);
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
