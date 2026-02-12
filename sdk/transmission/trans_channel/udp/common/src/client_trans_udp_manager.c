@@ -306,6 +306,46 @@ static int32_t TransSetdFileIdByChannelId(int32_t channelId, int32_t value)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
+static bool TransCheckIsSecondPath(int32_t channelId, int32_t *routeType)
+{
+    UdpChannel channel;
+    (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetUdpChannel(channelId, &channel);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed", channelId);
+        return false;
+    }
+    if (routeType != NULL) {
+        *routeType = channel.routeType;
+    }
+    return channel.isReserveChannel;
+}
+
+static int32_t ClosePeerUdpChannel(int32_t channelId)
+{
+    return ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_UDP);
+}
+
+static int32_t RleaseUdpResources(int32_t channelId)
+{
+    return ServerIpcReleaseResources(channelId);
+}
+
+static int32_t TransAddSecondPathFail(int32_t channelId)
+{
+    bool isSecondPath = TransCheckIsSecondPath(channelId, NULL);
+    if (!isSecondPath) {
+        TRANS_LOGD(TRANS_SDK, "not second path. channelId=%{public}d", channelId);
+        return SOFTBUS_OK;
+    }
+    int32_t ret = ClosePeerUdpChannel(channelId);
+    it (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_SDK, "close peer udp channel failed. channelId=%{public}d", channelId);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransOnUdpChannelOpened(
     const char *sessionName, const ChannelInfo *channel, int32_t *udpPort, SocketAccessInfo *accessInfo)
 {
@@ -338,6 +378,7 @@ int32_t TransOnUdpChannelOpened(
         case BUSINESS_TYPE_FILE:
             ret = TransOnFileChannelOpened(sessionName, channel, udpPort, accessInfo);
             if (ret < SOFTBUS_OK) {
+                (void)TransAddSecondPathFail(channel->channelId);
                 (void)TransDeleteUdpChannel(channel->channelId);
                 TRANS_LOGE(TRANS_SDK, "on file channel open failed.");
                 return ret;
@@ -414,16 +455,6 @@ int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType)
         ret = SOFTBUS_OK;
     }
     return ret;
-}
-
-static int32_t ClosePeerUdpChannel(int32_t channelId)
-{
-    return ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_UDP);
-}
-
-static int32_t RleaseUdpResources(int32_t channelId)
-{
-    return ServerIpcReleaseResources(channelId);
 }
 
 static void NotifyCallback(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
@@ -508,7 +539,7 @@ static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
                 channelId, ret);
         }
     }
-    return CloseUpdChannelProc(&channel, channelId, reason)
+    return CloseUpdChannelProc(&channel, channelId, reason);
 }
 
 static int32_t CloseReserveUdpChannel(int32_t channelId, ShutdownReason reason, int32_t routeType, bool delSecondPath)
@@ -544,6 +575,10 @@ static int32_t CloseReserveUdpChannel(int32_t channelId, ShutdownReason reason, 
 
 int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
+    int32_t routeType = -1;
+    if (TransCheckIsSecondPath(channel, &routeType)) {
+        return CloseReserveUdpChannel(channelId, SHUTDOWN_REASON_LOCAL, routeType, true);
+    }
     return CloseUdpChannel(channelId, reason);
 }
 
@@ -1092,7 +1127,7 @@ int32_t TransGetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *
             if (memcpy_s(addr, sizeof(struct sockaddr_storage), &(channelNode->addr), channelNode->addrLen) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "copy server addr error");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-                return SOFTBUS_MEM_ERROR;
+                return SOFTBUS_MEM_ERR;
             }
             *addrLen = channelNode->addrLen;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -1102,4 +1137,29 @@ int32_t TransGetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     TRANS_LOGE(TRANS_SDK, "udp channel not found, channelId=%{public}d.", channelId);
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
+}
+
+static int32_t GetChannelTypeByChannelId(int32_t channelId, int32_t *channelType)
+{
+    UdpChannel channel;
+    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "on udp channel opened memset failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    int32_t ret = TransGetUdpChannel(channelId, &channel);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK,
+            "get udp channel failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SDK,
+        "get udp channel success. channelId=%{public}d, sessionId=%{public}d", channelId, channel.sessionId);
+    ret = GetChannelTypeBySessionId(channel.sessionId, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK,
+            "get session failed. sessionId=%{public}d, channelId=%{public}d, ret=%{public}d",
+            channel.sessionId, channelId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
