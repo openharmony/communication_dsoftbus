@@ -26,7 +26,7 @@ if (dsoftbus_feature_trans_udp == true &&
       [ "$dsoftbus_udp_sdk_path/common/src/client_trans_udp_virtual.c" ]
 }
 trans_udp_channel_sdk_inc = [	 
-  "$dsoftbus_udp_sdk_path/common/include", 
+  "$dsoftbus_udp_sdk_path/common/include",
 ]
 trans_udp_channel_sdk_deps = []
 
