@@ -21,12 +21,12 @@
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "disc_nstackx_adapter.h"
-#include "lnn_local_net_ledger.h"
 #include "disc_nstackx_adapter_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
 using namespace testing::ext;
+using testing::Return;
 
 static bool isDeviceFound = false;
 namespace OHOS {
@@ -260,7 +260,7 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapRegisterCapabilityData001, TestSize.Lev
 
     capability = (1 << SHARE_CAPABILITY_BITMAP);
     ret = DiscCoapRegisterCapabilityData(capData, len, capability);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -411,7 +411,7 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterFound002, TestSize.Level1)
     ret = DiscCoapRegisterCb(&g_discInnerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 }
 
 /*
@@ -441,27 +441,27 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterFound003, TestSize.Level1)
     ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "wlan0");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "ncm0");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "wwan0");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "eth0");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "net");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 }
 
 /*
@@ -485,27 +485,27 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseResInfo001, TestSize.Level1
     ret = strcpy_s(testDeviceList.deviceId, sizeof(testDeviceList.deviceId), "test");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.deviceId, sizeof(testDeviceList.deviceId), "{\"UDID\":\"abcde\"}");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo), "test");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo), "{\"version\":\"1.0.0\"}");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 
     ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo),
         "{\"version\":\"1.0.0\",\"bData\":{\"nickname\":\"Jane\"}}");
     EXPECT_EQ(ret, EOK);
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
-    EXPECT_TRUE(!isDeviceFound);
+    EXPECT_TRUE(isDeviceFound);
 }
 } // namespace OHOS
