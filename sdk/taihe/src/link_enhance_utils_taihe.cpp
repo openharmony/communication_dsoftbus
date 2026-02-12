@@ -65,15 +65,9 @@ void ThrowException(int32_t err)
     COMM_LOGI(COMM_SDK, "error code is=%{public}d", err);
     bool flag = false;
     int32_t ret = ConvertToJsErrcode(err);
-    for (const auto& pair : taiheErrMsgMap) {
-        if (pair.first == ret) {
-            taihe::set_business_error(pair.first, pair.second);
-            flag = true;
-            break;
-        }
-    }
-    if (!flag) {
-        taihe::set_business_error(LINK_ENHANCE_INTERNAL_ERR, "Internal error.");
+    auto it = taiheErrMsgMap.find(ret);
+    if (it != taiheErrMsgMap.end()) {
+        taihe::set_business_error(it->first, it->second);
     }
 }
 
