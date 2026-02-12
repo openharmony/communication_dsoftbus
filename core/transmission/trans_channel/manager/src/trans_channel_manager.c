@@ -597,7 +597,6 @@ int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
         TRANS_LOGE(TRANS_CTRL, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
     SessionParam param = { 0 };
     param.isMultiNeg = true;
     int32_t ret = TransGetSessionParamByChannelId(channelId, &param);
@@ -1410,6 +1409,7 @@ void TransHandleReallocLnn(void)
         TRANS_LOGI(TRANS_CTRL, "multipathReallocList is empty");
         return;
     }
+
     ReallocInfo *reallocNode = NULL;
     ReallocInfo *reallocNodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(reallocNode, reallocNodeNext, (ListNode *)(&multipathReallocList), ReallocInfo, node) {
