@@ -65,7 +65,6 @@ ohos_shared_library("br_proxy_adapter") {
     ]
     external_deps = [
       "c_utils:utils",
-      "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
@@ -73,6 +72,7 @@ ohos_shared_library("br_proxy_adapter") {
       "samgr:samgr_proxy",
       "resource_schedule_service:ressched_client",
       "device_standby:standby_innerkits",
+      "ability_runtime:app_manager",
     ]
   } else {
     sources += [ "br_proxy_adapter_virtual.cpp" ]
