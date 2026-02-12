@@ -16,7 +16,6 @@ if (dsoftbus_feature_trans_br_proxy == true) {
   br_proxy_sa_sources = [
     "$dsoftbus_root_path/br_proxy/br_proxy_server_manager.c",
     "$dsoftbus_root_path/br_proxy/br_proxy_common.cpp",
-    "$dsoftbus_root_path/br_proxy/br_proxy_storage.c",
     "$dsoftbus_root_path/br_proxy/hap_uninstall_observer.cpp",
   ]
 } else {
