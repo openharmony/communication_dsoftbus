@@ -753,7 +753,6 @@ static bool WhitelistPermissionCheck(void)
     COMM_LOGI(COMM_SVC, "callingPid=%{public}u, processName=%{public}s, isWhitelist=%{public}d",
         callingPid, nativeTokenInfo.processName.c_str(), isWhitelist);
     return isWhitelist;
-
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
