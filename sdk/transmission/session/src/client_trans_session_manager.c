@@ -3915,7 +3915,7 @@ bool IsMultiPathSession(const char *sessionName, int32_t *multipathSessionId)
 
 int32_t UpdateMultiPathSessionInfo(int32_t multipathSessionId, const ChannelInfo *channel)
 {
-    if (multipathSessionId == INVALID_SESSION_ID || channel == NULL) {
+    if (multipathSessionId == INVALID_SESSION_ID || channel == NULL ) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -3969,9 +3969,9 @@ int32_t ClientGetReserveChannelBySessionId(
         TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
         return ret;
     }
-    *channelId = sessionNode->channelId;
+    *channelId = sessionNode->channelIdReserve;
     *channelType = sessionNode->channelTypeReserve;
-    *routeType = sessionNode->routeType;
+    *routeType = sessionNode->routeTypeReserve;
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }
