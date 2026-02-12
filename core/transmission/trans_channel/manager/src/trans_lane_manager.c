@@ -401,7 +401,8 @@ static void AnonymizeLogSessionNameWhenNotFound(const char *sessionName, int32_t
     AnonymizeFree(tmpName);
 }
 
-static void TransInitSocketBaseInfo(SocketWithChannelInfo *socketItem, bool isMultipathSession) {
+static void TransInitSocketBaseInfo(SocketWithChannelInfo *socketItem, bool isMultipathSession)
+{
     if (socketItem == NULL) {
         TRANS_LOGE(TRANS_SVC, "Invaild param, socketItem is null");
         return;
