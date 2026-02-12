@@ -95,7 +95,6 @@ extern "C" {
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
 #define ACCOUNT_UID_STR_LEN 65
-#define CRED_ID_STR_LEN 300
 
 #define ACCOUNT_ID_SIZE_MAX 65
 
