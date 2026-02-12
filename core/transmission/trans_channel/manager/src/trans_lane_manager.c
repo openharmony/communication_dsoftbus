@@ -401,8 +401,7 @@ static void AnonymizeLogSessionNameWhenNotFound(const char *sessionName, int32_t
     AnonymizeFree(tmpName);
 }
 
-static void TransInitSocketBaseInfo(SocketWithChannelInfo *socketItem, bool isMultipathSession)
-{
+static void TransInitSocketBaseInfo(SocketWithChannelInfo *socketItem, bool isMultipathSession) {
     if (socketItem == NULL) {
         TRANS_LOGE(TRANS_SVC, "Invaild param, socketItem is null");
         return;
@@ -491,7 +490,7 @@ int32_t TransAddSocketChannelInfoMultipath(
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
         TRANS_LOGI(TRANS_SVC, "socket lane info has existed. socket=%{public}d, sessionName=%{public}s",
-                sessionId, AnonymizeWrapper(tmpName));
+            sessionId, AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
         return SOFTBUS_OK;
