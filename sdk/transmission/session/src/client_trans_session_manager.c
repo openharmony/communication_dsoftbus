@@ -3915,7 +3915,7 @@ bool IsMultiPathSession(const char *sessionName, int32_t *multipathSessionId)
 
 int32_t UpdateMultiPathSessionInfo(int32_t multipathSessionId, const ChannelInfo *channel)
 {
-    if (multipathSessionId == INVALID_SESSION_ID || channel == NULL ) {
+    if (multipathSessionId == INVALID_SESSION_ID || channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
