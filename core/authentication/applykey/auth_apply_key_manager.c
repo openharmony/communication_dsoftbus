@@ -36,16 +36,15 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
-#define DEFAULT_FILE_PATH "/data/service/el1/public/dsoftbus/applykey"
-#define KEY_LEN           100
-#define MAP_KEY           "mapKey"
+#define DEFAULT_FILE_PATH     "/data/service/el1/public/dsoftbus/applykey"
+#define KEY_LEN               100
+#define D2D_APPLY_KEY_HEX_LEN (D2D_APPLY_KEY_LEN * 2 + 1)
+#define MAP_KEY               "mapKey"
 
 #define VALUE_APPLY_KEY    "applyKey"
 #define VALUE_USER_ID      "userId"
 #define VALUE_TIME         "time"
 #define VALUE_ACCOUNT_HASH "accountHash"
-
-#define D2D_APPLY_KEY_HEX_LEN   (D2D_APPLY_KEY_LEN * 2 + 1)
 
 typedef struct {
     uint8_t applyKey[D2D_APPLY_KEY_LEN];
@@ -216,11 +215,10 @@ static bool AuthPackApplyKey(cJSON *json, char *nodeKey, AuthApplyMapValue *valu
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return false;
     }
-
     char hexApplyKey[D2D_APPLY_KEY_HEX_LEN] = { 0 };
     if (ConvertBytesToHexString(
         hexApplyKey, D2D_APPLY_KEY_HEX_LEN, (unsigned char *)value->applyKey, D2D_APPLY_KEY_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "convert bytes to string fail");
+        AUTH_LOGE(AUTH_CONN, "ConvertBytesToHexString fail");
         return false;
     }
     if (!AddStringToJsonObject(json, MAP_KEY, nodeKey) || !AddStringToJsonObject(json, VALUE_APPLY_KEY, hexApplyKey) ||
@@ -268,7 +266,6 @@ static char *PackAllApplyKey(void)
     if (msg == NULL) {
         AUTH_LOGE(AUTH_CONN, "cJSON_PrintUnformatted fail");
     }
-    (void)SoftBusMutexUnlock(&g_authApplyMutex);
     cJSON_Delete(jsonArray);
     return msg;
 }
@@ -298,7 +295,7 @@ static bool AuthUnpackApplyKey(const cJSON *json, AuthApplyMap *node)
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return false;
     }
-    char hexApplyKey[D2D_APPLY_KEY_HEX_LEN] = { 0 };
+    char hexApplyKey[D2D_APPLY_KEY_HEX_LEN] = {0};
     if (!GetJsonObjectNumber64Item(json, VALUE_TIME, (int64_t *)&node->value.time) ||
         !GetJsonObjectNumberItem(json, VALUE_USER_ID, &node->value.userId) ||
         !GetJsonObjectStringItem(json, MAP_KEY, node->mapKey, KEY_LEN) ||
@@ -308,8 +305,8 @@ static bool AuthUnpackApplyKey(const cJSON *json, AuthApplyMap *node)
         return false;
     }
     if (ConvertHexStringToBytes(
-        (unsigned char *)node->value.applyKey, D2D_APPLY_KEY_LEN, hexApplyKey, D2D_APPLY_KEY_HEX_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "convert hexApplyKey to bytes fail.");
+        (unsigned char *)node->value.applyKey, D2D_APPLY_KEY_LEN, hexApplyKey, strlen(hexApplyKey)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "ConvertHexStringToBytes fail.");
         return false;
     }
     return true;
