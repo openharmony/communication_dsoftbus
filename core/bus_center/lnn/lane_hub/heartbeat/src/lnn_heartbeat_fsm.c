@@ -35,8 +35,10 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
+#include "softbus_utils.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
 
@@ -233,20 +235,21 @@ static int32_t RemoveCheckDevStatusMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage
     LnnCheckDevStatusMsgPara *delMsgPara = (LnnCheckDevStatusMsgPara *)delMsg->obj;
 
     if (delMsgPara->hasNetworkId != msgPara->hasNetworkId) {
-        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+        /* remove message when return 0, else return 1 */
+        return 1;
     }
     if (!delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType) {
         SoftBusFree(msgPara);
         msgPara = NULL;
-        return SOFTBUS_OK;
+        return 0;
     }
     if (delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType &&
         strcmp(msgPara->networkId, delMsgPara->networkId) == 0) {
         SoftBusFree(msgPara);
         msgPara = NULL;
-        return SOFTBUS_OK;
+        return 0;
     }
-    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+    return 1;
 }
 
 static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
@@ -258,9 +261,10 @@ static int32_t RemoveSendOnceMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delM
         msgPara->strategyType == delMsgPara->strategyType) {
         SoftBusFree(msgPara);
         msgPara = NULL;
-        return SOFTBUS_OK;
+        return 0;
     }
-    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+    /* remove message when return 0, else return 1 */
+    return 1;
 }
 
 static int32_t RemoveSendOneEndMsgStepOne(LnnHeartbeatSendEndData *msgPara, LnnRemoveSendEndMsgPara *delMsgPara)
@@ -328,6 +332,9 @@ static int32_t RemoveSendOneEndMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *de
 {
     LnnHeartbeatSendEndData *msgPara = (LnnHeartbeatSendEndData *)ctrlMsgObj->obj;
     LnnRemoveSendEndMsgPara *delMsgPara = (LnnRemoveSendEndMsgPara *)delMsg->obj;
+    if (msgPara == NULL || delMsgPara == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = RemoveSendOneEndMsgStepOne(msgPara, delMsgPara);
     if (ret == SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL || ret == SOFTBUS_OK) {
         return ret;
@@ -380,12 +387,13 @@ static int32_t RemoveCheckSleDevStatusMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMess
 static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
 {
     if (!CheckRemoveHbMsgParams(msg, args)) {
-        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+        /* remove message when return 0, else return 1 */
+        return 1;
     }
 
     SoftBusMessage *delMsg = (SoftBusMessage *)args;
     if (msg->what != delMsg->what || msg->arg1 != delMsg->arg1) {
-        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+        return 1;
     }
     FsmCtrlMsgObj *ctrlMsgObj = (FsmCtrlMsgObj *)msg->obj;
     switch (delMsg->arg1) {
@@ -402,7 +410,7 @@ static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
         default:
             break;
     }
-    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+    return 1;
 }
 
 static void RemoveHbMsgByCustObj(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType, void *obj)
@@ -858,8 +866,9 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
         return SOFTBUS_OK;
     }
     char udid[UDID_BUF_LEN] = {0};
-    int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN);
-    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_HEART_BEAT, "convert networkid to udid fail");
+    if (LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "convert udid err");
+    }
     (void)LnnGenerateHexStringHash((const unsigned char *)udid, udidHash, HB_SHORT_UDID_HASH_HEX_LEN);
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
@@ -1112,12 +1121,6 @@ static void CheckSleDevStatus(LnnHeartbeatFsm *hbFsm, const char *networkId,
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get nodeInfo fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
-        AnonymizeFree(anonyNetworkId);
-        return;
-    }
-    if (QueryControlPlaneNodeValidPacked(networkId) != SOFTBUS_OK) {
-        LNN_LOGD(LNN_HEART_BEAT, "target dev not in spark group, networkId=%{public}s",
-            AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return;
     }
