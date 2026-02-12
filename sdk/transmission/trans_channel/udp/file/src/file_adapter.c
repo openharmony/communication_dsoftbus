@@ -437,7 +437,7 @@ int32_t StartNStackXDFileServerV2(
     TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", para[0].linkType);
 
     int32_t paraNum = sizeof(para) / sizeof(para[0]);
-    sessionId = NSTACKX_DFileServerMpV2(
+    int32_t sessionId = NSTACKX_DFileServerMpV2(
         para, paraNum, (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, msgReceiver);
     *filePort = port;
     TransTdcReleaseFd(fd);
@@ -513,7 +513,7 @@ int32_t FillDFileParam(const char *srvIp, int32_t srvPort, int32_t linkType, NST
     } else {
         struct sockaddr_in localAddr = { 0 };
         int32_t ret = InitSockAddrInByIpPort(srvIp, srvPort, &localAddr);
-        if (ret!= SOFTBUS_OK) {
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in, ret=%{public}d", ret);
             return ret;
         }
