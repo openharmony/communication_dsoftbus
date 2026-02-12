@@ -71,9 +71,8 @@ CommonEventType CommonEventMonitor::GetEventType(std::string &event)
 void CommonEventMonitor::OnReceiveSleBusinessEvent(const EventFwk::Want& want)
 {
     int32_t state = want.GetIntParam(PARAM_KEY_STATE, 0);
-    LNN_LOGI(LNN_EVENT, "event state=%{public}d", state);
-    if (state) {
-        TriggerClearSparkGroupPacked();
+    if (state != 0) {
+        LNN_LOGI(LNN_EVENT, "event state=%{public}d", state);
     }
 }
 
@@ -83,7 +82,7 @@ void CommonEventMonitor::OnReceiveSleD2dEvent(const EventFwk::Want& want)
     int32_t groupState = want.GetIntParam(KEY_SLE_D2D_GROUP_ADV_STATE, INT_MAX);
     LNN_LOGI(LNN_EVENT, "d2d adv pagingState=%{public}d, groupState=%{public}d", pagingState, groupState);
     if (pagingState == OPEN_D2D || groupState == OPEN_D2D) {
-        TriggerClearSparkGroupPacked();
+        return;
     }
 }
 void CommonEventMonitor::OnReceiveSleEvent(const EventFwk::Want& want)
