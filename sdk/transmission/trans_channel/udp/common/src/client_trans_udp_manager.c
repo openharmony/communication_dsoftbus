@@ -312,7 +312,7 @@ static bool TransCheckIsSecondPath(int32_t channelId, int32_t *routeType)
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     int32_t ret = TransGetUdpChannel(channelId, &channel);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed", channelId);
+        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed.", channelId);
         return false;
     }
     if (routeType != NULL) {
@@ -339,7 +339,7 @@ static int32_t TransAddSecondPathFail(int32_t channelId)
         return SOFTBUS_OK;
     }
     int32_t ret = ClosePeerUdpChannel(channelId);
-    it (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SDK, "close peer udp channel failed. channelId=%{public}d", channelId);
         return ret;
     }
@@ -539,7 +539,7 @@ static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
                 channelId, ret);
         }
     }
-    return CloseUpdChannelProc(&channel, channelId, reason);
+    return CloseUdpChannelProc(&channel, channelId, reason);
 }
 
 static int32_t CloseReserveUdpChannel(int32_t channelId, ShutdownReason reason, int32_t routeType, bool delSecondPath)
@@ -576,7 +576,7 @@ static int32_t CloseReserveUdpChannel(int32_t channelId, ShutdownReason reason, 
 int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
     int32_t routeType = -1;
-    if (TransCheckIsSecondPath(channel, &routeType)) {
+    if (TransCheckIsSecondPath(channelId, &routeType)) {
         return CloseReserveUdpChannel(channelId, SHUTDOWN_REASON_LOCAL, routeType, true);
     }
     return CloseUdpChannel(channelId, reason);
@@ -1139,7 +1139,7 @@ int32_t TransGetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-static int32_t GetChannelTypeByChannelId(int32_t channelId, int32_t *channelType)
+int32_t GetChannelTypeByChannelId(int32_t channelId, int32_t *channelType)
 {
     UdpChannel channel;
     if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
