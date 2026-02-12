@@ -63,7 +63,6 @@ int32_t ConvertToJsErrcode(int32_t err)
 void ThrowException(int32_t err)
 {
     COMM_LOGI(COMM_SDK, "error code is=%{public}d", err);
-    bool flag = false;
     int32_t ret = ConvertToJsErrcode(err);
     auto it = taiheErrMsgMap.find(ret);
     if (it != taiheErrMsgMap.end()) {
