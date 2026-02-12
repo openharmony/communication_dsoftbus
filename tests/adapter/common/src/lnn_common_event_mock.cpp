@@ -85,9 +85,5 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
 {
     return LnnCommonEventInterface()->JudgeDeviceTypeAndGetOsAccountIds();
 }
-void TriggerClearSparkGroupPacked(void)
-{
-    return LnnCommonEventInterface()->TriggerClearSparkGroupPacked();
-}
 }
 } // namespace OHOS

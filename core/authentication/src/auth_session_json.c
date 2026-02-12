@@ -1876,7 +1876,6 @@ static void UnpackWifiDirectInfo(const JsonObj *json, NodeInfo *info, bool isMet
     }
     if (!JSON_GetStringFromObject(json, SERVICE_FIND_CAP, info->serviceFindCap, SERVICE_FIND_CAP_LEN)) {
         AUTH_LOGE(AUTH_FSM, "get service find cap fail");
-        return;
     }
     if (!JSON_GetStringFromObject(json, STATIC_CAP, staticCap, STATIC_CAP_STR_LEN)) {
         AUTH_LOGE(AUTH_FSM, "get static cap fail");

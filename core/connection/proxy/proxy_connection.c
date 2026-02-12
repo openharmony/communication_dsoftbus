@@ -51,7 +51,7 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
         int32_t socketHandle = connection->socketHandle;
         (void)SoftBusMutexUnlock(&connection->lock);
         if (socketHandle == BR_INVALID_SOCKET_HANDLE) {
-            ret = BR_INVALID_SOCKET_HANDLE;
+            ret = SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED;
             break;
         }
         int32_t recvLen = g_sppDriver->Read(socketHandle, buffer, BUFFER_SIZE);
@@ -81,7 +81,7 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
         };
-        CONN_EVENT(EVENT_STAGE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
+        CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
     }
     return ret;
 }
@@ -115,7 +115,7 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
         };
-        CONN_EVENT(EVENT_STAGE_BR_PROXY, EVENT_STAGE_CONNECT_START, extra);
+        CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_START, extra);
         return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
     }
     if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
@@ -271,7 +271,7 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
                 .result = EVENT_STAGE_RESULT_FAILED,
                 .errcode = SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL,
             };
-            CONN_EVENT(EVENT_STAGE_BR_PROXY, EVENT_STAGE_CONNECT_SEND_BASIC_INFO, extra);
+            CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_SEND_BASIC_INFO, extra);
             return SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL;
         }
         data += written;

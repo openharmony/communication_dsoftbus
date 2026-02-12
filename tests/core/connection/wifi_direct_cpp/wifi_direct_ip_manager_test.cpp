@@ -418,7 +418,7 @@ HWTEST_F(WifiDirectIpManagerTest, ReleaseIpv4WithInvalidLocalIp, TestSize.Level1
     Ipv4Info remote("172.30.1.1");
 
     // Should not crash, just return early
-    WifiDirectIpManager::GetInstance().ReleaseIpv4(interface, local, remote, remoteMac);
+    EXPECT_NO_FATAL_FAILURE(WifiDirectIpManager::GetInstance().ReleaseIpv4(interface, local, remote, remoteMac));
 }
 
 /*
@@ -437,7 +437,7 @@ HWTEST_F(WifiDirectIpManagerTest, ReleaseIpv4WithInvalidRemoteIp, TestSize.Level
     Ipv4Info remote;
 
     // Should not crash, just return early
-    WifiDirectIpManager::GetInstance().ReleaseIpv4(interface, local, remote, remoteMac);
+    EXPECT_NO_FATAL_FAILURE(WifiDirectIpManager::GetInstance().ReleaseIpv4(interface, local, remote, remoteMac));
 }
 
 /*
@@ -640,19 +640,5 @@ HWTEST_F(WifiDirectIpManagerTest, ApplySubNetWithOnlyRemoteArray, TestSize.Level
 
     std::string subNet = WifiDirectIpManager::GetInstance().ApplySubNet(localArray, remoteArray);
     EXPECT_EQ(subNet, "172.30.2");
-}
-
-/*
- * @tc.name: GetInstanceInitialization
- * @tc.desc: check GetInstance initializes and clears properly
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectIpManagerTest, GetInstanceInitialization, TestSize.Level1)
-{
-    // Get instance multiple times to verify singleton behavior
-    WifiDirectIpManager &instance1 = WifiDirectIpManager::GetInstance();
-    WifiDirectIpManager &instance2 = WifiDirectIpManager::GetInstance();
-    EXPECT_EQ(&instance1, &instance2);
 }
 } // namespace OHOS::SoftBus

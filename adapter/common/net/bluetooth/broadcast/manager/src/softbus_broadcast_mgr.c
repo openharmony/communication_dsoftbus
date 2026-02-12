@@ -18,13 +18,13 @@
 
 #include "broadcast_dfx_event.h"
 #include "disc_log.h"
+#include "g_enhance_adapter_func.h"
 #include "g_enhance_adapter_func_pack.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_broadcast_adapter_interface.h"
 #include "softbus_ble_gatt_public.h"
-#include "softbus_broadcast_adapter_interface.h"
 #include "softbus_broadcast_manager.h"
 #include "softbus_broadcast_mgr_utils.h"
 #include "softbus_broadcast_utils.h"
@@ -313,6 +313,16 @@ static void DelayReportBroadcast(void *para)
     }
 }
 
+void SoftbusBleAdapterInitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (pfnAdapterEnhanceFuncList->softbusBleAdapterInit == NULL) {
+        DISC_LOGE(DISC_BROADCAST, "go open source func");
+        return SoftbusBleAdapterInit();
+    }
+    return pfnAdapterEnhanceFuncList->softbusBleAdapterInit();
+}
+
 int32_t InitBroadcastMgr(void)
 {
     DISC_LOGI(DISC_BROADCAST, "init enter");
@@ -323,7 +333,7 @@ int32_t InitBroadcastMgr(void)
     int32_t ret = BcManagerLockInit();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "lock init failed");
 
-    SoftbusBleAdapterInit();
+    SoftbusBleAdapterInitPacked();
     SoftbusSleAdapterInitPacked();
     for (BroadcastProtocol i = 0; i < BROADCAST_PROTOCOL_BUTT; ++i) {
         if (g_interface[i] != NULL && g_interface[i]->Init != NULL) {
@@ -367,6 +377,16 @@ static int32_t CheckBroadcastingParam(const BroadcastParam *param, const Broadca
     DISC_CHECK_AND_RETURN_RET_LOGE(packet->bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST,
         "invalid param payload");
     return SOFTBUS_OK;
+}
+
+void SoftbusBleAdapterDeInitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (pfnAdapterEnhanceFuncList->softbusBleAdapterDeInit == NULL) {
+        DISC_LOGE(DISC_BROADCAST, "go open source func");
+        return SoftbusBleAdapterDeInit();
+    }
+    return pfnAdapterEnhanceFuncList->softbusBleAdapterDeInit();
 }
 
 int32_t DeInitBroadcastMgr(void)

@@ -69,8 +69,6 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_001, TestSize.Level1)
     want.SetParam(SLE_D2D_PAGING_ADV_STATE, OPEN_D2D);
     EventFwk::CommonEventData data;
     data.SetWant(want);
-    LnnCommonEventInterfaceMock mocker;
-    EXPECT_CALL(mocker, TriggerClearSparkGroupPacked).WillRepeatedly(Return());
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EVENT_DSOFTBUS_D2D_STATE_CHANGE);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
@@ -92,8 +90,6 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_002, TestSize.Level1)
     want.SetParam(SLE_D2D_GROUP_ADV_STATE, OPEN_D2D);
     EventFwk::CommonEventData data;
     data.SetWant(want);
-    LnnCommonEventInterfaceMock mocker;
-    EXPECT_CALL(mocker, TriggerClearSparkGroupPacked).WillRepeatedly(Return());
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EVENT_DSOFTBUS_D2D_STATE_CHANGE);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
@@ -115,8 +111,6 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_003, TestSize.Level1)
  
     EventFwk::CommonEventData data;
     data.SetWant(want);
-    LnnCommonEventInterfaceMock mocker;
-    EXPECT_CALL(mocker, TriggerClearSparkGroupPacked).WillRepeatedly(Return());
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EVENT_NEARLINK_HOST_DATA_TRANSFER_UPDATE);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
@@ -138,8 +132,6 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_004, TestSize.Level1)
  
     EventFwk::CommonEventData data;
     data.SetWant(want);
-    LnnCommonEventInterfaceMock mocker;
-    EXPECT_CALL(mocker, TriggerClearSparkGroupPacked).WillRepeatedly(Return());
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EVENT_NEARLINK_HOST_RANGING_UPDATE);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
@@ -160,8 +152,6 @@ HWTEST_F(LnnCommonEventMonitorTest, LNN_OnReceiveSleEvent_005, TestSize.Level1)
  
     EventFwk::CommonEventData data;
     data.SetWant(want);
-    LnnCommonEventInterfaceMock mocker;
-    EXPECT_CALL(mocker, TriggerClearSparkGroupPacked).WillRepeatedly(Return());
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EVENT_INVALID_STATE);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);

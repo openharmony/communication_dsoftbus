@@ -97,10 +97,10 @@ static void OnVirlinkLinklessMsgRecv(AuthHandle authHandle, const AuthTransData 
     AnonymizeFree(anonyUdid);
     if (LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BROADCAST, "LnnGetNetworkIdByUdid fail");
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return;
     }
-    DelAuthManager(auth, false);
+    DelDupAuthManager(auth);
 
     DiscVirlinkLinklessRecvCb recvCb = g_discVirLinkLinklessCb;
     if (recvCb != NULL) {

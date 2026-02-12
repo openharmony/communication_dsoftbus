@@ -291,13 +291,14 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest009, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest010, TestSize.Level1)
 {
-    int32_t appIndex;
-    bool ret = TryToUpdateBrProxy(nullptr, TEST_UUID, &appIndex);
+    BrProxyInfo inInfo;
+    (void)memset_s(&inInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    bool ret = TryToUpdateBrProxy(nullptr, TEST_UUID, &inInfo);
     EXPECT_FALSE(ret);
-    ret = TryToUpdateBrProxy(VALID_BR_MAC, nullptr, &appIndex);
+    ret = TryToUpdateBrProxy(VALID_BR_MAC, nullptr, &inInfo);
     EXPECT_FALSE(ret);
     g_proxyList = NULL;
-    ret = TryToUpdateBrProxy(VALID_BR_MAC, TEST_UUID, &appIndex);
+    ret = TryToUpdateBrProxy(VALID_BR_MAC, TEST_UUID, &inInfo);
     EXPECT_FALSE(ret);
 }
 
@@ -321,13 +322,16 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest011, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest012, TestSize.Level1)
 {
-    int32_t appIndex;
-    int32_t ret = ServerAddProxyToList(nullptr, TEST_UUID, &appIndex);
+    BrProxyInfo inInfo;
+    (void)memset_s(&inInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    int32_t ret = ServerAddProxyToList(nullptr, TEST_UUID, &inInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = ServerAddProxyToList(VALID_BR_MAC, nullptr, &appIndex);
+    ret = ServerAddProxyToList(VALID_BR_MAC, nullptr, &inInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     g_proxyList = NULL;
-    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &appIndex);
+    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &inInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -787,9 +791,10 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest034, TestSize.Level1)
     ASSERT_TRUE(ret == SOFTBUS_OK);
     NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
     EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
-    int32_t appIndex;
-    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &appIndex);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    BrProxyInfo inInfo;
+    (void)memset_s(&inInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &inInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     result = CheckSessionExistByUid(UID_TEST);
     EXPECT_EQ(result, IS_DISCONNECTED);
 }
@@ -1078,5 +1083,46 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest043, TestSize.Level1)
 
     ret = TransSendBrProxyData(0, data, TMP_LEN);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest044
+ * @tc.desc: BrProxyServerManagerTest044
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest044, TestSize.Level1)
+{
+    const char *mac = "11:33:44:22:33:56";
+    const char *uuid = "testuuid";
+    int32_t channelId = 1;
+    int32_t userId = 1;
+    int32_t arr = GetChannelIdAndUserId(NULL, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, NULL, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, uuid, NULL, &userId);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, uuid, &channelId, NULL);
+    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    arr = GetChannelIdAndUserId(mac, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+    arr = BrProxyServerInit();
+    ASSERT_EQ(arr, SOFTBUS_OK);
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    BrProxyInfo info;
+    (void)memset_s(&info, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    info.appIndex = 1;
+    arr = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID, &info);
+    EXPECT_EQ(SOFTBUS_OK, arr);
+    const char *mac1 = "11:33:44:22:33:88";
+    const char *uuid1 = "testuuid1";
+    arr = GetChannelIdAndUserId(mac1, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+    arr = GetChannelIdAndUserId(mac, uuid1, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+    arr = GetChannelIdAndUserId(mac, uuid, &channelId, &userId);
+    EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
 }
 }
