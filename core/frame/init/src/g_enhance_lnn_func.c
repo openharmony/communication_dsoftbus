@@ -248,7 +248,6 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.triggerSparkGroupBuild = dlsym(soHandle, "TriggerSparkGroupBuild");
     g_lnnEnhanceFuncList.triggerSparkGroupClear = dlsym(soHandle, "TriggerSparkGroupClear");
     g_lnnEnhanceFuncList.triggerSparkGroupJoinAgain = dlsym(soHandle, "TriggerSparkGroupJoinAgain");
-    g_lnnEnhanceFuncList.triggerClearSparkGroup = dlsym(soHandle, "TriggerClearSparkGroup");
     g_lnnEnhanceFuncList.initControlPlane = dlsym(soHandle, "InitControlPlane");
     g_lnnEnhanceFuncList.deinitControlPlane = dlsym(soHandle, "DeinitControlPlane");
     g_lnnEnhanceFuncList.queryControlPlaneNodeValid = dlsym(soHandle, "QueryControlPlaneNodeValid");
