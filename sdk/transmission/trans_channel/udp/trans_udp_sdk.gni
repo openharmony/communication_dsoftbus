@@ -27,7 +27,9 @@ if (dsoftbus_feature_trans_udp == true &&
 }
 trans_udp_channel_sdk_inc = [
   "$dsoftbus_udp_sdk_path/common/include",
+  "$dsoftbus_udp_sdk_path/stream/include",
 ]
+trans_udp_channel_sdk_inc += trans_dstream_inc + trans_file_sdk_inc
 trans_udp_channel_sdk_deps = []
 
 if (defined(ohos_lite)) {
