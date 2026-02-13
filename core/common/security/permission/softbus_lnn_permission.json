@@ -224,7 +224,7 @@
     ]
   },
   {
-    "INTERFACE_NAME": "SERVICE_SET_NODE_KEY_INFO",
+    "INTERFACE_NAME": "SERVER_SET_NODE_KEY_INFO",
     "PROCESS_NAME": [
       "device_manager"
     ]
