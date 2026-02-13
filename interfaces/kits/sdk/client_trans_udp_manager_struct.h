@@ -16,6 +16,7 @@
 #ifndef CLIENT_TRANS_UDP_MANAGER_STRUCT_H
 #define CLIENT_TRANS_UDP_MANAGER_STRUCT_H
 
+#include <netinet/in.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "session.h"
@@ -67,8 +68,9 @@ typedef struct {
     char peerAccountId[ACCOUNT_UID_LEN_MAX];
     char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
     bool enableMultipath;
-    int32_t srvPort;
-    char srvIp[IP_LEN];
+    bool isReserveChannel;
+    socklen_t addrLen;
+    struct sockaddr_storage addr;
 } UdpChannel;
 
 #ifdef __cplusplus

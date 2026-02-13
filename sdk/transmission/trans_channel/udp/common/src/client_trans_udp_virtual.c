@@ -57,14 +57,6 @@ int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ClientTransCloseMultiUdpChannel(int32_t channelId, ShutdownReason reason, bool mainChannel)
-{
-    (void)channelId;
-    (void)reason;
-    (void)mainChannel;
-    return SOFTBUS_FUNC_NOT_SUPPORT;
-}
-
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
     const StreamFrameInfo *param)
 {
@@ -172,21 +164,20 @@ int32_t TransGetUdpChannelTos(int32_t channelId, bool *isTosSet)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ClientTransCloseReserveUdpChannel(int32_t channelId,
-    ShutdownReason reason, const char *srvIp, int32_t srvPort, int32_t routeType)
+int32_t ClientTransCloseReserveUdpChannel(
+    int32_t channelId, ShutdownReason reason, int32_t routeType, bool delSecondPath)
 {
     (void)channelId;
     (void)reason;
-    (void)*srvIp;
-    (void)srvPort;
     (void)routeType;
+    (void)delSecondPath;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t TransGetUdpChannelExtraInfo(int32_t channelId, char *srvIp, int32_t *srvPort)
+int32_t TransGetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t *addrLen)
 {
     (void)channelId;
-    (void)*srvIp;
-    (void)*srvPort;
+    (void)*addr;
+    (void)*addrLen;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

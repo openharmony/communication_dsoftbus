@@ -31,13 +31,11 @@ int32_t TransOnFileChannelOpened(
 
 void TransCloseFileChannel(int32_t dfileId);
 
-void TransClearFileChannel(int32_t dfileId);
-
 int32_t TransSendFile(int32_t dfileId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
 int32_t NotifyTransLimitChanged(int32_t channelId, uint8_t tos);
 
-void TransCloseReserveFileChannel(int32_t dfileId, const char *srvIp, int32_t srvPort, int32_t type);
+void TransCloseReserveFileChannel(int32_t dfileId, struct sockaddr_storage *addr, socklen_t addrLen, int32_t type);
 #ifdef __cplusplus
 }
 #endif

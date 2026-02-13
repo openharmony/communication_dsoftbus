@@ -728,6 +728,33 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.flowInfo.flowQosType = (FlowQosType)data.ReadUint32();
 }
 
+static bool WhitelistPermissionCheck(void)
+{
+    bool isWhitelist = false;
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(tokenId));
+    if (tokenType != OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        COMM_LOGE(COMM_SVC, "not native call");
+        return false;
+    }
+    OHOS::Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+    if (result != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "GetNativeTokenInfo is failed, SOFTBUS_PERMISSION_DENIED");
+        return false;
+    }
+    bool retCheck = IsMultipathWhitelistPacked(nativeTokenInfo.processName.c_str(), &isWhitelist);
+    if (retCheck == false) {
+        COMM_LOGE(COMM_SVC, "IsMultipathWhitelistPacked is failed");
+        return false;
+    }
+    COMM_LOGI(COMM_SVC, "callingPid=%{public}u, processName=%{public}s, isWhitelist=%{public}d",
+        callingPid, nativeTokenInfo.processName.c_str(), isWhitelist);
+    return isWhitelist;
+}
+
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
@@ -787,6 +814,10 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
             retReply = SOFTBUS_TRANS_CHECK_RELATION_FAIL;
             goto EXIT;
         }
+    }
+    if (param.enableMultipath) {
+        param.enableMultipath = WhitelistPermissionCheck();
+        COMM_LOGI(COMM_SVC, "whitelist check pass is %{public}d", param.enableMultipath);
     }
 
     timeStart = GetSoftbusRecordTimeMillis();
