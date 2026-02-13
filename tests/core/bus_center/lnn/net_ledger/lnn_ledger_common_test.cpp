@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1037,7 +1037,9 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_UUID, LOCAL_UUID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_BR) == SOFTBUS_OK);
+    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_BR)};
+    EXPECT_TRUE(LnnSetLocalByteInfo(
+        NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption)) == SOFTBUS_OK);
     NodeBasicInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     (void)strncpy_s(nodeInfo.deviceName, DEVICE_NAME_BUF_LEN, NODE_DEVICE_NAME, strlen(NODE_DEVICE_NAME));
@@ -1149,7 +1151,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, LOCAL_CAPACITY);
+    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)LOCAL_CAPACITY};
+    ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, MASTER_WEIGHT);
     EXPECT_TRUE(ret == SOFTBUS_OK);

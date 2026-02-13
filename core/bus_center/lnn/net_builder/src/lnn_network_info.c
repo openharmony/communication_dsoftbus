@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -299,12 +299,22 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, boo
     SoftBusFree(msg);
 }
 
-static void WifiStateProcess(uint32_t netCapability, bool isSend)
+static void WifiStateProcess(CapabilityOption addCapability, CapabilityOption delCapability, bool isSend)
 {
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
+    int32_t ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&addCapability, sizeof(CapabilityOption));
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_NEED_UPDATE) {
+        return;
+    }
+    ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&delCapability, sizeof(CapabilityOption));
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_NEED_UPDATE) {
         return;
     }
     if (!isSend) {
+        return;
+    }
+    uint32_t netCapability = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "wifi state handler get capability fail from local.");
         return;
     }
     uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
@@ -318,118 +328,119 @@ static bool IsP2pAvailable(void)
     return g_isWifiDirectSupported && g_isWifiEnable;
 }
 
-static void LnnSetNetworkCapability(uint32_t *capability)
+static void LnnSetNetworkCapability(uint32_t *addCapability)
 {
-    (void)LnnSetNetCapability(capability, BIT_WIFI);
-    (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
-    (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+    (void)LnnSetNetCapability(addCapability, BIT_WIFI);
+    (void)LnnSetNetCapability(addCapability, BIT_WIFI_5G);
+    (void)LnnSetNetCapability(addCapability, BIT_WIFI_24G);
 }
 
-static void LnnClearNetworkCapability(uint32_t *capability)
+static void LnnClearNetworkCapability(uint32_t *delCapability)
 {
-    (void)LnnClearNetCapability(capability, BIT_WIFI);
-    (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
-    (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+    (void)LnnSetNetCapability(delCapability, BIT_WIFI);
+    (void)LnnSetNetCapability(delCapability, BIT_WIFI_5G);
+    (void)LnnSetNetCapability(delCapability, BIT_WIFI_24G);
 }
 
-static void LnnSetNetBandCapability(uint32_t *capability)
+static void LnnSetNetBandCapability(uint32_t *addCapability, uint32_t *delCapability)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band == BAND_24G) {
-        (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
-        (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(addCapability, BIT_WIFI_24G);
+        (void)LnnSetNetCapability(delCapability, BIT_WIFI_5G);
     } else if (band == BAND_5G) {
-        (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
-        (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+        (void)LnnSetNetCapability(addCapability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(delCapability, BIT_WIFI_24G);
     } else {
-        (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
-        (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+        (void)LnnSetNetCapability(addCapability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(addCapability, BIT_WIFI_24G);
     }
 }
 
-static void LnnClearNetBandCapability(uint32_t *capability)
+static void LnnClearNetBandCapability(uint32_t *delCapability)
 {
     if (!g_isApEnable) {
-        (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
-        (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+        (void)LnnSetNetCapability(delCapability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(delCapability, BIT_WIFI_24G);
     }
 }
 
-static void LnnSetP2pNetCapability(uint32_t *capability)
+static void LnnSetP2pNetCapability(uint32_t *addCapability, uint32_t *delCapability)
 {
     SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
     if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
-        (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+        (void)LnnSetNetCapability(delCapability, BIT_WIFI_P2P);
     } else {
-        (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+        (void)LnnSetNetCapability(addCapability, BIT_WIFI_P2P);
     }
 }
 
-static void ProcessApEnabled(uint32_t *capability, bool *needSync)
+static void ProcessApEnabled(uint32_t *addCapability, bool *needSync)
 {
     g_isApEnable = true;
-    LnnSetNetworkCapability(capability);
+    LnnSetNetworkCapability(addCapability);
     if (IsP2pAvailable()) {
-        (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+        (void)LnnSetNetCapability(addCapability, BIT_WIFI_P2P);
     }
     *needSync = true;
 }
 
-static void ProcessApDisabled(uint32_t *capability, bool *needSync)
+static void ProcessApDisabled(uint32_t *addCapability, uint32_t *delCapability, bool *needSync)
 {
     g_isApEnable = false;
     SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
     if (IsP2pAvailable()) {
-        (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+        (void)LnnSetNetCapability(addCapability, BIT_WIFI_P2P);
     }
     if (!g_isWifiEnable || (wifiState != SOFTBUS_WIFI_STATE_ACTIVED && wifiState != SOFTBUS_WIFI_STATE_ACTIVATING)) {
-        LnnClearNetworkCapability(capability);
+        LnnClearNetworkCapability(delCapability);
     }
     *needSync = true;
 }
 
-static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
+static void GetNetworkCapability(
+    SoftBusWifiState wifiState, uint32_t *addCapability, uint32_t *delCapability, bool *needSync)
 {
     switch (wifiState) {
         case SOFTBUS_WIFI_OBTAINING_IPADDR:
-            (void)LnnSetNetCapability(capability, BIT_WIFI);
-            LnnSetNetBandCapability(capability);
+            (void)LnnSetNetCapability(addCapability, BIT_WIFI);
+            LnnSetNetBandCapability(addCapability, delCapability);
             break;
         case SOFTBUS_WIFI_ENABLED:
             g_isWifiEnable = true;
-            (void)LnnSetNetCapability(capability, BIT_WIFI);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            (void)LnnSetNetCapability(addCapability, BIT_WIFI);
+            (void)LnnSetNetCapability(addCapability, BIT_WIFI_P2P);
             *needSync = true;
             break;
         case SOFTBUS_WIFI_CONNECTED:
-            (void)LnnSetNetCapability(capability, BIT_WIFI);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            LnnSetNetBandCapability(capability);
+            (void)LnnSetNetCapability(addCapability, BIT_WIFI);
+            (void)LnnSetNetCapability(addCapability, BIT_WIFI_P2P);
+            LnnSetNetBandCapability(addCapability, delCapability);
             *needSync = true;
             break;
         case SOFTBUS_WIFI_DISCONNECTED:
-            LnnClearNetBandCapability(capability);
+            LnnClearNetBandCapability(delCapability);
             *needSync = true;
             break;
         case SOFTBUS_WIFI_DISABLED:
             g_isWifiEnable = false;
             if (!g_isApEnable) {
-                LnnClearNetworkCapability(capability);
-                LnnSetP2pNetCapability(capability);
+                LnnClearNetworkCapability(delCapability);
+                LnnSetP2pNetCapability(addCapability, delCapability);
             } else if (!IsP2pAvailable()) {
-                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
+                (void)LnnSetNetCapability(delCapability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
         case SOFTBUS_AP_ENABLED:
-            ProcessApEnabled(capability, needSync);
+            ProcessApEnabled(addCapability, needSync);
             break;
         case SOFTBUS_AP_DISABLED:
-            ProcessApDisabled(capability, needSync);
+            ProcessApDisabled(addCapability, delCapability, needSync);
             break;
         case SOFTBUS_WIFI_SEMI_ACTIVE:
             g_isWifiEnable = true;
-            (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+            (void)LnnSetNetCapability(addCapability, BIT_WIFI_P2P);
             *needSync = true;
             break;
         default:
@@ -445,17 +456,13 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
-    uint32_t oldNetCap = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "wifi state handler get capability fail from local.");
-        return;
-    }
+    CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
+    CapabilityOption delCapability = {.isAdd = false, .capabilitySet = 0};
     bool needSync = false;
-    uint32_t netCapability = oldNetCap;
-    GetNetworkCapability(wifiState, &netCapability, &needSync);
-    LNN_LOGI(LNN_EVENT, "WifiState=%{public}d, local capabilty change:%{public}u->%{public}u, needSync=%{public}d",
-        wifiState, oldNetCap, netCapability, needSync);
-    WifiStateProcess(netCapability, needSync);
+    GetNetworkCapability(wifiState, &(addCapability.capabilitySet), &(delCapability.capabilitySet), &needSync);
+    LNN_LOGI(LNN_EVENT, "WifiState=%{public}d, local capabilty change:needSync=%{public}d",
+        wifiState, needSync);
+    WifiStateProcess(addCapability, delCapability, needSync);
 }
 
 static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
@@ -464,40 +471,45 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "HB bt state change evt handler get invalid param");
         return;
     }
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get netcap fail");
-        return;
-    }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusBtState btState = (SoftBusBtState)event->status;
     bool isSend = false;
     LNN_LOGI(LNN_BUILDER, "bt state change btState=%{public}d", btState);
+    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = 0};
     switch (btState) {
         case SOFTBUS_BR_TURN_ON:
-            (void)LnnSetNetCapability(&netCapability, BIT_BR);
+            setCapability.isAdd = true;
+            (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_BR);
             break;
         case SOFTBUS_BLE_TURN_ON:
-            (void)LnnSetNetCapability(&netCapability, BIT_BLE);
+            setCapability.isAdd = true;
+            (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_BLE);
             break;
         case SOFTBUS_BR_TURN_OFF:
-            (void)LnnClearNetCapability(&netCapability, BIT_BR);
+            setCapability.isAdd = false;
+            (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_BR);
             break;
         case SOFTBUS_BLE_TURN_OFF:
-            (void)LnnClearNetCapability(&netCapability, BIT_BLE);
+            setCapability.isAdd = false;
+            (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_BLE);
             isSend = true;
             break;
         default:
             return;
     }
 
-    LNN_LOGI(LNN_BUILDER, "bt state change. netCapability=%{public}d, isSend=%{public}d",
-        netCapability, isSend);
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
+    LNN_LOGI(LNN_BUILDER, "bt state change. isSend=%{public}d", isSend);
+    int32_t ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_NEED_UPDATE) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
         return;
     }
     if (!isSend) {
+        return;
+    }
+    uint32_t netCapability = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
     SendNetCapabilityToRemote(netCapability, 1 << (uint32_t)DISCOVERY_TYPE_WIFI, false);
@@ -521,28 +533,29 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "sle state change evt handler get invalid param");
         return;
     }
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get netcap fail");
-        return;
-    }
-    uint32_t oldCapability = netCapability;
     const LnnMonitorSleStateChangedEvent *event = (const LnnMonitorSleStateChangedEvent *)info;
     SoftBusSleState sleState = (SoftBusSleState)event->status;
     uint32_t delayTime = 0;
     TriggerSparkGroupClearPacked((uint32_t)sleState, delayTime);
+    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = 0};
+    (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_SLE);
     if (sleState == SOFTBUS_SLE_TURN_ON) {
-        (void)LnnSetNetCapability(&netCapability, BIT_SLE);
+        setCapability.isAdd = true;
     } else if (sleState == SOFTBUS_SLE_TURN_OFF) {
-        (void)LnnClearNetCapability(&netCapability, BIT_SLE);
+        setCapability.isAdd = false;
     }
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
+    int32_t ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_NEED_UPDATE) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "sle netCapability=%{public}d", netCapability);
-    if (oldCapability != netCapability) {
+    if (ret == SOFTBUS_OK) {
         UpdateLocalDeviceInfoToSH();
+    }
+    uint32_t netCapability = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get netcap fail");
+        return;
     }
     SendNetCapabilityToRemote(netCapability, 0, true);
 }
