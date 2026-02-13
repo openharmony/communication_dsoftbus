@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -958,56 +958,50 @@ int32_t LnnUpdateNodeAddr(const char *addr)
 
 void UpdateLocalNetCapability(void)
 {
-    uint32_t oldNetCap = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "get cap from local ledger fail");
-        return;
-    }
-    uint32_t netCapability = oldNetCap;
+    CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
+    CapabilityOption delCapability = {.isAdd = false, .capabilitySet = 0};
     int btState = SoftBusGetBtState();
     if (btState == BLE_ENABLE) {
         LNN_LOGI(LNN_INIT, "ble state is on");
-        (void)LnnSetNetCapability(&netCapability, BIT_BLE);
+        (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_BLE);
     } else if (btState == BLE_DISABLE) {
         LNN_LOGI(LNN_INIT, "ble state is off");
-        (void)LnnClearNetCapability(&netCapability, BIT_BLE);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_BLE);
     }
 
     int brState = SoftBusGetBrState();
     if (brState == BR_ENABLE) {
-        (void)LnnSetNetCapability(&netCapability, BIT_BR);
+        (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_BR);
     } else if (brState == BR_DISABLE) {
-        (void)LnnClearNetCapability(&netCapability, BIT_BR);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_BR);
     }
 
     bool isWifiActive = SoftBusIsWifiActive();
     if (!isWifiActive) {
-        (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
-        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
-        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI_24G);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI_5G);
     } else {
         SoftBusBand band = SoftBusGetLinkBand();
         if (band == BAND_24G) {
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_24G);
+            (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI_5G);
         } else if (band == BAND_5G) {
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
+            (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI_24G);
         } else {
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
-            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+            (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_24G);
         }
     }
     SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
     if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
-        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_P2P);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI_P2P);
     }
-
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
-    }
-    LNN_LOGI(LNN_INIT, "local capability change:%{public}u->%{public}u, brState=%{public}d, isWifiActive=%{public}d,",
-        oldNetCap, netCapability, brState, isWifiActive);
+    (void)LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&addCapability, sizeof(CapabilityOption));
+    (void)LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&delCapability, sizeof(CapabilityOption));
+    LNN_LOGI(LNN_INIT, "local capability change:brState=%{public}d, isWifiActive=%{public}d,",
+        brState, isWifiActive);
 }
 
 int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession)

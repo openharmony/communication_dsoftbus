@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_local_net_ledger_struct.h"
 #include "lnn_log.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -186,29 +187,15 @@ static int32_t P2pStaticCommCapa(const char *networkId)
     return SOFTBUS_OK;
 }
 
-static void SetLocalDynamicNetCap(NetCapability netCapaIndex)
-{
-    uint32_t oldCapa = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldCapa) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get local info fail");
-        return;
-    }
-    if ((oldCapa & (1 << netCapaIndex)) > 0) {
-        return;
-    }
-    uint32_t newCapa = oldCapa;
-    (void)LnnSetNetCapability(&newCapa, netCapaIndex);
-    int32_t ret = LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, newCapa);
-    LNN_LOGI(LNN_LANE, "local capability change:%{public}u->%{public}u, ret=%{public}d", oldCapa, newCapa, ret);
-}
-
 static bool IsLocalWifiEnabled(void)
 {
     SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
     if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         return false;
     }
-    SetLocalDynamicNetCap(BIT_WIFI_P2P);
+    CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
+    (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_P2P);
+    (void)LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&addCapability, sizeof(CapabilityOption));
     return true;
 }
 
