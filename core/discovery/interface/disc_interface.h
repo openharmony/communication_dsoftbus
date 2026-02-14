@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef DISC_MANAGER_INTERFACE_H
-#define DISC_MANAGER_INTERFACE_H
+#ifndef DISC_INTERFACE_H
+#define DISC_INTERFACE_H
 
-#include "disc_interface_struct.h"
 #include "stdint.h"
+#include "disc_interface_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -194,4 +194,4 @@ int32_t OnRaiseHandDeviceFound(RaiseHandDeviceInfo *deviceInfo);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif /* DISC_MANAGER_INTERFACE_H */
+#endif /* DISC_INTERFACE_H */
