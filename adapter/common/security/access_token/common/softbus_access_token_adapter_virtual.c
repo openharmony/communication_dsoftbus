@@ -59,7 +59,7 @@ int32_t SoftBusCheckDynamicPermission(uint64_t tokenId)
 }
 
 void SoftBusRegisterDataSyncPermission(
-    const uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid)
+    uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     (void)tokenId;
     (void)permissionName;
