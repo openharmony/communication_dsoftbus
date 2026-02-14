@@ -44,6 +44,7 @@ int32_t ApplyForUnrestricted(int32_t channelId);
 void TransBrProxyRemoveObject(int32_t pid);
 void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId);
 void TransBrProxyInit(void);
+void TransOnBrProxyOpened(pid_t pid, int32_t channelId, const char *brMac, const char *uuid);
 
 #ifdef __cplusplus
 }
