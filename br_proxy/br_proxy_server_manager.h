@@ -23,6 +23,15 @@
 extern "C" {
 #endif
 
+#define DEFAULT_INVALID_CHANNEL_ID  (-1)
+#define DEFAULT_INVALID_REQ_ID      10000000
+#define BR_PROXY_MAX_WAIT_TIME_MS   9000    // 9000ms
+#define SINGLE_TIME_MAX_BYTES       4096
+#define IS_CONNECTED                true
+#define IS_DISCONNECTED             false
+#define DEFAULT_APPINDEX            (-1)
+#define BR_PROXY_STOP_APP_DELAY_MS   10000
+
 int32_t TransOpenBrProxy(const char *brMac, const char *uuid);
 int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall);
 int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
@@ -34,6 +43,7 @@ bool IsBrProxy(const char *bundleName);
 int32_t ApplyForUnrestricted(int32_t channelId);
 void TransBrProxyRemoveObject(int32_t pid);
 void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId);
+void TransBrProxyInit(void);
 
 #ifdef __cplusplus
 }

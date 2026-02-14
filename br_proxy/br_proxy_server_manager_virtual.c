@@ -82,3 +82,8 @@ void TransBrProxyRemoveObject()
 {
     return;
 }
+
+void TransBrProxyInit(void)
+{
+    return;
+}
