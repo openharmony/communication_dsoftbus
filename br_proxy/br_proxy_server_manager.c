@@ -19,6 +19,7 @@
 #include "br_proxy.h"
 #include "br_proxy_common.h"
 #include "br_proxy_server_manager.h"
+#include "br_proxy_storage.h"
 #include "bus_center_event.h"
 #include "hap_uninstall_observer.h"
 #include "lnn_ohos_account_adapter.h"
@@ -30,15 +31,6 @@
 #include "trans_channel_common.h"
 #include "trans_client_proxy.h"
 #include "trans_log.h"
-
-#define DEFAULT_INVALID_CHANNEL_ID  (-1)
-#define DEFAULT_INVALID_REQ_ID      10000000
-#define BR_PROXY_MAX_WAIT_TIME_MS   10000    // 10000ms
-#define SINGLE_TIME_MAX_BYTES       4096
-#define IS_CONNECTED                true
-#define IS_DISCONNECTED             false
-#define DEFAULT_APPINDEX            (-1)
-#define BR_PROXY_STOP_APP_DELAY_MS   10000
 
 typedef struct {
     char brMac[BR_MAC_LEN];
@@ -94,12 +86,6 @@ typedef struct {
     ListNode node;
 } ServerDataInfo;
 
-typedef enum {
-    PRIORITY_HIGH = 1,
-    PRIORITY_LOW,
-    PRIORITY_DEFAULT
-} RECEIVE_DATA_PRI;
-
 static SoftBusList *g_serverList = NULL;
 static SoftBusList *g_dataList = NULL;
 static SoftBusList *g_proxyList = NULL;
@@ -107,15 +93,15 @@ static SoftBusList *g_retryList = NULL;
 static SoftBusMutex g_channelIdLock;
 static void ClearCountInRetryList(pid_t uid);
 static int32_t GetCallerInfoAndVerifyPermission(BrProxyInfo *info);
-static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel);
-static void onOpenFail(uint32_t requestId, int32_t reason, const char *brMac);
+static void OnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel);
+static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac);
 static void OnDataReceived(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen);
 static void OnDisconnected(struct ProxyChannel *channel, int32_t reason);
 static void OnReconnected(char *addr, struct ProxyChannel *channel);
 
 static OpenProxyChannelCallback g_channelOpen = {
-    .onOpenSuccess = onOpenSuccess,
-    .onOpenFail = onOpenFail,
+    .onOpenSuccess = OnOpenSuccess,
+    .onOpenFail = OnOpenFail,
 };
 
 static ProxyConnectListener g_channelListener = {
@@ -423,14 +409,14 @@ static int32_t GetNewChannelId(int32_t *channelId)
     if (channelId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    static int32_t g_channelId = 0;
+    static int32_t gChannelId = 0;
     int32_t id = 0;
 
     if (SoftBusMutexLock(&g_channelIdLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get channelId lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    id = ++g_channelId;
+    id = ++gChannelId;
     (void)SoftBusMutexUnlock(&g_channelIdLock);
     *channelId = id;
     return SOFTBUS_OK;
@@ -465,7 +451,6 @@ static int32_t BrProxyServerInit(void)
         ProxyChannelManager *proxyMgr = GetProxyChannelManager();
         proxyMgr->registerProxyChannelListener(&g_channelListener);
     }
-    DynamicLoadInit();
     static bool lockInited = false;
     if (lockInited) {
         TRANS_LOGI(TRANS_SVC, "[br_proxy] init trans server success");
@@ -986,7 +971,27 @@ static int32_t MarkLastConnect(const char *brMac, const char *uuid, uint32_t req
     return SOFTBUS_NOT_FIND;
 }
 
-static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
+static void StorageInfo(BrProxyInfo *proxyInfo)
+{
+    TransBrProxyStorageInfo info;
+    (void)memset_s(&info, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
+    info.userId = proxyInfo->userId;
+    info.appIndex = proxyInfo->appIndex;
+    info.uid = proxyInfo->uid;
+    int32_t ret = memcpy_s(info.bundleName, sizeof(info.bundleName),
+        proxyInfo->bundleName, sizeof(proxyInfo->bundleName));
+    if (ret != EOK) {
+        return;
+    }
+    ret = memcpy_s(info.abilityName, sizeof(info.abilityName),
+        proxyInfo->abilityName, sizeof(proxyInfo->abilityName));
+    if (ret != EOK) {
+        return;
+    }
+    TransBrProxyStorageWrite(TransBrProxyStorageGetInstance(), &info);
+}
+
+static void OnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
 {
     TRANS_CHECK_AND_RETURN_LOGE(channel != NULL, TRANS_SVC, "[br_proxy] channel is null");
     char *tmpName = NULL;
@@ -1035,6 +1040,7 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
         ClientIpcBrProxyStateChanged(nodeInfo.callingPid, nodeInfo.channelId, SOFTBUS_OK);
     }
     ClearCountInRetryList(nodeInfo.callingUid);
+    StorageInfo(&info);
 }
 
 static int32_t SetCurrentConnect(const char *brMac, const char *uuid, uint32_t requestId, bool isVirtualConnect)
@@ -1061,7 +1067,7 @@ static int32_t SetCurrentConnect(const char *brMac, const char *uuid, uint32_t r
     return SOFTBUS_NOT_FIND;
 }
 
-static void onOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
+static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
 {
     (void)brMac;
     TRANS_LOGE(TRANS_SVC, "[br_proxy] OpenFail requestId=%{public}d, reason = %{public}d",
@@ -1311,6 +1317,7 @@ int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall)
     TransBrProxyRemoveObject(info.callingPid);
     ServerDisableProxyFromList(info.requestId);
     ServerDeleteChannelFromList(channelId);
+    TransBrProxyStorageClear(TransBrProxyStorageGetInstance());
     return SOFTBUS_OK;
 }
 
@@ -2025,4 +2032,20 @@ void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId)
             g_serverList->cnt, appIndex, userId);
     }
     (void)SoftBusMutexUnlock(&(g_serverList->lock));
+}
+
+void TransBrProxyInit(void)
+{
+    DynamicLoadInit();
+    TransBrProxyStorageInfo info;
+    (void)memset_s(&info, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
+    bool flag = TransBrProxyStorageRead(TransBrProxyStorageGetInstance(), &info);
+    if (!flag) {
+        return;
+    }
+    int32_t ret = PullUpHap(info.bundleName, info.abilityName, info.appIndex);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] pull up hap failed. ret:%{public}d", ret);
+        return;
+    }
 }
