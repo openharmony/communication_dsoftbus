@@ -423,6 +423,9 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool i
         TransEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
+            .callPid = pid,
+            .callerPkg = bundleName,
+            .callUid = uid,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
         return ret;

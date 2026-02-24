@@ -217,7 +217,7 @@ static void ProxyChannelClose(struct ProxyChannel *channel, bool isClearReconnec
     ConnEventExtra extra = {
         .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
-        .brProxyIsClear = (int32_t)isClearReconnectEvent,
+        .brProxyIsClear = isClearReconnectEvent ? 1 : 0,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
 #define WAIT_CLOSE_END_TIME_MS 1000
@@ -878,12 +878,14 @@ static void AttemptReconnectDevice(char *brAddr)
         "not exit same addr=%{public}s need to reconnect", anomizeAddress);
     bool checkNeedToRetry = CheckNeedToRetry(brAddr, reconnectDeviceInfo);
     CONN_CHECK_AND_RETURN_LOGW(checkNeedToRetry, CONN_PROXY, "not retry");
+    struct ProxyConfig config = ProxyGetRetryConfig(GetProxyConfigManager(), reconnectDeviceInfo);
     ConnEventExtra extra = {
         .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
+        .costTime = (int32_t)config.delayMs,
+        .brProxyIsRetry = config.retryable,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_RECONNECT, extra);
-    struct ProxyConfig config = ProxyGetRetryConfig(GetProxyConfigManager(), reconnectDeviceInfo);
     if (!config.retryable) {
         CONN_LOGE(CONN_PROXY, "retry times=%{public}u, reach policy limit, not retry more",
             reconnectDeviceInfo->innerRetryNum);
@@ -922,6 +924,14 @@ static void AclStateChangedHandler(ProxyChannelAclStateContext *context)
 {
     ProxyConnectInfo *reconnectDeviceInfo = GetReconnectDeviceInfoByAddrUnsafe(context->brMac);
     CONN_CHECK_AND_RETURN_LOGW(reconnectDeviceInfo != NULL, CONN_PROXY, "no reconnect device");
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, context->brMac, BT_MAC_LEN);
+    ConnEventExtra extra = {
+        .peerBrMac = anomizeAddress,
+        .result = EVENT_STAGE_RESULT_OK,
+        .brProxyState = context->state,
+    };
+    CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_STATE, extra);
     reconnectDeviceInfo->innerRetryNum = 0;
     reconnectDeviceInfo->isAclConnected = (context->state == SOFTBUS_ACL_STATE_CONNECTED) ? true : false;
     if (!reconnectDeviceInfo->isAclConnected) {
