@@ -323,7 +323,7 @@ typedef enum  {
 } BlePriority;
 
 /**
- * @brief Enumerates {@link BleProtocolType} types of ble connection type
+ * @brief Enumerates {@link SleProtocolType} types of sle connection type
  *
  */
 typedef enum  {

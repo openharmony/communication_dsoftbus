@@ -303,12 +303,12 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest005, TestSize.Level1)
     CONN_LOGI(CONN_PROXY, "=================");
     ret = g_channel->send(&proxyChannel, data, sizeof(data));
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-    g_channel->close(&proxyChannel);
+    g_channel->close(&proxyChannel, true);
     sleep(1);
     proxyChannel.channelId = g_channelId;
     ret = g_channel->send(&proxyChannel, data, sizeof(data));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    g_channel->close(&proxyChannel);
+    g_channel->close(&proxyChannel, true);
     sleep(2);
     // test reconnect device is null
     ProxyChannelMock::InjectHfpConnectionChanged(addr, SOFTBUS_HFP_CONNECTED);
