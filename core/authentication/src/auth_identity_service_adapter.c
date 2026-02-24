@@ -33,13 +33,6 @@
 #define SCOPE_USER 2
 #define INT32_T_TO_STRING_MAX_LEN 21
 
-typedef enum {
-    ACCOUNT_RELATED = 1,
-    ACCOUNT_UNRELATED = 2,
-    ACCOUNT_SHARE = 3,
-    ACCOUNT_BUTT,
-} SoftbusCredType;
-
 static char *IdServiceGenerateQueryParam(const char *udidHash, const char *accountHash, bool isSameAccount)
 {
     (void)accountHash;
@@ -196,7 +189,7 @@ int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, c
         return SOFTBUS_OK;
     }
 
-    char *authParams = IdServiceGenerateQueryParamByCredType(peerUserId, udidHash, ACCOUNT_SHARE);
+    char *authParams = IdServiceGenerateQueryParamByCredType(peerUserId, udidHash, ACCOUNT_SHARED);
     AUTH_CHECK_AND_RETURN_RET_LOGE(authParams != NULL, SOFTBUS_CREATE_JSON_ERR,
         AUTH_HICHAIN, "hichain identity service generate query parameter fail");
     int32_t ret = credManger->queryCredentialByParams(localUserId, authParams, credList);
@@ -256,16 +249,16 @@ static char *IdServiceCopyCredId(char *credId)
         AUTH_LOGD(AUTH_HICHAIN, "hichain identity service get credid=%{public}s", AnonymizeWrapper(anonyCredId));
         AnonymizeFree(anonyCredId);
     }
-    
+
     return credIdMem;
 }
 
-static int32_t IdServiceGetCredTypeByCredId(int32_t userId, char *credId, int32_t *credType)
+int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType)
 {
     const CredManager *credManger = IdServiceGetCredMgrInstance();
     AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
         AUTH_HICHAIN, "hichain identity service not initialized");
-    
+
     char *credInfo = NULL;
     int32_t ret = credManger->queryCredInfoByCredId(userId, credId, &credInfo);
     if (ret != HC_SUCCESS) {
@@ -444,7 +437,7 @@ static int32_t GetCredInfoFromJson(const char *credInfo, SoftBusCredInfo *info)
         AUTH_LOGE(AUTH_HICHAIN, "parse json fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!JSON_GetInt32FromOject(json, FIELD_CRED_TYPE, &(info->credIdType)) ||
+    if (!JSON_GetInt32FromOject(json, FIELD_CRED_TYPE, (int32_t *)&(info->credIdType)) ||
         !JSON_GetInt32FromOject(json, FIELD_SUBJECT, &(info->subject)) ||
         !JSON_GetStringFromObject(json, FIELD_DEVICE_ID, info->udid, UDID_BUF_LEN) ||
         !JSON_GetStringFromObject(json, FIELD_USER_ID, info->userId, MAX_ACCOUNT_HASH_LEN)) {
@@ -487,18 +480,18 @@ static int32_t GetCredInfoByUserIdAndCredId(int32_t userId, const char *credId, 
     return SOFTBUS_OK;
 }
 
-bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount)
+bool IdServiceIsPotentialTrustedDevice(const char *shortUdidHash, const char *shortAccountIdHash, bool isSameAccount)
 {
-    if (accountIdHash == NULL || udidHash == NULL) {
+    if (shortUdidHash == NULL || shortAccountIdHash == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "invalid param");
         return false;
     }
-
     char *credList = NULL;
     int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
-    SoftBusCredInfo credInfo = { 0 };
+    SoftBusCredInfo credInfo;
+    (void)memset_s(&credInfo, sizeof(SoftBusCredInfo), 0, sizeof(SoftBusCredInfo));
     AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
-    int32_t ret = IdServiceQueryCredential(userId, udidHash, accountIdHash, isSameAccount, &credList);
+    int32_t ret = IdServiceQueryCredential(userId, shortUdidHash, shortAccountIdHash, isSameAccount, &credList);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "query credential fail, ret=%{public}d", ret);
         return false;
@@ -516,7 +509,7 @@ bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *account
         return false;
     }
     SoftBusFree(credId);
-    return credInfo.credIdType == ACCOUNT_SHARE;
+    return credInfo.credIdType == ACCOUNT_SHARED;
 }
 
 static bool IsLocalCredInfo(const char *udid)
@@ -531,7 +524,8 @@ static bool IsLocalCredInfo(const char *udid)
 
 static void IdServiceHandleCredAdd(const char *credInfo)
 {
-    SoftBusCredInfo info = { 0 };
+    SoftBusCredInfo info;
+    (void)memset_s(&info, sizeof(SoftBusCredInfo), 0, sizeof(SoftBusCredInfo));
     int32_t localDevTypeId = 0;
     if (GetCredInfoFromJson(credInfo, &info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "get credential info from json fail");
@@ -542,7 +536,7 @@ static void IdServiceHandleCredAdd(const char *credInfo)
         return;
     }
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK && localDevTypeId == TYPE_TV_ID &&
-        (info.credIdType == ACCOUNT_SHARE || info.credIdType == ACCOUNT_UNRELATED)) {
+        (info.credIdType == ACCOUNT_SHARED || info.credIdType == ACCOUNT_UNRELATED)) {
         AUTH_LOGI(AUTH_HICHAIN, "id service not start heartbeat");
         return;
     }
@@ -550,39 +544,46 @@ static void IdServiceHandleCredAdd(const char *credInfo)
         AUTH_LOGE(AUTH_HICHAIN, "id service insert trust info fail");
         return;
     }
-    LnnHbOnTrustedRelationIncreased(info.credIdType == ACCOUNT_SHARE ? AUTH_SHARE : AUTH_PEER_TO_PEER_GROUP);
+    LnnHbOnTrustedRelationIncreased(info.credIdType == ACCOUNT_SHARED ? AUTH_SHARE : AUTH_PEER_TO_PEER_GROUP);
 }
 
-static bool IsExitPotentialTrusted(const char *udid)
+static int32_t IdServiceQueryCredentialByUdid(int32_t userId, const char *udid, char **credList)
 {
     uint8_t udidHashResult[SHA_256_HASH_LEN] = { 0 };
-    char udidShortHashStr[DISC_MAX_DEVICE_ID_LEN] = { 0 };
+    char udidShortHashStr[HB_SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     char accountHexHash[SHA_256_HEX_HASH_LEN] = { 0 };
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "get local account hash fail");
-        return false;
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     if (ConvertBytesToHexString(accountHexHash, SHA_256_HEX_HASH_LEN, localAccountHash, SHA_256_HASH_LEN) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "convert account hash fail");
-        return false;
+        return SOFTBUS_BYTE_CONVERT_FAIL;
     }
-    if (SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), (unsigned char *)udidHashResult) !=
-        SOFTBUS_OK) {
+    if (SoftBusGenerateStrHash(
+        (const unsigned char *)udid, strlen(udid), (unsigned char *)udidHashResult) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "gen udid hash err");
-        return false;
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
-    (void)ConvertBytesToHexString(udidShortHashStr, HB_SHORT_UDID_HASH_HEX_LEN + 1,
-        (const unsigned char *)udidHashResult, HB_SHORT_UDID_HASH_LEN);
-    udidShortHashStr[HB_SHORT_UDID_HASH_HEX_LEN + 1] = '\0';
-
-    return IdServiceIsPotentialTrustedDevice(udidShortHashStr, accountHexHash, false);
+    if (ConvertBytesToHexString(udidShortHashStr, HB_SHORT_UDID_HASH_HEX_LEN + 1,
+        (const unsigned char *)udidHashResult, HB_SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "convert account hash fail");
+        return SOFTBUS_BYTE_CONVERT_FAIL;
+    }
+    int32_t ret = IdServiceQueryCredential(
+        userId, (const char *)udidShortHashStr, (const char *)accountHexHash, false, credList);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "query credential fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
 
 static void OnCredAdd(const char *credId, const char *credInfo)
 {
-    AUTH_LOGI(AUTH_HICHAIN, "OnCredAdd enter");
+    AUTH_LOGI(AUTH_HICHAIN, "enter");
     if (credId == NULL || credInfo == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
         return;
@@ -592,25 +593,14 @@ static void OnCredAdd(const char *credId, const char *credInfo)
 
 static void OnCredDelete(const char *credId, const char *credInfo)
 {
-    if (credId == NULL || credInfo == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
-        return;
-    }
-    SoftBusCredInfo info = { 0 };
-    if (GetCredInfoFromJson(credInfo, &info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "id service parse json fail");
-        return;
-    }
-    if (IsExitPotentialTrusted(info.udid)) {
-        AUTH_LOGI(AUTH_HICHAIN, "id service no need delete");
-        return;
-    }
-    LnnDeleteSpecificTrustedDevInfo(info.udid, JudgeDeviceTypeAndGetOsAccountIds());
-    LnnHbOnTrustedRelationReduced();
+    (void)credId;
+    (void)credInfo;
+    AUTH_LOGI(AUTH_HICHAIN, "enter");
 }
 
 static void OnCredUpdate(const char *credId, const char *credInfo)
 {
+    AUTH_LOGI(AUTH_HICHAIN, "enter");
     if (credId == NULL || credInfo == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
         return;
@@ -624,13 +614,59 @@ static CredChangeListener g_regCredChangeListener = {
     .onCredUpdate = OnCredUpdate,
 };
 
+int32_t IdServiceGetCredInfoByUdid(const char *udid, SoftBusCredInfo *credInfo)
+{
+    if (udid == NULL || credInfo == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
+    AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
+    const CredManager *credManger = IdServiceGetCredMgrInstance();
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
+        AUTH_HICHAIN, "hichain identity service not initialized");
+    char *credList = NULL;
+    int32_t ret = IdServiceQueryCredentialByUdid(userId, udid, &credList);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "query credential by udid fail, ret=%{public}d", ret);
+        return ret;
+    }
+    char *credId = IdServiceGetCredIdFromCredList(userId, credList);
+    if (credId == NULL) {
+        AUTH_LOGI(AUTH_HICHAIN, "has potential trusted relation");
+        IdServiceDestroyCredentialList(&credList);
+        return SOFTBUS_AUTH_GET_GROUP_ID_FAIL;
+    }
+    IdServiceDestroyCredentialList(&credList);
+    char *credInfoMsg = NULL;
+    ret = credManger->queryCredInfoByCredId(userId, credId, &credInfoMsg);
+    if (ret != HC_SUCCESS) {
+        uint32_t authErrCode = 0;
+        (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
+        AUTH_LOGE(AUTH_HICHAIN,
+            "hichain identity service quere credential info failed, err=%{public}d, authErrCode=%{public}d",
+            ret, authErrCode);
+        IdServiceDestroyCredentialList(&credInfoMsg);
+        SoftBusFree(credId);
+        return authErrCode;
+    }
+    SoftBusFree(credId);
+    if (GetCredInfoFromJson(credInfoMsg, credInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "id service parse json fail");
+        IdServiceDestroyCredentialList(&credInfoMsg);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    IdServiceDestroyCredentialList(&credInfoMsg);
+    return SOFTBUS_OK;
+}
+
 int32_t IdServiceRegCredMgr(void)
 {
     AUTH_LOGI(AUTH_HICHAIN, "id service init reg");
     const CredManager *credManager = IdServiceGetCredMgrInstance();
     AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL, AUTH_HICHAIN,
         "hichain identity service not initialized");
-    
+
     if (credManager->registerChangeListener == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "id service register listener is NULL");
         return SOFTBUS_AUTH_REG_CRED_CHANGE_FAIL;
