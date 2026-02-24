@@ -83,9 +83,6 @@ static DiscLinkInfo g_linkInfo[MAX_IF + 1] = {
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings,
     const DeviceInfo *deviceInfo, uint8_t bType, bool isRemoveShareCap)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(settings != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "settings is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(deviceInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "deviceInfo is nullptr");
-
     settings->businessData = NULL;
     settings->length = 0;
     settings->businessType = bType;
@@ -151,10 +148,6 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType, bool isRemo
 
 static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device, char *nickName)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(nstackxDevice != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nstackxDevice is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(nickName != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nickName is nullptr");
-
     cJSON *reserveInfo = cJSON_Parse(nstackxDevice->reservedInfo);
     DISC_CHECK_AND_RETURN_RET_LOGE(reserveInfo != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_COAP,
         "parse reserve data fail.");
@@ -171,10 +164,6 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
 
 static int32_t SpliceCoapDisplayName(char *devName, char *nickName, DeviceInfo *device)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(devName != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "devName is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(nickName != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nickName is nullptr");
-
     char *hyphen = NULL;
     bool isSameAccount = false;
     bool isZH = IsZHLanguage();
@@ -215,10 +204,6 @@ static int32_t SpliceCoapDisplayName(char *devName, char *nickName, DeviceInfo *
 
 static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, DeviceInfo *discDevInfo)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(nstackxDevInfo != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "nstackxDevInfo is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(discDevInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "discDevInfo is nullptr");
-
     char devName[DISC_MAX_DEVICE_NAME_LEN] = { 0 };
     char nickName[DISC_MAX_NICKNAME_LEN] = { 0 };
     if (strcpy_s(devName, DISC_MAX_DEVICE_NAME_LEN, nstackxDevInfo->deviceName) != EOK ||
@@ -250,10 +235,16 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
 
     // coap not support range now, just assign -1 as unknown
     discDevInfo->range = -1;
-    ret = SpliceCoapDisplayName(devName, nickName, discDevInfo);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
-        "parse display name fail, ret=%{public}d", ret);
-
+    if (strlen(nickName) != 0) {
+        ret = SpliceCoapDisplayName(devName, nickName, discDevInfo);
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
+            "parse display name fail, ret=%{public}d", ret);
+    } else {
+        ret = memcpy_s(discDevInfo->devName, DISC_MAX_DEVICE_NAME_LEN, devName, strlen(devName));
+        DISC_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_COAP, "devName copy fail, ret=%{public}d", ret);
+    }
+    
     return SOFTBUS_OK;
 }
 
@@ -474,8 +465,6 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
 
 static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(discFreq != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "discFreq is nullptr");
-
     uint32_t arrayFreq[FREQ_BUTT] = { 0 };
     int32_t ret = SoftbusGetConfig(SOFTBUS_INT_DISC_FREQ, (unsigned char *)arrayFreq, sizeof(arrayFreq));
     if (ret != SOFTBUS_OK) {
@@ -488,9 +477,6 @@ static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 
 static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const DiscCoapOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(discSet != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "discSet is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
-
     if (option->mode == ACTIVE_PUBLISH) {
         discSet->discoveryMode = PUBLISH_MODE_PROACTIVE;
     } else {
@@ -588,7 +574,7 @@ static int32_t SetLocalLinkInfo(LinkStatus status, int32_t ifnameIdx)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
         DISC_COAP, "lock fail");
-    if (g_localDeviceInfo == NULL) {
+    if (g_localDeviceInfo == NULL || g_localDeviceInfo->localIfInfo == NULL) {
         DISC_LOGE(DISC_COAP, "disc coap not init");
         (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
         return SOFTBUS_DISCOVER_COAP_NOT_INIT;
@@ -631,7 +617,7 @@ static int32_t SetLocalLinkInfo(LinkStatus status, int32_t ifnameIdx)
             return SOFTBUS_DISCOVER_GET_LOCAL_STR_FAILED;
         }
     }
-    
+
     g_localDeviceInfo->ifNums = 1;
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
     return SOFTBUS_OK;
@@ -810,9 +796,9 @@ void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
     int64_t accountId = 0;
     int32_t port = 0;
     int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account fail, err=%{public}d", ret);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account fail, ret=%{public}d", ret);
     ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, ifnameIdx);
-    DISC_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_INVALID_PARAM, DISC_COAP, "get local port fail, err=%{public}d", ret);
+    DISC_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_INVALID_PARAM, DISC_COAP, "get local port fail, ret=%{public}d", ret);
     DISC_LOGI(DISC_COAP, "register ifname=%{public}s. status=%{public}s, port=%{public}d, accountInfo=%{public}s",
         g_localDeviceInfo->localIfInfo->networkName, status == LINK_STATUS_UP ? "up" : "down", port,
         accountId == 0 ? "without" : "with");

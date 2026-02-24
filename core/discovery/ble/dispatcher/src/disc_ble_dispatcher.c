@@ -193,8 +193,6 @@ static void DfxRecordBleInitEnd(int32_t stage, int32_t reason)
 
 static int32_t DiscBleInitExt(DiscInnerCallback *discInnerCb)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(discInnerCb != NULL, SOFTBUS_INVALID_PARAM, DISC_INIT, "discInnerCb is nullptr");
-
     DiscoveryBleDispatcherInterface *touchInterface = DiscTouchBleInitPacked(discInnerCb);
     if (touchInterface == NULL) {
         DfxRecordBleInitEnd(EVENT_STAGE_TOUCH_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);

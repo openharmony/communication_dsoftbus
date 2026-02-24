@@ -14,10 +14,12 @@
 import("../../../dsoftbus.gni")
 
 nfc_disc_inc = [
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/interfaces/kits/disc",
-    "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/interfaces/kits/disc",
+  "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
 ]
 
-nfc_disc_src = ["$dsoftbus_root_path/core/discovery/nfc/dispatcher/src/disc_nfc_dispatcher.c"]
+nfc_disc_src = [
+  "$dsoftbus_root_path/core/discovery/nfc/dispatcher/src/disc_nfc_dispatcher.c",
+]
 nfc_disc_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
