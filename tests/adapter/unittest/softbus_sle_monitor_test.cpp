@@ -21,6 +21,7 @@
 #include "lnn_event_monitor_impl.h"
 #include "network_mock.h"
 #include "softbus_error_code.h"
+#include "softbus_adapter_sle_common_struct.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -65,6 +66,9 @@ HWTEST_F(SoftbusSleMonitorTest, LnnInitSleTest001, TestSize.Level1)
     EXPECT_CALL(networkMock, SoftBusRemoveSleStateListener) .WillOnce(Return());
     EXPECT_NO_FATAL_FAILURE(LnnDeinitSle());
     EXPECT_NO_FATAL_FAILURE(LnnOnSleStateChanged(SOFTBUS_SLE_UNKNOWN));
+    EXPECT_NO_FATAL_FAILURE(LnnOnSleStateChanged(SOFTBUS_SLE_STATE_TURN_ON));
+    EXPECT_NO_FATAL_FAILURE(LnnOnSleStateChanged(SOFTBUS_SLE_STATE_TURN_OFF));
+    EXPECT_NO_FATAL_FAILURE(LnnOnSleStateChanged(SOFTBUS_SLE_STATE_TURN_HALF));
 }
 
 } // namespace OHOS
