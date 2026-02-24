@@ -321,7 +321,7 @@ HWTEST_F(BrProxyTest, BrProxyTest0014, TestSize.Level1)
     struct ProxyChannel channel = {
         .brMac = "F0:FA:C7:13:56:AB",
     };
-    onOpenSuccess(g_validRequestId, &channel);
+    OnOpenSuccess(g_validRequestId, &channel);
     ServerBrProxyChannelInfo info;
     ret = GetChannelInfo(VALID_BR_MAC, TEST_UUID, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -329,7 +329,7 @@ HWTEST_F(BrProxyTest, BrProxyTest0014, TestSize.Level1)
     EXPECT_NE(EOK, ret);
     ret = memcpy_s(channel.brMac, sizeof(channel.brMac), "F0:FA:C7:13:56:BC", strlen("F0:FA:C7:13:56:BC"));
     EXPECT_EQ(EOK, ret);
-    onOpenSuccess(g_validRequestId, &channel);
+    OnOpenSuccess(g_validRequestId, &channel);
     ret = GetChannelInfo(VALID_BR_MAC, TEST_UUID, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ServerDeleteChannelFromList(g_validChannelId);
@@ -343,10 +343,10 @@ HWTEST_F(BrProxyTest, BrProxyTest0015, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<BrProxyInterfaceMock> BrProxyMock;
     EXPECT_CALL(BrProxyMock, ClientIpcBrProxyOpened).WillRepeatedly(Return(SOFTBUS_OK));
-    onOpenFail(g_invalidRequestId, 0, nullptr);
+    OnOpenFail(g_invalidRequestId, 0, nullptr);
     ret = GetChannelInfo(nullptr, nullptr, g_validChannelId, DEFAULT_INVALID_REQ_ID, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    onOpenFail(g_validRequestId, 0, nullptr);
+    OnOpenFail(g_validRequestId, 0, nullptr);
     ret = GetChannelInfo(nullptr, nullptr, g_validChannelId, DEFAULT_INVALID_REQ_ID, &info);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
     ret = ServerDeleteChannelFromList(g_validChannelId);

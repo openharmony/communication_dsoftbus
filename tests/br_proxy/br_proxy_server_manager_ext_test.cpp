@@ -127,7 +127,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest000, TestSize.L
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = ServerDisableProxyFromList(0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
-    ret1 = IsSessionExist(nullptr, nullptr, 0, false);
+    ret1 = IsSessionExist(nullptr, nullptr, 0, false, 0);
     EXPECT_EQ(false, ret1);
     ret = ServerAddChannelToList(nullptr, nullptr, CHANNEL_ID, 0, appIndex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -149,7 +149,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
     ret = GetChannelInfo(nullptr, nullptr, CHANNEL_ID, 0, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
-    onOpenSuccess(0, nullptr);
+    OnOpenSuccess(0, nullptr);
     ret = GetChannelId(nullptr, nullptr, nullptr, DEFAULT_APPINDEX);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransOpenBrProxy(nullptr, nullptr);
@@ -163,7 +163,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     ret = SelectClient(nullptr, nullptr, nullptr, 0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
     GetDataFromList(nullptr, nullptr, nullptr, nullptr);
-    bool ret1 = IsForegroundProcess(nullptr, 0);
+    bool ret1 = IsProcExist(nullptr, 0);
     EXPECT_EQ(false, ret1);
     DealDataWhenForeground(nullptr, nullptr, 0, 0);
     DealWithDataRecv(nullptr, nullptr, 0, 0);

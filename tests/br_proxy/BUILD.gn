@@ -171,6 +171,7 @@ ohos_unittest("BrProxyServerManagerTest") {
   sources = [
     "mock/br_proxy_server_manager_mock.cpp",
     "br_proxy_server_manager_test.cpp",
+    "trans_br_proxy_storage_test.cpp",
   ]
 
   deps = [

@@ -549,6 +549,7 @@ private:
         ThrowException(SOFTBUS_INVALID_PARAM);
         return connection;
     }
+    std::lock_guard<std::mutex> guard(connectionLock_);
     connectionList_.push_back(connection);
     return connection;
 }

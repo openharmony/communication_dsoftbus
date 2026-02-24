@@ -211,7 +211,6 @@ int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType);
 void TriggerSparkGroupBuildPacked(uint32_t delayTime);
 void TriggerSparkGroupClearPacked(uint32_t state, uint32_t delayTime);
 void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime);
-void TriggerClearSparkGroupPacked(void);
 int32_t InitControlPlanePacked(void);
 void DeinitControlPlanePacked(void);
 int32_t QueryControlPlaneNodeValidPacked(const char *deviceId);

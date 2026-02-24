@@ -191,7 +191,6 @@
               "authentication/enhance/auth_attest_interface_struct.h",
               "authentication/enhance/auth_device_common_key_struct.h",
               "broadcast/enhance/broadcast_scheduler_type_struct.h",
-              "broadcast/enhance/broadcast_struct.h",
               "broadcast/enhance/link_broadcast_manager_struct.h",
               "broadcast/broadcast_dfx_event_struct.h",
               "broadcast/broadcast_protocol_constant_struct.h",

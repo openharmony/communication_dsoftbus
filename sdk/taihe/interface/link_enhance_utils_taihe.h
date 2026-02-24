@@ -31,7 +31,7 @@
 #define SOFTBUS_NAME_MAX_LEN 255
 namespace Communication {
 namespace OHOS::Softbus {
-static const std::string PKG_NAME = "ohos.distributedschedule.dms";
+inline static const std::string PKG_NAME = "ohos.distributedschedule.dms";
 enum class ConnectionState {
     STATE_BASE = 0,
     STATE_CONNECTING = 1,

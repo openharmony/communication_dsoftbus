@@ -88,6 +88,11 @@ int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
     return GetTransLaneExtIf()->LnnGetNetworkIdByUdid(udid, buf, len);
 }
 
+int32_t UpdateAndGetReqInfoByFree(uint32_t laneReqId, TransReqInfo *reqInfo)
+{
+    return GetTransLaneExtIf()->UpdateAndGetReqInfoByFree(laneReqId, reqInfo);
+}
+
 int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type)
 {
     return GetTransLaneExtIf()->DestroyLink(networkId, laneReqId, type);

@@ -1608,17 +1608,6 @@ void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime)
     }
     return pfnLnnEnhanceFuncList->triggerSparkGroupJoinAgain(udid, delayTime);
 }
-void TriggerClearSparkGroupPacked(void)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (pfnLnnEnhanceFuncList == NULL) {
-        return;
-    }
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->triggerClearSparkGroup) != SOFTBUS_OK) {
-        return;
-    }
-    return pfnLnnEnhanceFuncList->triggerClearSparkGroup();
-}
 
 int32_t InitControlPlanePacked(void)
 {

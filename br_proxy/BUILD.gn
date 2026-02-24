@@ -73,6 +73,7 @@ ohos_shared_library("br_proxy_adapter") {
       "samgr:samgr_proxy",
       "resource_schedule_service:ressched_client",
       "device_standby:standby_innerkits",
+      "ability_runtime:app_manager",
     ]
   } else {
     sources += [ "br_proxy_adapter_virtual.cpp" ]

@@ -837,7 +837,7 @@ int WifiDirectUtils::GetLocalScreenStatus()
 
 int32_t WifiDirectUtils::ConvertPassiveErrorCode(int32_t code)
 {
-    if (code > SOFTBUS_CONN_SHORT_RANGE_BASE && code <= SOFTBUS_CONN_PASSIVE_TYPE_HML_NUM_LIMITED_CONFLICT) {
+    if (code > SOFTBUS_CONN_SHORT_RANGE_BASE && code <= SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_CHIP_CONFLICT) {
         // active code convert passive errorcode offset is 1
         code += 1;
     }

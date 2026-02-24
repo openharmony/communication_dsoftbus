@@ -28,7 +28,7 @@ int32_t AdapterOpenFuncInit(void *soHandle)
     }
     int32_t (*adapterRegisterOpenfunc)(void);
 
-    int ret = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
 
     ret = SoftBusDlsym(soHandle, "AdapterRegisterOpenFunc", (void **)&adapterRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
