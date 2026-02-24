@@ -622,8 +622,8 @@ int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint3
     return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByActionId(actionId, reuseLaneReqId, connReqId);
 }
 
-int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(const char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
-    uint32_t connReqId)
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(
+    const char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId, uint32_t connReqId)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (pfnLnnEnhanceFuncList == NULL) {
@@ -632,8 +632,8 @@ int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(const char *udidHash, uint32
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid(udidHash, udidHashLen, reuseLaneReqId,
-        connReqId);
+    return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid(
+        udidHash, udidHashLen, reuseLaneReqId, connReqId);
 }
 
 int32_t LnnAddLocalVapInfoPacked(LnnVapType type, const LnnVapAttr *vapAttr)
@@ -1720,7 +1720,7 @@ void LnnDeinitDecisionCenterV2Packed(void)
         return;
     }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitDecisionCenterV2) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        LNN_LOGI(LNN_LANE, "deinit packed, func pointer is NULL");
         return;
     }
     pfnLnnEnhanceFuncList->lnnDeinitDecisionCenterV2();
@@ -1733,7 +1733,7 @@ void SdMgrDeathCallbackPacked(const char *pkgName)
         return;
     }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sdMgrDeathCallback) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        LNN_LOGI(LNN_LANE, "sd death callback packed, func pointer is NULL");
         return;
     }
     pfnLnnEnhanceFuncList->sdMgrDeathCallback(pkgName);
