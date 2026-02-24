@@ -17,6 +17,8 @@
 #define AUTH_COMMON_H
 
 #include "auth_interface.h"
+#include "auth_uk_manager.h"
+#include "auth_session_key.h"
 #include "softbus_common.h"
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
@@ -58,6 +60,8 @@ DiscoveryType ConvertToDiscoveryType(AuthLinkType type);
 AuthLinkType ConvertToAuthLinkType(DiscoveryType type);
 bool CheckAuthConnInfoType(const AuthConnInfo *connInfo);
 void PrintAuthConnInfo(const AuthConnInfo *connInfo);
+int32_t CheckAclInfoIsAccesser(const AuthACLInfo *acl, bool *isAccesser);
+void SetDpGroupShare(const NodeInfo *info, AuthHandle authHandle);
 
 int32_t AuthCommonInit(void);
 void AuthCommonDeinit(void);
