@@ -77,6 +77,7 @@ typedef enum {
     EVENT_STAGE_GENERAL_HANDSHAKE_ACK = 2109,
     EVENT_STAGE_BR_PROXY_STATE = 2110,
     EVENT_STAGE_BR_PROXY_RECONNECT = 2111,
+    EVENT_STAGE_BR_PROXY_SEND = 2112,
 } ConnEventConnectStage;
 
 typedef enum {
@@ -154,6 +155,7 @@ typedef struct {
     int32_t virtualLinkType;      // VIRTUAL_LINK_TYPE
     int32_t brProxyState;         // BR_PROXY_STATE
     int32_t brProxyIsClear;       // BR_PROXY_IS_CLEAR
+    int32_t brProxyIsRetry;       // BR_PROXY_IS_RETRY
 } ConnEventExtra;
 
 typedef enum {

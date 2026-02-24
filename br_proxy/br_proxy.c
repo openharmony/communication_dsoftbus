@@ -570,6 +570,7 @@ int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
         TRANS_LOGE(TRANS_SDK, "[br_proxy] data too long! datalen:%{public}d", dataLen);
         return SOFTBUS_TRANS_BR_PROXY_DATA_TOO_LONG;
     }
+    int64_t timeStart = GetSoftbusRecordTimeMillis();
     int32_t ret = ServerIpcSendBrProxyData(channelId, data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
@@ -578,6 +579,7 @@ int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
             .channelId = channelId,
             .errcode = ret,
             .result = EVENT_STAGE_RESULT_FAILED,
+            .costTime = (int32_t)(GetSoftbusRecordTimeMillis() - timeStart),
             .dataLen = dataLen,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_SEND_DATA, extra);
@@ -594,11 +596,22 @@ int32_t SetListenerState(int32_t channelId, ListenerType type, bool isEnable)
     TRANS_LOGI(TRANS_SDK,
         "[br_proxy] enter! channelId:%{public}d, type:%{public}d, type_desc:%{public}s, isEnable:%{public}s",
         channelId, type, type == DATA_RECEIVE ? "receiveData":"receiveChannelStatus", isEnable ? "on":"off");
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .listenerType = type,
+        .listenerStatus = isEnable ? 1 : 0,
+    };
     int32_t ret = ServerIpcSetListenerState(channelId, type, isEnable);
     if (ret != SOFTBUS_OK) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        extra.errcode = ret;
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_LISTENER_STATUS, extra);
         TRANS_LOGE(TRANS_SDK, "[br_proxy] set listener state failed! ret=%{public}d", ret);
         return ret;
     }
+    extra.result = EVENT_STAGE_RESULT_OK;
+    extra.errcode = SOFTBUS_OK;
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_LISTENER_STATUS, extra);
     return ClientRecordListenerState(channelId, type, isEnable);
 }
 
@@ -694,7 +707,7 @@ int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const c
             .channelId = info.channelId,
             .errcode = result,
             .result = (result == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
-            .costTime = (result == SOFTBUS_OK) ? (int32_t)timeDiff : 0,
+            .costTime = (int32_t)timeDiff,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
     }
