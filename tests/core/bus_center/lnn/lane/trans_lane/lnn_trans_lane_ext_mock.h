@@ -39,7 +39,7 @@ public:
     virtual int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink) = 0;
     virtual bool CheckVirtualLinkByLaneReqId(uint32_t laneReqId) = 0;
     virtual int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t delayMillis) = 0;
-    virtual int32_t UpdateNotifyInfoBylaneReqId(uint32_t laneReqId, bool isNotifyFree) = 0;
+    virtual int32_t UpdateAndGetReqInfoByFree(uint32_t laneReqId, TransReqInfo *reqInfo) = 0;
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len) = 0;
     virtual int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type) = 0;
 };
@@ -58,7 +58,7 @@ public:
     MOCK_METHOD1(CheckLinkConflictByReleaseLink, int32_t (LaneLinkType));
     MOCK_METHOD1(CheckVirtualLinkByLaneReqId, bool (uint32_t));
     MOCK_METHOD3(PostDelayDestroyMessage, int32_t (uint32_t, uint64_t, uint64_t));
-    MOCK_METHOD2(UpdateNotifyInfoBylaneReqId, int32_t (uint32_t, bool));
+    MOCK_METHOD2(UpdateAndGetReqInfoByFree, int32_t (uint32_t, TransReqInfo *reqInfo));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *, char *, uint32_t));
     MOCK_METHOD3(DestroyLink, int32_t (const char *, uint32_t, LaneLinkType));
 };

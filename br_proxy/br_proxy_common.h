@@ -15,6 +15,8 @@
 #ifndef BR_PROXY_COMMON_HANDLE_H
 #define BR_PROXY_COMMON_HANDLE_H
 
+#include "br_proxy.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -23,6 +25,7 @@ extern "C" {
 typedef enum {
     LOOP_DCLOSE_MSG,
     LOOP_STOP_APP_MSG,
+    LOOP_BR_PROXY_OPENED_MSG,
 } BrProxyLoopMsg;
 
 typedef struct {
@@ -30,6 +33,13 @@ typedef struct {
     pid_t pid;
     pid_t uid;
 } StopAppInfo;
+
+typedef struct {
+    pid_t pid;
+    int32_t channelId;
+    char brMac[BR_MAC_LEN];
+    char uuid[UUID_LEN];
+} BrProxyOpenedInfo;
 
 int32_t PullUpHap(const char *bundleName, const char *abilityName, int32_t appIndex);
 int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
@@ -44,6 +54,7 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool i
 int32_t BrProxyPostMsgToLooper(int32_t what, uint64_t arg1, uint64_t arg2, void *obj, uint64_t delayMillis);
 void BrProxyRemoveMsgFromLooper(int32_t what, uint64_t arg1, uint64_t arg2, void *obj);
 int32_t BrProxyLoopInit(void);
+bool CommonGetRunningProcessInformation(const char *bundleName, int32_t userId, pid_t uid, pid_t *pid);
 
 #ifdef __cplusplus
 }

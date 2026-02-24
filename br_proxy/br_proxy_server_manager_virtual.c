@@ -82,3 +82,17 @@ void TransBrProxyRemoveObject()
 {
     return;
 }
+
+void TransBrProxyInit(void)
+{
+    return;
+}
+
+void TransOnBrProxyOpened(pid_t pid, int32_t channelId, const char *brMac, const char *uuid)
+{
+    (void)pid;
+    (void)channelId;
+    (void)brMac;
+    (void)uuid;
+    return;
+}

@@ -45,12 +45,14 @@ typedef int32_t (*GetAbilityNameFunc)(char *abilityName, int32_t userId, uint32_
 typedef int32_t (*StartAbilityFunc)(const char *bundleName, const char *abilityName,
     int32_t appIndex, int32_t userId);
 typedef int32_t (*UnrestrictedFunc)(const char *bundleName, pid_t pid, pid_t uid, bool isThaw);
+typedef bool (*GetRunningProcessInformationFunc)(const std::string bundleName, int32_t userId, pid_t uid, pid_t *pid);
 
 struct SymbolLoader {
     void *handle;
     StartAbilityFunc startAbility;
     GetAbilityNameFunc getAbilityName;
     UnrestrictedFunc unrestricted;
+    GetRunningProcessInformationFunc getRunningProcessInformation;
 };
 
 static SoftBusMutex g_lock;
@@ -71,7 +73,10 @@ static int32_t LoadSymbol(SymbolLoader *loader, bool *load)
     StartAbilityFunc startAbility = (StartAbilityFunc)dlsym(handle, "StartAbility");
     GetAbilityNameFunc getAbilityName = (GetAbilityNameFunc)dlsym(handle, "ProxyChannelMgrGetAbilityName");
     UnrestrictedFunc unrestricted = (UnrestrictedFunc)dlsym(handle, "Unrestricted");
-    if (startAbility == nullptr || getAbilityName == nullptr || unrestricted == nullptr) {
+    GetRunningProcessInformationFunc getRunningProcessInformation =
+        (GetRunningProcessInformationFunc)dlsym(handle, "GetRunningProcessInformation");
+    if (startAbility == nullptr || getAbilityName == nullptr || unrestricted == nullptr ||
+        getRunningProcessInformation == nullptr) {
         dlclose(handle);
         return SOFTBUS_NETWORK_DLSYM_FAILED;
     }
@@ -80,6 +85,7 @@ static int32_t LoadSymbol(SymbolLoader *loader, bool *load)
     loader->getAbilityName = getAbilityName;
     loader->startAbility = startAbility;
     loader->unrestricted = unrestricted;
+    loader->getRunningProcessInformation = getRunningProcessInformation;
 
     *load = true;
     return SOFTBUS_OK;
@@ -210,8 +216,14 @@ extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
         TRANS_LOGE(TRANS_SVC, "[br_proxy] copy bundleName or abilityName failed");
         return SOFTBUS_STRCPY_ERR;
     }
-    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
-    int32_t ret = GetAbilityName(abilityName, userId, abilityNameLen, hapTokenInfoRes.bundleName, appIndex);
+    int32_t uid = GetCallerUid();
+    int32_t userId = 0;
+    int32_t ret = GetOsAccountLocalIdFromUid(uid, &userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get userId failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = GetAbilityName(abilityName, userId, abilityNameLen, hapTokenInfoRes.bundleName, appIndex);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get abilityName failed, ret=%{public}d", ret);
         TransEventExtra extra = {
@@ -290,6 +302,16 @@ static void BrProxyLoopMsgHandler(SoftBusMessage *msg)
             }
             StopAppInfo *info = (StopAppInfo *)msg->obj;
             (void)BrProxyUnrestricted(info->bundleName, info->pid, info->uid, false);
+            break;
+        }
+        case LOOP_BR_PROXY_OPENED_MSG: {
+            if (msg->obj == nullptr) {
+                TRANS_LOGE(TRANS_CTRL, "[br_proxy] LOOP_BR_PROXY_OPENED_MSG msg is nullptr.");
+                return;
+            }
+            BrProxyOpenedInfo *info = static_cast<BrProxyOpenedInfo *>(msg->obj);
+            TransOnBrProxyOpened(info->pid, info->channelId,
+                static_cast<const char *>(info->brMac), static_cast<const char *>(info->uuid));
             break;
         }
         default:
@@ -421,4 +443,25 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool i
     }
     (void)SoftBusMutexUnlock(&g_lock);
     return SOFTBUS_OK;
+}
+
+bool CommonGetRunningProcessInformation(const char *bundleName, int32_t userId, pid_t uid, pid_t *pid)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(bundleName != nullptr && pid != nullptr, false,
+        TRANS_SVC, "[br_proxy] bundle name is invalid");
+    int32_t ret = SoftBusMutexLock(&g_lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false,
+        TRANS_SVC, "[br_proxy] lock failed! ret=%{public}d", ret);
+    bool load = false;
+    ret = LoadSymbol(&g_symbolLoader, &load);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] load sysmbol failed, error=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lock);
+        return false;
+    }
+    const std::string stlbundleName = bundleName;
+    bool checkRes = g_symbolLoader.getRunningProcessInformation(stlbundleName, userId, uid, pid);
+    CleanupSymbolIfNeed(&g_symbolLoader, load);
+    (void)SoftBusMutexUnlock(&g_lock);
+    return checkRes;
 }
