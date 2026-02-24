@@ -18,7 +18,9 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+
 #include "auth_connection.h"
+#include "auth_device_common_key.h"
 #include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_identity_service_adapter.h"
@@ -255,7 +257,8 @@ static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
         char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
         int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
             (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
-        if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfoPacked((const char *)udidHash, &nodeInfo) == SOFTBUS_OK &&
+        if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfoPacked((const char *)udidHash,
+            &nodeInfo) == SOFTBUS_OK &&
             IsNeedExchangeNetworkId(nodeInfo.authCapacity, BIT_SUPPORT_EXCHANGE_NETWORKID)) {
             AUTH_LOGI(AUTH_FSM, "LnnRetrieveDeviceInfo success");
             authFsm->info.idType = EXCHANGE_NETWORKID;
@@ -771,7 +774,8 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
-    AuthUpdateNormalizeKeyIndexPacked(udidShortHash, authFsm->info.normalizedIndex, authFsm->info.connInfo.type,
+    AuthUpdateNormalizeKeyIndexPacked(udidShortHash,
+        authFsm->info.normalizedIndex, authFsm->info.connInfo.type,
         authFsm->info.normalizedKey, authFsm->info.isServer);
     if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
         SaveLastAuthSeq(hash, authFsm->authSeq);
@@ -809,7 +813,8 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "find key fail, fastAuth error");
         return SOFTBUS_AUTH_NOT_FOUND;
     }
-    AuthUpdateKeyIndexPacked(udidShortHash, authFsm->info.connInfo.type, authFsm->authSeq, authFsm->info.isServer);
+    AuthUpdateKeyIndexPacked(udidShortHash, authFsm->info.connInfo.type,
+        authFsm->authSeq, authFsm->info.isServer);
     authFsm->info.oldIndex = key.keyIndex;
     ret = AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
     if (ret != SOFTBUS_OK) {
@@ -1333,7 +1338,7 @@ static void PopulateDeviceTypeId(HiChainAuthParam *authParam, uint32_t requestId
 
 static int32_t ProcessClientAuthState(AuthFsm *authFsm)
 {
-    HiChainAuthParam authParam;
+    HiChainAuthParam authParam = {};
     HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V2) ?
         HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
 
@@ -1341,6 +1346,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     authMode = HICHAIN_AUTH_DEVICE;
 #endif
     (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
+
     /* just client need start authDevice */
     if (ClientSetExchangeIdType(authFsm) != SOFTBUS_OK) {
         return SOFTBUS_OK;
@@ -1410,6 +1416,11 @@ static void GetCredTypeByCredId(AuthSessionInfo *info)
     info->credId = IdServiceGetCredIdFromCredList(nodeInfo.userId, credList);
     if (info->credId == NULL) {
         AUTH_LOGE(AUTH_FSM, "get cred id fail");
+        IdServiceDestroyCredentialList(&credList);
+        return;
+    }
+    if (IdServiceGetCredTypeByCredId(nodeInfo.userId, info->credId, &info->credIdType) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get cred id type fail");
     }
     IdServiceDestroyCredentialList(&credList);
 }
@@ -2052,16 +2063,6 @@ bool AuthSessionGetIsSameAccount(int64_t authSeq)
     return info.isSameAccount;
 }
 
-int32_t AuthSessionGetUserId(int64_t authSeq)
-{
-    AuthSessionInfo info = { 0 };
-    if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
-        return DEFAULT_USERID;
-    }
-    return info.userId;
-}
-
 int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
 {
     if (key == NULL) {
@@ -2244,8 +2245,9 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
     if (AuthManagerSetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey, true, false) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "auth fsm save session key fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
     }
-
-    (void)CalcHKDFPacked((uint8_t *)(&sessionKey.value), sessionKey.len, (uint8_t *)(&authFsm->info.sessionKeyRandomNum),
+    (void)AuthDeviceSetIsCreatedSessionKey(authFsm->authSeq, true);
+    (void)CalcHKDFPacked((uint8_t *)(&sessionKey.value), sessionKey.len,
+                         (uint8_t *)(&authFsm->info.sessionKeyRandomNum),
         sizeof(authFsm->info.sessionKeyRandomNum));
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (LnnGenerateLocalPtkPacked(authFsm->info.udid, authFsm->info.uuid) != SOFTBUS_OK) {
@@ -2276,10 +2278,20 @@ void AuthSessionSetReSyncDeviceName(void)
     AuthFsm *item = NULL;
     AuthFsm *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authFsmList, AuthFsm, node) {
-        if (item->curState >= STATE_SYNC_DEVICE_INFO) {
+        if (item->curState >= STATE_DEVICE_AUTH) {
             AUTH_LOGI(AUTH_FSM, "need resync latest device name authSeq=%{public}" PRId64, item->authSeq);
             item->info.nodeInfo.isNeedReSyncDeviceName = true;
         }
     }
     ReleaseAuthLock();
+}
+
+int32_t AuthSessionGetUserId(int64_t authSeq)
+{
+    AuthSessionInfo info = { 0 };
+    if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
+        return DEFAULT_USERID;
+    }
+    return info.userId;
 }

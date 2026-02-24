@@ -112,6 +112,7 @@ typedef struct {
    char udidShortHash[SHA_256_HEX_HASH_LEN];
    char accountHash[SHA_256_HEX_HASH_LEN];
    char *credId;
+   int32_t credIdType;
    int64_t headSeq;
 } AuthSessionInfo;
 
