@@ -191,7 +191,7 @@ static int32_t OpenSessionPort(void)
         LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
-    int32_t port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
+    int32_t port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_USB, &info);
     if (port < 0) {
         LNN_LOGE(LNN_BUILDER, "open session server failed");
         return SOFTBUS_INVALID_PORT;
@@ -455,7 +455,7 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
     if (subnet == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invaild subnet paramter");
+        LNN_LOGE(LNN_BUILDER, "invalid subnet parameter");
         if (status != NULL) {
             SoftBusFree(status);
         }

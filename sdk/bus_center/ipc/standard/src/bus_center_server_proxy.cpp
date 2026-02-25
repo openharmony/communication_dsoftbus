@@ -105,7 +105,7 @@ static int32_t CheckAndInitBusCenterServerProxyInit(void)
 
 static int32_t ClientCheckFuncPointer(void *func)
 {
-    if (func == NULL) {
+    if (func == nullptr) {
         LNN_LOGE(LNN_EVENT, "enhance func not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
