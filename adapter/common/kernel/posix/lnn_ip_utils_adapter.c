@@ -131,7 +131,7 @@ bool GetLinkUpStateByIfName(const char *ifName)
         return false;
     }
     struct ifreq ifr;
-    if (strncpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), ifName, strlen(ifName)) != EOK) {
+    if (strcpy_s(ifr.ifr_name, sizeof(ifr.ifr_name), ifName) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "copy netIfName fail. netIfName=%{public}s", ifName);
         close(fd);
         return false;

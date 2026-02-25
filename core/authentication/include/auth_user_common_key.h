@@ -26,6 +26,13 @@ extern "C" {
 #endif
 #endif
 
+typedef enum {
+    DP_BIND_TYPE_DIFF_ACCOUNT = 0,
+    DP_BIND_TYPE_SAME_ACCOUNT,
+    DP_BIND_TYPE_SHARE,
+    DP_BIND_TYPE_MAX,
+} DpBindType;
+
 typedef struct {
     uint8_t deviceKey[SESSION_KEY_LENGTH];
     uint32_t keyLen;
