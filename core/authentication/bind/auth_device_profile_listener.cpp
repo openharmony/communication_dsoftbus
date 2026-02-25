@@ -26,11 +26,11 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
-#include "lnn_heartbeat_utils.h"
 
 static const uint32_t SOFTBUS_SA_ID = 4700;
 static DeviceProfileChangeListener g_deviceProfileChange = { 0 };
@@ -113,11 +113,11 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceP
     Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "dp active callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
+    DelNotTrustDevice(profile.GetDeviceId().c_str());
     if (GetScreenState() == SOFTBUS_SCREEN_OFF && !LnnIsLocalSupportBurstFeature()) {
         AUTH_LOGI(AUTH_INIT, "screen off and not support burst. no need online");
         return SOFTBUS_OK;
     }
-    DelNotTrustDevice(profile.GetDeviceId().c_str());
     if (IsHeartbeatEnable()) {
         if (LnnStartHbByTypeAndStrategy(
             HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
@@ -238,4 +238,3 @@ int32_t RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
     g_deviceProfileChange = *deviceProfilePara;
     return OHOS::AuthToDeviceProfile::RegisterToDpHelper();
 }
-

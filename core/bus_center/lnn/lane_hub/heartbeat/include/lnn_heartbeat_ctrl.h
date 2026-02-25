@@ -33,7 +33,7 @@ int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
 int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
 void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType);
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
-int32_t LnnShiftLNNGearWithoutPkgName(
+int32_t HmosShiftLNNGear(
     const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType);
 int32_t LnnTriggerSleRangeForMsdp(const char *pkgName, const RangeConfig *config);
 int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config);

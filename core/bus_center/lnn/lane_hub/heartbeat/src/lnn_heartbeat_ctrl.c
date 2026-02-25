@@ -1307,7 +1307,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_OK;
 }
 
-int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
+int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
 {
     if (mode == NULL || callerId == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "shift lnn gear get invalid param");
@@ -1326,7 +1326,7 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
         return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
-    int32_t i, infoNum;
+    int32_t infoNum;
     char uuid[UUID_BUF_LEN] = { 0 };
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
@@ -1340,7 +1340,7 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
     int32_t ret;
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    for (i = 0; i < infoNum; ++i) {
+    for (int32_t i = 0; i < infoNum; ++i) {
         ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
         if (ret != SOFTBUS_OK || !LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI)) {
             continue;
