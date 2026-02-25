@@ -85,7 +85,7 @@ void SystemAbilityListener::OnAddSystemAbility(int32_t saId, const std::string &
         if (ret != SOFTBUS_OK) {
             ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryRegCredMgr, nullptr,
                 delayRegHichainTime);
-            AUTH_LOGI(AUTH_INIT, "RetryRegCredMgr AsyncCallbackDelay ret=%{public}d", ret);
+            AUTH_LOGI(AUTH_INIT, "LnnAsyncCallbackDelayHelper ret=%{public}d", ret);
         }
     }
 }
