@@ -50,6 +50,9 @@ static void LnnOnSleStateChanged(int32_t sleState)
         case SOFTBUS_SLE_STATE_TURN_OFF:
             *notifyState = SOFTBUS_SLE_TURN_OFF;
             break;
+        case SOFTBUS_SLE_STATE_TURN_HALF:
+            *notifyState = SOFTBUS_SLE_TURN_ON;
+            break;
         default:
             break;
     }
