@@ -25,6 +25,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
@@ -40,11 +41,11 @@
 #include "softbus_def.h"
 #include "wifi_direct_manager.h"
 
-#define MSG_LEN                     10
-#define BITS                        8
-#define BITLEN                      4
+#define MSG_LEN 10
+#define BITS 8
+#define BITLEN 4
 #define STRING_INTERFACE_BUFFER_LEN 16
-#define DP_INACTIVE_DEFAULT_USERID  (-1)
+#define DP_INACTIVE_DEFAULT_USERID (-1)
 
 static bool g_isWifiDirectSupported = false;
 static bool g_isApCoexistSupported = false;
@@ -219,6 +220,28 @@ static bool IsNeedToSend(NodeInfo *nodeInfo, uint32_t type)
     }
 }
 
+static int32_t SendCapabilityMsg(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *msg, uint32_t type)
+{
+    int32_t ret = SOFTBUS_OK;
+    int32_t localDevTypeId = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local dev type id failed");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (type == ((1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR))) {
+        if (((localDevTypeId == TYPE_WATCH_ID || nodeInfo.deviceInfo.deviceTypeId == TYPE_WATCH_ID) ||
+            (localDevTypeId == TYPE_GLASS_ID || nodeInfo.deviceInfo.deviceTypeId == TYPE_GLASS_ID)) &&
+            LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BR)) {
+            ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+        } else {
+            ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+        }
+    } else {
+        ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+    }
+    return ret;
+}
+
 static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *msg, uint32_t netCapability,
     uint32_t type)
 {
@@ -227,11 +250,7 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
         if (!IsFeatureSupport(nodeInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) {
             ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
         } else {
-            if (type == ((1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR))) {
-                ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
-            } else {
-                ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
-            }
+            ret = SendCapabilityMsg(nodeInfo, netInfo, msg, type);
         }
         char *anonyNetworkId = NULL;
         Anonymize(netInfo.networkId, &anonyNetworkId);
@@ -504,7 +523,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     return;
 }
 
-static void UpdateLocalDeviceInfoToSH()
+static void UpdateLocalDeviceInfoToSH(void)
 {
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -560,6 +579,9 @@ static int32_t UpdateLocalFeatureByWifiVspRes(void)
         FeatureOption feature = {.isAdd = true, .featureSet = 0};
         (void)LnnSetFeatureCapability(&feature.featureSet, BIT_FL_CAPABILITY);
         ret = LnnSetLocalByteInfo(NUM_KEY_FEATURE_CAPA, (uint8_t *)&feature, sizeof(FeatureOption));
+        if (ret == SOFTBUS_OK) {
+            LnnUpdateStateVersion(UPDATE_FEATURE);
+        }
     }
     return ret;
 }

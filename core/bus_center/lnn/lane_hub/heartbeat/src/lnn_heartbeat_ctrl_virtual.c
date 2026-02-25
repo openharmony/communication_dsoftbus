@@ -91,7 +91,7 @@ SoftBusScreenState GetScreenState(void)
     return SOFTBUS_SCREEN_UNKNOWN;
 }
 
-int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
+int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
 {
     (void)callerId;
     (void)mode;
