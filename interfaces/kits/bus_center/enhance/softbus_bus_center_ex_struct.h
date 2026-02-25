@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef IF_BUS_CENTER_EX_STRUCT_H
-#define IF_BUS_CENTER_EX_STRUCT_H
+#ifndef SOFTBUS_BUS_CENTER_EX_STRUCT_H
+#define SOFTBUS_BUS_CENTER_EX_STRUCT_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -28,19 +28,19 @@ extern "C" {
 #define DATA_MAX_LEN 2048
 
 typedef enum {
-    DISCOVERT_POLICY_ALLOW_REPLY,
-    DISCOVERT_POLICY_REJECT_REPLY,
-    DISCOVERT_POLICY_ALLOW_REPLY_SYNC,
+    DISCOVERY_POLICY_ALLOW_REPLY,
+    DISCOVERY_POLICY_REJECT_REPLY,
+    DISCOVERY_POLICY_ALLOW_REPLY_SYNC,
 } DiscoveryPolicy;
 
 /**
-* @brief Defines parameter, see {@link CustomData}.
-*
-* @since 1.0
-* @version 1.0
-*/
+ * @brief Defines  parameter, see {@link CustomData}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
 typedef struct {
-    MetaNodeType type;           /**< User type */
+    MetaNodeType type;                  /**< User type */
     uint8_t data[DATA_MAX_LEN];  /**< User data */
 } CustomData;
 
@@ -48,4 +48,4 @@ typedef struct {
 }
 #endif
 
-#endif  //SOFTBUS_BUS_CENTER_EX_STRUCT_H
+#endif // SOFTBUS_BUS_CENTER_EX_STRUCT_H

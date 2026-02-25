@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,7 @@ typedef int32_t (*ClientGetSessionIdByChannelIdFunc)(int32_t channelId, int32_t 
     int32_t *sessionId, bool isClosing);
 typedef int (*GetMySessionNameFunc)(int sessionId, char *sessionName, unsigned int len);
 typedef int32_t (*ClientRegEnhanceFunc)(ClientEnhanceFuncList *functionList);
+typedef int32_t (*ClientCancelAuthSessionTimerFunc)(int32_t sessionId);
 typedef int32_t (*ClientSetLowLatencyBySocketFunc)(int32_t socket);
 typedef int32_t (*CreatePagingSessionFunc)(const char *sessionName, int32_t businessType, int32_t socketId,
     const ISocketListener *socketListener, bool isPaging);
@@ -77,7 +78,6 @@ typedef struct TagClientOpenFuncList {
     CheckPackageNameFunc checkPackageName;
     InitSoftBusFunc initSoftBus;
     RestartAuthParaCallbackRegisterFunc restartAuthParaCallbackRegister;
-
     ClientGetChannelBySessionIdFunc clientGetChannelBySessionId;
     TransGetUdpChannelFunc transGetUdpChannel;
     TransUdpChannelSetStreamMultiLayerFunc transUdpChannelSetStreamMultiLayer;
@@ -91,6 +91,7 @@ typedef struct TagClientOpenFuncList {
     TransGetUdpChannelByFileIdFunc transGetUdpChannelByFileId;
     ClientGetSessionIdByChannelIdFunc clientGetSessionIdByChannelId;
     GetMySessionNameFunc getMySessionName;
+    ClientCancelAuthSessionTimerFunc clientCancelAuthSessionTimer;
     ClientSetLowLatencyBySocketFunc clientSetLowLatencyBySocket;
     CreatePagingSessionFunc createPagingSession;
     ClientDeletePagingSessionFunc clientDeletePagingSession;

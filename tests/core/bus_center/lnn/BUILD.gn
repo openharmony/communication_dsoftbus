@@ -1301,7 +1301,6 @@ ohos_unittest("LNNLedgerMockTest") {
 ohos_unittest("LNNNetLedgerCommonTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager_virtual.cpp",
     "net_ledger/lnn_ledger_common_test.cpp",
     "net_ledger/lnn_net_ledger_common_mock.cpp",
   ]
