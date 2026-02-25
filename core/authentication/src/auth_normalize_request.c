@@ -88,8 +88,8 @@ static int32_t GetNotifyRequestPriorityByUdidHash(const char *udidHash, Normaliz
         if (strncmp(item->udidHash, udidHash, UDID_SHORT_HASH_STR) != 0 || item->isNeedNotifyVerify) {
             continue;
         }
-        *request = *item;
         item->isNeedNotifyVerify = true;
+        *request = *item;
         return SOFTBUS_OK;
     }
     return SOFTBUS_NOT_FIND;
