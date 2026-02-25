@@ -64,7 +64,7 @@ static int64_t UptimeMicros(void)
     return when;
 }
 
-NO_SANITIZE("cfi") static void FreeSoftBusMsg(SoftBusMessage *msg)
+static void FreeSoftBusMsg(SoftBusMessage *msg)
 {
     if (msg->FreeMessage == NULL) {
         SoftBusFree(msg);
