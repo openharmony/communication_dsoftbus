@@ -83,7 +83,7 @@ static int32_t ActionOfLnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, c
 
 /*
  * @tc.name: GET_SUPPORT_BAND_WIDTH_TEST_001
- * @tc.desc: Test the functionality and boundary condition handling of the GetSupprotBandWidth function
+ * @tc.desc: Test the functionality and boundary condition handling of the GetSupportBandWidth function
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -109,7 +109,7 @@ HWTEST_F(LNNSelectRuleTest, GET_SUPPORT_BAND_WIDTH_TEST_001, TestSize.Level1)
 /*
  * @tc.name: GET_SUPPORT_BAND_WIDTH_TEST_002
  * @tc.desc: Test whether the function correctly returns the supported bandwidth types
- *           when both local and remote devices supprot WIFI P2P connections
+ *           when both local and remote devices support WIFI P2P connections
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -132,7 +132,7 @@ HWTEST_F(LNNSelectRuleTest, GET_SUPPORT_BAND_WIDTH_TEST_002, TestSize.Level1)
 /*
  * @tc.name: GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_001
  * @tc.desc: Verify whether the function correctly returns an error code
- *           when the parameters are invalid, and check the fucntion behavior under specific conditions
+ *           when the parameters are invalid, and check the function behavior under specific conditions
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -208,7 +208,7 @@ HWTEST_F(LNNSelectRuleTest, GET_ALL_SUPPORT_REUSE_BAND_WIDTH_TEST_003, TestSize.
 
 /*
  * @tc.name: LNN_LANE_DECIDE_01
- * @tc.desc: Verify the behavior of the DecideAvailableLane fucntion when the input parameters are invalid
+ * @tc.desc: Verify the behavior of the DecideAvailableLane function when the input parameters are invalid
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -256,7 +256,7 @@ HWTEST_F(LNNSelectRuleTest, LNN_LANE_DECIDE_02, TestSize.Level1)
 
 /*
  * @tc.name: LNN_LANE_DECIDE_03
- * @tc.desc: Verify whether the fucntion return values meet expectations under different input conditions
+ * @tc.desc: Verify whether the function return values meet expectations under different input conditions
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -478,7 +478,7 @@ HWTEST_F(LNNSelectRuleTest, LNN_SELECT_NO_CAP_LINK_002, TestSize.Level1)
 
 /*
  * @tc.name: LNN_LANE_SELECT_RULE_01
- * @tc.desc: Test the behavior of the FinalDecideLinkType fucntion under various invalid parameter conditons
+ * @tc.desc: Test the behavior of the FinalDecideLinkType function under various invalid parameter conditons
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
