@@ -35,7 +35,6 @@
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_connection_fsm.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_init_monitor.h"
