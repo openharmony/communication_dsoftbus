@@ -1588,7 +1588,8 @@ static void HandleActionTriggerError(uint32_t p2pRequestId)
     }
     LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
     if (guideType == LANE_ACTION_TRIGGER || guideType == LANE_BLE_TRIGGER) {
-        (void)LnnRequestCheckOnlineStatusPacked(reqInfo.laneRequestInfo.networkId, BLE_TRIGGER_TIMEOUT);
+        (void)LnnRequestCheckOnlineStatusPacked(reqInfo.laneRequestInfo.networkId,
+            BLE_TRIGGER_TIMEOUT);
     }
 }
 
