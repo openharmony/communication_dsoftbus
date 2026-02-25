@@ -204,6 +204,7 @@ int32_t InitDecisionCenter(void)
     }
     if (RegistAuthTransListenerPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist auth trans failed");
+        DestroySoftBusList(g_exceptionConnMgr.connections);
         g_exceptionConnMgr.initFlag = false;
         return SOFTBUS_SLE_RANGING_REGIST_TRANS_ERROR;
     }
