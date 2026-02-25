@@ -17,7 +17,6 @@
 
 #include <string.h>
 #include <securec.h>
-
 #include "anonymizer.h"
 
 #include "auth_interface.h"
@@ -57,7 +56,6 @@ static bool g_isDeviceInfoSet = false;
 
 int32_t LnnInitNetLedger(void)
 {
-    LNN_LOGE(LNN_EVENT, "LnnInitNetLedger enter.");
     if (LnnInitModuleNotifyWithRetrySync(INIT_DEPS_HUKS, LnnInitHuksInterface, RETRY_TIMES, DELAY_REG_DP_TIME) !=
         SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init huks interface fail");
@@ -82,17 +80,11 @@ int32_t LnnInitNetLedger(void)
     return SOFTBUS_OK;
 }
 
-static bool IsStaticFeatureChange(uint64_t softbusFeature, uint64_t feature)
-{
-    uint64_t mask = ~ (1 << BIT_FL_CAPABILITY);
-    return ((softbusFeature & mask) != (feature & mask));
-}
-
 static bool IsCapacityChange(NodeInfo *info)
 {
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
-        if (IsStaticFeatureChange(softbusFeature, info->feature)) {
+        if (softbusFeature != info->feature) {
             LNN_LOGW(LNN_LEDGER, "feature=%{public}" PRIu64 "->%{public}" PRIu64, info->feature, softbusFeature);
             return true;
         }
@@ -126,7 +118,6 @@ static bool IsCapacityChange(NodeInfo *info)
             int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, info->sleRangeCapacity);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LEDGER, "LnnSetLocalNumInfo fail, ret = %{public}d", ret);
-                return false;
             }
         } else if (sleRangeCap != info->sleRangeCapacity) {
             LNN_LOGW(LNN_LEDGER, "sleRangeCap=%{public}d->%{public}d", info->sleRangeCapacity, sleRangeCap);
@@ -239,11 +230,6 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         LNN_LOGW(LNN_LEDGER, "deviceSecurityLevel=%{public}d->%{public}d", info->deviceSecurityLevel, level);
         return true;
     }
-    int32_t sleRangeCap = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &sleRangeCap) == SOFTBUS_OK) {
-        LNN_LOGW(LNN_LEDGER, "sleRangeCap=%{public}d->%{public}d", info->sleRangeCapacity, sleRangeCap);
-        return true;
-    }
     if (IsLocalIrkInfoChange(info)) {
         return true;
     }
@@ -280,6 +266,15 @@ static void LnnSetLocalFeature(void)
     (void)LnnSetLocalByteInfo(NUM_KEY_FEATURE_CAPA, (uint8_t *)&deleteFeature, sizeof(FeatureOption));
 }
 
+static void UpdateStaticFeature(NodeInfo *info)
+{
+    FeatureOption feature = {.isAdd = true, .featureSet = 0};
+    if (IsFeatureSupport(info->feature, BIT_FL_CAPABILITY) &&
+        LnnSetFeatureCapability(&feature.featureSet, BIT_FL_CAPABILITY) == SOFTBUS_OK) {
+        (void)LnnSetLocalByteInfo(NUM_KEY_FEATURE_CAPA, (uint8_t *)&feature, sizeof(FeatureOption));
+    }
+}
+
 static void ProcessLocalDeviceInfo(void)
 {
     g_isRestore = true;
@@ -287,6 +282,7 @@ static void ProcessLocalDeviceInfo(void)
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)LnnGetLocalDevInfoPacked(&info);
     LnnDumpNodeInfo(&info, "load local deviceInfo success");
+    UpdateStaticFeature(&info);
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
         if (info.stateVersion > MAX_STATE_VERSION) {
@@ -343,7 +339,7 @@ void RestoreLocalDeviceInfo(void)
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
     LnnSetLocalFeature();
     if (g_isRestore) {
-        LNN_LOGI(LNN_LEDGER, "already init");
+        LNN_LOGI(LNN_LEDGER, "aready init");
         LnnLedgerInfoStatusSet();
         return;
     }
@@ -419,7 +415,7 @@ void LnnDeinitNetLedger(void)
     LnnDeinitDistributedLedger();
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
-    LnnInitMetaNodeExtLedgerPacked();
+    LnnDeinitMetaNodeExtLedgerPacked();
     LnnDeInitCloudSyncModule();
 }
 

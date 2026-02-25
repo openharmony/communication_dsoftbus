@@ -128,25 +128,6 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest003, TestSize.Lev
 }
 
 /*
- * @tc.name: IsStaticFeatureChangeTest001
- * @tc.desc: Verify IsStaticFeatureChange checks if static feature has
- *           changed with different feature values
- * @tc.type: FUNC
- * @tc.level: Level0
- * @tc.require:
- */
-HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
-{
-    uint64_t softbusFeature = 1 << BIT_FL_CAPABILITY;
-    uint64_t feature = softbusFeature;
-    bool ret = IsStaticFeatureChange(softbusFeature, feature);
-    EXPECT_FALSE(ret);
-    feature |= (1 << BIT_BLE_DIRECT_ONLINE);
-    ret = IsStaticFeatureChange(softbusFeature, feature);
-    EXPECT_TRUE(ret);
-}
-
-/*
  * @tc.name: IsLocalSparkCheckChange001
  * @tc.desc: Verify IsLocalSparkCheckChange checks spark check change with
  *           different LnnGetLocalByteInfo return values
