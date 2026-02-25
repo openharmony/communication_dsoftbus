@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,9 +150,9 @@ typedef struct {
     const char *scanCycle;       // SCAN_CYCLE
     int32_t discType;            // DISC_TYPE
     int32_t discMode;            // DISC_MODE
-    uint64_t startTime;           // BROADCAST_START_TIME
-    uint64_t stopTime;            // BROADCAST_STOP_TIME
-    uint64_t costTime;            // COST_TIME
+    uint64_t startTime;          // BROADCAST_START_TIME
+    uint64_t stopTime;           // BROADCAST_STOP_TIME
+    uint64_t costTime;           // COST_TIME
     int32_t successCnt;          // SUCCESS_COUNT
     int32_t failCnt;             // FAIL_COUNT
     const char *localNetworkId;  // LOCAL_NET_ID
