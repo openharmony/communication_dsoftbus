@@ -51,7 +51,7 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
         int32_t socketHandle = connection->socketHandle;
         (void)SoftBusMutexUnlock(&connection->lock);
         if (socketHandle == BR_INVALID_SOCKET_HANDLE) {
-            ret = BR_INVALID_SOCKET_HANDLE;
+            ret = SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED;
             break;
         }
         int32_t recvLen = g_sppDriver->Read(socketHandle, buffer, BUFFER_SIZE);
