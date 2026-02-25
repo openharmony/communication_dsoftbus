@@ -54,6 +54,7 @@ bool TransCheckNetworkDelegatePacked(const char *sessionName);
 bool TransCheckP2pOnlyPacked(const char *sessionName);
 bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName, const char *peerNetworkId);
 int32_t LoadTransPermissionJsonPacked(void);
+bool IsMultipathWhitelistPacked(const char *processName, bool *isWhitelist);
 
 void TransD2dQosUnregisterPacked(int32_t channelId, char *sleMac, uint32_t macLen);
 #ifdef __cplusplus

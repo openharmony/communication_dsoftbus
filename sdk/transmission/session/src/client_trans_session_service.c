@@ -1131,7 +1131,7 @@ int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount)
         TRANS_LOGI(TRANS_SDK, "set enableMultipath, socket=%{public}d", socket);
     }
     if (enableMultipath && (minBW <= LOW_BW || dataType != TYPE_FILE)) {
-        TRANS_LOGE(TRANS_SDK, "check multipath disable, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
+        TRANS_LOGE(TRANS_SDK, "not multipath ability, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
         ClientSetEnableMultipathBySocket(socket, false);
     }
     return SOFTBUS_OK;
@@ -1314,6 +1314,14 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
             CheckSessionIsOpened(socket, true);
         }
         TRANS_LOGI(TRANS_SDK, "This socket state is callback finish, socket=%{public}d", socket);
+        int32_t channelIdReserve = INVALID_CHANNEL_ID;
+        int32_t channelTypeReserve = CHANNEL_TYPE_BUTT;
+        int32_t routeTypeReserve = -1;
+        if (ClientGetReserveChannelBySessionId(socket, &channelIdReserve, &channelTypeReserve, &routeTypeReserve) ==
+            SOFTBUS_OK && channelIdReserve != INVALID_CHANNEL_ID) {
+            (void)ClientClearReserveChannelBySessionId(socket);
+            (void)ClientTransCloseReserveChannel(channelIdReserve, channelTypeReserve, routeTypeReserve, false);
+        }
         int32_t channelId = INVALID_CHANNEL_ID;
         int32_t type = CHANNEL_TYPE_BUTT;
         ret = ClientGetChannelBySessionId(socket, &channelId, &type, NULL);

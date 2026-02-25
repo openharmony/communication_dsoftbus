@@ -85,11 +85,13 @@ typedef enum {
     MULTIPATH_STRATEGY_MAX,             /**< 策略类型上限标记 */
 } MultipathStrategy;
 
-typedef struct {
-    SocketEventType event;
-    MultipathEvent eventData;
-    uint32_t dataLen;
-} CachedOnEvent;
+typedef enum {
+    NOT_MULTIPATH = 0,              /**< not multipath session's channel link down */
+    MULTIPATH_FIRST_CHANNEL,        /**< multipath session first channel link down */
+    MULTIPATH_BOTH_CHANNEL,         /**< second channel link down caused by first channel link down */
+    MULTIPATH_ONLY_SECOND_CHANNEL,  /**< multipath session only second channel link down*/
+    LINK_DOWN_MAX_NUM_TYPE,
+} LinkDownType;
 
 typedef struct {
     ListNode node;
@@ -139,7 +141,6 @@ typedef struct {
     ChannelType channelTypeReserve;
     LinkType linkTypeReserve[LINK_TYPE_MAX];
     bool isClosingReserve;
-    CachedOnEvent cachedOnEvent;
     int32_t routeTypeReserve;
     uint64_t startTimestamp;
 } SessionInfo;
@@ -191,6 +192,8 @@ typedef struct {
     ListNode node;
     int32_t sessionId;
     int32_t channelId;
+    int32_t routeType;
+    LinkDownType linkDownType;
     ChannelType channelType;
     bool isAsync;
     void (*OnSessionClosed)(int sessionId);
@@ -200,19 +203,6 @@ typedef struct {
     SocketLifecycleData lifecycle;
 } DestroySessionInfo;
 
-typedef struct {
-    ListNode node;
-    int32_t sessionId;
-    int32_t channelId;
-    ChannelType ChannelType;
-    bool isAsync;
-    bool mainChannel;
-    void (*OnSessionClose)(int sessionId);
-    void (*OnShutdown)(int32_t socket, ShutdownReason reason);
-    char sessionName[SESSION_NAME_SIZE_MAX];
-    char pkgName[PKG_NAME_SIZE_MAX];
-    SocketLifecycleData liftcycle;
-} DestroyMultiPathSessionInfo;
 #ifdef __cplusplus
 }
 #endif

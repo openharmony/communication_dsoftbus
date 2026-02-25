@@ -41,7 +41,8 @@ bool IsValidSessionParam(const SessionParam *param);
 
 SessionInfo *CreateNewSession(const SessionParam *param);
 
-DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server);
+DestroySessionInfo *CreateDestroySessionNode(
+    SessionInfo *sessionNode, const ClientSessionServer *server, LinkDownType linkDownType);
 
 void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason);
 
