@@ -79,7 +79,7 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
         ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
         ConnEventExtra extra = {
             .peerBrMac = anomizeAddress,
-            .connectionId = (int32_t)connection->socketHandle,
+            .connectionId = (int32_t)connection->channelId,
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
         };

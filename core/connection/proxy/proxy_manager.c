@@ -213,10 +213,11 @@ static void ProxyChannelClose(struct ProxyChannel *channel, bool isClearReconnec
         channel->channelId, channel->requestId, ret, isClearReconnectEvent);
     proxyConnection->dereference(proxyConnection);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, channel->brMac, BT_MAC_LEN);
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, proxyConnection->brMac, BT_MAC_LEN);
     ConnEventExtra extra = {
         .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
+        .connectionId = (int32_t)channel->channelId,
         .brProxyIsClear = isClearReconnectEvent ? 1 : 0,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
@@ -883,7 +884,8 @@ static void AttemptReconnectDevice(char *brAddr)
         .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
         .costTime = (int32_t)config.delayMs,
-        .brProxyIsRetry = config.retryable,
+        .brProxyIsRetry = config.retryable ? 1 : 0,
+        .brProxyIsAcl = reconnectDeviceInfo->isAclConnected ? 1 : 0,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_RECONNECT, extra);
     if (!config.retryable) {
