@@ -73,11 +73,6 @@ void TransCloseFileChannel(int32_t dfileId)
     (void)dfileId;
 }
 
-void TransClearFileChannel(int32_t dfileId)
-{
-    (void)dfileId;
-}
-
 int32_t TransSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     (void)channelId;
@@ -93,12 +88,4 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     (void)fileCallback;
     (void)isReceiver;
     return SOFTBUS_FUNC_NOT_SUPPORT;
-}
-
-void TransCloseReserveFileChannel(int32_t dfileId, const char *srvIp, int32_t srvPort, int32_t type)
-{
-    (void)dfileId;
-    (void)*srvIp;
-    (void)srvPort;
-    (void)type;
 }
