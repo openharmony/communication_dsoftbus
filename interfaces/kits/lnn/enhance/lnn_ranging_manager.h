@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LNN_RANGING_MANAGER_STRUCT_H
-#define LNN_RANGING_MANAGER_STRUCT_H
+#ifndef LNN_RANGING_MANAGER_H
+#define LNN_RANGING_MANAGER_H
 
 #include <stdint.h>
 
@@ -64,6 +64,15 @@ typedef struct {
     void (*onRangeResult)(const RangeResultInnerInfo *info);
     void (*onRangeStateChange)(const RangeState state);
 } ISleRangeInnerCallback;
+
+int32_t LnnStartRange(const RangeConfig *config);
+int32_t LnnStopRange(const RangeConfig *config);
+int32_t RegistAuthTransListener(void);
+int32_t UnregistAuthTransListener(void);
+void SleRangeDeathCallback(void);
+
+void LnnRegSleRangeCb(const ISleRangeInnerCallback *callback);
+void LnnUnregSleRangeCb(void);
 
 #ifdef __cplusplus
 }

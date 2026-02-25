@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ typedef enum {
     BIT_SUPPORT_SLE_CAPABILITY,
     BIT_HIGH_ACCURACY_SYNC_TIME_CAPABILITY,
     BIT_FL_CAPABILITY, // support flash light channel
-    BIT_DETERMINISTIC_TRANS_CAPABILITY,
+    BIT_DETERMINISTIC_TRANS_CAPABILITY = 21,
     BIT_SUPPORT_SPARK_GROUP_CAPABILITY = 22,
     BIT_SUPPORT_OLD_LP_SPARK_CAPABILITY = 23,
     BIT_DEVICE_CLOUD_CONVERGENCE_CAPABILITY = 24,
