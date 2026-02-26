@@ -101,7 +101,7 @@ bool AuthIdentityServiceAdapterFuzzTest(FuzzedDataProvider &provider)
         return false;
     }
     SoftBusCredInfo credInfo;
-    credInfo.credIdType = ACCOUNT_SHARE;
+    credInfo.credIdType = ACCOUNT_SHARED;
     (void)memset_s(&credInfo, sizeof(SoftBusCredInfo), 0, sizeof(SoftBusCredInfo));
     if (strcpy_s(credInfo.udid, UDID_BUF_LEN, udid.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s udid failed!");

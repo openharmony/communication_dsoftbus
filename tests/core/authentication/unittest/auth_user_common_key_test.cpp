@@ -55,7 +55,7 @@ HWTEST_F(AuthUserCommonKeyTest, AUTH_USER_COMMON_KEY_Test_001, TestSize.Level1)
 {
     AuthACLInfo aclInfo = {};
     AuthUserKeyInfo userKeyInfo = {};
-    int32_t ret = AuthInsertUserKey(&aclInfo, &userKeyInfo, false);
+    int32_t ret = AuthInsertUserKey(&aclInfo, &userKeyInfo, false, DP_BIND_TYPE_DIFF_ACCOUNT);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = GetUserKeyInfoSameAccount(&aclInfo, &userKeyInfo);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
@@ -110,11 +110,11 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_003, TestSize.Level1)
         .keyIndex = 1,
     };
     EXPECT_EQ(EOK, memcpy_s(userKeyInfo.deviceKey, SESSION_KEY_LENGTH, "testKey", strlen("testKey")));
-    int32_t ret = AuthInsertUserKey(nullptr, &userKeyInfo, false);
+    int32_t ret = AuthInsertUserKey(nullptr, &userKeyInfo, false, DP_BIND_TYPE_SAME_ACCOUNT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthInsertUserKey(&aclInfo, nullptr, false);
+    ret = AuthInsertUserKey(&aclInfo, nullptr, false, DP_BIND_TYPE_SAME_ACCOUNT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthInsertUserKey(&aclInfo, &userKeyInfo, false);
+    ret = AuthInsertUserKey(&aclInfo, &userKeyInfo, false, DP_BIND_TYPE_SAME_ACCOUNT);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = AuthUserKeyInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -135,7 +135,7 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_003, TestSize.Level1)
         .keyIndex = 2,
     };
     EXPECT_EQ(EOK, memcpy_s(userKeyInfo1.deviceKey, SESSION_KEY_LENGTH, "testKey1", strlen("testKey1")));
-    ret = AuthInsertUserKey(&aclInfo1, &userKeyInfo1, false);
+    ret = AuthInsertUserKey(&aclInfo1, &userKeyInfo1, false, DP_BIND_TYPE_SAME_ACCOUNT);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -164,7 +164,7 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_SAME_ACCOUNT_Test_001, TestSize
         .time = 12345,
         .keyIndex = 1,
     };
-    int32_t ret = AuthInsertUserKey(&aclInfo, &userKeyInfo1, false);
+    int32_t ret = AuthInsertUserKey(&aclInfo, &userKeyInfo1, false, DP_BIND_TYPE_SAME_ACCOUNT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     AuthUserKeyInfo userKeyInfo = {};
     ret = GetUserKeyInfoSameAccount(nullptr, &userKeyInfo);
@@ -235,7 +235,7 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_WITH_USER_Test_001
         .time = 12345,
         .keyIndex = 5,
     };
-    int32_t ret = AuthInsertUserKey(&aclInfo, &userKeyInfo1, true);
+    int32_t ret = AuthInsertUserKey(&aclInfo, &userKeyInfo1, true, DP_BIND_TYPE_DIFF_ACCOUNT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     aclInfo.isServer = true;
     AuthUserKeyInfo userKeyInfo = {};

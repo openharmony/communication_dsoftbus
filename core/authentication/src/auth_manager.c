@@ -2381,6 +2381,23 @@ int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac)
     return UpdateAuthManagerByAuthId(authId, SetAuthP2pMac, &inAuth, AUTH_LINK_TYPE_P2P);
 }
 
+int32_t AuthDeviceSetIsCreatedSessionKey(int64_t authId, const bool isCreatedSessionKey)
+{
+    if (!RequireAuthLock()) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthManager *auth = FindAuthManagerByAuthId(authId);
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_INIT, "auth manager not found, authId=%{public}" PRId64, authId);
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    auth->isCreatedSessionKey = isCreatedSessionKey;
+    AUTH_LOGI(AUTH_INIT, "auth manager set isCreatedSessionKey=%{public}d", isCreatedSessionKey);
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
+
 int32_t AuthDeviceInit(const AuthTransCallback *callback)
 {
     AUTH_LOGI(AUTH_INIT, "auth init enter");

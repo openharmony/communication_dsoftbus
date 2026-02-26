@@ -18,6 +18,9 @@
 
 #include <stdint.h>
 
+#include "auth_interface.h"
+
+#include "auth_common.h"
 #include "auth_session_key.h"
 #include "auth_uk_manager.h"
 #include "auth_user_common_key.h"
@@ -49,21 +52,33 @@ typedef struct {
     int32_t localUserId;
 } UpdateDpAclParams;
 
+typedef struct {
+    bool isLocal;
+    int32_t userId;
+    char udid[UDID_BUF_LEN];
+    char credId[CRED_ID_STR_LEN];
+    char shareCredId[CRED_ID_STR_LEN];
+    char accountUid[ACCOUNT_UID_STR_LEN];
+} SoftBusAclInfo;
+
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);
 bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId);
 void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
     AclWriteState aclState);
 void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState);
+void UpdateGroupShareToDp(SoftBusAclInfo *peerAclInfo, int32_t creIdType, SessionKey sessionKey, bool isNeedUpdateDk);
 void DelNotTrustDevice(const char *udid);
 void DelSessionKeyProfile(int32_t sessionKeyId);
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length);
+bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId);
+int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num);
 int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
 int32_t GetAccessUkIdDiffAccountWithUserLevel(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
 int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
+int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time);
 int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen);
 void UpdateAssetSessionKeyByAcl(
-    AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount);
-int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num);
+    AuthACLInfo *info, uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount);
 bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId);
 bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid);
 
@@ -73,4 +88,3 @@ bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid);
 #endif
 #endif
 #endif /* AUTH_DEVICEPROFILE_H */
-
