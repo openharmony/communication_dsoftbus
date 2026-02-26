@@ -296,7 +296,7 @@ static void DuplicateNodeStateCbList(ListNode *list)
             LNN_LOGE(LNN_STATE, "malloc node state callback item fail");
             continue;
         }
-        if (strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1) != EOK) {
+        if (strcpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName) != EOK) {
             LNN_LOGE(LNN_STATE, "copy pkgName fail");
             SoftBusFree(copyItem);
             continue;
@@ -1152,7 +1152,7 @@ int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId)
 
 int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
 {
-    if (info == NULL || info->capability == NULL || strlen(info->capability) == 0) {
+    if (info == NULL || info->capability == NULL || info->capability[0] == '\0') {
         LNN_LOGE(LNN_STATE, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
