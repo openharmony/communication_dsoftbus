@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,9 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_error_code.h"
+#include "softbus_init_common.h"
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
-#include "softbus_init_common.h"
 #include "trans_log.h"
 
 #define SESSION_NAME "ohos.dsoftbus.inner.p2pchannel"

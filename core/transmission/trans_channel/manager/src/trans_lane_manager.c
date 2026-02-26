@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "legacy/softbus_hidumper_trans.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -26,7 +27,6 @@
 #include "trans_channel_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
-#include "legacy/softbus_hidumper_trans.h"
 #include "trans_session_manager.h"
 
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"

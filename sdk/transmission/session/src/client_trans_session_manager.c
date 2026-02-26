@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,7 @@ void PermissionStateChange(const char *pkgName, int32_t state)
     UnlockClientSessionServerList();
 }
 
-int TransClientInit(void)
+int32_t TransClientInit(void)
 {
     g_clientSessionServerList = CreateSoftBusList();
     if (g_clientSessionServerList == NULL) {
@@ -183,7 +183,7 @@ static void ShowAllSessionInfo(void)
     TRANS_LOGI(TRANS_SDK, "g_sessionIdNum=%{public}d, g_closingIdNum=%{public}d", g_sessionIdNum, g_closingIdNum);
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
-    int count = 0;
+    int32_t count = 0;
     char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         Anonymize(serverNode->sessionName, &tmpName);
@@ -194,7 +194,7 @@ static void ShowAllSessionInfo(void)
         if (IsListEmpty(&serverNode->sessionList)) {
             continue;
         }
-        int sessionCount = 0;
+        int32_t sessionCount = 0;
         char *tmpPeerSessionName = NULL;
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             Anonymize(sessionNode->info.peerSessionName, &tmpPeerSessionName);
@@ -407,7 +407,7 @@ static void ShowClientSessionServer(void)
 {
     ClientSessionServer *pos = NULL;
     ClientSessionServer *tmp = NULL;
-    int count = 0;
+    int32_t count = 0;
     char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_clientSessionServerList->list, ClientSessionServer, node) {
         Anonymize(pos->sessionName, &tmpName);
@@ -795,7 +795,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Tr
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, TransSessionKey key)
+int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int32_t *data, TransSessionKey key)
 {
     if ((sessionId < 0) || (data == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
