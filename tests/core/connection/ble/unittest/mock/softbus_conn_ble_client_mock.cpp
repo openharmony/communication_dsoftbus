@@ -193,5 +193,10 @@ int32_t BleHiDumperRegister(void)
 {
     return SOFTBUS_OK;
 }
+
+bool IsUnknownDevicePacked(const char *bleMacAddr)
+{
+    return GetConnectionBleClientInterface()->IsUnknownDevicePacked(bleMacAddr);
+}
 }
 }
