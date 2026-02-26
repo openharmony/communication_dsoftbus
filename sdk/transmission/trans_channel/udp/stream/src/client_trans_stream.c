@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,7 +144,7 @@ static void OnStreamReceived(int32_t channelId, const StreamData *data, const St
     g_udpChannelMgrCb->OnStreamReceived(channelId, data, ext, param);
 }
 
-static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvList)
+static void OnQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     if ((g_udpChannelMgrCb == NULL) || (g_udpChannelMgrCb->OnQosEvent == NULL)) {
         return;

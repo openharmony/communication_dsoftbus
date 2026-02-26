@@ -72,7 +72,7 @@ std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen,
     return raw;
 }
 
-int RawStreamData::InitStreamData(std::unique_ptr<char[]> buffer, ssize_t bufLen,
+int32_t RawStreamData::InitStreamData(std::unique_ptr<char[]> buffer, ssize_t bufLen,
     std::unique_ptr<char[]> extBuffer, ssize_t extLen)
 {
     streamData_ = std::move(buffer);
@@ -92,13 +92,13 @@ ssize_t RawStreamData::GetBufferLen() const
     return streamLen_;
 };
 
-void RawStreamData::InsertBufferLength(int num, int length, uint8_t *output)
+void RawStreamData::InsertBufferLength(int32_t num, int32_t length, uint8_t *output)
 {
     if (output == nullptr || length < 0) {
         TRANS_LOGE(TRANS_STREAM, "param invalid");
         return;
     }
-    for (int i = 0; i < length; i++) {
+    for (int32_t i = 0; i < length; i++) {
         output[length - 1 - i] = static_cast<unsigned int>(
             ((static_cast<unsigned int>(num) >> static_cast<unsigned int>(BYTE_TO_BIT * i))) & INT_TO_BYTE);
     }

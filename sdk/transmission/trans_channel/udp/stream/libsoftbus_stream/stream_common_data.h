@@ -28,7 +28,7 @@ public:
     ~StreamCommonData() override = default;
 
     // 应用调用生成流数据。
-    int InitStreamData(std::unique_ptr<char[]> inputBuf, ssize_t bufSize, std::unique_ptr<char[]> inputExt,
+    int32_t InitStreamData(std::unique_ptr<char[]> inputBuf, ssize_t bufSize, std::unique_ptr<char[]> inputExt,
         ssize_t extSize);
 
     void SetTimeStamp(uint32_t timestamp) override
@@ -61,7 +61,7 @@ public:
         return extBufLen_;
     }
 
-    int GetSeqNum() const override
+    int32_t GetSeqNum() const override
     {
         return curSeqNum_;
     }

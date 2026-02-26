@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <securec.h>
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdatomic.h>
 
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_helper.h"
@@ -498,7 +498,7 @@ static int32_t SendOneFrame(const SendListenerInfo *sendInfo, const FileFrame *f
         TRANS_LOGW(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret;
+    int32_t ret;
     if (sendInfo->osType == OH_TYPE) {
         ret = SendOneFrameFront((SendListenerInfo *)sendInfo, fileFrame->frameType);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "send one frame front fail!");
