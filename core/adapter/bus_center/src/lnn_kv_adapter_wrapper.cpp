@@ -222,7 +222,7 @@ int32_t LnnCloudSync(int32_t dbId)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
-        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
+        LNN_LOGE(LNN_LEDGER, "Invalid dbId, dbId=%{public}d", dbId);
         return SOFTBUS_INVALID_PARAM;
     }
     auto kvAdapter = FindKvStorePtr(dbId);
@@ -268,7 +268,7 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
-        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
+        LNN_LOGE(LNN_LEDGER, "Invalid dbId, dbId=%{public}d", dbId);
         return;
     }
     auto kvAdapter = FindKvStorePtr(dbId);
@@ -309,7 +309,7 @@ int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
-        LNN_LOGE(LNN_LEDGER, "Invalid dbId ");
+        LNN_LOGE(LNN_LEDGER, "Invalid dbId, dbId=%{public}d", dbId);
         return SOFTBUS_INVALID_PARAM;
     }
     auto kvAdapter = FindKvStorePtr(dbId);
