@@ -105,8 +105,9 @@ CONN_ASSIGNER(Errcode, VirtualLinkType, virtualLinkType)
 CONN_ASSIGNER(Errcode, BrProxyState, brProxyState)
 CONN_ASSIGNER(Errcode, BrProxyIsClear, brProxyIsClear)
 CONN_ASSIGNER(Errcode, BrProxyIsRetry, brProxyIsRetry)
+CONN_ASSIGNER(Errcode, BrProxyIsAcl, brProxyIsAcl)
 
-#define CONN_ASSIGNER_SIZE 71 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 72 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -179,6 +180,7 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "BR_PROXY_STATE",         HISYSEVENT_INT32,  ConnAssignerBrProxyState      },
     { "BR_PROXY_IS_CLEAR",      HISYSEVENT_INT32,  ConnAssignerBrProxyIsClear      },
     { "BR_PROXY_IS_RETRY",      HISYSEVENT_INT32,  ConnAssignerBrProxyIsRetry      },
+    { "BR_PROXY_IS_ACL",        HISYSEVENT_INT32,  ConnAssignerBrProxyIsAcl      },
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 

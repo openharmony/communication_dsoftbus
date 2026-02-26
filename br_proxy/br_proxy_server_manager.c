@@ -1438,7 +1438,7 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
     GetChannelIdAndUserId(brMac, uuid, &channelId, &userId);
     extra.errcode = ret;
     extra.channelId = channelId;
-    extra.requestId = requestId;
+    extra.requestId = (int32_t)requestId;
     extra.userId = userId;
     extra.appIndex = proxyInfo.appIndex;
     if (ret != SOFTBUS_OK) {
@@ -1836,8 +1836,8 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
     extra.result = EVENT_STAGE_RESULT_OK;
     extra.errcode = reason;
     extra.channelId = info.channelId;
-    extra.connectionId = channel->channelId;
-    extra.requestId = info.requestId;
+    extra.connectionId = (int32_t)channel->channelId;
+    extra.requestId = (int32_t)info.requestId;
     TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_DISCONNECT, extra);
 EXIT:
     if (reason == SOFTBUS_CONN_BR_UNPAIRED) {
@@ -1871,8 +1871,8 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
     ClientIpcBrProxyStateChanged(info.callingPid, info.channelId, SOFTBUS_OK);
     TransEventExtra extra = {0};
     extra.channelId = info.channelId;
-    extra.connectionId = channel->channelId;
-    extra.requestId = channel->requestId;
+    extra.connectionId = (int32_t)channel->channelId;
+    extra.requestId = (int32_t)channel->requestId;
     TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_RECONNECT, extra);
 }
 
