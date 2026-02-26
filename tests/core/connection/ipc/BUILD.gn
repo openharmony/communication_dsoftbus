@@ -18,7 +18,7 @@ module_output_path = "dsoftbus/soft_bus/connection"
 
 ohos_unittest("ConnectionClientProxyTest") {
   module_out_path = module_output_path
-  sources = [ "connection_client_proxy_test.cpp" ]
+  sources = [ "$dsoftbus_root_path/tests/core/connection/ipc/unittest/connection_client_proxy_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_core_path/frame/standard/client_manager/include",
@@ -44,7 +44,7 @@ ohos_unittest("ConnectionClientProxyTest") {
 
 ohos_unittest("ConnectionClientProxyStandardTest") {
   module_out_path = module_output_path
-  sources = [ "connection_client_proxy_standard_test.cpp" ]
+  sources = [ "$dsoftbus_root_path/tests/core/connection/ipc/unittest/connection_client_proxy_standard_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_core_path/connection/ipc/standard/include",
