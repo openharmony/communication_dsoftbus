@@ -1337,6 +1337,7 @@ static int32_t DefaultUserIdFindUk(AuthACLInfo *aclInfo, int32_t *ukId, uint64_t
     }
     PrintfAuthAclInfo(0, 0, aclInfo);
     if (GetAccessUkIdSameAccount(aclInfo, ukId, time) != SOFTBUS_OK &&
+        GetAccessUkIdByGroupShare(aclInfo, ukId, time) != SOFTBUS_OK &&
         GetAccessUkIdDiffAccountWithUserLevel(aclInfo, ukId, time) != SOFTBUS_OK &&
         GetAccessUkIdDiffAccount(aclInfo, ukId, time) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "remote default userid get uk by asset fail");
@@ -1361,10 +1362,12 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
     aclInfo.isServer = !acl->isServer;
     PrintfAuthAclInfo(0, 0, &aclInfo);
     if (GetUserKeyInfoSameAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
+        GetUserKeyInfoGroupShare(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
         GetUserKeyInfoDiffAccountWithUserLevel(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
         GetUserKeyInfoDiffAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get uk by ukcachelist fail");
         if (GetAccessUkIdSameAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
+            GetAccessUkIdByGroupShare(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             GetAccessUkIdDiffAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             DefaultUserIdFindUk(&aclInfo, ukId, &time) != SOFTBUS_OK) {
