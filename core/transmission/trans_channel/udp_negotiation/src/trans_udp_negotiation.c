@@ -872,7 +872,7 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         errDesc = (char *)"peer device session name not create";
         goto ERR_EXIT;
     }
-    if (info.linkedChannelId > 0) {
+    if (info.linkedChannelId >= 0) {
         UdpChannelInfo channel;
         (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
         ret = TransGetUdpChannelByPeerId(info.linkedChannelId, &channel);
@@ -1499,7 +1499,7 @@ static int32_t TransProcessAsyncOpenUdpChannelSuccess(UdpChannelInfo *channel, i
         errDesc = (char *)"send reply udp info error";
         goto ERR_EXIT;
     }
-    if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+    if (channel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN && !channel->info.isMultiNeg) {
         ret = NotifyUdpChannelBind(&channel->info);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "notify bind fail ret=%{public}d, channelId=%{public}d", ret, channelId);

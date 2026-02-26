@@ -188,7 +188,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
     appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
     uint32_t remoteUdpChannelCapability = 0;
-    (void)GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPACILITY", (int32_t *)&remoteUdpChannelCapability);
+    (void)GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&remoteUdpChannelCapability);
     appInfo->udpChannelCapability = remoteUdpChannelCapability & TRANS_UDP_CHANNEL_CAPBILITY;
     TRANS_LOGW(TRANS_CTRL,
         "TransUnpackRequestUdpInfo UDP_CHANNEL_CAPABILITY=%{public}u, remoteUdpChannelCapability=%{public}u",

@@ -304,12 +304,12 @@ HWTEST_F(TransLanePendingTest, TransFreeLanePendingInit001, TestSize.Level1)
 }
 
 /*
- * @tc.name: DestroyAsyncReqItemParam001
- * @tc.desc: test DestroyAsyncReqItemParam
+ * @tc.name: ClearSessionParamMemory001
+ * @tc.desc: test ClearSessionParamMemory
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLanePendingTest, DestroyAsyncReqItemParam001, TestSize.Level1)
+HWTEST_F(TransLanePendingTest, ClearSessionParamMemory001, TestSize.Level1)
 {
     SessionParam *param = static_cast<SessionParam*>(SoftBusCalloc(sizeof(SessionParam)));
     ASSERT_TRUE(param != nullptr);
@@ -329,7 +329,7 @@ HWTEST_F(TransLanePendingTest, DestroyAsyncReqItemParam001, TestSize.Level1)
     param->groupId = groupId;
     param->attr = attr;
 
-    DestroyAsyncReqItemParam(param);
+    ClearSessionParamMemory(param);
 
     EXPECT_TRUE(param->sessionName == nullptr);
     EXPECT_TRUE(param->peerSessionName == nullptr);

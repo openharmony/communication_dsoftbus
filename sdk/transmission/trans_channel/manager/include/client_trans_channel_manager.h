@@ -28,8 +28,6 @@ void ClientTransChannelDeinit(void);
 
 int32_t ClientTransCloseChannel(int32_t channelId, int32_t type, int32_t socketId);
 
-int32_t ClientTransCloseMultiChannel(int32_t channelId, int32_t type, int32_t socketId, int32_t mainChannel);
-
 int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void *data, uint32_t len);
 
 int32_t ClientTransChannelAsyncSendBytes(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
@@ -54,8 +52,9 @@ int32_t ClientDisableSessionListener(int32_t channelId);
 int32_t ClientTransChannelAsyncSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
     uint16_t dataSeq);
 
-int32_t ClientTransCloseReserveChannel(int32_t channelId,
-    int32_t type, const char *srvIp, int32_t port, int32_t routeType);
+int32_t ClientTransCloseReserveChannel(
+    int32_t channelId, int32_t channelType, int32_t routeType, int32_t delSecondPath);
+
 #ifdef __cplusplus
 }
 #endif

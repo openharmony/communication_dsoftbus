@@ -423,8 +423,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         return ret;
     }
     appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
-    TRANS_LOGE(TRANS_CTRL, "start get udpChannelCapability=%{public}d", appInfo->udpChannelCapability);
+    TRANS_LOGI(TRANS_CTRL, "start get udpChannelCapability=%{public}d", appInfo->udpChannelCapability);
     appInfo->isMultiNeg = false;
+    appInfo->linkedChannelId = INVALID_CHANNEL_ID;
     DisableCapabilityBit(&appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
     if (!param->enableMultipath) {
         DisableCapabilityBit(&appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
@@ -434,7 +435,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     } else {
         EnableCapabilityBit(&appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
         TRANS_LOGD(TRANS_CTRL, "EnableCapabilityBit udpChannelCapability=%{public}d", appInfo->udpChannelCapability);
-        ret = TransAddSocketChannelInfoMP(
+        ret = TransAddSocketChannelInfoMultipath(
             param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     }
     if (ret != SOFTBUS_OK) {
@@ -443,12 +444,14 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftBusHitraceChainEnd();
         return ret;
     }
-    ret = TransAddSessionParamBySessionId(param->sessionName, param->sessionId, param);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransAddSessionParamBySessionId failed.");
-        TransFreeAppInfo(appInfo);
-        SoftBusHitraceChainEnd();
-        return ret;
+    if (param->enableMultipath) {
+        ret = TransAddSessionParamBySessionId(param->sessionName, param->sessionId, param);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "TransAddSessionParamBySessionId failed.");
+            TransFreeAppInfo(appInfo);
+            SoftBusHitraceChainEnd();
+            return ret;
+        }
     }
     GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
     (void)LnnGetRemoteNumInfo(param->peerDeviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
@@ -568,87 +571,11 @@ EXIT_CANCEL:
     return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
 }
 
-int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
+static void TransOpenChannelSecondDFXEvent(SessionParam *param, AppInfo *appInfo)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter. channelId=%{public}d, laneId=%{public}" PRIu64 "", channelId, laneId);
-    if (channelId <= 0) {
-        TRANS_LOGE(TRANS_CTRL, "Invalid param");
-        SoftBusHitraceChainEnd();
-        return SOFTBUS_INVALID_PARAM;
+    if (param == NULL || appInfo == NULL) {
+        return;
     }
-
-    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
-    if (param == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "calloc SessionParam failed.");
-        SoftBusHitraceChainEnd();
-        return SOFTBUS_MALLOC_ERR;
-    }
-    (void)memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
-    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
-    if (transInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "calloc TransInfo failed.");
-        TransFreeSessionParam(param);
-        param = NULL;
-        SoftBusHitraceChainEnd();
-        return SOFTBUS_MALLOC_ERR;
-    }
-    uint32_t laneHandle = INVALID_LANE_REQ_ID;
-    int32_t ret = TransGetSessionParamByChannelId(channelId, param);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get session param is failed.");
-        TransFreeSessionParam(param);
-        param = NULL;
-        SoftBusFree((void *)transInfo);
-        transInfo = NULL;
-        SoftBusHitraceChainEnd();
-        return ret;
-    }
-
-    char *tmpName = NULL;
-    Anonymize(param->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_CTRL,
-        "server TransOpenChannelSecond, sessionName=%{public}s, socket=%{public}d, actionId=%{public}d,"
-        " isQosLane=%{public}d, isAsync=%{public}d",
-        AnonymizeWrapper(tmpName), param->sessionId, param->actionId, param->isQosLane, param->isAsync);
-    AnonymizeFree(tmpName);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "calloc appInfo failed.");
-        TransFreeSessionParam(param);
-        SoftBusFree((void *)transInfo);
-        param = NULL;
-        transInfo = NULL;
-        SoftBusHitraceChainEnd();
-        return SOFTBUS_MALLOC_ERR;
-    }
-    param->isMultiNeg = true;
-    ret = TransCommonGetAppInfo(param, appInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get appinfo failed");
-        TransFreeAppInfo(appInfo);
-        TransFreeSessionParam(param);
-        SoftBusFree((void *)transInfo);
-        appInfo = NULL;
-        param = NULL;
-        transInfo = NULL;
-        SoftBusHitraceChainEnd();
-        return ret;
-    }
-    appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
-    ret = TransUpdateSocketChannelInfo(
-        param->sessionName, param->sessionId, true);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Add socket channel record failed");
-        TransFreeAppInfo(appInfo);
-        TransFreeSessionParam(param);
-        SoftBusFree((void *)transInfo);
-        appInfo = NULL;
-        param = NULL;
-        transInfo = NULL;
-        SoftBusHitraceChainEnd();
-        return ret;
-    }
-    appInfo->linkedChannelId = channelId;
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
@@ -661,39 +588,56 @@ int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
     extra.sessionId = param->sessionId;
     extra.multipathTag = MULTIPATH_EVENT_TAG;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    if (param->isQosLane) {
-        TRANS_LOGE(TRANS_CTRL, "linkedChannelId=%{public}d, channelId=%{public}d",
-            appInfo->linkedChannelId, channelId);
-        ret = TransAsyncGetLaneReserveInfo(param, &laneHandle, laneId, appInfo);
-        if (ret != SOFTBUS_OK) {
-            Anonymize(param->sessionName, &tmpName);
-            TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
-                AnonymizeWrapper(tmpName), param->sessionId);
-            AnonymizeFree(tmpName);
-            if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
-                TransFreeLaneInner(laneHandle, param->isQosLane, param->isAsync);
-            }
-            (void)TransDeleteSocketChannelInfoReserveBySession(param->sessionName, param->sessionId);
-        }
-        TransFreeAppInfo(appInfo);
-        TransFreeSessionParam(param);
-        SoftBusFree((void *)transInfo);
-        appInfo = NULL;
-        param = NULL;
-        transInfo = NULL;
-        SoftBusHitraceChainEnd();
-        return ret;
-    } else {
-        TRANS_LOGE(TRANS_CTRL, "isQosLane = false");
-        TransFreeAppInfo(appInfo);
-        TransFreeSessionParam(param);
-        SoftBusFree((void *)transInfo);
-        appInfo = NULL;
-        param = NULL;
-        transInfo = NULL;
-        SoftBusHitraceChainEnd();
+}
+
+int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
+{
+    TRANS_LOGI(TRANS_CTRL, "enter. channelId=%{public}d, laneId=%{public}" PRIu64, channelId, laneId);
+    if (channelId < 0) {
+        TRANS_LOGE(TRANS_CTRL, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    SessionParam param = { 0 };
+    param.isMultiNeg = true;
+    int32_t ret = TransGetSessionParamByChannelId(channelId, &param);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get session param is failed.");
+        return ret;
+    }
+    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannelSecond, sessionId=%{public}d", param.sessionId);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "calloc appInfo failed.");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ret = TransCommonGetAppInfo(&param, appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get appinfo failed");
+        TransFreeAppInfo(appInfo);
+        return ret;
+    }
+    appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
+    appInfo->linkedChannelId = channelId;
+    TRANS_LOGI(TRANS_CTRL, "linkedChannelId=%{public}d, channelId=%{public}d", appInfo->linkedChannelId, channelId);
+    TransSetSocketChannelStateReserveBySession(param.sessionName, param.sessionId, CORE_SESSION_STATE_INIT);
+    ret = TransUpdateSocketChannelInfo(param.sessionName, param.sessionId, true);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Add socket channel record failed");
+        TransFreeAppInfo(appInfo);
+        return ret;
+    }
+    TransOpenChannelSecondDFXEvent(&param, appInfo);
+    uint32_t laneHandle = INVALID_LANE_REQ_ID;
+    ret = TransAsyncGetLaneReserveInfo(&param, &laneHandle, laneId, appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "realloc lane failed for sessionId=%{public}d", param.sessionId);
+        if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
+            TransFreeLaneInner(laneHandle, param.isQosLane, param.isAsync);
+        }
+        (void)TransClearSocketChannelInfoReserveBySession(param.sessionName, param.sessionId);
+    }
+    TransFreeAppInfo(appInfo);
+    return ret;
 }
 
 static AppInfo *GetAuthAppInfo(const char *mySessionName)
@@ -1456,22 +1400,34 @@ int32_t PrivilegeCloseListAddItem(ListNode *privilegeCloseList, int32_t pid, con
     return SOFTBUS_OK;
 }
 
-void TransHandleReallocLnn()
+void TransHandleReallocLnn(void)
 {
-    int32_t ret;
-    int32_t sessionId = INVALID_SESSION_ID;
-    int32_t channelId = INVALID_CHANNEL_ID;
-    ret = TransGetMultiPathSessionId(&sessionId, &channelId);
-    TRANS_LOGI(TRANS_CTRL, "MP sessionId=%{public}d, channelId=%{public}d", sessionId, channelId);
-    uint64_t laneId = INVALID_LANE_ID;
-    TransGetLaneIdByChannelId(channelId, &laneId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "not find multipath socket with single valid laneReqId");
+    ListNode multipathReallocList;
+    ListInit(&multipathReallocList);
+    TransGetMultipathReallocList(&multipathReallocList);
+    if (IsListEmpty(&multipathReallocList)) {
+        TRANS_LOGI(TRANS_CTRL, "multipathReallocList is empty");
         return;
     }
-    ret = TransOpenChannelSecond(channelId, laneId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransOpenChannelSecond fail");
-        return;
+
+    ReallocInfo *reallocNode = NULL;
+    ReallocInfo *reallocNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(reallocNode, reallocNodeNext, (ListNode *)(&multipathReallocList), ReallocInfo, node) {
+        uint64_t laneId = INVALID_LANE_ID;
+        int32_t ret = TransGetLaneIdByChannelId(reallocNode->channelId, &laneId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(
+                TRANS_CTRL, "get laneId fail, sessionId=%{public}d, ret=%{public}d", reallocNode->sessionId, ret);
+            ListDelete(&(reallocNode->node));
+            SoftBusFree(reallocNode);
+            continue;
+        }
+        ret = TransOpenChannelSecond(reallocNode->channelId, laneId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(
+                TRANS_CTRL, "realloc channel fail, sessionId=%{public}d, ret=%{public}d", reallocNode->sessionId, ret);
+        }
+        ListDelete(&(reallocNode->node));
+        SoftBusFree(reallocNode);
     }
 }
