@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "lnn_local_net_ledger_struct.h"
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "securec.h"
@@ -114,28 +115,23 @@ static void NotifyIpUpdated(const char *ifName, struct nlmsghdr *nlh)
 
 static void WifiBandSetCapability()
 {
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get capability fail from local.");
-        return;
-    }
+    CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
+    CapabilityOption delCapability = {.isAdd = false, .capabilitySet = 0};
     SoftBusBand band = SoftBusGetLinkBand();
     if (band == BAND_24G) {
-        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
-        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_24G);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI_5G);
     } else if (band == BAND_5G) {
-        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
-        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
+        (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_5G);
+        (void)LnnSetNetCapability(&(delCapability.capabilitySet), BIT_WIFI_24G);
     } else {
-        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
-        (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+        (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_5G);
+        (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_24G);
     }
-    (void)LnnSetNetCapability(&netCapability, BIT_WIFI);
-    (void)LnnSetNetCapability(&netCapability, BIT_WIFI_P2P);
-    LNN_LOGD(LNN_BUILDER, "netCapability==%{public}d", netCapability);
-    if (LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set local capability fail");
-    }
+    (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI);
+    (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_WIFI_P2P);
+    (void)LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&addCapability, sizeof(CapabilityOption));
+    (void)LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&delCapability, sizeof(CapabilityOption));
 }
 
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
