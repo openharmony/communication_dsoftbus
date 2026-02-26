@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,7 @@ public:
     virtual SoftBusBand SoftBusGetLinkBand(void) = 0;
     virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type) = 0;
     virtual int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type) = 0;
+    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
 };
 class NetworkInterfaceMock : public NetworkInterface {
 public:
@@ -106,6 +107,7 @@ public:
     MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand());
     MOCK_METHOD2(LnnSetNetCapability, int32_t(uint32_t *, NetCapability));
     MOCK_METHOD2(LnnClearNetCapability, int32_t(uint32_t *, NetCapability));
+    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t (InfoKey, const uint8_t *, uint32_t));
 };
 
 extern "C" {

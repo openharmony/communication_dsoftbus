@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,7 +168,8 @@ static void ConstructBtLocalInfo(void)
 {
     int32_t ret = LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_BR);
+    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_BR)};
+    ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -181,9 +182,11 @@ static void ConstructWiFiLocalInfo(bool is5G)
     ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     if (is5G) {
-        ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_WIFI_5G);
+        CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_WIFI_5G)};
+        ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     } else {
-        ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_WIFI_24G);
+        CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_WIFI_24G)};
+        ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     }
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF);

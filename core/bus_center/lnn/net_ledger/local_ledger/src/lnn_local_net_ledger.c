@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1416,10 +1416,23 @@ int32_t UpdateLocalRole(ConnectRole role)
 
 static int32_t UpdateLocalNetCapability(const void *capability)
 {
-    if (capability == NULL) {
+    CapabilityOption *capabilityOption = (CapabilityOption *)capability;
+    if (capabilityOption == NULL || (capabilityOption->capabilitySet >= (0x1U << BIT_COUNT))) {
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    g_localNetLedger.localInfo.netCapacity = *(int32_t *)capability;
+    uint32_t oldCapacity = g_localNetLedger.localInfo.netCapacity;
+    if (capabilityOption->isAdd) {
+        g_localNetLedger.localInfo.netCapacity |= capabilityOption->capabilitySet;
+    } else {
+        g_localNetLedger.localInfo.netCapacity &= (~(capabilityOption->capabilitySet));
+    }
+    if (oldCapacity == g_localNetLedger.localInfo.netCapacity) {
+        LNN_LOGD(LNN_LEDGER, "not need update feature");
+        return SOFTBUS_NOT_NEED_UPDATE;
+    }
+    LNN_LOGI(LNN_LEDGER, "local net capacity changed=%{public}u->%{public}u, capabilitySet=%{public}u",
+        oldCapacity, g_localNetLedger.localInfo.netCapacity, capabilityOption->capabilitySet);
     return SOFTBUS_OK;
 }
 

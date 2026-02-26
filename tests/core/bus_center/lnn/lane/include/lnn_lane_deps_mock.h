@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,6 +126,7 @@ public:
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
     virtual int32_t AuthMetaGetConnectionTypeByMetaNodeId(const char *metaNodeId,
         NetworkConnectionType *connectionType) = 0;
+    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -200,6 +201,7 @@ public:
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *uuid, char *buf, uint32_t len));
     MOCK_METHOD2(AuthMetaGetConnectionTypeByMetaNodeId, int32_t (const char *metaNodeId,
         NetworkConnectionType *connectionType));
+    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t (InfoKey, const uint8_t *, uint32_t));
 
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,6 +142,11 @@ int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8
 int32_t LnnGetWlanLinkedInfoPacked(LnnWlanLinkedInfo *info)
 {
     return GetLnnSelectRuleInterface()->LnnGetWlanLinkedInfoPacked(info);
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetLnnSelectRuleInterface()->LnnSetLocalByteInfo(key, info, len);
 }
 }
 } // namespace OHOS
