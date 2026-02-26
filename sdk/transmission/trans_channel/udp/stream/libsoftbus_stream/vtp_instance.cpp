@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 namespace Communication {
 namespace SoftBus {
 namespace {
-int UpdateVtpLogLevel()
+int32_t UpdateVtpLogLevel()
 {
     return FILLP_DBG_LVL_DEBUG;
 }
@@ -31,8 +31,8 @@ int UpdateVtpLogLevel()
 bool VtpInstance::isDebuged_ = false;
 std::string VtpInstance::version_ = "VTP_V1.0";
 bool VtpInstance::isDestroyed_ = true;
-int VtpInstance::socketStreamCount_ = 0;
-int VtpInstance::initVtpCount_ = 0;
+int32_t VtpInstance::socketStreamCount_ = 0;
+int32_t VtpInstance::initVtpCount_ = 0;
 std::mutex VtpInstance::vtpLock_;
 std::vector<std::string> VtpInstance::packetNameArray_;
 std::shared_ptr<VtpInstance> VtpInstance::instance_ = nullptr;
@@ -70,7 +70,7 @@ void VtpInstance::PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel,
     va_start(vaList, format);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
-    int result = vsprintf_s(debugInfo, DEBUG_BUFFER_LEN, static_cast<const char *>(format), vaList);
+    int32_t result = vsprintf_s(debugInfo, DEBUG_BUFFER_LEN, static_cast<const char *>(format), vaList);
 #pragma clang diagnostic pop
     if (result < 0) {
         TRANS_LOGE(TRANS_STREAM, "**********fillDebugSend Fail!************");
@@ -119,21 +119,21 @@ void VtpInstance::PreSetFillpCoreParams(void)
     err = FtConfigSet(FT_CONF_MAX_SOCK_NUM, &maxSocketNums, nullptr);
     if (err != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM,
-            "failed to set MAX_SOCKET_NUM config, ret=%{public}d", static_cast<int>(err));
+            "failed to set MAX_SOCKET_NUM config, ret=%{public}d", static_cast<int32_t>(err));
     }
 
     FILLP_UINT16 maxConnectionNums = MAX_DEFAULT_SOCKET_NUM; // keep same with the nums of socket.
     err = FtConfigSet(FT_CONF_MAX_CONNECTION_NUM, &maxConnectionNums, nullptr);
     if (err != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM,
-            "failed to set MAX_CONNECTION_NUM config, ret=%{public}d", static_cast<int>(err));
+            "failed to set MAX_CONNECTION_NUM config, ret=%{public}d", static_cast<int32_t>(err));
     }
 
     FILLP_INT32 keepAlive = FILLP_KEEP_ALIVE_TIME;
     FILLP_INT confSock = FILLP_CONFIG_ALL_SOCKET;
     err = FtConfigSet(FT_CONF_TIMER_KEEP_ALIVE, &keepAlive, &confSock);
     if (err != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "failed to set KA config, ret=%{public}d", static_cast<int>(err));
+        TRANS_LOGE(TRANS_STREAM, "failed to set KA config, ret=%{public}d", static_cast<int32_t>(err));
     }
 }
 
@@ -156,14 +156,14 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
     initVtpCount_++;
     PreSetFillpCoreParams();
 
-    int err = static_cast<int>(FtInit());
+    int32_t err = static_cast<int32_t>(FtInit());
     if (err != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM, "failed to init fillp, pkgName=%{public}s, ret=%{public}d", pkgName.c_str(), err);
         return false;
     }
     isDestroyed_ = false;
 #ifdef FILLP_ENHANCED
-    if (static_cast<int>(FtSetDfxEventCb(NULL, DstreamHiEventCb)) != 0) {
+    if (static_cast<int32_t>(FtSetDfxEventCb(NULL, DstreamHiEventCb)) != 0) {
         TRANS_LOGE(TRANS_STREAM, "FtSetDfxEventCb set failed!");
     }
 #endif
@@ -172,7 +172,7 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
     return true;
 }
 
-void VtpInstance::WaitForDestroy(const int &delayTimes)
+void VtpInstance::WaitForDestroy(const int32_t &delayTimes)
 {
     sleep(delayTimes);
     std::lock_guard<std::mutex> guard(vtpLock_);

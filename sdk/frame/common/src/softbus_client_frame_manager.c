@@ -23,20 +23,20 @@
 #include "client_trans_socket_manager.h"
 #include "comm_log.h"
 #include "general_connection_server_proxy.h"
-#include "g_enhance_sdk_func.h"
 #include "g_enhance_adapter_func.h"
+#include "g_enhance_sdk_func.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
 #include "softbus_client_event_manager.h"
+#include "softbus_client_init.h"
 #include "softbus_client_stub_interface.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
+#include "softbus_init_common.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
-#include "softbus_client_init.h"
-#include "softbus_init_common.h"
 
 static bool g_isInited = false;
 static SoftBusMutex g_isInitedLock;
@@ -246,7 +246,7 @@ int32_t InitSoftBus(const char *pkgName)
 {
     ClientFuncInit();
     COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1),
-        SOFTBUS_INVALID_PKGNAME, COMM_SDK, "init softbus sdk fail.Package name is empty or length exceeds");
+        SOFTBUS_INVALID_PKGNAME, COMM_SDK, "init softbus sdk fail. Package name is empty or length exceeds");
 
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(
         &g_pkgNameLock, NULL) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_SDK, "lock init pkgName failed");
