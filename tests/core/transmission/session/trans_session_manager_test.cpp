@@ -17,6 +17,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "device_auth.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
@@ -60,6 +61,7 @@ void TransSessionManagerTest::SetUpTestCase(void)
     SoftbusConfigInit();
     ConnServerInit();
     AuthInit();
+    InitDeviceAuthService();
     BusCenterServerInit();
     TransServerInit();
 }
