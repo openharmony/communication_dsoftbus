@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_socket.h"
 #include "trans_channel_common.h"
 #include "trans_event.h"

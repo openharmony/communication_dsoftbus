@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 #include <securec.h>
 #include <string.h>
 
-#include "auth_interface.h"
 #include "auth_apply_key_process.h"
+#include "auth_interface.h"
 #include "cJSON.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_crypto.h"
@@ -30,8 +30,8 @@
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
-#include "trans_log.h"
 #include "trans_event.h"
+#include "trans_log.h"
 
 static int32_t TransProxySendEncryptInnerMessage(ProxyChannelInfo *info,
     const char *inData, uint32_t inDataLen, ProxyMessageHead *msgHead, ProxyDataInfo *dataInfo)

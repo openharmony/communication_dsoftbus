@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,12 @@
 
 #ifndef SOFTBUS_PROXYCHANNEL_MESSAGE_H
 #define SOFTBUS_PROXYCHANNEL_MESSAGE_H
+
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
+#include "softbus_proxychannel_message_struct.h"
 #include "trans_proxy_process_data.h"
 #include "trans_uk_manager.h"
-#include "softbus_proxychannel_message_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus

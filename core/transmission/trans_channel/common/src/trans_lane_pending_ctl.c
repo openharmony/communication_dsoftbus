@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,24 +18,24 @@
 #include <securec.h>
 
 #include "access_control.h"
-#include "softbus_app_info.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
+#include "legacy/softbus_adapter_hitrace.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_app_info.h"
 #include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_init_common.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_utils.h"
-#include "softbus_init_common.h"
-#include "legacy/softbus_adapter_hitrace.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
@@ -255,7 +255,7 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneHandle, bool isAsync)
                 DestroyNetworkingReqItemParam(laneItem);
             }
             ListDelete(&(laneItem->node));
-            TRANS_LOGI(TRANS_SVC, "delete laneHandle = %{public}u", laneItem->laneHandle);
+            TRANS_LOGI(TRANS_SVC, "delete laneHandle=%{public}u", laneItem->laneHandle);
             pendingList->cnt--;
             if (isAsync) {
                 ClearSessionParamMemory(&(laneItem->param));
