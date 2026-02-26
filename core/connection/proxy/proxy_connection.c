@@ -113,7 +113,7 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
         ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
         ConnEventExtra extra = {
             .peerBrMac = anomizeAddress,
-            .connectionId = (int32_t)connection->socketHandle,
+            .connectionId = (int32_t)connection->channelId,
             .requestId = (int32_t)connection->proxyChannel.requestId,
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
@@ -257,7 +257,7 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
     extra.peerBrMac = anomizeAddress;
-    extra.connectionId = (int32_t)connection->socketHandle;
+    extra.connectionId = (int32_t)connection->channelId;
     uint64_t costTime = 0;
     int32_t waitWriteLen = (int32_t)dataLen;
     while (waitWriteLen > 0) {
@@ -286,9 +286,9 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
         }
         data += written;
         waitWriteLen -= written;
-    }
-    if (costTime > BR_PROXY_REPORT_TIME) {
-        BrProxyReportSendExtra(&extra, SOFTBUS_OK);
+        if (costTime > BR_PROXY_REPORT_TIME) {
+            BrProxyReportSendExtra(&extra, SOFTBUS_OK);
+        }
     }
     return SOFTBUS_OK;
 }
