@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include "auth_interface.h"
+#include "device_auth.h"
 #include "disc_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -77,6 +78,7 @@ void SoftbusServerStubTest::SetUpTestCase(void)
     SoftbusConfigInit();
     ConnServerInit();
     AuthInit();
+    InitDeviceAuthService();
     BusCenterServerInit();
     TransServerInit();
 }
