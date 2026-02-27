@@ -35,7 +35,7 @@
 #include "lnn_lane_vap_info_struct.h"
 #include "lnn_log.h"
 #include "lnn_node_info_struct.h"
-#include "lnn_ranging_manager_struct.h"
+#include "lnn_ranging_manager.h"
 #include "lnn_secure_storage_struct.h"
 #include "lnn_sync_info_manager_struct.h"
 #include "lnn_time_sync_impl_struct.h"

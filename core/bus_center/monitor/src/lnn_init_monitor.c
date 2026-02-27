@@ -301,6 +301,8 @@ static void LnnInitModuleFailedLog(void *param)
             reCheck = true;
         } else if (LnnInitModuleStatusGet(depModule) == DEPS_STATUS_INIT_PROGRESS) {
             reCheck = true;
+        } else if (LnnInitModuleStatusGet(depModule) == DEPS_STATUS_NOT_INIT) {
+            LNN_LOGE(LNN_EVENT, "Module no init: %{public}d.", depModule);
         }
     }
     if (failedModules[0] != '\0') {
