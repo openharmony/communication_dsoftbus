@@ -28,11 +28,11 @@ extern "C" {
 #endif
 
 typedef struct {
-    char uuid[UUID_BUF_LEN];
-    ConnectionAddr connAddr;
     int32_t fd;
     uint32_t requestId;
     ListNode node;
+    ConnectionAddr connAddr;
+    char uuid[UUID_BUF_LEN];
 } AuthPreLinkNode;
 
 typedef struct {
@@ -49,9 +49,9 @@ bool AuthPreLinkCheckNeedPtk(uint32_t requestId, const char *uuid);
 int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr);
 int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode);
 int32_t FindAuthPreLinkNodeByUuid(const char *uuid, AuthPreLinkNode *reuseNode);
-int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, char *uuid);
+int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, const char *uuid);
 void DelAuthPreLinkById(uint32_t requestId);
-void DelAuthPreLinkByUuid(char *uuid);
+void DelAuthPreLinkByUuid(const char *uuid);
 void DeinitAuthPreLinkList(void);
 
 int32_t InitAuthGenCertParallelList(void);

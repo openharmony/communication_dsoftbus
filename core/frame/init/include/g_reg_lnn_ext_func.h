@@ -357,7 +357,7 @@ typedef int32_t (*AddLinkConflictInfoFunc)(const LinkConflictInfo *inputInfo);
 typedef int32_t (*SchedulerRegisterScanListenerFunc)(BroadcastProtocol protocol,
     BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
 typedef int32_t (*SchedulerUnregisterListenerFunc)(int32_t listenerId);
-typedef const NodeInfo *(*LnnGetOnlineNodeByUdidHashFunc)(const char *recvUdidHash);
+typedef int32_t (*LnnGetOnlineNodeByUdidHashFunc)(const char *recvUdidHash, NodeInfo *outNode);
 typedef int32_t (*LnnGetLocalStrInfoByIfnameIdxFunc)(InfoKey key, char *info, uint32_t len, int32_t ifIdx);
 typedef int32_t (*LnnGetRemoteStrInfoByIfnameIdxFunc)(const char *networkId,
                                                       InfoKey key, char *info, uint32_t len, int32_t ifIdx);

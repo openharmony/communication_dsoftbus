@@ -111,10 +111,9 @@ static int32_t GetIrkFromFile(unsigned char *irk, uint32_t len, bool isUpdate)
         return rc;
     }
     if (isUpdate || SoftBusReadFullFile(irkFilePath, (char *)irk, len) != SOFTBUS_OK) {
-        rc = SoftBusGenerateRandomArray(irk, len);
-        if (rc != SOFTBUS_OK) {
+        if (SoftBusGenerateRandomArray(irk, len) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "generate irk id fail");
-            return rc;
+            return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
         }
         rc = SoftBusWriteFile(irkFilePath, (char *)irk, len);
         if (rc != SOFTBUS_OK) {
