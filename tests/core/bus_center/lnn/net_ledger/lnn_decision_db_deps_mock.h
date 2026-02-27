@@ -79,7 +79,6 @@ public:
         const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
     virtual int32_t LnnCeDecryptDataByHuks(
         const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
-    virtual int64_t SoftBusGetRealTimeMs(void) = 0;
     virtual int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info) = 0;
     virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(
@@ -133,7 +132,6 @@ public:
     static int32_t DecisionDbAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para);
     MOCK_METHOD3(LnnCeEncryptDataByHuks, int32_t(const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
     MOCK_METHOD3(LnnCeDecryptDataByHuks, int32_t(const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
-    MOCK_METHOD0(SoftBusGetRealTimeMs, int64_t(void));
     MOCK_METHOD2(LnnGetLocalNum64Info, int32_t(InfoKey key, int64_t *));
     MOCK_METHOD2(LnnSetLocalNum64Info, int32_t(InfoKey, int64_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
