@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <securec.h>
 
 #include "lnn_event.h"
@@ -33,7 +32,6 @@
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
-
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
@@ -556,7 +554,7 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
         state = AuthMetaGetMetaValueByMetaNodeIdPacked(id);
-        LNN_LOGI(LNN_LEDGER, "can not find target node");
+        LNN_LOGI(LNN_LEDGER, "can not find target node, state=%{public}d", state);
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return state;
     }
@@ -644,8 +642,8 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
     short *ptr = (short *)LnnMapGet(&g_distributedNetLedger.cnnCode.connectionCode, key);
     if (ptr == NULL) {
         LNN_LOGE(LNN_LEDGER, " KEY not exist.");
-        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         DestroyCnnCodeKey(key);
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return INVALID_CONNECTION_CODE_VALUE;
     }
     short ret = *ptr;
@@ -1447,7 +1445,6 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     if (info == NULL) {
         return REPORT_NONE;
     }
-    // judge map
     info->onlineTimestamp = (uint64_t)LnnUpTimeMs();
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
@@ -1746,7 +1743,7 @@ int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32
     if (id == NULL || udid == NULL || len < UDID_BUF_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1761,8 +1758,8 @@ int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32
     }
     tmpUdid = LnnGetDeviceUdid(info);
     if (strcpy_s(udid, len, tmpUdid) != EOK) {
-        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         LNN_LOGE(LNN_LEDGER, "copy id fail");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -2246,8 +2243,12 @@ int32_t LnnInitDistributedLedger(void)
     return SOFTBUS_OK;
 }
 
-const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
+int32_t LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, NodeInfo *outNode)
 {
+    if (recvUdidHash == NULL || outNode == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t i;
     int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
@@ -2255,52 +2256,51 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
 
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get all online node info fail");
-        return NULL;
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     if (info == NULL || infoNum == 0) {
         if (info != NULL) {
             SoftBusFree(info);
         }
-        return NULL;
-    }
-    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
-        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
-        SoftBusFree(info);
-        return NULL;
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     for (i = 0; i < infoNum; ++i) {
-        const NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
-        if (nodeInfo == NULL) {
-            LNN_LOGI(LNN_LEDGER, "nodeInfo is null");
+        NodeInfo nodeInfo;
+        (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        int32_t ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGI(LNN_LEDGER, "get remote node fail, ret=%{public}d", ret);
             continue;
         }
-        if (GenerateStrHashAndConvertToHexString((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
+        if (GenerateStrHashAndConvertToHexString((const unsigned char *)nodeInfo.deviceInfo.deviceUdid,
             SHORT_UDID_HASH_LEN, shortUdidHash, SHORT_UDID_HASH_LEN + 1) != SOFTBUS_OK) {
             continue;
         }
-        if (memcmp(shortUdidHash, recvUdidHash, SHORT_UDID_HASH_LEN) == 0) {
+        if (memcmp(shortUdidHash, recvUdidHash, SHORT_UDID_HASH_LEN) == 0 &&
+            memcpy_s(outNode, sizeof(NodeInfo), &nodeInfo, sizeof(NodeInfo)) == EOK) {
             char *anoyUdid = NULL;
             char *anoyUdidHash = NULL;
-            Anonymize(nodeInfo->deviceInfo.deviceUdid, &anoyUdid);
+            Anonymize(outNode->deviceInfo.deviceUdid, &anoyUdid);
             Anonymize((const char *)shortUdidHash, &anoyUdidHash);
             LNN_LOGI(LNN_LEDGER, "node is online. nodeUdid=%{public}s, shortUdidHash=%{public}s",
                 AnonymizeWrapper(anoyUdid), AnonymizeWrapper(anoyUdidHash));
             AnonymizeFree(anoyUdid);
             AnonymizeFree(anoyUdidHash);
-            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             SoftBusFree(info);
-            return nodeInfo;
+            return SOFTBUS_OK;
         }
     }
-    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     SoftBusFree(info);
-    return NULL;
+    return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
 }
 
 static void RefreshDeviceOnlineStateInfo(DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     if (additions->medium == COAP || additions->medium == BLE) {
-        device->isOnline = ((LnnGetOnlineNodeByUdidHash(device->devId)) != NULL) ? true : false;
+        NodeInfo nodeInfo;
+        (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        int32_t ret = LnnGetOnlineNodeByUdidHash(device->devId, &nodeInfo);
+        device->isOnline = (ret == SOFTBUS_OK) ? true : false;
     }
 }
 

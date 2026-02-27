@@ -28,6 +28,7 @@
 #include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_auth_func_pack.h"
 #include "lnn_node_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_utils.h"
@@ -36,9 +37,7 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "softbus_init_common.h"
-
 #define INVALID_META_TYPE (-1)
-
 static uint64_t GetCurrentTime(void)
 {
     SoftBusSysTime now = { 0 };
@@ -51,19 +50,19 @@ static uint64_t GetCurrentTime(void)
 
 static int32_t DlGetDeviceUuid(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
-    if (networkId == NULL || buf == NULL) {
-        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
     (void)checkOnline;
     NodeInfo *info = NULL;
 
-    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if ((networkId) == NULL || (buf) == NULL) {
+        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID));
     if (info == NULL) {
         if (AuthMetaGetDeviceIdByMetaNodeIdPacked(networkId, (char *)buf, len) == SOFTBUS_OK) {
             return SOFTBUS_OK;
         }
-        AONYMIZE("get node info fail. networkId=%{public}s", networkId);
+        AONYMIZE("get uuid fail. networkId=%{public}s", networkId);
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     if (strncpy_s((char*)buf, len, info->uuid, strlen(info->uuid)) != EOK) {
@@ -87,15 +86,15 @@ static int32_t DlGetDeviceOfflineCode(const char *networkId, bool checkOnline, v
 
 static int32_t DlGetDeviceUdid(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
-    if (networkId == NULL || buf == NULL) {
-        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
     (void)checkOnline;
     const char *udid = NULL;
     NodeInfo *info = NULL;
 
-    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if ((networkId) == NULL || (buf) == NULL) {
+        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info = LnnGetNodeInfoById(networkId, (CATEGORY_NETWORK_ID));
     if (info == NULL) {
         LNN_LOGW(LNN_LEDGER, "node info is null");
         if (AuthMetaGetDeviceIdByMetaNodeIdPacked(networkId, (char *)buf, len) == SOFTBUS_OK) {
@@ -179,12 +178,11 @@ static int32_t DlGetAuthType(const char *networkId, bool checkOnline, void *buf,
 
 static int32_t DlGetAuthMetaType(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
-    if (networkId == NULL || buf == NULL) {
+    (void)checkOnline;
+    if ((networkId) == NULL || (buf) == NULL) {
         LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    (void)checkOnline;
-
     *(int32_t *)buf = INVALID_META_TYPE;
     (void)AuthMetaGetMetaTypeByMetaNodeIdPacked(networkId, (int32_t *)buf);
     LNN_LOGI(LNN_LEDGER, "meta type is=%{public}d", *(int32_t *)buf);
@@ -335,18 +333,12 @@ static int32_t DlGetNodeBleMac(const char *networkId, bool checkOnline, void *bu
     NodeInfo *info = NULL;
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (strlen(info->connectInfo.bleMacAddr) == 0) {
-        LNN_LOGE(LNN_LEDGER, "ble mac is invalid.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (info->bleMacRefreshSwitch != 0) {
-        uint64_t currentTimeMs = GetCurrentTime();
-        LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs,
-            SOFTBUS_NETWORK_GET_BLE_MAC_TIMEOUT, LNN_LEDGER,
-            "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64, info->connectInfo.latestTime,
-            currentTimeMs);
-    }
-    if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {
+    uint64_t currentTimeMs = GetCurrentTime();
+    LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs,
+        SOFTBUS_NETWORK_GET_BLE_MAC_TIMEOUT, LNN_LEDGER,
+        "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64, info->connectInfo.latestTime,
+        currentTimeMs);
+    if (memcpy_s(buf, len, info->connectInfo.bleMacAddr, MAC_LEN) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -520,15 +512,15 @@ static int32_t DlGetMasterWeight(const char *networkId, bool checkOnline, void *
 
 static int32_t DlGetP2pMac(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
-    if (networkId == NULL || buf == NULL) {
-        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
     (void)checkOnline;
     NodeInfo *info = NULL;
     const char *mac = NULL;
 
-    info = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if ((networkId) == NULL || (buf) == NULL) {
+        LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID));
     if (info == NULL) {
         if (AuthMetaGetP2pMacByMetaNodeIdPacked(networkId, (char *)buf, len) == SOFTBUS_OK) {
             return SOFTBUS_OK;
@@ -884,6 +876,9 @@ static int32_t DlGetUserId(const char *networkId, bool checkOnline, void *buf, u
     (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (sizeof(info->userId) > len) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     *((int32_t *)buf) = info->userId;
     return SOFTBUS_OK;
 }
@@ -1239,7 +1234,7 @@ int32_t LnnSetDLDeviceSparkCheck(const char *udid, const void *sparkCheck)
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1987,6 +1982,23 @@ int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
     return SOFTBUS_OK;
 }
 
+int32_t LnnGetDLSleRangeCapacity(const char *networkId, uint32_t *sleRangeCapacity)
+{
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_NOT_FIND;
+    }
+    *sleRangeCapacity = nodeInfo->sleRangeCapacity;
+    (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    return SOFTBUS_OK;
+}
+
 int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
 {
     if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
@@ -2307,7 +2319,7 @@ int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, co
         LNN_LOGE(LNN_LEDGER, "inavalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
