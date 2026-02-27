@@ -352,7 +352,7 @@ void PcCollaborationManagerDeinitPacked(void)
     }
     return pfnDiscEnhanceFuncList->pcCollaborationManagerDeinit();
 }
- 
+
 void DiscPcCollaborationEventDeinitPacked(void)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
