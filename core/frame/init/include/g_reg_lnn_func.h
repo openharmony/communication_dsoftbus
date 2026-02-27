@@ -128,6 +128,7 @@ typedef struct TagLnnOpenFuncList {
     LnnGetAllOnlineNodeInfoFunc lnnGetAllOnlineNodeInfo;
     LnnGetOnlineAndOfflineWithinTimeUdidsFunc lnnGetOnlineAndOfflineWithinTimeUdids;
     LnnGetNodeKeyInfoFunc lnnGetNodeKeyInfo;
+    LnnSetNodeKeyInfoFunc lnnSetNodeKeyInfo;
     LnnGetNetworkIdByUdidFunc lnnGetNetworkIdByUdid;
     LnnGetNetworkIdByUdidHashFunc lnnGetNetworkIdByUdidHash;
     LnnGetAllMetaNodeInfoFunc lnnGetAllMetaNodeInfo;
@@ -268,10 +269,6 @@ typedef struct TagLnnOpenFuncList {
     AuthGetLatestAuthSeqListFunc authGetLatestAuthSeqList;
     AuthHasTrustedRelationFunc authHasTrustedRelation;
     CompareConnInfoFunc compareConnInfo;
-    GetAuthManagerByAuthIdFunc getAuthManagerByAuthId;
-    GetLatestSessionKeyFunc getLatestSessionKey;
-    DelDupAuthManagerFunc delDupAuthManager;
-    GetSessionKeyByIndexFunc getSessionKeyByIndex;
 
     // adapter
     SoftBusGetCurrentGroupFunc softBusGetCurrentGroup;

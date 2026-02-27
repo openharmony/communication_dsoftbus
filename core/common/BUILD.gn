@@ -193,7 +193,10 @@ if (defined(ohos_lite)) {
       "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_nstack.c",
     ]
     sources = common_utils_src + conn_common_src + trans_common_src + dfx_source
-    sources += [ "$dsoftbus_root_path/core/common/utils/sqlite3_utils.c" ]
+    sources += [
+      "$dsoftbus_root_path/core/common/utils/sqlite3_utils.c",
+      "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
+    ]
     defines += [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
     if (is_asan) {
@@ -215,7 +218,7 @@ if (defined(ohos_lite)) {
       "cJSON:cjson",
     ]
     if (defined(global_parts_info) &&
-      !defined(global_parts_info.communication_dsoftbus_service_ext)) {
+        !defined(global_parts_info.communication_dsoftbus_service_ext)) {
       cflags += [ "-DFILLP_ENHANCED" ]
       if (dsoftbus_feature_dfile) {
         cflags += [ "-DDFILE_OPEN" ]

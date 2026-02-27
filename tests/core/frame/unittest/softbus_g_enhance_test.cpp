@@ -74,6 +74,7 @@ public:
  * @tc.name: InitSoftbusPagingPacked001
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, InitSoftbusPagingPacked001, TestSize.Level1)
@@ -83,13 +84,14 @@ HWTEST_F(SoftbusGEnhanceTest, InitSoftbusPagingPacked001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     DeInitSoftbusPagingPacked();
     TransPagingDeathCallbackPacked(TEST_PKG_NAME, TEST_PID);
-    TransHasAndUpdatePagingListenPacked(&info);
+    TransPagingHasListenAndGetInfoPacked(&info);
 }
 
 /*
  * @tc.name: TransReversePullUpPackedTest001
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, TransReversePullUpPackedTest001, TestSize.Level1)
@@ -105,6 +107,7 @@ HWTEST_F(SoftbusGEnhanceTest, TransReversePullUpPackedTest001, TestSize.Level1)
  * @tc.name: TransGetPkgnameByBusinessFlagPackedTest001
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, TransGetPkgnameByBusinessFlagPackedTest001, TestSize.Level1)
@@ -120,6 +123,7 @@ HWTEST_F(SoftbusGEnhanceTest, TransGetPkgnameByBusinessFlagPackedTest001, TestSi
  * @tc.name: TransPagingGetPidAndDataByFlgPackedTest001
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, TransPagingGetPidAndDataByFlgPackedTest001, TestSize.Level1)
@@ -137,6 +141,7 @@ HWTEST_F(SoftbusGEnhanceTest, TransPagingGetPidAndDataByFlgPackedTest001, TestSi
  * @tc.name: SoftbusGEnhanceTest001
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest001, TestSize.Level1)
@@ -150,6 +155,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest001, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest002
  * @tc.desc: AuthRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest002, TestSize.Level1)
@@ -163,6 +169,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest002, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest003
  * @tc.desc: ConnRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest003, TestSize.Level1)
@@ -176,6 +183,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest003, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest004
  * @tc.desc: DiscRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest004, TestSize.Level1)
@@ -189,6 +197,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest004, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest005
  * @tc.desc: LnnRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest005, TestSize.Level1)
@@ -202,6 +211,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest005, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest006
  * @tc.desc: LnnRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest006, TestSize.Level1)
@@ -215,6 +225,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest006, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest007
  * @tc.desc: Auth function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest007, TestSize.Level1)
@@ -237,6 +248,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest007, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest008
  * @tc.desc: Conn function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest008, TestSize.Level1)
@@ -263,6 +275,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest008, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest009
  * @tc.desc: Trans function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest009, TestSize.Level1)
@@ -281,6 +294,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest009, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest010
  * @tc.desc: Lnn0 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest010, TestSize.Level1)
@@ -329,6 +343,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest010, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest011
  * @tc.desc: Lnn1 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest011, TestSize.Level1)
@@ -383,6 +398,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest011, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest012
  * @tc.desc: Lnn2 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest012, TestSize.Level1)
@@ -431,6 +447,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest012, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest013
  * @tc.desc: Lnn3 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest013, TestSize.Level1)
@@ -472,6 +489,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest013, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest014
  * @tc.desc: Lnn4 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest014, TestSize.Level1)
@@ -523,6 +541,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest014, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest015
  * @tc.desc: Lnn5 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest015, TestSize.Level1)
@@ -574,6 +593,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest015, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest016
  * @tc.desc: Lnn6 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest016, TestSize.Level1)
@@ -598,6 +618,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest016, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest017
  * @tc.desc: Lnn6 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest017, TestSize.Level1)
@@ -608,7 +629,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest017, TestSize.Level1)
     EXPECT_FALSE(ret);
     ret = TransCheckP2pOnlyPacked(TEST_PKG_NAME);
     EXPECT_FALSE(ret);
-    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME);
+    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME, TEST_NETWORK_ID);
     EXPECT_FALSE(ret);
     int32_t res = LoadTransPermissionJsonPacked();
     EXPECT_EQ(res, SOFTBUS_OK);
@@ -619,6 +640,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest017, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest018
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest018, TestSize.Level1)
@@ -628,13 +650,14 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest018, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     DeInitSoftbusPagingPacked();
     TransPagingDeathCallbackPacked(TEST_PKG_NAME, TEST_PID);
-    TransHasAndUpdatePagingListenPacked(&info);
+    TransPagingHasListenAndGetInfoPacked(&info);
 }
 
 /*
  * @tc.name: SoftbusGEnhanceTest019
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest019, TestSize.Level1)
@@ -654,6 +677,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest019, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest020
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest020, TestSize.Level1)
@@ -669,6 +693,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest020, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest021
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest021, TestSize.Level1)
@@ -684,6 +709,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest021, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest022
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
@@ -701,6 +727,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest023
  * @tc.desc: SparkGroupEnhanceFunc function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest023, TestSize.Level1)
@@ -721,6 +748,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest023, TestSize.Level1)
  * @tc.name: IsInWhitelistPacked024
  * @tc.desc: IsInWhitelistPacked function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked024, TestSize.Level1)
@@ -734,6 +762,7 @@ HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked024, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest025
  * @tc.desc: Lnn6 function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest025, TestSize.Level1)
@@ -744,7 +773,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest025, TestSize.Level1)
     EXPECT_FALSE(ret);
     ret = TransCheckP2pOnlyPacked(TEST_PKG_NAME);
     EXPECT_FALSE(ret);
-    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME);
+    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME, TEST_NETWORK_ID);
     EXPECT_FALSE(ret);
     int32_t res = LoadTransPermissionJsonPacked();
     EXPECT_EQ(res, SOFTBUS_OK);
@@ -754,6 +783,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest025, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest026
  * @tc.desc: test htp return when not get enhance
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest026, TestSize.Level1)
@@ -781,6 +811,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest026, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest027
  * @tc.desc: test auth return when not get enhance
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest027, TestSize.Level1)
@@ -798,6 +829,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest027, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest028
  * @tc.desc: test Lnn return when not get enhance
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest028, TestSize.Level1)
@@ -892,6 +924,7 @@ void DiscShareNfcDeinitStub(void)
  * @tc.name: SoftbusGEnhanceTest029
  * @tc.desc: SoftbusGEnhanceTest function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest029, TestSize.Level1)
@@ -953,6 +986,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest029, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest030
  * @tc.desc: SoftbusGEnhanceTest function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest030, TestSize.Level1)
@@ -1030,6 +1064,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest030, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest031
  * @tc.desc: SoftbusGEnhanceTest function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest031, TestSize.Level1)
@@ -1056,6 +1091,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest031, TestSize.Level1)
  * @tc.name: SoftbusGEnhanceTest032
  * @tc.desc: SoftbusGEnhanceTest function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest032, TestSize.Level1)
@@ -1085,5 +1121,40 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest032, TestSize.Level1)
     DiscShareNfcDeinitPacked();
     pfnDiscEnhanceFuncList->discShareNfcDeinit = DiscShareNfcDeinitStub;
     DiscShareNfcDeinitPacked();
+}
+
+int32_t SoftbusMcuTimerInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+void SoftbusMcuTimerDeinit(void)
+{
+    return;
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest033
+ * @tc.desc: SoftbusMcuTimerInitPacked and SoftbusMcuTimerDeinitPacked test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest033, TestSize.Level1)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    pfnAdapterEnhanceFuncList->softbusMcuTimerInit = nullptr;
+    int32_t ret = SoftbusMcuTimerInitPacked();
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    pfnAdapterEnhanceFuncList->softbusMcuTimerInit = SoftbusMcuTimerInit;
+    ret = SoftbusMcuTimerInitPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit = nullptr;
+    EXPECT_NO_FATAL_FAILURE(SoftbusMcuTimerDeinitPacked());
+
+    pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit = SoftbusMcuTimerDeinit;
+    EXPECT_NO_FATAL_FAILURE(SoftbusMcuTimerDeinitPacked());
 }
 }

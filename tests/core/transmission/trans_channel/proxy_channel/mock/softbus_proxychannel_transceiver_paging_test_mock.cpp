@@ -53,9 +53,9 @@ int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, 
         checkInfo, chan, isClient);
 }
 
-bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info)
+bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info)
 {
-    return GetSoftbusProxychannelTransceiverPagingInterface()->TransHasAndUpdatePagingListenPacked(info);
+    return GetSoftbusProxychannelTransceiverPagingInterface()->TransPagingHasListenAndGetInfoPacked(info);
 }
 
 int32_t TransProxyPagingChannelOpened(ProxyChannelInfo *chan)

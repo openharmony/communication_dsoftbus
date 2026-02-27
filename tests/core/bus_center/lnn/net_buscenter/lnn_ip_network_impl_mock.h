@@ -62,7 +62,7 @@ public:
     virtual bool LnnIsLinkReady(const char *iface) = 0;
     virtual void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status) = 0;
     virtual bool LnnVisitNetif(VisitNetifCallback callback, void *data) = 0;
-    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
+    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable) = 0;
     virtual int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len) = 0;
     virtual int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr) = 0;
     virtual int32_t GetWlanIpv4Addr(char *ip, uint32_t size) = 0;
@@ -115,6 +115,7 @@ public:
     virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
     virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
+    virtual int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual bool LnnIsDefaultOhosAccount(void) = 0;
@@ -177,7 +178,7 @@ public:
     MOCK_METHOD1(LnnIsLinkReady, bool(const char *));
     MOCK_METHOD3(LnnNotifyPhysicalSubnetStatusChanged, void(const char *, ProtocolType, void *));
     MOCK_METHOD2(LnnVisitNetif, bool(VisitNetifCallback, void *));
-    MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t));
+    MOCK_METHOD3(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t, bool));
     MOCK_METHOD4(GetNetworkIpByIfName, int32_t(const char *, char *, char *, uint32_t));
     MOCK_METHOD1(LnnRegistProtocol, int32_t(LnnProtocolManager *));
     MOCK_METHOD2(GetWlanIpv4Addr, int32_t(char *, uint32_t));
@@ -233,6 +234,7 @@ public:
     MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t(const char *, char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalNum64Info, int32_t(InfoKey, int64_t));
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
+    MOCK_METHOD4(LnnSetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));

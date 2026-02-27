@@ -39,6 +39,8 @@ public:
     virtual int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
     virtual int32_t ServerIpcGetNodeKeyInfo(
         const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
+    virtual int32_t ServerIpcSetNodeKeyInfo(
+        const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
     virtual int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
     virtual int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen, bool isForceJoin);
     virtual int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
@@ -74,6 +76,7 @@ public:
     MOCK_METHOD4(ServerIpcGetAllOnlineNodeInfo, int32_t(const char *, void **, uint32_t, int32_t *));
     MOCK_METHOD3(ServerIpcGetLocalDeviceInfo, int32_t(const char *, void *, uint32_t));
     MOCK_METHOD5(ServerIpcGetNodeKeyInfo, int32_t(const char *, const char *, int, unsigned char *, uint32_t));
+    MOCK_METHOD5(ServerIpcSetNodeKeyInfo, int32_t(const char *, const char *, int, unsigned char *, uint32_t));
     MOCK_METHOD3(ServerIpcSetNodeDataChangeFlag, int32_t(const char *, const char *, uint16_t));
     MOCK_METHOD4(ServerIpcJoinLNN, int32_t(const char *, void *, unsigned int, bool));
     MOCK_METHOD2(ServerIpcLeaveLNN, int32_t(const char *, const char *));

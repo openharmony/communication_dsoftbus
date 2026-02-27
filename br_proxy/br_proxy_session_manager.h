@@ -1,0 +1,47 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef BR_PROXY_SESSION_MANAGER_H
+#define BR_PROXY_SESSION_MANAGER_H
+
+#include "softbus_adapter_mem.h"
+#include "softbus_utils.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+typedef struct {
+    int32_t sessionId;
+    int32_t channelId;
+    int32_t openResult;
+    bool condFlag;
+    SoftBusCond cond;
+    ListNode node;
+} SessionInfo;
+
+int32_t GetSessionId(void);
+int32_t SessionInit(void);
+int32_t AddSessionToList(int32_t sessionId);
+int32_t UpdateListBySessionId(int32_t sessionId, int32_t channelId, int32_t openResult);
+int32_t GetSessionInfoBySessionId(int32_t sessionId, SessionInfo *info);
+int32_t DeleteSessionById(int32_t sessionId);
+int32_t BrProxyWaitCond(int32_t sessionId);
+int32_t BrProxyPostCond(int32_t sessionId);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // BR_PROXY_SESSION_MANAGER_H

@@ -13,8 +13,14 @@
 
 import("../../dsoftbus.gni")
 
-connection_service_sdk_src =
+if (dsoftbus_feature_conn_general) {
+  connection_service_sdk_src =
     [ "$dsoftbus_root_path/sdk/connection/service/src/general_client_connection.c" ]
+} else {
+  connection_service_sdk_src =
+    [ "$dsoftbus_root_path/sdk/connection/service/src/general_client_connection_virtual.c" ]
+}
+
 connection_service_sdk_inc = [
   "$dsoftbus_dfx_path/interface/include",
   "$dsoftbus_root_path/core/frame/common/include",

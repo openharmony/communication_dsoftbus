@@ -83,6 +83,7 @@ void ClientBusCentManagerTest::TearDown() { }
  * @tc.name: BUS_CENTER_CLIENT_INIT_Test_001
  * @tc.desc: bus center client init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, BUS_CENTER_CLIENT_INIT_Test_001, TestSize.Level1)
@@ -102,6 +103,7 @@ HWTEST_F(ClientBusCentManagerTest, BUS_CENTER_CLIENT_INIT_Test_001, TestSize.Lev
  * @tc.name: JOIN_LNN_INNER_Test_001
  * @tc.desc: join lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, JOIN_LNN_INNER_Test_001, TestSize.Level1)
@@ -145,6 +147,7 @@ HWTEST_F(ClientBusCentManagerTest, JOIN_LNN_INNER_Test_001, TestSize.Level1)
  * @tc.name: LEAVE_LNN_INNER_Test_001
  * @tc.desc: leave lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LEAVE_LNN_INNER_Test_001, TestSize.Level1)
@@ -168,6 +171,7 @@ HWTEST_F(ClientBusCentManagerTest, LEAVE_LNN_INNER_Test_001, TestSize.Level1)
  * @tc.name: REG_NODE_DEVICE_STATE_CB_INNER_Test_001
  * @tc.desc: reg node device state cb inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, REG_NODE_DEVICE_STATE_CB_INNER_Test_001, TestSize.Level1)
@@ -187,6 +191,7 @@ HWTEST_F(ClientBusCentManagerTest, REG_NODE_DEVICE_STATE_CB_INNER_Test_001, Test
  * @tc.name: UNREG_NODE_DEVICE_STATE_CB_INNER_Test_001
  * @tc.desc: unreg node device state cb inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, UNREG_NODE_DEVICE_STATE_CB_INNER_Test_001, TestSize.Level1)
@@ -205,6 +210,7 @@ HWTEST_F(ClientBusCentManagerTest, UNREG_NODE_DEVICE_STATE_CB_INNER_Test_001, Te
  * @tc.name: GET_ALL_NODE_DEVICE_INFO_INNER_Test_001
  * @tc.desc: get all node device info inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, GET_ALL_NODE_DEVICE_INFO_INNER_Test_001, TestSize.Level1)
@@ -221,6 +227,7 @@ HWTEST_F(ClientBusCentManagerTest, GET_ALL_NODE_DEVICE_INFO_INNER_Test_001, Test
  * @tc.name: GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001
  * @tc.desc: get local node device info inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001, TestSize.Level1)
@@ -237,6 +244,7 @@ HWTEST_F(ClientBusCentManagerTest, GET_LOCAL_NODE_DEVICE_INFO_INNER_Test_001, Te
  * @tc.name: GET_NODE_KEY_INFO_INNER_Test_001
  * @tc.desc: get node key info inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, GET_NODE_KEY_INFO_INNER_Test_001, TestSize.Level1)
@@ -246,14 +254,33 @@ HWTEST_F(ClientBusCentManagerTest, GET_NODE_KEY_INFO_INNER_Test_001, TestSize.Le
     EXPECT_CALL(busCentManagerMock, ServerIpcGetNodeKeyInfo(_, _, _, _, _))
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen), SOFTBUS_OK);
+    EXPECT_NE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen), SOFTBUS_SERVER_NOT_INIT);
     EXPECT_TRUE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen) == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SET_NODE_KEY_INFO_INNER_Test_001
+ * @tc.desc: set node key info inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, SET_NODE_KEY_INFO_INNER_Test_001, TestSize.Level1)
+{
+    int32_t infoLen = 0;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, ServerIpcSetNodeKeyInfo(_, _, _, _, _))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(SetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_SERVICE_FIND_CAP_EX, nullptr, infoLen),
+        SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_TRUE(SetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_SERVICE_FIND_CAP_EX, nullptr, infoLen) == SOFTBUS_OK);
 }
 
 /*
  * @tc.name: SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001
  * @tc.desc: set node data change flag inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001, TestSize.Level1)
@@ -271,6 +298,7 @@ HWTEST_F(ClientBusCentManagerTest, SET_NODE_DATA_CHANGE_FLAG_INNER_Test_001, Tes
  * @tc.name: START_TIME_SYNC_INNER_Test_001
  * @tc.desc: start time sync inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_001, TestSize.Level1)
@@ -294,6 +322,7 @@ HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_001, TestSize.Leve
  * @tc.name: STOP_TIME_SYNC_INNER_Test_001
  * @tc.desc: stop time sync inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_001, TestSize.Level1)
@@ -312,6 +341,7 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_001, TestSize.Level
  * @tc.name: STOP_TIME_SYNC_INNER_Test_002
  * @tc.desc: stop time sync inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_002, TestSize.Level1)
@@ -336,6 +366,7 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_002, TestSize.Level
  * @tc.name: StartTimeSyncWithSocketInner_Test_001
  * @tc.desc: start time sync with socket inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, StartTimeSyncWithSocketInner_Test_001, TestSize.Level1)
@@ -354,6 +385,7 @@ HWTEST_F(ClientBusCentManagerTest, StartTimeSyncWithSocketInner_Test_001, TestSi
  * @tc.name: STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_001
  * @tc.desc: stop time sync with socket inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_001, TestSize.Level1)
@@ -375,6 +407,7 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_001, Te
  * @tc.name: STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_002
  * @tc.desc: stop time sync with socket inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_002, TestSize.Level1)
@@ -405,6 +438,7 @@ static void OnPublishResultCb(int32_t publishId, PublishResult reason)
  * @tc.name: PUBLISH_LNN_INNER_Test_001
  * @tc.desc: publish lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
@@ -435,6 +469,7 @@ HWTEST_F(ClientBusCentManagerTest, PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
  * @tc.name: STOP_PUBLISH_LNN_INNER_Test_001
  * @tc.desc: stop publish lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_PUBLISH_LNN_INNER_Test_001, TestSize.Level1)
@@ -464,6 +499,7 @@ static void OnDiscoverResultCb(int32_t refreshId, RefreshResult reason)
  * @tc.name: REFRESH_LNN_INNER_Test_001
  * @tc.desc: refresh lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
@@ -498,6 +534,7 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
  * @tc.name: REFRESH_LNN_INNER_Test_002
  * @tc.desc: refresh lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_002, TestSize.Level1)
@@ -557,6 +594,7 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_002, TestSize.Level1)
  * @tc.name: REFRESH_LNN_INNER_Test_003
  * @tc.desc: refresh lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_003, TestSize.Level1)
@@ -593,6 +631,7 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_003, TestSize.Level1)
  * @tc.name: STOP_REFRESH_LNN_INNER_Test_001
  * @tc.desc: stop refresh lnn inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_REFRESH_LNN_INNER_Test_001, TestSize.Level1)
@@ -617,6 +656,7 @@ static void OnJoinLNNResultCb(ConnectionAddr *addr, const char *networkId, int32
  * @tc.name: LNN_ONJOIN_RESULT_Test_001
  * @tc.desc: lnn on join result test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ONJOIN_RESULT_Test_001, TestSize.Level1)
@@ -652,6 +692,7 @@ static void OnLeaveResultCb(const char *networkId, int32_t retCode)
  * @tc.name: LNN_ON_LEAVE_RESULT_Test_001
  * @tc.desc: lnn on leave result test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_LEAVE_RESULT_Test_001, TestSize.Level1)
@@ -702,6 +743,7 @@ static void OnNodeStatusChangedCb(NodeStatusType type, NodeStatus *status)
  * @tc.name: LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001
  * @tc.desc: lnn on node online state changed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001, TestSize.Level1)
@@ -731,6 +773,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_ONLINE_STATE_CHANGED_Test_001, Te
  * @tc.name: LNN_ON_NODE_BASICINFO_CHANGED_Test_001
  * @tc.desc: lnn on node basic info changed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_BASICINFO_CHANGED_Test_001, TestSize.Level1)
@@ -761,6 +804,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_BASICINFO_CHANGED_Test_001, TestS
  * @tc.name: LNN_ON_NODE_STATUS_CHANGED_Test_001
  * @tc.desc: lnn on node status changed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_STATUS_CHANGED_Test_001, TestSize.Level1)
@@ -797,6 +841,7 @@ static void OnTimeSyncResultCb(const TimeSyncResultInfo *info, int32_t retCode)
  * @tc.name: LNN_ON_TIME_SYNC_RESULT_Test_001
  * @tc.desc: lnn on time sync result test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_001, TestSize.Level1)
@@ -823,6 +868,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_001, TestSize.Le
  * @tc.name: REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
  * @tc.desc: reg data level change cb inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, TestSize.Level1)
@@ -843,6 +889,7 @@ HWTEST_F(ClientBusCentManagerTest, REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, Test
  * @tc.name: REG_BLE_RANGE_INNER_Test_001
  * @tc.desc: reg ble range cb inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, REG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
@@ -862,6 +909,7 @@ HWTEST_F(ClientBusCentManagerTest, REG_BLE_RANGE_INNER_Test_001, TestSize.Level1
  * @tc.name: UNREG_BLE_RANGE_INNER_Test_001
  * @tc.desc: unReg ble range cb inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, UNREG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
@@ -878,6 +926,7 @@ HWTEST_F(ClientBusCentManagerTest, UNREG_BLE_RANGE_INNER_Test_001, TestSize.Leve
  * @tc.name: TRIGGER_HB_FOR_RANGE_INNER_Test_001
  * @tc.desc: reg ble range cb inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, TRIGGER_HB_FOR_RANGE_INNER_Test_001, TestSize.Level1)
@@ -897,6 +946,7 @@ HWTEST_F(ClientBusCentManagerTest, TRIGGER_HB_FOR_RANGE_INNER_Test_001, TestSize
  * @tc.name: RESTART_REG_DATA_LEVEL_CHANGE_Test_001
  * @tc.desc: restart reg data level change test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, RESTART_REG_DATA_LEVEL_CHANGE_Test_001, TestSize.Level1)
@@ -918,6 +968,7 @@ HWTEST_F(ClientBusCentManagerTest, RESTART_REG_DATA_LEVEL_CHANGE_Test_001, TestS
  * @tc.name: UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
  * @tc.desc: unreg data level change cb inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, TestSize.Level1)
@@ -935,6 +986,7 @@ HWTEST_F(ClientBusCentManagerTest, UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, Te
  * @tc.name: SET_DATA_LEVEL_INNER_Test_001
  * @tc.desc: set data level inner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, SET_DATA_LEVEL_INNER_Test_001, TestSize.Level1)
@@ -952,6 +1004,7 @@ HWTEST_F(ClientBusCentManagerTest, SET_DATA_LEVEL_INNER_Test_001, TestSize.Level
  * @tc.name: LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001
  * @tc.desc: lnn on local network id changed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, TestSize.Level1)
@@ -982,6 +1035,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, Tes
  * @tc.name: LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001
  * @tc.desc: lnn on node device trusted change test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, TestSize.Level1)
@@ -1010,6 +1064,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, T
  * @tc.name: LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001
  * @tc.desc: lnn on hichain proof exception test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, TestSize.Level1)
@@ -1038,6 +1093,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, Test
  * @tc.name: LNN_ON_TIME_SYNC_RESULT_Test_002
  * @tc.desc: lnn on time sync result test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_002, TestSize.Level1)
@@ -1066,6 +1122,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_002, TestSize.Le
  * @tc.name: LNN_ON_DATA_LEVEL_CHANGED_Test_001
  * @tc.desc: lnn on data level changed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_DATA_LEVEL_CHANGED_Test_001, TestSize.Level1)
@@ -1082,6 +1139,7 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_DATA_LEVEL_CHANGED_Test_001, TestSize.
  * @tc.name: DISC_RECOVERY_PUBLISH_Test_001
  * @tc.desc: disc recovery publish test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_PUBLISH_Test_001, TestSize.Level1)
@@ -1098,6 +1156,7 @@ HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_PUBLISH_Test_001, TestSize.Leve
  * @tc.name: DISC_RECOVERY_SUBSCRIBE_Test_001
  * @tc.desc: disc recovery subscribe test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_SUBSCRIBE_Test_001, TestSize.Level1)
@@ -1114,6 +1173,7 @@ HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_SUBSCRIBE_Test_001, TestSize.Le
  * @tc.name: IS_SAME_CONNECTION_ADDR_Test_001
  * @tc.desc: is same connection addr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
@@ -1162,6 +1222,7 @@ HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Le
  * @tc.name: IS_SAME_CONNECTION_ADDR_Test_002
  * @tc.desc: is same connection addr test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Level1)
@@ -1222,6 +1283,7 @@ HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Le
  * @tc.name: ADD_LEAVE_LNNCB_ITEM_Test_001
  * @tc.desc: add leave lnncb item test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, ADD_LEAVE_LNNCB_ITEM_Test_001, TestSize.Level1)
@@ -1235,6 +1297,7 @@ HWTEST_F(ClientBusCentManagerTest, ADD_LEAVE_LNNCB_ITEM_Test_001, TestSize.Level
  * @tc.name: ADD_TIME_SYNC_CB_ITEM_Test_001
  * @tc.desc: add time sync cb item test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, ADD_TIME_SYNC_CB_ITEM_Test_001, TestSize.Level1)
@@ -1250,6 +1313,7 @@ HWTEST_F(ClientBusCentManagerTest, ADD_TIME_SYNC_CB_ITEM_Test_001, TestSize.Leve
  * @tc.name: FREE_DISC_PUBLISH_MSG_Test_001
  * @tc.desc: free disc publish msg test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, FREE_DISC_PUBLISH_MSG_Test_001, TestSize.Level1)
@@ -1285,6 +1349,7 @@ HWTEST_F(ClientBusCentManagerTest, FREE_DISC_PUBLISH_MSG_Test_001, TestSize.Leve
  * @tc.name: FREE_DISC_SUBSCRIBE_MSG_Test_001
  * @tc.desc: free disc subscribe msg test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, FREE_DISC_SUBSCRIBE_MSG_Test_001, TestSize.Level1)
@@ -1320,6 +1385,7 @@ HWTEST_F(ClientBusCentManagerTest, FREE_DISC_SUBSCRIBE_MSG_Test_001, TestSize.Le
  * @tc.name: DESTROY_GROUP_OWNER_INNER_Test_001
  * @tc.desc: destroy group error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, DESTROY_GROUP_OWNER_INNER_Test_001, TestSize.Level1)
@@ -1344,6 +1410,7 @@ HWTEST_F(ClientBusCentManagerTest, DESTROY_GROUP_OWNER_INNER_Test_001, TestSize.
  * @tc.name: DESTROY_GROUP_OWNER_INNER_Test_002
  * @tc.desc: destroy group ok
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, DESTROY_GROUP_OWNER_INNER_Test_002, TestSize.Level1)
@@ -1363,6 +1430,7 @@ HWTEST_F(ClientBusCentManagerTest, DESTROY_GROUP_OWNER_INNER_Test_002, TestSize.
  * @tc.name: CREATE_GROUP_OWNER_INNER_Test_001
  * @tc.desc: create croup param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_001, TestSize.Level1)
@@ -1387,6 +1455,7 @@ HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_001, TestSize.L
  * @tc.name: CREATE_GROUP_OWNER_INNER_Test_002
  * @tc.desc: create is not init
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_002, TestSize.Level1)
@@ -1406,6 +1475,7 @@ HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_002, TestSize.L
  * @tc.name: CREATE_GROUP_OWNER_INNER_Test_003
  * @tc.desc: already create group
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_003, TestSize.Level1)
@@ -1430,6 +1500,7 @@ HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_003, TestSize.L
  * @tc.name: CREATE_GROUP_OWNER_INNER_Test_004
  * @tc.desc: create group ok
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_004, TestSize.Level1)
@@ -1458,6 +1529,7 @@ HWTEST_F(ClientBusCentManagerTest, CREATE_GROUP_OWNER_INNER_Test_004, TestSize.L
  * @tc.name: STOP_TIME_SYNC_INNER_Test_003
  * @tc.desc: stop time is not init
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_003, TestSize.Level1)
@@ -1473,6 +1545,7 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_003, TestSize.Level
  * @tc.name: START_TIME_SYNC_INNER_Test_002
  * @tc.desc: start time is not init
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_002, TestSize.Level1)
@@ -1494,6 +1567,7 @@ HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_INNER_Test_002, TestSize.Leve
  * @tc.name: STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_003
  * @tc.desc: stop time socket not init
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_003, TestSize.Level1)
@@ -1525,6 +1599,7 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_003, Te
  * @tc.name: START_TIME_SYNC_WITH_SOCKET_INNER_Test_001
  * @tc.desc: start time socket not init
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_WITH_SOCKET_INNER_Test_001, TestSize.Level1)

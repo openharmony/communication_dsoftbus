@@ -319,7 +319,7 @@ static void DfxReportSelectLaneResult(uint32_t laneReqId, const LaneAllocInfo *a
     if (LnnGetRemoteNumInfo(allocInfo->networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) == SOFTBUS_OK) {
         extra.onlineType = discoveryType;
     }
-    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
+    LNN_EVENT(EVENT_SCENE_LANE, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
 }
 
 static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
@@ -636,23 +636,23 @@ static int32_t LaneDelayInit(void)
 static int32_t InitLaneFirstStep(void)
 {
     if (InitLaneModel() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "init laneModel fail");
+        LNN_LOGE(LNN_LANE, "[InitLane]init laneModel fail");
         return SOFTBUS_NO_INIT;
     }
     if (InitLaneLink() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "init laneLink fail");
+        LNN_LOGE(LNN_LANE, "[InitLane]init laneLink fail");
         return SOFTBUS_NO_INIT;
     }
     if (InitLaneListener() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "init laneListener fail");
+        LNN_LOGE(LNN_LANE, "[InitLane]init laneListener fail");
         return SOFTBUS_NO_INIT;
     }
     if (LaneDelayInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "laneDelayInit fail");
+        LNN_LOGE(LNN_LANE, "[InitLane]laneDelayInit fail");
         return SOFTBUS_NO_INIT;
     }
     if (InitLaneLinkConflict() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "InitLaneLinkConflict fail");
+        LNN_LOGE(LNN_LANE, "[InitLane]InitLaneLinkConflict fail");
         return SOFTBUS_NO_INIT;
     }
     if (InitLaneSelectRule() != SOFTBUS_OK) {
@@ -662,7 +662,7 @@ static int32_t InitLaneFirstStep(void)
     int32_t ret = LnnInitVapInfoPacked();
     if (ret != SOFTBUS_OK) {
         /* optional case, ignore result */
-        LNN_LOGW(LNN_LANE, "init vap info err, ret=%{public}d", ret);
+        LNN_LOGW(LNN_LANE, "[InitLane]init vap info err, ret=%{public}d", ret);
     }
     ret = InitLinkLedger();
     if (ret != SOFTBUS_OK) {

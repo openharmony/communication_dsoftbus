@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -527,6 +527,11 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 int32_t AuthMetaGetConnectionTypeByMetaNodeId(const char *metaNodeId, NetworkConnectionType *connectionType)
 {
     return GetLaneDepsInterface()->AuthMetaGetConnectionTypeByMetaNodeId(metaNodeId, connectionType);
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetLaneDepsInterface()->LnnSetLocalByteInfo(key, info, len);
 }
 }
 } // namespace OHOS

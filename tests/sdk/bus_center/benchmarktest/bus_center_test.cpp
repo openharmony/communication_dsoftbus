@@ -235,6 +235,31 @@ BENCHMARK_F(BusCenterTest, GetNodeKeyInfoTestCase)(benchmark::State &state)
 BENCHMARK_REGISTER_F(BusCenterTest, GetNodeKeyInfoTestCase);
 
 /**
+ * @tc.name: SetNodeKeyInfoTestCase
+ * @tc.desc: SetNodeKeyInfo Performance Testing
+ * @tc.type: FUNC
+ * @tc.require: SetNodeKeyInfo normal operation
+ */
+BENCHMARK_F(BusCenterTest, SetNodeKeyInfoTestCase)(benchmark::State &state)
+{
+    while (state.KeepRunning()) {
+        int32_t ret;
+        NodeBasicInfo info;
+        char cap[SERVICE_FIND_CAP_LEN] = "123456789";
+        (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+        state.PauseTiming();
+        GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info);
+        state.ResumeTiming();
+        ret = SetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, (uint8_t *)cap,
+            SERVICE_FIND_CAP_LEN);
+        if (ret != 0) {
+            state.SkipWithError("SetNodeKeyInfoTestCase failed.");
+        }
+    }
+}
+BENCHMARK_REGISTER_F(BusCenterTest, SetNodeKeyInfoTestCase);
+
+/**
  * @tc.name: PublishLNNTestCase
  * @tc.desc: PublishLNN Performance Testing
  * @tc.type: FUNC

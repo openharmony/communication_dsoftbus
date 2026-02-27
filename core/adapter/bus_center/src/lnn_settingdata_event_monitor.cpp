@@ -84,7 +84,7 @@ static bool IsZHLanguage(void)
 
 int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len)
 {
-    if (nickName == nullptr || defaultName == nullptr || deviceName == nullptr) {
+    if (nickName == nullptr || defaultName == nullptr || deviceName == nullptr || len == 0) {
         LNN_LOGE(LNN_STATE, "param is invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -106,7 +106,7 @@ int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, c
         LNN_LOGE(LNN_STATE, "strcpy_s devName fail.");
         return SOFTBUS_STRCPY_ERR;
     }
-    char *anonyDeviceName = NULL;
+    char *anonyDeviceName = nullptr;
     AnonymizeDeviceName(deviceName, &anonyDeviceName);
     LNN_LOGD(LNN_STATE, "deviceName=%{public}s.", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);

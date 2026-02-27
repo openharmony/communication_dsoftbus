@@ -75,12 +75,12 @@ int32_t TransSpecObject::OpenAuthSessionWithPara(const char *sessionName, const 
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int TransSpecObject::SendLinkEvent(const char *networkId, uint16_t seqNum)
+int32_t TransSpecObject::SendLinkEvent(const char *networkId, uint16_t seqNum)
 {
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int TransSpecObject::StopLinkEvent(const char *networkId)
+int32_t TransSpecObject::StopLinkEvent(const char *networkId)
 {
     return SOFTBUS_NOT_IMPLEMENT;
 }

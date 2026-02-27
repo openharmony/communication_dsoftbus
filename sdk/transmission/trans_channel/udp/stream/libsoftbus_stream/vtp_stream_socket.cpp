@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ const int32_t US_PER_MS = 1000;
 static constexpr int32_t MAX_PORT = 65535;
 
 namespace {
-void PrintOptionInfo(int type, const StreamAttr &value)
+void PrintOptionInfo(int32_t type, const StreamAttr &value)
 {
     switch (value.GetType()) {
         case INT_TYPE:
@@ -61,9 +61,9 @@ void PrintOptionInfo(int type, const StreamAttr &value)
 } // namespace
 std::shared_ptr<VtpInstance> VtpStreamSocket::vtpInstance_ = VtpInstance::GetVtpInstance();
 
-std::map<int, std::mutex &> VtpStreamSocket::g_streamSocketLockMap;
+std::map<int32_t, std::mutex &> VtpStreamSocket::g_streamSocketLockMap;
 std::mutex VtpStreamSocket::g_streamSocketLockMapLock_;
-std::map<int, std::shared_ptr<VtpStreamSocket>> VtpStreamSocket::g_streamSocketMap;
+std::map<int32_t, std::shared_ptr<VtpStreamSocket>> VtpStreamSocket::g_streamSocketMap;
 std::mutex VtpStreamSocket::g_streamSocketMapLock_;
 
 static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo,
@@ -77,7 +77,7 @@ static inline void ConvertStreamFrameInfo2FrameInfo(FrameInfo* frameInfo,
     frameInfo->bitMap = (FILLP_UINT32)streamFrameInfo->bitMap;
 }
 
-void VtpStreamSocket::AddStreamSocketLock(int fd, std::mutex &streamsocketlock)
+void VtpStreamSocket::AddStreamSocketLock(int32_t fd, std::mutex &streamsocketlock)
 {
     std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (!g_streamSocketLockMap.empty() && g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
@@ -85,10 +85,10 @@ void VtpStreamSocket::AddStreamSocketLock(int fd, std::mutex &streamsocketlock)
         return;
     }
 
-    g_streamSocketLockMap.emplace(std::pair<int, std::mutex &>(fd, streamsocketlock));
+    g_streamSocketLockMap.emplace(std::pair<int32_t, std::mutex &>(fd, streamsocketlock));
 }
 
-void VtpStreamSocket::AddStreamSocketListener(int fd, std::shared_ptr<VtpStreamSocket> streamreceiver)
+void VtpStreamSocket::AddStreamSocketListener(int32_t fd, std::shared_ptr<VtpStreamSocket> streamreceiver)
 {
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     if (!g_streamSocketMap.empty() && g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
@@ -96,10 +96,10 @@ void VtpStreamSocket::AddStreamSocketListener(int fd, std::shared_ptr<VtpStreamS
         return;
     }
 
-    g_streamSocketMap.emplace(std::pair<int, std::shared_ptr<VtpStreamSocket>>(fd, streamreceiver));
+    g_streamSocketMap.emplace(std::pair<int32_t, std::shared_ptr<VtpStreamSocket>>(fd, streamreceiver));
 }
 
-void VtpStreamSocket::RemoveStreamSocketLock(int fd)
+void VtpStreamSocket::RemoveStreamSocketLock(int32_t fd)
 {
     std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
@@ -111,7 +111,7 @@ void VtpStreamSocket::RemoveStreamSocketLock(int fd)
     }
 }
 
-void VtpStreamSocket::RemoveStreamSocketListener(int fd)
+void VtpStreamSocket::RemoveStreamSocketListener(int32_t fd)
 {
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     if (g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
@@ -122,12 +122,12 @@ void VtpStreamSocket::RemoveStreamSocketListener(int fd)
     }
 }
 
-void VtpStreamSocket::InsertElementToFuncMap(int type, ValueType valueType, MySetFunc set, MyGetFunc get)
+void VtpStreamSocket::InsertElementToFuncMap(int32_t type, ValueType valueType, MySetFunc set, MyGetFunc get)
 {
     OptionFunc fun = {
         valueType, set, get
     };
-    optFuncMap_.insert(std::pair<int, OptionFunc>(type, fun));
+    optFuncMap_.insert(std::pair<int32_t, OptionFunc>(type, fun));
 }
 
 VtpStreamSocket::VtpStreamSocket()
@@ -186,7 +186,7 @@ std::shared_ptr<VtpStreamSocket> VtpStreamSocket::GetSelf()
     return shared_from_this();
 }
 
-int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
+int32_t VtpStreamSocket::HandleFillpFrameStats(int32_t fd, const FtEventCbkInfo *info)
 {
     if (info == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "stats info is nullptr");
@@ -214,7 +214,7 @@ int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
-int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
+int32_t VtpStreamSocket::HandleRipplePolicy(int32_t fd, const FtEventCbkInfo *info)
 {
     if (info == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "policy info is nullptr");
@@ -243,7 +243,7 @@ int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
-int VtpStreamSocket::HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info)
+int32_t VtpStreamSocket::HandleFillpFrameEvt(int32_t fd, const FtEventCbkInfo *info)
 {
     if (info == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "fd is %{public}d, info is nullptr", fd);
@@ -259,7 +259,7 @@ int VtpStreamSocket::HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
-static int HandleVtpFrameEvtPacked(int fd, OnFrameEvt cb, const FtEventCbkInfo *info)
+static int32_t HandleVtpFrameEvtPacked(int32_t fd, OnFrameEvt cb, const FtEventCbkInfo *info)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
     if (pfnClientEnhanceFuncList->handleVtpFrameEvt == nullptr) {
@@ -269,7 +269,7 @@ static int HandleVtpFrameEvtPacked(int fd, OnFrameEvt cb, const FtEventCbkInfo *
     return pfnClientEnhanceFuncList->handleVtpFrameEvt(fd, cb, info);
 }
 
-int VtpStreamSocket::HandleFillpFrameEvtInner(int fd, const FtEventCbkInfo *info)
+int32_t VtpStreamSocket::HandleFillpFrameEvtInner(int32_t fd, const FtEventCbkInfo *info)
 {
     if (onStreamEvtCb_ != nullptr) {
         TRANS_LOGD(TRANS_STREAM, "onStreamEvtCb_ enter");
@@ -281,7 +281,7 @@ int VtpStreamSocket::HandleFillpFrameEvtInner(int fd, const FtEventCbkInfo *info
 }
 
 #ifdef FILLP_SUPPORT_BW_DET
-void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *metricList)
+void VtpStreamSocket::FillSupportDet(int32_t fd, const FtEventCbkInfo *info, QosTv *metricList)
 {
     if (info == nullptr || metricList == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "info or metricList is nullptr");
@@ -388,7 +388,7 @@ void VtpStreamSocket::FillpAppStatistics()
     FillpStatisticsPcb fillpPcbStats = {};
     SoftBusSysTime fillpStatsGetTime = {0};
 
-    int getStatisticsRet = FtFillpStatsGet(streamFd_, &fillpPcbStats);
+    int32_t getStatisticsRet = FtFillpStatsGet(streamFd_, &fillpPcbStats);
     SoftBusGetTime(&fillpStatsGetTime);
     if (getStatisticsRet == 0) {
         metricList.type = STREAM_TRAFFIC_STASTICS;
@@ -433,9 +433,9 @@ void VtpStreamSocket::FillpAppStatistics()
     }
 }
 
-bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
+bool VtpStreamSocket::CreateClient(IpAndPort &local, int32_t streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
-    int fd = CreateAndBindSocket(local, false);
+    int32_t fd = CreateAndBindSocket(local, false);
     if (fd == -1) {
         TRANS_LOGE(TRANS_STREAM, "CreateAndBindSocket failed, errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
@@ -461,7 +461,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<u
     return true;
 }
 
-bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, int streamType,
+bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, int32_t streamType,
     std::pair<uint8_t*, uint32_t> sessionKey)
 {
     if (!CreateClient(local, streamType, sessionKey)) {
@@ -481,7 +481,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, const IpAndPort &remote, in
     return connectRet;
 }
 
-bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
+bool VtpStreamSocket::CreateServer(IpAndPort &local, int32_t streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
     listenFd_ = CreateAndBindSocket(local, true);
@@ -579,7 +579,7 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
     remoteSockAddr.sin_port = htons(static_cast<short>(remote.port));
     remoteSockAddr.sin_addr.s_addr = inet_addr(remote.ip.c_str());
 
-    int ret = FtConnect(streamFd_, reinterpret_cast<struct sockaddr *>(&remoteSockAddr), sizeof(remoteSockAddr));
+    int32_t ret = FtConnect(streamFd_, reinterpret_cast<struct sockaddr *>(&remoteSockAddr), sizeof(remoteSockAddr));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "FtConnect failed, ret=%{public}d, errno=%{public}d", ret, FtGetErrno());
         DestroyStreamSocket();
@@ -681,7 +681,7 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
     return true;
 }
 
-bool VtpStreamSocket::SetOption(int type, const StreamAttr &value)
+bool VtpStreamSocket::SetOption(int32_t type, const StreamAttr &value)
 {
     PrintOptionInfo(type, value);
     auto it = optFuncMap_.find(type);
@@ -703,7 +703,7 @@ bool VtpStreamSocket::SetOption(int type, const StreamAttr &value)
     }
 
     if (type == NON_BLOCK || type == TOS) {
-        return (this->*set)(static_cast<int>(streamFd_), value);
+        return (this->*set)(static_cast<int32_t>(streamFd_), value);
     }
 
     auto outerIt = FILLP_TYPE_MAP.find(type);
@@ -716,10 +716,10 @@ bool VtpStreamSocket::SetOption(int type, const StreamAttr &value)
         return (this->*set)(innerIt->second, value);
     }
 
-    return (this->*set)(static_cast<int>(type), value);
+    return (this->*set)(static_cast<int32_t>(type), value);
 }
 
-StreamAttr VtpStreamSocket::GetOption(int type) const
+StreamAttr VtpStreamSocket::GetOption(int32_t type) const
 {
     StreamAttr attr {};
     auto it = optFuncMap_.find(type);
@@ -730,9 +730,9 @@ StreamAttr VtpStreamSocket::GetOption(int type) const
             return std::move(StreamAttr());
         }
         if (type == NON_BLOCK) {
-            attr = (this->*get)(static_cast<int>(streamFd_));
+            attr = (this->*get)(static_cast<int32_t>(streamFd_));
         } else {
-            attr = (this->*get)(static_cast<int>(type));
+            attr = (this->*get)(static_cast<int32_t>(type));
         }
     }
 
@@ -765,7 +765,7 @@ void VtpStreamSocket::DestroyVtpInstance(const std::string &pkgName)
     TRANS_LOGD(TRANS_STREAM, "ok");
 }
 
-int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
+int32_t VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
 {
     localIpPort_ = local;
     vtpInstance_->UpdateSocketStreamCount(true);
@@ -774,7 +774,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
         return -1;
     }
 
-    int sockFd = FtSocket(AF_INET, SOCK_STREAM, IPPROTO_FILLP);
+    int32_t sockFd = FtSocket(AF_INET, SOCK_STREAM, IPPROTO_FILLP);
     if (sockFd == -1) {
         TRANS_LOGE(TRANS_STREAM, "FtSocket failed, errno=%{public}d", FtGetErrno());
         return -1;
@@ -804,7 +804,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
     }
 
     socklen_t localAddrLen = sizeof(localSockAddr);
-    int ret = FtBind(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), localAddrLen);
+    int32_t ret = FtBind(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), localAddrLen);
     if (ret == -1) {
         FtClose(sockFd);
         TRANS_LOGE(TRANS_STREAM, "FtBind failed, errno=%{public}d", FtGetErrno());
@@ -826,10 +826,10 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
 }
 
 
-bool VtpStreamSocket::EnableBwEstimationAlgo(int streamFd, bool isServer) const
+bool VtpStreamSocket::EnableBwEstimationAlgo(int32_t streamFd, bool isServer) const
 {
 #ifdef FILLP_SUPPORT_BW_DET
-    int errBwDet;
+    int32_t errBwDet;
     if (isServer) {
         int32_t enableBwDet = FILLP_BW_DET_RX_ENABLE;
         errBwDet = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SOCK_BW_DET_ALGO,
@@ -854,7 +854,7 @@ bool VtpStreamSocket::EnableBwEstimationAlgo(int streamFd, bool isServer) const
 #endif
 }
 
-bool VtpStreamSocket::EnableJitterDetectionAlgo(int streamFd) const
+bool VtpStreamSocket::EnableJitterDetectionAlgo(int32_t streamFd) const
 {
 #ifdef FILLP_SUPPORT_CQE
     int32_t  enableCQE = FILLP_CQE_ENABLE;
@@ -873,7 +873,7 @@ bool VtpStreamSocket::EnableJitterDetectionAlgo(int streamFd) const
 #endif
 }
 
-bool VtpStreamSocket::EnableDirectlySend(int streamFd) const
+bool VtpStreamSocket::EnableDirectlySend(int32_t streamFd) const
 {
     int32_t enable = 1;
     FILLP_INT ret = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SOCK_DIRECTLY_SEND, &enable, sizeof(enable));
@@ -886,7 +886,7 @@ bool VtpStreamSocket::EnableDirectlySend(int streamFd) const
     return true;
 }
 
-bool VtpStreamSocket::EnableSemiReliable(int streamFd) const
+bool VtpStreamSocket::EnableSemiReliable(int32_t streamFd) const
 {
     int32_t enable = 1;
     FILLP_INT ret = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SEMI_RELIABLE, &enable, sizeof(enable));
@@ -904,8 +904,8 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
     VtpStreamSocket::AddStreamSocketLock(streamFd_, streamSocketLock_);
     auto self = this->GetSelf();
     VtpStreamSocket::AddStreamSocketListener(streamFd_, self);
-    int regStatisticsRet = FtApiRegEventCallbackFunc(FILLP_CONFIG_ALL_SOCKET, FillpStatistics);
-    int value = 1;
+    int32_t regStatisticsRet = FtApiRegEventCallbackFunc(FILLP_CONFIG_ALL_SOCKET, FillpStatistics);
+    int32_t value = 1;
     auto err = FtSetSockOpt(streamFd_, IPPROTO_FILLP, FILLP_SOCK_TRAFFIC, &value, sizeof(value));
     if (err < 0) {
         TRANS_LOGE(TRANS_STREAM, "fail to set socket binding to device");
@@ -994,7 +994,7 @@ bool VtpStreamSocket::Accept()
     return true;
 }
 
-int VtpStreamSocket::EpollTimeout(int fd, int timeout)
+int32_t VtpStreamSocket::EpollTimeout(int32_t fd, int32_t timeout)
 {
     struct SpungeEpollEvent events[MAX_EPOLL_NUM];
     (void)memset_s(events, sizeof(events), 0, sizeof(events));
@@ -1025,7 +1025,7 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
     }
 }
 
-int VtpStreamSocket::SetSocketEpollMode(int fd)
+int32_t VtpStreamSocket::SetSocketEpollMode(int32_t fd)
 {
     if (!SetNonBlockMode(fd, StreamAttr(true))) {
         TRANS_LOGE(TRANS_STREAM, "SetNonBlockMode failed, errno=%{public}d", FtGetErrno());
@@ -1046,9 +1046,9 @@ int VtpStreamSocket::SetSocketEpollMode(int fd)
     return SOFTBUS_OK;
 }
 
-void VtpStreamSocket::InsertBufferLength(int num, int length, uint8_t *output) const
+void VtpStreamSocket::InsertBufferLength(int32_t num, int32_t length, uint8_t *output) const
 {
-    for (int i = 0; i < length; i++) {
+    for (int32_t i = 0; i < length; i++) {
         output[length - 1 - i] = static_cast<unsigned int>(
             ((static_cast<unsigned int>(num) >> static_cast<unsigned int>(BYTE_TO_BIT * i))) & INT_TO_BYTE);
     }
@@ -1113,7 +1113,7 @@ int32_t VtpStreamSocket::RecvStreamLen()
         }
     }
 
-    return ntohl(*reinterpret_cast<int *>(buffer.get()));
+    return ntohl(*reinterpret_cast<int32_t *>(buffer.get()));
 }
 
 bool VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer,
@@ -1162,8 +1162,8 @@ bool VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffe
 int64_t g_diffTime = 0;
 int64_t g_startTime = 0;
 int64_t g_lastTime = 0;
-const int TIME_OUT = 50;
-const int WAIT_UPLOAD_TIME = 300000;
+const int32_t TIME_OUT = 50;
+const int32_t WAIT_UPLOAD_TIME = 300000;
 
 void VtpStreamSocket::DoStreamRecv()
 {
@@ -1248,9 +1248,9 @@ std::unique_ptr<char[]> VtpStreamSocket::RecvStream(int32_t dataLength)
     return std::unique_ptr<char[]>(buffer.release());
 }
 
-void VtpStreamSocket::SetDefaultConfig(int fd)
+void VtpStreamSocket::SetDefaultConfig(int32_t fd)
 {
-    if (!SetIpTos(fd, StreamAttr(static_cast<int>(IPTOS_LOWDELAY)))) {
+    if (!SetIpTos(fd, StreamAttr(static_cast<int32_t>(IPTOS_LOWDELAY)))) {
         TRANS_LOGW(TRANS_STREAM, "SetIpTos failed");
     }
     // Set Fillp direct sending
@@ -1267,24 +1267,24 @@ void VtpStreamSocket::SetDefaultConfig(int fd)
         TRANS_LOGW(TRANS_STREAM, "Set differ transmit failed");
     }
 
-    if (!SetOption(RECV_BUF_SIZE, StreamAttr(static_cast<int>(DEFAULT_UDP_BUFFER_RCV_SIZE)))) {
+    if (!SetOption(RECV_BUF_SIZE, StreamAttr(static_cast<int32_t>(DEFAULT_UDP_BUFFER_RCV_SIZE)))) {
         TRANS_LOGW(TRANS_STREAM, "Set recv buff failed");
     }
 
-    if (!SetOption(SEND_BUF_SIZE, StreamAttr(static_cast<int>(DEFAULT_UDP_BUFFER_SIZE)))) {
+    if (!SetOption(SEND_BUF_SIZE, StreamAttr(static_cast<int32_t>(DEFAULT_UDP_BUFFER_SIZE)))) {
         TRANS_LOGW(TRANS_STREAM, "Set send buff failed");
     }
 
-    if (!SetOption(InnerStreamOptionType::RECV_CACHE, StreamAttr(static_cast<int>(FILLP_VTP_RECV_CACHE_SIZE)))) {
+    if (!SetOption(InnerStreamOptionType::RECV_CACHE, StreamAttr(static_cast<int32_t>(FILLP_VTP_RECV_CACHE_SIZE)))) {
         TRANS_LOGW(TRANS_STREAM, "Set recv cache failed");
     }
 
-    if (!SetOption(InnerStreamOptionType::SEND_CACHE, StreamAttr(static_cast<int>(FILLP_VTP_SEND_CACHE_SIZE)))) {
+    if (!SetOption(InnerStreamOptionType::SEND_CACHE, StreamAttr(static_cast<int32_t>(FILLP_VTP_SEND_CACHE_SIZE)))) {
         TRANS_LOGW(TRANS_STREAM, "Set send cache failed");
     }
 }
 
-bool VtpStreamSocket::SetIpTos(int fd, const StreamAttr &tos)
+bool VtpStreamSocket::SetIpTos(int32_t fd, const StreamAttr &tos)
 {
     auto tmp = tos.GetIntValue();
     if (FtSetSockOpt(fd, IPPROTO_IP, IP_TOS, &tmp, sizeof(tmp)) != ERR_OK) {
@@ -1296,11 +1296,11 @@ bool VtpStreamSocket::SetIpTos(int fd, const StreamAttr &tos)
     return true;
 }
 
-StreamAttr VtpStreamSocket::GetIpTos(int type) const
+StreamAttr VtpStreamSocket::GetIpTos(int32_t type) const
 {
     static_cast<void>(type);
-    int tos;
-    int size = sizeof(tos);
+    int32_t tos;
+    int32_t size = sizeof(tos);
 
     if (FtGetSockOpt(streamFd_, IPPROTO_IP, IP_TOS, &tos, &size) != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM, "FtGetSockOpt errno=%{public}d", FtGetErrno());
@@ -1310,19 +1310,19 @@ StreamAttr VtpStreamSocket::GetIpTos(int type) const
     return std::move(StreamAttr(tos));
 }
 
-StreamAttr VtpStreamSocket::GetStreamSocketFd(int type) const
+StreamAttr VtpStreamSocket::GetStreamSocketFd(int32_t type) const
 {
     static_cast<void>(type);
     return std::move(StreamAttr(streamFd_));
 }
 
-StreamAttr VtpStreamSocket::GetListenSocketFd(int type) const
+StreamAttr VtpStreamSocket::GetListenSocketFd(int32_t type) const
 {
     static_cast<void>(type);
     return std::move(StreamAttr(listenFd_));
 }
 
-bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
+bool VtpStreamSocket::SetSocketBoundInner(int32_t fd, std::string ip) const
 {
     auto boundIp = (ip.empty()) ? localIpPort_.ip : ip;
     struct ifaddrs *ifList = nullptr;
@@ -1360,7 +1360,7 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
     return true;
 }
 
-bool VtpStreamSocket::SetSocketBindToDevices(int type, const StreamAttr &ip)
+bool VtpStreamSocket::SetSocketBindToDevices(int32_t type, const StreamAttr &ip)
 {
     static_cast<void>(type);
     auto tmp = ip.GetStrValue();
@@ -1368,7 +1368,7 @@ bool VtpStreamSocket::SetSocketBindToDevices(int type, const StreamAttr &ip)
     return SetSocketBoundInner(streamFd_, boundIp);
 }
 
-bool VtpStreamSocket::SetVtpStackConfigDelayed(int type, const StreamAttr &value)
+bool VtpStreamSocket::SetVtpStackConfigDelayed(int32_t type, const StreamAttr &value)
 {
     std::unique_lock<std::mutex> lock(streamSocketLock_);
     if (streamFd_ == -1) {
@@ -1378,7 +1378,7 @@ bool VtpStreamSocket::SetVtpStackConfigDelayed(int type, const StreamAttr &value
     return SetVtpStackConfig(type, value);
 }
 
-bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
+bool VtpStreamSocket::SetVtpStackConfig(int32_t type, const StreamAttr &value)
 {
     if (streamFd_ == -1) {
         TRANS_LOGI(TRANS_STREAM, "set vtp stack config when streamFd is legal, type=%{public}d", type);
@@ -1392,8 +1392,8 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
     }
 
     if (value.GetType() == INT_TYPE) {
-        int intVal = value.GetIntValue();
-        int ret = FtConfigSet(type, &intVal, &streamFd_);
+        int32_t intVal = value.GetIntValue();
+        int32_t ret = FtConfigSet(type, &intVal, &streamFd_);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_STREAM,
                 "FtConfigSet failed, type=%{public}d, errno=%{public}d", type, FtGetErrno());
@@ -1407,7 +1407,7 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
 
     if (value.GetType() == BOOL_TYPE) {
         bool flag = value.GetBoolValue();
-        int ret = FtConfigSet(type, &flag, &streamFd_);
+        int32_t ret = FtConfigSet(type, &flag, &streamFd_);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_STREAM,
                 "FtConfigSet failed, type=%{public}d, errno=%{public}d", type, FtGetErrno());
@@ -1423,18 +1423,18 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
     return false;
 }
 
-StreamAttr VtpStreamSocket::GetVtpStackConfig(int type) const
+StreamAttr VtpStreamSocket::GetVtpStackConfig(int32_t type) const
 {
-    int intVal = -1;
-    int configFd = (streamFd_ == -1) ? FILLP_CONFIG_ALL_SOCKET : streamFd_;
-    int ret = FtConfigGet(type, &intVal, &configFd);
+    int32_t intVal = -1;
+    int32_t configFd = (streamFd_ == -1) ? FILLP_CONFIG_ALL_SOCKET : streamFd_;
+    int32_t ret = FtConfigGet(type, &intVal, &configFd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM,
             "FtConfigGet failed, type=%{public}d, errno=%{public}d", type, FtGetErrno());
         return std::move(StreamAttr());
     }
 
-    int valType = ValueType::UNKNOWN;
+    int32_t valType = ValueType::UNKNOWN;
     for (auto it = FILLP_TYPE_MAP.begin(); it != FILLP_TYPE_MAP.end(); it++) {
         if (it->second != type) {
             continue;
@@ -1462,7 +1462,7 @@ StreamAttr VtpStreamSocket::GetVtpStackConfig(int type) const
     return std::move(StreamAttr(intVal));
 }
 
-bool VtpStreamSocket::SetNonBlockMode(int fd, const StreamAttr &value)
+bool VtpStreamSocket::SetNonBlockMode(int32_t fd, const StreamAttr &value)
 {
     FILLP_INT flags = FtFcntl(fd, F_GETFL, 0);
     if (flags < 0) {
@@ -1484,7 +1484,7 @@ bool VtpStreamSocket::SetNonBlockMode(int fd, const StreamAttr &value)
     return true;
 }
 
-StreamAttr VtpStreamSocket::GetNonBlockMode(int fd) const
+StreamAttr VtpStreamSocket::GetNonBlockMode(int32_t fd) const
 {
     FILLP_INT flags = FtFcntl(fd, F_GETFL, 0);
     if (static_cast<unsigned int>(flags) & O_NONBLOCK) {
@@ -1494,7 +1494,7 @@ StreamAttr VtpStreamSocket::GetNonBlockMode(int fd) const
     return std::move(StreamAttr(false));
 }
 
-StreamAttr VtpStreamSocket::GetIp(int type) const
+StreamAttr VtpStreamSocket::GetIp(int32_t type) const
 {
     if (type == LOCAL_IP) {
         return std::move(StreamAttr(localIpPort_.ip));
@@ -1503,7 +1503,7 @@ StreamAttr VtpStreamSocket::GetIp(int type) const
     return std::move(StreamAttr(remoteIpPort_.ip));
 }
 
-StreamAttr VtpStreamSocket::GetPort(int type) const
+StreamAttr VtpStreamSocket::GetPort(int32_t type) const
 {
     if (type == LOCAL_PORT) {
         return std::move(StreamAttr(localIpPort_.port));
@@ -1511,7 +1511,7 @@ StreamAttr VtpStreamSocket::GetPort(int type) const
     return std::move(StreamAttr(remoteIpPort_.port));
 }
 
-bool VtpStreamSocket::SetStreamType(int type, const StreamAttr &value)
+bool VtpStreamSocket::SetStreamType(int32_t type, const StreamAttr &value)
 {
     if (type != STREAM_TYPE_INT) {
         return false;
@@ -1521,7 +1521,7 @@ bool VtpStreamSocket::SetStreamType(int type, const StreamAttr &value)
     return true;
 }
 
-StreamAttr VtpStreamSocket::GetStreamType(int type) const
+StreamAttr VtpStreamSocket::GetStreamType(int32_t type) const
 {
     if (type != STREAM_TYPE_INT) {
         return std::move(StreamAttr());
@@ -1530,7 +1530,7 @@ StreamAttr VtpStreamSocket::GetStreamType(int type) const
     return std::move(StreamAttr(streamType_));
 }
 
-bool VtpStreamSocket::SetStreamScene(int type, const StreamAttr &value)
+bool VtpStreamSocket::SetStreamScene(int32_t type, const StreamAttr &value)
 {
     static_cast<void>(type);
     if (value.GetType() != INT_TYPE) {
@@ -1542,7 +1542,7 @@ bool VtpStreamSocket::SetStreamScene(int type, const StreamAttr &value)
     return true;
 }
 
-bool VtpStreamSocket::SetStreamHeaderSize(int type, const StreamAttr &value)
+bool VtpStreamSocket::SetStreamHeaderSize(int32_t type, const StreamAttr &value)
 {
     static_cast<void>(type);
     if (value.GetType() != INT_TYPE) {
@@ -1557,7 +1557,7 @@ bool VtpStreamSocket::SetStreamHeaderSize(int type, const StreamAttr &value)
 void VtpStreamSocket::NotifyStreamListener()
 {
     while (isStreamRecv_) {
-        int streamNum = GetStreamNum();
+        int32_t streamNum = GetStreamNum();
         if (streamNum >= STREAM_BUFFER_THRESHOLD) {
             TRANS_LOGW(TRANS_STREAM, "Too many data in receiver, streamNum=%{public}d", streamNum);
         }
@@ -1639,7 +1639,7 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     return outLen;
 }
 
-static int32_t VtpSetSocketMultiLayerPacked(int fd, OnFrameEvt *cb, const void *para)
+static int32_t VtpSetSocketMultiLayerPacked(int32_t fd, OnFrameEvt *cb, const void *para)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
     if (pfnClientEnhanceFuncList->vtpSetSocketMultiLayer == nullptr) {
@@ -1651,7 +1651,7 @@ static int32_t VtpSetSocketMultiLayerPacked(int fd, OnFrameEvt *cb, const void *
 
 int32_t VtpStreamSocket::SetMultiLayer(const void *para)
 {
-    int fd = GetStreamSocketFd(FD).GetIntValue();
+    int32_t fd = GetStreamSocketFd(FD).GetIntValue();
     return VtpSetSocketMultiLayerPacked(fd, &onStreamEvtCb_, para);
 }
 

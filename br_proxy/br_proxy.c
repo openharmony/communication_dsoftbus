@@ -543,6 +543,12 @@ int32_t CloseBrProxy(int32_t channelId)
     if (!IsChannelValid(channelId)) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }
+    TransEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .errcode = SOFTBUS_OK,
+        .channelId = channelId,
+    };
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CLOSE_BR_PROXY, extra);
     (void)ClientRecordListenerState(channelId, DATA_RECEIVE, false);
     (void)ClientRecordListenerState(channelId, CHANNEL_STATE, false);
     int32_t ret = ServerIpcCloseBrProxy(channelId);
@@ -564,6 +570,7 @@ int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
         TRANS_LOGE(TRANS_SDK, "[br_proxy] data too long! datalen:%{public}d", dataLen);
         return SOFTBUS_TRANS_BR_PROXY_DATA_TOO_LONG;
     }
+    int64_t timeStart = GetSoftbusRecordTimeMillis();
     int32_t ret = ServerIpcSendBrProxyData(channelId, data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
@@ -572,6 +579,7 @@ int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
             .channelId = channelId,
             .errcode = ret,
             .result = EVENT_STAGE_RESULT_FAILED,
+            .costTime = (int32_t)(GetSoftbusRecordTimeMillis() - timeStart),
             .dataLen = dataLen,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_SEND_DATA, extra);
@@ -588,11 +596,22 @@ int32_t SetListenerState(int32_t channelId, ListenerType type, bool isEnable)
     TRANS_LOGI(TRANS_SDK,
         "[br_proxy] enter! channelId:%{public}d, type:%{public}d, type_desc:%{public}s, isEnable:%{public}s",
         channelId, type, type == DATA_RECEIVE ? "receiveData":"receiveChannelStatus", isEnable ? "on":"off");
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .listenerType = type,
+        .listenerStatus = isEnable ? 1 : 0,
+    };
     int32_t ret = ServerIpcSetListenerState(channelId, type, isEnable);
     if (ret != SOFTBUS_OK) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        extra.errcode = ret;
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_LISTENER_STATUS, extra);
         TRANS_LOGE(TRANS_SDK, "[br_proxy] set listener state failed! ret=%{public}d", ret);
         return ret;
     }
+    extra.result = EVENT_STAGE_RESULT_OK;
+    extra.errcode = SOFTBUS_OK;
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_LISTENER_STATUS, extra);
     return ClientRecordListenerState(channelId, type, isEnable);
 }
 
@@ -621,6 +640,7 @@ const SoftBusCodeToStateMap G_CODE_MAP[] = {
     { SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED,   CHANNEL_WAIT_RESUME },
     { SOFTBUS_OK,                               CHANNEL_RESUME      },
     { SOFTBUS_CONN_BR_UNPAIRED,                 CHANNEL_BR_NO_PAIRED},
+    { SOFTBUS_CONN_BLUETOOTH_OFF,               CHANNEL_WAIT_RESUME },
 };
 
 static int32_t SoftbusErrConvertChannelState(int32_t err)
@@ -684,10 +704,10 @@ int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const c
         int64_t timeStart = info.timeStart;
         int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
         TransEventExtra extra = {
-            .channelId = info.channelId,
+            .channelId = channelId,
             .errcode = result,
             .result = (result == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
-            .costTime = (result == SOFTBUS_OK) ? (int32_t)timeDiff : 0,
+            .costTime = (int32_t)timeDiff,
         };
         TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
     }
@@ -712,7 +732,7 @@ bool IsProxyChannelEnabled(int32_t uid)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc get brproxy channel state failed! ret:%{public}d", ret);
     }
-
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] exit uid:%{public}d, %{public}s", uid, isEnable ? "true" : "false");
     return isEnable;
 }
 
@@ -762,4 +782,26 @@ int32_t ClientTransBrProxyQueryPermission(const char *bundleName, bool *isEmpowe
     }
 
     return ret;
+}
+
+void BrProxyServiceDeathNotify(void)
+{
+    TRANS_LOGW(TRANS_SDK, "[br_proxy] server die!");
+    if (g_clientList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
+        return;
+    }
+ 
+    if (SoftBusMutexLock(&(g_clientList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        return;
+    }
+    ClientBrProxyChannelInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_clientList->list), ClientBrProxyChannelInfo, node) {
+        if (nodeInfo->enableStateChange && nodeInfo->listener.onChannelStatusChanged != NULL) {
+            TRANS_LOGI(TRANS_SDK, "[br_proxy] server died! channelId=%{public}d", nodeInfo->channelId);
+            nodeInfo->listener.onChannelStatusChanged(nodeInfo->channelId, CHANNEL_EXCEPTION_SOFTWARE_FAILED);
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_clientList->lock));
 }

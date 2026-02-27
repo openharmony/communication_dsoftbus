@@ -32,6 +32,7 @@ if (!support_bluetooth) {
     ]
   } else {
     proxy_connection_src += [
+      "$dsoftbus_root_path/core/connection/proxy/proxy_config.c",
       "$dsoftbus_root_path/core/connection/proxy/proxy_connection.c",
       "$dsoftbus_root_path/core/connection/proxy/proxy_manager.c",
       "$dsoftbus_root_path/core/connection/proxy/proxy_observer.cpp",

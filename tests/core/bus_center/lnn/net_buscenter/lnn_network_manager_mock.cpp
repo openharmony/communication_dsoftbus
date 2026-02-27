@@ -92,9 +92,9 @@ int32_t LnnNotifyDiscoveryDevice(
     return GetNetworkManagerInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
-    return GetNetworkManagerInterface()->LnnRequestLeaveByAddrType(type, typeLen);
+    return GetNetworkManagerInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
 }
 
 int32_t LnnAsyncCallbackDelayHelper(

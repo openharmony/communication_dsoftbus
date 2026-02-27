@@ -48,7 +48,7 @@ int32_t LnnInitLaneHub(void)
         LNN_LOGE(LNN_INIT, "init mcu heartbeat fail");
     }
     if (InitControlPlanePacked() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init spark group manage fail");
+        LNN_LOGE(LNN_INIT, "init control plane fail");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusRegBusCenterVarDump((char*)LNN_DUMP_CONTROL_LANE_GEOUP_INFO,

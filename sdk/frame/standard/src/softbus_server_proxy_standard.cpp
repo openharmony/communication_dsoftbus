@@ -235,6 +235,17 @@ int32_t SoftBusServerProxyFrame::GetNodeKeyInfo(const char *pkgName, const char 
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerProxyFrame::SetNodeKeyInfo(const char *pkgName, const char *networkId, int key,
+    unsigned char *buf, uint32_t len)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)key;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerProxyFrame::SetNodeDataChangeFlag(const char *pkgName, const char *networkId,
     uint16_t dataChangeFlag)
 {

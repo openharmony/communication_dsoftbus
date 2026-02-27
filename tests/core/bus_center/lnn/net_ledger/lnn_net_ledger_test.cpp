@@ -41,7 +41,8 @@ void LNNNetLedgerMockTest::TearDown() { }
 
 /*
  * @tc.name: LnnSetLocalFeatureTest001
- * @tc.desc: LnnSetLocalFeature test
+ * @tc.desc: Verify LnnSetLocalFeature sets local feature capability
+ *           with different mock return values
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require:

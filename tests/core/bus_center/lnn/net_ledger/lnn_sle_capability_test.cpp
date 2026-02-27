@@ -53,7 +53,8 @@ void LNNSleCapabilityTest::TearDown()
 
 /*
  * @tc.name: SetSleRangeCapToLocalLedgerTest001
- * @tc.desc: test func SetSleRangeCapToLocalLedger branch
+ * @tc.desc: Verify SetSleRangeCapToLocalLedger sets SLE range capability
+ *           to local ledger with different return values
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -77,7 +78,8 @@ HWTEST_F(LNNSleCapabilityTest, SetSleRangeCapToLocalLedgerTest001, TestSize.Leve
 
 /*
  * @tc.name: SetSleRangeCapToLocalLedgerTest002
- * @tc.desc: test func SetSleRangeCapToLocalLedger branch
+ * @tc.desc: Verify SetSleRangeCapToLocalLedger handles different
+ *           LnnUpdateSleCapacityAndVersion return values
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -104,7 +106,8 @@ HWTEST_F(LNNSleCapabilityTest, SetSleRangeCapToLocalLedgerTest002, TestSize.Leve
 
 /*
  * @tc.name: SetSleAddrToLocalLedgerTest001
- * @tc.desc: test func SetSleAddrToLocalLedger branch
+ * @tc.desc: Verify SetSleAddrToLocalLedger handles SLE enabled check
+ *           and different GetLocalSleAddrPacked return values
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -136,7 +139,8 @@ HWTEST_F(LNNSleCapabilityTest, SetSleAddrToLocalLedgerTest001, TestSize.Level1)
 
 /*
  * @tc.name: SleStateChangeEventHandlerTest001
- * @tc.desc: abnormal test func SleStateChangeEventHandler branch
+ * @tc.desc: Verify SleStateChangeEventHandler handles SLE state change
+ *           event with different GetSleRangeCapacityPacked results
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

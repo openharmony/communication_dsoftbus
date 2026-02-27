@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,19 @@
  */
 
 #include "trans_channel_callback.h"
+
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
+#include "legacy/softbus_adapter_hitrace.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "securec.h"
-#include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_init_common.h"
 #include "trans_channel_common.h"
 #include "trans_client_proxy.h"
@@ -95,7 +96,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     extra.deviceState = TransGetDeviceState(channel->peerDeviceId);
     if (!channel->isServer) {
         CoreSessionState state = CORE_SESSION_STATE_INIT;
-        TransGetSocketChannelStateByChannel(channel->channelId, channel->channelType, &state);
+        (void)TransGetSocketChannelStateByChannel(channel->channelId, channel->channelType, &state);
         if (state == CORE_SESSION_STATE_CANCELLING) {
             char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);

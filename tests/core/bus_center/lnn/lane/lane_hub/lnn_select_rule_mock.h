@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ public:
     virtual int32_t LnnAddLinkLedgerInfo(const char *udid, const LinkLedgerInfo *info) = 0;
     virtual int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8_t *linkCnt) = 0;
     virtual int32_t LnnGetWlanLinkedInfoPacked(LnnWlanLinkedInfo *info) = 0;
+    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
 };
 
 class LnnSelectRuleInterfaceMock : public LnnSelectRuleInterface {
@@ -89,6 +90,7 @@ public:
     MOCK_METHOD2(LnnAddLinkLedgerInfo, int32_t (const char *udid, const LinkLedgerInfo *info));
     MOCK_METHOD3(GetAllLinkWithDevId, int32_t (const char *peerUdid, LaneLinkType **linkList, uint8_t *linkCnt));
     MOCK_METHOD1(LnnGetWlanLinkedInfoPacked, int32_t (LnnWlanLinkedInfo *info));
+    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t (InfoKey, const uint8_t *, uint32_t));
 };
 } // namespace OHOS
 #endif // LNN_SELECT_RULE_MOCK_H

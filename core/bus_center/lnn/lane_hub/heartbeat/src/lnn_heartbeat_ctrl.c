@@ -135,12 +135,6 @@ bool IsHeartbeatEnable(void)
     bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
     bool isDeviceRisk = g_hbConditionState.deviceRiskState == SOFTBUS_DEVICE_IS_RISK;
 
-    LNN_LOGI(LNN_INIT,
-        "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
-        "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
-        "request=%{public}d, init check=%{public}d, deviceRisk=%{public}d",
-        isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
-        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc, isDeviceRisk);
     return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
         (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
         isInitCheckSuc && !isDeviceRisk;
@@ -297,11 +291,17 @@ static void HbSleStateEventHandler(const LnnEventBasicInfo *info)
 
 static void HbUpdateEnableStatusToMcu(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "local support mcu feature=%{public}d", LnnIsLocalSupportMcuFeature());
-    if (LnnIsLocalSupportMcuFeature() && g_enableStateMcu != IsHeartbeatEnableForMcu()) {
-        g_enableStateMcu = IsHeartbeatEnableForMcu();
-        LnnNotifyLpMcuInit(g_enableStateMcu);
+    bool isBleEnable = IsHeartbeatEnableForMcu();
+
+    if (!LnnIsLocalSupportMcuFeature()) {
+        return;
     }
+    if (isBleEnable == g_enableStateMcu) {
+        return;
+    }
+    g_enableStateMcu = isBleEnable;
+    SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
+    LnnNotifyLpMcuInit(state, 0);
 }
 
 static void HbConditionChanged(bool isOnlySetState)
@@ -363,7 +363,7 @@ static void RequestEnableDiscovery(void *para)
 {
     (void)para;
     if (!g_hbConditionState.isRequestDisable) {
-        LNN_LOGI(LNN_HEART_BEAT, "ble has been enabled, don't need  restore enabled");
+        LNN_LOGI(LNN_HEART_BEAT, "ble has been enabled, don't need restore enabled");
         return;
     }
     g_hbConditionState.isRequestDisable = false;
@@ -390,11 +390,11 @@ static void RequestDisableDiscovery(int64_t timeout)
     HbConditionChanged(false);
 }
 
-static int32_t SameAccountDevDisableDiscoveryProcess(void)
+static int32_t SameAccountDevDisableDiscoveryProcess(bool hasMcuRequestDisable)
 {
     bool addrType[CONNECTION_ADDR_MAX] = {false};
     addrType[CONNECTION_ADDR_BLE] = true;
-    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, hasMcuRequestDisable) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "leave ble network fail");
     }
     return LnnSyncBleOfflineMsgPacked();
@@ -402,7 +402,14 @@ static int32_t SameAccountDevDisableDiscoveryProcess(void)
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter");
+    if (LnnIsLocalSupportMcuFeature()) {
+        SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
+        LnnNotifyLpMcuInit(state, strategy);
+        if (strategy == SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY) {
+            SameAccountDevDisableDiscoveryProcess(true);
+        }
+        return;
+    }
     switch (strategy) {
         case REQUEST_DISABLE_BLE_DISCOVERY:
             RequestDisableDiscovery(timeout);
@@ -412,7 +419,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             break;
         case SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY:
             RequestDisableDiscovery(INVALID_DELAY_TIME);
-            SameAccountDevDisableDiscoveryProcess();
+            SameAccountDevDisableDiscoveryProcess(false);
             break;
         case SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY:
             RequestEnableDiscovery(NULL);
@@ -1123,12 +1130,34 @@ static void HbTryRecoveryNetwork(void)
     HbConditionChanged(true);
 }
 
+static void DumpHeartbeatEnableInfo(void)
+{
+    bool isBtOn = ((g_hbConditionState.btState != SOFTBUS_BLE_TURN_OFF) &&
+        (g_hbConditionState.btState != SOFTBUS_BT_UNKNOWN));
+    bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
+    bool isLogIn = g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN;
+    bool isBackground = g_hbConditionState.backgroundState == SOFTBUS_USER_BACKGROUND;
+    bool isNightMode = g_hbConditionState.nightModeState == SOFTBUS_NIGHT_MODE_ON;
+    bool isOOBEEnd =
+        g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
+    bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
+    bool isDeviceRisk = g_hbConditionState.deviceRiskState == SOFTBUS_DEVICE_IS_RISK;
+
+    LNN_LOGI(LNN_INIT,
+        "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
+        "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
+        "request=%{public}d, init check=%{public}d, deviceRisk=%{public}d",
+        isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
+        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc, isDeviceRisk);
+}
+
 static void PeriodDumpLocalInfo(void *para)
 {
     (void)para;
 
     LnnDumpLocalBasicInfo();
     (void)IsHeartbeatEnable();
+    DumpHeartbeatEnableInfo();
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), PeriodDumpLocalInfo, NULL, HB_PERIOD_DUMP_LOCAL_INFO_LEN);
 }
 

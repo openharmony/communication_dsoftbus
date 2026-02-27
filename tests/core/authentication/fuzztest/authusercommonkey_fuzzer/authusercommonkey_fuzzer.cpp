@@ -61,10 +61,10 @@ void UpdateUserKeyList(const AuthACLInfo aclInfo, AuthUserKeyInfo userKeyInfo)
 
 void ProcessInsertrAuthUserCommonKey(const AuthACLInfo aclInfo, AuthUserKeyInfo userKeyInfo)
 {
-    AuthInsertUserKey(&aclInfo, &userKeyInfo, true);
-    AuthInsertUserKey(&aclInfo, &userKeyInfo, true);
-    AuthInsertUserKey(&aclInfo, &userKeyInfo, true);
-    AuthInsertUserKey(&aclInfo, &userKeyInfo, true);
+    AuthInsertUserKey(&aclInfo, &userKeyInfo, true, DP_BIND_TYPE_DIFF_ACCOUNT);
+    AuthInsertUserKey(&aclInfo, &userKeyInfo, true, DP_BIND_TYPE_SAME_ACCOUNT);
+    AuthInsertUserKey(&aclInfo, &userKeyInfo, true, DP_BIND_TYPE_SHARE);
+    AuthInsertUserKey(&aclInfo, &userKeyInfo, true, DP_BIND_TYPE_MAX);
 }
 
 void ProcessGetUserKeyInfo(const AuthACLInfo aclInfo, AuthUserKeyInfo userKeyInfo)

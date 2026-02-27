@@ -138,12 +138,6 @@ typedef int32_t (*AuthOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId
 typedef void (*AuthCloseConnFunc)(AuthHandle authHandle);
 typedef int32_t (*AuthPostTransDataFunc)(AuthHandle authHandle, const AuthTransData *dataInfo);
 typedef int32_t (*LnnGetRemoteNodeInfoByIdFunc)(const char *id, IdCategory type, NodeInfo *info);
-typedef AuthManager *(*GetAuthManagerByAuthIdFunc)(int64_t authId);
-typedef int32_t (*GetLatestSessionKeyFunc)(const SessionKeyList *list, AuthLinkType type,
-    int32_t *index, SessionKey *key);
-typedef void (*DelDupAuthManagerFunc)(AuthManager *auth);
-typedef int32_t (*GetSessionKeyByIndexFunc)(const SessionKeyList *list, int32_t index,
-    AuthLinkType type, SessionKey *key);
 
 typedef MapIterator *(*LnnMapInitIteratorFunc)(Map *map);
 typedef bool (*LnnMapHasNextFunc)(MapIterator *it);
@@ -199,6 +193,7 @@ typedef int32_t (*LnnGetLocalByteInfoFunc)(InfoKey key, uint8_t *info, uint32_t 
 typedef int32_t (*LnnGetAllOnlineNodeInfoFunc)(NodeBasicInfo **info, int32_t *infoNum);
 typedef int32_t (*LnnGetOnlineAndOfflineWithinTimeUdidsFunc)(char **udids, int32_t *udidNum, uint64_t timeRange);
 typedef int32_t (*LnnGetNodeKeyInfoFunc)(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
+typedef int32_t (*LnnSetNodeKeyInfoFunc)(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
 typedef int32_t (*LnnGetNetworkIdByUdidFunc)(const char *udid, char *buf, uint32_t len);
 typedef int32_t (*LnnGetNetworkIdByUdidHashFunc)(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len,
     bool needOnline);

@@ -783,5 +783,10 @@ bool IsSameAccountId(int64_t accountId)
 {
     return GetNetBuilderDepsInterface()->IsSameAccountId(accountId);
 }
+
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return GetNetBuilderDepsInterface()->GetWifiDirectManager();
+}
 } // extern "C"
 } // namespace OHOS

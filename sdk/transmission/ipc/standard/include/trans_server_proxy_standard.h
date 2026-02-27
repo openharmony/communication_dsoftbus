@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,8 @@ public:
     int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum) override;
     int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) override;
     int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+        uint32_t len) override;
+    int32_t SetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
         uint32_t len) override;
     int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag) override;
     int32_t RegDataLevelChangeCb(const char *pkgName) override;

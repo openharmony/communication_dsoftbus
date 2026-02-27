@@ -124,6 +124,8 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P ||
+        OHOS::SoftBus::WifiDirectUtils::SupportHml(), SOFTBUS_NOT_IMPLEMENT, CONN_WIFI_DIRECT, "not support hml");
 
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
@@ -560,6 +562,16 @@ static void NotifyConnectedForSink(const struct WifiDirectSinkLink *link)
     }
 }
 
+static void NotifyVirtualLinkStateChange(VirtualLinkState virtualLinkState, const char *remoteUuid)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    for (auto listener : g_listeners) {
+        if (listener.onVirtualLinkStateChange != nullptr) {
+            listener.onVirtualLinkStateChange(virtualLinkState, remoteUuid);
+        }
+    }
+}
+
 static void NotifyDisconnectedForSink(const struct WifiDirectSinkLink *link)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
@@ -580,6 +592,13 @@ static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirec
     auto link = OHOS::SoftBus::LinkManager::GetInstance().GetReuseLink(linkType, remoteUuid);
     if (link == nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
+        return true;
+    }
+    // The eyeglasses wake up the virtual link through a guidance channel.
+    if (link->GetLinkPowerMode() == LOW_POWER &&
+        (OHOS::SoftBus::WifiDirectUtils::GetDeviceType() == TYPE_GLASS_ID ||
+            OHOS::SoftBus::WifiDirectUtils::GetDeviceType(remoteNetworkId) == TYPE_GLASS_ID)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "glasses scenario, need negotiate channel");
         return true;
     }
     if (link->GetNegotiateChannel() == nullptr) {
@@ -844,6 +863,7 @@ static struct WifiDirectManager g_manager = {
     .notifyPtkSyncResult = NotifyPtkSyncResult,
     .notifyPtkMismatch = NotifyPtkMismatch,
     .notifyHmlState = NotifyHmlState,
+    .notifyVirtualLinkStateChange = NotifyVirtualLinkStateChange,
     .getRemoteIpByRemoteMac = GetRemoteIpByRemoteMac,
 
     .addFrequencyChangedListener = AddFrequencyChangedListener,

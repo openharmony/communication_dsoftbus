@@ -101,6 +101,10 @@ static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *param
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectSuccessCnt);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectFailCnt);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.virtualLinkType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.brProxyState);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.brProxyIsClear);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.brProxyIsRetry);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.brProxyIsAcl);
     return ++index;
 }
 

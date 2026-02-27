@@ -31,6 +31,7 @@ declare_args() {
   dsoftbus_feature_conn_hv2 = false
   dsoftbus_feature_conn_hv2c = false
   dsoftbus_feature_conn_action = false
+  dsoftbus_feature_conn_general = true
   dsoftbus_feature_conn_legacy_im = false
   dsoftbus_feature_conn_legacy_data = false
 
@@ -39,6 +40,8 @@ declare_args() {
   dsoftbus_feature_trans_udp = true
   dsoftbus_feature_trans_proxy_file = true
   dsoftbus_feature_trans_qos = false
+  dsoftbus_feature_trans_htp = false
+  dsoftbus_feature_trans_br_proxy = false
   dsoftbus_feature_trans_legacy = false
   dsoftbus_feature_lnn_ble = true
   dsoftbus_feature_lnn_wifi = true
@@ -62,4 +65,5 @@ declare_args() {
   dsoftbus_feature_coap = true
   dsoftbus_feature_lnn_usb_ncm = false
   dsoftbus_feature_trans_mintp = false
+  dsoftbus_feature_lnn_d2d_auth = true
 }

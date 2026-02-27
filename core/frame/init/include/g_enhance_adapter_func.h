@@ -39,6 +39,8 @@ typedef void (*SoftbusBleAdapterDeInitFunc)(void);
 typedef void (*RegisterRadarCbForOpenSrcFunc)(void *callback);
 typedef void (*SoftbusSleAdapterInit)(void);
 typedef void (*SoftbusSleAdapterDeInit)(void);
+typedef int32_t (*SoftbusMcuTimerInitFunc)(void);
+typedef void (*SoftbusMcuTimerDeinitFunc)(void);
 
 typedef struct TagAdapterEnhanceFuncList {
     SoftBusRegRangeCbFunc softBusRegRangeCb;
@@ -55,6 +57,8 @@ typedef struct TagAdapterEnhanceFuncList {
     RegisterRadarCbForOpenSrcFunc registerRadarCbForOpenSrc;
     SoftbusSleAdapterInit softbusSleAdapterInit;
     SoftbusSleAdapterDeInit softbusSleAdapterDeInit;
+    SoftbusMcuTimerInitFunc softbusMcuTimerInit;
+    SoftbusMcuTimerDeinitFunc softbusMcuTimerDeinit;
 } AdapterEnhanceFuncList;
 
 AdapterEnhanceFuncList *AdapterEnhanceFuncListGet(void);

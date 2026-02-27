@@ -397,9 +397,9 @@ int32_t LnnNotifyDiscoveryDevice(
     return GetLocalLedgerDepsInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
-    return GetLocalLedgerDepsInterface()->LnnRequestLeaveByAddrType(type, typeLen);
+    return GetLocalLedgerDepsInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
 }
 
 int32_t LnnAsyncCallbackDelayHelper(

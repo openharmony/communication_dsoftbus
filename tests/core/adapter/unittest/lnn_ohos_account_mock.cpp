@@ -61,62 +61,62 @@ int32_t GetCurrentAccount(int64_t *account)
 {
     return GetLnnOhosAccountInterface()->GetCurrentAccount(account);
 }
- 
+
 int32_t GetOsAccountUid(char *id, uint32_t idLen, uint32_t *len)
 {
     return GetLnnOhosAccountInterface()->GetOsAccountUid(id, idLen, len);
 }
- 
+
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {
     return GetLnnOhosAccountInterface()->LnnGetOhosAccountInfo(accountHash, len);
 }
- 
+
 void DiscDeviceInfoChanged(InfoTypeChanged type)
 {
     return GetLnnOhosAccountInterface()->DiscDeviceInfoChanged(type);
 }
- 
+
 void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state)
 {
     return GetLnnOhosAccountInterface()->LnnNotifyDeviceInfoChanged(state);
 }
- 
+
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     return GetLnnOhosAccountInterface()->LnnUpdateHeartbeatInfo(type);
 }
- 
+
 void ClearAuthLimitMap(void)
 {
     return GetLnnOhosAccountInterface()->ClearAuthLimitMap();
 }
- 
+
 void ClearLnnBleReportExtraMap(void)
 {
     return GetLnnOhosAccountInterface()->ClearLnnBleReportExtraMap();
 }
- 
+
 void ClearPcRestrictMap(void)
 {
     return GetLnnOhosAccountInterface()->ClearPcRestrictMap();
 }
- 
+
 int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 {
     return GetLnnOhosAccountInterface()->LnnSetLocalStrInfo(key, info);
 }
- 
+
 int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
 {
     return GetLnnOhosAccountInterface()->LnnSetLocalByteInfo(key, info, len);
 }
- 
+
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     return GetLnnOhosAccountInterface()->LnnGetLocalStrInfo(key, info, len);
 }
- 
+
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
     return GetLnnOhosAccountInterface()->LnnSetLocalNum64Info(key, info);
@@ -429,9 +429,9 @@ int32_t lnnRegistProtocol(LnnProtocolManager *protocolMgr)
     return GetLnnOhosAccountInterface()->LnnRegistProtocol(protocolMgr);
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
-    return GetLnnOhosAccountInterface()->LnnRequestLeaveByAddrType(type, typeLen);
+    return GetLnnOhosAccountInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
 }
 
 int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete)

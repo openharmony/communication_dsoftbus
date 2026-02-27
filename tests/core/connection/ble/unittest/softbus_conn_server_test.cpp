@@ -57,7 +57,7 @@ int32_t SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtU
 class ServiceConnectionTest : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase() {}
+    static void TearDownTestCase();
     void SetUp() override {}
     void TearDown() override {}
 };
@@ -67,6 +67,12 @@ void ServiceConnectionTest::SetUpTestCase()
     LooperInit();
     SoftbusConfigInit();
     ConnServerInit();
+}
+
+void ServiceConnectionTest::TearDownTestCase()
+{
+    ConnServerDeinit();
+    LooperDeinit();
 }
 
 /*

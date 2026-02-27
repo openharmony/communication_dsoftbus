@@ -71,6 +71,12 @@ int32_t ServerIpcGetNodeKeyInfo(
     return GetBusCenterManagerInterface()->ServerIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
 
+int32_t ServerIpcSetNodeKeyInfo(
+    const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len)
+{
+    return GetBusCenterManagerInterface()->ServerIpcSetNodeKeyInfo(pkgName, networkId, key, buf, len);
+}
+
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     return GetBusCenterManagerInterface()->ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);

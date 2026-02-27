@@ -100,7 +100,8 @@ void LNNDistributedNetLedgerManagerTest::TearDown()
 
 /*
  * @tc.name: LNN_SET_DL_WIFI_DIRECT_ADDR_TEST_001
- * @tc.desc: LnnSetDLWifiDirectAddr test
+ * @tc.desc: Verify LnnSetDLWifiDirectAddr sets wifi direct address with
+ *           null and valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -120,7 +121,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_WIFI_DIRECT_ADDR_TEST_00
 
 /*
  * @tc.name: LNN_SET_DL_P2P_IP_TEST_001
- * @tc.desc: LnnSetDLP2pIp test
+ * @tc.desc: Verify LnnSetDLP2pIp sets P2P IP address with null and
+ *           valid UUID and IP parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -142,7 +144,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_P2P_IP_TEST_001, TestSiz
 
 /*
  * @tc.name: LNN_SET_DL_AUTH_PORT_TEST_001
- * @tc.desc: LnnSetDLAuthPort test
+ * @tc.desc: Verify LnnSetDLAuthPort sets auth port with null and
+ *           valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -160,7 +163,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_AUTH_PORT_TEST_001, Test
 
 /*
  * @tc.name: LNN_SET_DL_SESSION_PORT_TEST_001
- * @tc.desc: LnnSetDLSessionPort test
+ * @tc.desc: Verify LnnSetDLSessionPort sets session port with null and
+ *           valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -178,7 +182,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_SESSION_PORT_TEST_001, T
 
 /*
  * @tc.name: LNN_SET_DL_PROXY_PORT_TEST_001
- * @tc.desc: LnnSetDLProxyPort test
+ * @tc.desc: Verify LnnSetDLProxyPort sets proxy port with null and
+ *           valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -196,7 +201,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_PROXY_PORT_TEST_001, Tes
 
 /*
  * @tc.name: LNN_SET_DL_NODE_ADDR_TEST_001
- * @tc.desc: LnnSetDLNodeAddr test
+ * @tc.desc: Verify LnnSetDLNodeAddr sets node address with null and
+ *           valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -214,7 +220,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_NODE_ADDR_TEST_001, Test
 
 /*
  * @tc.name: LNN_SET_DL_BSS_TRANS_INFO_TEST_001
- * @tc.desc: LnnSetDLBssTransInfo test
+ * @tc.desc: Verify LnnSetDLBssTransInfo sets BSS transition info with
+ *           null and valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -236,7 +243,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BSS_TRANS_INFO_TEST_001,
 
 /*
  * @tc.name: LNN_SET_DL_BATTERY_INFO_TEST_001
- * @tc.desc: LnnSetDLBatteryInfo test
+ * @tc.desc: Verify LnnSetDLBatteryInfo sets battery info with null and
+ *           valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -258,7 +266,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_BATTERY_INFO_TEST_001, T
 
 /*
  * @tc.name: LNN_SET_DL_CONN_USER_ID_TEST_001
- * @tc.desc: LnnSetDLConnUserId test
+ * @tc.desc: Verify LnnSetDLConnUserId sets connection user ID with
+ *           null and valid network ID parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -376,7 +385,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_UPDATE_TIMESTAMP_TEST_00
     ret = LnnGetDLUpdateTimestamp(NODE_NETWORK_ID, &timestamp);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnGetDLUpdateTimestamp(NODE1_NETWORK_ID, &timestamp);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /*
@@ -547,7 +556,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BOOL_INFO_IGNORE_ONL
     ret = LnnGetRemoteBoolInfoIgnoreOnline(NODE_NETWORK_ID, BOOL_KEY_SCREEN_STATUS, &result);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     ret = LnnGetRemoteBoolInfoIgnoreOnline(NODE1_NETWORK_ID, BOOL_KEY_SCREEN_STATUS, &result);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_SUPPORT);
 
     ret = LnnGetRemoteBoolInfo(NODE1_NETWORK_ID, BOOL_KEY_SCREEN_STATUS, &result);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_SUPPORT);

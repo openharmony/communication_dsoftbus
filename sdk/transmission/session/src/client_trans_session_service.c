@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #define _GNU_SOURCE
 #endif
 
-#include "securec.h"
+#include <securec.h>
 #include <unistd.h>
 
 #include "anonymizer.h"
@@ -46,8 +46,8 @@
 #include "trans_server_proxy.h"
 #include "trans_split_serviceid.h"
 
-typedef int (*SessionOptionRead)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
-typedef int (*SessionOptionWrite)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
+typedef int32_t (*SessionOptionRead)(int32_t channelId, int32_t type, void *value, uint32_t valueSize);
+typedef int32_t (*SessionOptionWrite)(int32_t channelId, int32_t type, void *value, uint32_t valueSize);
 
 typedef struct {
     bool canRead;
@@ -60,7 +60,7 @@ typedef struct {
     ConfigType configType;
 } ConfigTypeMap;
 
-static bool IsValidSessionId(int sessionId)
+static bool IsValidSessionId(int32_t sessionId)
 {
     if (sessionId <= 0) {
         TRANS_LOGE(TRANS_SDK, "invalid sessionId=%{public}d", sessionId);
@@ -104,7 +104,7 @@ static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
     return sessionId;
 }
 
-int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
+int32_t CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         !IsValidListener(listener)) {
@@ -126,7 +126,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
     }
     uint64_t timestamp = 0;
 
-    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener, &timestamp);
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGI(TRANS_SDK, "SessionServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
@@ -147,7 +147,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
     return ret;
 }
 
-int RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t RemoveSessionServer(const char *pkgName, const char *sessionName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
@@ -261,7 +261,7 @@ static void InitSessionParam(const char *mySessionName, const char *peerSessionN
     param->actionId = INVALID_ACTION_ID;
 }
 
-int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
+int32_t OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
     int32_t ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
@@ -343,11 +343,11 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
         return SOFTBUS_OK;
     }
     if (GetJsonObjectStringItem(obj, "BLE_MAC", addrInfo->info.ble.bleMac, BT_MAC_LEN)) {
-        char udidHash[UDID_HASH_LEN] = {0};
+        char udidHash[UDID_HASH_LEN] = { 0 };
         if (GetJsonObjectStringItem(obj, "deviceId", udidHash, UDID_HASH_LEN)) {
             char *tmpUdidHash = NULL;
             Anonymize(udidHash, &tmpUdidHash);
-            int ret = ConvertHexStringToBytes(
+            int32_t ret = ConvertHexStringToBytes(
                 (unsigned char *)addrInfo->info.ble.udidHash, UDID_HASH_LEN, udidHash, strlen(udidHash));
             TRANS_LOGI(TRANS_SDK, "string to bytes ret=%{public}d, udidHash=%{public}s",
                 ret, AnonymizeWrapper(tmpUdidHash));
@@ -362,7 +362,7 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     return SOFTBUS_PARSE_JSON_ERR;
 }
 
-static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
+static int32_t IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int32_t num)
 {
     int32_t addrIndex = -1;
     if (addrInfo == NULL || num <= 0) {
@@ -394,7 +394,7 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
     return addrIndex;
 }
 
-int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int num, const char *mixAddr)
+int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int32_t num, const char *mixAddr)
 {
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
@@ -445,7 +445,7 @@ int OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int
     return sessionId;
 }
 
-void NotifyAuthSuccess(int sessionId)
+void NotifyAuthSuccess(int32_t sessionId)
 {
     int32_t channelId = -1;
     int32_t channelType = -1;
@@ -506,10 +506,10 @@ static int32_t CheckSessionIsOpened(int32_t sessionId, bool isCancelCheck)
     return SOFTBUS_TIMOUT;
 }
 
-int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
+int32_t OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
-    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
+    int32_t ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "invalid session name.");
     PrintSessionName(mySessionName, peerSessionName);
 
@@ -539,7 +539,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     }
     param.isAsync = false;
     param.sessionId = sessionId;
-    TransInfo transInfo = {0};
+    TransInfo transInfo = { 0 };
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
@@ -563,7 +563,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     return sessionId;
 }
 
-void CloseSession(int sessionId)
+void CloseSession(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d", sessionId);
     int32_t channelId = INVALID_CHANNEL_ID;
@@ -593,7 +593,7 @@ void CloseSession(int sessionId)
     TRANS_LOGD(TRANS_SDK, "ok");
 }
 
-int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
+int32_t GetMySessionName(int32_t sessionId, char *sessionName, unsigned int len)
 {
     if (!IsValidSessionId(sessionId) || (sessionName == NULL) || (len > SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
@@ -603,7 +603,7 @@ int GetMySessionName(int sessionId, char *sessionName, unsigned int len)
     return ClientGetSessionDataById(sessionId, sessionName, len, KEY_SESSION_NAME);
 }
 
-int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
+int32_t GetPeerSessionName(int32_t sessionId, char *sessionName, unsigned int len)
 {
     if (!IsValidSessionId(sessionId) || (sessionName == NULL) || (len > SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
@@ -613,7 +613,7 @@ int GetPeerSessionName(int sessionId, char *sessionName, unsigned int len)
     return ClientGetSessionDataById(sessionId, sessionName, len, KEY_PEER_SESSION_NAME);
 }
 
-int GetPeerDeviceId(int sessionId, char *networkId, unsigned int len)
+int32_t GetPeerDeviceId(int32_t sessionId, char *networkId, unsigned int len)
 {
     if (!IsValidSessionId(sessionId) || (networkId  == NULL) || (len > SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
@@ -623,7 +623,7 @@ int GetPeerDeviceId(int sessionId, char *networkId, unsigned int len)
     return ClientGetSessionDataById(sessionId, networkId, len, KEY_PEER_DEVICE_ID);
 }
 
-int GetSessionSide(int sessionId)
+int32_t GetSessionSide(int32_t sessionId)
 {
     TRANS_LOGI(TRANS_SDK, "get session side by sessionId=%{public}d", sessionId);
     return ClientGetSessionSide(sessionId);
@@ -644,7 +644,7 @@ static bool IsValidFileReceivePath(const char *rootDir)
     return true;
 }
 
-int SetFileReceiveListener(const char *pkgName, const char *sessionName,
+int32_t SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
@@ -663,7 +663,7 @@ int SetFileReceiveListener(const char *pkgName, const char *sessionName,
     return TransSetFileReceiveListener(sessionName, recvListener, rootDir);
 }
 
-int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener)
+int32_t SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
         sendListener == NULL) {
@@ -725,7 +725,7 @@ int32_t GetSessionKey(int32_t sessionId, char *key, unsigned int len)
     return ClientGetSessionKey(channelId, key, len);
 }
 
-int32_t GetSessionHandle(int32_t sessionId, int *handle)
+int32_t GetSessionHandle(int32_t sessionId, int32_t *handle)
 {
     int32_t channelId;
     if (!IsValidSessionId(sessionId) || handle == NULL) {
@@ -819,7 +819,7 @@ int32_t ReadMaxSendBytesSize(int32_t channelId, int32_t type, void *value, uint3
     return SOFTBUS_OK;
 }
 
-int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
+int32_t ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
     if (value == NULL) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
@@ -840,7 +840,7 @@ int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_
     return SOFTBUS_OK;
 }
 
-int ReadSessionLinkType(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
+int32_t ReadSessionLinkType(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
     if (value == NULL) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
@@ -867,7 +867,7 @@ static const SessionOptionItem g_SessionOptionArr[SESSION_OPTION_BUTT] = {
     {true, ReadSessionLinkType},
 };
 
-int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize)
+int32_t GetSessionOption(int32_t sessionId, SessionOption option, void* optionValue, uint32_t valueSize)
 {
     if ((option >= SESSION_OPTION_BUTT) || (optionValue == NULL) || (valueSize == 0)) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
@@ -915,7 +915,7 @@ bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName, i
     return true;
 }
 
-int CreateSocket(const char *pkgName, const char *sessionName)
+int32_t CreateSocket(const char *pkgName, const char *sessionName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         TRANS_LOGE(TRANS_SDK, "invalid pkgName or sessionName");
@@ -927,7 +927,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
 
     ret = CheckPackageName(pkgName);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PKGNAME, TRANS_SDK, "invalid pkg name");
-    char newSessionName[SESSION_NAME_SIZE_MAX + 1] = {0};
+    char newSessionName[SESSION_NAME_SIZE_MAX + 1] = { 0 };
     if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, strlen(sessionName)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "copy session name failed");
         return SOFTBUS_STRCPY_ERR;
@@ -943,7 +943,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
         }
     }
     uint64_t timestamp = 0;
-    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName, &timestamp);
+    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, newSessionName, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
@@ -1101,8 +1101,8 @@ static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *
 
 int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount)
 {
-    #define TRANS_DEFAULT_MIN_BW 0
-    #define LOW_BW                  (384 * 1024)
+#define TRANS_DEFAULT_MIN_BW 0
+#define LOW_BW               (384 * 1024)
     int32_t minBW = 0;
     bool enableMultipath = false;
     int32_t dataType = 0;
@@ -1131,7 +1131,7 @@ int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount)
         TRANS_LOGI(TRANS_SDK, "set enableMultipath, socket=%{public}d", socket);
     }
     if (enableMultipath && (minBW <= LOW_BW || dataType != TYPE_FILE)) {
-        TRANS_LOGE(TRANS_SDK, "check multipath disable, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
+        TRANS_LOGE(TRANS_SDK, "not multipath ability, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
         ClientSetEnableMultipathBySocket(socket, false);
     }
     return SOFTBUS_OK;
@@ -1314,6 +1314,14 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
             CheckSessionIsOpened(socket, true);
         }
         TRANS_LOGI(TRANS_SDK, "This socket state is callback finish, socket=%{public}d", socket);
+        int32_t channelIdReserve = INVALID_CHANNEL_ID;
+        int32_t channelTypeReserve = CHANNEL_TYPE_BUTT;
+        int32_t routeTypeReserve = -1;
+        if (ClientGetReserveChannelBySessionId(socket, &channelIdReserve, &channelTypeReserve, &routeTypeReserve) ==
+            SOFTBUS_OK && channelIdReserve != INVALID_CHANNEL_ID) {
+            (void)ClientClearReserveChannelBySessionId(socket);
+            (void)ClientTransCloseReserveChannel(channelIdReserve, channelTypeReserve, routeTypeReserve, false);
+        }
         int32_t channelId = INVALID_CHANNEL_ID;
         int32_t type = CHANNEL_TYPE_BUTT;
         ret = ClientGetChannelBySessionId(socket, &channelId, &type, NULL);

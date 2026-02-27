@@ -51,7 +51,7 @@ int32_t SoftBusRegRangeCbPacked(SoftBusRangeModule module, const SoftBusRangeCal
 {
     AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
     if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softBusRegRangeCb) != SOFTBUS_OK) {
-        return SoftBusRegRangeCb(module, callback);
+        return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnAdapterEnhanceFuncList->softBusRegRangeCb(module, callback);
 }
@@ -60,7 +60,6 @@ void SoftBusUnregRangeCbPacked(SoftBusRangeModule module)
 {
     AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
     if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softBusUnregRangeCb) != SOFTBUS_OK) {
-        SoftBusUnregRangeCb(module);
         return;
     }
     return pfnAdapterEnhanceFuncList->softBusUnregRangeCb(module);
@@ -127,4 +126,22 @@ void SoftbusSleAdapterDeInitPacked(void)
         return;
     }
     return pfnAdapterEnhanceFuncList->softbusSleAdapterDeInit();
+}
+
+int32_t SoftbusMcuTimerInitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softbusMcuTimerInit) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAdapterEnhanceFuncList->softbusMcuTimerInit();
+}
+
+void SoftbusMcuTimerDeinitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit();
 }

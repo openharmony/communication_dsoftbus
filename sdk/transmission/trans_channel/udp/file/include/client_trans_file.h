@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,13 +31,11 @@ int32_t TransOnFileChannelOpened(
 
 void TransCloseFileChannel(int32_t dfileId);
 
-void TransClearFileChannel(int32_t dfileId);
-
 int32_t TransSendFile(int32_t dfileId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
 int32_t NotifyTransLimitChanged(int32_t channelId, uint8_t tos);
 
-void TransCloseReserveFileChannel(int32_t dfileId, const char *srvIp, int32_t srvPort, int32_t type);
+void TransCloseReserveFileChannel(int32_t dfileId, struct sockaddr_storage *addr, socklen_t addrLen, int32_t type);
 #ifdef __cplusplus
 }
 #endif

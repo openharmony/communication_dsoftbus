@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,10 +36,10 @@
 #include "trans_server_proxy.h"
 #include "trans_split_serviceid.h"
 
-#define NETWORK_ID_LEN 7
-#define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
-#define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
-#define SENDBYTES_TIMEOUT_S 20
+#define NETWORK_ID_LEN       7
+#define GET_ROUTE_TYPE(type) ((uint32_t)(type)&0xff)
+#define GET_CONN_TYPE(type)  (((uint32_t)(type) >> 8) & 0xff)
+#define SENDBYTES_TIMEOUT_S  20
 
 #define DISTRIBUTED_DATA_SESSION "distributeddata-default"
 static IFeatureAbilityRelationChecker *g_relationChecker = NULL;
@@ -81,12 +81,8 @@ void TransDataSeqInfoListDeinit(void)
 
 bool IsValidSessionParam(const SessionParam *param)
 {
-    if ((param == NULL) ||
-        (param->sessionName == NULL) ||
-        (param->peerSessionName == NULL) ||
-        (param->peerDeviceId == NULL) ||
-        (param->groupId == NULL) ||
-        (param->attr == NULL)) {
+    if ((param == NULL) || (param->sessionName == NULL) || (param->peerSessionName == NULL) ||
+        (param->peerDeviceId == NULL) || (param->groupId == NULL) || (param->attr == NULL)) {
         return false;
     }
     return true;
@@ -98,7 +94,7 @@ SessionInfo *CreateNewSession(const SessionParam *param)
         TRANS_LOGE(TRANS_SDK, "param is null");
         return NULL;
     }
-    SessionInfo *session = (SessionInfo*)SoftBusCalloc(sizeof(SessionInfo));
+    SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
     if (session == NULL) {
         TRANS_LOGE(TRANS_SDK, "calloc failed");
         return NULL;
@@ -128,10 +124,10 @@ SessionInfo *CreateNewSession(const SessionParam *param)
     return session;
 }
 
-NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode,
-    const ClientSessionServer *server)
+DestroySessionInfo *CreateDestroySessionNode(
+    SessionInfo *sessionNode, const ClientSessionServer *server, LinkDownType linkDownType)
 {
-    if (sessionNode == NULL || server == NULL) {
+    if (sessionNode == NULL || server == NULL || linkDownType == LINK_DOWN_MAX_NUM_TYPE) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return NULL;
     }
@@ -141,8 +137,16 @@ NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *ses
         return NULL;
     }
     destroyNode->sessionId = sessionNode->sessionId;
-    destroyNode->channelId = sessionNode->channelId;
-    destroyNode->channelType = sessionNode->channelType;
+    if (linkDownType == NOT_MULTIPATH || linkDownType == MULTIPATH_FIRST_CHANNEL) {
+        destroyNode->channelId = sessionNode->channelId;
+        destroyNode->channelType = sessionNode->channelType;
+        destroyNode->routeType = sessionNode->routeType;
+    } else {
+        destroyNode->channelId = sessionNode->channelIdReserve;
+        destroyNode->channelType = sessionNode->channelTypeReserve;
+        destroyNode->routeType = sessionNode->routeTypeReserve;
+    }
+    destroyNode->linkDownType = linkDownType;
     destroyNode->isAsync = sessionNode->isAsync;
     if (!sessionNode->lifecycle.condIsWaiting) {
         (void)SoftBusCondDestroy(&(sessionNode->lifecycle.callbackCond));
@@ -163,13 +167,13 @@ NO_SANITIZE("cfi") DestroySessionInfo *CreateDestroySessionNode(SessionInfo *ses
     if (server->listener.isSocketListener == false) {
         destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
     } else {
-        destroyNode->OnShutdown = sessionNode->isServer ? server->listener.socketServer.OnShutdown :
-            server->listener.socketClient.OnShutdown;
+        destroyNode->OnShutdown =
+            sessionNode->isServer ? server->listener.socketServer.OnShutdown : server->listener.socketClient.OnShutdown;
     }
     return destroyNode;
 }
 
-NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
+void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
 {
     if (destroyList == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -184,6 +188,15 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
     TRANS_LOGD(TRANS_SDK, "enter.");
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
+        if (destroyNode->linkDownType == MULTIPATH_ONLY_SECOND_CHANNEL ||
+            destroyNode->linkDownType == MULTIPATH_BOTH_CHANNEL) {
+            bool delSecondPath = destroyNode->linkDownType == MULTIPATH_ONLY_SECOND_CHANNEL ? true : false;
+            (void)ClientTransCloseReserveChannel(
+                destroyNode->channelId, destroyNode->channelType, destroyNode->routeType, delSecondPath);
+            ListDelete(&(destroyNode->node));
+            SoftBusFree(destroyNode);
+            continue;
+        }
         (void)ClientDeleteRecvFileList(id);
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType, id);
         if (destroyNode->OnSessionClosed != NULL) {
@@ -212,7 +225,18 @@ void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyLi
         SessionInfo *sessionNode = NULL;
         SessionInfo *sessionNodeNext = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
-            DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+            DestroySessionInfo *destroyNode = NULL;
+            if (sessionNode->enableMultipath && sessionNode->channelIdReserve != INVALID_CHANNEL_ID) {
+                destroyNode = CreateDestroySessionNode(sessionNode, server, MULTIPATH_BOTH_CHANNEL);
+                sessionNode->channelIdReserve = INVALID_CHANNEL_ID;
+                sessionNode->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+                sessionNode->routeTypeReserve = -1;
+            }
+            if (destroyNode != NULL) {
+                ListAdd(destroyList, &(destroyNode->node));
+                destroyNode = NULL;
+            }
+            destroyNode = CreateDestroySessionNode(sessionNode, server, NOT_MULTIPATH);
             if (destroyNode == NULL) {
                 continue;
             }
@@ -231,8 +255,8 @@ void DestroyClientSessionServer(ClientSessionServer *server, ListNode *destroyLi
     SoftBusFree(server);
 }
 
-ClientSessionServer *GetNewSessionServer(SoftBusSecType type, const char *sessionName,
-    const char *pkgName, const ISessionListener *listener)
+ClientSessionServer *GetNewSessionServer(
+    SoftBusSecType type, const char *sessionName, const char *pkgName, const ISessionListener *listener)
 {
     if (sessionName == NULL || pkgName == NULL || listener == NULL) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
@@ -372,11 +396,46 @@ static bool CheckDMHandleAgingSession(const char *sessionName, const SessionInfo
     return false;
 }
 
+static bool ClientTransNeedDelReserve(SessionInfo *sessionNode, int32_t routeType, bool *onlyReserveLinkDown)
+{
+    if (sessionNode == NULL || routeType == INVALID_ROUTE_TYPE || onlyReserveLinkDown == NULL) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return false;
+    }
+    if (!sessionNode->enableMultipath) {
+        return false;
+    }
+    if ((sessionNode->routeType == routeType && sessionNode->routeTypeReserve != INVALID_ROUTE_TYPE) ||
+        sessionNode->routeTypeReserve == routeType) {
+        TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, type1=%{public}d, type2=%{public}d, linkDownType=%{public}d",
+            sessionNode->sessionId, sessionNode->routeType, sessionNode->routeTypeReserve, routeType);
+        *onlyReserveLinkDown = sessionNode->routeType == routeType ? false : true;
+        return true;
+    }
+    return false;
+}
+
+static void ClientTransDelReserveLinkDown(
+    SessionInfo *sessionNode, const ClientSessionServer *server, ListNode *destroyList, bool onlyReserveLinkDown)
+{
+    if (sessionNode == NULL || destroyList == NULL) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return;
+    }
+    LinkDownType linkDownType = onlyReserveLinkDown ? MULTIPATH_ONLY_SECOND_CHANNEL : MULTIPATH_BOTH_CHANNEL;
+    DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server, linkDownType);
+    sessionNode->channelIdReserve = INVALID_CHANNEL_ID;
+    sessionNode->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
+    sessionNode->routeTypeReserve = -1;
+    if (destroyNode != NULL) {
+        ListAdd(destroyList, &(destroyNode->node));
+    }
+    return;
+}
+
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
 static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
-    TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, type1=%{public}d, type2=%{public}d, linkDownType=%{public}d",
-        sessionNode->sessionId, sessionNode->routeType, sessionNode->routeTypeReserve, routeType);
     if (connType == TRANS_CONN_ALL) {
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
             return false;
@@ -388,40 +447,14 @@ static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, 
         return true;
     }
     /*
-    * only when the function OnWifiDirectDeviceOffLine is called can reach this else branch,
-    * and routeType is WIFI_P2P, the connType is hml or p2p
-    */
-    if (sessionNode->enableMultipath &&
-        (sessionNode->routeTypeReserve == routeType || sessionNode->routeType == routeType)) {
-        TRANS_LOGE(TRANS_SDK, "reserve link down");
-        char srvIp[IP_LEN];
-        int32_t srvPort = -1;
-        int32_t ret = TransGetUdpChannelExtraInfo(sessionNode->channelIdReserve, srvIp, &srvPort);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "TransGetUdpChannelExtraInfo error, ret=%{public}d", ret);
-            return false;
-        }
-        ret = ClientTransCloseReserveChannel(sessionNode->channelIdReserve,
-            sessionNode->channelTypeReserve, srvIp, srvPort, routeType);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "ClientTransCloseReserveChannel error, ret=%{public}d", ret);
-            return false;
-        }
-        TRANS_LOGI(TRANS_SDK, "clear reserveInfo, channelIdReserve=%{public}d, routeTypeReserve=%{public}d",
-            sessionNode->channelIdReserve, sessionNode->routeTypeReserve);
-        sessionNode->channelIdReserve = INVALID_CHANNEL_ID;
-        sessionNode->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
-        sessionNode->routeTypeReserve = -1;
-        if (sessionNode->routeTypeReserve == routeType) {
-            return false;
-        }
-    }
-    
+     * only when the function OnWifiDirectDeviceOffLine is called can reach this else branch,
+     * and routeType is WIFI_P2P, the connType is hml or p2p
+     */
     if (sessionNode->routeType != routeType) {
         return false;
     }
 
-    char myIp[IP_LEN] = {0};
+    char myIp[IP_LEN] = { 0 };
     if (sessionNode->channelType == CHANNEL_TYPE_UDP) {
         if (ClientTransGetUdpIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             return false;
@@ -459,7 +492,7 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
         TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
-        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server, NOT_MULTIPATH);
         if (destroyNode == NULL) {
             continue;
         }
@@ -473,8 +506,8 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
     }
 }
 
-void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
-    const char *networkId, int32_t type, ListNode *destroyList)
+void DestroyClientSessionByNetworkId(
+    const ClientSessionServer *server, const char *networkId, int32_t type, ListNode *destroyList)
 {
     if (server == NULL || networkId == NULL || destroyList == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -490,6 +523,15 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
         if (strcmp(sessionNode->info.peerDeviceId, networkId) != 0) {
             continue;
         }
+        bool onlyReserveLinkDown = true;
+        if (ClientTransNeedDelReserve(sessionNode, routeType, &onlyReserveLinkDown)) {
+            (void)ClientTransDelReserveLinkDown(sessionNode, server, destroyList, onlyReserveLinkDown);
+            if (sessionNode->routeType != routeType) {
+                TRANS_LOGI(TRANS_SDK, "multi path reserve channel link down.");
+                continue;
+            }
+            TRANS_LOGI(TRANS_SDK, "multi path main channel link down.");
+        }
 
         if (!ClientTransCheckNeedDel(server->sessionName, sessionNode, routeType, connType)) {
             continue;
@@ -497,7 +539,7 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
 
         TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d, type=%{public}d",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType, type);
-        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server, NOT_MULTIPATH);
         if (destroyNode == NULL) {
             continue;
         }
@@ -689,9 +731,11 @@ int32_t CheckBindSocketInfo(const SessionInfo *session)
         char *anonyNetworkId = NULL;
         Anonymize(session->info.peerSessionName, &anonySessionName);
         Anonymize(session->info.peerDeviceId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK, "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
-            "peerNetworkIdLen=%{public}zu", AnonymizeWrapper(anonySessionName), strlen(session->info.peerSessionName),
-            AnonymizeWrapper(anonyNetworkId), strlen(session->info.peerDeviceId));
+        TRANS_LOGI(TRANS_SDK,
+            "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
+            "peerNetworkIdLen=%{public}zu",
+            AnonymizeWrapper(anonySessionName), strlen(session->info.peerSessionName), AnonymizeWrapper(anonyNetworkId),
+            strlen(session->info.peerDeviceId));
         AnonymizeFree(anonyNetworkId);
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
@@ -705,8 +749,8 @@ int32_t CheckBindSocketInfo(const SessionInfo *session)
     return SOFTBUS_OK;
 }
 
-void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
-    ClientSessionServer *serverNode, SessionInfo *sessionNode)
+void FillSessionParam(
+    SessionParam *param, SessionAttribute *tmpAttr, ClientSessionServer *serverNode, SessionInfo *sessionNode)
 {
     if (param == NULL || tmpAttr == NULL || serverNode == NULL || sessionNode == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -779,8 +823,8 @@ void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
     TRANS_LOGD(TRANS_SDK, "ok");
 }
 
-void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode,
-    int32_t waitOutSocket[], uint32_t capacity, uint32_t *num)
+void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *sessionNode, int32_t waitOutSocket[],
+    uint32_t capacity, uint32_t *num)
 {
     if (serverNode == NULL || sessionNode == NULL || waitOutSocket == NULL || num == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -876,7 +920,7 @@ void ClientUpdateIdleTimeout(const ClientSessionServer *serverNode, SessionInfo 
         return;
     }
 
-    DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
+    DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode, NOT_MULTIPATH);
     if (destroyNode == NULL) {
         TRANS_LOGE(TRANS_SDK, "failed to create destory session Node, sessionId=%{public}d", sessionNode->sessionId);
         return;
@@ -902,8 +946,8 @@ int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList)
         uint64_t timestamp = SoftBusGetSysTimeMs();
         int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName, timestamp);
         Anonymize(infoNode->sessionName, &tmpName);
-        TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d",
-            AnonymizeWrapper(tmpName), infoNode->pkgName, ret);
+        TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d", AnonymizeWrapper(tmpName),
+            infoNode->pkgName, ret);
         AnonymizeFree(tmpName);
         ListDelete(&infoNode->node);
         SoftBusFree(infoNode);
@@ -1057,7 +1101,7 @@ void PrivilegeDestroyAllClientSession(
         }
         TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
-        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
+        DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server, NOT_MULTIPATH);
         if (destroyNode == NULL) {
             continue;
         }
@@ -1086,8 +1130,8 @@ int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationCh
     } else {
         TRANS_LOGI(TRANS_SDK, "overwrite relation checker.");
     }
-    int32_t ret = memcpy_s(g_relationChecker, sizeof(IFeatureAbilityRelationChecker),
-        relationChecker, sizeof(IFeatureAbilityRelationChecker));
+    int32_t ret = memcpy_s(g_relationChecker, sizeof(IFeatureAbilityRelationChecker), relationChecker,
+        sizeof(IFeatureAbilityRelationChecker));
     if (ret != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy_s relationChecker failed, ret=%{public}d", ret);
         return SOFTBUS_MEM_ERR;
@@ -1138,8 +1182,7 @@ int32_t ClientTransCheckCollabRelation(
     }
     int32_t ret = g_relationChecker->CheckCollabRelation(sourceInfo, sinkInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK,
-            "channelId=%{public}d check collaboration relation fail, ret=%{public}d", channelId, ret);
+        TRANS_LOGE(TRANS_SDK, "channelId=%{public}d check collaboration relation fail, ret=%{public}d", channelId, ret);
         PrintCollabInfo(sourceInfo, (char *)"source");
         PrintCollabInfo(sinkInfo, (char *)"sink");
         return SOFTBUS_TRANS_CHECK_RELATION_FAIL;
@@ -1154,7 +1197,7 @@ void DestroyRelationChecker(void)
         return;
     }
     SoftBusFree(g_relationChecker);
-    g_relationChecker= NULL;
+    g_relationChecker = NULL;
 }
 
 int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType)
@@ -1180,7 +1223,7 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
     item->seq = (int32_t)dataSeq;
     item->socketId = socketId;
     item->channelType = channelType;
-    item->isMessage = (businessType == BUSINESS_TYPE_D2D_MESSAGE) ? true :false;
+    item->isMessage = (businessType == BUSINESS_TYPE_D2D_MESSAGE) ? true : false;
     ListInit(&item->node);
     ListAdd(&(g_clientDataSeqInfoList->list), &(item->node));
     TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
@@ -1201,8 +1244,8 @@ int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
         if (item->channelId == channelId && item->seq == (int32_t)dataSeq) {
             ListDelete(&(item->node));
             SoftBusFree(item);
-            TRANS_LOGD(TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u",
-                channelId, dataSeq);
+            TRANS_LOGD(
+                TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
             UnlockClientDataSeqInfoList();
             return SOFTBUS_OK;
         }
@@ -1244,8 +1287,8 @@ static void TransOnBindSentProc(ListNode *timeoutItemList)
             }
             sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
         }
-        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u",
-            item->socketId, item->seq);
+        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u", item->socketId,
+            item->seq);
         ListDelete(&(item->node));
         SoftBusFree(item);
     }

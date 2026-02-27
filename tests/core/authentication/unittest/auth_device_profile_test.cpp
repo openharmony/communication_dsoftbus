@@ -41,16 +41,6 @@ const int32_t TEST_USER_ID_ONE = 1;
 const int32_t TEST_USER_ID_TWO = 2;
 const int32_t TEST_USER_ID_THREE = 3;
 const uint32_t TEST_ERROR_USER_ID = -1;
-const uint32_t CRED_ID_STR_LEN = 300;
-
-typedef struct {
-    bool isLocal;
-    int32_t userId;
-    char udid[UDID_BUF_LEN];
-    char credId[CRED_ID_STR_LEN];
-    char shareCredId[CRED_ID_STR_LEN];
-    char accountUid[ACCOUNT_UID_STR_LEN];
-} SoftBusAclInfo;
 
 class AuthDeviceProfileTest : public testing::Test {
 public:
@@ -244,9 +234,6 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
     InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId, 0);
     bool result = IsNotTrustDevice(deviceIdHash);
     EXPECT_FALSE(result);
-    std::string uidTest;
-    int32_t ret = GetAccountUid(uidTest);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED);
 }
 
 /*

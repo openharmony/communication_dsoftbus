@@ -40,5 +40,7 @@ int32_t AdapterRegisterEnhanceFunc(void *soHandle)
     g_adapterEnhanceFuncList.registerRadarCbForOpenSrc = dlsym(soHandle, "RegisterRadarCbForOpenSrc");
     g_adapterEnhanceFuncList.softbusSleAdapterInit = dlsym(soHandle, "SoftbusSleAdapterInit");
     g_adapterEnhanceFuncList.softbusSleAdapterDeInit = dlsym(soHandle, "SoftbusSleAdapterDeInit");
+    g_adapterEnhanceFuncList.softbusMcuTimerInit = dlsym(soHandle, "SoftbusMcuTimerInit");
+    g_adapterEnhanceFuncList.softbusMcuTimerDeinit = dlsym(soHandle, "SoftbusMcuTimerDeinit");
     return SOFTBUS_OK;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 
 #include "bus_center_manager.h"
 #include "common_list.h"
-#include "regex.h"
-#include "securec.h"
 #include "lnn_lane_interface_struct.h"
 #include "lnn_ohos_account_adapter.h"
+#include "regex.h"
+#include "securec.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -319,7 +319,7 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
     }
 }
 
-void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
+void TransCloseUdpChannelByNetWorkId(const char *netWorkId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
     if ((g_udpChannelMgr == NULL) || (netWorkId == NULL)) {
