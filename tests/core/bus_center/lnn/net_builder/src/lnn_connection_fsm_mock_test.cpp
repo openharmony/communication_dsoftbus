@@ -82,13 +82,12 @@ static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
  */
 HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.Level1)
 {
-    LnnConnectionFsm *connFsm = nullptr;
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_WLAN,
         .info.ip.port = PORT1,
     };
     (void)strcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, DEVICE_IP1);
-    connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
+    LnnConnectionFsm *connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -130,6 +129,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     (void)strcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP2);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
+    LnnStopConnectionFsm(connFsm, LnnConnectionFsmStopCallback);
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -469,4 +469,199 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDestroyConnectionFsm(connFsm);
 }
+
+/*
+ * @tc.name: DFX_RECORD_TRIGGER_TIME_TEST_001
+ * @tc.desc: test DfxRecordTriggerTime with valid parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, DFX_RECORD_TRIGGER_TIME_TEST_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(DfxRecordTriggerTime(WIFI_STATE_CHANGED, EVENT_STAGE_LNN_USER_SWITCHED));
+}
+
+/*
+ * @tc.name: DEVICE_STATE_CHANGE_PROCESS_TEST_001
+ * @tc.desc: test DeviceStateChangeProcess with null udid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, DEVICE_STATE_CHANGE_PROCESS_TEST_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(DeviceStateChangeProcess(nullptr, CONNECTION_ADDR_BLE, true));
+}
+
+/*
+ * @tc.name: DEVICE_STATE_CHANGE_PROCESS_TEST_002
+ * @tc.desc: test DeviceStateChangeProcess with non-BLE type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, DEVICE_STATE_CHANGE_PROCESS_TEST_002, TestSize.Level1)
+{
+    char udid[UDID_BUF_LEN] = "testUdid";
+    EXPECT_NO_FATAL_FAILURE(DeviceStateChangeProcess(udid, CONNECTION_ADDR_WLAN, true));
+}
+
+/*
+ * @tc.name: DEVICE_STATE_CHANGE_PROCESS_TEST_003
+ * @tc.desc: test DeviceStateChangeProcess with BLE type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, DEVICE_STATE_CHANGE_PROCESS_TEST_003, TestSize.Level1)
+{
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillRepeatedly(Return(false));
+
+    char udid[UDID_BUF_LEN] = "testUdid";
+    EXPECT_NO_FATAL_FAILURE(DeviceStateChangeProcess(udid, CONNECTION_ADDR_BLE, true));
+}
+
+/*
+ * @tc.name: SET_ASSET_SESSION_KEY_BY_AUTH_INFO_TEST_001
+ * @tc.desc: test SetAssetSessionKeyByAuthInfo with null info
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, SET_ASSET_SESSION_KEY_BY_AUTH_INFO_TEST_001, TestSize.Level1)
+{
+    AuthHandle authHandle = {};
+    EXPECT_NO_FATAL_FAILURE(SetAssetSessionKeyByAuthInfo(nullptr, authHandle));
+}
+
+/*
+ * @tc.name: UPDATE_DEVICE_INFO_TO_MCU_TEST_001
+ * @tc.desc: test UpdateDeviceInfoToMcu with valid udid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, UPDATE_DEVICE_INFO_TO_MCU_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
+
+    const char *udid = "testUdid";
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceInfoToMcu(udid));
+}
+
+/*
+ * @tc.name: UPDATE_DEVICE_INFO_TO_MLPS_TEST_001
+ * @tc.desc: test UpdateDeviceInfoToMlps with valid udid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
+
+    const char *udid = "testUdid";
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceInfoToMlps(udid));
+}
+
+/*
+ * @tc.name: IS_REPEAT_DEVICE_ID_TEST_003
+ * @tc.desc: test IsRepeatDeviceId with device not found
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, IS_REPEAT_DEVICE_ID_TEST_003, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    NodeInfo info = {};
+    (void)memset_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, 'A', UDID_BUF_LEN - 1);
+    info.deviceInfo.deviceUdid[UDID_BUF_LEN - 1] = '\0';
+    (void)memset_s(info.networkId, NETWORK_ID_BUF_LEN, 'B', NETWORK_ID_BUF_LEN - 1);
+    info.networkId[NETWORK_ID_BUF_LEN - 1] = '\0';
+    EXPECT_FALSE(IsRepeatDeviceId(&info));
+}
+
+/*
+ * @tc.name: CHECK_REMOTE_BASIC_INFO_CHANGED_TEST_001
+ * @tc.desc: test CheckRemoteBasicInfoChanged with null info
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, CHECK_REMOTE_BASIC_INFO_CHANGED_TEST_001, TestSize.Level1)
+{
+    EXPECT_FALSE(CheckRemoteBasicInfoChanged(nullptr));
+}
+
+/*
+ * @tc.name: CHECK_REMOTE_BASIC_INFO_CHANGED_TEST_002
+ * @tc.desc: test CheckRemoteBasicInfoChanged with device not found
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, CHECK_REMOTE_BASIC_INFO_CHANGED_TEST_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    NodeInfo nodeInfo = {};
+    EXPECT_FALSE(CheckRemoteBasicInfoChanged(&nodeInfo));
+}
+
+/*
+ * @tc.name: FILL_BLE_ADDR_TEST_001
+ * @tc.desc: test FillBleAddr with valid parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, FILL_BLE_ADDR_TEST_001, TestSize.Level1)
+{
+    ConnectionAddr addr = {};
+    ConnectionAddr connAddr = {};
+    NodeInfo nodeInfo = {};
+    (void)memset_s(nodeInfo.connectInfo.macAddr, BT_MAC_LEN, 'A', BT_MAC_LEN - 1);
+    nodeInfo.connectInfo.macAddr[BT_MAC_LEN - 1] = '\0';
+    (void)memset_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, 'B', UDID_BUF_LEN - 1);
+    nodeInfo.deviceInfo.deviceUdid[UDID_BUF_LEN - 1] = '\0';
+    int32_t ret = FillBleAddr(&addr, &connAddr, &nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(addr.type, CONNECTION_ADDR_BLE);
+}
+
+/*
+ * @tc.name: UPDATE_DEVICE_DEVICE_NAME_TEST_001
+ * @tc.desc: test UpdateDeviceDeviceName with same name
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, UPDATE_DEVICE_DEVICE_NAME_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnSetDLDeviceInfoName).WillRepeatedly(Return(true));
+
+    NodeInfo nodeInfo = {};
+    NodeInfo remoteInfo = {};
+    (void)strcpy_s(nodeInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "TestDevice");
+    (void)strcpy_s(remoteInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "TestDevice");
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceDeviceName(&nodeInfo, &remoteInfo));
+}
+
+/*
+ * @tc.name: UPDATE_DEVICE_DEVICE_NAME_TEST_002
+ * @tc.desc: test UpdateDeviceDeviceName with different name
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmMockTest, UPDATE_DEVICE_DEVICE_NAME_TEST_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnSetDLDeviceInfoName).WillRepeatedly(Return(true));
+
+    NodeInfo nodeInfo = {};
+    NodeInfo remoteInfo = {};
+    (void)strcpy_s(nodeInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "NewDevice");
+    (void)strcpy_s(remoteInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "OldDevice");
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceDeviceName(&nodeInfo, &remoteInfo));
+}
+
 } // namespace OHOS
