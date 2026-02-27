@@ -53,16 +53,16 @@ int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnGetDLUpdateTimestamp(const char *udid, uint64_t *timestamp);
 int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp);
 int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity);
+int32_t LnnGetDLSleRangeCapacity(const char *networkId, uint32_t *sleRangeCapacity);
 bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability);
-int32_t LnnSetDLConnUserIdCheckSum(const char *networked, int32_t userIdCheckSum);
 int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
 int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum);
 int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId);
 int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info);
 int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info);
-const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash);
+int32_t LnnGetOnlineNodeByUdidHash(const char *recvUdidHash, NodeInfo *outNode);
 void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
 int32_t LnnUpdateNetworkId(const NodeInfo *newInfo);

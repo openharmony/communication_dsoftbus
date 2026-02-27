@@ -204,6 +204,13 @@ int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnGetDLSleRangeCapacity(const char *networkId, uint32_t *sleRangeCapacity)
+{
+    (void)networkId;
+    (void)sleRangeCapacity;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     (void)networkId;

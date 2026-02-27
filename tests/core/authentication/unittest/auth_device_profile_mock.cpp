@@ -59,9 +59,10 @@ bool AuthIsUkExpired(uint64_t time)
     return GetInterface()->AuthIsUkExpired(time);
 }
 
-int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel)
+int32_t AuthInsertUserKey(
+    const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel, DpBindType type)
 {
-    return GetInterface()->AuthInsertUserKey(aclInfo, userKeyInfo, isUserBindLevel);
+    return GetInterface()->AuthInsertUserKey(aclInfo, userKeyInfo, isUserBindLevel, type);
 }
 
 uint64_t SoftBusGetSysTimeMs(void)
