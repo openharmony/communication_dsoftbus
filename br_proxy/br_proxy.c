@@ -704,7 +704,7 @@ int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const c
         int64_t timeStart = info.timeStart;
         int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
         TransEventExtra extra = {
-            .channelId = info.channelId,
+            .channelId = channelId,
             .errcode = result,
             .result = (result == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
             .costTime = (int32_t)timeDiff,

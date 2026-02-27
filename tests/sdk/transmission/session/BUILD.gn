@@ -56,11 +56,13 @@ ohos_unittest("TransClientSessionManagerTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   }
@@ -154,11 +156,13 @@ ohos_unittest("TransClientSessionServiceTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   }
@@ -209,6 +213,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
 
   external_deps = [
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "hilog:libhilog",
   ]
 }
@@ -328,6 +333,7 @@ ohos_unittest("TransClientMsgServiceTest") {
 
   external_deps = [
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "hilog:libhilog",
   ]
 }

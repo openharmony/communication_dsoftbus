@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,7 +230,7 @@ int32_t ClientGetSessionKey(int32_t channelId, char *key, unsigned int len)
     return TransTdcGetSessionKey(channelId, key, len);
 }
 
-int32_t ClientGetHandle(int32_t channelId, int *handle)
+int32_t ClientGetHandle(int32_t channelId, int32_t *handle)
 {
     return TransTdcGetHandle(channelId, handle);
 }

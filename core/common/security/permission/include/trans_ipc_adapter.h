@@ -15,13 +15,12 @@
 
 #ifndef TRANS_IPC_ADAPTER_H
 #define TRANS_IPC_ADAPTER_H
+
 #include <stdint.h>
 #include <sys/types.h>
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 uint64_t TransAclGetFirstTokenID(void);
@@ -31,9 +30,7 @@ uint64_t TransAclGetCallingTokenID(void);
 pid_t TransGetCallingPid(void);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
-#endif /* __cplusplus */
 #endif /* __cplusplus */
 
 #endif /* TRANS_IPC_ADAPTER_H */
