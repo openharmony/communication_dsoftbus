@@ -50,7 +50,7 @@ int32_t ConnSetHtpKeepalive(int32_t fd, int32_t aliveTime)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-static SocketInterface HtpSocketIntf = {
+static SocketInterface htpSocketIntf = {
     .name = "HTP",
     .type = LNN_PROTOCOL_HTP,
     .GetSockPort = GetHtpSockPort,
@@ -61,5 +61,5 @@ static SocketInterface HtpSocketIntf = {
 
 const SocketInterface *GetHtpProtocol(void)
 {
-    return &HtpSocketIntf;
+    return &htpSocketIntf;
 }
