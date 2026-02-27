@@ -78,10 +78,10 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
         char anomizeAddress[BT_MAC_LEN] = { 0 };
         ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
         ConnEventExtra extra = {
-            .peerBrMac = anomizeAddress,
-            .connectionId = (int32_t)connection->channelId,
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
+            .connectionId = (int32_t)connection->channelId,
+            .peerBrMac = anomizeAddress,
         };
         CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
     }
@@ -112,11 +112,11 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
         char anomizeAddress[BT_MAC_LEN] = { 0 };
         ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
         ConnEventExtra extra = {
-            .peerBrMac = anomizeAddress,
-            .connectionId = (int32_t)connection->channelId,
-            .requestId = (int32_t)connection->proxyChannel.requestId,
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+            .connectionId = (int32_t)connection->channelId,
+            .requestId = (int32_t)connection->proxyChannel.requestId,
+            .peerBrMac = anomizeAddress,
         };
         CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_START, extra);
         return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
