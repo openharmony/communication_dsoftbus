@@ -258,6 +258,7 @@ static int32_t SetNegoInfoRecvSessionKey(
         if (item->requestId == requestId) {
             item->negoInfo.isRecvSessionKeyEvent = isRecv;
             item->applyKeyLen = applyKeyLen;
+            (void)memset_s(item->applyKey, sizeof(item->applyKey), 0, sizeof(item->applyKey));
             if (memcpy_s(item->applyKey, sizeof(item->applyKey), applyKey, applyKeyLen) != EOK) {
                 AUTH_LOGE(AUTH_CONN, "memcpy applyKey fail");
                 ReleaseApplyKeyNegoListLock();

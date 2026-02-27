@@ -43,6 +43,7 @@
 typedef struct {
     bool isUserBindLevel;
     ListNode node;
+    DpBindType bindType;
     AuthACLInfo aclInfo;
     AuthUserKeyInfo ukInfo;
 } UserKeyInfo;
@@ -52,7 +53,6 @@ static SoftBusList *g_userKeyList = NULL;
 int32_t AuthUserKeyInit(void)
 {
     if (g_userKeyList != NULL) {
-        AUTH_LOGI(AUTH_KEY, "g_userKeyList already init");
         return SOFTBUS_OK;
     }
     g_userKeyList = CreateSoftBusList();
@@ -91,6 +91,12 @@ static int32_t UpdateUserKeyListByAcl(const AuthACLInfo *aclInfo, const AuthUser
 {
     UserKeyInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
+        bool isSameSide = strcmp(aclInfo->sourceUdid, item->aclInfo.sourceUdid) == 0;
+        if (!(item->bindType == DP_BIND_TYPE_SAME_ACCOUNT &&
+            !CompareByAclSameAccount(aclInfo, &item->aclInfo, isSameSide)) &&
+            !CompareByAllAcl(aclInfo, &item->aclInfo, isSameSide)) {
+            continue;
+        }
         if (!CompareByAllAcl(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
             continue;
         }
@@ -204,6 +210,7 @@ void DelUserKeyByNetworkId(const char *networkId)
     UserKeyInfo *nextItem = NULL;
     char *anonyUdid = NULL;
     Anonymize(peerUdid, &anonyUdid);
+
     if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "user key lock fail, anonyUdid=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
@@ -239,7 +246,7 @@ int32_t GetUserKeyInfoDiffAccountWithUserLevel(const AuthACLInfo *aclInfo, AuthU
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
-        if (!item->isUserBindLevel ||
+        if (!item->isUserBindLevel || item->bindType != DP_BIND_TYPE_DIFF_ACCOUNT ||
             !CompareByAclDiffAccountWithUserLevel(
                 aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
             continue;
@@ -275,6 +282,9 @@ int32_t GetUserKeyInfoDiffAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *u
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
+        if (item->bindType != DP_BIND_TYPE_DIFF_ACCOUNT) {
+            continue;
+        }
         if (!CompareByAclDiffAccount(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
             continue;
         }
@@ -309,7 +319,8 @@ int32_t GetUserKeyInfoSameAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *u
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
-        if (!CompareByAclSameAccount(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
+        if (item->bindType != DP_BIND_TYPE_SAME_ACCOUNT ||
+            !CompareByAclSameAccount(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
             continue;
         }
         if (memcpy_s(userKeyInfo, sizeof(AuthUserKeyInfo), &item->ukInfo, sizeof(AuthUserKeyInfo)) != EOK) {
