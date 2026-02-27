@@ -135,14 +135,13 @@ void LnnSendSleInfoForAllNode(void)
 
 static void SleStateChangeEventHandler(int32_t state)
 {
-    LNN_LOGE(LNN_LEDGER, "SleStateChangeEventHandler enter!");
-    if (state != SOFTBUS_SLE_STATE_TURN_ON) {
-        LNN_LOGI(LNN_LEDGER, "event is not sle turn on, ignore");
+    LNN_LOGI(LNN_LEDGER, "SleStateChangeEventHandler enter state=%{public}d", state);
+    if (state == SOFTBUS_SLE_STATE_TURN_ON || state == SOFTBUS_SLE_STATE_TURN_HALF) {
+        (void)SetSleRangeCapToLocalLedger();
+        (void)SetSleAddrToLocalLedger();
+        (void)LnnSendSleInfoForAllNode();
         return;
     }
-    (void)SetSleRangeCapToLocalLedger();
-    (void)SetSleAddrToLocalLedger();
-    (void)LnnSendSleInfoForAllNode();
 }
 
 int32_t LocalLedgerInitSleCapacity(NodeInfo* nodeInfo)

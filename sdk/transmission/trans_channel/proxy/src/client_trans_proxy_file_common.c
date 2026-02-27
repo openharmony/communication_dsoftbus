@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -179,8 +179,8 @@ const char *TransGetFileName(const char *path)
         return NULL;
     }
 
-    int i;
-    for (i = (int)(pathLength - 1); i >= 0; i--) {
+    int32_t i;
+    for (i = (int32_t)(pathLength - 1); i >= 0; i--) {
         if (path[i] == SOFTBUS_PATH_SEPRATOR) {
             i++;
             break;

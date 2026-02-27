@@ -47,6 +47,7 @@ ohos_unittest("TransSessionManagerTest") {
 
   external_deps = [
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
@@ -77,6 +78,7 @@ ohos_unittest("TransSessionServiceTest") {
 
   external_deps = [
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]

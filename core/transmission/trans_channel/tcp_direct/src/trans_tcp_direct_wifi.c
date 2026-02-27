@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,8 @@
 #include "softbus_socket.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_message.h"
-#include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_p2p.h"
+#include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
 
 #define ID_OFFSET (1)

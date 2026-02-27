@@ -162,9 +162,8 @@ int32_t UpdateAuthGenCertParaNode(int32_t requestId, bool isValid, SoftbusCertCh
 int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **genCertParaNode)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(genCertParaNode != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "CertParaNode is NULL");
-    int32_t ret = 0;
     int32_t totalSleepMs = 0;
-    ret = FindAuthGenCertParaNodeById(requestId, genCertParaNode);
+    int32_t ret = FindAuthGenCertParaNodeById(requestId, genCertParaNode);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -383,7 +382,7 @@ int32_t FindAuthPreLinkNodeByUuid(const char *uuid, AuthPreLinkNode *preLinkNode
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, char *uuid)
+int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, const char *uuid)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "uuid is NULL");
     if (AuthPreLinkLock() != SOFTBUS_OK) {
@@ -426,7 +425,7 @@ void DelAuthPreLinkById(uint32_t requestId)
     AuthPreLinkUnlock();
 }
 
-void DelAuthPreLinkByUuid(char *uuid)
+void DelAuthPreLinkByUuid(const char *uuid)
 {
     AUTH_CHECK_AND_RETURN_LOGE(uuid != NULL, AUTH_CONN, "uuid is NULL");
     if (AuthPreLinkLock() != SOFTBUS_OK) {

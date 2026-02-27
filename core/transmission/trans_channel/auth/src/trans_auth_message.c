@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,12 @@
 
 #include "trans_auth_message.h"
 
+#include "lnn_lane_interface.h"
 #include "securec.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
-#include "lnn_lane_interface.h"
 
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 

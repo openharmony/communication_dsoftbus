@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,12 +33,12 @@ public:
         {
             listener_->OnStreamReceived(std::move(stream));
         }
-        void OnStreamStatus(int status) override
+        void OnStreamStatus(int32_t status) override
         {
             listener_->OnStreamStatus(status);
         }
 
-        int OnStreamHdrReceived(std::unique_ptr<char[]> header, int size) override
+        int32_t OnStreamHdrReceived(std::unique_ptr<char[]> header, int32_t size) override
         {
             static_cast<void>(header);
             static_cast<void>(size);
@@ -68,19 +68,19 @@ public:
     StreamManager() = delete;
     virtual ~StreamManager() = default;
 
-    int CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
-        int streamType, std::pair<uint8_t*, uint32_t> sessionKey) override;
+    int32_t CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
+        int32_t streamType, std::pair<uint8_t*, uint32_t> sessionKey) override;
 
-    int CreateStreamServerChannel(IpAndPort &local, Proto protocol, int streamType,
+    int32_t CreateStreamServerChannel(IpAndPort &local, Proto protocol, int32_t streamType,
         std::pair<uint8_t*, uint32_t> sessionKey) override;
 
     bool DestroyStreamDataChannel() override;
 
     bool Send(std::unique_ptr<IStream> data) override;
 
-    bool SetOption(int type, const StreamAttr &value) override;
+    bool SetOption(int32_t type, const StreamAttr &value) override;
     int32_t SetMultiLayer(const void *para) override;
-    StreamAttr GetOption(int type) const override;
+    StreamAttr GetOption(int32_t type) const override;
 
     void SetStreamRecvListener(std::shared_ptr<IStreamManagerListener> recvListener) override;
     bool PrepareEnvironment(const std::string &pkgName) override;

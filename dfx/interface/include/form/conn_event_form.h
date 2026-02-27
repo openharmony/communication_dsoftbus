@@ -156,6 +156,7 @@ typedef struct {
     int32_t brProxyState;         // BR_PROXY_STATE
     int32_t brProxyIsClear;       // BR_PROXY_IS_CLEAR
     int32_t brProxyIsRetry;       // BR_PROXY_IS_RETRY
+    int32_t brProxyIsAcl;         // BR_PROXY_IS_ACL
 } ConnEventExtra;
 
 typedef enum {

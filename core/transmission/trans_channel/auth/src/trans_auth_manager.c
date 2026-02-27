@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,28 +21,28 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "comm_log.h"
-#include "lnn_connection_addr_utils.h"
-#include "lnn_net_builder.h"
 #include "g_enhance_auth_func.h"
 #include "g_enhance_auth_func_pack.h"
+#include "legacy/softbus_adapter_hitrace.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
+#include "lnn_connection_addr_utils.h"
+#include "lnn_net_builder.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
-#include "softbus_utils.h"
 #include "softbus_init_common.h"
-#include "legacy/softbus_adapter_hitrace.h"
+#include "softbus_utils.h"
 #include "trans_auth_message.h"
 #include "trans_channel_common.h"
 #include "trans_channel_limit.h"
-#include "trans_event.h"
-#include "trans_session_manager.h"
 #include "trans_channel_manager.h"
-#include "trans_log.h"
+#include "trans_event.h"
 #include "trans_lane_manager.h"
+#include "trans_log.h"
+#include "trans_session_manager.h"
 #include "wifi_direct_manager.h"
 
 #define AUTH_CHANNEL_REQ 0

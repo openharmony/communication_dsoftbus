@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <gtest/gtest.h>
@@ -1727,5 +1728,1131 @@ HWTEST_F(LNNLedgerMockTest, LNN_ANONYMIZE_SPARK_CHECK_TEST_001, TestSize.Level1)
         &anonySparkCheck));
     AnonymizeFree(anonySparkCheck);
     anonySparkCheck = nullptr;
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_HUKS_KEY_TIME_TEST_001
+ * @tc.desc: Verify LnnUpdateLocalHuksKeyTime returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_LOCAL_HUKS_KEY_TIME_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint64_t huksKeyTime = 987654321;
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalHuksKeyTime(huksKeyTime));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_PARENT_ID_TEST_001
+ * @tc.desc: Verify UpdateLocalParentId returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_PARENT_ID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *parentId = "test_parent_id_12345";
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalParentId(parentId));
+    EXPECT_NE(SOFTBUS_OK, UpdateLocalParentId(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_PUBLIC_ID_TEST_001
+ * @tc.desc: Verify UpdateLocalPublicId returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_PUBLIC_ID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *publicId = "test_public_id_67890";
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalPublicId(publicId));
+    EXPECT_NE(SOFTBUS_OK, UpdateLocalPublicId(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_ROLE_TEST_001
+ * @tc.desc: Verify UpdateLocalRole returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_ROLE_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalRole(ROLE_CONTROLLER));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalRole(ROLE_LEAF));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_STATUS_TEST_001
+ * @tc.desc: Verify UpdateLocalStatus returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_STATUS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalStatus(STATUS_ONLINE));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalStatus(STATUS_OFFLINE));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_WEIGHT_TEST_001
+ * @tc.desc: Verify UpdateLocalWeight returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_WEIGHT_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalWeight(100));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalWeight(200));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM64_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalNum64Info returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM64_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    int64_t info = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM64_INFO_TEST_001
+ * @tc.desc: Verify LnnSetLocalNum64Info returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM64_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, 123456789));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, 987654321));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM16_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalNum16Info returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM16_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    int32_t info = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM16_INFO_TEST_001
+ * @tc.desc: Verify LnnSetLocalNum16Info returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM16_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum16Info(NUM_KEY_SLE_RANGE_CAP, 100));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum16Info(NUM_KEY_SLE_RANGE_CAP, 200));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM_U16_INFO_TEST_001
+ * @tc.desc: Verify LnnSetLocalNumU16Info returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM_U16_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, 10));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, 20));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM_U32_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalNumU32Info returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM_U32_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint32_t info = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumU32Info(NUM_KEY_SLE_RANGE_CAP, &info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalNumU32Info(NUM_KEY_SLE_RANGE_CAP, nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM_U32_INFO_TEST_001
+ * @tc.desc: Verify LnnSetLocalNumU32Info returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM_U32_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU32Info(NUM_KEY_SLE_RANGE_CAP, 5000));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU32Info(NUM_KEY_SLE_RANGE_CAP, 6000));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_BYTE_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalByteInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BYTE_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint8_t info[SHA_256_HASH_LEN] = {0};
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, info, SHA_256_HASH_LEN));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, nullptr, SHA_256_HASH_LEN));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_BYTE_INFO_TEST_001
+ * @tc.desc: Verify LnnSetLocalByteInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_BYTE_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint8_t info[SHA_256_HASH_LEN] = {1, 2, 3, 4, 5};
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, info, SHA_256_HASH_LEN));
+    EXPECT_NE(SOFTBUS_OK, LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_SCREEN_STATUS_TEST_001
+ * @tc.desc: Verify LnnUpdateLocalScreenStatus returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_LOCAL_SCREEN_STATUS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalScreenStatus(true));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalScreenStatus(false));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_SLE_CAPACITY_AND_VERSION_TEST_001
+ * @tc.desc: Verify LnnUpdateSleCapacityAndVersion returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_SLE_CAPACITY_AND_VERSION_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateSleCapacityAndVersion(100));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateSleCapacityAndVersion(200));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_DEVICE_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalDeviceInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_DEVICE_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    NodeBasicInfo info;
+    (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalDeviceInfo(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalDeviceInfo(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_STATE_VERSION_TEST_001
+ * @tc.desc: Verify LnnUpdateStateVersion updates state version
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_STATE_VERSION_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    LnnUpdateStateVersion(UPDATE_NETWORKID);
+    LnnUpdateStateVersion(UPDATE_CIPHERKEY);
+    LnnUpdateStateVersion(UPDATE_CONCURRENT_AUTH);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_STR_INFO_TEST_001
+ * @tc.desc: Verify LnnSetLocalStrInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *info = "test_string_info";
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, info));
+    EXPECT_NE(SOFTBUS_OK, LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_BOOL_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalBoolInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    bool info = false;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, &info, sizeof(bool)));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, nullptr, sizeof(bool)));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM_INFO_TEST_001
+ * @tc.desc: Verify LnnSetLocalNumInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, 300));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, 400));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM_INFO_BY_IFNAME_IDX_TEST_001
+ * @tc.desc: Verify LnnSetLocalNumInfoByIfnameIdx returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM_INFO_BY_IFNAME_IDX_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, 8000, 0));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, 9000, 0));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM_INFO_BY_IFNAME_IDX_TEST_001
+ * @tc.desc: Verify LnnGetLocalNumInfoByIfnameIdx returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM_INFO_BY_IFNAME_IDX_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_STR_INFO_BY_IFNAME_IDX_TEST_001
+ * @tc.desc: Verify LnnGetLocalStrInfoByIfnameIdx returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_IDX_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    char info[MAX_ADDR_LEN] = {0};
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, info, MAX_ADDR_LEN, 0));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, nullptr, MAX_ADDR_LEN, 0));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_STR_INFO_BY_IFNAME_IDX_TEST_001
+ * @tc.desc: Verify LnnSetLocalStrInfoByIfnameIdx returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_BY_IFNAME_IDX_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *info = "test_ifname_info";
+    EXPECT_NE(SOFTBUS_OK, LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, info, 0));
+    EXPECT_NE(SOFTBUS_OK, LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_DEVICE_NAME_TEST_001
+ * @tc.desc: Verify LnnUpdateLocalDeviceName returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_LOCAL_DEVICE_NAME_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    DeviceBasicInfo info;
+    (void)memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
+    const char *name = "test_device_name";
+    (void)strcpy_s(info.deviceName, sizeof(info.deviceName), name);
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalDeviceName(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnUpdateLocalDeviceName(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_INIT_LOCAL_LEDGER_DELAY_TEST_001
+ * @tc.desc: Verify LnnInitLocalLedgerDelay returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_INIT_LOCAL_LEDGER_DELAY_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_NE(SOFTBUS_OK, LnnInitLocalLedgerDelay());
+}
+
+/*
+ * @tc.name: HANDLE_DEVICE_INFO_IF_UDID_CHANGED_TEST_001
+ * @tc.desc: Verify HandleDeviceInfoIfUdidChanged returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFO_IF_UDID_CHANGED_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, HandleDeviceInfoIfUdidChanged());
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_STR_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalStrInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    char info[ACCOUNT_UID_STR_LEN] = {0};
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, info, ACCOUNT_UID_STR_LEN));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, nullptr, ACCOUNT_UID_STR_LEN));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM_INFO_TEST_001
+ * @tc.desc: Verify LnnGetLocalNumInfo returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    int32_t info = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_NETWORK_ID_TEST_001
+ * @tc.desc: Verify LnnUpdateLocalNetworkId returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_LOCAL_NETWORK_ID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *networkId = "test_network_id_123";
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalNetworkId(networkId));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnUpdateLocalNetworkId(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_UNIFIED_NAME_TEST_001
+ * @tc.desc: Verify LnnSetLocalUnifiedName returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_UNIFIED_NAME_TEST_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *unifiedName = "test_unified_name";
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalUnifiedName(unifiedName));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnSetLocalUnifiedName(nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM_U16_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalNumU16Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM_U16_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint16_t info = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumU16Info(NUM_KEY_DATA_STATIC_LEVEL, &info));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumU16Info(NUM_KEY_DATA_DYNAMIC_LEVEL, &info));
+    uint32_t data = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, &data));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM_U16_INFO_TEST_002
+ * @tc.desc: Verify LnnSetLocalNumU16Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM_U16_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU16Info(NUM_KEY_DATA_STATIC_LEVEL, 10));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU16Info(NUM_KEY_DATA_DYNAMIC_LEVEL, 20));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LEVEL, 30));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_BOOL_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalBoolInfo with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    bool info = false;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, &info, sizeof(bool)));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_BYTE_INFO_TEST_002
+ * @tc.desc: Verify LnnSetLocalByteInfo with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_BYTE_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint8_t info1[SHA_256_HASH_LEN] = {1, 2, 3};
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, info1, SHA_256_HASH_LEN));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_BYTE_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalByteInfo with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BYTE_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint8_t info1[SHA_256_HASH_LEN] = {0};
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, info1, SHA_256_HASH_LEN));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_STR_INFO_TEST_002
+ * @tc.desc: Verify LnnSetLocalStrInfo with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *info1 = "test_info_1";
+    const char *info2 = "test_info_2";
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, info1));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalStrInfo(STRING_KEY_DEV_NICK_NAME, info2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_STR_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalStrInfo with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    char info1[ACCOUNT_UID_STR_LEN] = {0};
+    char info2[DEVICE_NAME_BUF_LEN] = {0};
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, info1, ACCOUNT_UID_STR_LEN));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalStrInfo(STRING_KEY_DEV_NICK_NAME, info2, DEVICE_NAME_BUF_LEN));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM_INFO_TEST_002
+ * @tc.desc: Verify LnnSetLocalNumInfo with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, 500));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, 600));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalNumInfo with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    int32_t info1 = 0;
+    int32_t info2 = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &info1));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, &info2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM64_INFO_TEST_002
+ * @tc.desc: Verify LnnSetLocalNum64Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM64_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, 111111111));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum64Info(NUM_KEY_HUKS_TIME, 222222222));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM64_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalNum64Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM64_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    int64_t info1 = 0;
+    int64_t info2 = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &info1));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNum64Info(NUM_KEY_HUKS_TIME, &info2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM16_INFO_TEST_002
+ * @tc.desc: Verify LnnSetLocalNum16Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM16_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum16Info(NUM_KEY_SLE_RANGE_CAP, 700));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNum16Info(NUM_KEY_P2P_ROLE, 800));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM16_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalNum16Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM16_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    int32_t info1 = 0;
+    int32_t info2 = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &info1));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumInfo(NUM_KEY_P2P_ROLE, &info2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_NUM_U32_INFO_TEST_002
+ * @tc.desc: Verify LnnSetLocalNumU32Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_NUM_U32_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU32Info(NUM_KEY_SLE_RANGE_CAP, 7000));
+    EXPECT_EQ(SOFTBUS_OK, LnnSetLocalNumU32Info(NUM_KEY_STA_FREQUENCY, 8000));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NUM_U32_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalNumU32Info with different keys
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NUM_U32_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    uint32_t info1 = 0;
+    uint32_t info2 = 0;
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumU32Info(NUM_KEY_SLE_RANGE_CAP, &info1));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNumU32Info(NUM_KEY_STA_FREQUENCY, &info2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_NETWORK_ID_TIME_TEST_002
+ * @tc.desc: Verify LnnUpdateLocalNetworkIdTime with different values
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_LOCAL_NETWORK_ID_TIME_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalNetworkIdTime(0));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalNetworkIdTime(-1));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalNetworkIdTime(999999999));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_HUKS_KEY_TIME_TEST_002
+ * @tc.desc: Verify LnnUpdateLocalHuksKeyTime with different values
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_LOCAL_HUKS_KEY_TIME_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalHuksKeyTime(0));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalHuksKeyTime(1));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalHuksKeyTime(18446744073709551615ULL));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_PARENT_ID_TEST_002
+ * @tc.desc: Verify UpdateLocalParentId with different values
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_PARENT_ID_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *parentId1 = "parent_id_1";
+    const char *parentId2 = "parent_id_2";
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalParentId(parentId1));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalParentId(parentId2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_PUBLIC_ID_TEST_002
+ * @tc.desc: Verify UpdateLocalPublicId with different values
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_PUBLIC_ID_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    const char *publicId1 = "public_id_1";
+    const char *publicId2 = "public_id_2";
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalPublicId(publicId1));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalPublicId(publicId2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_ROLE_TEST_002
+ * @tc.desc: Verify UpdateLocalRole with different roles
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_ROLE_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalRole(ROLE_CONTROLLER));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalRole(ROLE_LEAF));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalRole(ROLE_CONTROLLER));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_STATUS_TEST_002
+ * @tc.desc: Verify UpdateLocalStatus with different statuses
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_STATUS_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalStatus(STATUS_ONLINE));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalStatus(STATUS_OFFLINE));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalStatus(STATUS_ONLINE));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_WEIGHT_TEST_002
+ * @tc.desc: Verify UpdateLocalWeight with different weights
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_WEIGHT_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalWeight(0));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalWeight(1000));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalWeight(-100));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_IS_MASTER_NODE_TEST_002
+ * @tc.desc: Verify LnnIsMasterNode multiple calls
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_IS_MASTER_NODE_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    bool isMaster1 = LnnIsMasterNode();
+    bool isMaster2 = LnnIsMasterNode();
+    bool isMaster3 = LnnIsMasterNode();
+    EXPECT_TRUE(isMaster1 == isMaster2 && isMaster2 == isMaster3);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_LOCAL_SCREEN_STATUS_TEST_002
+ * @tc.desc: Verify LnnUpdateLocalScreenStatus multiple calls
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_LOCAL_SCREEN_STATUS_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalScreenStatus(true));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalScreenStatus(false));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalScreenStatus(true));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateLocalScreenStatus(false));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_SLE_CAPACITY_AND_VERSION_TEST_002
+ * @tc.desc: Verify LnnUpdateSleCapacityAndVersion with different values
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_SLE_CAPACITY_AND_VERSION_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateSleCapacityAndVersion(0));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateSleCapacityAndVersion(1000));
+    EXPECT_EQ(SOFTBUS_OK, LnnUpdateSleCapacityAndVersion(-100));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_DEVICE_INFO_TEST_002
+ * @tc.desc: Verify LnnGetLocalDeviceInfo multiple calls
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_DEVICE_INFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    NodeBasicInfo info1;
+    NodeBasicInfo info2;
+    (void)memset_s(&info1, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)memset_s(&info2, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalDeviceInfo(&info1));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalDeviceInfo(&info2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_NODE_INFO_SAFE_TEST_002
+ * @tc.desc: Verify LnnGetLocalNodeInfoSafe multiple calls
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_NODE_INFO_SAFE_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    NodeInfo info1;
+    NodeInfo info2;
+    (void)memset_s(&info1, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)memset_s(&info2, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNodeInfoSafe(&info1));
+    EXPECT_EQ(SOFTBUS_OK, LnnGetLocalNodeInfoSafe(&info2));
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_UPDATE_STATE_VERSION_TEST_002
+ * @tc.desc: Verify LnnUpdateStateVersion with different reasons
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_STATE_VERSION_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    LnnUpdateStateVersion(UPDATE_NETWORKID);
+    LnnUpdateStateVersion(UPDATE_CONCURRENT_AUTH);
+    LnnUpdateStateVersion(UPDATE_CIPHERKEY);
+    LnnUpdateStateVersion(UPDATE_SLE_CAP);
+    LnnUpdateStateVersion(UPDATE_ACCOUNT_LONG);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: LNN_INIT_LOCAL_LEDGER_DELAY_TEST_002
+ * @tc.desc: Verify LnnInitLocalLedgerDelay multiple calls
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_INIT_LOCAL_LEDGER_DELAY_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_NE(SOFTBUS_OK, LnnInitLocalLedgerDelay());
+}
+
+/*
+ * @tc.name: HANDLE_DEVICE_INFO_IF_UDID_CHANGED_TEST_002
+ * @tc.desc: Verify HandleDeviceInfoIfUdidChanged multiple calls
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFO_IF_UDID_CHANGED_TEST_002, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    MockForInitLocalLedger(localLedgerMock);
+    EXPECT_EQ(LnnInitLocalLedger(), SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, HandleDeviceInfoIfUdidChanged());
+    EXPECT_EQ(SOFTBUS_OK, HandleDeviceInfoIfUdidChanged());
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
 }
 } // namespace OHOS

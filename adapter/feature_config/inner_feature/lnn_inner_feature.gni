@@ -19,7 +19,6 @@ declare_args() {
   } else {
     dsoftbus_feature_lnn_wifiservice_dependence = true
   }
-}
 
 if (defined(global_parts_info) &&
     !defined(global_parts_info.ability_ability_runtime)) {
@@ -33,4 +32,5 @@ if (defined(global_parts_info) &&
   softbus_lnn_lp_feature = false
 } else {
   softbus_lnn_lp_feature = true
+}
 }
