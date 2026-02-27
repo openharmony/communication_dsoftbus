@@ -192,7 +192,51 @@ ohos_unittest("BrHidumperTest") {
   ]
 }
 
+ohos_unittest("ConnBrPendingPacketTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/br/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/br/include",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/tests/core/connection/br/mock",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/connbrpendingpacket_test/mock",
+    "$dsoftbus_root_path/core/connection/manager",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+  ]
+
+  external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+  sources = [
+    "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_pending_packet.c",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/connbrpendingpacket_test/softbus_conn_br_pending_packet_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/connbrpendingpacket_test/mock/softbus_conn_br_pending_packet_mock.cpp",
+  ]
+}
+
 group("unittest") {
   testonly = true
-  deps = [ ":BrConnectionTest" ]
+  deps = [
+    ":BrConnectionTest",
+    ":ConnBrPendingPacketTest",
+  ]
 }
