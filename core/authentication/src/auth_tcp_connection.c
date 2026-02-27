@@ -63,7 +63,7 @@ static InnerChannelListener g_listener[] = {
 };
 
 static SocketCallback g_callback = { NULL, NULL, NULL };
-static ListNode g_authTcpConnFdList  = { &g_authTcpConnFdList, &g_authTcpConnFdList };
+static ListNode g_authTcpConnFdList = { &g_authTcpConnFdList, &g_authTcpConnFdList };
 static SoftBusMutex g_authTcpConnFdListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
@@ -340,7 +340,7 @@ bool IsExistAuthTcpConnFdItemWithoutLock(int32_t fd)
     return false;
 }
 
-bool IsExistMetaAuthTcpConnFdItemWithoutLock(int32_t fd)
+bool IsExistMetaAuthFdItemWithoutLock(int32_t fd)
 {
     AuthTcpConnInstance *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authTcpConnFdList, AuthTcpConnInstance, node) {
