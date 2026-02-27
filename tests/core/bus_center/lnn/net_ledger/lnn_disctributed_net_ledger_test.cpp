@@ -561,7 +561,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLNODE_ADDR_Test_001, TestSize.Level
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_NODE_BY_UDID_HASH_Test_001, TestSize.Level1)
 {
-    EXPECT_TRUE(LnnGetOnlineNodeByUdidHash(RECV_UDID_HASH) == nullptr);
+    NodeInfo nodeInfo;
+    EXPECT_TRUE(LnnGetOnlineNodeByUdidHash(RECV_UDID_HASH, &nodeInfo) != SOFTBUS_OK);
 }
 
 /*
