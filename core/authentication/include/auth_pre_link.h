@@ -31,8 +31,8 @@ typedef struct {
     int32_t fd;
     uint32_t requestId;
     ListNode node;
-    char uuid[UUID_BUF_LEN];
     ConnectionAddr connAddr;
+    char uuid[UUID_BUF_LEN];
 } AuthPreLinkNode;
 
 typedef struct {
