@@ -32,6 +32,7 @@ group("unittest") {
       "br:BrConnectionTest",
       "br:BrHidumperTest",
       "br:ConnectionBrTest",
+      "br:ConnBrPendingPacketTest",
     ]
   }
   if (support_bluetooth && dsoftbus_feature_conn_ble) {
