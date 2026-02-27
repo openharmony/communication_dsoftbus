@@ -18,7 +18,6 @@
 
 #include "auth_device.h"
 #include "auth_interface.h"
-#include "auth_manager_struct.h"
 #include "auth_normalize_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
@@ -30,6 +29,38 @@
 extern "C" {
 #endif
 #endif
+
+typedef struct {
+    int64_t authId;
+    bool isServer;
+    /* connInfo */
+    uint64_t connId[AUTH_LINK_TYPE_MAX];
+    AuthConnInfo connInfo[AUTH_LINK_TYPE_MAX];
+    uint64_t lastActiveTime;
+    /* sessionKeyInfo */
+    int64_t lastAuthSeq[AUTH_LINK_TYPE_MAX];
+    uint64_t lastVerifyTime;
+    SessionKeyList sessionKeyList;
+    /* deviceInfo */
+    char p2pMac[MAC_LEN];
+    char udid[UDID_BUF_LEN];
+    char uuid[UUID_BUF_LEN];
+    SoftBusVersion version;
+    /* authState */
+    bool hasAuthPassed[AUTH_LINK_TYPE_MAX];
+    /* cred info */
+    char accountUid[ACCOUNT_UID_STR_LEN];
+    char credId[CRED_ID_STR_LEN];
+    char shareCredId[CRED_ID_STR_LEN];
+    int32_t credIdType;
+    bool isCreatedSessionKey;
+    ListNode node;
+} AuthManager;
+
+typedef struct {
+    int32_t messageType;
+    ModeCycle cycle;
+} DeviceMessageParse;
 
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect, bool isOldKey);
@@ -55,8 +86,8 @@ int32_t AuthDeviceGetPreferConnInfoWithoutSle(const char *uuid, AuthConnInfo *co
 int32_t AuthDeviceGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo);
-/*check whether AUTH device is exist or not*/
-bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConnection);
+/* check whether AUTH device is exist or not */
+bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection);
 int32_t AuthDeviceGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
@@ -82,6 +113,7 @@ AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, 
 bool IsHaveAuthIdByConnId(uint64_t connId);
 void DelAuthManagerByConnectionId(uint32_t connectionId);
 bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer);
+int32_t AuthDeviceSetIsCreatedSessionKey(int64_t authId, const bool isCreatedSessionKey);
 
 #ifdef __cplusplus
 #if __cplusplus
