@@ -24,7 +24,6 @@
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_decision_db.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability_struct.h"

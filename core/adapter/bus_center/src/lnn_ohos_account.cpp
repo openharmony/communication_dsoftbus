@@ -249,7 +249,6 @@ void LnnOnOhosAccountLogout(void)
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountUid[ACCOUNT_UID_STR_LEN] = {0};
     uint32_t size = 0;
-
     (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, 0);
     if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
         DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
