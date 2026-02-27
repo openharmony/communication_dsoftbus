@@ -100,3 +100,19 @@ int32_t TransUdpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
     (void)pid;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t TransUdpSetWakeUpInfo(int32_t channelId, bool needFastWakeUp)
+{
+    (void)channelId;
+    (void)needFastWakeUp;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t TransUdpGetWakeUpInfo(int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp)
+{
+    (void)channelId;
+    (void)uuid;
+    (void)uuidLen;
+    (void)needFastWakeUp;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
