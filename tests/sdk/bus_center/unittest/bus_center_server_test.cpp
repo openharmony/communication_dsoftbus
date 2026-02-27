@@ -52,6 +52,7 @@ void BusCenterServerTest::TearDown() { }
  * @tc.name: SERVER_IPC_JOIN_LNN_TEST_001
  * @tc.desc: server ipc join lnn test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_JOIN_LNN_TEST_001, TestSize.Level1)
@@ -71,6 +72,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_JOIN_LNN_TEST_001, TestSize.Level1)
  * @tc.name: SERVER_IPC_LEAVE_LNN_TEST_001
  * @tc.desc: server ipc leave lnn test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_LNN_TEST_001, TestSize.Level1)
@@ -86,6 +88,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_LNN_TEST_001, TestSize.Level1)
  * @tc.name: SERVER_IPC_STOP_TIME_SYNC_TEST_001
  * @tc.desc: server ipc stop time sync test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_STOP_TIME_SYNC_TEST_001, TestSize.Level1)
@@ -103,6 +106,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_STOP_TIME_SYNC_TEST_001, TestSize.Level
  * @tc.name: SERVER_IPC_ACTIVE_META_NODE_TEST_001
  * @tc.desc: server ipc active meta node test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_ACTIVE_META_NODE_TEST_001, TestSize.Level1)
@@ -123,6 +127,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_ACTIVE_META_NODE_TEST_001, TestSize.Lev
  * @tc.name: SERVER_IPC_DEACTIVE_META_NODE_TEST_001
  * @tc.desc: server ipc deactive meta node test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_DEACTIVE_META_NODE_TEST_001, TestSize.Level1)
@@ -138,6 +143,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_DEACTIVE_META_NODE_TEST_001, TestSize.L
  * @tc.name: SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001
  * @tc.desc: server ipc get all meta node info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001, TestSize.Level1)
@@ -155,6 +161,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001, TestSi
  * @tc.name: SERVER_IPC_SHIFT_LNN_GEAR_TEST_001
  * @tc.desc: server ipc shift lnn gear test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(BusCenterServerTest, SERVER_IPC_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)

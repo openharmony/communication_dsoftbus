@@ -499,7 +499,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetStopIsTakeHmlInfo001, TestSize.Level1)
 
     PublishOption pubOption = GetPublishOptionForCastPlus();
     bool processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, &pubOption);
-    EXPECT_TRUE(!processHml);
+    EXPECT_TRUE(processHml);
     processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, nullptr);
     EXPECT_TRUE(!processHml);
     processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_ACTIVE, UNPUBLISH_SERVICE, &pubOption);
@@ -601,21 +601,20 @@ HWTEST_F(DiscDistributedBleTest, TestUpdateCustData001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateCustData001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
-
-    EXPECT_NO_FATAL_FAILURE(UpdateCustData(START_ACTIVE_DISCOVERY));
-    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE));
-
     PublishOption pubOption = GetPublishOptionForCastPlus();
     bool isStart = true;
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(START_ACTIVE_DISCOVERY, &pubOption, isStart));
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE, &pubOption, isStart));
+
     int32_t ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE));
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE, &pubOption, isStart));
 
     pubOption.capabilityData = reinterpret_cast<uint8_t *>(g_invalidCastCapData.data());
     pubOption.dataLen = g_invalidCastCapData.length();
     ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE));
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE, &pubOption, isStart));
 
     DiscSoftBusBleDeinit();
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateCustData001, End");

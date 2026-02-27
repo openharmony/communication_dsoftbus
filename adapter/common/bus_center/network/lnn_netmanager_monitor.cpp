@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_event_monitor_impl.h"
+#include "lnn_local_net_ledger_struct.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "net_conn_client.h"
@@ -86,12 +87,8 @@ int32_t NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string 
         return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
-    uint32_t netCapability = 0;
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get cap from local ledger fail");
-        return ret;
-    }
+    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = 0};
+    (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_ETH);
     if (SoftBusMutexLock(&g_ethCountLock) != 0) {
         LNN_LOGE(LNN_BUILDER, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -100,7 +97,7 @@ int32_t NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string 
         // update eth
         if (g_ethCount == 0) {
             LNN_LOGI(LNN_BUILDER, "LnnSetNetCapability");
-            (void)LnnSetNetCapability(&netCapability, BIT_ETH);
+            setCapability.isAdd = true;
         }
         ++g_ethCount;
     } else {
@@ -113,16 +110,15 @@ int32_t NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string 
         --g_ethCount;
         if (g_ethCount == 0) {
             LNN_LOGI(LNN_BUILDER, "LnnClearNetCapability");
-            (void)LnnClearNetCapability(&netCapability, BIT_ETH);
+            setCapability.isAdd = false;
         }
     }
     (void)SoftBusMutexUnlock(&g_ethCountLock);
-    ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability);
-    if (ret != SOFTBUS_OK) {
+    int32_t ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_NEED_UPDATE) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
         return ret;
     }
-    LNN_LOGI(LNN_BUILDER, "local ledger netCapability=%{public}u", netCapability);
     return SOFTBUS_OK;
 }
 
@@ -148,25 +144,16 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
         (void)SoftBusMutexUnlock(&g_ethCountLock);
         return SOFTBUS_OK;
     }
-
-    uint32_t netCapability = 0;
-    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get cap from local ledger fail");
-        (void)SoftBusMutexUnlock(&g_ethCountLock);
-        return ret;
-    }
-
-    (void)LnnSetNetCapability(&netCapability, BIT_ETH);
-    ret = LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, netCapability);
-    if (ret != SOFTBUS_OK) {
+    CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
+    (void)LnnSetNetCapability(&(addCapability.capabilitySet), BIT_ETH);
+    int32_t ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&addCapability, sizeof(CapabilityOption));
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_NEED_UPDATE) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
         (void)SoftBusMutexUnlock(&g_ethCountLock);
         return ret;
     }
     ++g_ethCount;
     (void)SoftBusMutexUnlock(&g_ethCountLock);
-    LNN_LOGI(LNN_BUILDER, "local ledger netCapability=%{public}u", netCapability);
     return SOFTBUS_OK;
 }
 

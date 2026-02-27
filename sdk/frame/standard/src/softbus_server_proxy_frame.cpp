@@ -17,6 +17,7 @@
 
 #include <thread>
 #include "bus_center_server_proxy.h"
+#include "br_proxy.h"
 #include "client_bus_center_manager.h"
 #include "general_client_connection.h"
 #include "client_trans_socket_manager.h"
@@ -195,6 +196,7 @@ void ClientDeathProcTask(void)
         }
         SoftBusSleepMs(WAIT_SERVER_INTERVAL);
     }
+    BrProxyServiceDeathNotify();
     if (cnt == CYCLE_NUMBER_MAX) {
         COMM_LOGE(COMM_SDK, "server proxy init reached the maximum count=%{public}d", cnt);
         FreeClientPkgName();

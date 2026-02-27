@@ -50,7 +50,8 @@ void LNNNodeWeightTest::TearDown() { }
 
 /*
  * @tc.name: LNN_COMPARE_NODE_WEIGHT_TEST_001
- * @tc.desc: test LnnCompareNodeWeight
+ * @tc.desc: Verify LnnCompareNodeWeight compares node weights with
+ *           different weight values and UDIDs correctly
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  */
@@ -68,7 +69,8 @@ HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_LOCAL_WEIGHT_TEST_001
- * @tc.desc: test LnnGetLocalWeight
+ * @tc.desc: Verify LnnGetLocalWeight generates random local weight
+ *           with different random array results
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

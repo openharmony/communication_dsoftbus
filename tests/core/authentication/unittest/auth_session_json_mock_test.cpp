@@ -1284,6 +1284,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATE_INFO_TEST_002, TestSize.Lev
  * @tc.name: FillBroadcastCipherKey_TEST_001
  * @tc.desc: fill broadcast cipherkey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, FillBroadcastCipherKey_TEST_001, TestSize.Level1)
@@ -1299,6 +1300,7 @@ HWTEST_F(AuthSessionJsonMockTest, FillBroadcastCipherKey_TEST_001, TestSize.Leve
  * @tc.name: GetLocalUdidShortHash_TEST_001
  * @tc.desc: test func GetLocalUdidShortHash
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, GetLocalUdidShortHash_TEST_001, TestSize.Level1)

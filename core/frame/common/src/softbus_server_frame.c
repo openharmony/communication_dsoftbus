@@ -16,6 +16,9 @@
 #include "softbus_server_frame.h"
 
 #include <dlfcn.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 #include "auth_apply_key_manager.h"
 #include "auth_interface.h"
 #include "auth_uk_manager.h"
@@ -29,8 +32,10 @@
 #include "g_enhance_trans_func.h"
 #include "g_enhance_disc_func.h"
 #include "g_enhance_adapter_func.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "g_enhance_auth_func.h"
 #include "instant_statistics.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_init_monitor.h"
 #include "lnn_sle_monitor.h"
@@ -51,6 +56,9 @@
 #include "trans_session_service.h"
 #include "wifi_direct_manager.h"
 
+#define MEM_RECLAIM_PATH_MAX 64
+#define MEM_RECLAIM_DELAY_TIME 5000
+
 static bool g_isInit = false;
 
 int __attribute__((weak)) ServerStubInit(void)
@@ -68,6 +76,7 @@ static void ServerModuleDeinit(void)
     BusCenterServerDeinit();
     AuthDeinit();
     SoftBusTimerDeInit();
+    SoftbusMcuTimerDeinitPacked();
     LooperDeinit();
     SoftBusHiDumperDeinit();
     DeinitSoftbusSysEvt();
@@ -204,6 +213,35 @@ static int32_t InitServicesAndModules(void)
     return SOFTBUS_OK;
 }
 
+static void ReclaimMemForSoftBus(void *para)
+{
+    (void)para;
+    int32_t softBusPid = getpid();
+    COMM_CHECK_AND_RETURN_LOGE(softBusPid > 0, COMM_SVC, "get softbus pid invalid!");
+
+    char path[MEM_RECLAIM_PATH_MAX] = {0};
+    int32_t ret = snprintf_s(path, sizeof(path), sizeof(path) - 1, "/proc/%d/reclaim", softBusPid);
+    COMM_CHECK_AND_RETURN_LOGE(ret > 0 && ret < MEM_RECLAIM_PATH_MAX, COMM_SVC, "snprintf_s path failed!");
+
+    const char *contentStr = "1";
+    ret = access(path, W_OK);
+    COMM_CHECK_AND_RETURN_LOGE(ret == 0, COMM_SVC, "file not accessible, err=%{public}d!", errno);
+
+    int32_t fd = open(path, O_WRONLY);
+    COMM_CHECK_AND_RETURN_LOGE(fd >= 0, COMM_SVC, "open file failed, err=%{public}d!", errno);
+
+    ret = write(fd, contentStr, strlen(contentStr));
+    if (ret < 0) {
+        COMM_LOGE(COMM_SVC, "write file failed, ret=%{public}d, err=%{public}d!", ret, errno);
+        close(fd);
+        return;
+    }
+    if ((size_t)ret != strlen(contentStr)) {
+        COMM_LOGE(COMM_SVC, "write file incomplete!");
+    }
+    close(fd);
+}
+
 void InitSoftBusServer(void)
 {
     ServerFuncInit();
@@ -217,6 +255,10 @@ void InitSoftBusServer(void)
     if (SoftBusTimerInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus timer init failed.");
         return;
+    }
+
+    if (SoftbusMcuTimerInitPacked() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "mcu timer init failed.");
     }
 
     if (LooperInit() != SOFTBUS_OK) {
@@ -247,6 +289,7 @@ void InitSoftBusServer(void)
     UkNegotiateSessionInit();
     InitApplyKeyManager();
     g_isInit = true;
+    LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), ReclaimMemForSoftBus, NULL, MEM_RECLAIM_DELAY_TIME);
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }
 

@@ -40,7 +40,7 @@ typedef void (*DeInitSoftbusPagingResPullFunc)(void);
 typedef int32_t (*InitSoftbusPagingFunc)(void);
 typedef void (*DeInitSoftbusPagingFunc)(void);
 typedef void (*TransPagingDeathCallbackFunc)(const char *pkgName, int32_t pid);
-typedef bool (*TransHasAndUpdatePagingListenFunc)(ProxyChannelInfo *info);
+typedef bool (*TransPagingHasListenAndGetInfoFunc)(ProxyChannelInfo *info);
 typedef int32_t (*TransPagingGetPidAndDataByFlgFunc)(
     bool isClient, uint32_t businessFlag, int32_t *pid, char *data, uint32_t *len);
 typedef int32_t (*TransDelPagingInfoByBusinessFlagFunc)(uint32_t businessFlag);
@@ -55,9 +55,10 @@ typedef bool (*IsInWhitelistFunc)(const char *app);
 typedef bool (*CheckAuthChannelSessionNameValidFunc)(const char *sessionName);
 typedef bool (*TransCheckNetworkDelegateFunc)(const char *sessionName);
 typedef bool (*TransCheckP2pOnlyFunc)(const char *sessionName);
-typedef bool (*TransCheckDcTriggerVirtualLinkFunc)(const char *sessionName);
+typedef bool (*TransCheckDcTriggerVirtualLinkFunc)(const char *sessionName, const char *peerNetworkId);
 typedef int32_t (*LoadTransPermissionJsonFunc)(void);
 typedef void (*TransD2dQosUnregisterFunc)(int32_t channelId, char *sleMac, uint32_t macLen);
+typedef bool (*IsMultipathWhitelistFunc)(const char *processName, bool *isWhitelist);
 
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
@@ -72,7 +73,7 @@ typedef struct TagTransEnhanceFuncList {
     InitSoftbusPagingFunc initSoftbusPaging;
     DeInitSoftbusPagingFunc deInitSoftbusPaging;
     TransPagingDeathCallbackFunc transPagingDeathCallback;
-    TransHasAndUpdatePagingListenFunc transHasAndUpdatePagingListen;
+    TransPagingHasListenAndGetInfoFunc transPagingHasListenAndGetInfo;
     TransPagingGetPidAndDataByFlgFunc transPagingGetPidAndDataByFlg;
     TransDelPagingInfoByBusinessFlagFunc transDelPagingInfoByBusinessFlag;
     ClientOpenHtpChannelFunc clientOpenHtpChannel;
@@ -88,6 +89,7 @@ typedef struct TagTransEnhanceFuncList {
     TransCheckDcTriggerVirtualLinkFunc transCheckDcTriggerVirtualLink;
     LoadTransPermissionJsonFunc loadTransPermissionJson;
     TransD2dQosUnregisterFunc transD2dQosUnregister;
+    IsMultipathWhitelistFunc isMultipathWhitelist;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

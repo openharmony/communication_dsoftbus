@@ -86,8 +86,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
     return GetTransLanePendingTestInterface()->SoftBusCondWait(cond, mutex, time);
 }
 
-int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo,
-    const ConnectOption *connOpt, int32_t *channelId)
+int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt, int32_t *channelId)
 {
     return GetTransLanePendingTestInterface()->TransOpenChannelProc(type, appInfo, connOpt, channelId);
 }

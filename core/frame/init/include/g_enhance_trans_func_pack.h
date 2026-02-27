@@ -38,7 +38,7 @@ void DeInitSoftbusPagingResPullPacked(void);
 int32_t InitSoftbusPagingPacked(void);
 void DeInitSoftbusPagingPacked(void);
 void TransPagingDeathCallbackPacked(const char *pkgName, int32_t pid);
-bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info);
+bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info);
 int32_t TransPagingGetPidAndDataByFlgPacked(
     bool isClient, uint32_t businessFlag, int32_t *pid, char *data, uint32_t *len);
 int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag);
@@ -52,8 +52,9 @@ bool IsInWhitelistPacked(const char *app);
 bool CheckAuthChannelSessionNameValidPacked(const char *sessionName);
 bool TransCheckNetworkDelegatePacked(const char *sessionName);
 bool TransCheckP2pOnlyPacked(const char *sessionName);
-bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName);
+bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName, const char *peerNetworkId);
 int32_t LoadTransPermissionJsonPacked(void);
+bool IsMultipathWhitelistPacked(const char *processName, bool *isWhitelist);
 
 void TransD2dQosUnregisterPacked(int32_t channelId, char *sleMac, uint32_t macLen);
 #ifdef __cplusplus

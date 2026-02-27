@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,16 @@
 
 #include "softbus_app_info.h"
 #include "softbus_common.h"
-#include "trans_uk_manager.h"
 #include "trans_udp_channel_manager_struct.h"
+#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define UDP_CHANNEL_MULTIPATH_OFFSET 1
+#define CHANNEL_ISMULTINEG_OFFSET 2
+#define TRANS_UDP_CHANNEL_CAPBILITY 6 /* bit1 & bit2 */
 
 SoftBusList *GetUdpChannelMgrHead(void);
 

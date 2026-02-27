@@ -67,7 +67,8 @@ void LNNMetaNodeLedgerTest::TearDown()
 
 /*
  * @tc.name: LNN_ACTIVE_META_NODE_Test_001
- * @tc.desc: lnn active meta node test
+ * @tc.desc: Verify LnnActiveMetaNode activates meta node with different
+ *           address numbers and null parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -91,7 +92,8 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_ACTIVE_META_NODE_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_ALL_META_NODE_INFO_Test_001
- * @tc.desc: lnn get all meta node info test
+ * @tc.desc: Verify LnnGetAllMetaNodeInfo gets all meta node info with
+ *           valid and invalid info number parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -110,7 +112,8 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_ALL_META_NODE_INFO_Test_001, TestSize.Le
 
 /*
  * @tc.name: LNN_DEACTIVE_META_NODE_Test_001
- * @tc.desc: lnn deactive meta node test
+ * @tc.desc: Verify LnnDeactiveMetaNode deactivates meta node with
+ *           valid and null meta node ID
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -125,7 +128,8 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_DEACTIVE_META_NODE_Test_001, TestSize.Level1
 
 /*
  * @tc.name: LNN_GET_META_NODE_UID_TEST_001
- * @tc.desc: lnn get meta node udid by network id test
+ * @tc.desc: Verify LnnGetMetaNodeUdidByNetworkId handles null networkId
+ *           and udid parameters correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -140,7 +144,8 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_META_NODE_UID_TEST_002
- * @tc.desc: lnn get meta node udid by network id test
+ * @tc.desc: Verify LnnGetMetaNodeUdidByNetworkId gets meta node UDID
+ *           with null network ID parameter
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

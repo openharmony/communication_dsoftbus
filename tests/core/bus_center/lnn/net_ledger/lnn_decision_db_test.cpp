@@ -59,7 +59,8 @@ void LNNDbMockTest::TearDown()
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_001
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_GENERATE_KEY_FAIL
+ *           when LnnGenerateKeyByHuks fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -75,7 +76,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_002
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_GET_PATH_FAILED
+ *           when OpenDatabase and LnnGetFullStoragePath fail
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -97,7 +99,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_003
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_GET_PATH_FAILED
+ *           when LnnGetFullStoragePath fails after database open
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -121,7 +124,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_003, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_004
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED
+ *           when SoftBusReadFullFile fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -149,7 +153,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_004, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_005
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED
+ *           when LnnDecryptDataByHuks fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -179,7 +184,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_005, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_006
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED
+ *           when EncryptedDb fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -211,7 +217,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_006, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_007
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay initializes decision db delay
+ *           with valid mock return values
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

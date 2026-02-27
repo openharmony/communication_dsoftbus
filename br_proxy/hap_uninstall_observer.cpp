@@ -19,11 +19,14 @@
 #include "comm_log.h"
 #include "softbus_error_code.h"
 #include "br_proxy_server_manager.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::EventFwk;
 constexpr const char* APP_INDEX = "appIndex";
+constexpr const char* USER_ID = "userId";
 class HapUninstallObserver : public CommonEventSubscriber {
 public:
     explicit HapUninstallObserver(const CommonEventSubscribeInfo &sp) : CommonEventSubscriber(sp) {}
@@ -37,10 +40,18 @@ public:
             wantAction == CommonEventSupport::COMMON_EVENT_BUNDLE_REMOVED ||
             wantAction == CommonEventSupport::COMMON_EVENT_PACKAGE_FULLY_REMOVED) {
             std::string bundleName = want.GetBundle();
-            int32_t appIndex = want.GetIntParam(APP_INDEX, 0);
-            TRANS_LOGI(TRANS_SVC, "[br_proxy] index=%{public}d", appIndex);
+            int32_t appIndex = want.GetIntParam(APP_INDEX, -1);
+            int32_t userId = want.GetIntParam(USER_ID, 0);
+            TRANS_LOGI(TRANS_SVC, "[br_proxy] index=%{public}d, userId=%{public}d", appIndex, userId);
             if (IsBrProxy(bundleName.c_str())) {
-                CloseAllConnect(appIndex);
+                UninstallHandler(bundleName.c_str(), appIndex, userId);
+                TransEventExtra extra = {
+                    .result = EVENT_STAGE_RESULT_OK,
+                    .callerPkg = bundleName.c_str(),
+                    .appIndex = appIndex,
+                    .userId = userId,
+                };
+                TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CHANNEL_STATUS, extra);
             }
         }
     }

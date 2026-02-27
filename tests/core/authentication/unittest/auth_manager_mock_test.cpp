@@ -161,14 +161,14 @@ HWTEST_F(AuthManagerMockTest, PROCESS_SESSION_KEY_TEST_001, TestSize.Level1)
     EXPECT_CALL(authManagerMock, SetSessionKeyAuthLinkType)
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = ProcessSessionKey(&list, &key, &info, isOldKey, &peerAuthSeq);
+    int32_t ret = ProcessSessionKey(&list, &peerAuthSeq, &key, &info, isOldKey);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(authManagerMock, AddSessionKey)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = ProcessSessionKey(&list, &key, &info, isOldKey, &peerAuthSeq);
+    ret = ProcessSessionKey(&list, &peerAuthSeq, &key, &info, isOldKey);
     EXPECT_EQ(ret, SOFTBUS_AUTH_SESSION_KEY_PROC_ERR);
-    ret = ProcessSessionKey(&list, &key, &info, isOldKey, &peerAuthSeq);
+    ret = ProcessSessionKey(&list, &peerAuthSeq, &key, &info, isOldKey);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

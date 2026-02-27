@@ -74,6 +74,7 @@ public:
     virtual int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
     virtual bool LnnIsNeedInterceptBroadcast(bool disableGlass);
+    virtual bool LnnIsLocalSupportMcuFeature(void) = 0;
 };
 
 class HeartBeatFSMStrategyInterfaceMock : public HeartBeatFSMStrategyInterface {
@@ -118,6 +119,7 @@ public:
     MOCK_METHOD2(LnnPostUpdateSendInfoMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatUpdateInfoType));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
     MOCK_METHOD1(LnnIsNeedInterceptBroadcast, bool(bool));
+    MOCK_METHOD0(LnnIsLocalSupportMcuFeature, bool());
 };
 } // namespace OHOS
 #endif // HEARTBEAT_FSM_STRATEGY_H

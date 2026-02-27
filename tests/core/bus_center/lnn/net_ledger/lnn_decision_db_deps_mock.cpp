@@ -303,5 +303,10 @@ int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
 {
     return GetDecisionDbDepsInterface()->SelectAllAcl(trustedInfoArray, num);
 }
+
+void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy)
+{
+    return GetDecisionDbDepsInterface()->LnnNotifyLpMcuInit(state, strategy);
+}
 } // extern "C"
 } // namespace OHOS

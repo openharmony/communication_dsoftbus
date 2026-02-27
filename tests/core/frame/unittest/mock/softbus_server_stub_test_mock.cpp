@@ -78,6 +78,11 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t
 {
     return GetSoftbusServerStubTestInterface()->LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
 }
+int32_t LnnIpcSetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key,
+    unsigned char *buf, uint32_t len)
+{
+    return GetSoftbusServerStubTestInterface()->LnnIpcSetNodeKeyInfo(pkgName, networkId, key, buf, len);
+}
 int32_t SoftBusCheckDynamicPermission(uint64_t tokenId)
 {
     return GetSoftbusServerStubTestInterface()->SoftBusCheckDynamicPermission(tokenId);

@@ -148,7 +148,6 @@ typedef struct DeviceInfo {
 #endif
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
     SeqAll seq;
-    char notification[NSTACKX_MAX_NOTIFICATION_DATA_LEN];
 } DeviceInfo;
 
 int32_t DeviceModuleInit(EpollDesc epollfd, uint32_t maxDeviceNum);

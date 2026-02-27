@@ -27,7 +27,7 @@ extern "C" {
 typedef void (*ProxyListener)(const char *addr, int32_t state);
 
 int32_t RegisterHfpListener(const ProxyListener listener);
-bool IsPairedDevice(const char *addr, bool isRealMac);
+bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp);
 int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr);
 #ifdef __cplusplus
 }

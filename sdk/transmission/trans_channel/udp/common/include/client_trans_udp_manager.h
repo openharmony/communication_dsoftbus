@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef CLIENT_TRANS_UDP_MANAGER_H
 #define CLIENT_TRANS_UDP_MANAGER_H
 
+#include <netinet/in.h>
 #include "client_trans_session_callback.h"
 #include "client_trans_udp_manager_struct.h"
 #include "session.h"
@@ -36,8 +37,6 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
 int32_t TransOnUdpChannelBind(int32_t channelId, int32_t channelType);
 
 int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason);
-
-int32_t ClientTransCloseMultiUdpChannel(int32_t channelId, ShutdownReason reason, bool mainChannel);
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
     const StreamFrameInfo *param);
@@ -66,10 +65,14 @@ int32_t TransSetUdpChannelTos(int32_t channelId);
 
 int32_t TransGetUdpChannelTos(int32_t channelId, bool *isTosSet);
 
-int32_t TransGetUdpChannelExtraInfo(int32_t channelId, char *srvIp, int32_t *srvPort);
+int32_t TransSetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t addrLen);
 
-int32_t ClientTransCloseReserveUdpChannel(int32_t channelId,
-    ShutdownReason reason, const char *srvIp, int32_t srvPort, int32_t routeType);
+int32_t TransGetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t *addrLen);
+
+int32_t ClientTransCloseReserveUdpChannel(
+    int32_t channelId, ShutdownReason reason, int32_t routeType, bool delSecondPath);
+
+int32_t GetChannelTypeByChannelId(int32_t channelId, int32_t *channelType);
 #ifdef __cplusplus
 }
 #endif

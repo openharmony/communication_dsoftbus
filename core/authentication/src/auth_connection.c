@@ -20,8 +20,8 @@
 #include "auth_common.h"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_request.h"
 #include "auth_pre_link.h"
+#include "auth_request.h"
 #include "auth_tcp_connection.h"
 #include "lnn_async_callback_utils.h"
 #include "softbus_adapter_bt_common.h"
@@ -38,6 +38,9 @@
 #define AUTH_REPEAT_DEVICE_ID_HANDLE_DELAY   1000
 #define AUTH_CONN_MAX_RETRY_TIMES            1
 #define AUTH_CONN_RETRY_DELAY_MILLIS         3000
+
+#define REMOVE_AUTH_EVENT_SUCESS    0
+#define REMOVE_AUTH_EVENT_FAILED    1
 
 typedef struct {
     uint32_t requestId;
@@ -333,9 +336,9 @@ static void PostConnConnectTimeout(uint32_t requestId, AuthLinkType type)
 
 static int32_t RemoveFunc(const void *obj, void *param)
 {
-    CHECK_NULL_PTR_RETURN_VALUE(obj, SOFTBUS_INVALID_PARAM);
-    CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_INVALID_PARAM);
-    return ((*(uint32_t *)(obj) == *(uint32_t *)(param)) ? SOFTBUS_OK : SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(obj, REMOVE_AUTH_EVENT_FAILED);
+    CHECK_NULL_PTR_RETURN_VALUE(param, REMOVE_AUTH_EVENT_FAILED);
+    return ((*(uint32_t *)(obj) == *(uint32_t *)(param)) ? REMOVE_AUTH_EVENT_SUCESS : REMOVE_AUTH_EVENT_FAILED);
 }
 
 static void RemoveConnConnectTimeout(uint32_t requestId)
@@ -565,8 +568,8 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
     CHECK_NULL_PTR_RETURN_VOID(data);
 
     if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module) &&
-        !IsSessionAuth(head->module) && !IsSessionKeyAuth(head->module) && module != AUTH_USB
-        && module != AUTH_SESSION_KEY) {
+        !IsSessionAuth(head->module) && !IsSessionKeyAuth(head->module) && module != AUTH_USB &&
+        module != AUTH_SESSION_KEY) {
         return;
     }
     bool fromServer = false;

@@ -155,6 +155,25 @@ HWTEST_F(BusCenterSdkDdosTest, DDOS_GET_NODE_KEY_INFO_Test_001, TestSize.Level0)
 }
 
 /*
+* @tc.name: DDOS_SET_NODE_KEY_INFO_Test_001
+* @tc.desc: set node key info interface test
+* @tc.type: FUNC
+* @tc.require: I5I7B9
+*/
+HWTEST_F(BusCenterSdkDdosTest, DDOS_SET_NODE_KEY_INFO_Test_001, TestSize.Level0)
+{
+    NodeBasicInfo info = {0};
+    char cap[SERVICE_FIND_CAP_LEN] = "123456789";
+    EXPECT_TRUE(GetLocalNodeDeviceInfo(TEST_PKG_NAME, &info) == SOFTBUS_OK);
+    for (int i = 0; i < GET_DEVICE_INFO_TIMES; i++) {
+        SetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX,
+        (uint8_t *)cap, SERVICE_FIND_CAP_LEN);
+    }
+    EXPECT_TRUE(SetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX,
+        (uint8_t *)cap, SERVICE_FIND_CAP_LEN) == SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT);
+}
+
+/*
 * @tc.name: DDOS_SET_NODE_DATA_CHANGE_Test001
 * @tc.desc: set node data change flag test
 * @tc.type: FUNC

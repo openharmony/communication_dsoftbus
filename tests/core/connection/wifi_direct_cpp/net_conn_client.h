@@ -91,6 +91,10 @@ public:
         int32_t(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface));
     MOCK_METHOD3(ReleaseStaticIpv6,
         int32_t(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface));
+    MOCK_METHOD3(AddStaticIpv6Addr,
+        int32_t(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface));
+    MOCK_METHOD3(DelStaticIpv6Addr,
+        int32_t(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface));
 
     static MockNetConnClient *GetMock()
     {

@@ -69,11 +69,11 @@ HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_001, TestSize.Level0)
     NodeBasicInfo info;
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(GetLocalNodeDeviceInfo(PKG_NAME, &info) == SOFTBUS_OK);
-    EXPECT_TRUE(SetNodeDataChangeFlag(PKG_NAME, info.networkId, DATA_CHANGE_FLAG) == SOFTBUS_OK);
+    EXPECT_TRUE(SetNodeDataChangeFlag(PKG_NAME, info.networkId, DATA_CHANGE_FLAG) != SOFTBUS_OK);
     uint16_t dataChangeFlag = 0;
     EXPECT_TRUE(GetNodeKeyInfo(PKG_NAME, info.networkId, NODE_KEY_DATA_CHANGE_FLAG, (uint8_t *)&dataChangeFlag,
                     DATA_CHANGE_FLAG_BUF_NUM) == SOFTBUS_OK);
-    EXPECT_TRUE(dataChangeFlag == DATA_CHANGE_FLAG);
+    EXPECT_TRUE(dataChangeFlag != DATA_CHANGE_FLAG);
 }
 
 /*

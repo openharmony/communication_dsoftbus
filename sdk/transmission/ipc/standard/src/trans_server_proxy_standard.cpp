@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -761,6 +761,17 @@ int32_t TransServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info, ui
 }
 
 int32_t TransServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)key;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::SetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
     uint32_t len)
 {
     (void)pkgName;

@@ -69,6 +69,13 @@ void TransTcpDirectMockTest::TearDownTestCase(void)
     g_tcpDirectChannelInfoList = nullptr;
 }
 
+static void OnBytesSent(int32_t socket, uint32_t dataSeq, int32_t errCode)
+{
+    (void)dataSeq;
+    (void)errCode;
+    TRANS_LOGI(TRANS_TEST, "session on bytes sent, socketId=%{public}d", socket);
+}
+
 /**
  * @tc.name: BuildNeedAckTlvData001
  * @tc.desc: BuildNeedAckTlvData
@@ -232,6 +239,70 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransTdcSetPendingPacket004
+ * @tc.desc: TransTdcSetPendingPacket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket004, TestSize.Level1)
+{
+    const char *data = "test";
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    sessionCallback.socketClient.OnBytesSent = nullptr;
+
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionIdByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionCallbackAdapterById)
+        .WillOnce(DoAll(SetArgPointee<1>(sessionCallback), Return(SOFTBUS_OK)));
+    EXPECT_CALL(tcpDirectMock, DeleteDataSeqInfoList).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransTdcSetPendingPacket(1, data, DATA_SIZE, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransTdcSetPendingPacket005
+ * @tc.desc: TransTdcSetPendingPacket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket005, TestSize.Level1)
+{
+    const char *data = "test";
+    SessionListenerAdapter sessionCallback;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    sessionCallback.socketClient.OnBytesSent = OnBytesSent;
+
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionIdByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionCallbackAdapterById)
+        .WillOnce(DoAll(SetArgPointee<1>(sessionCallback), Return(SOFTBUS_OK)));
+    EXPECT_CALL(tcpDirectMock, DeleteDataSeqInfoList).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransTdcSetPendingPacket(1, data, DATA_SIZE, 1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransTdcSetPendingPacket006
+ * @tc.desc: TransTdcSetPendingPacket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket006, TestSize.Level1)
+{
+    const char *data = "test";
+
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, SetPendingPacket).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransTdcSetPendingPacket(1, data, DATA_SIZE, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(tcpDirectMock, SetPendingPacket).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = TransTdcSetPendingPacket(1, data, DATA_SIZE, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: TransTcpSetTos001
  * @tc.desc: TransTcpSetTos
  * @tc.type: FUNC
@@ -240,7 +311,9 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSetPendingPacket003, TestSize.Level1)
 HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level1)
 {
     TcpDirectChannelInfo channel;
+    (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     channel.channelId = 1;
+    unsigned char sessionName[] = "ohos.collaborationcenter.test";
     int32_t ret = TransTcpSetTos(nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -248,6 +321,12 @@ HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level1)
     EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND));
     ret = TransTcpSetTos(&channel, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(
+        DoAll(SetArrayArgument<2>(sessionName, sessionName + SESSION_NAME_SIZE_MAX), Return(SOFTBUS_OK)));
+    EXPECT_CALL(tcpDirectMock, SetIpTos).WillOnce(Return(SOFTBUS_TCP_SOCKET_ERR));
+    ret = TransTcpSetTos(&channel, 0);
+    EXPECT_EQ(ret, SOFTBUS_TCP_SOCKET_ERR);
 
     EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(tcpDirectMock, SetIpTos).WillOnce(Return(SOFTBUS_TCP_SOCKET_ERR));
@@ -287,7 +366,7 @@ HWTEST_F(TransTcpDirectMockTest, TransTcpSetTos001, TestSize.Level1)
 HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData001, TestSize.Level1)
 {
     int32_t newPkgHeadSize = PKG_HEAD_SIZE;
-    // will free in line 298
+    // will free in TransSetTosSendData
     char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
     uint32_t outLen = DATA_SIZE;
     TcpDirectChannelInfo channel;
@@ -297,6 +376,92 @@ HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData001, TestSize.Level1)
     EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND));
     ret = TransSetTosSendData(&channel, const_cast<char *>(buf), newPkgHeadSize, 0, outLen);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+}
+
+/**
+ * @tc.name: TransSetTosSendData002
+ * @tc.desc: TransSetTosSendData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData002, TestSize.Level1)
+{
+    int32_t newPkgHeadSize = PKG_HEAD_SIZE;
+    uint32_t outLen = DATA_SIZE;
+    // will free in TransSetTosSendData
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(buf, nullptr);
+    TcpDirectChannelInfo *channel = reinterpret_cast<
+        TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(channel, nullptr);
+    int32_t ret = SoftBusMutexInit(&(channel->detail.fdLock), NULL);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, SetIpTos).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, ConnSendSocketData).WillOnce(Return((ssize_t)outLen + newPkgHeadSize - 1));
+    ret = TransSetTosSendData(channel, const_cast<char *>(buf), newPkgHeadSize, 0, outLen);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    SoftBusFree(channel);
+}
+
+/**
+ * @tc.name: TransSetTosSendData003
+ * @tc.desc: TransSetTosSendData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransSetTosSendData003, TestSize.Level1)
+{
+    int32_t newPkgHeadSize = PKG_HEAD_SIZE;
+    uint32_t outLen = DATA_SIZE;
+    // will free in TransSetTosSendData
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(buf, nullptr);
+    TcpDirectChannelInfo *channel = reinterpret_cast<
+        TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(channel, nullptr);
+    int32_t ret = SoftBusMutexInit(&(channel->detail.fdLock), NULL);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, ClientGetSessionNameByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, SetIpTos).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, ConnSendSocketData).WillOnce(Return((ssize_t)outLen + newPkgHeadSize));
+    ret = TransSetTosSendData(channel, const_cast<char *>(buf), newPkgHeadSize, 0, outLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(channel);
+}
+
+/**
+ * @tc.name: TransTdcSetTimestamp001
+ * @tc.desc: TransTdcSetTimestamp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransTdcSetTimestamp001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint64_t timestamp = 0;
+    TcpDirectChannelInfo *info = reinterpret_cast<
+        TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(info, nullptr);
+
+    info->channelId = channelId;
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    EXPECT_NO_FATAL_FAILURE(TransTdcSetTimestamp(channelId, timestamp));
+
+    timestamp = 1;
+    EXPECT_NO_FATAL_FAILURE(TransTdcSetTimestamp(channelId, timestamp));
+    EXPECT_NO_FATAL_FAILURE(TransTdcSetTimestamp(channelId, timestamp));
+
+    channelId = 0;
+    EXPECT_NO_FATAL_FAILURE(TransTdcSetTimestamp(channelId, timestamp));
+
+    ListDelete(&info->node);
+    SoftBusFree(info);
 }
 
 /**
@@ -505,5 +670,110 @@ HWTEST_F(TransTcpDirectMockTest, MoveNode001, TestSize.Level1)
 {
     int32_t ret = MoveNode(TRANS_TEST_CHANNEL_ID, nullptr, TEST_DATA_LEN, PKG_HEAD_SIZE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ClientTransSetTcpOption001
+ * @tc.desc: ClientTransSetTcpOption will return error when ConnSetTcpKeepalive failed
+ * @tc.desc: ClientTransSetTcpOption will return error when ConnSetTcpUserTimeOut failed
+ * @tc.desc: ClientTransSetTcpOption will return ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, ClientTransSetTcpOption001, TestSize.Level1)
+{
+    int32_t fd = 1;
+
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, ConnSetTcpKeepalive).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = ClientTransSetTcpOption(fd);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(tcpDirectMock, ConnSetTcpKeepalive).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, ConnSetTcpUserTimeOut).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = ClientTransSetTcpOption(fd);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(tcpDirectMock, ConnSetTcpKeepalive).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(tcpDirectMock, ConnSetTcpUserTimeOut).WillOnce(Return(SOFTBUS_OK));
+    ret = ClientTransSetTcpOption(fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransStartTimeSyncTest001
+ * @tc.desc: TransStartTimeSyncTest func
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransStartTimeSyncTest001, TestSize.Level1)
+{
+    ChannelInfo channel;
+    channel.peerIp = (char *)"127.0.0.1";
+    channel.peerDeviceId = (char *)"1234567890";
+    channel.pkgName = (char *)"test";
+
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, StartTimeSyncWithSocketInner).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransStartTimeSync(&channel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(tcpDirectMock, StartTimeSyncWithSocketInner).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = TransStartTimeSync(&channel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransTdcGetSessionKeyTest001
+ * @tc.desc: TransTdcGetSessionKey func
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransTdcGetSessionKeyTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    unsigned int len = SESSION_KEY_LENGTH;
+    const char *sessionKey = "testSessionKey";
+    char *key = reinterpret_cast<char *>(SoftBusCalloc(SESSION_KEY_LENGTH));
+    ASSERT_NE(key, nullptr);
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(info, nullptr);
+    info->channelId = channelId;
+    (void)memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, sessionKey, strlen(sessionKey));
+
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = TransTdcGetSessionKey(channelId, key, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ListDelete(&info->node);
+    SoftBusFree(info);
+    SoftBusFree(key);
+}
+
+/**
+ * @tc.name: TransTdcGetHandleTest001
+ * @tc.desc: TransTdcGetHandle func
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, TransTdcGetHandleTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int handle = 1;
+    TcpDirectChannelInfo *info = reinterpret_cast<TcpDirectChannelInfo *>(SoftBusCalloc(sizeof(TcpDirectChannelInfo)));
+    ASSERT_NE(info, nullptr);
+    info->channelId = channelId;
+    info->detail.fd = 1;
+
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t ret = TransTdcGetHandle(channelId, &handle);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ListDelete(&info->node);
+    SoftBusFree(info);
 }
 } // namespace OHOS

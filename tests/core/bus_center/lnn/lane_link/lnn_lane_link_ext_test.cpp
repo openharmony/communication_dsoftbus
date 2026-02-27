@@ -538,8 +538,15 @@ HWTEST_F(LNNLaneLinkExtTest, SELECT_EXPECT_LANES_BY_QOS_TEST_001, TestSize.Level
     EXPECT_CALL(mock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, CheckStaticNetCap).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(capMock, CheckDynamicNetCap).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &request, &recommendList);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*

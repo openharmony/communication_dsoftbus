@@ -33,7 +33,7 @@ ohos_unittest("TcpManagerTest") {
     "$dsoftbus_root_path/core/common/softbus_property/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
   ]
-  sources = [ "softbus_tcp_connect_manager_test.cpp" ]
+  sources = [ "$dsoftbus_root_path/tests/core/connection/tcp/unittest/softbus_tcp_connect_manager_test.cpp" ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",

@@ -58,6 +58,7 @@ void DetectLocalIface(void *arg);
 const char *GetLocalDeviceId(void);
 DeviceInfo *GetLocalDeviceInfo(void);
 const char *GetLocalDeviceNetworkName(void);
+const char *GetLocalNotification(void);
 
 int GetBroadcastIp(const struct LocalIface *iface, char *ipStr, size_t ipStrLen);
 const char *GetLocalIfaceIpStr(const struct LocalIface *iface);

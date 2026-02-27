@@ -15,7 +15,8 @@
 #ifndef SOFTBUS_DEF_H
 #define SOFTBUS_DEF_H
 
-#include  <pthread.h>
+#include <netinet/in.h>
+#include <pthread.h>
 #include "common_list.h"
 #include "softbus_adapter_thread.h"
 #include "stdint.h"
@@ -94,6 +95,7 @@ extern "C" {
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
 #define ACCOUNT_UID_STR_LEN 65
+#define CRED_ID_STR_LEN 300
 
 #define ACCOUNT_ID_SIZE_MAX 65
 
@@ -104,8 +106,8 @@ extern "C" {
 #define FILE_PRIORITY_BE 0x00
 #define FILE_PRIORITY_BK 0x08
 
-#define GENERAL_SEND_DATA_MAX_LEN 1024
 #define GENERAL_NAME_SIZE_MAX     256
+#define GENERAL_SEND_DATA_MAX_LEN 1024
 
 #define MULTIPATH_EVENT_TAG 99
 
@@ -240,6 +242,17 @@ typedef struct {
     int64_t serviceId;
     int64_t peerServiceId;
 } ChannelInfo;
+
+typedef struct {
+    ListNode node;
+    int32_t sessionId;
+    int32_t channelId;
+} ReallocInfo;
+
+typedef struct {
+    struct sockaddr_storage addr;
+    socklen_t addrLen;
+} AddrInfo;
 
 typedef enum {
     FULL_WAKE_UP_LEVEL = 0, /**< full wake up. */

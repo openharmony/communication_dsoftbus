@@ -78,6 +78,7 @@ int32_t SendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
 int32_t SetListenerState(int32_t channelId, ListenerType type, bool isEnable);
 bool IsProxyChannelEnabled(int32_t uid);
 int32_t RegisterAccessHook(PermissonHookCb *cb);
+void BrProxyServiceDeathNotify(void);
 
 int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const char *uuid, int32_t result);
 int32_t ClientTransBrProxyDataReceived(int32_t channelId, const uint8_t *data, uint32_t len);

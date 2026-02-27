@@ -58,7 +58,8 @@ void LNNBtNetworkImplMockTest::TearDown() { }
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_001
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify LnnInitBtProtocol with nullptr protocolMgr returns error;
+ *           after LnnRegisterEventHandler setup returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -77,7 +78,8 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_002
- * @tc.desc: relationNum is nullptr return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify BtAclStateChangedEventHandler handles BT ACL state changed
+ *           events including connected and disconnected status
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -109,7 +111,8 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_002, TestSize.Level1
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_003
- * @tc.desc: *invalid parameter
+ * @tc.desc: Verify NotifyBtStatusChanged handles BR and BLE status change
+ *           notifications correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -138,7 +141,8 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_003, TestSize.Level1
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_004
- * @tc.desc: *invalid parameter
+ * @tc.desc: Verify LnnEnableBtProtocol with nullptr netifMgr returns
+ *           SOFTBUS_INVALID_PARAM; with valid parameters returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -165,7 +169,8 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_004, TestSize.Level1
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_005
- * @tc.desc: *invalid parameter
+ * @tc.desc: Verify DestroyBtSubnetManager handles subnet with IDLE and RUNNING
+ *           status correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -189,7 +194,8 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_005, TestSize.Level1
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_006
- * @tc.desc: *invalid parameter
+ * @tc.desc: Verify OnBtNetifStatusChanged handles nullptr and valid subnet
+ *           with different BT states correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -226,7 +232,8 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1
 
 /*
  * @tc.name: LNN_BT_NETWORK_IMPL_TEST_007
- * @tc.desc: *invalid parameter
+ * @tc.desc: Verify GetAvailableBtMac with invalid macStr returns SOFTBUS_INVALID_PARAM;
+ *           with valid macStr returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1

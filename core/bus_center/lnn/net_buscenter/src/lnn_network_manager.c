@@ -294,7 +294,7 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
             for (int32_t i = 0; i < CONNECTION_ADDR_MAX; i++) {
                 addrType[i] = true;
             }
-            if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+            if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_BUILDER, "LNN leave network fail");
             }
             break;
@@ -759,7 +759,7 @@ static void NightModeChangeEventHandler(const LnnEventBasicInfo *info)
         for (int32_t i = 0; i < CONNECTION_ADDR_MAX; i++) {
             addrType[i] = true;
         }
-        if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+        if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "LNN leave network fail");
         }
     }

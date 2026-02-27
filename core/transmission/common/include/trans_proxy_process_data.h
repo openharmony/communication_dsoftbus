@@ -145,7 +145,7 @@ uint8_t *TransProxyPackNewHeadD2DData(
     ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen);
 int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type);
 int32_t TransProxyD2DFirstNewHeadSliceProcess(
-    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t businessTye);
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t businessType);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

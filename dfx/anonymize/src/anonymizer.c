@@ -135,6 +135,7 @@ static bool MatchIpAddr(const char *str, uint32_t len)
     }
     bool cidrFlag = false;
     uint32_t slashIndex = len;
+    uint32_t dotCount = 0;
     for (uint32_t i = 0; i < len; ++i) {
         if (cidrFlag && !IsNum(str[i])) {
             return false;
@@ -144,9 +145,15 @@ static bool MatchIpAddr(const char *str, uint32_t len)
             cidrFlag = true;
             continue;
         }
+        if (IsDot(str[i])) {
+            dotCount++;
+        }
         if (!IsNum(str[i]) && !IsDot(str[i])) {
             return false;
         }
+    }
+    if (dotCount != DOT_NUM_MAX) {
+        return false;
     }
     if (cidrFlag && !IsValidCidr(str, len, slashIndex)) {
         return false;
@@ -232,7 +239,7 @@ static int32_t AnonymizeIpAddr(const char *str, uint32_t len, char **anonymized)
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "copy ip addr failed");
     COMM_CHECK_AND_RETURN_RET_LOGE(len != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "len is invalid");
 
-    for (uint32_t i = len - 1; i >= 0; --i) {
+    for (uint32_t i = len - 1; i > 0; --i) {
         if (IsDot((*anonymized)[i])) {
             break;
         }

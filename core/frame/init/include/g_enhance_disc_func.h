@@ -94,7 +94,7 @@ typedef int32_t (*DiscPcCollaborationEventInitFunc)(void);
 typedef void (*DiscPcCollaborationDeinitFunc)(void);
 typedef void (*DiscPcCollaborationEventDeinitFunc)(void);
 
-typedef int32_t (*DistUpdatePublishParamFunc)(const char *cust, const char *extCust);
+typedef int32_t (*DistUpdatePublishParamFunc)(const char *cust, const char *extCust, bool isStart);
 typedef int32_t (*DistDiscoveryStartActionPreLinkFunc)(void);
 typedef int32_t (*DistDiscoveryStopActionPreLinkFunc)(void);
 typedef int32_t (*DistPublishStopActionPreLinkFunc)(void);

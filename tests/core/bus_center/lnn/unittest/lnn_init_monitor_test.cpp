@@ -63,7 +63,9 @@ int32_t LnnInitMonitorCallbackFailed(void)
 
 /*
  * @tc.name: LnnInitMonitor_Test_001
- * @tc.desc: status set test
+ * @tc.desc: Verify LnnInitModuleStatusGet, LnnInitModuleStatusSet,
+ *           LnnInitDeviceInfoStatusGet and LnnInitDeviceInfoStatusSet functions
+ *           for status management
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -92,7 +94,8 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: LnnInitMonitor_Test_002
- * @tc.desc: status get test
+ * @tc.desc: Verify IsLnnInitCheckSucceed returns false before initialization
+ *           and LnnModuleInitMonitorCheckStart updates module status correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -116,7 +119,8 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: LnnModuleInitMonitorCheckStart_Test_001
- * @tc.desc: lnn init module notify test
+ * @tc.desc: Verify LnnModuleInitMonitorCheckStart with failed status can be
+ *           recovered to success and IsLnnInitCheckSucceed returns true
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -144,8 +148,9 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_003, TestSize.Level0)
 }
 
 /*
- * @tc.name: LnnModuleInitMonitorCheckStart_Test_001
- * @tc.desc: lnn init module notify with retry test
+ * @tc.name: LnnModuleInitMonitorCheckStart_Test_002
+ * @tc.desc: Verify LnnInitModuleNotifyWithRetryAsync with invalid parameters
+ *           returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -168,8 +173,9 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_004, TestSize.Level0)
 }
 
 /*
- * @tc.name: LnnModuleInitMonitorCheckStart_Test_001
- * @tc.desc: lnn init module notify with retry test
+ * @tc.name: LnnModuleInitMonitorCheckStart_Test_003
+ * @tc.desc: Verify LnnInitModuleNotifyWithRetrySync with invalid parameters
+ *           returns SOFTBUS_INVALID_PARAM and with valid parameters returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE

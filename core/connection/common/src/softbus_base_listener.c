@@ -432,7 +432,7 @@ static void SetIpv6Tos(int fd, uint32_t tos)
 {
     int32_t ret = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IPV6, SOFTBUS_IPV6_TCLASS, &tos, sizeof(tos));
     CONN_CHECK_AND_RETURN_LOGE(
-        ret == SOFTBUS_ADAPTER_OK, CONN_COMMON, "set tos fail, ret=%{public}d, fd=%{public}d", ret, fd);
+        ret == SOFTBUS_ADAPTER_OK, CONN_COMMON, "set tos fail, err=%{public}d, fd=%{public}d", ret, fd);
 }
 
 static void SetP2pSocketOption(const LocalListenerInfo *info, int32_t fd)
@@ -1181,7 +1181,6 @@ static void RemoveBadFd(void)
         ReturnListenerNode(&node);
     }
 }
-
 
 static void *WatchTask(void *arg)
 {

@@ -94,8 +94,16 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     const char *groupInfoStr = "{\"groupId\":\"1111\", \"groupType\":1}";
     const char *udid = "000";
     GroupInfo info;
+    int32_t accountId = 100;
+    NiceMock<AuthCommonInterfaceMock> authCommMock;
+    EXPECT_CALL(authCommMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(accountId));
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     AuthNetLedgertInterfaceMock ledgermock;
     EXPECT_CALL(ledgermock, GetJsonObjectStringItem).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgermock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(node), Return(SOFTBUS_OK)));
+
     OnGroupCreated(nullptr);
     OnGroupCreated(groupInfo);
     g_dataChangeListener.onGroupCreated = nullptr;
@@ -189,6 +197,9 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t accountId = 100;
+    NiceMock<AuthCommonInterfaceMock> authCommMock;
+    EXPECT_CALL(authCommMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(accountId));
     bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, false);
     EXPECT_TRUE(ret == false);
     ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, false);
@@ -226,6 +237,9 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
     NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgermock, GetJsonObjectStringItem).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    int32_t accountId = 100;
+    NiceMock<AuthCommonInterfaceMock> authCommMock;
+    EXPECT_CALL(authCommMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(accountId));
     bool ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, true);
     EXPECT_TRUE(ret == false);
     ret = IsPotentialTrustedDevice(idType, deviceId, isPrecise, true);
@@ -288,6 +302,14 @@ HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1
     grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups2;
     grounpManager.destroyInfo = LnnHichainInterfaceMock::destroyInfo;
     EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(nullptr)).WillRepeatedly(Return(&grounpManager));
+
+    int32_t invalidAccountId = 0;
+    int32_t accountId = 100;
+    NiceMock<AuthCommonInterfaceMock> authCommMock;
+    EXPECT_CALL(authCommMock, JudgeDeviceTypeAndGetOsAccountIds)
+        .WillOnce(Return(invalidAccountId))
+        .WillRepeatedly(Return(accountId));
+
     bool ret = IsSameAccountGroupDevice();
     EXPECT_TRUE(ret == false);
     ret = IsSameAccountGroupDevice();

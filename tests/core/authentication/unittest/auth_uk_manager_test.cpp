@@ -1279,4 +1279,309 @@ HWTEST_F(AuthUkManagerTest, IS_NEED_SINK_GENERATE_UK_Test_001, TestSize.Level1)
     ret = IsNeedSinkGenerateUk(peerUdid);
     EXPECT_EQ(ret, false);
 }
+
+/*
+ * @tc.name: AUTH_GET_UK_DECRYPT_SIZE_TEST_002
+ * @tc.desc: Test AuthGetUkDecryptSize with various input lengths
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, AUTH_GET_UK_DECRYPT_SIZE_TEST_002, TestSize.Level1)
+{
+    uint32_t testCases[] = {0, 1, OVERHEAD_LEN - 1, OVERHEAD_LEN, OVERHEAD_LEN + 1, 1000};
+    for (size_t i = 0; i < sizeof(testCases) / sizeof(testCases[0]); i++) {
+        uint32_t inLen = testCases[i];
+        uint32_t ret = AuthGetUkDecryptSize(inLen);
+        if (inLen < OVERHEAD_LEN) {
+            EXPECT_EQ(ret, inLen);
+        } else {
+            EXPECT_EQ(ret, inLen - OVERHEAD_LEN);
+        }
+    }
+}
+
+/*
+ * @tc.name: AUTH_FIND_UK_ID_BY_ACL_INFO_TEST_002
+ * @tc.desc: Test AuthFindUkIdByAclInfo with various ACL configurations
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, AUTH_FIND_UK_ID_BY_ACL_INFO_TEST_002, TestSize.Level1)
+{
+    AuthACLInfo aclInfo = { 0 };
+    int32_t ukId;
+    aclInfo.isServer = true;
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    int32_t ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
+    aclInfo.isServer = false;
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
+}
+
+/*
+ * @tc.name: UK_NEGOTIATE_INSTANCE_MANAGEMENT_TEST_001
+ * @tc.desc: Test UK negotiate instance management functions
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_INSTANCE_MANAGEMENT_TEST_001, TestSize.Level1)
+{
+    EXPECT_EQ(UkNegotiateInit(), SOFTBUS_OK);
+    EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
+    uint32_t requestId = 100;
+    uint32_t channelId = 100;
+    AuthACLInfo info = {
+        .isServer = true,
+        .sinkUserId = 10,
+        .sourceUserId = 20,
+        .sourceTokenId = 30,
+        .sinkTokenId = 40,
+    };
+    EXPECT_EQ(EOK, strcpy_s(info.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(info.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(info.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(info.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthGenUkCallback genCb = {
+        .onGenSuccess = OnGenSuccessTest,
+        .onGenFailed = OnGenFailedTest,
+    };
+    int32_t ret = CreateUkNegotiateInstance(requestId, channelId, &info, &genCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    UkNegotiateInstance instance = { 0 };
+    ret = GetGenUkInstanceByReq(requestId, &instance);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = GetGenUkInstanceByChannel(channelId, &instance);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    UkNegotiateInfo *negoInfo = GetUkNegotiateInfo(requestId);
+    EXPECT_NE(negoInfo, nullptr);
+    DeleteUkNegotiateInstance(requestId);
+    negoInfo = GetUkNegotiateInfo(requestId);
+    EXPECT_EQ(negoInfo, nullptr);
+    DeInitUkNegoInstanceList();
+    UkNegotiateDeinit();
+}
+
+/*
+ * @tc.name: UK_NEGOTIATE_INSTANCE_MANAGEMENT_TEST_002
+ * @tc.desc: Test multiple UK negotiate instances
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_INSTANCE_MANAGEMENT_TEST_002, TestSize.Level1)
+{
+    EXPECT_EQ(UkNegotiateInit(), SOFTBUS_OK);
+    EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
+    const int instanceCount = 3;
+    uint32_t requestIds[instanceCount] = {200, 201, 202};
+    uint32_t channelIds[instanceCount] = {200, 201, 202};
+    for (int i = 0; i < instanceCount; i++) {
+        AuthACLInfo info = {
+            .isServer = (i % 2 == 0),
+            .sinkUserId = 10 + i,
+            .sourceUserId = 20 + i,
+            .sourceTokenId = 30 + i,
+            .sinkTokenId = 40 + i,
+        };
+        EXPECT_EQ(EOK, strcpy_s(info.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+        EXPECT_EQ(EOK, strcpy_s(info.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+        EXPECT_EQ(EOK, strcpy_s(info.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+        EXPECT_EQ(EOK, strcpy_s(info.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+        AuthGenUkCallback genCb = {
+            .onGenSuccess = OnGenSuccessTest,
+            .onGenFailed = OnGenFailedTest,
+        };
+        int32_t ret = CreateUkNegotiateInstance(requestIds[i], channelIds[i], &info, &genCb);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+    for (int i = 0; i < instanceCount; i++) {
+        UkNegotiateInstance instance = { 0 };
+        int32_t ret = GetGenUkInstanceByReq(requestIds[i], &instance);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        ret = GetGenUkInstanceByChannel(channelIds[i], &instance);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        DeleteUkNegotiateInstance(requestIds[i]);
+    }
+    DeInitUkNegoInstanceList();
+    UkNegotiateDeinit();
+}
+
+/*
+ * @tc.name: CHECK_ACL_INFO_EMPTY_TEST_002
+ * @tc.desc: Test CheckAclInfoIsEmpty with various ACL configurations
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, CHECK_ACL_INFO_EMPTY_TEST_002, TestSize.Level1)
+{
+    AuthACLInfo info = { 0 };
+    bool ret = CheckAclInfoIsEmpty(&info);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(EOK, strcpy_s(info.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    ret = CheckAclInfoIsEmpty(&info);
+    EXPECT_EQ(ret, false);
+    AuthACLInfo info2 = { 0 };
+    EXPECT_EQ(EOK, strcpy_s(info2.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    ret = CheckAclInfoIsEmpty(&info2);
+    EXPECT_EQ(ret, false);
+    AuthACLInfo info3 = { 0 };
+    info3.sourceUserId = 1;
+    ret = CheckAclInfoIsEmpty(&info3);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: PROCESS_UK_NEGO_STATE_TEST_002
+ * @tc.desc: Test ProcessUkNegoState with different scenarios
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, PROCESS_UK_NEGO_STATE_TEST_002, TestSize.Level1)
+{
+    AuthACLInfo info = {
+        .isServer = true,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(info.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(info.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(info.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(info.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    bool isGreater = false;
+    int32_t ret = ProcessUkNegoState(&info, &isGreater);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    info.isServer = false;
+    ret = ProcessUkNegoState(&info, &isGreater);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: JUDGE_IS_SAME_ACCOUNT_TEST_002
+ * @tc.desc: Test JudgeIsSameAccount with different account hash values
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, JUDGE_IS_SAME_ACCOUNT_TEST_002, TestSize.Level1)
+{
+    char accountHashStr1[SHA_256_HEX_HASH_LEN] = { 0 };
+    char accountHashStr2[SHA_256_HEX_HASH_LEN] = "1234567890ABCDEF";
+    char accountHashStr3[SHA_256_HEX_HASH_LEN] = "9876543210FEDCBA";
+    bool ret = JudgeIsSameAccount(accountHashStr1);
+    EXPECT_EQ(ret, true);
+    ret = JudgeIsSameAccount(accountHashStr2);
+    EXPECT_EQ(ret, false);
+    ret = JudgeIsSameAccount(accountHashStr3);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: GET_SHORT_UDID_HASH_TEST_002
+ * @tc.desc: Test GetShortUdidHash with various UDID formats
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, GET_SHORT_UDID_HASH_TEST_002, TestSize.Level1)
+{
+    char udid1[SHA_256_HEX_HASH_LEN] = "0123456789901234567890123456789012345678901234567890123456789012";
+    char udid2[SHA_256_HEX_HASH_LEN] = "ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890";
+    char udidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    int32_t ret = GetShortUdidHash(udid1, udidHash, (SHA_256_HEX_HASH_LEN));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = GetShortUdidHash(udid2, udidHash, SHA_256_HEX_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: UPDATE_ALL_GEN_CB_CALLBACK_TEST_002
+ * @tc.desc: Test UpdateAllGenCbCallback with different scenarios
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, UPDATE_ALL_GEN_CB_CALLBACK_TEST_002, TestSize.Level1)
+{
+    EXPECT_EQ(UkNegotiateInit(), SOFTBUS_OK);
+    EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
+    AuthACLInfo info = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(info.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(info.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(info.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(info.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthGenUkCallback genCb = {
+        .onGenSuccess = OnGenSuccessTest,
+        .onGenFailed = OnGenFailedTest,
+    };
+    for (uint32_t i = 0; i < 2; i++) {
+        CreateUkNegotiateInstance(400 + i, 400 + i, &info, &genCb);
+    }
+    bool isSuccess = true;
+    int32_t reason = SOFTBUS_OK;
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
+    isSuccess = false;
+    reason = SOFTBUS_AUTH_UK_INSTANCE_NOT_FIND;
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
+    for (uint32_t i = 0; i < 2; i++) {
+        DeleteUkNegotiateInstance(400 + i);
+    }
+    DeInitUkNegoInstanceList();
+    UkNegotiateDeinit();
+}
+
+/*
+ * @tc.name: SECURITY_ON_BYTES_RECEIVED_TEST_002
+ * @tc.desc: Test SecurityOnBytesReceived with different data types
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, SECURITY_ON_BYTES_RECEIVED_TEST_002, TestSize.Level1)
+{
+    const uint8_t *data = reinterpret_cast<const uint8_t *>("testData");
+    uint32_t len = strlen("testData");
+    int32_t dataTypes[] = {DATA_TYPE_AUTH, DATA_TYPE_DEVICE_ID, DATA_TYPE_CLOSE_ACK, DATA_TYPE_DECRYPT_FAIL};
+    for (size_t i = 0; i < sizeof(dataTypes) / sizeof(dataTypes[0]); i++) {
+        AuthDataHead head = {
+            .dataType = dataTypes[i],
+            .module = MODULE_HICHAIN,
+            .seq = 1,
+            .flag = 0,
+            .len = len,
+        };
+        uint32_t size = AUTH_PKT_HEAD_LEN + len;
+        uint8_t *buf = static_cast<uint8_t *>(SoftBusCalloc(size));
+        ASSERT_TRUE(buf != nullptr);
+        int32_t ret = PackAuthData(&head, data, buf, size);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        int32_t channelId = 1;
+        uint32_t dataLen = size;
+        EXPECT_NO_FATAL_FAILURE(SecurityOnBytesReceived(channelId, buf, dataLen));
+        SoftBusFree(buf);
+    }
+}
+
+/*
+ * @tc.name: UK_NEGOTIATE_INIT_DEINIT_TEST_001
+ * @tc.desc: Test multiple init and deinit cycles
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_INIT_DEINIT_TEST_001, TestSize.Level1)
+{
+    for (int i = 0; i < 3; i++) {
+        int32_t ret = UkNegotiateInit();
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        ret = InitUkNegoInstanceList();
+        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_NO_FATAL_FAILURE(UkNegotiateSessionInit());
+        EXPECT_NO_FATAL_FAILURE(UkNegotiateDeinit());
+        DeInitUkNegoInstanceList();
+    }
+}
 } // namespace OHOS

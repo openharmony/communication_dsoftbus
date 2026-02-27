@@ -24,7 +24,8 @@
 #ifndef SOFTBUS_BROADCAST_MANAGER_STRUCT_H
 #define SOFTBUS_BROADCAST_MANAGER_STRUCT_H
 
-#include "softbus_broadcast_type.h"
+#include <stdint.h>
+#include "softbus_broadcast_type_struct.h"
 
 #ifdef __cplusplus
 extern "C"{

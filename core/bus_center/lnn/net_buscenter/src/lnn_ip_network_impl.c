@@ -336,7 +336,7 @@ static void LeaveOldIpNetwork(const char *ifCurrentName)
         addrType[type] = true;
     }
     LNN_LOGI(LNN_BUILDER, "LNN start leave ip network");
-    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LNN leave ip network fail");
     }
 }

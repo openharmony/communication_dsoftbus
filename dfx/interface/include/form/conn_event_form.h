@@ -38,7 +38,8 @@ typedef enum {
     EVENT_SCENE_PASSIVE_CONNECT = 11,
     EVENT_SCENE_PAGING = 12,
     EVENT_SCENE_PAGING_PASSIVE_BROADCAST_RESPONSE = 13,
-    EVENT_STAGE_BR_PROXY = 14,
+    EVENT_SCENE_BR_PROXY = 14,
+    EVENT_SCENE_GENERAL_CONNECT = 15,
 } ConnEventScene;
 
 typedef enum {
@@ -71,6 +72,12 @@ typedef enum {
     EVENT_STAGE_CONNECT_SEND_BASIC_INFO = 2105,
     EVENT_STAGE_CONNECT_PARSE_BASIC_INFO = 2106,
     EVENT_STAGE_CONNECT_DISCONNECTED = 2107,
+
+    EVENT_STAGE_GENERAL_HANDSHAKE = 2108,
+    EVENT_STAGE_GENERAL_HANDSHAKE_ACK = 2109,
+    EVENT_STAGE_BR_PROXY_STATE = 2110,
+    EVENT_STAGE_BR_PROXY_RECONNECT = 2111,
+    EVENT_STAGE_BR_PROXY_SEND = 2112,
 } ConnEventConnectStage;
 
 typedef enum {
@@ -146,6 +153,10 @@ typedef struct {
     int32_t connectSuccessCnt;    // CONNECT_SUCCESS_CNT
     int32_t connectFailCnt;       // CONNECT_FAIL_CNT
     int32_t virtualLinkType;      // VIRTUAL_LINK_TYPE
+    int32_t brProxyState;         // BR_PROXY_STATE
+    int32_t brProxyIsClear;       // BR_PROXY_IS_CLEAR
+    int32_t brProxyIsRetry;       // BR_PROXY_IS_RETRY
+    int32_t brProxyIsAcl;         // BR_PROXY_IS_ACL
 } ConnEventExtra;
 
 typedef enum {

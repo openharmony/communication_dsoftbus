@@ -43,10 +43,6 @@ extern "C" {
 #define TRANS_CHANNEL_INNER_ENCRYPT (1u << TRANS_CHANNEL_INNER_ENCRYPT_OFFSET) /* bit1 */
 #define TRANS_CHANNEL_CAPABILITY 0x17 /* bit0 & bit1 & bit2 & bit4 */
 
-#define UDP_CHANNEL_MULTIPATH_OFFSET 1
-#define CHANNEL_ISMULTINEG_OFFSET 2
-#define TRANS_UDP_CHANNEL_CAPBILITY 6 /* bit1 & bit2 */
-
 #define MAC_DELIMITER ':'
 #define IP_DELIMITER '.'
 #define ID_DELIMITER ' '

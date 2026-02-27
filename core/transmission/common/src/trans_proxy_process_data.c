@@ -209,8 +209,8 @@ static int32_t ProxyBuildTlvDataHead(DataHead *pktHead, int32_t finalSeq, int32_
     }
     pktHead->tlvElement = (uint8_t *)SoftBusCalloc(PROXY_TLV_ELEMENT * sizeof(TlvElement));
     if (pktHead->tlvElement == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "maoolc tlvElement failed");
-        return SOFTBUS_MEM_ERR;
+        TRANS_LOGE(TRANS_CTRL, "malloc tlvElement failed");
+        return SOFTBUS_MALLOC_ERR;
     }
     pktHead->magicNum = SoftBusHtoLl(MAGIC_NUMBER);
     uint32_t seq = SoftBusHtoLl((uint32_t)finalSeq);
@@ -305,8 +305,8 @@ int32_t TransProxyPackTlvBytes(
         return SOFTBUS_MEM_ERR;
     }
     char *outData = (char *)dataInfo->outData + newDataHeadSize;
-    ret = SoftBusEncryptDataWithSeq(&cipherKey, (const unsigned char*)dataInfo->inData,
-        dataInfo->inLen, (unsigned char*)outData, &outLen, seq);
+    ret = SoftBusEncryptDataWithSeq(&cipherKey, (const unsigned char *)dataInfo->inData,
+        dataInfo->inLen, (unsigned char *)outData, &outLen, seq);
     (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     outData = NULL;
     if (ret != SOFTBUS_OK || outLen != dataInfo->inLen + OVERHEAD_LEN) {

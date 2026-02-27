@@ -100,6 +100,12 @@ typedef enum {
 } VirtualLinkCapabilityCode;
 
 typedef enum {
+    CONN_VIRTUAL_LINK_STATE_INVALID = -1,
+    CONN_VIRTUAL_LINK_STATE_ENTER_VIRTUAL = 0,
+    CONN_VIRTUAL_LINK_STATE_VIRTUAL_SWITCH_REAL = 1,
+} VirtualLinkState;
+
+typedef enum {
     CONN_VSP_CAP_UNKNOWN = -1,
     CONN_VSP_SUPPORT = 0,
     CONN_VSP_NOT_SUPPORT = 1,

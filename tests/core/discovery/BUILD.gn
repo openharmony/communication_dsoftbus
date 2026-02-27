@@ -18,7 +18,6 @@ group("unittest") {
   testonly = true
   deps = [
     "manager/unittest:unittest",
-    "service_discovery/service_database/unittest:unittest",
     "virlink/adapter/unittest:unittest",
     "nfc/dispatcher:unittest",
   ]

@@ -163,7 +163,6 @@ BUSCENTER_BEHAVIOR:
   ID_COUNT: { type: INT32, desc: same id count}
   USER_COUNT: { type: INT32, desc: same user count}
   TOTAL_COUNT: { type: INT32, desc: total count}
-  LANE_STAGE: { type: INT32, desc: lane stage }
   LANE_HANDLE: { type: INT32, desc: lane handle }
   QOS_RTT_LEVEL: { type: INT32, desc: lane qos info rtt level }
   TRANS_TYPE: { type: INT32, desc: lane trans type }
@@ -172,10 +171,14 @@ BUSCENTER_BEHAVIOR:
   IS_GUIDE_RETRY: { type: INT32, desc: lane is guide retry }
   WIFI_DETECT_STATE: { type: INT32, desc: lane wifi detect state }
   WIFI_DETECT_TIME: { type: INT64, desc: lane wifi detect time }
-  BUILD_LINK_TIME: { type: INT64, desc: lane build link time }
+  COST_TIME: { type: UINT64, desc: cost time }
   IS_HML_REUSE: { type: INT32, desc: lane is hml reuse }
   IS_DELAY_FREE: { type: INT32, desc: lane is delay free }
-  FREE_LINK_TIME: { type: INT64, desc: lane free link time }
+  IS_BUILD_RETRY: { type: UINT32, desc: lane is build retry }
+  IS_NO_CAP_ALLOC: { type: UINT32, desc: lane is no cap alloc }
+  SOURCE_TYPE: { type: UINT8, desc: spark link send source type }
+  DATA_TYPE: { type: UINT8, desc: spark link send data type }
+  IS_RELIABLE: { type: UINT8, desc: spark link send data is reliable }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
@@ -360,20 +363,20 @@ CONNECTION_AUDIT:
   LINK_TYPE: { type: INT32, desc: link type }
   EXPECT_ROLE: { type: INT32, desc: expect role }
   COST_TIME: { type: INT32, desc: total cost time}
-  CONN_TIMES: { type: INT32, desc: connect times }
   FREQ: { type: STRING, desc: frequency}
   CHALLENGE_CODE: { type: STRING, desc: challenge code }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
-  LOCAL_BR_MAC: { type: STRING, desc: local br mac }
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
-  LOCAL_BLE_MAC: { type: STRING, desc: local ble mac }
   PEER_WIFI_MAC: { type: STRING, desc: peer wifi mac }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
   PEER_UDID: { type: STRING, desc: peer device udid }
-  LOCAL_UDID: { type: STRING, desc: local ble udid }
   CONN_PAYLOAD: { type: STRING, desc: payload data }
   LOCAL_DEV_NAME: { type: STRING, desc: local device name }
   PEER_IP: { type: STRING, desc: peer device ip }
+  CONN_TIMES: { type: INT32, desc: connect times }
+  LOCAL_BR_MAC: { type: STRING, desc: local br mac }
+  LOCAL_BLE_MAC: { type: STRING, desc: local ble mac }
+  LOCAL_UDID: { type: STRING, desc: local ble udid }
   LOCAL_IP: { type: STRING, desc: loca ip }
   PEER_PORT: { type: STRING, desc: peer port }
   LOCAL_PORT: { type: STRING, desc: local port }

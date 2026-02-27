@@ -210,7 +210,7 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest001, Tes
     CheckPagingListen(nullptr);
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
     EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(PagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
 }
@@ -243,7 +243,7 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest002, Tes
     tmpTest->channelId = TEST_CHANNEL_ID;
     EXPECT_CALL(PagingMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(PagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmpTest);
 }
@@ -272,7 +272,7 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest003, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
     EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(PagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
 }
@@ -301,7 +301,7 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest004, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
     EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(PagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
 }
@@ -331,7 +331,7 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest005, Tes
     }
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
     EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
+    EXPECT_CALL(PagingMock, TransPagingHasListenAndGetInfoPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
 }

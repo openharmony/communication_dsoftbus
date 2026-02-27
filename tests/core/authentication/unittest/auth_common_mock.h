@@ -83,6 +83,7 @@ public:
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
     virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
     virtual int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option) = 0;
+    virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -125,6 +126,7 @@ public:
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
     MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged));
     MOCK_METHOD2(ConnUpdateConnection, int32_t(uint32_t, UpdateOption *));
+    MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
     static inline char *g_encryptData;
     static inline ConnectCallback g_conncallback;
     static inline ConnectResult g_connresultcb;

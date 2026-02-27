@@ -33,5 +33,10 @@
     "PROCESS_NAME": "samgr",
     "SA_ID": "0",
     "SA_UID": "5555"
+  },
+  {
+    "PROCESS_NAME": "cloudfileservice",
+    "SA_ID": "5204",
+    "SA_UID": "1009"
   }
 ]

@@ -111,7 +111,7 @@ ohos_unittest("DiscCoapTest") {
 group("unittest") {
   testonly = true
   deps = [ ":DiscCoapTest" ]
-  if (dsoftbus_feature_ex_kits) {
+  if (dsoftbus_feature_disc_share_coap && dsoftbus_feature_inner_disc_coap) {
     deps += [ ":DiscNstackxAdapterTest" ]
   }
 }

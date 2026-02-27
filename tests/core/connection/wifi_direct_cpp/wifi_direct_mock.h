@@ -94,6 +94,7 @@ public:
     virtual WifiErrorCode Hid2dRequestGcIp(const unsigned char gcMac[MAC_LEN],
         unsigned int ipAddr[IPV4_ARRAY_LEN]) = 0;
     virtual WifiErrorCode Hid2dConfigIPAddr(const char ifName[IF_NAME_LEN], const IpAddrInfo *ipInfo) = 0;
+    virtual WifiErrorCode Hid2dSetGroupType(GroupLiveType groupLiveType) = 0;
     virtual WifiErrorCode Hid2dCreateGroup(const int32_t frequency, FreqType type) = 0;
     virtual WifiErrorCode Hid2dConnect(const Hid2dConnectConfig *config) = 0;
     virtual WifiErrorCode Hid2dSharedlinkIncrease(void) = 0;
@@ -192,6 +193,7 @@ public:
     MOCK_METHOD(WifiErrorCode, GetCurrentGroup, (WifiP2pGroupInfo*), (override));
     MOCK_METHOD(WifiErrorCode, Hid2dRequestGcIp, (const unsigned char*, unsigned int*), (override));
     MOCK_METHOD(WifiErrorCode, Hid2dConfigIPAddr, (const char*, const IpAddrInfo *), (override));
+    MOCK_METHOD(WifiErrorCode, Hid2dSetGroupType, (GroupLiveType groupLiveType), (override));
     MOCK_METHOD(WifiErrorCode, Hid2dCreateGroup, (const int, FreqType), (override));
     MOCK_METHOD(WifiErrorCode, Hid2dConnect, (const Hid2dConnectConfig *), (override));
     MOCK_METHOD(WifiErrorCode, Hid2dSharedlinkIncrease, (), (override));

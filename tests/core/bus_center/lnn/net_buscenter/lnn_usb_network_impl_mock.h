@@ -45,7 +45,7 @@ public:
     virtual int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info) = 0;
     virtual void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status) = 0;
     virtual bool LnnVisitNetif(VisitNetifCallback callback, void *data) = 0;
-    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen) = 0;
+    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable) = 0;
     virtual int32_t GetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len) = 0;
     virtual int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr) = 0;
     virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
@@ -74,7 +74,7 @@ public:
     MOCK_METHOD2(TransTdcStartSessionListener, int32_t(ListenerModule, const LocalListenerInfo *));
     MOCK_METHOD3(LnnNotifyPhysicalSubnetStatusChanged, void(const char *, ProtocolType, void *));
     MOCK_METHOD2(LnnVisitNetif, bool(VisitNetifCallback, void *));
-    MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t));
+    MOCK_METHOD3(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t, bool));
     MOCK_METHOD3(GetNetworkIpv6ByIfName, int32_t(const char *, char *, uint32_t));
     MOCK_METHOD1(LnnRegistProtocol, int32_t(LnnProtocolManager *));
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t(InfoKey, uint32_t *));

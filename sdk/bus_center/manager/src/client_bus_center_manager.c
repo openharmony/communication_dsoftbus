@@ -675,6 +675,16 @@ int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDevi
     return ret;
 }
 
+int32_t SetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDeviceInfoKeyEx key,
+    uint8_t *info, int32_t infoLen)
+{
+    int32_t ret = ServerIpcSetNodeKeyInfo(pkgName, networkId, key, info, infoLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server SetNodeKeyInfo failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -289,6 +289,12 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnNegotiateTest002, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+void OnBindTest(int32_t socket, PeerSocketInfo info)
+{
+    (void)socket;
+    (void)info;
+}
+
 /**
  * @tc.name: HandleServerOnNegotiateTest001
  * @tc.desc: HandleServerOnNegotiate param is invalid.
@@ -302,14 +308,22 @@ HWTEST_F(TransClientSessionCallbackExTest, HandleServerOnNegotiateTest001, TestS
     ISocketListener socketCallback = {
         .OnNegotiate = nullptr,
         .OnNegotiate2 = nullptr,
+        .OnBind = nullptr
     };
     ChannelInfo channel = {
         .peerUserId = -1,
         .channelType = CHANNEL_TYPE_AUTH,
     };
 
-    int32_t ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_HAP, nullptr, &channel, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    int32_t ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_HAP, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SERVER_NOT_LISTEN);
+
+    ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_HAP, &socketCallback, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SERVER_NOT_LISTEN);
+
+    socketCallback.OnBind = OnBindTest;
+    ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_HAP, &socketCallback, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SERVER_NOT_LISTEN);
 
     ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_HAP, &socketCallback, &channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -317,10 +331,7 @@ HWTEST_F(TransClientSessionCallbackExTest, HandleServerOnNegotiateTest001, TestS
     ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_NATIVE, &socketCallback, &channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    channel.channelId = CHANNEL_TYPE_TCP_DIRECT;
-    ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_HAP, &socketCallback, &channel, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
+    channel.channelType = CHANNEL_TYPE_PROXY;
     ret = HandleServerOnNegotiate(0, ACCESS_TOKEN_TYPE_NATIVE, &socketCallback, &channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -370,7 +381,7 @@ HWTEST_F(TransClientSessionCallbackExTest, HandleOnBindSuccessTest001, TestSize.
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = HandleOnBindSuccess(0, sessionCallback, &channel, &sinkAccessInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SERVER_NOT_LISTEN);
 
     channel.isServer = false;
     EXPECT_CALL(transSessionMgrMock, ClientHandleBindWaitTimer).WillRepeatedly(Return(SOFTBUS_OK));

@@ -75,11 +75,11 @@ std::string WifiDirectHashAnonymize(const std::vector<uint8_t> &input)
 {
     uint8_t hashData[SHA_256_HASH_LEN] = { 0 };
     int32_t ret = SoftBusGenerateStrHash(input.data(), input.size(), hashData);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "hash failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "hash fail ret=%{public}d", ret);
     char hashStr[HEXIFY_LEN(SHA_256_HASH_LEN)] = { 0 };
     ret = ConvertBytesToHexString(hashStr, sizeof(hashStr), hashData, sizeof(hashData));
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "convert hex string failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "convert hex string fail, ret=%{public}d", ret);
     return WifiDirectAnonymize(std::string(hashStr).substr(SHA_256_HASH_LEN, SHA_256_HASH_LEN));
 }
 
@@ -87,11 +87,11 @@ std::string WifiDirectHashAnonymize(const std::vector<char> &input)
 {
     uint8_t hashData[SHA_256_HASH_LEN] = { 0 };
     int32_t ret = SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(input.data()), input.size(), hashData);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "hash failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "hash fail ret=%{public}d", ret);
     char hashStr[HEXIFY_LEN(SHA_256_HASH_LEN)] = { 0 };
     ret = ConvertBytesToHexString(hashStr, sizeof(hashStr), hashData, sizeof(hashData));
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "convert hex string failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "convert hex string fail, ret=%{public}d", ret);
     return WifiDirectAnonymize(std::string(hashStr).substr(SHA_256_HASH_LEN, SHA_256_HASH_LEN));
 }
 } // namespace OHOS::SoftBus

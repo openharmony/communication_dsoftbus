@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -940,6 +940,74 @@ bool OnBrProxyQueryPermissionInnerTest(FuzzedDataProvider &provider)
     return true;
 }
 
+bool OnConnectionStateChangeInnerTest(FuzzedDataProvider &provider)
+{
+    uint32_t handle = provider.ConsumeIntegral<uint32_t>();
+    int32_t state = provider.ConsumeIntegral<int32_t>();
+    int32_t reason = provider.ConsumeIntegral<int32_t>();
+
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteUint32(handle);
+    datas.WriteInt32(state);
+    datas.WriteInt32(reason);
+    softBusClientStub->OnRemoteRequest(CLIENT_GENERAL_CONNECTION_STATE_CHANGE, datas, reply, option);
+    return true;
+}
+
+bool OnDataReceivedInnerTest(FuzzedDataProvider &provider)
+{
+    uint32_t handle = provider.ConsumeIntegral<uint32_t>();
+    uint32_t len = provider.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
+    uint8_t dataPtr[U32_AT_SIZE] = { 0 };
+    std::string providerDataInfo = provider.ConsumeBytesAsString(len - 1);
+    if (strcpy_s((char *)dataPtr, len - 1, providerDataInfo.c_str()) != EOK) {
+        return false;
+    }
+
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteUint32(handle);
+    datas.WriteUint32(len);
+    datas.WriteRawData(dataPtr, len);
+    softBusClientStub->OnRemoteRequest(CLIENT_GENERAL_DATA_RECEIVED, datas, reply, option);
+    return true;
+}
+
+bool OnAcceptConnectInnerTest(FuzzedDataProvider &provider)
+{
+    char name[HAP_NAME_MAX_LEN] = { 0 };
+    std::string providerName = provider.ConsumeBytesAsString(HAP_NAME_MAX_LEN - 1);
+    if (strcpy_s(name, HAP_NAME_MAX_LEN - 1, providerName.c_str()) != EOK) {
+        return false;
+    }
+    uint32_t handle = provider.ConsumeIntegral<uint32_t>();
+
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteCString(name);
+    datas.WriteUint32(handle);
+    softBusClientStub->OnRemoteRequest(CLIENT_GENERAL_ACCEPT_CONNECT, datas, reply, option);
+    return true;
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -982,5 +1050,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::OnBrProxyDataRecvInnerTest(provider);
     OHOS::OnBrProxyStateChangedInnerTest(provider);
     OHOS::OnBrProxyQueryPermissionInnerTest(provider);
+    OHOS::OnConnectionStateChangeInnerTest(provider);
+    OHOS::OnDataReceivedInnerTest(provider);
+    OHOS::OnAcceptConnectInnerTest(provider);
     return 0;
 }

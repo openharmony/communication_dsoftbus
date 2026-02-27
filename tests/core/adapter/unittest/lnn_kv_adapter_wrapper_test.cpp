@@ -166,7 +166,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
     LnnUnRegisterDataChangeListener(dbId);
     LnnUnRegisterDataChangeListener(dbId + 1);
     dbId = g_dbId;
-LnnUnRegisterDataChangeListener(dbId);
+    LnnUnRegisterDataChangeListener(dbId);
     string keyStr = "aaa";
     string valueStr = "aaa";
     char *value = nullptr;
@@ -246,6 +246,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin, T
     int32_t ret = LnnCreateKvAdapter(&dbId, appId, appIdLen, storeId, storeIdLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
 /*
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
  * @tc.desc: Test LnnCreateKvAdapter with appIdLen being greater than MAX_STRING_LEN
@@ -426,7 +427,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_Dbid_LessThanMin, TestSize.Level1)
 {
     int32_t dbId = MIN_DBID_COUNT - 1;
     const char *key = "validKey";
-int32_t keyLen = strlen(key);
+    int32_t keyLen = strlen(key);
     const char *value = "validValue";
     int32_t valueLen = strlen(value);
     int32_t ret = LnnPutDBData(dbId, key, keyLen, value, valueLen);

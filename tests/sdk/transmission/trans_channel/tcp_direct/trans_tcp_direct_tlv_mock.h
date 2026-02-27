@@ -18,8 +18,10 @@
 
 #include <gmock/gmock.h>
 
+#include "client_bus_center_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_manager.h"
+#include "softbus_bus_center.h"
 #include "trans_assemble_tlv.h"
 
 namespace OHOS {
@@ -46,6 +48,13 @@ public:
     virtual int32_t ClientTransTdcOnDataReceived(int32_t channelId, const void *data, uint32_t len,
     SessionPktType type) = 0;
     virtual int32_t SetMintpSocketTos(int32_t fd, uint32_t tos) = 0;
+    virtual int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type) = 0;
+    virtual ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout) = 0;
+    virtual int32_t ConnSetTcpKeepalive(
+        int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount) = 0;
+    virtual int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millsec) = 0;
+    virtual int32_t StartTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo,
+        TimeSyncAccuracy accuracy, TimeSyncPeriod period, ITimeSyncCbWithSocket *cbWithSocket) = 0;
 };
 
 class TransTcpDirectInterfaceMock : public TransTcpDirectInterface {
@@ -71,6 +80,13 @@ public:
     MOCK_METHOD4(ClientTransTdcOnDataReceived, int32_t(int32_t channelId, const void *data, uint32_t len,
         SessionPktType type));
     MOCK_METHOD2(SetMintpSocketTos, int32_t(int32_t fd, uint32_t tos));
+    MOCK_METHOD3(SetPendingPacket, int32_t(int32_t channelId, int32_t seqNum, int32_t type));
+    MOCK_METHOD4(ConnSendSocketData, ssize_t(int32_t fd, const char *buf, size_t len, int32_t timeout));
+    MOCK_METHOD4(ConnSetTcpKeepalive, int32_t(
+        int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount));
+    MOCK_METHOD2(ConnSetTcpUserTimeOut, int32_t(int32_t fd, uint32_t millsec));
+    MOCK_METHOD5(StartTimeSyncWithSocketInner, int32_t(const char *pkgName, const TimeSyncSocketInfo *socketInfo,
+        TimeSyncAccuracy accuracy, TimeSyncPeriod period, ITimeSyncCbWithSocket *cbWithSocket));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_TLV_MOCK_H

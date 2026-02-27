@@ -24,7 +24,7 @@ int32_t TransOpenFuncInit(void *soHandle)
     }
     int32_t (*transRegisterOpenfunc)(void);
 
-    int ret = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
 
     ret = SoftBusDlsym(soHandle, "TransRegisterOpenFunc", (void **)&transRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {

@@ -39,7 +39,7 @@ public:
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual bool AuthIsUkExpired(uint64_t time) = 0;
     virtual int32_t AuthInsertUserKey(
-        const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel) = 0;
+        const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel, DpBindType type) = 0;
     virtual uint64_t SoftBusGetSysTimeMs(void) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t ConvertBytesToHexString(
@@ -65,7 +65,7 @@ public:
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
     MOCK_METHOD1(AuthIsUkExpired, bool(uint64_t));
-    MOCK_METHOD3(AuthInsertUserKey, int32_t(const AuthACLInfo *, const AuthUserKeyInfo *, bool));
+    MOCK_METHOD4(AuthInsertUserKey, int32_t(const AuthACLInfo *, const AuthUserKeyInfo *, bool, DpBindType));
     MOCK_METHOD0(SoftBusGetSysTimeMs, uint64_t(void));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD4(ConvertBytesToHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t inLen));

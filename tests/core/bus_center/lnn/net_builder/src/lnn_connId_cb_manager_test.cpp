@@ -61,7 +61,9 @@ static LnnServerJoinExtCallBack cb = { .lnnServerJoinExtCallback = OnLnnServerJo
 
 /*
  * @tc.name: LnnConnIdCbManagerTest001
- * @tc.desc: AddConnIdCallbackInfoItem test
+ * @tc.desc: Verify AddConnIdCallbackInfoItem with valid parameters returns SOFTBUS_OK;
+ *           with duplicate connId returns SOFTBUS_ALREADY_EXISTED; with invalid parameters
+ *           returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -87,7 +89,8 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest001, TestSize.Level1)
 
 /*
  * @tc.name: LnnConnIdCbManagerTest002
- * @tc.desc: DelConnIdCallbackInfoItem test
+ * @tc.desc: Verify DelConnIdCallbackInfoItem with valid connId returns SOFTBUS_OK;
+ *           with invalid connId returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -102,7 +105,8 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest002, TestSize.Level1)
 
 /*
  * @tc.name: LnnConnIdCbManagerTest003
- * @tc.desc: InvokeCallbackForJoinExt test
+ * @tc.desc: Verify InvokeCallbackForJoinExt with valid and nullptr peerUdid
+ *           executes without fatal failure
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -118,7 +122,8 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest003, TestSize.Level1)
 
 /*
  * @tc.name: LnnConnIdCbManagerTest004
- * @tc.desc: GetConnIdCbInfoByAddr test
+ * @tc.desc: Verify GetConnIdCbInfoByAddr with nullptr addr returns SOFTBUS_INVALID_PARAM;
+ *           with non-existent addr returns SOFTBUS_NOT_FIND; with valid addr returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1

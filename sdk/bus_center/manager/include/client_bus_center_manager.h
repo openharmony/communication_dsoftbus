@@ -55,6 +55,8 @@ int32_t GetAllNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo **info, int
 int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info);
 int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId,
     NodeDeviceInfoKey key, uint8_t *info, int32_t infoLen);
+int32_t SetNodeKeyInfoInner(const char *pkgName, const char *networkId,
+    NodeDeviceInfoKeyEx key, uint8_t *info, int32_t infoLen);
 int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback);
 int32_t UnregDataLevelChangeCbInner(const char *pkgName);

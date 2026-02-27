@@ -126,13 +126,13 @@ void TransPagingDeathCallbackPacked(const char *pkgName, int32_t pid)
     return pfnTransEnhanceFuncList->transPagingDeathCallback(pkgName, pid);
 }
 
-bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info)
+bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
-    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transHasAndUpdatePagingListen) != SOFTBUS_OK) {
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transPagingHasListenAndGetInfo) != SOFTBUS_OK) {
         return true;
     }
-    return pfnTransEnhanceFuncList->transHasAndUpdatePagingListen(info);
+    return pfnTransEnhanceFuncList->transPagingHasListenAndGetInfo(info);
 }
 
 int32_t TransPagingGetPidAndDataByFlgPacked(
@@ -220,6 +220,18 @@ bool IsInWhitelistPacked(const char *app)
     return pfnTransEnhanceFuncList->isInWhitelist(app);
 }
 
+bool IsMultipathWhitelistPacked(const char *processName, bool *isWhitelist)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->isMultipathWhitelist) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->isMultipathWhitelist(processName, isWhitelist);
+}
+
 bool CheckAuthChannelSessionNameValidPacked(const char *sessionName)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
@@ -256,7 +268,7 @@ bool TransCheckP2pOnlyPacked(const char *sessionName)
     return pfnTransEnhanceFuncList->transCheckP2pOnly(sessionName);
 }
 
-bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName)
+bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName, const char *peerNetworkId)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
     if (pfnTransEnhanceFuncList == NULL) {
@@ -265,7 +277,7 @@ bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName)
     if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink) != SOFTBUS_OK) {
         return false;
     }
-    return pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink(sessionName);
+    return pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink(sessionName, peerNetworkId);
 }
 
 int32_t LoadTransPermissionJsonPacked(void)

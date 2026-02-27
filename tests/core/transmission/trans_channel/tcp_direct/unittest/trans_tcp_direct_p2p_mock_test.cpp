@@ -330,7 +330,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     info.myPort = port;
     info.protocol = LNN_PROTOCOL_IP;
     int32_t ret = VerifyP2p(authHandle, seq, &info);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(data));
     EXPECT_CALL(TcpP2pDirectMock, AuthPostTransData).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = VerifyP2p(authHandle, seq, &info);

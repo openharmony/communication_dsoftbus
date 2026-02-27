@@ -945,7 +945,7 @@ static void ReportConnectExceptionHandler(uint64_t u64Mac, int32_t errorCode)
     option.type = CONNECT_BR;
     int32_t ret = ConvertU64MacToStr(u64Mac, option.brOption.brMac, BT_MAC_LEN);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "ConvertU64MacToStr faild, ret=%{public}d", ret);
+        CONN_LOGE(CONN_BR, "ConvertU64MacToStr faild, err=%{public}d", ret);
         return;
     }
     LnnDCReportConnectException(&option, errorCode);

@@ -132,9 +132,9 @@ static int32_t CreateCustDataJson(DeviceInfo *device, RaiseHandDeviceInfo *devic
     DISC_CHECK_AND_RETURN_RET_LOGE(
         deviceInfo != NULL && device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param");
     cJSON *jsonObj = cJSON_CreateObject();
-    DISC_CHECK_AND_RETURN_RET_LOGE(jsonObj != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE, "create json object failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(jsonObj != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE, "create json object fail");
     if (!AddNumberToJsonObject(jsonObj, JSON_KEY_NOW_TIMES, deviceInfo->nowTimes)) {
-        DISC_LOGE(DISC_BLE, "add nowTimes to json failed");
+        DISC_LOGE(DISC_BLE, "add nowTimes to json fail");
         cJSON_Delete(jsonObj);
         return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
@@ -144,26 +144,26 @@ static int32_t CreateCustDataJson(DeviceInfo *device, RaiseHandDeviceInfo *devic
         heartbeatValueInt[i] = (int32_t)deviceInfo->heartbeatValue[i];
     }
     if (!AddIntArrayToJsonObject(jsonObj, JSON_KEY_HEARTBEAT_VALUE, heartbeatValueInt, HB_HEARTBEAT_VALUE_LEN)) {
-        DISC_LOGE(DISC_BLE, "add heartbeatValue to json failed");
+        DISC_LOGE(DISC_BLE, "add heartbeatValue to json fail");
         cJSON_Delete(jsonObj);
         return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
 
     if (!AddNumberToJsonObject(jsonObj, JSON_KEY_HEARTBEAT_VERSION, deviceInfo->heartbeatVersion)) {
-        DISC_LOGE(DISC_BLE, "add heartbeatVersion to json failed");
+        DISC_LOGE(DISC_BLE, "add heartbeatVersion to json fail");
         cJSON_Delete(jsonObj);
         return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
 
     if (!AddNumberToJsonObject(jsonObj, JSON_KEY_HEARTBEAT_TYPE, deviceInfo->heartbeatType)) {
-        DISC_LOGE(DISC_BLE, "add heartbeatType to json failed");
+        DISC_LOGE(DISC_BLE, "add heartbeatType to json fail");
         cJSON_Delete(jsonObj);
         return SOFTBUS_ADD_INFO_TO_JSON_FAIL;
     }
 
     char *custData = cJSON_PrintUnformatted(jsonObj);
     cJSON_Delete(jsonObj);
-    DISC_CHECK_AND_RETURN_RET_LOGE(custData != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "json print failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(custData != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "json print fail");
     if (strlen(custData) >= sizeof(device->custData)) {
         DISC_LOGE(DISC_BLE, "custData invaild length");
         cJSON_free(custData);
@@ -171,7 +171,7 @@ static int32_t CreateCustDataJson(DeviceInfo *device, RaiseHandDeviceInfo *devic
     }
     errno_t errRet = strcpy_s(device->custData, sizeof(device->custData), custData);
     cJSON_free(custData);
-    DISC_CHECK_AND_RETURN_RET_LOGE(errRet == EOK, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "copy cust data failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(errRet == EOK, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "copy cust data fail");
     return SOFTBUS_OK;
 }
 
@@ -194,7 +194,7 @@ int32_t OnRaiseHandDeviceFound(RaiseHandDeviceInfo *deviceInfo)
         SOFTBUS_MEM_ERR, DISC_BLE, "memcpy accountHash error");
     errno_t errRet = strcpy_s(device.addr[0].info.ble.bleMac, BT_MAC_LEN, deviceInfo->bleMac);
     if (errRet != EOK) {
-        DISC_LOGE(DISC_BLE, "copy bleMac failed");
+        DISC_LOGE(DISC_BLE, "copy bleMac fail");
         return SOFTBUS_STRCPY_ERR;
     }
 

@@ -70,6 +70,13 @@ static void MatchLnnEventNameTypeExtraInt64Param(const HiSysEventParam *params, 
     EXPECT_EQ(params[index].v.i64, extraParam);
 }
 
+static void MatchLnnEventNameTypeExtraUint8Param(const HiSysEventParam *params, int32_t index, uint8_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.ui8, extraParam);
+}
+
 MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array match fail")
 {
     const auto *params = static_cast<const HiSysEventParam *>(arg);
@@ -118,7 +125,6 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.idCount);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.userCount);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.totalCount);
-    MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.laneStage);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.laneHandle);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.rttLevel);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.transType);
@@ -127,10 +133,14 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isGuideRetry);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.wifiDetectState);
     MatchLnnEventNameTypeExtraUint64Param(params, ++index, extra.wifiDetectTime);
-    MatchLnnEventNameTypeExtraUint64Param(params, ++index, extra.buildLinkTime);
+    MatchLnnEventNameTypeExtraUint64Param(params, ++index, extra.costTime);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isHmlReuse);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isDelayFree);
-    MatchLnnEventNameTypeExtraUint64Param(params, ++index, extra.freeLinkTime);
+    MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isBuildRetry);
+    MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isNoCapAlloc);
+    MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.sourceType);
+    MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.dataType);
+    MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.isReliable);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.peerDeviceInfo);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerIp);
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);

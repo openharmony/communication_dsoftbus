@@ -36,8 +36,6 @@ auth_server_inc = [
 ]
 if (dsoftbus_feature_lnn_frame) {
   auth_server_src = [
-    "$authentication_path/applykey/auth_apply_key_manager.c",
-    "$authentication_path/applykey/auth_apply_key_process.c",
     "$authentication_path/src/auth_common.c",
     "$authentication_path/src/auth_connection.c",
     "$authentication_path/src/auth_device.c",
@@ -69,6 +67,16 @@ if (dsoftbus_feature_lnn_frame) {
         [ "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c" ]
   } else {
     auth_server_src += [ "$dsoftbus_root_path/core/authentication/src/virtual/auth_tcp_connection_virtual.c" ]
+  }
+
+  if (dsoftbus_feature_lnn_d2d_auth) {
+    auth_server_src += [
+      "$authentication_path/applykey/auth_apply_key_manager.c",
+      "$authentication_path/applykey/auth_apply_key_process.c",
+    ]
+  } else {
+    auth_server_src +=
+        [ "$authentication_path/applykey/auth_apply_key_virtual.c" ]
   }
 } else {
   auth_server_src = [

@@ -896,9 +896,13 @@ void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifyLpMcuInit(bool enable)
+void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy)
 {
-    LnnHBEnableStatusChangedEvent event = {.basic.event = LNN_EVENT_LP_MCU_ENABLE_HEARTBEAT, .enable = enable};
+    LnnHBEnableStatusChangedEvent event = {
+        .basic.event = LNN_EVENT_LP_MCU_ENABLE_HEARTBEAT,
+        .state = state,
+        .strategy = strategy,
+    };
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 

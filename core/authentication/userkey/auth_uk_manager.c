@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,9 @@
  */
 
 #include "auth_uk_manager.h"
+
 #include <securec.h>
+
 #include "anonymizer.h"
 #include "auth_log.h"
 #include "auth_common.h"
@@ -25,6 +27,8 @@
 #include "auth_identity_service_adapter.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
+#include "auth_tcp_connection.h"
+#include "auth_user_common_key.h"
 #include "bus_center_manager.h"
 #include "device_auth.h"
 #include "lnn_async_callback_utils.h"
@@ -37,6 +41,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_transmission_interface.h"
@@ -63,7 +68,9 @@
 #define USER_KEY_TRANS_LEN_MAX  20000
 
 static uint32_t g_uniqueId = 0;
-static uint64_t g_ukDecayTime = 15552000000; //180 * 24 * 60 * 60 * 1000L
+// UK key decay time: 180 days in milliseconds
+// 180 * 24 * 60 * 60 * 1000 = 15,552,000,000 ms
+static uint64_t g_ukDecayTime = 15552000000;
 static SoftBusList *g_ukNegotiateList = NULL;
 static SoftBusMutex g_ukNegotiateListLock;
 
@@ -144,6 +151,7 @@ void DeInitUkNegoInstanceList(void)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_ukNegotiateList->list, UkNegotiateInstance, node) {
         ListDelete(&item->node);
+        (void)memset_s(item, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
         SoftBusFree(item);
     }
     AUTH_LOGI(AUTH_CONN, "deinit uknego instance");
@@ -200,7 +208,9 @@ static uint32_t GetSameUkInstanceNum(AuthACLInfo *info)
         return num;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_ukNegotiateList->list, UkNegotiateInstance, node) {
-        if (!CompareByAllAcl(info, &item->info, info->isServer == item->info.isServer)) {
+        bool isSameSide = strcmp(info->sourceUdid, item->info.sourceUdid) == 0;
+        if (!CompareByAclSameAccount(info, &item->info, isSameSide) &&
+            !CompareByAllAcl(info, &item->info, isSameSide)) {
             continue;
         }
         if (item->state == GENUK_STATE_START) {
@@ -423,6 +433,7 @@ static void DeleteUkNegotiateInstance(uint32_t requestId)
         }
         AUTH_LOGE(AUTH_CONN, "delete uknego instance, requestId=%{public}u", requestId);
         ListDelete(&(item->node));
+        (void)memset_s(item, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
         SoftBusFree(item);
         g_ukNegotiateList->cnt--;
         ReleaseUkNegotiateListLock();
@@ -438,7 +449,6 @@ bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool 
         AUTH_LOGE(AUTH_CONN, "acl invalid param");
         return false;
     }
-
     if (isSameSide) {
         if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId ||
@@ -595,7 +605,9 @@ static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int3
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_ukNegotiateList->list, UkNegotiateInstance, node) {
-        if (!CompareByAllAcl(info, &item->info, info->isServer == item->info.isServer)) {
+        bool isSameSide = strcmp(info->sourceUdid, item->info.sourceUdid) == 0;
+        if (!CompareByAclSameAccount(info, &item->info, isSameSide) &&
+            !CompareByAllAcl(info, &item->info, isSameSide)) {
             continue;
         }
         if (isSuccess) {
@@ -686,7 +698,7 @@ static char *PackUkAclParam(const AuthACLInfo *info, bool isClient)
 
 static int32_t UnpackUkAclParam(const char *data, uint32_t len, AuthACLInfo *info)
 {
-    cJSON *msg = cJSON_ParseWithLength((char *)data, len);
+    cJSON *msg = cJSON_ParseWithLength(data, len);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_CONN, "cJSON_ParseWithLength fail");
         return SOFTBUS_CREATE_JSON_ERR;
@@ -747,7 +759,8 @@ static int32_t GetShortUdidHash(char *udid, char *udidHash, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static char *GetCredIdByIdService(char *localUdidHash, char *remoteUdidHash, char *accountHash, int32_t userId)
+static char *GetCredIdByIdService(
+    const char *localUdidHash, const char *remoteUdidHash, const char *accountHash, int32_t userId)
 {
     char *credList = NULL;
     char *credId = NULL;
@@ -1012,10 +1025,11 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         return NULL;
     }
     if (JsonObjectPackAuthBaseInfo(&instance, msg) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "pack base info fail");
+        AUTH_LOGE(AUTH_CONN, "pack request info fail");
         cJSON_Delete(msg);
         return NULL;
     }
+
     if (instance.authMode == HICHAIN_AUTH_IDENTITY_SERVICE) {
         ret = GetUkNegoAuthParamInfo(&instance.info, instance.authMode, &authParam);
         if (ret != SOFTBUS_OK) {
@@ -1052,7 +1066,8 @@ static HiChainAuthMode GetHichainAuthMode(const AuthACLInfo *info)
     return HICHAIN_AUTH_IDENTITY_SERVICE;
 }
 
-static int32_t ProcessAuthHichainParam(uint32_t requestId, AuthACLInfo *info, HiChainAuthMode authMode)
+static int32_t ProcessAuthHichainParam(
+    uint32_t requestId, const AuthACLInfo *info, HiChainAuthMode authMode)
 {
     HiChainAuthParam authParam = {};
     int32_t ret = GetUkNegoAuthParamInfo(info, authMode, &authParam);
@@ -1101,7 +1116,7 @@ static int32_t SendUkNegoDeviceId(UkNegotiateInstance *instance)
     return ret;
 }
 
-static int32_t ProcessUkNegoState(AuthACLInfo *info, bool *isGreater)
+static int32_t ProcessUkNegoState(const AuthACLInfo *info, bool *isGreater)
 {
     if (info == NULL) {
         AUTH_LOGE(AUTH_CONN, "find uknego info is invalid param");
@@ -1173,10 +1188,7 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
         }
     } else {
         ret = UpdateExistAclInfo(channelId, requestId, info, &instance);
-        if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "update acl fail, ret=%{public}d", ret);
-            return ret;
-        }
+        AUTH_LOGW(AUTH_CONN, "update acl fail, ret=%{public}d", ret);
     }
     ret = ProcessUkNegoState(&info, &isLocalUdidGreater);
     if (ret != SOFTBUS_OK || GetSameUkInstanceNum(&info) > 0) {
@@ -1206,6 +1218,7 @@ static int32_t ProcessUkData(uint32_t requestId, const uint8_t *data, uint32_t d
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return ret;
     }
+    AUTH_LOGE(AUTH_CONN, "authMode=%{public}d", instance.authMode);
     ret = HichainProcessUkNegoData(requestId, data, dataLen, instance.authMode, &g_GenUkCallback);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "uknego processData err=%{public}d", ret);
@@ -1324,6 +1337,7 @@ static int32_t DefaultUserIdFindUk(AuthACLInfo *aclInfo, int32_t *ukId, uint64_t
     }
     PrintfAuthAclInfo(0, 0, aclInfo);
     if (GetAccessUkIdSameAccount(aclInfo, ukId, time) != SOFTBUS_OK &&
+        GetAccessUkIdByGroupShare(aclInfo, ukId, time) != SOFTBUS_OK &&
         GetAccessUkIdDiffAccountWithUserLevel(aclInfo, ukId, time) != SOFTBUS_OK &&
         GetAccessUkIdDiffAccount(aclInfo, ukId, time) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "remote default userid get uk by asset fail");
@@ -1348,10 +1362,12 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
     aclInfo.isServer = !acl->isServer;
     PrintfAuthAclInfo(0, 0, &aclInfo);
     if (GetUserKeyInfoSameAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
+        GetUserKeyInfoGroupShare(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
         GetUserKeyInfoDiffAccountWithUserLevel(&aclInfo, &userKeyInfo) != SOFTBUS_OK &&
         GetUserKeyInfoDiffAccount(&aclInfo, &userKeyInfo) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get uk by ukcachelist fail");
         if (GetAccessUkIdSameAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
+            GetAccessUkIdByGroupShare(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             GetAccessUkIdDiffAccount(&aclInfo, ukId, &time) != SOFTBUS_OK &&
             DefaultUserIdFindUk(&aclInfo, ukId, &time) != SOFTBUS_OK) {
@@ -1431,7 +1447,7 @@ int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, u
     AUTH_LOGI(AUTH_CONN, "get ukid=%{public}d", ukId);
     if (GetUserKeyByUkId(ukId, userKey, SESSION_KEY_LENGTH) != SOFTBUS_OK &&
         GetAccessUkByUkId(ukId, userKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get user key fail");
+        AUTH_LOGE(AUTH_CONN, "get user uk fail");
         SoftBusFree(userKey);
         return SOFTBUS_AUTH_ACL_NOT_FOUND;
     }

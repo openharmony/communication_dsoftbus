@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -380,7 +380,7 @@ int32_t ClientTransProxyOnChannelClosed(int32_t channelId, ShutdownReason reason
     (void)ClientTransProxyDelChannelInfo(channelId);
     (void)TransProxyDelSliceProcessorByChannelId(channelId);
 
-    int ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY, reason);
+    int32_t ret = g_sessionCb.OnSessionClosed(channelId, CHANNEL_TYPE_PROXY, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "notify session closed errCode=%{public}d, channelId=%{public}d.", ret, channelId);
         return ret;
@@ -390,7 +390,7 @@ int32_t ClientTransProxyOnChannelClosed(int32_t channelId, ShutdownReason reason
 
 int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
-    int ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_PROXY, errCode);
+    int32_t ret = g_sessionCb.OnSessionOpenFailed(channelId, CHANNEL_TYPE_PROXY, errCode);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "notify session openfail errCode=%{public}d, channelId=%{public}d.", errCode, channelId);
         return ret;
@@ -860,7 +860,7 @@ static int32_t TransProxySliceAndSendMessage(ProxyDataInfo *dataInfo, const Prox
             if (sliceData == NULL) {
                 return SOFTBUS_MALLOC_ERR;
             }
-            int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData,
+            int32_t ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData,
                 dataLen + sizeof(D2dSliceHead), pktType);
             if (ret != SOFTBUS_OK) {
                 SoftBusFree(sliceData);
@@ -881,7 +881,7 @@ static int32_t TransProxySliceAndSendMessage(ProxyDataInfo *dataInfo, const Prox
         if (sliceData == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
-        int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData,
+        int32_t ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData,
             dataLen + sizeof(SliceHead), pktType);
         if (ret != SOFTBUS_OK) {
             SoftBusFree(sliceData);
@@ -1304,7 +1304,7 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(node, next, &g_channelSliceProcessorList->list, ChannelSliceProcessor, head) {
         if (node->channelId == channelId) {
-            for (int i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
+            for (int32_t i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
                 TransProxyClearProcessor(&(node->processor[i]));
             }
             ListDelete(&(node->head));
@@ -1486,7 +1486,7 @@ static void DfxReceiveRateStatistic(int32_t channelId, int32_t priority, int32_t
     TRANS_EVENT(EVENT_SCENE_TRANS_SEND_DATA, EVENT_STAGE_DATA_SEND_RATE, extra);
 }
 
-static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *head, const char *data, int32_t len)
+static int32_t ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *head, const char *data, int32_t len)
 {
     if (g_channelSliceProcessorList == NULL) {
         TRANS_LOGE(TRANS_SDK, "TransProxySubPacketProc not init");
@@ -1507,7 +1507,7 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
         SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret;
+    int32_t ret;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
@@ -1593,7 +1593,7 @@ static void ClientTransProxySliceTimerProc(void)
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_channelSliceProcessorList->list, ChannelSliceProcessor, head) {
-        for (int i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
+        for (int32_t i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
             if (removeNode->processor[i].active == true) {
                 removeNode->processor[i].timeout++;
                 if (removeNode->processor[i].timeout >= SLICE_PACKET_TIMEOUT) {

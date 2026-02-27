@@ -285,5 +285,10 @@ int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
 {
     return HeartBeatCtrlStaticInterface()->LnnStopSleOfflineTimingStrategy(networkId);
 }
+
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return HeartBeatCtrlStaticInterface()->GetWifiDirectManager();
+}
 }
 } // namespace OHOS

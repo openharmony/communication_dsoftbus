@@ -23,7 +23,7 @@ int32_t DiscServerInit(void)
 {
     int32_t ret = DiscMgrInit();
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_INIT, "DiscServerInit failed");
+        DISC_LOGE(DISC_INIT, "DiscServerInit fail");
         return ret;
     }
     return SOFTBUS_OK;

@@ -431,6 +431,7 @@ static void BleDescriptorAddCallback(int status, int serverId, BtUuid *uuid, int
 {
     if (uuid == NULL) {
         CONN_LOGE(CONN_BLE, "invalid param");
+        return;
     }
     CONN_LOGI(CONN_BLE, "srvcHandle=%{public}d, descriptorHandle=%{public}d", srvcHandle, descriptorHandle);
     if (serverId != g_halServerId) {

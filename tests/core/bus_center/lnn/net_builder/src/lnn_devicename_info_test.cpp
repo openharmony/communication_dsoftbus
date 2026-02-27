@@ -57,7 +57,8 @@ void LNNDeviceNameInfoTest::TearDown() { }
 
 /*
  * @tc.name: ON_RECEIVE_DEVICE_NAME_TEST_001
- * @tc.desc: on receive device name test
+ * @tc.desc: Verify OnReceiveDeviceName handles different info types and message formats
+ *           correctly including null parameters and invalid lengths
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -90,7 +91,8 @@ HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NAME_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: ON_RECEIVE_DEVICE_NICK_NAME_TEST_001
- * @tc.desc: on receive device nick name test
+ * @tc.desc: Verify OnReceiveDeviceNickName handles nick name sync messages
+ *           with different JSON formats and null parameters correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -118,7 +120,8 @@ HWTEST_F(LNNDeviceNameInfoTest, ON_RECEIVE_DEVICE_NICK_NAME_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_SYNC_DEVICE_NAME_TEST_001
- * @tc.desc: lnn sync device name test
+ * @tc.desc: Verify LnnSyncDeviceName syncs device name to remote device
+ *           and handles various error conditions correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -150,7 +153,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SYNC_DEVICE_NAME_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: NICK_NAME_MSG_PROC_TEST_001
- * @tc.desc: nick name msg proc test
+ * @tc.desc: Verify NickNameMsgProc processes nick name messages with
+ *           different node info states and account IDs correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -202,7 +206,8 @@ HWTEST_F(LNNDeviceNameInfoTest, NICK_NAME_MSG_PROC_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001
- * @tc.desc: notify device display name change test
+ * @tc.desc: Verify NotifyDeviceDisplayNameChange notifies display name
+ *           change event to remote devices correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -258,7 +263,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: LNN_SET_LOCAL_DEVICE_NAME_TEST_001
- * @tc.desc: LnnSetLocalDeviceName test
+ * @tc.desc: Verify LnnSetLocalDeviceName sets local device name
+ *           and syncs to remote devices correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -299,7 +305,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_LOCAL_DEVICE_NAME_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001
- * @tc.desc: lnn Async device name test
+ * @tc.desc: Verify LnnAsyncDeviceNameDelay sends device name sync
+ *           message asynchronously with delay
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -336,7 +343,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_001
- * @tc.desc: LnnAsyncDeviceNameDelay test get info failed
+ * @tc.desc: Verify LnnAsyncDeviceNameDelay handles get local node info
+ *           failure correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -362,7 +370,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002
- * @tc.desc: LnnAsyncDeviceNameDelay test send sync info failed
+ * @tc.desc: Verify LnnAsyncDeviceNameDelay returns error when
+ *           LnnAsyncCallbackDelayHelper fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -388,7 +397,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002, TestSize.L
 
 /*
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003
- * @tc.desc: LnnAsyncDeviceNameDelay test get nodeInfo success
+ * @tc.desc: Verify LnnAsyncDeviceNameDelay returns SOFTBUS_OK when
+ *           all operations succeed
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -415,7 +425,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003, TestSize.L
 
 /*
  * @tc.name: LNN_SET_DISPLAY_NAME_TEST_001
- * @tc.desc: LnnSetDisplayName test
+ * @tc.desc: Verify LnnSetDisplayName sets display name based on
+ *           nick name and account ID correctly
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

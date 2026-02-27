@@ -35,32 +35,32 @@ DiscCoapMock::~DiscCoapMock()
 
 int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
 {
-    return DiscCoapMock::ActionOfRegisterServiceDataV2(param, cnt);
+    return DiscCoapMock::GetMock()->NSTACKX_RegisterServiceDataV2(param, cnt);
 }
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
-    return DiscCoapMock::ActionOfLnnGetLocalNumInfo(key, info);
+    return DiscCoapMock::GetMock()->LnnGetLocalNumInfo(key, info);
 }
 
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
-    return DiscCoapMock::ActionOfLnnGetLocalNum64Info(key, info);
+    return DiscCoapMock::GetMock()->LnnGetLocalNum64Info(key, info);
 }
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
-    return DiscCoapMock::ActionOfLnnGetLocalStrInfo(key, info, len);
+    return DiscCoapMock::GetMock()->LnnGetLocalStrInfo(key, info, len);
 }
 
 int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
 {
-    return DiscCoapMock::ActionOfLnnGetLocalNumInfoByIfnameIdx(key, info, ifIdx);
+    return DiscCoapMock::GetMock()->LnnGetLocalNumInfoByIfnameIdx(key, info, ifIdx);
 }
 
 int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
-    return DiscCoapMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+    return DiscCoapMock::GetMock()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
 
 int32_t DiscCoapMock::ActionOfRegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)

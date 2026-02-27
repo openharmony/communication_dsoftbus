@@ -901,6 +901,18 @@ static int32_t DlGetSleAddr(const char *networkId, bool checkOnline, void *buf, 
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetServiceFindCap(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (strcpy_s((char *)buf, len, info->serviceFindCap) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy p2pIp to buf fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetDeviceSparkCheck(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     (void)checkOnline;
@@ -935,6 +947,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_WIFIDIRECT_ADDR, DlGetWifiDirectAddr},
     {STRING_KEY_P2P_IP, DlGetNodeP2pIp},
     {STRING_KEY_SLE_ADDR, DlGetSleAddr},
+    {STRING_KEY_SERVICE_FIND_CAP, DlGetServiceFindCap},
     {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_META_TYPE, DlGetAuthMetaType},
     {NUM_KEY_NET_CAP, DlGetNetCap},

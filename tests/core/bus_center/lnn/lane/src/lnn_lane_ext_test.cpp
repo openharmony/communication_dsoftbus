@@ -153,11 +153,11 @@ static void OnLaneLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneL
 }
 
 /*
-* @tc.name: LANE_INFO_001
-* @tc.desc: LaneInfoProcess BR
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_INFO_001
+ * @tc.desc: LaneInfoProcess BR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_INFO_001, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -169,11 +169,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_INFO_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_INFO_002
-* @tc.desc: LaneInfoProcess BLE
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_INFO_002
+ * @tc.desc: LaneInfoProcess BLE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_INFO_002, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -185,11 +185,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_INFO_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_INFO_003
-* @tc.desc: LaneInfoProcess P2P
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_INFO_003
+ * @tc.desc: LaneInfoProcess P2P
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_INFO_003, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -201,11 +201,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_INFO_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_INFO_004
-* @tc.desc: LaneInfoProcess fail
-* @tc.type: FAILUE
-* @tc.require:
-*/
+ * @tc.name: LANE_INFO_004
+ * @tc.desc: LaneInfoProcess fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_INFO_004, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -226,11 +226,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_INFO_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_INFO_005
-* @tc.desc: LaneInfoProcess 2.4G
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_INFO_005
+ * @tc.desc: LaneInfoProcess 2.4G
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_INFO_005, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -267,11 +267,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_INFO_005, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_DATA_001
-* @tc.desc: LnnCreateData
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_DATA_001
+ * @tc.desc: LnnCreateData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_DATA_001, TestSize.Level1)
 {
     int32_t ret = LnnCreateData(nullptr, 32, nullptr, 0);
@@ -280,11 +280,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_DATA_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_PROFILE_001
-* @tc.desc: BindLaneIdToProfile
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_PROFILE_001
+ * @tc.desc: BindLaneIdToProfile
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
 {
     uint64_t laneId = 0x1000000000000001;
@@ -324,11 +324,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_PROFILE_002
-* @tc.desc: BindLaneIdToProfile
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_PROFILE_002
+ * @tc.desc: BindLaneIdToProfile
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_PROFILE_002, TestSize.Level1)
 {
     uint64_t laneId = 0x1000000000000002;
@@ -355,11 +355,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_PROFILE_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_FIND_LANERESOURCE_BY_LINKADDR_001
-* @tc.desc: LANE FIND LANERESOURCE BY LINK ADDR TEST
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_FIND_LANERESOURCE_BY_LINKADDR_001
+ * @tc.desc: LANE FIND LANERESOURCE BY LINK ADDR TEST
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -412,11 +412,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Le
 }
 
 /*
-* @tc.name: LANE_FIND_LANERESOURCE_BY_LINKTYPE_001
-* @tc.desc: LANE FIND LANERESOURCE BY LINK TYPE TEST
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_FIND_LANERESOURCE_BY_LINKTYPE_001
+ * @tc.desc: LANE FIND LANERESOURCE BY LINK TYPE TEST
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -467,11 +467,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Le
 }
 
 /*
-* @tc.name: LANE_FIND_LANERESOURCE_BY_LANEID_001
-* @tc.desc: LANE FIND LANERESOURCE BY LANEID TEST
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_FIND_LANERESOURCE_BY_LANEID_001
+ * @tc.desc: LANE FIND LANERESOURCE BY LANEID TEST
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -514,11 +514,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LANE_DEL_AND_ADD_LANERESOURCEITEM_001
-* @tc.desc: LANE_DEL AND ADD LANERESOURCEITEM CLIENT
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_DEL_AND_ADD_LANERESOURCEITEM_001
+ * @tc.desc: LANE_DEL AND ADD LANERESOURCEITEM CLIENT
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -569,11 +569,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LANE_DEL_AND_ADD_LANERESOURCEITEM_002
-* @tc.desc: LANE_DEL AND ADD LANERESOURCEITEM SERVER
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_DEL_AND_ADD_LANERESOURCEITEM_002
+ * @tc.desc: LANE_DEL AND ADD LANERESOURCEITEM SERVER
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -617,11 +617,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_002, TestSize.Lev
 }
 
 /*
-* @tc.name: LANE_GENERATE_LANE_ID_001
-* @tc.desc: LANE GENERATE LANE ID
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_GENERATE_LANE_ID_001
+ * @tc.desc: LANE GENERATE LANE ID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_GENERATE_LANE_ID_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> laneMock;
@@ -637,11 +637,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_GENERATE_LANE_ID_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_CLEAR_LANE_RESOURCE_BYLANEID_001
-* @tc.desc: ClearLaneResourceByLaneId
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_CLEAR_LANE_RESOURCE_BYLANEID_001
+ * @tc.desc: ClearLaneResourceByLaneId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_CLEAR_LANE_RESOURCE_BYLANEID_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -673,11 +673,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_CLEAR_LANE_RESOURCE_BYLANEID_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LANE_PPOCESS_VAP_INFO_001
-* @tc.desc: ProcessVapInfo hml
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_PPOCESS_VAP_INFO_001
+ * @tc.desc: ProcessVapInfo hml
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_PPOCESS_VAP_INFO_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -714,11 +714,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_PPOCESS_VAP_INFO_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_PPOCESS_VAP_INFO_002
-* @tc.desc: ProcessVapInfo p2p
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_PPOCESS_VAP_INFO_002
+ * @tc.desc: ProcessVapInfo p2p
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_PPOCESS_VAP_INFO_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -755,11 +755,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_PPOCESS_VAP_INFO_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_MAC_INFO_TEST_01
-* @tc.desc: GetMacInfoByLaneId
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_MAC_INFO_TEST_01
+ * @tc.desc: GetMacInfoByLaneId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_01, TestSize.Level1)
 {
     LnnMacInfo macInfo;
@@ -803,11 +803,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_01, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_MAC_INFO_TEST_02
-* @tc.desc: GetMacInfoByLaneId
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_MAC_INFO_TEST_02
+ * @tc.desc: GetMacInfoByLaneId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_02, TestSize.Level1)
 {
     LaneLinkInfo linkInfo;
@@ -829,11 +829,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_02, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_UPDATE_LANE_ID_001
-* @tc.desc: test UpdateLaneResourceLaneId
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_UPDATE_LANE_ID_001
+ * @tc.desc: test UpdateLaneResourceLaneId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_UPDATE_LANE_ID_001, TestSize.Level1)
 {
     LaneLinkInfo linkInfo = {};
@@ -862,11 +862,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_UPDATE_LANE_ID_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001
-* @tc.desc: test DetectEnableWifiDirectApply & DetectDisableWifiDirectApply
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001
+ * @tc.desc: test DetectEnableWifiDirectApply & DetectDisableWifiDirectApply
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -917,11 +917,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001, TestSize.Lev
 }
 
 /*
-* @tc.name: LNN_CHECK_LANE_RESOURCE_NUM_001
-* @tc.desc: test CheckLaneResourceNumByLinkType
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_CHECK_LANE_RESOURCE_NUM_001
+ * @tc.desc: test CheckLaneResourceNumByLinkType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_CHECK_LANE_RESOURCE_NUM_001, TestSize.Level1)
 {
     LaneLinkInfo linkInfo = {};
@@ -952,11 +952,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_CHECK_LANE_RESOURCE_NUM_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_ADD_LANE_IS_VALID_LINK_ADDR_001
-* @tc.desc: test IsValidLinkAddr(hml/br/ble)
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ADD_LANE_IS_VALID_LINK_ADDR_001
+ * @tc.desc: test IsValidLinkAddr(hml/br/ble)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> laneDepMock;
@@ -1000,11 +1000,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_ADD_LANE_IS_VALID_LINK_ADDR_002
-* @tc.desc: test IsValidLinkAddr(coc_direct/wlan)
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ADD_LANE_IS_VALID_LINK_ADDR_002
+ * @tc.desc: test IsValidLinkAddr(coc_direct/wlan)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> laneDepMock;
@@ -1043,11 +1043,11 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level
 }
 
 /*
-* @tc.name: CHECK_LANE_LINK_EXIST_BY_TYPE_001
-* @tc.desc: test ExistsLaneLinkByType
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: CHECK_LANE_LINK_EXIST_BY_TYPE_001
+ * @tc.desc: test ExistsLaneLinkByType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, CHECK_LANE_LINK_EXIST_BY_TYPE_001, TestSize.Level1)
 {
     EXPECT_FALSE(ExistsLaneLinkByType(LANE_LINK_TYPE_BUTT));
@@ -1102,11 +1102,11 @@ static bool MockLnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, 
 }
 
 /*
-* @tc.name: BUILD_LINK_TEST_001
-* @tc.desc: BuildLink test linkType is LANE_USB
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: BUILD_LINK_TEST_001
+ * @tc.desc: BuildLink test linkType is LANE_USB
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, BUILD_LINK_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1150,11 +1150,11 @@ HWTEST_F(LNNLaneExtMockTest, BUILD_LINK_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_ALL_LINK_WITH_DEVID_TEST_001
-* @tc.desc: GetAllLinkWithDevId test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ALL_LINK_WITH_DEVID_TEST_001
+ * @tc.desc: GetAllLinkWithDevId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_DEVID_TEST_001, TestSize.Level1)
 {
     LaneLinkType *linkList = nullptr;
@@ -1187,11 +1187,11 @@ HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_DEVID_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_ALL_LINK_WITH_LINK_TYPE_TEST_001
-* @tc.desc: GetAllDevIdWithLinkType test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_ALL_LINK_WITH_LINK_TYPE_TEST_001
+ * @tc.desc: GetAllDevIdWithLinkType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_LINK_TYPE_TEST_001, TestSize.Level1)
 {
     char *linkList = nullptr;
@@ -1224,11 +1224,11 @@ HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_LINK_TYPE_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: GET_VALID_LANE_RESOURCE_TEST_001
-* @tc.desc: GetValidLaneResource test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_VALID_LANE_RESOURCE_TEST_001
+ * @tc.desc: GetValidLaneResource test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_001, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -1271,11 +1271,11 @@ HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: GET_VALID_LANE_RESOURCE_TEST_002
-* @tc.desc: GetValidLaneResource test LANE_SOFTAP_P2P
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: GET_VALID_LANE_RESOURCE_TEST_002
+ * @tc.desc: GetValidLaneResource test LANE_SOFTAP_P2P
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_002, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -1298,11 +1298,11 @@ HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_001
-* @tc.desc: FindLaneIdByP2pMac tests return invalid param
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_001
+ * @tc.desc: FindLaneIdByP2pMac tests return invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_001, TestSize.Level1)
 {
     LaneLinkType type = LANE_LINK_TYPE_BUTT;
@@ -1317,11 +1317,11 @@ HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_002
-* @tc.desc: FindLaneIdByP2pMac tests resource check
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FIND_LANE_ID_BY_P2P_MAC_TEST_002
+ * @tc.desc: FindLaneIdByP2pMac tests resource check
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_002, TestSize.Level1)
 {
     uint64_t laneId = 0;
@@ -1350,11 +1350,11 @@ HWTEST_F(LNNLaneExtMockTest, FIND_LANE_ID_BY_P2P_MAC_TEST_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_QUERY_OTHER_LANE_RESOURCE_BY_DEV_ID
-* @tc.desc: lane query other lane resource by devId
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_QUERY_OTHER_LANE_RESOURCE_BY_DEV_ID
+ * @tc.desc: lane query other lane resource by devId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_DEV_ID, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1385,11 +1385,11 @@ HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_DEV_ID, TestSize.
 }
 
 /*
-* @tc.name: LANE_QUERY_OTHER_LANE_RESOURCE_BY_UDID_HASH
-* @tc.desc: lane query other lane resource by udidHash
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LANE_QUERY_OTHER_LANE_RESOURCE_BY_UDID_HASH
+ * @tc.desc: lane query other lane resource by udidHash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_UDID_HASH, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();

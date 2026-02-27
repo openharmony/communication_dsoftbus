@@ -87,7 +87,8 @@ void LNNTopoManagerTest::TearDown() { }
 
 /*
  * @tc.name: LNN_INIT_TOPO_MANAGER_TEST_001
- * @tc.desc: LnnInitTopoManager test
+ * @tc.desc: Verify LnnInitTopoManager initializes topology manager
+ *           with different config values
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -121,7 +122,8 @@ HWTEST_F(LNNTopoManagerTest, LNN_INIT_TOPO_MANAGER_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_RELATION_TEST_001
- * @tc.desc: LnnGetRelation test
+ * @tc.desc: Verify LnnGetRelation gets relation with null and
+ *           valid UDID parameters
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -145,7 +147,8 @@ HWTEST_F(LNNTopoManagerTest, LNN_GET_RELATION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ADD_TOPO_INFO_TEST_001
- * @tc.desc: AddTopoInfo test
+ * @tc.desc: Verify AddTopoInfo adds topology info and retrieves
+ *           relation correctly
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -171,7 +174,7 @@ HWTEST_F(LNNTopoManagerTest, ADD_TOPO_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SAME_RELATION_TEST_001
- * @tc.desc: IsSameRelation test
+ * @tc.desc: Verify IsSameRelation compares relation values correctly
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -190,7 +193,8 @@ HWTEST_F(LNNTopoManagerTest, IS_SAME_RELATION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: HAS_RELATION_TEST_001
- * @tc.desc: HasRelation test
+ * @tc.desc: Verify HasRelation checks if relation has any
+ *           connection type correctly
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -205,7 +209,8 @@ HWTEST_F(LNNTopoManagerTest, HAS_RELATION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CREATE_TOPO_ITEM_TEST_001
- * @tc.desc: CreateTopoItem test
+ * @tc.desc: Verify CreateTopoItem creates topology item with
+ *           invalid and valid UDID
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -236,7 +241,8 @@ HWTEST_F(LNNTopoManagerTest, CREATE_TOPO_ITEM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_COMMON_TOPO_MSG_TEST_001
- * @tc.desc: PackCommonTopoMsg test
+ * @tc.desc: Verify PackCommonTopoMsg packs common topology message
+ *           with different random array results
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -262,7 +268,8 @@ HWTEST_F(LNNTopoManagerTest, PACK_COMMON_TOPO_MSG_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_TOPO_INFO_TEST_001
- * @tc.desc: PackTopoInfo test
+ * @tc.desc: Verify PackTopoInfo packs topology info with null
+ *           and valid UDID parameters
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -283,7 +290,8 @@ HWTEST_F(LNNTopoManagerTest, PACK_TOPO_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_ONE_LNN_RELATION_TEST_001
- * @tc.desc: PackOneLnnRelation test
+ * @tc.desc: Verify PackOneLnnRelation packs one LNN relation with
+ *           null and valid UDID parameters
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -305,7 +313,8 @@ HWTEST_F(LNNTopoManagerTest, PACK_ONE_LNN_RELATION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: UPDATE_LOCAL_TOPO_TEST_001
- * @tc.desc: UpdateLocalTopo test
+ * @tc.desc: Verify UpdateLocalTopo updates local topology with
+ *           different relation values
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -326,7 +335,8 @@ HWTEST_F(LNNTopoManagerTest, UPDATE_LOCAL_TOPO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FORWARD_TOPO_MSG_TO_ALL_TEST_001
- * @tc.desc: ForwardTopoMsgToAll test
+ * @tc.desc: Verify ForwardTopoMsgToAll forwards topology message
+ *           to all online nodes
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -351,7 +361,8 @@ HWTEST_F(LNNTopoManagerTest, FORWARD_TOPO_MSG_TO_ALL_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: TRY_CORRECT_RELATION_TEST_001
- * @tc.desc: TryCorrectRelation test
+ * @tc.desc: Verify TryCorrectRelation corrects relation with
+ *           different local UDID and peer UDID values
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -377,7 +388,8 @@ HWTEST_F(LNNTopoManagerTest, TRY_CORRECT_RELATION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PROCESS_TOPO_UPDATEINFO_TEST_001
- * @tc.desc: ProcessTopoUpdateInfo test
+ * @tc.desc: Verify ProcessTopoUpdateInfo processes topology update
+ *           info with different message formats
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -426,7 +438,8 @@ HWTEST_F(LNNTopoManagerTest, PROCESS_TOPO_UPDATEINFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_RECEIVE_TOPO_UPDATE_MSG_TEST_001
- * @tc.desc: OnReceiveTopoUpdateMsg test
+ * @tc.desc: Verify OnReceiveTopoUpdateMsg handles topology update
+ *           messages with different info types
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -459,7 +472,8 @@ HWTEST_F(LNNTopoManagerTest, ON_RECEIVE_TOPO_UPDATE_MSG_TEST_001, TestSize.Level
 
 /*
  * @tc.name: FILL_ALL_RELATION_TEST_001
- * @tc.desc: FillAllRelation test
+ * @tc.desc: Verify FillAllRelation fills all relation and notifies
+ *           relation changed event correctly
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1

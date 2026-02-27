@@ -43,6 +43,7 @@ public:
  * @tc.name: SoftbusClientInfoManagerTest001
  * @tc.desc: SoftbusAddService function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest001, TestSize.Level1)
@@ -64,6 +65,7 @@ HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest001, TestSize
  * @tc.name: SoftbusClientInfoManagerTest002
  * @tc.desc: SoftbusRemoveServiceInner function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest002, TestSize.Level1)
@@ -81,6 +83,7 @@ HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest002, TestSize
  * @tc.name: SoftbusClientInfoManagerTest003
  * @tc.desc: SoftbusRemoveService function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest003, TestSize.Level1)
@@ -95,6 +98,7 @@ HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest003, TestSize
  * @tc.name: SoftbusClientInfoManagerTest004
  * @tc.desc: GetSoftbusInnerObject function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest004, TestSize.Level1)
@@ -115,6 +119,7 @@ HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest004, TestSize
  * @tc.name: SoftbusClientInfoManagerTest005
  * @tc.desc: GetSoftbusClientProxy function test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest005, TestSize.Level1)

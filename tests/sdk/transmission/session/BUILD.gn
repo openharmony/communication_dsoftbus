@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -56,11 +56,13 @@ ohos_unittest("TransClientSessionManagerTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   }
@@ -114,6 +116,12 @@ ohos_unittest("TransClientSessionManagerExTest") {
 }
 
 ohos_unittest("TransClientSessionServiceTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "$dsoftbus_root_path/tests/cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
   sources = [ "client_trans_session_service_test.cpp" ]
 
@@ -148,11 +156,13 @@ ohos_unittest("TransClientSessionServiceTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   } else {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "hilog:libhilog",
     ]
   }
@@ -203,6 +213,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
 
   external_deps = [
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "hilog:libhilog",
   ]
 }
@@ -322,6 +333,7 @@ ohos_unittest("TransClientMsgServiceTest") {
 
   external_deps = [
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "hilog:libhilog",
   ]
 }

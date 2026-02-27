@@ -334,6 +334,16 @@ int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t
     return LnnGetNodeKeyInfo(networkId, key, buf, len);
 }
 
+int32_t LnnIpcSetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
+    uint32_t len)
+{
+    int32_t ret = IsOverThreshold(pkgName, SERVER_SET_NODE_KEY_INFO);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
+    return LnnSetNodeKeyInfo(networkId, key, buf, len);
+}
+
 int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId,
     uint16_t dataChangeFlag)
 {

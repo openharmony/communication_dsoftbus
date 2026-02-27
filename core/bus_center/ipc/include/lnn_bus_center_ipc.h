@@ -34,11 +34,13 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
 int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
 int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
 int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
+int32_t LnnIpcSetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
 int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 int32_t LnnIpcRegDataLevelChangeCb(const char *pkgName, int32_t callingPid);
 int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid);
 int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel);
 int32_t LnnIpcGetNodeKeyInfoLen(int32_t key);
+int32_t LnnIpcSetNodeKeyInfoLen(int32_t key);
 int32_t LnnIpcStartTimeSync(
     const char *pkgName, int32_t callingPid, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid);

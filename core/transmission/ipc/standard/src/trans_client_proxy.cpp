@@ -364,17 +364,9 @@ int32_t ClientIpcQueryPermission(const char *pkgName, const char *bundleName, bo
     return clientProxy->OnBrProxyQueryPermission(bundleName, isEmpowered);
 }
 
-int32_t BrProxyRemoveObject(const char *pkgName)
+int32_t BrProxyRemoveObject(const char *pkgName, int32_t pid)
 {
-    while (1) {
-        sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
-        if (clientObject == nullptr) {
-            break;
-        }
-        int32_t pid;
-        std::string name;
-        int32_t ret = SoftbusClientInfoManager::GetInstance().SoftbusRemoveService(clientObject, name, &pid);
-        TRANS_LOGI(TRANS_SDK, "[br_proxy] pkgName=%{public}s, pid=%{public}d, ret=%{public}d", name.c_str(), pid, ret);
-    }
+    int32_t ret = SoftbusClientInfoManager::GetInstance().SoftbusRemoveServiceWithPid(pkgName, pid);
+    TRANS_LOGI(TRANS_SDK, "[br_proxy] pid=%{public}d, ret=%{public}d", pid, ret);
     return SOFTBUS_OK;
 }

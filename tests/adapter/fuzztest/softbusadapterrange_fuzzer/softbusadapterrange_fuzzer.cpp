@@ -38,7 +38,6 @@ static void SoftBusAdapterRangeFuzzTest(const uint8_t* data, size_t size)
 
     int32_t range = 0;
     SoftBusBleRange(&rangeParam, &range);
-    SoftBusBleRangeAsync(&rangeParam);
 
     int8_t power = 0;
     SoftBusGetBlePower(&power);

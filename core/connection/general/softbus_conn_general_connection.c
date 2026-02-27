@@ -21,6 +21,8 @@
 
 #include "ble_protocol_interface_factory.h"
 #include "conn_log.h"
+#include "conn_event.h"
+#include "conn_event_form.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_conn_ble_manager.h"
@@ -413,6 +415,13 @@ static int32_t StartConnConnectDevice(const char *addr,
     }
     int32_t ret = ConnConnectDevice(&option, requestId, result);
     CONN_LOGI(CONN_BLE, "connect device, ret=%{public}d, reqId=%{public}u", ret, requestId);
+    ConnEventExtra extra = {
+        .connProtocol = protocol,
+        .requestId = requestId,
+        .errcode = ret,
+        .result = ret == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED,
+    };
+    CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_START, extra);
     return ret;
 }
 
@@ -429,9 +438,9 @@ static int32_t SetConnectionDeviceId(struct GeneralConnection *generalConnection
     generalConnection->isSupportNetWorkIdExchange = (bleConnection->protocol == BLE_COC || isSupportNetWorkIdExchange);
     int32_t ret = EOK;
     if (generalConnection->isSupportNetWorkIdExchange) {
-        ret = memcpy_s(generalConnection->networkId, NETWORK_ID_BUF_LEN, bleConnection->networkId, NETWORK_ID_BUF_LEN);
+        ret = strcpy_s(generalConnection->networkId, NETWORK_ID_BUF_LEN, bleConnection->networkId);
     } else {
-        ret = memcpy_s(generalConnection->udid, UDID_BUF_LEN, bleConnection->udid, UDID_BUF_LEN);
+        ret = strcpy_s(generalConnection->udid, UDID_BUF_LEN, bleConnection->udid);
     }
     if (ret != EOK) {
         CONN_LOGE(CONN_BLE, "server copy networkId fail, generalId=%{public}u", generalConnection->generalId);
@@ -445,7 +454,7 @@ static int32_t SetConnectionDeviceId(struct GeneralConnection *generalConnection
 
 static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *info)
 {
-    (void)info;
+    CONN_CHECK_AND_RETURN_LOGE(info != NULL, CONN_BLE, "info is null");
     struct GeneralConnection *generalConnection = GetGeneralConnectionByReqId(requestId);
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "get connection fail");
     int32_t status = SOFTBUS_OK;
@@ -472,6 +481,13 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
     if (status != SOFTBUS_OK) {
         ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
             generalConnection->generalId, 0, NULL);
+        ConnEventExtra extra = {
+            .connProtocol = info->bleInfo.protocol,
+            .requestId = requestId,
+            .errcode = status,
+            .result = EVENT_STAGE_RESULT_FAILED,
+        };
+        CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_GENERAL_HANDSHAKE, extra);
         g_generalConnectionListener.onConnectFailed(&generalConnection->info,
             generalConnection->generalId, status);
         ConnDisconnectDevice(generalConnection->underlayerHandle);
@@ -498,7 +514,14 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
         connection->generalId, reason);
     ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
         connection->generalId, 0, NULL);
+    ConnEventExtra extra = {
+        .requestId = requestId,
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED,
+    };
     if (connection->protocol == BLE_GATT) {
+        extra.connProtocol = BLE_GATT;
+        CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_END, extra);
         g_generalConnectionListener.onConnectFailed(&connection->info, connection->generalId, reason);
         ConnRemoveGeneralConnection(connection);
         ConnReturnGeneralConnection(&connection);
@@ -520,6 +543,9 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
         (void)SoftBusMutexUnlock(&connection->lock);
         ret = StartConnConnectDevice(connection->addr, BLE_GATT, &g_result, connection->requestId);
         if (ret != SOFTBUS_OK) {
+            extra.connProtocol = BLE_GATT;
+            extra.errcode = ret;
+            CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_END, extra);
             g_generalConnectionListener.onConnectFailed(&connection->info, connection->generalId, ret);
             ConnRemoveGeneralConnection(connection);
             ConnReturnGeneralConnection(&connection);
@@ -703,6 +729,13 @@ static void OnConnectTimeout(uint32_t generalId)
     struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalId);
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE,
         "connection is null, generalId=%{public}u", generalId);
+    ConnEventExtra extra = {
+        .connProtocol = generalConnection->protocol,
+        .requestId = generalConnection->requestId,
+        .errcode = SOFTBUS_CONN_GENERAL_CONNECT_TIMEOUT,
+        .result = EVENT_STAGE_RESULT_FAILED,
+    };
+    CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     g_generalConnectionListener.onConnectFailed(&generalConnection->info,
         generalConnection->generalId, SOFTBUS_CONN_GENERAL_CONNECT_TIMEOUT);
     GeneralSendResetMessage(generalConnection);
@@ -871,6 +904,12 @@ static int32_t ProcessHandshakeMessage(uint32_t connectionId, GeneralConnectionI
     }
     UpdateConnectionState(generalConnection, STATE_CONNECTING, STATE_CONNECTED);
     CONN_LOGI(CONN_BLE, "server accept, generalId=%{public}u", generalConnection->generalId);
+    ConnEventExtra extra = {
+        .peerBleMac = generalConnection->addr,
+        .connProtocol = generalConnection->protocol,
+        .result = EVENT_STAGE_RESULT_OK,
+    };
+    CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_SERVER_ACCEPTED, extra);
     g_generalConnectionListener.onAcceptConnect(&generalConnection->info, generalConnection->generalId);
     uint32_t generalId = generalConnection->generalId;
     generalConnection->dereference(generalConnection);
@@ -882,6 +921,13 @@ static int32_t ProcessHandshakeMessage(uint32_t connectionId, GeneralConnectionI
 
 static void NotifyConnectFailed(struct GeneralConnection *generalConnection, int32_t reason)
 {
+    ConnEventExtra extra = {
+        .connProtocol = generalConnection->protocol,
+        .requestId = generalConnection->requestId,
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED,
+    };
+    CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
     if (generalConnection->state == STATE_CONNECTED) {
         g_generalConnectionListener.onConnectionDisconnected(&generalConnection->info,
             generalConnection->generalId, reason);
@@ -970,9 +1016,17 @@ static int32_t ProcessHandShakeAck(uint32_t connectionId, GeneralConnectionInfo 
         "connection is null, generalId=%{public}u", info->peerId);
     ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
         generalConnection->generalId, 0, NULL);
+
+    ConnEventExtra extra = {
+        .connProtocol = generalConnection->protocol,
+        .requestId = generalConnection->requestId,
+    };
     if (info->ackStatus != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "hand shake fail, ackStatus=%{public}d, generalId=%{public}u",
             info->ackStatus, generalConnection->generalId);
+        extra.errcode = info->ackStatus;
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_GENERAL_HANDSHAKE_ACK, extra);
         g_generalConnectionListener.onConnectFailed(&generalConnection->info,
             generalConnection->generalId, info->ackStatus);
         ConnReturnGeneralConnection(&generalConnection);
@@ -982,6 +1036,8 @@ static int32_t ProcessHandShakeAck(uint32_t connectionId, GeneralConnectionInfo 
     UpdateConnectionState(generalConnection, STATE_CONNECTING, STATE_CONNECTED);
     CONN_LOGI(CONN_BLE, "recv handshake ack, ackStatus=%{public}d, report connect success, generalId=%{public}u",
         info->ackStatus, generalConnection->generalId);
+    extra.result = EVENT_STAGE_RESULT_OK;
+    CONN_EVENT(EVENT_SCENE_GENERAL_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     g_generalConnectionListener.onConnectSuccess(&generalConnection->info, generalConnection->generalId);
     if (ConnPostMsgToLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_MERGE_CMD,
         generalConnection->generalId, 0, NULL, 0) != SOFTBUS_OK) {

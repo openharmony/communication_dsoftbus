@@ -73,6 +73,20 @@ config dsoftbus_feature_trans_mintp
     help
       Answer Y to enable transmission with mintp
 
+config dsoftbus_feature_trans_htp
+    bool "Enable htp transmission"
+    default n
+    depends n
+    help
+      Answer Y to enable transmission with htp
+
+config dsoftbus_feature_trans_br_proxy
+    bool "Enable br transmission"
+    default n
+    depends n
+    help
+      Answer Y to enable transmission with br
+
 comment "Other configuration"
 config dsoftbus_feature_auth_account
     bool "Enable auth account"

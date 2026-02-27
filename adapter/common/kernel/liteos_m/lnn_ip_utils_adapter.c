@@ -44,7 +44,7 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
 #endif
     if (ipAddr == NULL || netMask == NULL) {
         COMM_LOGE(COMM_ADAPTER, "ipAddr or netMask is NULL!");
-        return SOFTBUS_NETWORK_NETIF_IP4_INFO_NULL;
+        return SOFTBUS_NETWORK_NETIF_NOT_FOUND;
     }
     ipStr = ip4addr_ntoa(ipAddr);
     if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {

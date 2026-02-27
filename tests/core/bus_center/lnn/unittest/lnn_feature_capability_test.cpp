@@ -42,8 +42,9 @@ void LNNFeatureCapabilityTest::SetUp() { }
 void LNNFeatureCapabilityTest::TearDown() { }
 
 /*
- * @tc.name:LnnSetFeatureCapability_Test_001
- * @tc.desc: Testing the LnnSetFeatureCapability interface returns normal values
+ * @tc.name: LnnSetFeatureCapability_Test_001
+ * @tc.desc: Verify LnnSetFeatureCapability with valid feature pointer and
+ *           valid capability bit returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -58,7 +59,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_001, TestSize.Le
 
 /*
  * @tc.name: LnnSetFeatureCapability_Test_002
- * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.desc: Verify LnnSetFeatureCapability with nullptr feature pointer returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -72,7 +74,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_002, TestSize.Le
 
 /*
  * @tc.name: LnnSetFeatureCapability_Test_003
- * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.desc: Verify LnnSetFeatureCapability with invalid capability bit
+ *           BIT_FEATURE_COUNT returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -87,7 +90,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_003, TestSize.Le
 
 /*
  * @tc.name: LnnClearFeatureCapability_Test_001
- * @tc.desc: Testing the LnnSetFeatureCapability interface returns normal values
+ * @tc.desc: Verify LnnClearFeatureCapability with valid feature pointer and
+ *           valid capability bit returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -102,7 +106,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_001, TestSize.
 
 /*
  * @tc.name: LnnClearFeatureCapability_Test_002
- * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.desc: Verify LnnClearFeatureCapability with nullptr feature pointer returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -116,7 +121,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_002, TestSize.
 
 /*
  * @tc.name: LnnClearFeatureCapability_Test_003
- * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.desc: Verify LnnClearFeatureCapability with invalid capability bit
+ *           BIT_FEATURE_COUNT returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -131,7 +137,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_003, TestSize.
 
 /*
  * @tc.name: LnnNodeInfo_Test_001
- * @tc.desc: Testing the LnnSetUserIdCheckSum interface returns an abnormal value
+ * @tc.desc: Verify LnnSetUserIdCheckSum with valid nodeInfo but nullptr data
+ *           returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -148,7 +155,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LnnNodeInfo_Test_002
- * @tc.desc: Testing the LnnSetUserIdCheckSum interface returns an abnormal value
+ * @tc.desc: Verify LnnSetUserIdCheckSum with nullptr nodeInfo returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -163,7 +171,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: LnnNodeInfo_Test_003
- * @tc.desc: Testing the LnnSetUserIdCheckSum interface returns normal value
+ * @tc.desc: Verify LnnSetUserIdCheckSum with valid nodeInfo and valid data
+ *           returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -182,7 +191,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_003, TestSize.Level1)
 
 /*
  * @tc.name: LnnNodeInfo_Test_004
- * @tc.desc: Testing the LnnGetUserIdCheckSum interface returns an abnormal value
+ * @tc.desc: Verify LnnGetUserIdCheckSum with valid nodeInfo but nullptr data
+ *           returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -199,7 +209,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_004, TestSize.Level1)
 
 /*
  * @tc.name: LnnNodeInfo_Test_005
- * @tc.desc: Testing the LnnGetUserIdCheckSum interface returns an abnormal value
+ * @tc.desc: Verify LnnGetUserIdCheckSum with nullptr nodeInfo returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
@@ -214,7 +225,8 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_005, TestSize.Level1)
 
 /*
  * @tc.name: LnnNodeInfo_Test_006
- * @tc.desc: Testing the LnnGetUserIdCheckSum interface returns normal value
+ * @tc.desc: Verify LnnGetUserIdCheckSum with valid nodeInfo and valid data
+ *           returns SOFTBUS_OK and retrieves correct checksum value
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: I5RHYE
