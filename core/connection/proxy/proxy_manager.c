@@ -214,9 +214,9 @@ static void ProxyChannelClose(struct ProxyChannel *channel, bool isClearReconnec
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, proxyConnection->brMac, BT_MAC_LEN);
     ConnEventExtra extra = {
-        .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
         .connectionId = (int32_t)channel->channelId,
+        .peerBrMac = anomizeAddress,
         .brProxyIsClear = isClearReconnectEvent ? 1 : 0,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
@@ -881,9 +881,9 @@ static void AttemptReconnectDevice(char *brAddr)
     CONN_CHECK_AND_RETURN_LOGW(checkNeedToRetry, CONN_PROXY, "not retry");
     struct ProxyConfig config = ProxyGetRetryConfig(GetProxyConfigManager(), reconnectDeviceInfo);
     ConnEventExtra extra = {
-        .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
         .costTime = (int32_t)config.delayMs,
+        .peerBrMac = anomizeAddress,
         .brProxyIsRetry = config.retryable ? 1 : 0,
         .brProxyIsAcl = reconnectDeviceInfo->isAclConnected ? 1 : 0,
     };
@@ -929,8 +929,8 @@ static void AclStateChangedHandler(ProxyChannelAclStateContext *context)
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, context->brMac, BT_MAC_LEN);
     ConnEventExtra extra = {
-        .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
+        .peerBrMac = anomizeAddress,
         .brProxyState = context->state,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_STATE, extra);
@@ -1086,8 +1086,8 @@ static void OnObserverStateChanged(const char *addr, int32_t state)
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
     ConnEventExtra extra = {
-        .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
+        .peerBrMac = anomizeAddress,
         .brProxyState = state,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_STATE, extra);
