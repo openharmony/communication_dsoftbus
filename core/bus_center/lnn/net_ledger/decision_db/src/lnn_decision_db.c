@@ -834,7 +834,7 @@ void FreeUpdateKeyResources(UpdateKeyRes *res)
 
 int32_t UpdateKeyAndLocalInfo(void)
 {
-    uint64_t keyTime = SoftBusGetSysTimeMs();
+    uint64_t keyTime = (uint64_t)SoftBusGetSysTimeMs();
     UpdateKeyRes res = { 0 };
     NodeInfo localNodeInfo;
     (void)memset_s(&localNodeInfo, sizeof(localNodeInfo), 0, sizeof(localNodeInfo));
