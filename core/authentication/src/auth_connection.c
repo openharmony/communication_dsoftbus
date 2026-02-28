@@ -39,7 +39,7 @@
 #define AUTH_CONN_MAX_RETRY_TIMES            1
 #define AUTH_CONN_RETRY_DELAY_MILLIS         3000
 
-#define REMOVE_AUTH_EVENT_SUCESS    0
+#define REMOVE_AUTH_EVENT_SUCCESS    0
 #define REMOVE_AUTH_EVENT_FAILED    1
 
 typedef struct {
@@ -338,7 +338,7 @@ static int32_t RemoveFunc(const void *obj, void *param)
 {
     CHECK_NULL_PTR_RETURN_VALUE(obj, REMOVE_AUTH_EVENT_FAILED);
     CHECK_NULL_PTR_RETURN_VALUE(param, REMOVE_AUTH_EVENT_FAILED);
-    return ((*(uint32_t *)(obj) == *(uint32_t *)(param)) ? REMOVE_AUTH_EVENT_SUCESS : REMOVE_AUTH_EVENT_FAILED);
+    return ((*(uint32_t *)(obj) == *(uint32_t *)(param)) ? REMOVE_AUTH_EVENT_SUCCESS : REMOVE_AUTH_EVENT_FAILED);
 }
 
 static void RemoveConnConnectTimeout(uint32_t requestId)
