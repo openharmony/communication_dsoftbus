@@ -204,8 +204,8 @@ int32_t InitDecisionCenter(void)
     }
     if (LnnInitSleRangePacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init sle range failed");
-        g_exceptionConnMgr.initFlag = false;
         DestroySoftBusList(g_exceptionConnMgr.connections);
+        g_exceptionConnMgr.initFlag = false;
     }
     g_exceptionConnMgr.initFlag = true;
     if (LnnVirtualLinkInitPacked() != SOFTBUS_OK) {
