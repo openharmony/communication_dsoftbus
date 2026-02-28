@@ -136,7 +136,6 @@ void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *s
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
             continue;
         }
-        
         if (strcmp(g_physicalSubnets[i]->ifName, LNN_PHYSICAL_SUBNET_ALL_NETIF) != 0 &&
             strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
             continue;
