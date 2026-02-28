@@ -54,12 +54,12 @@ void LNNLaneCommCapaTest::TearDown()
 }
 
 /*
-* @tc.name: LnnCommCapaTest001
-* @tc.desc: Verify whether the method can correctly return the expected error code
-*           when invalid parameters are passed
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LnnCommCapaTest001
+ * @tc.desc: Verify whether the method can correctly return the expected error code
+ *           when invalid parameters are passed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneCommCapaTest, LNN_COMM_CAPA_001, TestSize.Level1)
 {
     int32_t ret = CheckStaticNetCap(nullptr, LANE_BR);
@@ -71,12 +71,12 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_COMM_CAPA_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LnnCommCapaTest002
-* @tc.desc: Tested the verification logic for static and dynamic network capabilities
-*           under different link types
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LnnCommCapaTest002
+ * @tc.desc: Tested the verification logic for static and dynamic network capabilities
+ *           under different link types
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneCommCapaTest, LNN_COMM_CAPA_002, TestSize.Level1)
 {
     LaneLinkType typeList[] = {
@@ -151,7 +151,7 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_BR_COMM_CAPA_CHECK_001, TestSize.Level1)
 
 /*
  * @tc.name: LnnSleCommCapaCheckTest001
- * @tc.desc: Verify that the return results of the check fucntion meet expectations
+ * @tc.desc: Verify that the return results of the check function meet expectations
  *           under different network capability configurations
  * @tc.type: FUNC
  * @tc.require:
@@ -527,12 +527,12 @@ HWTEST_F(LNNLaneCommCapaTest, LNN_COC_COMM_CAPA_CHECK_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SetRemoteDynamicNetCapTest001
-* @tc.desc: Verify that the function can correctly handle various scenarios without crashing
-*           under different input conditions and depending on the return values of the function
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SetRemoteDynamicNetCapTest001
+ * @tc.desc: Verify that the function can correctly handle various scenarios without crashing
+ *           under different input conditions and depending on the return values of the function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneCommCapaTest, SetRemoteDynamicNetCapTest001, TestSize.Level1)
 {
     EXPECT_NO_FATAL_FAILURE(SetRemoteDynamicNetCap(nullptr, LANE_HML));
