@@ -20,25 +20,9 @@
 #include <stdint.h>
 #include "lnn_decision_db_struct.h"
 
-#include "lnn_node_info.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    char *remoteDevinfoData;
-    uint32_t remoteDevinfoLen;
-    char *deviceKey;
-    uint32_t deviceKeyLen;
-    char *broadcastKey;
-    uint32_t broadcastKeyLen;
-    char *ptkKey;
-    uint32_t ptkKeyLen;
-    char *localBroadcastKey;
-    uint32_t localBroadcastKeyLen;
-} UpdateKeyRes;
-
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid);
 int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId);
 int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
@@ -53,8 +37,8 @@ int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t l
 int32_t LnnGenerateCeParams(bool isUnlocked);
 void LnnRemoveDb(void);
 int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid);
-int32_t UpdateKeyAndLocalInfo(void);
 int32_t InitDbListDelay(void);
+int32_t UpdateKeyAndLocalInfo(void);
 
 #ifdef __cplusplus
 }

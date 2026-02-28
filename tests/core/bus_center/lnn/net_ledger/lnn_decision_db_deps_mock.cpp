@@ -223,11 +223,6 @@ int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
     return GetDecisionDbDepsInterface()->LnnCeDecryptDataByHuks(keyAlias, inData, outData);
 }
 
-int64_t SoftBusGetRealTimeMs(void)
-{
-    return GetDecisionDbDepsInterface()->SoftBusGetRealTimeMs();
-}
-
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     return GetDecisionDbDepsInterface()->LnnGetLocalNum64Info(key, info);
