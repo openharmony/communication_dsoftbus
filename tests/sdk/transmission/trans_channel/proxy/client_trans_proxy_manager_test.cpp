@@ -898,7 +898,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyProcessSessionData001, Tes
 /*
  * @tc.name: ClientTransProxyNoSubPacketTlvProc001
  * @tc.desc: Test the ClientTransProxyNoSubPacketTlvProc functions error handling capability
- 8           under different input conditions
+             under different input conditions
  * @tc.type: FUNC
  * @tc.require:
  */
