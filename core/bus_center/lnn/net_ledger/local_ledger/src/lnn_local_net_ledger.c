@@ -2102,6 +2102,8 @@ static int32_t LlGetServiceFindCap(void *buf, uint32_t len)
 
 static int32_t UpdateServiceFindCap(const void *capability)
 {
+    LNN_LOGI(LNN_LEDGER, "update local serviceFindCap[0]=%{public}d->%{public}d",
+        g_localNetLedger.localInfo.serviceFindCap[0], ((char *)capability)[0]);
     return ModifyId(g_localNetLedger.localInfo.serviceFindCap, SERVICE_FIND_CAP_LEN, (char *)capability);
 }
 
