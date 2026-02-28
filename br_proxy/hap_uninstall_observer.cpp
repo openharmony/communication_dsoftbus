@@ -48,8 +48,8 @@ public:
                 TransEventExtra extra = {
                     .result = EVENT_STAGE_RESULT_OK,
                     .callerPkg = bundleName.c_str(),
-                    .appIndex = appIndex,
                     .userId = userId,
+                    .appIndex = appIndex,
                 };
                 TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CHANNEL_STATUS, extra);
             }

@@ -50,8 +50,6 @@ typedef struct {
     char ifName[NET_IF_NAME_LEN];
 } LnnNetIfMgr;
 
-typedef LnnNetIfMgr *(*LnnNetIfManagerBuilder)(const char *ifName);
-
 typedef enum {
     CHOICE_VISIT_NEXT,
     CHOICE_FINISH_VISITING
@@ -65,6 +63,7 @@ typedef enum {
     LNN_LISTENER_MODE_AUTH
 } ListenerMode;
 
+
 typedef struct LnnProtocolManager {
     int32_t (*init)(struct LnnProtocolManager *self);
     void (*deinit)(struct LnnProtocolManager *self);
@@ -77,8 +76,6 @@ typedef struct LnnProtocolManager {
 } LnnProtocolManager;
 
 typedef LnnNetIfMgr *(*LnnNetIfManagerBuilder)(const char *ifName);
-
-typedef VisitNextChoice (*VisitNetifCallback)(const LnnNetIfMgr *, void *);
 
 typedef VisitNextChoice (*VisitProtocolCallback)(const LnnProtocolManager *, void *);
 

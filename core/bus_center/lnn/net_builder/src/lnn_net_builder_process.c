@@ -371,19 +371,6 @@ static int32_t ProcessEnhancedP2pDupBle(const DeviceVerifyPassMsgPara *msgPara)
     return ret;
 }
 
-static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, AuthHandle authHandle)
-{
-    SessionKey sessionKey;
-    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    UpdateDpAclParams aclParams = {
-        .accountId = msgPara->nodeInfo->accountId,
-        .deviceId = msgPara->nodeInfo->deviceInfo.deviceUdid,
-        .peerUserId = msgPara->nodeInfo->userId,
-        .localUserId = msgPara->nodeInfo->localUserId
-    };
-    UpdateDpSameAccount(&aclParams, sessionKey, false, msgPara->nodeInfo->aclState);
-}
-
 static int32_t CheckParamValid(const DeviceVerifyPassMsgPara *msgPara)
 {
     if (msgPara == NULL) {
@@ -396,6 +383,19 @@ static int32_t CheckParamValid(const DeviceVerifyPassMsgPara *msgPara)
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
+}
+
+static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, AuthHandle authHandle)
+{
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    UpdateDpAclParams aclParams = {
+        .accountId = msgPara->nodeInfo->accountId,
+        .deviceId = msgPara->nodeInfo->deviceInfo.deviceUdid,
+        .peerUserId = msgPara->nodeInfo->userId,
+        .localUserId = msgPara->nodeInfo->localUserId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, false, msgPara->nodeInfo->aclState);
 }
 
 static int32_t GetPeerDeviceUdid(char *peerNetworkId, char *peerUdid, uint32_t udidLen)

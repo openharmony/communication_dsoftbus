@@ -819,11 +819,10 @@ static void PrintSyncNodeInfoEx(const NodeInfo *cacheInfo)
     Anonymize(cacheInfo->deviceInfo.modelName, &anonyModelName);
     LNN_LOGI(LNN_BUILDER,
         "Sync NodeInfoEx: BROADCAST_CIPHER_KEY=%{public}02x, BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x,"
-        " PUB_MAC=%{public}02x, PTK=%{public}02x, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, "
-        "SLE_CAP=%{public}d",
+        " PUB_MAC=%{public}02x, PTK=%{public}02x, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, SLE_CAP=%{public}d",
         *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv, *cacheInfo->rpaInfo.peerIrk,
-        *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk,
-        AnonymizeWrapper(anonyProductId), AnonymizeWrapper(anonyModelName), cacheInfo->sleRangeCapacity);
+        *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk, AnonymizeWrapper(anonyProductId),
+        AnonymizeWrapper(anonyModelName), cacheInfo->sleRangeCapacity);
     AnonymizeFree(anonyProductId);
     AnonymizeFree(anonyModelName);
 }
@@ -934,6 +933,7 @@ static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
     oldInfo->heartbeatCapacity = newInfo->heartbeatCapacity;
     oldInfo->staticNetCap = newInfo->staticNetCap;
+    oldInfo->sleRangeCapacity = newInfo->sleRangeCapacity;
     if (LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
         oldInfo->stateVersion = newInfo->stateVersion;
         oldInfo->localStateVersion = newInfo->localStateVersion;
