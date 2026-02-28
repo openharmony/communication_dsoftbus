@@ -150,7 +150,6 @@ if (defined(ohos_lite)) {
       if (defined(global_parts_info) &&
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
         include_dirs += [
-          "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
           "$dsoftbus_dfx_path/statistics/include",
         ]
         sources += [
@@ -274,7 +273,6 @@ if (defined(ohos_lite)) {
       if (defined(global_parts_info) &&
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
         include_dirs += [
-          "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
           "$dsoftbus_dfx_path/statistics/include",
         ]
         sources += [
@@ -486,7 +484,6 @@ if (defined(ohos_lite)) {
     if (defined(global_parts_info) &&
         defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
       include_dirs += [
-        "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
         "$dsoftbus_dfx_path/statistics/include",
       ]
       sources += [
