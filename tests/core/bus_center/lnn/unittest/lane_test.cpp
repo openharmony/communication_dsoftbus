@@ -120,8 +120,14 @@ static void ConstructLocalInfo(void)
 {
     int32_t ret = LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORK_ID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(
-        NUM_KEY_NET_CAP, (1 << BIT_BR) | (1 << BIT_WIFI_24G) | (1 << BIT_WIFI_5G) | (1 << BIT_WIFI_P2P));
+    CapabilityOption setCapability = {
+        .isAdd = false,
+        .capabilitySet =
+            (uint32_t)((1 << BIT_BR) | (1 << BIT_WIFI_24G) | (1 << BIT_WIFI_5G) | (1 << BIT_WIFI_P2P))
+    };
+    LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+    setCapability.isAdd = true;
+    ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

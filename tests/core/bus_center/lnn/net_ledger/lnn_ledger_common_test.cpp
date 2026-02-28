@@ -1037,7 +1037,9 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_UUID, LOCAL_UUID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF) == SOFTBUS_OK);
-    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_BR)};
+    CapabilityOption setCapability = {.isAdd = false, .capabilitySet = (uint32_t)(1 << BIT_BR)};
+    LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+    setCapability.isAdd = true;
     EXPECT_TRUE(LnnSetLocalByteInfo(
         NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption)) == SOFTBUS_OK);
     NodeBasicInfo nodeInfo;
