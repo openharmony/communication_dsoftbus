@@ -472,7 +472,7 @@ uint16_t LnnGetDataSwitchLength(const NodeInfo *info)
 
 int32_t LnnSetDataSwitchLength(NodeInfo *info, uint16_t dataSwitchLength)
 {
-    if (info == NULL) {
+    if (info == NULL || dataSwitchLength > SWITCH_MAX_LENGTH) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

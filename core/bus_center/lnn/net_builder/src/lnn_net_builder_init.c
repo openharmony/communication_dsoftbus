@@ -133,6 +133,7 @@ static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
         .localUserId = nodeInfo.localUserId
     };
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
+    SetDpGroupShare(info, authHandle);
 }
 
 static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onlineType)
