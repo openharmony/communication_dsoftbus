@@ -48,6 +48,7 @@ bus_center_ledger_inc = [
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/core/frame/init/include",
 ]
 bus_center_ledger_deps = []
 bus_center_ledger_external_deps = [ "huks:libhukssdk" ]

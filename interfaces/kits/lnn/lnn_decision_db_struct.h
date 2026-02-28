@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,19 @@ typedef enum {
     LNN_ENCRYPT_LEVEL_ECE,
     LNN_ENCRYPT_LEVEL_MAX,
 } LnnEncryptDataLevel;
+
+typedef struct {
+    char *remoteDevinfoData;
+    uint32_t remoteDevinfoLen;
+    char *deviceKey;
+    uint32_t deviceKeyLen;
+    char *broadcastKey;
+    uint32_t broadcastKeyLen;
+    char *ptkKey;
+    uint32_t ptkKeyLen;
+    char *localBroadcastKey;
+    uint32_t localBroadcastKeyLen;
+} UpdateKeyRes;
 
 #ifdef __cplusplus
 }
