@@ -126,7 +126,7 @@ typedef struct TagDiscEnhanceFuncList {
     DiscVLinkBleEventDeinitFunc discVLinkBleEventDeinit;
     DiscTouchBleEventDeinitFunc discTouchBleEventDeinit;
     DiscShareNfcEventDeinitFunc discShareNfcEventDeinit;
-    
+
     DiscCoapReportNotificationFunc discCoapReportNotification;
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
     DiscCoapFillServiceDataFunc discCoapFillServiceData;
