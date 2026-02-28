@@ -168,7 +168,9 @@ static void ConstructBtLocalInfo(void)
 {
     int32_t ret = LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_BR)};
+    CapabilityOption setCapability = {.isAdd = false, .capabilitySet = (uint32_t)(1 << BIT_BR)};
+    LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+    setCapability.isAdd = true;
     ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -182,10 +184,14 @@ static void ConstructWiFiLocalInfo(bool is5G)
     ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     if (is5G) {
-        CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_WIFI_5G)};
+        CapabilityOption setCapability = {.isAdd = false, .capabilitySet = (uint32_t)(1 << BIT_WIFI_5G)};
+        LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+        setCapability.isAdd = true;
         ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     } else {
-        CapabilityOption setCapability = {.isAdd = true, .capabilitySet = (uint32_t)(1 << BIT_WIFI_24G)};
+        CapabilityOption setCapability = {.isAdd = false, .capabilitySet = (uint32_t)(1 << BIT_WIFI_24G)};
+        LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
+        setCapability.isAdd = true;
         ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
     }
     EXPECT_TRUE(ret == SOFTBUS_OK);
