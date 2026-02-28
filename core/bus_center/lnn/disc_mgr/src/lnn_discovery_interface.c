@@ -131,5 +131,7 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
 
 int32_t LnnDisSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        (pkgName != NULL && nameData != NULL && len > 0), SOFTBUS_INVALID_PARAM, LNN_BUILDER, "invalid param");
     return DiscSetDisplayName(pkgName, nameData, len);
 }
