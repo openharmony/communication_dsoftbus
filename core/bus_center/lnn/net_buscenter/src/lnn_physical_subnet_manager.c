@@ -132,7 +132,6 @@ int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 
 void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *status)
 {
-    LNN_LOGI(LNN_BUILDER, "ifname is %{public}s, protocolType %{public}d", ifName, protocolType);
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
             continue;
@@ -142,6 +141,7 @@ void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *s
             strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
             continue;
         }
+        LNN_LOGD(LNN_BUILDER, "ifname is %{public}s, protocolType %{public}d", ifName, protocolType);
         if (g_physicalSubnets[i]->onNetifStatusChanged != NULL) {
             g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i], status);
         }
