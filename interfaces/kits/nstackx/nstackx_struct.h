@@ -307,12 +307,14 @@ typedef struct {
 
 #ifdef ENABLE_USER_LOG
 typedef void (*DFinderLogCallback)(const char *moduleName, uint32_t logLevel, const char *format, ...);
+
 #endif
 
-#define LINKLESS_MAC_LEN                        6
-#define LINKLESS_NETWORK_ID_BUF_LEN             65 /* include '\0' */
-#define LINKLESS_INVALID_ACTION_LISTEN_CHANNEL  0
+#define LINKLESS_MAC_LEN                       6
+#define LINKLESS_NETWORK_ID_BUF_LEN            65 // 包含结束符在内
+#define LINKLESS_INVALID_ACTION_LISTEN_CHANNEL 0  // 无线局域网信道列表从 1 开始
 
+// 应用标识
 typedef enum {
     LINKLESS_APP_SHARE,
     LINKLESS_APP_TOUCH,
@@ -322,6 +324,7 @@ typedef enum {
     LINKLESS_APP_MAX,
 } LinklessAppId;
 
+// 链路类型
 typedef enum {
     LINKLESS_LINK_TYPE_AUTO,
     LINKLESS_LINK_TYPE_DIRECT,
@@ -329,18 +332,21 @@ typedef enum {
     LINKLESS_LINK_TYPE_MAX,
 } LinklessLinkType;
 
+// 工作模式
 typedef enum {
     LINKLESS_MODE_PUSH,
     LINKLESS_MODE_PULL,
     LINKLESS_MODE_MAX,
 } LinklessMode;
 
+// 优先级
 typedef enum {
     LINKLESS_PRIORITY_NORMAL,
     LINKLESS_PRIORITY_HIGH,
     LINKLESS_PRIORITY_MAX,
 } LinklessPriority;
 
+// 日志等级
 typedef enum {
     LINKLESS_LOG_LEVEL_OFF,
     LINKLESS_LOG_LEVEL_FATAL,
@@ -357,6 +363,7 @@ typedef enum {
     LINKLESS_MSG_TYPE_MAX,
 } LinklessMsgType;
 
+// wifi 状态信息
 typedef enum {
     LINKLESS_WIFI_STATUS_DEFAULT,
     LINKLESS_WIFI_STATUS_BUSY,
@@ -364,24 +371,24 @@ typedef enum {
 } LinklessWifiStatus;
 
 typedef enum {
-    LINKLESS_VIRTUAL_CONNECTED,
-    LINKLESS_VIRTUAL_DISCONNECTED,
+    LINKLESS_VIRTUAL_CONNNECTED,
+    LINKLESS_VIRTUAL_DISCONNNECTED,
     LINKLESS_VIRTUAL_CONN_MAX,
-} LinklessVirtualConnStatus;
+} LinklessVirtutalConnStatus;
 
 typedef struct {
-    uint16_t appId;
-    uint8_t linkType;
-    uint8_t priority;
-    uint8_t mode;
-    bool proxy;
-    bool enableListen;
-    uint8_t channel;
-    uint8_t mac[LINKLESS_MAC_LEN];
-    bool encrypt;
+    uint16_t appId;                // 应用标识
+    uint8_t linkType;              // 链路类型
+    uint8_t priority;              // 传输优先级
+    uint8_t mode;                  // 工作模式，pull/push
+    bool proxy;                    // 透传/代理，代理模式需封装 action 头部
+    bool enableListen;             // 是否启动 wifi action 监听
+    uint8_t channel;               // 监听信道：配合enableListen字段，启动监听时作为出参；不启动监听时作为入参
+    uint8_t mac[LINKLESS_MAC_LEN]; // mac地址：配合enableListen字段，启动监听时作为出参；不启动监听时作为入参
+    bool encrypt;                  // 是否需要对数据加密
     bool needAck;
-    uint8_t *data;
-    uint16_t dataLen;
+    uint8_t *data;                 // 待处理业务数据
+    uint16_t dataLen;              // 待处理业务数据长度
     char peerNetworkId[LINKLESS_NETWORK_ID_BUF_LEN];
 } LinklessParam;
 
@@ -393,20 +400,32 @@ typedef struct {
     uint16_t payloadLen;
 } LinklessActionSendParam;
 
+// action 发送回调原型
 typedef int32_t (*LinklessDirectlySendCb)(const LinklessActionSendParam *param);
+
+// action 启动监听回调原型
 typedef int32_t (*LinklessStartActionListenCb)(uint8_t *mac, int32_t len, int32_t *channel);
+
+// action 停止监听回调原型
 typedef int32_t (*LinklessStopActionListenCb)(void);
+
+// action 发送完成回调原型
 typedef void (*LinklessSendCompleteCb)(int32_t transactionId, uint32_t status);
+
+// action 接收回调原型
 typedef void (*LinklessRecvCb)(const LinklessParam *info);
+
 typedef int32_t (*LinklessVirtualSendCb)(const LinklessActionSendParam *param);
 
+// wifi action -> LinklessMsg 的函数回调，用于解耦依赖，无需再额外传递模块信息
 typedef struct {
-    LinklessStartActionListenCb startListenCb;
-    LinklessStopActionListenCb stopListenCb;
-    LinklessDirectlySendCb directlySendCb;
-    LinklessVirtualSendCb virtualSendCb;
+    LinklessStartActionListenCb startListenCb;     // 启动 action 监听
+    LinklessStopActionListenCb stopListenCb;       // 停止 action 监听
+    LinklessDirectlySendCb directlySendCb;         // 启动 action 发送
+    LinklessVirtualSendCb virtualSendCb;           // 启动虚连接发送
 } LinklessInitParam;
 
+// 应用注册回调参数
 typedef struct {
     uint16_t appId;
     LinklessSendCompleteCb onSendComplete;
@@ -440,24 +459,25 @@ typedef struct {
 } LinklessVirtualConn;
 
 enum LinklessErrorCode {
-    LINKLESS_ERRNO_SUCCESS = 0,
-    LINKLESS_ERRNO_FAIL = -101,
-    LINKLESS_ERRNO_INVALID_PARAM = -102,
-    LINKLESS_ERRNO_MODULE_NOT_INIT = -103,
-    LINKLESS_ERRNO_MODULE_ALREADY_INITED = -104,
-    LINKLESS_ERRNO_FEATURE_NOT_IMPLEMENTED = -105,
-    LINKLESS_ERRNO_USER_CALLBACK_NOT_FOUND = -106,
+    LINKLESS_ERRNO_SUCCESS                      = 0,
+
+    LINKLESS_ERRNO_FAIL                         = -101,
+    LINKLESS_ERRNO_INVALID_PARAM                = -102,
+    LINKLESS_ERRNO_MODULE_NOT_INIT              = -103,
+    LINKLESS_ERRNO_MODULE_ALREADY_INITED        = -104,
+    LINKLESS_ERRNO_FEATURE_NOT_IMPLEMENTED      = -105,
+    LINKLESS_ERRNO_USER_CALLBACK_NOT_FOUND      = -106,
     LINKLESS_ERRNO_USER_CALLBACK_NOT_REGISTERED = -107,
-    LINKLESS_ERRNO_NO_TRANSACTION_ONGOING = -108,
-    LINKLESS_ERRNO_LISTEN_CHANNEL_CONFLICT = -109,
-    LINKLESS_ERRNO_UNPACK_ACTION_DATA_FAIL = -110,
-    LINKLESS_ERRNO_CREATE_TIMER_FAIL = -111,
-    LINKLESS_ERRNO_START_ACTION_LISTEN_FAIL = -112,
-    LINKLESS_ERRNO_STOP_ACTION_LISTEN_FAIL = -113,
+    LINKLESS_ERRNO_NO_TRANSACTION_ONGOING       = -108,
+    LINKLESS_ERRNO_LISTEN_CHANNEL_CONFLICT      = -109,
+    LINKLESS_ERRNO_UNPACK_ACTION_DATA_FAIL      = -110,
+    LINKLESS_ERRNO_CREATE_TIMER_FAIL            = -111,
+    LINKLESS_ERRNO_START_ACTION_LISTEN_FAIL     = -112,
+    LINKLESS_ERRNO_STOP_ACTION_LISTEN_FAIL      = -113,
 };
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* NSTACKX_H */
+#endif /* NSTACKX_STRUCT_H */
