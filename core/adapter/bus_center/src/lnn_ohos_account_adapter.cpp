@@ -32,8 +32,7 @@
 
 
 static const int32_t ACCOUNT_STRTOLL_BASE = 10;
-static const int32_t CONTROL_PANEL_DISPLAY_ID = 0;
-static const int32_t CO_DRIVER_PANEL_DISPLAY_ID = 6;
+static const uint64_t CONTROL_PANEL_DISPLAY_ID = 0;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
 
@@ -148,31 +147,16 @@ int32_t GetCurrentAccount(int64_t *account)
     return SOFTBUS_OK;
 }
 
-int32_t GetAllDisplaysForCoDriverScreen(int32_t *coDriverUserId)
-{
-    int32_t displayId = CO_DRIVER_PANEL_DISPLAY_ID;
-    int32_t foregroundUserId = 0;
-    auto result = OHOS::AccountSA::OsAccountManager::
-        GetForegroundOsAccountLocalId(displayId, foregroundUserId);
-    if (result != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "GetForegroundOsAccountLocalId failed, result=%{public}d", result);
-        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
-    }
-    LNN_LOGI(LNN_STATE, "account id=%{public}d", foregroundUserId);
-    *coDriverUserId = foregroundUserId;
-    return SOFTBUS_OK;
-}
-
 static int32_t GetActiveOsAccountIdsByDisplayId(int32_t *userId)
 {
-    int32_t displayId = CONTROL_PANEL_DISPLAY_ID;
+    uint64_t displayId = CONTROL_PANEL_DISPLAY_ID;
     int32_t foregroundUserId = 0;
     if (userId == nullptr) {
         LNN_LOGE(LNN_STATE, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     auto result = OHOS::AccountSA::OsAccountManager::
-        GetForegroundOsAccountLocalId(displayId, foregroundUserId);
+        GetForegroundOsAccountLocalId(static_cast<int32_t>(displayId), foregroundUserId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "GetForegroundOsAccountLocalId failed, result=%{public}d", result);
         return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
