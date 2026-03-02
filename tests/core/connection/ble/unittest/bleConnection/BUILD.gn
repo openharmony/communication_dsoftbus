@@ -1,0 +1,81 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../../../dsoftbus.gni")
+
+module_output_path = "dsoftbus/soft_bus/connection"
+dsoftbus_root_path = "../../../../../.."
+
+config("softbus_conn_ble_connection_test_config") {
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/tests/core/connection/ble/softbus_conn_ble_connection/mock",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$softbus_adapter_common/include",
+    "$softbus_adapter_common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/tcp/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/br/include",
+    "$dsoftbus_root_path/core/adapter/br/include",
+    "$dsoftbus_root_path/core/connection/ble/channel",
+    "$dsoftbus_root_path/core/connection/ble/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/adapter/common/bluetooth/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/connection/sle/include",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
+    "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+  ]
+}
+
+ohos_unittest("ConnBleConnectionTest") {
+  module_out_path = module_output_path
+
+  public_configs = [ ":softbus_conn_ble_connection_test_config" ]
+  sources = [
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_connection.c",
+    "softbus_conn_ble_connection_mock.cpp",
+    "softbus_conn_ble_connection_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+  ]
+}
