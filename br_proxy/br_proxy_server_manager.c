@@ -365,6 +365,11 @@ static void BrProxyUserSwitch()
     TRANS_LOGI(TRANS_SVC, "[br_proxy] current userId=%{public}d", userId);
     CloseOtherUser(userId);
     RecoveryCurrentUser(userId);
+    TransEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .userId = userId,
+    };
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CHANNEL_STATUS, extra);
 }
 
 static void UserSwitchedHandler(const LnnEventBasicInfo *info)
@@ -1040,6 +1045,16 @@ static void NotifyIsVirtualConnect(
     }
 }
 
+static void TransSetEventExtra(TransEventExtra *extra, uint32_t requestId, uint32_t connectionId,
+    const BrProxyInfo *info, int32_t reason)
+{
+    extra->result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra->errcode = reason;
+    extra->channelId = info->channelId;
+    extra->requestId = (int32_t)requestId;
+    extra->connectionId = (int32_t)connectionId;
+}
+
 static void OnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
 {
     TRANS_CHECK_AND_RETURN_LOGE(channel != NULL, TRANS_SVC, "[br_proxy] channel is null");
@@ -1054,7 +1069,9 @@ static void OnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
     ret = GetBrProxy(channel->brMac, channel->uuid, channel->requestId, &info);
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC,
         "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
-
+    TransEventExtra extra = {0};
+    TransSetEventExtra(&extra, requestId, channel->channelId, &info, SOFTBUS_OK);
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
     int32_t foregroundUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (foregroundUserId != info.userId) {
         TRANS_LOGI(TRANS_SVC,
@@ -1154,6 +1171,9 @@ static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
         return;
     }
+    TransEventExtra extra = {0};
+    TransSetEventExtra(&extra, requestId, 0, &proxyInfo, reason);
+    TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
 }
 
 static int32_t UpdateBrProxyRequestId(const char *mac, const char *uuid, int32_t appIndex,
@@ -1364,6 +1384,20 @@ static int32_t UpdateServerAndNotifyOpened(const char *brMac, const char *uuid, 
     return SOFTBUS_OK;
 }
 
+static int32_t TransGetBrProxyInfo(BrProxyInfo *proxyInfo)
+{
+    proxyInfo->uid = GetCallerUid();
+    proxyInfo->pid = GetCallerPid();
+    int32_t ret = GetOsAccountLocalIdFromUid(proxyInfo->uid, &proxyInfo->userId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] get userId failed, ret=%{public}d", ret);
+
+    ret = GetCallerInfoAndVerifyPermission(proxyInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] get callerInfo failed, ret=%{public}d", ret);
+    return SOFTBUS_OK;
+}
+
 int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
 {
     if (brMac == NULL || uuid == NULL) {
@@ -1377,15 +1411,9 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
     BrProxyLoopInit();
     BrProxyInfo proxyInfo;
     (void)memset_s(&proxyInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
-    proxyInfo.uid = GetCallerUid();
-    proxyInfo.pid = GetCallerPid();
-    ret = GetOsAccountLocalIdFromUid(proxyInfo.uid, &proxyInfo.userId);
+    ret = TransGetBrProxyInfo(&proxyInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] get userId failed, ret=%{public}d", ret);
-
-    ret = GetCallerInfoAndVerifyPermission(&proxyInfo);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] get callerInfo failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] get proxyInfo failed, ret=%{public}d", ret);
 
     ret = ServerAddProxyToList(brMac, uuid, &proxyInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
@@ -1397,7 +1425,12 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
         ret = UpdateServerAndNotifyOpened(brMac, uuid, &proxyInfo);
         return ret;
     }
-    TransEventExtra extra = {0};
+    TransEventExtra extra = {
+        .callPid = proxyInfo.pid,
+        .callerPkg = proxyInfo.bundleName,
+        .appIndex = proxyInfo.appIndex,
+        .callUid = proxyInfo.uid,
+    };
     uint32_t requestId = 0;
     int32_t channelId = 0;
     int32_t userId = 0;
@@ -1405,7 +1438,7 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
     GetChannelIdAndUserId(brMac, uuid, &channelId, &userId);
     extra.errcode = ret;
     extra.channelId = channelId;
-    extra.requestId = requestId;
+    extra.requestId = (int32_t)requestId;
     extra.userId = userId;
     extra.appIndex = proxyInfo.appIndex;
     if (ret != SOFTBUS_OK) {
@@ -1802,8 +1835,9 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
     ClientIpcBrProxyStateChanged(info.callingPid, info.channelId, reason);
     extra.result = EVENT_STAGE_RESULT_OK;
     extra.errcode = reason;
-    extra.channelId = channel->channelId;
-    extra.requestId = channel->requestId;
+    extra.channelId = info.channelId;
+    extra.connectionId = (int32_t)channel->channelId;
+    extra.requestId = (int32_t)info.requestId;
     TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_DISCONNECT, extra);
 EXIT:
     if (reason == SOFTBUS_CONN_BR_UNPAIRED) {
@@ -1836,8 +1870,9 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
     UpdateProxyChannel(channel->brMac, channel->uuid, channel);
     ClientIpcBrProxyStateChanged(info.callingPid, info.channelId, SOFTBUS_OK);
     TransEventExtra extra = {0};
-    extra.channelId = channel->channelId;
-    extra.requestId = channel->requestId;
+    extra.channelId = info.channelId;
+    extra.connectionId = (int32_t)channel->channelId;
+    extra.requestId = (int32_t)channel->requestId;
     TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_RECONNECT, extra);
 }
 
