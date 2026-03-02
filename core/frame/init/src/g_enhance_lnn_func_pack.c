@@ -1042,8 +1042,7 @@ int32_t LnnInitMetaNodeExtLedgerPacked(void)
 void LnnDeinitMetaNodeExtLedgerPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (pfnLnnEnhanceFuncList == NULL ||
-        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger) != SOFTBUS_OK) {
         return;
     }
     return pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger();
@@ -1510,8 +1509,7 @@ int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t 
 int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (pfnLnnEnhanceFuncList == NULL ||
-        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->lnnSaveDeviceData(data, dataType);
