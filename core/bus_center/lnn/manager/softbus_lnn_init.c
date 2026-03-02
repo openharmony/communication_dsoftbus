@@ -24,7 +24,7 @@ int32_t LnnOpenFuncInit(void *soHandle)
     }
     int32_t (*lnnRegisterOpenfunc)(void);
 
-    int ret = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
 
     ret = SoftBusDlsym(soHandle, "LnnRegisterOpenFunc", (void**)&lnnRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
