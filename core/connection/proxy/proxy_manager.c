@@ -211,15 +211,16 @@ static void ProxyChannelClose(struct ProxyChannel *channel, bool isClearReconnec
     int32_t ret = GetProxyBrConnectionManager()->disconnect(proxyConnection);
     CONN_LOGW(CONN_PROXY, "channel=%{public}u, reqId=%{public}u, error=%{public}d, isClear=%{public}d",
         channel->channelId, channel->requestId, ret, isClearReconnectEvent);
-    proxyConnection->dereference(proxyConnection);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, channel->brMac, BT_MAC_LEN);
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, proxyConnection->brMac, BT_MAC_LEN);
     ConnEventExtra extra = {
-        .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
-        .brProxyIsClear = (int32_t)isClearReconnectEvent,
+        .connectionId = (int32_t)channel->channelId,
+        .peerBrMac = anomizeAddress,
+        .brProxyIsClear = isClearReconnectEvent ? 1 : 0,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
+    proxyConnection->dereference(proxyConnection);
 #define WAIT_CLOSE_END_TIME_MS 1000
     // add 10 ms after close, because of the remote device will refresh service after disconnected
     SoftBusSleepMs(WAIT_CLOSE_END_TIME_MS);
@@ -878,12 +879,15 @@ static void AttemptReconnectDevice(char *brAddr)
         "not exit same addr=%{public}s need to reconnect", anomizeAddress);
     bool checkNeedToRetry = CheckNeedToRetry(brAddr, reconnectDeviceInfo);
     CONN_CHECK_AND_RETURN_LOGW(checkNeedToRetry, CONN_PROXY, "not retry");
+    struct ProxyConfig config = ProxyGetRetryConfig(GetProxyConfigManager(), reconnectDeviceInfo);
     ConnEventExtra extra = {
-        .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
+        .costTime = (int32_t)config.delayMs,
+        .peerBrMac = anomizeAddress,
+        .brProxyIsRetry = config.retryable ? 1 : 0,
+        .brProxyIsAcl = reconnectDeviceInfo->isAclConnected ? 1 : 0,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_RECONNECT, extra);
-    struct ProxyConfig config = ProxyGetRetryConfig(GetProxyConfigManager(), reconnectDeviceInfo);
     if (!config.retryable) {
         CONN_LOGE(CONN_PROXY, "retry times=%{public}u, reach policy limit, not retry more",
             reconnectDeviceInfo->innerRetryNum);
@@ -922,6 +926,14 @@ static void AclStateChangedHandler(ProxyChannelAclStateContext *context)
 {
     ProxyConnectInfo *reconnectDeviceInfo = GetReconnectDeviceInfoByAddrUnsafe(context->brMac);
     CONN_CHECK_AND_RETURN_LOGW(reconnectDeviceInfo != NULL, CONN_PROXY, "no reconnect device");
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, context->brMac, BT_MAC_LEN);
+    ConnEventExtra extra = {
+        .result = EVENT_STAGE_RESULT_OK,
+        .peerBrMac = anomizeAddress,
+        .brProxyState = context->state,
+    };
+    CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_STATE, extra);
     reconnectDeviceInfo->innerRetryNum = 0;
     reconnectDeviceInfo->isAclConnected = (context->state == SOFTBUS_ACL_STATE_CONNECTED) ? true : false;
     if (!reconnectDeviceInfo->isAclConnected) {
@@ -1074,8 +1086,8 @@ static void OnObserverStateChanged(const char *addr, int32_t state)
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
     ConnEventExtra extra = {
-        .peerBrMac = anomizeAddress,
         .result = EVENT_STAGE_RESULT_OK,
+        .peerBrMac = anomizeAddress,
         .brProxyState = state,
     };
     CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_STATE, extra);
