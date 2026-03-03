@@ -93,11 +93,8 @@ static int32_t UpdateUserKeyListByAcl(const AuthACLInfo *aclInfo, const AuthUser
     LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
         bool isSameSide = strcmp(aclInfo->sourceUdid, item->aclInfo.sourceUdid) == 0;
         if (!(item->bindType == DP_BIND_TYPE_SAME_ACCOUNT &&
-            !CompareByAclSameAccount(aclInfo, &item->aclInfo, isSameSide)) &&
+            CompareByAclSameAccount(aclInfo, &item->aclInfo, isSameSide)) &&
             !CompareByAllAcl(aclInfo, &item->aclInfo, isSameSide)) {
-            continue;
-        }
-        if (!CompareByAllAcl(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
             continue;
         }
         if (memcpy_s(&item->ukInfo, sizeof(AuthUserKeyInfo), (AuthUserKeyInfo *)userKeyInfo, sizeof(AuthUserKeyInfo)) !=
