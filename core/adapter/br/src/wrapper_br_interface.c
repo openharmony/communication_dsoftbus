@@ -54,7 +54,8 @@ static void CloseSppServer(int32_t serverFd)
     SppServerClose(serverFd);
 }
 
-static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int socketPsmValue, void *connectCallback)
+static int32_t ConnectByPortCommon(const char *uuid, const BT_ADDR mac, const int socketPsmValue,
+    void *connectCallback, bool encrypt)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(mac != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "mac is incalid value");
     CONN_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "uuid is incalid value");
@@ -63,7 +64,7 @@ static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int sock
     socketPara.uuid.uuid = (char *)uuid;
     socketPara.uuid.uuidLen = strlen(uuid);
     socketPara.socketType = OHOS_SOCKET_SPP_RFCOMM;
-    socketPara.isEncrypt = IS_BR_ENCRYPT;
+    socketPara.isEncrypt = encrypt;
 
     BdAddr bdAddr;
     (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
@@ -82,9 +83,19 @@ static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int sock
     return ret;
 }
 
+static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int socketPsmValue, void *connectCallback)
+{
+    return ConnectByPortCommon(uuid, mac, socketPsmValue, connectCallback, IS_BR_ENCRYPT);
+}
+
 static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
     return ConnectByPort(uuid, mac, -1, connectCallback);
+}
+
+static int32_t ConnectEncrypt(const char *uuid, const BT_ADDR mac, void *connectCallback)
+{
+    return ConnectByPortCommon(uuid, mac, -1, connectCallback, true);
 }
 
 static int32_t DisConnect(int32_t clientFd)
@@ -183,6 +194,7 @@ static SppSocketDriver g_sppSocketDriver = {
     .CloseSppServer = CloseSppServer,
     .Connect = Connect,
     .ConnectByPort = ConnectByPort,
+    .ConnectEncrypt= ConnectEncrypt,
     .DisConnect = DisConnect,
     .IsConnected = IsConnected,
     .Accept = Accept,

@@ -922,7 +922,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(DoAll(SetArgPointee<2>(nodeInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
-    int32_t ret = SameAccountDevDisableDiscoveryProcess();
+    int32_t ret = SameAccountDevDisableDiscoveryProcess(false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -942,12 +942,12 @@ HWTEST_F(HeartBeatCtrlStaticTest, SAME_ACCOUNT_DEV_DISABLE_DISCOVERY_PROCESS_TES
         .WillRepeatedly(DoAll(SetArgPointee<0>(info), SetArgPointee<1>(infoNum), Return(SOFTBUS_INVALID_PARAM)));
     NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
     EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret = SameAccountDevDisableDiscoveryProcess();
+    int32_t ret = SameAccountDevDisableDiscoveryProcess(false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
         .WillRepeatedly(DoAll(SetArgPointee<0>(info), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
-    ret = SameAccountDevDisableDiscoveryProcess();
+    ret = SameAccountDevDisableDiscoveryProcess(false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

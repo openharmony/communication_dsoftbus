@@ -265,6 +265,51 @@ int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply)
     return ret;
 }
 
+int32_t ServerSetNodeKeyInfo(IpcIo *req, IpcIo *reply)
+{
+    LNN_LOGD(LNN_STATE, "ipc server pop");
+    size_t length;
+    const char *pkgName = (const char *)ReadString(req, &length);
+    if (pkgName == NULL || length >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t callingUid = GetCallingUid();
+    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "no permission");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    const char *networkId = (const char *)ReadString(req, &length);
+    if (networkId == NULL || length >= NETWORK_ID_BUF_LEN) {
+        LNN_LOGE(LNN_STATE, "read networkId failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t key;
+    ReadInt32(req, &key);
+    int32_t infoLen  = LnnIpcSetNodeKeyInfoLen(key);
+    if (infoLen == SOFTBUS_INVALID_NUM) {
+        LNN_LOGE(LNN_STATE, "get infoLen failed");
+        return SOFTBUS_INVALID_NUM;
+    }
+    uint32_t len;
+    ReadUint32(req, &len);
+    if (len > (uint32_t)infoLen) {
+        LNN_LOGE(LNN_STATE, "read len is invalid param, len=%{public}u, infoLen=%{public}d", len, infoLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const void *buf = ReadRawData(req, len);
+    if (buf == NULL) {
+        LNN_LOGE(LNN_STATE, "read buffer failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LnnIpcSetNodeKeyInfo(pkgName, networkId, key, (unsigned char *)buf, infoLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get local info failed");
+        return ret;
+    }
+    return ret;
+}
+
 int32_t ServerSetNodeDataChangeFlag(IpcIo *req, IpcIo *reply)
 {
     LNN_LOGD(LNN_STATE, "ipc server pop");

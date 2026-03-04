@@ -221,6 +221,17 @@ int32_t ConnectionServerProxy::GetNodeKeyInfo(
     return SOFTBUS_OK;
 }
 
+int32_t ConnectionServerProxy::SetNodeKeyInfo(
+    const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len)
+{
+    (void)pkgName;
+    (void)networkId;
+    (void)key;
+    (void)buf;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t ConnectionServerProxy::SetNodeDataChangeFlag(
     const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {

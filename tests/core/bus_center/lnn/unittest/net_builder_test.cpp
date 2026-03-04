@@ -46,7 +46,8 @@ void NetBuilderTest::TearDown() { }
 
 /*
  * @tc.name: NET_BUILDER_GEN_ID_Test_001
- * @tc.desc: generate network id interface test
+ * @tc.desc: Verify LnnGenLocalNetworkId generates unique network IDs and
+ *           two consecutive calls return different values
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J3
@@ -63,7 +64,8 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_001, TestSize.Level0)
 
 /*
  * @tc.name: NET_BUILDER_GEN_ID_Test_002
- * @tc.desc: generate uuid interface test
+ * @tc.desc: Verify LnnGenLocalUuid generates consistent UUID when forceRegen
+ *           is false and can regenerate UUID when forceRegen is true
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J3
@@ -83,7 +85,8 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_002, TestSize.Level0)
 
 /*
  * @tc.name: NET_BUILDER_GEN_ID_Test_003
- * @tc.desc: generate irk interface test
+ * @tc.desc: Verify LnnGenLocalIrk generates consistent IRK when forceRegen
+ *           is false and can regenerate IRK when forceRegen is true
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -103,7 +106,8 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
 
 /*
  * @tc.name: NET_BUILDER_CONNECTION_ADDR_Test_001
- * @tc.desc: connection address compare interface test
+ * @tc.desc: Verify LnnIsSameConnectionAddr correctly compares connection
+ *           addresses of same type and different types
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J2

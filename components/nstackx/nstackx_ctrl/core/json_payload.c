@@ -576,8 +576,7 @@ static char *PrepareServiceNotificationEx(void)
         DFINDER_LOGE(TAG, "cJSON_CreateObject failed");
         return NULL;
     }
-    const DeviceInfo *deviceInfo = GetLocalDeviceInfo();
-    if (JsonAddStr(data, JSON_NOTIFICATION, deviceInfo->notification) != NSTACKX_EOK) {
+    if (JsonAddStr(data, JSON_NOTIFICATION, GetLocalNotification()) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "add json data: %s fail", JSON_NOTIFICATION);
         cJSON_Delete(data);
         return NULL;

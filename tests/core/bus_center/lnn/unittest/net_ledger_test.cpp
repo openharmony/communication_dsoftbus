@@ -71,7 +71,9 @@ void NetLedgerTest::TearDown()
 
 /*
  * @tc.name: AUTH_TYPE_VALUE_SET_CLEAR_Test_001
- * @tc.desc: auth type value set and clear test
+ * @tc.desc: Verify LnnSetAuthTypeValue and LnnClearAuthTypeValue with nullptr
+ *           or invalid parameters return SOFTBUS_INVALID_PARAM; with valid
+ *           parameters return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -101,7 +103,8 @@ HWTEST_F(NetLedgerTest, AUTH_TYPE_VALUE_SET_CLEAR_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001
- * @tc.desc: lnn get trusted dev info from db test
+ * @tc.desc: Verify LnnGetTrustedDevInfoFromDb retrieves trusted device info
+ *           from database successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -120,7 +123,8 @@ HWTEST_F(NetLedgerTest, LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001, TestSize.Leve
 
 /*
  * @tc.name: DL_GET_Test_001
- * @tc.desc: dl get auth test
+ * @tc.desc: Verify LnnGetRemoteNumInfo and LnnGetRemoteNumInfoByIfnameIdx
+ *           with invalid parameters return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -138,7 +142,8 @@ HWTEST_F(NetLedgerTest, DL_GET_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_ADD_META_INFO_Test_001
- * @tc.desc: lnn add meta info test
+ * @tc.desc: Verify LnnAddMetaInfo adds meta info to nodeInfo successfully
+ *           and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -152,7 +157,8 @@ HWTEST_F(NetLedgerTest, LNN_ADD_META_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_DELETE_META_INFO_Test_001
- * @tc.desc: lnn delete meta info test
+ * @tc.desc: Verify LnnDeleteMetaInfo with non-existent udid returns error
+ *           and not SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -166,7 +172,8 @@ HWTEST_F(NetLedgerTest, LNN_DELETE_META_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001
- * @tc.desc: get all online and meta node info test
+ * @tc.desc: Verify LnnGetAllOnlineAndMetaNodeInfo with nullptr parameters
+ *           returns SOFTBUS_INVALID_PARAM; with valid parameters returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -190,7 +197,8 @@ HWTEST_F(NetLedgerTest, GET_ALL_ONLINE_AND_META_NODE_INFO_Test_001, TestSize.Lev
 
 /*
  * @tc.name: LNN_META_INFO_ADD_DEL_Test_001
- * @tc.desc: lnn add and del meta info test
+ * @tc.desc: Verify LnnAddMetaInfo adds meta info successfully and LnnDeleteMetaInfo
+ *           deletes meta info successfully; repeated delete returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -217,7 +225,8 @@ HWTEST_F(NetLedgerTest, LNN_META_INFO_ADD_DEL_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_REMOTE_NUM16_INFO_Test_001
- * @tc.desc: lnn get remote num16 info test
+ * @tc.desc: Verify LnnGetRemoteNum16Info with invalid parameters returns
+ *           SOFTBUS_INVALID_PARAM; with valid UDID but non-existent key returns error
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -243,7 +252,8 @@ HWTEST_F(NetLedgerTest, LNN_GET_REMOTE_NUM16_INFO_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_UDIDS_Test_001
- * @tc.desc: lnn get remote udids info test
+ * @tc.desc: Verify LnnGetOnlineAndOfflineWithinTimeUdids with nullptr parameters
+ *           returns SOFTBUS_INVALID_PARAM; with valid parameters returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -264,7 +274,8 @@ HWTEST_F(NetLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_UDIDS_Test_001, T
 
 /*
  * @tc.name: IS_NEED_UPDATE_HUK_KEY_Test_001
- * @tc.desc: is need update huk key test
+ * @tc.desc: Verify IsNeedUpdateHukKey checks if HUK key needs to be updated
+ *           and returns true with diffTime output parameter
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -278,7 +289,7 @@ HWTEST_F(NetLedgerTest, IS_NEED_UPDATE_HUK_KEY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: START_CHECK_HUK_KEY_TIME_PROC_Test_001
- * @tc.desc: start check huk key time proc test
+ * @tc.desc: Verify StartCheckHukKeyTimeProc executes without fatal failure
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -291,7 +302,8 @@ HWTEST_F(NetLedgerTest, START_CHECK_HUK_KEY_TIME_PROC_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001
- * @tc.desc: param is illegal and legal
+ * @tc.desc: Verify LnnFindDeviceUdidTrustedInfoFromDb with nullptr udid returns
+ *           SOFTBUS_INVALID_PARAM; with valid but non-existent udid returns SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -308,7 +320,7 @@ HWTEST_F(NetLedgerTest, LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001, TestS
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_001
- * @tc.desc: lnn init decision db delay fail
+ * @tc.desc: Verify DeviceDbRecoveryInit initializes successfully and returns true
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -321,7 +333,7 @@ HWTEST_F(NetLedgerTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_IS_POTENTIAL_HOME_GROUP_Test_001
- * @tc.desc: lnn is potential home group false
+ * @tc.desc: Verify LnnIsPotentialHomeGroup with non-home-group UDID returns false
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -335,7 +347,7 @@ HWTEST_F(NetLedgerTest, LNN_IS_POTENTIAL_HOME_GROUP_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_DEVICE_TRUSTED_Test_001
- * @tc.desc: device trusted test is false
+ * @tc.desc: Verify IsDeviceTrusted with empty udid or non-existent udid returns false
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -353,7 +365,8 @@ HWTEST_F(NetLedgerTest, IS_DEVICE_TRUSTED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001
- * @tc.desc: try recovery trusted devInfotable is failed
+ * @tc.desc: Verify InitTrustedDevInfoTable fails and TryRecoveryTrustedDevInfoTable
+ *           attempts to recover and returns true
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -371,7 +384,8 @@ HWTEST_F(NetLedgerTest, TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001, TestSize.Level
 
 /*
  * @tc.name: GET_ALL_DEV_NUM_Test_001
- * @tc.desc: get all dev nums is ok
+ * @tc.desc: Verify GetAllDevNums retrieves total device numbers successfully
+ *           and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -387,7 +401,8 @@ HWTEST_F(NetLedgerTest, GET_ALL_DEV_NUM_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEV_INFO_Test_001
- * @tc.desc: delete specific trusted dev info ok
+ * @tc.desc: Verify LnnDeleteSpecificTrustedDevInfo deletes specific trusted
+ *           device info successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -403,7 +418,8 @@ HWTEST_F(NetLedgerTest, LNN_DELETE_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.
 
 /*
  * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEV_INFO_Test_001
- * @tc.desc: delete specific trusted dev info is ok
+ * @tc.desc: Verify LnnInsertSpecificTrustedDevInfo inserts specific trusted
+ *           device info successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -418,7 +434,8 @@ HWTEST_F(NetLedgerTest, LNN_INSERT_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.
 
 /*
  * @tc.name: UPDATE_RECOVERY_DEVICE_INFO_FROM_DB_Test_001
- * @tc.desc: update recovery device info from db error
+ * @tc.desc: Verify InitDbListDelay and UpdateRecoveryDeviceInfoFromDb fail
+ *           when device info cannot be retrieved and return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

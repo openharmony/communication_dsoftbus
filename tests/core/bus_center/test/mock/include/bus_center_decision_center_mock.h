@@ -33,6 +33,7 @@ public:
     virtual ~BusCenterDecisionCenterInterface() {};
     virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
 };
 class BusCenterDecisionCenterInterfaceMock : public BusCenterDecisionCenterInterface {
 public:
@@ -40,6 +41,7 @@ public:
     ~BusCenterDecisionCenterInterfaceMock() override;
     MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t(const char *, char *, uint32_t));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *id, IdCategory type, NodeInfo *info));
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
 };
 } // namespace OHOS
 #endif // BUS_CENTER_DECISION_CENTER_MOCK_H

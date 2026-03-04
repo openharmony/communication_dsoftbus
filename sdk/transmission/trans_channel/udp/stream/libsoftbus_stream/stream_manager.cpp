@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,8 +40,8 @@ void StreamManager::DestroyEnvironment(const std::string &pkgName)
     VtpStreamSocket::DestroyVtpInstance(pkgName);
 }
 
-int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
-    int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
+int32_t StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
+    int32_t streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     TRANS_LOGI(TRANS_STREAM,
         "Start to create client channel, localPort=%{public}d, remotePort=%{public}d, proto=%{public}d",
@@ -59,7 +59,7 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
     if (streamSocket->CreateClient(local, remote, streamType, sessionKey)) {
         socketMap_.insert(std::pair<Proto, std::shared_ptr<IStreamSocket>>(curProtocol_, streamSocket));
         SetStreamRecvListener(streamListener_);
-        int scene = SOFTBUS_SCENE;
+        int32_t scene = SOFTBUS_SCENE;
         if (!streamSocket->SetOption(SCENE, StreamAttr(scene))) {
             TRANS_LOGE(TRANS_STREAM, "set stream scene failed");
             return INVALID_FD;
@@ -71,8 +71,8 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
     return SOFTBUS_OK;
 }
 
-int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
-    int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
+int32_t StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
+    int32_t streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     TRANS_LOGI(TRANS_STREAM,
         "Start to create server channel, localPort=%{public}d, protocol=%{public}d", local.port, protocol);
@@ -94,7 +94,7 @@ int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
     socketMap_.insert(std::pair<Proto, std::shared_ptr<IStreamSocket>>(curProtocol_, streamSocket));
     SetStreamRecvListener(streamListener_);
 
-    int scene = SOFTBUS_SCENE;
+    int32_t scene = SOFTBUS_SCENE;
     if (!streamSocket->SetOption(SCENE, StreamAttr(scene))) {
         TRANS_LOGE(TRANS_STREAM, "set stream scene failed");
         return INVALID_FD;
@@ -126,7 +126,7 @@ bool StreamManager::Send(std::unique_ptr<IStream> data)
     return false;
 }
 
-bool StreamManager::SetOption(int type, const StreamAttr &value)
+bool StreamManager::SetOption(int32_t type, const StreamAttr &value)
 {
     auto it = socketMap_.find(curProtocol_);
     if (it != socketMap_.end()) {
@@ -148,7 +148,7 @@ int32_t StreamManager::SetMultiLayer(const void *para)
     return SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED;
 }
 
-StreamAttr StreamManager::GetOption(int type) const
+StreamAttr StreamManager::GetOption(int32_t type) const
 {
     auto it = socketMap_.find(curProtocol_);
     if (it != socketMap_.end()) {

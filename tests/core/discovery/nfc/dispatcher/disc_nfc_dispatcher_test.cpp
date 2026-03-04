@@ -398,34 +398,46 @@ HWTEST_F(DiscNfcDispatcherTest, DiscPublish001, TestSize.Level1)
     SoftBusMutexInit(&g_nfcDispatchersLock, NULL);
     DiscoveryFuncInterface *interface = DiscNfcInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
-    g_interfaceFunCntA.publishCntA = 0;
-    g_interfaceFunCntB.publishCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.publishCntA;
+    beforeFunCntB = g_interfaceFunCntB.publishCntB;
     ret = interface->Publish(&g_pOption1);
+    afterFunCntA = g_interfaceFunCntA.publishCntA;
+    afterFunCntB = g_interfaceFunCntB.publishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.publishCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.publishCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.startScanCntA = 0;
-    g_interfaceFunCntB.startScanCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.startScanCntA;
+    beforeFunCntB = g_interfaceFunCntB.startScanCntB;
     ret = interface->StartScan(&g_pOption1);
+    afterFunCntA = g_interfaceFunCntA.startScanCntA;
+    afterFunCntB = g_interfaceFunCntB.startScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.startScanCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.startScanCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.unpublishCntA = 0;
-    g_interfaceFunCntB.unpublishCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.unpublishCntA;
+    beforeFunCntB = g_interfaceFunCntB.unpublishCntB;
     ret = interface->Unpublish(&g_pOption1);
+    afterFunCntA = g_interfaceFunCntA.unpublishCntA;
+    afterFunCntB = g_interfaceFunCntB.unpublishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.unpublishCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.unpublishCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.stopScanCntA = 0;
-    g_interfaceFunCntB.stopScanCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.stopScanCntA;
+    beforeFunCntB = g_interfaceFunCntB.stopScanCntB;
     ret = interface->StopScan(&g_pOption1);
+    afterFunCntA = g_interfaceFunCntA.stopScanCntA;
+    afterFunCntB = g_interfaceFunCntB.stopScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.stopScanCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.stopScanCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
     (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
 };
 
@@ -440,34 +452,46 @@ HWTEST_F(DiscNfcDispatcherTest, Discovery001, TestSize.Level1)
     SoftBusMutexInit(&g_nfcDispatchersLock, NULL);
     DiscoveryFuncInterface *interface = DiscNfcInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
-    g_interfaceFunCntA.startAdvertiseCntA = 0;
-    g_interfaceFunCntB.startAdvertiseCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
+    beforeFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     ret = interface->StartAdvertise(&g_sOption1);
+    afterFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
+    afterFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.startAdvertiseCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.startAdvertiseCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.subscribeCntA = 0;
-    g_interfaceFunCntB.subscribeCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.subscribeCntA;
+    beforeFunCntB = g_interfaceFunCntB.subscribeCntB;
     ret = interface->Subscribe(&g_sOption1);
+    afterFunCntA = g_interfaceFunCntA.subscribeCntA;
+    afterFunCntB = g_interfaceFunCntB.subscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.subscribeCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.subscribeCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.unsubscribeCntA = 0;
-    g_interfaceFunCntB.unsubscribeCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    beforeFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     ret = interface->Unsubscribe(&g_sOption1);
+    afterFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.unsubscribeCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.unsubscribeCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.stopAdvertiseCntA = 0;
-    g_interfaceFunCntB.stopAdvertiseCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
+    beforeFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     ret = interface->StopAdvertise(&g_sOption1);
+    afterFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
+    afterFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.stopAdvertiseCntA, 1);
-    EXPECT_EQ(g_interfaceFunCntB.stopAdvertiseCntB, 0);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
     (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
 };
 
@@ -482,34 +506,46 @@ HWTEST_F(DiscNfcDispatcherTest, DiscPublish002, TestSize.Level1)
     SoftBusMutexInit(&g_nfcDispatchersLock, NULL);
     DiscoveryFuncInterface *interface = DiscNfcInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
-    g_interfaceFunCntA.publishCntA = 0;
-    g_interfaceFunCntB.publishCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.publishCntA;
+    beforeFunCntB = g_interfaceFunCntB.publishCntB;
     ret = interface->Publish(&g_pOption2);
+    afterFunCntA = g_interfaceFunCntA.publishCntA;
+    afterFunCntB = g_interfaceFunCntB.publishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.publishCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.publishCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
-    g_interfaceFunCntA.startScanCntA = 0;
-    g_interfaceFunCntB.startScanCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.startScanCntA;
+    beforeFunCntB = g_interfaceFunCntB.startScanCntB;
     ret = interface->StartScan(&g_pOption2);
+    afterFunCntA = g_interfaceFunCntA.startScanCntA;
+    afterFunCntB = g_interfaceFunCntB.startScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.startScanCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.startScanCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
-    g_interfaceFunCntA.unpublishCntA = 0;
-    g_interfaceFunCntB.unpublishCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.unpublishCntA;
+    beforeFunCntB = g_interfaceFunCntB.unpublishCntB;
     ret = interface->Unpublish(&g_pOption2);
+    afterFunCntA = g_interfaceFunCntA.unpublishCntA;
+    afterFunCntB = g_interfaceFunCntB.unpublishCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.unpublishCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.unpublishCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
-    g_interfaceFunCntA.stopScanCntA = 0;
-    g_interfaceFunCntB.stopScanCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.stopScanCntA;
+    beforeFunCntB = g_interfaceFunCntB.stopScanCntB;
     ret = interface->StopScan(&g_pOption2);
+    afterFunCntA = g_interfaceFunCntA.stopScanCntA;
+    afterFunCntB = g_interfaceFunCntB.stopScanCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.stopScanCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.stopScanCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
     (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
 };
 
@@ -524,34 +560,46 @@ HWTEST_F(DiscNfcDispatcherTest, Discovery002, TestSize.Level1)
     SoftBusMutexInit(&g_nfcDispatchersLock, NULL);
     DiscoveryFuncInterface *interface = DiscNfcInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
-    g_interfaceFunCntA.startAdvertiseCntA = 0;
-    g_interfaceFunCntB.startAdvertiseCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
+    beforeFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     ret = interface->StartAdvertise(&g_sOption2);
+    afterFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
+    afterFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.startAdvertiseCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.startAdvertiseCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
-    g_interfaceFunCntA.subscribeCntA = 0;
-    g_interfaceFunCntB.subscribeCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.subscribeCntA;
+    beforeFunCntB = g_interfaceFunCntB.subscribeCntB;
     ret = interface->Subscribe(&g_sOption2);
+    afterFunCntA = g_interfaceFunCntA.subscribeCntA;
+    afterFunCntB = g_interfaceFunCntB.subscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.subscribeCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.subscribeCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
-    g_interfaceFunCntA.unsubscribeCntA = 0;
-    g_interfaceFunCntB.unsubscribeCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    beforeFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     ret = interface->Unsubscribe(&g_sOption2);
+    afterFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.unsubscribeCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.unsubscribeCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
 
-    g_interfaceFunCntA.stopAdvertiseCntA = 0;
-    g_interfaceFunCntB.stopAdvertiseCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
+    beforeFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     ret = interface->StopAdvertise(&g_sOption2);
+    afterFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
+    afterFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.stopAdvertiseCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.stopAdvertiseCntB, 1);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
     (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
 };
 
@@ -566,34 +614,46 @@ HWTEST_F(DiscNfcDispatcherTest, DiscPublish003, TestSize.Level1)
     SoftBusMutexInit(&g_nfcDispatchersLock, NULL);
     DiscoveryFuncInterface *interface = DiscNfcInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
-    g_interfaceFunCntA.publishCntA = 0;
-    g_interfaceFunCntB.publishCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.publishCntA;
+    beforeFunCntB = g_interfaceFunCntB.publishCntB;
     ret = interface->Publish(&g_pOption3);
+    afterFunCntA = g_interfaceFunCntA.publishCntA;
+    afterFunCntB = g_interfaceFunCntB.publishCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.publishCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.publishCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.startScanCntA = 0;
-    g_interfaceFunCntB.startScanCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.startScanCntA;
+    beforeFunCntB = g_interfaceFunCntB.startScanCntB;
     ret = interface->StartScan(&g_pOption3);
+    afterFunCntA = g_interfaceFunCntA.startScanCntA;
+    afterFunCntB = g_interfaceFunCntB.startScanCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.startScanCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.startScanCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.unpublishCntA = 0;
-    g_interfaceFunCntB.unpublishCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.unpublishCntA;
+    beforeFunCntB = g_interfaceFunCntB.unpublishCntB;
     ret = interface->Unpublish(&g_pOption3);
+    afterFunCntA = g_interfaceFunCntA.unpublishCntA;
+    afterFunCntB = g_interfaceFunCntB.unpublishCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.unpublishCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.unpublishCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.stopScanCntA = 0;
-    g_interfaceFunCntB.stopScanCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.stopScanCntA;
+    beforeFunCntB = g_interfaceFunCntB.stopScanCntB;
     ret = interface->StopScan(&g_pOption3);
+    afterFunCntA = g_interfaceFunCntA.stopScanCntA;
+    afterFunCntB = g_interfaceFunCntB.stopScanCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.stopScanCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.stopScanCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
     (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
 };
 
@@ -608,34 +668,46 @@ HWTEST_F(DiscNfcDispatcherTest, Discovery003, TestSize.Level1)
     SoftBusMutexInit(&g_nfcDispatchersLock, NULL);
     DiscoveryFuncInterface *interface = DiscNfcInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
+    int32_t beforeFunCntA;
+    int32_t beforeFunCntB;
+    int32_t afterFunCntA;
+    int32_t afterFunCntB;
 
-    g_interfaceFunCntA.startAdvertiseCntA = 0;
-    g_interfaceFunCntB.startAdvertiseCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
+    beforeFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     ret = interface->StartAdvertise(&g_sOption3);
+    afterFunCntA = g_interfaceFunCntA.startAdvertiseCntA;
+    afterFunCntB = g_interfaceFunCntB.startAdvertiseCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.startAdvertiseCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.startAdvertiseCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.subscribeCntA = 0;
-    g_interfaceFunCntB.subscribeCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.subscribeCntA;
+    beforeFunCntB = g_interfaceFunCntB.subscribeCntB;
     ret = interface->Subscribe(&g_sOption3);
+    afterFunCntA = g_interfaceFunCntA.subscribeCntA;
+    afterFunCntB = g_interfaceFunCntB.subscribeCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.subscribeCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.subscribeCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.unsubscribeCntA = 0;
-    g_interfaceFunCntB.unsubscribeCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    beforeFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     ret = interface->Unsubscribe(&g_sOption3);
+    afterFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.unsubscribeCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.unsubscribeCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
 
-    g_interfaceFunCntA.stopAdvertiseCntA = 0;
-    g_interfaceFunCntB.stopAdvertiseCntB = 0;
+    beforeFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
+    beforeFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     ret = interface->StopAdvertise(&g_sOption3);
+    afterFunCntA = g_interfaceFunCntA.stopAdvertiseCntA;
+    afterFunCntB = g_interfaceFunCntB.stopAdvertiseCntB;
     EXPECT_NE(SOFTBUS_OK, ret);
-    EXPECT_EQ(g_interfaceFunCntA.stopAdvertiseCntA, 0);
-    EXPECT_EQ(g_interfaceFunCntB.stopAdvertiseCntB, 0);
+    EXPECT_EQ(beforeFunCntA, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB, afterFunCntB);
     (void)SoftBusMutexDestroy(&g_nfcDispatchersLock);
 };
 
@@ -648,7 +720,7 @@ HWTEST_F(DiscNfcDispatcherTest, Discovery003, TestSize.Level1)
 HWTEST_F(DiscNfcDispatcherTest, LinkStatusChanged001, TestSize.Level1)
 {
     SoftBusMutexInit(&g_nfcDispatchersLock, NULL);
-    static LinkStatus status = LINK_STATUS_UP;
+    LinkStatus status = LINK_STATUS_UP;
     DiscoveryFuncInterface *interface = DiscNfcInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t beforeFunCntA;
     int32_t afterFunCntA;
@@ -705,12 +777,6 @@ HWTEST_F(DiscNfcDispatcherTest, NfcDispatchSubscribeOption001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_DISCOVER_NFC_DISPATCHER_FAIL, ret);
 }
 
-DiscoveryNfcDispatcherInterface *DiscShareNfcInitStub(DiscInnerCallback *discInnerCb)
-{
-    (void)discInnerCb;
-    return &g_interfaceA;
-}
-
 /*
  * @tc.name: DiscNfcDispatcherInit001
  * @tc.desc: test dispatcher
@@ -721,12 +787,27 @@ HWTEST_F(DiscNfcDispatcherTest, DiscNfcDispatcherInit001, TestSize.Level1)
 {
     DiscoveryFuncInterface *interface = DiscNfcDispatcherInit(nullptr);
     EXPECT_EQ(interface, nullptr);
+}
 
+DiscoveryNfcDispatcherInterface *DiscShareNfcInitStub(DiscInnerCallback *discInnerCb)
+{
+    (void)discInnerCb;
+    return &g_interfaceA;
+}
+
+/*
+ * @tc.name: DiscNfcDispatcherInit002
+ * @tc.desc: test dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNfcDispatcherTest, DiscNfcDispatcherInit002, TestSize.Level1)
+{
     DiscNfcDispatcherDeinit();
     DiscInnerCallback g_discMgrMediumCb;
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     pfnDiscEnhanceFuncList->discShareNfcInit = DiscShareNfcInitStub;
-    interface = DiscNfcDispatcherInit(&g_discMgrMediumCb);
+    DiscoveryFuncInterface *interface = DiscNfcDispatcherInit(&g_discMgrMediumCb);
     EXPECT_NE(interface, nullptr);
     DiscNfcDispatcherDeinit();
     pfnDiscEnhanceFuncList->discShareNfcInit = nullptr;
@@ -734,12 +815,12 @@ HWTEST_F(DiscNfcDispatcherTest, DiscNfcDispatcherInit001, TestSize.Level1)
 
 
 /*
- * @tc.name: NfcDispatchSubscribeOption002
+ * @tc.name: NfcDispatchSubscribeOptionWithInvalidParam002
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscNfcDispatcherTest, NfcDispatchSubscribeOption002, TestSize.Level1)
+HWTEST_F(DiscNfcDispatcherTest, NfcDispatchSubscribeOptionWithInvalidParam002, TestSize.Level1)
 {
     DiscNfcDispatcherDeinit();
     DiscInnerCallback g_discMgrMediumCb;
@@ -867,7 +948,7 @@ HWTEST_F(DiscNfcDispatcherTest, DfxRecordNfcInitEnd001, TestSize.Level1)
     int32_t stage = EVENT_STAGE_INIT;
     int32_t reason = SOFTBUS_OK;
     EXPECT_NO_FATAL_FAILURE(DfxRecordNfcInitEnd(stage, reason));
-    
+
     reason = SOFTBUS_ERR;
     EXPECT_NO_FATAL_FAILURE(DfxRecordNfcInitEnd(stage, reason));
 

@@ -133,6 +133,7 @@ static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
         .localUserId = nodeInfo.localUserId
     };
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
+    SetDpGroupShare(info, authHandle);
 }
 
 static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onlineType)
@@ -168,10 +169,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
     }
     int32_t ret = SoftBusGenerateStrHash((unsigned char *)info->deviceInfo.deviceUdid,
         strlen(info->deviceInfo.deviceUdid), (unsigned char *)addr.info.ble.udidHash);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "gen udidHash fail");
-        return;
-    }
+    LNN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, LNN_BUILDER, "gen udidHash fail");
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&addr, true);
     if (connFsm != NULL && !connFsm->isDead && !LnnIsNeedCleanConnectionFsm(info, addr.type)) {
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
@@ -181,6 +179,9 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
             UpdateProfile(info);
             LnnUpdateRemoteDeviceName(info);
             GetSessionKeyByNodeInfo(info, authHandle);
+        }
+        if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_JOIN_REQUEST) != 0) {
+            LnnNotifyJoinResult(&connFsm->connInfo.addr, connFsm->connInfo.peerNetworkId, SOFTBUS_OK);
         }
     } else {
         connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);
@@ -208,7 +209,7 @@ static void OnReAuthVerifyFailed(uint32_t requestId, int32_t reason)
         LNN_LOGE(LNN_BUILDER, "auth request not found");
         LnnConnectionFsm *connFsm = FindConnectionFsmByRequestId(requestId);
         if (connFsm == NULL || connFsm->isDead) {
-            LNN_LOGE(LNN_BUILDER, "can not find connection fsm by requestId. requestId=%{public}d", requestId);
+            LNN_LOGE(LNN_BUILDER, "can not find connection fsm by requestId. requestId=%{public}u", requestId);
             return;
         }
         if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_JOIN_REQUEST) != 0) {
@@ -512,7 +513,7 @@ void TryElectAsMasterState(const char *networkId, bool isOnline)
         return;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
-    if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_BUILDER, "get invalid peerUdid, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));

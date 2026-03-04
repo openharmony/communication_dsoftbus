@@ -30,9 +30,9 @@
 #include "softbus_error_code.h"
 #include "auth_hichain_adapter.h"
 
+
 static const int32_t ACCOUNT_STRTOLL_BASE = 10;
-static const int32_t CONTROL_PANEL_DISPLAY_ID = 0;
-static const int32_t CO_DRIVER_PANEL_DISPLAY_ID = 6;
+static const uint64_t CONTROL_PANEL_DISPLAY_ID = 0;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
 
@@ -147,31 +147,16 @@ int32_t GetCurrentAccount(int64_t *account)
     return SOFTBUS_OK;
 }
 
-int32_t GetAllDisplaysForCoDriverScreen(int32_t *coDriverUserId)
-{
-    int32_t displayId = CO_DRIVER_PANEL_DISPLAY_ID;
-    int32_t foregroundUserId = 0;
-    auto result = OHOS::AccountSA::OsAccountManager::
-        GetForegroundOsAccountLocalId(displayId, foregroundUserId);
-    if (result != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "GetForegroundOsAccountLocalId failed, result=%{public}d", result);
-        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
-    }
-    LNN_LOGI(LNN_STATE, "account id=%{public}d", foregroundUserId);
-    *coDriverUserId = foregroundUserId;
-    return SOFTBUS_OK;
-}
-
 static int32_t GetActiveOsAccountIdsByDisplayId(int32_t *userId)
 {
-    int32_t displayId = CONTROL_PANEL_DISPLAY_ID;
+    uint64_t displayId = CONTROL_PANEL_DISPLAY_ID;
     int32_t foregroundUserId = 0;
     if (userId == nullptr) {
         LNN_LOGE(LNN_STATE, "invalid parameter");
         return SOFTBUS_INVALID_PARAM;
     }
     auto result = OHOS::AccountSA::OsAccountManager::
-        GetForegroundOsAccountLocalId(displayId, foregroundUserId);
+        GetForegroundOsAccountLocalId(static_cast<int32_t>(displayId), foregroundUserId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "GetForegroundOsAccountLocalId failed, result=%{public}d", result);
         return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
@@ -292,5 +277,21 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
         LNN_LOGE(LNN_STATE, "memcpy_s accountUid failed, idLen=%{public}u, len=%{public}u", idLen, *len);
         return SOFTBUS_MEM_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t GetOsAccountLocalIdFromUid(int32_t uid, int32_t *userId)
+{
+    if (userId == nullptr) {
+        LNN_LOGE(LNN_STATE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t localId = -1;
+    OHOS::ErrCode res = OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, localId);
+    if (res != OHOS::ERR_OK) {
+        LNN_LOGE(LNN_STATE, "get userId fail. res=%{public}d", res);
+        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
+    }
+    *userId = localId;
     return SOFTBUS_OK;
 }

@@ -16,7 +16,6 @@
 #include "napi_link_enhance_utils.h"
 
 #include <regex>
-#include "conn_log.h"
 #include "napi_link_enhance_error_code.h"
 #include "securec.h"
 #include "softbus_access_token_adapter.h"

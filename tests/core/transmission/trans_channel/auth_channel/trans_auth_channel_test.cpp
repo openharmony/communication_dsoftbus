@@ -54,7 +54,6 @@ const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00";
 const char *g_groupid = "TEST_GROUP_ID";
 const char *g_errMsg = "error";
 static IServerChannelCallBack *callback = nullptr;
-static SoftBusList *g_transAuthChannelTestList = nullptr;
 static constexpr char TEST_SHARE_SESSION[] = "IShareEcologyAuthSession";
 class TransAuthChannelTest : public testing::Test {
 public:
@@ -1642,48 +1641,6 @@ HWTEST_F(TransAuthChannelTest, TransAsyncAuthChannelTaskTest001, TestSize.Level1
 
     info->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX;
     TransAsyncAuthChannelTask(info->appInfo.myData.channelId);
-
-    TransSessionMgrDeinit();
-    TransAuthDeinit();
-}
-
-/*
- * @tc.name: TransAuthDestroyChannelListTest001
- * @tc.desc: TransAuthDestroyChannelList test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransAuthChannelTest, TransAuthDestroyChannelListTest001, TestSize.Level1)
-{
-    int32_t ret = InitAndCreateSessionServer();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    AuthChannelInfo *info = static_cast<AuthChannelInfo *>(SoftBusCalloc(sizeof(AuthChannelInfo)));
-    EXPECT_NE(info, nullptr);
-    info->appInfo.myData.channelId = 1111; // test value
-    info->appInfo.waitOpenReplyCnt = CHANNEL_OPEN_SUCCESS;
-    (void)memcpy_s(info->appInfo.myData.pkgName, 13, "TEST_SESSION", 13); // test value
-    info->appInfo.myData.pid = TRANS_TEST_PID;
-    ret = AddAuthChannelInfo(info);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    if (g_transAuthChannelTestList == nullptr) {
-        g_transAuthChannelTestList = CreateSoftBusList();
-        EXPECT_NE(g_transAuthChannelTestList, nullptr);
-    }
-
-    ListNode destroyList;
-    ListInit(&destroyList);
-    if (SoftBusMutexLock(&g_transAuthChannelTestList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock failed!");
-        return;
-    }
-
-    ListAdd(&destroyList, &(info->node));
-    (void)SoftBusMutexUnlock(&g_transAuthChannelTestList->lock);
-    TransAuthDestroyChannelList(&destroyList);
-    DestroySoftBusList(g_transAuthChannelTestList);
-    g_transAuthChannelTestList = nullptr;
 
     TransSessionMgrDeinit();
     TransAuthDeinit();

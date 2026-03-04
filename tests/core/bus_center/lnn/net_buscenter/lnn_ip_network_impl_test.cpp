@@ -64,7 +64,9 @@ void LNNIpNetworkImplMockTest::TearDown() { }
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_001
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify LnnGetIpListenerModule returns correct listener module for
+ *           different modes; LnnEnableIpProtocol and LnnInitIpProtocol handle
+ *           invalid parameters correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -119,7 +121,8 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_002
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify NotifyWlanAddressChanged, OnIpNetifStatusChanged and
+ *           OnSoftbusIpNetworkDisconnected handle different subnet status correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -155,7 +158,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_003
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify GetAvailableIpAddr returns SOFTBUS_INVALID_PARAM when
+ *           GetNetworkIpByIfName fails; GetIpEventInRunning returns correct
+ *           IP subnet manager events
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -190,7 +195,8 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_004
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify RequestMainPort, OpenAuthPort, OpenIpLink and EnableIpSubnet
+ *           handle various return values from mocked functions correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -247,7 +253,8 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1
 }
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_005
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify ReleaseMainPort, LeaveOldIpNetwork and CloseProxyPort handle
+ *           function call sequences correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -292,7 +299,8 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_006
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify IsValidLocalIp returns false when LnnGetLocalStrInfoByIfnameIdx
+ *           fails or local IP is not valid
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -310,7 +318,8 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_006, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_007
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify WifiStateChangeWifiOrAp returns correct boolean value for
+ *           different SoftBusWifiState inputs
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -331,7 +340,8 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_007, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_008
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify GetWifiServiceIpAddr with nullptr parameters or when
+ *           GetWlanIpv4Addr fails returns error
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -353,7 +363,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_008, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_009
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify OpenProxyPort fails when LnnGetLocalNumInfoByIfnameIdx or
+ *           LnnGetLocalStrInfoByIfnameIdx returns error; EnableIpSubnet handles
+ *           different return values correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -401,7 +413,9 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_009, TestSize.Level1
 
 /*
  * @tc.name: LNN_IP_NETWORK_IMPL_TEST_010
- * @tc.desc: test ip network impl
+ * @tc.desc: Verify GetLocalIpInfo fails when LnnGetLocalStrInfoByIfnameIdx
+ *           returns error; SetLocalIpInfo fails when LnnSetLocalStrInfoByIfnameIdx
+ *           returns error
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1

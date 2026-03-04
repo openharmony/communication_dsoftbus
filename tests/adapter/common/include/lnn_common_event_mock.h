@@ -37,7 +37,6 @@ public:
     virtual void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state) = 0;
     virtual void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
-    virtual void TriggerClearSparkGroupPacked(void) = 0;
 };
 class LnnCommonEventInterfaceMock : public LnnCommonEventInterface {
 public:
@@ -53,7 +52,6 @@ public:
     MOCK_METHOD1(LnnNotifyScreenLockStateChangeEvent, void(SoftBusScreenLockState));
     MOCK_METHOD1(LnnNotifyDataShareStateChangeEvent, void(SoftBusDataShareState));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
-    MOCK_METHOD0(TriggerClearSparkGroupPacked, void(void));
 };
 } // namespace OHOS
 #endif // LNN_COMMON_EVENT_MOCK_H

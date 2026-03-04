@@ -22,7 +22,7 @@ namespace Communication {
 namespace SoftBus {
 class StreamPacketizer {
 public:
-    StreamPacketizer(int streamType, std::unique_ptr<IStream> data)
+    StreamPacketizer(int32_t streamType, std::unique_ptr<IStream> data)
     {
         originData_ = std::move(data);
         streamType_ = streamType;
@@ -48,7 +48,7 @@ private:
     ssize_t dataSize_ = 0;
     ssize_t extSize_ = 0;
     std::unique_ptr<IStream> originData_ = nullptr;
-    int streamType_ = INVALID;
+    int32_t streamType_ = INVALID;
 };
 } // namespace SoftBus
 } // namespace Communication

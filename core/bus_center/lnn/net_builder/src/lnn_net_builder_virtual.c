@@ -58,10 +58,11 @@ int32_t LnnNotifyDiscoveryDevice(
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
     (void)type;
     (void)typeLen;
+    (void)hasMcuRequestDisable;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

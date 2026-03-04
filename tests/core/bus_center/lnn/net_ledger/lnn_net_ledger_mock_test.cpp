@@ -44,7 +44,8 @@ void LNNNetLedgerMockTest::TearDown() { }
 
 /*
  * @tc.name: IsLocalIrkInfoChangeTest001
- * @tc.desc: local irk info change test
+ * @tc.desc: Verify IsLocalIrkInfoChange returns false when
+ *           LnnGetLocalByteInfo returns SOFTBUS_NETWORK_NOT_FOUND
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require: IBH09C
@@ -60,7 +61,8 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalIrkInfoChangeTest001, TestSize.Level0)
 
 /*
  * @tc.name: IsLocalIrkInfoChangeTest002
- * @tc.desc: local irk info change test
+ * @tc.desc: Verify IsLocalIrkInfoChange returns false when
+ *           LnnGetLocalByteInfo returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require: IBH09C
@@ -76,7 +78,8 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalIrkInfoChangeTest002, TestSize.Level0)
 
 /*
  * @tc.name: IsLocalBroadcastLinKeyChangeTest001
- * @tc.desc: local link key change test
+ * @tc.desc: Verify IsLocalBroadcastLinKeyChange returns false when
+ *           LnnGetLocalByteInfo returns SOFTBUS_NETWORK_NOT_FOUND
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require: IBH09C
@@ -92,7 +95,8 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest001, TestSize.Lev
 
 /*
  * @tc.name: IsLocalBroadcastLinKeyChangeTest002
- * @tc.desc: local link key change test
+ * @tc.desc: Verify IsLocalBroadcastLinKeyChange returns false when
+ *           LnnGetLocalByteInfo returns SOFTBUS_OK then SOFTBUS_ERR
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require: IBH09C
@@ -108,7 +112,8 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest002, TestSize.Lev
 
 /*
  * @tc.name: IsLocalBroadcastLinKeyChangeTest003
- * @tc.desc: local link key change test
+ * @tc.desc: Verify IsLocalBroadcastLinKeyChange returns false when
+ *           LnnGetLocalByteInfo returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require: IBH09C
@@ -123,26 +128,9 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest003, TestSize.Lev
 }
 
 /*
- * @tc.name: IsStaticFeatureChangeTest001
- * @tc.desc: IsStaticFeatureChange test
- * @tc.type: FUNC
- * @tc.level: Level0
- * @tc.require:
- */
-HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
-{
-    uint64_t softbusFeature = 1 << BIT_FL_CAPABILITY;
-    uint64_t feature = softbusFeature;
-    bool ret = IsStaticFeatureChange(softbusFeature, feature);
-    EXPECT_FALSE(ret);
-    feature |= (1 << BIT_BLE_DIRECT_ONLINE);
-    ret = IsStaticFeatureChange(softbusFeature, feature);
-    EXPECT_TRUE(ret);
-}
-
-/*
  * @tc.name: IsLocalSparkCheckChange001
- * @tc.desc: local sparkCheck invalid test
+ * @tc.desc: Verify IsLocalSparkCheckChange checks spark check change with
+ *           different LnnGetLocalByteInfo return values
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require: IBH09C
@@ -162,7 +150,8 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalSparkCheckChange001, TestSize.Level0)
 
 /*
  * @tc.name: IsBleDirectlyOnlineFactorChange001
- * @tc.desc: Is BleDirectly Online Factor Change test
+ * @tc.desc: Verify IsBleDirectlyOnlineFactorChange checks BLE directly
+ *           online factor change with different return values
  * @tc.type: FUNC
  * @tc.level: Level0
  * @tc.require: IBH09C

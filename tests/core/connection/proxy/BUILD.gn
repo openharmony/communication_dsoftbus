@@ -26,7 +26,7 @@ ohos_unittest("ProxyChannelManagerTest") {
     "$softbus_adapter_common/net/bluetooth/include",
     "$dsoftbus_root_path/core/connection/proxy",
     "$dsoftbus_root_path/test/core/connection/proxy",
-    "$dsoftbus_root_path/test/core/connection/proxy/mock",
+    "$dsoftbus_root_path/test/core/connection/proxy/unittest/mock",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$softbus_adapter_common/include",
@@ -43,11 +43,13 @@ ohos_unittest("ProxyChannelManagerTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/connection/proxy/proxy_config.c",
     "$dsoftbus_root_path/core/connection/proxy/proxy_manager.c",
     "$dsoftbus_root_path/core/connection/proxy/proxy_connection.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
-    "$dsoftbus_root_path/tests/core/connection/proxy/mock/proxy_manager_mock.cpp",
-    "proxy_manager_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/proxy/unittest/mock/proxy_manager_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/proxy/unittest/proxy_config_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/proxy/unittest/proxy_manager_test.cpp",
   ]
 
   external_deps = [

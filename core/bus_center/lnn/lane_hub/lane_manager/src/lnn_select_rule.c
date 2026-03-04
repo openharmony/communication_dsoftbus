@@ -1266,6 +1266,56 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     return ret;
 }
 
+static bool IsReuseLinkValid(const char *networkId, const LaneSelectParam *request,
+    LaneLinkType linkType, const char *peerUdid)
+{
+    bool isLinkValid = false;
+    switch (linkType) {
+        case LANE_WLAN_2P4G:
+        /* fall-through */
+        case LANE_WLAN_5G:{
+            if (LaneCheckLinkValid(networkId, linkType, request->transType) == SOFTBUS_OK) {
+                isLinkValid = true;
+            }
+            break;
+        }
+        default:{
+            LaneResource resourceItem;
+            (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+            if ((CheckLinkParam(linkType, request->transType) == SOFTBUS_OK) &&
+                (FindLaneResourceByLinkType(peerUdid, linkType, &resourceItem) == SOFTBUS_OK)) {
+                isLinkValid = true;
+            }
+            break;
+        }
+    }
+    return isLinkValid;
+}
+
+static int32_t FilterWithReuse(const char *networkId, const LaneSelectParam *request,
+    LaneLinkType *reuseLink, uint32_t *linksNum)
+{
+    char peerUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LaneLinkType filteredLinks[LANE_LINK_TYPE_BUTT];
+    uint32_t filterCount = 0;
+    for (uint32_t i = 0; i < *linksNum; i++) {
+        if (!IsReuseLinkValid(networkId, request, reuseLink[i], peerUdid)) {
+            LNN_LOGE(LNN_LANE, "linkType=%{public}d not valid, removed", reuseLink[i]);
+            continue;
+        }
+        filteredLinks[filterCount++] = reuseLink[i];
+    }
+    if (filterCount == 0) {
+        LNN_LOGI(LNN_LANE, "no valid reuse linkType");
+    }
+    GenerateLinkList(filteredLinks, filterCount, reuseLink, linksNum);
+    return SOFTBUS_OK;
+}
+
 int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
@@ -1274,31 +1324,18 @@ int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
         LNN_LOGE(LNN_LANE, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!IsDeviceTypeExist(networkId, TYPE_WATCH_ID)) {
-        LNN_LOGE(LNN_LANE, "reuse best effort only support watch");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    LaneLinkType reuseLink = LANE_BR;
-    LaneResource resourceItem;
-    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    char peerUdid[UDID_BUF_LEN] = {0};
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get udid error");
-        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
-    }
-    int32_t ret = FindLaneResourceByLinkType(peerUdid, reuseLink, &resourceItem);
+    LaneLinkType reuseLinkList[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(reuseLinkList, sizeof(reuseLinkList), -1, sizeof(reuseLinkList));
+    uint32_t linksNum = 0;
+    DecideLinksWithQosRequire(request, reuseLinkList, &linksNum);
+    int32_t ret = FilterWithReuse(networkId, request, reuseLinkList, &linksNum);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "linkType=%{public}d not support reuse", reuseLink);
+        LNN_LOGE(LNN_LANE, "filter reuse check fail");
         return ret;
     }
-    ret = LaneCheckLinkValid(networkId, reuseLink, request->transType);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "linkType=%{public}d no capability", reuseLink);
-        return ret;
+    for (uint32_t i = 0; i < linksNum; i++) {
+        recommendList->linkType[(recommendList->linkTypeNum)++] = reuseLinkList[i];
     }
-    LNN_LOGI(LNN_LANE, "linkType=%{public}d exist reuse laneId=%{public}" PRIu64 "",
-        reuseLink, resourceItem.laneId);
-    recommendList->linkType[(recommendList->linkTypeNum)++] = reuseLink;
     return SOFTBUS_OK;
 }
 

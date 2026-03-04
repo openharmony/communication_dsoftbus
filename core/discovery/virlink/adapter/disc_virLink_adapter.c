@@ -35,7 +35,7 @@ static int32_t VirLinkLinklessGetWifiDirectAuthByNetworkId(const char *networkId
 {
     char uuid[UUID_BUF_LEN] = {0};
     int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "convert dlId failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "convert dlId fail");
     AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, authHandle);
 
     if (authHandle->authId != AUTH_INVALID_ID) {
@@ -97,10 +97,10 @@ static void OnVirlinkLinklessMsgRecv(AuthHandle authHandle, const AuthTransData 
     AnonymizeFree(anonyUdid);
     if (LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BROADCAST, "LnnGetNetworkIdByUdid fail");
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return;
     }
-    DelAuthManager(auth, false);
+    DelDupAuthManager(auth);
 
     DiscVirlinkLinklessRecvCb recvCb = g_discVirLinkLinklessCb;
     if (recvCb != NULL) {

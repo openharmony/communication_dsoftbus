@@ -222,6 +222,11 @@ int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
 {
     return GetCommonInterface()->ConnUpdateConnection(connectionId, option);
 }
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return GetCommonInterface()->JudgeDeviceTypeAndGetOsAccountIds();
+}
 }
 
 int32_t AuthCommonInterfaceMock::ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)

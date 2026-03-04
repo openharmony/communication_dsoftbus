@@ -251,6 +251,11 @@ WifiErrorCode Hid2dRequestGcIp(const unsigned char gcMac[MAC_LEN], unsigned int 
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dRequestGcIp(gcMac, ipAddr);
 }
 
+WifiErrorCode Hid2dSetGroupType(GroupLiveType groupLiveType)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dSetGroupType(groupLiveType);
+}
+
 WifiErrorCode Hid2dConfigIPAddr(const char ifName[IF_NAME_LEN], const IpAddrInfo *ipInfo)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dConfigIPAddr(ifName, ipInfo);

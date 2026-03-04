@@ -53,10 +53,6 @@ static void FreeAsyncCallbackMessage(SoftBusMessage *msg)
 
 static void InitAsyncCallbackMessage(SoftBusMessage *msg, int32_t what, void *obj, SoftBusHandler *handler)
 {
-    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BROADCAST, "msg is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(obj != NULL, DISC_BROADCAST, "obj is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(handler != NULL, DISC_BROADCAST, "handler is nullptr");
-
     msg->what = what;
     msg->obj = obj;
     msg->handler = handler;
@@ -65,9 +61,6 @@ static void InitAsyncCallbackMessage(SoftBusMessage *msg, int32_t what, void *ob
 
 static void InitAsyncCallbackHandler(SoftBusHandler *handler, SoftBusLooper *looper)
 {
-    DISC_CHECK_AND_RETURN_LOGE(handler != NULL, DISC_BROADCAST, "handler is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(looper != NULL, DISC_BROADCAST, "looper is nullptr");
-
     handler->name = BLE_ASYNC_CALLBACK_HANDLER_NAME;
     handler->looper = looper;
     handler->HandleMessage = AsyncCallbackHandler;
@@ -76,8 +69,6 @@ static void InitAsyncCallbackHandler(SoftBusHandler *handler, SoftBusLooper *loo
 static AsyncCallbackInfo *CreateAsyncCallbackInfo(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
     void *para, int32_t msgType)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(looper != NULL, NULL, DISC_BROADCAST, "looper is nullptr");
-
     AsyncCallbackInfo *info = NULL;
 
     info = SoftBusCalloc(sizeof(AsyncCallbackInfo));

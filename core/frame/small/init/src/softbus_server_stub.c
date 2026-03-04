@@ -216,6 +216,7 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_RELEASE_RESOURCES, ServerReleaseResources },
     { SERVER_PROCESS_INNER_EVENT, ServerProcessInnerEvent },
     { SERVER_PRIVILEGE_CLOSE_CHANNEL, ServerPrivilegeCloseChannel },
+    { SERVER_SET_NODE_KEY_INFO, ServerSetNodeKeyInfo },
 };
 
 static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)

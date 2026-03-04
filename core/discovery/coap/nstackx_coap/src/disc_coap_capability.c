@@ -31,16 +31,6 @@ int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData,
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t DiscCoapAssembleBdata(const unsigned char *capabilityData, uint32_t dataLen, char *businessData,
-    uint32_t businessDataLen)
-{
-    (void)capabilityData;
-    (void)dataLen;
-    (void)businessData;
-    (void)businessDataLen;
-    return SOFTBUS_OK;
-}
-
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
 int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap)
 {
@@ -123,7 +113,7 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     AnonymizeFree(anonymizedId);
     AnonymizeFree(anonymizedIp);
     if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType, false) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "send response failed");
+        DISC_LOGE(DISC_COAP, "send response fail");
         return SOFTBUS_DISCOVER_COAP_SEND_RSP_FAIL;
     }
     return SOFTBUS_OK;

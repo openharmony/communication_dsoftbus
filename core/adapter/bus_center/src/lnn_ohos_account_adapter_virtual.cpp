@@ -70,3 +70,10 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
 {
     return ACCOUNT_ID;
 }
+
+int32_t GetOsAccountLocalIdFromUid(int32_t uid, int32_t *userId)
+{
+    (void)uid;
+    (void)userId;
+    return SOFTBUS_OK;
+}

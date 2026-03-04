@@ -35,7 +35,7 @@ ohos_unittest("DiscBleTest") {
       "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
     ]
   } else {
-    sources += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
+    sources += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_virtual.cpp" ]
   }
 
   include_dirs = [

@@ -45,6 +45,7 @@ void ClientBusMangerTest::TearDown() { }
  * @tc.name: IS_SAME_CONNECTION_ADDR_Test_001
  * @tc.desc: PreLink lane test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FN5VC
  */
 HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
@@ -65,6 +66,7 @@ HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
  * @tc.name: IS_SAME_CONNECTION_ADDR_Test_002
  * @tc.desc: PreLink lane test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FN5VC
  */
 HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Level1)
@@ -85,6 +87,7 @@ HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Level1)
  * @tc.name: IS_SAME_CONNECTION_ADDR_Test_003
  * @tc.desc: PreLink lane test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FN5VC
  */
 HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_003, TestSize.Level1)
@@ -105,6 +108,7 @@ HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_003, TestSize.Level1)
  * @tc.name: IS_SAME_CONNECTION_ADDR_Test_004
  * @tc.desc: PreLink lane test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require: AR000FN5VC
  */
 HWTEST_F(ClientBusMangerTest, IS_SAME_CONNECTION_ADDR_Test_004, TestSize.Level1)

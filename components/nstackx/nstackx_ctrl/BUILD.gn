@@ -88,6 +88,10 @@ if (dsoftbus_feature_inner_coap) {
     cflags += [
       "-DDFINDER_MGT_MSG_LOG",
       "-DNSTACKX_DFINDER_HIDUMP",
+      "-ffunction-sections",
+      "-fdata-sections",
+      "-fno-unwind-tables",
+      "-Os",
     ]
   }
 }

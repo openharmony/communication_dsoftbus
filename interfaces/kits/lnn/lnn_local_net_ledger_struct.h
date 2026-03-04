@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,12 +54,18 @@ typedef enum {
     UPDATE_CONCURRENT_AUTH = 64,
     UPDATE_CIPHERKEY = 128,
     UPDATE_SLE_CAP = 256,
+    UPDATE_FEATURE = 512,
 } StateVersionChangeReason;
 
 typedef struct {
     bool isAdd;
     uint64_t featureSet;
 } FeatureOption;
+
+typedef struct {
+    bool isAdd;
+    uint32_t capabilitySet;
+} CapabilityOption;
 
 #ifdef __cplusplus
 }

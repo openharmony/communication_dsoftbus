@@ -54,9 +54,9 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     return GetLnnBtNetworkImplInterface()->LnnRequestLeaveSpecific(networkId, addrType, leaveReason);
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
-    return GetLnnBtNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen);
+    return GetLnnBtNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
 }
 
 int32_t SoftBusGetBtState(void)
@@ -338,6 +338,11 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
 {
     return GetLnnBtNetworkImplInterface()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
+}
+
+int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
+{
+    return GetLnnBtNetworkImplInterface()->LnnSetNodeKeyInfo(networkId, key, info, infoLen);
 }
 
 int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)

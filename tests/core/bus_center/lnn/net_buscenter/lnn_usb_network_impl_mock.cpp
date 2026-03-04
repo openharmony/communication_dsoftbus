@@ -166,9 +166,9 @@ bool LnnVisitNetif(VisitNetifCallback callback, void *data)
     return GetLnnUsbNetworkImplInterface()->LnnVisitNetif(callback, data);
 }
 
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
 {
-    return GetLnnUsbNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen);
+    return GetLnnUsbNetworkImplInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
 }
 
 int32_t GetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len)

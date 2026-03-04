@@ -93,7 +93,8 @@ static void ClearNetBuilderFsmList()
 
 /*
  * @tc.name: LNN_INIT_NET_BUILDER_TEST_001
- * @tc.desc: lnn init netbuilder test
+ * @tc.desc: Verify LnnInitNetBuilder initializes net builder with
+ *           different mock return values
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -127,7 +128,8 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONFIG_LOCAL_LEDGER_TEST_001
- * @tc.desc: config local ledger test
+ * @tc.desc: Verify ConfigLocalLedger configures local ledger with
+ *           different mock return values
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -152,7 +154,8 @@ HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_NET_BUILDER_DELAY_TEST_001
- * @tc.desc: lnn init netbuilder delay test
+ * @tc.desc: Verify LnnInitNetBuilderDelay initializes net builder
+ *           delay with different mock return values
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -175,7 +178,8 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_DELAY_TEST_001, TestSize.Le
 
 /*
  * @tc.name: PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001
- * @tc.desc: process leave by addr type test
+ * @tc.desc: Verify ProcessLeaveByAddrType processes leave by address
+ *           type with null parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -189,7 +193,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001, TestSize.Le
 
 /*
  * @tc.name: PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002
- * @tc.desc: ProcessLeaveByAddrType test
+ * @tc.desc: Verify ProcessLeaveByAddrType processes leave by address
+ *           type with valid connection FSM
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -246,7 +251,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002, TestSize.Le
 
 /*
  * @tc.name: LNN_UPDATE_NODE_ADDR_TEST_001
- * @tc.desc: lnn update node addr test
+ * @tc.desc: Verify LnnUpdateNodeAddr updates node address with
+ *           null and valid network ID
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -271,7 +277,8 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: NODE_INFO_SYNC_TEST_001
- * @tc.desc: node info sync test
+ * @tc.desc: Verify InitNodeInfoSync initializes node info sync with
+ *           different mock return values
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1

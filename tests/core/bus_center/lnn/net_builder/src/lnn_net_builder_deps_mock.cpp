@@ -784,6 +784,11 @@ bool IsSameAccountId(int64_t accountId)
     return GetNetBuilderDepsInterface()->IsSameAccountId(accountId);
 }
 
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return GetNetBuilderDepsInterface()->GetWifiDirectManager();
+}
+
 bool LnnIsRemoteSupportAuthCapBit(cont char *networkid, AuthCapability capaBit);
 {
     return GetNetBuilderDepsInterface()->LnnIsRemoteSupportAuthCapBit(networkId, capaBit);

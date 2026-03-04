@@ -70,11 +70,11 @@ void AuthSessionJsonTest::SetUp() { }
 void AuthSessionJsonTest::TearDown() { }
 
 /*
- @tc.name: PackFastAuthValue_TEST_001
- @tc.desc: Quickly package authentication values test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PackFastAuthValue_TEST_001
+ * @tc.desc: Quickly package authentication values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PackFastAuthValue_TEST_001, TestSize.Level1)
 {
@@ -125,11 +125,11 @@ HWTEST_F(AuthSessionJsonTest, PackFastAuthValue_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: GetUdidOrShortHash_TEST_001
- @tc.desc: Get udid or short hash interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: GetUdidOrShortHash_TEST_001
+ * @tc.desc: Get udid or short hash interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, GetUdidOrShortHash_TEST_001, TestSize.Level1)
 {
@@ -169,11 +169,11 @@ HWTEST_F(AuthSessionJsonTest, GetUdidOrShortHash_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: VerifySessionInfoIdType_TEST_001
- @tc.desc: Verify session information id type interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: VerifySessionInfoIdType_TEST_001
+ * @tc.desc: Verify session information id type interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, VerifySessionInfoIdType_TEST_001, TestSize.Level1)
 {
@@ -225,11 +225,11 @@ HWTEST_F(AuthSessionJsonTest, VerifySessionInfoIdType_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: PackDeviceIdJson_TEST_001
- @tc.desc: Device id json pack interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PackDeviceIdJson_TEST_001
+ * @tc.desc: Device id json pack interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
 {
@@ -280,11 +280,11 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: UnpackWifiSinglePassInfo_TEST_001
- @tc.desc: Unpack of WiFi single channel information test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: UnpackWifiSinglePassInfo_TEST_001
+ * @tc.desc: Unpack of WiFi single channel information test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, UnpackWifiSinglePassInfo_TEST_001, TestSize.Level1)
 {
@@ -319,11 +319,11 @@ HWTEST_F(AuthSessionJsonTest, UnpackWifiSinglePassInfo_TEST_001, TestSize.Level1
 }
 
 /*
- @tc.name: SetExchangeIdTypeAndValue_TEST_001
- @tc.desc: Set Exchange Id type and value test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: SetExchangeIdTypeAndValue_TEST_001
+ * @tc.desc: Set Exchange Id type and value test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Level1)
 {
@@ -368,11 +368,11 @@ HWTEST_F(AuthSessionJsonTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Level
 }
 
 /*
- @tc.name: UnpackDeviceIdJson_TEST_001
- @tc.desc: Device IdJson unpack test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: UnpackDeviceIdJson_TEST_001
+ * @tc.desc: Device IdJson unpack test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
 {
@@ -417,11 +417,11 @@ HWTEST_F(AuthSessionJsonTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: PackCommonDevInfo_TEST_001
- @tc.desc: Common Device information pack interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PackCommonDevInfo_TEST_001
+ * @tc.desc: Common Device information pack interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
 {
@@ -461,11 +461,11 @@ HWTEST_F(AuthSessionJsonTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: UnpackCipherRpaInfo_TEST_001
- @tc.desc: Cipher Rpa information unpack test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: UnpackCipherRpaInfo_TEST_001
+ * @tc.desc: Cipher Rpa information unpack test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
 {
@@ -501,11 +501,11 @@ HWTEST_F(AuthSessionJsonTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: UnpackWifiDirectInfo_TEST_001
- @tc.desc: Wifi Direct information unpack interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: UnpackWifiDirectInfo_TEST_001
+ * @tc.desc: Wifi Direct information unpack interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
 {
@@ -559,11 +559,11 @@ HWTEST_F(AuthSessionJsonTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: CheckBusVersion_TEST_001
- @tc.desc: Check bus version information pack interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: CheckBusVersion_TEST_001
+ * @tc.desc: Check bus version information pack interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, CheckBusVersion_TEST_001, TestSize.Level1)
 {
@@ -589,11 +589,11 @@ HWTEST_F(AuthSessionJsonTest, CheckBusVersion_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: PackDeviceInfoBtV1_TEST_001
- @tc.desc: Device BtV1 information pack interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PackDeviceInfoBtV1_TEST_001
+ * @tc.desc: Device BtV1 information pack interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
 {
@@ -631,11 +631,11 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: UnpackDeviceInfoMessage_TEST_001
- @tc.desc: Device message information unpack interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: UnpackDeviceInfoMessage_TEST_001
+ * @tc.desc: Device message information unpack interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Level1)
 {
@@ -669,11 +669,11 @@ HWTEST_F(AuthSessionJsonTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: PACK_FAST_AUTH_VALUE_TEST_001
- @tc.desc: Pack fast auth value test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PACK_FAST_AUTH_VALUE_TEST_001
+ * @tc.desc: Pack fast auth value test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
 {
@@ -690,11 +690,11 @@ HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 /*
- @tc.name: CHECK_BUS_VERSION_TEST_001
- @tc.desc: check bus version test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: CHECK_BUS_VERSION_TEST_001
+ * @tc.desc: check bus version test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 {
@@ -748,11 +748,11 @@ HWTEST_F(AuthSessionJsonTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: PACK_FAST_AUTH_VALUE_TEST_002
- @tc.desc: Fast auth value pack test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PACK_FAST_AUTH_VALUE_TEST_002
+ * @tc.desc: Fast auth value pack test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
 {
@@ -773,11 +773,11 @@ HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
 }
 
 /*
- @tc.name: PACK_NORMALIZED_KEY_VALUE_TEST_001
- @tc.desc: NormalizedKey Value pack interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PACK_NORMALIZED_KEY_VALUE_TEST_001
+ * @tc.desc: NormalizedKey Value pack interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
 {
@@ -820,11 +820,11 @@ HWTEST_F(AuthSessionJsonTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level
 }
 
 /*
- @tc.name: PARSE_NORMALIZED_KEY_VALUE_TEST_001
- @tc.desc: Parse NormalizedKey Value test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+  * @tc.name: PARSE_NORMALIZED_KEY_VALUE_TEST_001
+  * @tc.desc: Parse NormalizedKey Value test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
 {
@@ -849,11 +849,11 @@ HWTEST_F(AuthSessionJsonTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Leve
 }
 
 /*
- @tc.name: PACK_DEVICE_JSON_INFO_TEST_001
- @tc.desc: Device Json information pack test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PACK_DEVICE_JSON_INFO_TEST_001
+ * @tc.desc: Device Json information pack test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
 {
@@ -892,11 +892,11 @@ HWTEST_F(AuthSessionJsonTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: PACK_DEVICE_INFO_MESSAGE_TEST_001
- @tc.desc: Device Message information pack test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: PACK_DEVICE_INFO_MESSAGE_TEST_001
+ * @tc.desc: Device Message information pack test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
 {
@@ -914,11 +914,11 @@ HWTEST_F(AuthSessionJsonTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: GenerateUdidShortHash_TEST_001
- @tc.desc: Generate Udid Short Hash interface test
- @tc.type: FUNC
- @tc.level: Level1
- @tc.require:
+ * @tc.name: GenerateUdidShortHash_TEST_001
+ * @tc.desc: Generate Udid Short Hash interface test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonTest, GenerateUdidShortHash_TEST_001, TestSize.Level1)
 {

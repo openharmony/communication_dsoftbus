@@ -22,7 +22,6 @@
 #include "lnn_network_manager.h"
 #include "lnn_network_manager_mock.h"
 #include "lnn_physical_subnet_manager.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_trans_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -100,7 +99,9 @@ static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
 
 /*
  * @tc.name: LNN_NETWORK_MANAGER_TEST_001
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify LnnInitNetworkManager handles various mock return values
+ *           including SOFTBUS_INVALID_PARAM and returns SOFTBUS_OK when all
+ *           initialization steps succeed
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -143,7 +144,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_NETWORK_MANAGER_TEST_002
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify LnnGetAddrTypeByIfName with nullptr parameters returns error;
+ *           with valid interface names returns correct ConnectionAddrType
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -177,7 +179,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
 
 /*
  * @tc.name: LNN_NETWORK_MANAGER_TEST_003
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify LnnRegistProtocol and UnregistProtocol with nullptr or
+ *           invalid protocolMgr returns error; with valid protocolMgr returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -233,7 +236,9 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
 
 /*
  * @tc.name: LNN_NETWORK_MANAGER_TEST_004
- * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
+ * @tc.desc: Verify LnnIsAutoNetWorkingEnabled returns correct boolean based on
+ *           device type and config settings; LnnInitManagerByConfig handles
+ *           different config return values correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -276,7 +281,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
 
 /*
  * @tc.name: NET_USER_STATE_EVENTHANDLER_TEST_001
- * @tc.desc: test func NetUserStateEventHandler
+ * @tc.desc: Verify NetUserStateEventHandler handles nullptr event and different
+ *           user states including FOREGROUND, BACKGROUND and UNKNOWN correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -314,7 +320,8 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_USER_STATE_EVENTHANDLER_TEST_001, TestSi
 
 /*
  * @tc.name: NET_LOCK_STATE_EVENTHANDLER_TEST_001
- * @tc.desc: test func NetLockStateEventHandler
+ * @tc.desc: Verify NetLockStateEventHandler handles nullptr event and processes
+ *           LNN_EVENT_SCREEN_LOCK_CHANGED event correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -336,7 +343,8 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_LOCK_STATE_EVENTHANDLER_TEST_001, TestSi
 
 /*
  * @tc.name: NET_OOB_STATE_EVENTHANDLER_TEST_001
- * @tc.desc: test func NetOOBEStateEventHandler
+ * @tc.desc: Verify NetOOBEStateEventHandler handles nullptr event and different
+ *           OOBE states including RUNNING, END and UNKNOWN correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -370,7 +378,8 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_OOB_STATE_EVENTHANDLER_TEST_001, TestSiz
 
 /*
  * @tc.name: ON_DEVICE_BOUND_TEST_001
- * @tc.desc: test func OnDeviceBound
+ * @tc.desc: Verify OnDeviceBound handles different mock return values for
+ *           LnnAsyncCallbackDelayHelper and LnnGetOnlineStateById
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -395,7 +404,8 @@ HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CREAT_NETIFMGR_TEST_001
- * @tc.desc: test func CreateNetifMgr
+ * @tc.desc: Verify CreateNetifMgr with valid netIfName returns non-nullptr;
+ *           with nullptr netIfName returns nullptr
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -419,7 +429,8 @@ HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CREAT_NETIFMGR_TEST_002
- * @tc.desc: test func CreateNetifMgr
+ * @tc.desc: Verify NetLockStateEventHandler handles different screen lock states
+ *           including SOFTBUS_USER_UNLOCK and SOFTBUS_SCREEN_LOCK
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -456,7 +467,9 @@ HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: SAVE_BRNETWORK_DEVICE_TEST_001
- * @tc.desc: test func SaveBrNetworkDevices
+ * @tc.desc: Verify SaveBrNetworkDevices handles different mock return values
+ *           for LnnGetAllOnlineNodeInfo, LnnGetRemoteNodeInfoById and
+ *           LnnHasDiscoveryType correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -481,7 +494,8 @@ HWTEST_F(LNNNetworkManagerMockTest, SAVE_BRNETWORK_DEVICE_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_001
- * @tc.desc: test func NetAccountStateChangeEventHandler
+ * @tc.desc: Verify NetAccountStateChangeEventHandler handles nullptr event and
+ *           different account states including LOG_IN, LOG_OUT and UNKNOWN correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -515,7 +529,8 @@ HWTEST_F(LNNNetworkManagerMockTest, NET_ACCOUNT_STATECHANGE_EVENTHANDLER_TEST_00
 
 /*
  * @tc.name: GET_ALL_PROTOCOLS_TEST_001
- * @tc.desc: test func GetAllProtocols
+ * @tc.desc: Verify OnGroupCreated with different group types; GetAllProtocols
+ *           with nullptr protocolMgr returns CHOICE_FINISH_VISITING
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -549,7 +564,8 @@ HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001
- * @tc.desc: test func NightModeChangeEventHandler
+ * @tc.desc: Verify NightModeChangeEventHandler handles nullptr event and
+ *           processes NIGHT_MODE_ON state correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -580,7 +596,8 @@ HWTEST_F(LNNNetworkManagerMockTest, NIGHT_MODE_CHANGE_EVENTHANDLER_TEST_001, Tes
 
 /*
  * @tc.name: REGIST_NETIFMGR_TEST_001
- * @tc.desc: test func RestartCoapDiscovery
+ * @tc.desc: Verify RestartCoapDiscovery handles different mock return values for
+ *           LnnStartDiscovery and RegistNetIfMgr with invalid type returns error
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -635,7 +652,8 @@ HWTEST_F(LNNNetworkManagerMockTest, REGIST_NETIFMGR_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONVERT_TO_NET_IF_TYPE_001
- * @tc.desc: test func ConvertToNetIfType
+ * @tc.desc: Verify ConvertToNetIfType with LNN_MAX_NUM_TYPE returns 0;
+ *           with LNN_ETH_TYPE or LNN_WLAN_TYPE returns non-zero value
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -681,7 +699,9 @@ HWTEST_F(LNNNetworkManagerMockTest, CONVERT_TO_NET_IF_TYPE_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_REGISTER_EVENT_001
- * @tc.desc: test func LnnRegisterEventHandler
+ * @tc.desc: Verify OnGroupDeleted with different group types; LnnRegisterEvent
+ *           returns SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR when any event handler
+ *           registration fails; returns SOFTBUS_OK when all succeed
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -733,7 +753,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
 
 /*
  * @tc.name: Risk_Device_Leave_Lnn_Test_001
- * @tc.desc: test func RiskDeviceLeaveLnn
+ * @tc.desc: Verify RiskDeviceLeaveLnn returns SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR
+ *           when LnnGetAllOnlineNodeInfo fails
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -741,14 +762,16 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
 HWTEST_F(LNNNetworkManagerMockTest, Risk_Device_Leave_Lnn_Test_001, TestSize.Level1)
 {
     int ret = 0;
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = RiskDeviceLeaveLnn();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 }
 
 /*
  * @tc.name: Net_Device_Risk_State_Event_Handler_001
- * @tc.desc: test func NetDeviceRiskStateEventHandler
+ * @tc.desc: Verify NetDeviceRiskStateEventHandler handles nullptr event and
+ *           processes different event types and device risk states correctly
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
@@ -761,6 +784,8 @@ HWTEST_F(LNNNetworkManagerMockTest, Net_Device_Risk_State_Event_Handler_001, Tes
     event->status = SOFTBUS_DEVICE_IS_RISK;
 
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, LnnStopPublish).WillRepeatedly(Return());
+    EXPECT_CALL(managerMock, LnnStopDiscovery).WillRepeatedly(Return());
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 

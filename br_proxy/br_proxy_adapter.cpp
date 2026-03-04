@@ -15,6 +15,8 @@
 #include <securec.h>
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
+#include "app_mgr_constants.h"
+#include "app_mgr_interface.h"
 #include "allow_type.h"
 #include "bundle_mgr_interface.h"
 #include "ipc_skeleton.h"
@@ -79,6 +81,53 @@ static sptr<AppExecFwk::IBundleMgr> GetBundleMgr()
     return iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
 }
 
+sptr<AppExecFwk::IAppMgr> GetAppManagerInstance()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] systemAbiliityManager is nullptr");
+        return nullptr;
+    }
+    sptr<IRemoteObject> appObject = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
+    if (appObject == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] appObject is nullptr");
+        return nullptr;
+    }
+    return iface_cast<AppExecFwk::IAppMgr>(appObject);
+}
+
+extern "C" bool GetRunningProcessInformation(const std::string bundleName, int32_t userId, pid_t uid, pid_t *pid)
+{
+    if (pid == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param");
+        return false;
+    }
+    std::vector<AppExecFwk::RunningProcessInfo> infos;
+    sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+    if (appMgr == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] GetAppManagerInstance failed");
+        return false;
+    }
+    int32_t ret = appMgr->GetRunningProcessInformation(bundleName, userId, infos);
+    if (ret != ERR_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] GetRunningProcessInformation failed: %{public}d", ret);
+        return false;
+    }
+    if (infos.size() <= 0) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] RunningProcessInfo size: %{public}zu", infos.size());
+        return false;
+    }
+    for (auto info : infos) {
+        if (info.uid_ == uid && info.processType_ == AppExecFwk::ProcessType::NORMAL) {
+            *pid = info.pid_;
+            return true;
+        }
+    }
+    TRANS_LOGE(TRANS_SVC, "[br_proxy] find infos failed!");
+    return false;
+}
+
 extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t userId, uint32_t abilityNameLen,
     std::string bundleName, int32_t *appIndex)
 {
@@ -113,7 +162,7 @@ extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t user
     return SOFTBUS_OK;
 }
 
-extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
+extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid, bool isThaw)
 {
     if (bundleName == nullptr) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] bundleName is null");
@@ -121,17 +170,18 @@ extern "C" int32_t Unrestricted(const char *bundleName, pid_t pid, pid_t uid)
     }
     #define SOFTBUS_SERVER_SA_ID 4700
     uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_SA_CONTROL_APP_EVENT;
-    int64_t status = OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_START_APP;
+    int64_t status = isThaw ? OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_START_APP:
+        OHOS::ResourceSchedule::ResType::SaControlAppStatus::SA_STOP_APP;
     std::unordered_map<std::string, std::string> payload;
     payload.emplace("saId", std::to_string(SOFTBUS_SERVER_SA_ID));
     payload.emplace("saName", "softbus_server");
     payload.emplace("pid", std::to_string(pid));
     payload.emplace("uid", std::to_string(uid));
     payload.emplace("bundleName", bundleName);
-    payload.emplace("isDelay", "1");
-    payload.emplace("delayTime", "10000"); // 10000ms
     OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, status, payload);
-   
+    if (!isThaw) {
+        return SOFTBUS_OK;
+    }
     auto resourceRequest = OHOS::sptr<OHOS::DevStandbyMgr::ResourceRequest>(
         new OHOS::DevStandbyMgr::ResourceRequest()
     );

@@ -55,7 +55,7 @@ ohos_unittest("ConnectionManagerTest") {
   ]
   sources = [
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
-    "softbus_conn_flow_control_test.cpp",
-    "softbus_conn_manager_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/manager/unittest/softbus_conn_flow_control_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/manager/unittest/softbus_conn_manager_test.cpp",
   ]
 }

@@ -35,7 +35,7 @@
 #include "lnn_lane_vap_info_struct.h"
 #include "lnn_log.h"
 #include "lnn_node_info_struct.h"
-#include "lnn_ranging_manager_struct.h"
+#include "lnn_ranging_manager.h"
 #include "lnn_secure_storage_struct.h"
 #include "lnn_sync_info_manager_struct.h"
 #include "lnn_time_sync_impl_struct.h"
@@ -211,7 +211,6 @@ int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType);
 void TriggerSparkGroupBuildPacked(uint32_t delayTime);
 void TriggerSparkGroupClearPacked(uint32_t state, uint32_t delayTime);
 void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime);
-void TriggerClearSparkGroupPacked(void);
 int32_t InitControlPlanePacked(void);
 void DeinitControlPlanePacked(void);
 int32_t QueryControlPlaneNodeValidPacked(const char *deviceId);

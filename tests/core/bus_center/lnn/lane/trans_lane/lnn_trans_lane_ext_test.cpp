@@ -34,6 +34,7 @@ constexpr uint64_t TEST_TIME_2 = 2;
 constexpr uint32_t REQ_ID = 268435455;
 constexpr uint64_t LANE_ID = 1773343659161363072;
 constexpr const char NODE_NETWORK_ID[] = "123456789";
+static bool g_freeLaneNotified;
 
 class LNNTransLaneExtTest : public testing::Test {
 public:
@@ -64,6 +65,7 @@ void LNNTransLaneExtTest::TearDown()
 static void OnLaneFreeSuccess(uint32_t laneHandle)
 {
     (void)laneHandle;
+    g_freeLaneNotified = true;
     GTEST_LOG_(INFO) << "free lane success, laneReqId=" << laneHandle;
 }
 
@@ -71,6 +73,7 @@ static void OnLaneFreeFail(uint32_t laneHandle, int32_t errCode)
 {
     (void)laneHandle;
     (void)errCode;
+    g_freeLaneNotified = true;
     GTEST_LOG_(INFO) << "free lane failed, laneReqId=" << laneHandle << ", errCode=" << errCode;
 }
 
@@ -297,7 +300,7 @@ HWTEST_F(LNNTransLaneExtTest, LNN_TRANS_LANE_EXT_009, TestSize.Level1)
     int32_t ret = FreeLane(INVALID_LANE_REQ_ID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    EXPECT_CALL(transMock, UpdateNotifyInfoBylaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transMock, UpdateAndGetReqInfoByFree).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = FreeLane(INVALID_LANE_REQ_ID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -320,5 +323,108 @@ HWTEST_F(LNNTransLaneExtTest, LNN_TRANS_LANE_EXT_010, TestSize.Level1)
         .type = LANE_BR,
     };
     EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(REQ_ID, &linkInfo));
+}
+
+/*
+ * @tc.name: LNN_NOTIFY_FREE_LANE_RESULT_001
+ * @tc.desc: NotifyFreeLaneResult test isWithQos and hasNotifiedFree
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneExtTest, LNN_NOTIFY_FREE_LANE_RESULT_001, TestSize.Level1)
+{
+    TransReqInfo reqInfo = {
+        .notifyFree = true,
+        .isWithQos = false,
+        .hasNotifiedFree = false,
+        .isCanceled = false,
+        .listener.onLaneFreeSuccess = OnLaneFreeSuccess,
+        .listener.onLaneFreeFail = OnLaneFreeFail,
+    };
+    NiceMock<TransLaneExtInterfaceMock> transMock;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
+    EXPECT_FALSE(g_freeLaneNotified);
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_LANE_ALLOC_NOT_COMPLETED));
+    EXPECT_FALSE(g_freeLaneNotified);
+
+    reqInfo.isWithQos = true;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_LANE_ALLOC_NOT_COMPLETED));
+    EXPECT_TRUE(g_freeLaneNotified);
+
+    reqInfo.isNotified = true;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
+    EXPECT_TRUE(g_freeLaneNotified);
+
+    reqInfo.hasNotifiedFree = true;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
+    EXPECT_FALSE(g_freeLaneNotified);
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_LANE_ALLOC_NOT_COMPLETED));
+    EXPECT_FALSE(g_freeLaneNotified);
+}
+
+/*
+ * @tc.name: LNN_NOTIFY_FREE_LANE_RESULT_002
+ * @tc.desc: NotifyFreeLaneResult test notifyFree
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneExtTest, LNN_NOTIFY_FREE_LANE_RESULT_002, TestSize.Level1)
+{
+    TransReqInfo reqInfo = {
+        .notifyFree = false,
+        .isWithQos = true,
+        .hasNotifiedFree = false,
+        .isCanceled = true,
+        .listener.onLaneFreeSuccess = OnLaneFreeSuccess,
+        .listener.onLaneFreeFail = OnLaneFreeFail,
+    };
+    NiceMock<TransLaneExtInterfaceMock> transMock;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
+    EXPECT_FALSE(g_freeLaneNotified);
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_LANE_ALLOC_NOT_COMPLETED));
+    EXPECT_FALSE(g_freeLaneNotified);
+
+    reqInfo.listener.onLaneFreeSuccess = nullptr;
+    reqInfo.listener.onLaneFreeFail = nullptr;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
+    EXPECT_FALSE(g_freeLaneNotified);
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_LANE_ALLOC_NOT_COMPLETED));
+    EXPECT_FALSE(g_freeLaneNotified);
+
+    reqInfo.isCanceled = false;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
+    EXPECT_FALSE(g_freeLaneNotified);
+
+    reqInfo.isWithQos = false;
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    g_freeLaneNotified = false;
+    EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
+    EXPECT_FALSE(g_freeLaneNotified);
 }
 } // namespace OHOS

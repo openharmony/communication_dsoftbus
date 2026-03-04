@@ -82,6 +82,7 @@ typedef struct {
     uint8_t cust[DIST_ACTION_CUST_LEN];
     uint8_t extCust[DIST_ACTION_EXT_CUST_MAX_LEN];
     uint8_t extCustLen;
+    bool isPublish;
 } DistInputContext;
 
 typedef struct {

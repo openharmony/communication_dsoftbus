@@ -876,6 +876,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_USB_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.desc: Verify that IsSameAccountId returns false when LnnGetLocalNum64Info fails to
  *           retrieve the local account ID.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_001, TestSize.Level1)
@@ -890,6 +891,7 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_001, TestSize.Level1)
  * @tc.desc: Verify that IsSameAccountId returns true when the provided account ID matches the
  *           local account ID and the local account is not a default OHOS account.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_002, TestSize.Level1)
@@ -906,6 +908,7 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_002, TestSize.Level1)
  * @tc.desc: Verify that IsSameAccountId returns false when the local account is a default OHOS
  *           account, even if the provided account ID matches the local account ID.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_003, TestSize.Level1)
@@ -922,6 +925,7 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_003, TestSize.Level1)
  * @tc.desc: Verify that IsSameAccountId returns true when the provided account ID matches the
  *           local account ID and the local account is not a default OHOS account.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_004, TestSize.Level1)

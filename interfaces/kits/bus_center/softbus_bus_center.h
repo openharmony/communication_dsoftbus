@@ -184,8 +184,19 @@ typedef enum {
     NODE_KEY_DEVICE_SECURITY_LEVEL,  /**< device security level in number format */
     NODE_KEY_DEVICE_SCREEN_STATUS,   /**< device screen status in bool format */
     NODE_KEY_STATIC_NETWORK_CAP,     /**< Static Network capability in number format */
+    NODE_KEY_SERVICE_FIND_CAP,       /**< Static find capability in number format */
 } NodeDeviceInfoKey;
 
+/**
+ * @brief Enumerates keys for local device.
+ * Set by SetNodeKeyInfo.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    NODE_KEY_SERVICE_FIND_CAP_EX,       /**< Static find capability in number format */
+} NodeDeviceInfoKeyEx;
 /**
  * @brief Enumerates supported network capabilities.
  *
@@ -819,6 +830,25 @@ int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16
  */
 int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId,
     NodeDeviceInfoKey key, uint8_t *info, int32_t infoLen);
+
+/**
+ * @brief Obtains a specified {@link NodeDeviceInfoKeyEx} of an online device.
+ *
+ * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
+ * For the same caller, the value of this parameter must be the same for all functions.
+ * @param networkId Indicates the pointer to the network ID of the device.
+ * @param key Indicates the key to be obtained.
+ * @param info Indicates the pointer to the buffer that stores the obtained key.
+ * @param infoLen Indicates the buffer length.
+ *
+ * @return Returns <b>0</b> if the {@link NodeDeviceInfoKeyEx} is obtained, in which case <b>info</b> is valid;
+ * returns any other value otherwise.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t SetNodeKeyInfo(const char *pkgName, const char *networkId,
+    NodeDeviceInfoKeyEx key, uint8_t *info, int32_t infoLen);
 
 /**
  * @brief Start the time synchronize with specific target node.

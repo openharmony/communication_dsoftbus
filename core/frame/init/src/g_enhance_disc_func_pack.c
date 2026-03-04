@@ -105,10 +105,8 @@ int32_t DiscCoapAssembleBdataPacked(const unsigned char *capabilityData, uint32_
     uint32_t businessDataLen)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
-    if (pfnDiscEnhanceFuncList == NULL ||
-        DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapAssembleBdata) != SOFTBUS_OK) {
-        return DiscCoapAssembleBdata(capabilityData, dataLen, businessData, businessDataLen);
-    }
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapAssembleBdata);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_COAP, "not find DiscCoapAssembleBdata");
     return pfnDiscEnhanceFuncList->discCoapAssembleBdata(capabilityData, dataLen, businessData, businessDataLen);
 }
 
@@ -602,13 +600,13 @@ void DiscUsbDeinitPacked(void)
     return pfnDiscEnhanceFuncList->discUsbDeinit();
 }
 
-int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust)
+int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust, bool isStart)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
 
     int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distUpdatePublishParam);
     DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_BLE, "not find DistUpdatePublishParam");
-    return pfnDiscEnhanceFuncList->distUpdatePublishParam(cust, extCust);
+    return pfnDiscEnhanceFuncList->distUpdatePublishParam(cust, extCust, isStart);
 }
 
 int32_t DistDiscoveryStartActionPreLinkPacked(void)

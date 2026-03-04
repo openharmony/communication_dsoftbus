@@ -122,7 +122,7 @@ public:
     virtual void LnnOnOhosAccountLogout(void);
     virtual int32_t LnnNotifyDiscoveryDevice(
         const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
-    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
+    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable);
     virtual int32_t LnnAsyncCallbackDelayHelper(
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
@@ -343,7 +343,7 @@ public:
     MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
     MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
     MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));
-    MOCK_METHOD2(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t));
+    MOCK_METHOD3(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t, bool));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t(LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void(SoftBusOOBEState));

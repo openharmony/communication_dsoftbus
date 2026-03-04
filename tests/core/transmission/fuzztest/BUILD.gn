@@ -24,6 +24,7 @@ group("fuzztest") {
     "softbusmintpsocket_fuzzer:fuzztest",
     "softbususbtcpsocket_fuzzer:fuzztest",
     "transauthlanependingctl_fuzzer:fuzztest",
+    "transauthlanependingctl2_fuzzer:fuzztest",
     "transbindrequestmanager_fuzzer:fuzztest",
     "transbroadcast_fuzzer:fuzztest",
     "transinner_fuzzer:fuzztest",

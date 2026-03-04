@@ -64,7 +64,8 @@ void Complete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, u
 
 /*
  * @tc.name: LNN_INIT_SYNC_INFO_MANAGER_TEST_001
- * @tc.desc: LnnInitSyncInfoManager
+ * @tc.desc: Verify LnnInitSyncInfoManager initializes sync info
+ *           manager and registers channel listener
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -82,7 +83,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_INIT_SYNC_INFO_MANAGER_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_REG_SYNC_INFO_HANDLER_TEST_001
- * @tc.desc: invalid parameter
+ * @tc.desc: Verify LnnRegSyncInfoHandler registers sync info handler
+ *           with invalid and valid info types
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -99,7 +101,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_REG_SYNC_INFO_HANDLER_TEST_001, TestSize.Le
 
 /*
  * @tc.name: LNN_UNREG_SYNC_INFO_HANDLER_TEST_001
- * @tc.desc: invalid parameter
+ * @tc.desc: Verify LnnUnregSyncInfoHandler unregisters sync info
+ *           handler with invalid and valid info types
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -117,7 +120,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
 
 /*
  * @tc.name: LNN_SEND_SYNC_INFO_MSG_TEST_001
- * @tc.desc: invalid parameter
+ * @tc.desc: Verify LnnSendSyncInfoMsg sends sync info message
+ *           with invalid and valid parameters
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -133,7 +137,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001
- * @tc.desc: LnnSendP2pSyncInfoMsg test
+ * @tc.desc: Verify LnnSendP2pSyncInfoMsg sends P2P sync info
+ *           message with auth handle and sequence
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -172,7 +177,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_002
- * @tc.desc: networkId == nullptr
+ * @tc.desc: Verify LnnSendP2pSyncInfoMsg handles null networkId
+ *           parameter correctly
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1
@@ -188,7 +194,8 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_002, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_003
- * @tc.desc: GetAuthHandleByNetworkId(networkId, &authHandle) != SOFTBUS_OK
+ * @tc.desc: Verify LnnSendP2pSyncInfoMsg handles GetAuthHandleByNetworkId
+ *           failure correctly
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  * @tc.level: Level1

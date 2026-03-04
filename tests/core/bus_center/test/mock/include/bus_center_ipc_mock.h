@@ -24,7 +24,7 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_heartbeat_utils_struct.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_ranging_manager_struct.h"
+#include "lnn_ranging_manager.h"
 
 namespace OHOS {
 class BusCenterIpcInterface {
@@ -38,6 +38,7 @@ public:
     virtual bool LnnIsLSANode(const NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
     virtual int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
+    virtual int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
     virtual int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag) = 0;
     virtual int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
         TimeSyncAccuracy accuracy, TimeSyncPeriod period) = 0;
@@ -87,6 +88,7 @@ public:
     MOCK_METHOD1(LnnIsLSANode, bool(const NodeBasicInfo *));
     MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
+    MOCK_METHOD4(LnnSetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnSetNodeDataChangeFlag, int32_t(const char *, uint16_t));
     MOCK_METHOD5(LnnStartTimeSync, int32_t(const char *, int32_t, const char *, TimeSyncAccuracy, TimeSyncPeriod));
     MOCK_METHOD3(LnnStopTimeSync, int32_t(const char *, const char *, int32_t));

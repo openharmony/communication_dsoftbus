@@ -135,6 +135,7 @@ public:
     static void TurnOnBt();
     static void TurnOffBt();
     static void WaitRecvMessageObsolete();
+    static void WaitForBleMockSafeDestruction(int32_t waitMs = BLE_SAFE_DESTRUCTION_WAIT_MS);
     static bool IsDeInitSuccess();
 
     static constexpr int32_t CON_ADV_ID = 0;
@@ -142,6 +143,7 @@ public:
     static constexpr int32_t BT_STATE_LISTENER_ID = 1;
     static constexpr int32_t SCAN_LISTENER_ID = 2;
     static constexpr int32_t BLE_MSG_TIME_OUT_MS = 6000;
+    static constexpr int32_t BLE_SAFE_DESTRUCTION_WAIT_MS = 1000;
 
     static inline const ScanCallback *scanListener {};
     static inline const SoftBusBtStateListener *btStateListener {};

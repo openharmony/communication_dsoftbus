@@ -203,12 +203,12 @@ HWTEST_F(AnonymizerTest, AnonymizeTest009, TestSize.Level0)
 }
 
 /**
- * @tc.name: AnonymizeTestIpCidr
+ * @tc.name: AnonymizeTestIpCidr001
  * @tc.desc: Test anonymize ip
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
-HWTEST_F(AnonymizerTest, AnonymizeTestIpCidr, TestSize.Level0)
+HWTEST_F(AnonymizerTest, AnonymizeTestIpCidr001, TestSize.Level0)
 {
     char *anonymizedStr = nullptr;
     Anonymize(TEST_PLAIN_IP_CIDR, &anonymizedStr);
@@ -248,6 +248,45 @@ HWTEST_F(AnonymizerTest, AnonymizeTestIpCidr, TestSize.Level0)
     constexpr char ipCidr7[] = "255.255.1/.1";
     EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr7, &anonymizedStr));
     EXPECT_STREQ("255******/.1", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeTestIpCidr002
+ * @tc.desc: Test anonymize not ip
+ * @tc.type: FUNC
+ * @tc.require: I8DW1W
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTestIpCidr002, TestSize.Level0)
+{
+    char *anonymizedStr = nullptr;
+    Anonymize(TEST_PLAIN_IP_CIDR, &anonymizedStr);
+    EXPECT_STREQ(TEST_ANONYMIZED_IP_CIDR, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr1[] = "192.168.12.12.";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr1, &anonymizedStr));
+    EXPECT_STREQ("192*******.12.", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr2[] = ".192.168.12.12";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr2, &anonymizedStr));
+    EXPECT_STREQ(".19*******2.12", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr3[] = "192.168.12.";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr3, &anonymizedStr));
+    EXPECT_STREQ("19******12.", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr4[] = ".192.168.12";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr4, &anonymizedStr));
+    EXPECT_STREQ(".1******.12", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    constexpr char ipCidr5[] = "192.168.12";
+    EXPECT_NO_FATAL_FAILURE(Anonymize(ipCidr5, &anonymizedStr));
+    EXPECT_STREQ("19*****.12", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
 

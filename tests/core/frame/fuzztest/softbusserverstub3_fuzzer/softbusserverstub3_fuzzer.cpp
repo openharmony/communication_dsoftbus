@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -303,6 +303,65 @@ void GetBrProxyChannelStateInnerTest(FuzzedDataProvider &provider)
     SoftBusServer->GetBrProxyChannelStateInner(data, reply);
     SoftBusServer->RegisterPushHookInner(data, reply);
 }
+
+void DestroyGroupOwnerInnerTest(FuzzedDataProvider &provider)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    (void)memset_s(&data, sizeof(MessageParcel), 0, sizeof(MessageParcel));
+    (void)memset_s(&reply, sizeof(MessageParcel), 0, sizeof(MessageParcel));
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return;
+    }
+    SoftBusServer->DestroyGroupOwnerInner(data, reply);
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return;
+    }
+    data.WriteCString(pkgName);
+    SoftBusServer->DestroyGroupOwnerInner(data, reply);
+}
+
+void CreateGroupOwnerInnerTest(FuzzedDataProvider &provider)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    (void)memset_s(&data, sizeof(MessageParcel), 0, sizeof(MessageParcel));
+    (void)memset_s(&reply, sizeof(MessageParcel), 0, sizeof(MessageParcel));
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return;
+    }
+    SoftBusServer->CreateGroupOwnerInner(data, reply);
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return;
+    }
+    data.WriteCString(pkgName);
+    SoftBusServer->CreateGroupOwnerInner(data, reply);
+}
+
+void CloseBrProxyInnerTest(FuzzedDataProvider &provider)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    (void)memset_s(&data, sizeof(MessageParcel), 0, sizeof(MessageParcel));
+    (void)memset_s(&reply, sizeof(MessageParcel), 0, sizeof(MessageParcel));
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return;
+    }
+    SoftBusServer->CloseBrProxyInner(data, reply);
+
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    data.WriteInt32(channelId);
+    SoftBusServer->CloseBrProxyInner(data, reply);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -326,5 +385,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::SendBrProxyDataInnerTest(provider);
     OHOS::SetBrProxyListenerStateInnerTest(provider);
     OHOS::GetBrProxyChannelStateInnerTest(provider);
+    OHOS::DestroyGroupOwnerInnerTest(provider);
+    OHOS::CreateGroupOwnerInnerTest(provider);
+    OHOS::CloseBrProxyInnerTest(provider);
     return 0;
 }

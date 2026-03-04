@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,24 +19,24 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_access_token_adapter.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
-#include "softbus_access_token_adapter.h"
 #include "softbus_proxychannel_callback.h"
+#include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_proxychannel_session.h"
-#include "softbus_proxychannel_control.h"
 #include "softbus_utils.h"
-#include "softbus_adapter_mem.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
+#include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
-#include "trans_event.h"
 
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {

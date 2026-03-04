@@ -2265,6 +2265,37 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam002, TestSize.Level1
 }
 
 /*
+ * @tc.name: BroadcastSetAdvDeviceParam003
+ * @tc.desc: BroadcastSetAdvDeviceParam003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam003 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetScanCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    g_baseFuzzPos = 0;
+    uint8_t type = GetData<uint8_t>();
+    LpScanParam lpScanParam = BuildLpScanParam();
+    lpScanParam.listenerId = bcId;
+    LpBroadcastParam lpBcParam;
+    BuildLpBroadcastParam(&lpBcParam);
+
+    EXPECT_FALSE(BroadcastSetAdvDeviceParam(static_cast<LpServerType>(type), &lpBcParam, &lpScanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParam003 end ----");
+}
+
+/*
  * @tc.name: BroadcastEnableSyncDataToLpDevice001
  * @tc.desc: BroadcastEnableSyncDataToLpDevice001
  * @tc.type: FUNC
@@ -2321,5 +2352,298 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetLpAdvParam001, TestSize.Level1)
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
     DISC_LOGI(DISC_TEST, "BroadcastSetLpAdvParam001 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastCheckAndStopScan001
+ * @tc.desc: Test CheckAndStopScan with deleteSize > 0 in !needUpdate branch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastCheckAndStopScan001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan001 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t listenerId = -1;
+    uint8_t filterNum = 2;
+    BcScanFilter *firstFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterNum);
+    firstFilter[0] = *GetBcScanFilter();
+    firstFilter[1] = *GetBcScanFilter();
+    unsigned char serviceData1[] = { 0x05, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(firstFilter[1].serviceData, sizeof(serviceData1), serviceData1, sizeof(serviceData1)));
+
+    BcScanFilter *secondFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * 1);
+    secondFilter[0] = *GetBcScanFilter();
+
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_TRUE(listenerId >= 0);
+
+    // First SetScanFilter and StartScan
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, firstFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(listenerId, &scanParam));
+
+    // Update filter to trigger deleteSize > 0 (from 2 filters to 1 filter)
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, secondFilter, 1));
+
+    // Stop scan to trigger CheckAndStopScan with !needUpdate branch
+    // This will test the new code: clearing g_firstSetIndex when deleteSize > 0
+    EXPECT_EQ(SOFTBUS_OK, StopScan(listenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan001 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastCheckAndStopScan002
+ * @tc.desc: Test CheckAndStopScan with deleteSize > 0 in needUpdate branch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastCheckAndStopScan002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan002 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t discListenerId = -1;
+    int32_t connListenerId = -1;
+    uint8_t filterNum = 2;
+
+    BcScanFilter *discFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterNum);
+    discFilter[0] = *GetBcScanFilter();
+    discFilter[1] = *GetBcScanFilter();
+    unsigned char serviceData1[] = { 0x05, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(discFilter[1].serviceData, sizeof(serviceData1), serviceData1, sizeof(serviceData1)));
+
+    BcScanFilter *connFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterNum);
+    connFilter[0] = *GetBcScanFilter();
+    connFilter[1] = *GetBcScanFilter();
+    unsigned char serviceData2[] = { 0x06, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(connFilter[1].serviceData, sizeof(serviceData2), serviceData2, sizeof(serviceData2)));
+
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
+    EXPECT_TRUE(connListenerId >= 0);
+
+    // Set filters and start scan for first listener
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+
+    // Start scan for second listener (both listeners are now scanning)
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(connListenerId, connFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(connListenerId, &scanParam));
+
+    // Update filter to trigger deleteSize > 0
+    BcScanFilter *newDiscFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * 1);
+    newDiscFilter[0] = *GetBcScanFilter();
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, newDiscFilter, 1));
+
+    // Stop first listener scan, will trigger CheckAndStopScan with needUpdate branch
+    // and deleteSize > 0, covering the DeleteFilterByIndex code path
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, StopScan(connListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(connListenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan002 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastCheckAndStopScan003
+ * @tc.desc: Test CheckAndStopScan with multiple filters deletion scenario
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastCheckAndStopScan003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan003 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t discListenerId = -1;
+    int32_t connListenerId = -1;
+    uint8_t firstFilterNum = 3;
+    uint8_t secondFilterNum = 1;
+
+    BcScanFilter *firstDiscFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * firstFilterNum);
+    firstDiscFilter[0] = *GetBcScanFilter();
+    firstDiscFilter[1] = *GetBcScanFilter();
+    firstDiscFilter[2] = *GetBcScanFilter();
+    unsigned char serviceData1[] = { 0x05, 0x05, 0x90 };
+    unsigned char serviceData2[] = { 0x06, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(firstDiscFilter[1].serviceData, sizeof(serviceData1), serviceData1, sizeof(serviceData1)));
+    EXPECT_EQ(EOK, memcpy_s(firstDiscFilter[2].serviceData, sizeof(serviceData2), serviceData2, sizeof(serviceData2)));
+
+    BcScanFilter *secondDiscFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * secondFilterNum);
+    secondDiscFilter[0] = *GetBcScanFilter();
+
+    BcScanFilter *connFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * secondFilterNum);
+    connFilter[0] = *GetBcScanFilter();
+
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
+    EXPECT_TRUE(connListenerId >= 0);
+
+    // Set 3 filters and start scan for first listener
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, firstDiscFilter, firstFilterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+
+    // Start scan for second listener (both listeners are now scanning)
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(connListenerId, connFilter, secondFilterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(connListenerId, &scanParam));
+
+    // Update to 1 filter to trigger deleteSize = 2 (delete 2 filters)
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, secondDiscFilter, secondFilterNum));
+
+    // Stop first listener scan, will trigger CheckAndStopScan with needUpdate branch
+    // and deleteSize = 2, testing multiple filters deletion
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, StopScan(connListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(connListenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan003 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastCheckAndStopScan004
+ * @tc.desc: Test UnRegisterScanListener when scanning with deleteSize > 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastCheckAndStopScan004, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan004 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t listenerId = -1;
+    uint8_t filterNum = 2;
+
+    BcScanFilter *firstFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterNum);
+    firstFilter[0] = *GetBcScanFilter();
+    firstFilter[1] = *GetBcScanFilter();
+    unsigned char serviceData1[] = { 0x05, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(firstFilter[1].serviceData, sizeof(serviceData1), serviceData1, sizeof(serviceData1)));
+
+    BcScanFilter *secondFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * 1);
+    secondFilter[0] = *GetBcScanFilter();
+
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_TRUE(listenerId >= 0);
+
+    // Set filters and start scan
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, firstFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(listenerId, &scanParam));
+
+    // Update filter to trigger deleteSize > 0
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, secondFilter, 1));
+
+    // UnRegisterScanListener will call CheckAndStopScan with !needUpdate branch
+    // This tests the new code: clearing g_firstSetIndex when deleteSize > 0
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan004 end ----");
+}
+
+/*
+ * @tc.name: SoftbusBroadcastCheckAndStopScan005
+ * @tc.desc: Test CheckAndStopScan with addSize == deleteSize scenario
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastCheckAndStopScan005, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan005 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    int32_t discListenerId = -1;
+    int32_t connListenerId = -1;
+    uint8_t filterNum = 2;
+
+    BcScanFilter *firstDiscFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterNum);
+    firstDiscFilter[0] = *GetBcScanFilter();
+    firstDiscFilter[1] = *GetBcScanFilter();
+    unsigned char serviceData1[] = { 0x05, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(firstDiscFilter[1].serviceData, sizeof(serviceData1), serviceData1, sizeof(serviceData1)));
+
+    BcScanFilter *secondDiscFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterNum);
+    secondDiscFilter[0] = *GetBcScanFilter();
+    secondDiscFilter[1] = *GetBcScanFilter();
+    unsigned char serviceData2[] = { 0x06, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(secondDiscFilter[1].serviceData, sizeof(serviceData2), serviceData2, sizeof(serviceData2)));
+
+    BcScanFilter *connFilter = (BcScanFilter *)SoftBusCalloc(sizeof(BcScanFilter) * filterNum);
+    connFilter[0] = *GetBcScanFilter();
+    connFilter[1] = *GetBcScanFilter();
+    unsigned char serviceData3[] = { 0x07, 0x05, 0x90 };
+    EXPECT_EQ(EOK, memcpy_s(connFilter[1].serviceData, sizeof(serviceData3), serviceData3, sizeof(serviceData3)));
+
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_TRUE(discListenerId >= 0);
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
+    EXPECT_TRUE(connListenerId >= 0);
+
+    // Set filters and start scan for first listener
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, firstDiscFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(discListenerId, &scanParam));
+
+    // Start scan for second listener (both listeners are now scanning)
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(connListenerId, connFilter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(connListenerId, &scanParam));
+
+    // Update filter to trigger addSize == deleteSize (replace 2 filters with 2 different filters)
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, secondDiscFilter, filterNum));
+
+    // Stop first listener scan, will trigger CheckAndStopScan with needUpdate branch
+    // and deleteSize == 2 == addSize
+    EXPECT_EQ(SOFTBUS_OK, StopScan(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, StopScan(connListenerId));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(discListenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(connListenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan005 end ----");
 }
 } // namespace OHOS

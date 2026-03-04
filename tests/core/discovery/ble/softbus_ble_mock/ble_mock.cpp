@@ -525,6 +525,15 @@ void BleMock::WaitRecvMessageObsolete()
     std::this_thread::sleep_for(std::chrono::milliseconds(BLE_MSG_TIME_OUT_MS));
 }
 
+void BleMock::WaitForBleMockSafeDestruction(int32_t waitMs)
+{
+    // Wait for BleMock async operations (including Looper messages) to complete
+    // This is much faster than WaitRecvMessageObsolete() by default (1s vs 6s)
+    // while still providing sufficient time for async operations
+    // For test cases with BT state toggle, use longer wait time (e.g., 2000ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(waitMs));
+}
+
 bool BleMock::IsDeInitSuccess()
 {
     return advCallback == nullptr;

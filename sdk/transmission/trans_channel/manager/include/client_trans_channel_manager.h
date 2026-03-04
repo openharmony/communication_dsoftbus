@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,6 @@ void ClientTransChannelDeinit(void);
 
 int32_t ClientTransCloseChannel(int32_t channelId, int32_t type, int32_t socketId);
 
-int32_t ClientTransCloseMultiChannel(int32_t channelId, int32_t type, int32_t socketId, int32_t mainChannel);
-
 int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void *data, uint32_t len);
 
 int32_t ClientTransChannelAsyncSendBytes(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
@@ -47,15 +45,16 @@ void DeleteFileListener(const char *sessionName);
 
 int32_t ClientGetSessionKey(int32_t channelId, char *key, unsigned int len);
 
-int32_t ClientGetHandle(int32_t channelId, int *handle);
+int32_t ClientGetHandle(int32_t channelId, int32_t *handle);
 
 int32_t ClientDisableSessionListener(int32_t channelId);
 
 int32_t ClientTransChannelAsyncSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
     uint16_t dataSeq);
 
-int32_t ClientTransCloseReserveChannel(int32_t channelId,
-    int32_t type, const char *srvIp, int32_t port, int32_t routeType);
+int32_t ClientTransCloseReserveChannel(
+    int32_t channelId, int32_t channelType, int32_t routeType, int32_t delSecondPath);
+
 #ifdef __cplusplus
 }
 #endif

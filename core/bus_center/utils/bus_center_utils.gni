@@ -37,5 +37,9 @@ bus_center_utils_inc = [
   "$dsoftbus_dfx_path/interface/include",
 ]
 bus_center_utils_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
-bus_center_utils_ex_deps = []
-bus_center_utils_src += [ "$core_bus_center_utils_path/src/lnn_compress_virtual.c" ]
+if (softbus_config_enhance) {
+  bus_center_utils_src += [ "$core_bus_center_utils_path/src/lnn_compress.c" ]
+} else {
+  bus_center_utils_src +=
+      [ "$core_bus_center_utils_path/src/lnn_compress_virtual.c" ]
+}

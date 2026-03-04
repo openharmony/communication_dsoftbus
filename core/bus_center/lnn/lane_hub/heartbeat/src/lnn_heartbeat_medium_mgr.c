@@ -20,7 +20,6 @@
 
 #include "anonymizer.h"
 #include "auth_manager.h"
-
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "auth_session_message_struct.h"
@@ -309,19 +308,17 @@ static int32_t HbUpdateOfflineTimingByRecvInfo(
 {
     uint64_t oldTimestamp;
     char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
     if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimestamp) != SOFTBUS_OK) {
-        Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_HEART_BEAT, "get timestamp err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR;
     }
     if (LnnSetDLHeartbeatTimestamp(networkId, updateTime) != SOFTBUS_OK) {
-        Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_HEART_BEAT, "update timestamp err, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
     }
-    Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT,
         "recv to update timestamp, networkId=%{public}s, timestamp:%{public}" PRIu64 "->%{public}" PRIu64,
         AnonymizeWrapper(anonyNetworkId), oldTimestamp, updateTime);
@@ -569,7 +566,8 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
         LNN_LOGI(LNN_HEART_BEAT, "checkSum is null no need update");
         return SOFTBUS_OK;
     }
-    int32_t ret = memcpy_s(deviceInfo->userIdCheckSum, USERID_CHECKSUM_LEN, hbResp->userIdCheckSum, USERID_CHECKSUM_LEN);
+    int32_t ret = memcpy_s(deviceInfo->userIdCheckSum, USERID_CHECKSUM_LEN,
+        hbResp->userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "memcpy failed");
     }
@@ -1498,7 +1496,7 @@ void LnnDumpHbOnlineNodeList(void)
         }
         char *deviceTypeStr = LnnConvertIdToDeviceType(nodeInfo.deviceInfo.deviceTypeId);
         char *anonyDeviceName = NULL;
-        Anonymize(nodeInfo.deviceInfo.deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(nodeInfo.deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGD(LNN_HEART_BEAT,
             "DumpOnlineNodeList count=%{public}d, i=%{public}d, deviceName=%{public}s, deviceTypeId=%{public}d, "
             "deviceTypeStr=%{public}s, masterWeight=%{public}d, discoveryType=%{public}d, "

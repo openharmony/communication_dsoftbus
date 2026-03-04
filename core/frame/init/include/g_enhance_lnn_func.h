@@ -36,7 +36,7 @@
 #include "lnn_lane_score_struct.h"
 #include "lnn_lane_vap_info_struct.h"
 #include "lnn_node_info_struct.h"
-#include "lnn_ranging_manager_struct.h"
+#include "lnn_ranging_manager.h"
 #include "lnn_secure_storage_struct.h"
 #include "lnn_sync_info_manager_struct.h"
 #include "lnn_time_sync_impl_struct.h"
@@ -64,7 +64,6 @@ typedef void (*LnnDcDispatchEventFunc)(DcEvent *dcEvent);
 typedef void (*TriggerSparkGroupBuildFunc)(uint32_t delayTime);
 typedef void (*TriggerSparkGroupClearFunc)(uint32_t state, uint32_t delayTime);
 typedef void (*TriggerSparkGroupJoinAgainFunc)(const char *udid, uint32_t delayTime);
-typedef void (*TriggerClearSparkGroupFunc)(void);
 typedef int32_t (*InitControlPlaneFunc)(void);
 typedef void (*DeinitControlPlaneFunc)(void);
 typedef int32_t (*QueryControlPlaneNodeValidFunc)(const char *deviceId);
@@ -309,7 +308,6 @@ typedef struct TagLnnEnhanceFuncList {
     TriggerSparkGroupBuildFunc triggerSparkGroupBuild;
     TriggerSparkGroupClearFunc triggerSparkGroupClear;
     TriggerSparkGroupJoinAgainFunc triggerSparkGroupJoinAgain;
-    TriggerClearSparkGroupFunc triggerClearSparkGroup;
     InitControlPlaneFunc initControlPlane;
     DeinitControlPlaneFunc deinitControlPlane;
     QueryControlPlaneNodeValidFunc queryControlPlaneNodeValid;

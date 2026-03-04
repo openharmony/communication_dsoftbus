@@ -18,6 +18,8 @@
 
 #include "auth_log.h"
 
+#define INVALID_KEY_SEQ 0
+
 int32_t InitApplyKeyManager(void)
 {
     AUTH_LOGI(AUTH_CONN, "not support");
@@ -95,7 +97,7 @@ int32_t AuthGenApplyKey(
 uint32_t GenApplyKeySeq(void)
 {
     AUTH_LOGI(AUTH_CONN, "not support");
-    return SOFTBUS_NOT_IMPLEMENT;
+    return INVALID_KEY_SEQ;
 }
 
 bool AuthIsApplyKeyExpired(uint64_t time)

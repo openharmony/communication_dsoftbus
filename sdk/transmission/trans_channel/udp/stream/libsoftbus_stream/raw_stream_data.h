@@ -29,13 +29,13 @@ public:
     static constexpr int INT_TO_BYTE = 0xff;
     static constexpr int FRAME_HEADER_LEN = 4;
 
-    int InitStreamData(std::unique_ptr<char[]> buffer, ssize_t bufLen, std::unique_ptr<char[]> extBuffer,
+    int32_t InitStreamData(std::unique_ptr<char[]> buffer, ssize_t bufLen, std::unique_ptr<char[]> extBuffer,
         ssize_t extLen);
 
     std::unique_ptr<char[]> GetBuffer() override;
     ssize_t GetBufferLen() const override;
 
-    static void InsertBufferLength(int num, int length, uint8_t *output);
+    static void InsertBufferLength(int32_t num, int32_t length, uint8_t *output);
 
 private:
     void SetTimeStamp(uint32_t timestamp) override
@@ -57,7 +57,7 @@ private:
         return 0;
     }
 
-    int GetSeqNum() const override
+    int32_t GetSeqNum() const override
     {
         return 0;
     }

@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "broadcast_dfx_event.h"
 #include "disc_log.h"
 #include "softbus_adapter_timer.h"
- 
+
 void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventDiscExtra *discExtra, int32_t size)
 {
     if (discExtra == NULL) {
@@ -25,7 +25,7 @@ void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventDiscExt
     }
  
     DiscEventExtra extra = { 0 };
-    int64_t stamptime = SoftBusGetSysTimeMs();
+    uint64_t stamptime = SoftBusGetSysTimeMs();
     for (int32_t i = 0; i < size; i++) {
         extra.capabilityBit = discExtra[i].capabilityBit;
         extra.discType = discExtra[i].discType;
@@ -43,13 +43,13 @@ void BroadcastDiscEvent(int32_t eventScene, int32_t eventStage, DiscEventDiscExt
         }
         DISC_LOGD(DISC_BLE, "capa=%{public}d, discType=%{public}d, broadcastType=%{public}d, minInterval=%{public}d, "
             "maxInterval=%{public}d, succCnt=%{public}d, failCnt=%{public}d, "
-            "costTime=%{public}" PRId64 ", Scene=%{public}d",
+            "costTime=%{public}" PRIu64 ", Scene=%{public}d",
             extra.capabilityBit, extra.discType, extra.broadcastType, extra.minInterval, extra.maxInterval,
             extra.successCnt, extra.failCnt, extra.costTime, eventScene);
         DISC_EVENT(eventScene, eventStage, extra);
     }
 }
- 
+
 void BroadcastScanEvent(int32_t eventScene, int32_t eventStage, DiscEventScanExtra *scanExtra, int32_t size)
 {
     if (scanExtra == NULL) {

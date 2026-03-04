@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.distributedsched.proxyChannelManager", "proxyChannelManager")
+
+@!sts_inject("""
+static { loadLibraryWithPermissionCheck("proxychannelmanager_taihe_native.z", "@ohos.distributedsched.proxyChannelManager") }
+""")
+@!sts_inject_into_module("import { Callback } from '@ohos.base';")
+
+enum LinkType: i32 {
+    LINK_BR = 0
+}
+
+enum ChannelState: i32 {
+    CHANNEL_WAIT_RESUME = 0,
+    CHANNEL_RESUME = 1,
+    CHANNEL_EXCEPTION_SOFTWARE_FAILED = 2,
+    CHANNEL_BR_NO_PAIRED = 3
+}
+
+struct ChannelInfo {
+    linkType: LinkType;
+    peerDevAddr: String;
+    peerUuid: String;
+}
+
+struct DataInfo {
+    channelId: i32;
+    data: @arraybuffer Array<u8>;
+}
+
+struct ChannelStateInfo {
+    channelId: i32;
+    state: ChannelState;
+}
+
+@gen_promise("openProxyChannel")
+function OpenProxyChannelAsync(channelInfo: ChannelInfo): i32;
+
+function CloseProxyChannel(channelId: i32): void;
+
+@gen_promise("sendData")
+function SendDataAsync(channelId: i32, data: @arraybuffer Array<u8>): void;
+
+function OnReceiveData(channelId: i32, callback: (dataInfo: DataInfo) => void): void;
+
+function OffReceiveData(channelId: i32, callback: Optional<(dataInfo: DataInfo) => void>): void;
+
+function OnChannelStateChange(channelId: i32, callback: (stateInfo: ChannelStateInfo) => void): void;
+
+function OffChannelStateChange(channelId: i32, callback: Optional<(stateInfo: ChannelStateInfo) => void>): void;

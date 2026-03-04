@@ -105,7 +105,7 @@ static int32_t CheckAndInitBusCenterServerProxyInit(void)
 
 static int32_t ClientCheckFuncPointer(void *func)
 {
-    if (func == NULL) {
+    if (func == nullptr) {
         LNN_LOGE(LNN_EVENT, "enhance func not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
@@ -159,6 +159,15 @@ int32_t ServerIpcGetNodeKeyInfo(
     LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
         LNN_EVENT, "server not init");
     int32_t ret = g_serverProxy->GetNodeKeyInfo(pkgName, networkId, key, buf, len);
+    return ret;
+}
+
+int32_t ServerIpcSetNodeKeyInfo(
+    const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->SetNodeKeyInfo(pkgName, networkId, key, buf, len);
     return ret;
 }
 

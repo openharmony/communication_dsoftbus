@@ -20,12 +20,13 @@
 #include "auth_hichain_adapter.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
-#include "softbus_adapter_mem.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_init_monitor.h"
+#include "softbus_adapter_mem.h"
 
 static const std::string DEFAULT_USER_ID = "0";
 static const std::string DEFAULT_ACCOUNT_UID = "ohosAnonymousUid";
@@ -172,8 +173,8 @@ static void AccountUpdateProcess(uint8_t *localAccountHash, uint8_t *accountHash
     ClearLnnBleReportExtraMap();
     ClearPcRestrictMap();
     LNN_LOGI(LNN_STATE,
-        "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
-        localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
+        "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X], "
+        "reason:%{public}d", localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1], reason);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
@@ -183,7 +184,8 @@ static void AccountUpdateProcess(uint8_t *localAccountHash, uint8_t *accountHash
     }
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
     LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
-    if (reason == UPDATE_HEARTBEAT || reason == UPDATE_USER_SWITCH) {
+    if (reason == UPDATE_HEARTBEAT || reason == UPDATE_USER_SWITCH ||
+        (reason == UPDATE_ACCOUNT_ONLY && IsSupportMcuFeaturePacked())) {
         LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
         DfxRecordTriggerTime(UPDATE_ACCOUNT, EVENT_STAGE_LNN_UPDATE_ACCOUNT);
     }
@@ -247,7 +249,6 @@ void LnnOnOhosAccountLogout(void)
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountUid[ACCOUNT_UID_STR_LEN] = {0};
     uint32_t size = 0;
-
     (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, 0);
     if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
         DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {

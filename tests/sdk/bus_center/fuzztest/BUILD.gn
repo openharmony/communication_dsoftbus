@@ -21,6 +21,7 @@ group("fuzztest") {
     "getallnodedeviceinfo_fuzzer:GetAllNodeDeviceInfoFuzzTest",
     "getlocalnodedeviceinfo_fuzzer:GetLocalNodeDeviceInfoFuzzTest",
     "getnodekeyinfo_fuzzer:GetNodeKeyInfoFuzzTest",
+    "setnodekeyinfo_fuzzer:SetNodeKeyInfoFuzzTest",
     "ispassseqcheck_fuzzer:IsPassSeqCheckFuzzTest",
     "joinlnn_fuzzer:JoinLNNFuzzTest",
     "leavelnn_fuzzer:LeaveLNNFuzzTest",

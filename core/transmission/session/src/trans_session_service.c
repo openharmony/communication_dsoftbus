@@ -19,6 +19,7 @@
 #include <stdatomic.h>
 
 #include "anonymizer.h"
+#include "br_proxy_server_manager.h"
 #include "lnn_ohos_account_adapter.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
@@ -81,6 +82,7 @@ int32_t TransServerInit(void)
         TRANS_LOGW(TRANS_INIT, "InitSoftbusPagingPacked Failed");
     }
     RegisterPermissionChangeCallback();
+    TransBrProxyInit();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
     return SOFTBUS_OK;

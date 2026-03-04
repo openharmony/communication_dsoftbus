@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,9 @@
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
-#include "softbus_adapter_crypto.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_access_token_adapter.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
@@ -38,8 +38,8 @@
 #include "trans_session_account_adapter.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "wifi_direct_manager_struct.h"
 #include "wifi_direct_manager.h"
+#include "wifi_direct_manager_struct.h"
 
 #define ID_OFFSET (1)
 #define OHOS_TYPE_UNKNOWN (-1)

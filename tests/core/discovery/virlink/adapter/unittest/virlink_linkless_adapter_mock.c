@@ -61,6 +61,11 @@ void DelAuthManager(AuthManager *auth, int32_t type)
     (void)type;
 }
 
+void DelDupAuthManager(AuthManager *auth)
+{
+    (void)auth;
+}
+
 static AuthTransListener g_authTransListenerMock;
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
 {

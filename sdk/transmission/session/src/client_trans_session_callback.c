@@ -386,7 +386,7 @@ static int32_t TransOnServiceNegotiate(int32_t socket, const ISocketListener *so
 static int32_t HandleServerOnNegotiate(int32_t socket, int32_t tokenType, const ISocketListener *socketCallback,
     const ChannelInfo *channel, SocketAccessInfo *localAccessInfo)
 {
-    if (socketCallback->OnBind == NULL || channel == NULL) {
+    if (socketCallback == NULL || socketCallback->OnBind == NULL || channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "OnBind exception, terminating this call, socket=%{public}d", socket);
         (void)ClientDeleteSocketSession(socket);
         return SOFTBUS_TRANS_SERVER_NOT_LISTEN;
@@ -639,11 +639,10 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
         return ret;
     }
     if (sessionCallback.isSocketListener) {
-        int32_t useType = 3;
+        int32_t useType = CHANNEL_USE_CHOOSE_OTHER;
         (void)CheckChannelIsReserveByChannelId(sessionId, channelId, &useType);
-        if (useType == 2) {
-            TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, sessionId=%{public}d, useType=%{public}d, set fail", sessionId,
-                channelId, useType);
+        if (useType == CHANNEL_USE_CHOOSE_SECOND) {
+            TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, sessionId=%{public}d, useType=second", sessionId, channelId);
             return SOFTBUS_OK;
         }
         (void)ClientSetEnableStatusBySocket(sessionId, ENABLE_STATUS_FAILED);
