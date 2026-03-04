@@ -105,10 +105,8 @@ int32_t DiscCoapAssembleBdataPacked(const unsigned char *capabilityData, uint32_
     uint32_t businessDataLen)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
-    if (pfnDiscEnhanceFuncList == NULL ||
-        DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapAssembleBdata) != SOFTBUS_OK) {
-        return DiscCoapAssembleBdata(capabilityData, dataLen, businessData, businessDataLen);
-    }
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapAssembleBdata);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_COAP, "not find DiscCoapAssembleBdata");
     return pfnDiscEnhanceFuncList->discCoapAssembleBdata(capabilityData, dataLen, businessData, businessDataLen);
 }
 

@@ -39,9 +39,7 @@
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-
 #include "lnn_heartbeat_utils.h"
-
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -70,7 +68,6 @@
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_init.h"
 #include "wifi_direct_manager.h"
-
 
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
