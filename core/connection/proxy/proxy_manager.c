@@ -49,6 +49,12 @@ typedef struct {
     int32_t state;
 } ProxyChannelAclStateContext;
 
+typedef struct {
+    uint32_t channelId;
+    uint32_t dataLen;
+    uint8_t *data;
+} ProxyChannelDataContext;
+
 enum BrProxyLooperMsgType {
     MSG_OPEN_PROXY_CHANNEL = 100,
     MSG_OPEN_PROXY_CHANNEL_TIMEOUT,
@@ -60,6 +66,7 @@ enum BrProxyLooperMsgType {
     MSG_PROXY_BT_TURN_OFF,
     MSG_PROXY_BT_TURN_ON,
     MSG_PROXY_UNPAIRED,
+    MSG_DATA_RECEIVED,
 };
 
 static void ProxyChannelMsgHandler(SoftBusMessage *msg);
@@ -192,7 +199,7 @@ static void AttemptPostChannelCloseEvent(struct ProxyChannel *channel, bool isCl
     }
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_CLOSE_PROXY_CHANNEL,
         channel->requestId, 0, copyAddr, 0);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         // fall-through
         CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
         SoftBusFree(copyAddr);
@@ -360,7 +367,7 @@ static void BrChannelConnectSuccess(uint32_t channelId)
     ctx->channelId = channelId;
     ctx->isSuccess = true;
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL_CONNECT_RESULT, 0, 0, ctx, 0);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
         SoftBusFree(ctx);
     }
@@ -374,7 +381,7 @@ static void BrChannelConnectFail(uint32_t channelId, int32_t errorCode)
     ctx->status = errorCode;
     ctx->isSuccess = false;
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL_CONNECT_RESULT, 0, 0, ctx, 0);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
         SoftBusFree(ctx);
     }
@@ -508,7 +515,7 @@ static bool IsNeedReuseOrWait(ProxyConnectInfo *connectInfo)
         CONN_CHECK_AND_RETURN_RET_LOGE(copyConnectInfo != NULL, false, CONN_PROXY, "copyProxyChannel err");
         int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL, 0, 0,
             copyConnectInfo, OPEN_PROXY_CHANNEL_WAIT_MS);
-        if (ret < 0) {
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
             DestoryProxyConnectInfo(&copyConnectInfo);
             return false;
@@ -636,7 +643,7 @@ static void OpenProxyChannelHandler(ProxyConnectInfo *connectInfo)
 
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL_TIMEOUT,
         connection->channelId, 0, NULL, connectInfo->timeoutMs);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
         DestoryProxyConnectInfo(&GetProxyChannelManager()->proxyChannelRequestInfo);
         RemoveProxyChannelByChannelId(connection->channelId);
@@ -753,7 +760,7 @@ static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannel
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_PROXY,
         "createProxyConnectInfo fail, ret=%{public}d", ret);
     ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL, 0, 0, connectInfo, 0);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
         DestoryProxyConnectInfo(&connectInfo);
         return ret;
@@ -761,16 +768,50 @@ static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannel
     return SOFTBUS_OK;
 }
 
-static void OnProxyChannelDataReceived(uint32_t channelId, uint8_t *data, uint32_t dataLen)
+static void ProxyChannelDataReceivedHandler(ProxyChannelDataContext *context)
 {
+    uint32_t channelId = context->channelId;
     struct ProxyConnection *proxyConnection = GetProxyChannelByChannelId(channelId);
-    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY,
-        "get proxyConnection fail, channelId=%{public}u", channelId);
-    CONN_LOGI(CONN_PROXY, "channelId=%{public}u, dataLen=%{public}u", channelId, dataLen);
+    if (proxyConnection == NULL) {
+        CONN_LOGE(CONN_PROXY, "get proxyConnection fail, channelId=%{public}u", channelId);
+        SoftBusFree(context->data);
+        context->data = NULL;
+        return;
+    }
+    CONN_LOGI(CONN_PROXY, "channelId=%{public}u, dataLen=%{public}u", channelId, context->dataLen);
     if (g_listener.onProxyChannelDataReceived != NULL) {
-        g_listener.onProxyChannelDataReceived(&proxyConnection->proxyChannel, data, dataLen);
+        g_listener.onProxyChannelDataReceived(&proxyConnection->proxyChannel, context->data, context->dataLen);
     }
     proxyConnection->dereference(proxyConnection);
+    SoftBusFree(context->data);
+    context->data = NULL;
+}
+
+static void OnProxyChannelDataReceived(uint32_t channelId, uint8_t *data, uint32_t dataLen)
+{
+    ProxyChannelDataContext *context = (ProxyChannelDataContext *)SoftBusCalloc(sizeof(ProxyChannelDataContext));
+    CONN_CHECK_AND_RETURN_LOGE(context != NULL, CONN_PROXY, "context is null");
+    context->data = (uint8_t *)SoftBusCalloc(sizeof(uint8_t) * dataLen);
+    if (context->data == NULL) {
+        CONN_LOGE(CONN_PROXY, "calloc data fail");
+        SoftBusFree(context);
+        return;
+    }
+    context->channelId = channelId;
+    if (memcpy_s(context->data, dataLen, data, dataLen) != EOK) {
+        CONN_LOGE(CONN_PROXY, "memcpy data fail");
+        SoftBusFree(context->data);
+        SoftBusFree(context);
+        return;
+    }
+    context->dataLen = dataLen;
+    int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_DATA_RECEIVED, 0, 0, context, 0);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
+        SoftBusFree(context->data);
+        SoftBusFree(context);
+        return;
+    }
 }
 
 static void NotifyDisconnected(struct ProxyChannel *proxyChannel, int32_t reason)
@@ -803,7 +844,7 @@ static void OnProxyChannelDisconnected(uint32_t channelId, int32_t reason)
     ctx->channelId = channelId;
     ctx->status = reason;
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_CLOSE_PROXY_DISCONNECT, 0, 0, ctx, 0);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
         SoftBusFree(ctx);
     }
@@ -912,7 +953,7 @@ static void AttemptReconnectDevice(char *brAddr)
     proxyChannelRequestInfo->timeoutMs = INNER_RECONNECT_TIMEOUT_MS;
     int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL,
         0, 0, proxyChannelRequestInfo, config.delayMs);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "post msg fail, error=%{public}d", ret);
         DestoryProxyConnectInfo(&proxyChannelRequestInfo);
     }
@@ -994,7 +1035,7 @@ static void ProxyRestoreHandler(void)
         proxyChannelRequestInfo->timeoutMs = INNER_RECONNECT_TIMEOUT_MS;
         int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL,
             0, 0, proxyChannelRequestInfo, RECONNECT_AFTER_BT_OPEN_WAIT_MS);
-        if (ret < 0) {
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_PROXY, "post msg fail, error=%{public}d", ret);
             DestoryProxyConnectInfo(&proxyChannelRequestInfo);
         }
@@ -1052,7 +1093,7 @@ static void OnProxyAclStateChanged(
     }
     context->state = aclState;
     ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_ACL_STATE_CHANGE, 0, 0, context, 0);
-    if (ret < 0) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "post msg fail, error=%{public}d", ret);
         SoftBusFree(context);
     }
@@ -1132,6 +1173,11 @@ static void ProxyChannelMsgHandler(SoftBusMessage *msg)
         case MSG_PROXY_UNPAIRED:
             CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_PROXY, "msg->obj is NULL");
             ProxyDeviceUnpaired((const char*)msg->obj);
+            break;
+        case MSG_DATA_RECEIVED:
+            CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_PROXY, "msg->obj is NULL");
+            ProxyChannelDataContext *context = (ProxyChannelDataContext *)(msg->obj);
+            ProxyChannelDataReceivedHandler(context);
             break;
         default:
             CONN_LOGW(CONN_PROXY, "receive unexpected msg, what=%{public}d", msg->what);
