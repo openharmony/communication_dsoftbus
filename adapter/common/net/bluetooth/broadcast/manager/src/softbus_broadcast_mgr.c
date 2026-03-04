@@ -287,7 +287,6 @@ static int32_t BcManagerLockInit(void)
 
 static void DelayReportBroadcast(void *para)
 {
-    (void)para;
     DiscEventExtra extra = { 0 };
     for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         if (g_bcManagerExtra[managerId].isOn == 1) {
@@ -297,7 +296,7 @@ static void DelayReportBroadcast(void *para)
             extra.minInterval = g_bcManagerExtra[managerId].minInterval;
             extra.maxInterval = g_bcManagerExtra[managerId].maxInterval;
             extra.bcOverMaxCnt = g_bcOverMaxNum;
-            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}" PRId64 ", advHandle=%{public}d, serverType=%{public}s, "
+            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}" PRIu64 ", advHandle=%{public}d, serverType=%{public}s, "
                 "minInterval=%{public}d, maxInterval=%{public}d, bcOverMaxCnt=%{public}d", extra.startTime,
                 extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval, extra.bcOverMaxCnt);
             DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
@@ -361,8 +360,6 @@ int32_t InitBroadcastMgr(void)
 
 static bool CheckLockIsInit(SoftBusMutex *lock)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(lock != NULL, false, DISC_BROADCAST, "lock is nullptr");
-
     if (SoftBusMutexLock(lock) != SOFTBUS_OK) {
         return false;
     }
@@ -448,7 +445,7 @@ static void ReportCurrentBroadcast(bool startBcResult)
             if (startBcResult) {
                 extra.currentNum = g_bcCurrentNum;
             }
-            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}" PRId64 ", advHandle=%{public}d, serverType=%{public}s, "
+            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}" PRIu64 ", advHandle=%{public}d, serverType=%{public}s, "
                 "minInterval=%{public}d, maxInterval=%{public}d", extra.startTime,
                 extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval);
             DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
@@ -727,9 +724,6 @@ static void BcStopScanCallback(BroadcastProtocol protocol, int32_t adapterScanId
 
 static int32_t BuildBcInfoCommon(const SoftBusBcScanResult *reportData, BroadcastReportInfo *bcInfo)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(reportData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "reportData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bcInfo is nullptr");
-
     bcInfo->eventType = reportData->eventType;
     bcInfo->dataStatus = reportData->dataStatus;
     bcInfo->primaryPhy = reportData->primaryPhy;
@@ -754,9 +748,6 @@ static int32_t BuildBcInfoCommon(const SoftBusBcScanResult *reportData, Broadcas
 
 static bool CheckManufactureIsMatch(const BcScanFilter *filter, const BroadcastPayload *bcData)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(filter != NULL, false, DISC_BROADCAST, "filter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcData != NULL, false, DISC_BROADCAST, "bcData is nullptr");
-
     uint8_t dataLen = bcData->payloadLen;
     uint32_t filterLen = filter->manufactureDataLength;
     if ((uint32_t)dataLen < filterLen) {
@@ -778,9 +769,6 @@ static bool CheckManufactureIsMatch(const BcScanFilter *filter, const BroadcastP
 
 static bool CheckServiceIsMatch(const BcScanFilter *filter, const BroadcastPayload *bcData)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(filter != NULL, false, DISC_BROADCAST, "filter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcData != NULL, false, DISC_BROADCAST, "bcData is nullptr");
-
     uint8_t dataLen = bcData->payloadLen;
     uint32_t filterLen = filter->serviceDataLength;
     if ((uint32_t)dataLen < filterLen) {
@@ -871,8 +859,6 @@ static void DumpSoftbusData(const char *description, uint16_t len, const uint8_t
 
 static void ReleaseBroadcastReportInfo(BroadcastReportInfo *bcInfo)
 {
-    DISC_CHECK_AND_RETURN_LOGE(bcInfo != NULL, DISC_BROADCAST, "bcInfo is nullptr");
-
     SoftBusFree(bcInfo->packet.bcData.payload);
     SoftBusFree(bcInfo->packet.rspData.payload);
     SoftBusFree(bcInfo->packet.uuidData.payload);
@@ -880,9 +866,6 @@ static void ReleaseBroadcastReportInfo(BroadcastReportInfo *bcInfo)
 
 static int32_t BuildBcPayload(const SoftbusBroadcastPayload *srcData, BroadcastPayload *dstData)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(srcData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "srcData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(dstData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "dstData is nullptr");
-
     if (srcData->payload == NULL) {
         DISC_LOGD(DISC_BROADCAST, "payload is null, skip");
         return SOFTBUS_OK;
@@ -905,10 +888,6 @@ static int32_t BuildBcPayload(const SoftbusBroadcastPayload *srcData, BroadcastP
 
 static int32_t BuildBroadcastPacket(const SoftbusBroadcastData *softbusBcData, BroadcastPacket *packet)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(softbusBcData != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "softbusBcData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "packet is nullptr");
-
     packet->isSupportFlag = softbusBcData->isSupportFlag;
     packet->flag = softbusBcData->flag;
 
@@ -941,8 +920,6 @@ static int32_t BuildBroadcastPacket(const SoftbusBroadcastData *softbusBcData, B
 
 static int32_t BuildBroadcastReportInfo(const SoftBusBcScanResult *reportData, BroadcastReportInfo *bcInfo)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(reportData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "reportData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bcInfo is nullptr");
     errno_t result = memcpy_s(bcInfo->localName, sizeof(bcInfo->localName),
         reportData->localName, sizeof(reportData->localName));
     DISC_CHECK_AND_RETURN_RET_LOGE(result == EOK, SOFTBUS_MEM_ERR, DISC_BROADCAST,
@@ -951,7 +928,6 @@ static int32_t BuildBroadcastReportInfo(const SoftBusBcScanResult *reportData, B
     // 1. Build BroadcastReportInfo from SoftBusBcScanResult except BroadcastPacket.
     int32_t ret = BuildBcInfoCommon(reportData, bcInfo);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "build broadcast common info failed");
-
     // 2. Build BroadcastPacket.
     ret = BuildBroadcastPacket(&(reportData->data), &(bcInfo->packet));
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "build broadcast packet failed");
@@ -961,7 +937,6 @@ static int32_t BuildBroadcastReportInfo(const SoftBusBcScanResult *reportData, B
 
 static bool CheckScanResultDataIsMatchApproach(const uint32_t managerId, BroadcastPayload *bcData)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcData != NULL, false, DISC_BROADCAST, "bcData is nullptr");
     if (bcData->payload == NULL) {
         return false;
     }
@@ -1043,9 +1018,6 @@ static void BcScanStateChanged(BroadcastProtocol protocol, int32_t resultCode, b
 
 static int32_t ConvertBroadcastUuid(const SoftbusBroadcastUuid *uuid, BroadcastUuid *bcUuid)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "uuid is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcUuid != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bcUuid is nullptr");
-
     bcUuid->uuidLen = uuid->uuidLen;
     bcUuid->uuid = (int8_t *)SoftBusCalloc(bcUuid->uuidLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(bcUuid->uuid != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST, "malloc failed");
@@ -1061,8 +1033,6 @@ static void BcLpDeviceInfoCallback(BroadcastProtocol protocol,
     const SoftbusBroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
     DISC_LOGD(DISC_BROADCAST, "enter lp cb");
-    DISC_CHECK_AND_RETURN_LOGE(uuid != NULL, DISC_BROADCAST, "uuid is nullptr");
-
     BroadcastUuid bcUuid = {0};
     int32_t ret = ConvertBroadcastUuid(uuid, &bcUuid);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BROADCAST, "convert broadcast Uuid failed");
@@ -1095,9 +1065,6 @@ static bool IsSrvTypeValid(BaseServiceType srvType)
 
 static int32_t InitializeBroadcaster(int32_t *bcId, BroadcastOptions *options, const BroadcastCallback *cb)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcId != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bcId is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "cb is nullptr");
-
     int32_t ret = SOFTBUS_OK;
     int32_t managerId;
 
@@ -1267,10 +1234,6 @@ static int32_t GetSrvTypeIndex(BaseServiceType srvType)
 static int32_t RegisterScanListenerForChannel(BroadcastProtocol protocol,
     int32_t channel, int32_t *adapterScanId, const ScanCallback *cb)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterScanId != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterScanId is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "cb is nullptr");
-
     int32_t ret;
     if (g_AdapterStatusControl[channel].isAdapterScanCbReg) {
         *adapterScanId = g_AdapterStatusControl[channel].adapterScannerId;
@@ -1292,6 +1255,7 @@ static int32_t RegisterScanListenerSub(
     DISC_CHECK_AND_RETURN_RET_LOGE(adapterScanId != NULL, SOFTBUS_INVALID_PARAM,
         DISC_BROADCAST, "adapterScanId is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "cb is nullptr");
+
     int32_t channel = GetSrvTypeIndex(srvType);
     switch (channel) {
         case CHANEL_LP:
@@ -1423,8 +1387,6 @@ static bool CheckNeedUnRegisterScanListener(int32_t listenerId)
 
 static bool CheckNeedUpdateScan(int32_t listenerId, int32_t *liveListenerId)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(liveListenerId != NULL, false, DISC_BROADCAST, "liveListenerId is nullptr");
-
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
     BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
     for (int32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
@@ -1451,9 +1413,6 @@ static int32_t DupData(uint8_t *srcData, uint32_t srcDataLen, uint8_t **outData)
 
 static int32_t CopyScanFilterServiceInfo(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(srcFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "srcFilter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "dstFilter is nullptr");
-
     dstFilter->serviceId = srcFilter->serviceId;
     dstFilter->serviceDataLength = srcFilter->serviceDataLength;
     
@@ -1537,10 +1496,6 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
 
 static int32_t CovertSoftBusBcScanFilters(const BcScanFilter *filter, uint8_t size, SoftBusBcScanFilter *adapterFilter)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(filter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterFilter != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterFilter is nullptr");
-
     while (size-- > 0) {
         int32_t ret = CopySoftBusBcScanFilter(filter + size, adapterFilter + size);
         DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "copy filter failed");
@@ -1550,8 +1505,6 @@ static int32_t CovertSoftBusBcScanFilters(const BcScanFilter *filter, uint8_t si
 
 static void ReleaseSoftBusBcScanFilter(SoftBusBcScanFilter *filter, int32_t size)
 {
-    DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BROADCAST, "filter is nullptr");
-
     if (filter != NULL) {
         while (size-- > 0) {
             if ((filter + size)->address != NULL) {
@@ -1586,10 +1539,6 @@ static void ReleaseSoftBusBcScanFilter(SoftBusBcScanFilter *filter, int32_t size
 static int32_t CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilter **adapterFilter, int32_t *filterSize)
 {
     DISC_LOGD(DISC_BROADCAST, "enter combine scan filters");
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterFilter != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterFilter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(filterSize != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filterSize is nullptr");
-
     uint8_t size = 0;
     BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
     for (int32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
@@ -1631,10 +1580,6 @@ static int32_t CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilt
 static int32_t GetScanFiltersForOneListener(int32_t listenerId, SoftBusBcScanFilter **adapterFilter,
     int32_t *filterSize)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterFilter != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterFilter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(filterSize != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filterSize is nullptr");
-
     if (g_scanManager[listenerId].filterSize == 0) {
         DISC_LOGE(DISC_BROADCAST, "adapterFilter couldn't assemble");
         return SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL;
@@ -1690,8 +1635,6 @@ static int32_t DeleteFilterByIndex(int32_t listenerId, SoftBusBcScanFilter **ada
 
 static int32_t GetAddFiltersByIndex(int32_t listenerId, SoftBusBcScanFilter **adapterFilter)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterFilter != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterFilter is nullptr");
     DISC_LOGI(DISC_BROADCAST, "enter add filter by index, listenerId=%{public}d, size=%{public}d",
         listenerId, g_scanManager[listenerId].addSize);
 
@@ -1718,8 +1661,6 @@ static int32_t GetAddFiltersByIndex(int32_t listenerId, SoftBusBcScanFilter **ad
 
 static int32_t GetModifyFiltersByIndex(int32_t listenerId, SoftBusBcScanFilter **adapterFilter)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterFilter != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterFilter is nullptr");
     DISC_LOGI(DISC_BROADCAST, "enter Modify filter by index, listenerId=%{public}d, addSize=%{public}d",
         listenerId, g_scanManager[listenerId].addSize);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_scanManager[listenerId].addSize != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST,
@@ -1753,9 +1694,6 @@ static int32_t GetModifyFiltersByIndex(int32_t listenerId, SoftBusBcScanFilter *
 
 static int32_t GetBcScanFilters(int32_t listenerId, SoftBusBcScanFilter **adapterFilter, int32_t *filterSize)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterFilter != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterFilter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(filterSize != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filterSize is nullptr");
     return CombineSoftbusBcScanFilters(listenerId, adapterFilter, filterSize);
 }
 
@@ -1783,8 +1721,6 @@ static void DumpBcScanFilter(const SoftBusBcScanFilter *nativeFilter, uint8_t fi
 static void BuildSoftBusBcScanParams(const BcScanParams *param, SoftBusBcScanParams *adapterParam)
 {
     DISC_LOGD(DISC_BROADCAST, "enter scan param");
-    DISC_CHECK_AND_RETURN_LOGE(param != NULL, DISC_BROADCAST, "param is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(adapterParam != NULL, DISC_BROADCAST, "adapterParam is nullptr");
     (void)memset_s(adapterParam, sizeof(SoftBusBcScanParams), 0x0, sizeof(SoftBusBcScanParams));
 
     // convert params
@@ -1798,8 +1734,6 @@ static void BuildSoftBusBcScanParams(const BcScanParams *param, SoftBusBcScanPar
 
 static void GetScanIntervalAndWindow(int32_t freq, SoftBusBcScanParams *adapterParam)
 {
-    DISC_CHECK_AND_RETURN_LOGE(adapterParam != NULL, DISC_BROADCAST, "adapterParam is nullptr");
-
     if (freq == SCAN_FREQ_P2_60_3000) {
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
         adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
@@ -1844,8 +1778,6 @@ static void GetScanIntervalAndWindow(int32_t freq, SoftBusBcScanParams *adapterP
 
 static void CheckScanFreq(int32_t listenerId, SoftBusBcScanParams *adapterParam)
 {
-    DISC_CHECK_AND_RETURN_LOGE(adapterParam != NULL, DISC_BROADCAST, "adapterParam is nullptr");
-
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
     int32_t maxFreq = g_scanManager[listenerId].freq;
     BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
@@ -1965,9 +1897,6 @@ static void ConvertBcParams(BroadcastProtocol protocol,
     const BroadcastParam *srcParam, SoftbusBroadcastParam *dstParam)
 {
     DISC_LOGD(DISC_BROADCAST, "enter covert bc param");
-    DISC_CHECK_AND_RETURN_LOGE(srcParam != NULL, DISC_BROADCAST, "srcParam is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(dstParam != NULL, DISC_BROADCAST, "dstParam is nullptr");
-
     dstParam->minInterval = srcParam->minInterval;
     dstParam->maxInterval = srcParam->maxInterval;
     dstParam->advType = srcParam->advType;
@@ -2001,9 +1930,6 @@ static void ConvertBcParams(BroadcastProtocol protocol,
 
 static void DumpBroadcastPacket(const BroadcastPayload *bcData, const BroadcastPayload *rspData)
 {
-    DISC_CHECK_AND_RETURN_LOGE(bcData != NULL, DISC_BROADCAST, "bcData is nullptr");
-    DISC_CHECK_AND_RETURN_LOGE(rspData != NULL, DISC_BROADCAST, "rspData is nullptr");
-
     if (bcData->payloadLen != 0 && bcData->payload != NULL) {
         DumpSoftbusData("BroadcastPayload bcData", bcData->payloadLen, bcData->payload);
     }
@@ -2014,8 +1940,6 @@ static void DumpBroadcastPacket(const BroadcastPayload *bcData, const BroadcastP
 
 static int32_t SoftBusCondWaitSec(int64_t sec, int32_t bcId, SoftBusMutex *mutex)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(mutex != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "mutex is nullptr");
-
     SoftBusSysTime absTime = {0};
     int32_t ret = SoftBusGetTime(&absTime);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "softbus get time failed");
@@ -2030,8 +1954,6 @@ static int32_t SoftBusCondWaitSec(int64_t sec, int32_t bcId, SoftBusMutex *mutex
 
 static int32_t SoftbusPauseCondWaitSec(int64_t sec, int32_t bcId, SoftBusMutex *mutex, SoftBusCond *cond)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(mutex != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "mutex is nullptr");
-
     SoftBusSysTime absTime = {0};
     int32_t ret = SoftBusGetTime(&absTime);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "softbus get time failed");
@@ -2046,9 +1968,6 @@ static int32_t SoftbusPauseCondWaitSec(int64_t sec, int32_t bcId, SoftBusMutex *
 
 static int32_t BuildSoftbusBcPayload(const BroadcastPayload *srcData, SoftbusBroadcastPayload *dstData)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(srcData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "srcData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(dstData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "dstData is nullptr");
-
     dstData->type = (SoftbusBcDataType)srcData->type;
     dstData->id = srcData->id;
     dstData->payloadLen = srcData->payloadLen;
@@ -2067,7 +1986,6 @@ static int32_t BuildSoftbusBcPayload(const BroadcastPayload *srcData, SoftbusBro
 static void ReleaseSoftbusBroadcastData(SoftbusBroadcastData *softbusBcData)
 {
     DISC_LOGD(DISC_BROADCAST, "enter release bc data");
-    DISC_CHECK_AND_RETURN_LOGE(softbusBcData != NULL, DISC_BROADCAST, "softbusBcData is nullptr");
     SoftBusFree(softbusBcData->bcData.payload);
     SoftBusFree(softbusBcData->rspData.payload);
 }
@@ -2075,10 +1993,6 @@ static void ReleaseSoftbusBroadcastData(SoftbusBroadcastData *softbusBcData)
 static int32_t BuildSoftbusBroadcastData(BroadcastProtocol protocol,
     const BroadcastPacket *packet, SoftbusBroadcastData *softbusBcData)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "packet is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(softbusBcData != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "softbusBcData is nullptr");
-
     softbusBcData->isSupportFlag = packet->isSupportFlag;
     softbusBcData->flag = packet->flag;
 
@@ -2552,10 +2466,6 @@ static int32_t GetScanFreq(uint16_t scanInterval, uint16_t scanWindow)
 static int32_t PerformNormalStartScan(BroadcastProtocol protocol,
     int32_t listenerId, SoftBusBcScanParams *adapterParam, uint32_t *callCount)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterParam != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterParam is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(callCount != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "c is nullptr");
-
     int32_t ret = 0;
     int32_t filterSize = 0;
     SoftBusBcScanFilter *adapterFilter = NULL;
@@ -2584,9 +2494,6 @@ static int32_t PerformNormalStartScan(BroadcastProtocol protocol,
 
 static int32_t CheckNotScaning(int32_t listenerId, SoftBusBcScanParams *adapterParam)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterParam != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterParam is nullptr");
-
     SoftBusBcScanFilter *adapterFilter = NULL;
     int32_t filterSize = 0;
     int32_t ret = 0;
@@ -2654,9 +2561,6 @@ static int32_t ProcessFliterChanged(int32_t listenerId, SoftBusBcScanParams *ada
 
 static int32_t CheckChannelScan(BroadcastProtocol protocol, int32_t listenerId, SoftBusBcScanParams *adapterParam)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(adapterParam != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_BROADCAST, "adapterParam is nullptr");
-
     SoftBusBcScanFilter *adapterFilter = NULL;
     int32_t filterSize = 0;
     int32_t ret = 0;
@@ -2676,7 +2580,7 @@ static int32_t StartScanSub(int32_t listenerId, BroadcastProtocol protocol)
     SoftBusBcScanParams adapterParam;
     BuildSoftBusBcScanParams(&g_scanManager[listenerId].param, &adapterParam);
     CheckScanFreq(listenerId, &adapterParam);
-    
+
     bool isChannelScanning = false;
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
 
@@ -2711,8 +2615,6 @@ NORMAL_START_SCAN:
 
 static int32_t GetFilterIndex(uint8_t *index)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(index != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "index is nullptr");
-
     for (int i = 1; i <= MAX_FILTER_SIZE; i++) {
         if (!g_firstSetIndex[i]) {
             g_firstSetIndex[i] = true;
