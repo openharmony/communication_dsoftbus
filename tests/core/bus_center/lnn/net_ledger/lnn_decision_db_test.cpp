@@ -59,7 +59,8 @@ void LNNDbMockTest::TearDown()
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_001
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_GENERATE_KEY_FAIL
+ *           when LnnGenerateKeyByHuks fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -75,7 +76,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_002
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_GET_PATH_FAILED
+ *           when OpenDatabase and LnnGetFullStoragePath fail
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -97,7 +99,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_002, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_003
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_GET_PATH_FAILED
+ *           when LnnGetFullStoragePath fails after database open
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -121,7 +124,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_003, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_004
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED
+ *           when SoftBusReadFullFile fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -149,7 +153,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_004, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_005
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED
+ *           when LnnDecryptDataByHuks fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -179,7 +184,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_005, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_006
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay returns SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED
+ *           when EncryptedDb fails
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -211,7 +217,8 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_006, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_007
- * @tc.desc: lnn init decision db delay test
+ * @tc.desc: Verify LnnInitDecisionDbDelay initializes decision db delay
+ *           with valid mock return values
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -257,8 +264,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_007, TestSize.Level1)
         .WillByDefault(Return(SOFTBUS_HUKS_DELETE_KEY_ERR));
     ON_CALL(decisionDbMock, CloseDatabase(_))
         .WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs())
-        .WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnGetLocalNum64Info(NUM_KEY_HUKS_TIME, _))
         .WillByDefault(DoAll(SetArgPointee<1>(hukTime), Return(SOFTBUS_OK)));
     ON_CALL(decisionDbMock, GetLooper(_)).WillByDefault(Return(nullptr));
@@ -439,7 +444,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
     ON_CALL(decisionDbMock, LnnDeleteKeyByHuks(_))
         .WillByDefault(Return(SOFTBUS_HUKS_DELETE_KEY_ERR));
     ON_CALL(decisionDbMock, CloseDatabase(_)).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs()).WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnGetLocalNum64Info(NUM_KEY_HUKS_TIME, _))
         .WillByDefault(DoAll(SetArgPointee<1>(hukTime), Return(SOFTBUS_INVALID_PARAM)));
     ON_CALL(decisionDbMock, GetLooper(_)).WillByDefault(Return(nullptr));
@@ -626,8 +630,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_016, TestSize.Level1)
         .WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(decisionDbMock, CloseDatabase(_))
         .WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs())
-        .WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnGetLocalNum64Info(NUM_KEY_HUKS_TIME, _))
         .WillByDefault(DoAll(SetArgPointee<1>(hukTime), Return(SOFTBUS_OK)));
     ON_CALL(decisionDbMock, GetLooper(_))
@@ -717,8 +719,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_018, TestSize.Level1)
         .WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(decisionDbMock, CloseDatabase(_))
         .WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs())
-        .WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnSetLocalNum64Info(_, _))
         .WillByDefault(Return(SOFTBUS_INVALID_PARAM));
     int32_t result = UpdateKeyAndLocalInfo();
@@ -763,8 +763,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_019, TestSize.Level1)
         .WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(decisionDbMock, CloseDatabase(_))
         .WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs())
-        .WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnSetLocalNum64Info(_, _))
         .WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(decisionDbMock, LnnSaveLocalDeviceInfo(_))
@@ -819,8 +817,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_020, TestSize.Level1)
         .WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(decisionDbMock, CloseDatabase(_))
         .WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs())
-        .WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnGetLocalNum64Info(NUM_KEY_HUKS_TIME, _))
         .WillByDefault(DoAll(SetArgPointee<1>(hukTime), Return(SOFTBUS_OK)));
     ON_CALL(decisionDbMock, LnnGetLocalDevInfo(_))
@@ -886,8 +882,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_021, TestSize.Level1)
         .WillByDefault(Return(SOFTBUS_HUKS_DELETE_KEY_ERR));
     ON_CALL(decisionDbMock, CloseDatabase(_))
         .WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs())
-        .WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnGetLocalNum64Info(NUM_KEY_HUKS_TIME, _))
         .WillByDefault(DoAll(SetArgPointee<1>(hukTime), Return(SOFTBUS_OK)));
     ON_CALL(decisionDbMock, LnnSetLocalNum64Info(_, _))
@@ -946,8 +940,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_022, TestSize.Level1)
         .WillByDefault(Return(SOFTBUS_HUKS_DELETE_KEY_ERR));
     ON_CALL(decisionDbMock, CloseDatabase(_))
         .WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(decisionDbMock, SoftBusGetRealTimeMs())
-        .WillByDefault(Return(nowTime));
     ON_CALL(decisionDbMock, LnnGetLocalNum64Info(NUM_KEY_HUKS_TIME, _))
         .WillByDefault(DoAll(SetArgPointee<1>(hukTime), Return(SOFTBUS_OK)));
     ON_CALL(decisionDbMock, GetLooper(_)).WillByDefault(Return(nullptr));

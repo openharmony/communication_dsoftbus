@@ -44,7 +44,7 @@ static int32_t UsbDispatchPublishOption(const PublishOption *option, DiscoverMod
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_USB,
-            "dispatch publish action failed: no implement support capability. capabilityBitmap=%{public}u",
+            "dispatch publish action fail: no implement support capability. capabilityBitmap=%{public}u",
             option->capabilityBitmap[0]);
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
@@ -64,7 +64,7 @@ static int32_t UsbDispatchPublishOption(const PublishOption *option, DiscoverMod
             return mode == DISCOVER_MODE_ACTIVE ? interface->Unpublish(option) : interface->StopScan(option);
         default:
             DISC_LOGE(DISC_USB,
-                "dispatch publish action failed: unsupport type. type=%{public}d, capability=%{public}u",
+                "dispatch publish action fail: unsupport type. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_USB_DISPATCHER_FAILED;
     }
@@ -76,7 +76,7 @@ static int32_t UsbDispatchSubscribeOption(const SubscribeOption *option, Discove
     DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
-        DISC_LOGE(DISC_USB, "dispatch subcribe action failed: no implement support capability. capability=%{public}u",
+        DISC_LOGE(DISC_USB, "dispatch subcribe action fail: no implement support capability. capability=%{public}u",
             option->capabilityBitmap[0]);
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
@@ -95,7 +95,7 @@ static int32_t UsbDispatchSubscribeOption(const SubscribeOption *option, Discove
         case STOPDISCOVERY_FUNC:
             return mode == DISCOVER_MODE_ACTIVE ? interface->StopAdvertise(option) : interface->Unsubscribe(option);
         default:
-            DISC_LOGE(DISC_USB, "dispatch subcribe action failed: unsupport. type=%{public}d, capability=%{public}u",
+            DISC_LOGE(DISC_USB, "dispatch subcribe action fail: unsupport. type=%{public}d, capability=%{public}u",
                 type, option->capabilityBitmap[0]);
             return SOFTBUS_DISCOVER_USB_DISPATCHER_FAILED;
     }
@@ -103,49 +103,41 @@ static int32_t UsbDispatchSubscribeOption(const SubscribeOption *option, Discove
 
 static int32_t UsbDispatchStartActivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_ACTIVE, PUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStartPassivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_PASSIVE, PUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStopActivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_ACTIVE, UNPUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStopPassivePublish(const PublishOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_PASSIVE, UNPUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStartActiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_ACTIVE, STARTDISCOVERTY_FUNC);
 }
 
 static int32_t UsbDispatchStartPassiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STARTDISCOVERTY_FUNC);
 }
 
 static int32_t UsbDispatchStopActiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_ACTIVE, STOPDISCOVERY_FUNC);
 }
 
 static int32_t UsbDispatchStopPassiveDiscovery(const SubscribeOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 

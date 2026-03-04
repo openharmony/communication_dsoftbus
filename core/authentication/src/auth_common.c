@@ -18,7 +18,10 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "auth_deviceprofile.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_log.h"
+#include "auth_manager.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
@@ -392,6 +395,7 @@ static int32_t SetP2pSocketOption(const AuthConnInfo *connInfo, ConnectOption *o
     option->socketOption.keepAlive = 0;
     if (connInfo->type == AUTH_LINK_TYPE_P2P) {
         option->socketOption.moduleId = AUTH_P2P;
+        option->socketOption.keepAlive = 1;
     } else {
         option->socketOption.moduleId = connInfo->info.ipInfo.moduleId;
     }
@@ -504,6 +508,8 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
 
 int32_t ConvertToAuthInfoForSle(const ConnectionInfo *info, AuthConnInfo *connInfo)
 {
+    CHECK_NULL_PTR_RETURN_VALUE(info, SOFTBUS_INVALID_PARAM);
+    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     connInfo->type = AUTH_LINK_TYPE_SLE;
     if (strcpy_s(connInfo->info.sleInfo.sleMac, BT_MAC_LEN, info->sleInfo.address) != EOK ||
         strcpy_s(connInfo->info.sleInfo.networkId, NETWORK_ID_BUF_LEN, info->sleInfo.networkId) != EOK) {
@@ -680,4 +686,70 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
         default:
             break;
     }
+}
+
+int32_t CheckAclInfoIsAccesser(const AuthACLInfo *acl, bool *isAccesser)
+{
+    if (acl == NULL || isAccesser == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char udid[UDID_BUF_LEN] = { 0 };
+    *isAccesser = false;
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local localUdid fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (strcmp(udid, acl->sourceUdid) == 0) {
+        *isAccesser = true;
+        return SOFTBUS_OK;
+    }
+    if (strcmp(udid, acl->sinkUdid) == 0) {
+        *isAccesser = false;
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_AUTH_UK_NOT_FIND;
+}
+
+void SetDpGroupShare(const NodeInfo *info, AuthHandle authHandle)
+{
+    if (info == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return;
+    }
+    bool isNeedUpdateDk = false;
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    SoftBusAclInfo remoteInfo = { 0 };
+    SessionKey sessionKey = { 0 };
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_CONN, "not found auth manager");
+        return;
+    }
+    if (auth->credIdType != ACCOUNT_SHARED) {
+        AUTH_LOGW(AUTH_CONN, "no need handle");
+        DelDupAuthManager(auth);
+        return;
+    }
+    remoteInfo.userId = info->userId;
+    if ((strcpy_s(remoteInfo.credId, CRED_ID_STR_LEN, auth->credId) != EOK) ||
+        (strcpy_s(remoteInfo.shareCredId, CRED_ID_STR_LEN, auth->shareCredId) != EOK) ||
+        (strcpy_s(remoteInfo.udid, UDID_BUF_LEN, info->deviceInfo.deviceUdid) != EOK) ||
+        (strcpy_s(remoteInfo.accountUid, ACCOUNT_UID_STR_LEN, auth->accountUid) != EOK)) {
+        AUTH_LOGE(AUTH_FSM, "strcpy_s fail");
+        DelDupAuthManager(auth);
+        return;
+    }
+    if (auth->isCreatedSessionKey) {
+        if (GetSessionKeyByIndex(&auth->sessionKeyList, TO_INT32(authHandle.authId), authHandle.type,
+            &sessionKey) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "GetSessionKeyByIndex fail");
+            DelDupAuthManager(auth);
+            return;
+        }
+        isNeedUpdateDk = true;
+        AuthDeviceSetIsCreatedSessionKey(authHandle.authId, false);
+    }
+    UpdateGroupShareToDp(&remoteInfo, auth->credIdType, sessionKey, isNeedUpdateDk);
+    DelDupAuthManager(auth);
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }

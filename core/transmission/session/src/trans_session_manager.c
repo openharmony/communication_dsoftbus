@@ -347,7 +347,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
 
 int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
 {
-    if (sessionName == NULL || uid == NULL || pid == NULL) {
+    if (sessionName == NULL || (uid == NULL && pid == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_sessionServerList == NULL) {
@@ -366,8 +366,12 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     Anonymize(sessionName, &tmpName);
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
-            *uid = pos->uid;
-            *pid = pos->pid;
+            if (uid != NULL) {
+                *uid = pos->uid;
+            }
+            if (pid != NULL) {
+                *pid = pos->pid;
+            }
             TRANS_LOGD(TRANS_CTRL, "sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
                 AnonymizeWrapper(tmpName), pos->uid, pos->pid);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);

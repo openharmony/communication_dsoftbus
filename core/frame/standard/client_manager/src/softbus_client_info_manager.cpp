@@ -102,6 +102,23 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
     return SOFTBUS_OK;
 }
 
+int32_t SoftbusClientInfoManager::SoftbusRemoveServiceWithPid(const std::string &pkgName, int32_t pid)
+{
+    std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
+    for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
+        if (iter->first == pkgName && iter->second.first == pid) {
+            iter->second.second.first->RemoveDeathRecipient(iter->second.second.second);
+            (void)clientObjectMap_.erase(iter);
+            COMM_LOGI(COMM_SVC, "[br_proxy]SoftbusRemoveServiceWithPid, pid=%{public}d, pkgName=%{public}s",
+                pid, pkgName.c_str());
+            break;
+        }
+    }
+ 
+    SoftBusUnRegisterDataSyncPermission(pid);
+    return SOFTBUS_OK;
+}
+
 int32_t SoftbusClientInfoManager::GetSoftbusInnerObject(const std::string &pkgName, ISessionListenerInner *listener)
 {
     if (listener == nullptr) {

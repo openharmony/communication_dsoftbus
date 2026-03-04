@@ -223,11 +223,6 @@ int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
     return GetDecisionDbDepsInterface()->LnnCeDecryptDataByHuks(keyAlias, inData, outData);
 }
 
-int64_t SoftBusGetRealTimeMs(void)
-{
-    return GetDecisionDbDepsInterface()->SoftBusGetRealTimeMs();
-}
-
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     return GetDecisionDbDepsInterface()->LnnGetLocalNum64Info(key, info);
@@ -302,6 +297,11 @@ int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
 {
     return GetDecisionDbDepsInterface()->SelectAllAcl(trustedInfoArray, num);
+}
+
+void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy)
+{
+    return GetDecisionDbDepsInterface()->LnnNotifyLpMcuInit(state, strategy);
 }
 } // extern "C"
 } // namespace OHOS

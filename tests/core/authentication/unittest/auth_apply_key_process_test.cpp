@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1155,10 +1155,10 @@ HWTEST_F(AuthApplyKeyProcessTest, SOFTBUS_GENERATE_STR_HASH_FUNC_Test_001, TestS
 HWTEST_F(AuthApplyKeyProcessTest, AUTH_IS_APPLY_KEY_EXPIRED_Test_001, TestSize.Level1)
 {
     bool ret = AuthIsApplyKeyExpired(0);
-    EXPECT_EQ(ret, false);
+    EXPECT_TRUE(ret);
     uint64_t currentTime = SoftBusGetSysTimeMs();
     ret = AuthIsApplyKeyExpired(currentTime - APPLY_KEY_DECAY_TIME + 1);
-    EXPECT_EQ(ret, true);
+    EXPECT_FALSE(ret);
 }
 
 /*

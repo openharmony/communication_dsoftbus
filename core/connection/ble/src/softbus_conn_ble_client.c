@@ -585,7 +585,7 @@ static int32_t NotificatedNetHandler(int32_t underlayerHandle, ConnBleConnection
             ret = UpdateBleConnectionStateInOrder(
                 connection, BLE_CONNECTION_STATE_NET_NOTIFICATED, BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
             if (ret != SOFTBUS_OK) {
-                CONN_LOGE(CONN_BLE, "update connection state failed, connId=%{public}u, handle=%{public}d, "
+                CONN_LOGE(CONN_BLE, "update connection state fail, connId=%{public}u, handle=%{public}d, "
                     "err=%{public}d", connection->connectionId, underlayerHandle, ret);
             }
             return ret;
@@ -593,7 +593,7 @@ static int32_t NotificatedNetHandler(int32_t underlayerHandle, ConnBleConnection
         ret = UpdateBleConnectionStateInOrder(
             connection, BLE_CONNECTION_STATE_NET_NOTIFICATED, BLE_CONNECTION_STATE_MTU_SETTED);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update connection state failed, connId=%{public}u, handle=%{public}d, "
+            CONN_LOGE(CONN_BLE, "update connection state fail, connId=%{public}u, handle=%{public}d, "
                 "err=%{public}d", connection->connectionId, underlayerHandle, ret);
             return ret;
         }
@@ -693,7 +693,7 @@ static void BleOnServiceChangedCallback(int32_t underlayerHandle)
     int32_t ret = ConnPostMsgToLooper(&g_bleGattClientAsyncHandler, MSG_CLIENT_SERVICE_CHANGED,
         underlayerHandle, 0, 0, 0);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE, "post msg to looper failed: handle=%{public}d, err=%{public}d", underlayerHandle, ret);
+        CONN_LOGW(CONN_BLE, "post msg to looper fail: handle=%{public}d, err=%{public}d", underlayerHandle, ret);
     }
 }
 
@@ -726,7 +726,7 @@ static void ServiceChangedMsgHandler(int32_t underlayerHandle)
     do {
         ret = SoftbusGattcSearchServices(underlayerHandle);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "search service failed, connId=%{public}u, handle=%{public}d, err=%{public}d",
+            CONN_LOGE(CONN_BLE, "search service fail, connId=%{public}u, handle=%{public}d, err=%{public}d",
                 connection->connectionId, underlayerHandle, ret);
             ret = RetrySearchService(connection, BLE_CLIENT_SEARCH_SERVICE_ERR);
             break;
@@ -734,7 +734,7 @@ static void ServiceChangedMsgHandler(int32_t underlayerHandle)
         ret = UpdateBleConnectionStateInOrder(
             connection, BLE_CONNECTION_STATE_CONNECTED, BLE_CONNECTION_STATE_SERVICE_SEARCHING);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGW(CONN_BLE, "update conn state failed: connId=%{public}u, handle=%{public}d, err=%{public}d",
+            CONN_LOGW(CONN_BLE, "update conn state fail: connId=%{public}u, handle=%{public}d, err=%{public}d",
                 connection->connectionId, underlayerHandle, ret);
             break;
         }

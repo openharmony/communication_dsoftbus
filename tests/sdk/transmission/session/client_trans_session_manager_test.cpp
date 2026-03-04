@@ -16,6 +16,7 @@
 #include <securec.h>
 
 #include <gtest/gtest.h>
+#include "device_auth.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_trans_def.h"
@@ -79,6 +80,7 @@ void TransClientSessionManagerTest::SetUpTestCase(void)
     SoftbusConfigInit();
     ConnServerInit();
     AuthInit();
+    InitDeviceAuthService();
     BusCenterServerInit();
     TransServerInit();
 }

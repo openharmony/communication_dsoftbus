@@ -1376,4 +1376,19 @@ HWTEST_F(TransTcpDirectP2pTest, UpdateHmlModule001, TestSize.Level1)
     EXPECT_EQ(UNUSE_BUTT, moduleType);
     StopHmlListener(DIRECT_CHANNEL_SERVER_HML_START);
 }
+
+/**
+ * @tc.name: CheckNeedStopMintp001
+ * @tc.desc: Test the function CheckNeedStopMintp abnormal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, CheckNeedStopMintp001, TestSize.Level1)
+{
+    SessionConn conn = { 0 };
+    int32_t ret = CheckNeedStopMintp(&conn);
+    EXPECT_FALSE(ret);
+    ret = CheckNeedStopMintp(nullptr);
+    EXPECT_FALSE(ret);
+}
 }

@@ -45,7 +45,7 @@ config("softbus_connection_br_test_config") {
     "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/lnn",
-    "$dsoftbus_root_path/tests/core/connection/br/mock",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/mock",
     "$dsoftbus_root_path/tests/interfaces/enhance",
     "$softbus_adapter_common/include",
     "$softbus_adapter_common/net/bluetooth/include",
@@ -69,8 +69,8 @@ ohos_unittest("BrConnTest") {
     "hilog:libhilog",
   ]
   sources = [
-    "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_manager_mock.cpp",
-    "softbus_conn_br_manager_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/mock/softbus_conn_br_manager_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/softbus_conn_br_manager_test.cpp",
     "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
   ]
   include_dirs = [
@@ -96,8 +96,8 @@ ohos_unittest("ConnectionBrTest") {
     "hilog:libhilog",
   ]
   sources = [
-    "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_manager_mock.cpp",
-    "softbus_conn_br_trans_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/mock/softbus_conn_br_manager_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/softbus_conn_br_trans_test.cpp",
   ]
 }
 
@@ -121,7 +121,7 @@ ohos_unittest("BrConnectionTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/interfaces/kits/lnn",
-    "$dsoftbus_root_path/tests/core/connection/br/mock",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/mock",
     "$dsoftbus_root_path/core/connection/manager",
   ]
 
@@ -142,8 +142,8 @@ ohos_unittest("BrConnectionTest") {
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_connection.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
-    "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_connection_mock.cpp",
-    "softbus_conn_br_connection_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/mock/softbus_conn_br_connection_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/softbus_conn_br_connection_test.cpp",
   ]
 }
 
@@ -165,7 +165,7 @@ ohos_unittest("BrHidumperTest") {
     "$dsoftbus_root_path/core/connection/br/include",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/tests/core/connection/br/mock",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/mock",
     "$dsoftbus_root_path/core/connection/manager",
   ]
 
@@ -187,8 +187,8 @@ ohos_unittest("BrHidumperTest") {
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_snapshot.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
-    "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_connection_mock.cpp",
-    "connection_br_hidumper_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/mock/softbus_conn_br_connection_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/br/unittest/connection_br_hidumper_test.cpp",
   ]
 }
 

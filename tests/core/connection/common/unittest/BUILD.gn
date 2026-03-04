@@ -153,3 +153,41 @@ ohos_unittest("DataheadTransformTest") {
     "hilog:libhilog",
   ]
 }
+
+ohos_unittest("SoftbusSocketTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock",
+    "$dsoftbus_root_path/dfx/interface/include",
+  ]
+
+  sources = [
+    "$dsoftbus_root_path/core/connection/common/src/softbus_socket.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_usb_tcp_socket.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_mintp_socket.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_htp_socket.c",
+    "$dsoftbus_root_path/tests/core/connection/common/unittest/mock/softbus_socket_mock.cpp",
+    "softbus_socket_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}

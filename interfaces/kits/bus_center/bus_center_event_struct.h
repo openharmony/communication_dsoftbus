@@ -209,6 +209,12 @@ typedef enum {
     SOFTBUS_DEVICE_RISK_UNKNOWN,
 } SoftBusDeviceRiskState;
 
+typedef enum {
+    SOFTBUS_HB_AP_ENABLE,
+    SOFTBUS_HB_AP_DISABLE,
+    SOFTBUS_HB_AP_STATE_UNKNOWN,
+} SoftBusHbApState;
+
 typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
@@ -325,7 +331,8 @@ typedef struct {
 
 typedef struct {
     LnnEventBasicInfo basic;
-    bool enable;
+    int32_t strategy;
+    SoftBusHbApState state;
 } LnnHBEnableStatusChangedEvent;
 
 typedef struct {

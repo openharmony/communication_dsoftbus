@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #define WIFI_SSID_LEN 32
 #define WIFI_MAC_LEN 6
 #define OFFLINE_CODE_LEN 32
@@ -85,7 +84,7 @@ typedef enum {
     DISCOVERY_TYPE_LSA,
     DISCOVERY_TYPE_SLE,
     DISCOVERY_TYPE_SESSION_KEY,
-    DISCOVERY_TYPE_USB,
+    DISCOVERY_TYPE_USB = 8,
     DISCOVERY_TYPE_COUNT,
 } DiscoveryType;
 
@@ -159,9 +158,11 @@ typedef struct {
     char wifiDirectAddr[MAC_LEN];
     char accountHash[SHA_256_HASH_LEN];
     char accountUid[ACCOUNT_UID_STR_LEN];
+    char shareCredId[CRED_ID_STR_LEN];
     unsigned char offlineCode[OFFLINE_CODE_BYTE_SIZE];
     char remotePtk[PTK_DEFAULT_LEN];
     char remoteMetaPtk[PTK_DEFAULT_LEN];
+    char serviceFindCap[SERVICE_FIND_CAP_LEN];
     bool isNeedReSyncDeviceName;
     bool isScreenOn;
     bool initPreventFlag;
@@ -228,6 +229,7 @@ typedef struct {
     AclWriteState aclState;
     unsigned char sparkCheck[SPARK_CHECK_LENGTH];
     int32_t localUserId;
+    uint64_t displayId;
 } NodeInfo;
 
 #ifdef __cplusplus

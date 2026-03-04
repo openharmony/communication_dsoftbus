@@ -54,7 +54,8 @@ void LNNBatteryInfoTest::TearDown() { }
 
 /*
  * @tc.name: LNN_SYNC_BATTERY_INFO_TEST_001
- * @tc.desc: test LnnSyncBatteryInfo
+ * @tc.desc: Verify LnnSyncBatteryInfo with mock ledger returns SOFTBUS_NETWORK_GET_NODE_INFO_ERR
+ *           on first call and SOFTBUS_OK on subsequent calls
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -75,7 +76,8 @@ HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_RECEIVE_BATTERY_INFO_TEST_001
- * @tc.desc: test OnReceiveBatteryInfo
+ * @tc.desc: Verify OnReceiveBatteryInfo handles different info types and message formats
+ *           correctly without causing fatal failures
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

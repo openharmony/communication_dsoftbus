@@ -315,14 +315,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection005, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection006, TestSize.Level1)
 {
-    int32_t ret;
-    ServerState serverState;
-
-    g_serverState = &serverState;
-    ret = ConnBrStartServer();
+    g_serverState.available = true;
+    int32_t ret = ConnBrStartServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    g_serverState = nullptr;
+    g_serverState.available = false;
     ret = ConnBrStartServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -331,11 +328,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection007, TestSize.Level1)
 {
     int32_t ret;
 
-    g_serverState->serverId = 1;
+    g_serverState.serverId = 1;
     ret = ConnBrStopServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    g_serverState = nullptr;
+    g_serverState.serverId = -1;
     ret = ConnBrStopServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -423,10 +420,10 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection012, TestSize.Level1)
 
     serverState = (ServerState *)SoftBusCalloc(sizeof(*serverState));
     ASSERT_NE(nullptr, serverState);
-    serverState->available = 0;
+    serverState->available = true;
     serverState->traceId = 0;
     serverState->serverId = 1;
-    SoftBusMutexInit(&serverState->mutex, nullptr);
+    SoftBusMutexInit(&g_serverStateMutex, nullptr);
     ret = ListenTask((void *)serverState);
     EXPECT_EQ(nullptr, ret);
 }
@@ -1348,7 +1345,11 @@ HWTEST_F(ConnectionBrConnectionTest, BrOnOccupyRelease, TestSize.Level1)
         .arg1 = connection->connectionId,
     };
     BrConnectionMsgHandler(&msg);
-    msg.what = MSG_CONNECTION_UPDATE_PEER_RC + 1;
+    msg.what = MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT;
+    BrConnectionMsgHandler(&msg);
+    EXPECT_EQ(false, connection->isOccupied);
+
+    msg.what = MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT + 1;
     BrConnectionMsgHandler(&msg);
     EXPECT_EQ(false, connection->isOccupied);
 
@@ -1377,5 +1378,18 @@ HWTEST_F(ConnectionBrConnectionTest, WaitNegotiationClosingTimeoutHandler, TestS
     ASSERT_EQ(SOFTBUS_OK, ret);
     WaitNegotiationClosingTimeoutHandler(brConnection->connectionId);
     EXPECT_EQ(BR_CONNECTION_STATE_CLOSED, brConnection->state);
+}
+
+HWTEST_F(ConnectionBrConnectionTest, DisableBrFrequentConnectControl, TestSize.Level1)
+{
+    InitBrManager();
+    const char *mac = "11:22:33:44:66:88";
+    ConnBrConnection *connection = ConnBrCreateConnection(mac, CONN_SIDE_CLIENT, 0);
+    ASSERT_NE(nullptr, connection);
+    connection->isDisableBrFrequentConnectControl = true;
+    int32_t ret = ConnBrSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ret = ConnBrConnect(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

@@ -497,12 +497,10 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_014, TestSize.Leve
     ret = EnableIpSubnet(&subnet);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    EXPECT_CALL(usbMock, LnnGetLocalNumU32Info)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(usbMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, LnnSetNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, LnnClearNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(usbMock, LnnSetLocalNumInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(usbMock, LnnSetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = EnableIpSubnet(&subnet);
     EXPECT_EQ(ret, SOFTBUS_OK);

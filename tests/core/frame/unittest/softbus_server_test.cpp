@@ -61,6 +61,7 @@ static sptr<IRemoteObject> GenerateRemoteObject(void)
  * @tc.name: SoftbusServerTest001
  * @tc.desc: Verify the SoftbusRegisterService function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest001, TestSize.Level1)
@@ -80,6 +81,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest001, TestSize.Level1)
  * @tc.name: SoftbusServerTest002
  * @tc.desc: Verify the OpenAuthSession function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest002, TestSize.Level1)
@@ -100,6 +102,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest002, TestSize.Level1)
  * @tc.name: SoftbusServerTest003
  * @tc.desc: Verify the Dump function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest003, TestSize.Level1)
@@ -121,6 +124,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest003, TestSize.Level1)
  * @tc.name: SoftbusServerTest004
  * @tc.desc: Verify the GetSoftbusSpecObject function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest004, TestSize.Level1)
@@ -136,6 +140,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest004, TestSize.Level1)
  * @tc.name: SoftbusServerTest005
  * @tc.desc: Verify the GetBusCenterExObj function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest005, TestSize.Level1)
@@ -151,6 +156,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest005, TestSize.Level1)
  * @tc.name: SoftbusServerTest006
  * @tc.desc: Verify the EvaluateQos function
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest006, TestSize.Level1)
@@ -176,6 +182,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest006, TestSize.Level1)
  * @tc.name: SoftbusServerTest007
  * @tc.desc: ConvertConnectType api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest007, TestSize.Level1)
@@ -196,6 +203,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest007, TestSize.Level1)
  * @tc.name: SoftbusServerTest008
  * @tc.desc: SoftbusRegisterService api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest008, TestSize.Level1)
@@ -215,6 +223,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest008, TestSize.Level1)
  * @tc.name: SoftbusServerTest009
  * @tc.desc: OpenAuthSession api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest009, TestSize.Level1)
@@ -245,6 +254,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest009, TestSize.Level1)
  * @tc.name: SoftbusServerTest010
  * @tc.desc: adapter func test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest010, TestSize.Level1)
@@ -270,6 +280,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest010, TestSize.Level1)
  * @tc.name: SoftbusServerTest011
  * @tc.desc: adapter func test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest011, TestSize.Level1)
@@ -293,6 +304,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest011, TestSize.Level1)
  * @tc.name: SoftbusServerTest012
  * @tc.desc: ConvertTransType api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest012, TestSize.Level1)
@@ -328,6 +340,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest012, TestSize.Level1)
  * @tc.name: SoftbusServerTest013
  * @tc.desc: ConnGetPeerDeviceId api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest013, TestSize.Level1)
@@ -355,6 +368,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest013, TestSize.Level1)
  * @tc.name: SoftbusServerTest014
  * @tc.desc: Connect api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest014, TestSize.Level1)
@@ -384,6 +398,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest014, TestSize.Level1)
  * @tc.name: SoftbusServerTest015
  * @tc.desc: Disconnect api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest015, TestSize.Level1)
@@ -407,6 +422,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest015, TestSize.Level1)
  * @tc.name: SoftbusServerTest016
  * @tc.desc: Send api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest016, TestSize.Level1)
@@ -430,6 +446,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest016, TestSize.Level1)
  * @tc.name: SoftbusServerTest017
  * @tc.desc: Send api test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(SoftbusServerTest, SoftbusServerTest017, TestSize.Level1)

@@ -117,7 +117,7 @@ void FsmStopCallback(struct tagLnnConnectionFsm *connFsm) { }
 
 /*
  * @tc.name: LNN_CREATE_CONNECTION_FSM_TEST_001
- * @tc.desc: test LnnCreateConnectionFsm with null addr
+ * @tc.desc: Verify LnnCreateConnectionFsm with nullptr addr returns nullptr fsm
  * @tc.type: FUNC
  * @tc.require:I5PRUD
  * @tc.level: Level1
@@ -133,7 +133,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: LNN_START_CONNECTION_FSM_TEST_001
- * @tc.desc: lnn start connection fsm test
+ * @tc.desc: Verify LnnStartConnectionFsm with nullptr connFsm returns SOFTBUS_INVALID_PARAM;
+ *           with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: I5PRUD
  * @tc.level: Level1
@@ -150,7 +151,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_START_CONNECTION_FSM_TEST_001, TestSize.Level
 
 /*
  * @tc.name: LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send join request to conn fsm test
+ * @tc.desc: Verify LnnSendJoinRequestToConnFsm sends join request and handles
+ *           AuthStartVerify result correctly
  * @tc.type: FUNC
  * @tc.require: I5PRUD
  * @tc.level: Level1
@@ -174,7 +176,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
 
 /*
  * @tc.name: LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send auth result msg to conn fsm test
+ * @tc.desc: Verify LnnSendAuthResultMsgToConnFsm with nullptr or dead connFsm
+ *           returns SOFTBUS_INVALID_PARAM; with valid parameters returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -200,7 +203,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_AUTH_RESULT_MSG_TO_CONNFSM_TEST_001, Tes
 
 /*
  * @tc.name: LNN_SEND_NOT_TRUSTED_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send not trusted to conn fsm test
+ * @tc.desc: Verify LnnSendNotTrustedToConnFsm with nullptr connFsm returns
+ *           SOFTBUS_INVALID_PARAM; with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -230,7 +234,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_DISCONNECT_MSG_TO_CONNFSM_TEST_001, Test
 
 /*
  * @tc.name: LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send leave request to conn fsm test
+ * @tc.desc: Verify LnnSendLeaveRequestToConnFsm with nullptr connFsm returns
+ *           SOFTBUS_INVALID_PARAM; with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -247,7 +252,8 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_LEAVE_REQUEST_TO_CONNFSM_TEST_001, TestS
 
 /*
  * @tc.name: LNN_SEND_SYNC_OFFLINE_FINISH_TO_CONNFSM_TEST_001
- * @tc.desc: lnn send sync offline finish to conn fsm test
+ * @tc.desc: Verify LnnSendSyncOfflineFinishToConnFsm with nullptr connFsm returns
+ *           SOFTBUS_INVALID_PARAM; with valid connFsm returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -958,16 +964,17 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Lev
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
 
     ON_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    ON_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillByDefault(Return(false));
 
     const char *udid = "udidTest";
-    UpdateDeviceInfoToMlps(udid);
-    UpdateDeviceInfoToMlps(udid);
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceInfoToMlps(udid));
+    EXPECT_NO_FATAL_FAILURE(UpdateDeviceInfoToMlps(udid));
 }
 
 /*
  * @tc.name: CHECK_REMOTE_ACCOUNT_ID_TEST_001
- * @tc.desc: test CheckRemoteAccountId
+ * @tc.desc: Verify CheckRemoteAccountId checks and updates accountId based on
+ *           local accountId and aclState correctly
  * @tc.type: FUNC
  * @tc.require:
  * @tc.level: Level1
@@ -1280,5 +1287,343 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_005, TestSize.Level0)
         
     int32_t ret = ProcessBleOnline(&nodeInfo, &connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
     EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+}
+
+/*
+ * @tc.name: SET_LNN_TRIGGER_INFO_TEST_001
+ * @tc.desc: test SetLnnTriggerInfo and GetLnnTriggerInfo with valid parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, SET_LNN_TRIGGER_INFO_TEST_001, TestSize.Level1)
+{
+    uint64_t triggerTime = 1000;
+    int32_t deviceCnt = 5;
+    int32_t triggerReason = 1;
+    SetLnnTriggerInfo(triggerTime, deviceCnt, triggerReason);
+    LnnTriggerInfo triggerInfo = {0};
+    GetLnnTriggerInfo(&triggerInfo);
+    EXPECT_EQ(triggerInfo.triggerTime, triggerTime);
+    EXPECT_EQ(triggerInfo.deviceCnt, deviceCnt);
+    EXPECT_EQ(triggerInfo.triggerReason, triggerReason);
+}
+
+/*
+ * @tc.name: SET_LNN_TRIGGER_INFO_TEST_002
+ * @tc.desc: test GetLnnTriggerInfo with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, SET_LNN_TRIGGER_INFO_TEST_002, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(GetLnnTriggerInfo(nullptr));
+}
+
+/*
+ * @tc.name: CHECK_DEAD_FLAG_TEST_001
+ * @tc.desc: test CheckDeadFlag with different flags
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, CHECK_DEAD_FLAG_TEST_001, TestSize.Level1)
+{
+    LnnConnectionFsm testFsm = {};
+    testFsm.isDead = true;
+    EXPECT_TRUE(CheckDeadFlag(&testFsm, true));
+    EXPECT_FALSE(CheckDeadFlag(&testFsm, false));
+    testFsm.isDead = false;
+    EXPECT_FALSE(CheckDeadFlag(&testFsm, true));
+    EXPECT_TRUE(CheckDeadFlag(&testFsm, false));
+}
+
+/*
+ * @tc.name: IS_DEVICE_TYPE_PC_TEST_001
+ * @tc.desc: test IsDeviceTypePc with null info
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_DEVICE_TYPE_PC_TEST_001, TestSize.Level1)
+{
+    EXPECT_FALSE(IsDeviceTypePc(nullptr));
+}
+
+/*
+ * @tc.name: IS_DEVICE_TYPE_PC_TEST_002
+ * @tc.desc: test IsDeviceTypePc with PC device type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_DEVICE_TYPE_PC_TEST_002, TestSize.Level1)
+{
+    NodeInfo info = {};
+    info.deviceInfo.deviceTypeId = TYPE_PC_ID;
+    EXPECT_TRUE(IsDeviceTypePc(&info));
+}
+
+/*
+ * @tc.name: IS_DEVICE_TYPE_PC_TEST_003
+ * @tc.desc: test IsDeviceTypePc with non-PC device type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_DEVICE_TYPE_PC_TEST_003, TestSize.Level1)
+{
+    NodeInfo info = {};
+    info.deviceInfo.deviceTypeId = TYPE_PHONE_ID;
+    EXPECT_FALSE(IsDeviceTypePc(&info));
+}
+
+/*
+ * @tc.name: IS_REPEAT_DEVICE_ID_TEST_001
+ * @tc.desc: test IsRepeatDeviceId with null info
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_REPEAT_DEVICE_ID_TEST_001, TestSize.Level1)
+{
+    EXPECT_FALSE(IsRepeatDeviceId(nullptr));
+}
+
+/*
+ * @tc.name: IS_REPEAT_DEVICE_ID_TEST_002
+ * @tc.desc: test IsRepeatDeviceId with invalid udid length
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_REPEAT_DEVICE_ID_TEST_002, TestSize.Level1)
+{
+    NodeInfo info = {};
+    info.deviceInfo.deviceUdid[0] = 'A';
+    info.deviceInfo.deviceUdid[1] = '\0';
+    EXPECT_FALSE(IsRepeatDeviceId(&info));
+}
+
+/*
+ * @tc.name: NEED_UPDATE_RAW_ENHANCE_P2P_TEST_001
+ * @tc.desc: test NeedUpdateRawEnhanceP2p with non-session type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, NEED_UPDATE_RAW_ENHANCE_P2P_TEST_001, TestSize.Level1)
+{
+    LnnConnectionFsm connFsm = {};
+    connFsm.connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    EXPECT_FALSE(NeedUpdateRawEnhanceP2p(&connFsm));
+}
+
+/*
+ * @tc.name: TRY_UPDATE_RAW_ENHANCE_P2P_TEST_001
+ * @tc.desc: test TryUpdateRawEnhanceP2p with non-session type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, TRY_UPDATE_RAW_ENHANCE_P2P_TEST_001, TestSize.Level1)
+{
+    LnnConnectionFsm connFsm = {};
+    connFsm.connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    EXPECT_NO_FATAL_FAILURE(TryUpdateRawEnhanceP2p(&connFsm));
+}
+
+/*
+ * @tc.name: ON_JOIN_FAIL_TEST_001
+ * @tc.desc: test OnJoinFail with dead flag true
+ * @tc.type: FUNC
+
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, ON_JOIN_FAIL_TEST_001, TestSize.Level1)
+{
+    LnnConnectionFsm connFsm = {};
+    connFsm.isDead = true;
+    int32_t ret = OnJoinFail(&connFsm, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_CONN_FSM_DEAD);
+}
+
+/*
+ * @tc.name: FILTER_RETRIEVE_DEVICE_INFO_TEST_001
+ * @tc.desc: test FilterRetrieveDeviceInfo with valid info
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, FILTER_RETRIEVE_DEVICE_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
+    EXPECT_CALL(lnnConnMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(0));
+    NodeInfo info = {};
+    EXPECT_NO_FATAL_FAILURE(FilterRetrieveDeviceInfo(&info));
+    EXPECT_EQ(info.authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_CLIENT_SIDE], 0);
+    EXPECT_EQ(info.authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_SERVER_SIDE], 0);
+    EXPECT_EQ(info.AuthTypeValue, 0);
+    EXPECT_EQ(info.aclState, ACL_WRITE_DEFAULT);
+}
+
+/*
+ * @tc.name: CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_001
+ * @tc.desc: test ConvertAddrTypeToHisysEvtLinkType with invalid type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_001, TestSize.Level1)
+{
+    SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(CONNECTION_ADDR_MAX);
+    EXPECT_EQ(linkType, SOFTBUS_HISYSEVT_LINK_TYPE_BUTT);
+}
+
+/*
+ * @tc.name: CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_002
+ * @tc.desc: test ConvertAddrTypeToHisysEvtLinkType with WLAN type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_002, TestSize.Level1)
+{
+    SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(CONNECTION_ADDR_WLAN);
+    EXPECT_EQ(linkType, SOFTBUS_HISYSEVT_LINK_TYPE_WLAN);
+}
+
+/*
+ * @tc.name: CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_003
+ * @tc.desc: test ConvertAddrTypeToHisysEvtLinkType with BLE type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_003, TestSize.Level1)
+{
+    SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(CONNECTION_ADDR_BLE);
+    EXPECT_EQ(linkType, SOFTBUS_HISYSEVT_LINK_TYPE_BLE);
+}
+
+/*
+ * @tc.name: CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_004
+ * @tc.desc: test ConvertAddrTypeToHisysEvtLinkType with BR type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, CONVERT_ADDR_TYPE_TO_HISYS_EVT_LINK_TYPE_TEST_004, TestSize.Level1)
+{
+    SoftBusLinkType linkType = ConvertAddrTypeToHisysEvtLinkType(CONNECTION_ADDR_BR);
+    EXPECT_EQ(linkType, SOFTBUS_HISYSEVT_LINK_TYPE_BR);
+}
+
+/*
+ * @tc.name: GET_LNN_ONLINE_TYPE_TEST_001
+ * @tc.desc: test GetLnnOnlineType with different parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, GET_LNN_ONLINE_TYPE_TEST_001, TestSize.Level1)
+{
+    int32_t lnnType = 0;
+    GetLnnOnlineType(false, CONNECTION_ADDR_BLE, &lnnType);
+    EXPECT_EQ(lnnType, LNN_TYPE_BLE_BROADCAST_ONLINE);
+    GetLnnOnlineType(true, CONNECTION_ADDR_BLE, &lnnType);
+    EXPECT_EQ(lnnType, LNN_TYPE_BLE_CONNECT_ONLINE);
+    GetLnnOnlineType(true, CONNECTION_ADDR_WLAN, &lnnType);
+    EXPECT_EQ(lnnType, LNN_TYPE_WIFI_CONNECT_ONLINE);
+    GetLnnOnlineType(true, CONNECTION_ADDR_ETH, &lnnType);
+    EXPECT_EQ(lnnType, LNN_TYPE_WIFI_CONNECT_ONLINE);
+    GetLnnOnlineType(true, CONNECTION_ADDR_BR, &lnnType);
+    EXPECT_EQ(lnnType, LNN_TYPE_BR_CONNECT_ONLINE);
+    GetLnnOnlineType(true, CONNECTION_ADDR_MAX, &lnnType);
+    EXPECT_EQ(lnnType, LNN_TYPE_OTHER_CONNECT_ONLINE);
+}
+
+/*
+ * @tc.name: IS_SUPPORT_FEATURE_BY_CAPABILITY_TEST_001
+ * @tc.desc: test IsSupportFeatureByCapability with different features
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_SUPPORT_FEATURE_BY_CAPABILITY_TEST_001, TestSize.Level1)
+{
+    uint32_t feature = 0x01;
+    EXPECT_TRUE(IsSupportFeatureByCapability(feature, BIT_SUPPORT_EXCHANGE_NETWORKID));
+    EXPECT_FALSE(IsSupportFeatureByCapability(feature, BIT_SUPPORT_SESSION_DUP_BLE));
+}
+
+/*
+ * @tc.name: IS_BASIC_NODE_INFO_CHANGED_TEST_001
+ * @tc.desc: test IsBasicNodeInfoChanged with same info
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_BASIC_NODE_INFO_CHANGED_TEST_001, TestSize.Level1)
+{
+    NodeInfo oldNodeInfo = {};
+    NodeInfo newNodeInfo = {};
+    (void)strcpy_s(oldNodeInfo.networkId, NETWORK_ID_BUF_LEN, "TestNetworkId");
+    (void)strcpy_s(newNodeInfo.networkId, NETWORK_ID_BUF_LEN, "TestNetworkId");
+    (void)strcpy_s(oldNodeInfo.uuid, UUID_BUF_LEN, "TestUuid");
+    (void)strcpy_s(newNodeInfo.uuid, UUID_BUF_LEN, "TestUuid");
+    (void)strcpy_s(oldNodeInfo.softBusVersion, VERSION_MAX_LEN, "1.0");
+    (void)strcpy_s(newNodeInfo.softBusVersion, VERSION_MAX_LEN, "1.0");
+    EXPECT_FALSE(IsBasicNodeInfoChanged(&oldNodeInfo, &newNodeInfo, false));
+}
+
+/*
+ * @tc.name: IS_BASIC_NODE_INFO_CHANGED_TEST_002
+ * @tc.desc: test IsBasicNodeInfoChanged with different networkId
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_BASIC_NODE_INFO_CHANGED_TEST_002, TestSize.Level1)
+{
+    NodeInfo oldNodeInfo = {};
+    NodeInfo newNodeInfo = {};
+    (void)strcpy_s(oldNodeInfo.networkId, NETWORK_ID_BUF_LEN, "OldNetworkId");
+    (void)strcpy_s(newNodeInfo.networkId, NETWORK_ID_BUF_LEN, "NewNetworkId");
+    EXPECT_TRUE(IsBasicNodeInfoChanged(&oldNodeInfo, &newNodeInfo, false));
+}
+
+/*
+ * @tc.name: IS_BASIC_NODE_INFO_CHANGED_TEST_003
+ * @tc.desc: test IsBasicNodeInfoChanged with different uuid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_BASIC_NODE_INFO_CHANGED_TEST_003, TestSize.Level1)
+{
+    NodeInfo oldNodeInfo = {};
+    NodeInfo newNodeInfo = {};
+    (void)strcpy_s(oldNodeInfo.networkId, NETWORK_ID_BUF_LEN, "TestNetworkId");
+    (void)strcpy_s(newNodeInfo.networkId, NETWORK_ID_BUF_LEN, "TestNetworkId");
+    (void)strcpy_s(oldNodeInfo.uuid, UUID_BUF_LEN, "OldUuid");
+    (void)strcpy_s(newNodeInfo.uuid, UUID_BUF_LEN, "NewUuid");
+    EXPECT_TRUE(IsBasicNodeInfoChanged(&oldNodeInfo, &newNodeInfo, false));
+}
+
+/*
+ * @tc.name: IS_BASIC_NODE_INFO_CHANGED_TEST_004
+ * @tc.desc: test IsBasicNodeInfoChanged with different softBusVersion
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_BASIC_NODE_INFO_CHANGED_TEST_004, TestSize.Level1)
+{
+    NodeInfo oldNodeInfo = {};
+    NodeInfo newNodeInfo = {};
+    (void)strcpy_s(oldNodeInfo.networkId, NETWORK_ID_BUF_LEN, "TestNetworkId");
+    (void)strcpy_s(newNodeInfo.networkId, NETWORK_ID_BUF_LEN, "TestNetworkId");
+    (void)strcpy_s(oldNodeInfo.uuid, UUID_BUF_LEN, "TestUuid");
+    (void)strcpy_s(newNodeInfo.uuid, UUID_BUF_LEN, "TestUuid");
+    (void)strcpy_s(oldNodeInfo.softBusVersion, VERSION_MAX_LEN, "1.0");
+    (void)strcpy_s(newNodeInfo.softBusVersion, VERSION_MAX_LEN, "2.0");
+    EXPECT_FALSE(IsBasicNodeInfoChanged(&oldNodeInfo, &newNodeInfo, false));
+}
+
+/*
+ * @tc.name: IS_WIFI_CONNECT_INFO_CHANGED_TEST_002
+ * @tc.desc: test IsWifiConnectInfoChanged with non-WLAN discovery type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
+
+    NodeInfo oldNodeInfo = {};
+    NodeInfo newNodeInfo = {};
+    EXPECT_FALSE(IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN));
 }
 } // namespace OHOS

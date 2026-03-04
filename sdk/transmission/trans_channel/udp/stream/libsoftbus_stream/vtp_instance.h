@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ public:
     static void UpdateSocketStreamCount(bool add);
     static bool InitVtp(const std::string &pkgName);
     static void DestroyVtp(const std::string &pkgName);
-    static void WaitForDestroy(const int &delayTimes);
+    static void WaitForDestroy(const int32_t &delayTimes);
 
 private:
     static constexpr int MAX_DEFAULT_SOCKET_NUM = 100;
@@ -58,10 +58,10 @@ private:
 
     static bool isDebuged_;
     static std::vector<std::string> packetNameArray_;
-    static int socketStreamCount_;
+    static int32_t socketStreamCount_;
     static std::string version_;
     static bool isDestroyed_;
-    static int initVtpCount_;
+    static int32_t initVtpCount_;
     static std::mutex vtpLock_;
     static std::shared_ptr<VtpInstance> instance_;
 };

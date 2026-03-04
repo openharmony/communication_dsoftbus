@@ -347,10 +347,10 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t severRet = remote->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, data, reply, option);
-    if (severRet != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", severRet);
-        return severRet;
+    int32_t serverRet = remote->SendRequest(SERVER_GET_ALL_ONLINE_NODE_INFO, data, reply, option);
+    if (serverRet != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", serverRet);
+        return serverRet;
     }
     return ReadIPCReceiveOnlineNodeInfo(info, infoTypeLen, infoNum, &reply);
 }
@@ -445,6 +445,48 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     if (memcpy_s(buf, len, retBuf, infoLen) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy node key info failed");
         return SOFTBUS_MEM_ERR;
+    }
+    int32_t serverRet = 0;
+    LNN_CHECK_AND_RETURN_RET_LOGE(reply.ReadInt32(serverRet), SOFTBUS_IPC_ERR,
+        LNN_EVENT, "read serverRet failed serverRet = %{public}d", serverRet);
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::SetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key,
+    unsigned char *buf, uint32_t len)
+{
+    if (pkgName == nullptr || networkId == nullptr || buf == nullptr) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteCString(pkgName) || !data.WriteCString(networkId)) {
+        LNN_LOGE(LNN_EVENT, "write client name or networkId failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteInt32(key) || !data.WriteUint32(len)) {
+        LNN_LOGE(LNN_EVENT, "write key or buf len failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteRawData(buf, len)) {
+        LNN_LOGE(LNN_EVENT, "write data level failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (remote->SendRequest(SERVER_SET_NODE_KEY_INFO, data, reply, option) != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed");
+        return SOFTBUS_IPC_ERR;
     }
     int32_t serverRet = 0;
     LNN_CHECK_AND_RETURN_RET_LOGE(reply.ReadInt32(serverRet), SOFTBUS_IPC_ERR,
@@ -1002,10 +1044,10 @@ int32_t BusCenterServerProxy::DeactiveMetaNode(const char *metaNodeId)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t severRet = remote->SendRequest(SERVER_DEACTIVE_META_NODE, data, reply, option);
-    if (severRet != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed, severRet=%{public}d", severRet);
-        return severRet;
+    int32_t serverRet = remote->SendRequest(SERVER_DEACTIVE_META_NODE, data, reply, option);
+    if (serverRet != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, serverRet=%{public}d", serverRet);
+        return serverRet;
     }
     return SOFTBUS_OK;
 }
@@ -1033,10 +1075,10 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t severRet = remote->SendRequest(SERVER_GET_ALL_META_NODE_INFO, data, reply, option);
-    if (severRet != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed, severRet=%{public}d", severRet);
-        return severRet;
+    int32_t serverRet = remote->SendRequest(SERVER_GET_ALL_META_NODE_INFO, data, reply, option);
+    if (serverRet != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, serverRet=%{public}d", serverRet);
+        return serverRet;
     }
     int32_t retInfoNum;
     if (!reply.ReadInt32(retInfoNum)) {

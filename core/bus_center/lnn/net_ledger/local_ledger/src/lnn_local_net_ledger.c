@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1180,7 +1180,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
     char *anonyName = NULL;
     AnonymizeDeviceName((char *)name, &anonyName);
     char *anonyDeviceName = NULL;
-    Anonymize(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s",
         AnonymizeWrapper(anonyBeforeName), AnonymizeWrapper(anonyName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyBeforeName);
@@ -1238,7 +1238,7 @@ static int32_t UpdateUnifiedName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (LnnLedgerAllDataSyncToDB(&nodeInfo, false, NULL) != SOFTBUS_OK) {
+        if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified device name change sync to cloud failed");
         }
     }
@@ -1416,10 +1416,23 @@ int32_t UpdateLocalRole(ConnectRole role)
 
 static int32_t UpdateLocalNetCapability(const void *capability)
 {
-    if (capability == NULL) {
+    CapabilityOption *capabilityOption = (CapabilityOption *)capability;
+    if (capabilityOption == NULL || (capabilityOption->capabilitySet >= (0x1U << BIT_COUNT))) {
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    g_localNetLedger.localInfo.netCapacity = *(int32_t *)capability;
+    uint32_t oldCapacity = g_localNetLedger.localInfo.netCapacity;
+    if (capabilityOption->isAdd) {
+        g_localNetLedger.localInfo.netCapacity |= capabilityOption->capabilitySet;
+    } else {
+        g_localNetLedger.localInfo.netCapacity &= (~(capabilityOption->capabilitySet));
+    }
+    if (oldCapacity == g_localNetLedger.localInfo.netCapacity) {
+        LNN_LOGD(LNN_LEDGER, "not need update feature");
+        return SOFTBUS_NOT_NEED_UPDATE;
+    }
+    LNN_LOGI(LNN_LEDGER, "local net capacity changed=%{public}u->%{public}u, capabilitySet=%{public}u",
+        oldCapacity, g_localNetLedger.localInfo.netCapacity, capabilityOption->capabilitySet);
     return SOFTBUS_OK;
 }
 
@@ -2019,6 +2032,32 @@ static int32_t UpdateLocalUserId(const void *userId)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateDisplayId(const void *displayId)
+{
+    if (displayId == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.displayId = *(uint64_t *)displayId;
+    int32_t ret = LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save local device info fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetDisplayId(void *displayId, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (displayId == NULL || len != sizeof(uint64_t)) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint64_t *)displayId) = info->displayId;
+    return SOFTBUS_OK;
+}
+
 static int32_t L1GetUserId(void *userId, uint32_t len)
 {
     if (userId == NULL || len != sizeof(int32_t)) {
@@ -2045,6 +2084,28 @@ static int32_t UpdateStaticNetCap(const void *capability)
     }
     g_localNetLedger.localInfo.staticNetCap = *(int32_t *)capability;
     return SOFTBUS_OK;
+}
+
+static int32_t LlGetServiceFindCap(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != SERVICE_FIND_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "get service find cap param fail.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (strncpy_s((char *)buf, len, info->serviceFindCap, strlen(info->serviceFindCap)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY serviceFindCap ERROR!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateServiceFindCap(const void *capability)
+{
+    LNN_LOGI(LNN_LEDGER, "update local serviceFindCap[0]=%{public}d->%{public}d",
+        g_localNetLedger.localInfo.serviceFindCap[0], ((char *)capability)[0]);
+    return ModifyId(g_localNetLedger.localInfo.serviceFindCap, SERVICE_FIND_CAP_LEN, (char *)capability);
 }
 
 static int32_t LlGetLocalSleRangeCapacity(void *buf, uint32_t len)
@@ -2081,6 +2142,19 @@ static int32_t LlGetLocalSleAddr(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateHuksKeyTime(const void *huksKeyTime)
+{
+    if (huksKeyTime == NULL) {
+        LNN_LOGE(LNN_LEDGER, "huks key time null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.huksKeyTime = *(uint64_t *)huksKeyTime;
+    if (LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save local device info fail");
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlSetLocalSleAddr(const void *addr)
 {
     if (addr == NULL) {
@@ -2091,19 +2165,6 @@ static int32_t LlSetLocalSleAddr(const void *addr)
     if (rc != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s fail, ret %{public}d", rc);
         return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t UpdateHuksKeyTime(const void *huksKeyTime)
-{
-    if (huksKeyTime == NULL) {
-        LNN_LOGE(LNN_LEDGER, "huks key time null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    g_localNetLedger.localInfo.huksKeyTime = *(uint64_t *)huksKeyTime;
-    if (LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "save local device info fail");
     }
     return SOFTBUS_OK;
 }
@@ -2139,6 +2200,13 @@ static int32_t LlSetLocalAccountUid(const void *accountUid)
         LNN_LOGE(LNN_LEDGER, "input invalid");
         return SOFTBUS_INVALID_PARAM;
     }
+
+    uint32_t accountUidLen = strlen((const char *)accountUid);
+    if (accountUidLen >= ACCOUNT_UID_STR_LEN) {
+        LNN_LOGE(LNN_LEDGER, "accountUid length exceeds limit, len=%{public}u", accountUidLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     errno_t rc = strcpy_s(g_localNetLedger.localInfo.accountUid, ACCOUNT_UID_STR_LEN, (const char *)accountUid);
     if (rc != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s failed, ret=%{public}d", rc);
@@ -2172,6 +2240,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_P2P_IP, IP_LEN, LlGetP2pIp, LlUpdateLocalP2pIp},
     {STRING_KEY_SLE_ADDR, MAC_LEN, LlGetLocalSleAddr, LlSetLocalSleAddr},
     {STRING_KEY_ACCOUNT_UID, ACCOUNT_UID_STR_LEN, LlGetLocalAccountUid, LlSetLocalAccountUid},
+    {STRING_KEY_SERVICE_FIND_CAP, SERVICE_FIND_CAP_LEN, LlGetServiceFindCap, UpdateServiceFindCap},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
     {NUM_KEY_FEATURE_CAPA, -1, LlGetFeatureCapa, UpdateLocalFeatureCapability},
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},
@@ -2209,6 +2278,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
     {BYTE_KEY_SPARK_CHECK, SPARK_CHECK_LENGTH, LlGetSparkCheck, UpdateLocalSparkCheck},
+    {NUM_KEY_DISPLAY_ID, sizeof(uint64_t), L1GetDisplayId, UpdateDisplayId},
 };
 
 static LocalLedgerKeyByIfname g_localKeyByIfnameTable[] = {
@@ -2687,6 +2757,11 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
     return LnnSetLocalInfo(key, (void *)&info);
 }
 
+int32_t LnnSetLocalNumU64Info(InfoKey key, uint64_t info)
+{
+    return LnnSetLocalInfo(key, (void *)&info);
+}
+
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {
     return LnnGetLocalInfo(key, (void *)info, sizeof(int16_t));
@@ -2793,13 +2868,6 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
     }
 }
 
-static void UpdateLocalAuthCapacity(NodeInfo *info)
-{
-    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID || info->deviceInfo.deviceTypeId == TYPE_GLASS_ID) {
-        info->authCapacity &= (~(1 << (uint32_t)BIT_SUPPORT_BR_DUP_BLE));
-    }
-}
-
 static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
 {
     int32_t ret = InitOfflineCode(nodeInfo);
@@ -2816,7 +2884,11 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "init local device info error");
         return ret;
     }
-    UpdateLocalAuthCapacity(nodeInfo);
+    // wearable must update authCapacity after local authCapacity and deviceTypeId are initialized
+    if (nodeInfo->deviceInfo.deviceTypeId == TYPE_WATCH_ID || nodeInfo->deviceInfo.deviceTypeId == TYPE_GLASS_ID) {
+        nodeInfo->authCapacity &= (~(1 << (uint32_t)BIT_SUPPORT_BR_DUP_BLE));
+        nodeInfo->authCapacity &= (~(1 << (uint32_t)BIT_SUPPORT_ENHANCEDP2P_DUP_BLE));
+    }
     ret = InitLocalVersionType(nodeInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local version type error");

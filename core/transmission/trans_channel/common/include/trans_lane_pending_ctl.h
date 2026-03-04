@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,11 +44,12 @@ int32_t TransDeleteLaneReqItemByLaneHandle(uint32_t laneHandle, bool isAsync);
 int32_t TransFreeLaneByLaneHandle(uint32_t laneHandle, bool isAsync);
 
 int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneAllocInfo *allocInfo,
-    uint64_t laneId, uint32_t *laneHandle, const AppInfo *info);
+    uint32_t *laneHandle, uint64_t laneId, const AppInfo *info);
 
 int32_t TransAsyncGetLaneReserveInfo(
     const SessionParam *param, uint32_t *laneHandle, uint64_t laneId, const AppInfo *info);
 
+void ClearSessionParamMemory(SessionParam *param);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

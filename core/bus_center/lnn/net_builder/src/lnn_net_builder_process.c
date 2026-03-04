@@ -39,9 +39,7 @@
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-
 #include "lnn_heartbeat_utils.h"
-
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -69,7 +67,7 @@
 #include "softbus_wifi_api_adapter.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_init.h"
-
+#include "wifi_direct_manager.h"
 
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
@@ -370,19 +368,6 @@ static int32_t ProcessEnhancedP2pDupBle(const DeviceVerifyPassMsgPara *msgPara)
     return ret;
 }
 
-static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, AuthHandle authHandle)
-{
-    SessionKey sessionKey;
-    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    UpdateDpAclParams aclParams = {
-        .accountId = msgPara->nodeInfo->accountId,
-        .deviceId = msgPara->nodeInfo->deviceInfo.deviceUdid,
-        .peerUserId = msgPara->nodeInfo->userId,
-        .localUserId = msgPara->nodeInfo->localUserId
-    };
-    UpdateDpSameAccount(&aclParams, sessionKey, false, msgPara->nodeInfo->aclState);
-}
-
 static int32_t CheckParamValid(const DeviceVerifyPassMsgPara *msgPara)
 {
     if (msgPara == NULL) {
@@ -395,6 +380,19 @@ static int32_t CheckParamValid(const DeviceVerifyPassMsgPara *msgPara)
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
+}
+
+static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, AuthHandle authHandle)
+{
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    UpdateDpAclParams aclParams = {
+        .accountId = msgPara->nodeInfo->accountId,
+        .deviceId = msgPara->nodeInfo->deviceInfo.deviceUdid,
+        .peerUserId = msgPara->nodeInfo->userId,
+        .localUserId = msgPara->nodeInfo->localUserId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, false, msgPara->nodeInfo->aclState);
 }
 
 static int32_t GetPeerDeviceUdid(char *peerNetworkId, char *peerUdid, uint32_t udidLen)
@@ -715,26 +713,45 @@ static int32_t ProcessMasterElect(const void *para)
     return rc;
 }
 
+static bool HasActiveHmlConnection(const char *networkId)
+{
+    NodeInfo info;
+    char myIp[IP_LEN] = { 0 };
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB not support wifi direct");
+        return false;
+    }
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB get node info fail");
+        return false;
+    }
+    if (pManager->getLocalIpByUuid(info.uuid, myIp, sizeof(myIp)) == SOFTBUS_OK) {
+        LNN_LOGI(LNN_HEART_BEAT, "HB get HML ip success");
+        return true;
+    }
+    return false;
+}
+
 static int32_t ProcessLeaveByAddrType(const void *para)
 {
-    bool *addrType = NULL;
+    LeaveMsgByAddrType *leaveMsg = NULL;
     LnnConnectionFsm *item = NULL;
     int32_t rc;
     bool notify = true;
-
     if (para == NULL) {
         LNN_LOGW(LNN_BUILDER, "leave by addr type msg para is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    addrType = (bool *)para;
+    leaveMsg = (LeaveMsgByAddrType *)para;
     LIST_FOR_EACH_ENTRY(item, &LnnGetNetBuilder()->fsmList, LnnConnectionFsm, node) {
-        if (!addrType[item->connInfo.addr.type]) {
+        if (!leaveMsg->addrType[item->connInfo.addr.type]) {
             continue;
         }
         // if there are any same addr type, let last one send notify
         notify = false;
-        if (item->isDead) {
+        if (item->isDead || (leaveMsg->needCheckHml && HasActiveHmlConnection(item->connInfo.peerNetworkId))) {
             continue;
         }
         rc = LnnSendLeaveRequestToConnFsm(item);
@@ -745,11 +762,13 @@ static int32_t ProcessLeaveByAddrType(const void *para)
         }
     }
     LNN_LOGD(LNN_BUILDER, "notify=%{public}d, eth=%{public}d, wifi=%{public}d, usb=%{public}d", notify,
-        addrType[CONNECTION_ADDR_ETH], addrType[CONNECTION_ADDR_WLAN], addrType[CONNECTION_ADDR_NCM]);
-    if (notify && (addrType[CONNECTION_ADDR_ETH] || addrType[CONNECTION_ADDR_WLAN] || addrType[CONNECTION_ADDR_NCM])) {
+        leaveMsg->addrType[CONNECTION_ADDR_ETH], leaveMsg->addrType[CONNECTION_ADDR_WLAN],
+        leaveMsg->addrType[CONNECTION_ADDR_NCM]);
+    if (notify && (leaveMsg->addrType[CONNECTION_ADDR_ETH] || leaveMsg->addrType[CONNECTION_ADDR_WLAN] ||
+        leaveMsg->addrType[CONNECTION_ADDR_NCM])) {
         (void)LnnNotifyAllTypeOffline(CONNECTION_ADDR_MAX);
     }
-    RemovePendingRequestByAddrType(addrType, CONNECTION_ADDR_MAX);
+    RemovePendingRequestByAddrType(leaveMsg->addrType, CONNECTION_ADDR_MAX);
     SoftBusFree((void *)para);
     return SOFTBUS_OK;
 }

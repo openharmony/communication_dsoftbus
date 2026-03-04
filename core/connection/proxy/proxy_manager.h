@@ -74,7 +74,7 @@ typedef struct {
 
 typedef struct {
     void (*onOpenSuccess)(uint32_t requestId, struct ProxyChannel *channel);
-    void (*onOpenFail)(uint32_t requestId, int32_t reason);
+    void (*onOpenFail)(uint32_t requestId, int32_t reason, const char *brMac);
 } OpenProxyChannelCallback;
 
 typedef struct {

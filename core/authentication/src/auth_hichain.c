@@ -26,14 +26,14 @@
 #include "bus_center_manager.h"
 #include "device_auth.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_connection_fsm.h"
-#include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_net_builder.h"
-#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
+#include "lnn_connection_fsm.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -288,6 +288,7 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnRequest: authSeq=%{public}" PRId64 ", operationCode=%{public}d", authSeq,
         operationCode);
     char udid[UDID_BUF_LEN] = {0};
+    int32_t peerUserId = AuthSessionGetUserId(authSeq);
     if (AuthSessionGetUdid(authSeq, udid, sizeof(udid)) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "get udid fail");
         return NULL;
@@ -306,7 +307,6 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
 
     bool bFlag = version < AUTH_VERSION_V2;
     char localUdid[UDID_BUF_LEN] = {0};
-    int32_t peerUserId = AuthSessionGetUserId(authSeq);
     LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
     if (!AddNumberToJsonObject(msg, FIELD_CONFIRMATION, REQUEST_ACCEPTED) ||
         !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||

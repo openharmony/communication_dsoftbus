@@ -206,5 +206,10 @@ bool LnnIsNeedInterceptBroadcast(bool disableGlass)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnIsNeedInterceptBroadcast(disableGlass);
 }
+
+bool LnnIsLocalSupportMcuFeature(void)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnIsLocalSupportMcuFeature();
+}
 }
 } // namespace OHOS

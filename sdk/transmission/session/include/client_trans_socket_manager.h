@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,8 @@
 #ifndef CLIENT_TRANS_SESSION_OPERATE_H
 #define CLIENT_TRANS_SESSION_OPERATE_H
 
-#include "inner_socket.h"
-
 #include "client_trans_session_manager.h"
+#include "inner_socket.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,10 +41,8 @@ bool IsValidSessionParam(const SessionParam *param);
 
 SessionInfo *CreateNewSession(const SessionParam *param);
 
-DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server);
-
-DestroyMultiPathSessionInfo *CreateMPDestroySessionNode(
-    SessionInfo *sessionNode, const ClientSessionServer *server, bool mainLaneLinkDown);
+DestroySessionInfo *CreateDestroySessionNode(
+    SessionInfo *sessionNode, const ClientSessionServer *server, LinkDownType linkDownType);
 
 void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason);
 

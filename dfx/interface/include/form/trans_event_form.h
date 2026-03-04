@@ -134,6 +134,10 @@ typedef enum {
     EVENT_STAGE_CHANNEL_STATUS = 3,
     EVENT_STAGE_INTERNAL_STATE = 4,
     EVENT_STAGE_RECV_DATA = 5,
+    EVENT_STAGE_CLOSE_BR_PROXY = 6,
+    EVENT_STAGE_DISCONNECT = 7,
+    EVENT_STAGE_RECONNECT = 8,
+    EVENT_STAGE_LISTENER_STATUS = 9,
 } TransEventBrProxy;
 
 typedef struct {
@@ -209,8 +213,13 @@ typedef struct {
     int32_t fileChannelCnt;
     int32_t streamChannelCnt;
     int32_t dataLen;
-    uint64_t sessionDuration;    // SESSION_DURATION
-    uint8_t channelStatus;     // BR_PROXY_CHANNEL_STATUS
+    uint64_t sessionDuration;   // SESSION_DURATION
+    uint8_t channelStatus;      // BR_PROXY_CHANNEL_STATUS
+    int32_t userId;             // USER_ID
+    int32_t appIndex;           // APP_INDEX
+    int32_t callUid;            // CALL_UID
+    int32_t listenerType;       // LISTENER_TYPE
+    int32_t listenerStatus;     // LISTENER_STATUS
 } TransEventExtra;
 
 typedef enum {

@@ -191,7 +191,8 @@ static int32_t SetIpDown()
 
 /*
  * @tc.name: NET_BusCenter_IP_Change_Monitor_Test_001
- * @tc.desc: IP change monitor test
+ * @tc.desc: Verify IP change monitor correctly updates local IP address
+ *           when IP is set to 192.168.50.10
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J3
@@ -209,7 +210,8 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_001, TestSize.Le
 
 /*
  * @tc.name: NET_BusCenter_IP_Change_Monitor_Test_002
- * @tc.desc: IP change monitor test
+ * @tc.desc: Verify IP change monitor correctly updates local IP address
+ *           to 127.0.0.1 when IP is set to 0.0.0.0
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J3
@@ -226,7 +228,8 @@ HWTEST_F(NetBusCenterTest, NET_BusCenter_IP_Change_Monitor_Test_002, TestSize.Le
 
 /*
  * @tc.name: NET_BusCenter_IP_Change_Monitor_Test_003
- * @tc.desc: IP change monitor test
+ * @tc.desc: Verify IP change monitor correctly updates local IP address
+ *           to 127.0.0.1 when network interface is brought down
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require: AR000FK6J3

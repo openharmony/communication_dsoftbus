@@ -291,11 +291,17 @@ static void HbSleStateEventHandler(const LnnEventBasicInfo *info)
 
 static void HbUpdateEnableStatusToMcu(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "local support mcu feature=%{public}d", LnnIsLocalSupportMcuFeature());
-    if (LnnIsLocalSupportMcuFeature() && g_enableStateMcu != IsHeartbeatEnableForMcu()) {
-        g_enableStateMcu = IsHeartbeatEnableForMcu();
-        LnnNotifyLpMcuInit(g_enableStateMcu);
+    bool isBleEnable = IsHeartbeatEnableForMcu();
+
+    if (!LnnIsLocalSupportMcuFeature()) {
+        return;
     }
+    if (isBleEnable == g_enableStateMcu) {
+        return;
+    }
+    g_enableStateMcu = isBleEnable;
+    SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
+    LnnNotifyLpMcuInit(state, 0);
 }
 
 static void HbConditionChanged(bool isOnlySetState)
@@ -357,7 +363,7 @@ static void RequestEnableDiscovery(void *para)
 {
     (void)para;
     if (!g_hbConditionState.isRequestDisable) {
-        LNN_LOGI(LNN_HEART_BEAT, "ble has been enabled, don't need  restore enabled");
+        LNN_LOGI(LNN_HEART_BEAT, "ble has been enabled, don't need restore enabled");
         return;
     }
     g_hbConditionState.isRequestDisable = false;
@@ -384,11 +390,11 @@ static void RequestDisableDiscovery(int64_t timeout)
     HbConditionChanged(false);
 }
 
-static int32_t SameAccountDevDisableDiscoveryProcess(void)
+static int32_t SameAccountDevDisableDiscoveryProcess(bool hasMcuRequestDisable)
 {
     bool addrType[CONNECTION_ADDR_MAX] = {false};
     addrType[CONNECTION_ADDR_BLE] = true;
-    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, hasMcuRequestDisable) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "leave ble network fail");
     }
     return LnnSyncBleOfflineMsgPacked();
@@ -396,7 +402,14 @@ static int32_t SameAccountDevDisableDiscoveryProcess(void)
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter");
+    if (LnnIsLocalSupportMcuFeature()) {
+        SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
+        LnnNotifyLpMcuInit(state, strategy);
+        if (strategy == SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY) {
+            SameAccountDevDisableDiscoveryProcess(true);
+        }
+        return;
+    }
     switch (strategy) {
         case REQUEST_DISABLE_BLE_DISCOVERY:
             RequestDisableDiscovery(timeout);
@@ -406,7 +419,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             break;
         case SAME_ACCOUNT_REQUEST_DISABLE_BLE_DISCOVERY:
             RequestDisableDiscovery(INVALID_DELAY_TIME);
-            SameAccountDevDisableDiscoveryProcess();
+            SameAccountDevDisableDiscoveryProcess(false);
             break;
         case SAME_ACCOUNT_REQUEST_ENABLE_BLE_DISCOVERY:
             RequestEnableDiscovery(NULL);
@@ -1294,7 +1307,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_OK;
 }
 
-int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
+int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
 {
     if (mode == NULL || callerId == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "shift lnn gear get invalid param");
@@ -1313,7 +1326,7 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
         return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
     }
-    int32_t i, infoNum;
+    int32_t infoNum;
     char uuid[UUID_BUF_LEN] = { 0 };
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
@@ -1327,7 +1340,7 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
     int32_t ret;
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    for (i = 0; i < infoNum; ++i) {
+    for (int32_t i = 0; i < infoNum; ++i) {
         ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
         if (ret != SOFTBUS_OK || !LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI)) {
             continue;

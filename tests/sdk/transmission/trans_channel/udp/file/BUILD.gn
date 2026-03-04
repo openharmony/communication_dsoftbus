@@ -123,8 +123,60 @@ if (defined(ohos_lite)) {
     ]
   }
 
+  ohos_unittest("ClientTransFileTest") {
+    module_out_path = module_output_path
+    sources = [
+      "client_trans_file_test.cpp",
+      "mock/client_trans_file_mock.cpp",
+    ]
+
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/core",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
+      "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+      "$dsoftbus_root_path/adapter/common/security/access_token/include",
+      "$dsoftbus_root_path/tests/sdk/common/include",
+      # Add current directory for mock headers
+      "$dsoftbus_root_path/tests/sdk/transmission/trans_channel/udp/file",
+    ]
+
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+    ]
+
+    if (!defined(global_parts_info) ||
+      defined(global_parts_info.communication_dsoftbus_service_ext)) {
+      deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
+    } else {
+      deps += [ "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open" ]
+    }
+
+    external_deps = [
+      "bounds_checking_function:libsec_static",
+      "c_utils:utils",
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  }
+
   group("unittest") {
     testonly = true
-    deps = [ ":TransSdkFileTest" ]
+    deps = [
+      ":TransSdkFileTest",
+      ":ClientTransFileTest",
+    ]
   }
 }

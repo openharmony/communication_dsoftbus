@@ -93,13 +93,13 @@ int32_t ServiceStatusMonitorManager::SubscribeSaById(int32_t saId)
 
 void ServiceStatusMonitorManager::UnSubscribeSaById(int32_t saId)
 {
+    if (statusLisener_ == nullptr) {
+        LNN_LOGE(LNN_EVENT, "listener is nullptr");
+        return;
+    }
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "get samgr proxy failed");
-        return;
-    }
-    if (statusLisener_ == nullptr) {
-        LNN_LOGE(LNN_EVENT, "listener is nullptr");
         return;
     }
     int32_t ret = samgrProxy->UnSubscribeSystemAbility(saId, statusLisener_);

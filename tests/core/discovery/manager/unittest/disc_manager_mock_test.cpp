@@ -144,7 +144,7 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
     nfcMock.SetupStub();
     EXPECT_CALL(nfcMock, DiscNfcDispatcherInit).WillRepeatedly(Return(nullptr));
 
-    EXPECT_NE(DiscMgrInit(), SOFTBUS_OK);
+    EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
     DiscMgrDeinit();
     DISC_LOGI(DISC_TEST, "DiscManagerInit001 end ----");
 }
@@ -539,7 +539,7 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe001, TestSize.Level1)
 
     info.mode = DISCOVER_MODE_PASSIVE;
     info.medium = COAP1;
-    EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_INVALID_PARAM);
+    EXPECT_NE(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_INVALID_PARAM);
 
     info.medium = BLE;
     info.freq = FREQ_BUTT;

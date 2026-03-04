@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "device_auth.h"
 #include "lnn_decision_db.h"
 #include "message_handler.h"
 #include "softbus_feature_config.h"
@@ -58,6 +60,7 @@ void TransTcpDirectMessageTest::SetUpTestCase(void)
     SoftbusConfigInit();
     ConnServerInit();
     AuthInit();
+    InitDeviceAuthService();
     BusCenterServerInit();
     TransServerInit();
     TransProxyPipelineInit();

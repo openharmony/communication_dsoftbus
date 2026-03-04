@@ -56,7 +56,8 @@ void LNNDataCloudSyncTest::TearDown() { }
 
 /*
  * @tc.name: LnnAsyncCallLedgerAllDataSyncToDB_Test_001
- * @tc.desc: LnnAsyncCallLedgerAllDataSyncToDB
+ * @tc.desc: Verify LnnAsyncCallLedgerAllDataSyncToDB with nullptr info returns
+ *           SOFTBUS_INVALID_PARAM; with valid info and accountId=0 returns SOFTBUS_KV_CLOUD_DISABLED
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -83,7 +84,8 @@ HWTEST_F(LNNDataCloudSyncTest, LnnAsyncCallLedgerAllDataSyncToDB_Test_001, TestS
 
 /*
  * @tc.name: LnnLedgerDataChangeSyncToDB_Test_002
- * @tc.desc: LnnLedgerDataChangeSyncToDB
+ * @tc.desc: Verify LnnLedgerDataChangeSyncToDB with nullptr key returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -98,7 +100,8 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Le
 
 /*
  * @tc.name: LnnDBDataChangeSyncToCache_Test_003
- * @tc.desc: LnnDBDataChangeSyncToCache
+ * @tc.desc: Verify LnnDBDataChangeSyncToCache with nullptr key or value returns
+ *           SOFTBUS_INVALID_PARAM; with DB_DELETE type returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -123,7 +126,8 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_003, TestSize.Lev
 
 /*
  * @tc.name: LnnDBDataAddChangeSyncToCache_Test_004
- * @tc.desc: LnnDBDataAddChangeSyncToCache
+ * @tc.desc: Verify LnnDBDataAddChangeSyncToCache with nullptr key returns
+ *           SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:

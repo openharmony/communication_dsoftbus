@@ -115,7 +115,7 @@ static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
         return SOFTBUS_NETWORK_SUBNET_STATUS_ERR;
     }
     LNN_LOGI(LNN_BUILDER, "br subnet is disable, start leave br network");
-    int32_t ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
+    int32_t ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "leave br network fail, ret=%{public}d", ret);
         return ret;
@@ -134,7 +134,7 @@ static int32_t DisableBleSubnet(LnnPhysicalSubnet *subnet)
         return SOFTBUS_NETWORK_SUBNET_STATUS_ERR;
     }
     LNN_LOGI(LNN_BUILDER, "ble subnet is disable, start leave ble network");
-    ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
+    ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "leave ble network fail, ret=%{public}d", ret);
         return ret;

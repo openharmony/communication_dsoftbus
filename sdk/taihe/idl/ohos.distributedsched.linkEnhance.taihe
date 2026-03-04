@@ -1,0 +1,57 @@
+/*
+ * Copyright (C) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.distributedsched.linkEnhance", "linkEnhance")
+
+@!sts_inject("""
+static { loadLibraryWithPermissionCheck("linkEnhance_taihe_native.z", "@ohos.distributedsched.linkEnhance") }
+ """)
+@!sts_inject_into_module("import { Callback } from '@ohos.base';")
+
+struct ConnectResult {
+    deviceId: String;
+    success: bool;
+    reason: i32;
+}
+
+interface Server {
+    Start(): void;
+    Stop(): void;
+    Close(): void;
+    OnConnectionAccepted(callback: (connection: Connection) => void): void;
+    OffConnectionAccepted(callback: Optional<(connection: Connection) => void>): void;
+    OnServerStopped(callback: (result: i32) => void): void;
+    OffServerStopped(callback: Optional<(result: i32) => void>): void;
+    GetServerImpl(): i64;
+}
+
+function CreateServer(name: String): Server;
+
+interface Connection {
+    Connect(): void;
+    Disconnect(): void;
+    Close(): void;
+    GetPeerDeviceId(): String;
+    SendData(data: @arraybuffer Array<u8>): void;
+    OnConnectResult(callback: (connectResult: ConnectResult) => void): void;
+    OffConnectResult(callback: Optional<(connectResult: ConnectResult) => void>): void;
+    OnDisconnected(callback: (result: i32) =>void): void;
+    OffDisconnected(callback: Optional<(result: i32) =>void>): void;
+    OnDataReceived(callback: (arraybuffer: @arraybuffer Array<u8>) => void): void;
+    OffDataReceived(callback: Optional<(arraybuffer: @arraybuffer Array<u8>) => void>): void;
+    GetConnectionImpl(): i64;
+}
+
+function CreateConnection(deviceId: String, name: String): Connection;

@@ -22,7 +22,7 @@ namespace Communication {
 namespace SoftBus {
 class StreamDepacketizer {
 public:
-    explicit StreamDepacketizer(int type) : streamType_(type) {}
+    explicit StreamDepacketizer(int32_t type) : streamType_(type) {}
     virtual ~StreamDepacketizer() = default;
 
     void DepacketizeHeader(const char *header);
@@ -62,17 +62,17 @@ public:
         return std::move(data_);
     }
 
-    int GetDataLength() const
+    int32_t GetDataLength() const
     {
         return dataLength_;
     }
 
 private:
-    int streamType_;
+    int32_t streamType_;
     StreamPacketHeader header_ {};
     TwoLevelsTlv tlvs_ {};
     std::unique_ptr<char[]> data_ = nullptr;
-    int dataLength_ = 0;
+    int32_t dataLength_ = 0;
 };
 } // namespace SoftBus
 } // namespace Communication

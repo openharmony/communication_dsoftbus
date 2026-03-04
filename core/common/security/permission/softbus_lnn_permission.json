@@ -80,9 +80,9 @@
   {
     "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_JOIN_METANODE",
     "PROCESS_NAME": [
+      "cast_engine_service",
       "CollaborationFwk",
       "car_distributed_engine",
-      "cast_engine_service",
       "wear_link_service",
       "device_manager"
     ]
@@ -90,9 +90,9 @@
   {
     "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_LEAVE_METANODE",
     "PROCESS_NAME": [
+      "cast_engine_service",
       "CollaborationFwk",
       "car_distributed_engine",
-      "cast_engine_service",
       "wear_link_service",
       "device_manager"
     ]
@@ -113,48 +113,6 @@
     "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_GET_HISTORY_NODE_INFO",
     "PROCESS_NAME": [
       "maintenance_service"
-    ]
-  },
-  {
-    "INTERFACE_NAME": "EX_OBJ_CMD_SET_PRE_LINK_PARAM",
-    "PROCESS_NAME": [
-      "CollaborationFwk"
-    ]
-  },
-  {
-    "INTERFACE_NAME": "EX_OBJ_CMD_GET_PRE_LINK_PARAM",
-    "PROCESS_NAME": [
-      "CollaborationFwk"
-    ]
-  },
-  {
-    "INTERFACE_NAME": "EX_OBJ_CMD_REG_PRE_LINK_PARAM_CHANGE",
-    "PROCESS_NAME": [
-      "CollaborationFwk"
-    ]
-  },
-  {
-    "INTERFACE_NAME": "EX_OBJ_CMD_RESOURCE_CONFLICT_CHECK",
-    "PROCESS_NAME": [
-      "CollaborationFwk"
-    ]
-  },
-  {
-    "INTERFACE_NAME": "EX_OBJ_CMD_CONFLICT_LISTENER",
-    "PROCESS_NAME": [
-      "CollaborationFwk"
-    ]
-  },
-  {
-    "INTERFACE_NAME": "EX_OBJ_CMD_RESOLVE_CONFLICT",
-    "PROCESS_NAME": [
-      "CollaborationFwk"
-    ]
-  },
-  {
-    "INTERFACE_NAME": "EX_OBJ_CMD_QUERY_VALID_QOS",
-    "PROCESS_NAME": [
-      "distributedsched"
     ]
   },
   {
@@ -200,6 +158,48 @@
     ]
   },
   {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SET_PRE_LINK_PARAM",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_GET_PRE_LINK_PARAM",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_REG_PRE_LINK_PARAM_CHANGE",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_RESOURCE_CONFLICT_CHECK",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_CONFLICT_LISTENER",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_RESOLVE_CONFLICT",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_QUERY_VALID_QOS",
+    "PROCESS_NAME": [
+      "distributedsched"
+    ]
+  },
+  {
     "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_PUBLISH_SERVICE",
     "PROCESS_NAME": [
       "device_manager"
@@ -219,6 +219,12 @@
   },
   {
     "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_STOP_DISCOVERY_SERVICE",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_SET_NODE_KEY_INFO",
     "PROCESS_NAME": [
       "device_manager"
     ]

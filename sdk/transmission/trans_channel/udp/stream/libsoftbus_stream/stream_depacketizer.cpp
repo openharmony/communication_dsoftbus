@@ -49,7 +49,7 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
         ptr += tlvTotalLen;
     }
 
-    dataLength_ = static_cast<int>(header_.GetDataLen() - tlvTotalLen);
+    dataLength_ = static_cast<int32_t>(header_.GetDataLen() - tlvTotalLen);
     if (dataLength_ <= 0 || dataLength_ > MAX_STREAM_LEN) {
         TRANS_LOGE(
             TRANS_STREAM,
@@ -57,7 +57,7 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
         return;
     }
 
-    int remain = static_cast<int>(bufferSize - (ptr - buffer));
+    int32_t remain = static_cast<int32_t>(bufferSize - (ptr - buffer));
     if (remain < dataLength_) {
         TRANS_LOGE(TRANS_STREAM, "Data out of bounds, remain=%{public}d, dataLen=%{public}d", remain, dataLength_);
         return;

@@ -120,7 +120,8 @@
         "time_service",
         "napi",
         "resource_schedule_service",
-        "device_standby"
+        "device_standby",
+        "runtime_core"
       ],
       "third_party": [
         "cJSON",
@@ -138,7 +139,8 @@
         "base_group":[],
         "fwk_group":[
           "//foundation/communication/dsoftbus/sdk:softbus_client",
-          "//foundation/communication/dsoftbus/br_proxy:br_proxy"
+          "//foundation/communication/dsoftbus/br_proxy:br_proxy",
+          "//foundation/communication/dsoftbus/br_proxy/taihe:proxychannelmanager_taihe"
         ],
         "service_group":[
           "//foundation/communication/dsoftbus/core:softbus_server",
@@ -189,7 +191,6 @@
               "authentication/enhance/auth_attest_interface_struct.h",
               "authentication/enhance/auth_device_common_key_struct.h",
               "broadcast/enhance/broadcast_scheduler_type_struct.h",
-              "broadcast/enhance/broadcast_struct.h",
               "broadcast/enhance/link_broadcast_manager_struct.h",
               "broadcast/broadcast_dfx_event_struct.h",
               "broadcast/broadcast_protocol_constant_struct.h",
@@ -258,7 +259,6 @@
               "lnn/enhance/lnn_lane_score_struct.h",
               "lnn/enhance/lnn_lane_vap_info_struct.h",
               "lnn/enhance/lnn_secure_storage_struct.h",
-              "lnn/enhance/lnn_ranging_manager_struct.h",
               "lnn/lnn_topo_manager_struct.h",
               "lnn/enhance/lnn_time_sync_impl_struct.h",
               "lnn/lnn_usb_adapter_struct.h",
@@ -350,6 +350,9 @@
             ],
             "header_base": "//foundation/communication/dsoftbus/dfx/interface/include"
           }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/br_proxy/taihe:proxychannelmanager_taihe_idl"
         }
       ],
       "test": [

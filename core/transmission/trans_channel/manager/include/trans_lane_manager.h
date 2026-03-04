@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define TRANS_LANE_MANAGER_H
 
 #include <stdint.h>
+
 #include "lnn_lane_interface.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
@@ -51,7 +52,7 @@ int32_t TransGetChannelInfoByLaneHandle(uint32_t laneHandle, int32_t *channelId,
 int32_t TransAddSocketChannelInfo(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state);
 
-int32_t TransAddSocketChannelInfoMP(
+int32_t TransAddSocketChannelInfoMultipath(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state);
 
 int32_t TransUpdateSocketChannelInfo(
@@ -86,13 +87,11 @@ int32_t TransGetConnectTypeByChannelId(int32_t channelId, ConnectType *connectTy
 
 int32_t TransGetTransLaneInfoByLaneHandle(uint32_t laneHandle, TransLaneInfo *laneInfo);
 
-int32_t TransGetMultiPathSessionId(int32_t *sessionId, int32_t *channelId);
+void TransGetMultipathReallocList(ListNode *multipathReallocList);
 
-int32_t GetPathTransitionTypeByLaneHandle(uint32_t laneHandle, PathTransitionType *transType);
+int32_t TransGetSocketChannelStateReserveBySession(const char *sessionName, int32_t sessionId, CoreSessionState *state);
 
-int32_t TransGetSocketChannelStateReserveBySession(const char *sessionName, int32_t SessionId, CoreSessionState *state);
-
-int32_t TransSetSocketChannelStateReserveBySession(const char *sessionName, int32_t SessionId, CoreSessionState state);
+int32_t TransSetSocketChannelStateReserveBySession(const char *sessionName, int32_t sessionId, CoreSessionState state);
 
 bool CheckNeedReallocSecondLane(int32_t channelId);
 
@@ -100,10 +99,11 @@ int32_t TransAddSessionParamBySessionId(const char *sessionName, int32_t session
 
 int32_t TransGetSessionParamByChannelId(int32_t channelId, SessionParam *param);
 
-int32_t TransDeleteSocketChannelInfoReserveBySession(const char *sessionName, int32_t sessionId);
+int32_t TransClearSocketChannelInfoReserveBySession(const char *sessionName, int32_t sessionId);
 
-void printchannelInfoSa(int32_t channelId);
+int32_t CopySessionParam(const SessionParam *source, SessionParam *target);
 
+int32_t CopySessionParamExtension(const SessionParam *source, SessionParam *target);
 
 #ifdef __cplusplus
 }

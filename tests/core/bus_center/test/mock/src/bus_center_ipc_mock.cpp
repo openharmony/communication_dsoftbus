@@ -67,6 +67,11 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uin
     return BusCenterIpcInterfaceInstance()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
 }
 
+int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
+{
+    return BusCenterIpcInterfaceInstance()->LnnSetNodeKeyInfo(networkId, key, info, infoLen);
+}
+
 int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
 {
     return BusCenterIpcInterfaceInstance()->LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);

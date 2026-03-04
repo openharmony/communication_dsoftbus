@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 #endif /* __cplusplus */
+
 int32_t SoftBusGetSelfTokenId(uint64_t *selfTokenId);
 int32_t SoftBusGetCallingTokenId(uint32_t *callingTokenId);
 int32_t SoftBusGetCallingFullTokenId(uint64_t *callingFullTokenId);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_ip_utils_adapter.h"
 #include "lnn_linkwatch.h"
+#include "lnn_local_net_ledger_struct.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
@@ -59,20 +60,9 @@ static bool IsValidUsbIfname(const char* ifname)
 
 static void UpdateUsbNetCap(bool isSet)
 {
-    uint32_t netCapability = 0;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get netcap fail");
-        return;
-    }
-    if (isSet) {
-        (void)LnnSetNetCapability(&netCapability, BIT_USB);
-    } else {
-        (void)LnnClearNetCapability(&netCapability, BIT_USB);
-    }
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
-        return;
-    }
+    CapabilityOption setCapability = {.isAdd = isSet ? true : false, .capabilitySet = 0};
+    (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_USB);
+    (void)LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&setCapability, sizeof(CapabilityOption));
 }
 
 static int32_t GetIpAddrFromNetlink(const char *ifName, char *ip, uint32_t size)
@@ -191,7 +181,7 @@ static int32_t OpenSessionPort(void)
         LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
-    int32_t port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
+    int32_t port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_USB, &info);
     if (port < 0) {
         LNN_LOGE(LNN_BUILDER, "open session server failed");
         return SOFTBUS_INVALID_PORT;
@@ -273,7 +263,7 @@ static void LeaveOldIpNetwork(const char *ifCurrentName)
         addrType[type] = true;
     }
     LNN_LOGI(LNN_BUILDER, "LNN start leave ip network");
-    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
+    if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LNN leave ip network fail");
     }
 }
@@ -455,7 +445,7 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
     if (subnet == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invaild subnet paramter");
+        LNN_LOGE(LNN_BUILDER, "invalid subnet parameter");
         if (status != NULL) {
             SoftBusFree(status);
         }

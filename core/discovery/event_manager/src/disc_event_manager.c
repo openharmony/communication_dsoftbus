@@ -21,22 +21,22 @@
 int32_t DiscEventManagerInit(void)
 {
     int32_t ret = DiscApproachBleEventInitPacked();
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init approach ble event failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init approach ble event fail");
 
     ret = DiscVLinkBleEventInitPacked();
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init vlink ble event failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init vlink ble event fail");
 
     ret = DiscTouchBleEventInitPacked();
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init touch ble event failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init touch ble event fail");
 
     ret = DiscOopBleEventInitPacked();
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init oop ble event failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init oop ble event fail");
 
     ret = DiscPcCollaborationEventInitPacked();
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init pc collaboration event failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init pc collaboration event fail");
 
     ret = DiscShareNfcEventInitPacked();
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init share nfc event failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init share nfc event fail");
 
     DISC_LOGI(DISC_INIT, "disc event manager init succ");
     return SOFTBUS_OK;

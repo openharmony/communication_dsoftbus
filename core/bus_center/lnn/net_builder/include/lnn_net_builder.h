@@ -30,6 +30,11 @@
 extern "C" {
 #endif
 
+typedef struct {
+    bool addrType[CONNECTION_ADDR_MAX];
+    bool needCheckHml;
+} LeaveMsgByAddrType;
+
 int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
@@ -38,7 +43,7 @@ int32_t LnnSetReSyncDeviceName(void);
 int32_t LnnNotifyDiscoveryDevice(
     const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
-int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable);
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason);
 void LnnRequestLeaveAllOnlineNodes(void);
 int32_t LnnRequestLeaveInvalidConn(const char *oldNetworkId, ConnectionAddrType addrType, const char *newNetworkId);

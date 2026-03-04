@@ -75,6 +75,7 @@ ohos_unittest("SoftbusServerStubTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "device_auth:deviceauth_sdk",
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",

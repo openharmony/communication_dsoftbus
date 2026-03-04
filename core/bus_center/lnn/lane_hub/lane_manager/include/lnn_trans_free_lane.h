@@ -23,6 +23,15 @@
 extern "C" {
 #endif
 
+typedef enum {
+    NOTIFY_TYPE_NORMAL,
+    NOTIFY_TYPE_FREE_BEFORE_ALLOC_SUCC,
+    NOTIFY_TYPE_ALLOC_SUCC_AFTER_FREE,
+    NOTIFY_TYPE_ALLOC_SUCC_AFTER_CANCEL,
+    NOTIFY_TYPE_UNUSED,
+    NOTIFY_TYPE_UNKNOWN,
+} NotifyFreeType;
+
 void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode);
 void HandleDelayDestroyLink(SoftBusMessage *msg);
 void HandelNotifyFreeLaneResult(SoftBusMessage *msg);
