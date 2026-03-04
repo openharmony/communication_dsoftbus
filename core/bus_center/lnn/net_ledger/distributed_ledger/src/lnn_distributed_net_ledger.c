@@ -2387,7 +2387,7 @@ bool IsRemoteDeviceSupportBleGuide(const char *id, IdCategory type)
 }
 
 
-bool LnnIsRemoteSupportAuthCapBit(cont char *networkid, AuthCapability capaBit)
+bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit)
 {
     if (networkid == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
