@@ -172,7 +172,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
         TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
         return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
     }
-
+    std::shared_ptr<StreamAdaptor> newAdaptor = nullptr;
     {
         std::lock_guard<std::mutex> lock(g_mutex);
         it = g_adaptorMap.find(channelId);
@@ -184,9 +184,9 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
             TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
             return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
         }
+        newAdaptor = it->second;
     }
 
-    auto newAdaptor = it->second;
     newAdaptor->InitAdaptor(channelId, param, true, callback);
 
     Communication::SoftBus::IpAndPort ipPort;
@@ -217,7 +217,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
         TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
         return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
     }
-
+    std::shared_ptr<StreamAdaptor> newAdaptor = nullptr;
     {
         std::lock_guard<std::mutex> lock(g_mutex);
         it = g_adaptorMap.find(channelId);
@@ -229,9 +229,9 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
             TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
             return SOFTBUS_TRANS_ADAPTOR_ALREADY_EXISTED;
         }
+        newAdaptor = it->second;
     }
 
-    auto newAdaptor = it->second;
     newAdaptor->InitAdaptor(channelId, param, false, callback);
 
     Communication::SoftBus::IpAndPort ipPort;
