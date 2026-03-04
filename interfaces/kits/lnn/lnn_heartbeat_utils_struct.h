@@ -109,12 +109,67 @@ typedef uint32_t LnnHeartbeatType;
 
 #define HB_USER_SWITCH_CALLER_ID "HEARTBEAT_USER_SWITCH_CALLER_ID"
 
+#define POS_HB_RSP_DB_SWITCH_LEVEL 4
+#define HB_RSP_DB_SWITCH_NUM_PER_BYTE 8
+#define HB_RSP_DB_SWITCH_COUNT_LEN 1
+#define HB_RSP_DB_SWITCH_MAX_LEN 4
+#define HB_DB_DYNAMIC_LEVEL_INVALID 0xFFFF
+#define HB_DB_STATIC_LEVEL_INVALID 0xFFFF
+#define HB_DB_SWITCH_LEVEL_INVALID 0xFFFFFFFF
+#define HB_DB_SWITCH_LENGTH_INVALID 0xFFFF
+#define SLE_ASSEMBLE_ONE_BYTE_LEN 1
+
+#define SLE_DEV_STATUS_DEV_STATE_BIT (0x1L << 0)
+#define SLE_DEV_STATUS_FEATURE_LIST_BIT (0x1L << 1)
+#define SLE_DEV_STATUS_STATE_FLAG_BIT (0x1L << 2)
+#define SLE_DEV_STATUS_USER_FALG_BIT (0x1L << 3)
+#define SLE_DEV_STATUS_VAP_NUMS_BIT (0x1L << 4)
+#define SLE_DEV_STATUS_BLE_CONN_NUMS_BIT (0x1L << 5)
+
+#define SLE_DEV_STATE_LOCKED (0x1L << 0)
+#define SLE_DEV_STATE_SCREEN_ON (0x1L << 1)
+#define SLE_DEV_STATE_SCREEN_PLUGGED (0x1L << 0)
+#define SLE_DEV_STATE_SCREEN_OFFLINE (0x1L << 0)
+
+#define SLE_DEV_STATUS_DATA_LEN 3
+
+#define SLE_DEV_INFO_DEV_TYPE_BIT (0x1L << 0)
+#define SLE_DEV_INFO_DEV_WEIGHT_BIT (0x1L << 1)
+#define SLE_DEV_INFO_DEV_NAME_BIT (0x1L << 2)
+
+#define SLE_DEV_INFO_DEV_TYPE_LEN 3
+#define SLE_DEV_INFO_DEV_WEIGHT_LEN 3
+#define SLE_DEV_INFO_DEV_NAME_LEN 64
+
+#define SLE_MAIN_USER_ID_BIT (0x1L << 0)
+#define SLE_MAIN_USER_SWTICH_BIT (0x1L << 1)
+#define SLE_MAIN_USER_DB_STATIC_BIT (0x1L << 2)
+#define SLE_MAIN_USER_DB_DYNAMIC_BIT (0x1L << 3)
+
+#define SLE_MAIN_USER_ID_LEN 4
+#define SLE_MAIN_USER_DB_SWITCH_MAX_LEN 4
+#define SLE_MAIN_USER_DB_STATIC_LEN 2
+#define SLE_MAIN_USER_DB_DYNAMIC_LEN 2
+#define DEVICE_NAME_BUF_LEN 128
+
 typedef struct {
     bool isScreenOn;
     bool isLocked;
     bool isPlugged;
     bool isOffline;
     uint8_t netcap;
+    uint8_t devType[SLE_DEV_INFO_DEV_TYPE_LEN];
+    uint8_t devWeight[SLE_DEV_INFO_DEV_WEIGHT_LEN];
+    char DevName[DEVICE_NAME_BUF_LEN];
+    uint8_t advUserId[SLE_MAIN_USER_ID_LEN];
+    int16_t stateVersion;
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
+    char udid[UDID_BUF_LEN];
+    uint16_t staticLength;
+    uint16_t staticLevel;
+    uint16_t switchLength;
+    uint32_t switchLevel;
+    uint16_t dynamicLevel;
 } SleDeviceInfo;
 
 typedef enum {

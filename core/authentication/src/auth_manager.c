@@ -303,7 +303,7 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType typ
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth manager already removed, authId=%{public}" PRId64, authId);
+        AUTH_LOGE(AUTH_CONN, "auth manager already removed, authId=%{public}" PRId64, authId);
         ReleaseAuthLock();
         return;
     }
@@ -997,6 +997,17 @@ static void NotifyAuthResult(AuthHandle authHandle, const AuthSessionInfo *info)
     }
 }
 
+static void SetCredInfoToAuthManager(AuthManager *auth, const AuthSessionInfo *info)
+{
+    if ((strcpy_s(auth->credId, CRED_ID_STR_LEN, info->credId) != EOK) ||
+        (strcpy_s(auth->shareCredId, CRED_ID_STR_LEN, info->nodeInfo.shareCredId) != EOK) ||
+        (strcpy_s(auth->accountUid, ACCOUNT_UID_STR_LEN, info->nodeInfo.accountUid) != EOK)) {
+        AUTH_LOGE(AUTH_FSM, "strcpy_s fail");
+        return;
+    }
+    auth->credIdType = info->credIdType;
+}
+
 void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
@@ -1015,6 +1026,7 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
         ReleaseAuthLock();
         return;
     }
+    SetCredInfoToAuthManager(auth, info);
     int64_t index = authSeq;
     if (info->normalizedType == NORMALIZED_SUPPORT) {
         index = info->normalizedIndex;
@@ -2390,7 +2402,7 @@ int32_t AuthDeviceSetIsCreatedSessionKey(int64_t authId, const bool isCreatedSes
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        AUTH_LOGE(AUTH_INIT, "auth manager not found, authId=%{public}" PRId64, authId);
+        AUTH_LOGE(AUTH_FSM, "auth manager not found, authId=%{public}" PRId64, authId);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
     }
