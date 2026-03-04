@@ -485,15 +485,14 @@ bool CompareByAclDiffAccountWithUserLevel(const AuthACLInfo *oldAcl, const AuthA
             AUTH_LOGE(AUTH_CONN, "same side compare fail");
             return false;
         }
-        return true;
     } else {
         if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
             oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId) {
             AUTH_LOGE(AUTH_CONN, "diff side compare fail");
             return false;
         }
-        return true;
     }
+    return true;
 }
 
 bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
