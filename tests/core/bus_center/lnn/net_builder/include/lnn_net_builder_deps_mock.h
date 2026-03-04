@@ -215,7 +215,7 @@ public:
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
     virtual bool IsSameAccountId(int64_t accountId) = 0;
     virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
-    virtual bool LnnIsRemoteSupportAuthCapBit(cont char *networkid, AuthCapability capaBit) = 0;
+    virtual bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
