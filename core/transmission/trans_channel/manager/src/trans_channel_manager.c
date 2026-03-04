@@ -605,16 +605,17 @@ int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
         return ret;
     }
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannelSecond, sessionId=%{public}d", param.sessionId);
+    uint32_t laneHandle = INVALID_LANE_REQ_ID;
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "calloc appInfo failed.");
+        ClearSessionParamMemory(&param);
         return SOFTBUS_MALLOC_ERR;
     }
     ret = TransCommonGetAppInfo(&param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appinfo failed");
-        TransFreeAppInfo(appInfo);
-        return ret;
+        goto EXIT_CLEAR;
     }
     appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
     appInfo->linkedChannelId = channelId;
@@ -623,11 +624,9 @@ int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
     ret = TransUpdateSocketChannelInfo(param.sessionName, param.sessionId, true);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Add socket channel record failed");
-        TransFreeAppInfo(appInfo);
-        return ret;
+        goto EXIT_CLEAR;
     }
     TransOpenChannelSecondDFXEvent(&param, appInfo);
-    uint32_t laneHandle = INVALID_LANE_REQ_ID;
     ret = TransAsyncGetLaneReserveInfo(&param, &laneHandle, laneId, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "realloc lane failed for sessionId=%{public}d", param.sessionId);
@@ -636,6 +635,9 @@ int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId)
         }
         (void)TransClearSocketChannelInfoReserveBySession(param.sessionName, param.sessionId);
     }
+    goto EXIT_CLEAR;
+EXIT_CLEAR:
+    ClearSessionParamMemory(&param);
     TransFreeAppInfo(appInfo);
     return ret;
 }
