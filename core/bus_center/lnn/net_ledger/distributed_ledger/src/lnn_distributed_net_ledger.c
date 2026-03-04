@@ -2386,7 +2386,6 @@ bool IsRemoteDeviceSupportBleGuide(const char *id, IdCategory type)
     return true;
 }
 
-
 bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit)
 {
     if (networkid == NULL) {
@@ -2407,7 +2406,7 @@ bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit)
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     char *anonyNetworkId = NULL;
     Anonymize(networkid, &anonyNetworkId);
-    LNN_LOGI(LNN_LEDGER, "peer networkid=%{pubilc}s, authCapacity=%{pubilc}u, capaBit=%{pubilc}d",
+    LNN_LOGI(LNN_LEDGER, "peer networkid=%{public}s, authCapacity=%{public}d, capaBit=%{public}d",
         AnonymizeWrapper(anonyNetworkId), authCapacity, capaBit);
     AnonymizeFree(anonyNetworkId);
     return ((authCapacity & (1 << (uint32_t)capaBit)) != 0);
