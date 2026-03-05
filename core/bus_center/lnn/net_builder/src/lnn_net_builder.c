@@ -558,7 +558,7 @@ void OnLnnProcessNotTrustedMsgDelay(void *para)
     for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
         DiscoveryType type = typeList[i];
         if (type == DISCOVERY_TYPE_SESSION_KEY &&
-            LnnIsRemoteSupportAuthCapBit(networkId, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE)) {
+            (!LnnIsRemoteSupportAuthCapBit(networkId, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE))) {
             continue;
         }
         LNN_LOGI(
@@ -624,7 +624,7 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
     for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
         DiscoveryType type = typeList[i];
         if (type == DISCOVERY_TYPE_SESSION_KEY &&
-            LnnIsRemoteSupportAuthCapBit(networkId, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE)) {
+            (!LnnIsRemoteSupportAuthCapBit(networkId, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE))) {
             continue;
         }
         LNN_LOGI(LNN_BUILDER, "authSeq:%{public}" PRId64 "->%{public}" PRId64, curAuthSeq[type], authSeq[type]);
