@@ -500,7 +500,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
- HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos002, TestSize.Level1)
+HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos002, TestSize.Level1)
 {
     SessionParam *newParam = TestCreateNewSessionParam();
     ASSERT_TRUE(newParam != nullptr);
@@ -1072,7 +1072,7 @@ HWTEST_F(TransLanePendingTest, TransFreeLaneByLaneHandle001, TestSize.Level1)
     EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillOnce(Return(nullptr));
     int32_t ret = TransFreeLaneByLaneHandle(laneReqId, true);
     EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
-    
+
     EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     ret = TransFreeLaneByLaneHandle(laneReqId, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1335,7 +1335,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfo002, TestSize.Level1)
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = TransAsyncGetLaneInfo(param, &laneHandle, &appInfo);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_TYPE, ret);
-    
+
     EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillRepeatedly(Return(LANE_T_MSG));
     EXPECT_CALL(TransLanePendingMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransLanePendingMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
@@ -1490,7 +1490,7 @@ HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest001, TestSize.Level1)
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, LnnGetOsTypeByNetworkId)
         .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
-    
+
     EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
 
     AppInfo appInfo;
@@ -1509,7 +1509,7 @@ HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest002, TestSize.Level1)
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, LnnGetOsTypeByNetworkId)
         .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
-    
+
     EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransLanePendingMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND));
 
@@ -1529,7 +1529,7 @@ HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest003, TestSize.Level1)
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, LnnGetOsTypeByNetworkId)
         .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
-    
+
     EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransLanePendingMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -1543,4 +1543,193 @@ HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest003, TestSize.Level1)
     int32_t ret = TransProxyGetAppInfo(TEST_SESSION_NAME, TEST_DEVICE_ID, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest001
+ * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit = 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest001, TestSize.Level1)
+{
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 0;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = 0;
+
+    LaneLinkType type = LANE_USB;
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+    EXPECT_EQ(0, appInfo.udpChannelCapability);
+}
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest002
+ * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit > 0 and dataType != TYPE_FILE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest002, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_BYTES;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 1 << LINK_TYPE_WIRED;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = 0;
+
+    LaneLinkType type = LANE_USB;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+    EXPECT_EQ(0, appInfo.udpChannelCapability);
+}
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest003
+ * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit > 0, dataType = TYPE_FILE, type = LANE_USB
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest003, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_FILE;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 1 << LINK_TYPE_WIRED;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = 0;
+
+    LaneLinkType type = LANE_USB;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+}
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest004
+ * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit > 0, dataType = TYPE_FILE, type != LANE_USB
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest004, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_FILE;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 1 << LINK_TYPE_WIRED;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = 0;
+
+    LaneLinkType type = LANE_BR;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+    EXPECT_EQ(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+}
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest005
+ * @tc.desc: Test UpdateChannelCancelEncryption with existing capability bits
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest005, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_FILE;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 1 << LINK_TYPE_WIRED;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = (1 << UDP_CHANNEL_MULTIPATH_OFFSET) | (1 << CHANNEL_ISMULTINEG_OFFSET);
+
+    LaneLinkType type = LANE_USB;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_MULTIPATH_OFFSET));
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1 << CHANNEL_ISMULTINEG_OFFSET));
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+}
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest006
+ * @tc.desc: Test UpdateChannelCancelEncryption disables bit when cancelEncryptionBit = 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest006, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_FILE;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 0;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = (1 << UDP_CHANNEL_CANCEL_ENCRYPTION) | (1 << UDP_CHANNEL_MULTIPATH_OFFSET);
+
+    LaneLinkType type = LANE_USB;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+
+    EXPECT_EQ(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_MULTIPATH_OFFSET));
+}
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest007
+ * @tc.desc: Test UpdateChannelCancelEncryption with wrong link type bit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest007, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_FILE;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 1 << LINK_TYPE_WIFI;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = 0;
+
+    LaneLinkType type = LANE_USB;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+    EXPECT_EQ(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+}
+
 } // namespace OHOS

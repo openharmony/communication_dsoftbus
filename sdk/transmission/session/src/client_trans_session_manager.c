@@ -569,6 +569,7 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
     if (session->isD2D) {
         session->isPagingRoot = false;
     }
+    session->cancelEncryptionBit = 0;
     ClientSessionServer *serverNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if (strcmp(serverNode->sessionName, sessionName) != 0) {
@@ -2264,6 +2265,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     param.isAsync = isAsync;
     param.sessionId = sessionId;
     param.enableMultipath = sessionNode->enableMultipath;
+    param.cancelEncryptionBit = sessionNode->cancelEncryptionBit;
     ret = SetSessionStateBySessionId(param.sessionId, SESSION_STATE_OPENING, 0);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_SDK, "set session state failed, maybe cancel, ret=%{public}d", ret);
@@ -4011,4 +4013,29 @@ int32_t SaveAddrInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t
         return SOFTBUS_INVALID_PARAM;
     }
     return TransSetUdpChannelExtraInfo(channelId, addr, addrLen);
+}
+
+int32_t ClientCancelEncryption(int32_t socket, const LinkMediumType type)
+{
+    if (socket <= 0 || type <= LINK_TYPE_UNKNOWN || type >= LINK_MEDIUM_TYPE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    TRANS_LOGE(TRANS_SDK, "CancelEncryption succ. socket=%{public}d", socket);
+    sessionNode->cancelEncryptionBit |= 1 << type;
+    UnlockClientSessionServerList();
+    return ret;
 }

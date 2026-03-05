@@ -25,9 +25,10 @@
 extern "C" {
 #endif
 
-#define UDP_CHANNEL_MULTIPATH_OFFSET 1
-#define CHANNEL_ISMULTINEG_OFFSET 2
-#define TRANS_UDP_CHANNEL_CAPBILITY 6 /* bit1 & bit2 */
+#define UDP_CHANNEL_MULTIPATH_OFFSET 1 /* bit1 */
+#define CHANNEL_ISMULTINEG_OFFSET 2 /* bit2 */
+#define UDP_CHANNEL_CANCEL_ENCRYPTION 3 /* bit3 */
+#define TRANS_UDP_CHANNEL_CAPBILITY 14 /* bit1 & bit2 & bit3 */
 
 SoftBusList *GetUdpChannelMgrHead(void);
 

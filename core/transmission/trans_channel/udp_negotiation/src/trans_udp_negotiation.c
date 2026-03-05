@@ -21,6 +21,7 @@
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
@@ -211,6 +212,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.connectType = appInfo->connectType;
     info.isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
     info.enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
+    info.cancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
     info.linkedChannelId = appInfo->linkedChannelId;
     TransGetLaneIdByChannelId(appInfo->myData.channelId, &info.laneId);
     ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
@@ -681,6 +683,42 @@ static int32_t TransGetUdpChannelLocalIp(AuthHandle authHandle, AppInfo *appInfo
     return SOFTBUS_OK;
 }
 
+static int32_t ParseRequestAppInfoEx(AppInfo *appInfo, AuthHandle authHandle)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
+    int32_t ret = SOFTBUS_OK;
+    if (appInfo->callingTokenId != TOKENID_NOT_SET) {
+        if (appInfo->osType != OH_OS_TYPE) {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", appInfo->osType);
+        } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
+            ret = TransCheckServerAccessControl(appInfo);
+            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "acl check failed.");
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check");
+        }
+    }
+    appInfo->enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
+    appInfo->isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
+    if (GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION) &&
+        !CancelEncryptionCheckPacked(NULL, (pid_t)appInfo->myData.uid)) {
+        TRANS_LOGW(TRANS_CTRL, "No support cancel encryption, uid=%{public}d", appInfo->myData.uid);
+        DisableCapabilityBit(&appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    }
+    appInfo->cancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    if (TransCheckServerPermission(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    }
+
+    if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
+        return SOFTBUS_OK;
+    }
+
+    TransSetUdpConnectTypeByAuthType(&appInfo->connectType, authHandle);
+    ret = TransGetUdpChannelLocalIp(authHandle, appInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get udp channel local ip failed.");
+    return SOFTBUS_OK;
+}
+
 static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppInfo *appInfo)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
@@ -710,32 +748,7 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         &appInfo->myData.pid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get uid and pid failed, ret=%{public}d", ret);
-
-    if (appInfo->callingTokenId != TOKENID_NOT_SET) {
-        if (appInfo->osType != OH_OS_TYPE) {
-            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", appInfo->osType);
-        } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
-            ret = TransCheckServerAccessControl(appInfo);
-            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "acl check failed.");
-        } else {
-            TRANS_LOGI(TRANS_CTRL, "not support acl check");
-        }
-    }
-    appInfo->enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
-    appInfo->isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
-
-    if (TransCheckServerPermission(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
-        return SOFTBUS_PERMISSION_SERVER_DENIED;
-    }
-
-    if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
-        return SOFTBUS_OK;
-    }
-
-    TransSetUdpConnectTypeByAuthType(&appInfo->connectType, authHandle);
-    ret = TransGetUdpChannelLocalIp(authHandle, appInfo);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get udp channel local ip failed.");
-    return SOFTBUS_OK;
+    return ParseRequestAppInfoEx(appInfo, authHandle);
 }
 
 /**

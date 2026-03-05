@@ -2169,4 +2169,140 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest66, TestSiz
     ret = ClientGetChannelBusinessTypeByChannelId(TRANS_TEST_CHANNEL_ID, &businessType);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
+
+/*
+ * @tc.name: ClientCancelEncryptionTest001
+ * @tc.desc: test ClientCancelEncryption with invalid socket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientCancelEncryptionTest001, TestSize.Level1)
+{
+    int32_t ret = ClientCancelEncryption(0, LINK_TYPE_WIRED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientCancelEncryption(-1, LINK_TYPE_WIRED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientCancelEncryption(1, LINK_TYPE_UNKNOWN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientCancelEncryption(1, LINK_MEDIUM_TYPE_MAX);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ClientCancelEncryptionTest002
+ * @tc.desc: test ClientCancelEncryption when session not found
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientCancelEncryptionTest002, TestSize.Level1)
+{
+    TransClientInit();
+    int32_t ret = ClientCancelEncryption(1, LINK_TYPE_WIRED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientCancelEncryptionTest003
+ * @tc.desc: test ClientCancelEncryption with valid session
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientCancelEncryptionTest003, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    EXPECT_TRUE(sessionParam != nullptr);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    int32_t sessionId = 1;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientCancelEncryption(sessionId, LINK_TYPE_WIRED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientCancelEncryption(sessionId, LINK_TYPE_WIFI);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientCancelEncryptionTest004
+ * @tc.desc: test ClientCancelEncryption with multiple link types
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientCancelEncryptionTest004, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    EXPECT_TRUE(sessionParam != nullptr);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    int32_t sessionId = 1;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientCancelEncryption(sessionId, LINK_TYPE_WIRED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientCancelEncryption(sessionId, LINK_TYPE_WIFI);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientCancelEncryptionTest005
+ * @tc.desc: test ClientCancelEncryption with file data type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientCancelEncryptionTest005, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    EXPECT_TRUE(sessionParam != nullptr);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    g_sessionAttr.dataType = TYPE_FILE;
+    GenerateCommParam(sessionParam);
+    int32_t sessionId = 1;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientCancelEncryption(sessionId, LINK_TYPE_WIRED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    g_sessionAttr.dataType = TYPE_BYTES;
+    TransClientDeinit();
+}
 }

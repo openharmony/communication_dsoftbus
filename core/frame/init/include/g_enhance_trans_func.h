@@ -59,6 +59,8 @@ typedef bool (*TransCheckDcTriggerVirtualLinkFunc)(const char *sessionName, cons
 typedef int32_t (*LoadTransPermissionJsonFunc)(void);
 typedef void (*TransD2dQosUnregisterFunc)(int32_t channelId, char *sleMac, uint32_t macLen);
 typedef bool (*IsMultipathWhitelistFunc)(const char *processName, bool *isWhitelist);
+typedef bool (*CancelEncryptionCheckFunc)(const char *processName, pid_t callingUid);
+typedef bool (*PermissionCheckFunc)(void);
 
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
@@ -90,6 +92,8 @@ typedef struct TagTransEnhanceFuncList {
     LoadTransPermissionJsonFunc loadTransPermissionJson;
     TransD2dQosUnregisterFunc transD2dQosUnregister;
     IsMultipathWhitelistFunc isMultipathWhitelist;
+    CancelEncryptionCheckFunc cancelEncryptionCheck;
+    PermissionCheckFunc permissionCheck;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

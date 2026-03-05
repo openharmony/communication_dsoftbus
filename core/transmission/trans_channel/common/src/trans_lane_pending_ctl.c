@@ -46,6 +46,7 @@
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
 #include "trans_uk_manager.h"
+#include "trans_udp_channel_manager.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -399,6 +400,7 @@ static int32_t CopyAsyncReqItemSessionParam(const SessionParam *source, SessionP
     }
     target->peerDeviceId = peerDeviceId;
     target->actionId = source->actionId;
+    target->cancelEncryptionBit = source->cancelEncryptionBit;
     return CopyAsyncReqItemSessionParamIds(source, target);
 }
 
@@ -850,6 +852,21 @@ static int32_t CheckSocketChannelState(uint32_t laneHandle, const SessionParam *
     return SOFTBUS_OK;
 }
 
+static void UpdateChannelCancelEncryption(const SessionParam *param, LaneLinkType type, AppInfo *info)
+{
+    DisableCapabilityBit(&info->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    if (param->cancelEncryptionBit == 0) {
+        return;
+    }
+    if (param->attr->dataType != TYPE_FILE) {
+        return;
+    }
+    if (type == LANE_USB && GetCapabilityBit(param->cancelEncryptionBit, LINK_TYPE_WIRED)) {
+        TRANS_LOGI(TRANS_SVC, "enable UDP_CHANNEL_CANCEL_ENCRYPTION");
+        EnableCapabilityBit(&info->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    }
+}
+
 static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *connInfo)
 {
     TRANS_LOGI(TRANS_SVC, "request success. laneHandle=%{public}u", laneHandle);
@@ -898,6 +915,7 @@ static void TransOnAsyncLaneSuccess(uint32_t laneHandle, const LaneConnInfo *con
     appInfo->timeStart = timeStart;
     appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
     appInfo->linkedChannelId = reqLane.linkedChannelId;
+    UpdateChannelCancelEncryption(&reqLane.param, connInfo->type, appInfo);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);

@@ -49,13 +49,13 @@ public:
     virtual int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener) = 0;
 
     // File Adapter methods
-    virtual int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
+    virtual int32_t StartNStackXDFileServer(const ChannelInfo *channel,
         DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue) = 0;
-    virtual int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
+    virtual int32_t StartNStackXDFileClient(const ChannelInfo *channel,
         uint32_t keyLen, DFileMsgReceiver msgReceiver) = 0;
-    virtual int32_t TransOnFileChannelClientAddSecondPath(const ChannelInfo *channel,
+    virtual int32_t DFileClientAddSecondPath(const ChannelInfo *channel,
         int32_t dfileId, uint32_t keyLen) = 0;
-    virtual int32_t TransOnFileChannelServerAddSecondPath(const ChannelInfo *channel,
+    virtual int32_t DFileServerAddSecondPath(const ChannelInfo *channel,
         int32_t *filePort, int32_t dfileId, uint32_t capabilityValue) = 0;
     virtual int32_t StartNStackXDFileClientV2(const char *peerIp, int32_t peerPort,
         const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t linkType) = 0;
@@ -100,13 +100,13 @@ public:
     MOCK_METHOD2(TransGetFileListener, int32_t(const char *sessionName, FileListener *fileListener));
 
     // File Adapter mocks
-    MOCK_METHOD5(StartNStackXDFileServer, int32_t(const char *myIp, const uint8_t *key,
+    MOCK_METHOD4(StartNStackXDFileServer, int32_t(const ChannelInfo *channel,
         DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue));
-    MOCK_METHOD5(StartNStackXDFileClient, int32_t(const char *peerIp, int32_t peerPort, const uint8_t *key,
+    MOCK_METHOD3(StartNStackXDFileClient, int32_t(const ChannelInfo *channel,
         uint32_t keyLen, DFileMsgReceiver msgReceiver));
-    MOCK_METHOD3(TransOnFileChannelClientAddSecondPath, int32_t(const ChannelInfo *channel,
+    MOCK_METHOD3(DFileClientAddSecondPath, int32_t(const ChannelInfo *channel,
         int32_t dfileId, uint32_t keyLen));
-    MOCK_METHOD4(TransOnFileChannelServerAddSecondPath, int32_t(const ChannelInfo *channel,
+    MOCK_METHOD4(DFileServerAddSecondPath, int32_t(const ChannelInfo *channel,
         int32_t *filePort, int32_t dfileId, uint32_t capabilityValue));
     MOCK_METHOD6(StartNStackXDFileClientV2, int32_t(const char *peerIp, int32_t peerPort,
         const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver, int32_t linkType));

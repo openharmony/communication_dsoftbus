@@ -232,6 +232,30 @@ bool IsMultipathWhitelistPacked(const char *processName, bool *isWhitelist)
     return pfnTransEnhanceFuncList->isMultipathWhitelist(processName, isWhitelist);
 }
 
+bool CancelEncryptionCheckPacked(const char *processName, pid_t callingUid)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->cancelEncryptionCheck) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->cancelEncryptionCheck(processName, callingUid);
+}
+
+bool PermissionCheckPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->permissionCheck) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->permissionCheck();
+}
+
 bool CheckAuthChannelSessionNameValidPacked(const char *sessionName)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
