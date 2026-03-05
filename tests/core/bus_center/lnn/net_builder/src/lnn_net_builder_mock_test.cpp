@@ -2390,13 +2390,13 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_002, T
     EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(false));
     void *para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
     EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para1));
-    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(true));
     void *para2 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
     EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para2));
-    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(false));
     void *para3 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
     EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para3));
 }
@@ -2414,13 +2414,13 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_PROCESS_COMPLETE_NOT_TRUSTED_MSG_TEST_002, T
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(false));
     LnnProcessCompleteNotTrustedMsg(
         LNN_INFO_TYPE_NOT_TRUSTED, NODE_NETWORK_ID, reinterpret_cast<uint8_t *>(jsonStr), strlen(jsonStr) + 1);
-    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(true));
     LnnProcessCompleteNotTrustedMsg(
         LNN_INFO_TYPE_NOT_TRUSTED, NODE_NETWORK_ID, reinterpret_cast<uint8_t *>(jsonStr), strlen(jsonStr) + 1);
-    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillOnce(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(false));
     LnnProcessCompleteNotTrustedMsg(
         LNN_INFO_TYPE_NOT_TRUSTED, NODE_NETWORK_ID, reinterpret_cast<uint8_t *>(jsonStr), strlen(jsonStr) + 1);
 }
