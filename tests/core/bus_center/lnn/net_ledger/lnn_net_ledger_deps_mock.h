@@ -121,9 +121,6 @@ public:
     virtual bool IsSupportLpFeaturePacked(void) = 0;
     virtual bool LnnIsSupportLpSparkFeaturePacked(void) = 0;
     virtual int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit) = 0;
-    virtual bool LnnIsFeatureSupportDetailPacked(void) = 0;
-    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
-    virtual int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit) = 0;
     virtual int32_t LnnGenSparkCheck(void) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual bool LnnIsFeatureSupportDetailPacked(void) = 0;
@@ -217,9 +214,6 @@ public:
     MOCK_METHOD0(IsSupportLpFeaturePacked, bool(void));
     MOCK_METHOD0(LnnIsSupportLpSparkFeaturePacked, bool(void));
     MOCK_METHOD2(LnnClearFeatureCapability, int32_t (uint64_t *, FeatureCapability));
-    MOCK_METHOD0(LnnIsFeatureSupportDetailPacked, bool(void));
-    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
-    MOCK_METHOD2(LnnSetFeatureCapability, int32_t (uint64_t *, FeatureCapability));
     MOCK_METHOD0(LnnGenSparkCheck, int32_t(void));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
     MOCK_METHOD0(LnnIsFeatureSupportDetailPacked, bool(void));
