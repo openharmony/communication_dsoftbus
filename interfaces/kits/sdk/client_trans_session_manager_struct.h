@@ -143,6 +143,7 @@ typedef struct {
     bool isClosingReserve;
     int32_t routeTypeReserve;
     uint64_t startTimestamp;
+    uint32_t cancelEncryptionBit;
 } SessionInfo;
 
 typedef struct {

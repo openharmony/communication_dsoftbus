@@ -46,6 +46,7 @@ typedef struct {
     bool isAsync;
     uint32_t actionId;
     uint32_t udpChannelCapability;
+    uint32_t cancelEncryptionBit;
     int32_t pid;
     bool isLowLatency;
     bool enableMultipath;

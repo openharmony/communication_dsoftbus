@@ -65,7 +65,7 @@ UdpChannel *TransAddChannelTest()
     (void)strcpy_s(channel->info.groupId, strlen("12345")+1, "12345");
     return channel;
 }
-ChannelInfo *TransAddChannleInfoTest()
+ChannelInfo *TransAddChannelInfoTest()
 {
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     if (channelInfo == nullptr) {
@@ -181,7 +181,7 @@ static IFileReceiveListener g_fileRecvListener = {
     .OnFileTransError = OnFileTransErrorTest,
 };
 
-static DFileMsgReceiver g_fileMsgRecviver = DFileMsgReceiverTest;
+static DFileMsgReceiver g_fileMsgReceiver = DFileMsgReceiverTest;
 
 void GenerateAndAddUdpChannel(UdpChannel *channel)
 {
@@ -426,7 +426,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level1)
     }
     int32_t filePort = 22;
     SocketAccessInfo accessInfo = { 0 };
-    ChannelInfo *channelInfo = TransAddChannleInfoTest();
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
     UdpChannel *channel = TransAddChannelTest();
     DFileMsg *msgData = {};
     DFileMsgType msgType = DFILE_ON_BIND;
@@ -439,7 +439,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level1)
 
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
-
+    SoftBusFree(channelInfo);
     TransDeleteFileListener(g_mySessionName);
     TransFileDeinit();
     ClientTransUdpMgrDeinit();
@@ -615,7 +615,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level1)
         return;
     };
     int32_t filePort = 22;
-    ChannelInfo *channelInfo = TransAddChannleInfoTest();
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
     UdpChannel *channel = TransAddChannelTest();
     DFileMsg *msgData = {};
     DFileMsgType msgType = DFILE_ON_BIND;
@@ -630,8 +630,8 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level1)
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort, nullptr);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
+    SoftBusFree(channelInfo);
     TransCloseFileChannel(channel->dfileId);
-
     TransDeleteFileListener(g_mySessionName);
     TransFileDeinit();
     ClientTransUdpMgrDeinit();
@@ -730,19 +730,26 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level1)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level1)
 {
-    uint8_t key = 215;
     int32_t filePort = 25;
     uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
-    int32_t ret = StartNStackXDFileServer(nullptr, &key, g_fileMsgRecviver, &filePort, capabilityValue);
+    int32_t ret = StartNStackXDFileServer(nullptr, g_fileMsgReceiver, &filePort, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = StartNStackXDFileServer("127.0.0.1", &key, g_fileMsgRecviver, nullptr, capabilityValue);
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    ret = StartNStackXDFileServer(channelInfo, g_fileMsgReceiver, nullptr, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    channelInfo->myIp = nullptr;
+    ret = StartNStackXDFileServer(channelInfo, g_fileMsgReceiver, &filePort, capabilityValue);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    channelInfo->myIp = g_myIp;
     ret = ConnInitSockets();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    (void)StartNStackXDFileServer("127.0.0.1", &key, g_fileMsgRecviver, &filePort, capabilityValue);
+
+    ret = StartNStackXDFileServer(channelInfo, g_fileMsgReceiver, &filePort, capabilityValue);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
     ConnDeinitSockets();
+    SoftBusFree(channelInfo);
 }
 
 /*
@@ -753,12 +760,14 @@ HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level1)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level1)
 {
-    uint8_t key = 215;
-    uint32_t keyLen = 8;
-    int32_t peerPort = 25;
-    int32_t ret = StartNStackXDFileClient(nullptr, peerPort, &key, keyLen, g_fileMsgRecviver);
+    int32_t ret = StartNStackXDFileClient(nullptr, g_keyLen, g_fileMsgReceiver);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    (void)StartNStackXDFileClient("127.0.0.1", peerPort, &key, keyLen, g_fileMsgRecviver);
+
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    channelInfo->myIp = nullptr;
+    ret = StartNStackXDFileClient(channelInfo, g_keyLen, g_fileMsgReceiver);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channelInfo);
 }
 
 /*
@@ -1225,12 +1234,12 @@ HWTEST_F(TransSdkFileTest, NotifySocketSendResultTest001, TestSize.Level1)
 }
 
 /*
- * @tc.name: FillFileEventErrorCodeTest
+ * @tc.name: FillFileEventErrorCodeTest001
  * @tc.desc: test fill file event error code
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level1)
+HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest001, TestSize.Level1)
 {
     DFileMsg msgData;
     FileEvent event;
@@ -1269,12 +1278,12 @@ HWTEST_F(TransSdkFileTest, FillFileEventErrorCodeTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConvertDFileLinkToLinkMediumTest
+ * @tc.name: ConvertDFileLinkToLinkMediumTest001
  * @tc.desc: convert dfilelink to linkmedium
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, ConvertDFileLinkToLinkMediumTest, TestSize.Level1)
+HWTEST_F(TransSdkFileTest, ConvertDFileLinkToLinkMediumTest001, TestSize.Level1)
 {
     LinkMediumType linkmediumtype = ConvertDFileLinkToLinkMedium(DFILE_LINK_WIRELESS);
     EXPECT_EQ(linkmediumtype, LINK_TYPE_WIFI);
@@ -1287,12 +1296,12 @@ HWTEST_F(TransSdkFileTest, ConvertDFileLinkToLinkMediumTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConvertOnEventReasonTest
+ * @tc.name: ConvertOnEventReasonTest001
  * @tc.desc: convert on event reason test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, ConvertOnEventReasonTest, TestSize.Level1)
+HWTEST_F(TransSdkFileTest, ConvertOnEventReasonTest001, TestSize.Level1)
 {
     SoftBusMPErrNo softbusErrNo = ConvertOnEventReason(1, DFILE_LINK_WIRELESS);
     EXPECT_EQ(softbusErrNo, MP_HML_LINK_ON);
@@ -1311,12 +1320,12 @@ HWTEST_F(TransSdkFileTest, ConvertOnEventReasonTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: NotifySendRateTest
+ * @tc.name: NotifySendRateTest001
  * @tc.desc: convert on event reason test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, NotifySendRateTest, TestSize.Level1)
+HWTEST_F(TransSdkFileTest, NotifySendRateTest001, TestSize.Level1)
 {
     UdpChannel udpChannel;
     DFileMsgType msgType = DFILE_ON_BIND;
@@ -1327,12 +1336,46 @@ HWTEST_F(TransSdkFileTest, NotifySendRateTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConvertRouteToDFileLinkTypeTest
+ * @tc.name: TransServerStartDFileTest001
+ * @tc.desc: Trans server start dfile test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransServerStartDFileTest001, TestSize.Level1)
+{
+    ChannelInfo *channel = TransAddChannelInfoTest();
+    bool isAddMultipath = true;
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = TransServerStartDFile(nullptr, &isAddMultipath, nullptr, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransServerStartDFile(channel, nullptr, nullptr, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransServerStartDFile(channel, &isAddMultipath, nullptr, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channel);
+}
+
+/*
+ * @tc.name: TransClientStartDFileTest001
+ * @tc.desc: Trans client start dfile test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransClientStartDFileTest001, TestSize.Level1)
+{
+    int32_t ret = TransClientStartDFile(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ConvertRouteToDFileLinkTypeTest001
  * @tc.desc: convert Route to DfilelinkType test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransSdkFileTest, ConvertRouteToDFileLinkTypeTest, TestSize.Level1)
+HWTEST_F(TransSdkFileTest, ConvertRouteToDFileLinkTypeTest001, TestSize.Level1)
 {
     DFileLinkType linktype = ConvertRouteToDFileLinkType(WIFI_USB);
     EXPECT_EQ(linktype, DFILE_LINK_WIRED);
@@ -1345,5 +1388,253 @@ HWTEST_F(TransSdkFileTest, ConvertRouteToDFileLinkTypeTest, TestSize.Level1)
 
     linktype = ConvertRouteToDFileLinkType(BT_SLE);
     EXPECT_EQ(linktype, DFILE_LINK_MAX);
+}
+
+/*
+ * @tc.name: DFileServerAddSecondPathTest001
+ * @tc.desc: DFil eServer Add Second Path test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, DFileServerAddSecondPathTest001, TestSize.Level1)
+{
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    int32_t dfileId = 1;
+    int32_t fileport = 22;
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+
+    int32_t ret = DFileServerAddSecondPath(nullptr, &fileport, dfileId, nullptr, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DFileServerAddSecondPath(channelInfo, nullptr, dfileId, nullptr, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DFileServerAddSecondPath(channelInfo, &fileport, dfileId, nullptr, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: DFileClientAddSecondPathTest001
+ * @tc.desc: DFile Client Add Second Path test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, DFileClientAddSecondPathTest001, TestSize.Level1)
+{
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    int32_t dfileId = 1;
+    int32_t keyLen = 1;
+    int32_t ret = DFileClientAddSecondPath(nullptr, dfileId, keyLen, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DFileClientAddSecondPath(channelInfo, dfileId, keyLen, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: StartNStackXDFileServerV2Test001
+ * @tc.desc: trans start nstackx file at server V2 test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, StartNStackXDFileServerV2Test001, TestSize.Level1)
+{
+    ChannelInfo *channel = TransAddChannelInfoTest();
+    int32_t filePort = 25;
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    int32_t ret = StartNStackXDFileServerV2(nullptr, g_fileMsgReceiver, &filePort, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = StartNStackXDFileServerV2(channel, g_fileMsgReceiver, &filePort, capabilityValue);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
+    SoftBusFree(channel);
+}
+
+/*
+ * @tc.name: StartNStackXDFileClientV2Test001
+ * @tc.desc: trans start nstackx file at client V2 test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, StartNStackXDFileClientV2Test001, TestSize.Level1)
+{
+    uint32_t keyLen = 8;
+    int32_t ret = StartNStackXDFileClientV2(nullptr, keyLen, g_fileMsgReceiver);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ChannelInfo channel;
+    memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    memcpy_s(channel.peerIp, IP_LEN, "127.0.0.1", strlen("127.0.0.1"));
+    channel.peerPort = 1;
+    channel.linkType = 1;
+
+    ret = StartNStackXDFileClientV2(&channel, keyLen, g_fileMsgReceiver);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: FillDFileParamTest001
+ * @tc.desc: trans fill dfile param test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, FillDFileParamTest001, TestSize.Level1)
+{
+    int32_t srvport = 22;
+    int32_t ret = FillDFileParam(nullptr, srvport, 1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = FillDFileParam("127.0.0.1", srvport, 1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    const char *ipv6_addr = "[::1]:8080";
+    const char *ipv4_addr = "192.168.1.1";
+    NSTACKX_SessionParaMpV2 para[1];
+    ret = FillDFileParam(ipv6_addr, srvport, 1, para);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
+
+    ret = FillDFileParam(ipv4_addr, srvport, 1, para);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+}
+
+/*
+ * @tc.name: StartNStackXDFileServerWithCancelEncryptionTest001
+ * @tc.desc: trans start nstackx file server with cancelEncryption enabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, StartNStackXDFileServerWithCancelEncryptionTest001, TestSize.Level1)
+{
+    int32_t filePort = 25;
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->cancelEncryption = true;
+    channelInfo->myIp = g_myIp;
+
+    int32_t ret = ConnInitSockets();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = StartNStackXDFileServer(channelInfo, g_fileMsgReceiver, &filePort, capabilityValue);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+
+    ConnDeinitSockets();
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: StartNStackXDFileClientWithCancelEncryptionTest001
+ * @tc.desc: trans start nstackx file client with cancelEncryption enabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, StartNStackXDFileClientWithCancelEncryptionTest001, TestSize.Level1)
+{
+    uint32_t keyLen = 8;
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->cancelEncryption = true;
+    channelInfo->peerIp = g_peerIp;
+    channelInfo->peerPort = 1;
+
+    int32_t ret = StartNStackXDFileClient(channelInfo, keyLen, g_fileMsgReceiver);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: DFileServerAddSecondPathWithCancelEncryptionTest001
+ * @tc.desc: DFileServerAddSecondPath with cancelEncryption enabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, DFileServerAddSecondPathWithCancelEncryptionTest001, TestSize.Level1)
+{
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->cancelEncryption = true;
+    channelInfo->myIp = g_myIp;
+    int32_t dfileId = 1;
+    int32_t fileport = 22;
+    AddrInfo addrInfo;
+    memset_s(&addrInfo, sizeof(AddrInfo), 0, sizeof(AddrInfo));
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+
+    int32_t ret = DFileServerAddSecondPath(channelInfo, &fileport, dfileId, &addrInfo, capabilityValue);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: DFileClientAddSecondPathWithCancelEncryptionTest001
+ * @tc.desc: DFileClientAddSecondPath with cancelEncryption enabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, DFileClientAddSecondPathWithCancelEncryptionTest001, TestSize.Level1)
+{
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->cancelEncryption = true;
+    channelInfo->peerIp = g_peerIp;
+    channelInfo->peerPort = 1;
+    int32_t dfileId = 1;
+    int32_t keyLen = 8;
+    AddrInfo addrInfo;
+    memset_s(&addrInfo, sizeof(AddrInfo), 0, sizeof(AddrInfo));
+
+    int32_t ret = DFileClientAddSecondPath(channelInfo, dfileId, keyLen, &addrInfo);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: StartNStackXDFileServerV2WithCancelEncryptionTest001
+ * @tc.desc: trans start nstackx file server V2 with cancelEncryption enabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, StartNStackXDFileServerV2WithCancelEncryptionTest001, TestSize.Level1)
+{
+    int32_t filePort = 25;
+    uint32_t capabilityValue = NSTACKX_WLAN_CAT_DIRECT;
+    ChannelInfo *channelInfo = TransAddChannelInfoTest();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->cancelEncryption = true;
+    channelInfo->myIp = g_myIp;
+
+    int32_t ret = ConnInitSockets();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = StartNStackXDFileServerV2(channelInfo, g_fileMsgReceiver, &filePort, capabilityValue);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+
+    ConnDeinitSockets();
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: StartNStackXDFileClientV2WithCancelEncryptionTest001
+ * @tc.desc: trans start nstackx file client V2 with cancelEncryption enabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, StartNStackXDFileClientV2WithCancelEncryptionTest001, TestSize.Level1)
+{
+    uint32_t keyLen = 8;
+    ChannelInfo channel;
+    memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    memcpy_s(channel.peerIp, IP_LEN, "127.0.0.1", strlen("127.0.0.1"));
+    channel.peerPort = 1;
+    channel.linkType = 1;
+    channel.cancelEncryption = true;
+
+    int32_t ret = StartNStackXDFileClientV2(&channel, keyLen, g_fileMsgReceiver);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 }

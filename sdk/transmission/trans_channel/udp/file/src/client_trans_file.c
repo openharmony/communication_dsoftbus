@@ -599,8 +599,7 @@ static int32_t TransServerStartDFile(
         return SOFTBUS_INVALID_PARAM;
     }
     if (!channel->enableMultipath) {
-        return StartNStackXDFileServer(channel->myIp, (uint8_t *)channel->sessionKey,
-            FileReceiveListener, filePort, capabilityValue);
+        return StartNStackXDFileServer(channel, FileReceiveListener, filePort, capabilityValue);
     }
 
     if (!channel->isMultiNeg) {
@@ -614,12 +613,12 @@ static int32_t TransServerStartDFile(
         TRANS_LOGE(TRANS_FILE, "get udpChannel failed, channelId=%{public}d", channel->linkedChannelId);
         return ret;
     }
-    TRANS_LOGI(TRANS_FILE, "enter TransOnFileChannelServerAddSecondPath, channelId=%{public}d,"
+    TRANS_LOGI(TRANS_FILE, "DFileServerAddSecondPath, channelId=%{public}d,"
         "firstchannel=%{public}d, sessionId=%{public}d, dfileId=%{public}d",
         channel->channelId, channel->linkedChannelId, channel->sessionId, udpChannel.dfileId);
     AddrInfo addrInfo;
     (void)memset_s(&addrInfo, sizeof(AddrInfo), 0, sizeof(AddrInfo));
-    int32_t fileSession = TransOnFileChannelServerAddSecondPath(
+    int32_t fileSession = DFileServerAddSecondPath(
         channel, filePort, udpChannel.dfileId, &addrInfo, capabilityValue);
     (void)SaveAddrInfo(channel->channelId, &(addrInfo.addr), addrInfo.addrLen);
     return fileSession;
@@ -632,8 +631,7 @@ static int32_t TransClientStartDFile(const ChannelInfo *channel)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!channel->enableMultipath) {
-        return StartNStackXDFileClient(channel->peerIp, channel->peerPort, (uint8_t *)channel->sessionKey,
-            DEFAULT_KEY_LENGTH, FileSendListener);
+        return StartNStackXDFileClient(channel, DEFAULT_KEY_LENGTH, FileSendListener);
     }
 
     if (!channel->isMultiNeg) {
@@ -647,12 +645,12 @@ static int32_t TransClientStartDFile(const ChannelInfo *channel)
         TRANS_LOGE(TRANS_FILE, "get udpChannel failed, channelId=%{public}d", channel->linkedChannelId);
         return ret;
     }
-    TRANS_LOGI(TRANS_FILE, "enter TransOnFileChannelClientAddSecondPath, channelId=%{public}d,"
-        "firstchannel=%{public}d, sessionId=%{public}d, dfileId=%{public}d",
-        channel->channelId, channel->linkedChannelId, channel->sessionId, udpChannel.dfileId);
+    TRANS_LOGI(TRANS_FILE, "DFileClientAddSecondPath, channelId=%{public}d, firstchannel=%{public}d, "
+        "sessionId=%{public}d, dfileId=%{public}d", channel->channelId, channel->linkedChannelId, channel->sessionId,
+        udpChannel.dfileId);
     AddrInfo addrInfo;
     (void)memset_s(&addrInfo, sizeof(AddrInfo), 0, sizeof(AddrInfo));
-    int32_t fileSession = TransOnFileChannelClientAddSecondPath(
+    int32_t fileSession = DFileClientAddSecondPath(
         channel, udpChannel.dfileId, DEFAULT_KEY_LENGTH, &addrInfo);
     (void)SaveAddrInfo(channel->channelId, &(addrInfo.addr), addrInfo.addrLen);
     return fileSession;

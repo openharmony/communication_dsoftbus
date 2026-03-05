@@ -137,6 +137,7 @@ typedef struct {
     bool forceGenerateUk;
     bool enableMultipath;
     bool isMultiNeg;
+    bool cancelEncryption;
     uint16_t fastTransDataSize;
     RouteType routeType;
     StreamType streamType;

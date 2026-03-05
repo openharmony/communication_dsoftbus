@@ -25,15 +25,14 @@ extern "C" {
 #endif
 
 int32_t StartNStackXDFileServer(
-    const char *myIp, const uint8_t *key, DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue);
+    const ChannelInfo *channel, DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue);
 
-int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
-    uint32_t keyLen, DFileMsgReceiver msgReceiver);
+int32_t StartNStackXDFileClient(const ChannelInfo *channel, uint32_t keyLen, DFileMsgReceiver msgReceiver);
 
-int32_t TransOnFileChannelClientAddSecondPath(
+int32_t DFileClientAddSecondPath(
     const ChannelInfo *channel, int32_t dfileId, uint32_t keyLen, AddrInfo *addrInfo);
 
-int32_t TransOnFileChannelServerAddSecondPath(
+int32_t DFileServerAddSecondPath(
     const ChannelInfo *channel, int32_t *filePort, int32_t dfileId, AddrInfo *addrInfo, uint32_t capabilityValue);
 
 int32_t StartNStackXDFileClientV2(const ChannelInfo *channel, uint32_t keyLen, DFileMsgReceiver msgReceiver);
