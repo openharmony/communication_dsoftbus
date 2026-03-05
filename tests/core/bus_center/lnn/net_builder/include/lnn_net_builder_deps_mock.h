@@ -370,7 +370,7 @@ public:
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD1(IsSameAccountId, bool(int64_t));
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
-    MOCK_METHOD2(LnnIsRemoteSupportAuthCapBit, int32_t(const char *, AuthCapability));
+    MOCK_METHOD2(LnnIsRemoteSupportAuthCapBit, bool(const char *, AuthCapability));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H
