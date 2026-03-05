@@ -26,6 +26,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor_impl.h"
+#include "lnn_feature_capability.h"
 #include "lnn_feature_capability_struct.h"
 #include "lnn_file_utils.h"
 #include "lnn_huks_utils.h"
@@ -123,6 +124,20 @@ public:
     virtual bool LnnIsFeatureSupportDetailPacked(void) = 0;
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
     virtual int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit) = 0;
+    virtual int32_t LnnGenSparkCheck(void) = 0;
+    virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
+    virtual bool LnnIsFeatureSupportDetailPacked(void) = 0;
+    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
+    virtual int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit) = 0;
+    virtual int32_t LnnInitMetaNodeExtLedgerPacked(void) = 0;
+    virtual bool IsSupportMcuFeaturePacked(void) = 0;
+    virtual int32_t LnnSaveLocalDeviceInfoPacked(const NodeInfo *deviceInfo) = 0;
+    virtual void LnnClearPtkListPacked(void) = 0;
+    virtual void ClearDeviceInfoPacked(void) = 0;
+    virtual int32_t GenerateNewLocalCipherKeyPacked(void) = 0;
+    virtual void AuthLoadDeviceKeyPacked(void) = 0;
+    virtual int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len) = 0;
+    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
 };
 
 class NetLedgerDepsInterfaceMock : public NetLedgerDepsInterface {
@@ -205,6 +220,20 @@ public:
     MOCK_METHOD0(LnnIsFeatureSupportDetailPacked, bool(void));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
     MOCK_METHOD2(LnnSetFeatureCapability, int32_t (uint64_t *, FeatureCapability));
+    MOCK_METHOD0(LnnGenSparkCheck, int32_t(void));
+    MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
+    MOCK_METHOD0(LnnIsFeatureSupportDetailPacked, bool(void));
+    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
+    MOCK_METHOD2(LnnSetFeatureCapability, int32_t(uint64_t *, FeatureCapability));
+    MOCK_METHOD0(LnnInitMetaNodeExtLedgerPacked, int32_t(void));
+    MOCK_METHOD0(IsSupportMcuFeaturePacked, bool(void));
+    MOCK_METHOD1(LnnSaveLocalDeviceInfoPacked, int32_t(const NodeInfo *));
+    MOCK_METHOD0(LnnClearPtkListPacked, void(void));
+    MOCK_METHOD0(ClearDeviceInfoPacked, void(void));
+    MOCK_METHOD0(GenerateNewLocalCipherKeyPacked, int32_t(void));
+    MOCK_METHOD0(AuthLoadDeviceKeyPacked, void(void));
+    MOCK_METHOD3(LnnGetLocalPtkByUuidPacked, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_COMMON_MOCK_H

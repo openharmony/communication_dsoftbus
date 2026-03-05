@@ -67,7 +67,8 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
     }
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        COMM_LOGE(COMM_ADAPTER, "open socket failed");
+        COMM_LOGE(COMM_ADAPTER, "open socket failed, fd=%{public}d, errno=%{public}d, strerror=%{public}s",
+            fd, errno, strerror(errno));
         return SOFTBUS_NETWORK_OPEN_SOCKET_FAIL;
     }
     struct ifreq ifr;
@@ -127,7 +128,8 @@ bool GetLinkUpStateByIfName(const char *ifName)
     }
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        COMM_LOGE(COMM_ADAPTER, "open socket failed");
+        COMM_LOGE(COMM_ADAPTER, "open socket failed, fd=%{public}d, errno=%{public}d, strerror=%{public}s",
+            fd, errno, strerror(errno));
         return false;
     }
     struct ifreq ifr;

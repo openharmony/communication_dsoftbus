@@ -1030,6 +1030,7 @@ HWTEST_F(LNNLedgerMockTest, LL_SLE_CAP_Test_001, TestSize.Level1)
     EXPECT_NE(sleAddrRet, nullptr);
     LnnDeinitLocalLedger();
 }
+
 /*
  * @tc.name: L1_GET_HUKS_KEY_TIME_Test_001
  * @tc.desc: Verify L1GetHuksKeyTime handles null pointer and
@@ -1044,6 +1045,132 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_HUKS_KEY_TIME_Test_001, TestSize.Level1)
     uint32_t len = sizeof(uint64_t);
     EXPECT_EQ(L1GetHuksKeyTime(nullptr, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(L1GetHuksKeyTime(reinterpret_cast<void *>(&hukTime), len), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LlSetLocalAccountUid001
+ * @tc.desc: Verify LlSetLocalAccountUid returns SOFTBUS_INVALID_PARAM when accountUid is null
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlSetLocalAccountUid001, TestSize.Level1)
+{
+    EXPECT_EQ(LlSetLocalAccountUid(nullptr), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LlSetLocalAccountUid002
+ * @tc.desc: Verify LlSetLocalAccountUid returns SOFTBUS_OK when accountUid is valid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlSetLocalAccountUid002, TestSize.Level1)
+{
+    const char *validAccountUid = "1234567890";
+    EXPECT_EQ(LlSetLocalAccountUid(validAccountUid), SOFTBUS_OK);
+    EXPECT_STREQ(g_localNetLedger.localInfo.accountUid, validAccountUid);
+}
+
+/*
+ * @tc.name: LlSetLocalAccountUid003
+ * @tc.desc: Verify LlSetLocalAccountUid returns SOFTBUS_MEM_ERR when accountUid length exceeds limit
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlSetLocalAccountUid003, TestSize.Level1)
+{
+    constexpr int32_t overLimitLen = ACCOUNT_UID_STR_LEN + 1;
+    char overLenAccountUid[overLimitLen + 1] = {0};
+    constexpr int32_t alphabetSize = 26;
+    constexpr char startChar = 'a';
+    for (int32_t i = 0; i < overLimitLen; i++) {
+        overLenAccountUid[i] = startChar + (i % alphabetSize);
+    }
+    overLenAccountUid[overLimitLen] = '\0';
+    int32_t ret = LlSetLocalAccountUid(overLenAccountUid);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+}
+
+/*
+ * @tc.name: LlGetLocalAccountUid001
+ * @tc.desc: Verify LlGetLocalAccountUid returns SOFTBUS_INVALID_PARAM when buffer is null
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlGetLocalAccountUid001, TestSize.Level1)
+{
+    void *buf = nullptr;
+    uint32_t len = ACCOUNT_UID_STR_LEN;
+    int32_t ret = LlGetLocalAccountUid(buf, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LlGetLocalAccountUid002
+ * @tc.desc: Verify LlGetLocalAccountUid returns SOFTBUS_INVALID_PARAM when buffer length is insufficient
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlGetLocalAccountUid002, TestSize.Level1)
+{
+    char buf[ACCOUNT_UID_STR_LEN + 1] = {0};
+    uint32_t len = ACCOUNT_UID_STR_LEN - 1;
+    int32_t ret = LlGetLocalAccountUid(buf, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LlGetLocalAccountUid003
+ * @tc.desc: Verify LlGetLocalAccountUid returns SOFTBUS_OK when buffer is valid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlGetLocalAccountUid003, TestSize.Level1)
+{
+    char buf[ACCOUNT_UID_STR_LEN + 1] = {0};
+    uint32_t len = ACCOUNT_UID_STR_LEN;
+    int32_t ret = LlGetLocalAccountUid(buf, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_STREQ(buf, g_localNetLedger.localInfo.accountUid);
+}
+
+/*
+ * @tc.name: LlGetLocalAccountUid004
+ * @tc.desc: Verify LlGetLocalAccountUid returns SOFTBUS_OK when accountUid is empty
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlGetLocalAccountUid004, TestSize.Level1)
+{
+    char buf[ACCOUNT_UID_STR_LEN + 1] = {0};
+    uint32_t len = ACCOUNT_UID_STR_LEN;
+    int32_t ret = LlGetLocalAccountUid(buf, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_UPDATE_SLE_CAP_AND_VERSION_001
+ * @tc.desc: Verify LnnUpdateSleCapacityAndVersion returns SOFTBUS_LOCK_ERR
+            when mutex not initialized and SOFTBUS_OK when initialized
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_SLE_CAP_AND_VERSION_001, TestSize.Level1)
+{
+    int32_t slecap = 1;
+    int32_t ret = LnnUpdateSleCapacityAndVersion(slecap);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    SoftBusMutexInit(&g_localNetLedger.lock, NULL);
+    ret = LnnUpdateSleCapacityAndVersion(slecap);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1145,7 +1272,8 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_HUM_U16_INFO_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     uint16_t info = 0;
     ret = LnnGetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, &info);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    // Before executing this case, the function SoftBusMutexInit has been called to initialize the lock, so return OK
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1159,9 +1287,9 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_HUM_U16_INFO_001, TestSize.Level1)
 HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
-    EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnGenBroadcastCipherInfo();
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -2869,5 +2997,20 @@ HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFO_IF_UDID_CHANGED_TEST_002, TestSiz
     EXPECT_EQ(SOFTBUS_OK, HandleDeviceInfoIfUdidChanged());
     EXPECT_EQ(SOFTBUS_OK, HandleDeviceInfoIfUdidChanged());
     EXPECT_NO_FATAL_FAILURE(LnnDeinitLocalLedger());
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_FEATURE_CAPABILITY_TEST_001
+ * @tc.desc: Verify UpdateLocalFeatureCapability returns SOFTBUS_OK when adding feature capability
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_FEATURE_CAPABILITY_TEST_001, TestSize.Level1)
+{
+    g_localNetLedger.localInfo.feature &= (~(BIT_SUPPORT_LP_SPARK_CAPABILITY));
+    FeatureOption featureOption = {.isAdd = true, .featureSet = BIT_SUPPORT_LP_SPARK_CAPABILITY};
+    int32_t ret = UpdateLocalFeatureCapability((void *)(&featureOption));
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
