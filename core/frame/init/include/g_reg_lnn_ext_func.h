@@ -107,7 +107,7 @@ typedef int32_t (*LnnGetDLHeartbeatTimestampFunc)(const char *networkId, uint64_
 typedef int32_t (*LnnGetDLBleDirectTimestampFunc)(const char *networkId, uint64_t *timestamp);
 typedef int32_t (*LnnGetDLUpdateTimestampFunc)(const char *udid, uint64_t *timestamp);
 typedef int32_t (*LnnSetDLBleDirectTimestampFunc)(const char *networkId, uint64_t timestamp);
-typedef int32_t (*LnnIsRemoteSupportAuthCapBitFunc)(const char *networkId, uint32_t *authCapacity);
+typedef bool (*LnnIsRemoteSupportAuthCapBitFunc)(const char *networkid, AuthCapability capaBit);
 typedef int32_t (*LnnSetDLConnCapabilityFunc)(const char *networkId, uint32_t connCapability);
 typedef int32_t (*LnnAddMetaInfoFunc)(NodeInfo *info);
 typedef int32_t (*LnnDeleteMetaInfoFunc)(const char *udid, AuthLinkType type);
