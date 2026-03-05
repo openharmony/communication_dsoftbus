@@ -404,6 +404,16 @@ int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
     return GetNetLedgerDepsInterface()->LnnClearFeatureCapability(feature, capaBit);
 }
 
+int32_t LnnGenSparkCheck(void)
+{
+    return GetNetLedgerDepsInterface()->LnnGenSparkCheck();
+}
+
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    return GetNetLedgerDepsInterface()->LnnGetLocalNodeInfoSafe(info);
+}
+
 bool LnnIsFeatureSupportDetailPacked(void)
 {
     return GetNetLedgerDepsInterface()->LnnIsFeatureSupportDetailPacked();
@@ -417,16 +427,6 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
 int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 {
     return GetNetLedgerDepsInterface()->LnnSetFeatureCapability(feature, capaBit);
-}
-
-int32_t LnnGenSparkCheck(void)
-{
-    return GetNetLedgerDepsInterface()->LnnGenSparkCheck();
-}
-
-int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
-{
-    return GetNetLedgerDepsInterface()->LnnGetLocalNodeInfoSafe(info);
 }
 
 int32_t LnnInitMetaNodeExtLedgerPacked(void)
