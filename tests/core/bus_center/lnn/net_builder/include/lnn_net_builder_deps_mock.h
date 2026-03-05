@@ -215,6 +215,7 @@ public:
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
     virtual bool IsSameAccountId(int64_t accountId) = 0;
     virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
+    virtual bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -369,6 +370,7 @@ public:
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD1(IsSameAccountId, bool(int64_t));
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
+    MOCK_METHOD2(LnnIsRemoteSupportAuthCapBit, bool(const char *, AuthCapability));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H
