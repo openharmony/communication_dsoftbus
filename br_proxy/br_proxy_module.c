@@ -230,13 +230,13 @@ napi_value NapiOpenProxyChannel(napi_env env, napi_callback_info info)
     void* data;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &thisArg, &data);
     if (status != napi_ok || argc < ARGS_SIZE_1) {
-        napi_throw_error(env, NULL, "Invalid arguments");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
         return NULL;
     }
     napi_valuetype valuetype;
     status = napi_typeof(env, args[0], &valuetype);
     if (status != napi_ok || valuetype != napi_object) {
-        napi_throw_error(env, NULL, "Argument must be an object");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
         return NULL;
     }
     AsyncOpenChannelData* asyncData = (AsyncOpenChannelData*)SoftBusCalloc(sizeof(AsyncOpenChannelData));
