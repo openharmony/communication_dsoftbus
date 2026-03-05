@@ -2392,12 +2392,21 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_002, T
     EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(false));
     void *para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    if (para1 == nullptr) {
+        return;
+    }
     EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para1));
     EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(true));
     void *para2 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    if (para2 == nullptr) {
+        return;
+    }
     EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para2));
     EXPECT_CALL(NetBuilderMock, LnnIsRemoteSupportAuthCapBit).WillRepeatedly(Return(false));
     void *para3 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    if (para3 == nullptr) {
+        return;
+    }
     EXPECT_NO_FATAL_FAILURE(OnLnnProcessNotTrustedMsgDelay(para3));
 }
 
