@@ -403,5 +403,75 @@ int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 {
     return GetNetLedgerDepsInterface()->LnnClearFeatureCapability(feature, capaBit);
 }
+
+int32_t LnnGenSparkCheck(void)
+{
+    return GetNetLedgerDepsInterface()->LnnGenSparkCheck();
+}
+
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    return GetNetLedgerDepsInterface()->LnnGetLocalNodeInfoSafe(info);
+}
+
+bool LnnIsFeatureSupportDetailPacked(void)
+{
+    return GetNetLedgerDepsInterface()->LnnIsFeatureSupportDetailPacked();
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetNetLedgerDepsInterface()->LnnSetLocalByteInfo(key, info, len);
+}
+
+int32_t LnnSetFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
+{
+    return GetNetLedgerDepsInterface()->LnnSetFeatureCapability(feature, capaBit);
+}
+
+int32_t LnnInitMetaNodeExtLedgerPacked(void)
+{
+    return GetNetLedgerDepsInterface()->LnnInitMetaNodeExtLedgerPacked();
+}
+
+bool IsSupportMcuFeaturePacked(void)
+{
+    return GetNetLedgerDepsInterface()->IsSupportMcuFeaturePacked();
+}
+
+int32_t LnnSaveLocalDeviceInfoPacked(const NodeInfo *deviceInfo)
+{
+    return GetNetLedgerDepsInterface()->LnnSaveLocalDeviceInfoPacked(deviceInfo);
+}
+
+void LnnClearPtkListPacked(void)
+{
+    return GetNetLedgerDepsInterface()->LnnClearPtkListPacked();
+}
+
+void ClearDeviceInfoPacked(void)
+{
+    return GetNetLedgerDepsInterface()->ClearDeviceInfoPacked();
+}
+
+int32_t GenerateNewLocalCipherKeyPacked(void)
+{
+    return GetNetLedgerDepsInterface()->GenerateNewLocalCipherKeyPacked();
+}
+
+void AuthLoadDeviceKeyPacked(void)
+{
+    return GetNetLedgerDepsInterface()->AuthLoadDeviceKeyPacked();
+}
+
+int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len)
+{
+    return GetNetLedgerDepsInterface()->LnnGetLocalPtkByUuidPacked(uuid, localPtk, len);
+}
+
+bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
+{
+    return GetNetLedgerDepsInterface()->IsFeatureSupport(feature, capaBit);
+}
 } // extern "C"
 } // namespace OHOS
