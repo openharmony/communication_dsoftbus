@@ -1268,9 +1268,13 @@ int P2pV1Processor::ProcessDisconnectRequest(std::shared_ptr<NegotiateCommand> &
         GetWifiDirectManager()->notifyDisconnectedForSink(&sinkLink);
     }
 
-    ret = RemoveLink(command->GetRemoteDeviceId());
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "remove link fail, ret=%{public}d", ret);
+    bool existInnerLink = LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::P2P, remoteDeviceId_, [](InnerLink &link) {});
+    if (existInnerLink) {
+        ret = RemoveLink(command->GetRemoteDeviceId());
+        CONN_CHECK_AND_RETURN_RET_LOGW(
+            ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "remove link fail, ret=%{public}d", ret);
+    }
     return SOFTBUS_OK;
 }
 
