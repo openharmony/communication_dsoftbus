@@ -553,9 +553,14 @@ void OnLnnProcessNotTrustedMsgDelay(void *para)
         SoftBusFree(info);
         return;
     }
-    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB };
+    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB,
+        DISCOVERY_TYPE_SESSION_KEY };
     for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
         DiscoveryType type = typeList[i];
+        if (type == DISCOVERY_TYPE_SESSION_KEY &&
+            (!LnnIsRemoteSupportAuthCapBit(networkId, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE))) {
+            continue;
+        }
         LNN_LOGI(
             LNN_BUILDER, "after 5s, authSeq:%{public}" PRId64 "->%{public}" PRId64, info->authSeq[type], authSeq[type]);
         if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
@@ -572,6 +577,26 @@ void OnLnnProcessNotTrustedMsgDelay(void *para)
     SoftBusFree(info);
 }
 
+static int32_t AnalysisJsonParse(const uint8_t *msg, uint32_t len, int64_t *authSeq)
+{
+    if (msg == NULL || authSeq == NULL) {
+        LNN_LOGW(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    JsonObj *json = JSON_Parse((const char *)msg, len);
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "json parse fail");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_WIFI, &authSeq[DISCOVERY_TYPE_WIFI]);
+    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BLE, &authSeq[DISCOVERY_TYPE_BLE]);
+    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BR, &authSeq[DISCOVERY_TYPE_BR]);
+    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_USB, &authSeq[DISCOVERY_TYPE_USB]);
+    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_SESSION_KEY, &authSeq[DISCOVERY_TYPE_SESSION_KEY]);
+    JSON_Delete(json);
+    return SOFTBUS_OK;
+}
+
 void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *networkId,
     const uint8_t *msg, uint32_t len)
 {
@@ -583,17 +608,10 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
         LNN_LOGI(LNN_BUILDER, "device is offline");
         return;
     }
-    JsonObj *json = JSON_Parse((const char *)msg, len);
-    if (json == NULL) {
-        LNN_LOGE(LNN_BUILDER, "json parse fail");
+    int64_t authSeq[DISCOVERY_TYPE_COUNT] = { 0 };
+    if (AnalysisJsonParse(msg, len, authSeq) != SOFTBUS_OK) {
         return;
     }
-    int64_t authSeq[DISCOVERY_TYPE_COUNT] = { 0 };
-    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_WIFI, &authSeq[DISCOVERY_TYPE_WIFI]);
-    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BLE, &authSeq[DISCOVERY_TYPE_BLE]);
-    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BR, &authSeq[DISCOVERY_TYPE_BR]);
-    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_USB, &authSeq[DISCOVERY_TYPE_USB]);
-    JSON_Delete(json);
     int64_t curAuthSeq[DISCOVERY_TYPE_COUNT] = { 0 };
     char udid[UDID_BUF_LEN] = { 0 };
     (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN);
@@ -601,9 +619,14 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
         LNN_LOGE(LNN_BUILDER, "get latest authSeq fail");
         return;
     }
-    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB };
+    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB,
+        DISCOVERY_TYPE_SESSION_KEY };
     for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
         DiscoveryType type = typeList[i];
+        if (type == DISCOVERY_TYPE_SESSION_KEY &&
+            (!LnnIsRemoteSupportAuthCapBit(networkId, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE))) {
+            continue;
+        }
         LNN_LOGI(LNN_BUILDER, "authSeq:%{public}" PRId64 "->%{public}" PRId64, curAuthSeq[type], authSeq[type]);
         if (authSeq[type] == curAuthSeq[type] && authSeq[type] != 0 && curAuthSeq[type] != 0) {
             if (type == DISCOVERY_TYPE_WIFI) {

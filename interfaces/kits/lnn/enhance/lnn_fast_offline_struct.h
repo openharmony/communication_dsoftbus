@@ -24,11 +24,11 @@
 extern "C" {
 #endif
 
-#define NETWORK_TYPE_WIFI "1"
-#define NETWORK_TYPE_BLE  "2"
-#define NETWORK_TYPE_BR   "3"
-#define NETWORK_TYPE_USB  "4"
-
+#define NETWORK_TYPE_WIFI           "1"
+#define NETWORK_TYPE_BLE            "2"
+#define NETWORK_TYPE_BR             "3"
+#define NETWORK_TYPE_USB            "4"
+#define NETWORK_TYPE_SESSION_KEY    "5"
 typedef struct {
     char udid[UDID_BUF_LEN];
     int64_t authSeq[DISCOVERY_TYPE_COUNT];

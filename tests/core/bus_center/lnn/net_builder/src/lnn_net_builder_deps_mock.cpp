@@ -788,5 +788,10 @@ struct WifiDirectManager* GetWifiDirectManager(void)
 {
     return GetNetBuilderDepsInterface()->GetWifiDirectManager();
 }
+
+bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit)
+{
+    return GetNetBuilderDepsInterface()->LnnIsRemoteSupportAuthCapBit(networkid, capaBit);
+}
 } // extern "C"
 } // namespace OHOS

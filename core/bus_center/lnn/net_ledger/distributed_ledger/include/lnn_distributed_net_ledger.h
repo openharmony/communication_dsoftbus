@@ -94,6 +94,7 @@ bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info);
 bool IsRemoteDeviceSupportBleGuide(const char *id, IdCategory type);
 int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, const char *addr);
 bool LnnIsLocalSupportMcuFeature(void);
+bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit);
 #ifdef __cplusplus
 }
 #endif

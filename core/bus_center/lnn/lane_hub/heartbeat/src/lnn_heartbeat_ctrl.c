@@ -1735,7 +1735,7 @@ int32_t LnnOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrTy
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "HB start sle offline strategy, netwrokId=%{publc}s, timestamp=%{public}" PRIu64 "",
+    LNN_LOGI(LNN_HEART_BEAT, "HB start sle offline strategy, netwrokId=%{public}s, timestamp=%{public}" PRIu64 "",
         AnonymizeWrapper(anonyNetworkId), nowTime);
     AnonymizeFree(anonyNetworkId);
     return SOFTBUS_OK;
@@ -1747,7 +1747,7 @@ void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrT
     LNN_CHECK_AND_RETURN_LOGE(addrType == CONNECTION_ADDR_BLE, LNN_HEART_BEAT, "only support ble");
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "HB stop sle offline strategy, netwrokId=%{publc}s",
+    LNN_LOGI(LNN_HEART_BEAT, "HB stop sle offline strategy, netwrokId=%{public}s",
         AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     LnnStopSleOfflineTimingStrategy(networkId);

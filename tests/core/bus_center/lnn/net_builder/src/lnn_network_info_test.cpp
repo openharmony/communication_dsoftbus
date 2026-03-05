@@ -1282,12 +1282,16 @@ HWTEST_F(LNNNetworkInfoTest, UpdateLocalFeatureByWifiVspRes_Test_001, TestSize.L
     EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
     ret = UpdateLocalFeatureByWifiVspRes();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    manager.getVspCapabilityCode = GetVspCapabilityCodeFunc2,
+    manager.getVspCapabilityCode = GetVspCapabilityCodeFunc2;
     ret = UpdateLocalFeatureByWifiVspRes();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    manager.getVspCapabilityCode = GetVspCapabilityCodeFunc3,
+    manager.getVspCapabilityCode = GetVspCapabilityCodeFunc3;
     ret = UpdateLocalFeatureByWifiVspRes();
     EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(netBuilderMock, LnnSetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    manager.getVspCapabilityCode = GetVspCapabilityCodeFunc1;
+    ret = UpdateLocalFeatureByWifiVspRes();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*

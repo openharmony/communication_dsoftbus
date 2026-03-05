@@ -1450,6 +1450,7 @@ static int32_t UpdateLocalFeatureCapability(const void *capability)
     } else {
         g_localNetLedger.localInfo.feature &= (~(featureOption->featureSet));
     }
+    // if the capability value is not modified, SOFTBUS_NOT_NEED_UPDATE is returned
     if (oldFeature == g_localNetLedger.localInfo.feature) {
         LNN_LOGI(LNN_LEDGER, "not need update feature");
         return SOFTBUS_NOT_NEED_UPDATE;
