@@ -241,7 +241,7 @@ napi_value NapiOpenProxyChannel(napi_env env, napi_callback_info info)
     }
     AsyncOpenChannelData* asyncData = (AsyncOpenChannelData*)SoftBusCalloc(sizeof(AsyncOpenChannelData));
     if (asyncData == NULL) {
-        napi_throw_error(env, NULL, "Memory allocation failed");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR);
         return NULL;
     }
     asyncData->env = env;
@@ -257,7 +257,7 @@ napi_value NapiOpenProxyChannel(napi_env env, napi_callback_info info)
     napi_value promise;
     status = napi_create_promise(env, &asyncData->deferred, &promise);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to create promise");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR);
         goto EXIT;
     }
     int32_t ret = StartWork(env, asyncData);
@@ -355,7 +355,7 @@ napi_value NapiCloseProxyChannel(napi_env env, napi_callback_info info)
     napi_value undefined;
     status = napi_get_undefined(env, &undefined);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to get undefined value.");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR);
         return NULL;
     }
     TRANS_LOGI(TRANS_SDK, "[br_proxy] close success, channelId=%{public}d.", channelId);
@@ -563,7 +563,7 @@ napi_value SendDataAsync(napi_env env, napi_callback_info info)
     napi_value promise;
     AsyncSendData* asyncData = (AsyncSendData*)SoftBusCalloc(sizeof(AsyncSendData));
     if (asyncData == NULL) {
-        napi_throw_error(env, NULL, "Memory allocation failed");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR);
         return NULL;
     }
     asyncData->env = env;
@@ -577,7 +577,7 @@ napi_value SendDataAsync(napi_env env, napi_callback_info info)
 
     napi_status status = napi_create_promise(env, &asyncData->deferred, &promise);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to create promise");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR);
         goto cleanup;
     }
     TRANS_LOGI(TRANS_SDK, "[br_proxy] channelId=%{public}d.", asyncData->channelId);
@@ -585,7 +585,7 @@ napi_value SendDataAsync(napi_env env, napi_callback_info info)
     QueueNode* node = (QueueNode*)SoftBusCalloc(sizeof(QueueNode));
     if (node == NULL) {
         pthread_mutex_unlock(&g_taskQueue.mutex);
-        napi_throw_error(env, NULL, "Memory allocation failed");
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR);
         goto cleanup;
     }
     node->data = asyncData;
