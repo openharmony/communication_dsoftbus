@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -359,12 +359,57 @@ static void RecoveryCurrentUser(int32_t userId)
     RecoveryConnect(recoveryInfo.proxyInfo.brMac, recoveryInfo.proxyInfo.uuid, recoveryInfo.requestId);
 }
 
+static void TryToPullUpHapWhenSwitch(int32_t userId)
+{
+    int32_t ret = SOFTBUS_OK;
+    TransBrProxyStorageInfo storageInfo;
+    (void)memset_s(&storageInfo, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
+    bool flag = TransBrProxyStorageRead(TransBrProxyStorageGetInstance(), &storageInfo);
+    if (!flag) {
+        return;
+    }
+    if (storageInfo.userId != userId) {
+        TRANS_LOGW(
+            TRANS_SVC, "[br_proxy] foregroundUserId=%{public}d, callerUserId=%{public}d", userId, storageInfo.userId);
+        return;
+    }
+
+    BrProxyInfo *nodeInfo = NULL;
+    if (g_proxyList == NULL) {
+        TRANS_LOGW(TRANS_SVC, "[br_proxy] proxy list not init!");
+        goto PULL_UP;
+    }
+    if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_proxyList->list), BrProxyInfo, node) {
+        if (strcmp(nodeInfo->bundleName, storageInfo.bundleName) == 0 &&
+            strcmp(nodeInfo->abilityName, storageInfo.abilityName) == 0 && nodeInfo->appIndex == storageInfo.appIndex &&
+            nodeInfo->userId == storageInfo.userId) {
+            TRANS_LOGW(TRANS_SVC, "[br_proxy] no need pull up hap");
+            (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+
+PULL_UP:
+    ret = PullUpHap(storageInfo.bundleName, storageInfo.abilityName, storageInfo.appIndex);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] pull up hap failed. ret:%{public}d", ret);
+        return;
+    }
+    return;
+}
+
 static void BrProxyUserSwitch()
 {
     int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     TRANS_LOGI(TRANS_SVC, "[br_proxy] current userId=%{public}d", userId);
     CloseOtherUser(userId);
     RecoveryCurrentUser(userId);
+    TryToPullUpHapWhenSwitch(userId);
     TransEventExtra extra = {
         .result = EVENT_STAGE_RESULT_OK,
         .userId = userId,
@@ -1323,6 +1368,23 @@ static void PrintSession(const char *brMac, const char *uuid)
     AnonymizeFree(uuidtmpName);
 }
 
+static int32_t GenerateRequestIdAndChannelId(uint32_t *requestId, int32_t *channelId)
+{
+    ProxyChannelManager *proxyMgr = GetProxyChannelManager();
+    if (proxyMgr == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *requestId = proxyMgr->generateRequestId();
+
+    int32_t ret = GetNewChannelId(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get new channelId failed! ret:%{public}d", ret);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] new channelId:%{public}d! requestId:%{public}u", *channelId, *requestId);
+    return SOFTBUS_OK;
+}
+
 static int32_t GetRequestIdAndChanIdByEnableProxy(
     const BrProxyInfo *info, const char *brMac, const char *uuid, uint32_t *requestId, int32_t *channelId)
 {
@@ -1330,7 +1392,7 @@ static int32_t GetRequestIdAndChanIdByEnableProxy(
         TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
         return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
     }
-    if (info == NULL || brMac == NULL || uuid == NULL || requestId == NULL) {
+    if (info == NULL || brMac == NULL || uuid == NULL || requestId == NULL || channelId == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1349,6 +1411,13 @@ static int32_t GetRequestIdAndChanIdByEnableProxy(
             *channelId = nodeInfo->channelId;
             (void)SoftBusMutexUnlock(&(g_proxyList->lock));
             return SOFTBUS_OK;
+        } else {
+            nodeInfo->isLastConnect = true;
+            int32_t ret = GenerateRequestIdAndChannelId(requestId, channelId);
+            nodeInfo->requestId = *requestId;
+            nodeInfo->channelId = *channelId;
+            (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+            return ret;
         }
     }
     (void)SoftBusMutexUnlock(&(g_proxyList->lock));
@@ -1406,8 +1475,6 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
     }
     int32_t ret = BrProxyServerInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] init failed ret=%{public}d", ret);
-    ret = RegisterUserSwitchEvent();
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "[br_proxy] register event failed.");
     BrProxyLoopInit();
     BrProxyInfo proxyInfo;
     (void)memset_s(&proxyInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
@@ -2232,10 +2299,17 @@ void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId)
 void TransBrProxyInit(void)
 {
     DynamicLoadInit();
+    RegisterUserSwitchEvent();
     TransBrProxyStorageInfo info;
     (void)memset_s(&info, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
     bool flag = TransBrProxyStorageRead(TransBrProxyStorageGetInstance(), &info);
     if (!flag) {
+        return;
+    }
+    int32_t foregroundUserId = JudgeDeviceTypeAndGetOsAccountIds();
+    if (info.userId != foregroundUserId) {
+        TRANS_LOGW(TRANS_SVC, "[br_proxy] foregroundUserId=%{public}d, callerUserId=%{public}d", foregroundUserId,
+            info.userId);
         return;
     }
     int32_t ret = PullUpHap(info.bundleName, info.abilityName, info.appIndex);
