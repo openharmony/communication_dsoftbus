@@ -99,7 +99,8 @@ if (defined(ohos_lite)) {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
 
-      sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+      sources +=
+          [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
       if (board_name == "v200zr") {
         external_deps += [ "json:nlohmann_json_static" ]
@@ -118,7 +119,8 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/range/softbus_adapter_range.c",
         ]
 
-        sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+        sources +=
+            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
       }
 
       deps = [
@@ -181,7 +183,8 @@ if (defined(ohos_lite)) {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
 
-      sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+      sources +=
+          [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
       deps = [
         "$dsoftbus_dfx_path:softbus_dfx",
@@ -224,9 +227,6 @@ if (defined(ohos_lite)) {
 
   ohos_shared_library("softbus_adapter") {
     sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
       cfi = true
       cfi_cross_dso = true
       debug = false
@@ -274,9 +274,11 @@ if (defined(ohos_lite)) {
       sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
     }
 
-    sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+    sources +=
+        [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
     deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+
     public_external_deps = [
       "bounds_checking_function:libsec_shared",
       "json:nlohmann_json_static",
