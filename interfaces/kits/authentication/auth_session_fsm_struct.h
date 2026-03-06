@@ -27,6 +27,7 @@
 #include "lnn_p2p_info_struct.h"
 #include "lnn_state_machine_struct.h"
 #include "softbus_hisysevt_bus_center.h"
+#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,6 +63,14 @@ typedef enum {
     AUTH_STATE_ACK,
     AUTH_STATE_COMPATIBLE,
 } AuthStartState;
+
+typedef enum {
+    CRED_NEGO_STATE_ASK = 0,
+    CRED_NEGO_STATE_REPLY,
+    CRED_NEGO_STATE_DECIDE,
+    CRED_NEGO_STATE_FINISH,
+    CRED_NEGO_STATE_COMPATIBLE,
+} CredNegoState;
 
 typedef struct {
     bool isServer;
@@ -112,6 +121,8 @@ typedef struct {
     char *credId;
     int32_t credIdType;
     int64_t headSeq;
+    cJSON *credTypeInfo;
+    uint8_t credNegoState;
 } AuthSessionInfo;
 
 typedef struct {

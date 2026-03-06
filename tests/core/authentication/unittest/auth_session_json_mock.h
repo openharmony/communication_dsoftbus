@@ -126,6 +126,9 @@ public:
     virtual void LnnDumpSparkCheck(const unsigned char *sparkCheck, const char *log) = 0;
     virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
+    virtual char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+        const char *udidHash) = 0;
+    virtual void CredTypesSort(int32_t *credTypes, int32_t credTypesLen) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -209,6 +212,9 @@ public:
     MOCK_METHOD2(LnnDumpSparkCheck, void(const unsigned char *sparkCheck, const char *log));
     MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
+    MOCK_METHOD4(IdServiceGetCredIdByCredType, char *(int32_t localUserId, int32_t peerUserId, int32_t credType,
+        const char *udidHash));
+    MOCK_METHOD2(CredTypesSort, void(int32_t *credTypes, int32_t credTypesLen));
 };
 
 extern "C" {
