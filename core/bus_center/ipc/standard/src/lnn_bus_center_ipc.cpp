@@ -25,6 +25,7 @@
 #include "ipc_skeleton.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
+
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
@@ -33,6 +34,7 @@
 #include "softbus_ddos.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
+#include "lnn_ranging_manager.h"
 #include "softbus_init_common.h"
 
 struct JoinLnnRequestInfo {
@@ -126,17 +128,17 @@ static int32_t AddTimeSyncInfo(const char *pkgName, int32_t callingPid, const ch
     TimeSyncReqInfo *info = new (std::nothrow) TimeSyncReqInfo();
     if (info == nullptr) {
         LNN_LOGE(LNN_EVENT, "new timesyncreq info fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy pkgName fail");
         delete info;
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (strncpy_s(info->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy networkId fail");
         delete info;
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     info->pid = callingPid;
     std::lock_guard<std::mutex> autoLock(g_lock);
@@ -408,7 +410,7 @@ int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel)
         LNN_LOGE(LNN_EVENT, "Set Data Level but trigger heartbeat failed, ret=%{public}d", ret);
         return ret;
     }
-    LNN_LOGE(LNN_EVENT, "Set Data Level and trigger heartbeat success!");
+    LNN_LOGI(LNN_EVENT, "Set Data Level and trigger heartbeat success!");
     return SOFTBUS_OK;
 }
 
@@ -668,6 +670,8 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
 
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        (pkgName != NULL && nameData != NULL && len > 0), SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid param");
     return LnnDisSetDisplayName(pkgName, nameData, len);
 }
 
@@ -858,7 +862,7 @@ static void RemoveRangeRequestInfoByPkgName(const char *pkgName)
     std::vector<MsdpRangeReqInfo *>::iterator iter;
     bool isRangePkg = false;
     for (iter = g_msdpRangeReqInfo.begin(); iter != g_msdpRangeReqInfo.end();) {
-        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+        if (strcmp(pkgName, (*iter)->pkgName) != 0) {
             ++iter;
             continue;
         }
@@ -892,7 +896,7 @@ static void StopTimeSyncReq(const char *pkgName)
     for (iter = g_timeSyncRequestInfo.begin(); iter != g_timeSyncRequestInfo.end();) {
         if ((*iter) == nullptr) {
             LNN_LOGE(LNN_EVENT, "iter is nullptr");
-            continue;
+            break;
         }
         if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
             ++iter;
@@ -901,6 +905,7 @@ static void StopTimeSyncReq(const char *pkgName)
         char networkId[NETWORK_ID_BUF_LEN] = { 0 };
         if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, (*iter)->networkId) != EOK) {
             LNN_LOGE(LNN_EVENT, "strcpy_s networkId fail");
+            ++iter;
             continue;
         }
         int32_t pid = (*iter)->pid;
