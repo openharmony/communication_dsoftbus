@@ -534,13 +534,14 @@ int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChai
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_CREATE_JSON_ERR;
     }
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     int32_t ret = SOFTBUS_OK;
     if (hiChainParam->cb == NULL) {
         ret = g_hiChainAuthInterface[authMode].authenticate(
-            JudgeDeviceTypeAndGetOsAccountIds(), authSeq, authParams, &g_hichainCallback);
+            localUserId, authSeq, authParams, &g_hichainCallback);
     } else {
         ret = g_hiChainAuthInterface[authMode].authenticate(
-            JudgeDeviceTypeAndGetOsAccountIds(), authSeq, authParams, hiChainParam->cb);
+            localUserId, authSeq, authParams, hiChainParam->cb);
     }
     if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");

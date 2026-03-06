@@ -280,5 +280,30 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
     return GetAuthHichainMockInterface()->JudgeDeviceTypeAndGetOsAccountIds();
 }
 
+bool IsSupportUDIDAbatementPacked(void)
+{
+    return GetAuthHichainMockInterface()->IsSupportUDIDAbatementPacked();
+}
+
+bool IsNeedUDIDAbatementPacked(const AuthSessionInfo *info)
+{
+    return GetAuthHichainMockInterface()->IsNeedUDIDAbatementPacked(info);
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetAuthHichainMockInterface()->LnnGetLocalNumInfo(key, info);
+}
+
+char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+    const char *udidHash)
+{
+    return GetAuthHichainMockInterface()->IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+}
+
+void CredTypesSort(int32_t *credTypes, int32_t credTypesLen)
+{
+    return GetAuthHichainMockInterface()->CredTypesSort(credTypes, credTypesLen);
+}
 } // extern "C"
 } // namespace OHOS

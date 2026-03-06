@@ -91,6 +91,12 @@ public:
     virtual int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType) = 0;
     virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
+    virtual bool IsSupportUDIDAbatementPacked(void) = 0;
+    virtual bool IsNeedUDIDAbatementPacked(const AuthSessionInfo *info) = 0;
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+        const char *udidHash) = 0;
+    virtual void CredTypesSort(int32_t *credTypes, int32_t credTypesLen) = 0;
 };
 
 class AuthHichainInterfaceMock : public AuthHichainInterface {
@@ -142,6 +148,12 @@ public:
     MOCK_METHOD3(IdServiceGetCredTypeByCredId, int32_t(int32_t, const char *, int32_t *));
     MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
+    MOCK_METHOD0(IsSupportUDIDAbatementPacked, bool(void));
+    MOCK_METHOD1(IsNeedUDIDAbatementPacked, bool(const AuthSessionInfo *info));
+    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
+    MOCK_METHOD4(IdServiceGetCredIdByCredType, char *(int32_t localUserId, int32_t peerUserId, int32_t credType,
+        const char *udidHash));
+    MOCK_METHOD2(CredTypesSort, void(int32_t *credTypes, int32_t credTypesLen));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H
