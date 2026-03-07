@@ -57,5 +57,7 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.loadTransPermissionJson = dlsym(soHandle, "LoadTransPermissionJson");
     g_transEnhanceFuncList.transD2dQosUnregister = dlsym(soHandle, "TransD2dQosUnregister");
     g_transEnhanceFuncList.isMultipathWhitelist = dlsym(soHandle, "IsMultipathWhitelist");
+    g_transEnhanceFuncList.cancelEncryptionCheck = dlsym(soHandle, "CancelEncryptionCheck");
+    g_transEnhanceFuncList.permissionCheck = dlsym(soHandle, "PermissionCheck");
     return SOFTBUS_OK;
 }

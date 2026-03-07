@@ -156,7 +156,7 @@ static int32_t CreateServerSocket(const char *ip, int32_t *fd, int32_t *port, ui
     }
 
     if (socketFd < 0) {
-        TRANS_LOGE(TRANS_FILE, "failed to start tcp server for getting port");
+        TRANS_LOGE(TRANS_FILE, "failed to start tcp server socket");
         return SOFTBUS_FILE_ERR;
     }
     const SocketInterface *interface = GetSocketInterface(LNN_PROTOCOL_IP);
@@ -217,43 +217,80 @@ static int32_t InitSockAddrIn6ByIpPort(const char *ip, int32_t port, struct sock
     return SOFTBUS_OK;
 }
 
-int32_t StartNStackXDFileServer(
-    const char *myIp, const uint8_t *key, DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue)
+static int32_t StartDFileServerIpv6(
+    const ChannelInfo *channel, int32_t port, DFileMsgReceiver msgReceiver, int32_t *sessionId)
 {
-    if (myIp == NULL || filePort == NULL) {
+    if (channel == NULL || sessionId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    struct sockaddr_in6 localAddr = { 0 };
+    int32_t ret = InitSockAddrIn6ByIpPort(channel->myIp, port, &localAddr);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in6, ret=%{public}d", ret);
+        return ret;
+    }
+    socklen_t addrLen = sizeof(struct sockaddr_in6);
+    if (channel->cancelEncryption) {
+        *sessionId = NSTACKX_DFileServer((struct sockaddr_in *)&localAddr, addrLen, NULL, 0, msgReceiver);
+    } else {
+        *sessionId = NSTACKX_DFileServer((struct sockaddr_in *)&localAddr, addrLen,
+            (const uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, msgReceiver);
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t StartDFileServerIpv4(
+    const ChannelInfo *channel, int32_t port, DFileMsgReceiver msgReceiver, int32_t *sessionId)
+{
+    if (channel == NULL || sessionId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    struct sockaddr_in localAddr = { 0 };
+    int32_t ret = InitSockAddrInByIpPort(channel->myIp, port, &localAddr);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in, ret=%{public}d", ret);
+        return ret;
+    }
+    socklen_t addrLen = sizeof(struct sockaddr_in);
+    if (channel->cancelEncryption) {
+        *sessionId = NSTACKX_DFileServer(
+            (struct sockaddr_in *)&localAddr, addrLen, NULL, 0, msgReceiver);
+    } else {
+        *sessionId = NSTACKX_DFileServer((struct sockaddr_in *)&localAddr, addrLen,
+            (const uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, msgReceiver);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t StartNStackXDFileServer(
+    const ChannelInfo *channel, DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue)
+{
+    if (channel == NULL || channel->myIp == NULL || filePort == NULL) {
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t port = -1;
     int32_t fd = -1;
-    int32_t ret = CreateServerSocket(myIp, &fd, &port, capabilityValue);
+    int32_t ret = CreateServerSocket(channel->myIp, &fd, &port, capabilityValue);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "failed to start tcp server for getting port");
+        TRANS_LOGE(TRANS_FILE, "failed to start tcp server socket");
         return ret;
     }
     int sessionId = -1;
-    if (GetDomainByAddr(myIp) == SOFTBUS_AF_INET6) {
-        struct sockaddr_in6 localAddr = { 0 };
-        ret = InitSockAddrIn6ByIpPort(myIp, port, &localAddr);
-        if (ret != SOFTBUS_OK) {
-            TransTdcReleaseFd(fd);
-            TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in6, ret=%{public}d", ret);
-            return ret;
-        }
-        socklen_t addrLen = sizeof(struct sockaddr_in6);
-        sessionId = NSTACKX_DFileServer(
-            (struct sockaddr_in *)&localAddr, addrLen, key, DEFAULT_KEY_LENGTH, msgReceiver);
-    } else {
-        struct sockaddr_in localAddr = { 0 };
-        ret = InitSockAddrInByIpPort(myIp, port, &localAddr);
+    if (GetDomainByAddr(channel->myIp) == SOFTBUS_AF_INET6) {
+        ret = StartDFileServerIpv6(channel, port, msgReceiver, &sessionId);
         if (ret != SOFTBUS_OK) {
             TransTdcReleaseFd(fd);
             TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in, ret=%{public}d", ret);
             return ret;
         }
-        socklen_t addrLen = sizeof(struct sockaddr_in);
-        sessionId = NSTACKX_DFileServer(
-            (struct sockaddr_in *)&localAddr, addrLen, key, DEFAULT_KEY_LENGTH, msgReceiver);
+    } else {
+        ret = StartDFileServerIpv4(channel, port, msgReceiver, &sessionId);
+        if (ret != SOFTBUS_OK) {
+            TransTdcReleaseFd(fd);
+            TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in, ret=%{public}d", ret);
+            return ret;
+        }
     }
     *filePort = port;
     TransTdcReleaseFd(fd);
@@ -263,38 +300,49 @@ int32_t StartNStackXDFileServer(
     }
 
     char animizedIp[IP_LEN] = { 0 };
-    ConvertAnonymizeIpAddress(animizedIp, IP_LEN, myIp, IP_LEN);
-    TRANS_LOGI(TRANS_FILE, "start dfile server, ip=%{public}s, port=%{public}d", animizedIp, port);
+    ConvertAnonymizeIpAddress(animizedIp, IP_LEN, channel->myIp, IP_LEN);
+    TRANS_LOGI(TRANS_FILE, "start dfile server, ip=%{public}s, port=%{public}d, linkType=%{public}d, "
+        "cancelEncryption=%{public}d", animizedIp, port, channel->linkType, channel->cancelEncryption);
     return sessionId;
 }
 
-int32_t StartNStackXDFileClient(
-    const char *peerIp, int32_t peerPort, const uint8_t *key, uint32_t keyLen, DFileMsgReceiver msgReceiver)
+int32_t StartNStackXDFileClient(const ChannelInfo *channel, uint32_t keyLen, DFileMsgReceiver msgReceiver)
 {
-    if (peerIp == NULL) {
+    if (channel == NULL || channel->peerIp == NULL) {
         TRANS_LOGW(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t sessionId = -1;
-    if (GetDomainByAddr(peerIp) == SOFTBUS_AF_INET6) {
+    if (GetDomainByAddr(channel->peerIp) == SOFTBUS_AF_INET6) {
         struct sockaddr_in6 localAddr = { 0 };
-        int32_t ret = InitSockAddrIn6ByIpPort(peerIp, peerPort, &localAddr);
+        int32_t ret = InitSockAddrIn6ByIpPort(channel->peerIp, channel->peerPort, &localAddr);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in6, ret=%{public}d", ret);
             return ret;
         }
         socklen_t addrLen = sizeof(struct sockaddr_in6);
-        sessionId = NSTACKX_DFileClient((struct sockaddr_in *)&localAddr, addrLen, key, keyLen, msgReceiver);
+        if (channel->cancelEncryption) {
+            sessionId = NSTACKX_DFileClient(
+                (struct sockaddr_in *)&localAddr, addrLen, NULL, 0, msgReceiver);
+        } else {
+            sessionId = NSTACKX_DFileClient((struct sockaddr_in *)&localAddr, addrLen,
+                (const uint8_t *)channel->sessionKey, keyLen, msgReceiver);
+        }
     } else {
         struct sockaddr_in localAddr = { 0 };
-        int32_t ret = InitSockAddrInByIpPort(peerIp, peerPort, &localAddr);
+        int32_t ret = InitSockAddrInByIpPort(channel->peerIp, channel->peerPort, &localAddr);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "failed to create sockaddr_in, ret=%{public}d", ret);
             return ret;
         }
         socklen_t addrLen = sizeof(struct sockaddr_in);
-        sessionId = NSTACKX_DFileClient(&localAddr, addrLen, key, keyLen, msgReceiver);
+        if (channel->cancelEncryption) {
+            sessionId = NSTACKX_DFileClient(&localAddr, addrLen, NULL, 0, msgReceiver);
+        } else {
+            sessionId = NSTACKX_DFileClient(&localAddr, addrLen,
+                (const uint8_t *)channel->sessionKey, keyLen, msgReceiver);
+        }
     }
 
     if (sessionId < 0) {
@@ -303,12 +351,50 @@ int32_t StartNStackXDFileClient(
     }
 
     char animizedIp[IP_LEN] = { 0 };
-    ConvertAnonymizeIpAddress(animizedIp, IP_LEN, peerIp, IP_LEN);
-    TRANS_LOGI(TRANS_FILE, "start dfile client, peerIp=%{public}s, peerPort=%{public}d", animizedIp, peerPort);
+    ConvertAnonymizeIpAddress(animizedIp, IP_LEN, channel->peerIp, IP_LEN);
+    TRANS_LOGI(TRANS_FILE, "start dfile client, peerIp=%{public}s, peerPort=%{public}d, linkType=%{public}d, "
+        "cancelEncryption=%{public}d", animizedIp, channel->peerPort, channel->linkType, channel->cancelEncryption);
     return sessionId;
 }
 
-int32_t TransOnFileChannelServerAddSecondPath(const ChannelInfo *channel, int32_t *filePort,
+static int32_t StartDFileAddMpPath(const ChannelInfo *channel, int32_t port, int32_t dfileId, AddrInfo *addrInfo)
+{
+    if (channel == NULL || addrInfo == NULL) {
+        TRANS_LOGW(TRANS_FILE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NSTACKX_SessionParaMpV2 para[1];
+    struct sockaddr_storage *addrStorage = (struct sockaddr_storage *)SoftBusCalloc(sizeof(struct sockaddr_storage));
+    if (addrStorage == NULL) {
+        TRANS_LOGE(TRANS_FILE, "addr calloc failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    para[0].addr = (struct sockaddr_in *)addrStorage;
+    int32_t ret = FillDFileParam(channel->myIp, port, channel->linkType, para);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "fill dfile param error, ret=%{public}d", ret);
+        SoftBusFree(addrStorage);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", para[0].linkType);
+
+    if (memcpy_s(&(addrInfo->addr), sizeof(struct sockaddr_storage), para[0].addr, para[0].addrLen) != EOK) {
+        TRANS_LOGE(TRANS_FILE, "failed to memcpy addr");
+        SoftBusFree(addrStorage);
+        return SOFTBUS_MEM_ERR;
+    }
+    addrInfo->addrLen = para[0].addrLen;
+    int32_t paraNum = sizeof(para) / sizeof(para[0]);
+    if (channel->cancelEncryption) {
+        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, NULL, 0);
+    } else {
+        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (const uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH);
+    }
+    SoftBusFree(addrStorage);
+    return ret;
+}
+
+int32_t DFileServerAddSecondPath(const ChannelInfo *channel, int32_t *filePort,
     int32_t dfileId, AddrInfo *addrInfo, uint32_t capabilityValue)
 {
     if (channel == NULL || filePort == NULL || addrInfo == NULL) {
@@ -318,48 +404,22 @@ int32_t TransOnFileChannelServerAddSecondPath(const ChannelInfo *channel, int32_
     int32_t port = -1;
     int32_t fd = -1;
     int32_t ret = CreateServerSocket(channel->myIp, &fd, &port, capabilityValue);
-    NSTACKX_SessionParaMpV2 para[1];
-    struct sockaddr_storage *addrStorage = (struct sockaddr_storage *)SoftBusCalloc(sizeof(struct sockaddr_storage));
-    if (addrStorage == NULL) {
-        TRANS_LOGE(TRANS_FILE, "addr calloc failed.");
-        TransTdcReleaseFd(fd);
-        return SOFTBUS_MEM_ERR;
-    }
-    para[0].addr = (struct sockaddr_in *)addrStorage;
-    ret = FillDFileParam(channel->myIp, port, channel->linkType, para);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "fill dfile param error, ret=%{public}d", ret);
-        TransTdcReleaseFd(fd);
-        SoftBusFree(addrStorage);
-        return SOFTBUS_MEM_ERR;
-    }
-    TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", para[0].linkType);
-
-    if (memcpy_s(&(addrInfo->addr), sizeof(struct sockaddr_storage), para[0].addr, para[0].addrLen) != EOK) {
-        TRANS_LOGE(TRANS_FILE, "failed to memcpy addr");
-        TransTdcReleaseFd(fd);
-        SoftBusFree(addrStorage);
-        return SOFTBUS_MEM_ERR;
-    }
-    addrInfo->addrLen = para[0].addrLen;
-    int32_t paraNum = sizeof(para) / sizeof(para[0]);
     int32_t sessionId = -1;
-    ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH);
+    ret = StartDFileAddMpPath(channel, port, dfileId, addrInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "NSTACK_DFileAddMpPath error, ret=%{public}d", ret);
         TransTdcReleaseFd(fd);
-        SoftBusFree(addrStorage);
         return sessionId;
     }
     sessionId = dfileId;
     *filePort = port;
-    TRANS_LOGI(TRANS_FILE, "add second path succ, dfileId=%{public}d, port=%{public}d", sessionId, *filePort);
+    TRANS_LOGI(TRANS_FILE, "add second path succ, dfileId=%{public}d, port=%{public}d, linkType=%{public}d, "
+        "cancelEncryption=%{public}d", sessionId, *filePort, channel->linkType, channel->cancelEncryption);
     TransTdcReleaseFd(fd);
-    SoftBusFree(addrStorage);
     return sessionId;
 }
 
-int32_t TransOnFileChannelClientAddSecondPath(
+int32_t DFileClientAddSecondPath(
     const ChannelInfo *channel, int32_t dfileId, uint32_t keyLen, AddrInfo *addrInfo)
 {
     if (channel == NULL || addrInfo == NULL) {
@@ -377,7 +437,7 @@ int32_t TransOnFileChannelClientAddSecondPath(
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "fill dfile param error, ret=%{public}d", ret);
         SoftBusFree(addrStorage);
-        return SOFTBUS_MEM_ERR;
+        return ret;
     }
     TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", para[0].linkType);
 
@@ -390,7 +450,11 @@ int32_t TransOnFileChannelClientAddSecondPath(
 
     int32_t paraNum = sizeof(para) / sizeof(para[0]);
     int32_t sessionId = -1;
-    ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (uint8_t *)channel->sessionKey, keyLen);
+    if (channel->cancelEncryption) {
+        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, NULL, 0);
+    } else {
+        ret = NSTACKX_DFileAddMpPath(dfileId, para, paraNum, (const uint8_t *)channel->sessionKey, keyLen);
+    }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "NSTACK_DFileAddMpPath error, ret=%{public}d", ret);
         SoftBusFree(addrStorage);
@@ -398,9 +462,41 @@ int32_t TransOnFileChannelClientAddSecondPath(
     }
     sessionId = dfileId;
     SoftBusFree(addrStorage);
-    TRANS_LOGI(
-        TRANS_FILE, "add second path succ, dfileId=%{public}d, peerPort=%{public}d", sessionId, channel->peerPort);
+    TRANS_LOGI(TRANS_FILE, "add second path succ, dfileId=%{public}d, peerPort=%{public}d, linkType=%{public}d, "
+        "cancelEncryption=%{public}d", sessionId, channel->peerPort, channel->linkType, channel->cancelEncryption);
     return sessionId;
+}
+
+static int32_t StartDFileServerMpV2(
+    const ChannelInfo *channel, DFileMsgReceiver msgReceiver, int32_t port, int32_t *sessionId)
+{
+    if (channel == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NSTACKX_SessionParaMpV2 para[1];
+    struct sockaddr_storage *addrStorage = (struct sockaddr_storage *)SoftBusCalloc(sizeof(struct sockaddr_storage));
+    if (addrStorage == NULL) {
+        TRANS_LOGE(TRANS_FILE, "addr calloc failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    para[0].addr = (struct sockaddr_in *)addrStorage;
+    int32_t ret = FillDFileParam(channel->myIp, port, channel->linkType, para);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "fill dfile param error, ret=%{public}d", ret);
+        SoftBusFree(addrStorage);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", para[0].linkType);
+
+    int32_t paraNum = sizeof(para) / sizeof(para[0]);
+    if (channel->cancelEncryption) {
+        *sessionId = NSTACKX_DFileServerMpV2(para, paraNum, NULL, 0, msgReceiver);
+    } else {
+        *sessionId = NSTACKX_DFileServerMpV2(
+            para, paraNum, (const uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, msgReceiver);
+    }
+    SoftBusFree(addrStorage);
+    return SOFTBUS_OK;
 }
 
 int32_t StartNStackXDFileServerV2(
@@ -415,33 +511,18 @@ int32_t StartNStackXDFileServerV2(
     int32_t fd = -1;
     int32_t ret = CreateServerSocket(channel->myIp, &fd, &port, capabilityValue);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "failed to start tcp server for getting port");
+        TRANS_LOGE(TRANS_FILE, "failed to start tcp server socket");
         return ret;
     }
-
-    NSTACKX_SessionParaMpV2 para[1];
-    struct sockaddr_storage *addrStorage = (struct sockaddr_storage *)SoftBusCalloc(sizeof(struct sockaddr_storage));
-    if (addrStorage == NULL) {
-        TRANS_LOGE(TRANS_FILE, "addr calloc failed.");
-        TransTdcReleaseFd(fd);
-        return SOFTBUS_MEM_ERR;
-    }
-    para[0].addr = (struct sockaddr_in *)addrStorage;
-    ret = FillDFileParam(channel->myIp, port, channel->linkType, para);
+    int32_t sessionId = -1;
+    ret = StartDFileServerMpV2(channel, msgReceiver, port, &sessionId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "fill dfile param error, ret=%{public}d", ret);
         TransTdcReleaseFd(fd);
-        SoftBusFree(addrStorage);
-        return SOFTBUS_MEM_ERR;
+        TRANS_LOGE(TRANS_FILE, "failed to start dfile server mp v2");
+        return ret;
     }
-    TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", para[0].linkType);
-
-    int32_t paraNum = sizeof(para) / sizeof(para[0]);
-    int32_t sessionId = NSTACKX_DFileServerMpV2(
-        para, paraNum, (uint8_t *)channel->sessionKey, DEFAULT_KEY_LENGTH, msgReceiver);
     *filePort = port;
     TransTdcReleaseFd(fd);
-    SoftBusFree(addrStorage);
     if (sessionId < 0) {
         TRANS_LOGE(TRANS_FILE, "failed to start dfile server.");
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
@@ -449,8 +530,9 @@ int32_t StartNStackXDFileServerV2(
 
     char animizedIp[IP_LEN] = { 0 };
     ConvertAnonymizeIpAddress(animizedIp, IP_LEN, channel->myIp, IP_LEN);
-    TRANS_LOGI(TRANS_FILE, "start dfile server, ip=%{public}s, port=%{public}d, dfileId=%{public}d",
-        animizedIp, port, sessionId);
+    TRANS_LOGI(TRANS_FILE, "start dfile server, ip=%{public}s, port=%{public}d, dfileId=%{public}d, "
+        "linkType=%{public}d, cancelEncryption=%{public}d",
+        animizedIp, port, sessionId, channel->linkType, channel->cancelEncryption);
     return sessionId;
 }
 
@@ -473,12 +555,17 @@ int32_t StartNStackXDFileClientV2(const ChannelInfo *channel, uint32_t keyLen, D
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "fill dfile param error, ret=%{public}d", ret);
         SoftBusFree(addrStorage);
-        return SOFTBUS_MEM_ERR;
+        return ret;
     }
     TRANS_LOGI(TRANS_FILE, "is wired=%{public}d", para[0].linkType);
 
     int32_t paraNum = sizeof(para) / sizeof(para[0]);
-    int32_t sessionId = NSTACKX_DFileClientMpV2(para, paraNum, (uint8_t *)channel->sessionKey, keyLen, msgReceiver);
+    int32_t sessionId = -1;
+    if (channel->cancelEncryption) {
+        sessionId = NSTACKX_DFileClientMpV2(para, paraNum, NULL, 0, msgReceiver);
+    } else {
+        sessionId = NSTACKX_DFileClientMpV2(para, paraNum, (const uint8_t *)channel->sessionKey, keyLen, msgReceiver);
+    }
     SoftBusFree(addrStorage);
     if (sessionId < 0) {
         TRANS_LOGE(TRANS_FILE, "failed to start dfile client.");
@@ -486,8 +573,9 @@ int32_t StartNStackXDFileClientV2(const ChannelInfo *channel, uint32_t keyLen, D
     }
     char animizedIp[IP_LEN] = { 0 };
     ConvertAnonymizeIpAddress(animizedIp, IP_LEN, channel->peerIp, IP_LEN);
-    TRANS_LOGI(TRANS_FILE, "start dfile client, peerip=%{public}s, peerPort=%{public}d, dfileId=%{public}d",
-        animizedIp, channel->peerPort, sessionId);
+    TRANS_LOGI(TRANS_FILE, "start dfile client, peerip=%{public}s, peerPort=%{public}d, dfileId=%{public}d, "
+        "linkType=%{public}d, cancelEncryption=%{public}d",
+        animizedIp, channel->peerPort, sessionId, channel->linkType, channel->cancelEncryption);
     return sessionId;
 }
 

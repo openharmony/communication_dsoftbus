@@ -99,6 +99,7 @@ static int32_t MessageParcelWriteEx(MessageParcel &data, const ChannelInfo *chan
             return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
         }
         WRITE_PARCEL_WITH_RET(data, CString, channel->groupId, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, Bool, channel->cancelEncryption, SOFTBUS_IPC_ERR);
     }
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isMultiNeg, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->linkedChannelId, SOFTBUS_IPC_ERR);

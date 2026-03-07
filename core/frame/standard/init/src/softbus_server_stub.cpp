@@ -726,6 +726,7 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.flowInfo.flowSize = data.ReadUint64();
     param.flowInfo.sessionType = (FlowSessionType)data.ReadUint32();
     param.flowInfo.flowQosType = (FlowQosType)data.ReadUint32();
+    param.cancelEncryptionBit = data.ReadUint32();
 }
 
 static bool WhitelistPermissionCheck(void)
@@ -753,6 +754,33 @@ static bool WhitelistPermissionCheck(void)
     COMM_LOGI(COMM_SVC, "callingPid=%{public}u, processName=%{public}s, isWhitelist=%{public}d",
         callingPid, nativeTokenInfo.processName.c_str(), isWhitelist);
     return isWhitelist;
+}
+
+static bool CancelEncryptionPermissionCheck(void)
+{
+    if (PermissionCheckPacked()) {
+        COMM_LOGI(COMM_SVC, "permission check succ");
+        return true;
+    }
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(tokenId));
+    if (tokenType != OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        COMM_LOGE(COMM_SVC, "not native call");
+        return false;
+    }
+    OHOS::Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+    if (result != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "GetNativeTokenInfo is failed, SOFTBUS_PERMISSION_DENIED");
+        return false;
+    }
+    bool retCheck = CancelEncryptionCheckPacked(nativeTokenInfo.processName.c_str(), callingUid);
+    COMM_LOGI(COMM_SVC, "callingPid=%{public}u, processName=%{public}s, retCheck=%{public}d",
+        callingPid, nativeTokenInfo.processName.c_str(), retCheck);
+    return retCheck;
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
@@ -818,6 +846,10 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     if (param.enableMultipath) {
         param.enableMultipath = WhitelistPermissionCheck();
         COMM_LOGI(COMM_SVC, "whitelist check pass is %{public}d", param.enableMultipath);
+    }
+    if (param.cancelEncryptionBit > 0 && !CancelEncryptionPermissionCheck()) {
+        COMM_LOGW(COMM_SVC, "cancel encryption no permission, old bit=%{public}u", param.cancelEncryptionBit);
+        param.cancelEncryptionBit = 0;
     }
 
     timeStart = GetSoftbusRecordTimeMillis();

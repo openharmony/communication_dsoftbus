@@ -73,6 +73,7 @@ typedef int32_t (*ClientSetFLTosFunc)(int32_t socket, TransFlowInfo *flowInfo);
 typedef int32_t (*ClientSetMultipathPackedFunc)(int32_t socket, bool optValue);
 typedef int32_t (*ClientGetMultipathPackedFunc)(int32_t socket, void *optValue);
 typedef int32_t (*ClientSetMultipathPolicyPackedFunc)(int32_t socket, const void *optValue);
+typedef int32_t (*ClientCancelEncryptionFunc)(int32_t socket, const LinkMediumType type);
 
 typedef struct TagClientOpenFuncList {
     CheckPackageNameFunc checkPackageName;
@@ -108,6 +109,7 @@ typedef struct TagClientOpenFuncList {
     ClientSetMultipathPackedFunc clientSetMultipath;
     ClientGetMultipathPackedFunc clientGetMultipath;
     ClientSetMultipathPolicyPackedFunc clientSetMultipathPolicy;
+    ClientCancelEncryptionFunc clientCancelEncryption;
 } ClientOpenFuncList;
 
 #ifdef __cplusplus
