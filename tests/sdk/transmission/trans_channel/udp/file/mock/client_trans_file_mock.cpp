@@ -100,40 +100,39 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
 }
 
 // File Adapter wrappers
-int32_t StartNStackXDFileServer(const char *myIp, const uint8_t *key,
+int32_t StartNStackXDFileServer(const ChannelInfo *channel,
     DFileMsgReceiver msgReceiver, int32_t *filePort, uint32_t capabilityValue)
 {
     if (GetClientTransFileInterface() == nullptr) {
         return SOFTBUS_ERR;
     }
-    return GetClientTransFileInterface()->StartNStackXDFileServer(myIp, key, msgReceiver, filePort, capabilityValue);
+    return GetClientTransFileInterface()->StartNStackXDFileServer(channel, msgReceiver, filePort, capabilityValue);
 }
 
-int32_t StartNStackXDFileClient(const char *peerIp, int32_t peerPort, const uint8_t *key,
-    uint32_t keyLen, DFileMsgReceiver msgReceiver)
+int32_t StartNStackXDFileClient(const ChannelInfo *channel, uint32_t keyLen, DFileMsgReceiver msgReceiver)
 {
     if (GetClientTransFileInterface() == nullptr) {
         return SOFTBUS_ERR;
     }
-    return GetClientTransFileInterface()->StartNStackXDFileClient(peerIp, peerPort, key, keyLen, msgReceiver);
+    return GetClientTransFileInterface()->StartNStackXDFileClient(channel, keyLen, msgReceiver);
 }
 
-int32_t TransOnFileChannelClientAddSecondPath(const ChannelInfo *channel,
+int32_t DFileClientAddSecondPath(const ChannelInfo *channel,
     int32_t dfileId, uint32_t keyLen)
 {
     if (GetClientTransFileInterface() == nullptr) {
         return SOFTBUS_ERR;
     }
-    return GetClientTransFileInterface()->TransOnFileChannelClientAddSecondPath(channel, dfileId, keyLen);
+    return GetClientTransFileInterface()->DFileClientAddSecondPath(channel, dfileId, keyLen);
 }
 
-int32_t TransOnFileChannelServerAddSecondPath(const ChannelInfo *channel,
+int32_t DFileServerAddSecondPath(const ChannelInfo *channel,
     int32_t *filePort, int32_t dfileId, uint32_t capabilityValue)
 {
     if (GetClientTransFileInterface() == nullptr) {
         return SOFTBUS_ERR;
     }
-    return GetClientTransFileInterface()->TransOnFileChannelServerAddSecondPath(
+    return GetClientTransFileInterface()->DFileServerAddSecondPath(
         channel, filePort, dfileId, capabilityValue);
 }
 

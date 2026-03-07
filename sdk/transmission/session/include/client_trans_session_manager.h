@@ -263,6 +263,8 @@ int32_t SaveAddrInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t
 
 int32_t GetChannelTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t *channelType);
 
+int32_t ClientCancelEncryption(int32_t socket, const LinkMediumType type);
+
 #ifdef __cplusplus
 }
 #endif

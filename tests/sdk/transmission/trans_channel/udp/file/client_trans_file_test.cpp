@@ -310,7 +310,7 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest003, TestSize.Level1)
 
     EXPECT_CALL(mock, TransGetFileListener(_, _))
         .WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, StartNStackXDFileServer(_, _, _, _, _))
+    EXPECT_CALL(mock, StartNStackXDFileServer(_, _, _, _))
         .WillOnce(Return(TEST_DFILE_ID));
 
     int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
@@ -337,7 +337,7 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest004, TestSize.Level1)
 
     NiceMock<ClientTransFileInterfaceMock> mock;
 
-    EXPECT_CALL(mock, StartNStackXDFileClient(_, _, _, _, _))
+    EXPECT_CALL(mock, StartNStackXDFileClient(_, _, _))
         .WillOnce(Return(TEST_DFILE_ID));
 
     int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
@@ -539,7 +539,7 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest007, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransGetUdpChannel(_, _))
         .WillOnce(DoAll(SetArgPointee<1>(*linkedChannel), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, TransOnFileChannelServerAddSecondPath(_, _, _, _))
+    EXPECT_CALL(mock, DFileServerAddSecondPath(_, _, _, _))
         .WillOnce(Return(TEST_DFILE_ID));
 
     int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
@@ -576,7 +576,7 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest008, TestSize.Level1)
 
     EXPECT_CALL(mock, TransGetUdpChannel(_, _))
         .WillOnce(DoAll(SetArgPointee<1>(*linkedChannel), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, TransOnFileChannelClientAddSecondPath(_, _, _))
+    EXPECT_CALL(mock, DFileClientAddSecondPath(_, _, _))
         .WillOnce(Return(TEST_DFILE_ID));
 
     int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
@@ -606,7 +606,7 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest009, TestSize.Level1)
 
     EXPECT_CALL(mock, TransGetFileListener(_, _))
         .WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, StartNStackXDFileServer(_, _, _, _, _))
+    EXPECT_CALL(mock, StartNStackXDFileServer(_, _, _, _))
         .WillOnce(Return(-1)); // Failure
 
     int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
@@ -633,13 +633,211 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest010, TestSize.Level1)
 
     NiceMock<ClientTransFileInterfaceMock> mock;
 
-    EXPECT_CALL(mock, StartNStackXDFileClient(_, _, _, _, _))
+    EXPECT_CALL(mock, StartNStackXDFileClient(_, _, _))
         .WillOnce(Return(-1)); // Failure
 
     int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
     SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: TransOnFileChannelOpenedTest011
+ * @tc.desc: Test TransOnFileChannelOpened with cancelEncryption enabled as server
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest011, TestSize.Level1)
+{
+    const char *sessionName = TEST_SESSION_NAME;
+    ChannelInfo *channelInfo = CreateTestChannelInfo();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->isServer = true;
+    channelInfo->enableMultipath = false;
+    channelInfo->cancelEncryption = true;
+    int32_t filePort = TEST_PORT;
+    SocketAccessInfo accessInfo = {0};
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    EXPECT_CALL(mock, TransGetFileListener(_, _))
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, StartNStackXDFileServer(_, _, _, _))
+        .WillOnce(Return(TEST_DFILE_ID));
+
+    int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
+    EXPECT_EQ(TEST_DFILE_ID, ret);
+
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: TransOnFileChannelOpenedTest012
+ * @tc.desc: Test TransOnFileChannelOpened with cancelEncryption enabled as client
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest012, TestSize.Level1)
+{
+    const char *sessionName = TEST_SESSION_NAME;
+    ChannelInfo *channelInfo = CreateTestChannelInfo();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->isServer = false;
+    channelInfo->enableMultipath = false;
+    channelInfo->cancelEncryption = true;
+    int32_t filePort = TEST_PORT;
+    SocketAccessInfo accessInfo = {0};
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    EXPECT_CALL(mock, StartNStackXDFileClient(_, _, _))
+        .WillOnce(Return(TEST_DFILE_ID));
+
+    int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
+    EXPECT_EQ(TEST_DFILE_ID, ret);
+
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: TransOnFileChannelOpenedTest013
+ * *tc.desc: Test TransOnFileChannelOpened with multipath and cancelEncryption as server
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest013, TestSize.Level1)
+{
+    const char *sessionName = TEST_SESSION_NAME;
+    ChannelInfo *channelInfo = CreateTestChannelInfo();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->isServer = true;
+    channelInfo->enableMultipath = true;
+    channelInfo->isMultiNeg = false;
+    channelInfo->linkType = WIFI_P2P;
+    channelInfo->cancelEncryption = true;
+    int32_t filePort = TEST_PORT;
+    SocketAccessInfo accessInfo = {0};
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    EXPECT_CALL(mock, TransGetFileListener(_, _))
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, StartNStackXDFileServerV2(_, _, _, _, _, _))
+        .WillOnce(Return(TEST_DFILE_ID));
+
+    int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
+    EXPECT_EQ(TEST_DFILE_ID, ret);
+
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: TransOnFileChannelOpenedTest014
+ * @tc.desc: Test TransOnFileChannelOpened with multipath and cancelEncryption as client
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest014, TestSize.Level1)
+{
+    const char *sessionName = TEST_SESSION_NAME;
+    ChannelInfo *channelInfo = CreateTestChannelInfo();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->isServer = false;
+    channelInfo->enableMultipath = true;
+    channelInfo->isMultiNeg = false;
+    channelInfo->linkType = WIFI_P2P;
+    channelInfo->cancelEncryption = true;
+    int32_t filePort = TEST_PORT;
+    SocketAccessInfo accessInfo = {0};
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    EXPECT_CALL(mock, StartNStackXDFileClientV2(_, _, _, _, _, _))
+        .WillOnce(Return(TEST_DFILE_ID));
+
+    int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
+    EXPECT_EQ(TEST_DFILE_ID, ret);
+
+    SoftBusFree(channelInfo);
+}
+
+/*
+ * @tc.name: TransOnFileChannelOpenedTest015
+ * @tc.desc: Test TransOnFileChannelOpened with multipath second path and cancelEncryption as server
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest015, TestSize.Level1)
+{
+    const char *sessionName = TEST_SESSION_NAME;
+    ChannelInfo *channelInfo = CreateTestChannelInfo();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->isServer = true;
+    channelInfo->enableMultipath = true;
+    channelInfo->isMultiNeg = true;
+    channelInfo->linkedChannelId = TEST_CHANNEL_ID + 1;
+    channelInfo->linkType = WIFI_P2P;
+    channelInfo->cancelEncryption = true;
+    int32_t filePort = TEST_PORT;
+    SocketAccessInfo accessInfo = {0};
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    UdpChannel *linkedChannel = CreateTestUdpChannel();
+    ASSERT_NE(linkedChannel, nullptr);
+    linkedChannel->dfileId = TEST_DFILE_ID;
+
+    EXPECT_CALL(mock, TransGetFileListener(_, _))
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransGetUdpChannel(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(*linkedChannel), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, DFileServerAddSecondPath(_, _, _, _))
+        .WillOnce(Return(TEST_DFILE_ID));
+
+    int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
+    EXPECT_EQ(TEST_DFILE_ID, ret);
+
+    SoftBusFree(channelInfo);
+    SoftBusFree(linkedChannel);
+}
+
+/*
+ * @tc.name: TransOnFileChannelOpenedTest016
+ * @tc.desc: Test TransOnFileChannelOpened with multipath second path and cancelEncryption as client
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest016, TestSize.Level1)
+{
+    const char *sessionName = TEST_SESSION_NAME;
+    ChannelInfo *channelInfo = CreateTestChannelInfo();
+    ASSERT_NE(channelInfo, nullptr);
+    channelInfo->isServer = false;
+    channelInfo->enableMultipath = true;
+    channelInfo->isMultiNeg = true;
+    channelInfo->linkedChannelId = TEST_CHANNEL_ID + 1;
+    channelInfo->linkType = WIFI_P2P;
+    channelInfo->cancelEncryption = true;
+    int32_t filePort = TEST_PORT;
+    SocketAccessInfo accessInfo = {0};
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    UdpChannel *linkedChannel = CreateTestUdpChannel();
+    ASSERT_NE(linkedChannel, nullptr);
+    linkedChannel->dfileId = TEST_DFILE_ID;
+
+    EXPECT_CALL(mock, TransGetUdpChannel(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(*linkedChannel), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, DFileClientAddSecondPath(_, _, _))
+        .WillOnce(Return(TEST_DFILE_ID));
+
+    int32_t ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
+    EXPECT_EQ(TEST_DFILE_ID, ret);
+
+    SoftBusFree(channelInfo);
+    SoftBusFree(linkedChannel);
 }
 
 } // namespace OHOS

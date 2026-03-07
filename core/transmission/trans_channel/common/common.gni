@@ -26,6 +26,7 @@ trans_channel_common_src = [
 ]
 trans_channel_common_inc = [
   "$dsoftbus_root_path/core/authentication/include",
+  "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
   "$dsoftbus_trans_channel_common_path/include",
 ]
 trans_channel_common_deps = []

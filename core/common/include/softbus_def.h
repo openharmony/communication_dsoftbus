@@ -191,6 +191,7 @@ typedef struct {
     bool isSupportNewHead;
     bool isMultiNeg;
     bool enableMultipath;
+    bool cancelEncryption;
     int32_t sessionId;
     int32_t pagingId;
     int32_t channelId;
