@@ -42,6 +42,7 @@ const NapiSoftbusErrCMapJs ERRCODE_C_JS_MAP[] = {
     { SOFTBUS_CONN_BR_UNPAIRED,                 NAPI_SOFTBUS_DEVICE_NOT_PAIRED                  },
     { SOFTBUS_TRANS_SESSION_OPENING,            NAPI_SOFTBUS_CHANNEL_REOPEN                     },
     { SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM,     NAPI_SOFTBUS_INVALID_PARAM                      },
+    { SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR,    NAPI_SOFTBUS_INTERNAL_ERROR                     },
 };
 
 const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
@@ -60,7 +61,7 @@ const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
         "BusinessError 32390102: Operation failed or Connection timed out."                                         },
     { NAPI_SOFTBUS_DATA_TOO_LONG,                   "BusinessError 32390103: Data too long."                        },
     { NAPI_SOFTBUS_SEND_OPERATION_FAILED,           "BusinessError 32390104: Send failed."                          },
-    { NAPI_SOFTBUS_UNKNOWN_ERR,                     "BusinessError 30200000: unknown error"                          },
+    { NAPI_SOFTBUS_UNKNOWN_ERR,                     "BusinessError 30200000: unknown error"                         },
 };
 
 const char *GetErrMsgByErrCode(int32_t errCode)
