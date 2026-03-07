@@ -1199,4 +1199,1001 @@ HWTEST_F(AuthTcpConnectionTest, GET_CONNECT_OPTION_BY_IFNAME_TEST_001, TestSize.
     option = GetConnectOptionByIfname(ifnameIdx, port);
     EXPECT_EQ(option.socketOption.moduleId, AUTH_USB);
 }
+
+/*
+ * @tc.name: REG_AUTH_CHANNEL_LISTENER_TEST_003
+ * @tc.desc: register listener with different modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, REG_AUTH_CHANNEL_LISTENER_TEST_003, TestSize.Level1)
+{
+    AuthChannelListener listenerTestOne = {
+        .onDataReceived = OnDataReceived,
+        .onDisconnected = OnDisconnect,
+    };
+    int32_t ret;
+
+    ret = RegAuthChannelListener(MODULE_AUTH_MSG, &listenerTestOne);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    UnregAuthChannelListener(MODULE_AUTH_MSG);
+
+    ret = RegAuthChannelListener(MODULE_AUTH_SDK, &listenerTestOne);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: AUTH_OPEN_CHANNEL_TEST_004
+ * @tc.desc: open channel with different ports test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_TEST_004, TestSize.Level1)
+{
+    const char *addr = "192.168.11.22";
+    int32_t ifnameIdx = 1;
+    int32_t ret;
+
+    ret = AuthOpenChannel(addr, 37025, ifnameIdx);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+
+    ret = AuthOpenChannel(addr, 65535, ifnameIdx);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+}
+
+/*
+ * @tc.name: AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_003
+ * @tc.desc: AuthOpenChannelWithAllIp with different ports test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_003, TestSize.Level1)
+{
+    const char *localIp = "192.168.11.22";
+    const char *remoteIp = "192.168.11.33";
+    int32_t ret;
+
+    ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 37025);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+
+    ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 65535);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+}
+
+/*
+ * @tc.name: SOCKET_GET_CONN_INFO_TEST_004
+ * @tc.desc: socket get conn info with different ifnameIdx test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_004, TestSize.Level1)
+{
+    int32_t fd = -1;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    bool isServer = true;
+    int32_t ret;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, 0);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, 2);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SOCKET_CONNECT_DEVICE_TEST_004
+ * @tc.desc: SocketConnectDevice with different isBlockMode values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_TEST_004, TestSize.Level1)
+{
+    const char *addr = "192.168.11.44";
+    int32_t port = 37025;
+    int32_t ifnameIdx = 1;
+    int32_t ret;
+
+    ret = SocketConnectDevice(addr, port, false, ifnameIdx);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
+
+    ret = SocketConnectDevice(addr, port, true, ifnameIdx);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
+}
+
+/*
+ * @tc.name: SOCKET_SET_DEVICE_TEST_003
+ * @tc.desc: Socket set device with different fd values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_SET_DEVICE_TEST_003, TestSize.Level1)
+{
+    bool isBlockMode = true;
+    int32_t ret;
+
+    ret = SocketSetDevice(0, isBlockMode);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
+
+    ret = SocketSetDevice(2, isBlockMode);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
+}
+
+/*
+ * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_003
+ * @tc.desc: is enhance p2p module id with all module values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, IS_ENHANCE_P2P_MODULE_ID_TEST_003, TestSize.Level1)
+{
+    bool ret;
+
+    ret = IsEnhanceP2pModuleId(ListenerModule::AUTH_SESSION_KEY);
+    EXPECT_FALSE(ret);
+
+    ret = IsEnhanceP2pModuleId(ListenerModule::AUTH_P2P);
+    EXPECT_FALSE(ret);
+
+    ret = IsEnhanceP2pModuleId(ListenerModule::AUTH_ENHANCED_P2P_START);
+    EXPECT_TRUE(ret);
+
+    ret = IsEnhanceP2pModuleId(ListenerModule::AUTH_ENHANCED_P2P_END);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: PROCESS_SOCKET_OUT_EVENT_TEST_003
+ * @tc.desc: process socket out event with different modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_003, TestSize.Level1)
+{
+    int32_t fd = 0;
+    int32_t ret;
+
+    ret = ProcessSocketOutEvent(AUTH_USB, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = ProcessSocketOutEvent(AUTH_P2P, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_DATA_EVENT_TEST_005
+ * @tc.desc: on data event with different modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, ON_DATA_EVENT_TEST_005, TestSize.Level1)
+{
+    int32_t events = SOFTBUS_SOCKET_IN;
+    int32_t fd = 0;
+    int32_t ret;
+
+    ret = OnDataEvent(AUTH, events, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = OnDataEvent(AUTH_USB, events, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: STOP_SOCKET_LISTENING_TEST_002
+ * @tc.desc: stop socket listening with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, STOP_SOCKET_LISTENING_TEST_002, TestSize.Level1)
+{
+    StopSocketListening(AUTH);
+    StopSocketListening(AUTH_USB);
+    StopSocketListening(AUTH_P2P);
+    StopSocketListening(AUTH_SESSION_KEY);
+    StopSocketListening(AUTH_RAW_P2P_CLIENT);
+}
+
+/*
+ * @tc.name: SET_SESSION_KEY_LISTENER_MODULE_TEST_002
+ * @tc.desc: set session key listener module with different fd values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SET_SESSION_KEY_LISTENER_MODULE_TEST_002, TestSize.Level1)
+{
+    SetSessionKeyListenerModule(1);
+    SetSessionKeyListenerModule(2);
+    SetSessionKeyListenerModule(100);
+}
+
+/*
+ * @tc.name: STOP_SESSION_KEY_LISTENING_TEST_002
+ * @tc.desc: stop session key listening with different fd values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, STOP_SESSION_KEY_LISTENING_TEST_002, TestSize.Level1)
+{
+    StopSessionKeyListening(1);
+    StopSessionKeyListening(2);
+    StopSessionKeyListening(100);
+}
+
+/*
+ * @tc.name: UNPACK_SOCKET_PKT_TEST_005
+ * @tc.desc: unpack socket pkt with valid data test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, UNPACK_SOCKET_PKT_TEST_005, TestSize.Level1)
+{
+    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint32_t len = AUTH_PKT_HEAD_LEN;
+    SocketPktHead head;
+    (void)memset_s(&head, sizeof(head), 0, sizeof(head));
+    int32_t ret = UnpackSocketPkt(data, len, &head);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: NOTIFY_DATA_RECEIVED_TEST_006
+ * @tc.desc: Notify data received with all module types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_006, TestSize.Level1)
+{
+    ListenerModule module = ListenerModule::AUTH_SESSION_KEY;
+    int32_t fd = 1;
+    SocketPktHead pktHead;
+    int32_t ret = SetSocketPktHead(&pktHead);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+
+    pktHead.module = MODULE_AUTH_CHANNEL;
+    NotifyDataReceived(module, fd, &pktHead, data);
+
+    pktHead.module = MODULE_AUTH_MSG;
+    NotifyDataReceived(module, fd, &pktHead, data);
+
+    pktHead.module = MODULE_CONNECTION;
+    NotifyDataReceived(module, fd, &pktHead, data);
+}
+
+/*
+ * @tc.name: RECV_PACKET_HEAD_TEST_004
+ * @tc.desc: recv packet head with different modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_004, TestSize.Level1)
+{
+    int32_t fd = 0;
+    SocketPktHead pktHead;
+    (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
+    int32_t ret;
+
+    ret = RecvPacketHead(AUTH_USB, fd, &pktHead);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = RecvPacketHead(AUTH_P2P, fd, &pktHead);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_CONNECT_EVENT_TEST_004
+ * @tc.desc: on connect event with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_004, TestSize.Level1)
+{
+    int32_t cfd = 1;
+    ConnectOption clientAddr;
+    (void)memset_s(&clientAddr, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    int32_t ret;
+
+    ret = OnConnectEvent(AUTH, cfd, &clientAddr);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL);
+
+    ret = OnConnectEvent(AUTH_USB, cfd, &clientAddr);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL);
+}
+
+/*
+ * @tc.name: START_SOCKET_LISTENING_TEST_004
+ * @tc.desc: start socket listening with different addresses test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, START_SOCKET_LISTENING_TEST_004, TestSize.Level1)
+{
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "0.0.0.0",
+            .port = 22,
+            .moduleId = AUTH,
+            .protocol = LNN_PROTOCOL_IP,
+        },
+    };
+    int32_t ret = StartSocketListening(AUTH, &info);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    StopSocketListening(AUTH);
+}
+
+/*
+ * @tc.name: AUTH_TCP_CREATE_LISTENER_TEST_005
+ * @tc.desc: AuthTcpCreateListener with all trigger types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_005, TestSize.Level1)
+{
+    ListenerModule module = PROXY;
+    int32_t fd = 1;
+    int32_t ret;
+
+    ret = AuthTcpCreateListener(module, fd, READ_TRIGGER);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    ret = AuthTcpCreateListener(module, fd, WRITE_TRIGGER);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/*
+ * @tc.name: MODULE_TO_DATA_TYPE_TEST_003
+ * @tc.desc: module to data type with all module types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, MODULE_TO_DATA_TYPE_TEST_003, TestSize.Level1)
+{
+    uint32_t ret;
+
+    ret = ModuleToDataType(MODULE_TRUST_ENGINE);
+    EXPECT_EQ(ret, DATA_TYPE_DEVICE_ID);
+
+    ret = ModuleToDataType(MODULE_AUTH_SDK);
+    EXPECT_EQ(ret, DATA_TYPE_AUTH);
+
+    ret = ModuleToDataType(MODULE_AUTH_CONNECTION);
+    EXPECT_EQ(ret, DATA_TYPE_DEVICE_INFO);
+
+    ret = ModuleToDataType(MODULE_AUTH_CANCEL);
+    EXPECT_EQ(ret, DATA_TYPE_CANCEL_AUTH);
+
+    ret = ModuleToDataType(MODULE_MESSAGE_SERVICE);
+    EXPECT_EQ(ret, DATA_TYPE_CONNECTION);
+}
+
+/*
+ * @tc.name: SESSION_NOTIFY_DATA_RECEIVED_TEST_005
+ * @tc.desc: Session notify data received with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_005, TestSize.Level1)
+{
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint32_t len = AUTH_PKT_HEAD_LEN;
+    int32_t fd = 1;
+
+    SessionNotifyDataReceived(ListenerModule::AUTH_SESSION_KEY, fd, len, data);
+    SessionNotifyDataReceived(ListenerModule::LISTENER_MODULE_DYNAMIC_START, fd, len, data);
+}
+
+/*
+ * @tc.name: SESSION_KEY_NOTIFY_DATA_RECEIVED_TEST_004
+ * @tc.desc: Session key notify data received with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SESSION_KEY_NOTIFY_DATA_RECEIVED_TEST_004, TestSize.Level1)
+{
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint32_t len = AUTH_PKT_HEAD_LEN;
+    int32_t fd = 1;
+
+    SessionKeyNotifyDataReceived(ListenerModule::AUTH_SESSION_KEY, fd, len, data);
+    SessionKeyNotifyDataReceived(ListenerModule::LISTENER_MODULE_DYNAMIC_START, fd, len, data);
+}
+
+/*
+ * @tc.name: NOTIFY_CONNECTED_TEST_005
+ * @tc.desc: notify connected with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, NOTIFY_CONNECTED_TEST_005, TestSize.Level1)
+{
+    int32_t fd = 1;
+    bool isClient = true;
+
+    NotifyConnected(AUTH, fd, isClient);
+    NotifyConnected(AUTH_USB, fd, isClient);
+    NotifyConnected(AUTH_P2P, fd, isClient);
+}
+
+/*
+ * @tc.name: NOTIFY_DISCONNECTED_TEST_004
+ * @tc.desc: notify disconnected with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, NOTIFY_DISCONNECTED_TEST_004, TestSize.Level1)
+{
+    int32_t fd = 1;
+
+    NotifyDisconnected(AUTH, fd);
+    NotifyDisconnected(AUTH_USB, fd);
+    NotifyDisconnected(AUTH_P2P, fd);
+}
+
+/*
+ * @tc.name: ADD_AUTH_TCP_CONN_FD_ITEM_TEST_006
+ * @tc.desc: AddAuthTcpConnFdItem with all module types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_006, TestSize.Level1)
+{
+    int32_t fd = 1;
+    int32_t ret = AuthTcpConnFdLockInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = AddAuthTcpConnFdItem(fd, AUTH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteAuthTcpConnFdItemByConnId(fd);
+
+    ret = AddAuthTcpConnFdItem(fd, AUTH_USB);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteAuthTcpConnFdItemByConnId(fd);
+
+    ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteAuthTcpConnFdItemByConnId(fd);
+
+    AuthTcpConnFdLockDeinit();
+}
+
+/*
+ * @tc.name: IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_CONN_ID_TEST_003
+ * @tc.desc: is exist FdItem with all module types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_CONN_ID_TEST_003, TestSize.Level1)
+{
+    int32_t fd = 1;
+    int32_t ret = AuthTcpConnFdLockInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = AddAuthTcpConnFdItem(fd, AUTH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool exist = IsExistAuthTcpConnFdItemByConnId(fd);
+    EXPECT_TRUE(exist);
+    DeleteAuthTcpConnFdItemByConnId(fd);
+
+    ret = AddAuthTcpConnFdItem(fd, AUTH_USB);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    exist = IsExistAuthTcpConnFdItemByConnId(fd);
+    EXPECT_TRUE(exist);
+    DeleteAuthTcpConnFdItemByConnId(fd);
+
+    AuthTcpConnFdLockDeinit();
+}
+
+/*
+ * @tc.name: PROCESS_SOCKET_IN_EVENT_TEST_004
+ * @tc.desc: process socket in event with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_004, TestSize.Level1)
+{
+    int32_t fd = 1;
+    int32_t ret = AuthTcpConnFdLockInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ProcessSocketInEvent(AUTH, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = ProcessSocketInEvent(AUTH_USB, fd);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_DATA_HEAD);
+    DeleteAuthTcpConnFdItemByConnId(fd);
+    AuthTcpConnFdLockDeinit();
+}
+
+/*
+ * @tc.name: ON_DATA_EVENT_TEST_006
+ * @tc.desc: on data event with all event types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, ON_DATA_EVENT_TEST_006, TestSize.Level1)
+{
+    ListenerModule module = AUTH_P2P;
+    int32_t fd = 0;
+    int32_t ret;
+
+    ret = OnDataEvent(module, SOFTBUS_SOCKET_OUT, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = OnDataEvent(module, SOFTBUS_SOCKET_IN, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = OnDataEvent(module, SOFTBUS_SOCKET_EXCEPTION, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SOCKET_GET_CONN_INFO_TEST_005
+ * @tc.desc: socket get conn info with all ifnameIdx values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_005, TestSize.Level1)
+{
+    int32_t fd = -1;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    bool isServer = true;
+    int32_t ret;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, WLAN_IF);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, USB_IF);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SOCKET_CONNECT_INNER_TEST_004
+ * @tc.desc: SocketConnectInner with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_INNER_TEST_004, TestSize.Level1)
+{
+    const char *localIp = "192.168.11.22";
+    const char *peerIp = "192.168.11.33";
+    int32_t ret;
+
+    ret = SocketConnectInner(localIp, peerIp, 37025, AUTH, true);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
+
+    ret = SocketConnectInner(localIp, peerIp, 37025, AUTH_USB, true);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
+}
+
+/*
+ * @tc.name: NIP_SOCKET_CONNECT_DEVICE_TEST_004
+ * @tc.desc: NipSocketConnectDevice with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, NIP_SOCKET_CONNECT_DEVICE_TEST_004, TestSize.Level1)
+{
+    const char *addr = "192.168.11.44";
+    int32_t ret;
+
+    ret = NipSocketConnectDevice(AUTH, addr, 37025, true);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
+
+    ret = NipSocketConnectDevice(AUTH_USB, addr, 37025, true);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
+}
+
+/*
+ * @tc.name: SET_TCP_KEEP_ALIVE_AND_IP_TOS_TEST_005
+ * @tc.desc: SetTcpKeepaliveAndIpTos with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SET_TCP_KEEP_ALIVE_AND_IP_TOS_TEST_005, TestSize.Level1)
+{
+    bool isBlockMode = true;
+    int32_t ifnameIdx = 1;
+    TriggerType triggerMode = TriggerType::READ_TRIGGER;
+    int32_t fd = 1;
+    int32_t ret;
+
+    ret = SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, AUTH, fd);
+    EXPECT_EQ(ret, SOFTBUS_ADAPTER_ERR);
+
+    ret = SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, AUTH_USB, fd);
+    EXPECT_EQ(ret, SOFTBUS_ADAPTER_ERR);
+}
+
+/*
+ * @tc.name: NOTIFY_CHANNEL_DATA_RECEIVED_TEST_006
+ * @tc.desc: Notification of receipt of data with all module types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DATA_RECEIVED_TEST_006, TestSize.Level1)
+{
+    SocketPktHead pktHead;
+    int32_t ret = SetSocketPktHead(&pktHead);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    int32_t channelId = 1;
+
+    pktHead.module = MODULE_AUTH_CHANNEL;
+    NotifyChannelDataReceived(channelId, &pktHead, data);
+
+    pktHead.module = MODULE_AUTH_MSG;
+    NotifyChannelDataReceived(channelId, &pktHead, data);
+}
+
+/*
+ * @tc.name: NOTIFY_CHANNEL_DISCONNECTED_TEST_004
+ * @tc.desc: Notification channel disconnected with all modules test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DISCONNECTED_TEST_004, TestSize.Level1)
+{
+    int32_t channelId = 1;
+
+    AuthChannelListener listenerTestOne = {
+        .onDataReceived = OnDataReceived,
+        .onDisconnected = OnDisconnect,
+    };
+    int32_t ret = RegAuthChannelListener(MODULE_AUTH_CHANNEL, &listenerTestOne);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    NotifyChannelDisconnected(channelId);
+    UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
+
+    ret = RegAuthChannelListener(MODULE_AUTH_MSG, &listenerTestOne);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    NotifyChannelDisconnected(channelId);
+    UnregAuthChannelListener(MODULE_AUTH_MSG);
+}
+
+/*
+ * @tc.name: REG_AUTH_CHANNEL_LISTENER_TEST_004
+ * @tc.desc: register listener with all module types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, REG_AUTH_CHANNEL_LISTENER_TEST_004, TestSize.Level1)
+{
+    AuthChannelListener listenerTestOne = {
+        .onDataReceived = OnDataReceived,
+        .onDisconnected = OnDisconnect,
+    };
+    int32_t ret;
+
+    ret = RegAuthChannelListener(MODULE_AUTH_CHANNEL, &listenerTestOne);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
+
+    ret = RegAuthChannelListener(MODULE_AUTH_MSG, &listenerTestOne);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    UnregAuthChannelListener(MODULE_AUTH_MSG);
+}
+
+/*
+ * @tc.name: AUTH_SET_TCP_KEEP_ALIVE_OPTION_TEST_004
+ * @tc.desc: set option with all cycle types test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_SET_TCP_KEEP_ALIVE_OPTION_TEST_004, TestSize.Level1)
+{
+    int32_t fd = 1;
+    int32_t ret;
+
+    ret = AuthSetTcpKeepaliveOption(fd, HIGH_FREQ_CYCLE);
+    EXPECT_EQ(ret, SOFTBUS_ADAPTER_ERR);
+
+    ret = AuthSetTcpKeepaliveOption(fd, MID_FREQ_CYCLE);
+    EXPECT_EQ(ret, SOFTBUS_ADAPTER_ERR);
+
+    ret = AuthSetTcpKeepaliveOption(fd, LOW_FREQ_CYCLE);
+    EXPECT_EQ(ret, SOFTBUS_ADAPTER_ERR);
+
+    ret = AuthSetTcpKeepaliveOption(fd, DEFAULT_FREQ_CYCLE);
+    EXPECT_EQ(ret, SOFTBUS_ADAPTER_ERR);
+}
+
+/*
+ * @tc.name: GET_CONNECT_OPTION_BY_IFNAME_TEST_005
+ * @tc.desc: GetConnectOptionByIfname with all ifnameIdx values test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, GET_CONNECT_OPTION_BY_IFNAME_TEST_005, TestSize.Level1)
+{
+    int32_t port = 1;
+    ConnectOption option;
+
+    option = GetConnectOptionByIfname(0, port);
+    EXPECT_EQ(option.socketOption.moduleId, AUTH);
+
+    option = GetConnectOptionByIfname(1, port);
+    EXPECT_EQ(option.socketOption.moduleId, AUTH_USB);
+}
+
+/*
+ * @tc.name: SOCKET_CONNECT_DEVICE_TEST_005
+ * @tc.desc: SocketConnectDevice with all parameter combinations test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_TEST_005, TestSize.Level1)
+{
+    const char *addr = "192.168.11.44";
+    int32_t port = 37025;
+    int32_t ifnameIdx = 1;
+    int32_t ret;
+
+    ret = SocketConnectDevice(addr, port, true, ifnameIdx);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
+
+    ret = SocketConnectDevice(addr, port, false, ifnameIdx);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
+}
+
+/*
+ * @tc.name: SOCKET_SET_DEVICE_TEST_004
+ * @tc.desc: Socket set device with all parameter combinations test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_SET_DEVICE_TEST_004, TestSize.Level1)
+{
+    int32_t fd = 1;
+    int32_t ret;
+
+    ret = SocketSetDevice(fd, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
+
+    ret = SocketSetDevice(fd, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
+}
+
+/*
+ * @tc.name: AUTH_OPEN_CHANNEL_TEST_005
+ * @tc.desc: open channel with all parameter combinations test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_TEST_005, TestSize.Level1)
+{
+    const char *addr = "192.168.11.22";
+    int32_t port = 1;
+    int32_t ret;
+
+    ret = AuthOpenChannel(addr, port, 0);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+
+    ret = AuthOpenChannel(addr, port, 1);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+
+    ret = AuthOpenChannel(addr, port, 2);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+}
+
+/*
+ * @tc.name: AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_004
+ * @tc.desc: AuthOpenChannelWithAllIp with all parameter combinations test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_004, TestSize.Level1)
+{
+    const char *localIp = "192.168.11.22";
+    const char *remoteIp = "192.168.11.33";
+    int32_t ret;
+
+    ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 37025);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+
+    ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 65535);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
+}
+
+/*
+ * @tc.name: SOCKET_GET_CONN_INFO_TEST_006
+ * @tc.desc: socket get conn info with all parameter combinations test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_006, TestSize.Level1)
+{
+    int32_t fd = -1;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    bool isServer = true;
+    int32_t ret;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, 0);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, 1);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = SocketGetConnInfo(fd, &connInfo, &isServer, 2);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: RECV_PACKET_DATA_TEST_004
+ * @tc.desc: recv packet data with edge cases test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_004, TestSize.Level1)
+{
+    int32_t fd = 0;
+    uint32_t len = 1;
+    uint8_t *packetData = RecvPacketData(fd, len);
+    EXPECT_EQ(packetData, nullptr);
+    len = UINT32_MAX;
+    packetData = RecvPacketData(fd, len);
+    EXPECT_EQ(packetData, nullptr);
+}
+
+/*
+ * @tc.name: RECV_PACKET_HEAD_TEST_005
+ * @tc.desc: recv packet head with edge cases test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_005, TestSize.Level1)
+{
+    int32_t fd = 0;
+    SocketPktHead pktHead;
+    (void)memset_s(&pktHead, sizeof(SocketPktHead), 0, sizeof(SocketPktHead));
+    int32_t ret;
+
+    ret = RecvPacketHead(AUTH, fd, &pktHead);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = RecvPacketHead(AUTH_USB, fd, &pktHead);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = RecvPacketHead(AUTH_P2P, fd, &pktHead);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PROCESS_SOCKET_OUT_EVENT_TEST_004
+ * @tc.desc: process socket out event with edge cases test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_004, TestSize.Level1)
+{
+    int32_t fd = 0;
+    int32_t ret;
+
+    ret = ProcessSocketOutEvent(AUTH, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = ProcessSocketOutEvent(AUTH_USB, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = ProcessSocketOutEvent(AUTH_P2P, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PROCESS_SOCKET_IN_EVENT_TEST_005
+ * @tc.desc: process socket in event with edge cases test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_005, TestSize.Level1)
+{
+    int32_t fd = 0;
+    int32_t ret;
+
+    ret = ProcessSocketInEvent(AUTH, fd);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    ret = ProcessSocketInEvent(AUTH_USB, fd);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    ret = ProcessSocketInEvent(AUTH_P2P, fd);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/*
+ * @tc.name: ON_DATA_EVENT_TEST_007
+ * @tc.desc: on data event with edge cases test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, ON_DATA_EVENT_TEST_007, TestSize.Level1)
+{
+    ListenerModule module = AUTH_P2P;
+    int32_t events = 0;
+    int32_t fd = 0;
+    int32_t ret = OnDataEvent(module, events, fd);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: START_SOCKET_LISTENING_TEST_005
+ * @tc.desc: start socket listening with edge cases test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, START_SOCKET_LISTENING_TEST_005, TestSize.Level1)
+{
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "127.0.0.1",
+            .port = 22,
+            .moduleId = AUTH,
+            .protocol = LNN_PROTOCOL_IP,
+        },
+    };
+    int32_t ret = StartSocketListening(AUTH, &info);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    StopSocketListening(AUTH);
+}
 } // namespace OHOS
