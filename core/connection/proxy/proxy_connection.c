@@ -26,6 +26,8 @@
 #include "softbus_utils.h"
 #include "wrapper_br_interface.h"
 
+#define BR_PROXY_REPORT_TIME 3000
+
 typedef struct {
     uint32_t channelId;
     ProxyBrConnectStateCallback callback;
@@ -76,10 +78,10 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
         char anomizeAddress[BT_MAC_LEN] = { 0 };
         ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
         ConnEventExtra extra = {
-            .peerBrMac = anomizeAddress,
-            .connectionId = (int32_t)connection->socketHandle,
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = ret,
+            .connectionId = (int32_t)connection->channelId,
+            .peerBrMac = anomizeAddress,
         };
         CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_DISCONNECTED, extra);
     }
@@ -110,10 +112,11 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
         char anomizeAddress[BT_MAC_LEN] = { 0 };
         ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
         ConnEventExtra extra = {
-            .peerBrMac = anomizeAddress,
-            .connectionId = (int32_t)connection->socketHandle,
             .result = EVENT_STAGE_RESULT_FAILED,
             .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+            .connectionId = (int32_t)connection->channelId,
+            .requestId = (int32_t)connection->proxyChannel.requestId,
+            .peerBrMac = anomizeAddress,
         };
         CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_START, extra);
         return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
@@ -230,6 +233,13 @@ static int32_t Disconnect(struct ProxyConnection *connection)
     return g_sppDriver->DisConnect(socketHandle);
 }
 
+static void BrProxyReportSendExtra(ConnEventExtra *extra, int32_t reason)
+{
+    extra->result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra->errcode = reason;
+    CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_BR_PROXY_SEND, *extra);
+}
+
 static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uint32_t dataLen)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL,
@@ -243,7 +253,12 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
         return SOFTBUS_INVALID_PARAM;
     }
     SoftBusMutexUnlock(&connection->lock);
-
+    ConnEventExtra extra = { 0 };
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
+    extra.peerBrMac = anomizeAddress;
+    extra.connectionId = (int32_t)connection->channelId;
+    uint64_t costTime = 0;
     int32_t waitWriteLen = (int32_t)dataLen;
     while (waitWriteLen > 0) {
         int32_t ret = SoftBusMutexLock(&connection->lock);
@@ -257,25 +272,23 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
             CONN_LOGE(CONN_PROXY, "invalid handle");
             return SOFTBUS_INVALID_PARAM;
         }
+        uint64_t timeStart = SoftBusGetTimeMs();
         int32_t written = g_sppDriver->Write(socketHandle, data, waitWriteLen);
+        costTime = SoftBusGetTimeMs() - timeStart;
+        extra.costTime = (int32_t)costTime;
         if (written < 0) {
             CONN_LOGE(CONN_PROXY,
                 "send data fail, channelId=%{public}u, totalLen=%{public}u, waitWriteLen=%{public}d, "
                 "alreadyWriteLen=%{public}d, error=%{public}d",
                 connection->channelId, dataLen, waitWriteLen, dataLen - waitWriteLen, written);
-            char anomizeAddress[BT_MAC_LEN] = { 0 };
-            ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
-            ConnEventExtra extra = {
-                .peerBrMac = anomizeAddress,
-                .connectionId = (int32_t)connection->socketHandle,
-                .result = EVENT_STAGE_RESULT_FAILED,
-                .errcode = SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL,
-            };
-            CONN_EVENT(EVENT_SCENE_BR_PROXY, EVENT_STAGE_CONNECT_SEND_BASIC_INFO, extra);
+            BrProxyReportSendExtra(&extra, SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL);
             return SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL;
         }
         data += written;
         waitWriteLen -= written;
+        if (costTime > BR_PROXY_REPORT_TIME) {
+            BrProxyReportSendExtra(&extra, SOFTBUS_OK);
+        }
     }
     return SOFTBUS_OK;
 }
