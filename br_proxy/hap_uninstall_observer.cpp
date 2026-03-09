@@ -19,6 +19,8 @@
 #include "comm_log.h"
 #include "softbus_error_code.h"
 #include "br_proxy_server_manager.h"
+#include "trans_event.h"
+#include "trans_event_form.h"
 #include "trans_log.h"
 
 using namespace OHOS::AppExecFwk;
@@ -43,6 +45,13 @@ public:
             TRANS_LOGI(TRANS_SVC, "[br_proxy] index=%{public}d, userId=%{public}d", appIndex, userId);
             if (IsBrProxy(bundleName.c_str())) {
                 UninstallHandler(bundleName.c_str(), appIndex, userId);
+                TransEventExtra extra = {
+                    .result = EVENT_STAGE_RESULT_OK,
+                    .callerPkg = bundleName.c_str(),
+                    .userId = userId,
+                    .appIndex = appIndex,
+                };
+                TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_CHANNEL_STATUS, extra);
             }
         }
     }
