@@ -874,7 +874,6 @@ static int32_t AllocLaneByQos(uint32_t laneReqId, const LaneAllocInfo *allocInfo
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc valid lane fail, laneReqId=%{public}u", laneReqId);
         ReportLaneEventInfo(EVENT_STAGE_LANE_ALLOC, laneReqId, ret);
-        FreeLaneReqId(laneReqId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -891,7 +890,6 @@ static int32_t ReallocLaneByQos(uint32_t laneReqId, uint64_t laneId, const LaneA
     int32_t ret = AllocValidLane(laneReqId, laneId, allocInfo, listener);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc valid lane fail, laneReqId=%{public}u", laneReqId);
-        FreeLaneReqId(laneReqId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -1214,11 +1212,11 @@ static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
     ReportLaneEventWithBuildLinkInfo(laneReqId, INVALID_LANE_ID, LANE_LINK_TYPE_BUTT, reason);
     if (reqInfo.isWithQos) {
         reqInfo.listener.onLaneAllocFail(laneReqId, reason);
-        FreeLaneReqId(laneReqId);
     } else {
         reqInfo.extraInfo.listener.onLaneRequestFail(laneReqId, reason);
     }
     DeleteRequestNode(laneReqId);
+    FreeLaneReqId(laneReqId);
 }
 
 static int32_t GetErrCodeWithLock(uint32_t laneReqId)
@@ -1322,6 +1320,11 @@ static void LaneTriggerLink(SoftBusMessage *msg)
             break;
         }
         nodeInfo->linkRetryIdx++;
+        if (requestInfo.linkType >= LANE_LINK_TYPE_BUTT) {
+            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", requestInfo.linkType);
+            Unlock();
+            break;
+        }
         nodeInfo->statusList[requestInfo.linkType].status = BUILD_LINK_STATUS_BUILDING;
         nodeInfo->singleLinkTime[requestInfo.linkType] = SoftBusGetSysTimeMs();
         Unlock();
@@ -1393,6 +1396,10 @@ static bool IsNeedNotifySucc(uint32_t laneReqId)
     bool isBuilding = false;
     for (uint32_t i = 0; i < nodeInfo->listNum; i++) {
         LaneLinkType linkType = nodeInfo->linkList->linkType[i];
+        if (linkType >= LANE_LINK_TYPE_BUTT) {
+            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
+            continue;
+        }
         if (nodeInfo->statusList[linkType].status == BUILD_LINK_STATUS_BUILDING) {
             Unlock();
             isBuilding = true;
@@ -1423,6 +1430,10 @@ static int32_t GetLaneLinkInfo(uint32_t laneReqId, LaneLinkType *type, LaneLinkI
     }
     for (uint32_t i = 0; i < nodeInfo->listNum; i++) {
         LaneLinkType linkType = nodeInfo->linkList->linkType[i];
+        if (linkType >= LANE_LINK_TYPE_BUTT) {
+            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
+            continue;
+        }
         if (nodeInfo->statusList[linkType].status == BUILD_LINK_STATUS_SUCC) {
             if (memcpy_s(info, sizeof(LaneLinkInfo), &(nodeInfo->statusList[linkType].linkInfo),
                 sizeof(LaneLinkInfo)) != EOK) {
@@ -1585,6 +1596,10 @@ static bool IsNeedNotifyFail(uint32_t laneReqId)
     }
     for (uint32_t i = 0; i < nodeInfo->linkRetryIdx; i++) {
         LaneLinkType linkType = nodeInfo->linkList->linkType[i];
+        if (linkType >= LANE_LINK_TYPE_BUTT) {
+            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
+            continue;
+        }
         if (nodeInfo->statusList[linkType].status != BUILD_LINK_STATUS_FAIL) {
             notifyFail = false;
         }
@@ -1617,6 +1632,10 @@ static void BuildLinkRetry(uint32_t laneReqId)
     }
     for (uint32_t i = 0; i < nodeInfo->linkRetryIdx; i++) {
         LaneLinkType linkType = nodeInfo->linkList->linkType[i];
+        if (linkType >= LANE_LINK_TYPE_BUTT) {
+            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
+            continue;
+        }
         if (nodeInfo->statusList[linkType].status == BUILD_LINK_STATUS_SUCC) {
             LNN_LOGI(LNN_LANE, "has exist high priority succ link, laneReqId=%{public}u", laneReqId);
             needRetry = false;
@@ -1651,7 +1670,8 @@ static void LaneLinkFail(SoftBusMessage *msg)
     SoftBusFree(failInfo);
     LnnDumpLocalBasicInfo();
     LnnDumpOnlineDeviceInfo();
-    if (UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_FAIL, linkType, NULL, failReason) != SOFTBUS_OK) {
+    if (linkType < LANE_LINK_TYPE_BUTT &&
+        UpdateLinkStatus(laneReqId, BUILD_LINK_STATUS_FAIL, linkType, NULL, failReason) != SOFTBUS_OK) {
         return;
     }
     if (IsNeedNotifySucc(laneReqId)) {
