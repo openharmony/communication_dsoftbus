@@ -252,6 +252,10 @@ void InitSoftBusServer(void)
         return;
     }
 
+    if (LnnIpcAccountAuthInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "server account auth init failed.");
+    }
+
     if (SoftBusTimerInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus timer init failed.");
         return;

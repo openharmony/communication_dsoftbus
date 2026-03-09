@@ -251,6 +251,8 @@
         "ClientGetMultipath";
         "ClientSetMultipathPolicy";
         "SetNodeKeyInfo";
+        "StartAccountAuth";
+        "ProcessAccountAuth";
     local:
         *;
 };

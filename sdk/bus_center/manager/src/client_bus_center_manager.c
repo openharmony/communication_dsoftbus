@@ -78,6 +78,7 @@ typedef struct {
     IDataLevelCb dataLevelCb;
     IRangeCallback rangeCb;
     GroupOwnerDestroyListener groupOwnerDestroyCb;
+    IAccountAuthCallback accountAuthCb;
     bool isInit;
     SoftBusMutex lock;
 } BusCenterClient;
@@ -105,6 +106,10 @@ static BusCenterClient g_busCenterClient = {
     .isInit = false,
     .rangeCb.onRangeResult = NULL,
     .rangeCb.onRangeStateChange = NULL,
+    .accountAuthCb.onTransmit = NULL,
+    .accountAuthCb.onSessionKeyReturned = NULL,
+    .accountAuthCb.onFinish = NULL,
+    .accountAuthCb.onError = NULL,
 };
 
 static bool IsUdidHashEmpty(const ConnectionAddr *addr)
@@ -1293,6 +1298,56 @@ int32_t DestroyGroupOwnerInner(const char *pkgName)
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t StartAccountAuthInner(const char *pkgName, int64_t requestId, const char *serviceId,
+    const IAccountAuthCallback *cb)
+{
+    if (pkgName == NULL || serviceId == NULL || cb == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ret = SoftBusMutexLock(&g_busCenterClient.lock);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, LNN_STATE,
+        "lock account auth callback failed, ret=%{public}d", ret);
+    ret = memcpy_s(&g_busCenterClient.accountAuthCb, sizeof(IAccountAuthCallback), cb, sizeof(IAccountAuthCallback));
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, LNN_STATE, "copy accountAuthCb failed");
+
+    ret = ServerIpcStartAccountAuth(pkgName, requestId, serviceId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server StartAccountAuth failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t ProcessAccountAuthInner(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen,
+    const IAccountAuthCallback *cb)
+{
+    if (pkgName == NULL || data == NULL || cb == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ret = SoftBusMutexLock(&g_busCenterClient.lock);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, LNN_STATE,
+        "lock account auth callback failed, ret=%{public}d", ret);
+    ret = memcpy_s(&g_busCenterClient.accountAuthCb, sizeof(IAccountAuthCallback), cb, sizeof(IAccountAuthCallback));
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, LNN_STATE, "copy accountAuthCb failed");
+
+    ret = ServerIpcProcessAccountAuth(pkgName, requestId, data, dataLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server ProcessAccountAuth failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
 {
     JoinLNNCbListItem *item = NULL;
@@ -1731,6 +1786,64 @@ void LnnOnGroupStateChange(int32_t retCode)
     }
     LNN_LOGE(LNN_STATE, "no create or reuse group");
     (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+}
+
+bool LnnOnTransmitAuthResult(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    (void)pkgName;
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return false;
+    }
+    if (g_busCenterClient.accountAuthCb.onTransmit == NULL) {
+        LNN_LOGE(LNN_STATE, "OnTransmit callback is null");
+        return false;
+    }
+    return g_busCenterClient.accountAuthCb.onTransmit(requestId, data, dataLen);
+}
+
+void LnnOnSessionKeyAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+{
+    (void)pkgName;
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return;
+    }
+    if (g_busCenterClient.accountAuthCb.onSessionKeyReturned == NULL) {
+        LNN_LOGE(LNN_STATE, "OnSessionKey callback is null");
+        return;
+    }
+    g_busCenterClient.accountAuthCb.onSessionKeyReturned(requestId, sessionKey, sessionKeyLen);
+}
+
+void LnnOnFinishAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData)
+{
+    (void)pkgName;
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return;
+    }
+    if (g_busCenterClient.accountAuthCb.onFinish == NULL) {
+        LNN_LOGE(LNN_STATE, "OnFinish callback is null");
+        return;
+    }
+    g_busCenterClient.accountAuthCb.onFinish(requestId, operationCode, returnData);
+}
+
+void LnnOnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode,
+    const char *returnData)
+{
+    (void)pkgName;
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return;
+    }
+    if (g_busCenterClient.accountAuthCb.onError == NULL) {
+        LNN_LOGE(LNN_STATE, "OnError callback is null");
+        return;
+    }
+    g_busCenterClient.accountAuthCb.onError(requestId, operationCode, errorCode, returnData);
 }
 
 int32_t DiscRecoveryPublish()

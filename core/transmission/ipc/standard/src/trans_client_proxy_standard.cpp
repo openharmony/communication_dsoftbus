@@ -737,4 +737,49 @@ void TransClientProxy::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
 {
     (void)rangeInfo;
 }
+
+bool TransClientProxy::OnTransmitAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)data;
+    (void)dataLen;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return true;
+}
+
+void TransClientProxy::OnSessionKeyAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)sessionKey;
+    (void)sessionKeyLen;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return;
+}
+
+void TransClientProxy::OnFinishAuthResult(
+    const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)operationCode;
+    (void)returnData;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return;
+}
+
+void TransClientProxy::OnErrorAuthResult(
+    const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode, const char *returnData)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)operationCode;
+    (void)errorCode;
+    (void)returnData;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return;
+}
 } // namespace OHOS

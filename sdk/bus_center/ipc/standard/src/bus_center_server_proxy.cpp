@@ -395,3 +395,19 @@ void ServerIpcDestroyGroupOwner(const char *pkgName)
     LNN_CHECK_AND_RETURN_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, LNN_EVENT, "server not init");
     g_serverProxy->DestroyGroupOwner(pkgName);
 }
+
+int32_t ServerIpcStartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->StartAccountAuth(pkgName, requestId, serviceId);
+    return ret;
+}
+
+int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->ProcessAccountAuth(pkgName, requestId, data, dataLen);
+    return ret;
+}
