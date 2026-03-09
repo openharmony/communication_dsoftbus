@@ -694,4 +694,163 @@ void BusCenterClientProxy::OnGroupStateChange(int32_t retCode)
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }
 }
+
+bool BusCenterClientProxy::OnTransmitAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return false;
+    }
+    MessageParcel proxyData;
+    if (!proxyData.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return false;
+    }
+    if (!proxyData.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return false;
+    }
+    if (!proxyData.WriteInt64(requestId)) {
+        LNN_LOGE(LNN_EVENT, "write requestId failed");
+        return false;
+    }
+    if (!proxyData.WriteUint32(dataLen)) {
+        LNN_LOGE(LNN_EVENT, "write data length failed");
+        return false;
+    }
+    if (!proxyData.WriteRawData(data, dataLen)) {
+        LNN_LOGE(LNN_EVENT, "write data failed");
+        return false;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_ON_TRANSMIT_AUTH_RESULT, proxyData, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return false;
+    }
+    bool replyResult = false;
+    if (!reply.ReadBool(replyResult)) {
+        LNN_LOGE(LNN_EVENT, "read auth result fail");
+        return false;
+    }
+    return replyResult;
+}
+
+void BusCenterClientProxy::OnSessionKeyAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel proxyData;
+    if (!proxyData.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!proxyData.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return;
+    }
+    if (!proxyData.WriteInt64(requestId)) {
+        LNN_LOGE(LNN_EVENT, "write requestId failed");
+        return;
+    }
+    if (!proxyData.WriteUint32(sessionKeyLen)) {
+        LNN_LOGE(LNN_EVENT, "write session key length failed");
+        return;
+    }
+    if (!proxyData.WriteRawData(sessionKey, sessionKeyLen)) {
+        LNN_LOGE(LNN_EVENT, "write session key failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_ON_SESSIONKEY_AUTH_RESULT, proxyData, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
+
+void BusCenterClientProxy::OnFinishAuthResult(
+    const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel proxyData;
+    if (!proxyData.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!proxyData.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return;
+    }
+    if (!proxyData.WriteInt64(requestId)) {
+        LNN_LOGE(LNN_EVENT, "write requestId failed");
+        return;
+    }
+    if (!proxyData.WriteInt32(operationCode)) {
+        LNN_LOGE(LNN_EVENT, "write operation code failed");
+        return;
+    }
+    if (!proxyData.WriteCString(returnData)) {
+        LNN_LOGE(LNN_EVENT, "write return data failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_ON_FINISH_AUTH_RESULT, proxyData, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
+
+void BusCenterClientProxy::OnErrorAuthResult(
+    const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode, const char *returnData)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel proxyData;
+    if (!proxyData.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!proxyData.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return;
+    }
+    if (!proxyData.WriteInt64(requestId)) {
+        LNN_LOGE(LNN_EVENT, "write requestId failed");
+        return;
+    }
+    if (!proxyData.WriteInt32(operationCode)) {
+        LNN_LOGE(LNN_EVENT, "write operation code failed");
+        return;
+    }
+    if (!proxyData.WriteInt32(errorCode)) {
+        LNN_LOGE(LNN_EVENT, "write error code failed");
+        return;
+    }
+    if (returnData != nullptr && !proxyData.WriteCString(returnData)) {
+        LNN_LOGE(LNN_EVENT, "write return data failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_ON_ERROR_AUTH_RESULT, proxyData, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
 } // namespace OHOS

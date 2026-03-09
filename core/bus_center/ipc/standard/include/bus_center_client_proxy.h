@@ -50,6 +50,13 @@ int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *n
     const DataLevelInfo *dataLevelInfo);
 int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo);
 int32_t ClientOnGroupStateChange(const char *pkgName, int32_t pid, int32_t retCode);
+bool ClientOnTransmitAuthResult(PkgNameAndPidInfo *info, int64_t requestId, const uint8_t *data, uint32_t dataLen);
+void ClientOnSessionKeyAuthResult(PkgNameAndPidInfo *info, int64_t requestId, const uint8_t *sessionKey,
+    uint32_t sessionKeyLen);
+void ClientOnFinishAuthResult(PkgNameAndPidInfo *info, int64_t requestId, int32_t operationCode,
+    const char *returnData);
+void ClientOnErrorAuthResult(PkgNameAndPidInfo *info, int64_t requestId, int32_t operationCode, int32_t errorCode,
+    const char *returnData);
 
 #ifdef __cplusplus
 #if __cplusplus

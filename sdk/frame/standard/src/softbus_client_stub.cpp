@@ -66,6 +66,10 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_BR_PROXY_DATA_RECV] = &SoftBusClientStub::OnBrProxyDataRecvInner;
     memberFuncMap_[CLIENT_ON_BR_PROXY_STATE_CHANGED] = &SoftBusClientStub::OnBrProxyStateChangedInner;
     memberFuncMap_[CLIENT_ON_BR_PROXY_QUERY_PERMISSION] = &SoftBusClientStub::OnBrProxyQueryPermissionInner;
+    memberFuncMap_[CLIENT_ON_TRANSMIT_AUTH_RESULT] = &SoftBusClientStub::OnTransmitAuthResultInner;
+    memberFuncMap_[CLIENT_ON_SESSIONKEY_AUTH_RESULT] = &SoftBusClientStub::OnSessionKeyAuthResultInner;
+    memberFuncMap_[CLIENT_ON_FINISH_AUTH_RESULT] = &SoftBusClientStub::OnFinishAuthResultInner;
+    memberFuncMap_[CLIENT_ON_ERROR_AUTH_RESULT] = &SoftBusClientStub::OnErrorAuthResultInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -946,6 +950,70 @@ int32_t SoftBusClientStub::OnBrProxyQueryPermissionInner(MessageParcel &data, Me
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnTransmitAuthResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read pkg name failed");
+    int64_t requestId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt64(requestId), SOFTBUS_IPC_ERR, COMM_SDK, "read requestId failed");
+    uint32_t dataLen = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(dataLen), SOFTBUS_IPC_ERR, COMM_SDK, "read data len failed");
+    const uint8_t *dataInfo = reinterpret_cast<const uint8_t *>(data.ReadRawData(dataLen));
+    COMM_CHECK_AND_RETURN_RET_LOGE(dataInfo != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read data info failed");
+    bool ret = OnTransmitAuthResult(pkgName, requestId, dataInfo, dataLen);
+    if (!reply.WriteBool(ret)) {
+        COMM_LOGE(COMM_SDK, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnSessionKeyAuthResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read pkg name failed");
+    int64_t requestId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt64(requestId), SOFTBUS_IPC_ERR, COMM_SDK, "read requestId failed");
+    uint32_t sessionKeyLen = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(sessionKeyLen), SOFTBUS_IPC_ERR, COMM_SDK,
+        "read session key len failed");
+    const uint8_t *sessionKey = reinterpret_cast<const uint8_t *>(data.ReadRawData(sessionKeyLen));
+    COMM_CHECK_AND_RETURN_RET_LOGE(sessionKey != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read session key failed");
+    OnSessionKeyAuthResult(pkgName, requestId, sessionKey, sessionKeyLen);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnFinishAuthResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read pkg name failed");
+    int64_t requestId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt64(requestId), SOFTBUS_IPC_ERR, COMM_SDK, "read requestId failed");
+    int32_t operationCode = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(operationCode), SOFTBUS_IPC_ERR, COMM_SDK,
+        "read operation code failed");
+    const char *returnData = data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(returnData != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read return data failed");
+    OnFinishAuthResult(pkgName, requestId, operationCode, returnData);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnErrorAuthResultInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read pkg name failed");
+    int64_t requestId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt64(requestId), SOFTBUS_IPC_ERR, COMM_SDK, "read requestId failed");
+    int32_t operationCode = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(operationCode), SOFTBUS_IPC_ERR, COMM_SDK,
+        "read operation code failed");
+    int32_t errorCode = SOFTBUS_IPC_ERR;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(errorCode), SOFTBUS_IPC_ERR, COMM_SDK, "read error code failed");
+    const char *returnData = data.ReadCString();
+    OnErrorAuthResult(pkgName, requestId, operationCode, errorCode, returnData);
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     (void)addrTypeLen;
@@ -1129,5 +1197,33 @@ int32_t SoftBusClientStub::OnDataReceived(uint32_t handle, const uint8_t *data, 
     COMM_LOGI(COMM_SDK, "OnDataReceived handle=%{public}d, len=%{public}u", handle, len);
     DataReceived(handle, data, len);
     return SOFTBUS_OK;
+}
+
+bool SoftBusClientStub::OnTransmitAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    COMM_LOGI(COMM_SDK, "OnTransmitAuthResult pkgName=%{public}s, requestId=%{public}" PRId64, pkgName, requestId);
+    return LnnOnTransmitAuthResult(pkgName, requestId, data, dataLen);
+}
+
+void SoftBusClientStub::OnSessionKeyAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+{
+    COMM_LOGI(COMM_SDK, "OnSessionKeyAuthResult pkgName=%{public}s, requestId=%{public}" PRId64, pkgName, requestId);
+    LnnOnSessionKeyAuthResult(pkgName, requestId, sessionKey, sessionKeyLen);
+}
+
+void SoftBusClientStub::OnFinishAuthResult(
+    const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData)
+{
+    COMM_LOGI(COMM_SDK, "OnFinishAuthResult pkgName=%{public}s, requestId=%{public}" PRId64, pkgName, requestId);
+    LnnOnFinishAuthResult(pkgName, requestId, operationCode, returnData);
+}
+
+void SoftBusClientStub::OnErrorAuthResult(
+    const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode, const char *returnData)
+{
+    COMM_LOGI(COMM_SDK, "OnErrorAuthResult pkgName=%{public}s, requestId=%{public}" PRId64, pkgName, requestId);
+    LnnOnErrorAuthResult(pkgName, requestId, operationCode, errorCode, returnData);
 }
 } // namespace OHOS

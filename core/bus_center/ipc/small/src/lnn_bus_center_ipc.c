@@ -551,3 +551,31 @@ int32_t LnnIpcNotifyOnGroupStateChange(int32_t retCode)
     LNN_LOGI(LNN_EVENT, "not implement");
     return SOFTBUS_OK;
 }
+
+int32_t LnnIpcAccountAuthInit(void)
+{
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const char *serviceId)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)requestId;
+    (void)serviceId;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const uint8_t *data,
+    uint32_t dataLen)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)requestId;
+    (void)data;
+    (void)dataLen;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}

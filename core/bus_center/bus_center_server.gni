@@ -45,6 +45,7 @@ bus_center_server_src += [
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_decision_center.c",
+  "$dsoftbus_root_path/core/authentication/accountgroup/auth_account_group_manager.c",
 ]
 
 bus_center_server_inc += [
@@ -54,6 +55,7 @@ bus_center_server_inc += [
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  "$dsoftbus_root_path/core/authentication/include",
 ]
 
 bus_center_server_external_deps = []

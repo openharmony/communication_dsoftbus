@@ -745,3 +745,33 @@ void DestroyGroupOwner(const char *pkgName)
     }
     (void)DestroyGroupOwnerInner(pkgName);
 }
+
+int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId,
+    const IAccountAuthCallback *cb)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || serviceId == NULL || cb == NULL) {
+        LNN_LOGE(LNN_EVENT, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return StartAccountAuthInner(pkgName, requestId, serviceId, cb);
+}
+
+int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen,
+    const IAccountAuthCallback *cb)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || data == NULL || cb == NULL) {
+        LNN_LOGE(LNN_EVENT, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%d", ret);
+        return ret;
+    }
+    return ProcessAccountAuthInner(pkgName, requestId, data, dataLen, cb);
+}

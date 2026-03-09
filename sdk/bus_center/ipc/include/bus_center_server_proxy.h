@@ -62,6 +62,8 @@ int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint3
 int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result);
 void ServerIpcDestroyGroupOwner(const char *pkgName);
+int32_t ServerIpcStartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId);
+int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen);
 
 #ifdef __cplusplus
 #if __cplusplus

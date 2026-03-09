@@ -196,3 +196,20 @@ void ServerIpcDestroyGroupOwner(const char *pkgName)
 {
     (void)pkgName;
 }
+
+int32_t ServerIpcStartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)serviceId;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)data;
+    (void)dataLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

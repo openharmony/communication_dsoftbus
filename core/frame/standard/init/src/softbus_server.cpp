@@ -739,4 +739,16 @@ int32_t SoftBusServer::PushRegisterHook()
     }
     return TransRegisterPushHook();
 }
+
+int32_t SoftBusServer::StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId)
+{
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcStartAccountAuth(pkgName, (int32_t)callingPid, requestId, serviceId);
+}
+
+int32_t SoftBusServer::ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcProcessAccountAuth(pkgName, (int32_t)callingPid, requestId, data, dataLen);
+}
 } // namespace OHOS

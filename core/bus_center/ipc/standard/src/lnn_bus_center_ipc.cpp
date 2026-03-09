@@ -18,6 +18,7 @@
 #include <mutex>
 #include <securec.h>
 
+#include "auth_account_group_manager.h"
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func.h"
@@ -74,6 +75,12 @@ struct GroupStateChangeRequestInfo {
     int32_t pid;
 };
 
+struct AccountAuthInfo {
+    int64_t requestId;
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
+};
+
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
@@ -81,6 +88,7 @@ static std::vector<RefreshLnnRequestInfo *> g_refreshLnnRequestInfo;
 static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
 static std::vector<MsdpRangeReqInfo *> g_msdpRangeReqInfo;
 static std::vector<TimeSyncReqInfo *> g_timeSyncRequestInfo;
+static std::vector<AccountAuthInfo *> g_accountAuthInfo;
 static std::shared_ptr<struct GroupStateChangeRequestInfo> g_groupStateChangeRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
@@ -106,6 +114,17 @@ static IBleRangeInnerCallback g_msdpRangeCb = {
 static ISleRangeInnerCallback g_msdpSleRangeCb = {
     .onRangeResult = onRangeResult,
     .onRangeStateChange = nullptr,
+};
+
+static bool OnTransmitAuthResult(int64_t requestId, const uint8_t *data, uint32_t dataLen);
+static void OnSessionKeyAuthResult(int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen);
+static void OnFinishAuthResult(int64_t requestId, int32_t operationCode, const char *returnData);
+static void OnErrorAuthResult(int64_t requestId, int32_t operationCode, int32_t errorCode, const char *returnData);
+static IAccountAuthCallback g_accountAuthCb = {
+    .onTransmit = OnTransmitAuthResult,
+    .onSessionKeyReturned = OnSessionKeyAuthResult,
+    .onFinish = OnFinishAuthResult,
+    .onError = OnErrorAuthResult,
 };
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
@@ -885,6 +904,45 @@ static void RemoveGroupByPkgName(const char *pkgName)
     LnnDestroyGroupOwner(pkgName);
 }
 
+static void RemoveAccountAuthInfoByPkgName(const char *pkgName)
+{
+    LNN_CHECK_AND_RETURN_LOGE(pkgName != nullptr, LNN_EVENT, "pkgName is null");
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<AccountAuthInfo *>::iterator iter;
+    for (iter = g_accountAuthInfo.begin(); iter != g_accountAuthInfo.end();) {
+        if ((*iter) == nullptr) {
+            LNN_LOGE(LNN_EVENT, "iter is nullptr");
+            break;
+        }
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+            ++iter;
+            continue;
+        }
+        LNN_LOGI(LNN_EVENT, "delete pkgName=%{public}s success", pkgName);
+        delete *iter;
+        iter = g_accountAuthInfo.erase(iter);
+    }
+}
+
+static void RemoveAccountAuthInfoByRequestId(const int64_t requestId)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<AccountAuthInfo *>::iterator iter;
+    for (iter = g_accountAuthInfo.begin(); iter != g_accountAuthInfo.end();) {
+        if ((*iter) == nullptr) {
+            LNN_LOGE(LNN_EVENT, "iter is nullptr");
+            break;
+        }
+        if (requestId != (*iter)->requestId) {
+            ++iter;
+            continue;
+        }
+        LNN_LOGI(LNN_EVENT, "delete requestId=%{public}" PRId64 " success", requestId);
+        delete *iter;
+        iter = g_accountAuthInfo.erase(iter);
+    }
+}
+
 static void StopTimeSyncReq(const char *pkgName)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
@@ -920,6 +978,170 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveRefreshRequestInfoByPkgName(pkgName);
     RemoveRangeRequestInfoByPkgName(pkgName);
     RemoveGroupByPkgName(pkgName);
+    RemoveAccountAuthInfoByPkgName(pkgName);
     StopTimeSyncReq(pkgName);
     SdMgrDeathCallbackPacked(pkgName);
+}
+
+static int32_t AddAccountAuthInfo(const char *pkgName, int32_t pid, int64_t requestId)
+{
+    AccountAuthInfo *info = new (std::nothrow) AccountAuthInfo();
+    if (info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "create account auth info failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy pkgName failed");
+        delete info;
+        return SOFTBUS_MEM_ERR;
+    }
+    info->pid = pid;
+    info->requestId = requestId;
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    g_accountAuthInfo.push_back(info);
+    return SOFTBUS_OK;
+}
+
+static bool IsRepeatAccountAuthRequest(const char *pkgName, int64_t requestId)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    for (const auto &iter : g_accountAuthInfo) {
+        if (strncmp(pkgName, (*iter).pkgName, strlen(pkgName)) != 0 || (*iter).requestId != requestId) {
+            continue;
+        }
+        return true;
+    }
+    return false;
+}
+
+static int32_t GetAccountAuthInfo(int64_t requestId, PkgNameAndPidInfo *info)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<AccountAuthInfo *>::iterator iter;
+    for (iter = g_accountAuthInfo.begin(); iter != g_accountAuthInfo.end();) {
+        if (requestId == (*iter)->requestId) {
+            if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, (*iter)->pkgName) != EOK) {
+                LNN_LOGE(LNN_EVENT, "copy pkgName failed");
+                return SOFTBUS_MEM_ERR;
+            }
+            info->pid = (*iter)->pid;
+            return SOFTBUS_OK;
+        }
+        ++iter;
+    }
+    return SOFTBUS_NOT_FIND;
+}
+
+static bool OnTransmitAuthResult(int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    if (data == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param");
+        return false;
+    }
+    PkgNameAndPidInfo info;
+    (void)memset_s(&info, sizeof(PkgNameAndPidInfo), 0, sizeof(PkgNameAndPidInfo));
+    int32_t ret = GetAccountAuthInfo(requestId, &info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "GetAccountAuthInfo failed");
+        return false;
+    }
+    return ClientOnTransmitAuthResult(&info, requestId, data, dataLen);
+}
+
+static void OnSessionKeyAuthResult(int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+{
+    if (sessionKey == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param");
+        return;
+    }
+    PkgNameAndPidInfo info;
+    (void)memset_s(&info, sizeof(PkgNameAndPidInfo), 0, sizeof(PkgNameAndPidInfo));
+    int32_t ret = GetAccountAuthInfo(requestId, &info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "GetAccountAuthInfo failed");
+        return;
+    }
+    ClientOnSessionKeyAuthResult(&info, requestId, sessionKey, sessionKeyLen);
+}
+
+static void OnFinishAuthResult(int64_t requestId, int32_t operationCode, const char *returnData)
+{
+    if (returnData == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param");
+        return;
+    }
+    PkgNameAndPidInfo info;
+    (void)memset_s(&info, sizeof(PkgNameAndPidInfo), 0, sizeof(PkgNameAndPidInfo));
+    int32_t ret = GetAccountAuthInfo(requestId, &info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "GetAccountAuthInfo failed");
+        return;
+    }
+    ClientOnFinishAuthResult(&info, requestId, operationCode, returnData);
+    RemoveAccountAuthInfoByRequestId(requestId);
+}
+
+static void OnErrorAuthResult(int64_t requestId, int32_t operationCode, int32_t errorCode, const char *returnData)
+{
+    PkgNameAndPidInfo info;
+    (void)memset_s(&info, sizeof(PkgNameAndPidInfo), 0, sizeof(PkgNameAndPidInfo));
+    int32_t ret = GetAccountAuthInfo(requestId, &info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "GetAccountAuthInfo failed");
+        return;
+    }
+    ClientOnErrorAuthResult(&info, requestId, operationCode, errorCode, returnData);
+    RemoveAccountAuthInfoByRequestId(requestId);
+}
+
+int32_t LnnIpcAccountAuthInit(void)
+{
+    RegisterAccountAuth(&g_accountAuthCb);
+    LNN_LOGI(LNN_EVENT, "auth init success");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const char *serviceId)
+{
+    if (pkgName == nullptr || serviceId == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret;
+    if (!IsRepeatAccountAuthRequest(pkgName, requestId)) {
+        ret = AddAccountAuthInfo(pkgName, pid, requestId);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "add account auth info failed, ret=%{public}d", ret);
+            return ret;
+        }
+    }
+    ret = StartGroupAccountAuth(pkgName, requestId, serviceId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "start account auth failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const uint8_t *data,
+    uint32_t dataLen)
+{
+    if (pkgName == nullptr || data == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret;
+    if (!IsRepeatAccountAuthRequest(pkgName, requestId)) {
+        ret = AddAccountAuthInfo(pkgName, pid, requestId);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "add account auth info failed, ret=%{public}d", ret);
+            return ret;
+        }
+    }
+    ret = ProcessGroupAccountAuth(pkgName, requestId, data, dataLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "process account auth failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ret;
 }
