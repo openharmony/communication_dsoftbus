@@ -513,6 +513,35 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_007, TestSize.Level1)
 }
 
 /*
+* @tc.name: LNN_TRANS_LANE_008
+* @tc.desc: test alloc lane linkType exceeds limit
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_008, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    uint32_t laneReqId = 1;
+    LaneRequestOption request = {};
+    request.type = LANE_TYPE_TRANS;
+    LanePreferredLinkList recommendLinkList = {};
+    recommendLinkList.linkTypeNum = 1;
+    recommendLinkList.linkType[0] = LANE_LINK_TYPE_BUTT;
+    EXPECT_CALL(laneMock, SelectLane)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
+    ILaneListener listener = {
+        .onLaneRequestSuccess = OnLaneRequestSuccess,
+        .onLaneRequestFail = OnLaneRequestFail,
+    };
+    SetIsNeedCondWait();
+    int32_t ret = transObj->allocLane(laneReqId, (const LaneRequestOption *)&request, &listener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+}
+
+/*
 * @tc.name: LNN_LANE_POST_LANE_STATE_CHANGE_MESSAGE_001
 * @tc.desc: PostLaneStateChangeMessage
 * @tc.type: FUNC
