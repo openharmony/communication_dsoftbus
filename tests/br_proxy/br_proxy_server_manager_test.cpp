@@ -1060,6 +1060,9 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest043, TestSize.Level1)
     (void)PrintSession(nullptr, nullptr);
     (void)PrintSession(brMac, uuid);
 
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
     int32_t ret = TransOpenBrProxy(brMac, uuid);
     EXPECT_NE(SOFTBUS_OK, ret);
     ProxyBaseInfo info = {
