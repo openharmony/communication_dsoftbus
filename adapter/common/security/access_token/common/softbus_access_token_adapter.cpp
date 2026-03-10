@@ -36,6 +36,7 @@ const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributed
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
 #define DBINDER_BUS_NAME_PREFIX     "DBinder"
 #define OBJECT_STORE_DB_NAME_PREFIX "objectstoreDB"
+#define GAME_SERVICE_NAME_PREFIX    "hms.nearby.game.service"
 #define SAMGR_UID                   5555
 #define DMS_UID                     5522
 #define OBJECT_STORE_UID            3012
@@ -133,6 +134,10 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
     }
 
     if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
+        return false;
+    }
+
+    if (strncmp(sessionName, GAME_SERVICE_NAME_PREFIX, strlen(GAME_SERVICE_NAME_PREFIX)) == 0) {
         return false;
     }
 
