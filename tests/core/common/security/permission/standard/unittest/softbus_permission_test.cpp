@@ -274,6 +274,20 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp004, TestSize.Level0)
 }
 
 /*
+ * @tc.name:SoftBusCheckIsNormalApp005
+ * @tc.desc: Verify SoftBusCheckIsNormalApp returns false when input parameter is valid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsNormalApp005, TestSize.Level0)
+{
+    const char *sessionName = "hms.nearby.game.service";
+    uint64_t fullTokenId = 0;
+    int32_t ret = SoftBusCheckIsNormalApp(fullTokenId, sessionName);
+    EXPECT_FALSE(ret);
+}
+
+/*
  * @tc.name:SoftBusCheckIsAccessAndRecordAccessToken001
  * @tc.desc: Verify SoftBusCheckIsAccessAndRecordAccessToken returns false when input parameter is valid
  * @tc.type: FUNC
