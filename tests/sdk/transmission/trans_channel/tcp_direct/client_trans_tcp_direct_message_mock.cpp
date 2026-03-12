@@ -107,5 +107,76 @@ void TransUpdateFdState(int32_t channelId)
 {
     return GetTransTcpDirectMsgInterface()->TransUpdateFdState(channelId);
 }
+
+void DelPendingPacketbyChannelId(int32_t channelId, int32_t seqNum, int32_t type)
+{
+    return GetTransTcpDirectMsgInterface()->DelPendingPacketbyChannelId(channelId, seqNum, type);
+}
+
+int32_t ClientTransTdcOnDataReceived(int32_t channelId, const void *data, uint32_t len, SessionPktType type)
+{
+    return GetTransTcpDirectMsgInterface()->ClientTransTdcOnDataReceived(channelId, data, len, type);
+}
+
+int32_t TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInfo *info)
+{
+    return GetTransTcpDirectMsgInterface()->TransTdcGetInfoById(channelId, info);
+}
+
+int32_t TransTdcDecrypt(const char *sessionKey, const char *in, uint32_t inLen, char *out, uint32_t *outLen)
+{
+    return GetTransTcpDirectMsgInterface()->TransTdcDecrypt(sessionKey, in, inLen, out, outLen);
+}
+
+int32_t MoveNode(int32_t channelId, DataBuf *node, uint32_t dataLen, int32_t pkgHeadSize)
+{
+    return GetTransTcpDirectMsgInterface()->MoveNode(channelId, node, dataLen, pkgHeadSize);
+}
+
+int32_t TransTdcUnPackData(int32_t channelId, const char *sessionKey, char *plain, uint32_t *plainLen, DataBuf *node)
+{
+    return GetTransTcpDirectMsgInterface()->TransTdcUnPackData(channelId, sessionKey, plain, plainLen, node);
+}
+
+uint64_t SoftBusGetTimeMs(void)
+{
+    return GetTransTcpDirectMsgInterface()->SoftBusGetTimeMs();
+}
+
+void TransTdcSetTimestamp(int32_t channelId, uint64_t timestamp)
+{
+    return GetTransTcpDirectMsgInterface()->TransTdcSetTimestamp(channelId, timestamp);
+}
+
+int32_t TransTdcUnPackAllTlvData(
+    int32_t channelId, TcpDataTlvPacketHead *head, uint32_t *headSize, DataBuf *node, bool *flag)
+{
+    return GetTransTcpDirectMsgInterface()->TransTdcUnPackAllTlvData(channelId, head, headSize, node, flag);
+}
+
+int32_t TransTdcUnPackAllData(int32_t channelId, DataBuf *node, bool *flag)
+{
+    return GetTransTcpDirectMsgInterface()->TransTdcUnPackAllData(channelId, node, flag);
+}
+
+int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing)
+{
+    return GetTransTcpDirectMsgInterface()->ClientGetSessionIdByChannelId(channelId, channelType, sessionId, isClosing);
+}
+
+int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType)
+{
+    return GetTransTcpDirectMsgInterface()->DataSeqInfoListAddItem(dataSeq, channelId, socketId, channelType);
+}
+
+int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
+{
+    return GetTransTcpDirectMsgInterface()->ClientGetSessionCallbackAdapterById(sessionId, callbackAdapter, isServer);
+}
+
+int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
+{
+    return GetTransTcpDirectMsgInterface()->DeleteDataSeqInfoList(dataSeq, channelId);
+}
 }
 }
