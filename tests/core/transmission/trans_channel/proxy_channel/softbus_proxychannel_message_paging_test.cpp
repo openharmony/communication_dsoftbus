@@ -1334,4 +1334,131 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackMessage001, TestSi
     ret = TransPagingPackMessage(&msg, &dataInfo, nullptr, needHash);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: TransPagingParseMessageTest001
+ * @tc.desc: test TransPagingParseMessage with invalid data length (too small)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingParseMessageTest001, TestSize.Level1)
+{
+    char *data = const_cast<char *>(TEST_DATA);
+    int32_t len = PAGING_CHANNEL_HANDSHAKE_HEAD_LEN + 10;
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE;
+    msg.msgHead.myId = TEST_CHANNEL_ID;
+    msg.msgHead.peerId = TEST_CHANNEL_ID;
+    msg.dataLen = 10;
+    msg.data = data;
+    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    EXPECT_CALL(ProxyPagingMock, TransPagingHandshakeUnPackErrMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyProcessErrMsg).Times(0);
+    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = TransPagingParseMessage(data, len, &msg);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/*
+ * @tc.name: TransPagingParseMessageTest002
+ * @tc.desc: test TransPagingParseMessage with invalid data length (exceeds max)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingParseMessageTest002, TestSize.Level1)
+{
+    char *data = const_cast<char *>(TEST_DATA);
+    int32_t len = PAGING_CHANNEL_HANDSHAKE_HEAD_LEN + PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN + 1;
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE;
+    msg.msgHead.myId = TEST_CHANNEL_ID;
+    msg.msgHead.peerId = TEST_CHANNEL_ID;
+    msg.dataLen = PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN + 1;
+    msg.data = data;
+    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    EXPECT_CALL(ProxyPagingMock, TransPagingHandshakeUnPackErrMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyProcessErrMsg).Times(0);
+    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = TransPagingParseMessage(data, len, &msg);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/*
+ * @tc.name: TransPagingParseMessageTest003
+ * @tc.desc: test TransPagingParseMessage with valid data length (boundary case)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingParseMessageTest003, TestSize.Level1)
+{
+    char *data = const_cast<char *>(TEST_DATA);
+    int32_t len = PAGING_CHANNEL_HANDSHAKE_HEAD_LEN + OVERHEAD_LEN + 1;
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE;
+    msg.msgHead.myId = TEST_CHANNEL_ID;
+    msg.msgHead.peerId = TEST_CHANNEL_ID;
+    msg.dataLen = OVERHEAD_LEN + 1;
+    msg.data = data;
+    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    EXPECT_CALL(ProxyPagingMock, TransPagingHandshakeUnPackErrMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyProcessErrMsg).Times(0);
+    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, SoftBusDecryptData).WillOnce(Return(SOFTBUS_DECRYPT_ERR));
+    int32_t ret = TransPagingParseMessage(data, len, &msg);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+}
+
+/*
+ * @tc.name: TransPagingParseMessageTest004
+ * @tc.desc: test TransPagingParseMessage with dataLen exactly equal to OVERHEAD_LEN
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingParseMessageTest004, TestSize.Level1)
+{
+    char *data = const_cast<char *>(TEST_DATA);
+    int32_t len = PAGING_CHANNEL_HANDSHAKE_HEAD_LEN + OVERHEAD_LEN;
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE;
+    msg.msgHead.myId = TEST_CHANNEL_ID;
+    msg.msgHead.peerId = TEST_CHANNEL_ID;
+    msg.dataLen = OVERHEAD_LEN;
+    msg.data = data;
+    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    EXPECT_CALL(ProxyPagingMock, TransPagingHandshakeUnPackErrMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyProcessErrMsg).Times(0);
+    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = TransPagingParseMessage(data, len, &msg);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/*
+ * @tc.name: TransPagingParseMessageTest005
+ * @tc.desc: test TransPagingParseMessage with dataLen exactly equal to PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingParseMessageTest005, TestSize.Level1)
+{
+    char *data = const_cast<char *>(TEST_DATA);
+    int32_t len = PAGING_CHANNEL_HANDSHAKE_HEAD_LEN + PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN;
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE;
+    msg.msgHead.myId = TEST_CHANNEL_ID;
+    msg.msgHead.peerId = TEST_CHANNEL_ID;
+    msg.dataLen = PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN;
+    msg.data = data;
+    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    EXPECT_CALL(ProxyPagingMock, TransPagingHandshakeUnPackErrMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyProcessErrMsg).Times(0);
+    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, SoftBusDecryptData).WillOnce(Return(SOFTBUS_DECRYPT_ERR));
+    int32_t ret = TransPagingParseMessage(data, len, &msg);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+}
 } // namespace OHOS

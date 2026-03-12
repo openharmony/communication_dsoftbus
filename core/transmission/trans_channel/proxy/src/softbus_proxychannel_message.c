@@ -974,6 +974,11 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
         }
         return ret;
     }
+    if ((uint32_t)msg->dataLen <= OVERHEAD_LEN ||
+        (uint32_t)msg->dataLen > (PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN)) {
+        TRANS_LOGE(TRANS_CTRL, "The data length of the PagingMessage is abnormal, dataLen=%{public}d", msg->dataLen);
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
     uint32_t decDataLen = (uint32_t)msg->dataLen - OVERHEAD_LEN;
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
     if (decData == NULL) {
