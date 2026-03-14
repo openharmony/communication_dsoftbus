@@ -100,5 +100,5 @@ ConnectFuncInterface *ConnSleInitPacked(const ConnectCallback *callback)
 {
     return GetConnectionManagerInterface()->ConnSleInitPacked(callback);
 }
-}    
+}
 }
