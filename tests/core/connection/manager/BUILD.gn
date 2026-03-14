@@ -82,6 +82,8 @@ ohos_unittest("SoftbusConnectionManagerTest") {
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/tests/core/connection/manager/unittest/manager_test/mock",
+    "$dsoftbus_root_path/core/connection/proxy",
+    "$dsoftbus_root_path/core/connection/proxy",
   ]
 
   deps = [
@@ -95,6 +97,7 @@ ohos_unittest("SoftbusConnectionManagerTest") {
     "c_utils:utils",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "googletest:gmock_main",
   ]
   sources = [
     "$dsoftbus_root_path/tests/core/connection/manager/unittest/manager_test/mock/softbus_conn_manager_mock.cpp",
