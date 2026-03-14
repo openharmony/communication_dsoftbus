@@ -1678,6 +1678,7 @@ ohos_unittest("AuthRequestTest") {
 ohos_unittest("AuthApplyKeyManagerTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "unittest/auth_apply_key_manager_mock.cpp",
     "unittest/auth_apply_key_manager_test.cpp",
   ]
@@ -1685,7 +1686,6 @@ ohos_unittest("AuthApplyKeyManagerTest") {
   include_dirs = [
     "unittest",
     "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/applykey",
@@ -1718,12 +1718,14 @@ ohos_unittest("AuthApplyKeyManagerTest") {
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
+    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
   ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
@@ -1734,8 +1736,8 @@ ohos_unittest("AuthApplyKeyManagerTest") {
       "c_utils:utils",
       "device_auth:deviceauth_sdk",
       "dsoftbus:softbus_client",
+      "googletest:gmock",
       "googletest:gmock_main",
-      "googletest:gtest_main",
       "hilog:libhilog",
     ]
   } else {
