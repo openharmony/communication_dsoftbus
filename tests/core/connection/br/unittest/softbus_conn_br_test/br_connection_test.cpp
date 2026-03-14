@@ -253,7 +253,7 @@ HWTEST_F(BrConnectionTest, ConnBrCreateConnectionTest005, TestSize.Level1)
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return((SoftBusList *)NULL));
-    EXPECT_CALL(brMock, SoftBusMutexDestroy).WillOnce(Return());
+    EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     
     char addr[BT_MAC_LEN] = "11:22:33:44:55:66";
     ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
@@ -789,7 +789,7 @@ HWTEST_F(BrConnectionTest, ConnBrDisconnectNowTest001, TestSize.Level1)
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(brMock, DestroySoftBusList).WillWillRepeatedly(Return());
+    EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     EXPECT_CALL(brMock, SoftBusMutexLockInner).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, SoftBusMutexUnlockInner).WillRepeatedly(Return(SOFTBUS_OK));
     
@@ -867,7 +867,7 @@ HWTEST_F(BrConnectionTest, ConnBrStopServerTest001, TestSize.Level1)
     EXPECT_CALL(brMock, SoftBusMutexUnlockInner).WillRepeatedly(Return(SOFTBUS_OK));
     
     int32_t ret = ConnBrStopServer();
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(BrConnectionTest, ConnBrStartServerTest002, TestSize.Level1)

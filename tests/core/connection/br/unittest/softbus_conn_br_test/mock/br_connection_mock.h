@@ -88,10 +88,7 @@ public:
     virtual SoftBusList *CreateSoftBusList(void) = 0;
     virtual void DestroySoftBusList(SoftBusList *list) = 0;
     virtual SoftBusThread SoftBusThreadGetSelf(void) = 0;
-    virtual int32_t SoftBusThreadSetName(SoftBusThread thread, const char *name) = 0;
     virtual int32_t SppDriverUpdatePriority(uint8_t *binaryAddr, int32_t priority) = 0;
-    virtual int32_t SppDriverConnect(const char *uuid, uint8_t *binaryAddr,
-        BtSocketConnectionCallback *callback) = 0;
     virtual void SppDriverDisConnect(int32_t socketHandle) = 0;
     virtual int32_t SppDriverGetRemoteDeviceInfo(int32_t socketHandle, BluetoothRemoteDevice *remote) = 0;
     virtual int32_t SppDriverOpenSppServer(const char *name, int32_t nameLen, const char *uuid, int32_t security) = 0;
@@ -149,9 +146,7 @@ public:
     MOCK_METHOD0(CreateSoftBusList, SoftBusList *());
     MOCK_METHOD1(DestroySoftBusList, void(SoftBusList *));
     MOCK_METHOD0(SoftBusThreadGetSelf, SoftBusThread());
-    MOCK_METHOD1(SoftBusThreadSetName, int32_t(SoftBusThread, const char *));
     MOCK_METHOD2(SppDriverUpdatePriority, int32_t(uint8_t *, int32_t));
-    MOCK_METHOD3(SppDriverConnect, int32_t(const char *, uint8_t *, BtSocketConnectionCallback *));
     MOCK_METHOD1(SppDriverDisConnect, void(int32_t));
     MOCK_METHOD2(SppDriverGetRemoteDeviceInfo, int32_t(int32_t, BluetoothRemoteDevice *));
     MOCK_METHOD4(SppDriverOpenSppServer, int32_t(const char *, int32_t, const char *, int32_t));
