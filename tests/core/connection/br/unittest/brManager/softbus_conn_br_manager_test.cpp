@@ -63,7 +63,6 @@ static void TestOnConnectFailed(uint32_t requestId, int32_t reason)
 
 static void TestOnConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
-    
     (void)connectionId;
     (void)info;
 }
