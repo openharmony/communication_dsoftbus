@@ -535,7 +535,5 @@ int32_t ConnBrTransConfigPostLimit(const LimitConfiguration *config)
     }
     return SOFTBUS_OK;
 }
-
-} 
-
+}
 }// namespace OHOS
