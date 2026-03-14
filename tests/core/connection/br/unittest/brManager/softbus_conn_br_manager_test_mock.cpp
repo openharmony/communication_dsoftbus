@@ -96,7 +96,8 @@ int32_t BrManagerTestMock::ActionOfBrGetConnectionInfoImpl(uint32_t connectionId
     return g_brGetConnectionInfoResult;
 }
 
-__attribute__((weak)) ConnBrConnection *ConnBrCreateConnection(const char *addr, ConnSideType side, int32_t socketHandle)
+__attribute__((weak)) ConnBrConnection *ConnBrCreateConnection(
+    const char *addr, ConnSideType side, int32_t socketHandle)
 {
     auto mock = BrManagerTestMock::GetMock();
     if (mock != nullptr) {
@@ -536,4 +537,4 @@ int32_t ConnBrTransConfigPostLimit(const LimitConfiguration *config)
     return SOFTBUS_OK;
 }
 }
-}// namespace OHOS
+}
