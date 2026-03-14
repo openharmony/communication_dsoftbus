@@ -34,8 +34,9 @@
 #include "softbus_conn_br_connection_struct.h"
 #include "softbus_conn_br_snapshot.h"
 
-namespace OHOS {
+#define HEAD_SIZE         8
 
+namespace OHOS {
 class BrManagerTestInterface {
 public:
     virtual ~BrManagerTestInterface() = default;
@@ -71,7 +72,8 @@ public:
     virtual int32_t ConnBrPostBytes(uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag,
         int64_t seq) = 0;
     
-    virtual ConnBrConnection *ActionOfConnBrCreateConnection(const char *addr, ConnSideType side, int32_t socketHandle) = 0;
+    virtual ConnBrConnection *ActionOfConnBrCreateConnection(const char *addr,
+                                                             ConnSideType side, int32_t socketHandle) = 0;
     virtual int32_t ActionOfConnBrUpdateConnectionRc(ConnBrConnection *connection, int32_t delta) = 0;
     virtual int32_t ActionOfConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json) = 0;
     virtual int32_t ActionOfConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *json) = 0;
@@ -164,7 +166,7 @@ public:
 
     static uint32_t DefaultActionOfConnGetHeadSize()
     {
-        return 8;
+        return HEAD_SIZE;
     }
 
     static uint32_t DefaultActionOfConnGetNewRequestId(ConnModule moduleId)
@@ -195,7 +197,8 @@ public:
         return SOFTBUS_OK;
     }
 
-    static ConnBrConnection *DefaultActionOfConnBrCreateConnection(const char *addr, ConnSideType side, int32_t socketHandle)
+    static ConnBrConnection *DefaultActionOfConnBrCreateConnection(const char *addr,
+        ConnSideType side, int32_t socketHandle)
     {
         (void)addr;
         (void)side;
