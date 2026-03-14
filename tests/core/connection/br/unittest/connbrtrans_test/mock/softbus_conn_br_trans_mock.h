@@ -16,8 +16,6 @@
 #ifndef CONNECTION_BR_TRANS_MOCK_H
 #define CONNECTION_BR_TRANS_MOCK_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <gmock/gmock.h>
 
 namespace OHOS {
