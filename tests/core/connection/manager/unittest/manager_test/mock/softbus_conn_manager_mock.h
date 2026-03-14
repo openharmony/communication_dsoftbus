@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include "softbus_conn_interface_struct.h"
+#include "softbus_conn_manager_struct.h"
 
 namespace OHOS {
 class ConnectionManagerInterface {
