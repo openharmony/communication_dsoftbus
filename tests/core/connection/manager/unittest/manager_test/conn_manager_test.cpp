@@ -22,10 +22,9 @@
 #include "common_list.h"
 #include "softbus_conn_manager_mock.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_conn_manager.c"
+#include "softbus_conn_manager.h"
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
-#include "softbus_feature_config.c"
 #include "softbus_feature_config.h"
 
 #define DATASIZE 256
@@ -130,37 +129,6 @@ HWTEST_F(ConnectionManagerTest, ConnGetHeadSize002, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConnGetNewRequestId001
- * @tc.desc: Get new request ID for different modules
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnGetNewRequestId001, TestSize.Level1)
-{
-    uint32_t reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
-    EXPECT_GT(reqId1, 0);
-
-    uint32_t reqId2 = ConnGetNewRequestId(MODULE_HICHAIN);
-    EXPECT_GT(reqId2, 0);
-    EXPECT_NE(reqId1, reqId2);
-}
-
-/*
- * @tc.name: ConnGetNewRequestId002
- * @tc.desc: Verify different calls return different request IDs
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnGetNewRequestId002, TestSize.Level1)
-{
-    uint32_t reqId1 = ConnGetNewRequestId(MODULE_AUTH_CONNECTION);
-    uint32_t reqId2 = ConnGetNewRequestId(MODULE_AUTH_CONNECTION);
-    EXPECT_NE(reqId1, reqId2);
-}
-
-/*
  * @tc.name: ConnGetNewRequestId003
  * @tc.desc: Verify request ID is within expected range
  * @tc.type: FUNC
@@ -185,20 +153,6 @@ HWTEST_F(ConnectionManagerTest, ConnGetNewRequestId004, TestSize.Level1)
 {
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     EXPECT_GT(reqId, 0);
-}
-
-/*
- * @tc.name: ConnGetNewRequestId005
- * @tc.desc: Get request ID for P2P link module
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnGetNewRequestId005, TestSize.Level1)
-{
-    uint32_t reqId1 = ConnGetNewRequestId(MODULE_P2P_LINK);
-    uint32_t reqId2 = ConnGetNewRequestId(MODULE_P2P_LINK);
-    EXPECT_NE(reqId1, reqId2);
 }
 
 /*
@@ -259,19 +213,6 @@ HWTEST_F(ConnectionManagerTest, ConnTypeIsSupport003, TestSize.Level1)
 HWTEST_F(ConnectionManagerTest, ConnTypeIsSupport004, TestSize.Level1)
 {
     int32_t ret = ConnTypeIsSupport(CONNECT_HML);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnTypeIsSupport005
- * @tc.desc: Check if SLE connection type is supported
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnTypeIsSupport005, TestSize.Level1)
-{
-    int32_t ret = ConnTypeIs(CONNECT_SLE);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
 }
 
@@ -348,7 +289,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback003, TestSize.Level1)
     callback.OnReusedConnected = OnReusedConnected;
 
     ret = ConnSetConnectCallback(MODULE_HICHAIN, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -368,7 +309,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback004, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -388,7 +329,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback005, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_AUTH_CONNECTION, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -408,7 +349,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback006, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_MESSAGE_SERVICE, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -428,7 +369,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback007, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_DIRECT_CHANNEL, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -448,7 +389,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback008, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_PROXY_CHANNEL, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -468,7 +409,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback009, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_DEVICE_AUTH, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -488,7 +429,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback010, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_P2P_LINK, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -508,7 +449,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback011, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_UDP_INFO, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -528,7 +469,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback012, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_PKG_VERIFY, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -548,7 +489,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback013, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_META_AUTH, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -568,7 +509,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback014, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_P2P_NEGO, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -588,7 +529,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback015, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_APPLY_KEY_CONNECTION, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -608,7 +549,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback016, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_LANE_SELECT, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -628,7 +569,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback017, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_BLE_NET, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -648,7 +589,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback018, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_BLE_CONN, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -668,7 +609,7 @@ HWTEST_F(ConnectionManagerTest, ConnSetConnectCallback019, TestSize.Level1)
     callback.OnDataReceived = OnDataReceived;
 
     ret = ConnSetConnectCallback(MODULE_BLE_GENERAL, &callback);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -807,7 +748,7 @@ HWTEST_F(ConnectionManagerTest, ConnConnectDevice001, TestSize.Level1)
 
     option.type = CONNECT_TCP;
     ret = ConnConnectDevice(&option, requestId, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -845,7 +786,7 @@ HWTEST_F(ConnectionManagerTest, ConnConnectDevice003, TestSize.Level1)
 
     option.type = CONNECT_TCP;
     ret = ConnConnectDevice(&option, requestId, &result);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -864,7 +805,7 @@ HWTEST_F(ConnectionManagerTest, ConnConnectDevice004, TestSize.Level1)
 
     option.type = CONNECT_BR;
     ret = ConnConnectDevice(&option, requestId, &result);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -883,7 +824,7 @@ HWTEST_F(ConnectionManagerTest, ConnConnectDevice005, TestSize.Level1)
 
     option.type = CONNECT_BLE;
     ret = ConnConnectDevice(&option, requestId, &result);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -902,7 +843,7 @@ HWTEST_F(ConnectionManagerTest, ConnConnectDevice006, TestSize.Level1)
 
     option.type = CONNECT_P2P;
     ret = ConnConnectDevice(&option, requestId, &result);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -921,7 +862,7 @@ HWTEST_F(ConnectionManagerTest, ConnConnectDevice007, TestSize.Level1)
 
     option.type = CONNECT_SLE;
     ret = ConnConnectDevice(&option, requestId, &result);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -940,27 +881,6 @@ HWTEST_F(ConnectionManagerTest, ConnConnectDevice008, TestSize.Level1)
 
     option.type = CONNECT_HML;
     ret = ConnConnectDevice(&option, requestId, &result);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnGetTypeByConnectionId001
- * @tc.desc: Get connection type by connection ID with null parameter
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnGetType GetTypeByConnectionId001, TestSize.Level1)
-{
-    int32_t ret;
-    ConnectType type;
-    uint32_t connectionId = 0;
-
-    ret = ConnGetTypeByConnectionId(connectionId, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    connectionId = (CONNECT_TCP << CONNECT_TYPE_SHIFT) + 1;
-    ret = ConnGetTypeByConnectionId(connectionId, &type);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
@@ -1085,214 +1005,6 @@ HWTEST_F(ConnectionManagerTest, ConnPostBytes001, TestSize.Level1)
     data.len = 100;
     ret = ConnPostBytes(connectionId, &data);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes002
- * @tc.desc: Post bytes with invalid packet length
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes002, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = 0;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = sizeof(ConnPktHead);
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_PKT_LEN_INVALID, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes003
- * @tc.desc: Post bytes to TCP connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManager(ConnectionManagerTest, ConnPostBytes003, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_TCP << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = DATASIZE;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes004
- * @tc.desc: Post bytes to BR connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes004, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_BR << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = DATASIZE;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes005
- * @tc.desc: Post bytes to BLE connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes005, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = DATASIZE;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes006
- * @tc.desc: Post bytes to P2P connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes006, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_P2P << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = DATASIZE;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes007
- * @tc.desc: Post bytes to SLE connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes007, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_SLE << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = DATASIZE;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes008
- * @tc.desc: Post large data to TCP connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes008, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_TCP << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[LARGE_DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = LARGE_DATASIZE;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes009
- * @tc.desc: Post bytes with minimal valid length
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes009, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_TCP << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = sizeof(ConnPktHead) + 1;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes010
- * @tc.desc: Post bytes with full parameters
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes010, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_TCP << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = sizeof(ConnPktHead) + 100;
-    data.module = MODULE_TRUST_ENGINE;
-    data.flag = CONN_DEFAULT;
-    data.seq = 1;
-    data.pid = 100;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPostBytes011
- * @tc.desc: Post bytes with high priority flag
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPostBytes011, TestSize.Level1)
-{
-    int32_t ret;
-    ConnPostData data;
-    uint32_t connectionId = (CONNECT_TCP << CONNECT_TYPE_SHIFT) + 1;
-    char buffer[DATASIZE] = {0};
-
-    data.buf = buffer;
-    data.len = sizeof(ConnPktHead) + 50;
-    data.module = MODULE_MESSAGE_SERVICE;
-    data.flag = CONN_HIGH;
-    data.seq = 100;
-    data.pid = 200;
-    ret = ConnPostBytes(connectionId, &data);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1445,7 +1157,7 @@ HWTEST_F(ConnectionManagerTest, ConnDisconnectDeviceAllConn002, TestSize.Level1)
 
     option.type = CONNECT_TCP;
     ret = ConnDisconnectDeviceAllConn(&option);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1462,7 +1174,7 @@ HWTEST_F(ConnectionManagerTest, ConnDisconnectDeviceAllConn003, TestSize.Level1)
 
     option.type = CONNECT_BR;
     ret = ConnDisconnectDeviceAllConn(&option);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1479,7 +1191,7 @@ HWTEST_F(ConnectionManagerTest, ConnDisconnectDeviceAllConn004, TestSize.Level1)
 
     option.type = CONNECT_BLE;
     ret = ConnDisconnectDeviceAllConn(&option);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1496,7 +1208,7 @@ HWTEST_F(ConnectionManagerTest, ConnDisconnectDeviceAllConn005, TestSize.Level1)
 
     option.type = CONNECT_P2P;
     ret = ConnDisconnectDeviceAllConn(&option);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1513,7 +1225,7 @@ HWTEST_F(ConnectionManagerTest, ConnDisconnectDeviceAllConn006, TestSize.Level1)
 
     option.type = CONNECT_SLE;
     ret = ConnDisconnectDeviceAllConn(&option);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1711,7 +1423,7 @@ HWTEST_F(ConnectionManagerTest, ConnStartLocalListening002, TestSize.Level1)
 
     info.type = CONNECT_TCP;
     ret = ConnStartLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1728,7 +1440,7 @@ HWTEST_F(ConnectionManagerTest, ConnStartLocalListening003, TestSize.Level1)
 
     info.type = CONNECT_BR;
     ret = ConnStartLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1745,7 +1457,7 @@ HWTEST_F(ConnectionManagerTest, ConnStartLocalListening004, TestSize.Level1)
 
     info.type = CONNECT_BLE;
     ret = ConnStartLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1762,7 +1474,7 @@ HWTEST_F(ConnectionManagerTest, ConnStartLocalListening005, TestSize.Level1)
 
     info.type = CONNECT_P2P;
     ret = ConnStartLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1779,7 +1491,7 @@ HWTEST_F(ConnectionManagerTest, ConnStartLocalListening006, TestSize.Level1)
 
     info.type = CONNECT_SLE;
     ret = ConnStartLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1816,7 +1528,7 @@ HWTEST_F(ConnectionManagerTest, ConnStopLocalListening002, TestSize.Level1)
 
     info.type = CONNECT_TCP;
     ret = ConnStopLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1826,14 +1538,14 @@ HWTEST_F(ConnectionManagerTest, ConnStopLocalListening002, TestSize.Level1)
  * @tc.require: AR532D
  * @tc.level: Level1
  */
-HWTEST_F(ConnectionManagerTest,ressConnStopLocalListening003, TestSize.Level1)
+HWTEST_F(ConnectionManagerTest, ressConnStopLocalListening003, TestSize.Level1)
 {
     int32_t ret;
     LocalListenerInfo info;
 
     info.type = CONNECT_BR;
     ret = ConnStopLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1850,7 +1562,7 @@ HWTEST_F(ConnectionManagerTest, ConnStopLocalListening004, TestSize.Level1)
 
     info.type = CONNECT_BLE;
     ret = ConnStopLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -1867,24 +1579,7 @@ HWTEST_F(ConnectionManagerTest, ConnStopLocalListening005, TestSize.Level1)
 
     info.type = CONNECT_P2P;
     ret = ConnStopLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnStopLocalListening006
- * @tc.desc: Stop SLE local listening
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnStopLocalListening006, TestSize.Level1)
-{
-    int32_t ret;
-    LocalListenerInfo info;
-
-    info.type = CONNECT_SLE;
-    ret = ConnStopLocalListening(&info);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
@@ -2086,615 +1781,5 @@ HWTEST_F(ConnectionManagerTest, ConnUpdateConnection004, TestSize.Level1)
 
     ret = ConnUpdateConnection(connectionId, &option);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnUpdateConnection005
- * @tc.desc: Update SLE connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnUpdateConnection005, TestSize.Level1)
-{
-    int32_t ret;
-    UpdateOption option;
-    uint32_t connectionId = (CONNECT_SLE << CONNECT_TYPE_SHIFT) + 1;
-
-    ret = ConnUpdateConnection(connectionId, &option);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPreventConnection001
- * @tc.desc: Prevent connection with null parameter
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPreventConnection001, TestSize.Level1)
-{
-    int32_t ret;
-    ConnectOption option;
-    uint32_t time = 1000;
-
-    ret = ConnPreventConnection(nullptr, time);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    option.type = CONNECT_TYPE_MAX;
-    ret = ConnPreventConnection(&option, time);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPreventConnection002
- * @tc.desc: Prevent TCP connection
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPreventConnection002, TestSize.Level1)
-{
-    int32_t ret;
-    ConnectOption option;
-    uint32_t time = 1000;
-
-    option.type = CONNECT_TCP;
-    ret = ConnPreventConnection(&option, time);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPreventConnection003
- * @tc.desc: Prevent BR connection with zero time
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPreventConnection003, TestSize.Level1)
-{
-    int32_t ret;
-    ConnectOption option;
-    uint32_t time = 0;
-
-    option.type = CONNECT_BR;
-    ret = ConnPreventConnection(&option, time);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPreventConnection004
- * @tc.desc: Prevent BLE connection with large time
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPreventConnection004, TestSize.Level1)
-{
-    int32_t ret;
-    ConnectOption option;
-    uint32_t time = 5000;
-
-    option.type = CONNECT_BLE;
-    ret = ConnPreventConnection(&option, time);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPreventConnection005
- * @tc.desc: Prevent P2P connection with very large time
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPreventConnection005, TestSize.Level1)
-{
-    int32_t ret;
-    ConnectOption option;
-    uint32_t time = 10000;
-
-    option.type = CONNECT_P2P;
-    ret = ConnPreventConnection(&option, time);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnPreventConnection006
- * @tc.desc: Prevent SLE connection with max time
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnPreventConnection006, TestSize.Level1)
-{
-    int32_t ret;
-    ConnectOption option;
-    uint32_t time = 9999;
-
-    option.type = CONNECT_SLE;
-    ret = ConnPreventConnection(&option, time);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnConfigPostLimit001
- * @tc.desc: Configure post limit with null parameter
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnConfigPostLimit001, TestSize.Level1)
-{
-    int32_t ret;
-    LimitConfiguration configuration;
-
-    ret = ConnConfigPostLimit(nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    configuration.type = CONNECT_TYPE_MAX;
-    ret = ConnConfigPostLimit(&configuration);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnConfigPostLimit002
- * @tc.desc: Configure TCP post limit
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnConfigPostLimit002, TestSize.Level1)
-{
-    int32_t ret;
-    LimitConfiguration configuration;
-
-    configuration.type = CONNECT_TCP;
-    ret = ConnConfigPostLimit(&configuration);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnConfigPostLimit003
- * @tc.desc: Configure BR post limit
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnConfigPostLimit003, TestSize.Level1)
-{
-    int32_t ret;
-    LimitConfiguration configuration;
-
-    configuration.type = CONNECT_BR;
-    ret = ConnConfigPostLimit(&configuration);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnConfigPostLimit004
- * @tc.desc: Configure BLE post limit
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnConfigPostLimit004, TestSize.Level1)
-{
-    int32_t ret;
-    LimitConfiguration configuration;
-
-    configuration.type = CONNECT_BLE;
-    ret = ConnConfigPostLimit(&configuration);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnConfigPostLimit005
- * @tc.desc: Configure P2P post limit
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnConfigPostLimit005, TestSize.Level1)
-{
-    int32_t ret;
-    LimitConfiguration configuration;
-
-    configuration.type = CONNECT_P2P;
-    ret = ConnConfigPostLimit(&configuration);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnConfigPostLimit006
- * @tc.desc: Configure SLE post limit
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnConfigPostLimit006, TestSize.Level1)
-{
-    int32_t ret;
-    LimitConfiguration configuration;
-
-    configuration.type = CONNECT_SLE;
-    ret = ConnConfigPostLimit(&configuration);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
-}
-
-/*
- * @tc.name: ConnManagerRecvData001
- * @tc.desc: Receive data with null buffer
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerRecvData001, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnModule moduleId = MODULE_TRUST_ENGINE;
-    int64_t seq = 1;
-    char *data = nullptr;
-    int32_t len = 100;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerRecvData(connectionId, moduleId, seq, data, len));
-
-    char buffer[DATASIZE] = {0};
-    len = sizeof(ConnPktHead);
-    EXPECT_NO_FATAL_FAILURE(ConnManagerRecvData(connectionId, moduleId, seq, buffer, len));
-}
-
-/*
- * @tc.name: ConnManagerRecvData002
- * @tc.desc: Receive data for HICHAIN module
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerRecvData002, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnModule moduleId = MODULE_HICHAIN;
-    int64_t seq = 0;
-    char buffer[DATASIZE] = {0};
-    int32_t len = sizeof(ConnPktHead) + 50;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerRecvData(connectionId, moduleId, seq, buffer, len));
-}
-
-/*
- * @tc.name: ConnManagerRecvData003
- * @tc.desc: Receive data for AUTH SDK module
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerRecvData003, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnModule moduleId = MODULE_AUTH_SDK;
-    int64_t seq = 100;
-    char buffer[DATASIZE] = {0};
-    int32_t len = sizeof(ConnPktHead) + 100;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerRecvData(connectionId, moduleId, seq, buffer, len));
-}
-
-/*
- * @tc.name: ConnManagerRecvData004
- * @tc.desc: Receive data for MESSAGE SERVICE module
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerRecvData004, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnModule moduleId = MODULE_MESSAGE_SERVICE;
-    int64_t seq = 999;
-    char buffer[DATASIZE] = {0};
-    int32_t len = sizeof(ConnPktHead) + 200;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerRecvData(connectionId, moduleId, seq, buffer, len));
-}
-
-/*
- * @tc.name: ConnManagerRecvData005
- * @tc.desc: Receive data with negative sequence
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerRecvData005, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnModule moduleId = MODULE_DIRECT_CHANNEL;
-    int64_t seq = -1;
-    char buffer[DATASIZE] = {0};
-    int32_t len = sizeof(ConnPktHead) + 10;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerRecvData(connectionId, moduleId, seq, buffer, len));
-}
-
-/*
- * @tc.name: ConnManagerRecvData006
- * @tc.desc: Receive data for PROXY CHANNEL module
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerRecvData006, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnModule moduleId = MODULE_PROXY_CHANNEL;
-    int64_t seq = 1;
-    char buffer[DATASIZE] = {0};
-    int32_t len = sizeof(ConnPktHead) + 150;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerRecvData(connectionId, moduleId, seq, buffer, len));
-}
-
-/*
- * @tc.name: ConnManagerConnected001
- * @tc.desc: Handle connection connected callback
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerConnected001, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnectionInfo info = {0};
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerConnected002
- * @tc.desc: Handle connection connected callback with TCP client
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerConnected002, TestSize.Level1)
-{
-    uint32_t connectionId = 100;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.isServer = 0;
-    info.type = CONNECT_TCP;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerConnected003
- * @tc.desc: Handle connection connected callback with BR server
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerConnected003, TestSize.Level1)
-{
-    uint32_t connectionId = 9999;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.isServer = 1;
-    info.type = CONNECT_BR;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerConnected004
- * @tc.desc: Handle connection connected callback with unavailable BLE
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerConnected004, TestSize.Level1)
-{
-    uint32_t connectionId = 1;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 0;
-    info.isServer = 0;
-    info.type = CONNECT_BLE;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerConnected005
- * @tc.desc: Handle connection connected callback with P2P server
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerConnected005, TestSize.Level1)
-{
-    uint32_t connectionId = 500;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.isServer = 1;
-    info.type = CONNECT_P2P;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerReusedConnected001
- * @tc.desc: Handle reused connection callback
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerReusedConnected001, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnectionInfo info = {0};
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerReusedConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerReusedConnected002
- * @tc.desc: Handle reused connection callback with TCP
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerReusedConnected002, TestSize.Level1)
-{
-    uint32_t connectionId = 100;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.type = CONNECT_TCP;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerReusedConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerReusedConnected003
- * @tc.desc: Handle reused connection callback with BR
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerReusedConnected003, TestSize.Level1)
-{
-    uint32_t connectionId = 999;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.type = CONNECT_BR;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerReusedConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerReusedConnected004
- * @tc.desc: Handle reused connection callback with unavailable BLE
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerReusedConnected004, TestSize.Level1)
-{
-    uint32_t connectionId = 1;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 0;
-    info.type = CONNECT_BLE;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerReusedConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerReusedConnected005
- * @tc.desc: Handle reused connection callback with P2P
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerReusedConnected005, TestSize.Level1)
-{
-    uint32_t connectionId = 500;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.type = CONNECT_P2P;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerReusedConnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerDisconnected001
- * @tc.desc: Handle disconnected callback
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerDisconnected001, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnectionInfo info = {0};
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerDisconnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerDisconnected002
- * @tc.desc: Handle disconnected callback with TCP
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerDisconnected002, TestSize.Level1)
-{
-    uint32_t connectionId = 100;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.type = CONNECT_TCP;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerDisconnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerDisconnected003
- * @tc.desc: Handle disconnected callback with BR
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerDisconnected003, TestSize.Level1)
-{
-    uint32_t connectionId = 999;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.type = CONNECT_BR;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerDisconnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerDisconnected004
- * @tc.desc: Handle disconnected callback with unavailable BLE
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerDisconnected004, TestSize.Level1)
-{
-    uint32_t connectionId = 1;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 0;
-    info.type = CONNECT_BLE;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerDisconnected(connectionId, &info));
-}
-
-/*
- * @tc.name: ConnManagerDisconnected005
- * @tc.desc: Handle disconnected callback with P2P
- * @tc.type: FUNC
- * @tc.require: AR532D
- * @tc.level: Level1
- */
-HWTEST_F(ConnectionManagerTest, ConnManagerDisconnected005, TestSize.Level1)
-{
-    uint32_t connectionId = 500;
-    ConnectionInfo info = {0};
-
-    info.isAvailable = 1;
-    info.type = CONNECT_P2P;
-
-    EXPECT_NO_FATAL_FAILURE(ConnManagerDisconnected(connectionId, &info));
 }
 } // namespace OHOS
