@@ -41,7 +41,7 @@ using namespace testing;
 using namespace std;
 
 #define DEFAULT_BR_MTU 990
-#define BR_WRITE_FAILED -1
+#define BR_WRITE_FAILED (-1)
 
 namespace OHOS {
 extern "C" {
