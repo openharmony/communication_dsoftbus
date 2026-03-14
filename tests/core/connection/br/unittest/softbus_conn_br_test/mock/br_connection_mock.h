@@ -156,5 +156,5 @@ public:
     static int32_t ActionOfSoftbusGetConfig1(ConfigType type, unsigned char *val, uint32_t len);
     static int32_t ActionOfSoftbusGetConfig2(ConfigType type, unsigned char *val, uint32_t len);
 };
-} 
-#endif 
+}
+#endif
