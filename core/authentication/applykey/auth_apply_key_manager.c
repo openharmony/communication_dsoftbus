@@ -455,7 +455,7 @@ int32_t AuthDeleteApplyKey(const RequestBusinessInfo *info)
 
 static int32_t AuthRemoveApplyKeyFile()
 {
-    char *filename = DEFAULT_FILE_PATH;
+    const char *filename = DEFAULT_FILE_PATH;
     return remove(filename);
 }
 
