@@ -1321,6 +1321,7 @@ int32_t TransAddSessionParamBySessionId(const char *sessionName, int32_t session
         socketItem->param.pid = param->pid;
         socketItem->param.isLowLatency = param->isLowLatency;
         socketItem->param.enableMultipath = param->enableMultipath;
+        socketItem->param.cancelEncryptionBit = param->cancelEncryptionBit;
 
         char *tmpName = NULL;
         Anonymize(param->sessionName, &tmpName);
@@ -1367,6 +1368,7 @@ int32_t TransGetSessionParamByChannelId(int32_t channelId, SessionParam *param)
         param->pid = socketItem->param.pid;
         param->isLowLatency = socketItem->param.isLowLatency;
         param->enableMultipath = socketItem->param.enableMultipath;
+        param->cancelEncryptionBit = socketItem->param.cancelEncryptionBit;
         char *tmpName = NULL;
         Anonymize(param->sessionName, &tmpName);
         TRANS_LOGI(TRANS_CTRL, "get param success. sessionName=%{public}s, sessionId=%{public}d",
