@@ -176,6 +176,8 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
 static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32_t srcLen)
 {
     uint32_t i = device->info->addrNum;
+    DISC_CHECK_AND_RETURN_RET_LOGE(i < CONNECTION_ADDR_MAX, SOFTBUS_INVALID_PARAM,
+        DISC_BLE, "invalid value, i=%{public}u", i);
     int32_t ret = ConvertBtMacToStr(device->info->addr[i].info.br.brMac, BT_MAC_LEN, (uint8_t *)src, srcLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE,
         "parse tlv convert br fail, tlvType=TLV_TYPE_BR_MAC, tlvLen=%{public}u, dstLen=%{public}d",
