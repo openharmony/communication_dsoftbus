@@ -137,7 +137,7 @@ public:
     MOCK_METHOD2(AuthGetServerSide, int32_t (int64_t, bool *));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char *, uint16_t));
     MOCK_METHOD2(AuthGetVersion, int32_t (int64_t, SoftBusVersion *));
-    MOCK_METHOD2(AuthGetMetaType,     int32_t (int64_t, bool *));
+    MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
 
     MOCK_METHOD5(AuthMetaStartVerify, int32_t (uint32_t, const AuthKeyInfo *, uint32_t, int32_t,
         const AuthVerifyCallback *));

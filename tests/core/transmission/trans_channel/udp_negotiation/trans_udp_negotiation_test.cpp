@@ -92,11 +92,11 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest01, TestSize.Level1)
     EXPECT_TRUE(connOpt != nullptr);
     int32_t channelId = 0;
     int32_t ret = TransOpenUdpChannel(nullptr, connOpt, &channelId);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransOpenUdpChannel(appInfo, nullptr, &channelId);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransOpenUdpChannel(appInfo, connOpt, nullptr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }
@@ -117,7 +117,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest02, TestSize.Level1)
     connOpt->type = CONNECT_TYPE_MAX;
     int32_t channelId = 0;
     int32_t ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }
@@ -148,9 +148,9 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest03, TestSize.Level1)
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     int32_t channelId = 0;
     ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = TransDelUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }
@@ -173,7 +173,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest04, TestSize.Level1)
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     int32_t channelId = 0;
     int32_t ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }
@@ -188,7 +188,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest04, TestSize.Level1)
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
 {
     int32_t ret = TransCloseUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
     EXPECT_TRUE(newChannel != nullptr);
     newChannel->seq = 1;
@@ -196,9 +196,9 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
     ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransCloseUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = TransDelUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -217,7 +217,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest06, TestSize.Level1)
     appInfo->myData.pid = INVALID_PID;
     appInfo->myData.channelId = TEST_CHANNEL_ID;
     int32_t ret = NotifyUdpChannelClosed(appInfo, MESSAGE_TYPE_NOMAL);
-    EXPECT_EQ(ret,  SOFTBUS_IPC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     SoftBusFree(appInfo);
 }
 
@@ -232,14 +232,14 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest07, TestSize.Level1)
 {
     AppInfo* appInfo = nullptr;
     int32_t ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_TRANS_INVALID_SESSION_NAME);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != nullptr);
     int32_t res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName),
                        g_sessionName);
     EXPECT_EQ(res, EOK);
     ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_TRANS_INVALID_SESSION_NAME);
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(appInfo);
 }
 
@@ -259,7 +259,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest08, TestSize.Level1)
     EXPECT_EQ(res, EOK);
     appInfo->myData.channelId = TEST_CHANNEL_ID;
     int32_t ret = NotifyUdpChannelOpenFailed(appInfo, SOFTBUS_MEM_ERR);
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     RemoveSessionServer(g_pkgName, g_sessionName);
     SoftBusFree(appInfo);
 }
@@ -279,7 +279,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest09, TestSize.Level1)
                        g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpQosEvent(appInfo, INVALID_EVENT_ID, 0, nullptr);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(appInfo);
 }
 
@@ -298,7 +298,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest10, TestSize.Level1)
                    g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpQosEvent(appInfo, INVALID_EVENT_ID, 0, nullptr);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     RemoveSessionServer(g_pkgName, g_sessionName);
     SoftBusFree(appInfo);
 }
@@ -319,7 +319,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest11, TestSize.Level1)
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransDelUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
 
@@ -343,9 +343,9 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransUdpDeathCallback(g_pkgName, INVALID_PID);
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransUdpChannelMgrInit();
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -436,7 +436,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest13, TestSize.Level1)
     connOpt->socketOption.protocol = LNN_PROTOCOL_USB;
     int32_t channelId = 0;
     int32_t ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
-    EXPECT_NE(ret,  SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }

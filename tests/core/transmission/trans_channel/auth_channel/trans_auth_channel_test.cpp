@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -463,7 +463,7 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest003, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = info->appInfo.myData.channelId;
     ret = GetAuthIdByChannelId(channelId);
-    EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID);
+    EXPECT_EQ(ret, TRANS_TEST_AUTH_ID);
     DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     ret = GetAuthIdByChannelId(channelId);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -569,6 +569,38 @@ HWTEST_F(TransAuthChannelTest, AuthGetUidAndPidBySessionNameTest001, TestSize.Le
     EXPECT_EQ(pid, TRANS_TEST_PID);
     TransAuthDeinit();
     TransSessionMgrDeinit();
+}
+
+static int32_t GetUidAndPidBySessionNameTest(const char *sessionName, int32_t *uid, int32_t *pid)
+{
+    (void)sessionName;
+    *uid = TRANS_TEST_UID;
+    *pid = TRANS_TEST_PID;
+    return SOFTBUS_OK;
+}
+
+/*
+ * @tc.name: AuthGetUidAndPidBySessionNameTest002
+ * @tc.desc: Transmission auth manager range param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, AuthGetUidAndPidBySessionNameTest002, TestSize.Level1)
+{
+    int32_t pid;
+    int32_t uid;
+    static IServerChannelCallBack cb = {
+        .GetUidAndPidBySessionName = GetUidAndPidBySessionNameTest
+    };
+    g_cb = &cb;
+    ASSERT_TRUE(g_cb != nullptr);
+
+    int32_t ret = AuthGetUidAndPidBySessionName("test.com.sessionName", &uid, &pid);
+    EXPECT_EQ(uid, TRANS_TEST_UID);
+    EXPECT_EQ(pid, TRANS_TEST_PID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_cb = nullptr;
 }
 
 /*
@@ -696,6 +728,29 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest002, TestSize.Level
     SoftBusFree(appInfo);
     TransSessionMgrDeinit();
     TransAuthDeinit();
+}
+
+/*
+ * @tc.name: OnRequsetUpdateAuthChannelTest003
+ * @tc.desc: Transmission auth manager request update auth channel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest003, TestSize.Level1)
+{
+    AppInfo appInfo = {
+        .myData.sessionName = { 0 }
+    };
+    if (g_authChannelList == nullptr) {
+        g_authChannelList = CreateSoftBusList();
+    }
+    ASSERT_TRUE(g_authChannelList != nullptr);
+
+    int32_t ret = OnRequsetUpdateAuthChannel(71254645, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_AUTH_CREATE_CHANINFO_FAIL);
+
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = nullptr;
 }
 
 /*
@@ -1020,6 +1075,27 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest002, TestSize.Leve
 }
 
 /*
+ * @tc.name: TransAuthGetAppInfoByChanIdTest003
+ * @tc.desc: Transmission auth manager get appInfo by channel id
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest003, TestSize.Level1)
+{
+    if (g_authChannelList == nullptr) {
+        g_authChannelList = CreateSoftBusList();
+    }
+    ASSERT_TRUE(g_authChannelList != nullptr);
+
+    AppInfo appInfo;
+    int32_t ret = TransAuthGetAppInfoByChanId(TRANS_TEST_CHANNEL_ID, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = nullptr;
+}
+
+/*
  * @tc.name: TransNotifyAuthDataSuccessTest001
  * @tc.desc: Transmission auth manager get appInfo by channel id
  * @tc.type: FUNC
@@ -1226,7 +1302,7 @@ HWTEST_F(TransAuthChannelTest, TransCloseAuthChannel001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = info->appInfo.myData.channelId;
     ret = GetAuthIdByChannelId(channelId);
-    EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID);
+    EXPECT_EQ(ret, TRANS_TEST_AUTH_ID);
     ret = TransCloseAuthChannel(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetAuthIdByChannelId(channelId);
@@ -1261,19 +1337,19 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetChannelInfo001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = GetAuthIdByChannelId(channelId);
-    EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID);
+    EXPECT_EQ(ret, TRANS_TEST_AUTH_ID);
     ret = GetAuthIdByChannelId(newChannelId);
-    EXPECT_EQ(ret,  TRANS_TEST_AUTH_ID + 1);
+    EXPECT_EQ(ret, TRANS_TEST_AUTH_ID + 1);
     AuthChannelInfo *destInfo = (AuthChannelInfo *)SoftBusCalloc(sizeof(AuthChannelInfo));
     ASSERT_TRUE(destInfo != nullptr);
     ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, destInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = memcmp(info, destInfo,  sizeof(AuthChannelInfo));
+    ret = memcmp(info, destInfo, sizeof(AuthChannelInfo));
     EXPECT_EQ(ret, EOK);
     memset_s(destInfo, sizeof(AuthChannelInfo), 0, sizeof(AuthChannelInfo));
     ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID + 1, destInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    memcmp(newInfo, destInfo,  sizeof(AuthChannelInfo));
+    memcmp(newInfo, destInfo, sizeof(AuthChannelInfo));
 
     DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     ret = GetAuthIdByChannelId(channelId);
@@ -1343,6 +1419,74 @@ HWTEST_F(TransAuthChannelTest, TransAuthFillDataConfigTest001, TestSize.Level1)
     ret = TransAuthFillDataConfig(appInfo);
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransAuthFillDataConfigTest002
+ * @tc.desc: TransAuthFillDataConfig test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthFillDataConfigTest002, TestSize.Level1)
+{
+    AppInfo appInfo = {
+        .peerData.dataConfig = 4096,
+        .businessType = BUSINESS_TYPE_FILE
+    };
+
+    int32_t ret = TransAuthFillDataConfig(&appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TransAuthCloseChannel001
+ * @tc.desc: TransAuthCloseChannel test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthCloseChannel001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(TransAuthCloseChannel(745321, LANE_HML_RAW, true));
+    EXPECT_NO_FATAL_FAILURE(TransAuthCloseChannel(134526, LANE_HML_RAW, false));
+    EXPECT_NO_FATAL_FAILURE(TransAuthCloseChannel(341255, LANE_USB, true));
+    EXPECT_NO_FATAL_FAILURE(TransAuthCloseChannel(418863, LANE_SLE, true));
+
+    TransEventExtra eventExtra = {
+        .connectionId = 12345,
+        .businessType = 1,
+        .socketName = "test_socket_name"
+    };
+    EXPECT_NO_FATAL_FAILURE(TransHandleErrorAndCloseChannel(&eventExtra, 123, LANE_P2P, false, SOFTBUS_OK));
+
+    if (g_authChannelList != nullptr) {
+        DestroySoftBusList(g_authChannelList);
+        g_authChannelList = nullptr;
+    }
+    ASSERT_EQ(g_authChannelList, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DelAuthChannelInfoByChanId(TRANS_TEST_CHANNEL_ID));
+    EXPECT_NO_FATAL_FAILURE(DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID));
+}
+
+/*
+ * @tc.name: GetAuthChannelLock001
+ * @tc.desc: GetAuthChannelLock test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, GetAuthChannelLock001, TestSize.Level1)
+{
+    if (g_authChannelList == nullptr) {
+        g_authChannelList = CreateSoftBusList();
+    }
+    ASSERT_NE(g_authChannelList, nullptr);
+
+    int32_t ret = GetAuthChannelLock();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_NO_FATAL_FAILURE(ReleaseAuthChannelLock());
+
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = nullptr;
 }
 
 /*
@@ -1517,6 +1661,40 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnIdByChanIdTest001, TestSize.Level
 }
 
 /*
+ * @tc.name: TransAuthGetConnIdByChanIdTest002
+ * @tc.desc: TransAuthGetConnIdByChanId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthGetConnIdByChanIdTest002, TestSize.Level1)
+{
+    if (g_authChannelList == nullptr) {
+        g_authChannelList = CreateSoftBusList();
+    }
+    ASSERT_TRUE(g_authChannelList != nullptr);
+    int32_t connId = 0;
+
+    int32_t ret = TransAuthGetConnIdByChanId(TRANS_TEST_CHANNEL_ID, &connId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    AuthChannelInfo *authChannelInfo = static_cast<AuthChannelInfo *>(SoftBusCalloc(sizeof(AuthChannelInfo)));
+    ASSERT_TRUE(authChannelInfo != nullptr);
+    authChannelInfo->appInfo.myData.channelId = 1;
+    authChannelInfo->authId = TRANS_TEST_AUTH_ID;
+    ListAdd(&g_authChannelList->list, &authChannelInfo->node);
+    ret = TransAuthGetConnIdByChanId(1, &connId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(connId, TRANS_TEST_AUTH_ID);
+
+    ret = TransAuthGetConnIdByChanId(2, &connId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    ListDelete(&authChannelInfo->node);
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = nullptr;
+}
+
+/*
  * @tc.name: CheckIsWifiAuthChannelTest001
  * @tc.desc: CheckIsWifiAuthChannel test
  * @tc.type: FUNC
@@ -1554,6 +1732,43 @@ HWTEST_F(TransAuthChannelTest, CheckIsWifiAuthChannelTest001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: CheckIsWifiAuthChannelTest002
+ * @tc.desc: CheckIsWifiAuthChannel test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, CheckIsWifiAuthChannelTest002, TestSize.Level1)
+{
+    ConnectOption connOption = {
+        .socketOption.moduleId = AUTH,
+        .socketOption.port = TEST_AUTH_PORT
+    };
+    (void)strcpy_s(connOption.socketOption.addr, IP_LEN, "11:22:33:55:66");
+    if (g_authChannelList == nullptr) {
+        g_authChannelList = CreateSoftBusList();
+    }
+    ASSERT_TRUE(g_authChannelList != nullptr);
+    int32_t ret = CheckIsWifiAuthChannel(&connOption);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    AuthChannelInfo *authChannelInfo = static_cast<AuthChannelInfo *>(SoftBusCalloc(sizeof(AuthChannelInfo)));
+    ASSERT_TRUE(authChannelInfo != nullptr);
+    authChannelInfo->connOpt.socketOption.port = TEST_AUTH_PORT;
+    (void)strcpy_s(authChannelInfo->connOpt.socketOption.addr, IP_LEN, "11:22:33:55:66");
+    ListAdd(&g_authChannelList->list, &authChannelInfo->node);
+    ret = CheckIsWifiAuthChannel(&connOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    connOption.socketOption.port = 2;
+    ret = CheckIsWifiAuthChannel(&connOption);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    ListDelete(&authChannelInfo->node);
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = nullptr;
+}
+
+/*
  * @tc.name: TransSetAuthChannelReplyCntTest002
  * @tc.desc: TransSetAuthChannelReplyCnt test
  * @tc.type: FUNC
@@ -1580,6 +1795,37 @@ HWTEST_F(TransAuthChannelTest, TransSetAuthChannelReplyCntTest002, TestSize.Leve
     DelAuthChannelInfoByChanId(info->appInfo.myData.channelId);
     TransSessionMgrDeinit();
     TransAuthDeinit();
+}
+
+/*
+ * @tc.name: TransSetAuthChannelReplyCntTest003
+ * @tc.desc: TransSetAuthChannelReplyCnt test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransSetAuthChannelReplyCntTest003, TestSize.Level1)
+{
+    if (g_authChannelList == nullptr) {
+        g_authChannelList = CreateSoftBusList();
+    }
+    ASSERT_TRUE(g_authChannelList != nullptr);
+
+    int32_t ret = TransSetAuthChannelReplyCnt(TRANS_TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    AuthChannelInfo *authChannelInfo = static_cast<AuthChannelInfo *>(SoftBusCalloc(sizeof(AuthChannelInfo)));
+    ASSERT_TRUE(authChannelInfo != nullptr);
+    authChannelInfo->appInfo.myData.channelId = 1;
+    ListAdd(&g_authChannelList->list, &authChannelInfo->node);
+    ret = TransSetAuthChannelReplyCnt(1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransSetAuthChannelReplyCnt(2);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    ListDelete(&authChannelInfo->node);
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = nullptr;
 }
 
 /*
@@ -1666,5 +1912,48 @@ HWTEST_F(TransAuthChannelTest, TransGetLocalDeviceIdTest001, TestSize.Level1)
 
     ret = TransGetLocalDeviceId(g_authSessionName, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: TransGetLocalConfigTest001
+ * @tc.desc: TransGetLocalConfig test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransGetLocalConfigTest001, TestSize.Level1)
+{
+    uint32_t len = 0;
+    int32_t ret = TransGetLocalConfig(CHANNEL_TYPE_UDP, BUSINESS_TYPE_MESSAGE, &len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransAuthGetRoleByAuthIdTest001
+ * @tc.desc: TransAuthGetRoleByAuthId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, TransAuthGetRoleByAuthIdTest001, TestSize.Level1)
+{
+    AuthChannelInfo *authChannelInfo = static_cast<AuthChannelInfo *>(SoftBusCalloc(sizeof(AuthChannelInfo)));
+    ASSERT_TRUE(authChannelInfo != nullptr);
+    authChannelInfo->authId = TRANS_TEST_AUTH_ID;
+    authChannelInfo->isClient = false;
+
+    if (g_authChannelList == nullptr) {
+        g_authChannelList = CreateSoftBusList();
+    }
+    ASSERT_TRUE(g_authChannelList != nullptr);
+
+    ListAdd(&g_authChannelList->list, &authChannelInfo->node);
+
+    bool isClient = true;
+    int32_t ret = TransAuthGetRoleByAuthId(TRANS_TEST_AUTH_ID, &isClient);
+    EXPECT_FALSE(isClient);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&authChannelInfo->node);
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = nullptr;
 }
 } // namespace OHOS

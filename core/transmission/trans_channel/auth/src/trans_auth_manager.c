@@ -1572,7 +1572,7 @@ void TransAsyncAuthChannelTask(int32_t channelId)
     if (curCount >= LOOPER_REPLY_CNT_MAX) {
         TRANS_LOGE(TRANS_CTRL, "open auth channel timeout, channelId=%{public}d", channelId);
         TransPostAuthChannelErrMsg(
-            info.authId,  SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, "open auth channel failed");
+            info.authId, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, "open auth channel failed");
         DelAuthChannelInfoByAuthId(info.authId);
         TransAuthCloseChannel(info.authId, info.appInfo.linkType, info.isClient);
         return;
