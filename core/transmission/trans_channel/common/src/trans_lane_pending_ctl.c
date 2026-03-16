@@ -1711,7 +1711,6 @@ int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneA
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
-        TransFreeLane(*laneHandle, true, true);
         return ret;
     }
     if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName, param->peerDeviceId)) {
