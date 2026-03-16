@@ -651,8 +651,8 @@ void ProxyBuildTlvDataHeadTest(FuzzedDataProvider &provider)
     uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
     int32_t tlvBufferSize = provider.ConsumeIntegral<int32_t>();
 
-    (void)ProxyBuildTlvDataHead(nullptr, finalSeq, flag, dataLen,  &tlvBufferSize);
-    (void)ProxyBuildTlvDataHead(&pktHead, finalSeq, flag, dataLen,  &tlvBufferSize);
+    (void)ProxyBuildTlvDataHead(nullptr, finalSeq, flag, dataLen, &tlvBufferSize);
+    (void)ProxyBuildTlvDataHead(&pktHead, finalSeq, flag, dataLen, &tlvBufferSize);
 }
 
 void ProxyBuildNeedAckTlvDataTest(FuzzedDataProvider &provider)
@@ -759,8 +759,8 @@ void TransProxyPackNewHeadD2DDataTest(FuzzedDataProvider &provider)
     uint16_t dataLen = 0;
     SessionPktType pktType = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    (void)TransProxyPackNewHeadD2DData(nullptr, sliceNum, pktType,  cnt, &dataLen);
-    uint8_t *sliceData = TransProxyPackNewHeadD2DData(&dataInfo, sliceNum, pktType,  cnt, &dataLen);
+    (void)TransProxyPackNewHeadD2DData(nullptr, sliceNum, pktType, cnt, &dataLen);
+    uint8_t *sliceData = TransProxyPackNewHeadD2DData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
     SoftBusFree(sliceData);
     sliceData = nullptr;
     SoftBusFree(dataInfo.outData);

@@ -78,13 +78,13 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
     int32_t ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, nullptr, sessionName,
                                            PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, pkgName, nullptr,
                              PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, pkgName, sessionName,
                              PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 }
 
 /*
@@ -99,12 +99,12 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
     ASSERT_TRUE(connOpt != nullptr);
     int32_t channelId = 0;
     int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId, nullptr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     connOpt->type = CONNECT_TCP;
     ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, nullptr, nullptr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransOpenAuthMsgChannel(g_sessionName, nullptr, &channelId, nullptr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(connOpt);
 }
 
@@ -117,9 +117,9 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
 HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
 {
     int32_t ret = TransAuthInit(cb);
-    ASSERT_EQ(ret,  SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransCloseAuthChannel(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
     GetAuthChannelListHead();
     TransAuthDeinit();
 }

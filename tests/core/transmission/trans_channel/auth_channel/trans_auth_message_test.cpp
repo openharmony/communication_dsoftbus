@@ -65,26 +65,26 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
     cJSON *msg = cJSON_CreateObject();
 
     int32_t ret = TransAuthChannelMsgPack(nullptr, appInfo);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransAuthChannelMsgPack(msg, nullptr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransAuthChannelMsgUnpack(nullptr, appInfo, 0);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, nullptr, 0);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, appInfo, 0);
-    EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     char cJsonStr[ERR_MSG_MAX_LEN] = {0};
     ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, nullptr, cJsonStr, ERR_MSG_MAX_LEN);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, g_errMsg, nullptr, ERR_MSG_MAX_LEN);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
@@ -108,7 +108,7 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
 
     char *data = cJSON_PrintUnformatted(msg);
     int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
     res = AddStringToJsonObject(msg, "DEVICE_ID", g_deviceId);
@@ -116,21 +116,21 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
 
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
     res = AddStringToJsonObject(msg, "PKG_NAME", g_pkgName);
     ASSERT_TRUE(res);
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
     res = AddStringToJsonObject(msg, "SRC_BUS_NAME", g_sessionName);
     ASSERT_TRUE(res);
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
     res = AddStringToJsonObject(msg, "DST_BUS_NAME", g_sessionName);
@@ -138,7 +138,7 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
 
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret,  SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
     res = AddStringToJsonObject(msg, "REQ_ID", g_reqId);
