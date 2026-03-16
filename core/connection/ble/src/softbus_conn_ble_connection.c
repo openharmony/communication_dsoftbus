@@ -686,9 +686,14 @@ static int32_t ParsePeerBasicInfoInner(ConnBleConnection *connection, const uint
             "date len exceed, connId=%{public}u, dataLen=%{public}d", connection->connectionId, dataLen);
         return SOFTBUS_INVALID_PARAM;
     }
-    int offset = 0;
+    uint32_t offset = 0;
     if (connection->protocol == BLE_COC) {
         offset += sizeof(ConnPktHead);
+    }
+    if (offset + NET_CTRL_MSG_TYPE_HEADER_SIZE >= dataLen) {
+        CONN_LOGI(CONN_BLE, "offset len exceed, connId=%{public}u, dataLen=%{public}u, offset==%{public}u",
+            connection->connectionId, dataLen, offset);
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t *netCtrlMsgHeader = (int32_t *)(data + offset);
     if (netCtrlMsgHeader[0] != NET_CTRL_MSG_TYPE_BASIC_INFO) {

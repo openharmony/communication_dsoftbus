@@ -272,6 +272,11 @@ static int32_t ConnGattTransSend(ConnBleConnection *connection, const uint8_t *d
     const uint8_t *waitSendData = data;
     uint32_t waitSendLen = dataLen;
     uint32_t offset = 0;
+    if (connection->mtu <= MTU_HEADER_SIZE + BLE_TRANS_HEADER_SIZE) {
+        CONN_LOGE(CONN_BLE, "mtu error, mtu=%{public}u", connection->mtu);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     const uint32_t maxPayload = connection->mtu - MTU_HEADER_SIZE - BLE_TRANS_HEADER_SIZE;
     // the sequence field should Keep the same duaring all segmental packets
     const uint32_t sequence = connection->sequence++;
