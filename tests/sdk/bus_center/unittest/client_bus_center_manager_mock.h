@@ -64,6 +64,9 @@ public:
     virtual void ServerIpcDestroyGroupOwner(const char *pkgName) = 0;
     virtual int32_t CheckPackageName(const char *pkgName) = 0;
     virtual int32_t InitSoftBus(const char *pkgName) = 0;
+    virtual int32_t ServerIpcStartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId) = 0;
+    virtual int32_t ServerIpcProcessAccountAuth(
+        const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen) = 0;
 };
 class ClientBusCenterManagerInterfaceMock : public ClientBusCenterManagerInterface {
 public:
@@ -99,6 +102,8 @@ public:
     MOCK_METHOD1(ServerIpcDestroyGroupOwner, void (const char *));
     MOCK_METHOD1(CheckPackageName, int32_t (const char *));
     MOCK_METHOD1(InitSoftBus, int32_t (const char *));
+    MOCK_METHOD3(ServerIpcStartAccountAuth, int32_t (const char *, int64_t, const char *));
+    MOCK_METHOD4(ServerIpcProcessAccountAuth, int32_t (const char *, int64_t, const uint8_t *, uint32_t));
 };
 } // namespace OHOS
 #endif // CLIENT_BUS_CENTER_MANAGER_MOCK_H

@@ -51,6 +51,7 @@ constexpr int32_t LNN_REFRESH_ID = 0;
 constexpr int32_t RESULT_REASON = -1;
 constexpr char PKGNAME[] = "softbustest";
 constexpr char IP_TEST[IP_LEN] = "192.168.51.170";
+constexpr char TEST_MSG[] = "testmsg";
 
 static void GroupOwnerDestroyListenerTest(int32_t retCode)
 {
@@ -1633,5 +1634,176 @@ HWTEST_F(ClientBusCentManagerTest, START_TIME_SYNC_WITH_SOCKET_INNER_Test_001, T
     g_busCenterClient.isInit = true;
     ret = StartTimeSyncWithSocketInner(pkgName, &socketInfo, accuracy, period, &cbWithSocket);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: START_ACCOUNT_AUTH_INNER_Test_001
+ * @tc.desc: start account auth inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, START_ACCOUNT_AUTH_INNER_Test_001, TestSize.Level1)
+{
+    IAccountAuthCallback cb = {};
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    int32_t ret = StartAccountAuthInner(nullptr, 0, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuthInner(PKGNAME, 0, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuthInner(nullptr, 0, TEST_MSG, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuthInner(nullptr, 0, nullptr, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuthInner(nullptr, 0, TEST_MSG, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    g_busCenterClient.isInit = false;
+    ret = StartAccountAuthInner(PKGNAME, 0, TEST_MSG, &cb);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    g_busCenterClient.isInit = true;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = StartAccountAuthInner(PKGNAME, 0, TEST_MSG, &cb);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_CALL(busCentManagerMock, ServerIpcStartAccountAuth).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK));
+    ret = StartAccountAuthInner(PKGNAME, 0, TEST_MSG, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuthInner(PKGNAME, 0, TEST_MSG, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PROCESS_ACCOUNT_AUTH_INNER_Test_001
+ * @tc.desc: process account auth inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, PROCESS_ACCOUNT_AUTH_INNER_Test_001, TestSize.Level1)
+{
+    IAccountAuthCallback cb = {};
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    int32_t ret = ProcessAccountAuthInner(nullptr, 0, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuthInner(PKGNAME, 0, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuthInner(nullptr, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuthInner(nullptr, 0, nullptr, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuthInner(nullptr, 0, (uint8_t*)TEST_MSG, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    g_busCenterClient.isInit = false;
+    ret = ProcessAccountAuthInner(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, &cb);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    g_busCenterClient.isInit = true;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = ProcessAccountAuthInner(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, &cb);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_CALL(busCentManagerMock, ServerIpcProcessAccountAuth).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK));
+    ret = ProcessAccountAuthInner(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuthInner(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+bool OnTransmit(int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    (void)requestId;
+    (void)data;
+    (void)dataLen;
+    return true;
+}
+
+void OnSessionKeyReturned(int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
+{
+    (void)requestId;
+    (void)sessionKey;
+    (void)sessionKeyLen;
+}
+
+void OnFinish(int64_t requestId, int32_t operationCode, const char *returnData)
+{
+    (void)requestId;
+    (void)operationCode;
+    (void)returnData;
+}
+
+void OnError(int64_t requestId, int32_t operationCode, int32_t errorCode, const char *errorReturn)
+{
+    (void)requestId;
+    (void)operationCode;
+    (void)errorCode;
+    (void)errorReturn;
+}
+
+/*
+ * @tc.name: ON_TRANSMIT_AUTH_RESULT_Test_001
+ * @tc.desc: on transmit auth result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, ON_TRANSMIT_AUTH_RESULT_Test_001, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    bool ret = LnnOnTransmitAuthResult(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, false);
+    g_busCenterClient.isInit = true;
+    ret = LnnOnTransmitAuthResult(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, false);
+    g_busCenterClient.accountAuthCb.onTransmit = OnTransmit;
+    ret = LnnOnTransmitAuthResult(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: ON_SESSION_KEY_AUTH_RESULT_Test_001
+ * @tc.desc: on sessionkey auth result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, ON_SESSION_KEY_AUTH_RESULT_Test_001, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    EXPECT_NO_FATAL_FAILURE(LnnOnSessionKeyAuthResult(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1));
+    g_busCenterClient.isInit = true;
+    EXPECT_NO_FATAL_FAILURE(LnnOnSessionKeyAuthResult(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1));
+    g_busCenterClient.accountAuthCb.onSessionKeyReturned = OnSessionKeyReturned;
+    EXPECT_NO_FATAL_FAILURE(LnnOnSessionKeyAuthResult(PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1));
+}
+
+/*
+ * @tc.name: ON_FINISH_AUTH_RESULT_Test_001
+ * @tc.desc: on finish auth result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, ON_FINISH_AUTH_RESULT_Test_001, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    EXPECT_NO_FATAL_FAILURE(LnnOnFinishAuthResult(PKGNAME, 0, 0, TEST_MSG));
+    g_busCenterClient.isInit = true;
+    EXPECT_NO_FATAL_FAILURE(LnnOnFinishAuthResult(PKGNAME, 0, 0, TEST_MSG));
+    g_busCenterClient.accountAuthCb.onFinish = OnFinish;
+    EXPECT_NO_FATAL_FAILURE(LnnOnFinishAuthResult(PKGNAME, 0, 0, TEST_MSG));
+}
+
+/*
+ * @tc.name: ON_ERROR_AUTH_RESULT_Test_001
+ * @tc.desc: on error auth result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, ON_ERROR_AUTH_RESULT_Test_001, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    EXPECT_NO_FATAL_FAILURE(LnnOnErrorAuthResult(PKGNAME, 0, 0, 0, TEST_MSG));
+    g_busCenterClient.isInit = true;
+    EXPECT_NO_FATAL_FAILURE(LnnOnErrorAuthResult(PKGNAME, 0, 0, 0, TEST_MSG));
+    g_busCenterClient.accountAuthCb.onError = OnError;
+    EXPECT_NO_FATAL_FAILURE(LnnOnErrorAuthResult(PKGNAME, 0, 0, 0, TEST_MSG));
 }
 } // namespace OHOS

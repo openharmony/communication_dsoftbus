@@ -181,5 +181,15 @@ int32_t InitSoftBus(const char *pkgName)
 {
     return GetBusCenterManagerInterface()->InitSoftBus(pkgName);
 }
+
+int32_t ServerIpcStartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId)
+{
+    return GetBusCenterManagerInterface()->ServerIpcStartAccountAuth(pkgName, requestId, serviceId);
+}
+
+int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    return GetBusCenterManagerInterface()->ServerIpcProcessAccountAuth(pkgName, requestId, data, dataLen);
+}
 } // extern "C"
 } // namespace OHOS

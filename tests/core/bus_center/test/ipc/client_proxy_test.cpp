@@ -808,6 +808,151 @@ HWTEST_F(ClientProxyTest, OnHichainProofException_01, TestSize.Level1)
 }
 
 /*
+ * @tc.name: ClientOnTransmitAuthResult_01
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnTransmitAuthResult_01, TestSize.Level1)
+{
+    PkgNameAndPidInfo info = {
+        .pkgName = "",
+        .pid = 0,
+    };
+    bool ret = ClientOnTransmitAuthResult(nullptr, 0, nullptr, 0);
+    EXPECT_EQ(ret, false);
+    ret = ClientOnTransmitAuthResult(&info, 0, nullptr, 0);
+    EXPECT_EQ(ret, false);
+    ret = ClientOnTransmitAuthResult(nullptr, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, false);
+    ret = ClientOnTransmitAuthResult(&info, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: ClientOnTransmitAuthResult_02
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnTransmitAuthResult_02, TestSize.Level1)
+{
+    static const uint32_t SOFTBUS_SA_ID = 4700;
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+    bool ret = clientProxy->OnTransmitAuthResult(TEST_PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: ClientOnSessionKeyAuthResult_01
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnSessionKeyAuthResult_01, TestSize.Level1)
+{
+    PkgNameAndPidInfo info = {
+        .pkgName = "",
+        .pid = 0,
+    };
+    EXPECT_NO_FATAL_FAILURE(ClientOnSessionKeyAuthResult(nullptr, 0, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(ClientOnSessionKeyAuthResult(&info, 0, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(ClientOnSessionKeyAuthResult(nullptr, 0, (uint8_t*)TEST_MSG, 0));
+    EXPECT_NO_FATAL_FAILURE(ClientOnSessionKeyAuthResult(&info, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1));
+}
+
+/*
+ * @tc.name: ClientOnSessionKeyAuthResult_02
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnSessionKeyAuthResult_02, TestSize.Level1)
+{
+    static const uint32_t SOFTBUS_SA_ID = 4700;
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+    EXPECT_NO_FATAL_FAILURE(
+        clientProxy->OnSessionKeyAuthResult(TEST_PKGNAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1));
+}
+
+/*
+ * @tc.name: ClientOnFinishAuthResult_01
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnFinishAuthResult_01, TestSize.Level1)
+{
+    PkgNameAndPidInfo info = {
+        .pkgName = "",
+        .pid = 0,
+    };
+    EXPECT_NO_FATAL_FAILURE(ClientOnFinishAuthResult(nullptr, 0, 0, nullptr));
+    EXPECT_NO_FATAL_FAILURE(ClientOnFinishAuthResult(&info, 0, 0, nullptr));
+    EXPECT_NO_FATAL_FAILURE(ClientOnFinishAuthResult(nullptr, 0, 0, TEST_MSG));
+    EXPECT_NO_FATAL_FAILURE(ClientOnFinishAuthResult(&info, 0, 0, TEST_MSG));
+}
+
+/*
+ * @tc.name: ClientOnFinishAuthResult_02
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnFinishAuthResult_02, TestSize.Level1)
+{
+    static const uint32_t SOFTBUS_SA_ID = 4700;
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+    EXPECT_NO_FATAL_FAILURE(clientProxy->OnFinishAuthResult(TEST_PKGNAME, 0, 0, TEST_MSG));
+}
+
+/*
+ * @tc.name: ClientOnErrorAuthResult_01
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnErrorAuthResult_01, TestSize.Level1)
+{
+    PkgNameAndPidInfo info = {
+        .pkgName = "",
+        .pid = 0,
+    };
+    EXPECT_NO_FATAL_FAILURE(ClientOnErrorAuthResult(nullptr, 0, 0, 0, nullptr));
+    EXPECT_NO_FATAL_FAILURE(ClientOnErrorAuthResult(&info, 0, 0, 0, nullptr));
+    EXPECT_NO_FATAL_FAILURE(ClientOnErrorAuthResult(&info, 0, 0, 0, TEST_MSG));
+}
+
+/*
+ * @tc.name: ClientOnErrorAuthResult_02
+ * @tc.desc: bus center client proxy standard
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientProxyTest, ClientOnErrorAuthResult_02, TestSize.Level1)
+{
+    static const uint32_t SOFTBUS_SA_ID = 4700;
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+    EXPECT_NO_FATAL_FAILURE(clientProxy->OnErrorAuthResult(TEST_PKGNAME, 0, 0, 0, TEST_MSG));
+}
+
+/*
  * @tc.name: ClientOnRangeResult_01
  * @tc.desc: Test ClientOnRangeResult function with null parameters.
  * @tc.type: FUNC
