@@ -276,6 +276,7 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     } else if (msg.GetMessageType() == NegotiateMessageType::CMD_DBAC_SYNC_DATA) {
         auto extraData = msg.GetExtraData();
         AuthNegotiateChannel::SyncDBACData(extraData);
+        return;
     }
 
     msg.SetRemoteDeviceId(remoteDeviceId);
