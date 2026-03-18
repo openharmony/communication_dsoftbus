@@ -23,6 +23,9 @@
 #include "conn_event.h"
 
 namespace OHOS::SoftBus {
+
+constexpr int CONN_COMMAND_RETRY_FORWARD_SLEEP = 4000;
+
 enum class ConnectCommandRetryReason {
     RETRY_FOR_NOTHING = 0,
     RETRY_FOR_PASSIVE_SWITCH_CHANNEL,
