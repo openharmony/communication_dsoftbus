@@ -2406,4 +2406,92 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest062, TestSize.Level1)
     ret = softBusServer->SetNodeKeyInfoInner(datas, reply);
     EXPECT_NE(SOFTBUS_IPC_ERR, ret);
 }
+
+/**
+ * @tc.name: SoftbusServerStubTest063
+ * @tc.desc: StartAccountAuthInner api test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest063, TestSize.Level1)
+{
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    int64_t requestId = 0;
+    char test[10] = "test";
+
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->StartAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->StartAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+
+    data.WriteCString(g_myPkgName);
+    ret = softBusServer->StartAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+
+    data.WriteCString(g_myPkgName);
+    data.WriteInt64(requestId);
+    ret = softBusServer->StartAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+
+    data.WriteCString(g_myPkgName);
+    data.WriteInt64(requestId);
+    data.WriteCString(test);
+    ret = softBusServer->StartAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest064
+ * @tc.desc: ProcessAccountAuthInner api test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest064, TestSize.Level1)
+{
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    int64_t requestId = 0;
+    char test[10] = "test";
+    int32_t dataLen = strlen(test) + 1;
+
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->ProcessAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->ProcessAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+
+    data.WriteCString(g_myPkgName);
+    ret = softBusServer->ProcessAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+
+    data.WriteCString(g_myPkgName);
+    data.WriteInt64(requestId);
+    ret = softBusServer->ProcessAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+
+    data.WriteCString(g_myPkgName);
+    data.WriteInt64(requestId);
+    data.WriteUint32(dataLen);
+    ret = softBusServer->ProcessAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+
+    data.WriteCString(g_myPkgName);
+    data.WriteInt64(requestId);
+    data.WriteUint32(dataLen);
+    data.WriteRawData(test, dataLen);
+    ret = softBusServer->ProcessAccountAuthInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 }
