@@ -61,6 +61,8 @@
 #define SERVER_REG_RANGE_CB_FOR_MSDP_NAME "SERVER_REG_RANGE_CB_FOR_MSDP"
 #define SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME "SERVER_UNREG_RANGE_CB_FOR_MSDP"
 #define SERVER_SET_NODE_KEY_INFO_NAME "SERVER_SET_NODE_KEY_INFO"
+#define SERVER_START_ACCOUNT_AUTH_NAME "SERVER_START_ACCOUNT_AUTH"
+#define SERVER_PROCESS_ACCOUNT_AUTH_NAME "SERVER_PROCESS_ACCOUNT_AUTH"
 
 const char *g_limitPkgName = "ohos.distributedschedule.dms";
 static const std::string CONSTRAINT = "constraint.distributed.transmission.outgoing";
@@ -219,6 +221,8 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GENERAL_SEND] = &SoftBusServerStub::SendInner;
     memberFuncMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = &SoftBusServerStub::GetPeerDeviceIdInner;
     memberFuncMap_[SERVER_SET_NODE_KEY_INFO] = &SoftBusServerStub::SetNodeKeyInfoInner;
+    memberFuncMap_[SERVER_START_ACCOUNT_AUTH] = &SoftBusServerStub::StartAccountAuthInner;
+    memberFuncMap_[SERVER_PROCESS_ACCOUNT_AUTH] = &SoftBusServerStub::ProcessAccountAuthInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -279,6 +283,8 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GENERAL_SEND] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_SET_NODE_KEY_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_START_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_PROCESS_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -2462,6 +2468,72 @@ int32_t SoftBusServerStub::GetPeerDeviceIdInner(MessageParcel &data, MessageParc
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerStub::StartAccountAuthInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = PermissionVerify(SERVER_START_ACCOUNT_AUTH);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "StartAccountAuthInner get pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int64_t requestId = 0;
+    if (!data.ReadInt64(requestId)) {
+        COMM_LOGE(COMM_SVC, "StartAccountAuthInner get requestId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    const char *serviceId = data.ReadCString();
+    if (serviceId == nullptr) {
+        COMM_LOGE(COMM_SVC, "StartAccountAuthInner get serviceId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t retReply = StartAccountAuth(pkgName, requestId, serviceId);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "StartAccountAuthInner write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+int32_t SoftBusServerStub::ProcessAccountAuthInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = PermissionVerify(SERVER_PROCESS_ACCOUNT_AUTH);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "ProcessAccountAuthInner get pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int64_t requestId = 0;
+    if (!data.ReadInt64(requestId)) {
+        COMM_LOGE(COMM_SVC, "ProcessAccountAuthInner get requestId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t authDataLen = 0;
+    if (!data.ReadUint32(authDataLen)) {
+        COMM_LOGE(COMM_SVC, "ProcessAccountAuthInner get authDataLen failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    const uint8_t *authData = reinterpret_cast<const uint8_t *>(data.ReadRawData(authDataLen));
+    if (authData == NULL) {
+        COMM_LOGE(COMM_SVC, "read authData failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t retReply = ProcessAccountAuth(pkgName, requestId, authData, authDataLen);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "ProcessAccountAuthInner write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
@@ -2601,46 +2673,34 @@ int32_t SoftBusServerStub::RegisterPushHookInner(MessageParcel &data, MessagePar
     return SOFTBUS_OK;
 }
 
+static std::map<uint32_t, std::string> tagNameMap = {
+    { SERVER_JOIN_LNN, SERVER_JOIN_LNN_NAME },
+    { SERVER_LEAVE_LNN, SERVER_LEAVE_LNN_NAME },
+    { SERVER_SET_NODE_DATA_CHANGE_FLAG, SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME },
+    { SERVER_ACTIVE_META_NODE, SERVER_ACTIVE_META_NODE_NAME },
+    { SERVER_DEACTIVE_META_NODE, SERVER_DEACTIVE_META_NODE_NAME },
+    { SERVER_GET_ALL_META_NODE_INFO, SERVER_GET_ALL_META_NODE_INFO_NAME },
+    { SERVER_SHIFT_LNN_GEAR, SERVER_SHIFT_LNN_GEAR_NAME },
+    { SERVER_SYNC_TRUSTED_RELATION, SERVER_SYNC_TRUSTED_RELATION_NAME },
+    { SERVER_SET_DISPLAY_NAME, SERVER_SET_DISPLAY_NAME_NAME },
+    { SERVER_CREATE_GROUP_OWNER, SERVER_CREATE_GROUP_OWNER_NAME },
+    { SERVER_DESTROY_GROUP_OWNER, SERVER_DESTROY_GROUP_OWNER_NAME },
+    { SERVER_SET_DATA_LEVEL, SERVER_SET_DATA_LEVEL_NAME },
+    { SERVER_REG_DATA_LEVEL_CHANGE_CB, SERVER_REG_DATA_LEVEL_CHANGE_CB_NAME },
+    { SERVER_UNREG_DATA_LEVEL_CHANGE_CB, SERVER_UNREG_DATA_LEVEL_CHANGE_CB_NAME },
+    { SERVER_TRIGGER_RANGE_FOR_MSDP, SERVER_TRIGGER_RANGE_FOR_MSDP_NAME },
+    { SERVER_STOP_RANGE_FOR_MSDP, SERVER_STOP_RANGE_FOR_MSDP_NAME },
+    { SERVER_REG_RANGE_CB_FOR_MSDP, SERVER_REG_RANGE_CB_FOR_MSDP_NAME },
+    { SERVER_UNREG_RANGE_CB_FOR_MSDP, SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME },
+    { SERVER_SET_NODE_KEY_INFO, SERVER_SET_NODE_KEY_INFO_NAME },
+    { SERVER_START_ACCOUNT_AUTH, SERVER_START_ACCOUNT_AUTH_NAME },
+    { SERVER_PROCESS_ACCOUNT_AUTH, SERVER_PROCESS_ACCOUNT_AUTH_NAME },
+};
+
 static const char* LabelTransformation(uint32_t code)
 {
-    if (code == SERVER_JOIN_LNN) {
-        return SERVER_JOIN_LNN_NAME;
-    } else if (code == SERVER_LEAVE_LNN) {
-        return SERVER_LEAVE_LNN_NAME;
-    } else if (code == SERVER_SET_NODE_DATA_CHANGE_FLAG) {
-        return SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME;
-    } else if (code == SERVER_ACTIVE_META_NODE) {
-        return SERVER_ACTIVE_META_NODE_NAME;
-    } else if (code == SERVER_DEACTIVE_META_NODE) {
-        return SERVER_DEACTIVE_META_NODE_NAME;
-    } else if (code == SERVER_GET_ALL_META_NODE_INFO) {
-        return SERVER_GET_ALL_META_NODE_INFO_NAME;
-    } else if (code == SERVER_SHIFT_LNN_GEAR) {
-        return SERVER_SHIFT_LNN_GEAR_NAME;
-    } else if (code == SERVER_SYNC_TRUSTED_RELATION) {
-        return SERVER_SYNC_TRUSTED_RELATION_NAME;
-    } else if (code == SERVER_SET_DISPLAY_NAME) {
-        return SERVER_SET_DISPLAY_NAME_NAME;
-    } else if (code == SERVER_CREATE_GROUP_OWNER) {
-        return SERVER_CREATE_GROUP_OWNER_NAME;
-    } else if (code == SERVER_DESTROY_GROUP_OWNER) {
-        return SERVER_DESTROY_GROUP_OWNER_NAME;
-    } else if (code == SERVER_SET_DATA_LEVEL) {
-        return SERVER_SET_DATA_LEVEL_NAME;
-    } else if (code == SERVER_REG_DATA_LEVEL_CHANGE_CB) {
-        return SERVER_REG_DATA_LEVEL_CHANGE_CB_NAME;
-    } else if (code == SERVER_UNREG_DATA_LEVEL_CHANGE_CB) {
-        return SERVER_UNREG_DATA_LEVEL_CHANGE_CB_NAME;
-    } else if (code == SERVER_TRIGGER_RANGE_FOR_MSDP) {
-        return SERVER_TRIGGER_RANGE_FOR_MSDP_NAME;
-    } else if (code == SERVER_STOP_RANGE_FOR_MSDP) {
-        return SERVER_STOP_RANGE_FOR_MSDP_NAME;
-    } else if (code == SERVER_REG_RANGE_CB_FOR_MSDP) {
-        return SERVER_REG_RANGE_CB_FOR_MSDP_NAME;
-    } else if (code == SERVER_UNREG_RANGE_CB_FOR_MSDP) {
-        return SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME;
-    } else if (code == SERVER_SET_NODE_KEY_INFO) {
-        return SERVER_SET_NODE_KEY_INFO_NAME;
+    if (tagNameMap.find(code) != tagNameMap.end()) {
+        return tagNameMap[code].c_str();
     }
     return nullptr;
 }

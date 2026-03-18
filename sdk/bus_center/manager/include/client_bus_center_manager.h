@@ -87,6 +87,10 @@ int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t 
 int32_t CreateGroupOwnerInner(const char *pkgName, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result, GroupOwnerDestroyListener listener);
 int32_t DestroyGroupOwnerInner(const char *pkgName);
+int32_t StartAccountAuthInner(const char *pkgName, int64_t requestId, const char *serviceId,
+    const IAccountAuthCallback *laCallBack);
+int32_t ProcessAccountAuthInner(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen,
+    const IAccountAuthCallback *laCallBack);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
@@ -104,6 +108,12 @@ void LnnOnRefreshDeviceFound(const void *device);
 void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 void LnnOnRangeResult(const RangeResultInnerInfo *rangeInfo);
 void LnnOnGroupStateChange(int32_t retCode);
+bool LnnOnTransmitAuthResult(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen);
+void LnnOnSessionKeyAuthResult(
+    const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen);
+void LnnOnFinishAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData);
+void LnnOnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode,
+    const char *returnData);
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);

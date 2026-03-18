@@ -68,6 +68,13 @@ public:
     int32_t OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason) override;
     int32_t OnAcceptConnect(const char *name, uint32_t handle) override;
     int32_t OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len) override;
+    bool OnTransmitAuthResult(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen) override;
+    void OnSessionKeyAuthResult(
+        const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen) override;
+    void OnFinishAuthResult(
+        const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData) override;
+    void OnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode,
+        const char *returnData) override;
 
 private:
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
@@ -104,6 +111,10 @@ private:
     int32_t OnBrProxyDataRecvInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnBrProxyStateChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnBrProxyQueryPermissionInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnTransmitAuthResultInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSessionKeyAuthResultInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnFinishAuthResultInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnErrorAuthResultInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

@@ -83,6 +83,8 @@ public:
     int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
     int32_t BusCenterServerProxyStandardInit(void);
     void BusCenterServerProxyStandardDeInit(void);
+    int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId) override;
+    int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen) override;
 
 private:
     static inline BrokerDelegator<BusCenterServerProxy> delegator_;

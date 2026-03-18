@@ -97,6 +97,9 @@ public:
     int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled) override;
     bool IsProxyChannelEnabled(int32_t uid) override;
     int32_t PushRegisterHook() override;
+    int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId) override;
+    int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data,
+        uint32_t dataLen) override;
 protected:
     void OnStart() override;
     void OnStop() override;

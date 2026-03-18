@@ -266,4 +266,22 @@ int32_t ISoftBusServer::PushRegisterHook()
     COMM_LOGE(COMM_SVC, "PushRegisterHook ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
+
+int32_t ISoftBusServer::StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)serviceId;
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data,
+    uint32_t dataLen)
+{
+    (void)pkgName;
+    (void)requestId;
+    (void)data;
+    (void)dataLen;
+    return SOFTBUS_IPC_ERR;
+}
 } // namespace OHOS

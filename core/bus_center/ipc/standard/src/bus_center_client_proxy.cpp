@@ -276,3 +276,62 @@ int32_t ClientOnGroupStateChange(const char *pkgName, int32_t pid, int32_t retCo
     clientProxy->OnGroupStateChange(retCode);
     return SOFTBUS_OK;
 }
+
+bool ClientOnTransmitAuthResult(PkgNameAndPidInfo *info, int64_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    if (data == nullptr || info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return false;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->pkgName, info->pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return false;
+    }
+    return clientProxy->OnTransmitAuthResult(info->pkgName, requestId, data, dataLen);
+}
+
+void ClientOnSessionKeyAuthResult(PkgNameAndPidInfo *info, int64_t requestId, const uint8_t *sessionKey,
+    uint32_t sessionKeyLen)
+{
+    if (sessionKey == nullptr || info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->pkgName, info->pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return;
+    }
+    clientProxy->OnSessionKeyAuthResult(info->pkgName, requestId, sessionKey, sessionKeyLen);
+}
+
+void ClientOnFinishAuthResult(PkgNameAndPidInfo *info, int64_t requestId, int32_t operationCode,
+    const char *returnData)
+{
+    if (returnData == nullptr || info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->pkgName, info->pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return;
+    }
+    clientProxy->OnFinishAuthResult(info->pkgName, requestId, operationCode, returnData);
+}
+
+void ClientOnErrorAuthResult(PkgNameAndPidInfo *info, int64_t requestId, int32_t operationCode, int32_t errorCode,
+    const char *returnData)
+{
+    if (info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->pkgName, info->pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return;
+    }
+    clientProxy->OnErrorAuthResult(info->pkgName, requestId, operationCode, errorCode, returnData);
+}

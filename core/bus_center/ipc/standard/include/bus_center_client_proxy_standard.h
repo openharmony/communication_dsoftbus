@@ -53,6 +53,13 @@ public:
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
     void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo) override;
     void OnGroupStateChange(int32_t retCode) override;
+    bool OnTransmitAuthResult(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen) override;
+    void OnSessionKeyAuthResult(
+        const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen) override;
+    void OnFinishAuthResult(
+        const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData) override;
+    void OnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode,
+        const char *returnData) override;
 
 private:
     static inline BrokerDelegator<BusCenterClientProxy> delegator_;

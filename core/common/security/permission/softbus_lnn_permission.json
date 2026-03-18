@@ -228,5 +228,17 @@
     "PROCESS_NAME": [
       "device_manager"
     ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_START_ACCOUNT_AUTH",
+    "PROCESS_NAME": [
+      "caas_service"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_PROCESS_ACCOUNT_AUTH",
+    "PROCESS_NAME": [
+      "caas_service"
+    ]
   }
 ]
