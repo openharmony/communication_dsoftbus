@@ -408,7 +408,7 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
         COMM_LOGW(COMM_DFX, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
+    if (memcpy_s((void *)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
         COMM_LOGW(COMM_DFX, "memcpy_s fail");
         return SOFTBUS_MEM_ERR;
     }

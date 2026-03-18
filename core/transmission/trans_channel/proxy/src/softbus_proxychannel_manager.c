@@ -1950,7 +1950,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         return;
     }
 
-    TRANS_LOGI(TRANS_CTRL, "recv reset myChannelId=%{public}d, peerChanelId=%{public}d, cipher=%{public}d",
+    TRANS_LOGI(TRANS_CTRL, "recv reset myChannelId=%{public}d, peerChannelId=%{public}d, cipher=%{public}d",
         msg->msgHead.myId, msg->msgHead.peerId, msg->msgHead.cipher);
     if (TransProxyUnpackIdentity(msg->data, info->identity, sizeof(info->identity), msg->dataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset identity fail");
