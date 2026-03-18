@@ -952,6 +952,15 @@ static void TransPagingParseMessageEx(
     }
 }
 
+static void PagingSendBadKeyMsg(ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash)
+{
+    if (msg->msgHead.type != PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
+        return;
+    }
+    TRANS_LOGI(TRANS_CTRL, "send bad key by handshake");
+    TransPagingSendBadKeyMsg(msg, accountHash, udidHash);
+}
+
 int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE((msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE &&
@@ -968,10 +977,7 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey, authAccountHash);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "parse msg get auth key fail");
-        if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
-            TRANS_LOGE(TRANS_CTRL, "send bad key by handshake");
-            TransPagingSendBadKeyMsg(msg, accountHash, udidHash);
-        }
+        PagingSendBadKeyMsg(msg, accountHash, udidHash);
         return ret;
     }
     if ((uint32_t)msg->dataLen <= OVERHEAD_LEN ||
@@ -991,6 +997,7 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
         TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
         SoftBusFree(decData);
         (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
+        PagingSendBadKeyMsg(msg, accountHash, udidHash);
         return SOFTBUS_DECRYPT_ERR;
     }
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));

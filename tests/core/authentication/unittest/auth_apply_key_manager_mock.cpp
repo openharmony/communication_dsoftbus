@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,13 +50,7 @@ AuthApplyKeyManagerMock &AuthApplyKeyManagerMock::GetMock()
     return *gMock;
 }
 
-int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType)
-{
-    printf("LnnAsyncSaveDeviceDataPacked\n");
-    return SOFTBUS_OK;
-}
-
-int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen)
+int32_t AuthApplyKeyManagerMock::LnnRetrieveDeviceDataInner(LnnDataType dataType, char **data, uint32_t *dataLen)
 {
     printf("LnnRetrieveDeviceDataPacked\n");
     cJSON *jsonArray = cJSON_CreateArray();
@@ -93,11 +87,53 @@ int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t 
     return SOFTBUS_OK;
 }
 
-void AuthApplyKeyManagerMockReg(void)
+extern "C" {
+int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->lnnAsyncSaveDeviceData = (LnnAsyncSaveDeviceDataFunc)LnnAsyncSaveDeviceDataPacked;
-    pfnLnnEnhanceFuncList->lnnRetrieveDeviceData = (LnnRetrieveDeviceDataFunc)LnnRetrieveDeviceDataPacked;
+    printf("LnnAsyncSaveDeviceDataPacked\n");
+    (void)data;
+    (void)dataType;
+    return SOFTBUS_OK;
 }
 
+int32_t GetActiveOsAccountIds(void)
+{
+    return AuthApplyKeyManagerMock::GetMock().GetActiveOsAccountIds();
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return AuthApplyKeyManagerMock::GetMock().JudgeDeviceTypeAndGetOsAccountIds();
+}
+
+int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    return AuthApplyKeyManagerMock::GetMock().LnnRegisterEventHandler(event, handler);
+}
+
+int32_t LnnDeleteDeviceDataPacked(LnnDataType dataType)
+{
+    return AuthApplyKeyManagerMock::GetMock().LnnDeleteDeviceDataPacked(dataType);
+}
+
+void LnnDeinitDistributedLedger(void)
+{
+    AuthApplyKeyManagerMock::GetMock().LnnDeinitDistributedLedger();
+}
+
+bool AuthIsApplyKeyExpired(uint64_t time)
+{
+    return AuthApplyKeyManagerMock::GetMock().AuthIsApplyKeyExpired(time);
+}
+
+LnnEnhanceFuncList *LnnEnhanceFuncListGet(void)
+{
+    return AuthApplyKeyManagerMock::GetMock().LnnEnhanceFuncListGet();
+}
+
+int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen)
+{
+    return AuthApplyKeyManagerMock::GetMock().LnnRetrieveDeviceDataPacked(dataType, data, dataLen);
+}
+} // extern "C"
 } // namespace OHOS
