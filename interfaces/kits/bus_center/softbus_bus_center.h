@@ -570,6 +570,60 @@ typedef struct {
 } ITimeSyncCb;
 
 /**
+ * @brief Defines a callback that is invoked when the account auth has result.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    /**
+     * @brief Called when the auth data has result.
+     *
+     * @param requestId Indicates the auth request unique id.
+     * @param data Indicates the auth data from hichain.
+     * @param dataLen Indicates the length of auth data.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    bool (*onTransmit)(int64_t requestId, const uint8_t *data, uint32_t dataLen);
+    /**
+     * @brief Called when the session key has result.
+     *
+     * @param requestId Indicates the auth request unique id.
+     * @param sessionKey Indicates the session key from hichain.
+     * @param sessionKeyLen Indicates the length of session key.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    void (*onSessionKeyReturned)(int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen);
+    /**
+     * @brief Called when the account auth finished.
+     *
+     * @param requestId Indicates the auth request unique id.
+     * @param operationCode Indicates the code result of account auth.
+     * @param returnData Indicates the account data after auth finished.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    void (*onFinish)(int64_t requestId, int32_t operationCode, const char *returnData);
+    /**
+     * @brief Called when the account auth has error.
+     *
+     * @param requestId Indicates the auth request unique id.
+     * @param operationCode Indicates the code result of account auth.
+     * @param errorCode Indicates the error code of account auth.
+     * @param errorReturn Indicates the error data of account auth.
+     *
+     * @since 1.0
+     * @version 1.0
+     */
+    void (*onError)(int64_t requestId, int32_t operationCode, int32_t errorCode, const char *errorReturn);
+} IAccountAuthCallback;
+
+/**
  * @brief Defines a meta node configuration, see {@link ActiveMetaNode}.
  *
  * @since 1.0
@@ -1076,6 +1130,35 @@ int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *con
  * @version 1.0
  */
 void DestroyGroupOwner(const char *pkgName);
+
+/**
+ * @brief Start Group Account Auth.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param requestId Indicates the id of request.
+ * @param serviceId Indicates the id string of service.
+ * @param cb Indicates the pointer to the callback of account auth. For details, see {@link IAccountAuthCallback}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId,
+    const IAccountAuthCallback *cb);
+
+/**
+ * @brief Process Group Account Auth.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param requestId Indicates the id of request.
+ * @param data Indicates the pointer to the auth data.
+ * @param dataLen Indicates the length of auth data.
+ * @param cb Indicates the pointer to the callback of account auth. For details, see {@link IAccountAuthCallback}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen,
+    const IAccountAuthCallback *cb);
 #ifdef __cplusplus
 }
 #endif

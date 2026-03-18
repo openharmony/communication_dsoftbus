@@ -99,6 +99,9 @@ public:
     virtual int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled);
     virtual bool IsProxyChannelEnabled(int32_t uid);
     virtual int32_t PushRegisterHook();
+    virtual int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId);
+    virtual int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data,
+        uint32_t dataLen);
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");
 };

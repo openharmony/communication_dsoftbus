@@ -96,6 +96,8 @@ private:
     int32_t SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterPushHookInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StartAccountAuthInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ProcessAccountAuthInner(MessageParcel &data, MessageParcel &reply);
     int32_t PermissionVerify(uint32_t code);
 
     void InitMemberFuncMap();
