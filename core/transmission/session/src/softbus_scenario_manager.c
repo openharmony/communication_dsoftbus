@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -477,7 +477,7 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     }
     BusinessCounter *counter = NULL;
     BusinessCounter *tmp = NULL;
-    LIST_FOR_EACH_ENTRY(tmp, &scenarioItem->businessCounterList,  BusinessCounter, node) {
+    LIST_FOR_EACH_ENTRY(tmp, &scenarioItem->businessCounterList, BusinessCounter, node) {
         if (tmp->localPid == info->localPid) {
             counter = tmp;
             break;
@@ -524,7 +524,7 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     }
     BusinessCounter *counter = NULL;
     BusinessCounter *tmp = NULL;
-    LIST_FOR_EACH_ENTRY(tmp, &scenarioItem->businessCounterList,  BusinessCounter, node) {
+    LIST_FOR_EACH_ENTRY(tmp, &scenarioItem->businessCounterList, BusinessCounter, node) {
         if (tmp->localPid == info->localPid) {
             counter = tmp;
             break;
@@ -599,7 +599,7 @@ static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
         return;
     }
-    LIST_FOR_EACH_ENTRY_SAFE(pair, nextPair, &manager->macIfacePairList->list,  MacIfacePair, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(pair, nextPair, &manager->macIfacePairList->list, MacIfacePair, node) {
         ListDelete(&pair->node);
         SoftBusFree(pair);
         manager->macIfacePairList->cnt--;
@@ -631,7 +631,7 @@ static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
         TRANS_LOGE(TRANS_CTRL, "lock mutex failed!");
         return;
     }
-    LIST_FOR_EACH_ENTRY_SAFE(item, tmp, &manager->scenarioItemList->list,  ScenarioItem, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, tmp, &manager->scenarioItemList->list, ScenarioItem, node) {
         ScenarioManagerClearBusinessCounterList(&item->businessCounterList);
         ListDelete(&item->node);
         SoftBusFree(item);

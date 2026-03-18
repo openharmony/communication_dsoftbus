@@ -82,9 +82,9 @@ void TransSessionServiceTest::TearDownTestCase(void)
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest01, TestSize.Level1)
 {
     int32_t ret = TransCreateSessionServer(nullptr, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransCreateSessionServer(g_pkgName, nullptr, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -119,11 +119,11 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest03, TestSize.Level1)
 {
     int32_t ret = TransRemoveSessionServer(nullptr, g_sessionName);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransRemoveSessionServer(g_pkgName, nullptr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransRemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret,  SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -140,23 +140,23 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest04, TestSize.Level1)
     EXPECT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     int32_t ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     sessionPara.sessionName = g_sessionName;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     sessionPara.peerSessionName = g_sessionName;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     sessionPara.peerDeviceId = g_deviceId;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_GROUP_INVALID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_GROUP_INVALID);
     char groupId[] = {"ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00AB"};
     sessionPara.groupId = groupId;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
     sessionPara.groupId = g_groupid;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
     SoftBusFree(transInfo);
 }
 
