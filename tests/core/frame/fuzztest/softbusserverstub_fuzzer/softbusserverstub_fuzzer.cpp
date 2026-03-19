@@ -95,7 +95,7 @@ static sptr<IRemoteObject> GetRemoteObject(void)
 static bool SendRequestByCommand(const uint8_t *data, size_t size, uint32_t command)
 {
     sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    if (object == nullptr) {
+    if (SoftBusServer == nullptr) {
         return false;
     }
     MessageParcel datas;
@@ -535,7 +535,7 @@ bool JoinLNNFuzzTest(const uint8_t *data, size_t size)
 bool JoinMetaNodeFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
-    if (object == nullptr || data == nullptr || size == 0 || size >= INT32_MAX - 1) {
+    if (SoftBusServer == nullptr || data == nullptr || size == 0 || size >= INT32_MAX - 1) {
         return false;
     }
     uint32_t addrTypeLen = SOFTBUS_FUZZ_TEST_ADDR_TYPE_LEN;
