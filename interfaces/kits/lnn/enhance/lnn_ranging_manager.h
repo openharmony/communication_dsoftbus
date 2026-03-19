@@ -19,21 +19,17 @@
 #include <stdint.h>
 
 #include "ble_range.h"
-#include "data_level_inner.h"
 #include "softbus_common.h"
+#include "data_level_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define SLE_ADDR_LEN 65
 #define RANGE_MSG_FLAG_REQUEST 1
 #define RANGE_MES_FLAG_REPLY 2
 #define DISTRIBUTED_CONFLICT 1
 #define DISTRIBUTED_NOT_CONFLICT 2
-
-#define LOCAL_START 1
-#define REMOTE_START 2
 
 typedef enum {
     SLE_NOT_SUPPORT,
@@ -43,21 +39,14 @@ typedef enum {
 
 typedef enum {
     SLE_INIT,
+    SLE_START,
     SLE_CONNECT,
     SLE_AUTH,
-    SLE_COMMUNICATION_LOCAL_START,
-    SLE_COMMUNICATION_REMOTE_START,
+    SLE_AUTH_REQUEST,
+    SLE_AUTH_REPLY,
     SLE_LOCAL_START,
-    SLE_REMOTE_START,
     SLE_STOP,
-} SleState;
-
-typedef struct {
-    int32_t remote;
-    char sleAddr[SLE_ADDR_LEN];
-    SleState state;
-    uint32_t requiredId;
-} SleMgrInfo;
+} SleRangeState;
 
 typedef struct {
     void (*onRangeResult)(const RangeResultInnerInfo *info);
@@ -66,8 +55,8 @@ typedef struct {
 
 int32_t LnnStartRange(const RangeConfig *config);
 int32_t LnnStopRange(const RangeConfig *config);
-int32_t RegistAuthTransListener(void);
-int32_t UnregistAuthTransListener(void);
+int32_t LnnInitSleRange(void);
+int32_t LnnDeinitSleRange(void);
 void SleRangeDeathCallback(void);
 
 void LnnRegSleRangeCb(const ISleRangeInnerCallback *callback);

@@ -199,12 +199,12 @@ int32_t LnnGetUdidByBrMacPacked(const char *brMac, char *udid, uint32_t udidLen)
 void AuthRemoveDeviceKeyByUdidPacked(const char *udidOrHash);
 int32_t LnnGetRecommendChannelPacked(const char *udid, int32_t *preferChannel);
 int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len);
-int32_t RegistAuthTransListenerPacked(void);
+int32_t LnnInitSleRangePacked(void);
 void LnnUnregSleRangeCbPacked(void);
 void LnnRegSleRangeCbPacked(const ISleRangeInnerCallback *callback);
 int32_t LnnStopRangePacked(const RangeConfig *config);
 int32_t LnnStartRangePacked(const RangeConfig *config);
-int32_t UnregistAuthTransListenerPacked(void);
+void LnnDeinitSleRangePacked(void);
 void SleRangeDeathCallbackPacked(void);
 int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen);
 int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType);
