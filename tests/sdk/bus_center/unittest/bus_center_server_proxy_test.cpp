@@ -380,4 +380,45 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcSyncTrustedRelationShip_TEST_001, Te
     int32_t ret = ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: ServerIpcStartAccountAuth_TEST_001
+ * @tc.desc: ServerIpcStartAccountAuth test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyTest, ServerIpcStartAccountAuth_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = "001";
+    const char *msg = "123";
+    int32_t ret = ServerIpcStartAccountAuth(nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcStartAccountAuth(pkgName, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcStartAccountAuth(nullptr, 0, msg);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcStartAccountAuth(pkgName, 0, msg);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/*
+ * @tc.name: ServerIpcProcessAccountAuth_TEST_001
+ * @tc.desc: ServerIpcProcessAccountAuth test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyTest, ServerIpcProcessAccountAuth_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = "001";
+    const char *msg = "123";
+    uint32_t msgLen = 123;
+    int32_t ret = ServerIpcProcessAccountAuth(nullptr, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcProcessAccountAuth(pkgName, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcProcessAccountAuth(nullptr, 0, (uint8_t*)msg, msgLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ServerIpcProcessAccountAuth(pkgName, 0, (uint8_t*)msg, msgLen);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
 } // namespace OHOS

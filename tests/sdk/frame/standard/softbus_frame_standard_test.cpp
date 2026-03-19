@@ -1286,4 +1286,148 @@ HWTEST_F(SoftBusServerProxyFrameTest, DiscRecoveryPolicyPackedTest, TestSize.Lev
     int32_t ret = DiscRecoveryPolicyPacked();
     EXPECT_NE(ret, SOFTBUS_NO_INIT);
 }
+
+/**
+ * @tc.name: OnTransmitAuthResultInnerTest
+ * @tc.desc: OnTransmitAuthResultInner Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnTransmitAuthResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnTransmitAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    std::string pkgName = "TestPkgName";
+    data.WriteCString(pkgName.c_str());
+    EXPECT_EQ(g_stub->OnTransmitAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    uint64_t requestId = 0;
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    EXPECT_EQ(g_stub->OnTransmitAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    std::string buffer = "OnTransmitAuthResultInner";
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(strlen(buffer.c_str()) + 1);
+    EXPECT_EQ(g_stub->OnTransmitAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(strlen(buffer.c_str()) + 1);
+    data.WriteRawData(buffer.c_str(), strlen(buffer.c_str()) + 1);
+    EXPECT_EQ(g_stub->OnTransmitAuthResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnSessionKeyAuthResultInnerTest
+ * @tc.desc: OnSessionKeyAuthResultInner Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnSessionKeyAuthResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnSessionKeyAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    std::string pkgName = "TestPkgName";
+    data.WriteCString(pkgName.c_str());
+    EXPECT_EQ(g_stub->OnSessionKeyAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    uint64_t requestId = 0;
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    EXPECT_EQ(g_stub->OnSessionKeyAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    std::string buffer = "OnSessionKeyAuthResultInner";
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(strlen(buffer.c_str()) + 1);
+    EXPECT_EQ(g_stub->OnSessionKeyAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(strlen(buffer.c_str()) + 1);
+    data.WriteRawData(buffer.c_str(), strlen(buffer.c_str()) + 1);
+    EXPECT_EQ(g_stub->OnSessionKeyAuthResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnFinishAuthResultInnerTest
+ * @tc.desc: OnFinishAuthResultInner Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnFinishAuthResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnFinishAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    std::string pkgName = "TestPkgName";
+    data.WriteCString(pkgName.c_str());
+    EXPECT_EQ(g_stub->OnFinishAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    uint64_t requestId = 0;
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    EXPECT_EQ(g_stub->OnFinishAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    int32_t operatoinCode = 0;
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(operatoinCode);
+    EXPECT_EQ(g_stub->OnFinishAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    std::string buffer = "OnSessionKeyAuthResultInner";
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(operatoinCode);
+    data.WriteCString(buffer.c_str());
+    EXPECT_EQ(g_stub->OnFinishAuthResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnErrorAuthResultInnerTest
+ * @tc.desc: OnErrorAuthResultInner Test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnErrorAuthResultInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnErrorAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    std::string pkgName = "TestPkgName";
+    data.WriteCString(pkgName.c_str());
+    EXPECT_EQ(g_stub->OnErrorAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    uint64_t requestId = 0;
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    EXPECT_EQ(g_stub->OnErrorAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    int32_t operatoinCode = 0;
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(operatoinCode);
+    EXPECT_EQ(g_stub->OnErrorAuthResultInner(data, reply), SOFTBUS_IPC_ERR);
+
+    int32_t errorCode = 0;
+    std::string buffer = "OnSessionKeyAuthResultInner";
+    data.WriteCString(pkgName.c_str());
+    data.WriteInt64(requestId);
+    data.WriteInt32(operatoinCode);
+    data.WriteInt32(errorCode);
+    data.WriteCString(buffer.c_str());
+    EXPECT_EQ(g_stub->OnErrorAuthResultInner(data, reply), SOFTBUS_OK);
+}
 } // namespace OHOS

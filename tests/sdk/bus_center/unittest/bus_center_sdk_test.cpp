@@ -39,6 +39,7 @@ using namespace testing::ext;
 constexpr char TEST_PKG_NAME[] = "com.softbus.test";
 constexpr char TEST_PKG_NAME_1[] = "com.softbus.test1";
 constexpr char TEST_MSDP_NAME[] = "ohos.msdp.spatialawareness";
+constexpr char TEST_MSG[] = "testmsg";
 constexpr int32_t DEFAULT_NODE_STATE_CB_NUM = 9;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID_1 = 0;
 constexpr uint8_t DEFAULT_LOCAL_DEVICE_TYPE_ID_2 = 14;
@@ -871,5 +872,49 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_CREATE_GROUP_OWNER_Test001, TestSize.L
     DestroyGroupOwner(TEST_PKG_NAME);
     EXPECT_EQ(CreateGroupOwner(TEST_PKG_NAME, &config, &result, NotifyP2pStateChange), SOFTBUS_IPC_ERR);
     DestroyGroupOwner(TEST_PKG_NAME);
+}
+
+/*
+ * @tc.name: BUS_CENTER_SDK_START_ACCOUNT_AUTH_Test001
+ * @tc.desc: start account auth test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_START_ACCOUNT_AUTH_Test001, TestSize.Level1)
+{
+    IAccountAuthCallback cb = {};
+    int32_t ret = StartAccountAuth(nullptr, 0, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuth(nullptr, 0, TEST_MSG, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuth(TEST_PKG_NAME, 0, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuth(nullptr, 0, nullptr, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartAccountAuth(TEST_PKG_NAME, 0, TEST_MSG, &cb);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/*
+ * @tc.name: BUS_CENTER_SDK_PROCESS_ACCOUNT_AUTH_Test001
+ * @tc.desc: process account auth test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_PROCESS_ACCOUNT_AUTH_Test001, TestSize.Level1)
+{
+    IAccountAuthCallback cb = {};
+    int32_t ret = ProcessAccountAuth(nullptr, 0, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuth(nullptr, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuth(TEST_PKG_NAME, 0, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuth(nullptr, 0, nullptr, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessAccountAuth(TEST_PKG_NAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, &cb);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
 }
 } // namespace OHOS
