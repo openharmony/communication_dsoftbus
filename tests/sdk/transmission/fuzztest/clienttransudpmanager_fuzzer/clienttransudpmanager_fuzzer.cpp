@@ -101,11 +101,13 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        int32_t tmpSize;
+        (void)GenerateInt32(tmpSize);
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(tmpSize + 1));
         if (ptr == nullptr) {
             return;
         }
-        if (memcpy_s(ptr, size, data, size) != EOK) {
+        if (memcpy_s(ptr, tmpSize, data, tmpSize) != EOK) {
             SoftBusFree(ptr);
             return;
         }
@@ -114,11 +116,11 @@ namespace OHOS {
         GenerateInt32(channelId);
         StreamData streamdata = {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-            .bufLen = size,
+            .bufLen = tmpSize,
         };
         StreamData ext = {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-            .bufLen = size,
+            .bufLen = tmpSize,
         };
         TV tv = { 0 };
         GenerateInt32(tv.type);

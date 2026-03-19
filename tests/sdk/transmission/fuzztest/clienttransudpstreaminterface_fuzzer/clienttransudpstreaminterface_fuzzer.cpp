@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "client_trans_udp_stream_interface.h"
+#include "fuzz_data_generator.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 
@@ -27,22 +28,24 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        int32_t tmpInteger;
+        (void)GenerateInt32(tmpInteger);
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(tmpInteger + 1));
         if (ptr == nullptr) {
             return;
         }
-        if (memcpy_s(ptr, size, data, size) != EOK) {
+        if (memcpy_s(ptr, tmpInteger, data, tmpInteger) != EOK) {
             SoftBusFree(ptr);
             return;
         }
         int32_t channelId = *(reinterpret_cast<const int32_t *>(ptr));
         StreamData streamdata = {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-            .bufLen = size,
+            .bufLen = tmpInteger,
         };
         StreamData ext = {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-            .bufLen = size,
+            .bufLen = tmpInteger,
         };
         TV tv = {
             .type = *(reinterpret_cast<const int32_t *>(ptr)),
@@ -68,11 +71,15 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        int32_t tmpInteger;
+        (void)GenerateInt32(tmpInteger);
+        bool isEncrypt;
+        (void)GenerateBool(isEncrypt);
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(tmpInteger + 1));
         if (ptr == nullptr) {
             return;
         }
-        if (memcpy_s(ptr, size, data, size) != EOK) {
+        if (memcpy_s(ptr, tmpInteger, data, tmpInteger) != EOK) {
             SoftBusFree(ptr);
             return;
         }
@@ -85,7 +92,7 @@ namespace OHOS {
             .type = *(reinterpret_cast<const StreamType *>(ptr)),
             .sessionKey = const_cast<uint8_t *>(ptr),
             .keyLen = *(reinterpret_cast<const uint32_t *>(ptr)),
-            .isRawStreamEncrypt = size % 2,
+            .isRawStreamEncrypt = isEncrypt,
         };
         IStreamListener *callback = nullptr;
 
@@ -98,11 +105,15 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        int32_t tmpInteger;
+        (void)GenerateInt32(tmpInteger);
+        bool isEncrypt;
+        (void)GenerateBool(isEncrypt);
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(tmpInteger + 1));
         if (ptr == nullptr) {
             return;
         }
-        if (memcpy_s(ptr, size, data, size) != EOK) {
+        if (memcpy_s(ptr, tmpInteger, data, tmpInteger) != EOK) {
             SoftBusFree(ptr);
             return;
         }
@@ -115,7 +126,7 @@ namespace OHOS {
             .type = *(reinterpret_cast<const StreamType *>(ptr)),
             .sessionKey = const_cast<uint8_t *>(ptr),
             .keyLen = *(reinterpret_cast<const uint32_t *>(ptr)),
-            .isRawStreamEncrypt = size % 2,
+            .isRawStreamEncrypt = isEncrypt,
         };
         IStreamListener *callback = nullptr;
 

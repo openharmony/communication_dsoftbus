@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,15 @@
  */
 
 #include "socket_fuzzer.h"
-#include "socket.h"
+
 #include <fuzzer/FuzzedDataProvider.h>
 #include <memory>
 #include <securec.h>
 #include <string>
 #include <vector>
+
+#include "fuzz_data_generator.h"
+#include "socket.h"
 
 namespace OHOS {
 static std::string DEFAULT_SOCKET_NAME = "com.communication.fuzz.socketName";
@@ -34,7 +37,8 @@ void SocketTestWithName(const uint8_t *data, size_t size)
         return;
     }
 
-    const size_t bufSize = size + 1;
+    uint32_t bufSize = 1;
+    (void)GenerateUint32(bufSize);
     std::unique_ptr<char[]> socketName = std::make_unique<char[]>(bufSize);
     if (memset_s(socketName.get(), bufSize, 0, bufSize) != EOK) {
         return;
@@ -61,7 +65,8 @@ void SocketTestWithPeerName(const uint8_t *data, size_t size)
         return;
     }
 
-    const size_t bufSize = size + 1;
+    uint32_t bufSize = 1;
+    (void)GenerateUint32(bufSize);
     std::unique_ptr<char[]> socketPeerName = std::make_unique<char[]>(bufSize);
     if (memset_s(socketPeerName.get(), bufSize, 0, bufSize) != EOK) {
         return;
@@ -88,7 +93,8 @@ void SocketTestWithNetworkId(const uint8_t *data, size_t size)
         return;
     }
 
-    const size_t bufSize = size + 1;
+    uint32_t bufSize = 1;
+    (void)GenerateUint32(bufSize);
     std::unique_ptr<char[]> socketNetworkId = std::make_unique<char[]>(bufSize);
     if (memset_s(socketNetworkId.get(), bufSize, 0, bufSize) != EOK) {
         return;
@@ -115,7 +121,8 @@ void SocketTestWithPkgName(const uint8_t *data, size_t size)
         return;
     }
 
-    const size_t bufSize = size + 1;
+    uint32_t bufSize = 1;
+    (void)GenerateUint32(bufSize);
     std::unique_ptr<char[]> socketPkgName = std::make_unique<char[]>(bufSize);
     if (memset_s(socketPkgName.get(), bufSize, 0, bufSize) != EOK) {
         return;

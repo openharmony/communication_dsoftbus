@@ -63,14 +63,16 @@ static void InitAuthHandle(const uint8_t *data, size_t size, AuthHandle *authHan
 
 static void InitProxyMessage(const uint8_t *data, size_t size, ProxyMessage *proxyMessage)
 {
-    InitProxyMessageHead(data, size, &proxyMessage->msgHead);
-    proxyMessage->dataLen = size;
+    int32_t tmpInteger;
+    (void)GenerateInt32(tmpInteger);
+    InitProxyMessageHead(data, tmpInteger, &proxyMessage->msgHead);
+    proxyMessage->dataLen = tmpInteger;
     proxyMessage->data = const_cast<char *>(reinterpret_cast<const char *>(data));
     DataGenerator::Write(data, size);
     GenerateUint32(proxyMessage->connId);
     GenerateInt32(proxyMessage->keyIndex);
     DataGenerator::Clear();
-    InitAuthHandle(data, size, &proxyMessage->authHandle);
+    InitAuthHandle(data, tmpInteger, &proxyMessage->authHandle);
 }
 
 void TransProxyOnMessageReceivedTest(const uint8_t *data, size_t size)
