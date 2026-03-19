@@ -81,7 +81,7 @@ static void FillAppInfoPart(const uint8_t *data, size_t size, AppInfo *appInfo)
     GenerateInt32(appInfo->algorithm);
     GenerateInt32(appInfo->crc);
     appInfo->fastTransData = (reinterpret_cast<const uint8_t *>(data));
-    GenerateInt16(appInfo->fastTransDataSize);
+    GenerateUint16(appInfo->fastTransDataSize);
     DataGenerator::Clear();
 }
 
