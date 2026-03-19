@@ -203,11 +203,10 @@ int32_t InitDecisionCenter(void)
         g_exceptionConnMgr.initFlag = false;
         return SOFTBUS_CREATE_LIST_ERR;
     }
-    if (RegistAuthTransListenerPacked() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist auth trans failed");
+    if (LnnInitSleRangePacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init sle range failed");
         DestroySoftBusList(g_exceptionConnMgr.connections);
         g_exceptionConnMgr.initFlag = false;
-        return SOFTBUS_SLE_RANGING_REGIST_TRANS_ERROR;
     }
     g_exceptionConnMgr.initFlag = true;
     if (LnnVirtualLinkInitPacked() != SOFTBUS_OK) {
@@ -231,8 +230,6 @@ void DeinitDecisionCenter(void)
     }
     LnnVirtualLinkDeinitPacked();
     LnnDeinitDecisionCenterV2Packed();
-    if (UnregistAuthTransListenerPacked() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "unregist auth trans failed");
-    }
+    LnnDeinitSleRangePacked();
     LNN_LOGD(LNN_INIT, "deinit ok");
 }

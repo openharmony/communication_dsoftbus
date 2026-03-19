@@ -270,12 +270,12 @@ typedef void (*LnnClearPtkListFunc)(void);
 typedef int32_t (*GenerateNewLocalCipherKeyFunc)(void);
 typedef int32_t (*InitActionBleConcurrencyFunc)(void);
 typedef int32_t (*InitActionStateAdapterFunc)(void);
-typedef int32_t (*RegistAuthTransListenerFunc)(void);
+typedef int32_t (*LnnInitSleRangeFunc)(void);
 typedef void (*LnnUnregSleRangeCbFunc)(void);
 typedef void (*LnnRegSleRangeCbFunc)(const ISleRangeInnerCallback *callback);
 typedef int32_t (*LnnStopRangeFunc)(const RangeConfig *config);
 typedef int32_t (*LnnStartRangeFunc)(const RangeConfig *config);
-typedef int32_t (*UnregistAuthTransListenerFunc)(void);
+typedef void (*LnnDeinitSleRangeFunc)(void);
 typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
 typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
@@ -314,8 +314,8 @@ typedef struct TagLnnEnhanceFuncList {
     LnnDumpControlLaneGroupInfoFunc lnnDumpControlLaneGroupInfo;
     IsSparkGroupEnabledFunc isSparkGroupEnabled;
     // sle range
-    RegistAuthTransListenerFunc registAuthTransListener;
-    UnregistAuthTransListenerFunc unregistAuthTransListener;
+    LnnInitSleRangeFunc lnnInitSLeRange;
+    LnnDeinitSleRangeFunc lnnDeinitSleRange;
     LnnUnregSleRangeCbFunc lnnUnregSleRangeCb;
     LnnStopRangeFunc lnnStopRange;
     LnnStartRangeFunc lnnStartRange;
