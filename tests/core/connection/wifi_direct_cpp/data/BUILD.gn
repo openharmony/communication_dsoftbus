@@ -557,6 +557,71 @@ ohos_unittest("WifiConfigInfoTest") {
   ]
 }
 
+ohos_unittest("NegotiateMessageExtendedTest") {
+  module_out_path = ut_out_path
+  configs = [
+    ":wifi_direct_include_dirs",
+    "//build/config/compiler:rtti",
+    "//build/config/compiler:exceptions",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+  ]
+
+  sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$wifi_direct_cpp_path/data/interface_info.cpp",
+    "$wifi_direct_cpp_path/data/ipv4_info.cpp",
+    "$wifi_direct_cpp_path/data/link_info.cpp",
+    "$wifi_direct_cpp_path/data/negotiate_message.cpp",
+    "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
+    "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
+    "negotiate_message_extended_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_single",
+    "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "wifi:wifi_sdk",
+  ]
+
+  remove_configs = [
+    "//build/config/compiler:no_rtti",
+    "//build/config/compiler:no_exceptions",
+  ]
+
+  cflags = [
+    "-fexceptions",
+    "-frtti",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -564,6 +629,7 @@ group("unittest") {
     ":InterfaceManagerTest",
     ":LinkInfoTest",
     ":LinkManagerTest",
+    ":NegotiateMessageExtendedTest",
     ":NegotiateMessageTest",
     ":WifiConfigInfoTest",
   ]
