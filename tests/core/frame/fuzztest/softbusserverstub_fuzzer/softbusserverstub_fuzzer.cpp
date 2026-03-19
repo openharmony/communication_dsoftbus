@@ -94,7 +94,7 @@ static sptr<IRemoteObject> GetRemoteObject(void)
 
 static bool SendRequestByCommand(const uint8_t *data, size_t size, uint32_t command)
 {
-    sptr<IRemoteObject> object = GetRemoteObject();
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     if (object == nullptr) {
         return false;
     }
@@ -105,7 +105,7 @@ static bool SendRequestByCommand(const uint8_t *data, size_t size, uint32_t comm
     MessageParcel reply;
     MessageOption option;
     SetAccessTokenPermission("SoftBusServerStubTest");
-    return object->SendRequest(command, datas, reply, option) == ERR_NONE;
+    return SoftBusServer->OnRemoteRequest(command, datas, reply, option) == ERR_NONE;
 }
 
 bool CreateSessionServerFuzzTest(const uint8_t *data, size_t size)
@@ -534,7 +534,7 @@ bool JoinLNNFuzzTest(const uint8_t *data, size_t size)
 
 bool JoinMetaNodeFuzzTest(const uint8_t *data, size_t size)
 {
-    sptr<IRemoteObject> object = GetRemoteObject();
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     if (object == nullptr || data == nullptr || size == 0 || size >= INT32_MAX - 1) {
         return false;
     }
@@ -547,7 +547,7 @@ bool JoinMetaNodeFuzzTest(const uint8_t *data, size_t size)
     MessageParcel reply;
     MessageOption option;
     SetAccessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_JOIN_METANODE, datas, reply, option) != ERR_NONE) {
+    if (SoftBusServer->OnRemoteRequest(SERVER_JOIN_METANODE, datas, reply, option) != ERR_NONE) {
         return false;
     }
     return true;
@@ -1281,24 +1281,25 @@ bool CheckOpenSessionPermissionFuzzTest(const uint8_t *data, size_t size)
 
 bool EvaLuateQosInnerFuzzTest(const uint8_t *data, size_t size)
 {
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || size == 0 || size >= INT32_MAX - 1) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr || size == 0 || size >= INT32_MAX - 1) {
         return false;
     }
     MessageParcel datas;
-    int32_t dataTypeNum = size % TYPE_NUM;
-    uint32_t qosCount = size % QOS_NUM;
-
+    int32_t dataTypeNum = 0;
+    GenerateInt32(dataTypeNum);
+    uint32_t qosCount = 0;
+    GenerateUint32(qosCount);
     datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
     datas.WriteCString("6B97BC8F6F85A2A1A6E0E262111F42D6A8541CBFF6CAF688FA5293956EC3FD43");
 
-    datas.WriteInt32(dataTypeNum);
-    datas.WriteUint32(qosCount);
-    datas.WriteBuffer(data, qosCount);
+    datas.WriteInt32(dataTypeNum % TYPE_NUM);
+    datas.WriteUint32(qosCount % QOS_NUM);
+    datas.WriteBuffer(data, qosCount % QOS_NUM);
     MessageParcel reply;
     MessageOption option;
     SetAccessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+    if (SoftBusServer->OnRemoteRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
     return true;
@@ -1306,24 +1307,26 @@ bool EvaLuateQosInnerFuzzTest(const uint8_t *data, size_t size)
 
 bool EvaLuateQosInnerNetworkIdFuzzTest(const uint8_t *data, size_t size)
 {
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || size == 0 || size >= INT32_MAX - 1) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr || size == 0 || size >= INT32_MAX - 1) {
         return false;
     }
     MessageParcel datas;
-    int32_t dataTypeNum = size % TYPE_NUM;
-    uint32_t qosCount = size % QOS_NUM;
+    int32_t dataTypeNum = 0;
+    GenerateInt32(dataTypeNum);
+    uint32_t qosCount = 0;
+    GenerateUint32(qosCount);
 
     datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
     datas.WriteCString((const char *)data);
 
-    datas.WriteInt32(dataTypeNum);
-    datas.WriteUint32(qosCount);
-    datas.WriteBuffer(data, qosCount);
+    datas.WriteInt32(dataTypeNum % TYPE_NUM);
+    datas.WriteUint32(qosCount % QOS_NUM);
+    datas.WriteBuffer(data, qosCount % QOS_NUM);
     MessageParcel reply;
     MessageOption option;
     SetAccessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+    if (SoftBusServer->OnRemoteRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
     return true;
@@ -1331,23 +1334,24 @@ bool EvaLuateQosInnerNetworkIdFuzzTest(const uint8_t *data, size_t size)
 
 bool EvaLuateQosInnerDataTypeFuzzTest(const uint8_t *data, size_t size)
 {
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || size == 0 || size >= INT32_MAX - 1) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr || size == 0 || size >= INT32_MAX - 1) {
         return false;
     }
     MessageParcel datas;
-    uint32_t qosCount = size % QOS_NUM;
+    uint32_t qosCount = 0;
+    GenerateUint32(qosCount);
 
     datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
     datas.WriteCString("6B97BC8F6F85A2A1A6E0E262111F42D6A8541CBFF6CAF688FA5293956EC3FD43");
 
     datas.WriteInt32(size);
-    datas.WriteUint32(qosCount);
-    datas.WriteBuffer(data, qosCount);
+    datas.WriteUint32(qosCount % QOS_NUM);
+    datas.WriteBuffer(data, qosCount % QOS_NUM);
     MessageParcel reply;
     MessageOption option;
     SetAccessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+    if (SoftBusServer->OnRemoteRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
     return true;
@@ -1355,22 +1359,23 @@ bool EvaLuateQosInnerDataTypeFuzzTest(const uint8_t *data, size_t size)
 
 bool EvaLuateQosInnerQosCountFuzzTest(const uint8_t *data, size_t size)
 {
-    sptr<IRemoteObject> object = GetRemoteObject();
-    if (object == nullptr || size == 0 || size >= INT32_MAX - 1) {
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr || size == 0 || size >= INT32_MAX - 1) {
         return false;
     }
     MessageParcel datas;
-    int32_t dataTypeNum = size % TYPE_NUM;
+    int32_t dataTypeNum = 0;
+    GenerateInt32(dataTypeNum);
     datas.WriteInterfaceToken(SOFTBUS_SERVER_STUB_INTERFACE_TOKEN);
     datas.WriteCString("6B97BC8F6F85A2A1A6E0E262111F42D6A8541CBFF6CAF688FA5293956EC3FD43");
 
-    datas.WriteInt32(dataTypeNum);
+    datas.WriteInt32(dataTypeNum % TYPE_NUM);
     datas.WriteUint32(size);
     datas.WriteBuffer(data, size);
     MessageParcel reply;
     MessageOption option;
     SetAccessTokenPermission("SoftBusServerStubTest");
-    if (object->SendRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
+    if (SoftBusServer->OnRemoteRequest(SERVER_EVALUATE_QOS, datas, reply, option) != ERR_NONE) {
         return false;
     }
     return true;
@@ -1473,7 +1478,6 @@ static bool CloseChannelWithStatisticsFuzzTest(uint32_t index, const uint8_t *da
     int32_t channelId = 0;
     int32_t channelType = 0;
     uint64_t laneId = 0;
-    uint32_t len = size;
 
     GenerateInt32(channelId);
     GenerateInt32(channelType);
@@ -1500,8 +1504,8 @@ static bool CloseChannelWithStatisticsFuzzTest(uint32_t index, const uint8_t *da
     }
 
     if (CheckAddItem(index, false)) {
-        datas.WriteUint32(len);
-        datas.WriteRawData(data, len);
+        datas.WriteUint32(size);
+        datas.WriteRawData(data, size);
     }
 
     (void)SoftBusServer->CloseChannelWithStatisticsInner(datas, reply);
@@ -1517,7 +1521,6 @@ static bool ProcessInnerEventFuzzTestType(uint32_t index, const uint8_t *data, s
     }
 
     int32_t eventType = 0;
-    uint32_t len = size;
 
     GenerateInt32(eventType);
 
@@ -1534,8 +1537,8 @@ static bool ProcessInnerEventFuzzTestType(uint32_t index, const uint8_t *data, s
     }
 
     if (CheckAddItem(index, false)) {
-        datas.WriteUint32(len);
-        datas.WriteRawData(data, len);
+        datas.WriteUint32(size);
+        datas.WriteRawData(data, size);
     }
 
     (void)SoftBusServer->ProcessInnerEventInner(datas, reply);
@@ -1550,8 +1553,6 @@ static bool ProcessInnerEventFuzzTestData(int32_t eventType, const uint8_t *data
         return false;
     }
 
-    uint32_t len = size;
-
     MessageParcel datas;
     MessageParcel reply;
 
@@ -1561,8 +1562,8 @@ static bool ProcessInnerEventFuzzTestData(int32_t eventType, const uint8_t *data
     }
 
     datas.WriteInt32(eventType);
-    datas.WriteUint32(len);
-    datas.WriteRawData(data, len);
+    datas.WriteUint32(size);
+    datas.WriteRawData(data, size);
 
     (void)SoftBusServer->ProcessInnerEventInner(datas, reply);
 
