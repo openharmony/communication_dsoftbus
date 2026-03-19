@@ -36,6 +36,8 @@ using namespace testing;
 #define TEST_TYPE          1
 #define TEST_MSDP_PKGNAME  "ohos.msdp.spatialawareness"
 
+constexpr char TEST_MSG[] = "testmsg";
+
 class BusCenterIpcTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -255,6 +257,154 @@ HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_03, TestSize.Leve
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnIpcUnregRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: RemoveAccountAuthInfoByPkgName_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, RemoveAccountAuthInfoByPkgName_01, TestSize.Level1)
+{
+    PkgNameAndPidInfo info = {
+        .pkgName = "default",
+        .pid = -1,
+    };
+    int32_t ret = AddAccountAuthInfo(TEST_PKGNAME, 0, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool repeatRet = IsRepeatAccountAuthRequest(TEST_PKGNAME2, 0);
+    EXPECT_EQ(repeatRet, false);
+    ret = AddAccountAuthInfo(TEST_PKGNAME2, 0, 1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    repeatRet = IsRepeatAccountAuthRequest(TEST_PKGNAME, 0);
+    EXPECT_EQ(repeatRet, true);
+    ret = GetAccountAuthInfo(-1, &info);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = GetAccountAuthInfo(0, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(RemoveAccountAuthInfoByPkgName(TEST_PKGNAME2));
+    EXPECT_NO_FATAL_FAILURE(RemoveAccountAuthInfoByPkgName(TEST_PKGNAME));
+}
+
+/*
+ * @tc.name: RemoveAccountAuthInfoByRequestId_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, RemoveAccountAuthInfoByRequestId_01, TestSize.Level1)
+{
+    PkgNameAndPidInfo info = {
+        .pkgName = "default",
+        .pid = -1,
+    };
+    int32_t ret = AddAccountAuthInfo(TEST_PKGNAME, 0, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool repeatRet = IsRepeatAccountAuthRequest(TEST_PKGNAME2, 0);
+    EXPECT_EQ(repeatRet, false);
+    ret = AddAccountAuthInfo(TEST_PKGNAME2, 0, 1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    repeatRet = IsRepeatAccountAuthRequest(TEST_PKGNAME, 0);
+    EXPECT_EQ(repeatRet, true);
+    ret = GetAccountAuthInfo(-1, &info);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = GetAccountAuthInfo(0, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(RemoveAccountAuthInfoByRequestId(1));
+    EXPECT_NO_FATAL_FAILURE(RemoveAccountAuthInfoByRequestId(0));
+}
+
+/*
+ * @tc.name: OnTransmitAuthResult_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, OnTransmitAuthResult_01, TestSize.Level1)
+{
+    bool ret = OnTransmitAuthResult(0, nullptr, 0);
+    EXPECT_EQ(ret, false);
+    ret = OnTransmitAuthResult(0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: OnSessionKeyAuthResult_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, OnSessionKeyAuthResult_01, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnSessionKeyAuthResult(0, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(OnSessionKeyAuthResult(0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1));
+}
+
+/*
+ * @tc.name: OnFinishAuthResult_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, OnFinishAuthResult_01, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnFinishAuthResult(0, 0, nullptr));
+    EXPECT_NO_FATAL_FAILURE(OnFinishAuthResult(0, 0, TEST_MSG));
+}
+
+/*
+ * @tc.name: OnErrorAuthResult_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, OnErrorAuthResult_01, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnErrorAuthResult(0, 0, 0, nullptr));
+    EXPECT_NO_FATAL_FAILURE(OnErrorAuthResult(0, 0, 0, TEST_MSG));
+}
+
+/*
+ * @tc.name: LnnIpcStartAccountAuth_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, LnnIpcStartAccountAuth_01, TestSize.Level1)
+{
+    int32_t ret = LnnIpcStartAccountAuth(nullptr, 0, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnIpcStartAccountAuth(TEST_PKGNAME, 0, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnIpcStartAccountAuth(nullptr, 0, 0, TEST_MSG);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnIpcStartAccountAuth(TEST_PKGNAME, 0, 0, TEST_MSG);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = LnnIpcStartAccountAuth(TEST_PKGNAME, 0, 0, TEST_MSG);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    RemoveAccountAuthInfoByPkgName(TEST_PKGNAME);
+}
+
+/*
+ * @tc.name: LnnIpcProcessAccountAuth_01
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, LnnIpcProcessAccountAuth_01, TestSize.Level1)
+{
+    int32_t ret = LnnIpcProcessAccountAuth(nullptr, 0, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnIpcProcessAccountAuth(TEST_PKGNAME, 0, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnIpcProcessAccountAuth(nullptr, 0, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnIpcProcessAccountAuth(TEST_PKGNAME, 0, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = LnnIpcProcessAccountAuth(TEST_PKGNAME, 0, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    RemoveAccountAuthInfoByPkgName(TEST_PKGNAME);
 }
 
 /*
