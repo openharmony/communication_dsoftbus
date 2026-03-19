@@ -91,7 +91,8 @@ const std::u16string SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN = u"OHOS.ISoftBusClient
 
 static void InitOnChannelOpenedInnerMsg(int32_t channelType, const uint8_t *data, size_t size, MessageParcel &message)
 {
-    bool boolParam = (size % 2 == 0) ? true : false;
+    bool boolParam = false;
+    (void)GenerateBool(boolParam);
     int32_t int32Param = *(reinterpret_cast<const int32_t *>(data));
     char *charParam = const_cast<char *>(reinterpret_cast<const char *>(data));
 
