@@ -250,7 +250,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest004, TestSize.Level1)
     int32_t ret = ConstructParamAndOpenProxyChannel(1, CONNECT_TIMEOUT);
     EXPECT_EQ(ret, SOFTBUS_OK);
     sleep(1);
-    EXPECT_EQ(g_connectFailedReason, SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL);
+    EXPECT_EQ(g_connectFailedReason, SOFTBUS_CONN_PROXY_BR_ACL_NOT_EXIST);
     ResetGlobalVariables();
 
     CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest004----02");
@@ -668,14 +668,54 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest012, TestSize.Level1)
 }
 
 /*
- * @tc.name: ProxyChannelManagerTest012
- * @tc.desc: test close not reset reconnect event
+ * @tc.name: ProxyChannelManagerTest013
+ * @tc.desc: test proxy connect callback
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest013, TestSize.Level1)
 {
     CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest013 in");
+    ProxyChannelMock mock;
+    EXPECT_CALL(mock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, Connect).WillRepeatedly(ProxyChannelMock::ActionOfConnect);
+    EXPECT_CALL(mock, Read).WillRepeatedly(ProxyChannelMock::ActionOfRead1);
+
+    // open new proxy channel
+    int32_t ret = ConstructParamAndOpenProxyChannel(1, CONNECT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    sleep(1);
+    BdAddr bdAddr = {
+        .addr =  { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
+    };
+    const char *uuid = "0000FEEA-0000-1000-8000-00805F9B34FB";
+    BtUuid testBtUuid = {
+        .uuidLen = strlen(uuid),
+        .uuid = (char *)uuid,
+    };
+    ProxyChannelMock::TestBtSocketConnectionCallback(&bdAddr, testBtUuid, 0, 0);
+    sleep(4);
+    EXPECT_EQ(g_channelId, 0);
+
+    EXPECT_CALL(mock, Connect).WillRepeatedly(ProxyChannelMock::ActionOfConnect3);
+    ret = ConstructParamAndOpenProxyChannel(1, CONNECT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    sleep(1);
+    ProxyChannelMock::TestBtSocketConnectionCallback(&bdAddr, testBtUuid, 1, 4);
+    sleep(4);
+    EXPECT_EQ(g_channelId, 0);
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest013 out");
+}
+
+/*
+ * @tc.name: ProxyChannelManagerTest014
+ * @tc.desc: test close not reset reconnect event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest014, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest014 in");
     ProxyChannelMock mock;
     EXPECT_CALL(mock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(mock, Read).WillRepeatedly(Return(-1));
@@ -707,6 +747,6 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest013, TestSize.Level1)
     ProxyChannelMock::InjectBtAclStateChanged(1, &btAddr, SOFTBUS_ACL_STATE_CONNECTED, 0);
     sleep(1);
     EXPECT_NE(g_channelId, 0);
-    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest013 out");
+    CONN_LOGI(CONN_PROXY, "ProxyChannelManagerTest014 out");
 }
 }

@@ -90,10 +90,37 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
 
 static void BrConnectCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t status, int32_t result)
 {
-    (void)bdAddr;
-    (void)uuid;
-    (void)status;
-    (void)result;
+    CONN_LOGW(CONN_PROXY, "result=%{public}d, status=%{public}d", result, status);
+    CONN_CHECK_AND_RETURN_LOGE(bdAddr != NULL, CONN_PROXY, "bdAddr is null");
+    char copyMac[BT_MAC_LEN] = { 0 };
+    int32_t ret = ConvertBtMacToStr(copyMac, BT_MAC_LEN, bdAddr->addr, sizeof(bdAddr->addr));
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_PROXY, "convert mac fail, ret=%{public}d", ret);
+
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, copyMac, BT_MAC_LEN);
+
+    struct ProxyConnection *connection = GetProxyChannelManager()->getProxyChannelByAddr(copyMac);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_PROXY, "connection not exist, mac=%{public}s", anomizeAddress);
+    if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_PROXY, "lock failed, mac=%{public}s", anomizeAddress);
+        connection->dereference(connection);
+        return;
+    }
+    BrUnderlayerStatus *callbackStatus = (BrUnderlayerStatus *)SoftBusCalloc(sizeof(BrUnderlayerStatus));
+    if (callbackStatus == NULL) {
+        CONN_LOGE(CONN_PROXY, "calloc fail, mac=%{public}s", anomizeAddress);
+        (void)SoftBusMutexUnlock(&connection->lock);
+        connection->dereference(connection);
+        return;
+    }
+    ListInit(&callbackStatus->node);
+    callbackStatus->status = status;
+    callbackStatus->result = result;
+    ListAdd(&connection->connectProcessStatus->list, &callbackStatus->node);
+    (void)SoftBusMutexUnlock(&connection->lock);
+    CONN_LOGW(CONN_PROXY, "br on connect calback, mac=%{public}s, channelId=%{public}u",
+        anomizeAddress, connection->channelId);
+    connection->dereference(connection);
 }
 
 static int32_t StartClientConnect(struct ProxyConnection *connection)

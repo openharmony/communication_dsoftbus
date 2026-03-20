@@ -22,6 +22,7 @@
 
 static SoftBusBtStateListener *g_btStateListener = nullptr;
 static ProxyListener g_hfpListener = { 0 };
+static BtSocketConnectionCallback g_btCallback = { 0 };
 
 extern "C" {
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId)
@@ -129,6 +130,7 @@ int32_t ProxyChannelMock::ActionOfRead1(int32_t clientFd, uint8_t *buf, const in
 
 int32_t ProxyChannelMock::ActionOfConnect(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
+    g_btCallback = *static_cast<BtSocketConnectionCallback *>(connectCallback);
     sleep(1);
     return UNDERLAYER_HANDLE;
 }
@@ -152,6 +154,21 @@ int32_t ProxyChannelMock::ActionOfConnect2(const char *uuid, const BT_ADDR mac, 
     GetProxyChannelManager()->proxyChannelRequestInfo = connectInfo;
     sleep(1);
     return UNDERLAYER_HANDLE;
+}
+
+int32_t ProxyChannelMock::ActionOfConnect3(const char *uuid, const BT_ADDR mac, void *connectCallback)
+{
+    g_btCallback = *static_cast<BtSocketConnectionCallback *>(connectCallback);
+    sleep(1);
+    return -1;
+}
+
+void ProxyChannelMock::TestBtSocketConnectionCallback(
+    const BdAddr *bdAddr, BtUuid uuid, int32_t status, int32_t result)
+{
+    if (g_btCallback.connStateCb != nullptr) {
+        g_btCallback.connStateCb(bdAddr, uuid, status, result);
+    }
 }
 
 bool ProxyChannelMock::ActionOfIsPairedDevice(const char *addr,  bool isRealMac, bool *isSupportHfp)

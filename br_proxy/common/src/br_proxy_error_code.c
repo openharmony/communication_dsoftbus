@@ -43,6 +43,7 @@ const NapiSoftbusErrCMapJs ERRCODE_C_JS_MAP[] = {
     { SOFTBUS_TRANS_SESSION_OPENING,            NAPI_SOFTBUS_CHANNEL_REOPEN                     },
     { SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM,     NAPI_SOFTBUS_INVALID_PARAM                      },
     { SOFTBUS_TRANS_BR_PROXY_INTERNAL_ERROR,    NAPI_SOFTBUS_INTERNAL_ERROR                     },
+    { SOFTBUS_CONN_PROXY_BR_ACL_NOT_EXIST,      NAPI_SOFTBUS_OPEN_OPERATION_FAILED              },
 };
 
 const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
@@ -82,6 +83,10 @@ int32_t NapiTransConvertErr(int32_t err)
         if (err == ERRCODE_C_JS_MAP[i].cErrCode) {
             return ERRCODE_C_JS_MAP[i].jsErrCode;
         }
+    }
+
+    if (SoftBusIsBtUnderlayerError(err)) {
+        return NAPI_SOFTBUS_OPEN_OPERATION_FAILED;
     }
 
     return NAPI_SOFTBUS_INTERNAL_ERROR;

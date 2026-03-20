@@ -24,6 +24,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 #include "softbus_error_code.h"
+#include "softbus_wrapper_br_interface_struct.h"
 
 #include "proxy_config.h"
 #include "proxy_connection.h"
@@ -259,10 +260,18 @@ static struct ProxyConnection *CreateProxyConnection(ProxyConnectInfo *connectIn
         SoftBusFree(proxyConnection);
         return NULL;
     }
+    SoftBusList *list = CreateSoftBusList();
+    if (list == NULL) {
+        CONN_LOGE(CONN_PROXY, "create softbus list fail");
+        SoftBusFree(proxyConnection);
+        return NULL;
+    }
+    proxyConnection->connectProcessStatus = list;
     ListInit(&proxyConnection->node);
 
     if (SoftBusMutexInit(&proxyConnection->lock, NULL) != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "init lock fail");
+        DestroySoftBusList(proxyConnection->connectProcessStatus);
         SoftBusFree(proxyConnection);
         return NULL;
     }
@@ -313,6 +322,15 @@ static int32_t SaveProxyConnection(struct ProxyConnection *proxyConnection)
 static void DestoryProxyConnection(struct ProxyConnection *proxyConnection)
 {
     SoftBusMutexDestroy(&proxyConnection->lock);
+    if (proxyConnection->connectProcessStatus != NULL) {
+        BrUnderlayerStatus *item = NULL;
+        BrUnderlayerStatus *next = NULL;
+        LIST_FOR_EACH_ENTRY_SAFE(item, next, &proxyConnection->connectProcessStatus->list, BrUnderlayerStatus, node) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+        }
+        DestroySoftBusList(proxyConnection->connectProcessStatus);
+    }
     SoftBusFree(proxyConnection);
 }
 
@@ -356,7 +374,10 @@ static void NotifyOpenProxyChannelResult(struct ProxyConnection *proxyConnection
         DestoryProxyConnectInfo(&GetProxyChannelManager()->proxyChannelRequestInfo);
         return;
     }
-
+    ProxyConnectInfo *reconnectDeviceInfo = GetReconnectDeviceInfoByAddrUnsafe(proxyConnection->brMac);
+    if (!SoftBusIsBtUnderlayerError(status) && reconnectDeviceInfo != NULL && !reconnectDeviceInfo->isAclConnected) {
+        status = SOFTBUS_CONN_PROXY_BR_ACL_NOT_EXIST;
+    }
     ProcessConnectFailed(connectingChannel, proxyConnection->brMac, status);
     RemoveProxyChannelByChannelId(proxyConnection->channelId);
 }
@@ -374,14 +395,46 @@ static void BrChannelConnectSuccess(uint32_t channelId)
     }
 }
 
+static bool IsNeedWaitCallbackError(uint32_t channelId, int32_t *errorCode)
+{
+    struct ProxyConnection *connection = GetProxyChannelByChannelId(channelId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, false, CONN_PROXY,
+        "get conntion fail, connId=%{public}d", channelId);
+
+    if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_PROXY, "lock fail, channelId=%{public}u", channelId);
+        connection->dereference(connection);
+        return false;
+    }
+    int32_t result = 0;
+    BrUnderlayerStatus *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
+        // to Find the last error result.
+        if ((it->result) != 0) {
+            result = it->result;
+        }
+    }
+    (void)SoftBusMutexUnlock(&connection->lock);
+    connection->dereference(connection);
+    if (result > 0 && result <= CONN_BR_CONNECT_UNDERLAYER_ERROR_UNDEFINED) {
+        *errorCode = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + result;
+        return false;
+    }
+    return true;
+}
+
 static void BrChannelConnectFail(uint32_t channelId, int32_t errorCode)
 {
+    CONN_LOGW(CONN_PROXY, "channelId=%{public}u, error=%{public}d", channelId, errorCode);
     ProxyChannelNotifyContext *ctx = (ProxyChannelNotifyContext *)SoftBusCalloc(sizeof(ProxyChannelNotifyContext));
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_PROXY, "on connect fail, calloc error context fail");
+    bool needWait = IsNeedWaitCallbackError(channelId, &errorCode);
     ctx->channelId = channelId;
     ctx->status = errorCode;
     ctx->isSuccess = false;
-    int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL_CONNECT_RESULT, 0, 0, ctx, 0);
+    uint32_t timeoutDelay = needWait ? PROXY_BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS : 0;
+    int32_t ret = ConnPostMsgToLooper(
+        &g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL_CONNECT_RESULT, 0, 0, ctx, timeoutDelay);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
         SoftBusFree(ctx);
@@ -1246,6 +1299,7 @@ static ProxyChannelManager g_proxyChannelManager = {
     .registerProxyChannelListener = RegisterProxyChannelListener,
 
     .getConnectionById = GetProxyChannelByChannelId,
+    .getProxyChannelByAddr = GetProxyChannelByAddr,
     .proxyChannelRequestInfo = NULL,
     .proxyConnectionList = NULL,
 };
