@@ -69,7 +69,8 @@ int32_t SoftBusRcObjectConstruct(const char *name, SoftBusRcObject *object, Soft
 
     ListInit(&object->node);
     object->id = 0;
-    object->mutex = (SoftBusMutex)0;
+    object->mutex.mutex = 0;
+    object->mutex.holder = 0;
     SoftBusMutexAttr attr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };

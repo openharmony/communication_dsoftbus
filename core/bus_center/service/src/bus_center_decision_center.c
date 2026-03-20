@@ -137,7 +137,11 @@ void LnnDCReportConnectException(const ConnectOption *option, int32_t errorCode)
     LNN_CHECK_AND_RETURN_LOGW(option != NULL, LNN_STATE, "option is NULL");
     LNN_CHECK_AND_RETURN_LOGE(g_exceptionConnMgr.initFlag && g_exceptionConnMgr.connections != NULL,
         LNN_STATE, "decision center not init yet");
-    SoftBusMutexLock(&g_exceptionConnMgr.connections->lock);
+    int32_t ret = SoftBusMutexLock(&g_exceptionConnMgr.connections->lock);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock failed, ret=%{public}d", ret);
+        return;
+    }
     LNN_LOGI(LNN_STATE, "connType=%{public}d, errorCode=%{public}d", option->type, errorCode);
     switch (option->type) {
         case CONNECT_BR:
@@ -155,7 +159,11 @@ void LnnDCClearConnectException(const ConnectOption *option)
     LNN_CHECK_AND_RETURN_LOGW(option != NULL, LNN_STATE, "option is NULL");
     LNN_CHECK_AND_RETURN_LOGE(g_exceptionConnMgr.initFlag && g_exceptionConnMgr.connections != NULL,
         LNN_STATE, "decision center not init yet");
-    SoftBusMutexLock(&g_exceptionConnMgr.connections->lock);
+    int32_t ret = SoftBusMutexLock(&g_exceptionConnMgr.connections->lock);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock failed, ret=%{public}d", ret);
+        return;
+    }
     switch (option->type) {
         case CONNECT_BR:
             ClearBrConnectException(option);

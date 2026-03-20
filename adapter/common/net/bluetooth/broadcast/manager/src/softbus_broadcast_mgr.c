@@ -1184,7 +1184,8 @@ int32_t UnRegisterBroadcaster(int32_t bcId)
     if (g_bcManager[bcId].isAdvertising) {
         SoftBusMutexUnlock(&g_bcLock);
         (void)g_interface[protocol]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
-        SoftBusMutexLock(&g_bcLock);
+        ret = SoftBusMutexLock(&g_bcLock);
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");
     }
     ret = g_interface[protocol]->UnRegisterBroadcaster(g_bcManager[bcId].adapterBcId);
     if (ret != SOFTBUS_OK) {
