@@ -123,6 +123,7 @@ typedef struct {
     int64_t headSeq;
     cJSON *credTypeInfo;
     uint8_t credNegoState;
+    cJSON *externalUserIds;
 } AuthSessionInfo;
 
 typedef struct {

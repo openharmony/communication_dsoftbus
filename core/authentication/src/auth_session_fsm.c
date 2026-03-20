@@ -354,6 +354,10 @@ static void DestroyAuthFsm(AuthFsm *authFsm)
         cJSON_Delete(authFsm->info.credTypeInfo);
         authFsm->info.credTypeInfo = NULL;
     }
+    if (authFsm->info.externalUserIds != NULL) {
+        cJSON_Delete(authFsm->info.externalUserIds);
+        authFsm->info.externalUserIds = NULL;
+    }
     SoftBusFree(authFsm);
 }
 
@@ -1385,8 +1389,16 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "copy authParam fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    authParam.userId = authFsm->info.userId;
     authParam.cb = NULL;
+    authParam.userId = authFsm->info.userId;
+    if (authFsm->info.credNegoState != CRED_NEGO_STATE_COMPATIBLE) {
+        if (authFsm->info.credTypeInfo == NULL ||
+            !GetJsonObjectNumberItem(authFsm->info.credTypeInfo, SINK_USERID, &authParam.userId)) {
+            AUTH_LOGE(AUTH_FSM, "parse peerUserId from chosenCredTypes fail");
+            authFsm->info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
+    }
     PopulateDeviceTypeId(&authParam, authFsm->info.requestId);
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
 }
@@ -2302,6 +2314,14 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
     if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
         return DEFAULT_USERID;
+    }
+    if (info.credNegoState != CRED_NEGO_STATE_COMPATIBLE) {
+        int32_t peerUserId = 0;
+        if (GetJsonObjectNumberItem(info.credTypeInfo, SINK_USERID, &peerUserId)) {
+            return peerUserId;
+        } else {
+            info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+        }
     }
     return info.userId;
 }
