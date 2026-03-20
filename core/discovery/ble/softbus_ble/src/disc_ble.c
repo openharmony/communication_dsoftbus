@@ -782,10 +782,10 @@ static int32_t DiscBleGetCustData(DeviceInfo *info)
         }
     }
     if (pos >= CAPABILITY_MAX_BITNUM) {
- 	    DISC_LOGD(DISC_BLE, "not find capBitMap");
- 	    (void)SoftBusMutexUnlock(&g_bleInfoLock);
- 	    return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
- 	}
+        DISC_LOGD(DISC_BLE, "not find capBitMap");
+        (void)SoftBusMutexUnlock(&g_bleInfoLock);
+        return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
+    }
     cJSON *json = cJSON_ParseWithLength((const char *)passiveBleInfo.capabilityData[pos],
         passiveBleInfo.capDataLen[pos]);
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
