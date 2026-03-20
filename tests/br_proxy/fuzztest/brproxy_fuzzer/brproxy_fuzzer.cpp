@@ -111,11 +111,6 @@ void IsProxyChannelEnabledTest(FuzzedDataProvider &provider)
     int32_t uid = provider.ConsumeIntegral<int32_t>();
 
     (void)IsProxyChannelEnabled(uid);
-}
-
-void TransClientInitTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
     (void)TransClientInit();
 }
 
@@ -231,11 +226,6 @@ void ClientTransOnBrProxyOpenedTest(FuzzedDataProvider &provider)
 
     (void)ClientTransOnBrProxyOpened(channelId, nullptr, nullptr, result);
     (void)ClientTransOnBrProxyOpened(channelId, brMac, uuid, result);
-}
-
-void RegisterAccessHookTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
     PermissonHookCb cb;
     (void)memset_s(&cb, sizeof(PermissonHookCb), 0, sizeof(PermissonHookCb));
 
@@ -267,7 +257,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::SendBrProxyDataTest(provider);
     OHOS::SetListenerStateTest(provider);
     OHOS::IsProxyChannelEnabledTest(provider);
-    OHOS::TransClientInitTest(provider);
     OHOS::ClientAddChannelToListTest(provider);
     OHOS::ClientUpdateListtTest(provider);
     OHOS::ClientQueryListTest(provider);
@@ -276,7 +265,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::SoftbusErrConvertChannelStateTest(provider);
     OHOS::ClientTransBrProxyChannelChangeTest(provider);
     OHOS::ClientTransOnBrProxyOpenedTest(provider);
-    OHOS::RegisterAccessHookTest(provider);
     OHOS::ClientTransBrProxyQueryPermissionTest(provider);
     OHOS::ClientDeleteChannelFromListTest(provider);
 
