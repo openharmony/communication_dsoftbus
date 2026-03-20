@@ -23,9 +23,14 @@ using namespace std;
 using namespace testing::ext;
 
 namespace OHOS {
+#define TIME_WAIT_SEC_TEST  5
+#define WAIT_ONE_TIMEOUT_MS 6000
+#define WAIT_TIMEOUTS_MS    30000
+
 static SoftBusCond g_cond;
 static SoftBusMutex g_mutex;
 const int32_t DELAY_TIME = 1000;
+static int32_t g_currentThreadTid = 0;
 
 class SoftbusThreadTest : public testing::Test {
 protected:
@@ -77,6 +82,95 @@ static void *ThreadSignalTest(void *arg)
     return nullptr;
 }
 
+static void *HolderThreadA(void *arg)
+{
+    if (arg == nullptr) {
+        return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+    }
+
+    SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+    int32_t result = SoftBusMutexLock(mutexArg);
+    if (result != SOFTBUS_OK) {
+        return reinterpret_cast<void*>(result);
+    }
+
+    return reinterpret_cast<void*>(result);
+};
+
+static void *HolderThreadB(void *arg)
+{
+    if (arg == nullptr) {
+        return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+    }
+
+    SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+    int32_t result = SoftBusMutexLock(mutexArg);
+    return reinterpret_cast<void*>(result);
+};
+
+static void *TestThread(void *arg)
+{
+    if (arg == nullptr) {
+        return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+    }
+
+    SoftBusMutex** mutexesPtr = reinterpret_cast<SoftBusMutex**>(arg);
+    SoftBusMutex* mutexAArg = mutexesPtr[0];
+    SoftBusMutex* mutexBArg = mutexesPtr[1];
+
+    int32_t resultA = SoftBusMutexLock(mutexAArg);
+    if (resultA != SOFTBUS_LOCK_ERR) {
+        return reinterpret_cast<void*>(resultA);
+    }
+
+    int32_t resultB = SoftBusMutexLock(mutexBArg);
+    if (resultB != SOFTBUS_LOCK_ERR) {
+        return reinterpret_cast<void*>(resultB);
+    }
+
+    return reinterpret_cast<void*>(SOFTBUS_OK);
+};
+
+static void *ThreadA(void *arg)
+{
+    if (arg == nullptr) {
+        return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+    }
+
+    SoftBusMutex** mutexesPtr = reinterpret_cast<SoftBusMutex**>(arg);
+    SoftBusMutex* mutexAArg = mutexesPtr[0];
+    SoftBusMutex* mutexBArg = mutexesPtr[1];
+
+    int32_t ret = SoftBusMutexLock(mutexAArg);
+    if (ret != SOFTBUS_OK) {
+        return reinterpret_cast<void*>(ret);
+    }
+
+    SoftBusSleepMs(DELAY_TIME);
+
+    ret = SoftBusMutexLock(mutexBArg);
+    return reinterpret_cast<void*>(ret);
+};
+
+static void *ThreadB(void *arg)
+{
+    if (arg == nullptr) {
+        return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+    }
+
+    SoftBusMutex** mutexesPtr = reinterpret_cast<SoftBusMutex**>(arg);
+    SoftBusMutex* mutexAArg = mutexesPtr[0];
+    SoftBusMutex* mutexBArg = mutexesPtr[1];
+
+    int32_t ret = SoftBusMutexLock(mutexBArg);
+    if (ret != SOFTBUS_OK) {
+        return reinterpret_cast<void*>(ret);
+    }
+
+    ret = SoftBusMutexLock(mutexAArg);
+    return reinterpret_cast<void*>(ret);
+};
+
 /*
  * @tc.name: SoftbusMutexAttrInitTest001
  * @tc.desc: mutexAttr is nullptr
@@ -111,9 +205,10 @@ HWTEST_F(SoftbusThreadTest, SoftbusMutexAttrInitTest002, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest001, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -124,12 +219,13 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest001, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest002, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
     int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -140,12 +236,13 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest002, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
     int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -183,7 +280,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest001, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest002, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -191,6 +288,8 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexLock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t currentTid = (int32_t)syscall(__NR_gettid);
+    EXPECT_EQ(currentTid, mutex.holder);
 }
 
 /*
@@ -201,14 +300,16 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest002, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
     int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexLock(&mutex);
+    int32_t currentTid = (int32_t)syscall(__NR_gettid);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(currentTid, mutex.holder);
 }
 
 /*
@@ -219,10 +320,12 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest003, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest004, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     ret = SoftBusMutexLock(&mutex);
+    int32_t currentTid = (int32_t)syscall(__NR_gettid);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(currentTid, mutex.holder);
 }
 
 /*
@@ -233,9 +336,575 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest004, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest005, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexLock(&mutex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: SoftBusMutexLockTest006
+ * @tc.desc: thread A hold mutex, thread B try lock failed
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest006, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    auto holderThread = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+
+        int32_t tid = (int32_t)syscall(__NR_gettid);
+        g_currentThreadTid = tid;
+
+        int32_t result = SoftBusMutexLock(mutexArg);
+        return reinterpret_cast<void*>(result);
+    };
+
+    auto timeoutThread = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+        int32_t result = SoftBusMutexLock(mutexArg);
+        return reinterpret_cast<void*>(result);
+    };
+
+    pthread_t holder;
+    void* result1 = nullptr;
+    pthread_create(&holder, nullptr, holderThread, &mutex);
+    pthread_join(holder, &result1);
+    EXPECT_EQ(SOFTBUS_OK, reinterpret_cast<intptr_t>(result1));
+    EXPECT_EQ(g_currentThreadTid, mutex.holder);
+
+    pthread_t timeout;
+    void* result2 = nullptr;
+    pthread_create(&timeout, nullptr, timeoutThread, &mutex);
+    pthread_join(timeout, &result2);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, reinterpret_cast<intptr_t>(result2));
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusMutexLockTest007
+ * @tc.desc: try 5 timeout -> unlock -> lock success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest007, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    auto timeLockThread = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+
+        int32_t tid = (int32_t)syscall(__NR_gettid);
+        g_currentThreadTid = tid;
+
+        int32_t result = SoftBusMutexLock(mutexArg);
+        return reinterpret_cast<void*>(result);
+    };
+
+    pthread_t thread;
+    pthread_create(&thread, nullptr, timeLockThread, &mutex);
+
+    SoftBusSleepMs(WAIT_TIMEOUTS_MS);
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    void* joinResult;
+    pthread_join(thread, &joinResult);
+
+    EXPECT_EQ(SOFTBUS_OK, reinterpret_cast<intptr_t>(joinResult));
+    EXPECT_EQ(g_currentThreadTid, mutex.holder);
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusMutexLockTest008
+ * @tc.desc: thread independent mutex counting
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest008, TestSize.Level1)
+{
+    SoftBusMutex mutexA = { 0 };
+    SoftBusMutex mutexB = { 0 };
+
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+
+    int32_t ret = SoftBusMutexInit(&mutexA, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexInit(&mutexB, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    SoftBusMutex* mutexes[2] = { &mutexA, &mutexB };
+    void* arg = static_cast<void*>(mutexes);
+
+    pthread_t holderA;
+    void* result1 = nullptr;
+    pthread_create(&holderA, nullptr, HolderThreadA, &mutexA);
+    pthread_join(holderA, &result1);
+    EXPECT_EQ(SOFTBUS_OK, reinterpret_cast<intptr_t>(result1));
+
+    pthread_t holderB;
+    void* result2 = nullptr;
+    pthread_create(&holderB, nullptr, HolderThreadB, &mutexB);
+    pthread_join(holderB, &result2);
+    EXPECT_EQ(SOFTBUS_OK, reinterpret_cast<intptr_t>(result2));
+
+    pthread_t test;
+    pthread_create(&test, nullptr, TestThread, arg);
+    void* testResult = nullptr;
+    pthread_join(test, &testResult);
+    EXPECT_EQ(SOFTBUS_OK, reinterpret_cast<intptr_t>(testResult));
+
+    ret = SoftBusMutexUnlock(&mutexA);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexUnlock(&mutexB);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutexA);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexDestroy(&mutexB);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+@tc.name: SoftBusMutexLockTest009
+@tc.desc: verify thread-local timeout count is independent across threads
+@tc.type: FUNC
+@tc.require: 1
+*/
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest009, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    int32_t currentTid = (int32_t)syscall(__NR_gettid);
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(currentTid, mutex.holder);
+
+    const int threadCount = 3;
+    pthread_t threads[threadCount];
+    int32_t results[threadCount];
+
+    auto threadFunc = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutex = (SoftBusMutex*)arg;
+        int32_t result = SOFTBUS_OK;
+        result = SoftBusMutexLock(mutex);
+        return reinterpret_cast<void*>(result);
+    };
+
+    for (int i = 0; i < threadCount; ++i) {
+        pthread_create(&threads[i], nullptr, threadFunc, &mutex);
+    }
+
+    for (int i = 0; i < threadCount; ++i) {
+        void* result;
+        pthread_join(threads[i], &result);
+        results[i] = reinterpret_cast<intptr_t>(result);
+    }
+
+    for (int i = 0; i < threadCount; ++i) {
+        EXPECT_EQ(SOFTBUS_LOCK_ERR, results[i]);
+    }
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftBusMutexLockTest010
+ * @tc.desc: After timeout, thread releases → re-attempt lock succeeds
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest010, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    pthread_t holderThread;
+    auto holderFunc = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+        int32_t result = SoftBusMutexLock(mutexArg);
+        if (result != SOFTBUS_OK) {
+            return reinterpret_cast<void*>(result);
+        }
+
+        SoftBusSleepMs(WAIT_ONE_TIMEOUT_MS);
+
+        int32_t unlockRet = SoftBusMutexUnlock(mutexArg);
+        if (unlockRet != SOFTBUS_OK) {
+            return reinterpret_cast<void*>(unlockRet);
+        }
+ 
+        return reinterpret_cast<void*>(SOFTBUS_OK);
+    };
+
+    pthread_create(&holderThread, nullptr, holderFunc, &mutex);
+
+    pthread_t timeoutThread;
+    auto timeoutFunc = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+
+        int32_t tid = (int32_t)syscall(__NR_gettid);
+        g_currentThreadTid = tid;
+
+        int32_t ret = SoftBusMutexLock(mutexArg);
+        return reinterpret_cast<void*>(ret);
+    };
+
+    SoftBusSleepMs(DELAY_TIME);
+
+    pthread_create(&timeoutThread, nullptr, timeoutFunc, &mutex);
+    void* result = nullptr;
+    pthread_join(timeoutThread, &result);
+    EXPECT_EQ(SOFTBUS_OK, reinterpret_cast<intptr_t>(result));
+    EXPECT_EQ(g_currentThreadTid, mutex.holder);
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    pthread_join(holderThread, nullptr);
+}
+
+/**
+ * @tc.name: SoftBusMutexLockTest011
+ * @tc.desc: thread A lock -> thread B lock timeout -> thread A unlock -> thread B lock success
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest011, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t tid1 = (int32_t)syscall(__NR_gettid);
+    EXPECT_EQ(tid1, mutex.holder);
+
+    auto timeLockThread = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+
+        int32_t tid = (int32_t)syscall(__NR_gettid);
+        g_currentThreadTid = tid;
+        int32_t result = SoftBusMutexLock(mutexArg);
+        return reinterpret_cast<void*>(result);
+    };
+
+    pthread_t thread1;
+    pthread_create(&thread1, nullptr, timeLockThread, &mutex);
+    void* joinResult1;
+    pthread_join(thread1, &joinResult1);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, reinterpret_cast<intptr_t>(joinResult1));
+    EXPECT_EQ(tid1, mutex.holder);
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
+
+    pthread_t thread2;
+    pthread_create(&thread2, nullptr, timeLockThread, &mutex);
+    void* joinResult2;
+    pthread_join(thread2, &joinResult2);
+    EXPECT_EQ(SOFTBUS_OK, reinterpret_cast<intptr_t>(joinResult2));
+    EXPECT_EQ(g_currentThreadTid, mutex.holder);
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusMutexLockTest012
+ * @tc.desc: system time back no affect the waiting time
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest012, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    ret = SoftBusMutexLock(&mutex);
+    int32_t tid = (int32_t)syscall(__NR_gettid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    auto timeLockThread = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+        int32_t result = 0;
+
+        result = SoftBusMutexLock(mutexArg);
+        struct timespec newTimeSpec = { 0 };
+        (void)clock_gettime(CLOCK_REALTIME, &newTimeSpec);
+        newTimeSpec.tv_sec -= 9000;
+        clock_settime(CLOCK_REALTIME, &newTimeSpec);
+
+        return reinterpret_cast<void*>(result);
+    };
+
+    pthread_t thread;
+    pthread_create(&thread, nullptr, timeLockThread, &mutex);
+
+    void* joinResult;
+    pthread_join(thread, &joinResult);
+
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, reinterpret_cast<intptr_t>(joinResult));
+    EXPECT_EQ(tid, mutex.holder);
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusMutexLockTest013
+ * @tc.desc: system time forward no affect the waiting time
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest013, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    ret = SoftBusMutexLock(&mutex);
+    int32_t tid = (int32_t)syscall(__NR_gettid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    auto timeLockThread = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutexArg = static_cast<SoftBusMutex*>(arg);
+        int32_t result = SoftBusMutexLock(mutexArg);
+
+        struct timespec newTimeSpec = { 0 };
+        (void)clock_gettime(CLOCK_REALTIME, &newTimeSpec);
+        newTimeSpec.tv_sec += 1000;
+        clock_settime(CLOCK_REALTIME, &newTimeSpec);
+
+        return reinterpret_cast<void*>(result);
+    };
+
+    pthread_t thread;
+    pthread_create(&thread, nullptr, timeLockThread, &mutex);
+
+    void* joinResult;
+    pthread_join(thread, &joinResult);
+
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, reinterpret_cast<intptr_t>(joinResult));
+    EXPECT_EQ(tid, mutex.holder);
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftBusMutexLockTest014
+ * @tc.desc: Thread A locked A try B, Thread B locked B try A
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest014, TestSize.Level1)
+{
+    SoftBusMutex mutexA = { 0 };
+    SoftBusMutex mutexB = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutexA, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexInit(&mutexB, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    SoftBusMutex* mutexes[2] = { &mutexA, &mutexB };
+    void* arg = static_cast<void*>(mutexes);
+
+    pthread_t thread1;
+    pthread_create(&thread1, nullptr, ThreadA, arg);
+    pthread_t thread2;
+    pthread_create(&thread2, nullptr, ThreadB, arg);
+    void* joinResult1;
+    pthread_join(thread1, &joinResult1);
+    void* joinResult2;
+    pthread_join(thread2, &joinResult2);
+
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, reinterpret_cast<intptr_t>(joinResult1));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, reinterpret_cast<intptr_t>(joinResult2));
+
+    ret = SoftBusMutexUnlock(&mutexA);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexUnlock(&mutexB);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutexA);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusMutexDestroy(&mutexB);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+@tc.name: SoftBusMutexLockTest015
+@tc.desc: verify high concurrency scenario
+@tc.type: FUNC
+@tc.require: 1
+*/
+HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest015, TestSize.Level1)
+{
+    SoftBusMutex mutex = { 0 };
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_NORMAL,
+    };
+    int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SetTimeWaitSec(TIME_WAIT_SEC_TEST);
+
+    int32_t currentTid = (int32_t)syscall(__NR_gettid);
+    ret = SoftBusMutexLock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(currentTid, mutex.holder);
+
+    const int threadCount = 11;
+    pthread_t threads[threadCount];
+    int32_t results[threadCount];
+
+    auto threadFunc = [](void* arg) -> void* {
+        if (arg == nullptr) {
+            return reinterpret_cast<void*>(SOFTBUS_INVALID_PARAM);
+        }
+
+        SoftBusMutex* mutex = (SoftBusMutex*)arg;
+        int32_t result = SOFTBUS_OK;
+        result = SoftBusMutexLock(mutex);
+        return reinterpret_cast<void*>(result);
+    };
+
+    for (int i = 0; i < threadCount; ++i) {
+        pthread_create(&threads[i], nullptr, threadFunc, &mutex);
+        void* result;
+        pthread_join(threads[i], &result);
+        results[i] = reinterpret_cast<intptr_t>(result);
+        EXPECT_EQ(SOFTBUS_LOCK_ERR, results[i]);
+    }
+
+    ret = SoftBusMutexUnlock(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftBusMutexDestroy(&mutex);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
@@ -258,7 +927,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest001, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest002, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -271,7 +940,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest002, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -281,6 +950,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -291,7 +961,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest003, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest004, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
@@ -301,6 +971,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest004, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -311,13 +982,14 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest004, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest005, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexLock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -340,7 +1012,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest001, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest002, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexDestroy(&mutex);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -353,12 +1025,13 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest002, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest003, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftBusMutexDestroy(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -369,7 +1042,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest003, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest004, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -378,6 +1051,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest004, TestSize.Level0)
 
     ret = SoftBusMutexDestroy(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -388,7 +1062,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest004, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest005, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,
     };
@@ -397,6 +1071,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest005, TestSize.Level0)
 
     ret = SoftBusMutexDestroy(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -407,7 +1082,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexDestroyTest005, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusMutexLockGuardTest001, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusMutexInit(&mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     {
@@ -915,7 +1590,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondBroadcastTest003, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest001, TestSize.Level0)
 {
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -934,7 +1609,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest001, TestSize.Level0)
 HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest002, TestSize.Level0)
 {
     SoftBusCond cond = 0;
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     SoftBusMutexAttr mutexAttr = {
         .type = SOFTBUS_MUTEX_NORMAL,
     };
@@ -969,7 +1644,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest003, TestSize.Level0)
 HWTEST_F(SoftbusThreadTest, SoftBusCondWaitTest004, TestSize.Level0)
 {
     SoftBusCond cond = 0;
-    SoftBusMutex mutex = 0;
+    SoftBusMutex mutex = { 0 };
     int32_t ret = SoftBusCondInit(&cond);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(cond != 0);
