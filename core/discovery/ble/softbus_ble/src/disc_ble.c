@@ -775,17 +775,20 @@ static int32_t DiscBleGetCustData(DeviceInfo *info)
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, DISC_BLE, "lock fail.");
     DiscBleInfo passiveBleInfo = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE];
-    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     uint32_t pos = 0;
     for (pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (CheckCapBitMapExist(CAPABILITY_NUM, passiveBleInfo.capBitMap, pos)) {
             break;
         }
     }
-    DISC_CHECK_AND_RETURN_RET_LOGD(
-        pos < CAPABILITY_MAX_BITNUM, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL, DISC_BLE, "not find capBitMap");
+    if (pos >= CAPABILITY_MAX_BITNUM) {
+        DISC_LOGD(DISC_BLE, "not find capBitMap");
+        (void)SoftBusMutexUnlock(&g_bleInfoLock);
+        return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL;
+    }
     cJSON *json = cJSON_ParseWithLength((const char *)passiveBleInfo.capabilityData[pos],
         passiveBleInfo.capDataLen[pos]);
+    (void)SoftBusMutexUnlock(&g_bleInfoLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_BLE, "parse cJSON fail");
 
     char custData[DISC_MAX_CUST_DATA_LEN] = {0};
