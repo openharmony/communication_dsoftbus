@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 
+#include "auth_hichain.h"
 #include "auth_request.h"
 #include "auth_session_fsm_struct.h"
 #include "lnn_distributed_net_ledger.h"
@@ -42,6 +43,9 @@ public:
     virtual int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info) = 0;
     virtual bool LnnIsNeedInterceptBroadcast(bool disableGlass) = 0;
     virtual int32_t LnnSaveRemoteDeviceInfoPacked(const NodeInfo *deviceInfo) = 0;
+    virtual int32_t GetLocalUdidShortHash(char *localUdidHash) = 0;
+    virtual bool IsSameAccount(const char *accountHash) = 0;
+    virtual int32_t HiChainStartAuth(int64_t authSeq, HiChainAuthParam *hichainParam, HiChainAuthMode authMode) = 0;
 };
 
 class AuthSessionFsmInterfaceMock : public AuthSessionFsmInterface {
@@ -61,6 +65,9 @@ public:
     MOCK_METHOD2(PostDeviceIdMessage, int32_t(int64_t, const AuthSessionInfo *));
     MOCK_METHOD1(LnnIsNeedInterceptBroadcast, bool(bool));
     MOCK_METHOD1(LnnSaveRemoteDeviceInfoPacked, int32_t(const NodeInfo *));
+    MOCK_METHOD1(GetLocalUdidShortHash, int32_t(char *localUdidHash));
+    MOCK_METHOD1(IsSameAccount, bool(const char *accountHash));
+    MOCK_METHOD3(HiChainStartAuth, int32_t(int64_t authSeq, HiChainAuthParam *hichainParam, HiChainAuthMode authMode));
 };
 } // namespace OHOS
 #endif // AUTH_AUTH_SESSION_FSM_MOCK_H

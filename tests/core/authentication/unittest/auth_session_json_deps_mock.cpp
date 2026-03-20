@@ -485,5 +485,122 @@ int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **
 {
     return GetInterface()->FindAndWaitAuthGenCertParaNodeById(requestId, genCertParaNode);
 }
+
+int32_t GetAllForegroundAccountIds(int32_t **userIds, int32_t *userIdsLen)
+{
+    return GetInterface()->GetAllForegroundAccountIds(userIds, userIdsLen);
+}
+
+char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+    const char *udidHash)
+{
+    return GetInterface()->IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+}
+
+char *cJSON_PrintUnformatted(const cJSON *item)
+{
+    return GetInterface()->cJSON_PrintUnformatted(item);
+}
+
+void cJSON_free(void *object)
+{
+    (void)object;
+}
+
+cJSON *cJSON_CreateObject(void)
+{
+    return (cJSON *)SoftBusCalloc(sizeof(cJSON));
+}
+
+void cJSON_Delete(cJSON *object)
+{
+    if (object != nullptr) {
+        SoftBusFree(object);
+    }
+}
+
+cJSON *CreateJsonObjectFromString(const char *jsonStr)
+{
+    return GetInterface()->CreateJsonObjectFromString(jsonStr);
+}
+
+cJSON *cJSON_AddNumberToObject(cJSON * const object, const char * const name, const double number)
+{
+    return GetInterface()->cJSON_AddNumberToObject(object, name, number);
+}
+
+cJSON_bool cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item)
+{
+    return GetInterface()->cJSON_AddItemToObject(object, string, item);
+}
+
+cJSON *cJSON_CreateArray(void)
+{
+    return GetInterface()->cJSON_CreateArray();
+}
+
+cJSON *cJSON_CreateNumber(double num)
+{
+    return GetInterface()->cJSON_CreateNumber(num);
+}
+
+cJSON_bool cJSON_AddItemToArray(cJSON *array, cJSON *item)
+{
+    return GetInterface()->cJSON_AddItemToArray(array, item);
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return GetInterface()->JudgeDeviceTypeAndGetOsAccountIds();
+}
+
+int GetArrayItemNum(const cJSON *jsonObj)
+{
+    return GetInterface()->GetArrayItemNum(jsonObj);
+}
+
+cJSON *GetArrayItemFromArray(const cJSON *jsonArr, int index)
+{
+    return GetInterface()->GetArrayItemFromArray(jsonArr, index);
+}
+
+double cJSON_GetNumberValue(const cJSON * const item)
+{
+    return GetInterface()->cJSON_GetNumberValue(item);
+}
+
+bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target)
+{
+    return GetInterface()->GetJsonObjectNumberItem(json, string, target);
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetInterface()->LnnGetLocalNumInfo(key, info);
+}
+
+cJSON *cJSON_GetObjectItem(const cJSON * const object, const char * const string)
+{
+    auto it = GetInterface();
+    if (it == nullptr) {
+        return nullptr;
+    }
+    return it->cJSON_GetObjectItem(object, string);
+}
+
+bool LnnIsDefaultOhosAccount(void)
+{
+    return GetInterface()->LnnIsDefaultOhosAccount();
+}
+
+cJSON *cJSON_Duplicate(const cJSON *item, cJSON_bool recurse)
+{
+    return GetInterface()->cJSON_Duplicate(item, recurse);
+}
+
+bool AddNumberToJsonObject(cJSON *json, const char *const string, int32_t num)
+{
+    return GetInterface()->AddNumberToJsonObject(json, string, num);
+}
 }
 } // namespace OHOS

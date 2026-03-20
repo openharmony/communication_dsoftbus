@@ -31,6 +31,7 @@ constexpr int32_t TEST_AUTH_PORT = 1;
 constexpr int32_t TEST_SESSION_PORT = 2;
 constexpr int32_t TEST_PROXY_PORT = 3;
 constexpr uint8_t KEY_VALUE[SESSION_KEY_LENGTH] = "123456keytest";
+constexpr int32_t TEST_BASIC_USER_ID = 100;
 
 class AuthSessionJsonMockTest : public testing::Test {
 public:
@@ -1311,5 +1312,1054 @@ HWTEST_F(AuthSessionJsonMockTest, GetLocalUdidShortHash_TEST_001, TestSize.Level
     char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     ret = GetLocalUdidShortHash(localUdidHash);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+}
+
+/*
+ * @tc.name: IS_SAME_ACCOUNT_TEST_001
+ * @tc.desc: test func IsSameAccount
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, IS_SAME_ACCOUNT_TEST_001, TestSize.Level1)
+{
+    char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mocker, LnnIsDefaultOhosAccount).WillOnce(Return(false));
+    // invalid param
+    ret = IsSameAccount(nullptr);
+    EXPECT_EQ(ret, false);
+    // get local account fail
+    ret = IsSameAccount(accountHash);
+    EXPECT_EQ(ret, false);
+    // convert fail
+    ret = IsSameAccount(accountHash);
+    EXPECT_EQ(ret, false);
+    // succ
+    ret = IsSameAccount(accountHash);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: QUERY_ALL_CRED_TYPE_BY_QUERY_PARAM_TEST_001
+ * @tc.desc: QueryAllCredTypeByQueryParam fail and succ
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_BY_QUERY_PARAM_TEST_001, TestSize.Level1)
+{
+    cJSON *credTypesJson = cJSON_CreateObject();
+    ASSERT_NE(credTypesJson, nullptr);
+    char udidHash[UDID_HASH_LEN] = {0};
+    CredTypeQueryParam queryParam = {
+        .localUserId = 1,
+        .peerUserId = 2,
+        .isSameAccount = false,
+        .localUdidHash =  udidHash,
+        .peerUdidHash = udidHash,
+    };
+    bool ret = false;
+    char msg[] = "";
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillRepeatedly(Return(msg));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, cJSON_AddItemToArray).WillRepeatedly(Return(true));
+    // add to credTypesJson fail
+    ret = QueryAllCredTypeByQueryParam(&queryParam, credTypesJson);
+    EXPECT_EQ(ret, false);
+    // succ
+    ret = QueryAllCredTypeByQueryParam(&queryParam, credTypesJson);
+    EXPECT_EQ(ret, true);
+
+    cJSON_Delete(credTypesJson);
+}
+
+/*
+ * @tc.name: QUERY_ALL_CRED_TYPE_PER_PEER_USERID_TEST_001
+ * @tc.desc: test func QueryAllCredTypePerPeerUserId fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_PER_PEER_USERID_TEST_001, TestSize.Level1)
+{
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    CredTypeQueryParam qParam = {
+        .localUdidHash = udidHash,
+        .peerUdidHash = udidHash,
+        .isSameAccount = false,
+    };
+    cJSON *peerUserIdsJson = cJSON_CreateObject();
+    ASSERT_NE(peerUserIdsJson, nullptr);
+    cJSON *ret = NULL;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    cJSON *tmpJson2 = cJSON_CreateObject();
+    char msg[] = "";
+    if (tmpJson1 == nullptr || tmpJson2 == nullptr) {
+        cJSON_Delete(tmpJson1);
+        cJSON_Delete(tmpJson2);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, cJSON_CreateArray).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson1))
+        .WillOnce(Return(tmpJson2));
+    EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(1)).WillOnce(Return(1));
+    EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(nullptr)).WillOnce(Return(peerUserIdsJson));
+    EXPECT_CALL(mocker, cJSON_GetNumberValue).WillRepeatedly(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(msg));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillOnce(Return(false));
+    // invlaid param
+    ret = QueryAllCredTypePerPeerUserId(nullptr, &qParam);
+    EXPECT_EQ(ret, nullptr);
+    // create array json fail
+    ret = QueryAllCredTypePerPeerUserId(peerUserIdsJson, &qParam);
+    EXPECT_EQ(ret, nullptr);
+    // get array item fail
+    ret = QueryAllCredTypePerPeerUserId(peerUserIdsJson, &qParam);
+    EXPECT_EQ(ret, nullptr);
+    // quary fail
+    ret = QueryAllCredTypePerPeerUserId(peerUserIdsJson, &qParam);
+    EXPECT_EQ(ret, nullptr);
+
+    cJSON_Delete(peerUserIdsJson);
+}
+
+/*
+ * @tc.name: QUERY_ALL_CRED_TYPE_PER_PEER_USERID_TEST_002
+ * @tc.desc: test func QueryAllCredTypePerPeerUserId succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_PER_PEER_USERID_TEST_002, TestSize.Level1)
+{
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    CredTypeQueryParam qParam = {
+        .localUdidHash = udidHash,
+        .peerUdidHash = udidHash,
+        .isSameAccount = false,
+    };
+    cJSON *peerUserIdsJson = cJSON_CreateObject();
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *ret = nullptr;
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    char msg[] = "";
+    if (peerUserIdsJson == nullptr || tmpJson1 == nullptr) {
+        cJSON_Delete(peerUserIdsJson);
+        cJSON_Delete(tmpJson1);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_CreateArray).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(1));
+    EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(peerUserIdsJson));
+    EXPECT_CALL(mocker, cJSON_GetNumberValue).WillRepeatedly(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(msg));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, cJSON_AddItemToArray).WillOnce(
+        Invoke([](cJSON *arrayJson, cJSON *item) {
+            if (item != nullptr) {
+                cJSON_Delete(item);
+            }
+            return true;
+        }));
+    // succ
+    ret = QueryAllCredTypePerPeerUserId(peerUserIdsJson, &qParam);
+    EXPECT_NE(ret, nullptr);
+
+    cJSON_Delete(peerUserIdsJson);
+    cJSON_Delete(tmpJson1);
+}
+
+/*
+ * @tc.name: CRED_TYPES_SORT_CMP_TEST_001
+ * @tc.desc: test func CredTypesSortCmp succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, CRED_TYPES_SORT_CMP_TEST_001, TestSize.Level1)
+{
+    CredTypeSortInfo credTypeArray[] = {
+        {.localUserId = TEST_BASIC_USER_ID + 1, .credType = ACCOUNT_UNRELATED, .peerUserId = TEST_BASIC_USER_ID,
+            .mainUserId = TEST_BASIC_USER_ID + 10},
+        {.localUserId = TEST_BASIC_USER_ID + 2, .credType = ACCOUNT_RELATED, .peerUserId = TEST_BASIC_USER_ID,
+            .mainUserId = TEST_BASIC_USER_ID + 10},
+        {.localUserId = TEST_BASIC_USER_ID + 3, .credType = ACCOUNT_SHARED, .peerUserId = TEST_BASIC_USER_ID,
+            .mainUserId = TEST_BASIC_USER_ID + 10},
+        {.localUserId = TEST_BASIC_USER_ID + 4, .credType = ACCOUNT_UNRELATED, .peerUserId = TEST_BASIC_USER_ID + 1,
+            .mainUserId = TEST_BASIC_USER_ID + 10},
+        {.localUserId = TEST_BASIC_USER_ID + 5, .credType = ACCOUNT_RELATED, .peerUserId = TEST_BASIC_USER_ID + 2,
+            .mainUserId = TEST_BASIC_USER_ID + 10},
+        {.localUserId = TEST_BASIC_USER_ID + 6, .credType = ACCOUNT_UNRELATED, .peerUserId = TEST_BASIC_USER_ID + 10,
+            .mainUserId = TEST_BASIC_USER_ID + 10},
+    };
+    int32_t credTypesLen = sizeof(credTypeArray) / sizeof(CredTypeSortInfo);
+    qsort(credTypeArray, credTypesLen, sizeof(CredTypeSortInfo), CredTypesSortCmp);
+    EXPECT_EQ(credTypeArray[0].localUserId, TEST_BASIC_USER_ID + 6);
+    EXPECT_EQ(credTypeArray[1].localUserId, TEST_BASIC_USER_ID + 2);
+    EXPECT_EQ(credTypeArray[2].localUserId, TEST_BASIC_USER_ID + 3);
+    EXPECT_EQ(credTypeArray[3].localUserId, TEST_BASIC_USER_ID + 1);
+    EXPECT_EQ(credTypeArray[4].localUserId, TEST_BASIC_USER_ID + 4);
+    EXPECT_EQ(credTypeArray[5].localUserId, TEST_BASIC_USER_ID + 5);
+    // TODO
+}
+
+/*
+ * @tc.name: SORT_CRED_TYPES_TEST_001
+ * @tc.desc: test func SortCredTypes fail and succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, SORT_CRED_TYPES_TEST_001, TestSize.Level1)
+{
+    cJSON *peerCredTypesJson = cJSON_CreateObject();
+    ASSERT_NE(peerCredTypesJson, nullptr);
+    int32_t credTypesLen = 1;
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    CredTypeSortInfo *ret = nullptr;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(nullptr)).WillRepeatedly(Return(peerCredTypesJson));
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    // get cjson item fail
+    ret = SortCredTypes(peerCredTypesJson, credTypesLen, &info);
+    EXPECT_EQ(ret, nullptr);
+    // get num item fail
+    ret = SortCredTypes(peerCredTypesJson, credTypesLen, &info);
+    EXPECT_EQ(ret, nullptr);
+    // succ
+    ret = SortCredTypes(peerCredTypesJson, credTypesLen, &info);
+    EXPECT_NE(ret, nullptr);
+    SoftBusFree(ret);
+    ret = nullptr;
+
+    cJSON_Delete(peerCredTypesJson);
+}
+
+/*
+ * @tc.name: CHOOSE_BEST_CRED_TYPE_TEST_001
+ * @tc.desc: test func ChooseBestCredType succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, CHOOSE_BEST_CRED_TYPE_TEST_001, TestSize.Level1)
+{
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    cJSON *peerUserIdsJson = cJSON_CreateObject();
+    ASSERT_NE(peerUserIdsJson, nullptr);
+    cJSON *chosenCredType = nullptr;
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    char msg[] = "";
+    EXPECT_CALL(mocker, GetArrayItemNum).WillRepeatedly(Return(1));
+    EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(nullptr)).WillRepeatedly(Return(peerUserIdsJson));
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(nullptr)).WillRepeatedly(Return(msg));
+    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr)).WillRepeatedly(Return(peerUserIdsJson));
+    // invalid param
+    ret = ChooseBestCredType(nullptr, udidHash, udidHash, &info, &chosenCredType);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(chosenCredType, nullptr);
+    // sort failed
+    ret = ChooseBestCredType(peerUserIdsJson, udidHash, udidHash, &info, &chosenCredType);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(chosenCredType, nullptr);
+    // find no credType
+    ret = ChooseBestCredType(peerUserIdsJson, udidHash, udidHash, &info, &chosenCredType);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(chosenCredType, nullptr);
+    // add to json fail
+    ret = ChooseBestCredType(peerUserIdsJson, udidHash, udidHash, &info, &chosenCredType);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(chosenCredType, nullptr);
+    // succ
+    ret = ChooseBestCredType(peerUserIdsJson, udidHash, udidHash, &info, &chosenCredType);
+    EXPECT_EQ(ret, true);
+    EXPECT_NE(chosenCredType, nullptr);
+    EXPECT_EQ(info.credId, msg);
+
+    cJSON_Delete(peerUserIdsJson);
+    cJSON_Delete(chosenCredType);
+}
+
+/*
+ * @tc.name: BUILD_PEER_USER_IDS_JSON_TEST_001
+ * @tc.desc: test func BuildPeerUserIdsJson create json fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, BUILD_PEER_USER_IDS_JSON_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.externalUserIds = nullptr;
+    cJSON *ret = nullptr;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    cJSON *tmpJson2 = cJSON_CreateObject();
+    cJSON *tmpJson3 = cJSON_CreateObject();
+    if (tmpJson1 == nullptr || tmpJson2 == nullptr || tmpJson3 == nullptr) {
+        cJSON_Delete(tmpJson1);
+        cJSON_Delete(tmpJson2);
+        cJSON_Delete(tmpJson3);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_CreateArray).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson1))
+        .WillOnce(Return(tmpJson2));
+    EXPECT_CALL(mocker, cJSON_CreateNumber).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson3));
+    EXPECT_CALL(mocker, cJSON_AddItemToArray).WillOnce(Return(false));
+    // invalid param
+    ret = BuildPeerUserIdsJson(nullptr);
+    EXPECT_EQ(ret, nullptr);
+    // create userIdsJson fail
+    ret = BuildPeerUserIdsJson(&info);
+    EXPECT_EQ(ret, nullptr);
+    // create userId fail
+    ret = BuildPeerUserIdsJson(&info);
+    EXPECT_EQ(ret, nullptr);
+    // add to array fail
+    ret = BuildPeerUserIdsJson(&info);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/*
+ * @tc.name: BUILD_PEER_USER_IDS_JSON_TEST_002
+ * @tc.desc: test func BuildPeerUserIdsJson succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, BUILD_PEER_USER_IDS_JSON_TEST_002, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.externalUserIds = cJSON_CreateObject();
+    cJSON *ret = nullptr;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    cJSON *tmpJson2 = cJSON_CreateObject();
+    if (info.externalUserIds == nullptr || tmpJson1 == nullptr || tmpJson2 == nullptr) {
+        cJSON_Delete(info.externalUserIds);
+        cJSON_Delete(tmpJson1);
+        cJSON_Delete(tmpJson2);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_Duplicate).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, cJSON_CreateNumber).WillOnce(Return(tmpJson2));
+    EXPECT_CALL(mocker, cJSON_AddItemToArray).WillOnce(Return(true));
+    // succ
+    ret = BuildPeerUserIdsJson(&info);
+    EXPECT_EQ(ret, tmpJson1);
+
+    cJSON_Delete(info.externalUserIds);
+    cJSON_Delete(tmpJson1);
+    cJSON_Delete(tmpJson2);
+}
+
+/*
+ * @tc.name: CRED_NEGO_STATE_ASK_RECEIVER_TEST_001
+ * @tc.desc: test func CredNegoStateAskReceiver fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_ASK_RECEIVER_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.credNegoState = CRED_NEGO_STATE_ASK;
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    cJSON *tmpJson2 = cJSON_CreateObject();
+    cJSON *tmpJson3 = cJSON_CreateObject();
+    if (tmpJson1 == nullptr || tmpJson2 == nullptr || tmpJson3 == nullptr) {
+        cJSON_Delete(tmpJson1);
+        cJSON_Delete(tmpJson2);
+        cJSON_Delete(tmpJson3);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_CreateArray).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson1))
+        .WillOnce(Return(nullptr)).WillOnce(Return(tmpJson2)).WillOnce(Return(tmpJson3));
+    EXPECT_CALL(mocker, cJSON_CreateNumber).WillOnce(Return(tmpJson1)).WillOnce(Return(tmpJson2));
+    EXPECT_CALL(mocker, cJSON_AddItemToArray).WillOnce(Return(true)).WillOnce(Return(true));
+    EXPECT_CALL(mocker, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(0)).WillOnce(Return(0));
+    // invalid param
+    ret = CredNegoStateAskReceiver(nullptr, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+    // build fail
+    ret = CredNegoStateAskReceiver(&info, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+    // Query fail
+    ret = CredNegoStateAskReceiver(&info, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+    // Query empty fail
+    ret = CredNegoStateAskReceiver(&info, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: CRED_NEGO_STATE_ASK_RECEIVER_TEST_002
+ * @tc.desc: test func CredNegoStateAskReceiver succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_ASK_RECEIVER_TEST_002, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));]
+    info.externalUserIds = nullptr;
+    info.credTypeInfo = cJSON_CreateObject();
+    ASSERT_NE(info.credTypeInfo, nullptr);
+    info.credNegoState = CRED_NEGO_STATE_ASK;
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    char msg[] = "";
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    cJSON *tmpJson2 = cJSON_CreateObject();
+    if (tmpJson1 == nullptr || tmpJson2 == nullptr) {
+        cJSON_Delete(info.credTypeInfo);
+        cJSON_Delete(tmpJson1);
+        cJSON_Delete(tmpJson2);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_CreateArray).WillOnce(Return(tmpJson1)).WillOnce(Return(tmpJson2));
+    EXPECT_CALL(mocker, cJSON_CreateNumber).WillOnce(Return(tmpJson2));
+    EXPECT_CALL(mocker, cJSON_AddItemToArray).WillOnce(Return(true)).WillRepeatedly(
+        Invoke([](cJSON *arrayJson, cJSON *item) {
+            if (item != nullptr) {
+                cJSON_Delete(item);
+            }
+            return true;
+        }));
+    EXPECT_CALL(mocker, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, GetArrayItemNum).WillRepeatedly(Return(1));
+    EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(tmpJson2));
+    EXPECT_CALL(mocker, cJSON_GetNumberValue).WillOnce(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillRepeatedly(Return(msg));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    // succ
+    ret = CredNegoStateAskReceiver(&info, udidHash, udidHash);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(info.credTypeInfo, tmpJson2);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_REPLY);
+
+    cJSON_Delete(tmpJson2);
+}
+
+/*
+ * @tc.name: CRED_NEGO_STATE_REPLY_RECEIVER_TEST_001
+ * @tc.desc: test func CredNegoStateReplyReceiver fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_REPLY_RECEIVER_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.credNegoState = CRED_NEGO_STATE_ASK;
+    info.credTypeInfo = cJSON_CreateObject();
+    ASSERT_NE(info.credTypeInfo, nullptr);
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(0));
+    // invalid param
+    ret = CredNegoStateReplyReceiver(nullptr, udidHash, udidHash);
+    EXPECT_EQ(ret, false);
+    // no found
+    ret = CredNegoStateReplyReceiver(&info, udidHash, udidHash);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: CRED_NEGO_STATE_REPLY_RECEIVER_TEST_002
+ * @tc.desc: test func CredNegoStateReplyReceiver succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_REPLY_RECEIVER_TEST_002, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.credNegoState = CRED_NEGO_STATE_ASK;
+    info.credTypeInfo = cJSON_CreateObject();
+    ASSERT_NE(info.credTypeInfo, nullptr);
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    char msg[] = "";
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    cJSON *tmpJson2 = cJSON_CreateObject();
+    if (info.credTypeInfo == nullptr || tmpJson1 == nullptr || tmpJson2 == nullptr) {
+        cJSON_Delete(info.credTypeInfo);
+        cJSON_Delete(tmpJson1);
+        cJSON_Delete(tmpJson2);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(1));
+    EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillRepeatedly(Return(msg));
+    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillRepeatedly(Return(tmpJson2));
+    // succ
+    ret = CredNegoStateReplyReceiver(&info, udidHash, udidHash);
+    EXPECT_TRUE(ret);
+    EXPECT_NE(info.credTypeInfo, nullptr);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_DECIDE);
+    EXPECT_EQ(info.credId, msg);
+
+    cJSON_Delete(tmpJson1);
+    cJSON_Delete(tmpJson2);
+}
+
+/*
+ * @tc.name: CRED_NEGO_STATE_DECIDE_RECEIVER_TEST_001
+ * @tc.desc: test func CredNegoStateDecideReceiver fail and succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_DECIDE_RECEIVER_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.credTypeInfo = cJSON_CreateObject();
+    ASSERT_NE(info.credTypeInfo, nullptr);
+    info.credNegoState = CRED_NEGO_STATE_DECIDE;
+    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    char msg[] = "";
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    if (tmpJson1 == nullptr) {
+        cJSON_Delete(info.credTypeInfo);
+        cJSON_Delete(tmpJson1);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr)).WillRepeatedly(Return(tmpJson1));
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(nullptr)).WillOnce(Return(msg));
+    // invalid param
+    ret = CredNegoStateDecideReceiver(nullptr, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+    // parse fail
+    ret = CredNegoStateDecideReceiver(&info, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+    // add fail
+    ret = CredNegoStateDecideReceiver(&info, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+    // cant use best cred
+    ret = CredNegoStateDecideReceiver(&info, udidHash, udidHash);
+    EXPECT_FALSE(ret);
+    // succ
+    ret = CredNegoStateDecideReceiver(&info, udidHash, udidHash);
+    EXPECT_TRUE(ret);
+    EXPECT_NE(info.credTypeInfo, nullptr);
+    cJSON_Delete(info.credTypeInfo);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_FINISH);
+    EXPECT_EQ(info.credId, msg);
+
+    cJSON_Delete(tmpJson1);
+}
+
+/*
+ * @tc.name: PROCESS_CRED_INFO_TEST_001
+ * @tc.desc: test func ProcessCredInfo succ and fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PROCESS_CRED_INFO_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillOnce(Return(SOFTBUS_OK));
+    // specific state
+    info.credNegoState = CRED_NEGO_STATE_FINISH;
+    EXPECT_NO_FATAL_FAILURE(ProcessCredInfo(&info));
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_FINISH);
+    // get local udid fail
+    info.credNegoState = CRED_NEGO_STATE_DECIDE;
+    EXPECT_NO_FATAL_FAILURE(ProcessCredInfo(&info));
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_COMPATIBLE);
+    // succ
+    info.credNegoState = CRED_NEGO_STATE_DECIDE;
+    info.credTypeInfo = nullptr;
+    EXPECT_NO_FATAL_FAILURE(ProcessCredInfo(&info));
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_COMPATIBLE);
+}
+
+/*
+ * @tc.name: UNPACK_CRED_TYPES_TEST_001
+ * @tc.desc: test func UnpackCredTypes fail and succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CRED_TYPES_TEST_001, TestSize.Level1)
+{
+    cJSON json;
+    (void)memset_s(&json, sizeof(cJSON), 0, sizeof(cJSON));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    info.credTypeInfo = cJSON_CreateObject();
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    cJSON *tmpJson2 = cJSON_CreateObject();
+    if (info.credTypeInfo == nullptr || tmpJson1 == nullptr || tmpJson2 == nullptr) {
+        cJSON_Delete(info.credTypeInfo);
+        cJSON_Delete(tmpJson1);
+        cJSON_Delete(tmpJson2);
+        FAIL() << "memory allocation failed";
+    }
+    bool ret = false;
+    EXPECT_CALL(mocker, cJSON_GetObjectItem).WillOnce(Return(nullptr)).WillRepeatedly(Return(tmpJson1));
+    EXPECT_CALL(mocker, cJSON_Duplicate).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson2));
+    // invalid param
+    ret = UnpackCredTypes(nullptr, nullptr);
+    EXPECT_EQ(ret, false);
+    // parse from json fail
+    ret = UnpackCredTypes(&json, &info);
+    EXPECT_EQ(ret, false);
+    // duplicate fail
+    ret = UnpackCredTypes(&json, &info);
+    EXPECT_EQ(ret, false);
+    // succ
+    ret = UnpackCredTypes(&json, &info);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(info.credTypeInfo, tmpJson2);
+
+    cJSON_Delete(tmpJson1);
+    cJSON_Delete(tmpJson2);
+}
+
+/*
+ * @tc.name: UNPACK_EXTERNAL_USERID_TEST_001
+ * @tc.desc: test func UnpackExternalUserId fail and succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_EXTERNAL_USERID_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    info.externalUserIds = cJSON_CreateObject();
+    cJSON *tmpJson = cJSON_CreateObject();
+    if (info.externalUserIds == nullptr || tmpJson == nullptr) {
+        cJSON_Delete(info.externalUserIds);
+        cJSON_Delete(tmpJson);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(Return(false))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(1), Return(true)));
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, CreateJsonObjectFromString).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson));
+    // read msgLen fail
+    EXPECT_NO_FATAL_FAILURE(UnpackExternalUserId(&json, &info));
+    // read msg fail
+    EXPECT_NO_FATAL_FAILURE(UnpackExternalUserId(&json, &info));
+    // create json from msg fail
+    EXPECT_NO_FATAL_FAILURE(UnpackExternalUserId(&json, &info));
+    // succ
+    EXPECT_NO_FATAL_FAILURE(UnpackExternalUserId(&json, &info));
+    EXPECT_EQ(tmpJson, info.externalUserIds);
+
+    cJSON_Delete(tmpJson);
+}
+
+/*
+ * @tc.name: UNPACK_CRED_NEGO_INFO_BY_STATE_TEST_001
+ * @tc.desc: test func UnpackCredNegoInfoByState succ and fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CRED_NEGO_INFO_BY_STATE_TEST_001, TestSize.Level1)
+{
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(Return(false));
+    EXPECT_CALL(mocker, cJSON_GetObjectItem).WillRepeatedly(Return(nullptr));
+    // STATE_ASK
+    info.credNegoState = CRED_NEGO_STATE_ASK;
+    ret = UnpackCredNegoInfoByState(&obj, &info, nullptr);
+    EXPECT_EQ(ret, true);
+    // STATE_REPLY
+    info.credNegoState = CRED_NEGO_STATE_REPLY;
+    ret = UnpackCredNegoInfoByState(&obj, &info, nullptr);
+    EXPECT_EQ(ret, false);
+    // STATE_DECIDE
+    info.credNegoState = CRED_NEGO_STATE_DECIDE;
+    ret = UnpackCredNegoInfoByState(&obj, &info, nullptr);
+    EXPECT_EQ(ret, false);
+    // STATE_FINISH
+    info.credNegoState = CRED_NEGO_STATE_FINISH;
+    ret = UnpackCredNegoInfoByState(&obj, &info, nullptr);
+    EXPECT_EQ(ret, true);
+    // STATE_COMPATIBLE
+    info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+    ret = UnpackCredNegoInfoByState(&obj, &info, nullptr);
+    EXPECT_EQ(ret, true);
+    // invalid state
+    info.credNegoState = CRED_NEGO_STATE_COMPATIBLE + 1;
+    ret = UnpackCredNegoInfoByState(&obj, &info, nullptr);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: UNPACK_CRED_NEGO_INFO_JSON_TEST_001
+ * @tc.desc: test func UnpackCredNegoInfoJson fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CRED_NEGO_INFO_JSON_TEST_001, TestSize.Level1)
+{
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson = cJSON_CreateObject();
+    if (tmpJson == nullptr) {
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(Return(false))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(1), Return(true)));
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, CreateJsonObjectFromString).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson));
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillOnce(Return(false));
+    // unpack len fail
+    info.credNegoState = CRED_NEGO_STATE_ASK;
+    ret = UnpackCredNegoInfoJson(&obj, &info);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_ASK);
+    // unpack credTypeInfo fail
+    ret = UnpackCredNegoInfoJson(&obj, &info);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_ASK);
+    // create json fail
+    ret = UnpackCredNegoInfoJson(&obj, &info);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_ASK);
+    // parse json fail
+    ret = UnpackCredNegoInfoJson(&obj, &info);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_ASK);
+}
+
+/*
+ * @tc.name: UNPACK_CRED_NEGO_INFO_JSON_TEST_002
+ * @tc.desc: test func UnpackCredNegoInfoJson succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CRED_NEGO_INFO_JSON_TEST_002, TestSize.Level1)
+{
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson = cJSON_CreateObject();
+    if (tmpJson == nullptr) {
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(DoAll(SetArgPointee<2>(1), Return(true)));
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillOnce(Return(true));
+    EXPECT_CALL(mocker, CreateJsonObjectFromString).WillOnce(Return(tmpJson));
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem)
+        .WillOnce(DoAll(SetArgPointee<2>(CRED_NEGO_STATE_FINISH), Return(true)));
+    // succ
+    ret = UnpackCredNegoInfoJson(&obj, &info);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_FINISH);
+}
+
+/*
+ * @tc.name: UNPACK_CRED_NEGO_INFO_TEST_001
+ * @tc.desc: test func UnpackCredNegoInfo fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CRED_NEGO_INFO_TEST_001, TestSize.Level1)
+{
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isSupportFastAuth = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(Return(false));
+    // STATE_COMPATIBLE
+    info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+    EXPECT_NO_FATAL_FAILURE(UnpackCredNegoInfo(&obj, &info));
+    // SK
+    info.normalizedType = NORMALIZED_SUPPORT;
+    info.credNegoState = CRED_NEGO_STATE_FINISH;
+    EXPECT_NO_FATAL_FAILURE(UnpackCredNegoInfo(&obj, &info));
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_COMPATIBLE);
+    // unpack fail
+    info.credNegoState = CRED_NEGO_STATE_REPLY;
+    info.normalizedType = NORMALIZED_NOT_SUPPORT;
+    EXPECT_NO_FATAL_FAILURE(UnpackCredNegoInfo(&obj, &info));
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_COMPATIBLE);
+}
+
+/*
+ * @tc.name: UNPACK_CRED_NEGO_INFO_TEST_002
+ * @tc.desc: test func UnpackCredNegoInfo succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CRED_NEGO_INFO_TEST_002, TestSize.Level1)
+{
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isSupportFastAuth = false;
+    info.normalizedType = NORMALIZED_NOT_SUPPORT;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    if (tmpJson1 == nullptr) {
+       cJSON_Delete(tmpJson1);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(DoAll(SetArgPointee<2>(1), Return(true)));
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillOnce(Return(true));
+    EXPECT_CALL(mocker, CreateJsonObjectFromString).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillOnce(
+        DoAll(SetArgPointee<2>(CRED_NEGO_STATE_FINISH), Return(true)));
+    // succ
+    info.credNegoState = CRED_NEGO_STATE_REPLY;
+    EXPECT_NO_FATAL_FAILURE(UnpackCredNegoInfo(&obj, &info));
+    EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_FINISH);
+}
+
+/*
+ * @tc.name: PACK_CRED_NEGO_INFO_JSON_TEST_001
+ * @tc.desc: test func PackCredNegoInfoJson succ and fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_NEGO_INFO_JSON_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    char *msg1 = reinterpret_cast<char *>(SoftBusCalloc(1));
+    char *msg2 = reinterpret_cast<char *>(SoftBusCalloc(1));
+    if (msg1 == nullptr || msg2 == nullptr) {
+        SoftBusFree(msg1);
+        SoftBusFree(msg2);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_PrintUnformatted).WillOnce(Return(nullptr)).WillOnce(Return(msg1)).WillOnce(Return(msg2));
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false)).WillOnce(Return(true));
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(true));
+    // printUnformatted fail
+    ret = PackCredNegoInfoJson(&json, nullptr);
+    EXPECT_EQ(ret, false);
+    // add fail
+    ret = PackCredNegoInfoJson(&json, nullptr);
+    EXPECT_EQ(ret, false);
+    // succ
+    ret = PackCredNegoInfoJson(&json, nullptr);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: PACK_CRED_TYPES_AND_STATE_TEST_001
+ * @tc.desc: test func PackCredTypesAndState fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_TYPES_AND_STATE_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    if (tmpJson1 == nullptr) {
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_Duplicate).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr));
+    // duplicate fail
+    ret = PackCredTypesAndState(&json, &info);
+    EXPECT_EQ(ret, false);
+    // add to object fail
+    ret = PackCredTypesAndState(&json, &info);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: PACK_CRED_TYPES_AND_STATE_TEST_002
+ * @tc.desc: test func PackCredTypesAdnState succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_TYPES_AND_STATE_TEST_002, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(1));
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    if (msg == nullptr || tmpJson1 == nullptr) {
+        SoftBusFree(msg);
+        cJSON_Delete(tmpJson1);
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_Duplicate).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, cJSON_AddItemToObject).WillOnce(Return(true));
+    EXPECT_CALL(mocker, cJSON_PrintUnformatted).WillOnce(Return(msg));
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(true));
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(true));
+    // succ
+    ret = PackCredTypesAndState(&json, &info);
+    EXPECT_EQ(ret, true);
+
+    cJSON_Delete(tmpJson1);
+}
+
+/*
+ * @tc.name: PACK_CRED_NEGO_STATE_TEST_001
+ * @tc.desc: test func PackCredNegoState fail and succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_NEGO_STATE_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    bool ret = false;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(1));
+    cJSON tmpJson = {0};
+    if (msg == nullptr) {
+        FAIL() << "memory allocation failed";
+    }
+    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(NULL)).WillOnce(Return(&tmpJson));
+    EXPECT_CALL(mocker, cJSON_PrintUnformatted).WillOnce(Return(msg));
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(true));
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(true));
+    // fail
+    ret = PackCredNegoState(&json, &info);
+    EXPECT_EQ(ret, false);
+    // succ
+    ret = PackCredNegoState(&json, &info);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: PACK_CRED_NEGO_INFO_TEST_001
+ * @tc.desc: test func PackCredNegoInfo invalid state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_NEGO_INFO_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    // invalid state
+    info.credNegoState = CRED_NEGO_STATE_COMPATIBLE + 1;
+    EXPECT_NO_FATAL_FAILURE(PackCredNegoInfo(&json, &info));
+}
+
+/*
+ * @tc.name: PACK_CRED_NEGO_INFO_TEST_002
+ * @tc.desc: test func PackCredNegoInfo valid state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_NEGO_INFO_TEST_002, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    // STATE_ASK
+    info.credNegoState = CRED_NEGO_STATE_ASK;
+    EXPECT_NO_FATAL_FAILURE(PackCredNegoInfo(&json, &info));
+    // STATE_REPLY
+    info.credNegoState = CRED_NEGO_STATE_REPLY;
+    EXPECT_NO_FATAL_FAILURE(PackCredNegoInfo(&json, &info));
+    // STATE_DECIDE
+    info.credNegoState = CRED_NEGO_STATE_DECIDE;
+    EXPECT_NO_FATAL_FAILURE(PackCredNegoInfo(&json, &info));
+    // STATE_FINISH
+    info.credNegoState = CRED_NEGO_STATE_FINISH;
+    EXPECT_NO_FATAL_FAILURE(PackCredNegoInfo(&json, &info));
+    // STATE_COMPATIBLE
+    info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+    EXPECT_NO_FATAL_FAILURE(PackCredNegoInfo(&json, &info));
+}
+
+/*
+ * @tc.name: GET_LOCAL_DEVICE_ID_TEST_001
+ * @tc.desc: test func GetLocalDeviceId fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, GET_LOCAL_DEVICE_ID_TEST_001, TestSize.Level1)
+{
+    char uuid[UUID_BUF_LEN] = { 0 };
+    char udid[UDID_BUF_LEN] = { 0 };
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    int32_t ret = SOFTBUS_OK;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    // invalid param
+    ret = GetLocalDeviceId(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    // get local info fail
+    ret = GetLocalDeviceId(uuid, udid, networkId);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+}
+
+/*
+ * @tc.name: GET_LOCAL_DEVICE_ID_TEST_002
+ * @tc.desc: test func GetLocalDeviceId succ
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, GET_LOCAL_DEVICE_ID_TEST_002, TestSize.Level1)
+{
+    char uuid[UUID_BUF_LEN] = { 0 };
+    char udid[UDID_BUF_LEN] = { 0 };
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    int32_t ret = SOFTBUS_OK;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    // succ
+    ret = GetLocalDeviceId(uuid, udid, networkId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

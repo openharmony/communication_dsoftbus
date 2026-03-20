@@ -157,5 +157,37 @@ void cJSON_Delete(cJSON *item)
         SoftBusFree(item);
     }
 }
+
+char *cJSON_GetStringValue(const cJSON * const item)
+{
+    return GetInterfaceMock()->cJSON_GetStringValue(item);
+}
+
+bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target)
+{
+    return GetInterfaceMock()->GetJsonObjectInt32Item(json, string, target);
+}
+
+cJSON *GetArrayItemFromArray(const cJSON *jsonArr, int index)
+{
+    return GetInterfaceMock()->GetArrayItemFromArray(jsonArr, index);
+}
+
+void cJSON_free(void *object)
+{
+    if (object != nullptr) {
+        SoftBusFree(object);
+    }
+}
+
+cJSON *cJSON_CreateArray(void)
+{
+    return (cJSON *)SoftBusCalloc(sizeof(cJSON));
+}
+
+cJSON_bool cJSON_AddItemToArray(cJSON *array, cJSON *item)
+{
+    return GetInterfaceMock()->cJSON_AddItemToArray(array, item);
+}
 } // extern "C"
 } // namespace OHOS
