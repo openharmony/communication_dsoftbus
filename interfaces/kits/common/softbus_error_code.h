@@ -38,6 +38,8 @@
 
 #ifndef SOFTBUS_ERROR_CODE_H
 #define SOFTBUS_ERROR_CODE_H
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -49,7 +51,6 @@ extern "C" {
 #define SOFTBUS_ERRNO(module) (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((module) << 16) | (0xFFFF)))
 #define SOFTBUS_SUB_ERRNO(module, sub) (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((module) << 16) | ((sub) << 12) | (0x0FFF)))
 #define CHIP_CONFLICT_ERROR_OFFSET 1000
-
 /**
  * @brief Softbus error code module. Support 32 modules.
  *
@@ -71,8 +72,15 @@ enum SoftBusSubModule {
 
 enum SoftBusUnderlayError {
     SOFTBUS_CONN_BR_UNDERLAYBASE_ERR = SOFTBUS_ERRNO(CONN_UNDERLAY_BLUETOOTH_MODULE_CODE),
-    SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + 4,
+    SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + 0x04,
+    SOFTBUS_CONN_BR_UNDERLAY_ERROR_UNDEFINED = SOFTBUS_CONN_BR_UNDERLAYBASE_ERR + 0xff,
 };
+
+// mapping softbus_wrapper_br_interface_struct file ConnBrConnectUnderlayerResult errcode.
+static inline bool SoftBusIsBtUnderlayerError(int32_t errCode)
+{
+    return errCode > SOFTBUS_CONN_BR_UNDERLAYBASE_ERR && errCode < SOFTBUS_CONN_BR_UNDERLAY_ERROR_UNDEFINED;
+}
 
 /**
  * @brief Discovery error code submodule. Support 16 submodules.
@@ -1292,6 +1300,7 @@ enum SoftBusErrNo {
     SOFTBUS_CONN_PROXY_RETRY_FAILED = SOFTBUS_CONN_ERR_BASE + 421,
     SOFTBUS_CONN_D2D_EXCEED_LIMIT_ERR = SOFTBUS_CONN_ERR_BASE + 422,
     SOFTBUS_CONN_D2D_CANCEL_ERR = SOFTBUS_CONN_ERR_BASE + 423,
+    SOFTBUS_CONN_PROXY_BR_ACL_NOT_EXIST = SOFTBUS_CONN_ERR_BASE + 424,
 
     SOFTBUS_CONN_PV1_INTERNAL_ERR0R = SOFTBUS_CONN_ERR_BASE + 600,
     SOFTBUS_CONN_PV1_WAIT_REUSE_RESPONSE_TIMEOUT = SOFTBUS_CONN_ERR_BASE + 601,
