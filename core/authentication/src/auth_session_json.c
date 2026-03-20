@@ -224,8 +224,11 @@
 #define CRED_NEGO_INFO_LEN "CRED_NEGO_INFO_LEN"
 #define CRED_TYPE_INFO "CRED_TYPE_INFO"
 #define CRED_NEGO_STATE "CRED_NEGO_STATE"
+#define EXTERNAL_USER_IDS "EXTERNAL_USER_IDS"
+#define EXTERNAL_USER_IDS_LEN "EXTERNAL_USER_IDS_LEN"
 
 #define CRED_NEGO_INFO_MAX_LEN 512
+#define EXTERNAL_USER_IDS_MAX_LEN 512
 #define INVALID_USER_ID (-1)
 
 typedef bool (*CredNegoFunc)(AuthSessionInfo *info, const char *localUdidHash, const char *peerUdidHash,
@@ -238,6 +241,13 @@ typedef struct {
     const char *peerUdidHash;
     bool isSameAccount;
 } CredTypeQueryParam;
+
+typedef struct {
+    int32_t localUserId;
+    int32_t credType;
+    int32_t peerUserId;
+    int32_t mainUserId;
+} CredTypeSortInfo;
 
 static void OptString(
     const JsonObj *json, const char * const key, char *target, uint32_t targetLen, const char *defaultValue)
@@ -1002,28 +1012,78 @@ static cJSON *QueryAllCredTypePerPeerUserId(cJSON *peerUserIdsJson, CredTypeQuer
     return credTypesJson;
 }
 
-static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHash, const char *peerUdidHash,
-    cJSON **chosenCredType)
+static int32_t CredTypesSortCmp(const void *info1, const void *info2)
 {
-    cJSON *peerCredTypesJson = info->credTypeInfo;
-    int32_t credTypesLen = GetArrayItemNum(peerCredTypesJson);
+    CredTypeSortInfo *credTypeInfo1 = (CredTypeSortInfo *)info1;
+    CredTypeSortInfo *credTypeInfo2 = (CredTypeSortInfo *)info2;
+    int32_t mainUserId = credTypeInfo1->mainUserId;
+    if (credTypeInfo1->peerUserId == credTypeInfo2->peerUserId) {
+        if (credTypeInfo1->credType == ACCOUNT_RELATED) {
+            return -1;
+        } else if (credTypeInfo1->credType == ACCOUNT_UNRELATED) {
+            return 1;
+        } else {
+            return (credTypeInfo2->credType == ACCOUNT_RELATED) ? 1: -1;
+        }
+    }
+    if (credTypeInfo1->peerUserId == mainUserId) {
+        return -1;
+    } else if (credTypeInfo2->peerUserId == mainUserId) {
+        return 1;
+    }
+    return (credTypeInfo1->peerUserId < credTypeInfo2->peerUserId) ? -1 : 1;
+}
+
+static CredTypeSortInfo *SortCredTypes(cJSON *peerCredTypesJson, int32_t credTypesLen, AuthSessionInfo *info)
+{
+    CredTypeSortInfo *credTypeArray = (CredTypeSortInfo *)SoftBusCalloc(sizeof(CredTypeSortInfo) * credTypesLen);
+    if (credTypeArray == NULL) {
+        AUTH_LOGE(AUTH_FSM, "credTypeArray malloc failed");
+        return NULL;
+    }
+    bool ret = true;
     for (int32_t i = 0; i < credTypesLen; i++) {
-        int32_t localUserId = 0;
-        int32_t peerUserId = 0;
-        int32_t credType = 0;
         cJSON *item = GetArrayItemFromArray(peerCredTypesJson, i);
         if (item == NULL) {
             AUTH_LOGE(AUTH_FSM, "get array item from peerCredTypesJson fail");
+            ret = false;
             break;
         }
-        if (!GetJsonObjectNumberItem(item, SINK_USERID, &localUserId) ||
-            !GetJsonObjectNumberItem(item, CRED_TYPE, &credType) ||
-            !GetJsonObjectNumberItem(item, SOURCE_USERID, &peerUserId)) {
+        if (!GetJsonObjectNumberItem(item, SINK_USERID, &credTypeArray[i].localUserId) ||
+            !GetJsonObjectNumberItem(item, CRED_TYPE, &credTypeArray[i].credType) ||
+            !GetJsonObjectNumberItem(item, SOURCE_USERID, &credTypeArray[i].peerUserId)) {
             AUTH_LOGE(AUTH_FSM, "Get item of object credTypeJson fail");
+            ret = false;
             break;
         }
-        const char *udidShortHash = (credType == ACCOUNT_RELATED) ? localUdidHash : peerUdidHash;
-        char *credIdTmp = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidShortHash);
+        credTypeArray[i].mainUserId = info->userId;
+    }
+    if (ret == false) {
+        SoftBusFree(credTypeArray);
+        return NULL;
+    }
+    qsort(credTypeArray, credTypesLen, sizeof(CredTypeSortInfo), CredTypesSortCmp);
+    return credTypeArray;
+}
+
+static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHash, const char *peerUdidHash,
+    cJSON **chosenCredType)
+{
+    cJSON *peerCredTypesJson  = info->credTypeInfo;
+    int32_t credTypesLen = GetArrayItemNum(peerCredTypesJson);
+    if (peerCredTypesJson == NULL || info == NULL || credTypesLen == 0) {
+        AUTH_LOGE(AUTH_FSM, "invalid param to choose credTypes");
+        return false;
+    }
+    CredTypeSortInfo *credTypeArray = SortCredTypes(peerCredTypesJson, credTypesLen, info);
+    if (credTypeArray == NULL) {
+        AUTH_LOGE(AUTH_FSM, "sort CredTypes fail");
+        return false;
+    }
+    for (int32_t i = 0; i < credTypesLen; i++) {
+        const char *udidShortHash = (credTypeArray[i].credType == ACCOUNT_RELATED) ? localUdidHash : peerUdidHash;
+        char *credIdTmp = IdServiceGetCredIdByCredType(credTypeArray[i].localUserId, credTypeArray[i].peerUserId,
+            credTypeArray[i].credType, udidShortHash);
         if (credIdTmp == NULL) {
             continue;
         }
@@ -1033,9 +1093,9 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
             cJSON_free(credIdTmp);
             break;
         }
-        if (!cJSON_AddNumberToObject(localCredTypeJson, SINK_USERID, peerUserId) ||
-            !cJSON_AddNumberToObject(localCredTypeJson, CRED_TYPE, credType) ||
-            !cJSON_AddNumberToObject(localCredTypeJson, SOURCE_USERID, localUserId)) {
+        if (!cJSON_AddNumberToObject(localCredTypeJson, SINK_USERID, credTypeArray[i].peerUserId) ||
+            !cJSON_AddNumberToObject(localCredTypeJson, CRED_TYPE, credTypeArray[i].credType) ||
+            !cJSON_AddNumberToObject(localCredTypeJson, SOURCE_USERID, credTypeArray[i].localUserId)) {
             AUTH_LOGE(AUTH_FSM, "add to localCredTypeJson fail");
             cJSON_Delete(localCredTypeJson);
             cJSON_free(credIdTmp);
@@ -1045,11 +1105,13 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
             SoftBusFree(info->credId);
         }
         info->credId = credIdTmp;
-        info->credIdType = credType;
+        info->credIdType = credTypeArray[i].credType;
         *chosenCredType = localCredTypeJson;
-        AUTH_LOGI(AUTH_FSM, "find best credType. credType=%{public}d", credType);
-        return credType;
+        AUTH_LOGI(AUTH_FSM, "find best credType. credType=%{public}d", credTypeArray[i].credType);
+        SoftBusFree(credTypeArray);
+        return credTypeArray[i].credType;
     }
+    SoftBusFree(credTypeArray);
     AUTH_LOGE(AUTH_FSM, "cant find the best credType");
     return ACCOUNT_BUTT;
 }
@@ -1060,7 +1122,12 @@ static cJSON *BuildPeerUserIdsJson(AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return NULL;
     }
-    cJSON *userIdsJson = cJSON_CreateArray();
+    cJSON *userIdsJson = NULL;
+    if (info->externalUserIds != NULL) {
+        userIdsJson = cJSON_Duplicate(info->externalUserIds, true);
+    } else {
+        userIdsJson = cJSON_CreateArray();
+    }
     if (userIdsJson == NULL) {
         AUTH_LOGE(AUTH_FSM, "create userIdsJson fail");
         return NULL;
@@ -1244,11 +1311,42 @@ static bool UnpackCredTypes(cJSON *json, AuthSessionInfo *info)
     return true;
 }
 
+static void UnpackExternalUserId(JsonObj *obj, AuthSessionInfo *info)
+{
+    int32_t msgLen = 0;
+    if (!JSON_GetInt32FromOject(obj, EXTERNAL_USER_IDS_LEN, &msgLen) ||
+        msgLen <= 0 || msgLen > EXTERNAL_USER_IDS_MAX_LEN) {
+        return;
+    }
+    char *msg = (char *)SoftBusCalloc(msgLen);
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc userIds fail");
+        return;
+    }
+    if (!JSON_GetStringFromObject(obj, EXTERNAL_USER_IDS, msg, msgLen)) {
+        AUTH_LOGE(AUTH_FSM, "unpack userIds fail");
+        SoftBusFree(msg);
+        return;
+    }
+    AUTH_LOGI(AUTH_FSM, "unpack userIds succ, msg=%{public}s", msg);
+    cJSON *userIdsJson = CreateJsonObjectFromString(msg);
+    SoftBusFree(msg);
+    if (userIdsJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create userIdsJson fail");
+        return;
+    }
+    if (info->externalUserIds != NULL) {
+        cJSON_Delete(info->externalUserIds);
+    }
+    info->externalUserIds = userIdsJson;
+}
+
 static bool UnpackCredNegoInfoByState(JsonObj *obj, AuthSessionInfo *info, cJSON *credNegoInfoJson)
 {
     bool ret = true;
     switch (info->credNegoState) {
         case CRED_NEGO_STATE_ASK:
+            UnpackExternalUserId(obj, info);
             break;
         case CRED_NEGO_STATE_REPLY:
             __attribute__((fallthrough));
