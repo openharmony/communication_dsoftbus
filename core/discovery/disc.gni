@@ -37,6 +37,7 @@ disc_server_src += disc_event_manager_src
 disc_server_deps += disc_event_manager_deps
 disc_server_src += [
   "$dsoftbus_root_path/core/discovery/manager/src/disc_manager.c",
+  "$dsoftbus_root_path/core/discovery/manager/src/disc_mgr_config.c",
   "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_server.c",
 ]
 

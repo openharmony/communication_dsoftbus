@@ -69,6 +69,7 @@ typedef enum {
     EVENT_STAGE_BROADCAST = 4,
     EVENT_STAGE_SCAN = 5,
     EVENT_STAGE_SCAN_RECV = 6,
+    EVENT_STAGE_BROADCAST_TIMEOUT = 7,
 } DiscEventBleStage;
 
 typedef enum {
