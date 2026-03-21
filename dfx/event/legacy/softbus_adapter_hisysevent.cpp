@@ -186,7 +186,7 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg *reportMsg)
         InitHisEvtMutexLock();
         g_init_lock = true;
     }
-    if (SoftBusMutexLock(&g_dfx_lock) != 0) {
+    if (SoftBusMutexLock(&g_dfx_lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }

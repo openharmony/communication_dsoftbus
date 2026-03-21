@@ -350,7 +350,7 @@ void LnnUpdateNodeBleMac(const char *networkId, char *bleMac, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "invalid arg");
         return;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return;
     }
@@ -988,7 +988,7 @@ bool LnnSetDLDeviceInfoName(const char *udid, const char *name)
         LNN_LOGE(LNN_LEDGER, "para error");
         return false;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return false;
     }
@@ -1020,7 +1020,7 @@ bool LnnSetDLDeviceNickName(const char *networkId, const char *name)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return false;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return false;
     }
@@ -1047,7 +1047,7 @@ int32_t LnnSetDLUnifiedDeviceName(const char *udid, const char *name)
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1081,7 +1081,7 @@ int32_t LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name)
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1115,7 +1115,7 @@ int32_t LnnSetDLDeviceNickNameByUdid(const char *udid, const char *name)
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1149,7 +1149,7 @@ int32_t LnnSetDLDeviceStateVersion(const char *udid, int32_t stateVersion)
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1179,7 +1179,7 @@ int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1208,7 +1208,7 @@ int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv)
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1263,7 +1263,7 @@ bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return false;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return false;
     }
@@ -1292,7 +1292,7 @@ bool LnnSetDlPtk(const char *networkId, const char *remotePtk)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return false;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return false;
     }
@@ -1349,7 +1349,7 @@ int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1382,7 +1382,7 @@ int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *networkId, InfoKey key, char 
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1416,7 +1416,7 @@ int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1450,7 +1450,7 @@ int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *networkId, InfoKey key, int32
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1484,7 +1484,7 @@ int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *inf
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1517,7 +1517,7 @@ int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *inf
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1550,7 +1550,7 @@ int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info)
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1583,7 +1583,7 @@ static int32_t LnnGetRemoteBoolInfoCommon(const char *networkId, bool checkOnlin
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1623,7 +1623,7 @@ int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, 
         LNN_LOGE(LNN_LEDGER, "KEY error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1647,7 +1647,7 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "btMac is empty");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1689,7 +1689,7 @@ int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen,
         LNN_LOGE(LNN_LEDGER, "udidHash is empty");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1737,7 +1737,7 @@ int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *con
         LNN_LOGE(LNN_LEDGER, "para is empty");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1781,7 +1781,7 @@ int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1811,7 +1811,7 @@ int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1836,7 +1836,7 @@ int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
 
 int32_t LnnGetDLOnlineTimestamp(const char *networkId, uint64_t *timestamp)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1853,7 +1853,7 @@ int32_t LnnGetDLOnlineTimestamp(const char *networkId, uint64_t *timestamp)
 
 int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1870,7 +1870,7 @@ int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
 
 int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1888,7 +1888,7 @@ int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
 int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_LEDGER, "invalid param");
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1909,7 +1909,7 @@ int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1930,7 +1930,7 @@ int32_t LnnGetDLBleDirectTimestamp(const char *networkId, uint64_t *timestamp)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1951,7 +1951,7 @@ int32_t LnnGetDLUpdateTimestamp(const char *udid, uint64_t *timestamp)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1968,7 +1968,7 @@ int32_t LnnGetDLUpdateTimestamp(const char *udid, uint64_t *timestamp)
 
 int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1985,7 +1985,7 @@ int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
 
 int32_t LnnGetDLSleRangeCapacity(const char *networkId, uint32_t *sleRangeCapacity)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2002,7 +2002,7 @@ int32_t LnnGetDLSleRangeCapacity(const char *networkId, uint32_t *sleRangeCapaci
 
 int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2023,7 +2023,7 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
     (void)memset_s(&recoveryInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo tempNodeInfo;
     (void)memset_s(&tempNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2063,7 +2063,7 @@ int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2094,7 +2094,7 @@ int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId)
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2120,7 +2120,7 @@ int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info)
     if (networkId == NULL || info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2141,7 +2141,7 @@ int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info)
     if (networkId == NULL || info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2162,7 +2162,7 @@ int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info)
 
 int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2182,7 +2182,7 @@ int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
 
 int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2199,7 +2199,7 @@ int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort)
 
 int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2216,7 +2216,7 @@ int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort
 
 int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort)
 {
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2237,7 +2237,7 @@ int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2263,7 +2263,7 @@ bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return false;
     }
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return false;
     }

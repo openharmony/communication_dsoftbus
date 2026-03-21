@@ -417,7 +417,7 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
     LnnEventHandlerItem *item = NULL;
     uint32_t i = 0;
 
-    if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
+    if (SoftBusMutexLock(&g_eventCtrl.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "lock failed in notify event");
         return;
     }
@@ -1072,7 +1072,7 @@ int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
         LNN_LOGW(LNN_EVENT, "invalid event handler params");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
+    if (SoftBusMutexLock(&g_eventCtrl.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "lock failed in register event handler");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1102,7 +1102,7 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
         LNN_LOGW(LNN_EVENT, "invalid event handler params");
         return;
     }
-    if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
+    if (SoftBusMutexLock(&g_eventCtrl.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "hold lock failed in unregister event handler");
         return;
     }

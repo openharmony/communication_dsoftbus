@@ -183,7 +183,7 @@ int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbea
         LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode memset_s err");
         return SOFTBUS_MEM_ERR;
     }
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -249,7 +249,7 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
     GearModeStorageInfo *info = NULL;
     LnnHeartbeatParamManager *paramMgr = NULL;
 
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB set Gearmode lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -825,7 +825,7 @@ static bool VisitRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType each
 
 int32_t LnnRegistParamMgrByType(LnnHeartbeatType type)
 {
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB regist paramMgr lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -871,7 +871,7 @@ static bool VisitUnRegistParamMgr(LnnHeartbeatType *typeSet, LnnHeartbeatType ea
 
 void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
 {
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB unRegist paramMgr lock mutex fail");
         return;
     }
@@ -887,7 +887,7 @@ int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
         LNN_LOGE(LNN_HEART_BEAT, "HB set medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB set medium param lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -935,7 +935,7 @@ int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeart
         LNN_LOGE(LNN_HEART_BEAT, "HB get medium param memset_s err");
         return SOFTBUS_MEM_ERR;
     }
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get medium param lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1242,7 +1242,7 @@ static bool VisitEnableHbType(LnnHeartbeatType *typeSet, LnnHeartbeatType eachTy
 
 int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
 {
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB enable hbType lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1256,7 +1256,7 @@ bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
     bool ret = false;
     LnnHeartbeatParamManager *paramMgr = NULL;
 
-    if (SoftBusMutexLock(&g_hbStrategyMutex) != 0) {
+    if (SoftBusMutexLock(&g_hbStrategyMutex) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get param regist status lock mutex fail");
         return false;
     }

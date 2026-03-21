@@ -83,7 +83,7 @@ int32_t ConnBleEnqueueNonBlock(const void *msg)
     CONN_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "msg is null");
     SendQueueNode *queueNode = (SendQueueNode *)msg;
     int32_t priority = GetPriority(queueNode->flag);
-    if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
+    if (SoftBusMutexLock(&g_bleQueueLock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "Lock fail");
         return SOFTBUS_LOCK_ERR;
     }

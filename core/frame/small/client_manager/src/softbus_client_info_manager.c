@@ -77,7 +77,7 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
     clientInfo->cookie = svcId->cookie;
     ListInit(&clientInfo->node);
 
-    if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_clientInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "lock failed");
         SoftBusFree(clientInfo);
         return SOFTBUS_ERR;
@@ -102,7 +102,7 @@ int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_clientInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "lock failed");
         return SOFTBUS_ERR;
     }
@@ -134,7 +134,7 @@ int SERVER_GetClientInfoNodeNum(int *num)
         COMM_LOGE(COMM_SVC, "not init");
         return SOFTBUS_ERR;
     }
-    if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_clientInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "lock failed");
         return SOFTBUS_ERR;
     }
@@ -154,7 +154,7 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
         COMM_LOGE(COMM_SVC, "not init");
         return SOFTBUS_ERR;
     }
-    if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_clientInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "lock failed");
         return SOFTBUS_ERR;
     }
