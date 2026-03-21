@@ -1314,7 +1314,7 @@ static int32_t UpdateNickName(const void *name)
 
 int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
 {
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1325,7 +1325,7 @@ int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
 
 int32_t LnnUpdateLocalHuksKeyTime(uint64_t huksKeyTime)
 {
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1672,7 +1672,7 @@ int32_t LlUpdateNodeAddr(const void *addr)
 
 int32_t LnnUpdateLocalNetworkId(const void *id)
 {
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1697,7 +1697,7 @@ int32_t LnnUpdateLocalDeviceName(const DeviceBasicInfo *info)
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2302,7 +2302,7 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2336,7 +2336,7 @@ int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int
         LNN_LOGE(LNN_LEDGER, "ifname index error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2367,7 +2367,7 @@ static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2398,7 +2398,7 @@ static int32_t LnnGetLocalInfoByIfnameIdx(InfoKey key, void* info, uint32_t info
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2428,7 +2428,7 @@ int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "info is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2456,7 +2456,7 @@ int32_t LnnSetLocalUnifiedName(const char *unifiedName)
     if (unifiedName == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2481,7 +2481,7 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2518,7 +2518,7 @@ int32_t LnnSetLocalStrInfoByIfnameIdx(InfoKey key, const char *info, int32_t ifI
         LNN_LOGE(LNN_LEDGER, "ifname index error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2548,7 +2548,7 @@ static int32_t LnnSetLocalInfo(InfoKey key, void* info)
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -2578,7 +2578,7 @@ static int32_t LnnSetLocalInfoByIfnameIdx(InfoKey key, void* info, int32_t ifIdx
         LNN_LOGE(LNN_LEDGER, "KEY error");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -3012,7 +3012,7 @@ int32_t HandleDeviceInfoIfUdidChanged(void)
 
 int32_t LnnInitLocalLedgerDelay(void)
 {
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -3044,7 +3044,7 @@ void LnnDeinitLocalLedger(void)
 bool LnnIsMasterNode(void)
 {
     bool ret = false;
-    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return ret;
     }

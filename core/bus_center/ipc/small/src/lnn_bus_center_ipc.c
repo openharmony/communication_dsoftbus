@@ -226,7 +226,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
         LNN_LOGE(LNN_EVENT, "addr is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -260,7 +260,7 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
         LNN_LOGE(LNN_EVENT, "parameter is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -417,7 +417,7 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
         LNN_LOGE(LNN_EVENT, "request info is null");
         return SOFTBUS_LIST_EMPTY;
     }
-    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -445,7 +445,7 @@ int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
         LNN_LOGE(LNN_EVENT, "request info is null");
         return SOFTBUS_LIST_EMPTY;
     }
-    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
+    if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
         return SOFTBUS_LOCK_ERR;
     }

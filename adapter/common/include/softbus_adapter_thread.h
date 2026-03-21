@@ -84,9 +84,9 @@ static inline bool CheckMutexIsNull(const SoftBusMutex *mutex)
         COMM_LOGD(COMM_ADAPTER, "SoftBusMutexLock mutex is null");                     \
         ret = SOFTBUS_INVALID_PARAM;                                                   \
     } else {                                                                           \
-        ret = SoftBusMutexLockInner(mutex);                                            \
-        if (ret != 0) {                                                                \
-            COMM_LOGE(COMM_ADAPTER, "SoftBusMutexLock failed, ret=%{public}d", ret);   \
+        int32_t err = SoftBusMutexLockInner(mutex);                                            \
+        if (err != 0) {                                                                \
+            COMM_LOGE(COMM_ADAPTER, "SoftBusMutexLock failed, err=%{public}d", err);   \
             ret = SOFTBUS_LOCK_ERR;                                                    \
         }                                                                              \
     }                                                                                  \
@@ -100,9 +100,9 @@ static inline bool CheckMutexIsNull(const SoftBusMutex *mutex)
         COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock mutex is null");                   \
         ret = SOFTBUS_INVALID_PARAM;                                                   \
     } else {                                                                           \
-        ret = SoftBusMutexUnlockInner(mutex);                                          \
-        if (ret != 0) {                                                                \
-            COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock failed, ret=%{public}d", ret); \
+        int32_t err = SoftBusMutexUnlockInner(mutex);                                          \
+        if (err != 0) {                                                                \
+            COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock failed, err=%{public}d", err); \
             ret = SOFTBUS_LOCK_ERR;                                                    \
         }                                                                              \
     }                                                                                  \

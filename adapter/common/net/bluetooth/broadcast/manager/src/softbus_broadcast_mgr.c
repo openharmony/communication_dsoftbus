@@ -965,7 +965,7 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BROADCAST, "build bc report info failed");
     bool isFindMatchFiter = false;
     for (uint32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
-        if (SoftBusMutexLock(&g_scanLock) != 0) {
+        if (SoftBusMutexLock(&g_scanLock) != SOFTBUS_OK) {
             ReleaseBroadcastReportInfo(&bcInfo);
             return;
         }
