@@ -957,4 +957,159 @@ HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
     DiscMgrDeinit();
     DISC_LOGI(DISC_TEST, "DiscManagerDeinit001 end ----");
 }
+
+/*
+ * @tc.name: ModifyCapabilityCallTimes001
+ * @tc.desc: test ModifyCapabilityCallTimes add and subtract
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, ModifyCapabilityCallTimes001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "ModifyCapabilityCallTimes001 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        PublishInfo info;
+        info.publishId = PUBLISH_ID1;
+        info.medium = COAP;
+        info.mode = DISCOVER_MODE_PASSIVE;
+        info.freq = LOW;
+        info.capability = "nfc_share";
+        info.capabilityData = (uint8_t *)"test";
+        info.dataLen = 4;
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+        EXPECT_CALL(coapMock, StartScan).WillRepeatedly(Return(SOFTBUS_OK));
+        EXPECT_CALL(coapMock, StopScan).WillRepeatedly(Return(SOFTBUS_OK));
+
+        // First publish should succeed
+        EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_OK);
+        // Unpublish
+        EXPECT_EQ(DiscUnPublishService(packageName_, PUBLISH_ID1, 0), SOFTBUS_OK);
+        // Second publish should succeed again
+        info.publishId = PUBLISH_ID2;
+        EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_OK);
+        EXPECT_EQ(DiscUnPublishService(packageName_, PUBLISH_ID2, 0), SOFTBUS_OK);
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "ModifyCapabilityCallTimes001 end ----");
+}
+
+/*
+ * @tc.name: CheckRequestValid001
+ * @tc.desc: test CheckRequestValid with capability having maxTimes limit (32)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, CheckRequestValid001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CheckRequestValid001 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+        EXPECT_CALL(coapMock, StartScan).WillRepeatedly(Return(SOFTBUS_OK));
+
+        // Test with osd capability (maxTimes = 32)
+        // First 32 publishes should succeed
+        for (int i = 0; i < 32; i++) {
+            PublishInfo info;
+            info.publishId = PUBLISH_ID1 + i;
+            info.medium = COAP;
+            info.mode = DISCOVER_MODE_PASSIVE;
+            info.freq = LOW;
+            info.capability = "osdCapability";
+            info.capabilityData = (uint8_t *)"test";
+            info.dataLen = 4;
+            EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_OK);
+        }
+        // 33rd publish with same capability should fail due to maxTimes limit
+        PublishInfo info;
+        info.publishId = PUBLISH_ID1 + 32;
+        info.medium = COAP;
+        info.mode = DISCOVER_MODE_PASSIVE;
+        info.freq = LOW;
+        info.capability = "osdCapability";
+        info.capabilityData = (uint8_t *)"test";
+        info.dataLen = 4;
+        EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_DISCOVER_MANAGER_CALLTIMES_MAX_ERR);
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "CheckRequestValid001 end ----");
+}
+
+/*
+ * @tc.name: CheckRequestValid002
+ * @tc.desc: test CheckRequestValid duplicate id check
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, CheckRequestValid002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CheckRequestValid002 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        PublishInfo info;
+        info.publishId = PUBLISH_ID1;
+        info.medium = COAP;
+        info.mode = DISCOVER_MODE_PASSIVE;
+        info.freq = LOW;
+        info.capability = "hicall";
+        info.capabilityData = (uint8_t *)"test";
+        info.dataLen = 4;
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+        EXPECT_CALL(coapMock, StartScan).WillRepeatedly(Return(SOFTBUS_OK));
+
+        // First publish should succeed
+        EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_OK);
+        // Second publish with same ID should fail
+        EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM);
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "CheckRequestValid002 end ----");
+}
+
+/*
+ * @tc.name: CheckRequestValid003
+ * @tc.desc: test CheckRequestValid with unlimited capability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, CheckRequestValid003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CheckRequestValid003 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+        EXPECT_CALL(coapMock, StartScan).WillRepeatedly(Return(SOFTBUS_OK));
+
+        // Test with hicall capability (NO_LIMITED_TIMES)
+        for (int i = 0; i < 5; i++) {
+            PublishInfo info;
+            info.publishId = PUBLISH_ID1 + i;
+            info.medium = COAP;
+            info.mode = DISCOVER_MODE_PASSIVE;
+            info.freq = LOW;
+            info.capability = "hicall";
+            info.capabilityData = (uint8_t *)"test";
+            info.dataLen = 4;
+
+            EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_OK);
+        }
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "CheckRequestValid003 end ----");
+}
 } // namespace OHOS

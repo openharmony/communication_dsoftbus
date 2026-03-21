@@ -15,6 +15,7 @@
 
 #include <unistd.h>
 
+#include "anonymizer.h"
 #include "disc_manager.h"
 #include "bus_center_event.h"
 #include "common_list.h"
@@ -22,6 +23,7 @@
 #include "disc_coap.h"
 #include "disc_event.h"
 #include "disc_log.h"
+#include "disc_mgr_config.h"
 #include "disc_nfc_dispatcher.h"
 #include "disc_usb_dispatcher.h"
 #include "securec.h"
@@ -80,6 +82,7 @@ typedef struct {
     InnerCallback callback;
     uint32_t infoNum;
     ListNode InfoList;
+    uint8_t callTimes[CAPABILITY_MAX_BITNUM];
 } DiscItem;
 
 typedef struct {
@@ -668,6 +671,62 @@ static void DumpDiscInfoList(const DiscItem *itemNode)
     }
 }
 
+static void ModifyCapabilityCallTimes(DiscItem *itemNode, DiscInfo *info, ServiceType type, bool isAdd)
+{
+    uint32_t bitMap = (type == PUBLISH_SERVICE || type == PUBLISH_INNER_SERVICE) ?
+        info->option.publishOption.capabilityBitmap[0] : info->option.subscribeOption.capabilityBitmap[0];
+
+    for (uint32_t tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
+        if (!IsBitmapSet((const uint32_t *)&bitMap, tmp)) {
+            continue;
+        }
+        if (isAdd) {
+            itemNode->callTimes[tmp]++;
+        } else if (itemNode->callTimes[tmp] > 0) {
+            itemNode->callTimes[tmp]--;
+        }
+        break;
+    }
+}
+
+static int32_t CheckRequestValid(const char *packageName, const DiscItem *itemNode, const DiscInfo *info,
+    ServiceType type)
+{
+    uint32_t bitMap = (type == PUBLISH_SERVICE || type == PUBLISH_INNER_SERVICE) ?
+        info->option.publishOption.capabilityBitmap[0] : info->option.subscribeOption.capabilityBitmap[0];
+
+    DiscInfo *infoNode = NULL;
+    LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+        if (infoNode->id == info->id) {
+            DISC_LOGE(DISC_CONTROL, "id already existed");
+            return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
+        }
+    }
+
+    char *anonyPkgName = NULL;
+    for (uint32_t tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
+        int32_t maxTimes = DiscMgrGetMaxCallTimes(tmp);
+        if (IsBitmapSet((const uint32_t *)&bitMap, tmp) && maxTimes != NO_LIMITED_TIMES &&
+            itemNode->callTimes[tmp] >= maxTimes) {
+            Anonymize(packageName, &anonyPkgName);
+            DISC_LOGE(DISC_CONTROL,
+                "exceed max call times, bitmap=%{public}d, packageName=%{public}s, times=%{public}u", tmp,
+                AnonymizeWrapper(anonyPkgName), itemNode->callTimes[tmp]);
+            AnonymizeFree(anonyPkgName);
+            return SOFTBUS_DISCOVER_MANAGER_CALLTIMES_MAX_ERR;
+        }
+    }
+
+    if (itemNode->infoNum >= DISC_INFO_LIST_SIZE_MAX) {
+        Anonymize(packageName, &anonyPkgName);
+        DISC_LOGE(DISC_CONTROL, "infolist size limit reached, packageName=%{public}s", AnonymizeWrapper(anonyPkgName));
+        AnonymizeFree(anonyPkgName);
+        return SOFTBUS_DISCOVER_MANAGER_ID_MAX_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
 static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageName, const InnerCallback *cb,
                                  DiscInfo *info, ServiceType type)
 {
@@ -687,22 +746,15 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
             DumpDiscInfoList(itemNode);
         }
 
-        DiscInfo *infoNode = NULL;
-        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
-            if (infoNode->id == info->id) {
-                DISC_LOGI(DISC_CONTROL, "id already existed");
-                return SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM;
-            }
-        }
-        DISC_CHECK_AND_RETURN_RET_LOGE(
-            itemNode->infoNum < DISC_INFO_LIST_SIZE_MAX, SOFTBUS_DISCOVER_MANAGER_ID_MAX_ERR,
-            DISC_CONTROL, "infolist size limit reached, packageName=%{public}s", packageName);
-
+        int32_t ret = CheckRequestValid(packageName, itemNode, info, type);
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_CONTROL, "request check fail");
+    
         SetDiscItemCallback(itemNode, cb, type);
         exist = true;
         itemNode->infoNum++;
         info->item = itemNode;
         ListTailInsert(&(itemNode->InfoList), &(info->node));
+        ModifyCapabilityCallTimes(itemNode, info, type, true);
         AddDiscInfoToCapabilityList(info, type);
         break;
     }
@@ -717,6 +769,7 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
         itemNode->infoNum++;
         info->item = itemNode;
         ListTailInsert(&(itemNode->InfoList), &(info->node));
+        ModifyCapabilityCallTimes(itemNode, info, type, true);
         AddDiscInfoToCapabilityList(info, type);
     }
 
@@ -771,6 +824,7 @@ static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packag
             }
             isIdExist = true;
             itemNode->infoNum--;
+            ModifyCapabilityCallTimes(itemNode, infoNode, type, false);
             RemoveDiscInfoFromCapabilityList(infoNode, type);
             ListDelete(&(infoNode->node));
 
@@ -879,6 +933,7 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
         ret = CallInterfaceByMedium(info, packageName, STARTDISCOVERTY_FUNC);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "call interface by medium fail");
+            ModifyCapabilityCallTimes(info->item, info, type, false);
             RemoveDiscInfoFromCapabilityList(info, type);
             ListDelete(&(info->node));
             info->item->infoNum--;
