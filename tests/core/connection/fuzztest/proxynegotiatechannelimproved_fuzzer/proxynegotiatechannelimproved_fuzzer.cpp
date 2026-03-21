@@ -52,11 +52,13 @@ void SetUpEnvironment(OHOS::SoftBus::WifiDirectInterfaceMock &mock)
     pthread_mutex_unlock(&g_lock);
 }
 
-void DataReceivedFuzzTest(FuzzedDataProvider &provider, const uint8_t *data, size_t size)
+void DataReceivedFuzzTest(FuzzedDataProvider &provider)
 {
     auto channelId = provider.ConsumeIntegral<int32_t>();
-    auto *dataStr = reinterpret_cast<char *>(const_cast<uint8_t *>(data));
-    g_proxyListener.onDataReceived(channelId, dataStr, size);
+    const auto dataSize = provider.ConsumeIntegral<int>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    auto *dataStr = reinterpret_cast<char *>(const_cast<uint8_t *>(data.data()));
+    g_proxyListener.onDataReceived(channelId, dataStr, data.size());
     SoftBusSleepMs(WAIT_CLEAE_TIME);
 }
 } // namespace OHOS
@@ -80,6 +82,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::SoftBus::WifiDirectInterfaceMock mock;
     OHOS::SetUpEnvironment(mock);
     FuzzedDataProvider provider(data, size);
-    OHOS::DataReceivedFuzzTest(provider, data, size);
+    OHOS::DataReceivedFuzzTest(provider);
     return SOFTBUS_OK;
 }
