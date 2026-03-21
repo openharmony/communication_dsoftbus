@@ -54,17 +54,19 @@ void SetUpEnvironment(OHOS::SoftBus::WifiDirectInterfaceMock &mock)
     pthread_mutex_unlock(&g_lock);
 }
 
-void DataReceivedFuzzTest(FuzzedDataProvider &provider, const uint8_t *data, size_t size)
+void DataReceivedFuzzTest(FuzzedDataProvider &provider)
 {
     AuthHandle handle = { 0 };
+    const auto dataSize = provider.ConsumeIntegral<int>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
     handle.authId = provider.ConsumeIntegral<int64_t>();
     handle.type = provider.ConsumeIntegral<uint32_t>();
     AuthTransData authData = {
         .module = provider.ConsumeIntegral<int32_t>(),
         .flag = provider.ConsumeIntegral<int32_t>(),
         .seq = provider.ConsumeIntegral<int64_t>(),
-        .len = static_cast<uint32_t>(size),
-        .data = data,
+        .len = static_cast<uint32_t>(data.size()),
+        .data = data.data(),
     };
 
     g_authListener.onDataReceived(handle, &authData);
@@ -91,6 +93,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::SoftBus::WifiDirectInterfaceMock mock;
     OHOS::SetUpEnvironment(mock);
     FuzzedDataProvider provider(data, size);
-    OHOS::DataReceivedFuzzTest(provider, data, size);
+    OHOS::DataReceivedFuzzTest(provider);
     return SOFTBUS_OK;
 }
