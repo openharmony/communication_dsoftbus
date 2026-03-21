@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,33 +24,65 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
-const uint32_t ENCRYPT_RANDOM_MAX = 2000;
 using namespace std;
+namespace {
+class TestEnv {
+public:
+    TestEnv()
+    {
+        isInited_ = true;
+    }
+    ~TestEnv()
+    {
+        isInited_ = false;
+    }
+
+    bool IsEnvInited()
+    {
+        return isInited_;
+    }
+
+private:
+    volatile bool isInited_ = false;
+};
+} // namespace
+
 namespace OHOS {
 bool SoftBusGenerateHmacHashFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<uint32_t>();
-    string stringData = provider.ConsumeBytesAsString(size);
-    size = stringData.size();
-    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    vector<uint8_t> data = provider.ConsumeRemainingBytes<uint8_t>();
+    EncryptKey randomKey;
+    (void)memset_s(&randomKey, sizeof(EncryptKey), 0, sizeof(EncryptKey));
+    randomKey.key = data.data();
+    randomKey.len = data.size();
     uint8_t hash[SHA256_MAC_LEN] = { 0 };
-    EncryptKey randomKey = { data, size };
-    SoftBusGenerateHmacHash(&randomKey, data, size, hash, SHA256_MAC_LEN);
+    const uint8_t *ptrToData = data.data();
+    SoftBusGenerateHmacHash(&randomKey, ptrToData, data.size(), hash, SHA256_MAC_LEN);
     return true;
 }
 
 bool SoftBusAesCfbRootEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<uint32_t>();
-    string stringData = provider.ConsumeBytesAsString(size);
-    size = stringData.size();
-    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     AesOutputData encryptOutData = { 0 };
     AesOutputData decryptOutData = { 0 };
 
-    AesInputData encryptInData = { data, size };
-    EncryptKey randomKey = { data, size };
-    EncryptKey rootKey = { data, size };
+    vector<uint8_t> data = provider.ConsumeRemainingBytes<uint8_t>();
+    AesInputData encryptInData;
+    (void)memset_s(&encryptInData, sizeof(AesInputData), 0, sizeof(AesInputData));
+    encryptInData.data = data.data();
+    encryptInData.len = data.size();
+
+    vector<uint8_t> key1 = provider.ConsumeRemainingBytes<uint8_t>();
+    EncryptKey randomKey;
+    (void)memset_s(&randomKey, sizeof(EncryptKey), 0, sizeof(EncryptKey));
+    randomKey.key = key1.data();
+    randomKey.len = key1.size();
+
+    vector<uint8_t> key2 = provider.ConsumeRemainingBytes<uint8_t>();
+    EncryptKey rootKey;
+    (void)memset_s(&rootKey, sizeof(EncryptKey), 0, sizeof(EncryptKey));
+    rootKey.key = key2.data();
+    rootKey.len = key2.size();
 
     if (SoftBusAesCfbRootEncrypt(&encryptInData, &randomKey, &rootKey, ENCRYPT_MODE, &encryptOutData) != SOFTBUS_OK) {
         COMM_LOGE(COMM_TEST, "SoftBus AesCfbRootEncrypt failed!");
@@ -75,15 +107,22 @@ bool SoftBusAesCfbRootEncryptFuzzTest(FuzzedDataProvider &provider)
 
 bool SoftBusAesGcmEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<uint32_t>();
-    string stringData = provider.ConsumeBytesAsString(size);
-    size = stringData.size();
-    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
-    AesOutputData encryptOutData = { 0 };
-    AesOutputData decryptOutData = { 0 };
+    AesOutputData encryptOutData = {0};
+    AesOutputData decryptOutData = {0};
 
-    AesInputData encryptInData = { data, size };
-    AesCipherKey cipherKey = { (uint8_t *)data, size, (uint8_t *)data, size };
+    vector<uint8_t> data = provider.ConsumeRemainingBytes<uint8_t>();
+    AesInputData encryptInData;
+    (void)memset_s(&encryptInData, sizeof(AesInputData), 0, sizeof(AesInputData));
+    encryptInData.data = data.data();
+    encryptInData.len = data.size();
+
+    vector<uint8_t> key = provider.ConsumeRemainingBytes<uint8_t>();
+    AesCipherKey cipherKey;
+    (void)memset_s(&cipherKey, sizeof(AesCipherKey), 0, sizeof(AesCipherKey));
+    cipherKey.key = key.data();
+    cipherKey.keyLen = key.size();
+    cipherKey.iv = key.data();
+    cipherKey.ivLen = key.size();
 
     if (SoftBusAesGcmEncrypt(&encryptInData, &cipherKey, ENCRYPT_MODE, &encryptOutData) != SOFTBUS_OK) {
         COMM_LOGE(COMM_TEST, "SoftBus AesGcmEncrypt failed!");
@@ -134,38 +173,27 @@ static bool EncryptSubFunctionFuzzTest(AesInputData &encryptInData, AesCipherKey
 
 bool SoftBusAesCfbEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<uint32_t>();
-    string stringData = provider.ConsumeBytesAsString(size);
-    uint8_t randomSession[ENCRYPT_RANDOM_MAX] = {0};
-    uint8_t randomIv[ENCRYPT_RANDOM_MAX] = {0};
-    uint8_t randomSessionCopy[ENCRYPT_RANDOM_MAX] = {0};
-    uint8_t randomIvCopy[ENCRYPT_RANDOM_MAX] = {0};
+    vector<uint8_t> inputData = provider.ConsumeRemainingBytes<uint8_t>();
+    AesInputData encryptInData;
+    (void)memset_s(&encryptInData, sizeof(AesInputData), 0, sizeof(AesInputData));
+    encryptInData.data = inputData.data();
+    encryptInData.len = inputData.size();
 
-    if (memcpy_s(randomSession, ENCRYPT_RANDOM_MAX - 1, stringData.data(), stringData.size()) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomSession memcpy_s failed!");
-        return false;
-    }
-    string stringData1 = provider.ConsumeBytesAsString(size);
-    if (memcpy_s(randomIv, ENCRYPT_RANDOM_MAX - 1, stringData1.data(), stringData1.size()) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomIv memcpy_s failed!");
-        return false;
-    }
-    string stringData2 = provider.ConsumeBytesAsString(size);
-    if (memcpy_s(randomSessionCopy, ENCRYPT_RANDOM_MAX - 1, stringData2.data(), stringData2.size()) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomSessionCopy memcpy_s failed!");
-        return false;
-    }
-    string stringData3 = provider.ConsumeBytesAsString(size);
-    if (memcpy_s(randomIvCopy, ENCRYPT_RANDOM_MAX - 1, stringData3.data(), stringData3.size()) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomIvCopy memcpy_s failed!");
-        return false;
-    }
-    string stringData4 = provider.ConsumeBytesAsString(size);
-    const uint8_t *data4 = reinterpret_cast<const uint8_t *>(stringData4.data());
-    size_t size4 = stringData4.size();
-    AesInputData encryptInData = { data4, size4 };
-    AesCipherKey cipherKey = { randomSession, ENCRYPT_RANDOM_MAX - 1, randomIv, ENCRYPT_RANDOM_MAX - 1 };
-    AesCipherKey cipherKeyCopy = { randomSessionCopy, ENCRYPT_RANDOM_MAX - 1, randomIvCopy, ENCRYPT_RANDOM_MAX - 1 };
+    vector<uint8_t> key1 = provider.ConsumeRemainingBytes<uint8_t>();
+    AesCipherKey cipherKey;
+    (void)memset_s(&cipherKey, sizeof(AesCipherKey), 0, sizeof(AesCipherKey));
+    cipherKey.key = key1.data();
+    cipherKey.keyLen = key1.size();
+    cipherKey.iv = key1.data();
+    cipherKey.ivLen = key1.size();
+
+    vector<uint8_t> key2 = provider.ConsumeRemainingBytes<uint8_t>();
+    AesCipherKey cipherKeyCopy;
+    (void)memset_s(&cipherKeyCopy, sizeof(AesCipherKey), 0, sizeof(AesCipherKey));
+    cipherKeyCopy.key = key2.data();
+    cipherKeyCopy.keyLen = key2.size();
+    cipherKeyCopy.iv = key2.data();
+    cipherKeyCopy.ivLen = key2.size();
     return EncryptSubFunctionFuzzTest(encryptInData, cipherKey, cipherKeyCopy);
 }
 
@@ -178,6 +206,10 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
+    static TestEnv env;
+    if (!env.IsEnvInited()) {
+        return -1;
+    }
     FuzzedDataProvider provider(data, size);
     OHOS::SoftBusGenerateHmacHashFuzzTest(provider);
     OHOS::SoftBusAesCfbRootEncryptFuzzTest(provider);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,18 +26,42 @@
 #include "softbus_error_code.h"
 
 using namespace std;
+namespace {
+class TestEnv {
+public:
+    TestEnv()
+    {
+        isInited_ = true;
+    }
+    ~TestEnv()
+    {
+        isInited_ = false;
+    }
+
+    bool IsEnvInited()
+    {
+        return isInited_;
+    }
+
+private:
+    volatile bool isInited_ = false;
+};
+} // namespace
+
 namespace OHOS {
 bool SoftBusRsaEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<uint32_t>();
-    string stringData = provider.ConsumeBytesAsString(size);
-    size = stringData.size();
+    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
+    string stringData = provider.ConsumeBytesAsString(dataLen);
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     uint32_t encryptedDataLen = 0;
     uint8_t *encryptedData = nullptr;
-    PublicKey peerPublicKey = { data, size };
-
-    if (SoftBusRsaEncrypt(data, size, &peerPublicKey, &encryptedData, &encryptedDataLen) != SOFTBUS_OK) {
+    PublicKey peerPublicKey;
+    (void)memset_s(&peerPublicKey, sizeof(PublicKey), 0, sizeof(PublicKey));
+    dataLen = stringData.size();
+    peerPublicKey.key = data;
+    peerPublicKey.len = dataLen;
+    if (SoftBusRsaEncrypt(data, dataLen, &peerPublicKey, &encryptedData, &encryptedDataLen) != SOFTBUS_OK) {
         COMM_LOGE(COMM_TEST, "SoftBusRsaEncrypt failed!");
         return false;
     }
@@ -47,14 +71,14 @@ bool SoftBusRsaEncryptFuzzTest(FuzzedDataProvider &provider)
 
 bool SoftBusRsaDecryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<uint32_t>();
-    string stringData = provider.ConsumeBytesAsString(size);
-    size = stringData.size();
+    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
+    string stringData = provider.ConsumeBytesAsString(dataLen);
+    dataLen = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     uint32_t decryptedDataLen = 0;
     uint8_t *decryptedData = nullptr;
 
-    if (SoftBusRsaDecrypt(data, size, &decryptedData, &decryptedDataLen) != SOFTBUS_OK) {
+    if (SoftBusRsaDecrypt(data, dataLen, &decryptedData, &decryptedDataLen) != SOFTBUS_OK) {
         COMM_LOGE(COMM_TEST, "SoftBusRsaDecrypt failed!");
         return false;
     }
@@ -70,6 +94,10 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
+    static TestEnv env;
+    if (!env.IsEnvInited()) {
+        return -1;
+    }
     FuzzedDataProvider provider(data, size);
     OHOS::SoftBusRsaEncryptFuzzTest(provider);
     OHOS::SoftBusRsaDecryptFuzzTest(provider);
