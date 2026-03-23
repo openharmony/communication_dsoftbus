@@ -55,9 +55,9 @@ void SetUpEnvironment(OHOS::SoftBus::WifiDirectInterfaceMock &mock)
 void DataReceivedFuzzTest(FuzzedDataProvider &provider)
 {
     auto channelId = provider.ConsumeIntegral<int32_t>();
-    const auto dataSize = provider.ConsumeIntegral<int>();
+    const auto dataSize = provider.ConsumeIntegral<uint32_t>();
     auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    auto *dataStr = reinterpret_cast<char *>(const_cast<uint8_t *>(data.data()));
+    auto *dataStr = reinterpret_cast<char *>(data.data());
     g_proxyListener.onDataReceived(channelId, dataStr, data.size());
     SoftBusSleepMs(WAIT_CLEAE_TIME);
 }
