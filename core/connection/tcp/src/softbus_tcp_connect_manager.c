@@ -121,7 +121,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
         return SOFTBUS_INVALID_PARAM;
     }
     TcpConnInfoNode *temp = NULL;
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -189,7 +189,7 @@ static void DelTcpConnNode(uint32_t connectionId)
         return;
     }
     TcpConnInfoNode *item = NULL;
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail");
         return;
     }
@@ -311,7 +311,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
     if (g_tcpConnInfoList == NULL) {
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -434,7 +434,7 @@ static void DelAllConnInfo(ListenerModule moduleId)
     if (g_tcpConnInfoList == NULL) {
         return;
     }
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail");
         return;
     }
@@ -609,7 +609,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
         CONN_LOGE(CONN_COMMON, "tcp connection info list is null or option is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -662,7 +662,7 @@ int32_t TcpPostBytes(
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
     int32_t fd = -1;
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail");
         SoftBusFree((void*)data);
         return SOFTBUS_LOCK_ERR;
@@ -700,7 +700,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     TcpConnInfoNode *item = NULL;
-    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }

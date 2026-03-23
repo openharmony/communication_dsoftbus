@@ -41,7 +41,7 @@ static LnnPhysicalSubnet *g_physicalSubnets[MAX_SUPPORTED_PHYSICAL_SUBNET];
 
 #define CALL_VOID_FUNC_WITH_LOCK(LOCK, ACTION)                               \
     do {                                                                     \
-        if (SoftBusMutexLock(LOCK) != 0) {                                   \
+        if (SoftBusMutexLock(LOCK) != SOFTBUS_OK) {                                   \
             LNN_LOGE(LNN_BUILDER, "lock mutex failed"); \
             break;                                                           \
         }                                                                    \

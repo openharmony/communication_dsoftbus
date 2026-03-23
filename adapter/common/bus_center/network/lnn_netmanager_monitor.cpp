@@ -89,7 +89,7 @@ int32_t NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string 
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
     CapabilityOption setCapability = {.isAdd = true, .capabilitySet = 0};
     (void)LnnSetNetCapability(&(setCapability.capabilitySet), BIT_ETH);
-    if (SoftBusMutexLock(&g_ethCountLock) != 0) {
+    if (SoftBusMutexLock(&g_ethCountLock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -136,7 +136,7 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
     if (strstr(ifName.c_str(), "eth") == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_ethCountLock) != 0) {
+    if (SoftBusMutexLock(&g_ethCountLock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }

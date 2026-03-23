@@ -1390,7 +1390,7 @@ static void HbDeinitRecvList(void)
     if (g_hbRecvList == NULL) {
         return;
     }
-    if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
+    if (SoftBusMutexLock(&g_hbRecvList->lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "deinit recv list lock recv info list fail");
         return;
     }
@@ -1412,7 +1412,7 @@ void LnnHbClearRecvList(void)
     if (g_hbRecvList == NULL) {
         return;
     }
-    if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
+    if (SoftBusMutexLock(&g_hbRecvList->lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "deinit recv list lock recv info list fail");
         return;
     }
@@ -1432,7 +1432,7 @@ void LnnDumpHbMgrRecvList(void)
     char *deviceType = NULL;
     LnnHeartbeatRecvInfo *item = NULL;
 
-    if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
+    if (SoftBusMutexLock(&g_hbRecvList->lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "dump recv list lock recv info list fail");
         return;
     }

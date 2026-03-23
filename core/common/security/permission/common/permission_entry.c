@@ -816,7 +816,7 @@ bool PermIsSecLevelPublic(const char *sessionName)
         return false;
     }
 
-    if (SoftBusMutexLock(&g_permissionEntryList->lock) != 0) {
+    if (SoftBusMutexLock(&g_permissionEntryList->lock) != SOFTBUS_OK) {
         return false;
     }
     LIST_FOR_EACH_ENTRY(pe, &g_permissionEntryList->list, SoftBusPermissionEntry, node) {

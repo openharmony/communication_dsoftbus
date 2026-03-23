@@ -164,7 +164,7 @@ void ClinetTransProxyFileManagerDeinit(void)
 
 static ProxyFileMutexLock *GetSessionFileLock(int32_t channelId)
 {
-    if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != 0) {
+    if (SoftBusMutexLock(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "lock mutex failed");
         return NULL;
     }
