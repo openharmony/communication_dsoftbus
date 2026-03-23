@@ -41,7 +41,7 @@ extern "C"{
 // Bluetooth scan duty cycle, unit: ms
 #define SOFTBUS_BC_SCAN_INTERVAL_P2              3000
 #define SOFTBUS_BC_SCAN_INTERVAL_P2_FAST         1500
-#define SOFTBUS_BC_SCAN_INTERVAL_P10             300
+#define SOFTBUS_BC_SCAN_INTERVAL_P10             250
 #define SOFTBUS_BC_SCAN_INTERVAL_P10_LONG_RANGE  400
 #define SOFTBUS_BC_SCAN_INTERVAL_P25             240
 #define SOFTBUS_BC_SCAN_INTERVAL_P50             60
@@ -52,7 +52,7 @@ extern "C"{
 
 #define SOFTBUS_BC_SCAN_WINDOW_P2                60
 #define SOFTBUS_BC_SCAN_WINDOW_P2_FAST           30
-#define SOFTBUS_BC_SCAN_WINDOW_P10               30
+#define SOFTBUS_BC_SCAN_WINDOW_P10               25
 #define SOFTBUS_BC_SCAN_WINDOW_P10_LONG_RANGE    40
 #define SOFTBUS_BC_SCAN_WINDOW_P25               60
 #define SOFTBUS_BC_SCAN_WINDOW_P50               30

@@ -46,6 +46,8 @@ typedef struct {
     int32_t subscribeCntB;
     int32_t stopAdvertiseCntB;
     int32_t unsubscribeCntB;
+    int32_t linkStatusChangedCntB;
+    int32_t updateLocalDeviceInfoCntB;
 } InterfaceFunCntB;
 
 #define IS_CONCERNA 1
@@ -70,6 +72,8 @@ InterfaceFunCntB g_interfaceFunCntB = {
     .subscribeCntB = 0,
     .stopAdvertiseCntB = 0,
     .unsubscribeCntB = 0,
+    .linkStatusChangedCntB = 0,
+    .updateLocalDeviceInfoCntB = 0,
 };
 static bool IsConcernA(uint32_t capability)
 {
@@ -242,6 +246,17 @@ static int32_t StopAdvertiseB(const SubscribeOption *option)
     return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
+static void LinkStatusChangedB(LinkStatus status, int32_t ifnameIdx)
+{
+    g_interfaceFunCntB.linkStatusChangedCntB = 1;
+}
+
+static void UpdateLocalDeviceInfoB(InfoTypeChanged type)
+{
+    (void)type;
+    g_interfaceFunCntB.updateLocalDeviceInfoCntB = 1;
+}
+
 static PublishOption g_pOption0 = {
     .freq = 1,
     .capabilityBitmap = {0},
@@ -340,8 +355,8 @@ static DiscoveryFuncInterface g_discoveryFuncB = {
     .Subscribe = SubscribeB,
     .Unsubscribe = UnsubscribeB,
     .StopAdvertise = StopAdvertiseB,
-    .LinkStatusChanged = LinkStatusChangedA,
-    .UpdateLocalDeviceInfo = UpdateLocalDeviceInfoA,
+    .LinkStatusChanged = LinkStatusChangedB,
+    .UpdateLocalDeviceInfo = UpdateLocalDeviceInfoB,
 };
 
 static DiscoveryBleDispatcherInterface g_interfaceB = {
@@ -767,5 +782,520 @@ HWTEST_F(DiscBleDispatcherTest, DiscBleInit002, TestSize.Level1)
     g_discMgrMediumCb.OnDeviceFound = nullptr;
     DiscoveryFuncInterface *interface = DiscBleInit(&g_discMgrMediumCb);
     EXPECT_EQ(interface, nullptr);
+}
+
+/*
+ * @tc.name: FindDiscoveryFuncInterfaceNullDispatcher001
+ * @tc.desc: test FindDiscoveryFuncInterface with null dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, FindDiscoveryFuncInterfaceNullDispatcher001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "FindDiscoveryFuncInterfaceNullDispatcher001");
+    DiscoveryBleDispatcherInterface nullInterface = {0};
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &nullInterface);
+    int32_t ret = interface->Publish(&g_pOption2);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchSubscribeOptionNullInterface001
+ * @tc.desc: test BleDispatchSubscribeOption with null interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOptionNullInterface001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOptionNullInterface001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->StartAdvertise(&g_sOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchLinkStatusChangedNullDispatcher001
+ * @tc.desc: test BleDispatchLinkStatusChanged with null dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchLinkStatusChangedNullDispatcher001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchLinkStatusChangedNullDispatcher001");
+    g_interfaceFunCntB.linkStatusChangedCntB = 0;
+    DiscoveryBleDispatcherInterface nullInterface = {0};
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&nullInterface, &g_interfaceB);
+    static LinkStatus status = LINK_STATUS_UP;
+    int32_t beforeFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    interface->LinkStatusChanged(status, 0);
+    int32_t afterFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchLinkStatusChangedNullCallback001
+ * @tc.desc: test BleDispatchLinkStatusChanged with null callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchLinkStatusChangedNullCallback001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchLinkStatusChangedNullCallback001");
+    g_interfaceFunCntB.linkStatusChangedCntB = 0;
+    DiscoveryFuncInterface nullCallbackInterface = {
+        .Publish = nullptr,
+        .StartScan = nullptr,
+        .Unpublish = nullptr,
+        .StopScan = nullptr,
+        .StartAdvertise = nullptr,
+        .Subscribe = nullptr,
+        .Unsubscribe = nullptr,
+        .StopAdvertise = nullptr,
+        .LinkStatusChanged = nullptr,
+        .UpdateLocalDeviceInfo = nullptr,
+    };
+    DiscoveryBleDispatcherInterface interfaceWithNullCallback = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = &nullCallbackInterface,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullCallback, &g_interfaceB);
+    static LinkStatus status = LINK_STATUS_UP;
+    int32_t beforeFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    interface->LinkStatusChanged(status, 0);
+    int32_t afterFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchUpdateLocalDeviceInfoNullMediumInterface001
+ * @tc.desc: test BleDispatchUpdateLocalDeviceInfo with null medium interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUpdateLocalDeviceInfoNullMediumInterface001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUpdateLocalDeviceInfoNullMediumInterface001");
+    g_interfaceFunCntB.updateLocalDeviceInfoCntB = 0;
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
+    int32_t beforeFunCntB = g_interfaceFunCntB.updateLocalDeviceInfoCntB;
+    interface->UpdateLocalDeviceInfo(type);
+    int32_t afterFunCntB = g_interfaceFunCntB.updateLocalDeviceInfoCntB;
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchUpdateLocalDeviceInfoNullCallback001
+ * @tc.desc: test BleDispatchUpdateLocalDeviceInfo with null callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUpdateLocalDeviceInfoNullCallback001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUpdateLocalDeviceInfoNullCallback001");
+    g_interfaceFunCntB.updateLocalDeviceInfoCntB = 0;
+    DiscoveryFuncInterface nullCallbackInterface = {
+        .Publish = nullptr,
+        .StartScan = nullptr,
+        .Unpublish = nullptr,
+        .StopScan = nullptr,
+        .StartAdvertise = nullptr,
+        .Subscribe = nullptr,
+        .Unsubscribe = nullptr,
+        .StopAdvertise = nullptr,
+        .LinkStatusChanged = nullptr,
+        .UpdateLocalDeviceInfo = nullptr,
+    };
+    DiscoveryBleDispatcherInterface interfaceWithNullCallback = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = &nullCallbackInterface,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullCallback, &g_interfaceB);
+    static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
+    int32_t beforeFunCntB = g_interfaceFunCntB.updateLocalDeviceInfoCntB;
+    interface->UpdateLocalDeviceInfo(type);
+    int32_t afterFunCntB = g_interfaceFunCntB.updateLocalDeviceInfoCntB;
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: FindDiscoveryFuncInterfaceReturnNull001
+ * @tc.desc: test FindDiscoveryFuncInterface return null for unsupported capability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, FindDiscoveryFuncInterfaceReturnNull001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "FindDiscoveryFuncInterfaceReturnNull001");
+    PublishOption unsupportedOption = {
+        .freq = 1,
+        .capabilityBitmap = {99},
+        .capabilityData = nullptr,
+        .dataLen = 0,
+        .ranging = true
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t ret = interface->Publish(&unsupportedOption);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchPublishOptionPassiveMode001
+ * @tc.desc: test BleDispatchPublishOption with passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOptionPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchPublishOptionPassiveMode001");
+    g_interfaceFunCntA.startScanCntA = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntA = g_interfaceFunCntA.startScanCntA;
+    int32_t ret = interface->StartScan(&g_pOption1);
+    int32_t afterFunCntA = g_interfaceFunCntA.startScanCntA;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+}
+
+/*
+ * @tc.name: BleDispatchUnpublishOptionPassiveMode001
+ * @tc.desc: test BleDispatchUnpublishOption with passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUnpublishOptionPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUnpublishOptionPassiveMode001");
+    g_interfaceFunCntA.stopScanCntA = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntA = g_interfaceFunCntA.stopScanCntA;
+    int32_t ret = interface->StopScan(&g_pOption1);
+    int32_t afterFunCntA = g_interfaceFunCntA.stopScanCntA;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+}
+
+/*
+ * @tc.name: BleDispatchSubscribeOptionPassiveMode001
+ * @tc.desc: test BleDispatchSubscribeOption with passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOptionPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOptionPassiveMode001");
+    g_interfaceFunCntA.subscribeCntA = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntA = g_interfaceFunCntA.subscribeCntA;
+    int32_t ret = interface->Subscribe(&g_sOption1);
+    int32_t afterFunCntA = g_interfaceFunCntA.subscribeCntA;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+}
+
+/*
+ * @tc.name: BleDispatchUnsubscribeOptionPassiveMode001
+ * @tc.desc: test BleDispatchUnsubscribeOption with passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUnsubscribeOptionPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUnsubscribeOptionPassiveMode001");
+    g_interfaceFunCntA.unsubscribeCntA = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    int32_t ret = interface->Unsubscribe(&g_sOption1);
+    int32_t afterFunCntA = g_interfaceFunCntA.unsubscribeCntA;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+}
+
+/*
+ * @tc.name: BleDispatchLinkStatusChangedWithNullDispatcher001
+ * @tc.desc: test BleDispatchLinkStatusChanged with null dispatcher in array
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchLinkStatusChangedWithNullDispatcher001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchLinkStatusChangedWithNullDispatcher001");
+    g_interfaceFunCntB.linkStatusChangedCntB = 0;
+    DiscoveryBleDispatcherInterface nullInterface = {0};
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&nullInterface, &g_interfaceB);
+    static LinkStatus status = LINK_STATUS_UP;
+    int32_t beforeFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    interface->LinkStatusChanged(status, 0);
+    int32_t afterFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchPublishOptionNullInterface001
+ * @tc.desc: test BleDispatchPublishOption with null interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOptionNullInterface001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchPublishOptionNullInterface001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->Publish(&g_pOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchLinkStatusChangedNullMediumInterface001
+ * @tc.desc: test BleDispatchLinkStatusChanged with null medium interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchLinkStatusChangedNullMediumInterface001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchLinkStatusChangedNullMediumInterface001");
+    g_interfaceFunCntB.linkStatusChangedCntB = 0;
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    static LinkStatus status = LINK_STATUS_UP;
+    int32_t beforeFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    interface->LinkStatusChanged(status, 0);
+    int32_t afterFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchUpdateLocalDeviceInfoNullDispatcher001
+ * @tc.desc: test BleDispatchUpdateLocalDeviceInfo with null dispatcher
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUpdateLocalDeviceInfoNullDispatcher001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUpdateLocalDeviceInfoNullDispatcher001");
+    g_interfaceFunCntB.updateLocalDeviceInfoCntB = 0;
+    DiscoveryBleDispatcherInterface nullInterface = {0};
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&nullInterface, &g_interfaceB);
+    static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
+    int32_t beforeFunCntB = g_interfaceFunCntB.updateLocalDeviceInfoCntB;
+    interface->UpdateLocalDeviceInfo(type);
+    int32_t afterFunCntB = g_interfaceFunCntB.updateLocalDeviceInfoCntB;
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchPublishOptionPassiveModeWithInterfaceB001
+ * @tc.desc: test BleDispatchPublishOption with passive mode and interface B
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOptionPassiveModeWithInterfaceB001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchPublishOptionPassiveModeWithInterfaceB001");
+    g_interfaceFunCntB.startScanCntB = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntB = g_interfaceFunCntB.startScanCntB;
+    int32_t ret = interface->StartScan(&g_pOption2);
+    int32_t afterFunCntB = g_interfaceFunCntB.startScanCntB;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchUnpublishOptionPassiveModeWithInterfaceB001
+ * @tc.desc: test BleDispatchUnpublishOption with passive mode and interface B
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUnpublishOptionPassiveModeWithInterfaceB001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUnpublishOptionPassiveModeWithInterfaceB001");
+    g_interfaceFunCntB.stopScanCntB = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntB = g_interfaceFunCntB.stopScanCntB;
+    int32_t ret = interface->StopScan(&g_pOption2);
+    int32_t afterFunCntB = g_interfaceFunCntB.stopScanCntB;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchSubscribeOptionPassiveModeWithInterfaceB001
+ * @tc.desc: test BleDispatchSubscribeOption with passive mode and interface B
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOptionPassiveModeWithInterfaceB001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOptionPassiveModeWithInterfaceB001");
+    g_interfaceFunCntB.subscribeCntB = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntB = g_interfaceFunCntB.subscribeCntB;
+    int32_t ret = interface->Subscribe(&g_sOption2);
+    int32_t afterFunCntB = g_interfaceFunCntB.subscribeCntB;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchUnsubscribeOptionPassiveModeWithInterfaceB001
+ * @tc.desc: test BleDispatchUnsubscribeOption with passive mode and interface B
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUnsubscribeOptionPassiveModeWithInterfaceB001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUnsubscribeOptionPassiveModeWithInterfaceB001");
+    g_interfaceFunCntB.unsubscribeCntB = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    int32_t beforeFunCntB = g_interfaceFunCntB.unsubscribeCntB;
+    int32_t ret = interface->Unsubscribe(&g_sOption2);
+    int32_t afterFunCntB = g_interfaceFunCntB.unsubscribeCntB;
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchLinkStatusChangedWithBothInterfaces001
+ * @tc.desc: test BleDispatchLinkStatusChanged with both interfaces
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchLinkStatusChangedWithBothInterfaces001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchLinkStatusChangedWithBothInterfaces001");
+    g_interfaceFunCntA.linkStatusChangedCntA = 0;
+    g_interfaceFunCntB.linkStatusChangedCntB = 0;
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
+    static LinkStatus status = LINK_STATUS_DOWN;
+    int32_t beforeFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
+    int32_t beforeFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    interface->LinkStatusChanged(status, 1);
+    int32_t afterFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
+    int32_t afterFunCntB = g_interfaceFunCntB.linkStatusChangedCntB;
+    EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
+    EXPECT_EQ(beforeFunCntB + 1, afterFunCntB);
+}
+
+/*
+ * @tc.name: BleDispatchPublishOptionNullInterfaceForPassiveMode001
+ * @tc.desc: test BleDispatchPublishOption with null interface for passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOptionNullInterfaceForPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchPublishOptionNullInterfaceForPassiveMode001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->StartScan(&g_pOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchUnpublishOptionNullInterfaceForPassiveMode001
+ * @tc.desc: test BleDispatchUnpublishOption with null interface for passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUnpublishOptionNullInterfaceForPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUnpublishOptionNullInterfaceForPassiveMode001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->StopScan(&g_pOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchSubscribeOptionNullInterfaceForPassiveMode001
+ * @tc.desc: test BleDispatchSubscribeOption with null interface for passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOptionNullInterfaceForPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOptionNullInterfaceForPassiveMode001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->Subscribe(&g_sOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchUnsubscribeOptionNullInterfaceForPassiveMode001
+ * @tc.desc: test BleDispatchUnsubscribeOption with null interface for passive mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchUnsubscribeOptionNullInterfaceForPassiveMode001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchUnsubscribeOptionNullInterfaceForPassiveMode001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->Unsubscribe(&g_sOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchStartAdvertiseNullInterface001
+ * @tc.desc: test BleDispatchStartAdvertise with null interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchStartAdvertiseNullInterface001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchStartAdvertiseNullInterface001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->StartAdvertise(&g_sOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
+}
+
+/*
+ * @tc.name: BleDispatchStopAdvertiseNullInterface001
+ * @tc.desc: test BleDispatchStopAdvertise with null interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleDispatcherTest, BleDispatchStopAdvertiseNullInterface001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BleDispatchStopAdvertiseNullInterface001");
+    DiscoveryBleDispatcherInterface interfaceWithNullMedium = {
+        .IsConcern = IsConcernA,
+        .mediumInterface = nullptr,
+    };
+    DiscoveryFuncInterface *interface = DiscBleInitForTest(&interfaceWithNullMedium, &g_interfaceB);
+    int32_t ret = interface->StopAdvertise(&g_sOption1);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
 }
 } // namespace OHOS
