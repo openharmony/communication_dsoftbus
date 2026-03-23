@@ -609,7 +609,7 @@ HWTEST_F(ConnBrSendQueueTest, ConnBrDequeueBlockTest007, TestSize.Level1)
  * @tc.name: ConnBrDequeueBlockTest008
  * @tc.desc: Test dequeue timeout when queue is empty
  * @tc.type: FUNC
- * @tc.require: Verify that dequeue returns SOFTBUS_TIMOUT when waiting times out
+ * @tc.require: Verify that dequeue returns SOFTBUS_TIMOUT when queue is empty and time retrieval succeeds
  */
 HWTEST_F(ConnBrSendQueueTest, ConnBrDequeueBlockTest008, TestSize.Level1)
 {
