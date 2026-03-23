@@ -343,7 +343,7 @@ int32_t TransGetLaneIdByChannelId(int32_t channelId, uint64_t *laneId)
     if (g_channelLaneList == NULL || laneId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_channelLaneList->lock)) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
     TransLaneInfo *item = NULL;

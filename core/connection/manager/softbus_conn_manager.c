@@ -91,7 +91,7 @@ static int32_t GetAllListener(ConnListenerNode **node)
         return cnt;
     }
 
-    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock mutex fail");
         return 0;
     }
@@ -128,7 +128,7 @@ static int32_t GetListenerByModuleId(ConnModule moduleId, ConnListenerNode *node
         return SOFTBUS_INVALID_PARAM;
     }
     int ret = SOFTBUS_OK;
-    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -154,7 +154,7 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
         CONN_LOGE(CONN_COMMON, "listener list is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -187,7 +187,7 @@ static void DelListener(ConnModule moduleId)
         return;
     }
 
-    if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_listenerList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock mutex fail");
         return;
     }
