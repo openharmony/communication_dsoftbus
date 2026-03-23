@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "fuzz_data_generator.h"
 #include "fuzzer/FuzzedDataProvider.h"
 #include "gtest/gtest.h"
 #include "softbus_conn_interface_struct.h"
@@ -103,30 +102,23 @@ void OnConnectionDisconnectedFuzz(GeneralConnectionParam *info, uint32_t general
     (void)reason;
 }
 
-void OnCommDataReceivedTest()
+void OnCommDataReceivedTest(FuzzedDataProvider &provider)
 {
-    uint32_t connectionId;
-    GenerateUint32(connectionId);
     ConnModule moduleId = MODULE_BLE_GENERAL;
-    int64_t seq;
-    GenerateInt64(seq);
-    std::vector<uint8_t> payload;
-    GeneratePayload(payload);
-
-    OnCommDataReceived(connectionId, moduleId, seq, reinterpret_cast<char *>(payload.data()), payload.size());
+    int64_t seq = provider.ConsumeIntegral<int64_t>();
+    uint32_t connectionId = provider.ConsumeIntegral<uint32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(size);
+    OnCommDataReceived(connectionId, moduleId, seq, reinterpret_cast<char *>(data.data()), data.size());
 }
 
-void SendTest()
+void SendTest(FuzzedDataProvider &provider)
 {
-    uint32_t generalHandle;
-    GenerateUint32(generalHandle);
-    std::vector<uint8_t> payload;
-    GeneratePayload(payload);
-    int32_t pid;
-    GenerateInt32(pid);
-
+    uint32_t generalHandle = provider.ConsumeIntegral<uint32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
+    auto payload = provider.ConsumeBytes<uint8_t>(size);
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
     Send(generalHandle, payload.data(), payload.size(), pid);
-
     PrepareConnection(true);
     if (g_generalConnection == nullptr) {
         return;
@@ -152,8 +144,7 @@ void ConnectTest(FuzzedDataProvider &provider)
     if (strcpy_s(param.bundleName, PKG_NAME_SIZE_MAX, bundleName.c_str()) != EOK) {
         return;
     }
-    GenerateInt32(param.pid);
-
+    param.pid = provider.ConsumeIntegral<int32_t>();
     Connect(&param, mac);
 }
 
@@ -172,7 +163,7 @@ void CreateServerTest(FuzzedDataProvider &provider)
     if (strcpy_s(param.bundleName, PKG_NAME_SIZE_MAX, bundleName.c_str()) != EOK) {
         return;
     }
-    GenerateInt32(param.pid);
+    param.pid = provider.ConsumeIntegral<int32_t>();
 
     CreateServer(&param);
 
@@ -201,17 +192,14 @@ void CloseServerTest(FuzzedDataProvider &provider)
 
 void GetPeerDeviceIdTest(FuzzedDataProvider &provider)
 {
-    uint32_t generalHandle;
-    GenerateUint32(generalHandle);
+    uint32_t generalHandle = provider.ConsumeIntegral<uint32_t>();
     std::string adr = provider.ConsumeRandomLengthString(BT_MAC_LEN - 1);
     char mac[BT_MAC_LEN] = { 0 };
     if (strcpy_s(mac, BT_MAC_LEN, adr.c_str()) != EOK) {
         return;
     }
-    uint32_t tokenId;
-    GenerateUint32(tokenId);
-    int32_t pid;
-    GenerateInt32(pid);
+    uint32_t tokenId = provider.ConsumeIntegral<uint32_t>();
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
 
     GetPeerDeviceId(generalHandle, mac, BT_MAC_LEN, tokenId, pid);
 }
@@ -228,8 +216,7 @@ void ClearAllGeneralConnectionTest(FuzzedDataProvider &provider)
     if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX, pkgNameStr.c_str()) != EOK) {
         return;
     }
-    int32_t pid;
-    GenerateInt32(pid);
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
 
     ClearAllGeneralConnection(pkgName, pid);
 }
@@ -237,6 +224,8 @@ void ClearAllGeneralConnectionTest(FuzzedDataProvider &provider)
 void ProcessInnerMessageByTypeTest(FuzzedDataProvider &provider)
 {
     GeneralConnectionInfo info = {{0}};
+    info.peerId = provider.ConsumeIntegral<uint32_t>();
+    info.localId = provider.ConsumeIntegral<uint32_t>();
     ProcessInnerMessageByType(0, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE, &info);
     ProcessInnerMessageByType(0, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE_ACK, &info);
     ProcessInnerMessageByType(0, GENERAL_CONNECTION_MSG_TYPE_MERGE, &info);
@@ -280,11 +269,11 @@ void GeneralConnectionPackMsgTest(FuzzedDataProvider &provider)
     if (strcpy_s(info.bundleName, BUNDLE_NAME_MAX, bundleName.c_str()) != EOK) {
         return;
     }
-    GenerateUint32(info.abilityBitSet);
-    GenerateInt32(info.ackStatus);
-    GenerateUint32(info.updateHandle);
-    GenerateUint32(info.localId);
-    GenerateUint32(info.peerId);
+    info.abilityBitSet = provider.ConsumeIntegral<uint32_t>();
+    info.updateHandle = provider.ConsumeIntegral<uint32_t>();
+    info.ackStatus = provider.ConsumeIntegral<int32_t>();
+    info.localId = provider.ConsumeIntegral<uint32_t>();
+    info.peerId = provider.ConsumeIntegral<uint32_t>();
     GeneralConnectionPackMsg(&info, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE);
     GeneralConnectionPackMsg(&info, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE_ACK);
     GeneralConnectionPackMsg(&info, GENERAL_CONNECTION_MSG_TYPE_RESET);
@@ -294,8 +283,9 @@ void GeneralConnectionPackMsgTest(FuzzedDataProvider &provider)
 
 void GeneralConnectionUnpackTest(FuzzedDataProvider &provider)
 {
-    std::vector<uint8_t> data;
-    GeneratePayload(data);
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(size);
+
     GeneralConnectionInfo info = {{0}};
     GeneralConnectionUnpackMsg(data.data(), data.size(), &info, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE);
     GeneralConnectionUnpackMsg(data.data(), data.size(), &info, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE_ACK);
@@ -310,7 +300,8 @@ void DisconnectTest(FuzzedDataProvider &provider)
     if (g_generalConnection == nullptr) {
         return;
     }
-    g_generalConnection->info.pid = 1;
+
+    g_generalConnection->info.pid = provider.ConsumeIntegral<int32_t>();
     SaveConnection(g_generalConnection);
     Disconnect(g_generalConnection->underlayerHandle, 0);
     Disconnect(g_generalConnection->underlayerHandle, g_generalConnection->info.pid);
@@ -319,7 +310,6 @@ void DisconnectTest(FuzzedDataProvider &provider)
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    DataGenerator::Write(data, size);
     FuzzedDataProvider provider(data, size);
     static bool runCoverage = true;
     if (runCoverage) {
@@ -345,8 +335,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     OHOS::GeneralConnectionInterfaceMock mock;
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
-    OHOS::OnCommDataReceivedTest();
-    OHOS::SendTest();
+    OHOS::OnCommDataReceivedTest(provider);
+    OHOS::SendTest(provider);
     OHOS::ConnectTest(provider);
     OHOS::CreateServerTest(provider);
     OHOS::GetPeerDeviceIdTest(provider);
@@ -358,6 +348,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::GeneralConnectionUnpackTest(provider);
     OHOS::DisconnectTest(provider);
     sleep(1);
-    DataGenerator::Clear();
     return 0;
 }
