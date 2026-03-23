@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #include <securec.h>
 #include "socket.h"
 
+#include "fuzz_data_generator.h"
+
 namespace OHOS {
 static std::string DEFAULT_SOCKET_PEER_NETWORKID =
     "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm";
@@ -28,15 +30,14 @@ void EvaluateQosTestWithNetworkId(const uint8_t *data, size_t size)
         return;
     }
 
-    const size_t bufSize = size + 1;
-    std::unique_ptr<char[]> peerNetworkId = std::make_unique<char[]>(bufSize);
-    if (memset_s(peerNetworkId.get(), bufSize, 0, bufSize) != EOK) {
+    uint32_t bufSize = 1;
+    (void)GenerateUint32(bufSize);
+    if (bufSize == 0) {
         return;
     }
 
-    if (memcpy_s(peerNetworkId.get(), bufSize, data, size) != EOK) {
-        return;
-    }
+    std::string peerNetworkId(bufSize, '\0');
+    (void)GenerateString(peerNetworkId);
 
     QosTV qosInfo[] = {
         {.qos = QOS_TYPE_MIN_BW, .value = 160 * 1024 * 1024},
@@ -44,7 +45,7 @@ void EvaluateQosTestWithNetworkId(const uint8_t *data, size_t size)
         {.qos = QOS_TYPE_MIN_LATENCY, .value = 5},
     };
 
-    (void)EvaluateQos(peerNetworkId.get(), DATA_TYPE_MESSAGE, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]));
+    (void)EvaluateQos(peerNetworkId.c_str(), DATA_TYPE_MESSAGE, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]));
 }
 
 void EvaluateQosTestWithDataType(const uint8_t *data, size_t size)
