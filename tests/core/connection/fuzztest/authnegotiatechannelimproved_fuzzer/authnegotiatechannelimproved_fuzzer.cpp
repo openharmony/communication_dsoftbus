@@ -57,7 +57,7 @@ void SetUpEnvironment(OHOS::SoftBus::WifiDirectInterfaceMock &mock)
 void DataReceivedFuzzTest(FuzzedDataProvider &provider)
 {
     AuthHandle handle = { 0 };
-    const auto dataSize = provider.ConsumeIntegral<int>();
+    const auto dataSize = provider.ConsumeIntegral<uint32_t>();
     auto data = provider.ConsumeBytes<uint8_t>(dataSize);
     handle.authId = provider.ConsumeIntegral<int64_t>();
     handle.type = provider.ConsumeIntegral<uint32_t>();
