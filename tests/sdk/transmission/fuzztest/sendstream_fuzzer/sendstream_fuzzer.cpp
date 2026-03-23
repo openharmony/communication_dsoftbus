@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cstddef>
 
+#include "fuzz_data_generator.h"
 #include "securec.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
@@ -27,22 +28,24 @@ void SendStreamTest(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int64_t)) {
         return;
     }
-    uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+    int32_t tmpInteger = 0;
+    (void)GenerateInt32(tmpInteger);
+    uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(tmpInteger + 1));
     if (ptr == nullptr) {
         return;
     }
-    if (memcpy_s(ptr, size, data, size) != EOK) {
+    if (memcpy_s(ptr, tmpInteger, data, tmpInteger) != EOK) {
         SoftBusFree(ptr);
         return;
     }
     int32_t sessionId = *(reinterpret_cast<const int32_t *>(ptr));
     StreamData streamdata = {
         .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-        .bufLen = size,
+        .bufLen = tmpInteger,
     };
     StreamData ext = {
         .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-        .bufLen = size,
+        .bufLen = tmpInteger,
     };
     TV tv = {
         .type = *(reinterpret_cast<const int32_t *>(ptr)),

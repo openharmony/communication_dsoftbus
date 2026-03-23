@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,11 @@
  */
 
 #include "bind_fuzzer.h"
+
 #include <memory>
 #include <securec.h>
+
+#include "fuzz_data_generator.h"
 #include "socket.h"
 
 namespace OHOS {
@@ -121,7 +124,8 @@ void BindTestWithQosInfo(const uint8_t *data, size_t size)
 
     int32_t socketId = 1;
 
-    size_t count = size / sizeof(QosTV);
+    uint32_t count;
+    (void)GenerateUint32(count);
     if (count == 0) {
         return;
     }

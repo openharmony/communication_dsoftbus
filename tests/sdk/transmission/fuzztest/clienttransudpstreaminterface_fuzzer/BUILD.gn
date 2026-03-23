@@ -29,6 +29,7 @@ ohos_fuzztest("ClientTransUdpStreamInterfaceFuzzTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/tests/common/include"
   ]
   cflags = [
     "-g",

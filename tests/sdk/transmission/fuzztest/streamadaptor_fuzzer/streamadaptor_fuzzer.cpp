@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <string>
 
 #include "client_trans_udp_stream_interface.h"
+#include "fuzz_data_generator.h"
 #include "stream_adaptor.h"
 
 #define STANDARD_NUMBER 2
@@ -47,6 +48,8 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(uint32_t)) {
             return;
         }
+        bool isServerSide = false;
+        (void)GenerateBool(isServerSide);
         VtpStreamOpenParam param  = {
             .pkgName = reinterpret_cast<const char *>(data),
             .myIp = const_cast<char *>(reinterpret_cast<const char *>(data)),
@@ -55,12 +58,11 @@ namespace OHOS {
             .type = *(reinterpret_cast<const StreamType *>(data)),
             .sessionKey = const_cast<uint8_t *>(data),
             .keyLen = *(reinterpret_cast<const uint32_t *>(data)),
-            .isRawStreamEncrypt = size % 2,
+            .isRawStreamEncrypt = isServerSide,
         };
         int32_t channelId = *(reinterpret_cast<const int32_t *>(data));
         IStreamListener *callback = nullptr;
         const std::string &pkgName = "ohos.msdp.spatialawareness";
-        bool isServerSide = size % 2;
 
         OHOS::StreamAdaptor streamadaptor(pkgName);
         streamadaptor.InitAdaptor(channelId, &param, isServerSide, callback);

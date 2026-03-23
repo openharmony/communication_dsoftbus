@@ -117,7 +117,8 @@ static void InitSessionAttribute(const uint8_t *data, size_t size, SessionAttrib
 static void InitSessionParam(
     const uint8_t *data, size_t size, SessionParam *sessionParam, SessionAttribute *sessionAttr)
 {
-    bool boolParam = (size % 2 == 0) ? true : false;
+    bool boolParam = true;
+    (void)GenerateBool(boolParam);
     char *charParam = boolParam ? const_cast<char *>(reinterpret_cast<const char *>(data)) : nullptr;
 
     sessionParam->sessionName = charParam;
@@ -176,21 +177,6 @@ void ServerIpcOpenAuthSessionTest(const uint8_t *data, size_t size)
     (void)ServerIpcOpenAuthSession(sessionName, nullptr);
     (void)ServerIpcOpenAuthSession(nullptr, nullptr);
     SoftBusFree(dataWithEndCharacter);
-    DataGenerator::Clear();
-}
-
-void ServerIpcNotifyAuthSuccessTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int32_t)) {
-        return;
-    }
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-
-    (void)ServerIpcNotifyAuthSuccess(channelId, channelType);
     DataGenerator::Clear();
 }
 

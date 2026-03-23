@@ -16,7 +16,9 @@
 #include "clienttransstream_fuzzer.h"
 
 #include <securec.h>
+
 #include "client_trans_stream.h"
+#include "fuzz_data_generator.h"
 #include "softbus_adapter_mem.h"
 
 namespace OHOS {
@@ -36,22 +38,24 @@ namespace OHOS {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
         }
-        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
+        int32_t tmpSize;
+        (void)GenerateInt32(tmpSize);
+        uint8_t *ptr = static_cast<uint8_t *>(SoftBusCalloc(tmpSize + 1));
         if (ptr == nullptr) {
             return;
         }
-        if (memcpy_s(ptr, size, data, size) != EOK) {
+        if (memcpy_s(ptr, tmpSize, data, tmpSize) != EOK) {
             SoftBusFree(ptr);
             return;
         }
         int32_t channelId = *(reinterpret_cast<const int32_t *>(ptr));
         StreamData streamdata = {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-            .bufLen = size,
+            .bufLen = tmpSize,
         };
         StreamData ext = {
             .buf = const_cast<char *>(reinterpret_cast<const char *>(ptr)),
-            .bufLen = size,
+            .bufLen = tmpSize,
         };
         TV tv = {
             .type = *(reinterpret_cast<const int32_t *>(ptr)),
