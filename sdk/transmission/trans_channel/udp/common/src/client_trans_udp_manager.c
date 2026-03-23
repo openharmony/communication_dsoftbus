@@ -476,6 +476,7 @@ static void NotifyCallback(UdpChannel *channel, int32_t channelId, ShutdownReaso
     }
 }
 
+/* Skip VTP cleanup when closing stream with unexpected reason */
 static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, ShutdownReason reason)
 {
     int32_t ret;
@@ -507,7 +508,8 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
             break;
     }
 
-    if (channel != NULL) {
+    /* Skip VTP cleanup when closing stream with unexpected reason */
+    if (channel != NULL && reason != SHUTDOWN_REASON_UNEXPECTED) {
         ret = TransDeleteBusinnessChannel(channel);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "del business channel failed. channelId=%{public}d", channelId);
@@ -521,6 +523,7 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
     return SOFTBUS_OK;
 }
 
+/* Skip VTP cleanup when closing stream with unexpected reason */
 static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
     UdpChannel channel;
@@ -573,6 +576,7 @@ static int32_t CloseReserveUdpChannel(int32_t channelId, ShutdownReason reason, 
     return SOFTBUS_OK;
 }
 
+/* Skip VTP cleanup when closing stream with unexpected reason */
 int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason)
 {
     int32_t routeType = -1;
@@ -596,6 +600,7 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
     return SOFTBUS_OK;
 }
 
+/* Skip VTP cleanup when closing stream with unexpected reason */
 int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
     int32_t ret = AddPendingPacket(channelId, 0, PENDING_TYPE_UDP);
