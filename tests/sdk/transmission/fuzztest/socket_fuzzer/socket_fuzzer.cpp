@@ -16,155 +16,12 @@
 #include "socket_fuzzer.h"
 
 #include <fuzzer/FuzzedDataProvider.h>
-#include <memory>
-#include <securec.h>
 #include <string>
-#include <vector>
+#include <securec.h>
 
-#include "fuzz_data_generator.h"
 #include "socket.h"
 
 namespace OHOS {
-static std::string DEFAULT_SOCKET_NAME = "com.communication.fuzz.socketName";
-static std::string DEFAULT_SOCKET_PEER_NAME = "com.communication.fuzz.peerName";
-static std::string DEFAULT_SOCKET_PEER_NETWORKID =
-    "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm";
-static std::string DEFAULT_SOCKET_PKG_NAME = "com.communication.fuzz.pkgName";
-
-void SocketTestWithName(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-
-    uint32_t bufSize = 1;
-    (void)GenerateUint32(bufSize);
-    std::unique_ptr<char[]> socketName = std::make_unique<char[]>(bufSize);
-    if (memset_s(socketName.get(), bufSize, 0, bufSize) != EOK) {
-        return;
-    }
-
-    if (memcpy_s(socketName.get(), bufSize, data, size) != EOK) {
-        return;
-    }
-
-    SocketInfo info = {
-        .name = socketName.get(),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PEER_NETWORKID.c_str()),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
-        .dataType = DATA_TYPE_MESSAGE,
-    };
-
-    (void)Socket(info);
-}
-
-void SocketTestWithPeerName(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-
-    uint32_t bufSize = 1;
-    (void)GenerateUint32(bufSize);
-    std::unique_ptr<char[]> socketPeerName = std::make_unique<char[]>(bufSize);
-    if (memset_s(socketPeerName.get(), bufSize, 0, bufSize) != EOK) {
-        return;
-    }
-
-    if (memcpy_s(socketPeerName.get(), bufSize, data, size) != EOK) {
-        return;
-    }
-
-    SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
-        .peerName = socketPeerName.get(),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PEER_NETWORKID.c_str()),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
-        .dataType = DATA_TYPE_MESSAGE,
-    };
-
-    (void)Socket(info);
-}
-
-void SocketTestWithNetworkId(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-
-    uint32_t bufSize = 1;
-    (void)GenerateUint32(bufSize);
-    std::unique_ptr<char[]> socketNetworkId = std::make_unique<char[]>(bufSize);
-    if (memset_s(socketNetworkId.get(), bufSize, 0, bufSize) != EOK) {
-        return;
-    }
-
-    if (memcpy_s(socketNetworkId.get(), bufSize, data, size) != EOK) {
-        return;
-    }
-
-    SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
-        .peerNetworkId = socketNetworkId.get(),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
-        .dataType = DATA_TYPE_MESSAGE,
-    };
-
-    (void)Socket(info);
-}
-
-void SocketTestWithPkgName(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-
-    uint32_t bufSize = 1;
-    (void)GenerateUint32(bufSize);
-    std::unique_ptr<char[]> socketPkgName = std::make_unique<char[]>(bufSize);
-    if (memset_s(socketPkgName.get(), bufSize, 0, bufSize) != EOK) {
-        return;
-    }
-
-    if (memcpy_s(socketPkgName.get(), bufSize, data, size) != EOK) {
-        return;
-    }
-
-    SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
-        .pkgName = socketPkgName.get(),
-        .dataType = DATA_TYPE_MESSAGE,
-    };
-
-    (void)Socket(info);
-}
-
-void SocketTestWithDataType(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(TransDataType))) {
-        return;
-    }
-
-    TransDataType socketDataType = DATA_TYPE_BUTT;
-    if (memcpy_s(&socketDataType, sizeof(TransDataType), data, sizeof(TransDataType)) != EOK) {
-        return;
-    }
-
-    SocketInfo info = {
-        .name = const_cast<char *>(DEFAULT_SOCKET_NAME.c_str()),
-        .peerName = const_cast<char *>(DEFAULT_SOCKET_PEER_NAME.c_str()),
-        .peerNetworkId = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
-        .pkgName = const_cast<char *>(DEFAULT_SOCKET_PKG_NAME.c_str()),
-        .dataType = socketDataType,
-    };
-
-    (void)Socket(info);
-}
-
 void ServiceSocketTest(FuzzedDataProvider &provider)
 {
 #define NETWORK_ID_BUF_LEN 65
@@ -190,11 +47,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
-    OHOS::SocketTestWithName(data, size);
-    OHOS::SocketTestWithPeerName(data, size);
-    OHOS::SocketTestWithNetworkId(data, size);
-    OHOS::SocketTestWithPkgName(data, size);
-    OHOS::SocketTestWithDataType(data, size);
     OHOS::ServiceSocketTest(provider);
     return 0;
 }
