@@ -93,15 +93,6 @@ static void FillAppInfo(FuzzedDataProvider &provider, AppInfo *appInfo)
     FillAppInfoPart(provider, appInfo);
 }
 
-static void FillConnectOption(const uint8_t *data, size_t size, ConnectOption *connInfo)
-{
-    int32_t cnt = 0;
-    DataGenerator::Write(data, size);
-    GenerateInt32(cnt);
-    connInfo->type = static_cast<ConnectType>(cnt);
-    DataGenerator::Clear();
-}
-
 static void FillConnectOption(FuzzedDataProvider &provider, ConnectOption *connInfo)
 {
     connInfo->type = static_cast<ConnectType>(provider.ConsumeIntegral<int32_t>());
