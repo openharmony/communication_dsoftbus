@@ -263,6 +263,7 @@ bool ForCJsonPackUnpackFuzzTest(FuzzedDataProvider &provider)
 
 bool SaveAndRecoveryApplyKeyCase(FuzzedDataProvider &provider)
 {
+    (void)provider;
     g_isRecoveryApplyKey = true;
     AuthRecoveryApplyKey();
     g_isRecoveryApplyKey = false;
