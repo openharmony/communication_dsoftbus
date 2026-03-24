@@ -24,13 +24,16 @@
 using namespace testing;
 using namespace testing::ext;
 
-#define MAP_KEY "mapKey"
-#define VALUE_ACCOUNT_HASH "accountHash"
-#define VALUE_APPLY_KEY "applyKey"
-#define VALUE_USER_ID "userId"
-#define VALUE_TIME "time"
-#define USER_ID 100
-#define D2D_TIME 100
+#define MAP_KEY              "mapKey"
+#define MAP_KEY_1            "mapKey1"
+#define VALUE_ACCOUNT_HASH   "accountHash"
+#define VALUE_ACCOUNT_HASH_1 "accountHash1"
+#define VALUE_APPLY_KEY      "applyKey"
+#define VALUE_APPLY_KEY_1    "applyKey1"
+#define VALUE_USER_ID        "userId"
+#define VALUE_TIME           "time"
+#define USER_ID              100
+#define D2D_TIME             100
 
 namespace OHOS {
 AuthApplyKeyManagerMock *AuthApplyKeyManagerMock::gMock;
@@ -52,38 +55,48 @@ AuthApplyKeyManagerMock &AuthApplyKeyManagerMock::GetMock()
 
 int32_t AuthApplyKeyManagerMock::LnnRetrieveDeviceDataInner(LnnDataType dataType, char **data, uint32_t *dataLen)
 {
-    printf("LnnRetrieveDeviceDataPacked\n");
     cJSON *jsonArray = cJSON_CreateArray();
     if (jsonArray == NULL) {
-        printf("jsonArray is null\n");
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    cJSON *obj = cJSON_CreateObject();
-    if (obj == NULL) {
-        printf("create json fail\n");
+    cJSON *obj1 = cJSON_CreateObject();
+    if (obj1 == NULL) {
+        cJSON_Delete(jsonArray);
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    if (!AddStringToJsonObject(obj, MAP_KEY, "nodeKey") || !AddStringToJsonObject(obj, VALUE_APPLY_KEY, "ApplyKey") ||
-        !AddStringToJsonObject(obj, VALUE_ACCOUNT_HASH, "accountHash") ||
-        !AddNumberToJsonObject(obj, VALUE_USER_ID, USER_ID) ||
-        !AddNumber64ToJsonObject(obj, VALUE_TIME, D2D_TIME)) {
-        printf("add json object fail\n");
+    if (!AddStringToJsonObject(obj1, MAP_KEY, MAP_KEY) ||
+        !AddStringToJsonObject(obj1, VALUE_APPLY_KEY, VALUE_APPLY_KEY) ||
+        !AddStringToJsonObject(obj1, VALUE_ACCOUNT_HASH, VALUE_ACCOUNT_HASH) ||
+        !AddNumberToJsonObject(obj1, VALUE_USER_ID, USER_ID) ||
+        !AddNumber64ToJsonObject(obj1, VALUE_TIME, D2D_TIME)) {
+        cJSON_Delete(jsonArray);
+        cJSON_Delete(obj1);
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    cJSON_AddItemToArray(jsonArray, obj);
-    obj = cJSON_CreateObject();
-    if (obj == NULL) {
-        printf("create json fail\n");
+    cJSON_AddItemToArray(jsonArray, obj1);
+    cJSON *obj2 = cJSON_CreateObject();
+    if (obj2 == NULL) {
+        cJSON_Delete(jsonArray);
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    if (!AddStringToJsonObject(obj, MAP_KEY, "nodeKey1") || !AddStringToJsonObject(obj, VALUE_APPLY_KEY, "ApplyKey1") ||
-        !AddStringToJsonObject(obj, VALUE_ACCOUNT_HASH, "accountHash") ||
-        !AddNumberToJsonObject(obj, VALUE_USER_ID, USER_ID) ||
-        !AddNumber64ToJsonObject(obj, VALUE_TIME, D2D_TIME)) {
-        printf("add json object fail\n");
+    if (!AddStringToJsonObject(obj2, MAP_KEY, MAP_KEY_1) ||
+        !AddStringToJsonObject(obj2, VALUE_APPLY_KEY, VALUE_APPLY_KEY_1) ||
+        !AddStringToJsonObject(obj2, VALUE_ACCOUNT_HASH, VALUE_ACCOUNT_HASH_1) ||
+        !AddNumberToJsonObject(obj2, VALUE_USER_ID, USER_ID) ||
+        !AddNumber64ToJsonObject(obj2, VALUE_TIME, D2D_TIME)) {
+        cJSON_Delete(jsonArray);
+        cJSON_Delete(obj2);
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    cJSON_AddItemToArray(jsonArray, obj);
+    cJSON_AddItemToArray(jsonArray, obj2);
+    char *msg = cJSON_PrintUnformatted(jsonArray);
+    if (msg == nullptr) {
+        cJSON_Delete(jsonArray);
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    cJSON_Delete(jsonArray);
+    *data = msg;
+    *dataLen = (uint32_t)strlen(msg);
     return SOFTBUS_OK;
 }
 
