@@ -295,6 +295,10 @@ int32_t SendStream(int32_t sessionId, const StreamData *data, const StreamData *
         TRANS_LOGE(TRANS_STREAM, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ext->bufLen > UINT16_MAX) {
+        TRANS_LOGE(TRANS_STREAM, "ext len is greater than uint16 max");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = CheckPermissionState(sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "SendStream no permission, ret=%{public}d", ret);

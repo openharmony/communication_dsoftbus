@@ -53,6 +53,7 @@
 #define TRANS_TEST_FILE_COUNT 2
 
 #define TRANS_TEST_INVALID_SEND_LEN (1024 * 1024)
+#define TRANS_TEST_INVALID_STREAM_EXT_LEN (UINT16_MAX + 1)
 
 using namespace testing::ext;
 
@@ -550,6 +551,33 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     len = TRANS_TEST_DEFAULT_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+}
+
+/**
+ * @tc.name: SendStreamTest01
+ * @tc.desc: SendStream with invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientMsgServiceTest, SendStreamTest01, TestSize.Level1)
+{
+    char dataBuf[TRANS_TEST_MAX_MSG_LEN] = {0};
+    StreamData data = {
+        .buf = dataBuf,
+        .bufLen = TRANS_TEST_MAX_MSG_LEN
+    };
+    char extBuf[TRANS_TEST_INVALID_STREAM_EXT_LEN] = {0};
+    StreamData ext = {
+        .buf = extBuf,
+        .bufLen = TRANS_TEST_INVALID_STREAM_EXT_LEN
+    };
+    StreamFrameInfo streamFrameInfo = {0};
+    int32_t sessionId =
+        AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, BUSINESS_TYPE_BUTT, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    int32_t ret = SendStream(sessionId, &data, &ext, &streamFrameInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 }
