@@ -57,34 +57,6 @@ private:
     volatile bool isInited_;
 };
 
-static void FillAppInfoPart(const uint8_t *data, size_t size, AppInfo *appInfo)
-{
-    DataGenerator::Write(data, size);
-    GenerateInt32(appInfo->fd);
-    GenerateInt32(appInfo->fileProtocol);
-    GenerateInt32(appInfo->autoCloseTime);
-    GenerateInt32(appInfo->myHandleId);
-    GenerateInt32(appInfo->peerHandleId);
-    GenerateInt32(appInfo->transFlag);
-    GenerateInt64(appInfo->authSeq);
-    GenerateInt32(appInfo->linkType);
-    GenerateInt32(appInfo->connectType);
-    GenerateInt32(appInfo->channelType);
-    GenerateInt32(appInfo->errorCode);
-    GenerateInt64(appInfo->timeStart);
-    GenerateInt64(appInfo->connectedStart);
-    GenerateUint64(appInfo->callingTokenId);
-    GenerateBool(appInfo->isClient);
-    GenerateInt32(appInfo->osType);
-    GenerateUint32(appInfo->protocol);
-    GenerateInt32(appInfo->encrypt);
-    GenerateInt32(appInfo->algorithm);
-    GenerateInt32(appInfo->crc);
-    appInfo->fastTransData = (reinterpret_cast<const uint8_t *>(data));
-    appInfo->fastTransDataSize = size;
-    DataGenerator::Clear();
-}
-
 static void FillAppInfoPart(FuzzedDataProvider &provider, AppInfo *appInfo)
 {
     appInfo->fd = provider.ConsumeIntegral<int32_t>();
@@ -107,27 +79,6 @@ static void FillAppInfoPart(FuzzedDataProvider &provider, AppInfo *appInfo)
     appInfo->encrypt = provider.ConsumeIntegral<int32_t>();
     appInfo->algorithm = provider.ConsumeIntegral<int32_t>();
     appInfo->crc = provider.ConsumeIntegral<int32_t>();
-}
-
-static void FillAppInfo(const uint8_t *data, size_t size, AppInfo *appInfo)
-{
-    int32_t cnt = 0;
-    DataGenerator::Write(data, size);
-    GenerateInt32(cnt);
-    appInfo->routeType = static_cast<RouteType>(cnt);
-    GenerateInt32(cnt);
-    appInfo->businessType = static_cast<BusinessType>(cnt);
-    GenerateInt32(cnt);
-    appInfo->streamType = static_cast<StreamType>(cnt);
-    GenerateInt32(cnt);
-    appInfo->udpConnType = static_cast<UdpConnType>(cnt);
-    GenerateInt32(cnt);
-    appInfo->udpChannelOptType = static_cast<UdpChannelOptType>(cnt);
-    GenerateInt32(cnt);
-    appInfo->appType = static_cast<AppType>(cnt);
-
-    FillAppInfoPart(data, size, appInfo);
-    DataGenerator::Clear();
 }
 
 static void FillAppInfo(FuzzedDataProvider &provider, AppInfo *appInfo)
@@ -177,22 +128,6 @@ void FillAppInfoTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-}
-
-void TransProxyOpenProxyChannelTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int64_t)) {
-        return;
-    }
-
-    int32_t channelId;
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    FillAppInfo(data, size, &appInfo);
-    ConnectOption connectOption;
-    FillConnectOption(data, size, &connectOption);
-
-    (void)TransProxyOpenProxyChannel(&appInfo, &connectOption, &channelId);
 }
 
 void TransProxyOpenProxyChannelTest(FuzzedDataProvider &provider)
@@ -440,25 +375,6 @@ void TransProxyOpenProxyChannelSuccessTest(FuzzedDataProvider &provider)
     TransProxyDelChanByChanId(channelId);
 }
 
-void TransProxyOpenProxyChannelFailTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int64_t)) {
-        return;
-    }
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t errCode = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(errCode);
-    DataGenerator::Clear();
-
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    FillAppInfo(data, size, &appInfo);
-
-    TransProxyOpenProxyChannelFail(channelId, &appInfo, errCode);
-}
-
 void TransProxyOpenProxyChannelFailTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
@@ -552,26 +468,6 @@ void TransProxyGetSendMsgChanInfoTest(FuzzedDataProvider &provider)
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     (void)TransProxyGetSendMsgChanInfo(channelId, proxyChannelInfo);
-    TransProxyDelChanByChanId(channelId);
-}
-
-void TransProxyCreateChanInfoTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int64_t)) {
-        return;
-    }
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    GenerateInt32(channelId);
-    DataGenerator::Clear();
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    FillAppInfo(data, size, &appInfo);
-
-    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
-
-    // proxyChannelInfo will be free at function TransProxyDelChanByChanId
     TransProxyDelChanByChanId(channelId);
 }
 
