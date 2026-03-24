@@ -34,6 +34,7 @@ group("unittest") {
       "br:ConnectionBrTest",
       "br:ConnBrPendingPacketTest",
       "br:SoftbusBrConnectionTest",
+      "br:ConnBrSendQueueTest",
     ]
   }
   if (support_bluetooth && dsoftbus_feature_conn_ble) {
