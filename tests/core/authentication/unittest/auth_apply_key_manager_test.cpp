@@ -17,8 +17,8 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "auth_apply_key_manager.h"
 #include "auth_apply_key_manager.c"
+#include "auth_apply_key_manager.h"
 #include "auth_apply_key_manager_mock.h"
 #include "auth_log.h"
 #include "g_enhance_lnn_func.h"
@@ -30,6 +30,23 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_manager_struct.h"
 
+#define TEST_KEY_001            "test_key_001"
+#define TEST_KEY_002            "test_key_002"
+#define TEST_KEY_003            "test_key_003"
+#define TEST_KEY_004            "test_key_004"
+#define TEST_KEY_005            "test_key_005"
+#define TEST_KEY                "test_key"
+#define TEST_KEY_NOT_EXIST      "test_key_not_exist"
+#define TEST_NON_EXIST_KEY      "non_exist_key"
+#define TEST_NODE_KEY           "test_node_key"
+#define TEST_INVALID_JSON       "invalid json"
+#define TEST_UDID_HASH          "udidHash"
+#define TEST_ACCOUNT            "account"
+#define TEST_PEER_ACCOUNT_HASH  "peerAccountHash"
+#define TEST_JSON_KEY           "test_key"
+#define TEST_APPLY_KEY_VALUE    "0102030405"
+#define TEST_ACCOUNT_HASH_VALUE "aaaa"
+#define TEST_TIME_VALUE         1000
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
@@ -42,13 +59,17 @@ public:
     void TearDown();
 };
 
+static void InitApplyKeyManagerMock(AuthApplyKeyManagerMock *mock)
+{
+    EXPECT_CALL(*mock, LnnRetrieveDeviceDataPacked).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(*mock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
+}
+
 void AuthApplyKeyManagerTest::SetUpTestCase()
 {
     AUTH_LOGI(AUTH_CONN, "AuthApplyKeyManagerTest start");
-    AuthApplyKeyManagerMock ApplyKeyMock;
-    EXPECT_CALL(ApplyKeyMock, LnnRetrieveDeviceDataPacked)
-        .WillRepeatedly(ApplyKeyMock.LnnRetrieveDeviceDataInner);
-    EXPECT_CALL(ApplyKeyMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
+    AuthApplyKeyManagerMock applyKeyMock;
+    InitApplyKeyManagerMock(&applyKeyMock);
     InitApplyKeyManager();
 }
 
@@ -93,12 +114,8 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_INIT_Test_001, TestSize
  */
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_001, TestSize.Level1)
 {
-    AuthApplyKeyManagerMock ApplyKeyMock;
-    EXPECT_CALL(ApplyKeyMock, LnnRetrieveDeviceDataPacked)
-        .WillRepeatedly(ApplyKeyMock.LnnRetrieveDeviceDataInner);
-    EXPECT_CALL(ApplyKeyMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t userId = 0;
-    EXPECT_CALL(ApplyKeyMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(userId));
+    AuthApplyKeyManagerMock applyKeyMock;
+    InitApplyKeyManagerMock(&applyKeyMock);
     InitApplyKeyManager();
     RequestBusinessInfo info;
     (void)memset_s(&info, sizeof(RequestBusinessInfo), 0, sizeof(RequestBusinessInfo));
@@ -106,6 +123,8 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_001, TestSize.Leve
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
     uint8_t uk[D2D_APPLY_KEY_LEN] = { 0 };
     uint64_t currentTime = SoftBusGetSysTimeMs();
+    int32_t userId = 0;
+    EXPECT_CALL(applyKeyMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(userId));
     int32_t ret = AuthInsertApplyKey(&info, uk, D2D_APPLY_KEY_LEN, currentTime, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint8_t outUk[D2D_APPLY_KEY_LEN] = { 0 };
@@ -128,12 +147,8 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_001, TestSize.Leve
  */
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_002, TestSize.Level1)
 {
-    AuthApplyKeyManagerMock ApplyKeyMock;
-    EXPECT_CALL(ApplyKeyMock, LnnRetrieveDeviceDataPacked)
-        .WillRepeatedly(ApplyKeyMock.LnnRetrieveDeviceDataInner);
-    EXPECT_CALL(ApplyKeyMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t userId = 0;
-    EXPECT_CALL(ApplyKeyMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(userId));
+    AuthApplyKeyManagerMock applyKeyMock;
+    InitApplyKeyManagerMock(&applyKeyMock);
     InitApplyKeyManager();
     RequestBusinessInfo info;
     (void)memset_s(&info, sizeof(RequestBusinessInfo), 0, sizeof(RequestBusinessInfo));
@@ -141,6 +156,8 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_002, TestSize.Leve
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
     uint8_t uk[D2D_APPLY_KEY_LEN] = { 0 };
     uint64_t currentTime = 0;
+    int32_t userId = 0;
+    EXPECT_CALL(applyKeyMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(userId));
     int32_t ret = AuthInsertApplyKey(&info, uk, D2D_APPLY_KEY_LEN, currentTime, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint8_t outUk[D2D_APPLY_KEY_LEN] = { 0 };
@@ -175,10 +192,10 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_APPLY_KEY_MANAGER_Test_003, TestSize.Leve
  */
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_INSERT_TO_AUTH_APPLY_MAP_Test_001, TestSize.Level1)
 {
-    const char *applyMapKey = "test_key_001";
+    const char *applyMapKey = TEST_KEY_001;
     uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 1 };
     int32_t userId = 0;
-    uint64_t time = 1000;
+    uint64_t time = TEST_TIME_VALUE;
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
     int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, userId, time, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -197,11 +214,11 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_INSERT_TO_AUTH_APPLY_MAP_Test_002, TestSi
 {
     uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 1 };
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    int32_t ret = InsertToAuthApplyMap(nullptr, applyKey, 0, 1000, accountHash);
+    int32_t ret = InsertToAuthApplyMap(nullptr, applyKey, 0, TEST_TIME_VALUE, accountHash);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = InsertToAuthApplyMap("test_key", nullptr, 0, 1000, accountHash);
+    ret = InsertToAuthApplyMap(TEST_KEY, nullptr, 0, TEST_TIME_VALUE, accountHash);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = InsertToAuthApplyMap("test_key", applyKey, 0, 1000, nullptr);
+    ret = InsertToAuthApplyMap(TEST_KEY, applyKey, 0, TEST_TIME_VALUE, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -214,10 +231,10 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_INSERT_TO_AUTH_APPLY_MAP_Test_002, TestSi
  */
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_GET_NODE_FROM_AUTH_APPLY_MAP_Test_001, TestSize.Level1)
 {
-    const char *applyMapKey = "test_key_002";
+    const char *applyMapKey = TEST_KEY_002;
     uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 2 };
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, 1000, accountHash);
+    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, TEST_TIME_VALUE, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     AuthApplyMapValue value;
     (void)memset_s(&value, sizeof(AuthApplyMapValue), 0, sizeof(AuthApplyMapValue));
@@ -240,7 +257,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_GET_NODE_FROM_AUTH_APPLY_MAP_Test_002, Te
     (void)memset_s(&value, sizeof(AuthApplyMapValue), 0, sizeof(AuthApplyMapValue));
     int32_t ret = GetNodeFromAuthApplyMap(nullptr, &value);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = GetNodeFromAuthApplyMap("test_key_not_exist", &value);
+    ret = GetNodeFromAuthApplyMap(TEST_KEY_NOT_EXIST, &value);
     EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_NOT_FOUND);
 }
 
@@ -253,10 +270,10 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_GET_NODE_FROM_AUTH_APPLY_MAP_Test_002, Te
  */
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_DELETE_TO_AUTH_APPLY_MAP_Test_001, TestSize.Level1)
 {
-    const char *applyMapKey = "test_key_003";
+    const char *applyMapKey = TEST_KEY_003;
     uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 3 };
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, 1000, accountHash);
+    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, TEST_TIME_VALUE, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DeleteToAuthApplyMap(applyMapKey);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -273,7 +290,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_DELETE_TO_AUTH_APPLY_MAP_Test_002, TestSi
 {
     int32_t ret = DeleteToAuthApplyMap(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DeleteToAuthApplyMap("non_exist_key");
+    ret = DeleteToAuthApplyMap(TEST_NON_EXIST_KEY);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -286,10 +303,10 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_DELETE_TO_AUTH_APPLY_MAP_Test_002, TestSi
  */
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_CLEAR_AUTH_APPLY_MAP_Test_001, TestSize.Level1)
 {
-    const char *applyMapKey = "test_key_004";
+    const char *applyMapKey = TEST_KEY_004;
     uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 4 };
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, 1000, accountHash);
+    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, TEST_TIME_VALUE, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(ClearAuthApplyMap());
 }
@@ -305,11 +322,11 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_PACK_APPLY_KEY_Test_001, TestSize.Level1)
 {
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(json, nullptr);
-    char nodeKey[KEY_LEN] = "test_node_key";
+    char nodeKey[KEY_LEN] = TEST_NODE_KEY;
     AuthApplyMapValue value;
     (void)memset_s(&value, sizeof(AuthApplyMapValue), 0, sizeof(AuthApplyMapValue));
     value.userId = 0;
-    value.time = 1000;
+    value.time = TEST_TIME_VALUE;
     (void)memset_s(value.applyKey, D2D_APPLY_KEY_LEN, 1, D2D_APPLY_KEY_LEN);
     (void)memset_s(value.accountHash, SHA_256_HEX_HASH_LEN, 'a', SHA_256_HEX_HASH_LEN - 1);
     bool ret = AuthPackApplyKey(json, nodeKey, &value);
@@ -331,7 +348,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_PACK_APPLY_KEY_Test_002, TestSize.Level1)
     AuthApplyMapValue value;
     (void)memset_s(&value, sizeof(AuthApplyMapValue), 0, sizeof(AuthApplyMapValue));
     value.userId = 0;
-    value.time = 1000;
+    value.time = TEST_TIME_VALUE;
     bool ret = AuthPackApplyKey(json, nullptr, &value);
     EXPECT_FALSE(ret);
     ret = AuthPackApplyKey(nullptr, const_cast<char *>("key"), &value);
@@ -352,11 +369,11 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_UNPACK_APPLY_KEY_Test_001, TestSize.Level
 {
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(json, nullptr);
-    AddStringToJsonObject(json, MAP_KEY, "test_key");
-    AddStringToJsonObject(json, VALUE_APPLY_KEY, "0102030405");
-    AddStringToJsonObject(json, VALUE_ACCOUNT_HASH, "aaaa");
+    AddStringToJsonObject(json, MAP_KEY, TEST_JSON_KEY);
+    AddStringToJsonObject(json, VALUE_APPLY_KEY, TEST_APPLY_KEY_VALUE);
+    AddStringToJsonObject(json, VALUE_ACCOUNT_HASH, TEST_ACCOUNT_HASH_VALUE);
     AddNumberToJsonObject(json, VALUE_USER_ID, 0);
-    AddNumber64ToJsonObject(json, VALUE_TIME, 1000);
+    AddNumber64ToJsonObject(json, VALUE_TIME, TEST_TIME_VALUE);
     AuthApplyMap node;
     (void)memset_s(&node, sizeof(AuthApplyMap), 0, sizeof(AuthApplyMap));
     bool ret = AuthUnpackApplyKey(json, &node);
@@ -396,7 +413,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_UNPACK_APPLY_KEY_Test_002, TestSize.Level
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_PRASE_APPLY_KEY_Test_001, TestSize.Level1)
 {
     const char *validJson = "[[{\"mapKey\":\"key1\",\"applyKey\":\"01020\",\"accountHash\":\"aaaa\",\"userId\":0,"
-                           "\"time\":9999999999999}]]";
+        "\"time\":9999999999999}]]";
     int32_t len = std::strlen(validJson) + 1;
     char *key = reinterpret_cast<char *>(SoftBusCalloc(len));
     ASSERT_NE(key, nullptr);
@@ -418,7 +435,7 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_PRASE_APPLY_KEY_Test_002, TestSize.Level1
 {
     bool ret = AuthPraseApplyKey(nullptr);
     EXPECT_FALSE(ret);
-    ret = AuthPraseApplyKey("invalid json");
+    ret = AuthPraseApplyKey(TEST_INVALID_JSON);
     EXPECT_FALSE(ret);
 }
 
@@ -431,10 +448,10 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_PRASE_APPLY_KEY_Test_002, TestSize.Level1
  */
 HWTEST_F(AuthApplyKeyManagerTest, AUTH_PACK_ALL_APPLY_KEY_Test_001, TestSize.Level1)
 {
-    const char *applyMapKey = "test_key_005";
+    const char *applyMapKey = TEST_KEY_005;
     uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 5 };
     char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, 1000, accountHash);
+    int32_t ret = InsertToAuthApplyMap(applyMapKey, applyKey, 0, TEST_TIME_VALUE, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     char *packedData = PackAllApplyKey();
     EXPECT_NE(packedData, nullptr);
@@ -455,11 +472,11 @@ HWTEST_F(AuthApplyKeyManagerTest, AUTH_PRINTF_REQUEST_BUSINESS_INFO_Test_001, Te
     RequestBusinessInfo info;
     (void)memset_s(&info, sizeof(RequestBusinessInfo), 0, sizeof(RequestBusinessInfo));
     info.type = BUSINESS_TYPE_D2D;
-    int ret = strcpy_s(info.udidHash, D2D_UDID_HASH_STR_LEN, "udidHash");
+    int ret = strcpy_s(info.udidHash, D2D_UDID_HASH_STR_LEN, TEST_UDID_HASH);
     EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(info.accountHash, D2D_ACCOUNT_HASH_STR_LEN, "account");
+    ret = strcpy_s(info.accountHash, D2D_ACCOUNT_HASH_STR_LEN, TEST_ACCOUNT);
     EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(info.peerAccountHash, SHA_256_HEX_HASH_LEN, "peerAccountHash");
+    ret = strcpy_s(info.peerAccountHash, SHA_256_HEX_HASH_LEN, TEST_PEER_ACCOUNT_HASH);
     EXPECT_EQ(ret, EOK);
     EXPECT_NO_FATAL_FAILURE(PrintfRequestBusinessInfo(&info, 0));
 }
