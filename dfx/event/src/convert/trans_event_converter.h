@@ -112,8 +112,9 @@ TRANS_ASSIGNER(Errcode,  AppIndex, appIndex)
 TRANS_ASSIGNER(Errcode,  CallUid, callUid)
 TRANS_ASSIGNER(Errcode,  ListenerType, listenerType)
 TRANS_ASSIGNER(Errcode,  ListenerStatus, listenerStatus)
+TRANS_ASSIGNER(Errcode, UnrestrictedCallCount, unrestrictedCallCount)
 
-#define TRANS_ASSIGNER_SIZE 78 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 79 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
     { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
@@ -193,6 +194,7 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "CALL_UID",            HISYSEVENT_INT32,    TransAssignerCallUid         },
     { "LISTENER_TYPE",       HISYSEVENT_INT32,    TransAssignerListenerType    },
     { "LISTENER_STATUS",     HISYSEVENT_INT32,    TransAssignerListenerStatus  },
+    { "UNRESTRICTED_CALL_CNT", HISYSEVENT_INT32,  TransAssignerUnrestrictedCallCount},
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
