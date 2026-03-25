@@ -155,6 +155,7 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.callUid);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.listenerType);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.listenerStatus);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.unrestrictedCallCount);
 
     EXPECT_EQ(++index, validSize);
     return true;
@@ -226,6 +227,7 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
     EXPECT_EQ(params[index].v.i64, extra.listenerStatus);
+    EXPECT_EQ(params[++index].v.i32, extra.unrestrictedCallCount);
     EXPECT_EQ(++index, validSize);
     return true;
 }
