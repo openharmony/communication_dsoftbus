@@ -12,35 +12,41 @@
 # limitations under the License.
 import("../dsoftbus.gni")
 ohos_shared_library("proxychannelmanager") {
-  include_dirs = [
-    "common/include"
-  ]
-  sources = [
-    "br_proxy_module.c",
-    "common/src/softbus_napi_utils.c",
-  ]
+  if (dsoftbus_feature_compile_guard) {
+    sources = [
+      "br_proxy_module_virtual.c",
+    ]
+    external_deps = ["napi:ace_napi"]
+  } else {
+    sources = [
+      "br_proxy_module.c",
+      "common/src/softbus_napi_utils.c",
+    ]
+    deps = [
+      "$dsoftbus_dfx_path:softbus_dfx",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/br_proxy:br_proxy_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+      "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump"
+    ]
+ 
+    external_deps = [
+      "c_utils:utils",
+      "bounds_checking_function:libsec_shared",
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
+    include_dirs = [
+      "common/include"
+    ]
+  }
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
-
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/br_proxy:br_proxy_utils",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump"
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "bounds_checking_function:libsec_shared",
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
 
   relative_install_dir = "module/distributedsched"
 
@@ -113,9 +119,15 @@ ohos_shared_library("br_proxy_utils") {
 }
 
 group("br_proxy") {
+  if (dsoftbus_feature_compile_guard) {
+    deps = [
+      ":proxychannelmanager",
+    ]
+  } else {
     deps = [
       ":br_proxy_adapter",
       ":br_proxy_utils",
       ":proxychannelmanager",
     ]
+  }
 }

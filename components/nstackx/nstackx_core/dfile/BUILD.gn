@@ -14,7 +14,9 @@
 DSOFTBUS_ROOT_PATH = "./../../../.."
 import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 
-NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"
+if (!dsoftbus_feature_compile_guard) {
+  NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"
+}
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dfile_lite_config") {
@@ -44,50 +46,122 @@ if (defined(ohos_lite)) {
     cflags_cc = cflags
   }
   shared_library("nstackx_dfile.open") {
-    if (ohos_kernel_type == "liteos_a") {
-      configs += [ ":dfile_lite_config" ]
-      include_dirs = [
-        "include",
-        "interface",
-        "$NSTACKX_ROOT/nstackx_congestion/interface/",
-        "$NSTACKX_ROOT/nstackx_core",
-        "$NSTACKX_ROOT/nstackx_util/interface",
-        "$NSTACKX_ROOT/nstackx_util/platform/liteos",
-      ]
-      sources = []
-      deps = []
-      external_deps = []
-      if (dsoftbus_feature_dfile) {
-        sources += [
-          "$NSTACKX_ROOT/nstackx_core/platform/liteos/dfile/sys_dfile.c",
-          "$NSTACKX_ROOT/nstackx_core/platform/liteos/dfile/sys_dfile_session.c",
-          "$NSTACKX_ROOT/nstackx_core/platform/liteos/dfile/sys_file_manager.c",
-          "core/nstackx_dfile.c",
-          "core/nstackx_dfile_config.c",
-          "core/nstackx_dfile_control.c",
-          "core/nstackx_dfile_dfx.c",
-          "core/nstackx_dfile_frame.c",
-          "core/nstackx_dfile_log.c",
-          "core/nstackx_dfile_mp.c",
-          "core/nstackx_dfile_retransmission.c",
-          "core/nstackx_dfile_send.c",
-          "core/nstackx_dfile_session.c",
-          "core/nstackx_dfile_transfer.c",
-          "core/nstackx_file_list.c",
-          "core/nstackx_file_manager.c",
-          "core/nstackx_file_manager_client.c",
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      if (ohos_kernel_type == "liteos_a") {
+        configs += [ ":dfile_lite_config" ]
+        include_dirs = [
+          "include",
+          "interface",
+          "$NSTACKX_ROOT/nstackx_congestion/interface/",
+          "$NSTACKX_ROOT/nstackx_core",
+          "$NSTACKX_ROOT/nstackx_util/interface",
+          "$NSTACKX_ROOT/nstackx_util/platform/liteos",
         ]
-        deps += [
-          "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
-          "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+        sources = []
+        deps = []
+        external_deps = []
+        if (dsoftbus_feature_dfile) {
+          sources += [
+            "$NSTACKX_ROOT/nstackx_core/platform/liteos/dfile/sys_dfile.c",
+            "$NSTACKX_ROOT/nstackx_core/platform/liteos/dfile/sys_dfile_session.c",
+            "$NSTACKX_ROOT/nstackx_core/platform/liteos/dfile/sys_file_manager.c",
+            "core/nstackx_dfile.c",
+            "core/nstackx_dfile_config.c",
+            "core/nstackx_dfile_control.c",
+            "core/nstackx_dfile_dfx.c",
+            "core/nstackx_dfile_frame.c",
+            "core/nstackx_dfile_log.c",
+            "core/nstackx_dfile_mp.c",
+            "core/nstackx_dfile_retransmission.c",
+            "core/nstackx_dfile_send.c",
+            "core/nstackx_dfile_session.c",
+            "core/nstackx_dfile_transfer.c",
+            "core/nstackx_file_list.c",
+            "core/nstackx_file_manager.c",
+            "core/nstackx_file_manager_client.c",
+          ]
+          deps += [
+            "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
+            "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+          ]
+          external_deps += [
+            "bounds_checking_function:libsec_shared",
+            "mbedtls:mbedtls_shared",
+          ]
+        }
+      } else if (ohos_kernel_type == "linux") {
+        configs += [ ":dfile_linux_config" ]
+        include_dirs = [
+          "include",
+          "interface",
+          "$NSTACKX_ROOT/nstackx_congestion/interface/",
+          "$NSTACKX_ROOT/nstackx_core",
+          "$NSTACKX_ROOT/nstackx_util/interface",
+          "$NSTACKX_ROOT/nstackx_util/platform/unix",
         ]
-        external_deps += [
-          "bounds_checking_function:libsec_shared",
-          "mbedtls:mbedtls_shared",
-        ]
+        sources = []
+        deps = []
+        external_deps = []
+        if (dsoftbus_feature_dfile) {
+          sources += [
+            "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_dfile.c",
+            "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_dfile_session.c",
+            "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_file_manager.c",
+            "core/nstackx_dfile.c",
+            "core/nstackx_dfile_config.c",
+            "core/nstackx_dfile_control.c",
+            "core/nstackx_dfile_dfx.c",
+            "core/nstackx_dfile_frame.c",
+            "core/nstackx_dfile_log.c",
+            "core/nstackx_dfile_mp.c",
+            "core/nstackx_dfile_retransmission.c",
+            "core/nstackx_dfile_send.c",
+            "core/nstackx_dfile_session.c",
+            "core/nstackx_dfile_transfer.c",
+            "core/nstackx_file_list.c",
+            "core/nstackx_file_manager.c",
+            "core/nstackx_file_manager_client.c",
+          ]
+          deps += [
+            "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
+            "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
+          ]
+          external_deps += [
+            "bounds_checking_function:libsec_shared",
+            "mbedtls:mbedtls_shared",
+          ]
+        }
       }
-    } else if (ohos_kernel_type == "linux") {
-      configs += [ ":dfile_linux_config" ]
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("nstackx_dfile.open") {
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      sanitize = {
+        ubsan = true
+        integer_overflow = true
+        boundary_sanitize = true
+        cfi = true
+        cfi_cross_dso = true
+        debug = false
+      }
+      branch_protector_ret = "pac_ret"
+
+      cflags = [
+        "-Wall",
+        "-DNSTACKX_WITH_LINUX",
+        "-DDFILE_ENABLE_HIDUMP",
+        "-DENABLE_USER_LOG",
+        "-DSSL_AND_CRYPTO_INCLUDED",
+        "-Os",
+      ]
+      cflags_cc = cflags
       include_dirs = [
         "include",
         "interface",
@@ -125,79 +199,15 @@ if (defined(ohos_lite)) {
         ]
         external_deps += [
           "bounds_checking_function:libsec_shared",
-          "mbedtls:mbedtls_shared",
+          "openssl:libcrypto_shared",
         ]
       }
+      if (is_standard_system) {
+        external_deps += [ "c_utils:utils" ]
+      }
+      innerapi_tags = [ "platformsdk_indirect" ]
+      part_name = "dsoftbus"
+      subsystem_name = "communication"
     }
-  }
-} else {
-  import("//build/ohos.gni")
-
-  ohos_shared_library("nstackx_dfile.open") {
-    sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-    }
-    branch_protector_ret = "pac_ret"
-
-    cflags = [
-      "-Wall",
-      "-DNSTACKX_WITH_LINUX",
-      "-DDFILE_ENABLE_HIDUMP",
-      "-DENABLE_USER_LOG",
-      "-DSSL_AND_CRYPTO_INCLUDED",
-      "-Os",
-    ]
-    cflags_cc = cflags
-    include_dirs = [
-      "include",
-      "interface",
-      "$NSTACKX_ROOT/nstackx_congestion/interface/",
-      "$NSTACKX_ROOT/nstackx_core",
-      "$NSTACKX_ROOT/nstackx_util/interface",
-      "$NSTACKX_ROOT/nstackx_util/platform/unix",
-    ]
-    sources = []
-    deps = []
-    external_deps = []
-    if (dsoftbus_feature_dfile) {
-      sources += [
-        "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_dfile.c",
-        "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_dfile_session.c",
-        "$NSTACKX_ROOT/nstackx_core/platform/unix/dfile/sys_file_manager.c",
-        "core/nstackx_dfile.c",
-        "core/nstackx_dfile_config.c",
-        "core/nstackx_dfile_control.c",
-        "core/nstackx_dfile_dfx.c",
-        "core/nstackx_dfile_frame.c",
-        "core/nstackx_dfile_log.c",
-        "core/nstackx_dfile_mp.c",
-        "core/nstackx_dfile_retransmission.c",
-        "core/nstackx_dfile_send.c",
-        "core/nstackx_dfile_session.c",
-        "core/nstackx_dfile_transfer.c",
-        "core/nstackx_file_list.c",
-        "core/nstackx_file_manager.c",
-        "core/nstackx_file_manager_client.c",
-      ]
-      deps += [
-        "$NSTACKX_ROOT/nstackx_congestion:nstackx_congestion.open",
-        "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
-      ]
-      external_deps += [
-        "bounds_checking_function:libsec_shared",
-        "openssl:libcrypto_shared",
-      ]
-    }
-    if (is_standard_system) {
-      external_deps += [ "c_utils:utils" ]
-    }
-    innerapi_tags = [ "platformsdk_indirect" ]
-    part_name = "dsoftbus"
-    subsystem_name = "communication"
   }
 }

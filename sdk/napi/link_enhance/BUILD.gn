@@ -15,39 +15,56 @@ import("../../../dsoftbus.gni")
 
 ohos_shared_library("linkenhance") {
 
-  include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits/connection",
-    "$dsoftbus_sdk_path/napi/link_enhance/include",
-  ]
+  sources = []
+  deps = []
+  external_deps = []
+  if (dsoftbus_feature_conn_general) {
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/connection",
+      "$dsoftbus_sdk_path/napi/link_enhance/include",
+    ]
 
-  sources = [
-    "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_connection.cpp",
-    "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_module.cpp",
-    "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_server.cpp",
-    "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_utils.cpp",
-    "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_object.cpp",
-  ]
-  
+    sources += [
+      "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_connection.cpp",
+      "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_module.cpp",
+      "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_server.cpp",
+      "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_utils.cpp",
+      "$dsoftbus_sdk_path/napi/link_enhance/src/napi_link_enhance_object.cpp",
+    ]
+
+    deps += [
+      "$dsoftbus_dfx_path:softbus_dfx",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
+    ]
+    
+    external_deps = [
+      "c_utils:utils",
+      "bounds_checking_function:libsec_shared",
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
+  } else {
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/connection"
+    ]
+    external_deps += [
+      "napi:ace_napi"
+    ]
+    sources += [
+      "$dsoftbus_sdk_path/napi/link_enhance/virtual/napi_link_enhance_connection_virtual.cpp",
+      "$dsoftbus_sdk_path/napi/link_enhance/virtual/napi_link_enhance_module_virtual.cpp",
+      "$dsoftbus_sdk_path/napi/link_enhance/virtual/napi_link_enhance_server_virtual.cpp",
+      "$dsoftbus_sdk_path/napi/link_enhance/virtual/napi_link_enhance_utils_virtual.cpp",
+    ]
+  }
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
-
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/sdk:softbus_client",
-    "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
-  ]
-  
-  external_deps = [
-    "c_utils:utils",
-    "bounds_checking_function:libsec_shared",
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
 
   relative_install_dir = "module/distributedsched"
 

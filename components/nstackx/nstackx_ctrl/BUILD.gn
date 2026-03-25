@@ -152,6 +152,77 @@ if (defined(ohos_lite)) {
   } else {
     import("//build/lite/config/component/lite_component.gni")
     shared_library("nstackx_ctrl") {
+      if (dsoftbus_feature_compile_guard) {
+        install_enable = false
+      } else {
+        if (!dsoftbus_feature_inner_coap) {
+          sources = [ "core/nstackx_common_virtual.c" ]
+          include_dirs = [
+            "interface",
+            "../nstackx_util/interface",
+          ]
+          # include_dirs += standard_small_diff_include_dirs
+          include_dirs += [
+            "include/coap_discover",
+            "$dsoftbus_root_path/interfaces/kits/nstackx"
+          ]
+          deps = [ "../nstackx_util:nstackx_util.open" ]
+          public_configs = [ ":nstackx_ctrl_interface" ]
+        } else {
+          sources = base_src
+          sources += standard_small_diff_src
+          include_dirs = base_include_dirs
+          # include_dirs += standard_small_diff_include_dirs
+          include_dirs += [
+            "include/coap_discover",
+            "$dsoftbus_root_path/interfaces/kits/nstackx"
+          ]
+          public_configs = [ ":nstackx_ctrl_interface" ]
+          deps = [
+            "../nstackx_util:nstackx_util.open",
+            "//build/lite/config/component/cJSON:cjson_shared",
+          ]
+          external_deps = [
+            "bounds_checking_function:libsec_shared",
+            "libcoap:libcoap",
+          ]
+          if (ohos_kernel_type == "liteos_a") {
+            cflags += [
+              "-DNSTACKX_WITH_LITEOS",
+              "-DLWIP_LITEOS_A_COMPAT",
+            ]
+          }
+          cflags += [
+            "-fPIC",
+            "-std=c99",
+            "-DNSTACKX_DFINDER_HIDUMP",
+          ]
+          cflags_cc = cflags
+          ldflags = [
+            "-Wl,-z,relro,-z,now",
+            "-s",
+            "-fPIC",
+          ]
+        }
+      }
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+  ohos_shared_library("nstackx_ctrl") {
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      sanitize = {
+        ubsan = true
+        integer_overflow = true
+        boundary_sanitize = true
+        cfi = true
+        cfi_cross_dso = true
+        debug = false
+      }
+      branch_protector_ret = "pac_ret"
+
       if (!dsoftbus_feature_inner_coap) {
         sources = [ "core/nstackx_common_virtual.c" ]
         include_dirs = [
@@ -166,6 +237,11 @@ if (defined(ohos_lite)) {
         deps = [ "../nstackx_util:nstackx_util.open" ]
         public_configs = [ ":nstackx_ctrl_interface" ]
       } else {
+        cflags += [
+          "-DDFINDER_MGT_MSG_LOG",
+          "-DNSTACKX_DFINDER_HIDUMP",
+        ]
+        cflags_cc = cflags
         sources = base_src
         sources += standard_small_diff_src
         include_dirs = base_include_dirs
@@ -174,86 +250,18 @@ if (defined(ohos_lite)) {
           "include/coap_discover",
           "$dsoftbus_root_path/interfaces/kits/nstackx"
         ]
+        include_dirs += [ "../nstackx_util/platform/unix" ]
         public_configs = [ ":nstackx_ctrl_interface" ]
-        deps = [
-          "../nstackx_util:nstackx_util.open",
-          "//build/lite/config/component/cJSON:cjson_shared",
-        ]
+        deps = [ "../nstackx_util:nstackx_util.open" ]
         external_deps = [
           "bounds_checking_function:libsec_shared",
+          "cJSON:cjson",
           "libcoap:libcoap",
         ]
-        if (ohos_kernel_type == "liteos_a") {
-          cflags += [
-            "-DNSTACKX_WITH_LITEOS",
-            "-DLWIP_LITEOS_A_COMPAT",
-          ]
-        }
-        cflags += [
-          "-fPIC",
-          "-std=c99",
-          "-DNSTACKX_DFINDER_HIDUMP",
-        ]
-        cflags_cc = cflags
-        ldflags = [
-          "-Wl,-z,relro,-z,now",
-          "-s",
-          "-fPIC",
-        ]
       }
+      subsystem_name = "communication"
+      innerapi_tags = [ "platformsdk_indirect" ]
+      part_name = "dsoftbus"
     }
-  }
-} else {
-  import("//build/ohos.gni")
-  ohos_shared_library("nstackx_ctrl") {
-    sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-    }
-    branch_protector_ret = "pac_ret"
-
-    if (!dsoftbus_feature_inner_coap) {
-      sources = [ "core/nstackx_common_virtual.c" ]
-      include_dirs = [
-        "interface",
-        "../nstackx_util/interface",
-      ]
-      # include_dirs += standard_small_diff_include_dirs
-      include_dirs += [
-        "include/coap_discover",
-        "$dsoftbus_root_path/interfaces/kits/nstackx"
-      ]
-      deps = [ "../nstackx_util:nstackx_util.open" ]
-      public_configs = [ ":nstackx_ctrl_interface" ]
-    } else {
-      cflags += [
-        "-DDFINDER_MGT_MSG_LOG",
-        "-DNSTACKX_DFINDER_HIDUMP",
-      ]
-      cflags_cc = cflags
-      sources = base_src
-      sources += standard_small_diff_src
-      include_dirs = base_include_dirs
-      # include_dirs += standard_small_diff_include_dirs
-      include_dirs += [
-        "include/coap_discover",
-        "$dsoftbus_root_path/interfaces/kits/nstackx"
-      ]
-      include_dirs += [ "../nstackx_util/platform/unix" ]
-      public_configs = [ ":nstackx_ctrl_interface" ]
-      deps = [ "../nstackx_util:nstackx_util.open" ]
-      external_deps = [
-        "bounds_checking_function:libsec_shared",
-        "cJSON:cjson",
-        "libcoap:libcoap",
-      ]
-    }
-    subsystem_name = "communication"
-    innerapi_tags = [ "platformsdk_indirect" ]
-    part_name = "dsoftbus"
   }
 }

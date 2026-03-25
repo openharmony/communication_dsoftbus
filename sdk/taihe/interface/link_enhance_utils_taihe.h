@@ -16,17 +16,8 @@
 #ifndef TAIHE_SOFTBUS_LINK_ENHANCE_UTILS_H_
 #define TAIHE_SOFTBUS_LINK_ENHANCE_UTILS_H_
 
-#include "comm_log.h"
-#include <atomic>
-#include <condition_variable>
 #include <cstdint>
-#include <map>
-#include <mutex>
 #include <string>
-#include <vector>
-#include "uv.h"
-#include "securec.h"
-#include "softbus_adapter_mem.h"
 
 #define SOFTBUS_NAME_MAX_LEN 255
 namespace Communication {

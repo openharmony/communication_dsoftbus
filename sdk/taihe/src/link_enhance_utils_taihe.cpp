@@ -13,13 +13,21 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "link_enhance_utils_taihe.h"
-#include "taihe/runtime.hpp"
 #include "napi_link_enhance_error_code.h"
 #include "securec.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "taihe/runtime.hpp"
+#include "uv.h"
+#include <atomic>
+#include <condition_variable>
+#include <map>
+#include <mutex>
+
+#include <vector>
 
 namespace Communication {
 namespace OHOS::Softbus {
