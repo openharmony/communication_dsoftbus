@@ -13,19 +13,21 @@
 
 import("../dsoftbus.gni")
 
-softbus_anonymizer_src = [ "anonymize/src/anonymizer.c" ]
-softbus_log_src = [ "log/src/softbus_log.c" ]
-if (defined(ohos_lite)) {
-  softbus_event_src = [ "event/src/softbus_event_virtual.c" ]
-} else {
-  softbus_event_src = [
-    "event/src/conn_event.c",
-    "event/src/disc_event.c",
-    "event/src/lnn_event.c",
-    "event/src/softbus_event.c",
-    "event/src/stats_event.c",
-    "event/src/trans_event.c",
-  ]
+if (!dsoftbus_feature_compile_guard) {
+  softbus_anonymizer_src = [ "anonymize/src/anonymizer.c" ]
+  softbus_log_src = [ "log/src/softbus_log.c" ]
+  if (defined(ohos_lite)) {
+    softbus_event_src = [ "event/src/softbus_event_virtual.c" ]
+  } else {
+    softbus_event_src = [
+      "event/src/conn_event.c",
+      "event/src/disc_event.c",
+      "event/src/lnn_event.c",
+      "event/src/softbus_event.c",
+      "event/src/stats_event.c",
+      "event/src/trans_event.c",
+    ]
+  }
 }
 
 if (defined(ohos_lite)) {
@@ -48,15 +50,19 @@ if (defined(ohos_lite)) {
   }
 
   target(build_type, "softbus_dfx") {
-    include_dirs = [
-      "event/src",
-      "interface/include",
-      "$dsoftbus_root_path/interfaces/kits/common",
-    ]
-    sources = softbus_anonymizer_src + softbus_log_src + softbus_event_src
-    deps = [ "$hilog_lite_deps_path" ]
-    external_deps = libsec_external_deps
-    public_configs = [ ":dsoftbus_dfx_interface_lite" ]
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      include_dirs = [
+        "event/src",
+        "interface/include",
+        "$dsoftbus_root_path/interfaces/kits/common",
+      ]
+      sources = softbus_anonymizer_src + softbus_log_src + softbus_event_src
+      deps = [ "$hilog_lite_deps_path" ]
+      external_deps = libsec_external_deps
+      public_configs = [ ":dsoftbus_dfx_interface_lite" ]
+    }
   }
 } else {
   config("dsoftbus_dfx_interface_std") {
@@ -69,31 +75,35 @@ if (defined(ohos_lite)) {
     ]
   }
   ohos_shared_library("softbus_dfx") {
-    sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-    }
-    branch_protector_ret = "pac_ret"
-    include_dirs = [
-      "event/src",
-      "interface/include",
-      "$dsoftbus_root_path/interfaces/kits/common",
-    ]
-    sources = softbus_anonymizer_src + softbus_log_src + softbus_event_src
-    defines += [ "__STDC_FORMAT_MACROS" ]
-    if (is_asan) {
-      defines += [ "ASAN_BUILD" ]
-    }
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      sanitize = {
+        cfi = true
+        cfi_cross_dso = true
+        debug = false
+      }
+      branch_protector_ret = "pac_ret"
+      include_dirs = [
+        "event/src",
+        "interface/include",
+        "$dsoftbus_root_path/interfaces/kits/common",
+      ]
+      sources = softbus_anonymizer_src + softbus_log_src + softbus_event_src
+      defines += [ "__STDC_FORMAT_MACROS" ]
+      if (is_asan) {
+        defines += [ "ASAN_BUILD" ]
+      }
 
-    public_configs = [ ":dsoftbus_dfx_interface_std" ]
-    public_external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "hilog:libhilog",
-      "hisysevent:libhisysevent",
-    ]
-    innerapi_tags = [ "platformsdk_indirect" ]
-    part_name = "dsoftbus"
-    subsystem_name = "communication"
+      public_configs = [ ":dsoftbus_dfx_interface_std" ]
+      public_external_deps = [
+        "bounds_checking_function:libsec_shared",
+        "hilog:libhilog",
+        "hisysevent:libhisysevent",
+      ]
+      innerapi_tags = [ "platformsdk_indirect" ]
+      part_name = "dsoftbus"
+      subsystem_name = "communication"
+    }
   }
 }

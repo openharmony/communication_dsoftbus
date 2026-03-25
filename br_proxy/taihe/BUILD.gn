@@ -47,23 +47,32 @@ taihe_shared_library("proxychannelmanager_taihe_native") {
     "$dsoftbus_root_path/br_proxy/common/include",
     "$dsoftbus_root_path/br_proxy",
   ]
-  sources += [
-    "src/ani_constructor.cpp",
-    "src/ohos.distributedsched.proxyChannelManager.impl.cpp",
-  ]
-  deps = [
-    ":run_proxychannelmanager_taihe",
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/br_proxy:br_proxy_utils",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/sdk:softbus_client",
-  ]
-  external_deps = [
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
+  if (dsoftbus_feature_compile_guard) {
+    sources += [
+      "src/ani_constructor.cpp",
+      "src/ohos.distributedsched.proxyChannelManager.impl.virtual.cpp",
+    ]
+    deps = [":run_proxychannelmanager_taihe"]
+    external_deps = ["napi:ace_napi"]
+    } else {
+    sources += [
+      "src/ani_constructor.cpp",
+      "src/ohos.distributedsched.proxyChannelManager.impl.cpp",
+    ]
+    deps = [
+      ":run_proxychannelmanager_taihe",
+      "$dsoftbus_dfx_path:softbus_dfx",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/br_proxy:br_proxy_utils",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+      "$dsoftbus_root_path/sdk:softbus_client",
+    ]
+    external_deps = [
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
+  }
 }
 
 generate_static_abc("proxychannelmanager_taihe_ani") {

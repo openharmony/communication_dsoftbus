@@ -17,12 +17,13 @@
 #include "ohos.distributedsched.linkEnhance.impl.hpp"
 #include "stdexcept"
 #include <thread>
-#include "conn_log.h"
+#include "comm_log.h"
 #include "napi_link_enhance_error_code.h"
 #include "securec.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "taihe/runtime.hpp"
 #include "link_enhance_utils_taihe.h"
 #include "softbus_connection.h"
 
@@ -668,7 +669,7 @@ static void NotifyDataReceived(std::shared_ptr<::taihe::callback<void(
 
 static void OnDataReceivedAdapter(uint32_t handle, const uint8_t *data, uint32_t len)
 {
-    CONN_CHECK_AND_RETURN_LOGE(data != nullptr, COMM_SDK, "data is null");
+    COMM_CHECK_AND_RETURN_LOGE(data != nullptr, COMM_SDK, "data is null");
     COMM_LOGI(COMM_SDK, "on data receive, handle=%{public}u", handle);
     std::lock_guard<std::mutex> guard(connectionLock_);
     for (auto it : connectionList_) {
