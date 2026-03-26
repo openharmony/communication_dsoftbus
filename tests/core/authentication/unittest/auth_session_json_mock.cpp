@@ -464,5 +464,16 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
 {
     return GetInterface()->JudgeDeviceTypeAndGetOsAccountIds();
 }
+
+char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+    const char *udidHash)
+{
+    return GetInterface()->IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+}
+
+void CredTypesSort(int32_t *credTypes, int32_t credTypesLen)
+{
+    return GetInterface()->CredTypesSort(credTypes, credTypesLen);
+}
 }
 } // namespace OHOS

@@ -444,15 +444,16 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
 {
     AuthHichainInterfaceMock hichainMock;
     AuthSessionInfo info = { 0 };
+    int64_t authSeq = 0;
     JsonObj *obj = JSON_CreateObject();
     EXPECT_NE(obj, NULL);
 
     EXPECT_CALL(hichainMock, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    UnpackExternalAuthInfo(obj, &info);
+    UnpackExternalAuthInfo(obj, &info, authSeq);
     EXPECT_EQ(info.credId, NULL);
 
     info.authVersion = (AuthVersion)2; // AUTH_VERSION_V2
-    UnpackExternalAuthInfo(obj, &info);
+    UnpackExternalAuthInfo(obj, &info, authSeq);
     EXPECT_EQ(info.credId, NULL);
 
     JSON_Delete(obj);

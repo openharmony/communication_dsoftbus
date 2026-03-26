@@ -502,20 +502,6 @@ HWTEST_F(AuthSessionFsmTest, GET_CRED_TYPE_BY_CREDID_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: JUDGE_IS_SAME_ACCOUNT_Test_001
- * @tc.desc: JudgeIsSameAccount test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthSessionFsmTest, JUDGE_IS_SAME_ACCOUNT_Test_001, TestSize.Level1)
-{
-    char accountHashStr[SHA_256_HEX_HASH_LEN] = { 0 };
-    bool isSameAccount = JudgeIsSameAccount(accountHashStr);
-    EXPECT_EQ(isSameAccount, false);
-}
-
-/*
  * @tc.name: DEVICE_AUTH_STATE_PROCESS_TEST_001
  * @tc.desc: DeviceAuthStateProcess test
  * @tc.type: FUNC
