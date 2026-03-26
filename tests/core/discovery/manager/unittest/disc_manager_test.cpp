@@ -24,6 +24,7 @@
 #include "disc_coap.h"
 #include "disc_log.h"
 #include "disc_manager.h"
+#include "disc_mgr_config.h"
 #include "nstackx.h"
 #include "softbus_error_code.h"
 
@@ -2614,5 +2615,57 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     int32_t ret = DiscGetDisplayName(localDevName, DEVICE_NAME_BUF_LEN, remainLen);
     TEST_ASSERT_TRUE(ret == 0);
     DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest003 end ----");
+}
+
+/*
+ * @tc.name: DiscMgrGetMaxCallTimesTest001
+ * @tc.desc: Test DiscMgrGetMaxCallTimes with invalid bitmap parameter
+ * @tc.type: FUNC
+ * @tc.require: DiscMgrGetMaxCallTimes returns NO_LIMITED_TIMES for invalid bitmap
+ */
+HWTEST_F(DiscManagerTest, DiscMgrGetMaxCallTimesTest001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest001 begin ----");
+    int32_t ret = DiscMgrGetMaxCallTimes(-1);
+    EXPECT_EQ(ret, NO_LIMITED_TIMES);
+    ret = DiscMgrGetMaxCallTimes(NFC_SHARE_CAPABILITY_BITMAP + 1);
+    EXPECT_EQ(ret, NO_LIMITED_TIMES);
+    DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest001 end ----");
+}
+
+/*
+ * @tc.name: DiscMgrGetMaxCallTimesTest002
+ * @tc.desc: Test DiscMgrGetMaxCallTimes with valid bitmap parameters
+ * @tc.type: FUNC
+ * @tc.require: DiscMgrGetMaxCallTimes returns correct max call times
+ */
+HWTEST_F(DiscManagerTest, DiscMgrGetMaxCallTimesTest002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest002 begin ----");
+    int32_t ret = DiscMgrGetMaxCallTimes(HICALL_CAPABILITY_BITMAP);
+    EXPECT_EQ(ret, NO_LIMITED_TIMES);
+    ret = DiscMgrGetMaxCallTimes(PROFILE_CAPABILITY_BITMAP);
+    EXPECT_EQ(ret, NO_LIMITED_TIMES);
+    ret = DiscMgrGetMaxCallTimes(CASTPLUS_CAPABILITY_BITMAP);
+    EXPECT_EQ(ret, 32);
+    ret = DiscMgrGetMaxCallTimes(AA_CAPABILITY_BITMAP);
+    EXPECT_EQ(ret, NO_LIMITED_TIMES);
+    ret = DiscMgrGetMaxCallTimes(DDMP_CAPABILITY_BITMAP);
+    EXPECT_EQ(ret, NO_LIMITED_TIMES);
+    DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest002 end ----");
+}
+
+/*
+ * @tc.name: DiscMgrGetMaxCallTimesTest003
+ * @tc.desc: Test DiscMgrGetMaxCallTimes for NFC_SHARE_CAPABILITY_BITMAP
+ * @tc.type: FUNC
+ * @tc.require: DiscMgrGetMaxCallTimes returns NO_LIMITED_TIMES for NFC_SHARE_CAPABILITY_BITMAP
+ */
+HWTEST_F(DiscManagerTest, DiscMgrGetMaxCallTimesTest003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest003 begin ----");
+    int32_t ret = DiscMgrGetMaxCallTimes(NFC_SHARE_CAPABILITY_BITMAP);
+    EXPECT_EQ(ret, NO_LIMITED_TIMES);
+    DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest003 end ----");
 }
 } // namespace OHOS
