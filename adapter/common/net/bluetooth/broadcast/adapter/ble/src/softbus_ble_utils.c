@@ -368,7 +368,7 @@ int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow)
         return OHOS_BLE_SCAN_MODE_OP_P2_30_1500;
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P10 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P10) {
-        return OHOS_BLE_SCAN_MODE_OP_P10_30_300;
+        return OHOS_BLE_SCAN_MODE_OP_P10_25_250;
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P25 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P25) {
         return OHOS_BLE_SCAN_MODE_OP_P25_60_240;
