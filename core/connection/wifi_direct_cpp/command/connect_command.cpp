@@ -99,6 +99,7 @@ void ConnectCommand::OnFailure(int32_t reason) const
         info_.info_.requestId, reason, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
     if (reason == SOFTBUS_CONN_NEED_RENEGOTIATE && !HasRetried()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "retry");
+        std::this_thread::sleep_for(std::chrono::milliseconds(CONN_COMMAND_RETRY_FORWARD_SLEEP));
         WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(info_.info_, callback_, true);
         return;
     }
