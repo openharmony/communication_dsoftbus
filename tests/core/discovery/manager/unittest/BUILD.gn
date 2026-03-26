@@ -20,7 +20,10 @@ module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscManagerTest") {
   module_out_path = module_output_path
-  sources = [ "disc_manager_test.cpp" ]
+  sources = [
+    "disc_manager_test.cpp",
+    "$dsoftbus_core_path/discovery/manager/src/disc_mgr_config.c",
+  ]
 
   include_dirs = [
     "$softbus_adapter_common/include",
@@ -53,6 +56,7 @@ ohos_unittest("DiscManagerMockTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
+    "$dsoftbus_core_path/discovery/manager/src/disc_mgr_config.c",
     "ble_mock.cpp",
     "coap_mock.cpp",
     "disc_manager_mock_test.cpp",
