@@ -1492,6 +1492,37 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest004, TestSize.Level1)
     g_tcpDataList = nullptr;
 }
 
+ /*
+ * @tc.name: TransTdcProcAllDataTest005
+ * @tc.desc: TransTdcProcAllData, lock fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest005, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uintptr_t originalMutex = 0;
+    DataBuf *oldBuf = (DataBuf *)SoftBusCalloc(sizeof(DataBuf));
+    ASSERT_TRUE(oldBuf != nullptr);
+    (void)memset_s(oldBuf, sizeof(DataBuf), 0, sizeof(DataBuf));
+
+    int32_t ret = TransTdcProcAllData(channelId);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    ret = TransDataListInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    
+    originalMutex = g_tcpDataList->lock.mutex;
+    g_tcpDataList->lock.mutex = (uintptr_t)NULL;
+
+    ret = TransTdcProcAllData(channelId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    g_tcpDataList->lock.mutex = originalMutex;
+    TransDataListDeinit();
+    SoftBusFree(oldBuf);
+}
+
 /*
  * @tc.name: TransAssembleTlvData001
  * @tc.desc: test TransAssembleTlvData

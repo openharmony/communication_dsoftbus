@@ -506,7 +506,11 @@ static int32_t TransInnerTdcProcAllTlvData(TransInnerSessionInfo *info)
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_innerChannelDataBufList != NULL,
         SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvData list not init");
     while (1) {
-        SoftBusMutexLock(&(g_innerChannelDataBufList->lock));
+        int32_t ret = SoftBusMutexLock(&(g_innerChannelDataBufList->lock));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "lock failed. ret=%{public}d", ret);
+            return ret;
+        }
         TcpDataTlvPacketHead pktHead;
         uint32_t newPktHeadSize = 0;
         DataBuf *node = TransGetInnerDataBufNodeById(info->channelId);
@@ -516,7 +520,7 @@ static int32_t TransInnerTdcProcAllTlvData(TransInnerSessionInfo *info)
             return SOFTBUS_TRANS_NODE_NOT_FOUND;
         }
         bool flag = false;
-        int32_t ret = TransTdcUnPackAllTlvData(info->channelId, &pktHead, &newPktHeadSize, node, &flag);
+        ret = TransTdcUnPackAllTlvData(info->channelId, &pktHead, &newPktHeadSize, node, &flag);
         if (ret != SOFTBUS_OK || flag == true) {
             (void)SoftBusMutexUnlock(&(g_innerChannelDataBufList->lock));
             return ret;
@@ -578,7 +582,11 @@ static int32_t TransInnerTdcProcAllData(TransInnerSessionInfo *info)
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_innerChannelDataBufList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is null");
     while (1) {
-        SoftBusMutexLock(&(g_innerChannelDataBufList->lock));
+        int32_t ret = SoftBusMutexLock(&(g_innerChannelDataBufList->lock));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "lock failed. ret=%{public}d", ret);
+            return ret;
+        }
         DataBuf *node = TransGetInnerDataBufNodeById(info->channelId);
         if (node == NULL) {
             (void)SoftBusMutexUnlock(&(g_innerChannelDataBufList->lock));
@@ -586,7 +594,7 @@ static int32_t TransInnerTdcProcAllData(TransInnerSessionInfo *info)
             return SOFTBUS_TRANS_NODE_NOT_FOUND;
         }
         bool flag = false;
-        int32_t ret = TransTdcUnPackAllData(info->channelId, node, &flag);
+        ret = TransTdcUnPackAllData(info->channelId, node, &flag);
         if (ret != SOFTBUS_OK || flag == true) {
             (void)SoftBusMutexUnlock(&(g_innerChannelDataBufList->lock));
             return ret;
