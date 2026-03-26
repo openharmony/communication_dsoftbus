@@ -219,6 +219,36 @@
 /* udid short hash */
 #define UDID_SHORT_HASH       "UDID_SHORT_HASH"
 
+/* cred nego */
+#define CRED_NEGO_INFO "CRED_NEGO_INFO"
+#define CRED_NEGO_INFO_LEN "CRED_NEGO_INFO_LEN"
+#define CRED_TYPE_INFO "CRED_TYPE_INFO"
+#define CRED_NEGO_STATE "CRED_NEGO_STATE"
+#define EXTERNAL_USER_IDS "EXTERNAL_USER_IDS"
+#define EXTERNAL_USER_IDS_LEN "EXTERNAL_USER_IDS_LEN"
+
+#define CRED_NEGO_INFO_MAX_LEN 512
+#define EXTERNAL_USER_IDS_MAX_LEN 512
+#define INVALID_USER_ID (-1)
+
+typedef bool (*CredNegoFunc)(AuthSessionInfo *info, const char *localUdidHash, const char *peerUdidHash,
+    int64_t authSeq);
+
+typedef struct {
+    int32_t localUserId;
+    int32_t peerUserId;
+    const char *localUdidHash;
+    const char *peerUdidHash;
+    bool isSameAccount;
+} CredTypeQueryParam;
+
+typedef struct {
+    int32_t localUserId;
+    int32_t credType;
+    int32_t peerUserId;
+    int32_t mainUserId;
+} CredTypeSortInfo;
+
 static void OptString(
     const JsonObj *json, const char * const key, char *target, uint32_t targetLen, const char *defaultValue)
 {
@@ -872,6 +902,28 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
     (void)memset_s(&deviceKey, sizeof(deviceKey), 0, sizeof(deviceKey));
 }
 
+bool IsSameAccount(const char *accountHash)
+{
+    if (accountHash == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param");
+        return false;
+    }
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local account hash fail");
+        return false;
+    }
+
+    uint8_t peerAccountHash[SHA_256_HASH_LEN] = { 0 };
+    if (ConvertHexStringToBytes(peerAccountHash, SHA_256_HASH_LEN, accountHash, strlen(accountHash)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert peer account hash to bytes fail");
+        return false;
+    }
+
+    return (memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == 0) &&
+        (!LnnIsDefaultOhosAccount());
+}
+
 int32_t GetLocalUdidShortHash(char *localUdidHash)
 {
     if (localUdidHash == NULL) {
@@ -891,7 +943,486 @@ int32_t GetLocalUdidShortHash(char *localUdidHash)
     return SOFTBUS_OK;
 }
 
-static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
+static bool QueryAllCredTypeByQueryParam(CredTypeQueryParam *queryParam, cJSON *credTypesJson)
+{
+    int32_t localUserId = queryParam->localUserId;
+    int32_t peerUserId = queryParam->peerUserId;
+    const char *localUdidHash = queryParam->localUdidHash;
+    const char *peerUdidHash = queryParam->peerUdidHash;
+    for (int32_t credType = ACCOUNT_RELATED; credType < ACCOUNT_BUTT; credType++) {
+        if (credType == ACCOUNT_RELATED && !queryParam->isSameAccount) {
+            continue;
+        }
+        const char *udidHash = (credType == ACCOUNT_RELATED) ? localUdidHash : peerUdidHash;
+        char *credId = IdServiceGetCredIdByCredType(localUserId, peerUserId, (SoftbusCredType)credType, udidHash);
+        if (credId == NULL) {
+            continue;
+        }
+        cJSON_free(credId);
+        cJSON *credTypeJson = cJSON_CreateObject();
+        if (credTypeJson == NULL) {
+            AUTH_LOGE(AUTH_HICHAIN, "create credTypeJson fail");
+            return false;
+        }
+        if (!AddNumberToJsonObject(credTypeJson, SINK_USERID, peerUserId) ||
+            !AddNumberToJsonObject(credTypeJson, CRED_TYPE, credType) ||
+            !AddNumberToJsonObject(credTypeJson, SOURCE_USERID, localUserId) ||
+            !cJSON_AddItemToArray(credTypesJson, credTypeJson)) {
+            AUTH_LOGE(AUTH_HICHAIN, "add credTypeJson to credTypesJson fail");
+            cJSON_Delete(credTypeJson);
+            return false;
+        }
+    }
+    return true;
+}
+
+static cJSON *QueryAllCredTypePerPeerUserId(cJSON *peerUserIdsJson, CredTypeQueryParam *queryParam)
+{
+    if (peerUserIdsJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param");
+        return NULL;
+    }
+    queryParam->localUserId = JudgeDeviceTypeAndGetOsAccountIds();
+    cJSON *credTypesJson = cJSON_CreateArray();
+    if (credTypesJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create credTypesJson fail");
+        return NULL;
+    }
+    bool ret = true;
+    int32_t peerUserIdsJsonLen = GetArrayItemNum(peerUserIdsJson);
+    for (int32_t peerIdx = 0; peerIdx < peerUserIdsJsonLen; peerIdx++) {
+        cJSON *peerUserIdJson = GetArrayItemFromArray(peerUserIdsJson, peerIdx);
+        if (peerUserIdJson == NULL) {
+            AUTH_LOGE(AUTH_FSM, "get userIdJson from peerUserIdsJson fail");
+            ret = false;
+            break;
+        }
+        queryParam->peerUserId = (int32_t)cJSON_GetNumberValue(peerUserIdJson);
+        if (!QueryAllCredTypeByQueryParam(queryParam, credTypesJson)) {
+            AUTH_LOGE(AUTH_FSM, "query credType for single peerUserId fail");
+            ret = false;
+            break;
+        }
+    }
+    if (!ret) {
+        AUTH_LOGE(AUTH_FSM, "get credTypeList by peerUserId fail");
+        cJSON_Delete(credTypesJson);
+        return NULL;
+    }
+    return credTypesJson;
+}
+
+static int32_t CredTypesSortCmp(const void *info1, const void *info2)
+{
+    CredTypeSortInfo *credTypeInfo1 = (CredTypeSortInfo *)info1;
+    CredTypeSortInfo *credTypeInfo2 = (CredTypeSortInfo *)info2;
+    int32_t mainUserId = credTypeInfo1->mainUserId;
+    if (credTypeInfo1->peerUserId == credTypeInfo2->peerUserId) {
+        if (credTypeInfo1->credType == ACCOUNT_RELATED) {
+            return -1;
+        } else if (credTypeInfo1->credType == ACCOUNT_UNRELATED) {
+            return 1;
+        } else {
+            return (credTypeInfo2->credType == ACCOUNT_RELATED) ? 1: -1;
+        }
+    }
+    if (credTypeInfo1->peerUserId == mainUserId) {
+        return -1;
+    } else if (credTypeInfo2->peerUserId == mainUserId) {
+        return 1;
+    }
+    return (credTypeInfo1->peerUserId < credTypeInfo2->peerUserId) ? -1 : 1;
+}
+
+static CredTypeSortInfo *SortCredTypes(cJSON *peerCredTypesJson, int32_t credTypesLen, AuthSessionInfo *info)
+{
+    CredTypeSortInfo *credTypeArray = (CredTypeSortInfo *)SoftBusCalloc(sizeof(CredTypeSortInfo) * credTypesLen);
+    if (credTypeArray == NULL) {
+        AUTH_LOGE(AUTH_FSM, "credTypeArray malloc failed");
+        return NULL;
+    }
+    bool ret = true;
+    for (int32_t i = 0; i < credTypesLen; i++) {
+        cJSON *item = GetArrayItemFromArray(peerCredTypesJson, i);
+        if (item == NULL) {
+            AUTH_LOGE(AUTH_FSM, "get array item from peerCredTypesJson fail");
+            ret = false;
+            break;
+        }
+        if (!GetJsonObjectNumberItem(item, SINK_USERID, &credTypeArray[i].localUserId) ||
+            !GetJsonObjectNumberItem(item, CRED_TYPE, &credTypeArray[i].credType) ||
+            !GetJsonObjectNumberItem(item, SOURCE_USERID, &credTypeArray[i].peerUserId)) {
+            AUTH_LOGE(AUTH_FSM, "Get item of object credTypeJson fail");
+            ret = false;
+            break;
+        }
+        credTypeArray[i].mainUserId = info->userId;
+    }
+    if (ret == false) {
+        SoftBusFree(credTypeArray);
+        return NULL;
+    }
+    qsort(credTypeArray, credTypesLen, sizeof(CredTypeSortInfo), CredTypesSortCmp);
+    return credTypeArray;
+}
+
+static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHash, const char *peerUdidHash,
+    cJSON **chosenCredType)
+{
+    cJSON *peerCredTypesJson  = info->credTypeInfo;
+    int32_t credTypesLen = GetArrayItemNum(peerCredTypesJson);
+    if (peerCredTypesJson == NULL || info == NULL || credTypesLen == 0) {
+        AUTH_LOGE(AUTH_FSM, "invalid param to choose credTypes");
+        return false;
+    }
+    CredTypeSortInfo *credTypeArray = SortCredTypes(peerCredTypesJson, credTypesLen, info);
+    if (credTypeArray == NULL) {
+        AUTH_LOGE(AUTH_FSM, "sort CredTypes fail");
+        return false;
+    }
+    for (int32_t i = 0; i < credTypesLen; i++) {
+        const char *udidShortHash = (credTypeArray[i].credType == ACCOUNT_RELATED) ? localUdidHash : peerUdidHash;
+        char *credIdTmp = IdServiceGetCredIdByCredType(credTypeArray[i].localUserId, credTypeArray[i].peerUserId,
+            credTypeArray[i].credType, udidShortHash);
+        if (credIdTmp == NULL) {
+            continue;
+        }
+        cJSON *localCredTypeJson = cJSON_CreateObject();
+        if (localCredTypeJson == NULL) {
+            AUTH_LOGE(AUTH_FSM, "create localCredTypeJson fail");
+            cJSON_free(credIdTmp);
+            break;
+        }
+        if (!cJSON_AddNumberToObject(localCredTypeJson, SINK_USERID, credTypeArray[i].peerUserId) ||
+            !cJSON_AddNumberToObject(localCredTypeJson, CRED_TYPE, credTypeArray[i].credType) ||
+            !cJSON_AddNumberToObject(localCredTypeJson, SOURCE_USERID, credTypeArray[i].localUserId)) {
+            AUTH_LOGE(AUTH_FSM, "add to localCredTypeJson fail");
+            cJSON_Delete(localCredTypeJson);
+            cJSON_free(credIdTmp);
+            break;
+        }
+        if (info->credId != NULL) {
+            SoftBusFree(info->credId);
+        }
+        info->credId = credIdTmp;
+        info->credIdType = credTypeArray[i].credType;
+        *chosenCredType = localCredTypeJson;
+        AUTH_LOGI(AUTH_FSM, "find best credType. credType=%{public}d", credTypeArray[i].credType);
+        SoftBusFree(credTypeArray);
+        return credTypeArray[i].credType;
+    }
+    SoftBusFree(credTypeArray);
+    AUTH_LOGE(AUTH_FSM, "cant find the best credType");
+    return ACCOUNT_BUTT;
+}
+
+static cJSON *BuildPeerUserIdsJson(AuthSessionInfo *info)
+{
+    if (info == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param");
+        return NULL;
+    }
+    cJSON *userIdsJson = NULL;
+    if (info->externalUserIds != NULL) {
+        userIdsJson = cJSON_Duplicate(info->externalUserIds, true);
+    } else {
+        userIdsJson = cJSON_CreateArray();
+    }
+    if (userIdsJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create userIdsJson fail");
+        return NULL;
+    }
+    cJSON *mainPeerUserIdJson = cJSON_CreateNumber(info->userId);
+    if (mainPeerUserIdJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create mainPeerUserIdJson fail");
+        cJSON_Delete(userIdsJson);
+        return NULL;
+    }
+    if (!cJSON_AddItemToArray(userIdsJson, mainPeerUserIdJson)) {
+        AUTH_LOGE(AUTH_FSM, "add mainPeerUserIdJson to userIdsJson fail");
+        cJSON_Delete(userIdsJson);
+        cJSON_Delete(mainPeerUserIdJson);
+        return NULL;
+    }
+    return userIdsJson;
+}
+
+static bool CredNegoStateAskReceiver(AuthSessionInfo *info, const char *localUdidHash,
+    const char *peerUdidHash, int64_t authSeq)
+{
+    if (info == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param for ask receiver");
+        return false;
+    }
+    cJSON *peerUserIdsJson = BuildPeerUserIdsJson(info);
+    if (peerUserIdsJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "build peerUserIdsJson fail");
+        return false;
+    }
+    CredTypeQueryParam queryParam = {
+        .localUdidHash = localUdidHash,
+        .peerUdidHash = peerUdidHash,
+        .isSameAccount = info->isSameAccount,
+    };
+    cJSON *credTypesJson = QueryAllCredTypePerPeerUserId(peerUserIdsJson, &queryParam);
+    cJSON_Delete(peerUserIdsJson);
+    if (credTypesJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "query credTypes by peerUserIds fail");
+        return false;
+    }
+    if (GetArrayItemNum(credTypesJson) == 0) {
+        AUTH_LOGE(AUTH_FSM, "query empty credTypes by peerUserIds");
+        cJSON_Delete(credTypesJson);
+        return false;
+    }
+    if (info->credTypeInfo != NULL) {
+        cJSON_Delete(info->credTypeInfo);
+    }
+    info->credTypeInfo = credTypesJson;
+    info->credNegoState = CRED_NEGO_STATE_REPLY;
+    AUTH_LOGI(AUTH_FSM, "credNegoState turn to STATE_REPLY in receiver, credTypesLen=%{public}d, authSeq=%{public}"
+        PRId64, GetArrayItemNum(info->credTypeInfo), authSeq);
+    return true;
+}
+
+static bool CredNegoStateReplyReceiver(AuthSessionInfo *info, const char *localUdidHash,
+    const char *peerUdidHash, int64_t authSeq)
+{
+    if (info == NULL || info->credTypeInfo == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param for reply receiver");
+        return false;
+    }
+    cJSON *chosenCredTypeInfo = NULL;
+    int32_t chosenCredType = ChooseBestCredType(info, localUdidHash, peerUdidHash, &chosenCredTypeInfo);
+    if (chosenCredType == ACCOUNT_BUTT) {
+        AUTH_LOGE(AUTH_FSM, "cant find the best credType to go on");
+        return false;
+    }
+
+    if (info->credTypeInfo != NULL) {
+        cJSON_Delete(info->credTypeInfo);
+    }
+    info->credTypeInfo = chosenCredTypeInfo;
+    info->credNegoState = CRED_NEGO_STATE_DECIDE;
+    AUTH_LOGI(AUTH_FSM, "credNegoState turn to STATE_DECIDE in receiver, credType=%{public}d, authSeq=%{public}"
+        PRId64, chosenCredType, authSeq);
+    return true;
+}
+
+static bool CredNegoStateDecideReceiver(AuthSessionInfo *info, const char *localUdidHash,
+    const char *peerUdidHash, int64_t authSeq)
+{
+    if (info == NULL || info->credTypeInfo == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param for decide reciver");
+        return false;
+    }
+    int32_t localUserId = 0;
+    int32_t peerUserId = 0;
+    int32_t credType = 0;
+    if (!GetJsonObjectNumberItem(info->credTypeInfo, SINK_USERID, &localUserId) ||
+        !GetJsonObjectNumberItem(info->credTypeInfo, CRED_TYPE, &credType) ||
+        !GetJsonObjectNumberItem(info->credTypeInfo, SOURCE_USERID, &peerUserId)) {
+        AUTH_LOGE(AUTH_FSM, "parse obj from credTypeJson fail");
+        return false;
+    }
+    cJSON *credTypeJson = cJSON_CreateObject();
+    if (credTypeJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create credTypeJson fail");
+        return false;
+    }
+    if (!cJSON_AddNumberToObject(credTypeJson, SINK_USERID, peerUserId) ||
+        !cJSON_AddNumberToObject(credTypeJson, CRED_TYPE, credType) ||
+        !cJSON_AddNumberToObject(credTypeJson, SOURCE_USERID, localUserId)) {
+        AUTH_LOGE(AUTH_FSM, "add to credTypeJson fail");
+        cJSON_Delete(credTypeJson);
+        return false;
+    }
+    const char *udidShortHash = (credType == ACCOUNT_RELATED) ? localUdidHash : peerUdidHash;
+    char *credIdTmp = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidShortHash);
+    if (credIdTmp == NULL) {
+        AUTH_LOGE(AUTH_FSM, "find no credId by chosenCredTypeJson");
+        cJSON_Delete(credTypeJson);
+        return false;
+    }
+    if (info->credId != NULL) {
+        SoftBusFree(info->credId);
+    }
+    info->credId = credIdTmp;
+    info->credIdType = credType;
+    if (info->credTypeInfo != NULL) {
+        cJSON_Delete(info->credTypeInfo);
+    }
+    info->credTypeInfo = credTypeJson;
+    info->credNegoState = CRED_NEGO_STATE_FINISH;
+    AUTH_LOGI(AUTH_FSM,
+        "credNegoState turn to STATE_FINISH in receiver, chosen credType=%{public}d, "
+        "localUserId=%{public}d, peerUserId=%{public}d, authSeq=%{public}" PRId64,
+        credType, localUserId, peerUserId, authSeq);
+    return true;
+}
+
+static void ProcessCredInfo(AuthSessionInfo *info, int64_t authSeq)
+{
+    if (info->credNegoState >= CRED_NEGO_STATE_FINISH) {
+        return;
+    }
+    char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local udidShortHash fail, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
+            PRId64, authSeq);
+        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+        return;
+    }
+
+    static CredNegoFunc negoFuncTable[CRED_NEGO_STATE_FINISH] = {
+        CredNegoStateAskReceiver,
+        CredNegoStateReplyReceiver,
+        CredNegoStateDecideReceiver,
+    };
+    AUTH_LOGI(AUTH_FSM, "recv credNegoState=%{public}d", info->credNegoState);
+    if (!negoFuncTable[info->credNegoState](info, localUdidHash, info->udidShortHash, authSeq)) {
+        AUTH_LOGE(AUTH_FSM, "in receiver, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
+            PRId64, authSeq);
+        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+    }
+}
+
+static bool UnpackCredTypes(cJSON *json, AuthSessionInfo *info)
+{
+    if (json == NULL || info == NULL) {
+        AUTH_LOGE(AUTH_FSM, "invalid param");
+        return false;
+    }
+
+    cJSON *item = cJSON_GetObjectItem(json, CRED_TYPE_INFO);
+    if (item == NULL) {
+        AUTH_LOGE(AUTH_FSM, "parse credTypeInfo from json fail");
+        return false;
+    }
+    cJSON *credTypeInfoJson = cJSON_Duplicate(item, true);
+    if (credTypeInfoJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create credTypeInfoJson fail");
+        return false;
+    }
+    if (info->credTypeInfo != NULL) {
+        cJSON_Delete(info->credTypeInfo);
+    }
+    info->credTypeInfo = credTypeInfoJson;
+    return true;
+}
+
+static void UnpackExternalUserId(JsonObj *obj, AuthSessionInfo *info)
+{
+    int32_t msgLen = 0;
+    if (!JSON_GetInt32FromOject(obj, EXTERNAL_USER_IDS_LEN, &msgLen) ||
+        msgLen <= 0 || msgLen > EXTERNAL_USER_IDS_MAX_LEN) {
+        return;
+    }
+    char *msg = (char *)SoftBusCalloc(msgLen);
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc userIds fail");
+        return;
+    }
+    if (!JSON_GetStringFromObject(obj, EXTERNAL_USER_IDS, msg, msgLen)) {
+        AUTH_LOGE(AUTH_FSM, "unpack userIds fail");
+        SoftBusFree(msg);
+        return;
+    }
+    AUTH_LOGI(AUTH_FSM, "unpack userIds succ, msg=%{public}s", msg);
+    cJSON *userIdsJson = CreateJsonObjectFromString(msg);
+    SoftBusFree(msg);
+    if (userIdsJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create userIdsJson fail");
+        return;
+    }
+    if (info->externalUserIds != NULL) {
+        cJSON_Delete(info->externalUserIds);
+    }
+    info->externalUserIds = userIdsJson;
+}
+
+static bool UnpackCredNegoInfoByState(JsonObj *obj, AuthSessionInfo *info, cJSON *credNegoInfoJson)
+{
+    bool ret = true;
+    switch (info->credNegoState) {
+        case CRED_NEGO_STATE_ASK:
+            UnpackExternalUserId(obj, info);
+            break;
+        case CRED_NEGO_STATE_REPLY:
+            __attribute__((fallthrough));
+        case CRED_NEGO_STATE_DECIDE:
+            ret = UnpackCredTypes(credNegoInfoJson, info);
+            break;
+        case CRED_NEGO_STATE_FINISH:
+            break;
+        case CRED_NEGO_STATE_COMPATIBLE:
+            break;
+        default:
+            AUTH_LOGE(AUTH_FSM, "invalid credNegoState to pack");
+            ret = false;
+            break;
+    }
+    return ret;
+}
+
+static bool UnpackCredNegoInfoJson(JsonObj *obj, AuthSessionInfo *info, int64_t authSeq)
+{
+    int32_t msgLen = 0;
+    if (!JSON_GetInt32FromOject(obj, CRED_NEGO_INFO_LEN, &msgLen) ||
+        msgLen <= 0 || msgLen > CRED_NEGO_INFO_MAX_LEN) {
+        AUTH_LOGE(AUTH_FSM, "Unpack credNegoInfoLen fail");
+        return false;
+    }
+    char *msg = (char *)SoftBusCalloc(msgLen);
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc credNegoInfo fail");
+        return false;
+    }
+    if (!JSON_GetStringFromObject(obj, CRED_NEGO_INFO, msg, msgLen)) {
+        AUTH_LOGE(AUTH_FSM, "unpack credNegoInfo fail");
+        SoftBusFree(msg);
+        return false;
+    }
+    AUTH_LOGI(AUTH_FSM, "unpack credNegoInfo succ, msg=%{public}s, authSeq=%{public}" PRId64, msg, authSeq);
+    cJSON *credNegoJson = CreateJsonObjectFromString(msg);
+    SoftBusFree(msg);
+    if (credNegoJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create credNegoInfoJson fail");
+        return false;
+    }
+    int32_t credNegoState = 0;
+    if (!GetJsonObjectNumberItem(credNegoJson, CRED_NEGO_STATE, &credNegoState)) {
+        AUTH_LOGE(AUTH_FSM, "parse credNegoJson fail");
+        cJSON_Delete(credNegoJson);
+        return false;
+    }
+    info->credNegoState = (uint8_t)credNegoState;
+    bool ret = UnpackCredNegoInfoByState(obj, info, credNegoJson);
+    cJSON_Delete(credNegoJson);
+    return ret;
+}
+
+static void UnpackCredNegoInfo(JsonObj *obj, AuthSessionInfo *info, int64_t authSeq)
+{
+    if (info->credNegoState == CRED_NEGO_STATE_COMPATIBLE) {
+        return;
+    }
+    if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth) {
+        AUTH_LOGI(AUTH_FSM, "Support SK, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
+            PRId64, authSeq);
+        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+        return;
+    }
+    if (!UnpackCredNegoInfoJson(obj, info, authSeq)) {
+        AUTH_LOGE(AUTH_FSM, "unpack credNegoInfo fail, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
+            PRId64, authSeq);
+        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+        return;
+    }
+    ProcessCredInfo(info, authSeq);
+}
+
+static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info, int64_t authSeq)
 {
     OptInt(obj, USERID, &info->userId, 0);
     if (info->authVersion < AUTH_VERSION_V2) {
@@ -906,6 +1437,8 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "account hash not found");
         return;
     }
+    info->isSameAccount = IsSameAccount(info->accountHash);
+    UnpackCredNegoInfo(obj, info, authSeq);
 }
 
 static void PackCompressInfo(JsonObj *obj, const NodeInfo *info)
@@ -1058,6 +1591,97 @@ static void PackUserId(JsonObj *json, int32_t userId, NodeInfo *info)
     info->localUserId = userId >= 0 ? userId : 0;
 }
 
+static bool PackCredNegoInfoJson(JsonObj *json, cJSON *credNegoInfoJson, int64_t authSeq)
+{
+    char *msg = cJSON_PrintUnformatted(credNegoInfoJson);
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_FSM, "print unformatted credNegoInfo fail");
+        return false;
+    }
+    if (!JSON_AddInt32ToObject(json, CRED_NEGO_INFO_LEN, strlen(msg) + 1) ||
+        !JSON_AddStringToObject(json, CRED_NEGO_INFO, msg)) {
+        AUTH_LOGE(AUTH_FSM, "pack credNegoInfo fail");
+        cJSON_free(msg);
+        return false;
+    }
+    AUTH_LOGE(AUTH_FSM, "pack credNegoInfo succ, msg=%{public}s, authSeq=%{public}" PRId64, msg, authSeq);
+    cJSON_free(msg);
+    return true;
+}
+
+static bool PackCredTypesAndState(JsonObj *json, AuthSessionInfo *info, int64_t authSeq)
+{
+    cJSON *credNegoInfoJson = cJSON_CreateObject();
+    if (credNegoInfoJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create credNegoInfoJson fail");
+        return false;
+    }
+    cJSON *credTypesJson = cJSON_Duplicate(info->credTypeInfo, true);
+    if (credTypesJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create credTypesJson fail");
+        cJSON_Delete(credNegoInfoJson);
+        return false;
+    }
+    if (!cJSON_AddNumberToObject(credNegoInfoJson, CRED_NEGO_STATE, info->credNegoState) ||
+        !cJSON_AddItemToObject(credNegoInfoJson, CRED_TYPE_INFO, credTypesJson)) {
+        AUTH_LOGE(AUTH_FSM, "add to credNegoInfoJson fail");
+        cJSON_Delete(credTypesJson);
+        cJSON_Delete(credNegoInfoJson);
+        return false;
+    }
+    bool ret = PackCredNegoInfoJson(json, credNegoInfoJson, authSeq);
+    cJSON_Delete(credNegoInfoJson);
+    return ret;
+}
+
+static bool PackCredNegoState(JsonObj *json, AuthSessionInfo *info, int64_t authSeq)
+{
+    cJSON *credNegoInfoJson = cJSON_CreateObject();
+    if (credNegoInfoJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create credNegoInfoJson fail");
+        return false;
+    }
+    if (!cJSON_AddNumberToObject(credNegoInfoJson, CRED_NEGO_STATE, info->credNegoState)) {
+        AUTH_LOGE(AUTH_FSM, "add item to credNegoInfoJson fail");
+        cJSON_Delete(credNegoInfoJson);
+        return false;
+    }
+    bool ret = PackCredNegoInfoJson(json, credNegoInfoJson, authSeq);
+    cJSON_Delete(credNegoInfoJson);
+    return ret;
+}
+
+static void PackCredNegoInfo(JsonObj *json, AuthSessionInfo *info, int64_t authSeq)
+{
+#ifdef DISABLE_IDENTITY_SERVICE
+    info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+#endif
+    bool ret = true;
+    switch (info->credNegoState) {
+        case CRED_NEGO_STATE_ASK:
+            ret = PackCredNegoState(json, info, authSeq);
+            break;
+        case CRED_NEGO_STATE_REPLY:
+            __attribute__((fallthrough));
+        case CRED_NEGO_STATE_DECIDE:
+            ret = PackCredTypesAndState(json, info, authSeq);
+            break;
+        case CRED_NEGO_STATE_FINISH:
+            ret = PackCredNegoState(json, info, authSeq);
+            break;
+        case CRED_NEGO_STATE_COMPATIBLE:
+            break;
+        default:
+            AUTH_LOGE(AUTH_FSM, "invalid credNegoState to pack");
+            ret = false;
+            break;
+    }
+    if (!ret) {
+        AUTH_LOGE(AUTH_FSM, "pack credNegoInfo fail, turn to STATE_COMPATIBLE, authSeq=%{public}" PRId64, authSeq);
+        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+    }
+}
+
 static void PackAuthPreLinkNode(JsonObj *obj, const AuthSessionInfo *info)
 {
     AuthPreLinkNode node;
@@ -1105,6 +1729,19 @@ static int32_t PackExternalAuthInfo(JsonObj *json)
     return SOFTBUS_OK;
 }
 
+static int32_t GetLocalDeviceId(char *uuid, char *udid, char *networkId)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(uuid != NULL && udid != NULL && networkId != NULL, SOFTBUS_INVALID_PARAM,
+        AUTH_FSM, "info is NULL");
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK ||
+        LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK ||
+        LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get uuid/udid/networkId fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, AUTH_FSM, "info is NULL");
@@ -1116,10 +1753,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
     char uuid[UUID_BUF_LEN] = { 0 };
     char udid[UDID_BUF_LEN] = { 0 };
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get uuid/udid/networkId fail");
+    if (GetLocalDeviceId(uuid, udid, networkId) != SOFTBUS_OK) {
         JSON_Delete(obj);
         return NULL;
     }
@@ -1152,6 +1786,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
         return NULL;
     }
     PackUDIDAbatementFlag(obj, info);
+    PackCredNegoInfo(obj, (AuthSessionInfo *)info, authSeq);
     char *msg = JSON_PrintUnformatted(obj);
     JSON_Delete(obj);
     return msg;
@@ -1399,7 +2034,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info,
     UnpackFastAuth(obj, info);
     UnpackNormalizedKey(obj, info, isSupportNormalizedKey, authSeq);
     OptBool(obj, IS_NEED_PACK_CERT, &info->isNeedPackCert, false);
-    UnpackExternalAuthInfo(obj, info);
+    UnpackExternalAuthInfo(obj, info, authSeq);
     JSON_Delete(obj);
     return SOFTBUS_OK;
 }

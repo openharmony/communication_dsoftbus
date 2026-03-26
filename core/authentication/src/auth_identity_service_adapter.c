@@ -163,6 +163,16 @@ static bool IsInvalidCredList(const char *credList)
     return false;
 }
 
+static int32_t QueryCredentialFailedLog(int32_t errorRet)
+{
+    uint32_t authErrCode = 0;
+    (void)GetSoftbusHichainAuthErrorCode((uint32_t)errorRet, &authErrCode);
+    AUTH_LOGE(AUTH_HICHAIN,
+        "hichain identity service query credential list fail err=%{public}d, authErrCode=%{public}d",
+        errorRet, authErrCode);
+    return authErrCode;
+}
+
 int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
     bool isSameAccount, char **credList)
 {
@@ -179,12 +189,7 @@ int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, c
         int32_t ret = credManger->queryCredentialByParams(localUserId, authParams, credList);
         cJSON_free(authParams);
         if (ret != HC_SUCCESS) {
-            uint32_t authErrCode = 0;
-            (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
-            AUTH_LOGE(AUTH_HICHAIN,
-                "hichain identity service query credential list fail err=%{public}d, authErrCode=%{public}d",
-                ret, authErrCode);
-            return authErrCode;
+            return QueryCredentialFailedLog(ret);
         }
         return SOFTBUS_OK;
     }
@@ -205,14 +210,33 @@ int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, c
         cJSON_free(authParams);
     }
     if (ret != HC_SUCCESS) {
-        uint32_t authErrCode = 0;
-        (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
-        AUTH_LOGE(AUTH_HICHAIN,
-            "hichain identity service query credential list fail err=%{public}d, authErrCode=%{public}d",
-            ret, authErrCode);
-        return authErrCode;
+        return QueryCredentialFailedLog(ret);
     }
     return SOFTBUS_OK;
+}
+
+char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+    const char *udidHash)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(udidHash != NULL, NULL, AUTH_HICHAIN, "invalid param");
+    const CredManager *credManager = IdServiceGetCredMgrInstance();
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, NULL,
+        AUTH_HICHAIN, "hichain identity service not initialized");
+    char *authParams = IdServiceGenerateQueryParamByCredType(peerUserId, udidHash, (SoftbusCredType)credType);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(authParams != NULL, NULL,
+        AUTH_HICHAIN, "hichain identity service generate query parameter fail");
+    AUTH_LOGI(AUTH_HICHAIN, "get credId by localUserId=%{public}d, peerUserId=%{public}d and credType=%{public}d",
+        localUserId, peerUserId, credType);
+    char *credList;
+    int32_t ret = credManager->queryCredentialByParams(localUserId, authParams, &credList);
+    cJSON_free(authParams);
+    if (ret != HC_SUCCESS) {
+        (void)QueryCredentialFailedLog(ret);
+        return NULL;
+    }
+    char *credId = IdServiceGetCredIdFromCredList(localUserId, credList);
+    IdServiceDestroyCredentialList(&credList);
+    return credId;
 }
 
 void IdServiceDestroyCredentialList(char **returnData)

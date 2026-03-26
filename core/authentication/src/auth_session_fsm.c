@@ -350,6 +350,14 @@ static void DestroyAuthFsm(AuthFsm *authFsm)
         SoftBusFree(authFsm->info.credId);
         authFsm->info.credId = NULL;
     }
+    if (authFsm->info.credTypeInfo != NULL) {
+        cJSON_Delete(authFsm->info.credTypeInfo);
+        authFsm->info.credTypeInfo = NULL;
+    }
+    if (authFsm->info.externalUserIds != NULL) {
+        cJSON_Delete(authFsm->info.externalUserIds);
+        authFsm->info.externalUserIds = NULL;
+    }
     SoftBusFree(authFsm);
 }
 
@@ -1001,6 +1009,19 @@ static void UpdateUdidHashIfEmpty(AuthFsm *authFsm, AuthSessionInfo *info)
     }
 }
 
+static bool ProcessCredNegoUnfinished(AuthFsm *authFsm, AuthSessionInfo *info, int32_t *ret, int32_t expectedState)
+{
+    if (info->normalizedType != NORMALIZED_SUPPORT && !info->isSupportFastAuth &&
+        info->credNegoState == expectedState) {
+        AUTH_LOGI(AUTH_FSM, "before STATE_AUTH, credNego unfinished, authSeq=%{public}" PRId64, authFsm->authSeq);
+        if (PostDeviceIdMessage(authFsm->authSeq, info) != SOFTBUS_OK && ret != NULL) {
+            *ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
+        }
+        return true;
+    }
+    return false;
+}
+
 static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
 {
     int32_t ret = SOFTBUS_OK;
@@ -1025,6 +1046,9 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
                 break;
             }
         } else {
+            if (ProcessCredNegoUnfinished(authFsm, info, &ret, CRED_NEGO_STATE_DECIDE)) {
+                break;
+            }
             if (info->normalizedType == NORMALIZED_NOT_SUPPORT || info->peerState == AUTH_STATE_COMPATIBLE) {
                 NotifyNormalizeRequestSuccess(authFsm->authSeq, false);
             }
@@ -1045,6 +1069,9 @@ static void LocalAuthStateProc(AuthFsm *authFsm, AuthSessionInfo *info, int32_t 
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
     } else if (info->localState == AUTH_STATE_ACK) {
         info->isServer = true;
+        if (ProcessCredNegoUnfinished(authFsm, info, result, CRED_NEGO_STATE_REPLY)) {
+            return;
+        }
         *result = PostDeviceIdMessage(authFsm->authSeq, info);
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
     } else if (info->localState == AUTH_STATE_WAIT) {
@@ -1362,28 +1389,18 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "copy authParam fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    authParam.userId = authFsm->info.userId;
     authParam.cb = NULL;
+    authParam.userId = authFsm->info.userId;
+    if (authFsm->info.credNegoState != CRED_NEGO_STATE_COMPATIBLE) {
+        if (authFsm->info.credTypeInfo == NULL ||
+            !GetJsonObjectNumberItem(authFsm->info.credTypeInfo, SINK_USERID, &authParam.userId)) {
+            AUTH_LOGE(AUTH_FSM, "parse peerUserId from chosenCredTypes fail");
+            authFsm->info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
+    }
     PopulateDeviceTypeId(&authParam, authFsm->info.requestId);
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
-}
-
-static bool JudgeIsSameAccount(const char *accountHash)
-{
-    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
-    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get local account hash fail");
-        return false;
-    }
-
-    uint8_t peerAccountHash[SHA_256_HASH_LEN] = { 0 };
-    if (ConvertHexStringToBytes(peerAccountHash, SHA_256_HASH_LEN, accountHash, strlen(accountHash)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "convert peer account hash to bytes fail");
-        return false;
-    }
-
-    return (memcmp(localAccountHash, peerAccountHash, SHA_256_HASH_LEN) == 0) &&
-        (!LnnIsDefaultOhosAccount());
 }
 
 static void GetCredTypeByCredId(AuthSessionInfo *info)
@@ -1400,7 +1417,7 @@ static void GetCredTypeByCredId(AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "get node info fail");
         return;
     }
-    info->isSameAccount = JudgeIsSameAccount(info->accountHash);
+    info->isSameAccount = IsSameAccount(info->accountHash);
     char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get local udid short hash fail");
@@ -1447,7 +1464,12 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
         }
         return;
     }
-    GetCredTypeByCredId(info);
+    if (info->credNegoState == CRED_NEGO_STATE_COMPATIBLE || info->credId == NULL) {
+        AUTH_LOGI(AUTH_FSM, "cred negotiation fail, get credType by credId, authSeq=%{public}" PRId64,
+            authFsm->authSeq);
+        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+        GetCredTypeByCredId(info);
+    }
     if (!info->isServer) {
         ret = ProcessClientAuthState(authFsm);
     }
@@ -2292,6 +2314,14 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
     if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
         return DEFAULT_USERID;
+    }
+    if (info.credNegoState != CRED_NEGO_STATE_COMPATIBLE) {
+        int32_t peerUserId = 0;
+        if (GetJsonObjectNumberItem(info.credTypeInfo, SINK_USERID, &peerUserId)) {
+            return peerUserId;
+        } else {
+            info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+        }
     }
     return info.userId;
 }
