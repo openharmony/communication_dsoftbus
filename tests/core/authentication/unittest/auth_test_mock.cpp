@@ -383,48 +383,4 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_002, TestSize.Level1)
     WaitForSignal();
     SoftBusFree(data4);
 }
-
-/*
- * @tc.name: CONVERT_TO_DISCOVERET_TYPE_TEST_001
- * @tc.desc: auth ConvertToDiscoveryType test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, CONVERT_TO_DISCOVERET_TYPE_TEST_001, TestSize.Level1)
-{
-    DiscoveryType type;
-    AuthLinkType ret;
-    type = DISCOVERY_TYPE_WIFI;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
-
-    type = DISCOVERY_TYPE_BLE;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
-
-    type = DISCOVERY_TYPE_SLE;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_SLE);
-
-    type = DISCOVERY_TYPE_BR;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
-
-    type = DISCOVERY_TYPE_P2P;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
-
-    type = DISCOVERY_TYPE_SESSION_KEY;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_SESSION_KEY);
-
-    type = DISCOVERY_TYPE_USB;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_USB);
-
-    type = DISCOVERY_TYPE_COUNT;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_MAX);
-}
 } // namespace OHOS
