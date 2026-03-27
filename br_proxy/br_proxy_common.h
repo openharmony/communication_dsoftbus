@@ -26,6 +26,7 @@ typedef enum {
     LOOP_DCLOSE_MSG,
     LOOP_STOP_APP_MSG,
     LOOP_BR_PROXY_OPENED_MSG,
+    LOOP_REPORT_CALL_COUNT_MSG,
 } BrProxyLoopMsg;
 
 typedef struct {
