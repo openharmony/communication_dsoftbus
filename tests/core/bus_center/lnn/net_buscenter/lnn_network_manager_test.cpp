@@ -555,8 +555,8 @@ HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
     VisitNextChoice ret = GetAllProtocols(nullptr, data);
     EXPECT_TRUE(ret == CHOICE_FINISH_VISITING);
     LnnProtocolManager manager;
-    data = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnProtocolManager)));
-    EXPECT_TRUE(data != nullptr);
+    data = reinterpret_cast<void *>(SoftBusCalloc(sizeof(LnnProtocolManager)));
+    ASSERT_TRUE(data != nullptr);
     ret = GetAllProtocols(&manager, data);
     EXPECT_TRUE(ret == CHOICE_VISIT_NEXT);
     SoftBusFree(data);
@@ -780,6 +780,7 @@ HWTEST_F(LNNNetworkManagerMockTest, Net_Device_Risk_State_Event_Handler_001, Tes
 {
     LnnDeviceRiskStateChangeEvent *event =
         reinterpret_cast<LnnDeviceRiskStateChangeEvent *>(SoftBusCalloc(sizeof(LnnDeviceRiskStateChangeEvent)));
+    ASSERT_TRUE(event != nullptr);
     event->basic.event = LNN_EVENT_TYPE_MAX;
     event->status = SOFTBUS_DEVICE_IS_RISK;
 
