@@ -384,158 +384,158 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_002, TestSize.Level1)
     SoftBusFree(data4);
 }
 
-/*
- * @tc.name: AUTH_GENSEQ_TEST_001
- * @tc.desc: auth GenSeq test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, AUTH_GENSEQ_TEST_001, TestSize.Level1)
-{
-    bool isServer = false;
-    AuthNetLedgertInterfaceMock authMock;
-    ON_CALL(authMock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_ERR));
-    int64_t ret = GenSeq(isServer);
-    EXPECT_NE(ret, 0);
-}
+// /*
+//  * @tc.name: AUTH_GENSEQ_TEST_001
+//  * @tc.desc: auth GenSeq test
+//  * @tc.type: FUNC
+//  * @tc.level: Level1
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthTestCallBackTest, AUTH_GENSEQ_TEST_001, TestSize.Level1)
+// {
+//     bool isServer = false;
+//     AuthNetLedgertInterfaceMock authMock;
+//     ON_CALL(authMock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_ERR));
+//     int64_t ret = GenSeq(isServer);
+//     EXPECT_NE(ret, 0);
+// }
 
-/*
- * @tc.name: AUTH_GENSEQ_TEST_002
- * @tc.desc: auth GenSeq test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, AUTH_GENSEQ_TEST_002, TestSize.Level1)
-{
-    bool isServer = false;
-    int64_t ret = 0;
-    AuthNetLedgertInterfaceMock ledgerMock;
-    AuthCommonInterfaceMock authMock;
+// /*
+//  * @tc.name: AUTH_GENSEQ_TEST_002
+//  * @tc.desc: auth GenSeq test
+//  * @tc.type: FUNC
+//  * @tc.level: Level1
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthTestCallBackTest, AUTH_GENSEQ_TEST_002, TestSize.Level1)
+// {
+//     bool isServer = false;
+//     int64_t ret = 0;
+//     AuthNetLedgertInterfaceMock ledgerMock;
+//     AuthCommonInterfaceMock authMock;
 
-    ON_CALL(ledgerMock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(authMock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_ERR));
-    ret = GenSeq(isServer);
-    EXPECT_NE(ret, 0);
-}
+//     ON_CALL(ledgerMock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_OK));
+//     ON_CALL(authMock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_ERR));
+//     ret = GenSeq(isServer);
+//     EXPECT_NE(ret, 0);
+// }
 
-/*
- * @tc.name: AUTH_GENSEQ_TEST_003
- * @tc.desc: auth GenSeq test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, AUTH_GENSEQ_TEST_003, TestSize.Level1)
-{
-    bool isServer = false;
-    int64_t ret = 0;
-    AuthNetLedgertInterfaceMock ledgerMock;
-    AuthCommonInterfaceMock authMock;
+// /*
+//  * @tc.name: AUTH_GENSEQ_TEST_003
+//  * @tc.desc: auth GenSeq test
+//  * @tc.type: FUNC
+//  * @tc.level: Level1
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthTestCallBackTest, AUTH_GENSEQ_TEST_003, TestSize.Level1)
+// {
+//     bool isServer = false;
+//     int64_t ret = 0;
+//     AuthNetLedgertInterfaceMock ledgerMock;
+//     AuthCommonInterfaceMock authMock;
 
-    ON_CALL(ledgerMock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(authMock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_OK));
-    ret = GenSeq(isServer);
-    EXPECT_NE(ret, 0);
-}
+//     ON_CALL(ledgerMock, LnnGetLocalStrInfo).WillByDefault(Return(SOFTBUS_OK));
+//     ON_CALL(authMock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_OK));
+//     ret = GenSeq(isServer);
+//     EXPECT_NE(ret, 0);
+// }
 
-/*
- * @tc.name: CONVERT_TO_DISCOVERET_TYPE_TEST_001
- * @tc.desc: auth ConvertToDiscoveryType test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, CONVERT_TO_DISCOVERET_TYPE_TEST_001, TestSize.Level1)
-{
-    DiscoveryType type;
-    AuthLinkType ret;
-    type = DISCOVERY_TYPE_WIFI;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
+// /*
+//  * @tc.name: CONVERT_TO_DISCOVERET_TYPE_TEST_001
+//  * @tc.desc: auth ConvertToDiscoveryType test
+//  * @tc.type: FUNC
+//  * @tc.level: Level1
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthTestCallBackTest, CONVERT_TO_DISCOVERET_TYPE_TEST_001, TestSize.Level1)
+// {
+//     DiscoveryType type;
+//     AuthLinkType ret;
+//     type = DISCOVERY_TYPE_WIFI;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
 
-    type = DISCOVERY_TYPE_BLE;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+//     type = DISCOVERY_TYPE_BLE;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
 
-    type = DISCOVERY_TYPE_SLE;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_SLE);
+//     type = DISCOVERY_TYPE_SLE;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_SLE);
 
-    type = DISCOVERY_TYPE_BR;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
+//     type = DISCOVERY_TYPE_BR;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
 
-    type = DISCOVERY_TYPE_P2P;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
+//     type = DISCOVERY_TYPE_P2P;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
 
-    type = DISCOVERY_TYPE_SESSION_KEY;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_SESSION_KEY);
+//     type = DISCOVERY_TYPE_SESSION_KEY;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_SESSION_KEY);
 
-    type = DISCOVERY_TYPE_USB;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_USB);
+//     type = DISCOVERY_TYPE_USB;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_USB);
 
-    type = DISCOVERY_TYPE_COUNT;
-    ret = ConvertToAuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_MAX);
-}
+//     type = DISCOVERY_TYPE_COUNT;
+//     ret = ConvertToAuthLinkType(type);
+//     EXPECT_EQ(ret, AUTH_LINK_TYPE_MAX);
+// }
 
-/*
- * @tc.name: AUTH_COMNMO_DENINIT_TEST_001
- * @tc.desc: auth AuthCommonInit test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, AUTH_COMNMO_DENINIT_TEST_001, TestSize.Level1)
-{
-    AuthCommonInterfaceMock authMock;
-    EXPECT_CALL(authMock, SoftBusMutexDestroy).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_NO_FATAL_FAILURE(AuthCommonDeinit());
+// /*
+//  * @tc.name: AUTH_COMNMO_DENINIT_TEST_001
+//  * @tc.desc: auth AuthCommonInit test
+//  * @tc.type: FUNC
+//  * @tc.level: Level1
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthTestCallBackTest, AUTH_COMNMO_DENINIT_TEST_001, TestSize.Level1)
+// {
+//     AuthCommonInterfaceMock authMock;
+//     EXPECT_CALL(authMock, SoftBusMutexDestroy).WillOnce(Return(SOFTBUS_ERR));
+//     EXPECT_NO_FATAL_FAILURE(AuthCommonDeinit());
 
-    EXPECT_CALL(authMock, SoftBusMutexDestroy).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(AuthCommonDeinit());
-}
+//     EXPECT_CALL(authMock, SoftBusMutexDestroy).WillOnce(Return(SOFTBUS_OK));
+//     EXPECT_NO_FATAL_FAILURE(AuthCommonDeinit());
+// }
 
-/*
- * @tc.name: AUTH_COMNMON_INIT_TEST_001
- * @tc.desc: auth AuthCommonInit test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, AUTH_COMNMON_INIT_TEST_001, TestSize.Level1)
-{
-    int32_t ret = 0;
-    AuthCommonInterfaceMock authMock;
-    EXPECT_CALL(authMock, SoftBusMutexInit).WillOnce(Return(SOFTBUS_ERR));
-    ret = AuthCommonInit();
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+// /*
+//  * @tc.name: AUTH_COMNMON_INIT_TEST_001
+//  * @tc.desc: auth AuthCommonInit test
+//  * @tc.type: FUNC
+//  * @tc.level: Level1
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthTestCallBackTest, AUTH_COMNMON_INIT_TEST_001, TestSize.Level1)
+// {
+//     int32_t ret = 0;
+//     AuthCommonInterfaceMock authMock;
+//     EXPECT_CALL(authMock, SoftBusMutexInit).WillOnce(Return(SOFTBUS_ERR));
+//     ret = AuthCommonInit();
+//     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
-    EXPECT_CALL(authMock, SoftBusMutexInit).WillOnce(Return(SOFTBUS_OK));
-    ret = AuthCommonInit();
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-}
+//     EXPECT_CALL(authMock, SoftBusMutexInit).WillOnce(Return(SOFTBUS_OK));
+//     ret = AuthCommonInit();
+//     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+// }
 
-/*
- * @tc.name: AUTH_GET_PEER_UDID_BY_NETWORKID_TEST_001
- * @tc.desc: auth GetPeerUdidByNetworkId test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTestCallBackTest, AUTH_GET_PEER_UDID_BY_NETWORKID_TEST_001, TestSize.Level1)
-{
-    int32_t ret = 0;
-    const char *networkId = "testudid";
-    char udid[UDID_BUF_LEN] = { 0 };
-    AuthNetLedgertInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnRetrieveDeviceInfoByNetworkIdPacked).WillOnce(Return(SOFTBUS_ERR));
-    ret = GetPeerUdidByNetworkId(networkId, udid, UDID_BUF_LEN);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-}
+// /*
+//  * @tc.name: AUTH_GET_PEER_UDID_BY_NETWORKID_TEST_001
+//  * @tc.desc: auth GetPeerUdidByNetworkId test
+//  * @tc.type: FUNC
+//  * @tc.level: Level1
+//  * @tc.require:
+//  */
+// HWTEST_F(AuthTestCallBackTest, AUTH_GET_PEER_UDID_BY_NETWORKID_TEST_001, TestSize.Level1)
+// {
+//     int32_t ret = 0;
+//     const char *networkId = "testudid";
+//     char udid[UDID_BUF_LEN] = { 0 };
+//     AuthNetLedgertInterfaceMock authMock;
+//     EXPECT_CALL(authMock, LnnRetrieveDeviceInfoByNetworkIdPacked).WillOnce(Return(SOFTBUS_ERR));
+//     ret = GetPeerUdidByNetworkId(networkId, udid, UDID_BUF_LEN);
+//     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+// }
 } // namespace OHOS

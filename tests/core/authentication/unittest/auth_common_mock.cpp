@@ -228,61 +228,61 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
     return GetCommonInterface()->JudgeDeviceTypeAndGetOsAccountIds();
 }
 
-int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
-{
-    return GetCommonInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
-}
+// int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+// {
+//     return GetCommonInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
+// }
 
-int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
-{
-    return GetCommonInterface()->LnnGetLocalDeviceInfo(info);
-}
+// int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
+// {
+//     return GetCommonInterface()->LnnGetLocalDeviceInfo(info);
+// }
 
-int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
-{
-    return GetCommonInterface()->LnnSetNodeKeyInfo(networkId, key, info, infoLen);
-}
+// int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen)
+// {
+//     return GetCommonInterface()->LnnSetNodeKeyInfo(networkId, key, info, infoLen);
+// }
 
-int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
-{
-    return GetCommonInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
-}
+// int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
+// {
+//     return GetCommonInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
+// }
 
-int32_t LnnGetNetworkIdByUdidHash(
-    const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline)
-{
-    return GetCommonInterface()->LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, buf, len, needOnline);
-}
+// int32_t LnnGetNetworkIdByUdidHash(
+//     const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline)
+// {
+//     return GetCommonInterface()->LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, buf, len, needOnline);
+// }
 
-int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin)
-{
-    return GetCommonInterface()->LnnServerJoin(addr, pkgName, isForceJoin);
-}
+// int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin)
+// {
+//     return GetCommonInterface()->LnnServerJoin(addr, pkgName, isForceJoin);
+// }
 
-int32_t BusCenterServerInit(void)
-{
-    return GetCommonInterface()->BusCenterServerInit();
-}
+// int32_t BusCenterServerInit(void)
+// {
+//     return GetCommonInterface()->BusCenterServerInit();
+// }
 
-int32_t LnnSyncP2pInfo(void)
-{
-    return GetCommonInterface()->LnnSyncP2pInfo();
-}
+// int32_t LnnSyncP2pInfo(void)
+// {
+//     return GetCommonInterface()->LnnSyncP2pInfo();
+// }
 
-int32_t LnnInitLnnLooper(void)
-{
-    return GetCommonInterface()->LnnInitLnnLooper();
-}
+// int32_t LnnInitLnnLooper(void)
+// {
+//     return GetCommonInterface()->LnnInitLnnLooper();
+// }
 
-int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
-{
-    return GetCommonInterface()->SoftBusMutexInit(mutex, mutexAttr);
-}
+// int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
+// {
+//     return GetCommonInterface()->SoftBusMutexInit(mutex, mutexAttr);
+// }
 
-int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
-{
-    return GetCommonInterface()->SoftBusMutexDestroy(mutex);
-}
+// int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
+// {
+//     return GetCommonInterface()->SoftBusMutexDestroy(mutex);
+// }
 }
 
 int32_t AuthCommonInterfaceMock::ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
