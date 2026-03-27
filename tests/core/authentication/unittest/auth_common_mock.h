@@ -31,11 +31,9 @@
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_ohos_account_adapter.h"
-// #include "g_enhance_lnn_func_pack.h"
 #include "map"
 #include "securec.h"
 #include "softbus_adapter_bt_common.h"
-// #include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 
@@ -86,18 +84,6 @@ public:
     virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
     virtual int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
-    // virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
-    // virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
-    // virtual int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
-    // virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
-    // virtual int32_t LnnGetNetworkIdByUdidHash(
-    //     const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline) = 0;
-    // virtual int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin) = 0;
-    // virtual int32_t BusCenterServerInit(void) = 0;
-    // virtual int32_t LnnSyncP2pInfo(void) = 0;
-    // virtual int32_t LnnInitLnnLooper(void) = 0;
-    // virtual int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr) = 0;
-    // virtual int32_t SoftBusMutexDestroy(SoftBusMutex *mutex) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -141,17 +127,6 @@ public:
     MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged));
     MOCK_METHOD2(ConnUpdateConnection, int32_t(uint32_t, UpdateOption *));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
-    // MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
-    // MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
-    // MOCK_METHOD4(LnnSetNodeKeyInfo, int32_t(const char *, int32_t, uint8_t *, uint32_t));
-    // MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t(const char *, char *, uint32_t));
-    // MOCK_METHOD5(LnnGetNetworkIdByUdidHash, int32_t(const uint8_t *, uint32_t, char *, uint32_t, bool));
-    // MOCK_METHOD3(LnnServerJoin, int32_t(ConnectionAddr *, const char *, bool));
-    // MOCK_METHOD0(BusCenterServerInit, int32_t(void));
-    // MOCK_METHOD0(LnnSyncP2pInfo, int32_t(void));
-    // MOCK_METHOD0(LnnInitLnnLooper, int32_t(void));
-    // MOCK_METHOD2(SoftBusMutexInit, int32_t(SoftBusMutex *, SoftBusMutexAttr *));
-    // MOCK_METHOD1(SoftBusMutexDestroy, int32_t(SoftBusMutex *mutex));
     static inline char *g_encryptData;
     static inline ConnectCallback g_conncallback;
     static inline ConnectResult g_connresultcb;
