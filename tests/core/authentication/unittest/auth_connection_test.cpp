@@ -18,6 +18,11 @@
 
 #include "auth_connection.c"
 #include "auth_connection_mock.h"
+#include "auth_common_struct.h"
+#include "auth_interface_struct.h"
+#include "softbus_conn_interface_struct.h"
+
+#define TEST_LARGE_CONN_ID 0x100000000
 
 namespace OHOS {
 using namespace testing;
@@ -1112,5 +1117,468 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, Test
     type = AUTH_LINK_TYPE_WIFI;
     ret = AuthStartListeningForWifiDirect(type, addr, port, &moduleId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+  * @tc.name: HANDLE_CONN_CONNECT_TIMEOUT_TEST_001
+  * @tc.desc: HandleConnConnectTimeout test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_CONN_CONNECT_TIMEOUT_TEST_001, TestSize.Level1)
+{
+    uint32_t requestId = TEST_REQUEST_ID;
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectTimeout(nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectTimeout(&requestId));
+}
+
+/*
+  * @tc.name: HANDLE_CONN_CONNECT_CMD_TEST_001
+  * @tc.desc: HandleConnConnectCmd test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_CONN_CONNECT_CMD_TEST_001, TestSize.Level1)
+{
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ConnCmdInfo cmdInfo;
+    (void)memset_s(&cmdInfo, sizeof(cmdInfo), 0, sizeof(cmdInfo));
+    cmdInfo.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    cmdInfo.requestId = TEST_REQUEST_ID;
+    strcpy_s(cmdInfo.connInfo.info.ipInfo.ip, sizeof(TEST_IP), TEST_IP);
+    cmdInfo.connInfo.info.ipInfo.port = TEST_PORT;
+
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, FindAuthPreLinkNodeById(_, _)).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(mock, SocketConnectDevice(_, _, _, _))
+        .WillOnce(Return(-1)).WillRepeatedly(Return(TEST_FD));
+    EXPECT_CALL(mock, SocketSetDevice(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, DelAuthPreLinkById(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock, PostAuthEvent(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectCmd(nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectCmd(&cmdInfo));
+
+    cmdInfo.connInfo.type = AUTH_LINK_TYPE_USB;
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectCmd(&cmdInfo));
+
+    cmdInfo.connInfo.type = AUTH_LINK_TYPE_BLE;
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectCmd(&cmdInfo));
+    AuthConnDeinit();
+}
+
+/*
+  * @tc.name: HANDLE_CONN_CONNECT_CMD_TEST_002
+  * @tc.desc: HandleConnConnectCmd test with mocked FindAuthPreLinkNodeById success
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_CONN_CONNECT_CMD_TEST_002, TestSize.Level1)
+{
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ConnCmdInfo cmdInfo;
+    (void)memset_s(&cmdInfo, sizeof(cmdInfo), 0, sizeof(cmdInfo));
+    cmdInfo.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    cmdInfo.requestId = TEST_REQUEST_ID;
+
+    AuthPreLinkNode linkNode;
+    memset_s(&linkNode, sizeof(linkNode), 0, sizeof(linkNode));
+    linkNode.fd = TEST_FD;
+
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, FindAuthPreLinkNodeById(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(linkNode), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, SocketSetDevice(TEST_FD, true)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, PostAuthEvent(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectCmd(&cmdInfo));
+    AuthConnDeinit();
+}
+
+/*
+  * @tc.name: HANDLE_TCP_SESSION_CONN_CONNECT_CMD_TEST_001
+  * @tc.desc: HandleTcpSessionConnConnectCmd test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_TCP_SESSION_CONN_CONNECT_CMD_TEST_001, TestSize.Level1)
+{
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ConnCmdInfo cmdInfo;
+    (void)memset_s(&cmdInfo, sizeof(cmdInfo), 0, sizeof(cmdInfo));
+    cmdInfo.connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
+    cmdInfo.requestId = TEST_REQUEST_ID;
+
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, FindAuthPreLinkNodeById(_, _)).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(mock, SocketSetDevice(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, DelAuthPreLinkById(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock, PostAuthEvent(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectCmd(nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectCmd(&cmdInfo));
+
+    cmdInfo.connInfo.type = AUTH_LINK_TYPE_USB;
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectCmd(&cmdInfo));
+    AuthConnDeinit();
+}
+
+/*
+  * @tc.name: HANDLE_CONN_CONNECT_RESULT_TEST_001
+  * @tc.desc: HandleConnConnectResult test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_CONN_CONNECT_RESULT_TEST_001, TestSize.Level1)
+{
+    AuthConnectResult result = {
+        .fd = TEST_FD,
+        .ret = SOFTBUS_OK,
+    };
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectResult(nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectResult(&result));
+
+    result.fd = -1;
+    result.ret = SOFTBUS_INVALID_PARAM;
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectResult(&result));
+
+    result.fd = AUTH_INVALID_FD;
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectResult(&result));
+}
+
+/*
+  * @tc.name: HANDLE_CONN_CONNECT_RESULT_TEST_002
+  * @tc.desc: HandleConnConnectResult test with init and cleanup
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_CONN_CONNECT_RESULT_TEST_002, TestSize.Level1)
+{
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    ConnServerInit();
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddConnRequest(&connInfo, TEST_REQUEST_ID, TEST_FD);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    
+    AuthConnectResult result = {
+        .fd = TEST_FD,
+        .ret = SOFTBUS_OK,
+    };
+    EXPECT_NO_FATAL_FAILURE(HandleConnConnectResult(&result));
+    AuthConnDeinit();
+    ConnServerDeinit();
+}
+
+/*
+  * @tc.name: HANDLE_TCP_SESSION_CONN_CONNECT_RESULT_TEST_001
+  * @tc.desc: HandleTcpSessionConnConnectResult test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_TCP_SESSION_CONN_CONNECT_RESULT_TEST_001, TestSize.Level1)
+{
+    AuthConnectResult result = {
+        .fd = TEST_FD,
+        .ret = SOFTBUS_OK,
+    };
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    ConnServerInit();
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectResult(nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectResult(&result));
+
+    result.fd = -1;
+    result.ret = SOFTBUS_INVALID_PARAM;
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectResult(&result));
+
+    result.fd = AUTH_INVALID_FD;
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectResult(&result));
+    AuthConnDeinit();
+    ConnServerDeinit();
+}
+
+/*
+  * @tc.name: HANDLE_TCP_SESSION_CONN_CONNECT_RESULT_TEST_002
+  * @tc.desc: HandleTcpSessionConnConnectResult test with init and cleanup
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_TCP_SESSION_CONN_CONNECT_RESULT_TEST_002, TestSize.Level1)
+{
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_SESSION_KEY,
+    };
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    ConnServerInit();
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddConnRequest(&connInfo, TEST_REQUEST_ID, TEST_FD);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthConnectResult result = {
+        .fd = TEST_FD,
+        .ret = SOFTBUS_OK,
+    };
+    EXPECT_NO_FATAL_FAILURE(HandleTcpSessionConnConnectResult(&result));
+    AuthConnDeinit();
+    ConnServerDeinit();
+}
+
+/*
+  * @tc.name: HANDLE_DATA_RECEIVED_PROCESS_TEST_001
+  * @tc.desc: HandleDataReceivedProcess test with memory management and mock
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_DATA_RECEIVED_PROCESS_TEST_001, TestSize.Level1)
+{
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
+
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_AUTH,
+        .len = TEST_DATA_LEN,
+    };
+    uint8_t data[TEST_DATA_LEN] = {1, 2, 3, 4, 5, 6};
+    EXPECT_NO_FATAL_FAILURE(HandleDataReceivedProcess(TEST_LARGE_CONN_ID, &connInfo, true, &head, data));
+
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    EXPECT_NO_FATAL_FAILURE(HandleDataReceivedProcess(TEST_LARGE_CONN_ID, &connInfo, false, &head, data));
+
+    head.len = 0;
+    EXPECT_NO_FATAL_FAILURE(HandleDataReceivedProcess(TEST_LARGE_CONN_ID, &connInfo, true, &head, data));
+}
+
+/*
+  * @tc.name: HANDLE_DATA_RECEIVED_PROCESS_TEST_002
+  * @tc.desc: HandleDataReceivedProcess test with null param and mock failure
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_DATA_RECEIVED_PROCESS_TEST_002, TestSize.Level1)
+{
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
+    
+    uint64_t connId = 0;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_AUTH,
+        .len = TEST_DATA_LEN,
+    };
+    uint8_t data[TEST_DATA_LEN] = {1, 2, 3, 4, 5, 6};
+    EXPECT_NO_FATAL_FAILURE(HandleDataReceivedProcess(connId, &connInfo, true, &head, nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleDataReceivedProcess(0, &connInfo, true, &head, data));
+}
+
+/*
+  * @tc.name: ON_WIFI_CONNECTED_TEST_001
+  * @tc.desc: OnWiFiConnected test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH_P2P;
+    int32_t fd = TEST_FD;
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, PostAuthEvent).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnWiFiConnected(module, fd, true));
+    EXPECT_NO_FATAL_FAILURE(OnWiFiConnected(module, fd, false));
+}
+
+/*
+  * @tc.name: ON_TCP_SESSION_CONNECTED_TEST_001
+  * @tc.desc: OnTcpSessionConnected test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH_SESSION_KEY;
+    int32_t fd = TEST_FD;
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, PostAuthEvent).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnTcpSessionConnected(module, fd, true));
+    EXPECT_NO_FATAL_FAILURE(OnTcpSessionConnected(module, fd, false));
+}
+
+/*
+  * @tc.name: ON_WIFI_DISCONNECTED_TEST_001
+  * @tc.desc: OnWiFiDisconnected test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH_P2P;
+    int32_t fd = TEST_FD;
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, PostAuthEvent).WillRepeatedly(Return(SOFTBUS_OK));
+
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    ConnServerInit();
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(OnWiFiDisconnected(module, fd));
+
+    module = AUTH_USB;
+    EXPECT_NO_FATAL_FAILURE(OnWiFiDisconnected(module, fd));
+
+    module = AUTH_SESSION_KEY;
+    EXPECT_NO_FATAL_FAILURE(OnWiFiDisconnected(module, fd));
+    AuthConnDeinit();
+    ConnServerDeinit();
+}
+
+/*
+  * @tc.name: HANDLE_REPEAT_DEVICE_ID_DATA_DELAY_TEST_001
+  * @tc.desc: HandleRepeatDeviceIdDataDelay test with memory management and mock
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_REPEAT_DEVICE_ID_DATA_DELAY_TEST_001, TestSize.Level1)
+{
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
+    
+    uint64_t connId = 0x100000000;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_DEVICE_ID,
+        .len = TEST_DATA_LEN,
+    };
+    uint8_t data[TEST_DATA_LEN] = {1, 2, 3, 4, 5, 6};
+    EXPECT_NO_FATAL_FAILURE(HandleRepeatDeviceIdDataDelay(connId, &connInfo, true, &head, data));
+
+    head.dataType = DATA_TYPE_AUTH;
+    EXPECT_NO_FATAL_FAILURE(HandleRepeatDeviceIdDataDelay(connId, &connInfo, false, &head, data));
+
+    head.len = 0;
+    EXPECT_NO_FATAL_FAILURE(HandleRepeatDeviceIdDataDelay(connId, &connInfo, true, &head, data));
+}
+
+/*
+  * @tc.name: HANDLE_REPEAT_DEVICE_ID_DATA_DELAY_TEST_002
+  * @tc.desc: HandleRepeatDeviceIdDataDelay test with null param
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, HANDLE_REPEAT_DEVICE_ID_DATA_DELAY_TEST_002, TestSize.Level1)
+{
+    AuthConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
+    
+    uint64_t connId = 0;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_DEVICE_ID,
+        .len = TEST_DATA_LEN,
+    };
+    uint8_t data[TEST_DATA_LEN] = {1, 2, 3, 4, 5, 6};
+    EXPECT_NO_FATAL_FAILURE(HandleRepeatDeviceIdDataDelay(connId, nullptr, true, &head, data));
+    EXPECT_NO_FATAL_FAILURE(HandleRepeatDeviceIdDataDelay(connId, &connInfo, true, nullptr, data));
+    EXPECT_NO_FATAL_FAILURE(HandleRepeatDeviceIdDataDelay(connId, &connInfo, true, &head, nullptr));
+}
+
+/*
+  * @tc.name: ON_COMM_CONNECT_SUCC_TEST_001
+  * @tc.desc: OnCommConnectSucc test
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthConnectionTest, ON_COMM_CONNECT_SUCC_TEST_001, TestSize.Level1)
+{
+    uint32_t requestId = TEST_REQUEST_ID;
+    uint32_t connectionId = 1;
+    ConnectionInfo info;
+    (void)memset_s(&info, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
+    info.isAvailable = 1;
+    info.isServer = 1;
+    info.type = CONNECT_BR;
+    char addr[BT_MAC_LEN] = "11:22:33:44:55:66";
+    ASSERT_TRUE(strcpy_s(info.brInfo.brMac, BT_MAC_LEN, addr) == EOK);
+
+    AuthConnListener connListener = {
+        .onConnectResult = OnConnectResult,
+        .onDisconnected = OnDisconnected,
+        .onDataReceived = OnDataReceived,
+    };
+    ConnServerInit();
+    int32_t ret = AuthConnInit(&connListener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_NO_FATAL_FAILURE(OnCommConnectSucc(requestId, connectionId, nullptr));
+    EXPECT_NO_FATAL_FAILURE(OnCommConnectSucc(requestId, connectionId, &info));
+
+    info.type = CONNECT_BLE;
+    EXPECT_NO_FATAL_FAILURE(OnCommConnectSucc(requestId, connectionId, &info));
+    AuthConnDeinit();
+    ConnServerDeinit();
 }
 } // namespace OHOS
