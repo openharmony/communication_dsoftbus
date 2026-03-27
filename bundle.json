@@ -54,6 +54,7 @@
       "dsoftbus_feature_trans_qos",
       "dsoftbus_feature_trans_htp",
       "dsoftbus_feature_trans_br_proxy",
+      "dsoftbus_feature_compile_guard",
       "dsoftbus_feature_trans_legacy",
       "dsoftbus_feature_lnn_ble",
       "dsoftbus_feature_lnn_wifi",

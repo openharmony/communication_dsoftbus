@@ -15,29 +15,23 @@
 
 #include "ohos.distributedsched.linkEnhance.ani.hpp"
 #include "link_enhance_utils_taihe.h"
-#include "softbus_error_code.h"
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     if (vm == nullptr) {
-        COMM_LOGE(COMM_SDK, "vm is null");
         return ANI_ERROR;
     }
     if (result == nullptr) {
-        COMM_LOGE(COMM_SDK, "result is null");
         return ANI_ERROR;
     }
     ani_env *env = nullptr;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        COMM_LOGE(COMM_SDK, "get env fail");
         return ANI_ERROR;
     }
     if (ANI_OK != ohos::distributedsched::linkEnhance::ANIRegister(env)) {
-        COMM_LOGE(COMM_SDK, "register fail");
         return ANI_ERROR;
     }
     int32_t ret = Communication::OHOS::Softbus::Init();
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "init fail");
+    if (ret != ANI_OK) {
         return ANI_ERROR;
     }
     *result = ANI_VERSION_1;

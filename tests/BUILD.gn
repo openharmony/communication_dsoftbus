@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../dsoftbus.gni")
+
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
@@ -18,14 +20,16 @@ if (defined(ohos_lite)) {
     if (ohos_kernel_type == "liteos_m") {
       features = []
     } else {
-      features = []
-      if (ohos_build_type == "debug") {
-        features += [
-          "adapter/unittest:AdapterTest",
-          "sdk/bus_center/unittest:BusCenterSdkRefreshSmall",
-          "sdk/discovery/unittest:DiscSdkTest",
-          "sdk/transmission/trans_channel:TransSdkStreamTest",
-        ]
+      if (!dsoftbus_feature_compile_guard) {
+        features = []
+        if (ohos_build_type == "debug") {
+          features += [
+            "adapter/unittest:AdapterTest",
+            "sdk/bus_center/unittest:BusCenterSdkRefreshSmall",
+            "sdk/discovery/unittest:DiscSdkTest",
+            "sdk/transmission/trans_channel:TransSdkStreamTest",
+          ]
+        }
       }
     }
   }
@@ -34,64 +38,72 @@ if (defined(ohos_lite)) {
   import("../dsoftbus.gni")
 
   group("unittest") {
-    testonly = true
-    deps = []
-    if (!use_libfuzzer) {
-      deps += [
-        "adapter:unittest",
-        "core/adapter:unittest",
-        "core/authentication:unittest",
-        "core/broadcast:unittest",
-        "core/bus_center:unittest",
-        "core/common:unittest",
-        "core/connection:unittest",
-        "core/discovery:unittest",
-        "core/frame:unittest",
-        "core/transmission:unittest",
-        "dfx:unittest",
-        "sdk/bus_center:unittest",
-        "sdk/connection/ipc:unittest",
-        "sdk/connection/service:unittest",
-        "sdk/discovery:unittest",
-        "sdk/frame/common:unittest",
-        "sdk/frame/standard:unittest",
-        "sdk/transmission:unittest",
-        "br_proxy:unittest",
-      ]
+    if (!dsoftbus_feature_compile_guard) {
+      testonly = true
+      deps = []
+      if (!use_libfuzzer) {
+        deps += [
+          "adapter:unittest",
+          "core/adapter:unittest",
+          "core/authentication:unittest",
+          "core/broadcast:unittest",
+          "core/bus_center:unittest",
+          "core/common:unittest",
+          "core/connection:unittest",
+          "core/discovery:unittest",
+          "core/frame:unittest",
+          "core/transmission:unittest",
+          "dfx:unittest",
+          "sdk/bus_center:unittest",
+          "sdk/connection/ipc:unittest",
+          "sdk/connection/service:unittest",
+          "sdk/discovery:unittest",
+          "sdk/frame/common:unittest",
+          "sdk/frame/standard:unittest",
+          "sdk/transmission:unittest",
+          "br_proxy:unittest",
+        ]
+      }
     }
   }
 
   group("fuzztest") {
-    testonly = true
-    deps = [
-      "adapter:fuzztest",
-      "br_proxy:fuzztest",
-      "core/adapter:fuzztest",
-      "core/authentication:fuzztest",
-      "core/broadcast:fuzztest",
-      "core/bus_center:fuzztest",
-      "core/common:fuzztest",
-      "core/connection:fuzztest",
-      "core/frame:fuzztest",
-      "core/transmission:fuzztest",
-      "dfx:fuzztest",
-      "sdk/bus_center:fuzztest",
-      "sdk/frame:fuzztest",
-      "sdk/transmission:fuzztest",
-    ]
+    if (!dsoftbus_feature_compile_guard) {
+      testonly = true
+      deps = [
+        "adapter:fuzztest",
+        "br_proxy:fuzztest",
+        "core/adapter:fuzztest",
+        "core/authentication:fuzztest",
+        "core/broadcast:fuzztest",
+        "core/bus_center:fuzztest",
+        "core/common:fuzztest",
+        "core/connection:fuzztest",
+        "core/frame:fuzztest",
+        "core/transmission:fuzztest",
+        "dfx:fuzztest",
+        "sdk/bus_center:fuzztest",
+        "sdk/frame:fuzztest",
+        "sdk/transmission:fuzztest",
+      ]
+    }
   }
 
   group("benchmarktest") {
-    testonly = true
-    deps = [
-      "sdk/bus_center:benchmarktest",
-      "sdk/discovery:benchmarktest",
-      "sdk/transmission:benchmarktest",
-    ]
+    if (!dsoftbus_feature_compile_guard) {
+      testonly = true
+      deps = [
+        "sdk/bus_center:benchmarktest",
+        "sdk/discovery:benchmarktest",
+        "sdk/transmission:benchmarktest",
+      ]
+    }
   }
 
   group("integration_test") {
-    testonly = true
-    deps = [ "sdk/transmission:integration_test" ]
+    if (!dsoftbus_feature_compile_guard) {
+      testonly = true
+      deps = [ "sdk/transmission:integration_test" ]
+    }
   }
 }

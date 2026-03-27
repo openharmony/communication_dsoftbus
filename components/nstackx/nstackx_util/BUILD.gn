@@ -14,8 +14,10 @@
 DSOFTBUS_ROOT_PATH = "./../../.."
 import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 
-NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"
-cflags = [ "-DENABLE_USER_LOG" ]
+if (!dsoftbus_feature_compile_guard) {
+  NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"
+  cflags = [ "-DENABLE_USER_LOG" ]
+}
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_a" || ohos_kernel_type == "liteos_m") {
@@ -78,87 +80,91 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("nstackx_util.open") {
-      if (ohos_kernel_type == "liteos_a") {
-        cflags += [
-          "-Wall",
-          "-D_GNU_SOURCE",
-          "-DNSTACKX_WITH_LITEOS",
-          "-DLWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS",
-          "-DLWIP_LITEOS_A_COMPAT",
-          "-DMBEDTLS_INCLUDED",
-          "-DENABLE_USER_LOG",
-        ]
-        cflags_cc = cflags
-        include_dirs = [
-          "include",
-          "interface",
-          "platform/liteos",
-          "$NSTACKX_ROOT/nstackx_core/",
-          "$hilog_lite_include_path",
-          "$utils_lite_include_path",
-        ]
-        sources = [
-          "core/nstackx_dev.c",
-          "core/nstackx_event.c",
-          "core/nstackx_getopt.c",
-          "core/nstackx_log.c",
-          "core/nstackx_mbedtls.c",
-          "core/nstackx_socket.c",
-          "core/nstackx_timer.c",
-          "core/nstackx_util.c",
-          "platform/liteos/sys_dev.c",
-          "platform/liteos/sys_epoll.c",
-          "platform/liteos/sys_event.c",
-          "platform/liteos/sys_log.c",
-          "platform/liteos/sys_socket.c",
-          "platform/liteos/sys_timer.c",
-          "platform/liteos/sys_util.c",
-        ]
-        deps = [ "$hilog_lite_deps_path" ]
-        external_deps = [
-          "bounds_checking_function:libsec_shared",
-          "mbedtls:mbedtls_shared",
-        ]
-      } else if (ohos_kernel_type == "linux") {
-        cflags += [
-          "-Wall",
-          "-DNSTACKX_WITH_LINUX",
-          "-DMBEDTLS_INCLUDED",
-          "-DENABLE_USER_LOG",
-        ]
-        cflags_cc = cflags
-        include_dirs = [
-          "include",
-          "interface",
-          "platform/unix",
-          "$NSTACKX_ROOT/nstackx_core/",
-          "$hilog_lite_include_path",
-          "$utils_lite_include_path",
-        ]
-        sources = [
-          "core/nstackx_dev.c",
-          "core/nstackx_event.c",
-          "core/nstackx_getopt.c",
-          "core/nstackx_log.c",
-          "core/nstackx_mbedtls.c",
-          "core/nstackx_socket.c",
-          "core/nstackx_timer.c",
-          "core/nstackx_util.c",
-          "platform/unix/sys_dev.c",
-          "platform/unix/sys_epoll.c",
-          "platform/unix/sys_event.c",
-          "platform/unix/sys_log.c",
-          "platform/unix/sys_socket.c",
-          "platform/unix/sys_timer.c",
-          "platform/unix/sys_util.c",
-        ]
-        deps = [ "$hilog_lite_deps_path" ]
-        external_deps = [
-          "bounds_checking_function:libsec_shared",
-          "mbedtls:mbedtls_shared",
-        ]
+      if (dsoftbus_feature_compile_guard) {
+        install_enable = false
+      } else {
+        if (ohos_kernel_type == "liteos_a") {
+          cflags += [
+            "-Wall",
+            "-D_GNU_SOURCE",
+            "-DNSTACKX_WITH_LITEOS",
+            "-DLWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS",
+            "-DLWIP_LITEOS_A_COMPAT",
+            "-DMBEDTLS_INCLUDED",
+            "-DENABLE_USER_LOG",
+          ]
+          cflags_cc = cflags
+          include_dirs = [
+            "include",
+            "interface",
+            "platform/liteos",
+            "$NSTACKX_ROOT/nstackx_core/",
+            "$hilog_lite_include_path",
+            "$utils_lite_include_path",
+          ]
+          sources = [
+            "core/nstackx_dev.c",
+            "core/nstackx_event.c",
+            "core/nstackx_getopt.c",
+            "core/nstackx_log.c",
+            "core/nstackx_mbedtls.c",
+            "core/nstackx_socket.c",
+            "core/nstackx_timer.c",
+            "core/nstackx_util.c",
+            "platform/liteos/sys_dev.c",
+            "platform/liteos/sys_epoll.c",
+            "platform/liteos/sys_event.c",
+            "platform/liteos/sys_log.c",
+            "platform/liteos/sys_socket.c",
+            "platform/liteos/sys_timer.c",
+            "platform/liteos/sys_util.c",
+          ]
+          deps = [ "$hilog_lite_deps_path" ]
+          external_deps = [
+            "bounds_checking_function:libsec_shared",
+            "mbedtls:mbedtls_shared",
+          ]
+        } else if (ohos_kernel_type == "linux") {
+          cflags += [
+            "-Wall",
+            "-DNSTACKX_WITH_LINUX",
+            "-DMBEDTLS_INCLUDED",
+            "-DENABLE_USER_LOG",
+          ]
+          cflags_cc = cflags
+          include_dirs = [
+            "include",
+            "interface",
+            "platform/unix",
+            "$NSTACKX_ROOT/nstackx_core/",
+            "$hilog_lite_include_path",
+            "$utils_lite_include_path",
+          ]
+          sources = [
+            "core/nstackx_dev.c",
+            "core/nstackx_event.c",
+            "core/nstackx_getopt.c",
+            "core/nstackx_log.c",
+            "core/nstackx_mbedtls.c",
+            "core/nstackx_socket.c",
+            "core/nstackx_timer.c",
+            "core/nstackx_util.c",
+            "platform/unix/sys_dev.c",
+            "platform/unix/sys_epoll.c",
+            "platform/unix/sys_event.c",
+            "platform/unix/sys_log.c",
+            "platform/unix/sys_socket.c",
+            "platform/unix/sys_timer.c",
+            "platform/unix/sys_util.c",
+          ]
+          deps = [ "$hilog_lite_deps_path" ]
+          external_deps = [
+            "bounds_checking_function:libsec_shared",
+            "mbedtls:mbedtls_shared",
+          ]
+        }
+        public_configs = [ ":nstackx_util_header" ]
       }
-      public_configs = [ ":nstackx_util_header" ]
     }
   }
 } else {
@@ -172,67 +178,71 @@ if (defined(ohos_lite)) {
   }
 
   ohos_shared_library("nstackx_util.open") {
-    sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-    }
-    branch_protector_ret = "pac_ret"
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      sanitize = {
+        ubsan = true
+        integer_overflow = true
+        boundary_sanitize = true
+        cfi = true
+        cfi_cross_dso = true
+        debug = false
+      }
+      branch_protector_ret = "pac_ret"
 
-    cflags += [
-      "-DNSTACKX_WITH_LINUX",
-      "-DENABLE_USER_LOG",
-      "-DNSTACKX_WITH_LINUX_STANDARD",
-    ]
-    if (defined(board_toolchain_type)) {
-      if (board_toolchain_type != "iccarm") {
+      cflags += [
+        "-DNSTACKX_WITH_LINUX",
+        "-DENABLE_USER_LOG",
+        "-DNSTACKX_WITH_LINUX_STANDARD",
+      ]
+      if (defined(board_toolchain_type)) {
+        if (board_toolchain_type != "iccarm") {
+          cflags += [ "-Wall" ]
+        }
+      } else {
         cflags += [ "-Wall" ]
       }
-    } else {
-      cflags += [ "-Wall" ]
-    }
-    cflags_cc = cflags
-    include_dirs = [
-      "include",
-      "interface",
-      "platform/unix",
-      "$NSTACKX_ROOT/nstackx_core/",
-    ]
-    sources = [
-      "core/nstackx_dev.c",
-      "core/nstackx_event.c",
-      "core/nstackx_getopt.c",
-      "core/nstackx_log.c",
-      "core/nstackx_socket.c",
-      "core/nstackx_timer.c",
-      "core/nstackx_util.c",
-      "platform/unix/sys_dev.c",
-      "platform/unix/sys_epoll.c",
-      "platform/unix/sys_event.c",
-      "platform/unix/sys_log.c",
-      "platform/unix/sys_socket.c",
-      "platform/unix/sys_timer.c",
-      "platform/unix/sys_util.c",
-    ]
-
-    external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "hilog:libhilog",
-    ]
-    if (is_standard_system) {
-      cflags += [ "-DSSL_AND_CRYPTO_INCLUDED" ]
-      sources += [ "core/nstackx_openssl.c" ]
-      external_deps += [
-        "c_utils:utils",
-        "openssl:libcrypto_shared",
+      cflags_cc = cflags
+      include_dirs = [
+        "include",
+        "interface",
+        "platform/unix",
+        "$NSTACKX_ROOT/nstackx_core/",
       ]
+      sources = [
+        "core/nstackx_dev.c",
+        "core/nstackx_event.c",
+        "core/nstackx_getopt.c",
+        "core/nstackx_log.c",
+        "core/nstackx_socket.c",
+        "core/nstackx_timer.c",
+        "core/nstackx_util.c",
+        "platform/unix/sys_dev.c",
+        "platform/unix/sys_epoll.c",
+        "platform/unix/sys_event.c",
+        "platform/unix/sys_log.c",
+        "platform/unix/sys_socket.c",
+        "platform/unix/sys_timer.c",
+        "platform/unix/sys_util.c",
+      ]
+
+      external_deps = [
+        "bounds_checking_function:libsec_shared",
+        "hilog:libhilog",
+      ]
+      if (is_standard_system) {
+        cflags += [ "-DSSL_AND_CRYPTO_INCLUDED" ]
+        sources += [ "core/nstackx_openssl.c" ]
+        external_deps += [
+          "c_utils:utils",
+          "openssl:libcrypto_shared",
+        ]
+      }
+      public_configs = [ ":nstackx_util_header" ]
+      innerapi_tags = [ "platformsdk_indirect" ]
+      part_name = "dsoftbus"
+      subsystem_name = "communication"
     }
-    public_configs = [ ":nstackx_util_header" ]
-    innerapi_tags = [ "platformsdk_indirect" ]
-    part_name = "dsoftbus"
-    subsystem_name = "communication"
   }
 }

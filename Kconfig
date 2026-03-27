@@ -87,6 +87,13 @@ config dsoftbus_feature_trans_br_proxy
     help
       Answer Y to enable transmission with br
 
+config dsoftbus_feature_compile_guard
+    bool "Enable no crash br transmission"
+    default n
+    depends n
+    help
+      Answer Y to enable transmission with br
+
 comment "Other configuration"
 config dsoftbus_feature_auth_account
     bool "Enable auth account"

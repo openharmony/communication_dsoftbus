@@ -145,19 +145,118 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("softbus_adapter") {
-      include_dirs = common_include
-      include_dirs += [ "$dsoftbus_root_path/interfaces/inner_kits/lnn" ]
-      cflags = [
-        "-Wall",
-        "-Werror",
-        "-fPIC",
-        "-fno-builtin",
-        "-std=c99",
+      if (dsoftbus_feature_compile_guard) {
+        install_enable = false
+      } else {
+        include_dirs = common_include
+        include_dirs += [ "$dsoftbus_root_path/interfaces/inner_kits/lnn" ]
+        cflags = [
+          "-Wall",
+          "-Werror",
+          "-fPIC",
+          "-fno-builtin",
+          "-std=c99",
+        ]
+        cflags_cc = [ "-fPIC" ]
+        sources = [
+          "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent_mini.c",
+          "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace_virtual.c",
+          "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
+          "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
+          "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
+          "$softbus_adapter_common/perf/softbus_adapter_perf.c",
+          "$softbus_adapter_common/range/softbus_adapter_range.c",
+        ]
+
+        if (dsoftbus_access_token_feature) {
+          sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter.cpp" ]
+          external_deps += [
+            "access_token:libaccesstoken_sdk",
+            "access_token:libprivacy_sdk",
+            "access_token:libtokenid_sdk",
+          ]
+          if (dsoftbus_ipc_feature) {
+            external_deps += [ "ipc:ipc_single" ]
+          }
+        } else {
+          sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
+        }
+
+        sources +=
+            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
+
+        deps = [
+          "$dsoftbus_dfx_path:softbus_dfx",
+          "$hilog_lite_deps_path",
+        ]
+        external_deps = [
+          "bounds_checking_function:libsec_shared",
+          "init:libbegetutil",
+        ]
+        public_external_deps = [ "json:nlohmann_json_static" ]
+
+        if (dsoftbus_feature_encrypt == 0) {
+          sources += [
+            "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
+            "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
+          ]
+          deps += [ "//third_party/mbedtls" ]
+        } else if (dsoftbus_feature_encrypt == 1) {
+          sources += [
+            "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
+            "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
+          ]
+          deps += [ "//third_party/openssl:libcrypto_shared" ]
+        }
+        public_configs = [ ":dsoftbus_adapter_common_interface" ]
+      }
+    }
+  }
+} else {
+  config("config_adapter_common") {
+    include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_feature_product_config_path/spec_config",
+      "$dsoftbus_root_path/core/common/include",
+      "$softbus_adapter_common/include",
+      "$softbus_adapter_common/include/OS_adapter_define/linux",
+      "$softbus_adapter_common/security/access_token/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    ]
+  }
+
+  ohos_shared_library("softbus_adapter") {
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      sanitize = {
+        cfi = true
+        cfi_cross_dso = true
+        debug = false
+      }
+      branch_protector_ret = "pac_ret"
+
+      include_dirs = [
+        "$dsoftbus_dfx_path/interface/include",
+        "$dsoftbus_root_path/interfaces/kits",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$softbus_adapter_common/security/access_token/include",
       ]
-      cflags_cc = [ "-fPIC" ]
+
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
+      if (is_standard_system) {
+        external_deps += [
+          "c_utils:utils",
+          "json:nlohmann_json_static",
+        ]
+      }
       sources = [
-        "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent_mini.c",
-        "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace_virtual.c",
+        "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent.cpp",
+        "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace.c",
         "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
         "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
@@ -166,7 +265,6 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
         "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
         "$softbus_adapter_common/perf/softbus_adapter_perf.c",
-        "$softbus_adapter_common/range/softbus_adapter_range.c",
       ]
 
       if (dsoftbus_access_token_feature) {
@@ -186,132 +284,42 @@ if (defined(ohos_lite)) {
       sources +=
           [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
-      deps = [
-        "$dsoftbus_dfx_path:softbus_dfx",
-        "$hilog_lite_deps_path",
-      ]
-      external_deps = [
+      deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+
+      public_external_deps = [
         "bounds_checking_function:libsec_shared",
-        "init:libbegetutil",
+        "json:nlohmann_json_static",
       ]
-      public_external_deps = [ "json:nlohmann_json_static" ]
+
+      sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
 
       if (dsoftbus_feature_encrypt == 0) {
         sources += [
           "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
           "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
         ]
-        deps += [ "//third_party/mbedtls" ]
+        external_deps += [ "//third_party/mbedtls" ]
       } else if (dsoftbus_feature_encrypt == 1) {
         sources += [
           "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
           "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
         ]
-        deps += [ "//third_party/openssl:libcrypto_shared" ]
+        public_external_deps += [ "openssl:libcrypto_shared" ]
       }
-      public_configs = [ ":dsoftbus_adapter_common_interface" ]
-    }
-  }
-} else {
-  config("config_adapter_common") {
-    include_dirs = [
-      "$dsoftbus_dfx_path/interface/include",
-      "$dsoftbus_feature_product_config_path/spec_config",
-      "$dsoftbus_root_path/core/common/include",
-      "$softbus_adapter_common/include",
-      "$softbus_adapter_common/include/OS_adapter_define/linux",
-      "$softbus_adapter_common/security/access_token/include",
-      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    ]
-  }
-
-  ohos_shared_library("softbus_adapter") {
-    sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-    }
-    branch_protector_ret = "pac_ret"
-
-    include_dirs = [
-      "$dsoftbus_dfx_path/interface/include",
-      "$dsoftbus_root_path/interfaces/kits",
-      "$dsoftbus_root_path/interfaces/kits/common",
-      "$softbus_adapter_common/security/access_token/include",
-    ]
-
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
-    if (is_standard_system) {
-      external_deps += [
-        "c_utils:utils",
-        "json:nlohmann_json_static",
-      ]
-    }
-    sources = [
-      "$dsoftbus_dfx_path/event/legacy/softbus_adapter_hisysevent.cpp",
-      "$dsoftbus_dfx_path/trace/legacy/softbus_adapter_hitrace.c",
-      "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
-      "$softbus_adapter_common/kernel/posix/lnn_ip_utils_adapter.c",
-      "$softbus_adapter_common/kernel/posix/softbus_adapter_file.c",
-      "$softbus_adapter_common/kernel/posix/softbus_adapter_mem.c",
-      "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
-      "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
-      "$softbus_adapter_common/kernel/posix/softbus_adapter_timer.c",
-      "$softbus_adapter_common/perf/softbus_adapter_perf.c",
-    ]
-
-    if (dsoftbus_access_token_feature) {
-      sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter.cpp" ]
-      external_deps += [
-        "access_token:libaccesstoken_sdk",
-        "access_token:libprivacy_sdk",
-        "access_token:libtokenid_sdk",
-      ]
-      if (dsoftbus_ipc_feature) {
-        external_deps += [ "ipc:ipc_single" ]
+      public_configs = [ ":config_adapter_common" ]
+      public_external_deps += [ "hitrace:libhitracechain" ]
+      if (is_standard_system) {
+        external_deps += [
+          "ffrt:libffrt",
+          "hilog:libhilog",
+          "hisysevent:libhisysevent",
+          "hitrace:libhitracechain",
+          "init:libbegetutil",
+        ]
       }
-    } else {
-      sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
+      innerapi_tags = [ "platformsdk_indirect" ]
+      part_name = "dsoftbus"
+      subsystem_name = "communication"
     }
-
-    sources +=
-        [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-
-    deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
-
-    public_external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "json:nlohmann_json_static",
-    ]
-
-    sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
-
-    if (dsoftbus_feature_encrypt == 0) {
-      sources += [
-        "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
-        "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
-      ]
-      external_deps += [ "//third_party/mbedtls" ]
-    } else if (dsoftbus_feature_encrypt == 1) {
-      sources += [
-        "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
-        "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
-      ]
-      public_external_deps += [ "openssl:libcrypto_shared" ]
-    }
-    public_configs = [ ":config_adapter_common" ]
-    public_external_deps += [ "hitrace:libhitracechain" ]
-    if (is_standard_system) {
-      external_deps += [
-        "ffrt:libffrt",
-        "hilog:libhilog",
-        "hisysevent:libhisysevent",
-        "hitrace:libhitracechain",
-        "init:libbegetutil",
-      ]
-    }
-    innerapi_tags = [ "platformsdk_indirect" ]
-    part_name = "dsoftbus"
-    subsystem_name = "communication"
   }
 }
