@@ -209,11 +209,6 @@ void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defa
 {
     return GetNetLedgerInterface()->LnnAnonymizeDeviceStr(deviceStr, strLen, defaultLen, anonymizedStr);
 }
-
-// int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info)
-// {
-//     return GetNetLedgerInterface()->LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, info);
-// }
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)
