@@ -60,6 +60,11 @@ int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
     return GetCommonInterface()->SocketSetDevice(fd, isBlockMode);
 }
 
+int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
+{
+    return GetCommonInterface()->SocketConnectDevice(ip, port, isBlockMode, ifnameIdx);
+}
+
 void DelAuthPreLinkById(uint32_t requestId)
 {
     return GetCommonInterface()->DelAuthPreLinkById(requestId);
@@ -73,6 +78,12 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
 int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info)
 {
     return GetCommonInterface()->StartSocketListening(module, info);
+}
+
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
+{
+    return GetCommonInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
 }
 } // namespace OHOS
