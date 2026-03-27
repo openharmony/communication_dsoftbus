@@ -220,6 +220,7 @@ typedef struct {
     int32_t callUid;            // CALL_UID
     int32_t listenerType;       // LISTENER_TYPE
     int32_t listenerStatus;     // LISTENER_STATUS
+    int32_t unrestrictedCallCount; // UNRESTRICTED_CALL_COUNT
 } TransEventExtra;
 
 typedef enum {

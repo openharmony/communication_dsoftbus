@@ -38,6 +38,7 @@
 #endif
 #define COMPARE_SUCCESS 0
 #define COMPARE_FAILED  1
+#define CALL_COUNT_REPORT_TIME 43200000 // 12 * 60 * 60 * 1000 ms
 
 using namespace OHOS;
 typedef int32_t (*GetAbilityNameFunc)(char *abilityName, int32_t userId, uint32_t abilityNameLen,
@@ -58,6 +59,9 @@ struct SymbolLoader {
 static SoftBusMutex g_lock;
 static std::shared_ptr<OHOS::PowerMgr::RunningLock> g_powerMgr;
 static SymbolLoader g_symbolLoader = { 0 };
+static std::map<std::string, int32_t> g_callCountMap;
+static std::mutex g_bundleCountMutex;
+static std::atomic<bool> g_statsReportStarted(false);
 
 static int32_t LoadSymbol(SymbolLoader *loader, bool *load)
 {
@@ -286,7 +290,35 @@ void BrProxyPostDcloseMsgToLooperDelay(uint32_t delayTime)
  
     g_brProxyLooperHandler.looper->PostMessageDelay(g_brProxyLooperHandler.looper, msg, delayTime);
 }
+
+static void BrProxyReportCallCountMsgToLooper(void)
+{
+    SoftBusMessage *msg  = BrProxyCreateLoopMsg(LOOP_REPORT_CALL_COUNT_MSG, 0, 0, nullptr);
+    TRANS_CHECK_AND_RETURN_LOGE(msg != nullptr, TRANS_CTRL, "[br_proxy] msg create failed");
  
+    g_brProxyLooperHandler.looper->PostMessageDelay(g_brProxyLooperHandler.looper, msg, CALL_COUNT_REPORT_TIME);
+}
+
+static void BrProxyProcReport(void)
+{
+    {
+        std::lock_guard<std::mutex> lock(g_bundleCountMutex);
+        for (const auto &[bundleName, count] : g_callCountMap) {
+            if (count > 0) {
+                TransEventExtra extra = {
+                    .callerPkg = bundleName.c_str(),
+                    .unrestrictedCallCount = count,
+                };
+                TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
+            }
+        }
+        g_callCountMap.clear();
+    }
+    SoftBusMessage *nextMsg = BrProxyCreateLoopMsg(LOOP_REPORT_CALL_COUNT_MSG, 0, 0, nullptr);
+    TRANS_CHECK_AND_RETURN_LOGE(nextMsg != nullptr, TRANS_CTRL, "[br_proxy] call count msg create failed");
+    g_brProxyLooperHandler.looper->PostMessageDelay(g_brProxyLooperHandler.looper, nextMsg, CALL_COUNT_REPORT_TIME);
+}
+
 static void BrProxyLoopMsgHandler(SoftBusMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != nullptr, TRANS_CTRL, "[br_proxy] param invalid");
@@ -312,6 +344,10 @@ static void BrProxyLoopMsgHandler(SoftBusMessage *msg)
             BrProxyOpenedInfo *info = static_cast<BrProxyOpenedInfo *>(msg->obj);
             TransOnBrProxyOpened(info->pid, info->channelId,
                 static_cast<const char *>(info->brMac), static_cast<const char *>(info->uuid));
+            break;
+        }
+        case LOOP_REPORT_CALL_COUNT_MSG: {
+            BrProxyProcReport();
             break;
         }
         default:
@@ -398,6 +434,46 @@ int32_t DynamicLoadInit()
     return SOFTBUS_OK;
 }
 
+static int32_t CallUnrestrictedInternal(const char *bundleName, pid_t pid, pid_t uid, bool isThaw, bool load)
+{
+    if (!g_statsReportStarted.exchange(true)) {
+        BrProxyReportCallCountMsgToLooper();
+    }
+    std::string bundleStr(bundleName);
+    {
+        std::lock_guard<std::mutex> lock(g_bundleCountMutex);
+        g_callCountMap[bundleStr]++;
+    }
+    int32_t ret = g_symbolLoader.unrestricted(bundleName, pid, uid, isThaw);
+    CleanupSymbolIfNeed(&g_symbolLoader, load);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] unrestricted failed, error=%{public}d", ret);
+        TransEventExtra extra = {
+            .result = EVENT_STAGE_RESULT_FAILED,
+            .errcode = ret,
+            .callPid = pid,
+            .callerPkg = bundleName,
+            .callUid = uid,
+        };
+        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
+        return ret;
+    }
+    if (!isThaw) {
+        return SOFTBUS_OK;
+    }
+    if (g_powerMgr == nullptr) {
+        g_powerMgr = OHOS::PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("softbus_server_brproxy",
+            OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
+    }
+    if (g_powerMgr != nullptr) {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] Anti-sleep begin");
+        g_powerMgr->Lock(5000); // 5000ms
+    } else {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get g_powerMgr failed");
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool isThaw)
 {
     TRANS_LOGI(TRANS_SVC, "[br_proxy] pid:%{public}d, uid:%{public}d, %{public}s",
@@ -415,35 +491,7 @@ int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool i
         (void)SoftBusMutexUnlock(&g_lock);
         return ret;
     }
-    ret = g_symbolLoader.unrestricted(bundleName, pid, uid, isThaw);
-    CleanupSymbolIfNeed(&g_symbolLoader, load);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] unrestricted failed, error=%{public}d", ret);
-        (void)SoftBusMutexUnlock(&g_lock);
-        TransEventExtra extra = {
-            .result = EVENT_STAGE_RESULT_FAILED,
-            .errcode = ret,
-            .callPid = pid,
-            .callerPkg = bundleName,
-            .callUid = uid,
-        };
-        TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_INTERNAL_STATE, extra);
-        return ret;
-    }
-    if (!isThaw) {
-        (void)SoftBusMutexUnlock(&g_lock);
-        return SOFTBUS_OK;
-    }
-    if (g_powerMgr == nullptr) {
-        g_powerMgr = OHOS::PowerMgr::PowerMgrClient::GetInstance().CreateRunningLock("softbus_server_brproxy",
-            OHOS::PowerMgr::RunningLockType::RUNNINGLOCK_BACKGROUND_TASK);
-    }
-    if (g_powerMgr != nullptr) {
-        TRANS_LOGI(TRANS_SVC, "[br_proxy] Anti-sleep begin");
-        g_powerMgr->Lock(5000); // 5000ms
-    } else {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] get g_powerMgr failed");
-    }
+    ret = CallUnrestrictedInternal(bundleName, pid, uid, isThaw, load);
     (void)SoftBusMutexUnlock(&g_lock);
     return SOFTBUS_OK;
 }
