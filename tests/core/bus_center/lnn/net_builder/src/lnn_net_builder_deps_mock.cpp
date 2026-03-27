@@ -49,7 +49,7 @@ int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicIn
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
-    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
+    *info = reinterpret_cast<NodeBasicInfo *>(SoftBusCalloc((*infoNum) * sizeof(NodeBasicInfo)));
     if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
