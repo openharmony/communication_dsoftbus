@@ -20,37 +20,79 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   shared_library("nstackx_congestion.open") {
-    if (ohos_kernel_type == "liteos_a") {
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      if (ohos_kernel_type == "liteos_a") {
+        cflags = [
+          "-Wall",
+          "-D_GNU_SOURCE",
+          "-DNSTACKX_WITH_LITEOS",
+          "-DLWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS",
+          "-DLWIP_LITEOS_A_COMPAT",
+          "-DMBEDTLS_INCLUDED",
+          "-DENABLE_USER_LOG",
+          "-Os",
+        ]
+        cflags_cc = cflags
+        include_dirs = [
+          "$NSTACKX_ROOT/nstackx_util/interface",
+          "$NSTACKX_ROOT/nstackx_util/platform/liteos",
+          "interface",
+          "platform/liteos",
+        ]
+        sources = [
+          "core/nstackx_congestion.c",
+          "platform/liteos/sys_congestion.c",
+        ]
+        deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
+        external_deps = [ "bounds_checking_function:libsec_shared" ]
+      } else if (ohos_kernel_type == "linux") {
+        cflags = [
+          "-Wall",
+          "-DNSTACKX_WITH_LINUX",
+          "-DMBEDTLS_INCLUDED",
+          "-DENABLE_USER_LOG",
+          "-Os",
+        ]
+        cflags_cc = cflags
+        include_dirs = [
+          "$NSTACKX_ROOT/nstackx_util/interface",
+          "$NSTACKX_ROOT/nstackx_util/platform/unix",
+          "interface",
+          "platform/unix",
+        ]
+        sources = [
+          "core/nstackx_congestion.c",
+          "platform/unix/sys_congestion.c",
+        ]
+        deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
+        external_deps = [ "bounds_checking_function:libsec_shared" ]
+      }
+    }
+  }
+} else {
+  import("//build/ohos.gni")
+
+  ohos_shared_library("nstackx_congestion.open") {
+    if (dsoftbus_feature_compile_guard) {
+      install_enable = false
+    } else {
+      sanitize = {
+        ubsan = true
+        integer_overflow = true
+        boundary_sanitize = true
+        cfi = true
+        cfi_cross_dso = true
+        debug = false
+      }
+      branch_protector_ret = "pac_ret"
+
       cflags = [
         "-Wall",
-        "-D_GNU_SOURCE",
-        "-DNSTACKX_WITH_LITEOS",
-        "-DLWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS",
-        "-DLWIP_LITEOS_A_COMPAT",
         "-DMBEDTLS_INCLUDED",
-        "-DENABLE_USER_LOG",
-        "-Os",
-      ]
-      cflags_cc = cflags
-      include_dirs = [
-        "$NSTACKX_ROOT/nstackx_util/interface",
-        "$NSTACKX_ROOT/nstackx_util/platform/liteos",
-        "interface",
-        "platform/liteos",
-      ]
-      sources = [
-        "core/nstackx_congestion.c",
-        "platform/liteos/sys_congestion.c",
-      ]
-      deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
-      external_deps = [ "bounds_checking_function:libsec_shared" ]
-    } else if (ohos_kernel_type == "linux") {
-      cflags = [
-        "-Wall",
         "-DNSTACKX_WITH_LINUX",
-        "-DMBEDTLS_INCLUDED",
         "-DENABLE_USER_LOG",
-        "-Os",
       ]
       cflags_cc = cflags
       include_dirs = [
@@ -58,55 +100,21 @@ if (defined(ohos_lite)) {
         "$NSTACKX_ROOT/nstackx_util/platform/unix",
         "interface",
         "platform/unix",
+        "-Os",
       ]
       sources = [
         "core/nstackx_congestion.c",
         "platform/unix/sys_congestion.c",
       ]
+
       deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
       external_deps = [ "bounds_checking_function:libsec_shared" ]
+      if (is_standard_system) {
+        external_deps += [ "c_utils:utils" ]
+      }
+      innerapi_tags = [ "platformsdk_indirect" ]
+      part_name = "dsoftbus"
+      subsystem_name = "communication"
     }
-  }
-} else {
-  import("//build/ohos.gni")
-
-  ohos_shared_library("nstackx_congestion.open") {
-    sanitize = {
-      ubsan = true
-      integer_overflow = true
-      boundary_sanitize = true
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
-    }
-    branch_protector_ret = "pac_ret"
-
-    cflags = [
-      "-Wall",
-      "-DMBEDTLS_INCLUDED",
-      "-DNSTACKX_WITH_LINUX",
-      "-DENABLE_USER_LOG",
-    ]
-    cflags_cc = cflags
-    include_dirs = [
-      "$NSTACKX_ROOT/nstackx_util/interface",
-      "$NSTACKX_ROOT/nstackx_util/platform/unix",
-      "interface",
-      "platform/unix",
-      "-Os",
-    ]
-    sources = [
-      "core/nstackx_congestion.c",
-      "platform/unix/sys_congestion.c",
-    ]
-
-    deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
-    external_deps = [ "bounds_checking_function:libsec_shared" ]
-    if (is_standard_system) {
-      external_deps += [ "c_utils:utils" ]
-    }
-    innerapi_tags = [ "platformsdk_indirect" ]
-    part_name = "dsoftbus"
-    subsystem_name = "communication"
   }
 }

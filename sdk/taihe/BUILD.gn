@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 import("../../dsoftbus.gni")
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
@@ -42,37 +42,52 @@ ohos_taihe("run_linkEnhance_taihe") {
 }
 
 taihe_shared_library("linkEnhance_taihe_native") {
+  public_configs = [ ":taihe_config" ]
+  sources = get_target_outputs(":run_linkEnhance_taihe")
+
+  if (dsoftbus_feature_conn_general) {
+    sources += [
+      "src/ani_constructor.cpp",
+      "src/ohos.distributedsched.linkEnhance.impl.cpp",
+      "src/link_enhance_utils_taihe.cpp"
+    ]
+    deps = [
+      ":run_linkEnhance_taihe",
+      "${dsoftbus_dfx_path}:softbus_dfx",
+      "${dsoftbus_root_path}/adapter:softbus_adapter",
+      "${dsoftbus_root_path}/core/common:softbus_utils",
+      "${dsoftbus_root_path}/sdk:softbus_client",
+      "${dsoftbus_dfx_path}/dumper/legacy:softbus_dfx_dump",
+    ]
+    external_deps = [
+      "c_utils:utils",
+      "bounds_checking_function:libsec_shared",
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
+  } else {
+    sources += [
+      "src/ani_constructor.cpp",
+      "src/ohos.distributedsched.linkEnhance.impl_virtual.cpp"
+    ]
+
+    deps = [
+      ":run_linkEnhance_taihe",
+    ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "napi:ace_napi",
+    ]
+  }
   taihe_generated_file_path = "$taihe_generated_file_path"
   part_name = "$part_name"
   subsystem_name = "$subsystem_name"
-  sources = get_target_outputs(":run_linkEnhance_taihe")
-  public_configs = [ ":taihe_config" ]
-  sources += [
-    "src/ani_constructor.cpp",
-    "src/ohos.distributedsched.linkEnhance.impl.cpp",
-    "src/link_enhance_utils_taihe.cpp"
-  ]
 
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
-
-  deps = [
-    ":run_linkEnhance_taihe",
-    "${dsoftbus_dfx_path}:softbus_dfx",
-    "${dsoftbus_root_path}/adapter:softbus_adapter",
-    "${dsoftbus_root_path}/core/common:softbus_utils",
-    "${dsoftbus_root_path}/sdk:softbus_client",
-    "${dsoftbus_dfx_path}/dumper/legacy:softbus_dfx_dump",
-  ]
-  external_deps = [
-    "c_utils:utils",
-    "bounds_checking_function:libsec_shared",
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
 }
 
 generate_static_abc("linkEnhance_taihe_ani") {
