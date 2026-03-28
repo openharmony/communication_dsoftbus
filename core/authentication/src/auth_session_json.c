@@ -1073,12 +1073,12 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
     int32_t credTypesLen = GetArrayItemNum(peerCredTypesJson);
     if (peerCredTypesJson == NULL || info == NULL || credTypesLen == 0) {
         AUTH_LOGE(AUTH_FSM, "invalid param to choose credTypes");
-        return false;
+        return ACCOUNT_BUTT;
     }
     CredTypeSortInfo *credTypeArray = SortCredTypes(peerCredTypesJson, credTypesLen, info);
     if (credTypeArray == NULL) {
         AUTH_LOGE(AUTH_FSM, "sort CredTypes fail");
-        return false;
+        return ACCOUNT_BUTT;
     }
     for (int32_t i = 0; i < credTypesLen; i++) {
         const char *udidShortHash = (credTypeArray[i].credType == ACCOUNT_RELATED) ? localUdidHash : peerUdidHash;
@@ -1107,9 +1107,9 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
         info->credId = credIdTmp;
         info->credIdType = credTypeArray[i].credType;
         *chosenCredType = localCredTypeJson;
-        AUTH_LOGI(AUTH_FSM, "find best credType. credType=%{public}d", credTypeArray[i].credType);
+        AUTH_LOGI(AUTH_FSM, "find best credType. credType=%{public}d", info->credIdType);
         SoftBusFree(credTypeArray);
-        return credTypeArray[i].credType;
+        return info->credIdType;
     }
     SoftBusFree(credTypeArray);
     AUTH_LOGE(AUTH_FSM, "cant find the best credType");
@@ -1194,7 +1194,7 @@ static bool CredNegoStateReplyReceiver(AuthSessionInfo *info, const char *localU
     }
     cJSON *chosenCredTypeInfo = NULL;
     int32_t chosenCredType = ChooseBestCredType(info, localUdidHash, peerUdidHash, &chosenCredTypeInfo);
-    if (chosenCredType == ACCOUNT_BUTT) {
+    if (chosenCredType == ACCOUNT_BUTT || chosenCredTypeInfo == NULL) {
         AUTH_LOGE(AUTH_FSM, "cant find the best credType to go on");
         return false;
     }
