@@ -906,11 +906,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
         COMM_LOGE(COMM_PERM, "dynamic list is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SoftBusMutexLock(&g_dynamicPermissionList->lock);
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_PERM, "Lock failed, ret=%{public}d", ret);
-        return ret;
-    }
+    SoftBusMutexLock(&g_dynamicPermissionList->lock);
     if (g_dynamicPermissionList->cnt >= DYNAMIC_PERMISSION_MAX_SIZE) {
         COMM_LOGE(COMM_PERM, "dynamic permission reach the upper limit");
         (void)SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
@@ -930,7 +926,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
         return SOFTBUS_MALLOC_ERR;
     }
 
-    ret = NewDynamicPermissionEntry(permissionEntry, sessionName, callingUid, callingPid);
+    int32_t ret = NewDynamicPermissionEntry(permissionEntry, sessionName, callingUid, callingPid);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "NewDynamicPermissionEntry failed. ret=%{public}d", ret);
         SoftBusFree(permissionEntry);
@@ -960,11 +956,7 @@ int32_t DeleteDynamicPermission(const char *sessionName)
         COMM_LOGE(COMM_PERM, "dynamic list is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SoftBusMutexLock(&g_dynamicPermissionList->lock);
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_PERM, "Lock failed, ret=%{public}d", ret);
-        return ret;
-    }
+    SoftBusMutexLock(&g_dynamicPermissionList->lock);
     SoftBusPermissionEntry *pe = NULL;
     LIST_FOR_EACH_ENTRY(pe, &g_dynamicPermissionList->list, SoftBusPermissionEntry, node) {
         if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {

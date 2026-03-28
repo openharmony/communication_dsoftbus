@@ -688,11 +688,7 @@ static int32_t TransTdcProcAllTlvData(int32_t channelId, bool isMinTp)
         if (!isMinTp) {
             TransTdcSetTimestamp(channelId, SoftBusGetTimeMs());
         }
-        int32_t ret = SoftBusMutexLock(&g_tcpDataList->lock);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "lock failed, ret=%{public}d", ret);
-            return ret;
-        }
+        SoftBusMutexLock(&g_tcpDataList->lock);
         TcpDataTlvPacketHead pktHead = { 0 };
         uint32_t newPktHeadSize = 0;
         DataBuf *node = TransGetDataBufNodeById(channelId);
@@ -702,7 +698,7 @@ static int32_t TransTdcProcAllTlvData(int32_t channelId, bool isMinTp)
             return SOFTBUS_TRANS_NODE_NOT_FOUND;
         }
         bool flag = false;
-        ret = TransTdcUnPackAllTlvData(channelId, &pktHead, &newPktHeadSize, node, &flag);
+        int32_t ret = TransTdcUnPackAllTlvData(channelId, &pktHead, &newPktHeadSize, node, &flag);
         if (ret != SOFTBUS_OK || flag == true) {
             (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return ret;
@@ -721,11 +717,7 @@ static int32_t TransTdcProcAllData(int32_t channelId)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_tcpDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is NULL");
     while (1) {
-        int32_t ret = SoftBusMutexLock(&g_tcpDataList->lock);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "lock failed, ret=%{public}d", ret);
-            return ret;
-        }
+        SoftBusMutexLock(&g_tcpDataList->lock);
         DataBuf *node = TransGetDataBufNodeById(channelId);
         if (node == NULL) {
             (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
@@ -733,7 +725,7 @@ static int32_t TransTdcProcAllData(int32_t channelId)
             return SOFTBUS_TRANS_NODE_NOT_FOUND;
         }
         bool flag = false;
-        ret = TransTdcUnPackAllData(channelId, node, &flag);
+        int32_t ret = TransTdcUnPackAllData(channelId, node, &flag);
         if (ret != SOFTBUS_OK || flag == true) {
             (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             return ret;
