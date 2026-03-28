@@ -1108,9 +1108,9 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
         info->credId = credIdTmp;
         info->credIdType = credTypeArray[i].credType;
         *chosenCredType = localCredTypeJson;
-        AUTH_LOGI(AUTH_FSM, "find best credType. credType=%{public}d", info->credIdType);
+        AUTH_LOGI(AUTH_FSM, "find best credType. credType=%{public}d", credTypeArray[i].credType);
         SoftBusFree(credTypeArray);
-        return info->credIdType;
+        return credTypeArray[i].credType;
     }
     SoftBusFree(credTypeArray);
     AUTH_LOGE(AUTH_FSM, "cant find the best credType");

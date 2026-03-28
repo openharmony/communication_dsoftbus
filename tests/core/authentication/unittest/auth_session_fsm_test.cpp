@@ -1164,7 +1164,7 @@ HWTEST_F(AuthSessionFsmTest, PROCESS_CRED_TYPE_NEGO_UNFINISHED_TEST_002, TestSiz
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     AuthSessionInfo *info = &authFsm.info;
     int32_t ret = SOFTBUS_OK;
-    AuthSessionFsmDepsInterfaceMock mock;
+    AuthSessionFsmInterfaceMock mock;
     EXPECT_CALL(mock, PostDeviceIdMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillOnce(Return(SOFTBUS_OK));
     info->credNegoState = CRED_NEGO_STATE_DECIDE;
     info->normalizedType = NORMALIZED_KEY_ERROR;
