@@ -366,34 +366,6 @@ HWTEST_F(TransInnerTest, TransInnerTdcProcAllTlvDataTest001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransInnerTdcProcAllTlvDataTest002
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when g_innerChannelDataBufList->lock.mutex is null.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransInnerTest, TransInnerTdcProcAllTlvDataTest002, TestSize.Level1)
-{
-    SessionInnerCallback Innerlistener = { 0 };
-    uintptr_t originalMutex = 0;
-    Innerlistener.func = TestInnerMessageHandler;
-    TransInnerSessionInfo info = {
-        .channelId = TRANS_TEST_CHANNEL_ID,
-        .fd = TRANS_TEST_FD,
-        .channelType = CHANNEL_TYPE_TCP_DIRECT,
-    };
-    memcpy_s(&info.listener, sizeof(info.listener), &Innerlistener, sizeof(SessionInnerCallback));
-    InnerListInit();
-    
-    originalMutex = g_innerChannelDataBufList->lock.mutex;
-    g_innerChannelDataBufList->lock.mutex = (uintptr_t)NULL;
-    int32_t ret = TransInnerTdcProcAllTlvData(&info);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    g_innerChannelDataBufList->lock.mutex = originalMutex;
-    InnerListDeinit();
-}
-
-/*
  * @tc.name: TransTdcProcessInnerDataTest001
  * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
  * @tc.type: FUNC
@@ -460,34 +432,6 @@ HWTEST_F(TransInnerTest, TransInnerTdcProcAllDataTest001, TestSize.Level1)
     ret = TransInnerTdcProcAllData(&info);
     EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
     TransSrvDelInnerDataBufNode(TRANS_TEST_CHANNEL_ID);
-    InnerListDeinit();
-}
-
-/**
- * @tc.name: TransInnerTdcProcAllDataTest002
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when g_innerChannelDataBufList->lock.mutex is null.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransInnerTest, TransInnerTdcProcAllDataTest002, TestSize.Level1)
-{
-    SessionInnerCallback Innerlistener = { 0 };
-    uintptr_t originalMutex = 0;
-    Innerlistener.func = TestInnerMessageHandler;
-    TransInnerSessionInfo info = {
-        .channelId = TRANS_TEST_CHANNEL_ID,
-        .fd = TRANS_TEST_FD,
-        .channelType = CHANNEL_TYPE_TCP_DIRECT,
-    };
-    memcpy_s(&info.listener, sizeof(info.listener), &Innerlistener, sizeof(SessionInnerCallback));
-    InnerListInit();
-
-    originalMutex = g_innerChannelDataBufList->lock.mutex;
-    g_innerChannelDataBufList->lock.mutex = (uintptr_t)NULL;
-    int32_t ret = TransInnerTdcProcAllData(&info);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    g_innerChannelDataBufList->lock.mutex = originalMutex;
     InnerListDeinit();
 }
 

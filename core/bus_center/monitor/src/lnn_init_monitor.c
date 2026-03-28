@@ -52,11 +52,7 @@ static LnnInitMonitorInfo g_lnnInitMonitorInfoMgr = { 0 };
 void LnnInitModuleReturnSet(uint32_t module, int32_t ret)
 {
     if (module < INIT_DEPS_MODULE_BUTT) {
-        int32_t lockRet = SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
-        if (lockRet != SOFTBUS_OK) {
-            LNN_LOGE(LNN_INIT, "Module({public}%u) mutex failed, ret={public}%d", module, lockRet);
-            return;
-        }
+        SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
         g_lnnEnableModuleDeps[module].ret = ret;
         SoftBusMutexUnlock(&g_lnnEnableModuleDeps[module].lock);
     }
@@ -65,11 +61,7 @@ void LnnInitModuleReturnSet(uint32_t module, int32_t ret)
 void LnnInitModuleCbRegister(uint32_t module, ModuleInitCallBack callback)
 {
     if (module < INIT_DEPS_MODULE_BUTT) {
-        int32_t ret = SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_INIT, "Module({public}%u) mutex failed, ret={public}%d", module, ret);
-            return;
-        }
+        SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
         g_lnnEnableModuleDeps[module].callback = callback;
         SoftBusMutexUnlock(&g_lnnEnableModuleDeps[module].lock);
     }
@@ -81,11 +73,7 @@ static InitDepsStatus LnnInitModuleStatusGet(uint32_t module)
         LNN_LOGE(LNN_INIT, "Module({public}%u) is invalid.", module);
         return DEPS_STATUS_NOT_INIT;
     }
-    int32_t ret = SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "Module({public}%u) mutex failed, ret={public}%d", module, ret);
-        return DEPS_STATUS_FAILED;
-    }
+    SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
     InitDepsStatus status = g_lnnEnableModuleDeps[module].status;
     SoftBusMutexUnlock(&g_lnnEnableModuleDeps[module].lock);
     return status;
@@ -120,11 +108,7 @@ static void LnnInitModuleCheckEach(void)
 void LnnInitModuleStatusSet(uint32_t module, InitDepsStatus status)
 {
     if (module < INIT_DEPS_MODULE_BUTT) {
-        int32_t ret = SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_INIT, "Module({public}%u) mutex failed, ret={public}%d", module, ret);
-            return;
-        }
+        SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
         g_lnnEnableModuleDeps[module].status = status;
         SoftBusMutexUnlock(&g_lnnEnableModuleDeps[module].lock);
         LnnInitModuleCheckEach();
@@ -134,11 +118,7 @@ void LnnInitModuleStatusSet(uint32_t module, InitDepsStatus status)
 void LnnInitDeviceInfoStatusSet(uint32_t module, InitDepsStatus status)
 {
     if (module < LEDGER_INFO_BUTT) {
-        int32_t ret = SoftBusMutexLock(&g_lnnDeviceInfoDeps[module].lock);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_INIT, "Module({public}%u) mutex failed, ret={public}%d", module, ret);
-            return;
-        }
+        SoftBusMutexLock(&g_lnnDeviceInfoDeps[module].lock);
         g_lnnDeviceInfoDeps[module].status = status;
         SoftBusMutexUnlock(&g_lnnDeviceInfoDeps[module].lock);
     }
@@ -150,11 +130,7 @@ static InitDepsStatus LnnInitDeviceInfoStatusGet(uint32_t module)
         LNN_LOGE(LNN_INIT, "Device info(%u) is invalid.", module);
         return DEPS_STATUS_NOT_INIT;
     }
-    int32_t ret = SoftBusMutexLock(&g_lnnDeviceInfoDeps[module].lock);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "Module({public}%u) mutex failed, ret={public}%d", module, ret);
-        return DEPS_STATUS_FAILED;
-    }
+    SoftBusMutexLock(&g_lnnDeviceInfoDeps[module].lock);
     InitDepsStatus status = g_lnnDeviceInfoDeps[module].status;
     SoftBusMutexUnlock(&g_lnnDeviceInfoDeps[module].lock);
     return status;

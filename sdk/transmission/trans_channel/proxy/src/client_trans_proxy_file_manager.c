@@ -40,11 +40,11 @@
 #include "trans_log.h"
 
 static TransFileInfoLock g_sendFileInfoLock = {
-    .lock = {0},
+    .lock = 0,
     .lockInitFlag = false,
 };
 static TransFileInfoLock g_recvFileInfoLock = {
-    .lock = {0},
+    .lock = 0,
     .lockInitFlag = false,
 };
 static LIST_HEAD(g_sessionFileLockList);

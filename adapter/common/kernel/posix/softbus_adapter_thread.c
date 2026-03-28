@@ -26,15 +26,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
-static int32_t g_timeWaitSec = TIME_WAIT_SEC_DEFAULT;
-
 static pthread_mutex_t g_adapterStaticLock = PTHREAD_MUTEX_INITIALIZER;
-
-void SetTimeWaitSec(int32_t timeWaitSec)
-{
-    g_timeWaitSec = timeWaitSec;
-}
-
 /* mutex */
 int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 {
@@ -57,7 +49,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
         COMM_LOGE(COMM_ADAPTER, "mutex init : g_adapterStaticLock lock failed");
         return SOFTBUS_ERR;
     }
-    if ((void *)mutex->mutex != NULL) {
+    if ((void *)*mutex != NULL) {
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_OK;
     }
@@ -92,79 +84,38 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
         return SOFTBUS_ERR;
     }
 
-    mutex->mutex = (uintptr_t)tempMutex;
-    mutex->holder = 0;
-
+    *mutex = (SoftBusMutex)tempMutex;
     (void)pthread_mutex_unlock(&g_adapterStaticLock);
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
 {
-#ifndef __LITEOS_M__
-    struct timespec timeSpec = {0};
-    int32_t retryCount = 0;
-    int32_t ret = 0;
-
-    while (retryCount < CONSECUTIVE_TIMEOUT_MAX) {
-        clock_gettime(CLOCK_MONOTONIC, &timeSpec);
-        timeSpec.tv_sec += g_timeWaitSec;
-        ret = pthread_mutex_timedlock_monotonic_np((pthread_mutex_t *)mutex->mutex, &timeSpec);
-        if (ret == 0) {
-            mutex->holder = (int32_t)syscall(__NR_gettid);
-            return SOFTBUS_OK;
-        }
-
-        if (ret == ETIMEDOUT) {
-            COMM_LOGE(COMM_ADAPTER, "The thread lock timeout, retry: %{public}d count,"
-                      " mutex locked by thread: TID=%{public}d", retryCount, mutex->holder);
-            retryCount++;
-            continue;
-        }
-
-        COMM_LOGE(COMM_ADAPTER, "The thread lock failed, mutex locked by TID=%{public}d", mutex->holder);
-        return ret;
-    }
-
-    COMM_LOGE(COMM_ADAPTER, "The thread failed to lock after 10 retries, mutex locked by TID=%{public}d",
-              mutex->holder);
-    return SOFTBUS_LOCK_ERR;
-#else
-    return pthread_mutex_lock((pthread_mutex_t *)mutex->mutex);
-#endif
+    return pthread_mutex_lock((pthread_mutex_t *)*mutex);
 }
 
 int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex)
 {
-    int32_t currentHolder = mutex->holder;
-    mutex->holder = 0;
-
-    int32_t ret = pthread_mutex_unlock((pthread_mutex_t *)mutex->mutex);
-    if (ret != 0) {
-        mutex->holder = currentHolder;
-    }
-    return ret;
+    return pthread_mutex_unlock((pthread_mutex_t *)*mutex);
 }
 
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 {
-    if (CheckMutexIsNull(mutex)) {
+    if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
         COMM_LOGD(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t ret = pthread_mutex_destroy((pthread_mutex_t *)mutex->mutex);
+    int32_t ret = pthread_mutex_destroy((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusMutexDestroy failed, ret=%{public}d", ret);
-        SoftBusFree((void *)mutex->mutex);
-        mutex->mutex = (uintptr_t)NULL;
-        mutex->holder = 0;
+        SoftBusFree((void *)*mutex);
+        *mutex = (SoftBusMutex)NULL;
         return SOFTBUS_ERR;
     }
 
-    SoftBusFree((void *)mutex->mutex);
-    mutex->mutex = (uintptr_t)NULL;
-    mutex->holder = 0;
+    SoftBusFree((void *)*mutex);
+    *mutex = (SoftBusMutex)NULL;
     return SOFTBUS_OK;
 }
 
@@ -470,26 +421,23 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (CheckMutexIsNull(mutex)) {
+    if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
         COMM_LOGE(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret;
     if (time == NULL) {
-        mutex->holder = 0;
-        ret = pthread_cond_wait((pthread_cond_t *)*cond, (pthread_mutex_t *)mutex->mutex);
+        ret = pthread_cond_wait((pthread_cond_t *)*cond, (pthread_mutex_t *)*mutex);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "SoftBusCondWait failed, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
-        mutex->holder = (int32_t)syscall(__NR_gettid);
     } else {
-        mutex->holder = 0;
         struct timespec tv;
         tv.tv_sec = time->sec;
         tv.tv_nsec = time->usec * USECTONSEC;
-        ret = pthread_cond_timedwait((pthread_cond_t *)*cond, (pthread_mutex_t *)mutex->mutex, &tv);
+        ret = pthread_cond_timedwait((pthread_cond_t *)*cond, (pthread_mutex_t *)*mutex, &tv);
         if (ret == ETIMEDOUT) {
             COMM_LOGD(COMM_ADAPTER, "SoftBusCondTimedWait timeout, ret=%{public}d", ret);
             return SOFTBUS_TIMOUT;
@@ -499,7 +447,6 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
             COMM_LOGE(COMM_ADAPTER, "SoftBusCondTimedWait failed, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
-        mutex->holder = (int32_t)syscall(__NR_gettid);
     }
 
     return SOFTBUS_OK;
