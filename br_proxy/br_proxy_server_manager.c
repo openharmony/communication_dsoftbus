@@ -1090,12 +1090,12 @@ static void NotifyIsVirtualConnect(
     }
 }
 
-static void TransSetEventExtra(TransEventExtra *extra, uint32_t requestId, uint32_t connectionId,
-    const BrProxyInfo *info, int32_t reason)
+static void TransSetEventExtra(
+    TransEventExtra *extra, uint32_t requestId, uint32_t connectionId, int32_t channelId, int32_t reason)
 {
     extra->result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     extra->errcode = reason;
-    extra->channelId = info->channelId;
+    extra->channelId = channelId;
     extra->requestId = (int32_t)requestId;
     extra->connectionId = (int32_t)connectionId;
 }
@@ -1115,7 +1115,7 @@ static void OnOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC,
         "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
     TransEventExtra extra = {0};
-    TransSetEventExtra(&extra, requestId, channel->channelId, &info, SOFTBUS_OK);
+    TransSetEventExtra(&extra, requestId, channel->channelId, nodeInfo.channelId, SOFTBUS_OK);
     TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
     int32_t foregroundUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (foregroundUserId != info.userId) {
@@ -1217,7 +1217,7 @@ static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
         return;
     }
     TransEventExtra extra = {0};
-    TransSetEventExtra(&extra, requestId, 0, &proxyInfo, reason);
+    TransSetEventExtra(&extra, requestId, 0, info.channelId, reason);
     TRANS_EVENT(EVENT_SCENE_TRANS_BR_PROXY, EVENT_STAGE_OPEN_CHANNEL, extra);
 }
 
