@@ -87,5 +87,17 @@ int32_t LnnSaveRemoteDeviceInfoPacked(const NodeInfo *deviceInfo)
 {
     return GetAuthSessionFsmInterface()->LnnSaveRemoteDeviceInfoPacked(deviceInfo);
 }
+int32_t GetLocalUdidShortHash(char *localUdidHash)
+{
+    return GetAuthSessionFsmInterface()->GetLocalUdidShortHash(localUdidHash);
+}
+bool IsSameAccount(const char *accountHash)
+{
+    return GetAuthSessionFsmInterface()->IsSameAccount(accountHash);
+}
+int32_t HiChainStartAuth(int64_t authSeq, HiChainAuthParam *hichainParam, HiChainAuthMode authMode)
+{
+    return GetAuthSessionFsmInterface()->HiChainStartAuth(authSeq, hichainParam, authMode);
+}
 }
 } // namespace OHOS

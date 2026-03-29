@@ -958,7 +958,8 @@ static bool QueryAllCredTypeByQueryParam(CredTypeQueryParam *queryParam, cJSON *
         if (credId == NULL) {
             continue;
         }
-        cJSON_free(credId);
+        SoftBusFree(credId);
+
         cJSON *credTypeJson = cJSON_CreateObject();
         if (credTypeJson == NULL) {
             AUTH_LOGE(AUTH_HICHAIN, "create credTypeJson fail");
@@ -1071,7 +1072,7 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
 {
     cJSON *peerCredTypesJson  = info->credTypeInfo;
     int32_t credTypesLen = GetArrayItemNum(peerCredTypesJson);
-    if (peerCredTypesJson == NULL || info == NULL || credTypesLen == 0) {
+    if (peerCredTypesJson == NULL || credTypesLen == 0) {
         AUTH_LOGE(AUTH_FSM, "invalid param to choose credTypes");
         return ACCOUNT_BUTT;
     }
@@ -1090,7 +1091,7 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
         cJSON *localCredTypeJson = cJSON_CreateObject();
         if (localCredTypeJson == NULL) {
             AUTH_LOGE(AUTH_FSM, "create localCredTypeJson fail");
-            cJSON_free(credIdTmp);
+            SoftBusFree(credIdTmp);
             break;
         }
         if (!cJSON_AddNumberToObject(localCredTypeJson, SINK_USERID, credTypeArray[i].peerUserId) ||
@@ -1098,7 +1099,7 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
             !cJSON_AddNumberToObject(localCredTypeJson, SOURCE_USERID, credTypeArray[i].localUserId)) {
             AUTH_LOGE(AUTH_FSM, "add to localCredTypeJson fail");
             cJSON_Delete(localCredTypeJson);
-            cJSON_free(credIdTmp);
+            SoftBusFree(credIdTmp);
             break;
         }
         if (info->credId != NULL) {
@@ -1604,7 +1605,7 @@ static bool PackCredNegoInfoJson(JsonObj *json, cJSON *credNegoInfoJson, int64_t
         cJSON_free(msg);
         return false;
     }
-    AUTH_LOGE(AUTH_FSM, "pack credNegoInfo succ, msg=%{public}s, authSeq=%{public}" PRId64, msg, authSeq);
+    AUTH_LOGI(AUTH_FSM, "pack credNegoInfo succ, msg=%{public}s, authSeq=%{public}" PRId64, msg, authSeq);
     cJSON_free(msg);
     return true;
 }

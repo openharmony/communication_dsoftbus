@@ -44,6 +44,7 @@ constexpr char BLE_MAC[BT_MAC_LEN] = "00:15:5d:de:d4:23";
 constexpr char SLE_MAC[BT_MAC_LEN] = "00:15:5d:de:d4:23";
 constexpr uint8_t DEVICE_ID_HASH[UDID_HASH_LEN] = "123456789";
 constexpr uint8_t TMP_IN_DATA[TMP_DATA_LEN] = "tmpInData";
+constexpr int32_t TEST_USER_ID = 100;
 
 class AuthSessionFsmTest : public testing::Test {
 public:
@@ -478,6 +479,51 @@ HWTEST_F(AuthSessionFsmTest, PROCESS_CLIENT_AUTH_STATE_TEST_001, TestSize.Level1
 }
 
 /*
+ * @tc.name: PROCESS_CLIENT_AUTH_STATE_TEST_002
+ * @tc.desc: ProcessClientAuthState test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, PROCESS_CLIENT_AUTH_STATE_TEST_002, TestSize.Level1)
+{
+    NiceMock<AuthSessionFsmInterfaceMock> mock;
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    AuthSessionInfo *info = &authFsm.info;
+    int32_t ret = SOFTBUS_OK;
+    info->authVersion = AUTH_VERSION_V2;
+    info->idType = EXCHANGE_UDID;
+    info->credNegoState = CRED_NEGO_STATE_FINISH;
+    info->credTypeInfo = NULL;
+
+    ret = ProcessClientAuthState(&authFsm);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/*
+ * @tc.name: DEVICE_AUTH_STATE_ENTER_TEST_001
+ * @tc.desc: DeviceAuthStateEnter succ and fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_ENTER_TEST_001, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    NiceMock<AuthSessionFsmInterfaceMock> mock;
+    // nullptr
+    EXPECT_NO_FATAL_FAILURE(DeviceAuthStateEnter(nullptr));
+    // succ
+    authFsm.info.normalizedType = NORMALIZED_NOT_SUPPORT;
+    authFsm.info.isSupportFastAuth = false;
+    authFsm.info.credId = NULL;
+    authFsm.info.authVersion = AUTH_VERSION_V1;
+    EXPECT_NO_FATAL_FAILURE(DeviceAuthStateEnter(&authFsm.fsm));
+}
+
+/*
  * @tc.name: GET_CRED_TYPE_BY_CREDID_TEST_001
  * @tc.desc: GetCredTypeByCredId test
  * @tc.type: FUNC
@@ -886,6 +932,34 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_MSG_RECV_DEVICE_ID_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: HANDLE_MSG_RECV_DEVICE_ID_002
+ * @tc.desc: test HandleMsgRecvDeviceId client
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, HANDLE_MSG_RECV_DEVICE_ID_002, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    MessagePara para;
+    (void)memset_s(&para, sizeof(MessagePara), 0, sizeof(MessagePara));
+    authFsm.authSeq = AUTH_SEQ_1;
+    authFsm.info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    NiceMock<AuthSessionFsmInterfaceMock> mock;
+    EXPECT_CALL(mock, ProcessDeviceIdMessage)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnIsNeedInterceptBroadcast)
+        .WillRepeatedly(Return(true));
+
+    authFsm.info.isServer = false;
+    authFsm.info.normalizedType = NORMALIZED_NOT_SUPPORT;
+    authFsm.info.isSupportFastAuth = false;
+    authFsm.info.credNegoState = CRED_NEGO_STATE_DECIDE;
+    EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDeviceId(&authFsm, &para));
+}
+
+/*
  * @tc.name: HANDLE_MSG_RECV_DEVICE_ID_NDGO_001
  * @tc.desc: test HandleMsgRecvDeviceIdNego
  * @tc.type: FUNC
@@ -929,6 +1003,10 @@ HWTEST_F(AuthSessionFsmTest, DESTROY_AUTH_FSM_TEST_001, TestSize.Level1)
     ASSERT_TRUE(authFsm->info.deviceInfoData != nullptr);
     authFsm->info.credId = static_cast<char *>(SoftBusCalloc(TMP_DATA_LEN));
     ASSERT_TRUE(authFsm->info.credId != nullptr);
+    authFsm->info.credTypeInfo = cJSON_CreateArray();
+    ASSERT_TRUE(authFsm->info.credTypeInfo != nullptr);
+    authFsm->info.externalUserIds = cJSON_CreateArray();
+    ASSERT_TRUE(authFsm->info.externalUserIds != nullptr);
     EXPECT_NO_FATAL_FAILURE(DestroyAuthFsm(authFsm));
 }
 
@@ -1041,6 +1119,67 @@ HWTEST_F(AuthSessionFsmTest, UPDATE_UDID_HASH_IF_EMPTY_TEST_001, TestSize.Level1
 }
 
 /*
+ * @tc.name: PROCESS_CRED_TYPE_NEGO_UNFINISHED_TEST_001
+ * @tc.desc: test ProcessCredNegoUnfinished stop
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, PROCESS_CRED_TYPE_NEGO_UNFINISHED_TEST_001, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    AuthSessionInfo *info = &authFsm.info;
+    int32_t ret = SOFTBUS_OK;
+    // support SK
+    info->credNegoState = CRED_NEGO_STATE_DECIDE;
+    info->normalizedType = NORMALIZED_SUPPORT;
+    info->isSupportFastAuth = false;
+    EXPECT_FALSE(ProcessCredNegoUnfinished(&authFsm, info, &ret, CRED_NEGO_STATE_DECIDE));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    // support fastAuth
+    info->credNegoState = CRED_NEGO_STATE_DECIDE;
+    info->normalizedType = NORMALIZED_KEY_ERROR;
+    info->isSupportFastAuth = true;
+    EXPECT_FALSE(ProcessCredNegoUnfinished(&authFsm, info, &ret, CRED_NEGO_STATE_DECIDE));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    // not support SK and fastAuth, but not state3
+    info->credNegoState = CRED_NEGO_STATE_REPLY;
+    info->normalizedType = NORMALIZED_KEY_ERROR;
+    info->isSupportFastAuth = false;
+    EXPECT_FALSE(ProcessCredNegoUnfinished(&authFsm, info, &ret, CRED_NEGO_STATE_DECIDE));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PROCESS_CRED_TYPE_NEGO_UNFINISHED_TEST_002
+ * @tc.desc: test ProcessCredNegoUnfinished continue
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, PROCESS_CRED_TYPE_NEGO_UNFINISHED_TEST_002, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    AuthSessionInfo *info = &authFsm.info;
+    int32_t ret = SOFTBUS_OK;
+    AuthSessionFsmInterfaceMock mock;
+    EXPECT_CALL(mock, PostDeviceIdMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillOnce(Return(SOFTBUS_OK));
+    info->credNegoState = CRED_NEGO_STATE_DECIDE;
+    info->normalizedType = NORMALIZED_KEY_ERROR;
+    info->isSupportFastAuth = false;
+    // Post fail
+    ret = SOFTBUS_OK;
+    EXPECT_TRUE(ProcessCredNegoUnfinished(&authFsm, info, &ret, CRED_NEGO_STATE_DECIDE));
+    EXPECT_EQ(ret, SOFTBUS_AUTH_SYNC_DEVID_FAIL);
+    // Post Succ
+    ret = SOFTBUS_OK;
+    EXPECT_TRUE(ProcessCredNegoUnfinished(&authFsm, info, &ret, CRED_NEGO_STATE_DECIDE));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
  * @tc.name: LOCAL_AUTH_STATE_PROC_TEST_001
  * @tc.desc: test LocalAuthStateProc
  * @tc.type: FUNC
@@ -1066,6 +1205,30 @@ HWTEST_F(AuthSessionFsmTest, LOCAL_AUTH_STATE_PROC_TEST_001, TestSize.Level1)
     info.localState = AUTH_STATE_COMPATIBLE;
     EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
     info.localState = AUTH_STATE_UNKNOW;
+    EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
+}
+
+/*
+ * @tc.name: LOCAL_AUTH_STATE_PROC_TEST_002
+ * @tc.desc: test LocalAuthStateProc ACK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, LOCAL_AUTH_STATE_PROC_TEST_002, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    int32_t result = 0;
+    NiceMock<AuthSessionFsmInterfaceMock> mock;
+    EXPECT_CALL(mock, PostDeviceIdMessage).WillRepeatedly(Return(SOFTBUS_OK));
+    info.localState = AUTH_STATE_ACK;
+
+    authFsm.info.isSupportFastAuth = false;
+    authFsm.info.normalizedType = NORMALIZED_NOT_SUPPORT;
+    authFsm.info.credNegoState = CRED_NEGO_STATE_REPLY;
     EXPECT_NO_FATAL_FAILURE(LocalAuthStateProc(&authFsm, &info, &result));
 }
 
@@ -1166,4 +1329,44 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_MSG_SAVE_SESSION_KEY_TEST_001, TestSize.Leve
     (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
     EXPECT_NO_FATAL_FAILURE(HandleMsgSaveSessionKey(&authFsm, para));
 }
+
+/*
+ * @tc.name: AUTH_SESSION_GET_USER_ID_TEST_001
+ * @tc.desc: AuthSessiongetUserId test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_GET_USER_ID_TEST_001, TestSize.Level1)
+{
+    AuthFsm authFsm;
+    (void)memset_s(&authFsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    int32_t userId = 0;
+    authFsm.authSeq = AUTH_SEQ;
+    authFsm.info.credNegoState = CRED_NEGO_STATE_FINISH;
+    ListInit(&g_authFsmList);
+    ListNodeInsert(&g_authFsmList, &authFsm.node);
+
+    // no peerUserId
+    authFsm.info.credTypeInfo = NULL;
+    authFsm.info.userId = 0;
+    userId = AuthSessionGetUserId(AUTH_SEQ);
+    EXPECT_EQ(userId, 0);
+
+    authFsm.info.credTypeInfo = cJSON_CreateObject();
+    if (authFsm.info.credTypeInfo == NULL ||
+        !cJSON_AddNumberToObject(authFsm.info.credTypeInfo, SINK_USERID, TEST_USER_ID)) {
+        cJSON_Delete(authFsm.info.credTypeInfo);
+        ListInit(&g_authFsmList);
+        FAIL() << "create credTypeInfo fail";
+    }
+    
+    // valid peerUserId
+    userId = AuthSessionGetUserId(AUTH_SEQ);
+    EXPECT_EQ(userId, TEST_USER_ID);
+
+    cJSON_Delete(authFsm.info.credTypeInfo);
+    ListInit(&g_authFsmList);
+}
+
 } // namespace OHOS

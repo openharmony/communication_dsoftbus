@@ -23,6 +23,7 @@
 #include "auth_connection.h"
 #include "auth_device_common_key_struct.h"
 #include "auth_hichain_adapter.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
@@ -42,6 +43,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_feature_config.h"
@@ -155,6 +157,29 @@ public:
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId) = 0;
     virtual int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **genCertParaNode) = 0;
+    virtual int32_t GetAllForegroundAccountIds(int32_t **userIds, int32_t *userIdsLen) = 0;
+    virtual char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+        const char *udidHash) = 0;
+    virtual char *cJSON_PrintUnformatted(const cJSON *item) = 0;
+    virtual void cJSON_free(void *object) = 0;
+    virtual cJSON *cJSON_CreateObject(void) = 0;
+    virtual void cJSON_Delete(cJSON *object) = 0;
+    virtual cJSON *CreateJsonObjectFromString(const char *jsonStr) = 0;
+    virtual cJSON *cJSON_AddNumberToObject(cJSON * const object, const char * const name, const double number) = 0;
+    virtual cJSON_bool cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item) = 0;
+    virtual cJSON *cJSON_CreateArray(void) = 0;
+    virtual cJSON *cJSON_CreateNumber(double num) = 0;
+    virtual cJSON_bool cJSON_AddItemToArray(cJSON *array, cJSON *item) = 0;
+    virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
+    virtual int GetArrayItemNum(const cJSON *jsonObj) = 0;
+    virtual cJSON *GetArrayItemFromArray(const cJSON *jsonArr, int index) = 0;
+    virtual double cJSON_GetNumberValue(const cJSON * const item) = 0;
+    virtual bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target) = 0;
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual cJSON *cJSON_GetObjectItem(const cJSON * const object, const char * const string) = 0;
+    virtual bool LnnIsDefaultOhosAccount(void) = 0;
+    virtual cJSON *cJSON_Duplicate(const cJSON *item, cJSON_bool recurse) = 0;
+    virtual bool AddNumberToJsonObject(cJSON *json, const char *const string, int32_t num) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -251,6 +276,29 @@ public:
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD3(IsTrustedDeviceFromAccess, bool(const char *, const char *, int32_t));
     MOCK_METHOD2(FindAndWaitAuthGenCertParaNodeById, int32_t(int32_t, AuthGenCertNode **));
+    MOCK_METHOD2(GetAllForegroundAccountIds, int32_t(int32_t **userIds, int32_t *userIdsLen));
+    MOCK_METHOD4(IdServiceGetCredIdByCredType, char *(int32_t localUserId, int32_t peerUserId, int32_t credType,
+        const char *udidHash));
+    MOCK_METHOD1(cJSON_PrintUnformatted, char *(const cJSON *item));
+    MOCK_METHOD1(cJSON_free, void(void *object));
+    MOCK_METHOD0(cJSON_CreateObject, cJSON *(void));
+    MOCK_METHOD1(cJSON_Delete, void(cJSON *object));
+    MOCK_METHOD1(CreateJsonObjectFromString, cJSON *(const char *jsonStr));
+    MOCK_METHOD3(cJSON_AddNumberToObject, cJSON *(cJSON * const object, const char * const name, const double number));
+    MOCK_METHOD3(cJSON_AddItemToObject, cJSON_bool(cJSON *object, const char *string, cJSON *item));
+    MOCK_METHOD0(cJSON_CreateArray, cJSON *(void));
+    MOCK_METHOD1(cJSON_CreateNumber, cJSON *(double num));
+    MOCK_METHOD2(cJSON_AddItemToArray, cJSON_bool(cJSON *array, cJSON *item));
+    MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
+    MOCK_METHOD1(GetArrayItemNum, int(const cJSON *jsonObj));
+    MOCK_METHOD2(GetArrayItemFromArray, cJSON *(const cJSON *jsonArr, int index));
+    MOCK_METHOD1(cJSON_GetNumberValue, double(const cJSON * const item));
+    MOCK_METHOD3(GetJsonObjectNumberItem, bool(const cJSON *json, const char * const string, int32_t *target));
+    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
+    MOCK_METHOD2(cJSON_GetObjectItem, cJSON *(const cJSON * const object, const char * const string));
+    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));
+    MOCK_METHOD2(cJSON_Duplicate, cJSON *(const cJSON *item, cJSON_bool recurse));
+    MOCK_METHOD3(AddNumberToJsonObject, bool(cJSON *json, const char *const string, int32_t num));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H
