@@ -57,6 +57,32 @@ void DestroyInfo(char **returnData)
     AUTH_LOGI(AUTH_TEST, "DestroyInfo test");
 }
 
+int32_t QueryCredentialByParamsSucc(int32_t osAccountId, const char *requestParams, char **returnData)
+{
+    (void)osAccountId;
+    (void)requestParams;
+    AUTH_LOGI(AUTH_TEST, "QueryCredentialByParamsSucc test");
+
+    *returnData = (char *)SoftBusCalloc(TEST_DATA_LEN);
+    return g_ret;
+}
+void DestroyInfoSucc(char **returnData)
+{
+    if (returnData != nullptr && *returnData != nullptr) {
+        SoftBusFree(*returnData);
+        *returnData = nullptr;
+    }
+    AUTH_LOGI(AUTH_TEST, "DestroyInfoSucc test");
+}
+int32_t QueryCredInfoByCredIdSucc(int32_t osAccountId, const char *credId, char **returnCredInfo)
+{
+    (void)osAccountId;
+    (void)credId;
+    (void)returnCredInfo;
+    AUTH_LOGI(AUTH_TEST, "QueryCredInfoByCredIdSucc test");
+    return g_ret;
+}
+
 /*
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_BY_CRED_TYPE_TEST_001
  * @tc.desc: Verify that IdServiceGenerateQueryParamByCredType returns nullptr when
@@ -556,6 +582,177 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     EXPECT_EQ(ret, HC_ERROR);
     SoftBusFree(credList);
     SoftBusFree(manager);
+}
+
+/*
+ * @tc.name: ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_001
+ * @tc.desc: IdServiceGetCredIdByCredType invalid param
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_001, TestSize.Level1)
+{
+    int32_t localUserId = 1;
+    int32_t peerUserId = 2;
+    int32_t credType = ACCOUNT_RELATED;
+
+    char *ret = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, nullptr);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/*
+ * @tc.name: ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_002
+ * @tc.desc: IdServiceGetCredIdByCredType get credMgr fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_002, TestSize.Level1)
+{
+    int32_t localUserId = 1;
+    int32_t peerUserId = 2;
+    int32_t credType = ACCOUNT_RELATED;
+    char udidHash[UDID_HASH_LEN] = {0};
+    char *ret = NULL;
+    AuthIdentityServiceAdapterInterfaceMock mock;
+    EXPECT_CALL(mock, InitDeviceAuthService).WillOnce(Return(HC_ERROR)).WillRepeatedly(Return(HC_SUCCESS));
+    EXPECT_CALL(mock, GetCredMgrInstance).WillOnce(Return(nullptr));
+    // Service not init
+    ret = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+    EXPECT_EQ(ret, nullptr);
+    // get instance fail
+    ret = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/*
+ * @tc.name: ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_003
+ * @tc.desc: IdServiceGetCredIdByCredType gen authParam fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_003, TestSize.Level1)
+{
+    int32_t localUserId = 1;
+    int32_t peerUserId = 2;
+    int32_t credType = ACCOUNT_RELATED;
+    char udidHash[UDID_HASH_LEN] = {0};
+    char *ret = NULL;
+    AuthIdentityServiceAdapterInterfaceMock mock;
+    CredManager manager = {0};
+    manager.queryCredentialByParams = QueryCredentialByParams;
+    EXPECT_CALL(mock, InitDeviceAuthService).WillRepeatedly(Return(HC_SUCCESS));
+    EXPECT_CALL(mock, GetCredMgrInstance).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(mock, cJSON_CreateObject).WillOnce(Return(nullptr));
+    // gen authParam fail
+    ret = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/*
+ * @tc.name: ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_004
+ * @tc.desc: IdServiceGetCredIdByCredType query credId fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_004, TestSize.Level1)
+{
+    int32_t localUserId = 1;
+    int32_t peerUserId = 2;
+    int32_t credType = ACCOUNT_RELATED;
+    char udidHash[UDID_HASH_LEN] = {0};
+    char *ret = NULL;
+    AuthIdentityServiceAdapterInterfaceMock mock;
+    CredManager manager = {0};
+    cJSON *msg = (cJSON *)SoftBusCalloc(sizeof(cJSON));
+    char *authParams = reinterpret_cast<char *>(SoftBusCalloc(1));
+    if (msg == nullptr || authParams == nullptr) {
+        SoftBusFree(msg);
+        SoftBusFree(authParams);
+        FAIL() << "memory allocation failed";
+    }
+    manager.queryCredentialByParams = QueryCredentialByParams;
+    manager.destroyInfo = DestroyInfo;
+    EXPECT_CALL(mock, InitDeviceAuthService).WillRepeatedly(Return(HC_SUCCESS));
+    EXPECT_CALL(mock, GetCredMgrInstance).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(mock, cJSON_CreateObject).WillOnce(Return(msg));
+    EXPECT_CALL(mock, AddStringToJsonObject).WillOnce(Return(true));
+    EXPECT_CALL(mock, AddNumberToJsonObject).WillOnce(Return(true));
+    EXPECT_CALL(mock, cJSON_PrintUnformatted).WillOnce(Return(authParams));
+    EXPECT_CALL(mock, GetSoftbusHichainAuthErrorCode).WillOnce(DoAll(SetArgPointee<1>(HC_ERROR), Return()));
+    // query fail
+    g_ret = HC_ERROR;
+    ret = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/*
+ * @tc.name: ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_005
+ * @tc.desc: IdServiceGetCredIdByCredType query credId succ
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_005, TestSize.Level1)
+{
+    int32_t localUserId = 1;
+    int32_t peerUserId = 2;
+    int32_t credType = ACCOUNT_RELATED;
+    char udidHash[UDID_HASH_LEN] = {0};
+    char *ret = NULL;
+    AuthIdentityServiceAdapterInterfaceMock mock;
+    CredManager manager = {0};
+    cJSON *msg = (cJSON *)SoftBusCalloc(sizeof(cJSON));
+    char *authParams = reinterpret_cast<char *>(SoftBusCalloc(1));
+    cJSON *credIdArrJson = (cJSON *)SoftBusCalloc(sizeof(cJSON));
+    cJSON *credInfoJson = (cJSON *)SoftBusCalloc(sizeof(cJSON));
+    cJSON item = {0};
+    char credIdTmp[8] = "credId";
+    if (msg == nullptr || authParams == nullptr || credIdArrJson == nullptr || credInfoJson == nullptr) {
+        SoftBusFree(msg);
+        SoftBusFree(authParams);
+        SoftBusFree(credIdArrJson);
+        SoftBusFree(credInfoJson);
+        FAIL() << "memory allocation failed";
+    }
+    manager.queryCredentialByParams = QueryCredentialByParamsSucc;
+    manager.destroyInfo = DestroyInfoSucc;
+    manager.queryCredInfoByCredId = QueryCredInfoByCredIdSucc;
+    EXPECT_CALL(mock, InitDeviceAuthService).WillRepeatedly(Return(HC_SUCCESS));
+    EXPECT_CALL(mock, GetCredMgrInstance).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(mock, cJSON_CreateObject).WillOnce(Return(msg));
+    EXPECT_CALL(mock, AddStringToJsonObject).WillOnce(Return(true));
+    EXPECT_CALL(mock, AddNumberToJsonObject).WillOnce(Return(true));
+    EXPECT_CALL(mock, cJSON_PrintUnformatted).WillOnce(Return(authParams));
+    EXPECT_CALL(mock, CreateJsonObjectFromString).WillOnce(Return(credIdArrJson)).WillOnce(Return(credInfoJson));
+    EXPECT_CALL(mock, GetArrayItemNum).WillOnce(Return(1));
+    EXPECT_CALL(mock, GetArrayItemFromArray).WillOnce(Return(&item));
+    EXPECT_CALL(mock, cJSON_GetStringValue).WillOnce(Return(credIdTmp));
+    EXPECT_CALL(mock, GetJsonObjectInt32Item).WillOnce(DoAll(SetArgPointee<2>(ACCOUNT_RELATED), Return(true)));
+    // query succ
+    g_ret = HC_SUCCESS;
+    ret = IdServiceGetCredIdByCredType(localUserId, peerUserId, credType, udidHash);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_TRUE(memcmp(ret, credIdTmp, strlen(credIdTmp)) == 0);
+    SoftBusFree(ret);
+}
+
+/*
+ * @tc.name: QUERY_CREDENTIAL_FAILED_LOG_TEST_001
+ * @tc.desc: QueryCredentialFailedLog succ and fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthIdentityServiceAdapterTest, QUERY_CREDENTIAL_FAILED_LOG_TEST_001, TestSize.Level1)
+{
+    int32_t errorRet = HC_ERR_INVALID_PARAMS;
+    AuthIdentityServiceAdapterInterfaceMock mock;
+    
+    EXPECT_NO_FATAL_FAILURE(QueryCredentialFailedLog(errorRet));
 }
 
 /*
