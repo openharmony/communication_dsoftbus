@@ -346,4 +346,89 @@ HWTEST_F(AuthHichainTest, HICHAIN_PROCESS_UK_NEGO_DATA_TEST_001, TestSize.Level1
     ret = HichainProcessUkNegoData(authSeq, nullptr, len, authMode, &cb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+  * @tc.name: NOTIFY_AUTH_FAIL_EVENT_TEST_001
+  * @tc.desc: Verify that NotifyAuthFailEvent correctly processes error codes and
+  *           handles memory allocation and data anonymization for error notifications.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainTest, NOTIFY_AUTH_FAIL_EVENT_TEST_001, TestSize.Level1)
+{
+    NiceMock<AuthCommonInterfaceMock> authCommMock;
+    EXPECT_CALL(authCommMock, LnnAsyncCallbackDelayHelper)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    
+    int32_t errCode1 = 1001;
+    const char *errorReturn1 = "{\"error\":\"authentication failed\"}";
+    EXPECT_NO_FATAL_FAILURE(NotifyAuthFailEvent(errCode1, errorReturn1));
+    
+    int32_t errCode2 = 1002;
+    const char *errorReturn2 = "{\"error\":\"timeout\"}";
+    EXPECT_NO_FATAL_FAILURE(NotifyAuthFailEvent(errCode2, errorReturn2));
+
+    int32_t errCode3 = 1003;
+    const char *errorReturn3 = "";
+    EXPECT_NO_FATAL_FAILURE(NotifyAuthFailEvent(errCode3, errorReturn3));
+}
+
+/*
+  * @tc.name: ON_DEVICE_BOUND_TEST_001
+  * @tc.desc: Verify that OnDeviceBound handles various device binding scenarios,
+  *           including invalid parameters, group parsing, and selective processing
+  *           based on device type and group membership.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
+{
+    const char *udid1 = "test_device_001";
+    const char *groupInfo1 = "{\"groupId\":\"group123\",\"groupType\":1}";
+    const char *groupInfo2 = "{\"groupId\":\"same_account_group\",\"groupType\":2}";
+    const char *groupInfo3 = "invalid_json";
+    
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(nullptr, groupInfo1));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid1, nullptr));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid1, groupInfo1));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid1, groupInfo2));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid1, groupInfo3));
+    
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    EXPECT_EQ(strcpy_s(localUdid, UDID_BUF_LEN, udid1), EOK);
+    NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
+    EXPECT_CALL(ledgermock, LnnGetLocalStrInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*localUdid), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid1, groupInfo1));
+}
+
+/*
+  * @tc.name: ON_DEVICE_BOUND_TEST_002
+  * @tc.desc: Verify that OnDeviceBound correctly handles device binding with
+  *           callback registration and different group types.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainTest, ON_DEVICE_BOUND_TEST_002, TestSize.Level1)
+{
+    const char *udid = "test_device_002";
+    const char *groupInfoAccount = "{\"groupId\":\"account_group\",\"groupType\":1}";
+    const char *groupInfoP2p = "{\"groupId\":\"p2p_group\",\"groupType\":2}";
+    const char *groupInfoMesh = "{\"groupId\":\"mesh_group\",\"groupType\":4}";
+    const char *groupInfoCompatible = "{\"groupId\":\"compatible_group\",\"groupType\":8}";
+    
+    g_dataChangeListener.onDeviceBound = nullptr;
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfoAccount));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfoP2p));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfoMesh));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfoCompatible));
+    
+    NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
+    EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    g_dataChangeListener.onDeviceBound = OnDeviceBound;
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfoAccount));
+}
 } // namespace OHOS

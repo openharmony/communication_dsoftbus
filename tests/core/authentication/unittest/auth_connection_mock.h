@@ -20,6 +20,7 @@
 
 #include "auth_connection.h"
 #include "auth_pre_link.h"
+#include "lnn_async_callback_utils.h"
 
 namespace OHOS {
 class AuthConnectionInterface {
@@ -33,9 +34,12 @@ public:
     virtual bool IsHaveAuthIdByConnId(uint64_t connId) = 0;
     virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
     virtual int32_t SocketSetDevice(int32_t fd, bool isBlockMode) = 0;
+    virtual int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx) = 0;
     virtual int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *data) = 0;
     virtual int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *info) = 0;
     virtual void DelAuthPreLinkById(uint32_t requestId);
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
 };
 
 class AuthConnectionInterfaceMock : public AuthConnectionInterface {
@@ -48,9 +52,11 @@ public:
     MOCK_METHOD1(IsHaveAuthIdByConnId, bool(uint64_t));
     MOCK_METHOD2(FindAuthPreLinkNodeById, int32_t(uint32_t, AuthPreLinkNode *));
     MOCK_METHOD2(SocketSetDevice, int32_t(int32_t, bool));
+    MOCK_METHOD4(SocketConnectDevice, int32_t(const char *, int32_t, bool, int32_t));
     MOCK_METHOD3(SocketPostBytes, int32_t(int32_t, const AuthDataHead *, const uint8_t *));
     MOCK_METHOD2(StartSocketListening, int32_t(ListenerModule, const LocalListenerInfo *));
     MOCK_METHOD1(DelAuthPreLinkById, void(uint32_t));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
 };
 } // namespace OHOS
 #endif
