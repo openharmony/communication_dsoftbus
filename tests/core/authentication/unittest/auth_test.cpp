@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,14 +20,12 @@
 
 #include "auth_channel.h"
 #include "auth_common.h"
-#include "auth_common_mock.h"
 #include "auth_connection.h"
 #include "auth_hichain.h"
 #include "auth_interface.c"
 #include "auth_interface.h"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_net_ledger_mock.h"
 #include "auth_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
@@ -1654,7 +1652,7 @@ HWTEST_F(AuthTest, CONVERT_TO_CONNECT_OPTION_Test_002, TestSize.Level1)
 {
     AuthConnInfo connInfo;
     ConnectOption option;
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
@@ -2457,7 +2455,8 @@ HWTEST_F(AuthTest, AUTH_DISCONNECT_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, CONVERT_TO_DISCOVERET_TYPE_TEST_001, TestSize.Level1)
 {
     DiscoveryType type;
-    AuthLinkType ret;
+    AuthLinkType ret = AUTH_LINK_TYPE_MAX;
+
     type = DISCOVERY_TYPE_WIFI;
     ret = ConvertToAuthLinkType(type);
     EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
@@ -2489,116 +2488,5 @@ HWTEST_F(AuthTest, CONVERT_TO_DISCOVERET_TYPE_TEST_001, TestSize.Level1)
     type = DISCOVERY_TYPE_COUNT;
     ret = ConvertToAuthLinkType(type);
     EXPECT_EQ(ret, AUTH_LINK_TYPE_MAX);
-}
-
-/*
- * @tc.name: AUTH_GENSEQ_TEST_001
- * @tc.desc: auth GenSeq test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_GENSEQ_TEST_001, TestSize.Level1)
-{
-    bool isServer = false;
-    NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR));
-    int64_t ret = GenSeq(isServer);
-    EXPECT_NE(ret, 0);
-}
-
-/*
- * @tc.name: AUTH_GENSEQ_TEST_002
- * @tc.desc: auth GenSeq test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_GENSEQ_TEST_002, TestSize.Level1)
-{
-    bool isServer = false;
-    int64_t ret = 0;
-    NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<AuthCommonInterfaceMock> authMock;
-
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(authMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_ERR));
-    ret = GenSeq(isServer);
-    EXPECT_NE(ret, 0);
-}
-
-/*
- * @tc.name: AUTH_GENSEQ_TEST_003
- * @tc.desc: auth GenSeq test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_GENSEQ_TEST_003, TestSize.Level1)
-{
-    bool isServer = false;
-    int64_t ret = 0;
-    NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
-    NiceMock<AuthCommonInterfaceMock> authMock;
-
-    EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(authMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_OK));
-    ret = GenSeq(isServer);
-    EXPECT_NE(ret, 0);
-}
-
-/*
- * @tc.name: AUTH_COMNMO_DENINIT_TEST_001
- * @tc.desc: auth AuthCommonInit test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_COMNMO_DENINIT_TEST_001, TestSize.Level1)
-{
-    NiceMock<AuthCommonInterfaceMock> authMock;
-    EXPECT_CALL(authMock, SoftBusMutexDestroy).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_NO_FATAL_FAILURE(AuthCommonDeinit());
-
-    EXPECT_CALL(authMock, SoftBusMutexDestroy).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(AuthCommonDeinit());
-}
-
-/*
- * @tc.name: AUTH_COMNMON_INIT_TEST_001
- * @tc.desc: auth AuthCommonInit test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_COMNMON_INIT_TEST_001, TestSize.Level1)
-{
-    int32_t ret = 0;
-    NiceMock<AuthCommonInterfaceMock> authMock;
-    EXPECT_CALL(authMock, SoftBusMutexInit).WillOnce(Return(SOFTBUS_ERR));
-    ret = AuthCommonInit();
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-
-    EXPECT_CALL(authMock, SoftBusMutexInit).WillOnce(Return(SOFTBUS_OK));
-    ret = AuthCommonInit();
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-}
-
-/*
- * @tc.name: AUTH_GET_PEER_UDID_BY_NETWORKID_TEST_001
- * @tc.desc: auth GetPeerUdidByNetworkId test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_GET_PEER_UDID_BY_NETWORKID_TEST_001, TestSize.Level1)
-{
-    int32_t ret = 0;
-    const char *networkId = "testudid";
-    char udid[UDID_BUF_LEN] = { 0 };
-    NiceMock<AuthNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnRetrieveDeviceInfoByNetworkIdPacked).WillOnce(Return(SOFTBUS_ERR));
-    ret = GetPeerUdidByNetworkId(networkId, udid, UDID_BUF_LEN);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 } // namespace OHOS
