@@ -31,7 +31,6 @@
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_ohos_account_adapter.h"
-#include "g_enhance_lnn_func_pack.h"
 #include "map"
 #include "securec.h"
 #include "softbus_adapter_bt_common.h"
