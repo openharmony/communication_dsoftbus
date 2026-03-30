@@ -24,8 +24,8 @@
 namespace OHOS {
 class AuthConnectionInterface {
 public:
-    AuthConnectionInterface() {};
-    virtual ~AuthConnectionInterface() {};
+    AuthConnectionInterface() { };
+    virtual ~AuthConnectionInterface() { };
 
     virtual int32_t SoftBusGetBtState(void) = 0;
     virtual int32_t PostAuthEvent(
