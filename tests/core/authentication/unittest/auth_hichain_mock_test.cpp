@@ -22,7 +22,11 @@
 #include "auth_hichain_adapter.c"
 #include "auth_hichain_deps_mock.h"
 #include "auth_session_json.c"
+#include "lnn_node_info.h"
 #include "softbus_error_code.h"
+
+#define AUTH_FORM_IDENTICAL_ACCOUNT 1
+#define AUTH_FORM_TRUST_PAIR 2
 
 namespace OHOS {
 using namespace testing;
@@ -71,6 +75,7 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
     const char *uid = "123";
     if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
         strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
+        SoftBusFree(msg);
         return;
     }
     hiChainParam.userId = DEFALUT_USERID;
@@ -280,6 +285,7 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, AddBoolToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, AuthSessionGetCredId).WillRepeatedly(Return(nullptr));
 
     char msgStr[10] = { 0 };
     const char *val = "returnStr";
@@ -365,10 +371,6 @@ HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(nullptr, groupInfo));
     int32_t ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
-    cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
-    if (msg == nullptr) {
-        return;
-    }
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
     EXPECT_CALL(hichainMock, GetJsonObjectStringItem).WillRepeatedly(Return(true));
     EXPECT_CALL(hichainMock, GetJsonObjectNumberItem)
@@ -457,5 +459,178 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
     EXPECT_EQ(info.credId, NULL);
 
     JSON_Delete(obj);
+}
+
+/*
+  * @tc.name: DFX_RECORD_CERT_END_TIME_TEST_001
+  * @tc.desc: Verify that DfxRecordCertEndTime handles different authSeq scenarios and
+  *           correctly manages auth lock and fsm operations.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainMockTest, DFX_RECORD_CERT_END_TIME_TEST_001, TestSize.Level1)
+{
+    AuthHichainInterfaceMock hichainMock;
+    EXPECT_CALL(hichainMock, LnnEventExtraInit).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, GetLnnTriggerInfo).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, SoftBusGetSysTimeMs).WillRepeatedly(Return(12345));
+    EXPECT_CALL(hichainMock, RequireAuthLock).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, ReleaseAuthLock).WillRepeatedly(Return());
+
+    AuthFsm fsm;
+    (void)memset_s(&fsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    EXPECT_CALL(hichainMock, GetAuthFsmByAuthSeq).WillOnce(Return(nullptr)).WillOnce(Return(&fsm));
+
+    int64_t authSeq1 = 123;
+    EXPECT_NO_FATAL_FAILURE(DfxRecordCertEndTime(authSeq1));
+    EXPECT_NO_FATAL_FAILURE(DfxRecordCertEndTime(authSeq1));
+}
+
+/*
+  * @tc.name: ON_SESSION_KEY_RETURNED_TEST_001
+  * @tc.desc: Verify that OnSessionKeyReturned handles various session key input scenarios,
+  *           including null keys and invalid length, and correctly updates auth state.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainMockTest, ON_SESSION_KEY_RETURNED_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = 456;
+    const uint8_t *sessionKey = reinterpret_cast<const uint8_t *>("123456789");
+    uint32_t sessionKeyLen = strlen("123456789");
+
+    AuthHichainInterfaceMock hichainMock;
+    EXPECT_CALL(hichainMock, LnnEventExtraInit).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, GetLnnTriggerInfo).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, SoftBusGetSysTimeMs).WillRepeatedly(Return(12345));
+    EXPECT_CALL(hichainMock, RequireAuthLock).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, ReleaseAuthLock).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, AuthSessionSaveSessionKey).WillRepeatedly(Return(SOFTBUS_OK));
+    AuthFsm fsm;
+    (void)memset_s(&fsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    EXPECT_CALL(hichainMock, GetAuthFsmByAuthSeq).WillRepeatedly(Return(&fsm));
+
+    EXPECT_NO_FATAL_FAILURE(OnSessionKeyReturned(authSeq, nullptr, sessionKeyLen));
+    EXPECT_NO_FATAL_FAILURE(OnSessionKeyReturned(authSeq, sessionKey, SESSION_KEY_LENGTH + 1));
+    EXPECT_NO_FATAL_FAILURE(OnSessionKeyReturned(authSeq, sessionKey, 0));
+    EXPECT_NO_FATAL_FAILURE(OnSessionKeyReturned(authSeq, sessionKey, sessionKeyLen));
+}
+
+/*
+  * @tc.name: ON_FINISH_TEST_001
+  * @tc.desc: Verify that OnFinish correctly handles different operation codes and
+  *           performs auth session cleanup and ACL state management.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainMockTest, ON_FINISH_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = 789;
+    const char *returnData = "success";
+    AuthHichainInterfaceMock hichainMock;
+    EXPECT_CALL(hichainMock, LnnEventExtraInit).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, AuthSessionHandleAuthFinish).WillRepeatedly(Return(SOFTBUS_OK));
+    
+    int32_t operationCode1 = AUTH_FORM_IDENTICAL_ACCOUNT;
+    EXPECT_NO_FATAL_FAILURE(OnFinish(authSeq, operationCode1, returnData));
+    
+    int32_t operationCode2 = AUTH_FORM_TRUST_PAIR;
+    EXPECT_NO_FATAL_FAILURE(OnFinish(authSeq, operationCode2, returnData));
+    
+    EXPECT_NO_FATAL_FAILURE(OnFinish(authSeq, 999, returnData));
+}
+
+/*
+  * @tc.name: NOTIFY_PC_AUTH_FAIL_TEST_001
+  * @tc.desc: Verify that NotifyPcAuthFail handles different error codes and
+  *           selectively processes error returns based on device side and error type.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainMockTest, NOTIFY_PC_AUTH_FAIL_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = 101;
+    int32_t errCode = PC_AUTH_ERRCODE;
+
+    AuthHichainInterfaceMock hichainMock;
+    EXPECT_CALL(hichainMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    const char *errorReturn = nullptr;
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(authSeq, errCode, errorReturn));
+    const char *errorReturn1 = "{\"proof\":\"valid data\"}";
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(authSeq, errCode, errorReturn1));
+    const char *errorReturn2 = "invalid_json";
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(authSeq, errCode, errorReturn2));
+}
+
+/*
+  * @tc.name: NOTIFY_PC_AUTH_FAIL_TEST_002
+  * @tc.desc: Verify that NotifyPcAuthFail handles error code and
+  *           selectively processes error returns based on device side and true type.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainMockTest, NOTIFY_PC_AUTH_FAIL_TEST_002, TestSize.Level1)
+{
+    AuthFsm fsm;
+    (void)memset_s(&fsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    fsm.info.isServer = true;
+    int64_t authSeq = 102;
+    int32_t errCode = PC_PROOF_NON_CONSISTENT_ERRCODE;
+
+    AuthHichainInterfaceMock hichainMock;
+    EXPECT_CALL(hichainMock, RequireAuthLock).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, ReleaseAuthLock).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, GetAuthFsmByAuthSeq).WillOnce(Return(nullptr)).WillRepeatedly(Return(&fsm));
+    EXPECT_CALL(hichainMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(hichainMock, GetAuthSideStr).WillRepeatedly(Return("server"));
+
+    const char *errorReturn = "{\"proof\":\"mismatch server\"}";
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(authSeq, errCode, errorReturn));
+    const char *errorReturn1 = "{\"proof\":\"mismatch\"}";
+    EXPECT_NO_FATAL_FAILURE(NotifyPcAuthFail(authSeq, errCode, errorReturn1));
+}
+
+/*
+  * @tc.name: ON_ERROR_TEST_001
+  * @tc.desc: Verify that OnError correctly processes authentication errors,
+  *           logs error information, and handles session cleanup with different operation codes.
+  * @tc.type: FUNC
+  * @tc.level: Level1
+  * @tc.require:
+  */
+HWTEST_F(AuthHichainMockTest, ON_ERROR_TEST_001, TestSize.Level1)
+{
+    AuthHichainInterfaceMock hichainMock;
+    EXPECT_CALL(hichainMock, LnnEventExtraInit).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, AuthSessionHandleAuthError).WillRepeatedly(Return(SOFTBUS_OK));
+    
+    int64_t authSeq = 202;
+    int32_t operationCode = AUTH_FORM_IDENTICAL_ACCOUNT;
+    int32_t errCode1 = 404;
+    const char *errorReturn1 = nullptr;
+    EXPECT_NO_FATAL_FAILURE(OnError(authSeq, operationCode, errCode1, errorReturn1));
+    
+    AuthFsm fsm;
+    (void)memset_s(&fsm, sizeof(AuthFsm), 0, sizeof(AuthFsm));
+    fsm.info.isServer = true;
+    EXPECT_CALL(hichainMock, RequireAuthLock).WillRepeatedly(Return(true));
+    EXPECT_CALL(hichainMock, ReleaseAuthLock).WillRepeatedly(Return());
+    EXPECT_CALL(hichainMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(hichainMock, GetAuthFsmByAuthSeq).WillOnce(Return(&fsm));
+    EXPECT_CALL(hichainMock, GetAuthSideStr).WillRepeatedly(Return("server"));
+
+    int32_t errCode2 = PC_AUTH_ERRCODE;
+    const char *errorReturn2 = "{\"error\":\"session expired\"}";
+    EXPECT_NO_FATAL_FAILURE(OnError(authSeq, operationCode, errCode2, errorReturn2));
+
+    int32_t errCode3 = PC_PROOF_NON_CONSISTENT_ERRCODE;
+    const char *errorReturn3 = "{\"error\":\"server error\"}";
+    EXPECT_NO_FATAL_FAILURE(OnError(authSeq, operationCode, errCode3, errorReturn3));
 }
 } // namespace OHOS
