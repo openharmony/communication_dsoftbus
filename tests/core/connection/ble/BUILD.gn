@@ -200,6 +200,43 @@ ohos_unittest("BleTransTest") {
   ]
 }
 
+ohos_unittest("ConnBleTransTest") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "$softbus_adapter_common/include",
+    "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/tests/core/connection/ble/unittest/connbletrans_test/mock",
+  ]
+  sources = [
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_send_queue.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_trans.c",
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
+    "$dsoftbus_root_path/tests/core/connection/ble/unittest/connbletrans_test/mock/conn_ble_trans_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/ble/unittest/connbletrans_test/conn_ble_trans_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("BleClientTest") {
   module_out_path = module_output_path
   include_dirs = [
