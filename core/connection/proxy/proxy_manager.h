@@ -28,6 +28,7 @@ extern "C" {
 #define UUID_STRING_LEN 38
 // the length of the latter half of the hexString representing the sha256 hash value of mac address
 #define BT_MAC_MAX_LEN 33
+#define PROXY_BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS      (500)
 
 typedef struct {
     uint32_t requestId;
@@ -64,6 +65,8 @@ struct ProxyConnection {
     ProxyChannelState state;
     int32_t socketHandle;
     ListNode node;
+    // connect process status
+    SoftBusList *connectProcessStatus;
 };
 
 typedef struct {
@@ -100,6 +103,7 @@ typedef struct {
     // inner
     SoftBusList *proxyConnectionList;
     struct ProxyConnection *(*getConnectionById)(uint32_t channelId);
+    struct ProxyConnection *(*getProxyChannelByAddr)(char *addr);
     // current process request info
     ProxyConnectInfo *proxyChannelRequestInfo;
     ListNode reconnectDeviceInfos;

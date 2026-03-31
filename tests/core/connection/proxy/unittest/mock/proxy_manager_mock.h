@@ -21,6 +21,11 @@
 #include <condition_variable>
 #include <gmock/gmock.h>
 
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_gap.h"
+#include "c_header/ohos_bt_spp.h"
+#include "c_header/ohos_bt_socket.h"
+
 #include "common_list.h"
 #include "conn_log.h"
 #include "message_handler.h"
@@ -87,6 +92,7 @@ public:
     static int32_t ActionOfConnect(const char *uuid, const BT_ADDR mac, void *connectCallback);
     static int32_t ActionOfConnect1(const char *uuid, const BT_ADDR mac, void *connectCallback);
     static int32_t ActionOfConnect2(const char *uuid, const BT_ADDR mac, void *connectCallback);
+    static int32_t ActionOfConnect3(const char *uuid, const BT_ADDR mac, void *connectCallback);
     static bool ActionOfIsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp);
     static void InjectHfpConnectionChanged(std::string addr, int32_t state);
     static void InjectBtAclStateChanged(
@@ -95,6 +101,7 @@ public:
     static void InjectProxyConfigDisableRetryConnect();
     static void InjectProxyConfigRestoreRetryConnect();
     static void InjectProxyConfigRetryCustomTimes(uint32_t times);
+    static void TestBtSocketConnectionCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t status, int32_t result);
 
     int32_t SoftBusRemoveBtStateListener(int32_t listenerId);
 private:
