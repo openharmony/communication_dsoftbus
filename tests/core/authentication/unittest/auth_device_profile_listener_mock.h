@@ -26,8 +26,8 @@
 namespace OHOS {
 class AuthDeviceProfileListenerInterface {
 public:
-    AuthDeviceProfileListenerInterface() {};
-    virtual ~AuthDeviceProfileListenerInterface() {};
+    AuthDeviceProfileListenerInterface() { };
+    virtual ~AuthDeviceProfileListenerInterface() { };
     virtual int32_t LnnStartHbByTypeAndStrategy(
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
