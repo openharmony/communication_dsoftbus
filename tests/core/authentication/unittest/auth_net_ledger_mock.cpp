@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,6 +208,11 @@ int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
 void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen, char **anonymizedStr)
 {
     return GetNetLedgerInterface()->LnnAnonymizeDeviceStr(deviceStr, strLen, defaultLen, anonymizedStr);
+}
+
+int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info)
+{
+    return GetNetLedgerInterface()->LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, info);
 }
 }
 

@@ -70,6 +70,7 @@ public:
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen,
         char **anonymizedStr) = 0;
+    virtual int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info) = 0;
 };
 
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
@@ -110,6 +111,7 @@ public:
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey, uint8_t *, uint32_t));
     MOCK_METHOD4(LnnAnonymizeDeviceStr, void(const char *deviceStr, uint32_t strLen, uint32_t defaultLen,
         char **anonymizedStr));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkIdPacked, int32_t(const char *, NodeInfo *));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;
