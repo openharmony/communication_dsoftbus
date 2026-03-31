@@ -16,6 +16,9 @@
 #ifndef SOFTBUS_ADAPTER_THREAD_H
 #define SOFTBUS_ADAPTER_THREAD_H
 
+#include <sys/syscall.h>
+#include <unistd.h>
+
 #include "comm_log.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"
@@ -25,6 +28,8 @@ extern "C" {
 #endif
 
 #define TASK_NAME_MAX_LEN (16)
+#define CONSECUTIVE_TIMEOUT_MAX (10)
+#define TIME_WAIT_SEC_DEFAULT (180)
 
 typedef enum {
     SOFTBUS_SCHED_OTHER,
@@ -61,8 +66,12 @@ typedef struct {
     SoftBusMutexType type;
 } SoftBusMutexAttr;
 
+typedef struct {
+    uintptr_t mutex;
+    int32_t holder;
+} SoftBusMutex;
+
 typedef uintptr_t SoftBusThread;
-typedef uintptr_t SoftBusMutex;
 typedef uintptr_t SoftBusCond;
 
 // mutex
@@ -71,10 +80,11 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr);
 int32_t SoftBusMutexLockInner(SoftBusMutex *mutex);
 int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex);
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex);
+void SetTimeWaitSec(int32_t timeWaitSec); /* Only use for UT verification */
 
 static inline bool CheckMutexIsNull(const SoftBusMutex *mutex)
 {
-    return (mutex == NULL) || ((void *)(*mutex) == NULL);
+    return (mutex == NULL) || ((void *)(mutex->mutex) == NULL);
 }
 
 #define SoftBusMutexLock(mutex)                                                        \
