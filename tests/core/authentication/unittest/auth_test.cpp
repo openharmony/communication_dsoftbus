@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@
 #include "softbus_socket.h"
 
 namespace OHOS {
+using namespace testing;
 using namespace testing::ext;
 constexpr uint32_t TEST_DATA_LEN = 10;
 constexpr uint32_t CRYPT_DATA_LEN = 200;
@@ -1641,6 +1642,32 @@ HWTEST_F(AuthTest, CONVERT_TO_CONNECT_OPTION_Test_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: CONVERT_TO_CONNECT_OPTION_Test_002
+ * @tc.desc: convert to connect option test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, CONVERT_TO_CONNECT_OPTION_Test_002, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    ConnectOption option;
+    int32_t ret = SOFTBUS_ERR;
+
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
+    ret = ConvertToConnectOption(&connInfo, &option);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    connInfo.type = AUTH_LINK_TYPE_SLE;
+    ret = ConvertToConnectOption(&connInfo, &option);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    connInfo.type = AUTH_LINK_TYPE_MAX;
+    ret = ConvertToConnectOption(&connInfo, &option);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE);
+}
+
+/*
  * @tc.name: CONVERT_TO_AUTH_CONNINFO_Test_001
  * @tc.desc: convert to auth connInfo test
  * @tc.type: FUNC
@@ -2416,5 +2443,50 @@ HWTEST_F(AuthTest, AUTH_DISCONNECT_Test_001, TestSize.Level1)
 {
     uint64_t connId = GenConnId(AUTH_LINK_TYPE_RAW_ENHANCED_P2P, 1);
     EXPECT_NO_FATAL_FAILURE(DisconnectAuthDevice(&connId));
+}
+
+/*
+ * @tc.name: CONVERT_TO_DISCOVERET_TYPE_TEST_001
+ * @tc.desc: auth ConvertToDiscoveryType test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, CONVERT_TO_DISCOVERET_TYPE_TEST_001, TestSize.Level1)
+{
+    DiscoveryType type;
+    AuthLinkType ret = AUTH_LINK_TYPE_MAX;
+
+    type = DISCOVERY_TYPE_WIFI;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
+
+    type = DISCOVERY_TYPE_BLE;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+
+    type = DISCOVERY_TYPE_SLE;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_SLE);
+
+    type = DISCOVERY_TYPE_BR;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
+
+    type = DISCOVERY_TYPE_P2P;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
+
+    type = DISCOVERY_TYPE_SESSION_KEY;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_SESSION_KEY);
+
+    type = DISCOVERY_TYPE_USB;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_USB);
+
+    type = DISCOVERY_TYPE_COUNT;
+    ret = ConvertToAuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_MAX);
 }
 } // namespace OHOS
