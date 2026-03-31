@@ -1406,7 +1406,6 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_BY_UK_ID_TEST_001, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-
 /*
  * @tc.name: SELECT_ALL_ACL_TEST_001
  * @tc.desc: Verify that SelectAllAcl returns an invalid parameter error when provided with null

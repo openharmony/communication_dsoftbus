@@ -32,8 +32,8 @@
 namespace OHOS {
 class AuthApplyKeyProcessInterface {
 public:
-    AuthApplyKeyProcessInterface() {};
-    virtual ~AuthApplyKeyProcessInterface() {};
+    AuthApplyKeyProcessInterface() { };
+    virtual ~AuthApplyKeyProcessInterface() { };
     virtual int32_t LnnAsyncCallbackDelayHelper(
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
