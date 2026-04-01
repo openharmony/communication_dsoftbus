@@ -236,5 +236,47 @@ bool CheckAccessToken(void)
     }
     return isAccessToken;
 }
+
+bool CheckAccessTokenAndParams(napi_env env, napi_callback_info info, std::string &funcName, bool isOn)
+{
+    if (!CheckAccessToken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
+        return false;
+    }
+    size_t argc = ARGS_SIZE_TWO;
+    napi_value args[ARGS_SIZE_TWO];
+    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (status != napi_ok || (isOn && argc != ARGS_SIZE_TWO) ||
+        (!isOn && argc != ARGS_SIZE_ONE && argc != ARGS_SIZE_TWO)) {
+        COMM_LOGE(COMM_SDK, "error param, argc=%{public}zu, status=%{public}d", argc, status);
+        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        return false;
+    }
+    if (argc == ARGS_SIZE_TWO) {
+        napi_valuetype valueType = napi_null;
+        napi_typeof(env, args[PARAM1], &valueType);
+        bool validType = isOn ? (valueType == napi_function) : (valueType != napi_null);
+        if (!validType) {
+            COMM_LOGE(COMM_SDK, "error param, valueType=%{public}d", valueType);
+            HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+            return false;
+        }
+    }
+
+    size_t typeLen = 0;
+    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], nullptr, -1, &typeLen);
+    if (status != napi_ok || typeLen >= ARGS_TYPE_MAX_LEN) {
+        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        return false;
+    }
+    char type[ARGS_TYPE_MAX_LEN] = {0};
+    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], type, sizeof(type), &typeLen);
+    if (status != napi_ok) {
+        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        return false;
+    }
+    funcName = type;
+    return true;
+}
 } // namespace Softbus
 } // namespace Communication
