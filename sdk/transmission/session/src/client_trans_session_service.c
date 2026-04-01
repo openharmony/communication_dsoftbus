@@ -372,6 +372,7 @@ static int32_t IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int32_t num)
     int32_t wifiIndex = -1;
     int32_t brIndex = -1;
     int32_t bleIndex = -1;
+    int32_t bleDirectIndex = -1;
     for (int32_t index = 0; index < num; index++) {
         if (addrInfo[index].type == CONNECTION_ADDR_NCM && usbIndex < 0) {
             usbIndex = index;
@@ -386,11 +387,15 @@ static int32_t IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int32_t num)
         if (addrInfo[index].type == CONNECTION_ADDR_BLE && bleIndex < 0) {
             bleIndex = index;
         }
+        if (addrInfo[index].type == CONNECTION_ADDR_RAW_BLE_DIRECT && bleDirectIndex < 0) {
+            bleDirectIndex = index;
+        }
     }
     addrIndex = (usbIndex >= 0) ? usbIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? wifiIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? brIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? bleIndex : addrIndex;
+    addrIndex = (addrIndex < 0) ? bleDirectIndex : addrIndex;
     return addrIndex;
 }
 
@@ -429,7 +434,8 @@ int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo,
     }
 
     transInfo.channelId = ServerIpcOpenAuthSession(sessionName, addr);
-    if (addr->type == CONNECTION_ADDR_BR || addr->type == CONNECTION_ADDR_BLE) {
+    if (addr->type == CONNECTION_ADDR_BR || addr->type == CONNECTION_ADDR_BLE ||
+        addr->type == CONNECTION_ADDR_RAW_BLE_DIRECT) {
         transInfo.channelType = CHANNEL_TYPE_PROXY;
     } else {
         transInfo.channelType = CHANNEL_TYPE_AUTH;
