@@ -17,5 +17,9 @@
 #define SOCKET_FUZZER_H
 
 #define FUZZ_PROJECT_NAME "transmission_fuzzer"
+#define DEFAULT_SOCKET_NAME "com.communication.fuzz.socketName"
+#define DEFAULT_SOCKET_PEER_NAME "com.communication.fuzz.peerName"
+#define DEFAULT_SOCKET_PKG_NAME "com.communication.fuzz.pkgName"
+#define DEFAULT_SOCKET_PEER_NETWORKID "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm"
 
 #endif // SOCKET_FUZZER_H
