@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "bus_center_adapter.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func.h"
 #include "lnn_decision_db.h"
@@ -40,6 +41,7 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "lnn_sle_capability.h"
 
 #define ONE_BIT_MAX_HEX               15
 #define DEVICE_TYPE_MAX_LENGTH        3
@@ -1356,9 +1358,295 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_NODE_KEY_INFO_Test_001, TestSize.Level1
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetNodeKeyInfo(nullptr, 0, (uint8_t *)serviceFindCap, strlen(serviceFindCap))
         == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetNodeKeyInfo(LOCAL_NETWORKID, 0, (uint8_t *)serviceFindCap, strlen(serviceFindCap)) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetNodeKeyInfo(LOCAL_NETWORKID, 0, (uint8_t *)serviceFindCap,
+        strlen(serviceFindCap)) == SOFTBUS_OK);
     EXPECT_EQ(LnnSetNodeKeyInfo(LOCAL_NETWORKID, KEY_EX_MAX_INDEX, (uint8_t *)serviceFindCap, strlen(serviceFindCap)),
         SOFTBUS_INVALID_NUM);
     LnnDeinitNetLedger();
+}
+
+/*
+ * @tc.name: LNN_DL_SLE_TIMESTAMP_Test_001
+ * @tc.desc: Verify LnnSetDLSleHbTimestamp handles null networkId
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_TIMESTAMP_Test_001, TestSize.Level1)
+{
+    int32_t ret = LnnSetDLSleHbTimestamp(nullptr, 1000);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_DL_SLE_TIMESTAMP_Test_002
+ * @tc.desc: Verify LnnGetDLSleHbTimestamp handles null parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_TIMESTAMP_Test_002, TestSize.Level1)
+{
+    uint64_t timestamp = 0;
+    int32_t ret = LnnGetDLSleHbTimestamp(nullptr, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetDLSleHbTimestamp(LOCAL_NETWORKID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_DL_SLE_RANGE_CAPACITY_Test_001
+ * @tc.desc: Verify LnnGetDLSleRangeCapacity with invalid networkId
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_RANGE_CAPACITY_Test_001, TestSize.Level1)
+{
+    uint32_t sleRangeCapacity = 0;
+    int32_t ret = LnnGetDLSleRangeCapacity("invalid_network_id_xyz", &sleRangeCapacity);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/*
+ * @tc.name: LNN_SAVE_BROADCAST_LINK_KEY_Test_001
+ * @tc.desc: Verify LnnSaveBroadcastLinkKey handles null parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SAVE_BROADCAST_LINK_KEY_Test_001, TestSize.Level1)
+{
+    BroadcastCipherInfo info;
+    (void)memset_s(&info, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+    bool ret = LnnSaveBroadcastLinkKey(nullptr, &info);
+    EXPECT_FALSE(ret);
+    ret = LnnSaveBroadcastLinkKey(LOCAL_UDID, nullptr);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: LNN_SAVE_BROADCAST_LINK_KEY_Test_002
+ * @tc.desc: Verify LnnSaveBroadcastLinkKey success
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SAVE_BROADCAST_LINK_KEY_Test_002, TestSize.Level1)
+{
+    BroadcastCipherInfo info;
+    (void)memset_s(&info, sizeof(BroadcastCipherInfo), 0, sizeof(BroadcastCipherInfo));
+    (void)memset_s(info.key, SESSION_KEY_LENGTH, 0xAB, SESSION_KEY_LENGTH);
+    (void)memset_s(info.iv, BROADCAST_IV_LEN, 0xCD, BROADCAST_IV_LEN);
+    bool ret = LnnSaveBroadcastLinkKey("nonexistent_udid_123456", &info);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: LNN_DL_SLE_TIMESTAMP_Test_003
+ * @tc.desc: Verify LnnSetDLSleHbTimestamp and LnnGetDLSleHbTimestamp with valid node
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_TIMESTAMP_Test_003, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitDistributedLedger() == SOFTBUS_OK);
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, LOCAL_UUID, strlen(LOCAL_UUID)));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, LOCAL_UDID, strlen(LOCAL_UDID)));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID)));
+    info.discoveryType = DISCOVERY_TYPE_WIFI;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    uint64_t timestamp = 123456789;
+    int32_t ret = LnnSetDLSleHbTimestamp(LOCAL_NETWORKID, timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint64_t getTimestamp = 0;
+    ret = LnnGetDLSleHbTimestamp(LOCAL_NETWORKID, &getTimestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(getTimestamp, timestamp);
+
+    ret = LnnGetDLSleHbTimestamp(LOCAL_NETWORKID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LnnSetDLSleHbTimestamp("invalid_network_id", timestamp);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    LnnDeinitDistributedLedger();
+}
+
+/*
+ * @tc.name: LNN_DL_SLE_RANGE_CAPACITY_Test_002
+ * @tc.desc: Verify LnnGetDLSleRangeCapacity with valid node
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_RANGE_CAPACITY_Test_002, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitDistributedLedger() == SOFTBUS_OK);
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, LOCAL_UUID, strlen(LOCAL_UUID)));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, LOCAL_UDID, strlen(LOCAL_UDID)));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID)));
+    info.discoveryType = DISCOVERY_TYPE_WIFI;
+    info.sleRangeCapacity = 100;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    uint32_t sleRangeCapacity = 0;
+    int32_t ret = LnnGetDLSleRangeCapacity(LOCAL_NETWORKID, &sleRangeCapacity);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(sleRangeCapacity, 100);
+
+    LnnDeinitDistributedLedger();
+}
+
+/*
+ * @tc.name: LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_001
+ * @tc.desc: Verify LnnConvertDeviceTypeToId converts predefined device types to corresponding IDs correctly
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_001, TestSize.Level1)
+{
+    uint16_t typeId = 0;
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_PHONE, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_PHONE_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_TV, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_TV_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_WATCH, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_WATCH_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_CAR, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_CAR_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_IPCAMERA, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_IPCAMERA_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_PC, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_PC_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_UNKNOWN, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_UNKNOW_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_SMART_DISPLAY, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_SMART_DISPLAY_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_GLASS, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_GLASS_ID);
+}
+
+/*
+ * @tc.name: SET_SLE_RANGE_CAP_TO_LOCAL_LEDGER_Test_001
+ * @tc.desc: Verify SetSleRangeCapToLocalLedger sets SLE range capability to local ledger
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, SET_SLE_RANGE_CAP_TO_LOCAL_LEDGER_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+    int32_t ret = SetSleRangeCapToLocalLedger();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: ON_RECEIVE_SLE_MAC_CHANGED_MSG_Test_001
+ * @tc.desc: Verify OnReceiveSleMacChangedMsg handles different message types and parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, ON_RECEIVE_SLE_MAC_CHANGED_MSG_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitDistributedLedger() == SOFTBUS_OK);
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, LOCAL_UUID, strlen(LOCAL_UUID)));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, LOCAL_UDID, strlen(LOCAL_UDID)));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID)));
+    info.discoveryType = DISCOVERY_TYPE_WIFI;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    constexpr char testMsg[] = "{\"SLE_MAC\":\"11:22:33:44:55\",\"SLE_CAP\":100}";
+    uint32_t msgSize = strlen(testMsg) + 1;
+
+    LnnSyncInfoType type = LNN_INFO_TYPE_SLE_MAC;
+    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(LNN_INFO_TYPE_COUNT, LOCAL_NETWORKID,
+        (const uint8_t *)testMsg, msgSize));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, nullptr, (const uint8_t *)testMsg, msgSize));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, LOCAL_NETWORKID, nullptr, msgSize));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, LOCAL_NETWORKID, (const uint8_t *)testMsg, 0));
+
+    LnnDeinitDistributedLedger();
+    LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: LNN_SEND_SLE_INFO_FOR_ALL_NODE_Test_001
+ * @tc.desc: Verify LnnSendSleInfoForAllNode sends SLE info to all online nodes
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SEND_SLE_INFO_FOR_ALL_NODE_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitDistributedLedger() == SOFTBUS_OK);
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, LOCAL_UUID, strlen(LOCAL_UUID)));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, LOCAL_UDID, strlen(LOCAL_UDID)));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID)));
+    info.discoveryType = DISCOVERY_TYPE_WIFI;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    EXPECT_NO_FATAL_FAILURE(LnnSendSleInfoForAllNode());
+
+    LnnDeinitDistributedLedger();
+    LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_002
+ * @tc.desc: Verify LnnConvertDeviceTypeToId converts custom 3-character hex strings to IDs correctly
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_002, TestSize.Level1)
+{
+    uint16_t typeId = 0;
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("123", &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == 0x123);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("ABC", &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == 0xABC);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("0FF", &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == 0x0FF);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("FF", &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == 0xFF);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("a1", &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == 0x0A1);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("FFF", &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == 0xFFF);
+}
+
+/*
+ * @tc.name: LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_003
+ * @tc.desc: Verify LnnConvertDeviceTypeToId handles invalid device type strings and returns expected errors
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_003, TestSize.Level1)
+{
+    uint16_t typeId = 0;
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("1G", &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("ZZZ", &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("12G", &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("abc", &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == 0x0ABC);
 }
 } // namespace OHOS
