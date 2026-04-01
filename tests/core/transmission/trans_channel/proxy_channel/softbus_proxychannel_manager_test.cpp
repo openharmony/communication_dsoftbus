@@ -1804,6 +1804,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
     info.type = CONNECT_BLE_DIRECT;
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
+    info.type = CONNECT_RAW_BLE_DIRECT;
+    ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
     TransWifiOnLineProc(nullptr);
 

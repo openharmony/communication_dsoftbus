@@ -502,6 +502,14 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnectDevice001, TestSize.Level
     connInfo.type = CONNECT_TYPE_MAX;
     ret = TransProxyConnectDevice(&connInfo, reqId);
     EXPECT_NE(SOFTBUS_OK, ret);
+
+    connInfo.type = CONNECT_SLE_DIRECT;
+    ret = TransProxyConnectDevice(&connInfo, reqId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    connInfo.type = CONNECT_RAW_BLE_DIRECT;
+    ret = TransProxyConnectDevice(&connInfo, reqId);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*

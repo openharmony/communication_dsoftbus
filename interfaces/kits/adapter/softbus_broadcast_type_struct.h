@@ -122,6 +122,7 @@ typedef enum {
     SRV_TYPE_D2D_GROUP_TALKIE, // The service type is D2D group talkie.
     SRV_TYPE_SD, // The service type is service discovery.
     SRV_TYPE_COLLABORATION, // The service type is pc collaboration.
+    SRV_TYPE_RAW,
     SRV_TYPE_BUTT,
 } BaseServiceType;
 

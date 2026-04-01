@@ -1246,6 +1246,8 @@ static void SelectRouteType(ConnectType type, RouteType *routeType)
         *routeType = BT_SLE;
     } else if (type == CONNECT_BLE_DIRECT) {
         *routeType = BT_BLE;
+    } else if (type == CONNECT_RAW_BLE_DIRECT) {
+        *routeType = BT_BLE;
     }
 }
 
