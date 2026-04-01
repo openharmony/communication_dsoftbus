@@ -302,6 +302,7 @@ typedef enum {
     CONNECTION_ADDR_SLE,      /**< SLE */
     CONNECTION_ADDR_NCM,      /**< USB NCM */
     CONNECTION_ADDR_NFC,      /**< NFC */
+    CONNECTION_ADDR_RAW_BLE_DIRECT, /**< RAW BLE DIRECT */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 
@@ -400,6 +401,10 @@ typedef struct {
             char localIp[IP_STR_MAX_LEN]; /**< IP address in string format */
             NetworkConnectionType connectionType; /**< connection type for softap p2p */
         } session;
+        /**< Ble direct address */
+        struct BleDirectAddr {
+            uint8_t udidHash[UDID_HASH_LEN]; /**< udid hash value */
+        } bleDirect;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
     DeviceKeyId deviceKeyId;

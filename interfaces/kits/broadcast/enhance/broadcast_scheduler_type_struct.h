@@ -49,6 +49,7 @@ typedef enum {
     BC_TYPE_D2D_GROUP_TALKIE_DATA,
     BC_TYPE_SD,
     BC_TYPE_PC_COLLABORATION,
+    BC_TYPE_RAW_BLE_DIRECT,
     BC_TYPE_SCHEDULER_BUTT,
 } BroadcastContentType;
 

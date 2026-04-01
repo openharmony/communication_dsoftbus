@@ -708,7 +708,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
         if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId, reqId) != SOFTBUS_OK) {
             goto EXIT_ERR;
         }
-    } else if (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE) {
+    } else if (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE || connOpt->type == CONNECT_RAW_BLE_DIRECT) {
         AppInfo *appInfo = GetAuthAppInfo(sessionName);
         if (appInfo == NULL) {
             TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo failed");
