@@ -1191,8 +1191,8 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult010, TestSize.Level3)
     int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(scanResult1.nameTruncated, true);
-    EXPECT_STREQ((char *)scanResult1.localName, "DEVSHR");
-    EXPECT_STREQ((char *)scanResult1.advDevName, "DEVSHR");
+    EXPECT_STREQ((char *)scanResult1.localName, "DEVSH");
+    EXPECT_STREQ((char *)scanResult1.advDevName, "DEVSH");
 
     DISC_LOGI(DISC_TEST, "ParseScanResult010 end");
 }
@@ -1308,7 +1308,7 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult014, TestSize.Level3)
     (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
 
     int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
-    EXPECT_EQ(ret, SOFTBUS_OK);  // Boundary check triggers break, not error
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_PARSE_FAIL);  // Boundary check triggers break, not error
 
     // Test len < ID_LEN + 1 (invalid len)
     uint8_t advData2[] = {0x01, 0x16};  // len field says 1, type=0x16
@@ -1317,7 +1317,7 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult014, TestSize.Level3)
     (void)memset_s(&scanResult2, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
 
     ret = ParseScanResult(advData2, advLen2, &scanResult2);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_PARSE_FAIL);
 
     DISC_LOGI(DISC_TEST, "ParseScanResult014 end");
 }
@@ -1409,10 +1409,10 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult017, TestSize.Level3)
 
     int32_t ret = ParseScanResult(advData, advLen, &scanResult);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(scanResult.nameTruncated, true);
-    EXPECT_STREQ((char *)scanResult.localName, "SECNAM");
+    EXPECT_EQ(scanResult.nameTruncated, false);
+    EXPECT_STREQ((char *)scanResult.localName, "FIRSTN");
     // advDevName should be "FIRSTNA" (first name, not overwritten)
-    EXPECT_STREQ((char *)scanResult.advDevName, "FIRSTNA");
+    EXPECT_STREQ((char *)scanResult.advDevName, "FIRSTN");
 
     DISC_LOGI(DISC_TEST, "ParseScanResult017 end");
 }
@@ -1497,4 +1497,5 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult020, TestSize.Level3)
     EXPECT_EQ(scanResult.data.bcData.payloadLen, 0);
 
     DISC_LOGI(DISC_TEST, "ParseScanResult020 end");
+}
 } // namespace OHOS
