@@ -78,6 +78,7 @@ typedef enum {
     CONNECT_TRIGGER_HML_V2C,
     CONNECT_PROXY_CHANNEL,
     CONNECT_PAGING,
+    CONNECT_RAW_BLE_DIRECT,
     CONNECT_TYPE_MAX
 } ConnectType;
 
@@ -212,6 +213,7 @@ struct BleOption {
 
 struct BleDirectOption {
     char networkId[NETWORK_ID_BUF_LEN];
+    uint8_t udidHash[UDID_HASH_LEN];
     BleProtocolType protoType;
 };
 

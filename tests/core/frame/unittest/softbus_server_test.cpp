@@ -197,6 +197,8 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest007, TestSize.Level1)
     EXPECT_EQ(ret, CONNECT_TCP);
     ret = ConvertConnectType(CONNECTION_ADDR_NCM);
     EXPECT_EQ(ret, CONNECT_TCP);
+    ret = ConvertConnectType(CONNECTION_ADDR_RAW_BLE_DIRECT);
+    EXPECT_EQ(ret, CONNECT_RAW_BLE_DIRECT);
 }
 
 /*
@@ -246,6 +248,9 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest009, TestSize.Level1)
     ret = softBusServer->OpenAuthSession("test", &addr1);
     EXPECT_EQ(ret, -1);
     addr1.type = CONNECTION_ADDR_ETH;
+    ret = softBusServer->OpenAuthSession("test", &addr1);
+    EXPECT_EQ(ret, -1);
+    addr1.type = CONNECTION_ADDR_RAW_BLE_DIRECT;
     ret = softBusServer->OpenAuthSession("test", &addr1);
     EXPECT_EQ(ret, -1);
 }

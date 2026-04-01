@@ -804,7 +804,8 @@ static int32_t TransProxyConnectDevice(const ConnectOption *connInfo, uint32_t r
     ConnectResult result;
     result.OnConnectFailed = TransOnConnectFailed;
     result.OnConnectSuccessed = TransOnConnectSucceed;
-    if (connInfo->type == CONNECT_BLE_DIRECT || connInfo->type == CONNECT_SLE_DIRECT) {
+    if (connInfo->type == CONNECT_BLE_DIRECT || connInfo->type == CONNECT_SLE_DIRECT ||
+        connInfo->type == CONNECT_RAW_BLE_DIRECT) {
         return ConnDirectConnectDevicePacked(connInfo, requestId, &result);
     } else {
         return ConnConnectDevice(connInfo, requestId, &result);

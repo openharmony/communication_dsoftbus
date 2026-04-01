@@ -201,6 +201,9 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
     connOpt->type = CONNECT_BLE;
     ret = TransOpenAuthChannel(sessionName, connOpt, nullptr, &param);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    connOpt->type = CONNECT_RAW_BLE_DIRECT;
+    ret = TransOpenAuthChannel(sessionName, connOpt, nullptr, &param);
+    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     SoftBusFree(connOpt);
 }
 

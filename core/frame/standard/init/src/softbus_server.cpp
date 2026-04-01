@@ -58,6 +58,8 @@ static ConnectType ConvertConnectType(ConnectionAddrType type)
         case CONNECTION_ADDR_WLAN:
         case CONNECTION_ADDR_NCM:
             return CONNECT_TCP;
+        case CONNECTION_ADDR_RAW_BLE_DIRECT:
+            return CONNECT_RAW_BLE_DIRECT;
         default:
             return CONNECT_TYPE_MAX;
     }
@@ -121,6 +123,73 @@ static bool IsNcmAddrType(ConnectionAddrType addrType)
     return addrType == CONNECTION_ADDR_NCM;
 }
 
+static int32_t HandleTcpConnect(const ConnectionAddr *addrInfo, ConnectOption *connOpt)
+{
+    if (addrInfo == nullptr || connOpt == nullptr) {
+        COMM_LOGE(COMM_SVC, "addrInfo or connopt is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), addrInfo->info.ip.ip, IP_LEN) != EOK) {
+        COMM_LOGE(COMM_SVC, "connect TCP memory error");
+        return SOFTBUS_MEM_ERR;
+    }
+    connOpt->socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
+    connOpt->socketOption.protocol = IsNcmAddrType(addrInfo->type) ? LNN_PROTOCOL_USB : LNN_PROTOCOL_IP;
+    connOpt->socketOption.moduleId = IsNcmAddrType(addrInfo->type) ? AUTH_USB : AUTH;
+    return SOFTBUS_OK;
+}
+
+static int32_t HandleBleConnect(const ConnectionAddr *addrInfo, ConnectOption *connOpt, ConnectParam *param)
+{
+    if (addrInfo == nullptr || connOpt == nullptr || param == nullptr) {
+        COMM_LOGE(COMM_SVC, "addrInfo, connopt or param is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(connOpt->bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
+        COMM_LOGE(COMM_SVC, "connect BLE memory error");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(connOpt->bleOption.deviceIdHash, sizeof(connOpt->bleOption.deviceIdHash), addrInfo->info.ble.udidHash,
+            sizeof(addrInfo->info.ble.udidHash)) != EOK) {
+        COMM_LOGE(COMM_SVC, "connect BLE memory error");
+        return SOFTBUS_MEM_ERR;
+    }
+    connOpt->bleOption.protocol = addrInfo->info.ble.protocol;
+    connOpt->bleOption.psm = addrInfo->info.ble.psm;
+    connOpt->bleOption.fastestConnectEnable = true;
+    param->blePriority = addrInfo->info.ble.priority;
+    return SOFTBUS_OK;
+}
+
+static int32_t HandleBrConnect(const ConnectionAddr *addrInfo, ConnectOption *connOpt)
+{
+    if (addrInfo == nullptr || connOpt == nullptr) {
+        COMM_LOGE(COMM_SVC, "addrInfo or connopt is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(connOpt->brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
+        COMM_LOGE(COMM_SVC, "connect BR memory error");
+        return SOFTBUS_MEM_ERR;
+    }
+    connOpt->brOption.waitTimeoutDelay = OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS;
+    connOpt->brOption.isDisableBrFrequentConnectControl = true;
+    return SOFTBUS_OK;
+}
+
+static int32_t HandleBleDirectConnect(const ConnectionAddr *addrInfo, ConnectOption *connOpt)
+{
+    if (addrInfo == nullptr || connOpt == nullptr) {
+        COMM_LOGE(COMM_SVC, "addrInfo or connopt is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(connOpt->bleDirectOption.udidHash, sizeof(connOpt->bleDirectOption.udidHash),
+            addrInfo->info.bleDirect.udidHash, sizeof(addrInfo->info.bleDirect.udidHash)) != EOK) {
+        COMM_LOGE(COMM_SVC, "connect bleDirect memory error");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
 {
     if (sessionName == nullptr || addrInfo == nullptr) {
@@ -132,43 +201,26 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
     ConnectParam param;
     (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
     connOpt.type = ConvertConnectType(addrInfo->type);
+    int32_t ret = SOFTBUS_OK;
     switch (connOpt.type) {
         case CONNECT_TCP:
-            if (memcpy_s(connOpt.socketOption.addr, sizeof(connOpt.socketOption.addr), addrInfo->info.ip.ip, IP_LEN) !=
-                EOK) {
-                COMM_LOGE(COMM_SVC, "connect TCP memory error");
-                return SOFTBUS_MEM_ERR;
-            }
-            connOpt.socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
-            connOpt.socketOption.protocol = IsNcmAddrType(addrInfo->type) ? LNN_PROTOCOL_USB : LNN_PROTOCOL_IP;
-            connOpt.socketOption.moduleId = IsNcmAddrType(addrInfo->type) ? AUTH_USB : AUTH;
+            ret = HandleTcpConnect(addrInfo, &connOpt);
             break;
         case CONNECT_BLE:
-            if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
-                COMM_LOGE(COMM_SVC, "connect BLE memory error");
-                return SOFTBUS_MEM_ERR;
-            }
-            if (memcpy_s(connOpt.bleOption.deviceIdHash, sizeof(connOpt.bleOption.deviceIdHash),
-                addrInfo->info.ble.udidHash, sizeof(addrInfo->info.ble.udidHash)) != EOK) {
-                COMM_LOGE(COMM_SVC, "connect BLE memory error");
-                return SOFTBUS_MEM_ERR;
-            }
-            connOpt.bleOption.protocol = addrInfo->info.ble.protocol;
-            connOpt.bleOption.psm = addrInfo->info.ble.psm;
-            connOpt.bleOption.fastestConnectEnable = true;
-            param.blePriority = addrInfo->info.ble.priority;
+            ret = HandleBleConnect(addrInfo, &connOpt, &param);
             break;
         case CONNECT_BR:
-            if (memcpy_s(connOpt.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
-                COMM_LOGE(COMM_SVC, "connect BR memory error");
-                return SOFTBUS_MEM_ERR;
-            }
-            connOpt.brOption.waitTimeoutDelay = OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS;
-            connOpt.brOption.isDisableBrFrequentConnectControl = true;
+            ret = HandleBrConnect(addrInfo, &connOpt);
+            break;
+        case CONNECT_RAW_BLE_DIRECT:
+            ret = HandleBleDirectConnect(addrInfo, &connOpt);
             break;
         default:
             COMM_LOGE(COMM_SVC, "connect type error");
             return SOFTBUS_TRANS_INVALID_CONNECT_TYPE;
+    }
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     return TransOpenAuthChannel(sessionName, &connOpt, "", &param);
 }
