@@ -83,6 +83,7 @@ static uint16_t BtAdvTypeToSoftbus(uint16_t advType)
         case MANUFACTURE_BC_TYPE:
             return BC_DATA_TYPE_MANUFACTURER;
         case SERVICE_UUID_BC_TYPE:
+        case SERVICE_IOS_16UUID_BC_TYPE:
             return BC_DATA_TYPE_SERVICE_UUID;
         default:
             return 0x00;
@@ -535,7 +536,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             isRsp = !isRsp;
             DISC_CHECK_AND_RETURN_RET_LOGE(
                 ret == SOFTBUS_OK, ret, DISC_BLE_ADAPTER, "parse payload failed, err=%{public}d", ret);
-        } else if (type == SERVICE_UUID_BC_TYPE) {
+        } else if (type == SERVICE_UUID_BC_TYPE || type == SERVICE_IOS_16UUID_BC_TYPE) {
             SoftbusBroadcastPayload *data = &dst->data.uuidData;
             int32_t ret = ParsePayload(data, advData, advLen, index, len);
             DISC_CHECK_AND_RETURN_RET_LOGE(
