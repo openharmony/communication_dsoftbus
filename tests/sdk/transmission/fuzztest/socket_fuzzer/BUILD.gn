@@ -31,12 +31,94 @@ ohos_fuzztest("SocketFuzzTest") {
   ]
   sources = [ "socket_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
-  include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+  external_deps = [ "c_utils:utils" ]
 }
+
+ohos_fuzztest("SocketNameFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/socket_fuzzer"
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
+  ]
+  sources = [ "socketname_fuzzer.cpp" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
+  include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
+  external_deps = [ "c_utils:utils" ]
+}
+
+ohos_fuzztest("SocketPeerNameFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/socket_fuzzer"
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
+  ]
+  sources = [ "socketpeername_fuzzer.cpp" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
+  include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
+  external_deps = [ "c_utils:utils" ]
+}
+
+ohos_fuzztest("SocketPkgNameFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/socket_fuzzer"
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
+  ]
+  sources = [ "socketpkgname_fuzzer.cpp" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
+  include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
+  external_deps = [ "c_utils:utils" ]
+}
+
+ohos_fuzztest("SocketNetworkIdFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/socket_fuzzer"
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
+  ]
+  sources = [ "socketnetworkid_fuzzer.cpp" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
+  include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
+  external_deps = [ "c_utils:utils" ]
+}
+
+ohos_fuzztest("SocketDataTypeFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/sdk/transmission/fuzztest/socket_fuzzer"
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
+  ]
+  sources = [ "socketdatatype_fuzzer.cpp" ]
+  deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
+  include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
+  external_deps = [ "c_utils:utils" ]
+}
+
 
 ###############################################################################
 group("fuzztest") {
@@ -44,6 +126,11 @@ group("fuzztest") {
   deps = [
     # deps file
     ":SocketFuzzTest",
+    ":SocketNameFuzzTest",
+    ":SocketPeerNameFuzzTest",
+    ":SocketPkgNameFuzzTest",
+    ":SocketNetworkIdFuzzTest",
+    ":SocketDataTypeFuzzTest",
   ]
 }
 ###############################################################################
