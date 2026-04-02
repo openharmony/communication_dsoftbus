@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -353,7 +353,7 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
     }
     uint32_t code = MANAGE_REGISTER_SERVICE;
     SoftbusRecordCalledApiInfo(pkgName, code);
-    int32_t retReply = SoftbusRegisterService(pkgName, remote);
+    int32_t retReply = SoftbusRegisterService(pkgName, remote, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
@@ -2549,7 +2549,7 @@ int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &dat
     }
     uint32_t code = MANAGE_REGISTER_BR_PROXY_SERVICE;
     SoftbusRecordCalledApiInfo(pkgName, code);
-    int32_t retReply = SoftbusRegisterService(pkgName, remote);
+    int32_t retReply = SoftbusRegisterService(pkgName, remote, OHOS_PERMISSION_ACCESS_BLUETOOTH);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;

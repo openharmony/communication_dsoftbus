@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,10 +59,12 @@ static sptr<IRemoteObject> GetSystemAbility()
     return reply.ReadRemoteObject();
 }
 
-int32_t ConnectionServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
+int32_t ConnectionServerProxy::SoftbusRegisterService(
+    const char *clientPkgName, const sptr<IRemoteObject> &object, const char *permissionName)
 {
     (void)clientPkgName;
     (void)object;
+    (void)permissionName;
     return SOFTBUS_OK;
 }
 

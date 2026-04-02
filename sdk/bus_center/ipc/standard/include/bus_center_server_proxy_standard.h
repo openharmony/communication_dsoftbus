@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,8 @@ public:
         : IRemoteProxy<ISoftBusServer>(impl) {}
     virtual ~BusCenterServerProxy() = default;
 
-    int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
+    int32_t SoftbusRegisterService(
+        const char *clientPkgName, const sptr<IRemoteObject> &object, const char *permissionName) override;
 
     int32_t CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) override;
     int32_t RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) override;

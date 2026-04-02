@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, SoftbusRegisterService_TEST_001, Test
     const char *clientPkgName = "000";
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.SoftbusRegisterService(clientPkgName, nullptr);
+    int32_t ret = servertest.SoftbusRegisterService(clientPkgName, nullptr, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

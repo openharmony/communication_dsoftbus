@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ int32_t SoftBusCheckDynamicPermission(uint64_t tokenId)
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-void SoftBusRegisterDataSyncPermission(
+void SoftBusRegisterPermission(
     const uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     (void)tokenId;
@@ -67,7 +67,7 @@ void SoftBusRegisterDataSyncPermission(
     (void)pid;
 }
 
-void SoftBusUnRegisterDataSyncPermission(int32_t pid)
+void SoftBusUnRegisterPermission(int32_t pid)
 {
     (void)pid;
 }

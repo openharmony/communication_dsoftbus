@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,9 +42,10 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName);
 bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission);
 int32_t SoftBusCalcPermType(uint64_t fullTokenId, pid_t uid, pid_t pid);
 int32_t SoftBusCheckDynamicPermission(uint64_t tokenId);
-void SoftBusRegisterDataSyncPermission(uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid);
-void SoftBusUnRegisterDataSyncPermission(int32_t pid);
+void SoftBusRegisterPermission(uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid);
+void SoftBusUnRegisterPermission(int32_t pid);
 void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb);
+void BrProxyRegisterBtPermissionChangeCb(PermissionChangeCb cb);
 int32_t SoftBusGetAccessTokenType(uint64_t tokenId);
 void SoftBusGetTokenNameByTokenType(
     char *tokenName, int32_t nameLen, uint64_t tokenId, SoftBusAccessTokenType tokenType);
