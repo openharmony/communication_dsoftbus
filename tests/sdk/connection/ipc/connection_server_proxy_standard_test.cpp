@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ HWTEST_F(ConnectionServerProxyStandardTest, ConnectionServerProxyVirtualTest001,
 {
     const sptr<IRemoteObject> impl = nullptr;
     ConnectionServerProxy testProxy(impl);
-    int32_t ret = testProxy.SoftbusRegisterService(nullptr, nullptr);
+    int32_t ret = testProxy.SoftbusRegisterService(nullptr, nullptr, nullptr);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = testProxy.CreateSessionServer(nullptr, nullptr, 1);
     ASSERT_EQ(ret, SOFTBUS_OK);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,8 +90,8 @@ HWTEST_F(ConnectionClientProxyTest, ConnectionClientProxyTest002, TestSize.Level
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    int32_t ret =
-        SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    int32_t ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, "ohos.permission.DISTRIBUTED_DATASYNC");
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientIpcOnConnectionStateChange("test", 0, 0, 0, 0);

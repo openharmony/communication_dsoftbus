@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ class SoftbusClientInfoManager {
 public:
     static SoftbusClientInfoManager &GetInstance();
     int32_t SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
-        const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid);
+        const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid, const std::string &permissionName);
     int32_t SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName, int32_t* pid);
     int32_t SoftbusRemoveServiceWithPid(const std::string &pkgName, int32_t pid);
     int32_t SoftbusAddServiceInner(const std::string &pkgName, ISessionListenerInner *listener, int32_t pid);

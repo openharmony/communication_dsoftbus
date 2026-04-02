@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "securec.h"
 #include <gtest/gtest.h>
 
+#include "br_proxy_server_manager.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
 #include "permission_utils.h"
@@ -374,27 +375,68 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback002, TestSize.Level0)
     std::cout << "g_permissionChangeCb is not empty." << std::endl;
 }
 
-/*
- * @tc.name:SoftBusRegisterDataSyncPermission001
- * @tc.desc: Verify SoftBusRegisterDataSyncPermission returns without crash when input parameter is valid
+/**
+ * @tc.name:PermStateChangeCallback003
+ * @tc.desc: Test PermStateChangeCallback when g_btPermissionChangeCb is null
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusPermissionTest, SoftBusRegisterDataSyncPermission001, TestSize.Level0)
+HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback003, TestSize.Level0)
 {
-    uint64_t tonkenId = 0;
-    EXPECT_NO_FATAL_FAILURE(SoftBusRegisterDataSyncPermission(tonkenId, nullptr, nullptr, INVALID_TEST_PID));
+    PermStateChangeInfo result;
+    result.permissionName = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    PermissionChangeCb btPermissionChanCb = nullptr;
+    EXPECT_NO_FATAL_FAILURE(BrProxyRegisterBtPermissionChangeCb(btPermissionChanCb));
+
+    std::string pkgaName = "BrProxyPkgName";
+    PermStateChangeScope permStateObj;
+    OHOS::SoftBusAccessTokenAdapter accessTokenAdapterObj(permStateObj, pkgaName, INVALID_TEST_PID);
+    EXPECT_NO_FATAL_FAILURE(accessTokenAdapterObj.PermStateChangeCallback(result));
+    std::cout << "g_permissionChangeCb is empty." << std::endl;
+}
+
+/**
+ * @tc.name:PermStateChangeCallback004
+ * @tc.desc: Test PermStateChangeCallback when vilide param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback004, TestSize.Level0)
+{
+    PermStateChangeInfo result;
+    result.permissionName = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    result.permStateChangeType = STATE_CHANGE_GRANTED;
+    PermissionChangeCb btPermissionChanCb = BtPermissionChange;
+    EXPECT_NO_FATAL_FAILURE(BrProxyRegisterBtPermissionChangeCb(btPermissionChanCb));
+
+    std::string pkgaName = "BrProxyPkgName";
+    PermStateChangeScope permStateObj;
+    OHOS::SoftBusAccessTokenAdapter accessTokenAdapterObj(permStateObj, pkgaName, INVALID_TEST_PID);
+    EXPECT_NO_FATAL_FAILURE(accessTokenAdapterObj.PermStateChangeCallback(result));
+    std::cout << "g_permissionChangeCb is empty." << std::endl;
 }
 
 /*
- * @tc.name:SoftBusUnRegisterDataSyncPermission001
- * @tc.desc: Verify SoftBusUnRegisterDataSyncPermission returns without crash when input parameter is valid
+ * @tc.name:SoftBusRegisterPermission001
+ * @tc.desc: Verify SoftBusRegisterPermission returns without crash when input parameter is valid
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusPermissionTest, SoftBusUnRegisterDataSyncPermission001, TestSize.Level0)
+HWTEST_F(SoftbusPermissionTest, SoftBusRegisterPermission001, TestSize.Level0)
 {
-    EXPECT_NO_FATAL_FAILURE(SoftBusUnRegisterDataSyncPermission(INVALID_TEST_PID));
+    uint64_t tonkenId = 0;
+    EXPECT_NO_FATAL_FAILURE(SoftBusRegisterPermission(tonkenId, nullptr, nullptr, INVALID_TEST_PID));
+}
+
+/*
+ * @tc.name:SoftBusUnRegisterPermission001
+ * @tc.desc: Verify SoftBusUnRegisterPermission returns without crash when input parameter is valid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, SoftBusUnRegisterPermission001, TestSize.Level0)
+{
+    EXPECT_NO_FATAL_FAILURE(SoftBusUnRegisterPermission(INVALID_TEST_PID));
 }
 
 /*

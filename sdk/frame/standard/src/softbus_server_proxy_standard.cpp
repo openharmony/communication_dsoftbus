@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,8 +33,10 @@ sptr<IRemoteObject> SoftBusServerProxyFrame::GetRemoteInstance()
     return clientCallbackStub_;
 }
 
-int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)
+int32_t SoftBusServerProxyFrame::SoftbusRegisterService(
+    const char *clientPkgName, const sptr<IRemoteObject> &object, const char *permissionName)
 {
+    (void)permissionName;
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         COMM_LOGE(COMM_SDK, "remote is nullptr!");

@@ -79,10 +79,12 @@ void BusCenterServerProxy::BusCenterServerProxyStandardDeInit(void)
     g_remoteProxy.clear();
 }
 
-int32_t BusCenterServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject>& object)
+int32_t BusCenterServerProxy::SoftbusRegisterService(
+    const char *clientPkgName, const sptr<IRemoteObject> &object, const char *permissionName)
 {
     (void)clientPkgName;
     (void)object;
+    (void)permissionName;
     return SOFTBUS_OK;
 }
 
