@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,7 @@ const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributed
 #define OBJECT_STORE_UID            3012
 
 static PermissionChangeCb g_permissionChangeCb = nullptr;
+static PermissionChangeCb g_btPermissionChangeCb = nullptr;
 
 namespace OHOS {
 using namespace Security::AccessToken;
@@ -216,7 +217,19 @@ int32_t SoftBusCheckDynamicPermission(uint64_t tokenId)
 
 void SoftBusAccessTokenAdapter::PermStateChangeCallback(PermStateChangeInfo &result)
 {
+#define COMM_PKGNAME_BRPROXY "BrProxyPkgName"
     COMM_LOGI(COMM_PERM, "permission changed. permissionName=%{public}s", result.permissionName.c_str());
+    if (result.permissionName == OHOS_PERMISSION_ACCESS_BLUETOOTH && this->pkgName == COMM_PKGNAME_BRPROXY) {
+        if (g_btPermissionChangeCb == nullptr) {
+            COMM_LOGE(COMM_PERM, "g_btPermissionChangeCb is nullptr");
+            return;
+        }
+        if (g_btPermissionChangeCb(result.permStateChangeType, this->pkgName.c_str(), pid) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_PERM, "BtPermissionChange fail");
+        }
+        return;
+    }
+
     if (g_permissionChangeCb == nullptr) {
         COMM_LOGE(COMM_PERM, "g_permissionChangeCb is nullptr");
         return;
@@ -227,7 +240,7 @@ void SoftBusAccessTokenAdapter::PermStateChangeCallback(PermStateChangeInfo &res
     }
 }
 
-void SoftBusRegisterDataSyncPermission(uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
+void SoftBusRegisterPermission(uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     if (permissionName == nullptr || pkgName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, permissionName or pkgName is nullptr");
@@ -239,14 +252,15 @@ void SoftBusRegisterDataSyncPermission(uint64_t tonkenId, const char *permission
     scopeInfo.tokenIDs = {tonkenId};
     std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ =
         std::make_shared<SoftBusAccessTokenAdapter>(scopeInfo, pkgName, pid);
-    COMM_LOGI(COMM_PERM, "after register. tokenId=%{public}" PRIu64, tonkenId);
+    COMM_LOGI(
+        COMM_PERM, "after register. permissionName=%{public}s,tokenId=%{public}" PRIu64, permissionName, tonkenId);
     callbackPtrMap_.emplace(pid, callbackPtr_);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "RegisterPermStateChangeCallback failed.");
     }
 }
 
-void SoftBusUnRegisterDataSyncPermission(int32_t pid)
+void SoftBusUnRegisterPermission(int32_t pid)
 {
     std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ = nullptr;
     auto iter = callbackPtrMap_.find(pid);
@@ -264,6 +278,11 @@ void SoftBusUnRegisterDataSyncPermission(int32_t pid)
 void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb)
 {
     g_permissionChangeCb = cb;
+}
+
+void BrProxyRegisterBtPermissionChangeCb(PermissionChangeCb cb)
+{
+    g_btPermissionChangeCb = cb;
 }
 
 int32_t SoftBusGetAccessTokenType(uint64_t tokenId)

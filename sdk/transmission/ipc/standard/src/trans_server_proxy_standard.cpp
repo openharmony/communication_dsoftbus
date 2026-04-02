@@ -57,10 +57,12 @@ static sptr<IRemoteObject> GetSystemAbility()
     return reply.ReadRemoteObject();
 }
 
-int32_t TransServerProxy::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
+int32_t TransServerProxy::SoftbusRegisterService(
+    const char *clientPkgName, const sptr<IRemoteObject> &object, const char *permissionName)
 {
     (void)clientPkgName;
     (void)object;
+    (void)permissionName;
     return SOFTBUS_OK;
 }
 

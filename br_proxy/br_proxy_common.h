@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,7 @@ pid_t GetCallerPid();
 pid_t GetCallerUid();
 uint32_t GetCallerTokenId();
 int32_t CheckPushPermission();
+bool CheckPermissionStateIsRevoked(int32_t state);
 void BrProxyPostDcloseMsgToLooperDelay(uint32_t delayTime);
 int32_t DynamicLoadInit();
 int32_t BrProxyUnrestricted(const char *bundleName, pid_t pid, pid_t uid, bool isThaw);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,7 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level1)
     (void)memset_s(pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     TransServerProxy transServerProxy(nullptr);
 
-    int32_t ret = transServerProxy.SoftbusRegisterService(g_pkgName, nullptr);
+    int32_t ret = transServerProxy.SoftbusRegisterService(g_pkgName, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(subInfo);
     SoftBusFree(pubInfo);

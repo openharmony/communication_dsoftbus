@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1127,5 +1127,77 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest044, TestSize.Level1)
     EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
     arr = GetChannelIdAndUserId(mac, uuid, &channelId, &userId);
     EXPECT_EQ(arr, SOFTBUS_NOT_FIND);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest045
+ * @tc.desc: Test BtPermissionChange when valid and invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest045, TestSize.Level1)
+{
+    int32_t ret = BtPermissionChange(0, nullptr, 0);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = BtPermissionChange(1, "TestPkgName", 0);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    ret = BtPermissionChange(0, "BrProxyPkgName", 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = BtPermissionChange(1, "BrProxyPkgName", 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest046
+ * @tc.desc: Test CloseConnectByPid when g_serverList is NULL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest046, TestSize.Level1)
+{
+    g_serverList = NULL;
+    CloseConnectByPid(PID_TEST);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest047
+ * @tc.desc: Test CloseConnectByPid with multiple PIDs
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest047, TestSize.Level1)
+{
+    g_serverList = NULL;
+    int32_t ret = BrProxyServerInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    
+    BrProxyChannelInfo info1 = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info1.peerBRMacAddr, info1.peerBRUuid, CHANNEL_ID, REQUEST_ID, APP_INDEX_TEST);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    
+    pid_t pid2 = 2222;
+    BrProxyChannelInfo info2 = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:DD",
+        .peerBRUuid = "BBBBBBBB-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(pid2));
+    ret = ServerAddChannelToList(info2.peerBRMacAddr, info2.peerBRUuid, CHANNEL_ID + 1, REQUEST_ID + 1, APP_INDEX_TEST);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    
+    EXPECT_EQ(g_serverList->cnt, 2);
+    
+    CloseConnectByPid(PID_TEST);
+    
+    EXPECT_EQ(g_serverList->cnt, 1);
+    
+    ret = ServerDeleteChannelFromList(CHANNEL_ID + 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,10 +32,11 @@ SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
 }
 
 int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, const sptr<IRemoteObject> &object,
-    const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid)
+    const sptr<IRemoteObject::DeathRecipient> &abilityDeath, int32_t pid, const std::string &permissionName)
 {
-    if (pkgName.empty() || object == nullptr || abilityDeath == nullptr) {
-        COMM_LOGE(COMM_SVC, "package name, object or abilityDeath is nullptr\n");
+#define COMM_PKGNAME_BRPROXY "BrProxyPkgName"
+    if (pkgName.empty() || permissionName.empty() || object == nullptr || abilityDeath == nullptr) {
+        COMM_LOGE(COMM_SVC, "package name, permission name, object or abilityDeath is nullptr\n");
         return SOFTBUS_INVALID_PARAM;
     }
     COMM_LOGI(COMM_SVC, "add SoftbusAddService, pid=%{public}d, pkgname=%{public}s", pid, pkgName.c_str());
@@ -45,8 +46,7 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
     clientObjectMap_.emplace(pkgName, clientObjPair);
 
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
-    std::string permissionName = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    SoftBusRegisterDataSyncPermission(tokenCaller, permissionName.c_str(), pkgName.c_str(), pid);
+    SoftBusRegisterPermission(tokenCaller, permissionName.c_str(), pkgName.c_str(), pid);
 
     return SOFTBUS_OK;
 }
@@ -97,7 +97,7 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
         }
     }
 
-    SoftBusUnRegisterDataSyncPermission((*pid));
+    SoftBusUnRegisterPermission((*pid));
     COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgName=%{public}s", (*pid), pkgName.c_str());
     return SOFTBUS_OK;
 }
@@ -114,8 +114,8 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveServiceWithPid(const std::string 
             break;
         }
     }
- 
-    SoftBusUnRegisterDataSyncPermission(pid);
+
+    SoftBusUnRegisterPermission(pid);
     return SOFTBUS_OK;
 }
 

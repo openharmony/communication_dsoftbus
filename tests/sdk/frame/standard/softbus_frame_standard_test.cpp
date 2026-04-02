@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -211,15 +211,18 @@ HWTEST_F(SoftBusServerProxyFrameTest, SoftbusRegisterServiceTest, TestSize.Level
 {
     sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(nullptr);
     ASSERT_TRUE(serverProxyFrame != nullptr);
-    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr), SOFTBUS_IPC_ERR);
+    EXPECT_EQ(
+        serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr, nullptr), SOFTBUS_IPC_ERR);
 
     sptr<IRemoteObject> serverProxy = GetSystemAbility();
     ASSERT_TRUE(serverProxy != nullptr);
     serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(serverProxy);
     ASSERT_TRUE(serverProxyFrame != nullptr);
-    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr), SOFTBUS_IPC_ERR);
+    EXPECT_EQ(
+        serverProxyFrame->SoftbusRegisterService("SoftbusRegisterServiceTest", nullptr, nullptr), SOFTBUS_IPC_ERR);
 
-    EXPECT_EQ(serverProxyFrame->SoftbusRegisterService(nullptr, nullptr), SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    EXPECT_EQ(
+        serverProxyFrame->SoftbusRegisterService(nullptr, nullptr, nullptr), SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
 }
 
 /*

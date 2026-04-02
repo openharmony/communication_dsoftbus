@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,10 +67,11 @@ SoftBusServer::SoftBusServer(int32_t saId, bool runOnCreate) : SystemAbility(saI
 {
 }
 
-int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
+int32_t SoftBusServer::SoftbusRegisterService(
+    const char *clientPkgName, const sptr<IRemoteObject> &object, const char *permissionName)
 {
-    if (clientPkgName == nullptr || object == nullptr) {
-        COMM_LOGE(COMM_SVC, "package name or object is nullptr");
+    if (clientPkgName == nullptr || object == nullptr || permissionName == nullptr) {
+        COMM_LOGE(COMM_SVC, "package name, permission name or object is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t pid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
@@ -89,7 +90,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         return SOFTBUS_TRANS_ADD_DEATH_RECIPIENT_FAILED;
     }
     if (SoftbusClientInfoManager::GetInstance().SoftbusAddService(clientPkgName,
-        object, abilityDeath, pid) != SOFTBUS_OK) {
+        object, abilityDeath, pid, permissionName) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus add client service failed");
         return SOFTBUS_TRANS_ADD_CLIENT_SERVICE_FAILED;
     }
