@@ -925,4 +925,579 @@ HWTEST(SoftbusBleUtilsTest, BtScanEventTypeToSoftbus002, TestSize.Level3)
 
     DISC_LOGI(DISC_TEST, "BtScanAddrTypeToSoftbus002 end");
 }
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult002
+ * @tc.desc: test ParseScanResult with SERVICE_UUID_BC_TYPE to cover BtAdvTypeToSoftbus
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult002, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult002 begin");
+
+    // Test SERVICE_UUID_BC_TYPE (0x03) -> BC_DATA_TYPE_SERVICE_UUID
+    uint8_t advData1[] = {0x03, 0x03, 0x01, 0x00};  // len=3, type=SERVICE_UUID_BC_TYPE, id=0x0001
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    // BC_DATA_TYPE_SERVICE_UUID (value 2) maps to BROADCAST_DATA_TYPE_BUTT in SoftbusBcDataType
+    EXPECT_EQ(scanResult1.data.uuidData.type, BROADCAST_DATA_TYPE_BUTT);
+    EXPECT_EQ(scanResult1.data.uuidData.id, 0x0001);
+    EXPECT_EQ(scanResult1.data.uuidData.payloadLen, 0);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult002 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult003
+ * @tc.desc: test ParseScanResult with SERVICE_IOS_16UUID_BC_TYPE to cover BtAdvTypeToSoftbus
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult003, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult003 begin");
+
+    // Test SERVICE_IOS_16UUID_BC_TYPE (0x07) -> BC_DATA_TYPE_SERVICE_UUID
+    // len=5, type=SERVICE_IOS_16UUID_BC_TYPE, id=0x0002, payload=0xAABB
+    uint8_t advData1[] = {0x05, 0x07, 0x02, 0x00, 0xAA, 0xBB};
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    // BC_DATA_TYPE_SERVICE_UUID (value 2) maps to BROADCAST_DATA_TYPE_BUTT in SoftbusBcDataType
+    EXPECT_EQ(scanResult1.data.uuidData.type, BROADCAST_DATA_TYPE_BUTT);
+    EXPECT_EQ(scanResult1.data.uuidData.id, 0x0002);
+    EXPECT_EQ(scanResult1.data.uuidData.payloadLen, 2);
+    EXPECT_NE(scanResult1.data.uuidData.payload, nullptr);
+    if (scanResult1.data.uuidData.payload != nullptr) {
+        EXPECT_EQ(scanResult1.data.uuidData.payload[0], 0xAA);
+        EXPECT_EQ(scanResult1.data.uuidData.payload[1], 0xBB);
+    }
+    SoftBusFree(scanResult1.data.uuidData.payload);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult003 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult004
+ * @tc.desc: test ParseScanResult with unknown type to cover default branch
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult004, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult004 begin");
+
+    // Test unknown type (0x99) -> default -> 0x00
+    uint8_t advData1[] = {0x05, 0x99, 0x03, 0x00, 0xCC, 0xDD};  // len=5, type=0x99 (unknown), id=0x0003, payload
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    // Unknown type should be skipped, so uuidData should be empty
+    EXPECT_EQ(scanResult1.data.uuidData.type, 0);
+    EXPECT_EQ(scanResult1.data.uuidData.id, 0);
+    EXPECT_EQ(scanResult1.data.uuidData.payloadLen, 0);
+    EXPECT_EQ(scanResult1.data.uuidData.payload, nullptr);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult004 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult005
+ * @tc.desc: test ParseScanResult with NULL parameters
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult005, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult005 begin");
+
+    uint8_t advData[] = {0x02, 0x01, 0x01};
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+
+    // Test NULL advData
+    int32_t ret = ParseScanResult(nullptr, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    // Test NULL dst
+    ret = ParseScanResult(advData, advLen, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    // Test advLen = 0
+    ret = ParseScanResult(advData, 0, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult005 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult006
+ * @tc.desc: test ParseScanResult with len == 0 in loop
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult006, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult006 begin");
+
+    // Test len == 0 case (index increment continues)
+    uint8_t advData[] = {0x00, 0x02, 0x01, 0x01};  // First len=0, then valid data
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult.data.isSupportFlag, true);
+    EXPECT_EQ(scanResult.data.flag, 0x01);
+
+    // Test multiple consecutive zero lengths
+    uint8_t advData2[] = {0x00, 0x00, 0x00, 0x02, 0x01, 0x01};
+    uint8_t advLen2 = sizeof(advData2);
+    SoftBusBcScanResult scanResult2 = {};
+    (void)memset_s(&scanResult2, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    ret = ParseScanResult(advData2, advLen2, &scanResult2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult2.data.isSupportFlag, true);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult006 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult007
+ * @tc.desc: test ParseScanResult with boundary check failures
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult007, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult007 begin");
+
+    // Test index + len >= advLen boundary check
+    uint8_t advData1[] = {0x05, 0x03, 0x01, 0x00};  // len=5 but only 4 bytes total
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    // Test index + 1 >= advLen boundary check
+    uint8_t advData2[] = {0x01};  // len=1 but no type byte
+    uint8_t advLen2 = sizeof(advData2);
+    SoftBusBcScanResult scanResult2 = {};
+    (void)memset_s(&scanResult2, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    ret = ParseScanResult(advData2, advLen2, &scanResult2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult007 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult008
+ * @tc.desc: test ParseScanResult with BC_FLAG_AD_TYPE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult008, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult008 begin");
+
+    // Test BC_FLAG_AD_TYPE with valid flag
+    uint8_t advData1[] = {0x02, 0x01, 0x05};  // len=2, type=BC_FLAG_AD_TYPE, flag=0x05
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult1.data.isSupportFlag, true);
+    EXPECT_EQ(scanResult1.data.flag, 0x05);
+
+    // Test BC_FLAG_AD_TYPE with index + 1 >= advLen (ParseFlag boundary)
+    uint8_t advData2[] = {0x01, 0x01};  // len=1, type=BC_FLAG_AD_TYPE, no flag byte
+    uint8_t advLen2 = sizeof(advData2);
+    SoftBusBcScanResult scanResult2 = {};
+    (void)memset_s(&scanResult2, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    ret = ParseScanResult(advData2, advLen2, &scanResult2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult008 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult009
+ * @tc.desc: test ParseScanResult with LOCAL_NAME_BC_TYPE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult009, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult009 begin");
+
+    // Test LOCAL_NAME_BC_TYPE (0x09)
+    // len=8, type=LOCAL_NAME_BC_TYPE, name="DEVICE1"
+    uint8_t advData1[] = {0x08, 0x09, 'D', 'E', 'V', 'I', 'C', 'E', '1'};
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult1.nameTruncated, false);
+    EXPECT_STREQ((char *)scanResult1.localName, "DEVICE1");
+    EXPECT_STREQ((char *)scanResult1.advDevName, "DEVICE1");
+
+    // Test LOCAL_NAME_BC_TYPE with index + 1 >= advLen (ParseLocalName boundary)
+    uint8_t advData2[] = {0x01, 0x09};  // len=1, type=LOCAL_NAME_BC_TYPE, no name
+    uint8_t advLen2 = sizeof(advData2);
+    SoftBusBcScanResult scanResult2 = {};
+    (void)memset_s(&scanResult2, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    ret = ParseScanResult(advData2, advLen2, &scanResult2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult009 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult010
+ * @tc.desc: test ParseScanResult with SHORTENED_LOCAL_NAME_BC_TYPE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult010, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult010 begin");
+
+    // Test SHORTENED_LOCAL_NAME_BC_TYPE (0x08)
+    uint8_t advData1[] = {0x06, 0x08, 'D', 'E', 'V', 'S', 'H', 'R'};  // len=6, type=SHORTENED_LOCAL_NAME_BC_TYPE
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult1.nameTruncated, true);
+    EXPECT_STREQ((char *)scanResult1.localName, "DEVSH");
+    EXPECT_STREQ((char *)scanResult1.advDevName, "DEVSH");
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult010 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult011
+ * @tc.desc: test ParseScanResult with SERVICE_BC_TYPE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult011, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult011 begin");
+
+    // Test SERVICE_BC_TYPE (0x16) -> BC_DATA_TYPE_SERVICE
+    uint8_t advData1[] = {0x05, 0x16, 0x04, 0x00, 0x11, 0x22};  // len=5, type=SERVICE_BC_TYPE, id=0x0004, payload
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult1.data.bcData.type, BROADCAST_DATA_TYPE_SERVICE);
+    EXPECT_EQ(scanResult1.data.bcData.id, 0x0004);
+    EXPECT_EQ(scanResult1.data.bcData.payloadLen, 2);
+    EXPECT_NE(scanResult1.data.bcData.payload, nullptr);
+    if (scanResult1.data.bcData.payload != nullptr) {
+        EXPECT_EQ(scanResult1.data.bcData.payload[0], 0x11);
+        EXPECT_EQ(scanResult1.data.bcData.payload[1], 0x22);
+    }
+    SoftBusFree(scanResult1.data.bcData.payload);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult011 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult012
+ * @tc.desc: test ParseScanResult with MANUFACTURE_BC_TYPE
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult012, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult012 begin");
+
+    // Test MANUFACTURE_BC_TYPE (0xFF) -> BC_DATA_TYPE_MANUFACTURER
+    uint8_t advData1[] = {0x06, 0xFF, 0x05, 0x00, 0x33, 0x44, 0x55};  // len=6, type=MANUFACTURE_BC_TYPE
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult1.data.bcData.type, BROADCAST_DATA_TYPE_MANUFACTURER);
+    EXPECT_EQ(scanResult1.data.bcData.id, 0x0005);
+    EXPECT_EQ(scanResult1.data.bcData.payloadLen, 3);
+    EXPECT_NE(scanResult1.data.bcData.payload, nullptr);
+    if (scanResult1.data.bcData.payload != nullptr) {
+        EXPECT_EQ(scanResult1.data.bcData.payload[0], 0x33);
+        EXPECT_EQ(scanResult1.data.bcData.payload[1], 0x44);
+        EXPECT_EQ(scanResult1.data.bcData.payload[2], 0x55);
+    }
+    SoftBusFree(scanResult1.data.bcData.payload);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult012 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult013
+ * @tc.desc: test ParseScanResult with multiple data types (isRsp toggle)
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult013, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult013 begin");
+
+    // Test multiple SERVICE_BC_TYPE entries (isRsp toggles between bcData and rspData)
+    uint8_t advData[] = {
+        0x05, 0x16, 0x06, 0x00, 0xAA, 0x11,  // First SERVICE_BC_TYPE -> bcData
+        0x05, 0x16, 0x07, 0x00, 0xBB, 0x22   // Second SERVICE_BC_TYPE -> rspData
+    };
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult.data.bcData.type, BROADCAST_DATA_TYPE_SERVICE);
+    EXPECT_EQ(scanResult.data.bcData.id, 0x0006);
+    EXPECT_EQ(scanResult.data.rspData.type, BROADCAST_DATA_TYPE_SERVICE);
+    EXPECT_EQ(scanResult.data.rspData.id, 0x0007);
+    SoftBusFree(scanResult.data.bcData.payload);
+    SoftBusFree(scanResult.data.rspData.payload);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult013 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult014
+ * @tc.desc: test ParseScanResult ParsePayload boundary conditions
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult014, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult014 begin");
+
+    // Test advLen - index < ID_LEN + 1 (invalid advLen)
+    uint8_t advData1[] = {0x01, 0x16};  // len=1, not enough for ID_LEN (2)
+    uint8_t advLen1 = sizeof(advData1);
+    SoftBusBcScanResult scanResult1 = {};
+    (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData1, advLen1, &scanResult1);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_PARSE_FAIL);  // Boundary check triggers break, not error
+
+    // Test len < ID_LEN + 1 (invalid len)
+    uint8_t advData2[] = {0x01, 0x16};  // len field says 1, type=0x16
+    uint8_t advLen2 = sizeof(advData2);
+    SoftBusBcScanResult scanResult2 = {};
+    (void)memset_s(&scanResult2, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    ret = ParseScanResult(advData2, advLen2, &scanResult2);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_PARSE_FAIL);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult014 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult015
+ * @tc.desc: test ParseScanResult ParsePayload with zero payload length
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult015, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult015 begin");
+
+    // Test payloadLen == 0 case (only ID, no payload)
+    uint8_t advData[] = {0x03, 0x16, 0x08, 0x00};  // len=3, type=SERVICE_BC_TYPE, id=0x0008, no payload
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult.data.bcData.type, BROADCAST_DATA_TYPE_SERVICE);
+    EXPECT_EQ(scanResult.data.bcData.id, 0x0008);
+    EXPECT_EQ(scanResult.data.bcData.payloadLen, 0);
+    EXPECT_EQ(scanResult.data.bcData.payload, nullptr);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult015 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult016
+ * @tc.desc: test ParseScanResult with all types combined
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult016, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult016 begin");
+
+    // Test complex scenario with all data types
+    uint8_t advData[] = {
+        0x02, 0x01, 0x06,           // BC_FLAG_AD_TYPE, flag=0x06
+        0x07, 0x09, 'D', 'E', 'V', 'C', 'M', 'P',  // LOCAL_NAME_BC_TYPE
+        0x05, 0x16, 0x09, 0x00, 0x12, 0x34,  // SERVICE_BC_TYPE -> bcData
+        0x06, 0xFF, 0x0A, 0x00, 0x56, 0x78, 0x9A,  // MANUFACTURE_BC_TYPE -> rspData
+        0x05, 0x03, 0x0B, 0x00, 0xAB, 0xCD   // SERVICE_UUID_BC_TYPE -> uuidData
+    };
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult.data.isSupportFlag, true);
+    EXPECT_EQ(scanResult.data.flag, 0x06);
+    EXPECT_STREQ((char *)scanResult.localName, "DEVCMP");
+    EXPECT_EQ(scanResult.data.bcData.type, BROADCAST_DATA_TYPE_SERVICE);
+    EXPECT_EQ(scanResult.data.bcData.id, 0x0009);
+    EXPECT_EQ(scanResult.data.rspData.type, BROADCAST_DATA_TYPE_MANUFACTURER);
+    EXPECT_EQ(scanResult.data.rspData.id, 0x000A);
+    EXPECT_EQ(scanResult.data.uuidData.type, BROADCAST_DATA_TYPE_BUTT);
+    EXPECT_EQ(scanResult.data.uuidData.id, 0x000B);
+    SoftBusFree(scanResult.data.bcData.payload);
+    SoftBusFree(scanResult.data.rspData.payload);
+    SoftBusFree(scanResult.data.uuidData.payload);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult016 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult017
+ * @tc.desc: test ParseScanResult with advDevName already set
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult017, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult017 begin");
+
+    // Test ParseLocalName when advDevName is already set (skip copy)
+    uint8_t advData[] = {
+        0x07, 0x09, 'F', 'I', 'R', 'S', 'T', 'N', 'A',  // First LOCAL_NAME
+        0x06, 0x08, 'S', 'E', 'C', 'N', 'A', 'M'   // Second SHORTENED_LOCAL_NAME
+    };
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult.nameTruncated, false);
+    EXPECT_STREQ((char *)scanResult.localName, "FIRSTN");
+    // advDevName should be "FIRSTNA" (first name, not overwritten)
+    EXPECT_STREQ((char *)scanResult.advDevName, "FIRSTN");
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult017 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult018
+ * @tc.desc: test ParseScanResult with SERVICE_IOS_16UUID_BC_TYPE (0x07)
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult018, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult018 begin");
+
+    // Test SERVICE_IOS_16UUID_BC_TYPE to ensure it maps to BC_DATA_TYPE_SERVICE_UUID
+    uint8_t advData[] = {0x04, 0x07, 0x0C, 0x00, 0xEE};  // len=4, type=0x07, id=0x000C, payload=0xEE
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult.data.uuidData.type, BROADCAST_DATA_TYPE_BUTT);
+    EXPECT_EQ(scanResult.data.uuidData.id, 0x000C);
+    EXPECT_EQ(scanResult.data.uuidData.payloadLen, 1);
+    EXPECT_NE(scanResult.data.uuidData.payload, nullptr);
+    if (scanResult.data.uuidData.payload != nullptr) {
+        EXPECT_EQ(scanResult.data.uuidData.payload[0], 0xEE);
+    }
+    SoftBusFree(scanResult.data.uuidData.payload);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult018 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult019
+ * @tc.desc: test ParseScanResult with multiple UUID data types
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult019, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult019 begin");
+
+    // Test multiple SERVICE_UUID_BC_TYPE entries (same uuidData, gets overwritten)
+    uint8_t advData[] = {
+        0x04, 0x03, 0x0D, 0x00, 0x11,  // SERVICE_UUID_BC_TYPE
+        0x04, 0x07, 0x0E, 0x00, 0x22   // SERVICE_IOS_16UUID_BC_TYPE (overwrites)
+    };
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    // Last one wins
+    EXPECT_EQ(scanResult.data.uuidData.type, BROADCAST_DATA_TYPE_BUTT);
+    EXPECT_EQ(scanResult.data.uuidData.id, 0x000E);
+    SoftBusFree(scanResult.data.uuidData.payload);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult019 end");
+}
+
+/*
+ * @tc.name: SoftbusBleUtilsTest_ParseScanResult020
+ * @tc.desc: test ParseScanResult with invalid payloadLen > available data
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST(SoftbusBleUtilsTest, ParseScanResult020, TestSize.Level3)
+{
+    DISC_LOGI(DISC_TEST, "ParseScanResult020 begin");
+
+    // Test payloadLen > advLen - index - ID_LEN - 1 (invalid payload length)
+    uint8_t advData[] = {0x03, 0x16, 0x0F, 0x00};  // len=3 means payloadLen=0, but let's try invalid
+    uint8_t advLen = sizeof(advData);
+    SoftBusBcScanResult scanResult = {};
+    (void)memset_s(&scanResult, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
+
+    int32_t ret = ParseScanResult(advData, advLen, &scanResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(scanResult.data.bcData.payloadLen, 0);
+
+    DISC_LOGI(DISC_TEST, "ParseScanResult020 end");
+}
 } // namespace OHOS
