@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ static int InnerRegisterService(ListNode *sessionServerInfoList)
         return SOFTBUS_TRANS_GET_CLIENT_NAME_FAILED;
     }
     for (uint32_t i = 0; i < clientNameNum; i++) {
-        while (serverProxyFrame->SoftbusRegisterService(clientName[i], nullptr) != SOFTBUS_OK) {
+        while (serverProxyFrame->SoftbusRegisterService(clientName[i], nullptr, nullptr) != SOFTBUS_OK) {
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
         }
         SoftBusFree(clientName[i]);
@@ -253,7 +253,7 @@ int ClientRegisterService(const char *pkgName)
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t sleepCnt = 0;
-    while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr) != SOFTBUS_OK) {
+    while (serverProxyFrame->SoftbusRegisterService(pkgName, nullptr, nullptr) != SOFTBUS_OK) {
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
         sleepCnt++;
         if (sleepCnt >= SOFTBUS_MAX_RETRY_TIMES) {

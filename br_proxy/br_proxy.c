@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -637,10 +637,11 @@ typedef struct {
 } SoftBusCodeToStateMap;
 
 const SoftBusCodeToStateMap G_CODE_MAP[] = {
-    { SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED,   CHANNEL_WAIT_RESUME },
-    { SOFTBUS_OK,                               CHANNEL_RESUME      },
-    { SOFTBUS_CONN_BR_UNPAIRED,                 CHANNEL_BR_NO_PAIRED},
-    { SOFTBUS_CONN_BLUETOOTH_OFF,               CHANNEL_WAIT_RESUME },
+    { SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED, CHANNEL_WAIT_RESUME               },
+    { SOFTBUS_OK,                             CHANNEL_RESUME                    },
+    { SOFTBUS_CONN_BR_UNPAIRED,               CHANNEL_BR_NO_PAIRED              },
+    { SOFTBUS_CONN_BLUETOOTH_OFF,             CHANNEL_WAIT_RESUME               },
+    { SOFTBUS_PERMISSION_DENIED,              CHANNEL_EXCEPTION_SOFTWARE_FAILED },
 };
 
 static int32_t SoftbusErrConvertChannelState(int32_t err)

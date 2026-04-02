@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,10 +50,16 @@ HWTEST_F(SoftbusClientInfoManagerTest, SoftbusClientInfoManagerTest001, TestSize
 {
     int32_t pidTest = TEST_PID;
     std::string pkgName = "testPkgName";
+    std::string permissionName = "";
     const sptr<IRemoteObject> object = nullptr;
     const sptr<IRemoteObject::DeathRecipient> abilityDeath = nullptr;
-    int32_t ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(pkgName,
-        object, abilityDeath, pidTest);
+    int32_t ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        pkgName, object, abilityDeath, pidTest, permissionName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    permissionName = "testPermissionName";
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        pkgName, object, abilityDeath, pidTest, permissionName);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddServiceInner(pkgName,

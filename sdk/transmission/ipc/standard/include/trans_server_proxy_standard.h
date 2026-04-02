@@ -26,7 +26,8 @@ public:
         : IRemoteProxy<ISoftBusServer>(impl) {}
     virtual ~TransServerProxy() = default;
 
-    int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
+    int32_t SoftbusRegisterService(
+        const char *clientPkgName, const sptr<IRemoteObject> &object, const char *permissionName) override;
 
     int32_t CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) override;
     int32_t RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) override;

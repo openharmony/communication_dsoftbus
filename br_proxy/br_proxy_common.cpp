@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,6 +253,11 @@ extern "C" int32_t CheckPushPermission()
     }
     TRANS_LOGI(TRANS_SVC, "[br_proxy] The push identity passes the authentication.");
     return SOFTBUS_OK;
+}
+
+extern "C" bool CheckPermissionStateIsRevoked(int32_t state)
+{
+    return state == Security::AccessToken::STATE_CHANGE_REVOKED;
 }
 
 SoftBusHandler g_brProxyLooperHandler = { 0 };

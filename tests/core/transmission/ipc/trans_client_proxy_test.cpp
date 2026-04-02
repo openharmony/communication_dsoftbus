@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,8 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = InformPermissionChange(TEST_STATE, g_pkgName, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -136,11 +137,12 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
-    
+
     channel.isServer = false;
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
@@ -166,7 +168,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg;
     BuildChannelMsg(&msg);
@@ -200,7 +203,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg = {
         .msgPid = TEST_PID,
@@ -232,7 +236,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg;
     BuildChannelMsg(&msg);
@@ -267,7 +272,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg;
     BuildChannelMsg(&msg);
@@ -303,7 +309,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientIpcOnChannelQosEvent(g_pkgName, &param);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -334,7 +341,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     data->msgPkgName = g_pkgName;
@@ -433,7 +441,8 @@ HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
-    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
+    ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(
+        g_pkgName, remoteObject, abilityDeath, TEST_PID, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientIpcSetChannelInfo(g_pkgName, g_sessionName, sessionId, transInfo, pid);

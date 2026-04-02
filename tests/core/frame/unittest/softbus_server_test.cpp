@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,11 +69,15 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest001, TestSize.Level1)
     sptr<OHOS::SoftBusServer> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
 
-    int32_t ret = softBusServer->SoftbusRegisterService("test", nullptr);
+    int32_t ret = softBusServer->SoftbusRegisterService("test", nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     sptr<IRemoteObject> obj = GenerateRemoteObject();
-    ret = softBusServer->SoftbusRegisterService("test", obj);
+
+    ret = softBusServer->SoftbusRegisterService("test", obj, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = softBusServer->SoftbusRegisterService("test", obj, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -215,9 +219,9 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest008, TestSize.Level1)
     sptr<IRemoteObject> obj = GenerateRemoteObject();
     EXPECT_NE(obj, nullptr);
 
-    int32_t ret = softBusServer->SoftbusRegisterService("test008", obj);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = softBusServer->SoftbusRegisterService("test008", obj);
+    int32_t ret = softBusServer->SoftbusRegisterService("test008", obj, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = softBusServer->SoftbusRegisterService("test008", obj, OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

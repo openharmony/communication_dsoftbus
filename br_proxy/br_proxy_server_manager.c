@@ -24,6 +24,7 @@
 #include "hap_uninstall_observer.h"
 #include "lnn_ohos_account_adapter.h"
 #include "proxy_manager.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
@@ -224,6 +225,36 @@ static void CloseAllConnect()
     }
     // if client died, need clear g_proxyList
     CloseAllBrProxy();
+}
+
+static void CloseConnectByPid(pid_t pid)
+{
+    if (g_serverList == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
+        return;
+    }
+    if (SoftBusMutexLock(&(g_serverList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
+        return;
+    }
+    ServerBrProxyChannelInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_serverList->list), ServerBrProxyChannelInfo, node) {
+        if (nodeInfo->callingPid != pid) {
+            continue;
+        }
+        int32_t channelId = nodeInfo->channelId;
+        (void)SoftBusMutexUnlock(&(g_serverList->lock));
+        ClientIpcBrProxyStateChanged(pid, channelId, SOFTBUS_PERMISSION_DENIED);
+        int32_t ret = TransCloseBrProxy(channelId, true);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "[br_proxy] close failed! ret=%{public}d, channelId=%{public}d, pid=%{public}d", ret,
+                channelId, pid);
+        } else {
+            TRANS_LOGI(TRANS_SVC, "[br_proxy] close success! channelId=%{public}d, pid=%{public}d", channelId, pid);
+        }
+        return;
+    }
+    (void)SoftBusMutexUnlock(&(g_serverList->lock));
 }
 
 static void ListMemFree(ListNode *list)
@@ -2296,10 +2327,26 @@ void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId)
     (void)SoftBusMutexUnlock(&(g_serverList->lock));
 }
 
+int32_t BtPermissionChange(int32_t state, const char *pkgName, int32_t pid)
+{
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] pkgName is null!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(pkgName, COMM_PKGNAME_BRPROXY) == 0) {
+        if (CheckPermissionStateIsRevoked(state)) {
+            CloseConnectByPid(pid);
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_NOT_FIND;
+}
+
 void TransBrProxyInit(void)
 {
     DynamicLoadInit();
     RegisterUserSwitchEvent();
+    BrProxyRegisterBtPermissionChangeCb(BtPermissionChange);
     TransBrProxyStorageInfo info;
     (void)memset_s(&info, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
     bool flag = TransBrProxyStorageRead(TransBrProxyStorageGetInstance(), &info);

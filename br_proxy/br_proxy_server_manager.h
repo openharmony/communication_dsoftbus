@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@ void TransBrProxyRemoveObject(int32_t pid);
 void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId);
 void TransBrProxyInit(void);
 void TransOnBrProxyOpened(pid_t pid, int32_t channelId, const char *brMac, const char *uuid);
+int32_t BtPermissionChange(int32_t state, const char *pkgName, int32_t pid);
 
 #ifdef __cplusplus
 }
