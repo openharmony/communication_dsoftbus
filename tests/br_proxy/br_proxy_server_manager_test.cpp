@@ -1156,7 +1156,8 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest045, TestSize.Level1)
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest046, TestSize.Level1)
 {
     g_serverList = NULL;
-    CloseConnectByPid(PID_TEST);
+    int32_t ret = CloseConnectByPid(PID_TEST);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 }
 
 /**
