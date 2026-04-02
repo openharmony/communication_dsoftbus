@@ -227,15 +227,15 @@ static void CloseAllConnect()
     CloseAllBrProxy();
 }
 
-static void CloseConnectByPid(pid_t pid)
+static int32_t CloseConnectByPid(pid_t pid)
 {
     if (g_serverList == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
-        return;
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
     }
     if (SoftBusMutexLock(&(g_serverList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
-        return;
+        return SOFTBUS_LOCK_ERR;
     }
     ServerBrProxyChannelInfo *nodeInfo = NULL;
     LIST_FOR_EACH_ENTRY(nodeInfo, &(g_serverList->list), ServerBrProxyChannelInfo, node) {
@@ -252,9 +252,10 @@ static void CloseConnectByPid(pid_t pid)
         } else {
             TRANS_LOGI(TRANS_SVC, "[br_proxy] close success! channelId=%{public}d, pid=%{public}d", channelId, pid);
         }
-        return;
+        return ret;
     }
     (void)SoftBusMutexUnlock(&(g_serverList->lock));
+    return SOFTBUS_OK;
 }
 
 static void ListMemFree(ListNode *list)
@@ -2335,7 +2336,7 @@ int32_t BtPermissionChange(int32_t state, const char *pkgName, int32_t pid)
     }
     if (strcmp(pkgName, COMM_PKGNAME_BRPROXY) == 0) {
         if (CheckPermissionStateIsRevoked(state)) {
-            CloseConnectByPid(pid);
+            (void)CloseConnectByPid(pid);
         }
         return SOFTBUS_OK;
     }
