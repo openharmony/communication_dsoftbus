@@ -133,14 +133,7 @@ int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
 
 int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex)
 {
-    int32_t currentHolder = mutex->holder;
-    mutex->holder = 0;
-
-    int32_t ret = pthread_mutex_unlock((pthread_mutex_t *)mutex->mutex);
-    if (ret != 0) {
-        mutex->holder = currentHolder;
-    }
-    return ret;
+    return pthread_mutex_unlock((pthread_mutex_t *)mutex->mutex);
 }
 
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
@@ -474,15 +467,12 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
 
     int32_t ret;
     if (time == NULL) {
-        mutex->holder = 0;
         ret = pthread_cond_wait((pthread_cond_t *)*cond, (pthread_mutex_t *)mutex->mutex);
         if (ret != 0) {
             COMM_LOGE(COMM_ADAPTER, "SoftBusCondWait failed, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
-        mutex->holder = (int32_t)syscall(__NR_gettid);
     } else {
-        mutex->holder = 0;
         struct timespec tv;
         tv.tv_sec = time->sec;
         tv.tv_nsec = time->usec * USECTONSEC;
@@ -496,7 +486,6 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
             COMM_LOGE(COMM_ADAPTER, "SoftBusCondTimedWait failed, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
-        mutex->holder = (int32_t)syscall(__NR_gettid);
     }
 
     return SOFTBUS_OK;
