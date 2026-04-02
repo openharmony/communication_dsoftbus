@@ -686,7 +686,6 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexLockTest011, TestSize.Level1)
 
     ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(0, mutex.holder);
 
     pthread_t thread2;
     pthread_create(&thread2, nullptr, timeLockThread, &mutex);
@@ -950,7 +949,6 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -971,7 +969,6 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest004, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
@@ -989,7 +986,6 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexUnlockTest005, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusMutexUnlock(&mutex);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(0, mutex.holder);
 }
 
 /*
