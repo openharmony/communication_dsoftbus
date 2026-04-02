@@ -963,7 +963,8 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult003, TestSize.Level3)
     DISC_LOGI(DISC_TEST, "ParseScanResult003 begin");
 
     // Test SERVICE_IOS_16UUID_BC_TYPE (0x07) -> BC_DATA_TYPE_SERVICE_UUID
-    uint8_t advData1[] = {0x05, 0x07, 0x02, 0x00, 0xAA, 0xBB};  // len=5, type=SERVICE_IOS_16UUID_BC_TYPE, id=0x0002, payload=0xAABB
+    // len=5, type=SERVICE_IOS_16UUID_BC_TYPE, id=0x0002, payload=0xAABB
+    uint8_t advData1[] = {0x05, 0x07, 0x02, 0x00, 0xAA, 0xBB};
     uint8_t advLen1 = sizeof(advData1);
     SoftBusBcScanResult scanResult1 = {};
     (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
@@ -1149,7 +1150,8 @@ HWTEST(SoftbusBleUtilsTest, ParseScanResult009, TestSize.Level3)
     DISC_LOGI(DISC_TEST, "ParseScanResult009 begin");
 
     // Test LOCAL_NAME_BC_TYPE (0x09)
-    uint8_t advData1[] = {0x08, 0x09, 'D', 'E', 'V', 'I', 'C', 'E', '1'};  // len=8, type=LOCAL_NAME_BC_TYPE, name="DEVICE1"
+    // len=8, type=LOCAL_NAME_BC_TYPE, name="DEVICE1"
+    uint8_t advData1[] = {0x08, 0x09, 'D', 'E', 'V', 'I', 'C', 'E', '1'};
     uint8_t advLen1 = sizeof(advData1);
     SoftBusBcScanResult scanResult1 = {};
     (void)memset_s(&scanResult1, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
