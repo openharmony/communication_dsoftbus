@@ -31,7 +31,10 @@ ohos_fuzztest("SocketFuzzTest") {
   ]
   sources = [ "socket_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_fuzztest("SocketNameFuzzTest") {
@@ -48,7 +51,10 @@ ohos_fuzztest("SocketNameFuzzTest") {
   sources = [ "socketname_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_fuzztest("SocketPeerNameFuzzTest") {
@@ -65,7 +71,10 @@ ohos_fuzztest("SocketPeerNameFuzzTest") {
   sources = [ "socketpeername_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_fuzztest("SocketPkgNameFuzzTest") {
@@ -82,7 +91,10 @@ ohos_fuzztest("SocketPkgNameFuzzTest") {
   sources = [ "socketpkgname_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_fuzztest("SocketNetworkIdFuzzTest") {
@@ -99,7 +111,10 @@ ohos_fuzztest("SocketNetworkIdFuzzTest") {
   sources = [ "socketnetworkid_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ohos_fuzztest("SocketDataTypeFuzzTest") {
@@ -116,7 +131,10 @@ ohos_fuzztest("SocketDataTypeFuzzTest") {
   sources = [ "socketdatatype_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
   include_dirs = [ "$dsoftbus_root_path/tests/common/include" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 
