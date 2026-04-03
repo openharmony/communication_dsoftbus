@@ -179,47 +179,10 @@ static NapiLinkEnhanceConnection *NapiGetEnhanceConnection(napi_env env, napi_ca
     return NapiGetEnhanceConnection(env, thisVar);
 }
 
-static bool CheckAccessTokenAndParams(napi_env env, napi_callback_info info, std::string &funcName)
-{
-    if (!CheckAccessToken()) {
-        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
-        return false;
-    }
-    size_t argc = ARGS_SIZE_TWO;
-    napi_value args[ARGS_SIZE_TWO];
-    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok || argc != ARGS_SIZE_TWO) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-
-    napi_valuetype valueType = napi_null;
-    napi_typeof(env, args[PARAM1], &valueType);
-    if (valueType != napi_function) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-
-    size_t typeLen = 0;
-    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], nullptr, -1, &typeLen);
-    if (status != napi_ok || typeLen >= ARGS_TYPE_MAX_LEN) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-    char type[ARGS_TYPE_MAX_LEN];
-    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], type, sizeof(type), &typeLen);
-    if (status != napi_ok) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-    funcName = type;
-    return true;
-}
-
 napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
 {
     std::string funcName = "";
-    if (!CheckAccessTokenAndParams(env, info, funcName)) {
+    if (!CheckAccessTokenAndParams(env, info, funcName, true)) {
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
@@ -261,7 +224,7 @@ napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
 napi_value NapiLinkEnhanceConnection::Off(napi_env env, napi_callback_info info)
 {
     std::string funcName = "";
-    if (!CheckAccessTokenAndParams(env, info, funcName)) {
+    if (!CheckAccessTokenAndParams(env, info, funcName, false)) {
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
