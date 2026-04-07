@@ -261,9 +261,8 @@ bool ForCJsonPackUnpackFuzzTest(FuzzedDataProvider &provider)
     return false;
 }
 
-bool SaveAndRecoveryApplyKeyCase(FuzzedDataProvider &provider)
+bool SaveAndRecoveryApplyKeyCase(void)
 {
-    (void)provider;
     g_isRecoveryApplyKey = true;
     AuthRecoveryApplyKey();
     g_isRecoveryApplyKey = false;
@@ -287,12 +286,12 @@ bool AuthApplyKeyManagerFuzzTest(FuzzedDataProvider &provider)
     AuthInsertApplyKeyFuzzTest(provider);
     AuthDeleteApplyKeyFuzzTest(provider);
     AuthInsertApplyKeyFuzzTest(provider);
-    SaveAndRecoveryApplyKeyCase(provider);
+    SaveAndRecoveryApplyKeyCase();
     GetApplyKeyByBusinessInfoFuzzTest(provider);
     GetNodeFromAuthApplyMapFuzzTest(provider);
     InsertToAuthApplyMapFuzzTest(provider);
     ForCJsonPackUnpackFuzzTest(provider);
-    SaveAndRecoveryApplyKeyCase(provider);
+    SaveAndRecoveryApplyKeyCase();
 
     DeInitApplyKeyManager();
     DeInitApplyKeyManager();
