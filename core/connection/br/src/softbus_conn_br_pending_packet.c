@@ -137,10 +137,12 @@ int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, 
         (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_NOT_FIND;
     }
+    ListDelete(&pending->node);
     (void)SoftBusMutexUnlock(&g_pendingLock);
 
     int32_t ret = SOFTBUS_OK;
     if (SoftBusMutexLock(&pending->lock) != SOFTBUS_OK) {
+        *data = pending->data;
         ret = SOFTBUS_LOCK_ERR;
         goto EXIT;
     }
@@ -163,12 +165,9 @@ int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, 
     }
     (void)SoftBusMutexUnlock(&pending->lock);
 EXIT:
-    (void)SoftBusMutexLock(&g_pendingLock);
-    ListDelete(&pending->node);
     SoftBusMutexDestroy(&pending->lock);
     SoftBusCondDestroy(&pending->cond);
     SoftBusFree(pending);
-    (void)SoftBusMutexUnlock(&g_pendingLock);
     return ret;
 }
 
