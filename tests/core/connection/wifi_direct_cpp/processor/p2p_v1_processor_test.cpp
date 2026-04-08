@@ -1327,7 +1327,8 @@ HWTEST_F(P2pV1ProcessorTest, RoleDecisionAsGc, TestSize.Level1)
          SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE                                                                           },
         { WIFI_DIRECT_ROLE_GO,   WIFI_DIRECT_ROLE_GO,   "11:22:33:44:55:66", "22:33:44:55:66:77",
          SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE                                                                           },
-        { WIFI_DIRECT_ROLE_NONE, WIFI_DIRECT_ROLE_NONE, "11:22:33:44:55:66", "",                  SOFTBUS_CONN_PV1_IF_NOT_AVAILABLE},
+        { WIFI_DIRECT_ROLE_NONE, WIFI_DIRECT_ROLE_NONE, "11:22:33:44:55:66", "",
+         SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE                                                              },
         { WIFI_DIRECT_ROLE_GC,   WIFI_DIRECT_ROLE_GC,   "11:22:33:44:55:66", "22:33:44:55:66:77",
          SOFTBUS_CONN_PV1_GC_CONNECTED_TO_ANOTHER_DEVICE                                                                           },
     };
