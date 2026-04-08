@@ -1476,9 +1476,6 @@ static int32_t TransProxySendHandShakeMsgWhenInner(uint32_t connId, ProxyChannel
     if (chan->appInfo.appType != APP_TYPE_INNER) {
         return SOFTBUS_OK;
     }
-    if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
-        TransProxyFastDataRecv(chan);
-    }
     chan->appInfo.myHandleId = 0;
     int32_t ret = TransProxyAckHandshake(connId, chan, SOFTBUS_OK);
     if (ret != SOFTBUS_OK) {
@@ -1531,13 +1528,6 @@ static int32_t CopyAppInfoFastTransData(ProxyChannelInfo *chan, const AppInfo *a
     return SOFTBUS_OK;
 }
 
-static void ReleaseFastTransData(AppInfo *appInfo)
-{
-    if (appInfo != NULL && appInfo->fastTransData != NULL) {
-        SoftBusFree((void *)(appInfo->fastTransData));
-    }
-}
-
 static int32_t TransProxySaveAndOnOpen(ProxyChannelInfo *chan, int32_t channelId, TransEventExtra *extra)
 {
     int32_t ret = SOFTBUS_OK;
@@ -1553,10 +1543,8 @@ static int32_t TransProxySaveAndOnOpen(ProxyChannelInfo *chan, int32_t channelId
         ret = SOFTBUS_MEM_ERR;
         goto EXIT_RELEASE;
     }
-    ret = CopyAppInfoFastTransData(&(tmpChan), &(chan->appInfo));
-    if (ret != SOFTBUS_OK) {
-        goto EXIT_RELEASE;
-    }
+    tmpChan.appInfo.fastTransData = NULL;
+    tmpChan.appInfo.fastTransDataSize = 0;
     ret = TransProxyAddChanItem(chan);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
@@ -1566,17 +1554,14 @@ static int32_t TransProxySaveAndOnOpen(ProxyChannelInfo *chan, int32_t channelId
         ret = CheckCollabRelation(&(tmpChan.appInfo), tmpChan.channelId, CHANNEL_TYPE_PROXY);
         if (ret == SOFTBUS_OK) {
             TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
-            ReleaseFastTransData(&(tmpChan.appInfo));
             return SOFTBUS_OK;
         } else if (ret != SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
             (void)TransProxyAckHandshake(tmpChan.connId, &tmpChan, ret);
             TransProxyDelChanByChanId(channelId);
-            ReleaseFastTransData(&(tmpChan.appInfo));
             return ret;
         }
     }
     ret = TransServerProxyChannelOpened(&tmpChan, extra, channelId);
-    ReleaseFastTransData(&(tmpChan.appInfo));
     return ret;
 EXIT_RELEASE:
     ReleaseProxyChannelId(channelId);
