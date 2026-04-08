@@ -108,7 +108,8 @@ typedef struct NSTACKX_DeviceInfo {
     uint32_t deviceType;
     uint8_t mode;
     uint8_t update : 1;
-    uint8_t reserved : 7;
+    uint8_t needRspWithBtype0 : 1; /* Indicates whether a response is needed for special bType 0 messages. */
+    uint8_t reserved : 6;
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
     uint8_t discoveryType;
     uint8_t businessType;

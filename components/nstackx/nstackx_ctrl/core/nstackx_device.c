@@ -337,6 +337,7 @@ int32_t GetNotifyDeviceInfo(NSTACKX_DeviceInfo *notifyDevice, const DeviceInfo *
     notifyDevice->deviceType = deviceInfo->deviceType;
     notifyDevice->mode = deviceInfo->mode;
     notifyDevice->businessType = deviceInfo->businessType;
+    notifyDevice->needRspWithBtype0 = IsSeqNoneType(deviceInfo) ? NSTACKX_TRUE : NSTACKX_FALSE;
     return NSTACKX_EOK;
 }
 
