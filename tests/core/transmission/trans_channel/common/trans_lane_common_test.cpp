@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -388,8 +388,6 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam002, TestSize.Level1)
 
 /*
  * @tc.name: CopyAppInfoFromSessionParam003
- * @tc.desc: Should return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH when businessType is BUSINESS_TYPE_FILE
- * @tc.desc: Should return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH when businessType is BUSINESS_TYPE_STREAM
  * @tc.desc: Should return SOFTBUS_MEM_ERR when groupId or sessionName or peerDeviceId or peerSessionName is nullptr
  * @tc.desc: Should return SOFTBUS_TRANS_BAD_KEY when TransGetPkgNameBySessionName return SOFTBUS_TRANS_BAD_KEY
  * @tc.desc: Should return SOFTBUS_TRANS_BAD_KEY when TransGetPkgNameBySessionName return LnnGetRemoteStrInfo
@@ -404,18 +402,11 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam003, TestSize.Level1)
     SessionParam *param = TestCreateSessionParam();
     EXPECT_NE(param, nullptr);
 
-    appInfo->businessType = BUSINESS_TYPE_FILE;
-    int32_t ret = CopyAppInfoFromSessionParam(appInfo, param);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
-
-    appInfo->businessType = BUSINESS_TYPE_STREAM;
-    ret = CopyAppInfoFromSessionParam(appInfo, param);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
-
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
     EXPECT_CALL(transLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = CopyAppInfoFromSessionParam(appInfo, param);
+
+    int32_t ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     param->groupId = TEST_GROUP_ID;
@@ -506,7 +497,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo001, TestSize.Level1)
 
 /*
  * @tc.name: TransCommonGetAppInfo002
- * @tc.desc: Should return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH when businessType is BUSINESS_TYPE_FILE
+ * @tc.desc: Should return SOFTBUS_MEM_ERR when businessType is BUSINESS_TYPE_FILE
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -522,7 +513,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
     NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
     EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = TransCommonGetAppInfo(param, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     param->groupId = TEST_GROUP_ID;

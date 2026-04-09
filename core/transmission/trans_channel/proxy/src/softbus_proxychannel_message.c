@@ -48,8 +48,6 @@
 #include "trans_session_account_adapter.h"
 #include "trans_uk_manager.h"
 
-static _Atomic int32_t g_proxyPktHeadSeq = 2048;
-
 #define PROXY_CHANNEL_CLIENT      0
 #define PROXY_CHANNEL_SERVER      1
 #define CHAT_MODE_SINGLE          0x01
@@ -1159,42 +1157,7 @@ int32_t TransProxyPackMessage(
 
 static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 {
-    if (appInfo->fastTransDataSize > 0) {
-        TRANS_LOGI(TRANS_CTRL, "have fast data need transport");
-        if (!AddNumberToJsonObject(root, JSON_KEY_ROUTE_TYPE, appInfo->routeType)) {
-            TRANS_LOGE(TRANS_CTRL, "add route type fail.");
-            return SOFTBUS_CREATE_JSON_ERR;
-        }
-        uint8_t *encodeFastData = (uint8_t *)SoftBusCalloc(BASE64_FAST_DATA_LEN);
-        if (encodeFastData == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "malloc encode fast data fail.");
-            return SOFTBUS_MALLOC_ERR;
-        }
-        size_t fastDataSize = 0;
-        uint32_t outLen;
-        char *buf = TransProxyPackFastData(appInfo, &outLen);
-        if (buf == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
-            SoftBusFree(encodeFastData);
-            return SOFTBUS_TRANS_PACK_FAST_DATA_FAILED;
-        }
-        int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
-            (const unsigned char *)buf, outLen);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "mbedtls base64 encode failed.");
-            SoftBusFree(encodeFastData);
-            SoftBusFree(buf);
-            return SOFTBUS_DECRYPT_ERR;
-        }
-        if (!AddStringToJsonObject(root, JSON_KEY_FIRST_DATA, (const char *)encodeFastData)) {
-            TRANS_LOGE(TRANS_CTRL, "add first data failed.");
-            SoftBusFree(encodeFastData);
-            SoftBusFree(buf);
-            return SOFTBUS_CREATE_JSON_ERR;
-        }
-        SoftBusFree(encodeFastData);
-        SoftBusFree(buf);
-    }
+    // fastTransData is NULL, just fill fastTransDataSize
     if (!AddNumber16ToJsonObject(root, JSON_KEY_FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
         TRANS_LOGE(TRANS_CTRL, "add first data size failed.");
         return SOFTBUS_CREATE_JSON_ERR;
@@ -1574,14 +1537,13 @@ static int32_t GetSinkSessionKeyFromHandshakeAckMsg(cJSON *root, AppInfo *appInf
     return DecryptAndAddSinkSessionKey(root, appInfo);
 }
 
-static void GetNoramlInfoFromHandshakeAckMsg(cJSON *root, ProxyChannelInfo *chanInfo, uint16_t *fastDataSize)
+static void GetNoramlInfoFromHandshakeAckMsg(cJSON *root, ProxyChannelInfo *chanInfo)
 {
     if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &chanInfo->appInfo.peerData.uid) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_PID, &chanInfo->appInfo.peerData.pid) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &chanInfo->appInfo.encrypt) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &chanInfo->appInfo.algorithm) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &chanInfo->appInfo.crc) ||
-        !GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, fastDataSize) ||
         !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, chanInfo->appInfo.peerData.sessionName,
             sizeof(chanInfo->appInfo.peerData.sessionName)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, chanInfo->appInfo.myData.sessionName,
@@ -1590,10 +1552,9 @@ static void GetNoramlInfoFromHandshakeAckMsg(cJSON *root, ProxyChannelInfo *chan
     }
 }
 
-int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
-    int32_t len, uint16_t *fastDataSize)
+int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(msg != NULL && chanInfo != NULL && fastDataSize != NULL,
+    TRANS_CHECK_AND_RETURN_RET_LOGE(msg != NULL && chanInfo != NULL,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "msg or chanInfo or fastDataSize is empty.");
 
     TRANS_CHECK_AND_RETURN_RET_LOGE(&chanInfo->appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null");
@@ -1622,7 +1583,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
     if (chanInfo->appInfo.appType == APP_TYPE_NORMAL) {
-        GetNoramlInfoFromHandshakeAckMsg(root, chanInfo, fastDataSize);
+        GetNoramlInfoFromHandshakeAckMsg(root, chanInfo);
         if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &chanInfo->appInfo.peerHandleId)) {
             chanInfo->appInfo.peerHandleId = -1;
         }
@@ -1913,158 +1874,6 @@ int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t ident
 
     cJSON_Delete(root);
     return SOFTBUS_OK;
-}
-
-static int32_t TransProxyEncryptFastData(const char *sessionKey, int32_t seq, const char *in, uint32_t inLen,
-    char *out, uint32_t *outLen)
-{
-    AesGcmCipherKey cipherKey = { 0 };
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
-        return SOFTBUS_MEM_ERR;
-    }
-
-    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char *)in, inLen,
-        (unsigned char *)out, outLen, seq);
-    (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-
-    if (ret != SOFTBUS_OK || *outLen != inLen + OVERHEAD_LEN) {
-        TRANS_LOGE(TRANS_CTRL, "encrypt error, ret=%{public}d.", ret);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static void FastDataPackPacketHead(PacketFastHead *data)
-{
-    data->magicNumber = (int32_t)SoftBusHtoLl((uint32_t)data->magicNumber);
-    data->seq = (int32_t)SoftBusHtoLl((uint32_t)data->seq);
-    data->flags = (int32_t)SoftBusHtoLl((uint32_t)data->flags);
-    data->dataLen = (int32_t)SoftBusHtoLl((uint32_t)data->dataLen);
-}
-
-static int32_t TransProxyPackFastDataHead(ProxyDataInfo *dataInfo, const AppInfo *appInfo)
-{
-#define MAGIC_NUMBER 0xBABEFACE
-    if (dataInfo == NULL || appInfo ==NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invaild param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + sizeof(PacketFastHead);
-    uint32_t cipherLength = dataInfo->inLen + OVERHEAD_LEN;
-    dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
-    if (dataInfo->outData == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "calloc error");
-        return SOFTBUS_MALLOC_ERR;
-    }
-
-    int32_t seq = atomic_fetch_add_explicit(&g_proxyPktHeadSeq, 1, memory_order_relaxed);
-    if (TransProxyEncryptFastData(appInfo->sessionKey, seq, (const char *)dataInfo->inData,
-        dataInfo->inLen, (char *)dataInfo->outData + sizeof(PacketFastHead), &cipherLength) != SOFTBUS_OK) {
-        SoftBusFree(dataInfo->outData);
-        TRANS_LOGE(TRANS_CTRL, "TransProxyEncryptFastData err");
-        return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
-    }
-
-    PacketFastHead *pktHead = (PacketFastHead*)dataInfo->outData;
-    pktHead->magicNumber = MAGIC_NUMBER;
-    pktHead->seq = seq;
-    pktHead->flags = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE;
-    pktHead->dataLen = (int32_t)cipherLength;
-    FastDataPackPacketHead(pktHead);
-
-    return SOFTBUS_OK;
-}
-
-static void FastDataPackSliceHead(SliceFastHead *data)
-{
-    data->priority = (int32_t)SoftBusHtoLl((uint32_t)data->priority);
-    data->sliceNum = (int32_t)SoftBusHtoLl((uint32_t)data->sliceNum);
-    data->sliceSeq = (int32_t)SoftBusHtoLl((uint32_t)data->sliceSeq);
-    data->reserved = (int32_t)SoftBusHtoLl((uint32_t)data->reserved);
-}
-static int32_t TransProxyMessageData(const AppInfo *appInfo, ProxyDataInfo *dataInfo)
-{
-    dataInfo->inData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize);
-    if (dataInfo->inData == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc error");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    uint16_t fastDataSize = appInfo->fastTransDataSize;
-    if (memcpy_s(dataInfo->inData, fastDataSize, appInfo->fastTransData, fastDataSize) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy_s fastTransData error.");
-        SoftBusFree(dataInfo->inData);
-        return SOFTBUS_MEM_ERR;
-    }
-    dataInfo->inLen = fastDataSize;
-    return SOFTBUS_OK;
-}
-
-static int32_t TransProxyByteData(const AppInfo *appInfo, ProxyDataInfo *dataInfo)
-{
-    dataInfo->inData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + sizeof(SessionHead));
-    if (dataInfo->inData == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc error");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    uint16_t fastDataSize = appInfo->fastTransDataSize;
-    SessionHead *sessionHead = (SessionHead*)dataInfo->inData;
-    sessionHead->seq = atomic_fetch_add_explicit(&g_proxyPktHeadSeq, 1, memory_order_relaxed);
-    sessionHead->packetFlag = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE;
-    sessionHead->shouldAck = 0;
-    if (memcpy_s(dataInfo->inData + sizeof(SessionHead), fastDataSize, appInfo->fastTransData, fastDataSize) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy_s fastTransData error.");
-        SoftBusFree(dataInfo->inData);
-        return SOFTBUS_MEM_ERR;
-    }
-    dataInfo->inLen = fastDataSize + sizeof(SessionHead);
-    return SOFTBUS_OK;
-}
-
-char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen)
-{
-    ProxyDataInfo dataInfo = {0};
-    if (appInfo->businessType == BUSINESS_TYPE_MESSAGE && appInfo->routeType == WIFI_STA) {
-        if (TransProxyMessageData(appInfo, &dataInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "TransProxyMessageData error");
-            return NULL;
-        }
-    } else {
-        if (TransProxyByteData(appInfo, &dataInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "TransProxyByteData error");
-            return NULL;
-        }
-    }
-    if (TransProxyPackFastDataHead(&dataInfo, appInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransProxyPackFastDataHead error");
-        SoftBusFree(dataInfo.inData);
-        return NULL;
-    }
-
-    char *sliceData = (char *)SoftBusMalloc(dataInfo.outLen + sizeof(SliceFastHead));
-    if (sliceData == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc slice data error");
-        SoftBusFree(dataInfo.inData);
-        SoftBusFree(dataInfo.outData);
-        return NULL;
-    }
-    SliceFastHead *slicehead = (SliceFastHead*)sliceData;
-    slicehead->priority = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE;
-    slicehead->sliceNum = 1;
-    slicehead->sliceSeq = 0;
-    FastDataPackSliceHead(slicehead);
-    if (memcpy_s(sliceData + sizeof(SliceFastHead), dataInfo.outLen, dataInfo.outData, dataInfo.outLen) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy_s error");
-        SoftBusFree(dataInfo.inData);
-        SoftBusFree(dataInfo.outData);
-        SoftBusFree(sliceData);
-        return NULL;
-    }
-    *outLen = dataInfo.outLen + sizeof(SliceFastHead);
-    SoftBusFree(dataInfo.inData);
-    SoftBusFree(dataInfo.outData);
-    return sliceData;
 }
 
 int32_t TransProxyParseD2DData(const char *data, int32_t len)

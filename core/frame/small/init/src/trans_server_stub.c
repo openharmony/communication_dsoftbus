@@ -148,15 +148,6 @@ static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
         TRANS_LOGE(TRANS_CTRL, "read streamType failed");
         return;
     }
-
-    if (!ReadUint16(req, &getAttr->fastTransDataSize)) {
-        TRANS_LOGE(TRANS_CTRL, "read fastTransDataSize failed");
-        return;
-    }
-
-    if (getAttr->fastTransDataSize != 0) {
-        getAttr->fastTransData = (uint8_t *)ReadRawData(req, getAttr->fastTransDataSize);
-    }
 }
 
 static bool ReadQosInfo(IpcIo *req, SessionParam *param)

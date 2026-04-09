@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,12 +43,10 @@ int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int32_t *errCode, int32
     return SoftbusTransProxyChannelManagerMock::GetMockObj().TransProxyUnPackHandshakeErrMsg(msg, errCode, len);
 }
 
-int32_t TransProxyUnpackHandshakeAckMsg(
-    const char *msg, ProxyChannelInfo *chanInfo, int32_t len, uint16_t *fastDataSize)
+int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len)
 {
     std::cout << "TransProxyUnpackHandshakeAckMsg calling enter" << std::endl;
-    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransProxyUnpackHandshakeAckMsg(
-        msg, chanInfo, len, fastDataSize);
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransProxyUnpackHandshakeAckMsg(msg, chanInfo, len);
 }
 
 int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t len)

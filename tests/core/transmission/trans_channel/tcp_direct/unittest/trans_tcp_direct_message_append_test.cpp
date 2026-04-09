@@ -852,29 +852,6 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetClientSideIpInfoTest001, TestSize.L
 }
 
 /*
- * @tc.name: TransTdcPostFisrtDataTest001
- * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when TransTdcPackFastData return nullptr
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostFisrtDataTest001, TestSize.Level1)
-{
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_TRUE(conn != nullptr);
-
-    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, SoftBusEncryptData).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
-    int32_t ret = TransTdcPostFastData(conn);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
-
-    EXPECT_CALL(TcpMessageMock, SoftBusEncryptData).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, SetIpTos).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
-    ret = TransTdcPostFastData(conn);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
-    ReleaseSessionConn(conn);
-}
-
-/*
  * @tc.name: OpenDataBusReplyTest001
  * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED when GetSessionConnById return nullptr
  * @tc.type: FUNC
@@ -999,7 +976,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest005, TestSize.Leve
     EXPECT_CALL(TcpMessageMock, SetAppInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, GetErrCodeBySocketErr).WillRepeatedly(Return(SOFTBUS_CONN_SOCKET_EINTR));
     ret = OpenDataBusReply(channelId, seq, reply, 0);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_P2P_INFO_FAILED, ret);
 
     TransDelSessionConnById(channelId);
     cJSON_Delete(reply);

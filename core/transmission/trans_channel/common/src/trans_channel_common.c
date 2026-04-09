@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -295,23 +295,8 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
         TRANS_LOGE(TRANS_CTRL, "parm is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (param->attr->fastTransData != NULL && param->attr->fastTransDataSize > 0 &&
-        param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
-        if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
-            TRANS_LOGE(TRANS_CTRL, "not support send fast data");
-            return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
-        }
-        appInfo->fastTransData = (uint8_t *)SoftBusCalloc(param->attr->fastTransDataSize);
-        if (appInfo->fastTransData == NULL) {
-            return SOFTBUS_MALLOC_ERR;
-        }
-        if (memcpy_s((char *)appInfo->fastTransData, param->attr->fastTransDataSize,
-            (const char *)param->attr->fastTransData, param->attr->fastTransDataSize) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "memcpy_s err");
-            return SOFTBUS_MEM_ERR;
-        }
-    }
-    appInfo->fastTransDataSize = param->attr->fastTransDataSize;
+    appInfo->fastTransData = NULL;
+    appInfo->fastTransDataSize = 0;
     int32_t errCode = TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid);
     if (errCode != SOFTBUS_OK) {
         return errCode;
