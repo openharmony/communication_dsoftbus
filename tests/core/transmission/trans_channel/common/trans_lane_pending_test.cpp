@@ -1732,4 +1732,60 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest007, TestSize.Le
     EXPECT_EQ(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
 }
 
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest008
+ * @tc.desc: Test UpdateChannelCancelEncryption with hml link type bit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest008, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_FILE;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 1u << LINK_TYPE_WIFI;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = 0;
+
+    LaneLinkType type = LANE_HML;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1u << UDP_CHANNEL_CANCEL_ENCRYPTION));
+}
+
+/**
+ * @tc.name: UpdateChannelCancelEncryptionTest009
+ * @tc.desc: Test UpdateChannelCancelEncryption with existing capability bits
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest009, TestSize.Level1)
+{
+    SessionAttribute attr;
+    (void)memset_s(&attr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    attr.dataType = TYPE_FILE;
+
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    param.cancelEncryptionBit = 1u << LINK_TYPE_WIRED;
+    param.attr = &attr;
+
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelCapability = (1u << UDP_CHANNEL_MULTIPATH_OFFSET) | (1u << CHANNEL_ISMULTINEG_OFFSET);
+
+    LaneLinkType type = LANE_HML;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateChannelCancelEncryption(&param, type, &appInfo));
+
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1u << UDP_CHANNEL_MULTIPATH_OFFSET));
+    EXPECT_NE(0, appInfo.udpChannelCapability & (1u << CHANNEL_ISMULTINEG_OFFSET));
+    EXPECT_EQ(0, appInfo.udpChannelCapability & (1u << UDP_CHANNEL_CANCEL_ENCRYPTION));
+}
 } // namespace OHOS
