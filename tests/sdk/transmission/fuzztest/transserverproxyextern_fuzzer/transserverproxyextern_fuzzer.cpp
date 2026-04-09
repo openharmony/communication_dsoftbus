@@ -22,6 +22,7 @@
 
 #include "fuzz_data_generator.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "trans_server_proxy.h"
 
 #define LOOP_SLEEP_MILLS 100
@@ -51,307 +52,221 @@ private:
     volatile bool isInited_;
 };
 
-void TransServerProxyDeInitTest(const uint8_t *data, size_t size)
+void ServerIpcCreateSessionServerTest(FuzzedDataProvider &provider)
 {
-    (void)data;
-    (void)size;
-    TransServerProxyDeInit();
-}
-
-static uint8_t *TestDataSwitch(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int32_t)) {
-        return nullptr;
-    }
-    uint8_t *dataWithEndCharacter = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
-    if (dataWithEndCharacter == nullptr) {
-        return nullptr;
-    }
-    if (memcpy_s(dataWithEndCharacter, size, data, size) != EOK) {
-        SoftBusFree(dataWithEndCharacter);
-        return nullptr;
-    }
-    return dataWithEndCharacter;
-}
-
-void ServerIpcCreateSessionServerTest(const uint8_t *data, size_t size)
-{
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
         return;
     }
-    char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-    char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
+        return;
+    }
+    TransServerProxyDeInit();
     (void)ServerIpcCreateSessionServer(pkgName, sessionName, 1);
     (void)ServerIpcCreateSessionServer(nullptr, sessionName, 1);
     (void)ServerIpcCreateSessionServer(pkgName, nullptr, 1);
     (void)ServerIpcCreateSessionServer(nullptr, nullptr, 1);
-    SoftBusFree(dataWithEndCharacter);
 }
 
-void ServerIpcRemoveSessionServerTest(const uint8_t *data, size_t size)
+void ServerIpcRemoveSessionServerTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
         return;
     }
-    char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-    char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
+        return;
+    }
 
     (void)ServerIpcRemoveSessionServer(pkgName, sessionName, 1);
     (void)ServerIpcRemoveSessionServer(nullptr, sessionName, 1);
     (void)ServerIpcRemoveSessionServer(pkgName, nullptr, 1);
     (void)ServerIpcRemoveSessionServer(nullptr, nullptr, 1);
-    SoftBusFree(dataWithEndCharacter);
 }
 
-static void InitSessionAttribute(const uint8_t *data, size_t size, SessionAttribute *sessionAttr)
+void ServerIpcOpenSessionTest(FuzzedDataProvider &provider)
 {
-    DataGenerator::Write(data, size);
-    GenerateInt32(sessionAttr->dataType);
-    GenerateInt32(sessionAttr->attr.streamAttr.streamType);
-    DataGenerator::Clear();
-}
-
-static void InitSessionParam(
-    const uint8_t *data, size_t size, SessionParam *sessionParam, SessionAttribute *sessionAttr)
-{
-    bool boolParam = true;
-    (void)GenerateBool(boolParam);
-    char *charParam = boolParam ? const_cast<char *>(reinterpret_cast<const char *>(data)) : nullptr;
-
-    sessionParam->sessionName = charParam;
-    sessionParam->peerSessionName = charParam;
-    sessionParam->peerDeviceId = charParam;
-    sessionParam->groupId = charParam;
-    sessionParam->attr = sessionAttr;
-    DataGenerator::Write(data, size);
-    sessionParam->sessionId = 0;
-    GenerateInt32(sessionParam->sessionId);
-    DataGenerator::Clear();
-    sessionParam->isQosLane = boolParam;
-    sessionParam->isAsync = boolParam;
-}
-
-void ServerIpcOpenSessionTest(const uint8_t *data, size_t size)
-{
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
-        return;
-    }
-    DataGenerator::Write(data, size);
     TransInfo transInfo = { 0 };
-    GenerateInt32(transInfo.channelId);
-    GenerateInt32(transInfo.channelType);
-    DataGenerator::Clear();
-
     SessionAttribute sessionAttr = { 0 };
-    InitSessionAttribute(dataWithEndCharacter, size, &sessionAttr);
-
     SessionParam sessionParam = { 0 };
-    InitSessionParam(dataWithEndCharacter, size, &sessionParam, &sessionAttr);
+    transInfo.channelId = provider.ConsumeIntegral<int32_t>();
+    transInfo.channelType = provider.ConsumeIntegral<int32_t>();
+    sessionAttr.dataType = provider.ConsumeIntegral<int32_t>();
+    sessionAttr.attr.streamAttr.streamType = provider.ConsumeIntegral<int32_t>();
+    sessionParam.isQosLane = provider.ConsumeBool();
+    sessionParam.isAsync = provider.ConsumeBool();
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    sessionParam.sessionName = providerSessionName.c_str();
+    std::string providerPeerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    sessionParam.peerSessionName = providerPeerSessionName.c_str();
+    std::string providerPeerDeviceId = provider.ConsumeBytesAsString(DEVICE_ID_SIZE_MAX - 1);
+    sessionParam.peerDeviceId = providerPeerDeviceId.c_str();
+    std::string providerGroupId = provider.ConsumeBytesAsString(GROUP_ID_SIZE_MAX - 1);
+    sessionParam.groupId = providerGroupId.c_str();
+    sessionParam.attr = &sessionAttr;
+    sessionParam.sessionId = provider.ConsumeIntegral<int32_t>();
 
     (void)ServerIpcOpenSession(&sessionParam, &transInfo);
-    SoftBusFree(dataWithEndCharacter);
+    sessionParam.attr = nullptr;
+    (void)ServerIpcOpenSession(&sessionParam, &transInfo);
+    sessionParam.groupId = nullptr;
+    (void)ServerIpcOpenSession(&sessionParam, &transInfo);
+    sessionParam.peerDeviceId = nullptr;
+    (void)ServerIpcOpenSession(&sessionParam, &transInfo);
+    sessionParam.peerSessionName = nullptr;
+    (void)ServerIpcOpenSession(&sessionParam, &transInfo);
+    sessionParam.sessionName = nullptr;
+    (void)ServerIpcOpenSession(&sessionParam, &transInfo);
 }
 
-void ServerIpcOpenAuthSessionTest(const uint8_t *data, size_t size)
+void ServerIpcOpenAuthSessionTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
         return;
     }
-    char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
     ConnectionAddr connectionAddr;
     connectionAddr.type = CONNECTION_ADDR_SESSION;
-    DataGenerator::Write(data, size);
-    connectionAddr.info.session.sessionId = 0;
-    connectionAddr.info.session.channelId = 0;
-    connectionAddr.info.session.type = 0;
-    GenerateInt32(connectionAddr.info.session.sessionId);
-    GenerateInt32(connectionAddr.info.session.channelId);
-    GenerateInt32(connectionAddr.info.session.type);
+    connectionAddr.info.session.sessionId = provider.ConsumeIntegral<int32_t>();
+    connectionAddr.info.session.channelId = provider.ConsumeIntegral<int32_t>();
+    connectionAddr.info.session.type = provider.ConsumeIntegral<int32_t>();
     (void)ServerIpcOpenAuthSession(sessionName, &connectionAddr);
     (void)ServerIpcOpenAuthSession(nullptr, &connectionAddr);
     (void)ServerIpcOpenAuthSession(sessionName, nullptr);
     (void)ServerIpcOpenAuthSession(nullptr, nullptr);
-    SoftBusFree(dataWithEndCharacter);
-    DataGenerator::Clear();
 }
 
-void ServerIpcCloseChannelTest(const uint8_t *data, size_t size)
+void ServerIpcCloseChannelTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
         return;
     }
-    char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
 
     (void)ServerIpcCloseChannel(sessionName, channelId, channelType);
-    SoftBusFree(dataWithEndCharacter);
-    DataGenerator::Clear();
 }
 
-void ServerIpcCloseChannelWithStatisticsTest(const uint8_t *data, size_t size)
+void ServerIpcCloseChannelWithStatisticsTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < sizeof(uint64_t)) {
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
+    uint64_t laneId = provider.ConsumeIntegral<uint64_t>();
+    uint64_t size = provider.ConsumeIntegral<uint64_t>();
+    if (size < 1) {
         return;
     }
-
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    uint64_t laneId = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateUint64(laneId);
+    std::string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
 
     (void)ServerIpcCloseChannelWithStatistics(channelId, channelType, laneId, data, size);
-    DataGenerator::Clear();
 }
 
-void ServerIpcReleaseResourcesTest(const uint8_t *data, size_t size)
+void ServerIpcReleaseResourcesTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
-        return;
-    }
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    GenerateInt32(channelId);
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
 
     (void)ServerIpcReleaseResources(channelId);
-    DataGenerator::Clear();
 }
 
-void ServerIpcSendMessageTest(const uint8_t *data, size_t size)
+void ServerIpcSendMessageTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
+    int32_t msgType = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
+    if (size < 1) {
         return;
     }
-
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t msgType = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateInt32(msgType);
+    std::string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
 
     (void)ServerIpcSendMessage(channelId, channelType, data, size, msgType);
-    DataGenerator::Clear();
 }
 
-void ServerIpcQosReportTest(const uint8_t *data, size_t size)
+void ServerIpcQosReportTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
-        return;
-    }
-
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t appType = 0;
-    int32_t quality = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateInt32(appType);
-    GenerateInt32(quality);
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
+    int32_t appType = provider.ConsumeIntegral<int32_t>();
+    int32_t quality = provider.ConsumeIntegral<int32_t>();
 
     (void)ServerIpcQosReport(channelId, channelType, appType, quality);
-    DataGenerator::Clear();
 }
 
-void ServerIpcStreamStatsTest(const uint8_t *data, size_t size)
+void ServerIpcStreamStatsTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < sizeof(uint32_t)) {
-        return;
-    }
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t channelType = 0;
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
     StreamSendStats streamSendStats;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateUint32(streamSendStats.costTimeStatsCnt[FRAME_COST_LT10MS]);
-    GenerateUint32(streamSendStats.sendBitRateStatsCnt[FRAME_BIT_RATE_LT3M]);
+    streamSendStats.costTimeStatsCnt[FRAME_COST_LT10MS] = provider.ConsumeIntegral<uint32_t>();
+    streamSendStats.sendBitRateStatsCnt[FRAME_BIT_RATE_LT3M] = provider.ConsumeIntegral<uint32_t>();
     (void)ServerIpcStreamStats(channelId, channelType, &streamSendStats);
-    DataGenerator::Clear();
 }
 
-void ServerIpcRippleStatsTest(const uint8_t *data, size_t size)
+void ServerIpcRippleStatsTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
-        return;
-    }
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
     TrafficStats trafficStats;
     trafficStats.stats[0] = 't';
     trafficStats.stats[1] = 'e';
     (void)ServerIpcRippleStats(channelId, channelType, &trafficStats);
-    DataGenerator::Clear();
 }
 
-void ServerIpcGrantPermissionTest(const uint8_t *data, size_t size)
+void ServerIpcGrantPermissionTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
         return;
     }
-    DataGenerator::Write(data, size);
-    int32_t uid = 0;
-    int32_t pid = 0;
-    GenerateInt32(uid);
-    GenerateInt32(pid);
-    char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
+    int32_t uid = provider.ConsumeIntegral<int32_t>();
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
 
     (void)ServerIpcGrantPermission(uid, pid, sessionName);
     (void)ServerIpcGrantPermission(uid, pid, nullptr);
-    SoftBusFree(dataWithEndCharacter);
-    DataGenerator::Clear();
 }
 
-void ServerIpcRemovePermissionTest(const uint8_t *data, size_t size)
+void ServerIpcRemovePermissionTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
         return;
     }
-    char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
 
     (void)ServerIpcRemovePermission(sessionName);
     (void)ServerIpcRemovePermission(nullptr);
-    SoftBusFree(dataWithEndCharacter);
 }
 
-void ServerIpcEvaluateQosTest(const uint8_t *data, size_t size)
+void ServerIpcEvaluateQosTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
+    char peerNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    QosTV qosTv;
+    std::string providerPeerNetworkId = provider.ConsumeBytesAsString(NETWORK_ID_BUF_LEN - 1);
+    if (strcpy_s(peerNetworkId, NETWORK_ID_BUF_LEN - 1, providerPeerNetworkId.c_str()) != EOK) {
         return;
     }
-    char *peerNetworkId = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-    TransDataType dataType = *(reinterpret_cast<const TransDataType *>(dataWithEndCharacter));
-    QosTV qosTv = {
-        .qos = *(reinterpret_cast<const QosType *>(dataWithEndCharacter)),
-    };
-    DataGenerator::Write(data, size);
-    GenerateInt32(qosTv.value);
+    TransDataType dataType = (TransDataType)provider.ConsumeIntegralInRange<uint32_t>(DATA_TYPE_MESSAGE,
+        DATA_TYPE_BUTT);
+    qosTv.qos = (QosType)provider.ConsumeIntegralInRange<uint32_t>(QOS_TYPE_MIN_BW, QOS_TYPE_BUTT);
+    qosTv.value = provider.ConsumeIntegral<int32_t>();
     uint32_t qosCount = 1;
 
     (void)ServerIpcEvaluateQos(peerNetworkId, dataType, &qosTv, qosCount);
     (void)ServerIpcEvaluateQos(nullptr, dataType, &qosTv, qosCount);
-    SoftBusFree(dataWithEndCharacter);
-    DataGenerator::Clear();
 }
 
 void ServerIpcNotifyAuthSuccessTest(FuzzedDataProvider &provider)
@@ -418,15 +333,15 @@ void ServerIpcSetListenerStateTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     int32_t type = provider.ConsumeIntegral<int32_t>();
-    bool CbEnabled = provider.ConsumeIntegral<bool>();
+    bool cbEnabled = provider.ConsumeBool();
 
-    (void)ServerIpcSetListenerState(channelId, type, CbEnabled);
+    (void)ServerIpcSetListenerState(channelId, type, cbEnabled);
 }
 
 void ServerIpcIsProxyChannelEnabledTest(FuzzedDataProvider &provider)
 {
     int32_t uid = provider.ConsumeIntegral<int32_t>();
-    bool isEnable = provider.ConsumeIntegral<bool>();
+    bool isEnable = provider.ConsumeBool();
 
     (void)ServerIpcIsProxyChannelEnabled(uid, &isEnable);
 }
@@ -448,21 +363,20 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
-    OHOS::TransServerProxyDeInitTest(data, size);
-    OHOS::ServerIpcCreateSessionServerTest(data, size);
-    OHOS::ServerIpcRemoveSessionServerTest(data, size);
-    OHOS::ServerIpcOpenSessionTest(data, size);
-    OHOS::ServerIpcOpenAuthSessionTest(data, size);
-    OHOS::ServerIpcCloseChannelTest(data, size);
-    OHOS::ServerIpcCloseChannelWithStatisticsTest(data, size);
-    OHOS::ServerIpcReleaseResourcesTest(data, size);
-    OHOS::ServerIpcSendMessageTest(data, size);
-    OHOS::ServerIpcQosReportTest(data, size);
-    OHOS::ServerIpcStreamStatsTest(data, size);
-    OHOS::ServerIpcRippleStatsTest(data, size);
-    OHOS::ServerIpcGrantPermissionTest(data, size);
-    OHOS::ServerIpcRemovePermissionTest(data, size);
-    OHOS::ServerIpcEvaluateQosTest(data, size);
+    OHOS::ServerIpcCreateSessionServerTest(provider);
+    OHOS::ServerIpcRemoveSessionServerTest(provider);
+    OHOS::ServerIpcOpenSessionTest(provider);
+    OHOS::ServerIpcOpenAuthSessionTest(provider);
+    OHOS::ServerIpcCloseChannelTest(provider);
+    OHOS::ServerIpcCloseChannelWithStatisticsTest(provider);
+    OHOS::ServerIpcReleaseResourcesTest(provider);
+    OHOS::ServerIpcSendMessageTest(provider);
+    OHOS::ServerIpcQosReportTest(provider);
+    OHOS::ServerIpcStreamStatsTest(provider);
+    OHOS::ServerIpcRippleStatsTest(provider);
+    OHOS::ServerIpcGrantPermissionTest(provider);
+    OHOS::ServerIpcRemovePermissionTest(provider);
+    OHOS::ServerIpcEvaluateQosTest(provider);
     OHOS::ServerIpcNotifyAuthSuccessTest(provider);
     OHOS::ServerIpcPrivilegeCloseChannelTest(provider);
     OHOS::ServerIpcOpenBrProxyTest(provider);

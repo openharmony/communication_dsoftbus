@@ -22,7 +22,9 @@
 
 #include "client_trans_channel_manager.h"
 #include "fuzz_data_generator.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_app_info.h"
 #include "softbus_client_stub.h"
 #include "softbus_server_ipc_interface_code.h"
 
@@ -89,78 +91,175 @@ enum SoftBusFuncId {
 
 const std::u16string SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN = u"OHOS.ISoftBusClient";
 
-static void InitOnChannelOpenedInnerMsg(int32_t channelType, const uint8_t *data, size_t size, MessageParcel &message)
+static void InitOnChannelOpenedInnerMsgExxx(
+    FuzzedDataProvider &provider, MessageParcel &message, bool isServer, int32_t channelType)
 {
-    bool boolParam = false;
-    (void)GenerateBool(boolParam);
-    int32_t int32Param = *(reinterpret_cast<const int32_t *>(data));
-    char *charParam = const_cast<char *>(reinterpret_cast<const char *>(data));
-
-    message.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-
-    message.WriteCString(charParam);
-    message.WriteInt32(int32Param);
-    message.WriteInt32(channelType);
-    message.WriteUint64(size);
-    message.WriteInt32(int32Param);
-
-    message.WriteBool(boolParam);
-    message.WriteBool(boolParam);
-    message.WriteBool(boolParam);
-    message.WriteInt32(int32Param);
-    message.WriteInt32(int32Param);
-    message.WriteCString(charParam);
-    message.WriteUint32(size);
-    message.WriteRawData(data, size);
-    message.WriteCString(charParam);
-    message.WriteCString(charParam);
-    message.WriteInt32(int32Param);
-
-    if (channelType == CHANNEL_TYPE_UDP) {
-        message.WriteCString(charParam);
-        message.WriteInt32(int32Param);
-        message.WriteBool(boolParam);
-        if (boolParam) {
-            message.WriteInt32(int32Param);
-            message.WriteCString(charParam);
-        }
+    int32_t tokenType = provider.ConsumeIntegral<int32_t>();
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    char peerExtraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX] = { 0 };
+    char groupId[GROUP_ID_SIZE_MAX] = { 0 };
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
     }
-
-    message.WriteInt32(int32Param);
-    message.WriteInt32(int32Param);
-    message.WriteInt32(int32Param);
-    message.WriteInt32(int32Param);
-    message.WriteUint32(size);
-    message.WriteInt32(int32Param);
-    message.WriteInt32(int32Param);
+    std::string providerPeerExtraAccessInfo = provider.ConsumeBytesAsString(EXTRA_ACCESS_INFO_LEN_MAX - 1);
+    if (strcpy_s(peerExtraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, providerPeerExtraAccessInfo.c_str()) != EOK) {
+        return;
+    }
+    std::string providerGroupId = provider.ConsumeBytesAsString(GROUP_ID_SIZE_MAX - 1);
+    if (strcpy_s(groupId, GROUP_ID_SIZE_MAX, providerGroupId.c_str()) != EOK) {
+        return;
+    }
+    message.WriteInt32(tokenType);
+    if (tokenType > ACCESS_TOKEN_TYPE_HAP && channelType != CHANNEL_TYPE_AUTH && isServer) {
+        message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+        message.WriteUint32(provider.ConsumeIntegral<uint32_t>());
+        message.WriteCString(peerExtraAccessInfo);
+    }
+    message.WriteRawData(sessionKey, SESSION_KEY_LENGTH);
+    message.WriteCString(groupId);
+    message.WriteBool(provider.ConsumeBool());
 }
 
-uint8_t *TestDataSwitch(const uint8_t *data, size_t size)
+static void InitOnChannelOpenedInnerMsgExx(
+    FuzzedDataProvider &provider, MessageParcel &message, bool isServer, int32_t channelType)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return nullptr;
+    bool isD2D = provider.ConsumeBool();
+    message.WriteBool(isD2D);
+    char pagingNonce[PAGING_NONCE_LEN] = { 0 };
+    char pagingSessionkey[SHORT_SESSION_KEY_LENGTH] = { 0 };
+    char pagingAccountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    std::string providerPagingNonce = provider.ConsumeBytesAsString(PAGING_NONCE_LEN - 1);
+    if (strcpy_s(pagingNonce, PAGING_NONCE_LEN - 1, providerPagingNonce.c_str()) != EOK) {
+        return;
     }
-    uint8_t *dataWithEndCharacter = static_cast<uint8_t *>(SoftBusCalloc(size + 1));
-    if (dataWithEndCharacter == nullptr) {
-        return nullptr;
+    std::string providerPagingSessionkey = provider.ConsumeBytesAsString(SHORT_SESSION_KEY_LENGTH - 1);
+    if (strcpy_s(pagingSessionkey, SHORT_SESSION_KEY_LENGTH - 1, providerPagingSessionkey.c_str()) != EOK) {
+        return;
     }
-    if (memcpy_s(dataWithEndCharacter, size, data, size) != EOK) {
-        SoftBusFree(dataWithEndCharacter);
-        return nullptr;
+    std::string providerPagingAccountId = provider.ConsumeBytesAsString(ACCOUNT_UID_LEN_MAX - 1);
+    if (strcpy_s(pagingAccountId, ACCOUNT_UID_LEN_MAX - 1, providerPagingAccountId.c_str()) != EOK) {
+        return;
     }
-    return dataWithEndCharacter;
+    if (isD2D) {
+        message.WriteBool(provider.ConsumeBool());
+        message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+        message.WriteUint32(provider.ConsumeIntegral<uint32_t>());
+        message.WriteUint32(provider.ConsumeIntegral<uint32_t>());
+        message.WriteRawData(pagingNonce, PAGING_NONCE_LEN);
+        message.WriteRawData(pagingSessionkey, SHORT_SESSION_KEY_LENGTH);
+        message.WriteUint32(0);
+        if (isServer) {
+            message.WriteCString(pagingAccountId);
+        }
+    } else {
+        InitOnChannelOpenedInnerMsgExxx(provider, message, isServer, channelType);
+    }
+    message.WriteBool(provider.ConsumeBool());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+}
+
+static void InitOnChannelOpenedInnerMsgEx(
+    int32_t channelType, bool isServer, FuzzedDataProvider &provider, MessageParcel &message)
+{
+    char peerSessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    char myIp [IP_LEN] = { 0 };
+    char peerIp [IP_LEN] = { 0 };
+    char peerDeviceId[DEVICE_ID_SIZE_MAX] = { 0 };
+    std::string providerPeerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(peerSessionName, SESSION_NAME_SIZE_MAX - 1, providerPeerSessionName.c_str()) != EOK) {
+        return;
+    }
+    std::string providerIp = provider.ConsumeBytesAsString(IP_LEN - 1);
+    if (strcpy_s(myIp, IP_LEN - 1, providerIp.c_str()) != EOK) {
+        return;
+    }
+    std::string providerpeerIp = provider.ConsumeBytesAsString(IP_LEN - 1);
+    if (strcpy_s(peerIp, IP_LEN - 1, providerpeerIp.c_str()) != EOK) {
+        return;
+    }
+    std::string providerPeerDeviceId = provider.ConsumeBytesAsString(DEVICE_ID_SIZE_MAX - 1);
+    if (strcpy_s(peerDeviceId, DEVICE_ID_SIZE_MAX - 1, providerPeerDeviceId.c_str()) != EOK) {
+        return;
+    }
+    message.WriteCString(peerSessionName);
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    if (channelType == CHANNEL_TYPE_UDP) {
+        message.WriteCString(myIp);
+        message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+        message.WriteBool(provider.ConsumeBool());
+        if (!isServer) {
+            message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+            message.WriteCString(peerIp);
+        }
+    }
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteUint32(provider.ConsumeIntegral<uint32_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteBool(provider.ConsumeBool());
+    message.WriteCString(peerDeviceId);
+    InitOnChannelOpenedInnerMsgExx(provider, message, isServer, channelType);
+}
+
+static void InitOnChannelOpenedInnerMsg(FuzzedDataProvider &provider, MessageParcel &message)
+{
+    bool isServer = provider.ConsumeBool();
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char myIp [IP_LEN] = { 0 };
+    char peerIp [IP_LEN] = { 0 };
+    int32_t channelType = provider.ConsumeIntegralInRange<int32_t>(CHANNEL_TYPE_TCP_DIRECT, CHANNEL_TYPE_AUTH);
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
+        return;
+    }
+    std::string providerIp = provider.ConsumeBytesAsString(IP_LEN - 1);
+    if (strcpy_s(myIp, IP_LEN - 1, providerIp.c_str()) != EOK) {
+        return;
+    }
+    std::string providerpeerIp = provider.ConsumeBytesAsString(IP_LEN - 1);
+    if (strcpy_s(peerIp, IP_LEN - 1, providerpeerIp.c_str()) != EOK) {
+        return;
+    }
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return;
+    }
+    message.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    message.WriteCString(sessionName);
+    message.WriteBool(provider.ConsumeBool());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteInt32(channelType);
+    message.WriteUint64(provider.ConsumeIntegral<uint64_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        message.WriteFileDescriptor(provider.ConsumeIntegral<int32_t>());
+        message.WriteCString(myIp);
+        message.WriteUint32(provider.ConsumeIntegral<uint32_t>());
+        message.WriteCString(peerIp);
+        message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+        message.WriteCString(pkgName);
+    }
+    message.WriteBool(isServer);
+    message.WriteBool(provider.ConsumeBool());
+    message.WriteBool(provider.ConsumeBool());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    message.WriteUint32(SESSION_KEY_LENGTH);
+    InitOnChannelOpenedInnerMsgEx(channelType, isServer, provider, message);
 }
 
 /*
  * Due to FileDescriptor is invalid, CHANNEL_TYPE_TCP_DIRECT will read it and crash
  * Do not add test case which channel type is CHANNEL_TYPE_TCP_DIRECT
  */
-bool OnChannelOpenedInnerTest(const uint8_t *data, size_t size)
+bool OnChannelOpenedInnerTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
-        return false;
-    }
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
@@ -168,57 +267,43 @@ bool OnChannelOpenedInnerTest(const uint8_t *data, size_t size)
 
     MessageParcel reply;
     MessageOption option;
-    MessageParcel dataNomal;
-    InitOnChannelOpenedInnerMsg(CHANNEL_TYPE_UNDEFINED, dataWithEndCharacter, size, dataNomal);
-
     MessageParcel dataUdp;
-    InitOnChannelOpenedInnerMsg(CHANNEL_TYPE_UDP, dataWithEndCharacter, size, dataUdp);
+    InitOnChannelOpenedInnerMsg(provider, dataUdp);
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_OPENED, dataUdp, reply, option);
-    SoftBusFree(dataWithEndCharacter);
     return true;
 }
 
-bool OnChannelOpenFailedInnerTest(const uint8_t *data, size_t size)
+bool OnChannelOpenFailedInnerTest(FuzzedDataProvider &provider)
 {
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+    if (softBusClientStub == nullptr) {
         return false;
     }
-    DataGenerator::Write(data, size);
-
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t errCode = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateInt32(errCode);
 
     MessageParcel datas;
     MessageParcel reply;
     MessageOption option;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(channelId);
-    datas.WriteInt32(channelType);
-    datas.WriteInt32(errCode);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_OPENFAILED, datas, reply, option);
-    DataGenerator::Clear();
 
     return true;
 }
 
-bool OnChannelLinkDownInnerTest(const uint8_t *data, size_t size)
+bool OnChannelLinkDownInnerTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
-        return false;
-    }
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
 
-    char *networkId = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-    int32_t routeType = *(reinterpret_cast<const int32_t *>(dataWithEndCharacter));
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    std::string providerNetworkId = provider.ConsumeBytesAsString(NETWORK_ID_BUF_LEN - 1);
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN - 1, providerNetworkId.c_str()) != EOK) {
+        return false;
+    }
 
     MessageParcel datas;
     MessageParcel reply;
@@ -226,88 +311,68 @@ bool OnChannelLinkDownInnerTest(const uint8_t *data, size_t size)
 
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
     datas.WriteCString(networkId);
-    datas.WriteInt32(routeType);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_LINKDOWN, datas, reply, option);
-    SoftBusFree(dataWithEndCharacter);
 
     return true;
 }
 
-bool OnChannelClosedInnerTest(const uint8_t *data, size_t size)
+bool OnChannelClosedInnerTest(FuzzedDataProvider &provider)
 {
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+    if (softBusClientStub == nullptr) {
         return false;
     }
-    DataGenerator::Write(data, size);
-
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t messageType = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateInt32(messageType);
 
     MessageParcel datas;
     MessageParcel reply;
     MessageOption option;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(channelId);
-    datas.WriteInt32(channelType);
-    datas.WriteInt32(messageType);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_CLOSED, datas, reply, option);
-    DataGenerator::Clear();
 
     return true;
 }
 
-bool OnChannelMsgReceivedInnerTest(const uint8_t *data, size_t size)
+bool OnChannelMsgReceivedInnerTest(FuzzedDataProvider &provider)
 {
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+    if (softBusClientStub == nullptr) {
         return false;
     }
-    DataGenerator::Write(data, size);
 
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t type = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateInt32(type);
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+    if (len < 1) {
+        return false;
+    }
+    std::string dataInfo = provider.ConsumeBytesAsString(len - 1);
 
     MessageParcel datas;
     MessageParcel reply;
     MessageOption option;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(channelId);
-    datas.WriteInt32(channelType);
-    datas.WriteUint32(size);
-    datas.WriteRawData(data, size);
-    datas.WriteInt32(type);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteUint32(dataInfo.size());
+    datas.WriteRawData(dataInfo.c_str(), dataInfo.size());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, datas, reply, option);
-    DataGenerator::Clear();
 
     return true;
 }
 
-bool OnChannelQosEventInnerTest(const uint8_t *data, size_t size)
+bool OnChannelQosEventInnerTest(FuzzedDataProvider &provider)
 {
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+    if (softBusClientStub == nullptr) {
         return false;
     }
-    DataGenerator::Write(data, size);
 
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t eventId = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    GenerateInt32(eventId);
     WifiChannelQuality wifiChannelInfo = { 0 };
-    GenerateInt32(wifiChannelInfo.channel);
-    GenerateInt32(wifiChannelInfo.score);
+    wifiChannelInfo.channel = provider.ConsumeIntegral<int32_t>();
+    wifiChannelInfo.score = provider.ConsumeIntegral<int32_t>();
     QosTv qosTv = {
         .type = WIFI_CHANNEL_QUALITY,
         .info.wifiChannelInfo = wifiChannelInfo,
@@ -317,450 +382,369 @@ bool OnChannelQosEventInnerTest(const uint8_t *data, size_t size)
     MessageParcel reply;
     MessageOption option;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(channelId);
-    datas.WriteInt32(channelType);
-    datas.WriteInt32(eventId);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
     datas.WriteInt32(sizeof(qosTv));
     datas.WriteRawData(&qosTv, sizeof(qosTv));
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_QOSEVENT, datas, reply, option);
-    DataGenerator::Clear();
 
     return true;
 }
 
-bool OnDeviceFoundInnerTest(const uint8_t *data, size_t size)
+bool OnJoinLNNResultInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
-    softBusClientStub->OnRemoteRequest(CLIENT_DISCOVERY_DEVICE_FOUND, datas, reply, option);
-    return true;
-}
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    std::string providerNetworkId = provider.ConsumeBytesAsString(NETWORK_ID_BUF_LEN - 1);
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN - 1, providerNetworkId.c_str()) != EOK) {
+        return false;
+    }
+    uint32_t addrTypeLen = sizeof(ConnectionAddr);
+    std::string addr = provider.ConsumeBytesAsString(addrTypeLen - 1);
 
-bool OnJoinLNNResultInnerTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr uint32_t addrTypeLen = 10;
-    constexpr int32_t retCode = 2;
-    const char *test = "test";
-    constexpr size_t len = 4;
     MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteUint32(addrTypeLen);
-    datas.WriteInt32(retCode);
-    datas.WriteRawData(test, len);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr) {
-        return false;
-    }
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteUint32(addr.size());
+    datas.WriteRawData(addr.c_str(), addr.size());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteCString(networkId);
     softBusClientStub->OnRemoteRequest(CLIENT_ON_JOIN_RESULT, datas, reply, option);
     return true;
 }
 
-bool OnJoinMetaNodeResultInnerTest(const uint8_t *data, size_t size)
+bool OnJoinMetaNodeResultInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr uint32_t addrTypeLen = 12;
-    constexpr int32_t retCode = 2;
-    const char *test = "test";
-    constexpr size_t len = 4;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteUint32(addrTypeLen);
-    datas.WriteInt32(retCode);
-    datas.WriteRawData(test, len);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    uint32_t addrTypeLen = sizeof(ConnectionAddr);
+    std::string addr = provider.ConsumeBytesAsString(addrTypeLen - 1);
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteUint32(addr.size());
+    datas.WriteRawData(addr.c_str(), addr.size());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    MessageParcel reply;
+    MessageOption option;
     softBusClientStub->OnRemoteRequest(CLIENT_ON_JOIN_METANODE_RESULT, datas, reply, option);
     return true;
 }
 
-bool OnLeaveLNNResultInnerTest(const uint8_t *data, size_t size)
+bool OnLeaveLNNResultInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t intNum = 2;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.WriteInt32(intNum);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    std::string providerNetworkId = provider.ConsumeBytesAsString(NETWORK_ID_BUF_LEN - 1);
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN - 1, providerNetworkId.c_str()) != EOK) {
+        return false;
+    }
+
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteCString(networkId);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    MessageParcel reply;
+    MessageOption option;
     softBusClientStub->OnRemoteRequest(CLIENT_ON_LEAVE_RESULT, datas, reply, option);
     return true;
 }
 
-bool OnLeaveMetaNodeResultInnerTest(const uint8_t *data, size_t size)
+bool OnLeaveMetaNodeResultInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t intNum = 2;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.WriteInt32(intNum);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    MessageParcel reply;
+    MessageOption option;
     softBusClientStub->OnRemoteRequest(CLIENT_ON_LEAVE_METANODE_RESULT, datas, reply, option);
     return true;
 }
 
-bool OnNodeDeviceTrustedChangeInnerTest(const uint8_t *data, size_t size)
+bool OnNodeDeviceTrustedChangeInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return false;
+    }
+    datas.WriteCString(pkgName);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    uint32_t msgLen = provider.ConsumeIntegral<uint32_t>();
+    if (msgLen < 1) {
+        return false;
+    }
+    std::string msg = provider.ConsumeBytesAsString(msgLen - 1);
+    datas.WriteCString(msg.c_str());
+    datas.WriteUint32(msgLen);
+
     softBusClientStub->OnRemoteRequest(CLIENT_ON_NODE_DEVICE_TRUST_CHANGED, datas, reply, option);
     return true;
 }
 
-bool OnHichainProofExceptionInnerTest(const uint8_t *data, size_t size)
+bool OnHichainProofExceptionInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return false;
+    }
+    datas.WriteCString(pkgName);
+    uint32_t proofLen = provider.ConsumeIntegral<uint32_t>();
+    if (proofLen < 1) {
+        return false;
+    }
+    std::string proofInfo = provider.ConsumeBytesAsString(proofLen - 1);
+    datas.WriteUint32(proofInfo.size());
+    datas.WriteRawData(proofInfo.c_str(), proofInfo.size());
+    datas.WriteUint16(provider.ConsumeIntegral<uint16_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+
     softBusClientStub->OnRemoteRequest(CLIENT_ON_HICHAIN_PROOF_EXCEPTION, datas, reply, option);
     return true;
 }
 
-bool OnNodeOnlineStateChangedInnerTest(const uint8_t *data, size_t size)
+bool OnNodeOnlineStateChangedInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr uint32_t infoTypeLen = 10;
-    bool boolNum = true;
-    const char *test = "test";
-    constexpr size_t len = 4;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.WriteBool(boolNum);
-    datas.WriteUint32(infoTypeLen);
-    datas.WriteRawData(test, len);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return false;
+    }
+    datas.WriteCString(pkgName);
+    datas.WriteBool(provider.ConsumeBool());
+    uint32_t infoTypeLen = provider.ConsumeIntegral<uint32_t>();
+    if (infoTypeLen < 1) {
+        return false;
+    }
+    std::string info = provider.ConsumeBytesAsString(infoTypeLen - 1);
+    datas.WriteUint32(info.size());
+    datas.WriteRawData(info.c_str(), info.size());
+
+    MessageParcel reply;
+    MessageOption option;
     softBusClientStub->OnRemoteRequest(CLIENT_ON_NODE_ONLINE_STATE_CHANGED, datas, reply, option);
     return true;
 }
 
-bool OnNodeBasicInfoChangedInnerTest(const uint8_t *data, size_t size)
+bool OnNodeBasicInfoChangedInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t type = 2;
-    constexpr uint32_t infoTypeLen = 10;
-    const char *test = "test";
-    constexpr size_t len = 4;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteBuffer(data, size);
-    datas.WriteRawData(test, len);
-    datas.WriteInt32(type);
-    datas.WriteUint32(infoTypeLen);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return false;
+    }
+    datas.WriteCString(pkgName);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    uint32_t infoTypeLen = provider.ConsumeIntegral<uint32_t>();
+    if (infoTypeLen < 1) {
+        return false;
+    }
+    std::string info = provider.ConsumeBytesAsString(infoTypeLen - 1);
+    datas.WriteUint32(info.size());
+    datas.WriteRawData(info.c_str(), info.size());
+
     softBusClientStub->OnRemoteRequest(CLIENT_ON_NODE_BASIC_INFO_CHANGED, datas, reply, option);
     return true;
 }
 
-bool OnTimeSyncResultInnerTest(const uint8_t *data, size_t size)
+bool OnTimeSyncResultInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr uint32_t infoTypeLen = 10;
-    int32_t retCode = *(reinterpret_cast<const char *>(data));
-    const char *test = "test";
-    constexpr size_t len = 4;
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(retCode);
-    datas.WriteUint32(infoTypeLen);
-    datas.WriteRawData(test, len);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t infoTypeLen = provider.ConsumeIntegral<uint32_t>();
+    if (infoTypeLen < 1) {
+        return false;
+    }
+    std::string info = provider.ConsumeBytesAsString(infoTypeLen - 1);
+    datas.WriteUint32(info.size());
+    datas.WriteRawData(info.c_str(), info.size());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+
     softBusClientStub->OnRemoteRequest(CLIENT_ON_TIME_SYNC_RESULT, datas, reply, option);
     return true;
 }
 
-static bool OnClientEventByReasonAndCode(const uint8_t *data, size_t size, int32_t reason, uint32_t code)
+bool OnPublishLNNResultInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    int32_t intNum = *(reinterpret_cast<const int32_t *>(data));
-    MessageParcel datas;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(intNum);
-    datas.WriteInt32(reason);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
-    softBusClientStub->OnRemoteRequest(code, datas, reply, option);
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_PUBLISH_LNN_RESULT, datas, reply, option);
     return true;
 }
 
-bool OnPublishLNNResultInnerTest(const uint8_t *data, size_t size)
+bool OnRefreshLNNResultInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t reason = 2;
-    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
-}
-
-bool OnRefreshLNNResultInnerTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t reason = 8;
-    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_REFRESH_LNN_RESULT);
-}
-
-bool OnRefreshDeviceFoundInnerTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    uint32_t deviceLen = *(reinterpret_cast<const int32_t *>(data));
-    const char *test = "test";
-    MessageParcel datas;
-    constexpr size_t len = 4;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteUint32(deviceLen);
-    datas.WriteRawData(test, len);
-    datas.RewindRead(0);
-    MessageParcel reply;
-    MessageOption option;
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_REFRESH_LNN_RESULT, datas, reply, option);
+    return true;
+}
+
+bool OnRefreshDeviceFoundInnerTest(FuzzedDataProvider &provider)
+{
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+
     softBusClientStub->OnRemoteRequest(CLIENT_ON_REFRESH_DEVICE_FOUND, datas, reply, option);
     return true;
 }
 
-bool OnClientPermissionChangeInnerTest(const uint8_t *data, size_t size)
+bool OnClientPermissionChangeInnerTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
-        return false;
-    }
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
 
-    int32_t state = *(reinterpret_cast<const int32_t *>(dataWithEndCharacter));
-    char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
-
     MessageParcel datas;
     MessageParcel reply;
     MessageOption option;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(state);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    std::string providerPkgNameName = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerPkgNameName.c_str()) != EOK) {
+        return false;
+    }
     datas.WriteCString(pkgName);
+
     softBusClientStub->OnRemoteRequest(CLIENT_ON_PERMISSION_CHANGE, datas, reply, option);
-    SoftBusFree(dataWithEndCharacter);
 
     return true;
 }
 
-bool OnDiscoverFailedInnerTest(const uint8_t *data, size_t size)
+bool OnClientTransLimitChangeInnerTest(FuzzedDataProvider &provider)
 {
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t reason = 2;
-    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
-}
-
-bool OnDiscoverySuccessInnerTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t reason = 2;
-    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
-}
-
-bool OnPublishSuccessInnerTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t reason = 2;
-    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
-}
-
-bool OnPublishFailInnerTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    constexpr int32_t reason = 2;
-    return OnClientEventByReasonAndCode(data, size, reason, CLIENT_ON_PUBLISH_LNN_RESULT);
-}
-
-bool OnClientTransLimitChangeInnerTest(const uint8_t *data, size_t size)
-{
-    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-        return false;
-    }
-    DataGenerator::Write(data, size);
-
-    int32_t channelId = 0;
-    uint8_t tos = 0;
-    GenerateInt32(channelId);
-    GenerateUint8(tos);
-
-    MessageParcel datas;
-    MessageParcel reply;
-    MessageOption option;
-    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(channelId);
-    datas.WriteUint8(tos);
-    softBusClientStub->OnRemoteRequest(CLIENT_ON_TRANS_LIMIT_CHANGE, datas, reply, option);
-    DataGenerator::Clear();
-
-    return true;
-}
-
-bool SetChannelInfoInnerTest(const uint8_t *data, size_t size)
-{
-    uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
-    if (dataWithEndCharacter == nullptr) {
-        return false;
-    }
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
     if (softBusClientStub == nullptr) {
         return false;
     }
-    DataGenerator::Write(data, size);
+    MessageParcel datas;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteUint8(provider.ConsumeIntegral<int8_t>());
 
-    int32_t sessionId = 0;
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    GenerateInt32(sessionId);
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
-    char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_TRANS_LIMIT_CHANGE, datas, reply, option);
+    return true;
+}
+
+bool SetChannelInfoInnerTest(FuzzedDataProvider &provider)
+{
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
 
     MessageParcel datas;
     MessageParcel reply;
     MessageOption option;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerSessionName.c_str()) != EOK) {
+        return false;
+    }
     datas.WriteCString(sessionName);
-    datas.WriteInt32(sessionId);
-    datas.WriteInt32(channelId);
-    datas.WriteInt32(channelType);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
     softBusClientStub->OnRemoteRequest(CLIENT_SET_CHANNEL_INFO, datas, reply, option);
-    SoftBusFree(dataWithEndCharacter);
-    DataGenerator::Clear();
 
     return true;
 }
 
-bool OnChannelBindInnerTest(const uint8_t *data, size_t size)
+bool OnChannelBindInnerTest(FuzzedDataProvider &provider)
 {
     sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
-    if (softBusClientStub == nullptr || data == nullptr || size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+    if (softBusClientStub == nullptr) {
         return false;
     }
-    DataGenerator::Write(data, size);
-
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    GenerateInt32(channelId);
-    GenerateInt32(channelType);
 
     MessageParcel datas;
     MessageParcel reply;
     MessageOption option;
     datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
-    datas.WriteInt32(channelId);
-    datas.WriteInt32(channelType);
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
+    datas.WriteInt32(provider.ConsumeIntegral<int32_t>());
     softBusClientStub->OnRemoteRequest(CLIENT_ON_CHANNEL_BIND, datas, reply, option);
-    DataGenerator::Clear();
 
     return true;
 }
@@ -884,6 +868,9 @@ bool OnBrProxyDataRecvInnerTest(FuzzedDataProvider &provider)
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     uint32_t len = provider.ConsumeIntegralInRange<int32_t>(0, FOO_MAX_LEN);
     uint8_t dataInfo[FOO_MAX_LEN] = { 0 };
+    if (len < 1) {
+        return false;
+    }
     std::string providerDataInfo = provider.ConsumeBytesAsString(len - 1);
     if (strcpy_s((char *)dataInfo, len - 1, providerDataInfo.c_str()) != EOK) {
         return false;
@@ -967,6 +954,9 @@ bool OnDataReceivedInnerTest(FuzzedDataProvider &provider)
     uint32_t handle = provider.ConsumeIntegral<uint32_t>();
     uint32_t len = provider.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     uint8_t dataPtr[U32_AT_SIZE] = { 0 };
+    if (len < 1) {
+        return false;
+    }
     std::string providerDataInfo = provider.ConsumeBytesAsString(len - 1);
     if (strcpy_s((char *)dataPtr, len - 1, providerDataInfo.c_str()) != EOK) {
         return false;
@@ -1018,33 +1008,28 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (!env.IsInited()) {
         return 0;
     }
-    OHOS::OnChannelOpenedInnerTest(data, size);
-    OHOS::OnChannelOpenFailedInnerTest(data, size);
-    OHOS::OnChannelLinkDownInnerTest(data, size);
-    OHOS::OnChannelClosedInnerTest(data, size);
-    OHOS::OnChannelMsgReceivedInnerTest(data, size);
-    OHOS::OnChannelQosEventInnerTest(data, size);
-    OHOS::OnDeviceFoundInnerTest(data, size);
-    OHOS::OnJoinLNNResultInnerTest(data, size);
-    OHOS::OnJoinMetaNodeResultInnerTest(data, size);
-    OHOS::OnLeaveLNNResultInnerTest(data, size);
-    OHOS::OnLeaveMetaNodeResultInnerTest(data, size);
-    OHOS::OnHichainProofExceptionInnerTest(data, size);
-    OHOS::OnNodeOnlineStateChangedInnerTest(data, size);
-    OHOS::OnNodeBasicInfoChangedInnerTest(data, size);
-    OHOS::OnTimeSyncResultInnerTest(data, size);
-    OHOS::OnPublishLNNResultInnerTest(data, size);
-    OHOS::OnRefreshLNNResultInnerTest(data, size);
-    OHOS::OnRefreshDeviceFoundInnerTest(data, size);
-    OHOS::OnClientPermissionChangeInnerTest(data, size);
-    OHOS::OnDiscoverFailedInnerTest(data, size);
-    OHOS::OnDiscoverySuccessInnerTest(data, size);
-    OHOS::OnPublishSuccessInnerTest(data, size);
-    OHOS::OnPublishFailInnerTest(data, size);
-    OHOS::OnClientTransLimitChangeInnerTest(data, size);
-    OHOS::SetChannelInfoInnerTest(data, size);
-    OHOS::OnChannelBindInnerTest(data, size);
     FuzzedDataProvider provider(data, size);
+    OHOS::OnChannelOpenedInnerTest(provider);
+    OHOS::OnChannelOpenFailedInnerTest(provider);
+    OHOS::OnChannelLinkDownInnerTest(provider);
+    OHOS::OnChannelClosedInnerTest(provider);
+    OHOS::OnChannelMsgReceivedInnerTest(provider);
+    OHOS::OnChannelQosEventInnerTest(provider);
+    OHOS::OnJoinLNNResultInnerTest(provider);
+    OHOS::OnJoinMetaNodeResultInnerTest(provider);
+    OHOS::OnLeaveLNNResultInnerTest(provider);
+    OHOS::OnLeaveMetaNodeResultInnerTest(provider);
+    OHOS::OnHichainProofExceptionInnerTest(provider);
+    OHOS::OnNodeOnlineStateChangedInnerTest(provider);
+    OHOS::OnNodeBasicInfoChangedInnerTest(provider);
+    OHOS::OnTimeSyncResultInnerTest(provider);
+    OHOS::OnPublishLNNResultInnerTest(provider);
+    OHOS::OnRefreshLNNResultInnerTest(provider);
+    OHOS::OnRefreshDeviceFoundInnerTest(provider);
+    OHOS::OnClientPermissionChangeInnerTest(provider);
+    OHOS::OnClientTransLimitChangeInnerTest(provider);
+    OHOS::SetChannelInfoInnerTest(provider);
+    OHOS::OnChannelBindInnerTest(provider);
     OHOS::OnChannelOnQosInnerTest(provider);
     OHOS::OnCheckCollabRelationInnerTest(provider);
     OHOS::OnBrProxyOpenedInnerTest(provider);
