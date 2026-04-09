@@ -143,11 +143,8 @@ static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInf
     (void)GetJsonObjectNumberItem(msg, "LINKED_CHANNEL_ID", &appInfo->linkedChannelId);
 }
 
-int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
+static int32_t TransUnpackSessionKeyFromJson(const cJSON *msg, AppInfo *appInfo)
 {
-    TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
-    TRANS_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
-    TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
     unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = { 0 };
     size_t len = 0;
     (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char *)encodeSessionKey, BASE64_SESSION_KEY_LEN);
@@ -159,6 +156,40 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             len == sizeof(appInfo->sessionKey), SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
     }
+    return SOFTBUS_OK;
+}
+
+static void TransGetUdpChannelCloseInfoFromJson(const cJSON *msg, AppInfo *appInfo)
+{
+    (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
+    (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
+    (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
+    if (appInfo->myData.channelId == INVALID_CHANNEL_ID) {
+        (void)TransUdpGetChannelIdByAddr(appInfo);
+    }
+}
+
+static void TransGetCapabilityFromJson(const cJSON *msg, AppInfo *appInfo)
+{
+    uint32_t remoteCapability = 0;
+    (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
+    appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
+    uint32_t remoteUdpChannelCapability = 0;
+    (void)GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&remoteUdpChannelCapability);
+    appInfo->udpChannelCapability = remoteUdpChannelCapability & TRANS_UDP_CHANNEL_CAPBILITY;
+    TRANS_LOGW(TRANS_CTRL,
+        "TransUnpackRequestUdpInfo UDP_CHANNEL_CAPABILITY=%{public}u, remoteUdpChannelCapability=%{public}u",
+        appInfo->udpChannelCapability, remoteUdpChannelCapability);
+}
+
+int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
+{
+    TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
+    TRANS_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
+
+    int32_t ret = TransUnpackSessionKeyFromJson(msg, appInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "unpack sessionKey failed ret=%{public}d", ret);
 
     TransGetCommonUdpInfoFromJson(msg, appInfo);
 
@@ -173,26 +204,14 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
             TransGetUdpChannelOpenInfoFromJson(msg, appInfo);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
-            (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
-            (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
-            (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
-            if (appInfo->myData.channelId == INVALID_CHANNEL_ID) {
-                (void)TransUdpGetChannelIdByAddr(appInfo);
-            }
+            TransGetUdpChannelCloseInfoFromJson(msg, appInfo);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
-    uint32_t remoteCapability = 0;
-    (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
-    appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
-    uint32_t remoteUdpChannelCapability = 0;
-    (void)GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&remoteUdpChannelCapability);
-    appInfo->udpChannelCapability = remoteUdpChannelCapability & TRANS_UDP_CHANNEL_CAPBILITY;
-    TRANS_LOGW(TRANS_CTRL,
-        "TransUnpackRequestUdpInfo UDP_CHANNEL_CAPABILITY=%{public}u, remoteUdpChannelCapability=%{public}u",
-        appInfo->udpChannelCapability, remoteUdpChannelCapability);
+
+    TransGetCapabilityFromJson(msg, appInfo);
     return SOFTBUS_OK;
 }
 
@@ -481,13 +500,9 @@ int32_t TransUnpackExtDeviceRequestInfo(const cJSON *msg, AppInfo *appInfo)
     int32_t code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     appInfo->fileProtocol = 0;
-    uint32_t remoteCapability = 0;
-    uint32_t remoteUdpChannelCapability = 0;
-    (void)GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&remoteCapability);
-    (void)GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&remoteUdpChannelCapability);
     int32_t ret = TransUnpackMetaTypeSpecificData(msg, appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Failed to unpack specific data.");
-    appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
+    TransGetCapabilityFromJson(msg, appInfo);
     appInfo->peerData.userId = INVALID_USER_ID;
     return SOFTBUS_OK;
 }

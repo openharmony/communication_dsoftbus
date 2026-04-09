@@ -15,6 +15,8 @@
 
 #include "trans_udp_negotiation.h"
 
+#include "securec.h"
+
 #include "access_control.h"
 #include "auth_interface.h"
 #include "bus_center_event.h"
@@ -25,7 +27,6 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
-#include "securec.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -683,6 +684,46 @@ static int32_t TransGetUdpChannelLocalIp(AuthHandle authHandle, AppInfo *appInfo
     return SOFTBUS_OK;
 }
 
+static bool TransMetaCheckCancelEncryptionPermission(pid_t uid, UdpConnType udpConnType, BusinessType businessType)
+{
+#define COLLABORATION_FWK_UID 5520
+    if (uid != COLLABORATION_FWK_UID) {
+        TRANS_LOGW(TRANS_SVC, "disable CANCEL_ENCRYPTION due to uid=%{public}d", uid);
+        return false;
+    }
+
+    if (udpConnType != UDP_CONN_TYPE_P2P) {
+        TRANS_LOGW(TRANS_SVC, "disable CANCEL_ENCRYPTION due to udpConnType=%{public}d", udpConnType);
+        return false;
+    }
+
+    if (businessType != BUSINESS_TYPE_FILE) {
+        TRANS_LOGW(TRANS_SVC, "disable CANCEL_ENCRYPTION due to businessType=%{public}u", businessType);
+        return false;
+    }
+
+    return true;
+}
+
+static void TransProcessUdpCapability(AppInfo *appInfo)
+{
+    appInfo->enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
+    appInfo->isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
+    if (appInfo->osType == OTHER_OS_TYPE && appInfo->metaType == META_SDK) {
+        if (GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION) &&
+            !TransMetaCheckCancelEncryptionPermission(
+                appInfo->myData.uid, appInfo->udpConnType, appInfo->businessType)) {
+            DisableCapabilityBit(&appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+        }
+    } else {
+        if (GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION) &&
+            !CancelEncryptionCheckPacked(NULL, (pid_t)appInfo->myData.uid)) {
+            TRANS_LOGW(TRANS_CTRL, "No support cancel encryption, uid=%{public}d", appInfo->myData.uid);
+            DisableCapabilityBit(&appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+        }
+    }
+}
+
 static int32_t ParseRequestAppInfoEx(AppInfo *appInfo, AuthHandle authHandle)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
@@ -697,14 +738,7 @@ static int32_t ParseRequestAppInfoEx(AppInfo *appInfo, AuthHandle authHandle)
             TRANS_LOGI(TRANS_CTRL, "not support acl check");
         }
     }
-    appInfo->enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
-    appInfo->isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
-    if (GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION) &&
-        !CancelEncryptionCheckPacked(NULL, (pid_t)appInfo->myData.uid)) {
-        TRANS_LOGW(TRANS_CTRL, "No support cancel encryption, uid=%{public}d", appInfo->myData.uid);
-        DisableCapabilityBit(&appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
-    }
-    appInfo->cancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    TransProcessUdpCapability(appInfo);
     if (TransCheckServerPermission(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
         return SOFTBUS_PERMISSION_SERVER_DENIED;
     }
