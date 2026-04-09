@@ -221,22 +221,6 @@ static bool TransWriteIpcSessionAttrs(IpcIo *request, const SessionAttribute *at
         return false;
     }
 
-    if (attrs->fastTransData != NULL) {
-        if (!WriteUint16(request, attrs->fastTransDataSize)) {
-            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransDataSize failed!");
-            return false;
-        }
-        if (!WriteRawData(request, attrs->fastTransData, attrs->fastTransDataSize)) {
-            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransData failed!");
-            return false;
-        }
-    } else {
-        if (!WriteUint16(request, 0)) {
-            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransDataSize failed!");
-            return false;
-        }
-    }
-
     return true;
 }
 

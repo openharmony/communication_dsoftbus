@@ -213,22 +213,6 @@ static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel 
         return false;
     }
 
-    if (attrs->fastTransData != nullptr && attrs->fastTransDataSize > 0) {
-        if (!data.WriteUint16(attrs->fastTransDataSize)) {
-            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransDataSize failed!");
-            return false;
-        }
-        if (!data.WriteRawData(attrs->fastTransData, attrs->fastTransDataSize)) {
-            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransData failed!");
-            return false;
-        }
-    } else {
-        if (!data.WriteUint16(0)) {
-            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransDataSize failed!");
-            return false;
-        }
-    }
-
     return true;
 }
 

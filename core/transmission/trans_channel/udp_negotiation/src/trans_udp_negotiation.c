@@ -336,24 +336,6 @@ int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount,
     return g_channelCb->OnQosEvent(pkgName, &param);
 }
 
-static int32_t CopyAppInfoFastTransData(UdpChannelInfo *newChannel, const AppInfo *appInfo)
-{
-    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
-        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
-        if (fastTransData == NULL) {
-            return SOFTBUS_MALLOC_ERR;
-        }
-        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
-            appInfo->fastTransDataSize) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
-            SoftBusFree(fastTransData);
-            return SOFTBUS_MEM_ERR;
-        }
-        newChannel->info.fastTransData = fastTransData;
-    }
-    return SOFTBUS_OK;
-}
-
 static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
 {
     UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
@@ -362,20 +344,14 @@ static UdpChannelInfo *NewUdpChannelByAppInfo(const AppInfo *info)
         return NULL;
     }
 
+    // fastTransData is always NULL in the UDP channel, no need to copy, set NULL to avoid shallow copy issues
     if (memcpy_s(&(newChannel->info), sizeof(newChannel->info), info, sizeof(AppInfo)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy_s failed.");
         SoftBusFree(newChannel);
         return NULL;
     }
-    if (CopyAppInfoFastTransData(newChannel, info) != SOFTBUS_OK) {
-        (void)memset_s(newChannel->info.sessionKey, sizeof(newChannel->info.sessionKey), 0,
-            sizeof(newChannel->info.sessionKey));
-        (void)memset_s(newChannel->info.sinkSessionKey, sizeof(newChannel->info.sinkSessionKey), 0,
-            sizeof(newChannel->info.sinkSessionKey));
-        SoftBusFree(newChannel);
-        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
-        return NULL;
-    }
+    newChannel->info.fastTransData = NULL;
+    newChannel->info.fastTransDataSize = 0;
     return newChannel;
 }
 
@@ -1325,11 +1301,9 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
     int32_t ret = TransAddUdpChannel(newChannel);
     if (ret != SOFTBUS_OK) {
+        // fastTransData is always NULL in the UDP channel, no need to free
         TRANS_LOGE(TRANS_CTRL, "add new udp channel failed.");
         ReleaseUdpChannelId(id);
-        if (newChannel->info.fastTransData != NULL) {
-            SoftBusFree((void *)newChannel->info.fastTransData);
-        }
         (void)memset_s(newChannel->info.sessionKey, sizeof(newChannel->info.sessionKey), 0,
             sizeof(newChannel->info.sessionKey));
         (void)memset_s(newChannel->info.sinkSessionKey, sizeof(newChannel->info.sinkSessionKey), 0,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,30 +269,6 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest008, TestSize.Level1)
 
     SoftBusFree(info);
     info = nullptr;
-}
-
-/*
- * @tc.name: TransUdpStaticTest009
- * @tc.desc: CopyAppInfoFastTransData test
- *           Verify the ability of the CopyAppInfoFastTransData function to correctly copy application information
- *           in fast transmission data over a UDP channel
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpStaticTest, TransUdpStaticTest009, TestSize.Level1)
-{
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_NE(nullptr, appInfo);
-    appInfo->fastTransDataSize = TEST_SIZE;
-
-    UdpChannelInfo *newChannel = static_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
-    ASSERT_NE(nullptr, newChannel);
-
-    int32_t ret = CopyAppInfoFastTransData(newChannel, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    SoftBusFree(appInfo);
-    SoftBusFree(newChannel);
-    newChannel = nullptr;
 }
 
 /*

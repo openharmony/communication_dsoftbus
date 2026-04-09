@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -210,23 +210,6 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyHandshakeUnpackErrMsg002
     int32_t result = TransProxyHandshakeUnpackErrMsg(&info, &msg, &errCode);
     EXPECT_EQ(result, SOFTBUS_OK);
     EXPECT_EQ(errCode, 0);
-}
-
-/*
- * @tc.name: TransProxyHandshakeUnpackRightMsg001
- * @tc.desc: test proxy TransProxyHandshakeUnpackRightMsg
- *           use wrong param or normal param
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusTransProxyChannelManagerTest, TransProxyHandshakeUnpackRightMsg001, TestSize.Level1)
-{
-    ProxyChannelInfo info;
-    ProxyMessage msg;
-    int32_t errCode = 100;
-
-    int32_t ret = TransProxyHandshakeUnpackRightMsg(&info, &msg, errCode, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*

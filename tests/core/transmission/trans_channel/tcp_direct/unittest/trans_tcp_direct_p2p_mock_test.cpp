@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -959,107 +959,6 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest005, TestSize.Level1)
     EXPECT_CALL(TcpP2pDirectMock, TransProxyReuseByChannelId).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
-    SoftBusFree(conn);
-    SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: CopyAppInfoFastTransDataTest001
- * @tc.desc: Test OnP2pVerifyMsgReceived
- *           when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest001, TestSize.Level1)
-{
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_TRUE(conn != nullptr);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
-    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
-    uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
-    ASSERT_TRUE(fastTransData != nullptr);
-    appInfo->fastTransData = nullptr;
-    FreeFastTransData(appInfo);
-    int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    appInfo->fastTransData = fastTransData;
-    ret = CopyAppInfoFastTransData(conn, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    appInfo->fastTransDataSize = 0;
-    ret = CopyAppInfoFastTransData(conn, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    FreeFastTransData(appInfo);
-    FreeFastTransData(nullptr);
-
-    SoftBusFree(conn);
-    SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: CopyAppInfoFastTransDataTest002
- * @tc.desc: Test CopyAppInfoFastTransData
- *           use the wrong parms or normal parms
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest002, TestSize.Level1)
-{
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_TRUE(conn != nullptr);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
-    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
-    uint8_t data = 1;
-    appInfo->fastTransData = &data;
-    appInfo->fastTransDataSize = 1;
-    int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    SoftBusFree(conn);
-    SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: CopyAppInfoFastTransDataTest003
- * @tc.desc: Test CopyAppInfoFastTransData
- *           use the wrong parms or normal parms
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest003, TestSize.Level1)
-{
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_TRUE(conn != nullptr);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
-    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
-    appInfo->fastTransData = nullptr;
-    appInfo->fastTransDataSize = 1;
-    int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    SoftBusFree(conn);
-    SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: CopyAppInfoFastTransDataTest004
- * @tc.desc: Test CopyAppInfoFastTransData
- *           use the wrong parms or normal parms
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest004, TestSize.Level1)
-{
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_TRUE(conn != nullptr);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
-    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
-    uint8_t data = 1;
-    appInfo->fastTransData = &data;
-    appInfo->fastTransDataSize = 0;
-    int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(conn);
     SoftBusFree(appInfo);
 }

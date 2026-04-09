@@ -328,38 +328,6 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReplyErrCode001, TestSize.Level1)
 }
 
 /*
- * @tc.name: PackFirstData001
- * @tc.desc: test PackFirstData.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftBusMessageOpenChannelTest, PackFirstData001, TestSize.Level1)
-{
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ASSERT_TRUE(appInfo != nullptr);
-
-    char *mag = TestGetMsgPack(API_V2);
-    cJSON *json = cJSON_Parse(mag);
-    EXPECT_NE(json, nullptr);
-
-    int32_t ret = PackFirstData(appInfo, json);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-
-    appInfo->fastTransDataSize = fastTransDataSize;
-    appInfo->fastTransData = (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc";
-
-    int32_t res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), TEST_SESSION_KEY);
-    EXPECT_EQ(EOK, res);
-
-    ret = PackFirstData(appInfo, json);
-    EXPECT_EQ(EOK, ret);
-    if (appInfo != nullptr) {
-        SoftBusFree(appInfo);
-    }
-    cJSON_Delete(json);
-}
-
-/*
  * @tc.name: UnpackFirstData001
  * @tc.desc: test UnpackFirstData.
  * @tc.type: FUNC

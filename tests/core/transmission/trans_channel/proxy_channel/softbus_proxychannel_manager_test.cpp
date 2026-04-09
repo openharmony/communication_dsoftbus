@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2136,17 +2136,12 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackRightMsg001, T
     ASSERT_TRUE(nullptr != chan);
     ProxyMessage *msg = reinterpret_cast<ProxyMessage *>(SoftBusCalloc(sizeof(ProxyMessage)));
     ASSERT_TRUE(nullptr != msg);
-    int32_t *errcode = nullptr;
-    int32_t ret = TransProxyHandshakeUnpackRightMsg(chan, msg, *errcode, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    uint16_t *fastDataSize = reinterpret_cast<uint16_t *>(SoftBusCalloc(sizeof(uint16_t)));
-    *fastDataSize = TEST_NUMBER_ONE;
     chan->channelId = TEST_PARSE_MESSAGE_CHANNEL;
     chan->myId = TEST_NUMBER_THREE;
     chan->peerId = TEST_NUMBER_TEN;
     msg->dataLen = TEST_NUMBER_TWENTY;
-    ret = TransProxyHandshakeUnpackRightMsg(chan, msg, SOFTBUS_OK, fastDataSize);
+    int32_t ret = TransProxyHandshakeUnpackRightMsg(chan, msg, SOFTBUS_OK);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ReleaseChannelInfo(chan);
     SoftBusFree(msg);
@@ -2432,24 +2427,15 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransAsyncProxyChannelTask002, TestSize
 }
 
 /*
- * @tc.name: CopyAppInfoFastTransData001
+ * @tc.name: TransProxyUpdateBlePriority001
  * @tc.desc: test handshake uk msg
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelManagerTest, CopyAppInfoFastTransData001, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateBlePriority001, TestSize.Level1)
 {
-    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    ASSERT_TRUE(channelInfo != nullptr);
-
     AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
-    appInfo->fastTransData = static_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
-    ASSERT_TRUE(appInfo->fastTransData != nullptr);
-    appInfo->fastTransDataSize = 1;
-
-    int32_t ret = CopyAppInfoFastTransData(channelInfo, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 
     uint32_t connId = 1;
     int32_t channelId = 1111; // test value
@@ -2464,8 +2450,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, CopyAppInfoFastTransData001, TestSize.L
     info.event = LNN_EVENT_TYPE_MAX;
     TransNotifyOffLine(&info);
 
-    SoftBusFree(channelInfo);
-    SoftBusFree((void*)appInfo->fastTransData);
     SoftBusFree(appInfo);
 }
 
