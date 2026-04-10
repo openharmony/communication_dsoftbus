@@ -392,7 +392,7 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback003, TestSize.Level0)
     PermStateChangeScope permStateObj;
     OHOS::SoftBusAccessTokenAdapter accessTokenAdapterObj(permStateObj, pkgaName, INVALID_TEST_PID);
     EXPECT_NO_FATAL_FAILURE(accessTokenAdapterObj.PermStateChangeCallback(result));
-    std::cout << "g_permissionChangeCb is empty." << std::endl;
+    std::cout << "g_btPermissionChangeCb is empty." << std::endl;
 }
 
 /**
@@ -413,7 +413,7 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback004, TestSize.Level0)
     PermStateChangeScope permStateObj;
     OHOS::SoftBusAccessTokenAdapter accessTokenAdapterObj(permStateObj, pkgaName, INVALID_TEST_PID);
     EXPECT_NO_FATAL_FAILURE(accessTokenAdapterObj.PermStateChangeCallback(result));
-    std::cout << "g_permissionChangeCb is empty." << std::endl;
+    std::cout << "g_btPermissionChangeCb is not empty." << std::endl;
 }
 
 /*
