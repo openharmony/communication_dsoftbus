@@ -443,6 +443,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     char *udid = (char *)SoftBusCalloc((UDID_BUF_LEN + 1) * sizeof(char));
+    ASSERT_TRUE(udid != nullptr);
     ret = LnnSetDeviceUdid(&nodeInfo, udid);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(udid);
@@ -501,6 +502,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_005, TestSize.Level1)
     EXPECT_EQ(strcmp(btMac, LOCAL_BT_MAC), 0);
 
     char *localBtMac = (char *)SoftBusCalloc((MAC_LEN + 1) * sizeof(char));
+    ASSERT_TRUE(localBtMac != nullptr);
     LnnSetBtMac(&nodeInfo, localBtMac);
     EXPECT_EQ(strcmp(nodeInfo.connectInfo.macAddr, localBtMac), 0);
     SoftBusFree(localBtMac);
@@ -528,6 +530,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_006, TestSize.Level1)
     EXPECT_NE(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].netIfName, netIfName1), 0);
 
     char *netIfName2 = (char *)SoftBusCalloc((NET_IF_NAME_LEN + 1) * sizeof(char));
+    ASSERT_TRUE(netIfName2 != nullptr);
     LnnSetNetIfName(&nodeInfo, netIfName2, WLAN_IF);
     SoftBusFree(netIfName2);
 
@@ -598,6 +601,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_009, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     char *wifiCfg2 = (char *)SoftBusCalloc((WIFI_CFG_INFO_MAX_LEN + 1) * sizeof(char));
+    ASSERT_TRUE(wifiCfg2 != nullptr);
     ret = LnnSetWifiCfg(&nodeInfo, wifiCfg2);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(wifiCfg2);
@@ -630,6 +634,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_010, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     char *chanList5g2 = (char *)SoftBusCalloc((CHANNEL_LIST_STR_LEN + 1) * sizeof(char));
+    ASSERT_TRUE(chanList5g2 != nullptr);
     ret = LnnSetChanList5g(&nodeInfo, chanList5g2);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(chanList5g2);
