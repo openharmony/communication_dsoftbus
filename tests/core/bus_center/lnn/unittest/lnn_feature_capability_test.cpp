@@ -182,6 +182,7 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_003, TestSize.Level1)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     uint8_t *data = static_cast<uint8_t *>(SoftBusCalloc(sizeof(USERID_CHECKSUM_LEN)));
+    ASSERT_TRUE(data != nullptr);
     (void)memset_s(data, USERID_CHECKSUM_LEN, 0, USERID_CHECKSUM_LEN);
     uint32_t len = USERID_CHECKSUM_LEN;
     int32_t ret = LnnSetUserIdCheckSum(&info, data, len);
@@ -237,6 +238,7 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_006, TestSize.Level1)
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)memset_s(info.userIdCheckSum, USERID_CHECKSUM_LEN, 1, USERID_CHECKSUM_LEN);
     uint8_t *data = static_cast<uint8_t *>(SoftBusCalloc(sizeof(USERID_CHECKSUM_LEN)));
+    ASSERT_TRUE(data != nullptr);
     (void)memset_s(data, USERID_CHECKSUM_LEN, 1, USERID_CHECKSUM_LEN);
     uint32_t len = USERID_CHECKSUM_LEN;
     int32_t ret = LnnGetUserIdCheckSum(&info, data, len);

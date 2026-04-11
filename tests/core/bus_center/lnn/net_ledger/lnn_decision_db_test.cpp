@@ -1890,16 +1890,34 @@ HWTEST_F(LNNDbMockTest, FREE_UPDATE_KEY_RESOURCES_Test_001, TestSize.Level1)
     ASSERT_TRUE(res.remoteDevinfoData != nullptr);
     res.remoteDevinfoLen = TEST_LEN;
     res.deviceKey = reinterpret_cast<char *>(SoftBusCalloc(TEST_LEN));
-    ASSERT_TRUE(res.deviceKey != nullptr);
+    if (res.deviceKey == nullptr) {
+        SoftBusFree(res.remoteDevinfoData);
+        return;
+    }
     res.deviceKeyLen = TEST_LEN;
     res.broadcastKey = reinterpret_cast<char *>(SoftBusCalloc(TEST_LEN));
-    ASSERT_TRUE(res.broadcastKey != nullptr);
+    if (res.broadcastKey == nullptr) {
+        SoftBusFree(res.remoteDevinfoData);
+        SoftBusFree(res.deviceKey);
+        return;
+    }
     res.broadcastKeyLen = TEST_LEN;
     res.ptkKey = reinterpret_cast<char *>(SoftBusCalloc(TEST_LEN));
-    ASSERT_TRUE(res.ptkKey != nullptr);
+    if (res.ptkKey == nullptr) {
+        SoftBusFree(res.remoteDevinfoData);
+        SoftBusFree(res.deviceKey);
+        SoftBusFree(res.broadcastKey);
+        return;
+    }
     res.ptkKeyLen = TEST_LEN;
     res.localBroadcastKey = reinterpret_cast<char *>(SoftBusCalloc(TEST_LEN));
-    ASSERT_TRUE(res.localBroadcastKey != nullptr);
+    if (res.localBroadcastKey == nullptr) {
+        SoftBusFree(res.remoteDevinfoData);
+        SoftBusFree(res.deviceKey);
+        SoftBusFree(res.broadcastKey);
+        SoftBusFree(res.ptkKey);
+        return;
+    }
     res.localBroadcastKeyLen = TEST_LEN;
     EXPECT_NO_FATAL_FAILURE(FreeUpdateKeyResources(&res));
 }
