@@ -607,8 +607,8 @@ static int32_t NotifyConnectResult(ConnectionImpl *connection, bool success, int
     }
     ::ohos::distributedsched::linkEnhance::ConnectResult result = {
         .deviceId = connection->deviceId_,
-        .reason = ret,
         .success = success,
+        .reason = ret,
     };
     (*connection->GetConnCallback())(result);
     return SOFTBUS_OK;
