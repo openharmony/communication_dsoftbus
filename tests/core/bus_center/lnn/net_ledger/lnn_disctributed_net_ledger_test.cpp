@@ -2186,4 +2186,393 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnIsRemoteSupportAuthCapBit_Test_001, TestS
     ret = LnnIsRemoteSupportAuthCapBit(NODE1_NETWORK_ID, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE);
     EXPECT_FALSE(ret);
 }
+
+/*
+ * @tc.name: LNN_UPDATE_NODE_IP_INFO_Test_001
+ * @tc.desc: Verify UpdateNodeIpInfo with null pointer and normal parameters for WLAN interface,
+ *           including port copy verification
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_IP_INFO_Test_001, TestSize.Level1)
+{
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    oldInfo.discoveryType = DISCOVERY_TYPE_WIFI;
+    oldInfo.netCapacity = (1 << BIT_WIFI);
+    oldInfo.connectInfo.ifInfo[WLAN_IF].authPort = 5000;
+    oldInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = 5001;
+    oldInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = 5002;
+    EXPECT_EQ(EOK, strncpy_s(oldInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN,
+        "192.168.1.1", strlen("192.168.1.1")));
+
+    NodeInfo newInfo;
+    (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    newInfo.discoveryType = DISCOVERY_TYPE_WIFI;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateNodeIpInfo(nullptr, &newInfo, WLAN_IF));
+    EXPECT_NO_FATAL_FAILURE(UpdateNodeIpInfo(&oldInfo, nullptr, WLAN_IF));
+    EXPECT_NO_FATAL_FAILURE(UpdateNodeIpInfo(&oldInfo, &newInfo, WLAN_IF));
+    EXPECT_EQ(newInfo.connectInfo.ifInfo[WLAN_IF].authPort, oldInfo.connectInfo.ifInfo[WLAN_IF].authPort);
+    EXPECT_EQ(newInfo.connectInfo.ifInfo[WLAN_IF].proxyPort, oldInfo.connectInfo.ifInfo[WLAN_IF].proxyPort);
+    EXPECT_EQ(newInfo.connectInfo.ifInfo[WLAN_IF].sessionPort, oldInfo.connectInfo.ifInfo[WLAN_IF].sessionPort);
+}
+
+/*
+ * @tc.name: LNN_UPDATE_NODE_IP_INFO_Test_002
+ * @tc.desc: Verify UpdateNodeIpInfo correctly copies USB interface port information from oldInfo to newInfo
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_IP_INFO_Test_002, TestSize.Level1)
+{
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    oldInfo.discoveryType = DISCOVERY_TYPE_USB;
+    oldInfo.netCapacity = (1 << BIT_USB);
+    oldInfo.connectInfo.ifInfo[USB_IF].authPort = 6000;
+    oldInfo.connectInfo.ifInfo[USB_IF].proxyPort = 6001;
+    oldInfo.connectInfo.ifInfo[USB_IF].sessionPort = 6002;
+
+    NodeInfo newInfo;
+    (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    newInfo.discoveryType = DISCOVERY_TYPE_USB;
+
+    EXPECT_NO_FATAL_FAILURE(UpdateNodeIpInfo(&oldInfo, &newInfo, USB_IF));
+    EXPECT_EQ(newInfo.connectInfo.ifInfo[USB_IF].authPort, oldInfo.connectInfo.ifInfo[USB_IF].authPort);
+    EXPECT_EQ(newInfo.connectInfo.ifInfo[USB_IF].proxyPort, oldInfo.connectInfo.ifInfo[USB_IF].proxyPort);
+    EXPECT_EQ(newInfo.connectInfo.ifInfo[USB_IF].sessionPort, oldInfo.connectInfo.ifInfo[USB_IF].sessionPort);
+}
+
+/*
+ * @tc.name: LNN_USB_UPDATE_HANDLE_Test_001
+ * @tc.desc: Verify UsbUpdateHandle handles null pointer parameters and oldUsbFlag scenario correctly
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_USB_UPDATE_HANDLE_Test_001, TestSize.Level1)
+{
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    oldInfo.discoveryType = DISCOVERY_TYPE_USB;
+    oldInfo.netCapacity = (1 << BIT_USB);
+
+    NodeInfo newInfo;
+    (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    newInfo.discoveryType = DISCOVERY_TYPE_USB;
+
+    NodeInfoAbility infoAbility;
+    (void)memset_s(&infoAbility, sizeof(NodeInfoAbility), 0, sizeof(infoAbility));
+    infoAbility.oldUsbFlag = true;
+
+    EXPECT_NO_FATAL_FAILURE(UsbUpdateHandle(nullptr, &newInfo, &infoAbility));
+    EXPECT_NO_FATAL_FAILURE(UsbUpdateHandle(&oldInfo, nullptr, &infoAbility));
+    EXPECT_NO_FATAL_FAILURE(UsbUpdateHandle(&oldInfo, &newInfo, nullptr));
+    EXPECT_NO_FATAL_FAILURE(UsbUpdateHandle(&oldInfo, &newInfo, &infoAbility));
+}
+
+/*
+ * @tc.name: LNN_USB_UPDATE_HANDLE_Test_002
+ * @tc.desc: Verify UsbUpdateHandle correctly sets isNetworkChanged when oldWifiFlag is true and newUsbFlag is true
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_USB_UPDATE_HANDLE_Test_002, TestSize.Level1)
+{
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    oldInfo.discoveryType = DISCOVERY_TYPE_WIFI;
+    oldInfo.netCapacity = (1 << BIT_WIFI);
+
+    NodeInfo newInfo;
+    (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    newInfo.discoveryType = DISCOVERY_TYPE_USB;
+
+    NodeInfoAbility infoAbility;
+    (void)memset_s(&infoAbility, sizeof(NodeInfoAbility), 0, sizeof(infoAbility));
+    infoAbility.oldWifiFlag = true;
+    infoAbility.newUsbFlag = true;
+
+    EXPECT_NO_FATAL_FAILURE(UsbUpdateHandle(&oldInfo, &newInfo, &infoAbility));
+    EXPECT_TRUE(infoAbility.isNetworkChanged);
+}
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_001
+ * @tc.desc: Verify GetOnlineAndOfflineWithinTimeNumLocked with empty ledger returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_001, TestSize.Level1)
+{
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    int32_t ret = LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(udidNum, 1);
+    SoftBusFree(udids);
+}
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_002
+ * @tc.desc: Verify GetOnlineAndOfflineWithinTimeNumLocked with online node returns correct count
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_002, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info.discoveryType = DISCOVERY_TYPE;
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, "3456789BNHFCD", strlen("3456789BNHFCD")));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, "3456789BNHFCD", strlen("3456789BNHFCD")));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, "3456789BNHFCD", strlen("3456789BNHFCD")));
+    EXPECT_EQ(EOK, strncpy_s(info.connectInfo.macAddr, MAC_LEN, "3456789BNHFCD", strlen("3456789BNHFCD")));
+    info.authSeq[0] = AUTH_SEQ;
+    info.heartbeatTimestamp = TIME_STAMP;
+    info.deviceInfo.osType = HO_OS_TYPE;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    uint64_t timeRange = 0;
+    int32_t ret = LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, timeRange);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_GE(udidNum, 1);
+    SoftBusFree(udids);
+}
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_003
+ * @tc.desc: Verify FillOnlineAndOfflineWithinTimeUdidsLocked with offline node within time range
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_003, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info.discoveryType = DISCOVERY_TYPE;
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, "456789BNHFCD", strlen("456789BNHFCD")));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, "456789BNHFCD", strlen("456789BNHFCD")));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, "456789BNHFCD", strlen("456789BNHFCD")));
+    EXPECT_EQ(EOK, strncpy_s(info.connectInfo.macAddr, MAC_LEN, "456789BNHFCD", strlen("456789BNHFCD")));
+    info.authSeq[0] = AUTH_SEQ;
+    info.heartbeatTimestamp = TIME_STAMP;
+    info.deviceInfo.osType = HO_OS_TYPE;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    uint64_t offlineTime = LnnUpTimeMs() - 1000;
+    DoubleHashMap *map = &(LnnGetDistributedNetLedger()->distributedInfo);
+    ASSERT_TRUE(map != nullptr);
+    NodeInfo *nodeInfo = GetNodeInfoFromMap(map, "456789BNHFCD");
+    ASSERT_NE(nodeInfo, nullptr);
+    nodeInfo->offlineTimestamp = offlineTime;
+    nodeInfo->status = STATUS_OFFLINE;
+
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    uint64_t timeRange = 5000;
+    int32_t ret = LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, timeRange);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_GE(udidNum, 1);
+    SoftBusFree(udids);
+}
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_004
+ * @tc.desc: Verify GetOnlineAndOfflineWithinTimeNumLocked with offline node outside time range
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_004, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info.discoveryType = DISCOVERY_TYPE;
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, "567890ABCDEF", strlen("567890ABCDEF")));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, "567890ABCDEF", strlen("567890ABCDEF")));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, "567890ABCDEF", strlen("567890ABCDEF")));
+    EXPECT_EQ(EOK, strncpy_s(info.connectInfo.macAddr, MAC_LEN, "567890ABCDEF", strlen("567890ABCDEF")));
+    info.authSeq[0] = AUTH_SEQ;
+    info.heartbeatTimestamp = TIME_STAMP;
+    info.deviceInfo.osType = HO_OS_TYPE;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    uint64_t offlineTime = LnnUpTimeMs() - 10000;
+    DoubleHashMap *map = &(LnnGetDistributedNetLedger()->distributedInfo);
+    ASSERT_TRUE(map != nullptr);
+    NodeInfo *nodeInfo = GetNodeInfoFromMap(map, "567890ABCDEF");
+    ASSERT_NE(nodeInfo, nullptr);
+    nodeInfo->offlineTimestamp = offlineTime;
+    nodeInfo->status = STATUS_OFFLINE;
+
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    uint64_t timeRange = 1000;
+    int32_t ret = LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, timeRange);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(udidNum, 1);
+    SoftBusFree(udids);
+}
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_005
+ * @tc.desc: Verify GetOnlineAndOfflineWithinTimeNumLocked with meta node is skipped
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_005, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info.discoveryType = DISCOVERY_TYPE;
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, "ABCDEF123456", strlen("ABCDEF123456")));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, "ABCDEF123456", strlen("ABCDEF123456")));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, "ABCDEF123456", strlen("ABCDEF123456")));
+    EXPECT_EQ(EOK, strncpy_s(info.connectInfo.macAddr, MAC_LEN, "ABCDEF123456", strlen("ABCDEF123456")));
+    info.authSeq[0] = AUTH_SEQ;
+    info.heartbeatTimestamp = TIME_STAMP;
+    info.deviceInfo.osType = HO_OS_TYPE;
+    info.metaInfo.isMetaNode = true;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    int32_t ret = LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(udidNum, 1);
+    SoftBusFree(udids);
+}
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_006
+ * @tc.desc: Verify multiple nodes with different online/offline states
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_006, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    NodeInfo info1;
+    (void)memset_s(&info1, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info1.discoveryType = DISCOVERY_TYPE;
+    EXPECT_EQ(EOK, strncpy_s(info1.uuid, UUID_BUF_LEN, "NODE1TEST", strlen("NODE1TEST")));
+    EXPECT_EQ(EOK, strncpy_s(info1.deviceInfo.deviceUdid, UDID_BUF_LEN, "NODE1TEST", strlen("NODE1TEST")));
+    EXPECT_EQ(EOK, strncpy_s(info1.networkId, NETWORK_ID_BUF_LEN, "NODE1TEST", strlen("NODE1TEST")));
+    EXPECT_EQ(EOK, strncpy_s(info1.connectInfo.macAddr, MAC_LEN, "NODE1TEST", strlen("NODE1TEST")));
+    info1.authSeq[0] = AUTH_SEQ;
+    info1.heartbeatTimestamp = TIME_STAMP;
+    info1.deviceInfo.osType = HO_OS_TYPE;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info1));
+
+    NodeInfo info2;
+    (void)memset_s(&info2, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info2.discoveryType = DISCOVERY_TYPE;
+    EXPECT_EQ(EOK, strncpy_s(info2.uuid, UUID_BUF_LEN, "NODE2TEST", strlen("NODE2TEST")));
+    EXPECT_EQ(EOK, strncpy_s(info2.deviceInfo.deviceUdid, UDID_BUF_LEN, "NODE2TEST", strlen("NODE2TEST")));
+    EXPECT_EQ(EOK, strncpy_s(info2.networkId, NETWORK_ID_BUF_LEN, "NODE2TEST", strlen("NODE2TEST")));
+    EXPECT_EQ(EOK, strncpy_s(info2.connectInfo.macAddr, MAC_LEN, "NODE2TEST", strlen("NODE2TEST")));
+    info2.authSeq[0] = AUTH_SEQ;
+    info2.heartbeatTimestamp = TIME_STAMP;
+    info2.deviceInfo.osType = HO_OS_TYPE;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info2));
+
+    uint64_t offlineTime = LnnUpTimeMs() - 5000;
+    DoubleHashMap *map = &(LnnGetDistributedNetLedger()->distributedInfo);
+    ASSERT_TRUE(map != nullptr);
+    NodeInfo *nodeInfo2 = GetNodeInfoFromMap(map, "NODE2TEST");
+    ASSERT_NE(nodeInfo2, nullptr);
+    nodeInfo2->offlineTimestamp = offlineTime;
+    nodeInfo2->status = STATUS_OFFLINE;
+
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    uint64_t timeRange = 10000;
+    int32_t ret = LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, timeRange);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(udidNum, 3);
+    SoftBusFree(udids);
+}
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_007
+ * @tc.desc: Verify offline node with currentTime less than offlineTimestamp
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_007, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    info.discoveryType = DISCOVERY_TYPE;
+    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, "ASDFGHJKL123456", strlen("ASDFGHJKL123456")));
+    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, "ASDFGHJKL123456", strlen("ASDFGHJKL123456")));
+    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, "ASDFGHJKL123456", strlen("ASDFGHJKL123456")));
+    EXPECT_EQ(EOK, strncpy_s(info.connectInfo.macAddr, MAC_LEN, "ASDFGHJKL123456", strlen("ASDFGHJKL123456")));
+    info.authSeq[0] = AUTH_SEQ;
+    info.heartbeatTimestamp = TIME_STAMP;
+    info.deviceInfo.osType = HO_OS_TYPE;
+    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
+
+    DoubleHashMap *map = &(LnnGetDistributedNetLedger()->distributedInfo);
+    ASSERT_TRUE(map != nullptr);
+    NodeInfo *nodeInfo = GetNodeInfoFromMap(map, "ASDFGHJKL123456");
+    ASSERT_NE(nodeInfo, nullptr);
+    nodeInfo->offlineTimestamp = LnnUpTimeMs() + 1000;
+    nodeInfo->status = STATUS_OFFLINE;
+
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    int32_t ret = LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(udidNum, 1);
+    SoftBusFree(udids);
+}
 } // namespace OHOS
