@@ -873,6 +873,7 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
         ret = CallInterfaceByMedium(info, packageName, PUBLISH_FUNC);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "call interface by medium fail");
+            ModifyCapabilityCallTimes(info->item, info, type, false);
             ListDelete(&(info->node));
             info->item->infoNum--;
         }
