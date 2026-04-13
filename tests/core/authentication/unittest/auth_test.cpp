@@ -2489,4 +2489,110 @@ HWTEST_F(AuthTest, CONVERT_TO_DISCOVERET_TYPE_TEST_001, TestSize.Level1)
     ret = ConvertToAuthLinkType(type);
     EXPECT_EQ(ret, AUTH_LINK_TYPE_MAX);
 }
+/*
+ * @tc.name: GEN_AUTH_ID_SEQ_Test_001
+ * @tc.desc: GenAuthIdSeq generate unique auth id sequence test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, GEN_AUTH_ID_SEQ_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    uint32_t seq1 = GenAuthIdSeq();
+    EXPECT_NE(seq1, 0);
+    uint32_t seq2 = GenAuthIdSeq();
+    EXPECT_NE(seq2, 0);
+    EXPECT_NE(seq1, seq2);
+    AuthCommonDeinit();
+}
+
+/*
+ * @tc.name: GEN_AUTH_ID_SEQ_Test_002
+ * @tc.desc: GenAuthIdSeq multiple calls produce increasing sequences
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, GEN_AUTH_ID_SEQ_Test_002, TestSize.Level1)
+{
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    constexpr uint32_t callCount = 10;
+    uint32_t prevSeq = GenAuthIdSeq();
+    for (uint32_t i = 1; i < callCount; i++) {
+        uint32_t curSeq = GenAuthIdSeq();
+        EXPECT_NE(curSeq, 0);
+        EXPECT_NE(curSeq, prevSeq);
+        prevSeq = curSeq;
+    }
+    AuthCommonDeinit();
+}
+
+/*
+ * @tc.name: AUTH_COMMON_INIT_DEINIT_Test_001
+ * @tc.desc: AuthCommonInit and AuthCommonDeinit with g_authIdSeqLock test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_COMMON_INIT_DEINIT_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    uint32_t seq = GenAuthIdSeq();
+    EXPECT_NE(seq, 0);
+    AuthCommonDeinit();
+    ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    seq = GenAuthIdSeq();
+    EXPECT_NE(seq, 0);
+    AuthCommonDeinit();
+}
+
+/*
+ * @tc.name: GEN_SEQ_WITH_LOCK_Test_001
+ * @tc.desc: GenSeq uses g_authIdSeqLock for thread safety test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, GEN_SEQ_WITH_LOCK_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    int64_t seqClient1 = GenSeq(false);
+    int64_t seqClient2 = GenSeq(false);
+    EXPECT_NE(seqClient1, seqClient2);
+    int64_t seqServer1 = GenSeq(true);
+    int64_t seqServer2 = GenSeq(true);
+    EXPECT_NE(seqServer1, seqServer2);
+    AuthCommonDeinit();
+}
+
+/*
+ * @tc.name: GEN_SEQ_AND_AUTH_ID_SEQ_Test_001
+ * @tc.desc: GenSeq and GenAuthIdSeq both use g_authIdSeqLock
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, GEN_SEQ_AND_AUTH_ID_SEQ_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    int64_t seqVal = GenSeq(false);
+    EXPECT_NE(seqVal, 0);
+    uint32_t authIdSeqVal = GenAuthIdSeq();
+    EXPECT_NE(authIdSeqVal, 0);
+    seqVal = GenSeq(true);
+    EXPECT_NE(seqVal, 0);
+    authIdSeqVal = GenAuthIdSeq();
+    EXPECT_NE(authIdSeqVal, 0);
+    seqVal = GenSeq(false);
+    EXPECT_NE(seqVal, 0);
+    AuthCommonDeinit();
+}
+
 } // namespace OHOS
