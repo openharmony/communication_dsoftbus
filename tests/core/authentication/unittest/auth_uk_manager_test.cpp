@@ -202,8 +202,11 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_006, TestSize.Level1)
  */
 HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_007, TestSize.Level1)
 {
-    uint32_t ret = GenUkSeq();
-    EXPECT_GT(ret, 0);
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    uint32_t seq = GenUkSeq();
+    EXPECT_GT(seq, 0);
+    AuthCommonDeinit();
 }
 
 /*
@@ -1583,5 +1586,120 @@ HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_INIT_DEINIT_TEST_001, TestSize.Level1)
         EXPECT_NO_FATAL_FAILURE(UkNegotiateDeinit());
         DeInitUkNegoInstanceList();
     }
+}
+/*
+ * @tc.name: COMPARE_BY_ALL_ACL_REFINED_Test_001
+ * @tc.desc: Verify refactored CompareByAllAcl with mismatched UDID via CompareAclFields
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, COMPARE_BY_ALL_ACL_REFINED_Test_001, TestSize.Level1)
+{
+    AuthACLInfo oldAcl = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthACLInfo newAcl = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    bool ret = CompareByAllAcl(&oldAcl, &newAcl, true);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: COMPARE_BY_ACL_DIFF_ACCOUNT_REFINED_Test_001
+ * @tc.desc: Verify refactored CompareByAclDiffAccount with mismatched tokenId
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_DIFF_ACCOUNT_REFINED_Test_001, TestSize.Level1)
+{
+    AuthACLInfo oldAcl = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    AuthACLInfo newAcl = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 99,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    bool ret = CompareByAclDiffAccount(&oldAcl, &newAcl, true);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: COMPARE_BY_ACL_DIFF_ACCOUNT_REFINED_Test_002
+ * @tc.desc: Verify refactored CompareByAclDiffAccountWithUserLevel with mismatched userId
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_DIFF_ACCOUNT_REFINED_Test_002, TestSize.Level1)
+{
+    AuthACLInfo oldAcl = {
+        .isServer = false,
+        .sinkUserId = 1,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    AuthACLInfo newAcl = {
+        .isServer = false,
+        .sinkUserId = 99,
+        .sourceUserId = 2,
+        .sourceTokenId = 3,
+        .sinkTokenId = 4,
+    };
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(newAcl.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    bool ret = CompareByAclDiffAccountWithUserLevel(&oldAcl, &newAcl, true);
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: GEN_UK_SEQ_DELEGATE_Test_001
+ * @tc.desc: Verify GenUkSeq delegates to GenAuthIdSeq and returns non-zero unique values
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, GEN_UK_SEQ_DELEGATE_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthCommonInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    uint32_t seq1 = GenUkSeq();
+    EXPECT_GT(seq1, 0);
+    uint32_t seq2 = GenUkSeq();
+    EXPECT_GT(seq2, 0);
+    EXPECT_NE(seq1, seq2);
+    AuthCommonDeinit();
 }
 } // namespace OHOS

@@ -1423,4 +1423,191 @@ HWTEST_F(AuthDeviceProfileTest, SELECT_ALL_ACL_TEST_001, TestSize.Level1)
     ret = SelectAllAcl(nullptr, &num);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+/*
+ * @tc.name: GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_002
+ * @tc.desc: Verify that GetAccessUkIdSameAccount delegates to GetAccessUkIdByCompare
+ *           and returns ACL_NOT_FOUND when no matching profile exists.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_002, TestSize.Level1)
+{
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    int32_t ukId = 0;
+    uint64_t time = 0;
+    int32_t ret = GetAccessUkIdSameAccount(&aclInfo, &ukId, &time);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
+}
+
+/*
+ * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_002
+ * @tc.desc: Verify GetAccessUkIdDiffAccountWithUserLevel delegates to GetAccessUkIdByCompare
+ *           and returns ACL_NOT_FOUND when no matching profile exists.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_002, TestSize.Level1)
+{
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    int32_t ukId = 0;
+    uint64_t time = 0;
+    int32_t ret = GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, &ukId, &time);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
+}
+
+/*
+ * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_002
+ * @tc.desc: Verify GetAccessUkIdDiffAccount delegates to GetAccessUkIdByCompare
+ *           and returns ACL_NOT_FOUND when no matching profile exists.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_002, TestSize.Level1)
+{
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    int32_t ukId = 0;
+    uint64_t time = 0;
+    int32_t ret = GetAccessUkIdDiffAccount(&aclInfo, &ukId, &time);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_003
+ * @tc.desc: Verify CompareAssetAclDiffAccountWithUserLevel rejects SAME_ACCOUNT bind type
+ *           via the refactored CompareAssetAclFields path.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_003, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_004
+ * @tc.desc: Verify CompareAssetAclDiffAccountWithUserLevel rejects SHARE bind type
+ *           via the refactored path.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_004, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_005
+ * @tc.desc: Verify CompareAssetAclDiffAccountWithUserLevel rejects SERVICE bind level
+ *           via the refactored path.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_005, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::POINT_TO_POINT;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::SERVICE;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_004
+ * @tc.desc: Verify CompareAssetAclDiffAccount rejects SAME_ACCOUNT bind type via refactored path.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_004, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_005
+ * @tc.desc: Verify CompareAssetAclDiffAccount rejects SHARE bind type via refactored path.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_005, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_006
+ * @tc.desc: Verify CompareAssetAclDiffAccount rejects USER bind level via refactored path.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_006, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::POINT_TO_POINT;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS
