@@ -598,7 +598,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
     ret = AddHmlTrigger(fd, IP, seq, port, TEST_UDID);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
 }
 
 /*
@@ -791,7 +791,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OpenNewAuthConnTest001, TestSize.Level1)
     EXPECT_CALL(TcpP2pDirectMock, AuthOpenConn).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = OpenNewAuthConn(appInfo, conn, type);
     EXPECT_EQ(SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, ret);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
     SoftBusFree(appInfo);
 }
 

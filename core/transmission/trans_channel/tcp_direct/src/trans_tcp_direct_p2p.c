@@ -528,7 +528,7 @@ static void OnChannelOpenFail(int32_t channelId, int32_t errCode)
 {
     TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d", channelId);
     NotifyChannelOpenFailed(channelId, errCode);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
     TRANS_LOGW(TRANS_CTRL, "ok");
 }
@@ -1501,7 +1501,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     ret = StartVerifyP2pInfo(appInfo, conn, connInfo->type);
     if (ret != SOFTBUS_OK) {
-        TransDelSessionConnById(conn->channelId);
+        (void)TransDelSessionConnById(conn->channelId);
         TRANS_LOGE(TRANS_CTRL, "StartVerifyP2pInfo fail, ret=%{public}d", ret);
         return ret;
     }

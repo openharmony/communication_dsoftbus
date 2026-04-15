@@ -1117,7 +1117,6 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0,
             sizeof(conn->appInfo.sinkSessionKey));
         (void)TransDelTcpChannelInfoByChannelId(channelId);
-        TransDelSessionConnById(channelId);
         CloseHtpChannelPacked(channelId);
     }
     ReleaseSessionConn(conn);
@@ -1526,7 +1525,7 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t ty
 static void TransCleanTdcSource(int32_t channelId)
 {
     (void)TransDelTcpChannelInfoByChannelId(channelId);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
 }
 
@@ -1554,7 +1553,7 @@ static int32_t HandleTdcChannelOpenedReply(
     (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
     (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0,
         sizeof(conn->appInfo.sinkSessionKey));
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
     if (ret != SOFTBUS_OK) {
         (void)TransDelTcpChannelInfoByChannelId(channelId);
@@ -1826,6 +1825,6 @@ ERR_EXIT:
         return ret;
     }
     CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     return ret;
 }
