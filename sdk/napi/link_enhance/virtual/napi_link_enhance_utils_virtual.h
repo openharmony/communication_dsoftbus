@@ -19,7 +19,7 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-#define LINK_ENHANCE_DEVICE_NOT_SUPPORT "32390300"
+#define LINK_ENHANCE_DEVICE_NOT_SUPPORT "801"
 #define LINK_ENHANCE_NOT_SUPPORT_DESCRIPTION        "device not support"
 namespace Communication {
 namespace OHOS::Softbus {
