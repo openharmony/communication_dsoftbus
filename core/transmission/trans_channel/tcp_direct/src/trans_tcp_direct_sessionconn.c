@@ -338,13 +338,13 @@ int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
     return SOFTBUS_TRANS_GET_AUTH_HANDLE_FAILED;
 }
 
-void TransDelSessionConnById(int32_t channelId)
+int32_t TransDelSessionConnById(int32_t channelId)
 {
     TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d", channelId);
     SessionConn *item = NULL;
     SessionConn *next = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
-        return;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
@@ -365,10 +365,11 @@ void TransDelSessionConnById(int32_t channelId)
             SoftBusFree(item);
             g_sessionConnList->cnt--;
             ReleaseSessionConnLock();
-            return;
+            return SOFTBUS_OK;
         }
     }
     ReleaseSessionConnLock();
+    return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 
 int32_t TransTdcAddSessionConn(SessionConn *conn)

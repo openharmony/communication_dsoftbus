@@ -137,7 +137,7 @@ void GetIsClientInfoByIdTest(FuzzedDataProvider &provider)
     (void)GetIsClientInfoById(1, channelType, &value);
     channelType = CHANNEL_TYPE_PROXY;
     (void)GetIsClientInfoById(1, channelType, &value);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
 }
 
 void OnSessionOpenedInnerTest(FuzzedDataProvider &provider)

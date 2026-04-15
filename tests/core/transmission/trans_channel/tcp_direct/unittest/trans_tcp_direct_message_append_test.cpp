@@ -291,7 +291,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest002, TestSize.Lev
     EXPECT_CALL(TcpMessageMock, ConnSendSocketData).WillOnce(Return(bufferLen));
     ret = TransTdcPostBytes(channelId, &packetHead, data);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -360,7 +360,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003, TestSize.Lev
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_PIPE_INTER, ret);
     testing::Mock::VerifyAndClearExpectations(&TcpMessageMock);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -421,7 +421,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003_1, TestSize.L
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_CONN_RESET, ret);
     testing::Mock::VerifyAndClearExpectations(&TcpMessageMock);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -478,7 +478,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003_2, TestSize.L
     EXPECT_EQ(SOFTBUS_CONN_SOCKET_NO_ROUTE_AVALIABLE, ret);
     testing::Mock::VerifyAndClearExpectations(&TcpMessageMock);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -733,7 +733,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest002, TestSi
     ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -756,7 +756,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest003, TestSi
     ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -789,7 +789,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest004, TestSi
     ret = NotifyChannelOpenFailed(channelId, errCode);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -912,7 +912,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest002, TestSize.Leve
     ret = OpenDataBusReply(channelId, seq, reply, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
 
@@ -938,7 +938,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest003, TestSize.Leve
     ret = OpenDataBusReply(channelId, seq, reply, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_UNPACK_REPLY_FAILED);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
 
@@ -965,7 +965,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest004, TestSize.Leve
     ret = OpenDataBusReply(channelId, seq, reply, 0);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
 
@@ -1001,7 +1001,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest005, TestSize.Leve
     ret = OpenDataBusReply(channelId, seq, reply, 0);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
 
@@ -1030,7 +1030,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest006, TestSize.Leve
     ret = OpenDataBusReply(channelId, seq, reply, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
 
@@ -1074,7 +1074,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     SessionConn *connect = GetSessionConnFromDataBusRequest(channelId, reply, 0);
     EXPECT_TRUE(connect != nullptr);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
 
@@ -1098,7 +1098,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     SessionConn *connect = GetSessionConnFromDataBusRequest(channelId, reply, 0);
     EXPECT_TRUE(connect == nullptr);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     cJSON_Delete(reply);
 }
 
@@ -1357,7 +1357,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = NotifyChannelOpened(channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -1408,7 +1408,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest002, TestSize.L
     EXPECT_CALL(TcpMessageMock, SetSessionConnStatusById).WillOnce(Return(SOFTBUS_OK));
     ret = NotifyChannelOpened(channelId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -1435,7 +1435,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelBindTest001, TestSize.Lev
     ret = NotifyChannelBind(channelId, conn);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -1640,7 +1640,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
     ret = ProcessMessage(channelId, flags, seq, msg, dataLen);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -1984,8 +1984,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     ret = OpenDataBusRequest(channelId, flags, seq, reply);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    TransDelSessionConnById(TEST_NEW_CHANNEL_ID);
-    TransDelSessionConnById(TEST_CHANNELID);
+    (void)TransDelSessionConnById(TEST_NEW_CHANNEL_ID);
+    (void)TransDelSessionConnById(TEST_CHANNELID);
     cJSON_Delete(reply);
 }
 

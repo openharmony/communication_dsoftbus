@@ -253,7 +253,7 @@ HWTEST_F(TransTcpDirectP2pTest, NotifyP2pSessionConnClearTest001, TestSize.Level
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ClearP2pSessionConn();
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 
     SoftBusFree(sessionConnList);
     SoftBusFree(testsessionConnList);
@@ -824,7 +824,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthConnOpenedTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_MAX };
     OnAuthConnOpened(requestId, authHandle);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -974,7 +974,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest001, TestSize.Level1)
     ret = OnVerifyP2pReply(authId, req, json);
     EXPECT_NE(ret, SOFTBUS_OK);
     cJSON_Delete(json);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /**
@@ -1014,7 +1014,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest002, TestSize.Level1)
     ret = OnVerifyP2pReply(authId, req, json);
     EXPECT_NE(ret, SOFTBUS_OK);
     cJSON_Delete(json);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /**
@@ -1054,7 +1054,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest003, TestSize.Level1)
     ret = OnVerifyP2pReply(authId, req, json);
     EXPECT_NE(ret, SOFTBUS_OK);
     cJSON_Delete(json);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*

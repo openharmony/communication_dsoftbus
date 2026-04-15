@@ -280,7 +280,7 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetAuthIdByChanId001, TestSize.Level1)
 
     ret = GetAuthIdByChanId(channelId);
     EXPECT_EQ(ret, conn->authHandle.authId);
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -424,7 +424,7 @@ HWTEST_F(TransTcpDirectSessionConnTest, SetSessionConnStatusById001, TestSize.Le
     channelId = 0;
     ret = SetSessionConnStatusById(channelId, status);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
 }
 
 /*
@@ -486,7 +486,7 @@ HWTEST_F(TransTcpDirectSessionConnTest, GetChannelIdsByAuthIdAndStatus001, TestS
     EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = GetChannelIdsByAuthIdAndStatus(&count, &authHandle, TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL);
     EXPECT_NE(channelId, nullptr);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
 }
 
 /*
@@ -651,7 +651,7 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcUpdateReplyCnt002, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransTdcUpdateReplyCnt(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
 }
 
 /*
@@ -674,7 +674,7 @@ HWTEST_F(TransTcpDirectSessionConnTest, TransTdcResetReplyCnt001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransTdcResetReplyCnt(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
 }
 
 /*
