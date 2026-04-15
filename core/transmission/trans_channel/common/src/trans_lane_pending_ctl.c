@@ -862,7 +862,11 @@ static void UpdateChannelCancelEncryption(const SessionParam *param, LaneLinkTyp
         return;
     }
     if (type == LANE_USB && GetCapabilityBit(param->cancelEncryptionBit, LINK_TYPE_WIRED)) {
-        TRANS_LOGI(TRANS_SVC, "enable UDP_CHANNEL_CANCEL_ENCRYPTION");
+        TRANS_LOGI(TRANS_SVC, "usb enable UDP_CHANNEL_CANCEL_ENCRYPTION");
+        EnableCapabilityBit(&info->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    }
+    if (type == LANE_HML && GetCapabilityBit(param->cancelEncryptionBit, LINK_TYPE_WIFI)) {
+        TRANS_LOGI(TRANS_SVC, "hml enable UDP_CHANNEL_CANCEL_ENCRYPTION");
         EnableCapabilityBit(&info->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
     }
 }

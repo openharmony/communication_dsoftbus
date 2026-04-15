@@ -160,46 +160,10 @@ static NapiLinkEnhanceServer *NapiGetEnhanceServer(napi_env env, napi_callback_i
     return NapiGetEnhanceServer(env, thisVar);
 }
 
-static bool CheckAccessTokenAndParams(napi_env env, napi_callback_info info, std::string &funcName)
-{
-    if (!CheckAccessToken()) {
-        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
-        return false;
-    }
-    size_t argc = ARGS_SIZE_TWO;
-    napi_value args[ARGS_SIZE_TWO];
-    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok || argc != ARGS_SIZE_TWO) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-    napi_valuetype valueType = napi_null;
-    napi_typeof(env, args[PARAM1], &valueType);
-    if (valueType != napi_function) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-
-    size_t typeLen = 0;
-    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], nullptr, -1, &typeLen);
-    if (status != napi_ok || typeLen >= ARGS_TYPE_MAX_LEN) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-    char type[ARGS_TYPE_MAX_LEN];
-    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], type, sizeof(type), &typeLen);
-    if (status != napi_ok) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return false;
-    }
-    funcName = type;
-    return true;
-}
-
 napi_value NapiLinkEnhanceServer::On(napi_env env, napi_callback_info info)
 {
     std::string funcName = "";
-    if (!CheckAccessTokenAndParams(env, info, funcName)) {
+    if (!CheckAccessTokenAndParams(env, info, funcName, true)) {
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceServer *enhanceServer = NapiGetEnhanceServer(env, info);
@@ -212,20 +176,21 @@ napi_value NapiLinkEnhanceServer::On(napi_env env, napi_callback_info info)
     }
 
     if (strcmp(funcName.c_str(), "connectionAccepted") == 0) {
-        COMM_LOGE(COMM_SDK, "register connectionAccepted");
+        COMM_LOGI(COMM_SDK, "register connectionAccepted");
         if (enhanceServer->acceptConnectRef_ != nullptr) {
             napi_delete_reference(env, enhanceServer->acceptConnectRef_);
         }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(enhanceServer->acceptConnectRef_));
         enhanceServer->SetAcceptedEnable(true);
     } else if (strcmp(funcName.c_str(), "serverStopped") == 0) {
-        COMM_LOGE(COMM_SDK, "register serverStopped");
+        COMM_LOGI(COMM_SDK, "register serverStopped");
         if (enhanceServer->serverStopRef_ != nullptr) {
             napi_delete_reference(env, enhanceServer->serverStopRef_);
         }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(enhanceServer->serverStopRef_));
         enhanceServer->SetStopEnable(true);
     } else {
+        COMM_LOGE(COMM_SDK, "unknown str, name=%{public}s", funcName.c_str());
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
     }
@@ -235,7 +200,7 @@ napi_value NapiLinkEnhanceServer::On(napi_env env, napi_callback_info info)
 napi_value NapiLinkEnhanceServer::Off(napi_env env, napi_callback_info info)
 {
     std::string funcName = "";
-    if (!CheckAccessTokenAndParams(env, info, funcName)) {
+    if (!CheckAccessTokenAndParams(env, info, funcName, false)) {
         return NapiGetUndefinedRet(env);
     }
 
@@ -244,7 +209,7 @@ napi_value NapiLinkEnhanceServer::Off(napi_env env, napi_callback_info info)
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
     }
-    if (strcmp(funcName.c_str(), "onAcceptConnect") == 0) {
+    if (strcmp(funcName.c_str(), "connectionAccepted") == 0) {
         if (enhanceServer->acceptConnectRef_ != nullptr) {
             napi_delete_reference(env, enhanceServer->acceptConnectRef_);
         }
@@ -257,6 +222,7 @@ napi_value NapiLinkEnhanceServer::Off(napi_env env, napi_callback_info info)
         enhanceServer->serverStopRef_ = nullptr;
         enhanceServer->SetStopEnable(false);
     } else {
+        COMM_LOGE(COMM_SDK, "unknown str, name=%{public}s", funcName.c_str());
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
     }

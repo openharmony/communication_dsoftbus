@@ -24,7 +24,7 @@
 #include "softbus_conn_br_trans.h"
 #include "softbus_def.h"
 
-typedef struct {
+struct PendingPacket {
     ListNode node;
     uint32_t id;
     int64_t seq;
@@ -32,7 +32,12 @@ typedef struct {
     bool finded;
     SoftBusCond cond;
     SoftBusMutex lock;
-} PendingPacket;
+    int32_t refCnt;
+    int32_t (*reference)(struct PendingPacket *self);
+    void (*dereference)(struct PendingPacket **self);
+};
+
+typedef struct PendingPacket PendingPacket;
 
 static SoftBusMutex g_pendingLock;
 static LIST_HEAD(g_pendingList);
@@ -43,6 +48,40 @@ int32_t ConnBrInitBrPendingPacket(void)
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t Reference(PendingPacket *pending)
+{
+    int32_t ret = SoftBusMutexLock(&pending->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BR,
+        "pending lock fail, ret=%{public}d, id=%{public}u, seq=%{public}" PRId64, ret, pending->id, pending->seq);
+    pending->refCnt += 1;
+    SoftBusMutexUnlock(&pending->lock);
+    return ret;
+}
+
+static void Dereference(PendingPacket **pendingPtr)
+{
+    CONN_CHECK_AND_RETURN_LOGW(pendingPtr != NULL, CONN_BR, "invalid para, pending ptr is null.");
+    PendingPacket *pending = *pendingPtr;
+    CONN_CHECK_AND_RETURN_LOGW(pending != NULL, CONN_BR, "invalid para, pending is null.");
+    int32_t ret = SoftBusMutexLock(&pending->lock);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_BR,
+        "pending br lock fail, id=%{public}u, seq=%{public}" PRId64, pending->id, pending->seq);
+    pending->refCnt -= 1;
+    bool destruct = pending->refCnt <= 0;
+    if (destruct) {
+        ListDelete(&pending->node);
+    }
+    SoftBusMutexUnlock(&pending->lock);
+    if (!destruct) {
+        pending = NULL;
+        return;
+    }
+    SoftBusMutexDestroy(&pending->lock);
+    SoftBusCondDestroy(&pending->cond);
+    SoftBusFree(pending);
+    *pendingPtr = NULL;
 }
 
 int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
@@ -65,6 +104,9 @@ int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&pending->node);
+    pending->refCnt = 1;
+    pending->reference = Reference;
+    pending->dereference = Dereference;
     pending->id = id;
     pending->seq = seq;
     pending->data = NULL;
@@ -92,11 +134,8 @@ void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
     PendingPacket *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_pendingList, PendingPacket, node) {
         if (it->id == id && it->seq == seq) {
-            ListDelete(&it->node);
             SoftBusCondSignal(&it->cond);
-            SoftBusMutexDestroy(&it->lock);
-            SoftBusCondDestroy(&it->cond);
-            SoftBusFree(it);
+            it->dereference(&it);
             break;
         }
     }
@@ -110,11 +149,8 @@ void ConnBrDelBrPendingPacketById(uint32_t id)
     PendingPacket *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_pendingList, PendingPacket, node) {
         if (it->id == id) {
-            ListDelete(&it->node);
             SoftBusCondSignal(&it->cond);
-            SoftBusMutexDestroy(&it->lock);
-            SoftBusCondDestroy(&it->cond);
-            SoftBusFree(it);
+            it->dereference(&it);
         }
     }
     (void)SoftBusMutexUnlock(&g_pendingLock);
@@ -137,12 +173,15 @@ int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, 
         (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_NOT_FIND;
     }
-    ListDelete(&pending->node);
+
+    int32_t ret = pending->reference(pending);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&g_pendingLock);
+        return ret;
+    }
     (void)SoftBusMutexUnlock(&g_pendingLock);
 
-    int32_t ret = SOFTBUS_OK;
     if (SoftBusMutexLock(&pending->lock) != SOFTBUS_OK) {
-        *data = pending->data;
         ret = SOFTBUS_LOCK_ERR;
         goto EXIT;
     }
@@ -165,9 +204,9 @@ int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, 
     }
     (void)SoftBusMutexUnlock(&pending->lock);
 EXIT:
-    SoftBusMutexDestroy(&pending->lock);
-    SoftBusCondDestroy(&pending->cond);
-    SoftBusFree(pending);
+    (void)SoftBusMutexLock(&g_pendingLock);
+    pending->dereference(&pending);
+    (void)SoftBusMutexUnlock(&g_pendingLock);
     return ret;
 }
 
