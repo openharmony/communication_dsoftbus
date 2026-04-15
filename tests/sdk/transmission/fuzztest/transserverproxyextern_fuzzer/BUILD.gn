@@ -24,6 +24,7 @@ ohos_fuzztest("TransServerProxyExternFuzzTest") {
   fuzz_config_file = "$dsoftbus_test_path/sdk/transmission/fuzztest/transserverproxyextern_fuzzer"
 
   include_dirs = [
+    "$dsoftbus_core_path/common/include",
     "$dsoftbus_core_path/transmission/common/include",
 
     "$dsoftbus_root_path/adapter/common/include",

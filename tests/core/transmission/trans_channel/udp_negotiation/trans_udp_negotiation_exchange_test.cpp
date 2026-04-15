@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,21 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "bus_center_info_key_struct.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_utils.h"
+#include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 
 using namespace testing::ext;
 
 namespace OHOS {
 
-#define TEST_SOCKET_ADDR "192.168.8.119"
-#define TEST_ERROR_CODE (-12345)
+#define TEST_SOCKET_ADDR       "192.168.8.119"
+#define TEST_ERROR_CODE        (-12345)
+#define COLLABORATION_FWK_UID  5520
+#define CODE_EXCHANGE_UDP_INFO 6
 
 const char *g_sessionKey = "www.test.com";
 const char *g_pkgName = "dms";
@@ -34,30 +40,23 @@ const char *g_groupid = "TEST_GROUP_ID";
 
 class TransUdpNegotiationExchangeTest : public testing::Test {
 public:
-    TransUdpNegotiationExchangeTest()
-    {}
-    ~TransUdpNegotiationExchangeTest()
-    {}
+    TransUdpNegotiationExchangeTest() { }
+    ~TransUdpNegotiationExchangeTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void TransUdpNegotiationExchangeTest::SetUpTestCase(void)
-{}
+void TransUdpNegotiationExchangeTest::SetUpTestCase(void) { }
 
-void TransUdpNegotiationExchangeTest::TearDownTestCase(void)
-{}
+void TransUdpNegotiationExchangeTest::TearDownTestCase(void) { }
 
 static void GenerateAppInfo(AppInfo *appInfo)
 {
     if (appInfo == nullptr) {
-        appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+        appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
         EXPECT_TRUE(appInfo != nullptr);
-        memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     }
     int32_t res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), g_sessionKey);
     EXPECT_EQ(res, EOK);
@@ -86,9 +85,8 @@ static void GenerateAppInfo(AppInfo *appInfo)
  */
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest001, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
     int32_t ret = TransPackRequestUdpInfo(nullptr, appInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -111,9 +109,8 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest001, Te
  */
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest002, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     GenerateAppInfo(appInfo);
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     cJSON *msg = cJSON_CreateObject();
@@ -150,9 +147,8 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest002, Te
  */
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest003, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
     int32_t ret = TransPackReplyUdpInfo(nullptr, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -181,9 +177,8 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest003, Te
  */
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest004, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     GenerateAppInfo(appInfo);
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
@@ -219,9 +214,8 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest004, Te
  */
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest005, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo* appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     EXPECT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
     GenerateAppInfo(appInfo);
     appInfo->udpChannelOptType = TYPE_INVALID_CHANNEL;
@@ -286,4 +280,388 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest007, Te
     cJSON_Delete(msg);
 }
 
+/*
+ * @tc.name: TransMetaCheckCancelEncryptionPermission001
+ * @tc.desc: Test TransMetaCheckCancelEncryptionPermission with valid parameters
+ *           All conditions met: correct uid, P2P connection type, FILE business type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransMetaCheckCancelEncryptionPermission001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    appInfo->osType = OTHER_OS_TYPE;
+    appInfo->metaType = META_SDK;
+    appInfo->myData.uid = COLLABORATION_FWK_UID;
+    appInfo->udpConnType = UDP_CONN_TYPE_P2P;
+    appInfo->businessType = BUSINESS_TYPE_FILE;
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool hasCancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    EXPECT_TRUE(hasCancelEncryption);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
 }
+
+/*
+ * @tc.name: TransMetaCheckCancelEncryptionPermission002
+ * @tc.desc: Test TransMetaCheckCancelEncryptionPermission with invalid uid
+ *           Session name is not IShareReceiverFileSession
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransMetaCheckCancelEncryptionPermission002, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    appInfo->osType = OTHER_OS_TYPE;
+    appInfo->metaType = META_SDK;
+    appInfo->udpConnType = UDP_CONN_TYPE_P2P;
+    appInfo->businessType = BUSINESS_TYPE_FILE;
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool hasCancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    EXPECT_TRUE(hasCancelEncryption);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransMetaCheckCancelEncryptionPermission003
+ * @tc.desc: Test TransMetaCheckCancelEncryptionPermission with invalid UDP connection type
+ *           UDP connection type is not P2P
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransMetaCheckCancelEncryptionPermission003, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    appInfo->osType = OTHER_OS_TYPE;
+    appInfo->metaType = META_SDK;
+    appInfo->myData.uid = COLLABORATION_FWK_UID;
+    appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
+    appInfo->businessType = BUSINESS_TYPE_FILE;
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool hasCancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    EXPECT_TRUE(hasCancelEncryption);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransMetaCheckCancelEncryptionPermission004
+ * @tc.desc: Test TransMetaCheckCancelEncryptionPermission with invalid business type
+ *           Business type is not FILE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransMetaCheckCancelEncryptionPermission004, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    appInfo->osType = OTHER_OS_TYPE;
+    appInfo->metaType = META_SDK;
+    appInfo->myData.uid = COLLABORATION_FWK_UID;
+    appInfo->udpConnType = UDP_CONN_TYPE_P2P;
+    appInfo->businessType = BUSINESS_TYPE_STREAM;
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool hasCancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    EXPECT_TRUE(hasCancelEncryption);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransProcessCapabilityFromJson001
+ * @tc.desc: Test TransGetCapabilityFromJson with non-meta device
+ *           Non-meta device should use CancelEncryptionCheckPacked
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransProcessCapabilityFromJson001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    appInfo->osType = OH_OS_TYPE;
+    appInfo->metaType = META_HA;
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0x1);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_EQ(appInfo->channelCapability, 0x1);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransProcessCapabilityFromJson002
+ * @tc.desc: Test TransGetCapabilityFromJson with capability masking
+ *           Verify that capabilities are properly masked
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransProcessCapabilityFromJson002, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    uint32_t testCapability = 0xFFFFFFFF;
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", testCapability);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", testCapability);
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_EQ(appInfo->channelCapability, (testCapability & TRANS_CHANNEL_CAPABILITY));
+
+    EnableCapabilityBit(&testCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    EXPECT_EQ(appInfo->udpChannelCapability, (testCapability & TRANS_UDP_CHANNEL_CAPBILITY));
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransUnpackRequestUdpInfoWithSessionKey001
+ * @tc.desc: Test TransUnpackRequestUdpInfo with valid session key
+ * @tc.type.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransUnpackRequestUdpInfoWithSessionKey001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    unsigned char testSessionKey[SESSION_KEY_LENGTH] = { 0 };
+    for (int i = 0; i < SESSION_KEY_LENGTH; i++) {
+        testSessionKey[i] = (unsigned char)i;
+    }
+
+    char base64Key[BASE64_SESSION_KEY_LEN] = { 0 };
+    size_t outLen = 0;
+    int32_t ret = SoftBusBase64Encode(
+        (unsigned char *)base64Key, BASE64_SESSION_KEY_LEN, &outLen, testSessionKey, SESSION_KEY_LENGTH);
+    EXPECT_EQ(ret, 0);
+
+    cJSON_AddStringToObject(msg, "SESSION_KEY", base64Key);
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "CODE", CODE_EXCHANGE_UDP_INFO);
+    cJSON_AddNumberToObject(msg, "UDPChannelOptType", TYPE_UDP_CHANNEL_OPEN);
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransUnpackRequestUdpInfoWithSessionKey002
+ * @tc.desc: Test TransUnpackRequestUdpInfo with empty session key
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransUnpackRequestUdpInfoWithSessionKey002, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddStringToObject(msg, "SESSION_KEY", "");
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "CODE", CODE_EXCHANGE_UDP_INFO);
+    cJSON_AddNumberToObject(msg, "UDPChannelOptType", TYPE_UDP_CHANNEL_OPEN);
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransUnpackRequestUdpInfoCloseChannel001
+ * @tc.desc: Test TransUnpackRequestUdpInfo with TYPE_UDP_CHANNEL_CLOSE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransUnpackRequestUdpInfoCloseChannel001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddStringToObject(msg, "SESSION_KEY", "");
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", 0);
+    cJSON_AddNumberToObject(msg, "CODE", CODE_EXCHANGE_UDP_INFO);
+    cJSON_AddNumberToObject(msg, "UDPChannelOptType", TYPE_UDP_CHANNEL_CLOSE);
+    cJSON_AddNumberToObject(msg, "PEER_CHANNEL_ID", 12345);
+    cJSON_AddNumberToObject(msg, "MY_CHANNEL_ID", 67890);
+    cJSON_AddStringToObject(msg, "MY_IP", "192.168.1.1");
+
+    GenerateAppInfo(appInfo);
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+    int32_t ret = TransUnpackRequestUdpInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransUnpackExtDeviceRequestInfo001
+ * @tc.desc: Test TransUnpackExtDeviceRequestInfo with meta device
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransUnpackExtDeviceRequestInfo001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    appInfo->osType = OTHER_OS_TYPE;
+    appInfo->metaType = META_SDK;
+    appInfo->myData.uid = COLLABORATION_FWK_UID;
+    appInfo->udpConnType = UDP_CONN_TYPE_P2P;
+    appInfo->businessType = BUSINESS_TYPE_FILE;
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddNumberToObject(msg, "CODE", CODE_EXCHANGE_UDP_INFO);
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0x1);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+
+    GenerateAppInfo(appInfo);
+
+    int32_t ret = TransUnpackExtDeviceRequestInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool hasCancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    EXPECT_TRUE(hasCancelEncryption);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransUnpackExtDeviceRequestInfo002
+ * @tc.desc: Test TransUnpackExtDeviceRequestInfo with meta device but invalid permission
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationExchangeTest, TransUnpackExtDeviceRequestInfo002, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_TRUE(appInfo != nullptr);
+
+    appInfo->osType = OTHER_OS_TYPE;
+    appInfo->metaType = META_SDK;
+    appInfo->udpConnType = UDP_CONN_TYPE_P2P;
+    appInfo->businessType = BUSINESS_TYPE_FILE;
+    appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+
+    cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
+
+    cJSON_AddNumberToObject(msg, "CODE", CODE_EXCHANGE_UDP_INFO);
+    cJSON_AddNumberToObject(msg, "TRANS_CAPABILITY", 0x1);
+    cJSON_AddNumberToObject(msg, "UDP_CHANNEL_CAPABILITY", (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
+
+    GenerateAppInfo(appInfo);
+    int32_t ret = TransUnpackExtDeviceRequestInfo(msg, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool hasCancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
+    EXPECT_TRUE(hasCancelEncryption);
+
+    cJSON_Delete(msg);
+    SoftBusFree(appInfo);
+}
+} // namespace OHOS

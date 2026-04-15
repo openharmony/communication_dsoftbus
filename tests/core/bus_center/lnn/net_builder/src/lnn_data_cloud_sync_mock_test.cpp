@@ -543,9 +543,16 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_001, TestS
 {
     const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
     const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    if (value == nullptr || key == nullptr) {
+        SoftBusFree(key);
+        SoftBusFree(value);
+        return;
+    }
     int32_t keySize = KEY_SIZE0;
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(nullptr, value, keySize), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(key, nullptr, keySize), SOFTBUS_INVALID_PARAM);
+    SoftBusFree(key);
+    SoftBusFree(value);
 }
 
 /*
@@ -558,6 +565,11 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestS
 {
     const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
     const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    if (value == nullptr || key == nullptr) {
+        SoftBusFree(key);
+        SoftBusFree(value);
+        return;
+    }
     int32_t keySize = KEY_SIZE1;
     EXPECT_NE(LnnDBDataAddChangeSyncToCache(key, value, keySize), SOFTBUS_OK);
 }
@@ -743,6 +755,11 @@ HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
 {
     const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
     const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    if (value == nullptr || key == nullptr) {
+        SoftBusFree(key);
+        SoftBusFree(value);
+        return;
+    }
     int32_t keySize = KEY_SIZE1;
     int32_t ret = CheckParamValidity(nullptr, nullptr, keySize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

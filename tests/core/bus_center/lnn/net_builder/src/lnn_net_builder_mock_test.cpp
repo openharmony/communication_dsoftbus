@@ -87,6 +87,7 @@ static void ClearNetBuilderFsmList()
     LnnConnectionFsm *next = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE (item, next, &netBuilder->fsmList, LnnConnectionFsm, node) {
         ListDelete(&item->node);
+        SoftBusFree(item);
         --netBuilder->connCount;
     }
 }
@@ -223,16 +224,16 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002, TestSize.Le
         [CONNECTION_ADDR_WLAN] = true,
         [CONNECTION_ADDR_BLE] = false,
     };
-    bool *para = reinterpret_cast<bool *>(SoftBusMalloc(sizeof(bool) * CONNECTION_ADDR_MAX));
-    EXPECT_TRUE(para != nullptr);
+    bool *para = reinterpret_cast<bool *>(SoftBusCalloc(sizeof(bool) * CONNECTION_ADDR_MAX));
+    ASSERT_TRUE(para != nullptr);
     EXPECT_EQ(EOK, memcpy_s(para, sizeof(bool) * CONNECTION_ADDR_MAX, addrType, sizeof(bool) * CONNECTION_ADDR_MAX));
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(NetBuilderMock, LnnNotifyAllTypeOffline(_)).WillRepeatedly(Return());
     int32_t ret = ProcessLeaveByAddrType(reinterpret_cast<const void *>(para));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    bool *para1 = reinterpret_cast<bool *>(SoftBusMalloc(sizeof(bool) * CONNECTION_ADDR_MAX));
-    EXPECT_TRUE(para1 != nullptr);
+    bool *para1 = reinterpret_cast<bool *>(SoftBusCalloc(sizeof(bool) * CONNECTION_ADDR_MAX));
+    ASSERT_TRUE(para1 != nullptr);
     EXPECT_EQ(EOK, memcpy_s(para1, sizeof(bool) * CONNECTION_ADDR_MAX, addrType, sizeof(bool) * CONNECTION_ADDR_MAX));
     EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ProcessLeaveByAddrType(reinterpret_cast<const void *>(para1));
@@ -407,7 +408,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_001, TestSize.Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
 {
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(ElectMsgPara)));
+    void *para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ElectMsgPara)));
+    ASSERT_TRUE(para != nullptr);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     SoftBusLooper loop;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -438,7 +440,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_001, TestSize.Level1)
 {
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(ConnectionAddr)));
+    void *para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ConnectionAddr)));
+    ASSERT_TRUE(para != nullptr);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessNodeStateChanged(nullptr) == SOFTBUS_INVALID_PARAM);
@@ -455,17 +458,29 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_001, TestSize.Le
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_002, TestSize.Level1)
 {
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(ConnectionAddr)));
-    EXPECT_TRUE(para != nullptr);
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ConnectionAddr)));
+    ASSERT_TRUE(para != nullptr);
     void *para1 = nullptr;
-    para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(ConnectionAddr)));
-    EXPECT_TRUE(para1 != nullptr);
+    para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ConnectionAddr)));
+    if (para1 == nullptr) {
+        SoftBusFree(para);
+        return;
+    }
     void *para2 = nullptr;
-    para2 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(ConnectionAddr)));
-    EXPECT_TRUE(para2 != nullptr);
+    para2 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ConnectionAddr)));
+    if (para2 == nullptr) {
+        SoftBusFree(para);
+        SoftBusFree(para1);
+        return;
+    }
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(para);
+        SoftBusFree(para1);
+        SoftBusFree(para2);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_NEW_V1;
     connFsm->isDead = false;
@@ -494,14 +509,21 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_002, TestSize.Le
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_003, TestSize.Level1)
 {
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(ConnectionAddr)));
-    EXPECT_TRUE(para != nullptr);
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ConnectionAddr)));
+    ASSERT_TRUE(para != nullptr);
     void *para1 = nullptr;
-    para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(ConnectionAddr)));
-    EXPECT_TRUE(para1 != nullptr);
+    para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(ConnectionAddr)));
+    if (para1 == nullptr) {
+        SoftBusFree(para);
+        return;
+    }
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(para);
+        SoftBusFree(para1);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_OLD_V2;
     connFsm->isDead = false;
@@ -576,7 +598,8 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_ONLINE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_INVALID_CONN_TEST_001, TestSize.Level1)
 {
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LeaveInvalidConnMsgPara)));
+    void *para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(LeaveInvalidConnMsgPara)));
+    ASSERT_TRUE(para != nullptr);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessLeaveInvalidConn(nullptr) == SOFTBUS_INVALID_PARAM);
@@ -625,7 +648,8 @@ HWTEST_F(LNNNetBuilderMockTest, IS_INVALID_CONNECTION_FSM_TEST_001, TestSize.Lev
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_001, TestSize.Level1)
 {
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    void *para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    ASSERT_TRUE(para != nullptr);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessSyncOfflineFinish(nullptr) == SOFTBUS_INVALID_PARAM);
@@ -641,7 +665,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_001, TestSize.L
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_001, TestSize.Level1)
 {
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    void *para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    ASSERT_TRUE(para != nullptr);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
     EXPECT_CALL(NetBuilderMock, LnnNotifyLeaveResult(_, _)).WillRepeatedly(Return());
@@ -676,7 +701,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Le
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_DISCONNECT_TEST_001, TestSize.Level1)
 {
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int64_t)));
+    void *para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(int64_t)));
+    ASSERT_TRUE(para != nullptr);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessDeviceDisconnect(nullptr) == SOFTBUS_INVALID_PARAM);
@@ -693,7 +719,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_DISCONNECT_TEST_001, TestSize.Lev
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
 {
     DeviceVerifyPassMsgPara *msgPara =
-        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
+        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusCalloc(sizeof(DeviceVerifyPassMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
     msgPara->nodeInfo = nullptr;
     void *para = reinterpret_cast<void *>(msgPara);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
@@ -713,12 +740,22 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_002, TestSize.Le
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     DeviceVerifyPassMsgPara *msgPara =
-        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusCalloc(sizeof(DeviceVerifyPassMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (msgPara->nodeInfo == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     msgPara->authHandle.authId = AUTH_ID;
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara->nodeInfo);
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->connInfo.authHandle.authId = AUTH_ID_ADD;
@@ -742,12 +779,22 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Le
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     DeviceVerifyPassMsgPara *msgPara =
-        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusCalloc(sizeof(DeviceVerifyPassMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (msgPara->nodeInfo == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     msgPara->authHandle.authId = AUTH_ID;
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara->nodeInfo);
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
@@ -770,12 +817,22 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Le
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Level1)
 {
     DeviceVerifyPassMsgPara *msgPara =
-        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+        reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusCalloc(sizeof(DeviceVerifyPassMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (msgPara->nodeInfo == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     msgPara->authHandle.authId = AUTH_ID;
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara->nodeInfo);
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
@@ -798,15 +855,21 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Le
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_001, TestSize.Level1)
 {
-    VerifyResultMsgPara *msgPara1 = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
+    VerifyResultMsgPara *msgPara1 = reinterpret_cast<VerifyResultMsgPara *>(SoftBusCalloc(sizeof(VerifyResultMsgPara)));
+    ASSERT_TRUE(msgPara1 != nullptr);
     msgPara1->nodeInfo = nullptr;
     void *para1 = reinterpret_cast<void *>(msgPara1);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessVerifyResult(nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(ProcessVerifyResult(para1) != SOFTBUS_OK);
-    VerifyResultMsgPara *msgPara2 = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara2->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    VerifyResultMsgPara *msgPara2 = reinterpret_cast<VerifyResultMsgPara *>(SoftBusCalloc(sizeof(VerifyResultMsgPara)));
+    ASSERT_TRUE(msgPara2 != nullptr);
+    msgPara2->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (msgPara2->nodeInfo == nullptr) {
+        SoftBusFree(msgPara2);
+        return;
+    }
     void *para2 = reinterpret_cast<void *>(msgPara2);
     EXPECT_TRUE(ProcessVerifyResult(para2) != SOFTBUS_OK);
 }
@@ -821,12 +884,22 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_002, TestSize.Level1)
 {
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusCalloc(sizeof(VerifyResultMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (msgPara->nodeInfo == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     msgPara->requestId = REQUEST_ID;
     void *para = reinterpret_cast<void *>(msgPara);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara->nodeInfo);
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = true;
@@ -844,13 +917,23 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_002, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_003, TestSize.Level1)
 {
-    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusCalloc(sizeof(VerifyResultMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (msgPara->nodeInfo == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     msgPara->requestId = REQUEST_ID;
     msgPara->retCode = SOFTBUS_INVALID_PARAM;
     void *para = reinterpret_cast<void *>(msgPara);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara->nodeInfo);
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = false;
@@ -871,12 +954,22 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_003, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_004, TestSize.Level1)
 {
-    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
-    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    VerifyResultMsgPara *msgPara = reinterpret_cast<VerifyResultMsgPara *>(SoftBusCalloc(sizeof(VerifyResultMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
+    msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (msgPara->nodeInfo == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     msgPara->requestId = REQUEST_ID;
     msgPara->retCode = SOFTBUS_INVALID_PARAM;
     void *para = reinterpret_cast<void *>(msgPara);
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara->nodeInfo);
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = false;
@@ -897,7 +990,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_004, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_CLEAN_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(uint16_t)));
+    void *para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(uint16_t)));
+    ASSERT_TRUE(para != nullptr);
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessCleanConnectionFsm(nullptr) == SOFTBUS_INVALID_PARAM);
@@ -982,7 +1076,8 @@ HWTEST_F(LNNNetBuilderMockTest, DUP_NODE_INFO_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
@@ -993,7 +1088,12 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
     connFsm->id = FSM_ID;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
     MetaJoinRequestNode *requestNode =
-        reinterpret_cast<MetaJoinRequestNode *>(SoftBusMalloc(sizeof(MetaJoinRequestNode)));
+        reinterpret_cast<MetaJoinRequestNode *>(SoftBusCalloc(sizeof(MetaJoinRequestNode)));
+    if (requestNode == nullptr) {
+        ListDelete(&connFsm->node);
+        SoftBusFree(connFsm);
+        return;
+    }
     ListInit(&requestNode->node);
     (void)strcpy_s(requestNode->addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
     requestNode->requestId = REQUEST_ID;
@@ -1036,7 +1136,8 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
 HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_001, TestSize.Level1)
 {
     ClearNetBuilderFsmList();
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->isDead = false;
@@ -1050,7 +1151,12 @@ HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_001, TestSize.Lev
     SendElectMessageToAll(NODE1_NETWORK_ID);
     SendElectMessageToAll(NODE1_NETWORK_ID);
     EXPECT_TRUE(NeedPendingJoinRequest() == false);
-    LnnConnectionFsm *connFsm1 = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm1 = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm1 == nullptr) {
+        ListDelete(&connFsm->node);
+        SoftBusFree(connFsm);
+        return;
+    }
     ListInit(&connFsm1->node);
     (void)strcpy_s(connFsm1->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
     connFsm1->isDead = true;
@@ -1070,8 +1176,8 @@ HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_001, TestSize.Lev
 HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_002, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->isDead = false;
@@ -1114,7 +1220,8 @@ HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_002, TestSize.Lev
  */
 HWTEST_F(LNNNetBuilderMockTest, INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.Level1)
 {
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
@@ -1143,7 +1250,8 @@ HWTEST_F(LNNNetBuilderMockTest, INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.L
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_001, TestSize.Level1)
 {
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
@@ -1182,7 +1290,8 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_001, TestSize
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_002, TestSize.Level1)
 {
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, NODE1_IP);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_WLAN;
@@ -1217,11 +1326,16 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_002, TestSize
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_002, TestSize.Level1)
 {
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    void *msgPara = reinterpret_cast<void *>(SoftBusMalloc(sizeof(char) * UDID_BUF_LEN));
+    void *msgPara = reinterpret_cast<void *>(SoftBusCalloc(sizeof(char) * UDID_BUF_LEN));
+    ASSERT_TRUE(msgPara != nullptr);
     EXPECT_CALL(NetBuilderMock, LnnGetNetworkIdByUdid(_, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(NetBuilderMock, LnnGetDeviceUdid(_)).WillRepeatedly(Return(nullptr));
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
@@ -1241,10 +1355,15 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_002, TestSize.Le
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_002, TestSize.Level1)
 {
-    char *msgPara = reinterpret_cast<char *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    char *msgPara = reinterpret_cast<char *>(SoftBusCalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
@@ -1266,10 +1385,15 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_002, TestSize.Lev
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_003, TestSize.Level1)
 {
-    char *msgPara = reinterpret_cast<char *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    char *msgPara = reinterpret_cast<char *>(SoftBusCalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->isDead = true;
@@ -1292,10 +1416,15 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_003, TestSize.Lev
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_004, TestSize.Level1)
 {
-    char *msgPara = reinterpret_cast<char *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    char *msgPara = reinterpret_cast<char *>(SoftBusCalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->isDead = false;
@@ -1319,10 +1448,15 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_004, TestSize.Lev
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_002, TestSize.Level1)
 {
-    char *msgPara = reinterpret_cast<char *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    char *msgPara = reinterpret_cast<char *>(SoftBusCalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
@@ -1342,10 +1476,15 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_002, TestSize.L
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_003, TestSize.Level1)
 {
-    char *msgPara = reinterpret_cast<char *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    char *msgPara = reinterpret_cast<char *>(SoftBusCalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->isDead = true;
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
@@ -1367,11 +1506,16 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_003, TestSize.L
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_002, TestSize.Level1)
 {
     SpecificLeaveMsgPara *msgPara =
-        reinterpret_cast<SpecificLeaveMsgPara *>(SoftBusMalloc(sizeof(SpecificLeaveMsgPara)));
+        reinterpret_cast<SpecificLeaveMsgPara *>(SoftBusCalloc(sizeof(SpecificLeaveMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara->networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
     msgPara->addrType = CONNECTION_ADDR_BLE;
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
@@ -1395,9 +1539,14 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_002, TestSize.Level1
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_003, TestSize.Level1)
 {
     SpecificLeaveMsgPara *msgPara =
-        reinterpret_cast<SpecificLeaveMsgPara *>(SoftBusMalloc(sizeof(SpecificLeaveMsgPara)));
+        reinterpret_cast<SpecificLeaveMsgPara *>(SoftBusCalloc(sizeof(SpecificLeaveMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
@@ -1423,11 +1572,13 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001, T
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     OnLnnProcessNotTrustedMsgDelay(nullptr);
-    void *para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(NotTrustedDelayInfo)));
+    void *para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    ASSERT_TRUE(para1 != nullptr);
     EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList(_, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     OnLnnProcessNotTrustedMsgDelay(para1);
 
-    void *para2 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(NotTrustedDelayInfo)));
+    void *para2 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(NotTrustedDelayInfo)));
+    ASSERT_TRUE(para2 != nullptr);
     EXPECT_CALL(NetBuilderMock, AuthGetLatestAuthSeqList(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     OnLnnProcessNotTrustedMsgDelay(para2);
@@ -1442,10 +1593,15 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001, T
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_002, TestSize.Level1)
 {
-    ElectMsgPara *msgPara = reinterpret_cast<ElectMsgPara *>(SoftBusMalloc(sizeof(ElectMsgPara)));
+    ElectMsgPara *msgPara = reinterpret_cast<ElectMsgPara *>(SoftBusCalloc(sizeof(ElectMsgPara)));
+    ASSERT_TRUE(msgPara != nullptr);
     (void)strcpy_s(msgPara->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
 
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(msgPara);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_NEW_V1;
     connFsm->isDead = false;
@@ -1473,11 +1629,14 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_002, TestSize.Level1)
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Level1)
 {
     JoinLnnMsgPara *para = nullptr;
-    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusMalloc(sizeof(JoinLnnMsgPara)));
-    EXPECT_TRUE(para != nullptr);
+    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusCalloc(sizeof(JoinLnnMsgPara)));
+    ASSERT_TRUE(para != nullptr);
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(para);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_NEW_V1;
     connFsm->isDead = false;
@@ -1508,11 +1667,14 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Lev
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_002, TestSize.Level1)
 {
     JoinLnnMsgPara *para = nullptr;
-    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusMalloc(sizeof(JoinLnnMsgPara)));
-    EXPECT_TRUE(para != nullptr);
+    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusCalloc(sizeof(JoinLnnMsgPara)));
+    ASSERT_TRUE(para != nullptr);
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(para);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_NEW_V1;
     connFsm->isDead = false;
@@ -1541,11 +1703,14 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_002, TestSize.Lev
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_003, TestSize.Level1)
 {
     JoinLnnMsgPara *para = nullptr;
-    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusMalloc(sizeof(JoinLnnMsgPara)));
-    EXPECT_TRUE(para != nullptr);
+    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusCalloc(sizeof(JoinLnnMsgPara)));
+    ASSERT_TRUE(para != nullptr);
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(para);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_NEW_V1;
     connFsm->isDead = false;
@@ -1574,11 +1739,14 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_003, TestSize.Lev
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_004, TestSize.Level1)
 {
     JoinLnnMsgPara *para = nullptr;
-    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusMalloc(sizeof(JoinLnnMsgPara)));
-    EXPECT_TRUE(para != nullptr);
+    para = reinterpret_cast<JoinLnnMsgPara *>(SoftBusCalloc(sizeof(JoinLnnMsgPara)));
+    ASSERT_TRUE(para != nullptr);
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    if (connFsm == nullptr) {
+        SoftBusFree(para);
+        return;
+    }
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_NEW_V1;
     connFsm->isDead = false;
@@ -1657,8 +1825,8 @@ HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_001, TestSize.Leve
 HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_002, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     connFsm->connInfo.version = SOFTBUS_NEW_V1;
     connFsm->isDead = false;
@@ -1691,12 +1859,16 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Le
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(false)).WillRepeatedly(Return(true));
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = false;
-    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
+    if (connFsm->connInfo.nodeInfo == nullptr) {
+        SoftBusFree(connFsm);
+        return;
+    }
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
 
@@ -1780,8 +1952,8 @@ HWTEST_F(LNNNetBuilderMockTest, ACCOUNT_STATE_CHANGE_HANDLER_TEST_001, TestSize.
 HWTEST_F(LNNNetBuilderMockTest, TRY_INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.Level1)
 {
     LnnConnectionFsm *connFsm1 = nullptr;
-    connFsm1 = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm1 != nullptr);
+    connFsm1 = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm1 != nullptr);
     connFsm1->connInfo.flag = CONN_FLAG1;
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1879,7 +2051,7 @@ HWTEST_F(LNNNetBuilderMockTest, CREATE_PASSIVE_CONNECTION_FSM_TEST_001, TestSize
     LnnConnectionFsm *fsm = StartNewConnectionFsm(&addr, pkgName, false);
     EXPECT_TRUE(fsm == nullptr);
     LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE2_BR_MAC);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
@@ -1906,7 +2078,7 @@ HWTEST_F(LNNNetBuilderMockTest, IS_SAME_PENDING_REQUEST_TEST_001, TestSize.Level
 {
     PendingJoinRequestNode *request =
         reinterpret_cast<PendingJoinRequestNode *>(SoftBusCalloc(sizeof(PendingJoinRequestNode)));
-    EXPECT_TRUE(request != nullptr);
+    ASSERT_TRUE(request != nullptr);
     ListInit(&request->node);
     request->needReportFailure = true;
     ListAdd(&g_netBuilder.pendingList, &request->node);
@@ -2035,7 +2207,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_NOTIFY_AUTH_HANDLE_LEAVE_LNN_TEST_001, TestS
 {
     ClearNetBuilderFsmList();
     LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
-    EXPECT_TRUE(connFsm != nullptr);
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
@@ -2358,7 +2530,8 @@ HWTEST_F(LNNNetBuilderMockTest, OnReAuthVerifyPassed_Test_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, GetAuthRequest(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnConvertAuthConnInfoToAddr(_, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(NetBuilderMock, SoftBusGenerateStrHash(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ASSERT_TRUE(connFsm != nullptr);
     ListInit(&connFsm->node);
     connFsm->isDead = false;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);

@@ -30,6 +30,24 @@ using testing::_;
 using ::testing::Return;
 
 namespace OHOS::SoftBus {
+
+// RAII guard to restore global listener state automatically
+template <typename ListenerType, ListenerType* GlobalListener>
+class ListenerGuard {
+public:
+    explicit ListenerGuard(const ListenerType& original) : original_(original) {}
+    ~ListenerGuard() { *GlobalListener = original_; }
+    ListenerGuard(const ListenerGuard&) = delete;
+    ListenerGuard& operator=(const ListenerGuard&) = delete;
+private:
+    ListenerType original_;
+};
+
+// Type aliases for specific guards
+using PtkMismatchListenerGuard = ListenerGuard<PtkMismatchListener, &g_ptkMismatchListener>;
+using HmlStateListenerGuard = ListenerGuard<HmlStateListener, &g_hmlStateListener>;
+using SyncPtkListenerGuard = ListenerGuard<SyncPtkListener, &g_syncPtkListener>;
+
 class WifiDirectManagerCppTest : public testing::Test {
 public:
     static void SetUpTestCase() { }
@@ -600,5 +618,483 @@ HWTEST_F(WifiDirectManagerCppTest, IsNegotiateChannelNeedTest, TestSize.Level1)
 
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     CONN_LOGI(CONN_WIFI_DIRECT, "IsNegotiateChannelNeedTest out");
+}
+
+/*
+ * @tc.name: GetRequestIdTest
+ * @tc.desc: check GetRequestId method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, GetRequestIdTest, TestSize.Level1)
+{
+    auto requestId1 = GetWifiDirectManager()->getRequestId();
+    auto requestId2 = GetWifiDirectManager()->getRequestId();
+    EXPECT_GT(requestId2, requestId1);
+}
+
+/*
+ * @tc.name: FreeListenerModuleIdTest
+ * @tc.desc: check FreeListenerModuleId method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, FreeListenerModuleIdTest, TestSize.Level1)
+{
+    auto moduleId1 = GetWifiDirectManager()->allocateListenerModuleId();
+    auto moduleId2 = GetWifiDirectManager()->allocateListenerModuleId();
+    EXPECT_EQ(moduleId1, AUTH_ENHANCED_P2P_START);
+    EXPECT_EQ(moduleId2, AUTH_ENHANCED_P2P_START + 1);
+
+    GetWifiDirectManager()->freeListenerModuleId(moduleId1);
+    auto moduleId3 = GetWifiDirectManager()->allocateListenerModuleId();
+    EXPECT_EQ(moduleId3, AUTH_ENHANCED_P2P_START);
+
+    GetWifiDirectManager()->freeListenerModuleId(moduleId2);
+    GetWifiDirectManager()->freeListenerModuleId(moduleId3);
+}
+
+/*
+ * @tc.name: LinkHasPtkTest
+ * @tc.desc: check LinkHasPtk method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, LinkHasPtkTest, TestSize.Level1)
+{
+    std::string remoteDeviceId("0123456789ABCDEF");
+
+    // Test with no link - should return false
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    auto hasPtk = GetWifiDirectManager()->linkHasPtk(remoteDeviceId.c_str());
+    EXPECT_EQ(hasPtk, false);
+
+    // Test with link without PTK
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteDeviceId, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        link.SetPtk(false);
+    });
+    hasPtk = GetWifiDirectManager()->linkHasPtk(remoteDeviceId.c_str());
+    EXPECT_EQ(hasPtk, false);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteDeviceId, [](InnerLink &link) {
+        link.SetPtk(true);
+    });
+    hasPtk = GetWifiDirectManager()->linkHasPtk(remoteDeviceId.c_str());
+    EXPECT_EQ(hasPtk, true);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: GetLocalAndRemoteMacByRemoteIpTest
+ * @tc.desc: check GetLocalAndRemoteMacByRemoteIp method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, GetLocalAndRemoteMacByRemoteIpTest, TestSize.Level1)
+{
+    std::string uuid("0123456789ABCDE9");
+    std::string remoteIp("172.30.1.2");
+    std::string remoteIpv6("fe80::a446:b4ff:fec1:7323");
+    constexpr int32_t macLen = 18;
+    char localMac[macLen] = {0};
+    char remoteMac[macLen] = {0};
+
+    // Test with no links
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    auto ret =
+        GetWifiDirectManager()->getLocalAndRemoteMacByRemoteIp(remoteIp.c_str(), localMac, macLen, remoteMac, macLen);
+    EXPECT_EQ(ret, SOFTBUS_CONN_NOT_FOUND_FAILED);
+
+    // Test with IPv4 link
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [&remoteIp](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        link.SetLocalDynamicMac("aa:bb:cc:dd:ee:ff");
+        link.SetRemoteDynamicMac("11:22:33:44:55:66");
+        link.SetRemoteIpv4(remoteIp);
+    });
+    ret = GetWifiDirectManager()->getLocalAndRemoteMacByRemoteIp(remoteIp.c_str(), localMac, macLen, remoteMac, macLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: GetRemoteIpByRemoteMacTest
+ * @tc.desc: check GetRemoteIpByRemoteMac method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, GetRemoteIpByRemoteMacTest, TestSize.Level1)
+{
+    std::string uuid("0123456789ABCDE9");
+    std::string remoteMac("11:22:33:44:55:66");
+    std::string remoteIp("172.30.1.2");
+    char ip[IP_LEN] = { 0 };
+
+    // Test with no links
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    auto ret = GetWifiDirectManager()->getRemoteIpByRemoteMac(remoteMac.c_str(), ip, sizeof(ip));
+    EXPECT_EQ(ret, SOFTBUS_CONN_NOT_FOUND_FAILED);
+
+    // Test with remote dynamic mac
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, uuid, [&remoteMac, &remoteIp](InnerLink &link) {
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+            link.SetRemoteDynamicMac(remoteMac);
+            link.SetRemoteIpv4(remoteIp);
+        });
+    ret = GetWifiDirectManager()->getRemoteIpByRemoteMac(remoteMac.c_str(), ip, sizeof(ip));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: NotifyPtkMismatchTest
+ * @tc.desc: check NotifyPtkMismatch method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, NotifyPtkMismatchTest, TestSize.Level1)
+{
+    std::string remoteNetworkId("1234567890");
+    uint32_t len = 32;
+    int32_t reason = 0;
+    // RAII guard ensures global listener is restored even if test fails
+    PtkMismatchListenerGuard guard(g_ptkMismatchListener);
+
+    // Test with no listener
+    EXPECT_NO_FATAL_FAILURE(GetWifiDirectManager()->notifyPtkMismatch(remoteNetworkId.c_str(), len, reason));
+
+    // Test with listener using a function pointer (no lambda capture)
+    static bool ptkMismatchListenerCalled = false;
+    ptkMismatchListenerCalled = false;
+    auto testPtkMismatchListener = [](const char *networkId, uint32_t length, int32_t errReason) {
+        ptkMismatchListenerCalled = true;
+    };
+    PtkMismatchListener listener = testPtkMismatchListener;
+    GetWifiDirectManager()->addPtkMismatchListener(listener);
+    EXPECT_NO_FATAL_FAILURE(GetWifiDirectManager()->notifyPtkMismatch(remoteNetworkId.c_str(), len, reason));
+    EXPECT_EQ(ptkMismatchListenerCalled, true);
+    // Guard automatically restores g_ptkMismatchListener on destruction
+}
+
+/*
+ * @tc.name: NotifyHmlStateTest
+ * @tc.desc: check NotifyHmlState method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, NotifyHmlStateTest, TestSize.Level1)
+{
+    SoftBusHmlState state = CONN_HML_ENABLED;
+    // RAII guard ensures global listener is restored even if test fails
+    HmlStateListenerGuard guard(g_hmlStateListener);
+
+    // Test with no listener
+    EXPECT_NO_FATAL_FAILURE(GetWifiDirectManager()->notifyHmlState(state));
+
+    // Test with listener using a function pointer (no lambda capture)
+    static bool hmlStateListenerCalled = false;
+    hmlStateListenerCalled = false;
+    auto testHmlStateListener = [](SoftBusHmlState hmlState) { hmlStateListenerCalled = true; };
+    HmlStateListener listener = testHmlStateListener;
+    GetWifiDirectManager()->addHmlStateListener(listener);
+    EXPECT_NO_FATAL_FAILURE(GetWifiDirectManager()->notifyHmlState(state));
+    EXPECT_EQ(hmlStateListenerCalled, true);
+    // Guard automatically restores g_hmlStateListener on destruction
+}
+
+/*
+ * @tc.name: IsNoneLinkByTypeTest
+ * @tc.desc: check IsNoneLinkByType method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, IsNoneLinkByTypeTest, TestSize.Level1)
+{
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
+
+    // Test with no HML links
+    auto isNone = GetWifiDirectManager()->isNoneLinkByType(WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_EQ(isNone, true);
+
+    // Test with HML link
+    std::string uuid("0123456789ABCDEF");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    isNone = GetWifiDirectManager()->isNoneLinkByType(WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_EQ(isNone, false);
+
+    // Test with only P2P link (HML should be none)
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, uuid, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    isNone = GetWifiDirectManager()->isNoneLinkByType(WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_EQ(isNone, true);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
+}
+
+/*
+ * @tc.name: RegisterStatusListenerTest
+ * @tc.desc: check RegisterStatusListener method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, RegisterStatusListenerTest, TestSize.Level1)
+{
+    std::string remoteMac("10:dc:b6:90:84:82");
+    std::string remoteIp("170.30.1.2");
+    std::string remoteUuid("0123456789ABCDEF");
+    bool isSource = true;
+
+    // Use static flag to track listener invocation
+    static bool statusListenerCalled = false;
+    statusListenerCalled = false;
+    // Use static storage to ensure listener pointer remains valid
+    static struct WifiDirectStatusListener staticListener = {};
+
+    // Configure the listener with the callback
+    staticListener.onDeviceOnLine = [](const char *mac, const char *ip, const char *uuid, bool source) {
+        statusListenerCalled = true;
+    };
+
+    GetWifiDirectManager()->registerStatusListener(&staticListener);
+    EXPECT_NO_FATAL_FAILURE(
+        GetWifiDirectManager()->notifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource));
+    EXPECT_EQ(statusListenerCalled, true);
+
+    // Clean up: find and remove the listener by pointer comparison
+    for (auto it = g_listeners.begin(); it != g_listeners.end(); ++it) {
+        if (&(*it) == &staticListener) {
+            g_listeners.erase(it);
+            break;
+        }
+    }
+}
+
+/*
+ * @tc.name: IsNegotiateChannelNeededWithNullNetworkIdTest
+ * @tc.desc: check IsNegotiateChannelNeeded with null networkId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, IsNegotiateChannelNeededWithNullNetworkIdTest, TestSize.Level1)
+{
+    auto ret = GetWifiDirectManager()->isNegotiateChannelNeeded(nullptr, WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: IsNegotiateChannelNeededWithGlassesLowPowerTest
+ * @tc.desc: check IsNegotiateChannelNeeded with glasses scenario and low power
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, IsNegotiateChannelNeededWithGlassesLowPowerTest, TestSize.Level1)
+{
+    std::string remoteNetworkId("1234567890");
+    char uuid[UUID_BUF_LEN] = "0123456789ABCDEF";
+    std::string remoteMac("10:dc:b6:90:84:82");
+    WifiDirectInterfaceMock mock;
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo(_, _, _, _))
+        .WillRepeatedly([&uuid](const std::string &netWorkId, InfoKey key, char *info, uint32_t len) {
+            if (strcpy_s(info, UUID_BUF_LEN, uuid) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            return SOFTBUS_OK;
+        });
+
+    // Test with glasses scenario and low power
+    EXPECT_CALL(mock, LnnGetLocalNumInfo(_, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumInfo(_, _, _))
+        .WillRepeatedly(testing::DoAll(testing::SetArgPointee<2>(TYPE_PAD_ID), Return(SOFTBUS_OK)));
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [&remoteMac](InnerLink &link) {
+        link.SetLinkPowerMode(LOW_POWER);
+        link.SetRemoteBaseMac(remoteMac);
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+
+    auto ret = GetWifiDirectManager()->isNegotiateChannelNeeded(remoteNetworkId.c_str(), WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_TRUE(ret);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: SavePtkWithNullParamTest
+ * @tc.desc: check SavePtk with null parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, SavePtkWithNullParamTest, TestSize.Level1)
+{
+    std::string remoteDeviceId("123");
+    std::string ptk("ptk");
+
+    // Test with null remoteDeviceId
+    auto ret = GetWifiDirectManager()->savePTK(nullptr, ptk.c_str());
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    // Test with null ptk
+    ret = GetWifiDirectManager()->savePTK(remoteDeviceId.c_str(), nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    // Test with both null
+    ret = GetWifiDirectManager()->savePTK(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: IsHmlConnectedTest
+ * @tc.desc: check IsHmlConnected method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, IsHmlConnectedTest, TestSize.Level1)
+{
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
+
+    // Test with no HML links
+    auto isConnected = GetWifiDirectManager()->isHmlConnected();
+    EXPECT_EQ(isConnected, false);
+
+    // Test with HML link connected
+    std::string uuid("0123456789ABCDEF");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    isConnected = GetWifiDirectManager()->isHmlConnected();
+    EXPECT_EQ(isConnected, true);
+
+    // Test with only P2P link
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, uuid, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    isConnected = GetWifiDirectManager()->isHmlConnected();
+    EXPECT_EQ(isConnected, false);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
+}
+
+/*
+ * @tc.name: ForceDisconnectDeviceSyncWithConnectedDeviceTest
+ * @tc.desc: check ForceDisconnectDeviceSync with connected device
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, ForceDisconnectDeviceSyncWithConnectedDeviceTest, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "ForceDisconnectDeviceSyncWithConnectedDeviceTest in");
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
+
+    // Create a connected HML link
+    std::string remoteUuid("0123456789ABCDEF");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteUuid, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+
+    // Force disconnect with connected device - verify it doesn't crash
+    EXPECT_NO_FATAL_FAILURE(GetWifiDirectManager()->forceDisconnectDeviceSync(WIFI_DIRECT_LINK_TYPE_HML));
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    CONN_LOGI(CONN_WIFI_DIRECT, "ForceDisconnectDeviceSyncWithConnectedDeviceTest out");
+}
+
+/*
+ * @tc.name: GetLocalAndRemoteMacByLocalIpWithIpv6Test
+ * @tc.desc: check GetLocalAndRemoteMacByLocalIp with IPv6
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, GetLocalAndRemoteMacByLocalIpWithIpv6Test, TestSize.Level1)
+{
+    std::string uuid("0123456789ABCDE9");
+    std::string localIpv6("fe80::200:22ff:fe6b:262d");
+    constexpr int32_t macLen = 18;
+    char localMac[macLen] = {0};
+    char remoteMac[macLen] = {0};
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+
+    // Test with IPv6 local address
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [&localIpv6](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        link.SetLocalIpv6(localIpv6);
+        link.SetLocalDynamicMac("aa:bb:cc:dd:ee:ff");
+        link.SetRemoteDynamicMac("11:22:33:44:55:66");
+    });
+
+    auto ret = GetLocalAndRemoteMacByLocalIp(localIpv6.c_str(), localMac, macLen, remoteMac, macLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: GetRemoteUuidByIpWithIpv6Test
+ * @tc.desc: check GetRemoteUuidByIp with IPv6
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, GetRemoteUuidByIpWithIpv6Test, TestSize.Level1)
+{
+    std::string uuid("0123456789ABCDE9");
+    std::string remoteIpv6("fe80::a446:b4ff:fec1:7323");
+    char resultUuid[UUID_BUF_LEN] = { 0 };
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+
+    // Test with IPv6 address
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, uuid, [&remoteIpv6](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        link.SetRemoteIpv6(remoteIpv6);
+    });
+
+    auto ret = GetRemoteUuidByIp(remoteIpv6.c_str(), resultUuid, sizeof(resultUuid));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_STREQ(resultUuid, uuid.c_str());
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: AddSyncPtkListenerTest
+ * @tc.desc: check AddSyncPtkListener method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, AddSyncPtkListenerTest, TestSize.Level1)
+{
+    std::string remoteDeviceId("0123456789ABCDEF");
+    int32_t result = 0;
+    // RAII guard ensures global listener is restored even if test fails
+    SyncPtkListenerGuard guard(g_syncPtkListener);
+
+    // Test with no listener
+    EXPECT_NO_FATAL_FAILURE(NotifyPtkSyncResult(remoteDeviceId.c_str(), result));
+
+    // Test with listener
+    static bool syncPtkListenerCalled = false;
+    syncPtkListenerCalled = false;
+    SyncPtkListener listener = [](const char *deviceId, int32_t res) { syncPtkListenerCalled = true; };
+    GetWifiDirectManager()->addSyncPtkListener(listener);
+    EXPECT_NO_FATAL_FAILURE(NotifyPtkSyncResult(remoteDeviceId.c_str(), result));
+    EXPECT_EQ(syncPtkListenerCalled, true);
 }
 } // namespace OHOS::SoftBus
