@@ -82,19 +82,19 @@ public:
         (void)info;
         return;
     }
-    static void onVerifyFailed(uint32_t requestId, int32_t reason)
+    static void OnVerifyFailed(uint32_t requestId, int32_t reason)
     {
         (void)requestId;
         (void)reason;
         return;
     }
-    static void onConnOpened(uint32_t requestId, AuthHandle authHandle)
+    static void OnConnOpened(uint32_t requestId, AuthHandle authHandle)
     {
         (void)requestId;
         (void)authHandle;
         return;
     }
-    static void onConnOpenFailed(uint32_t requestId, int32_t reason)
+    static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
     {
         (void)requestId;
         (void)reason;
