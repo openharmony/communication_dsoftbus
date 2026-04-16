@@ -21,7 +21,7 @@
 #include "link_enhance_utils_taihe.h"
 #include "taihe/runtime.hpp"
 
-#define LINK_ENHANCE_DEVICE_NOT_SUPPORT 32390300
+#define LINK_ENHANCE_DEVICE_NOT_SUPPORT 801
 #define LINK_ENHANCE_DESCRIPTION        "device not support"
 
 namespace Communication {
