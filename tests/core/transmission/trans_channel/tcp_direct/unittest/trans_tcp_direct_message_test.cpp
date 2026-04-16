@@ -450,7 +450,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthHandleByChanIdTest0012, TestSize.Leve
 HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0013, TestSize.Level1)
 {
     int32_t channelId = 1;
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t res = TransTcpDirectInit(cb);
@@ -460,7 +460,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0013, TestSize.Level1)
     res = TransTdcAddSessionConn(con);
     EXPECT_EQ(res, SOFTBUS_OK);
     channelId = 0;
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 
     TransTcpDirectDeinit();
 }
@@ -689,9 +689,9 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, Test
     EXPECT_EQ(count, 2);
     EXPECT_EQ(channelId[0], 1);
     EXPECT_EQ(channelId[1], 2);
-    TransDelSessionConnById(con->channelId);
-    TransDelSessionConnById(con2->channelId);
-    TransDelSessionConnById(con3->channelId);
+    (void)TransDelSessionConnById(con->channelId);
+    (void)TransDelSessionConnById(con2->channelId);
+    (void)TransDelSessionConnById(con3->channelId);
     SoftBusFree(channelId);
 }
 

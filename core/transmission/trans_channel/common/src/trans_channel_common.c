@@ -505,7 +505,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
             case CHANNEL_TYPE_TCP_DIRECT:
                 CloseHtpChannelPacked(channelId);
                 (void)TransDelTcpChannelInfoByChannelId(channelId);
-                TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
+                (void)TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
                 (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = SOFTBUS_OK;
                 break;

@@ -63,9 +63,9 @@ extern "C" {
         return;
     }
 
-    void TransDelSessionConnById(int32_t channelId)
+    int32_t TransDelSessionConnById(int32_t channelId)
     {
-        return;
+        return SOFTBUS_OK;
     }
 }
 

@@ -114,7 +114,7 @@ void TestAddTestSessionConn(void)
 void TestDelSessionConn(void)
 {
     int32_t channelId = 1;
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     if (g_conn != nullptr) {
         SoftBusFree(g_conn);
     }
@@ -225,7 +225,7 @@ static int32_t TestAddSessionConn(bool isServerSide)
 
 static void TestDelSessionConnNode(int32_t channelId)
 {
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
 }
 
 /*
@@ -617,7 +617,7 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
     NotifyTdcChannelStopProc(nullptr);
     TransTdcStopSessionProc(AUTH);
 
-    TransDelSessionConnById(channelId);
+    (void)TransDelSessionConnById(channelId);
     SoftBusFree(conn);
 }
 

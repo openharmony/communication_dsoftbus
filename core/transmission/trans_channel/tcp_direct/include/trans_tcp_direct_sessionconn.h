@@ -105,7 +105,7 @@ int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle);
 int64_t GetAuthIdByChanId(int32_t channelId);
 int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle);
 
-void TransDelSessionConnById(int32_t channelId);
+int32_t TransDelSessionConnById(int32_t channelId);
 
 int32_t TransTdcAddSessionConn(SessionConn *conn);
 
