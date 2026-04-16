@@ -255,7 +255,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     ret = AddTrigger(module, fd, READ_TRIGGER);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add trigger failed, delete session conn.");
-        TransDelSessionConnById(chanId);
+        (void)TransDelSessionConnById(chanId);
         return ret;
     }
 
@@ -363,15 +363,17 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
             sizeof(conn.appInfo.sinkSessionKey));
         DelTrigger(module, fd, READ_TRIGGER);
         (void)NotifyChannelOpenFailed(channelId, errCode);
-        TransDelSessionConnById(channelId);
-        TransTdcSocketReleaseFd(module, fd);
+        ret = TransDelSessionConnById(channelId);
+        if (ret == SOFTBUS_OK) {
+            TransTdcSocketReleaseFd(module, fd);
+        }
     } else {
         if (ret != SOFTBUS_OK || conn.serverSide) {
             return;
         }
         DelTrigger(module, fd, READ_TRIGGER);
         CloseTcpDirectFd(module, fd);
-        TransDelSessionConnById(channelId);
+        (void)TransDelSessionConnById(channelId);
     }
     TransSrvDelDataBufNode(channelId);
 }
@@ -417,7 +419,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int32_t fd)
         TRANS_LOGE(TRANS_CTRL, "start verify session failed, ret=%{public}d", ret);
         DelTrigger(conn->listenMod, fd, READ_TRIGGER);
         (void)NotifyChannelOpenFailed(conn->channelId, ret);
-        TransDelSessionConnById(conn->channelId);
+        (void)TransDelSessionConnById(conn->channelId);
         TransTdcSocketReleaseFd(conn->listenMod, fd);
         TransSrvDelDataBufNode(conn->channelId);
     }
@@ -429,7 +431,7 @@ static void ProcessSocketExceptionEvent(SessionConn *conn, int32_t fd)
     TRANS_LOGE(TRANS_CTRL, "exception occurred.");
     DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
     TransTdcSocketReleaseFd(conn->listenMod, fd);
-    TransDelSessionConnById(conn->channelId);
+    (void)TransDelSessionConnById(conn->channelId);
     TransSrvDelDataBufNode(conn->channelId);
 }
 
