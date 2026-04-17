@@ -52,6 +52,8 @@
 #define BLE_ACTIVE                     0x0
 #define BLE_PASSIVE                    0x1
 #define BLE_INFO_COUNT                 4
+#define BLE_STATUS_ADVERTISER_ON       1
+#define BLE_STATUS_ADVERTISER_OFF      0
 
 #define BLE_CHANNLE_MAP                0x0
 
@@ -1539,16 +1541,21 @@ static void UnregisterCapability(DiscBleInfo *info, const DiscBleOption *option)
     }
 }
 
-static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t activeFlags, const void *option)
+static int32_t ProcessBleInfoManager(
+    bool isStart, uint8_t publishFlags, uint8_t activeFlags, const void *option, int32_t *advertiserStatus)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(
+        option != NULL && advertiserStatus != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "param is invalid");
     DiscBleOption regOption;
+    int32_t advId;
     if (publishFlags == BLE_PUBLISH) {
         regOption.publishOption = (PublishOption *)option;
         regOption.subscribeOption = NULL;
+        advId = NON_ADV_ID;
     } else {
         regOption.publishOption = NULL;
         regOption.subscribeOption = (SubscribeOption *)option;
+        advId = CON_ADV_ID;
     }
     uint8_t index = publishFlags | activeFlags;
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK,
@@ -1574,6 +1581,17 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     DISC_LOGI(DISC_BLE, "(%{public}d, %{public}d, %{public}d), Cap=%{public}d, needUpdateCap=%{public}d",
         isStart, publishFlags, activeFlags, newCap, g_bleInfoManager[index].needUpdateCap);
 
+    uint32_t capBit;
+    if (advId == NON_ADV_ID) {
+        capBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
+    } else {
+        capBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
+            g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].capBitMap[0];
+    }
+    if (capBit == 0) {
+        DISC_LOGD(DISC_BLE, "advertiser adv GetConDeviceInfo fail. adv=%{public}d", advId);
+        *advertiserStatus = BLE_STATUS_ADVERTISER_OFF;
+    }
     SoftBusMutexUnlock(&g_bleInfoLock);
     return SOFTBUS_OK;
 }
@@ -1739,7 +1757,8 @@ static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t ac
     if (!isStart) {
         processHml = GetStopIsTakeHmlInfo(publishFlags, activeFlags, funcCode, option);
     }
-    int32_t ret = ProcessBleInfoManager(isStart, publishFlags, activeFlags, option);
+    int32_t advertiserStatus = BLE_STATUS_ADVERTISER_ON;
+    int32_t ret = ProcessBleInfoManager(isStart, publishFlags, activeFlags, option, &advertiserStatus);
     if (ret != SOFTBUS_OK) {
         DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, ret);
         DISC_LOGE(DISC_BLE, "process ble info manager fail");
@@ -1749,7 +1768,7 @@ static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t ac
         processHml = GetStartIsTakeHmlInfo(funcCode);
     }
     UpdateCustData(funcCode, option, isStart);
-    SoftBusMessage *msg = CreateBleHandlerMsg(funcCode, processHml, 0, NULL);
+    SoftBusMessage *msg = CreateBleHandlerMsg(funcCode, processHml, advertiserStatus, NULL);
     if (msg == NULL) {
         DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, SOFTBUS_MALLOC_ERR);
         DISC_LOGE(DISC_BLE, "CreateBleHandlerMsg fail");
@@ -2337,6 +2356,7 @@ static void ProcessStopAction(SoftBusMessage *msg, bool isDisc)
 
 static void DiscBleMsgHandler(SoftBusMessage *msg)
 {
+    int32_t advertiserStatus = msg->arg2;
     switch (msg->what) {
         case PUBLISH_ACTIVE_SERVICE:
             StartActivePublish(msg);
@@ -2346,10 +2366,15 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             break;
         case UNPUBLISH_SERVICE:
             ProcessStopAction(msg, false);
-            if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
-                UpdateAdvertiser(NON_ADV_ID);
+            if (advertiserStatus == BLE_STATUS_ADVERTISER_OFF) {
+                CalcDurationTime(NON_ADV_ID, g_bleAdvertiser[NON_ADV_ID].deviceInfo.capabilityBitmap[0]);
+                StopAdvertiser(NON_ADV_ID);
+            } else {
+                if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
+                    UpdateAdvertiser(NON_ADV_ID);
+                }
+                StartScaner();
             }
-            StartScaner();
             break;
         case START_ACTIVE_DISCOVERY:
             ProcessStartAction(msg);
@@ -2360,12 +2385,17 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             break;
         case STOP_DISCOVERY:
             ProcessStopAction(msg, true);
-            if (g_bleAdvertiser[CON_ADV_ID].isAdvertising) {
-                UpdateAdvertiser(CON_ADV_ID);
+            if (advertiserStatus == BLE_STATUS_ADVERTISER_OFF) {
+                CalcDurationTime(CON_ADV_ID, g_bleAdvertiser[CON_ADV_ID].deviceInfo.capabilityBitmap[0]);
+                StopAdvertiser(CON_ADV_ID);
             } else {
-                StartAdvertiser(CON_ADV_ID);
+                if (g_bleAdvertiser[CON_ADV_ID].isAdvertising) {
+                    UpdateAdvertiser(CON_ADV_ID);
+                } else {
+                    StartAdvertiser(CON_ADV_ID);
+                }
+                StartScaner();
             }
-            StartScaner();
             break;
         case REPLY_PASSIVE_NON_BROADCAST:
             StartAdvertiser(NON_ADV_ID);

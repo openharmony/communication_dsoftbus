@@ -507,7 +507,8 @@ HWTEST_F(DiscDistributedBleTest, TestGetStopIsTakeHmlInfo001, TestSize.Level1)
 
 
     bool isStart = true;
-    int32_t ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
+    int32_t advertiserStatus;
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption, &advertiserStatus);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, &pubOption);
@@ -533,7 +534,8 @@ HWTEST_F(DiscDistributedBleTest, TestGetStopIsTakeHmlInfo002, TestSize.Level1)
     bool isStart = true;
     subOption.capabilityData = reinterpret_cast<uint8_t *>(g_invalidDiscCapData.data());
     subOption.dataLen = g_invalidDiscCapData.length();
-    int32_t ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    int32_t advertiserStatus;
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption, &advertiserStatus);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     bool processHml = GetStopIsTakeHmlInfo(BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, &subOption);
@@ -541,7 +543,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetStopIsTakeHmlInfo002, TestSize.Level1)
 
     subOption.capabilityData = reinterpret_cast<uint8_t *>(g_discCapData.data());
     subOption.dataLen = g_discCapData.length();
-    ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption, &advertiserStatus);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     processHml = GetStopIsTakeHmlInfo(BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, &subOption);
@@ -570,9 +572,10 @@ HWTEST_F(DiscDistributedBleTest, TestGetStartIsTakeHmlInfo001, TestSize.Level1)
     EXPECT_TRUE(!processHml);
 
     bool isStart = true;
+    int32_t advertiserStatus;
     subOption.capabilityData = reinterpret_cast<uint8_t *>(g_invalidDiscCapData.data());
     subOption.dataLen = g_invalidDiscCapData.length();
-    int32_t ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption, &advertiserStatus);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     processHml = GetStartIsTakeHmlInfo(START_ACTIVE_DISCOVERY);
@@ -580,7 +583,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetStartIsTakeHmlInfo001, TestSize.Level1)
 
     subOption.capabilityData = reinterpret_cast<uint8_t *>(g_discCapData.data());
     subOption.dataLen = g_discCapData.length();
-    ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption, &advertiserStatus);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     processHml = GetStartIsTakeHmlInfo(START_ACTIVE_DISCOVERY);
@@ -606,13 +609,14 @@ HWTEST_F(DiscDistributedBleTest, TestUpdateCustData001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(UpdateCustData(START_ACTIVE_DISCOVERY, &pubOption, isStart));
     EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE, &pubOption, isStart));
 
-    int32_t ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
+    int32_t advertiserStatus;
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption, &advertiserStatus);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE, &pubOption, isStart));
 
     pubOption.capabilityData = reinterpret_cast<uint8_t *>(g_invalidCastCapData.data());
     pubOption.dataLen = g_invalidCastCapData.length();
-    ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
+    ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption, &advertiserStatus);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE, &pubOption, isStart));
 
