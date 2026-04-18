@@ -868,7 +868,7 @@ static int32_t DispatchFdEvent(
 {
     if (listener->onDataEvent != NULL) {
         listener->onDataEvent(module, event, fd);
-        CONN_LOGI(CONN_COMMON,
+        CONN_LOGD(CONN_COMMON,
             "wakeupTrace=%{public}d, module=%{public}d, fd=%{public}d, event=%{public}d",
             wakeupTrace, module, fd, event);
         return SOFTBUS_OK;
@@ -1210,7 +1210,7 @@ static void *WatchTask(void *arg)
         }
         ListNode fdEvents;
         ListInit(&fdEvents);
-        CONN_LOGI(CONN_COMMON, "wait,tId=%{public}d,wId=%{public}d", watchState->traceId, wakeupTraceIdGenerator);
+        CONN_LOGD(CONN_COMMON, "wait,tId=%{public}d,wId=%{public}d", watchState->traceId, wakeupTraceIdGenerator);
         int32_t nEvents = WatchEvent(g_eventWatcher, SOFTBUS_LISTENER_WATCH_TIMEOUT_MSEC, &fdEvents);
         int32_t wakeupTraceId = ++wakeupTraceIdGenerator;
         if (nEvents == 0 || nEvents == SOFTBUS_ADAPTER_SOCKET_EINTR) {
@@ -1228,7 +1228,7 @@ static void *WatchTask(void *arg)
             SoftBusSleepMs(WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
-        CONN_LOGI(CONN_COMMON, "in,tId=%{public}d,wId=%{public}d,evt=%{public}d", watchState->traceId, wakeupTraceId,
+        CONN_LOGD(CONN_COMMON, "in,tId=%{public}d,wId=%{public}d,evt=%{public}d", watchState->traceId, wakeupTraceId,
             nEvents);
         ProcessEvent(&fdEvents, watchState, wakeupTraceId);
         ReleaseFdNode(&fdEvents);
