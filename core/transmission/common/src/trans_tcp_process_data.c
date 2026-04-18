@@ -291,8 +291,7 @@ static int32_t TransTdcParseTlv(uint32_t bufLen, char *data, TcpDataTlvPacketHea
                 break;
             default:
                 TRANS_LOGE(TRANS_CTRL, "unknown trans tdc tlv skip, tlvType=%{public}d", *type);
-                temp += *length;
-                continue;
+                break;
         }
         temp += *length;
         *headSize += (TLV_TYPE_AND_LENGTH * sizeof(uint8_t) + *length);
