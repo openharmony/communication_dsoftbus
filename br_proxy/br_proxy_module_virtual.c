@@ -40,15 +40,15 @@ napi_value SendDataAsync(napi_env env, napi_callback_info info)
 
 napi_value On(napi_env env, napi_callback_info info)
 {
+    (void)env;
     (void)info;
-    napi_throw_error(env, DEVICE_NOT_SUPPORT, "device not support");
     return NULL;
 }
 
 napi_value Off(napi_env env, napi_callback_info info)
 {
+    (void)env;
     (void)info;
-    napi_throw_error(env, DEVICE_NOT_SUPPORT, "device not support");
     return NULL;
 }
 
