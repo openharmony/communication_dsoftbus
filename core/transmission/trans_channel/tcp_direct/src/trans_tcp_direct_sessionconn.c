@@ -218,28 +218,32 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
     }
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
+            uint8_t *newFastTransData = NULL;
+            uint16_t newFastTransDataSize = 0;
+            if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
+                newFastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
+                if (newFastTransData == NULL) {
+                    ReleaseSessionConnLock();
+                    return SOFTBUS_MALLOC_ERR;
+                }
+                if (memcpy_s((char *)newFastTransData, appInfo->fastTransDataSize,
+                    (const char *)appInfo->fastTransData, appInfo->fastTransDataSize) != EOK) {
+                    SoftBusFree(newFastTransData);
+                    ReleaseSessionConnLock();
+                    return SOFTBUS_MEM_ERR;
+                }
+                newFastTransDataSize = appInfo->fastTransDataSize;
+            }
+
             if (conn->appInfo.fastTransData != NULL) {
                 SoftBusFree((void *)conn->appInfo.fastTransData);
                 conn->appInfo.fastTransData = NULL;
                 conn->appInfo.fastTransDataSize = 0;
             }
+
             (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
-            if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
-                conn->appInfo.fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
-                if (conn->appInfo.fastTransData == NULL) {
-                    conn->appInfo.fastTransDataSize = 0;
-                    ReleaseSessionConnLock();
-                    return SOFTBUS_MALLOC_ERR;
-                }
-                if (memcpy_s((char *)conn->appInfo.fastTransData, appInfo->fastTransDataSize,
-                    (const char *)appInfo->fastTransData, appInfo->fastTransDataSize) != EOK) {
-                    SoftBusFree((void *)conn->appInfo.fastTransData);
-                    conn->appInfo.fastTransData = NULL;
-                    conn->appInfo.fastTransDataSize = 0;
-                    ReleaseSessionConnLock();
-                    return SOFTBUS_MEM_ERR;
-                }
-            }
+            conn->appInfo.fastTransData = newFastTransData;
+            conn->appInfo.fastTransDataSize = newFastTransDataSize;
             ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
