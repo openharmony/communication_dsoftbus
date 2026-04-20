@@ -151,14 +151,18 @@ static void ClearConnResultRecord(void)
 {
     PIdOfPkgNameNode *pIdItem = NULL;
     PIdOfPkgNameNode *pIdNext = NULL;
+    int32_t ret = SoftBusMutexLock(&g_pIdOfNameLock);
+    COMM_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, COMM_EVENT, "pId of name lock fail");
     if (g_pIdOfPkgName.prev == NULL && g_pIdOfPkgName.next == NULL) {
         COMM_LOGE(COMM_EVENT, "g_pIdOfPkgName is NULL");
+        (void)SoftBusMutexUnlock(&g_pIdOfNameLock);
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pIdItem, pIdNext, &(g_pIdOfPkgName), PIdOfPkgNameNode, node) {
         ListDelete(&pIdItem->node);
         SoftBusFree(pIdItem);
     }
+    (void)SoftBusMutexUnlock(&g_pIdOfNameLock);
 
     ConnResultApiRecordNode *conItem = NULL;
     ConnResultApiRecordNode *conNext = NULL;
