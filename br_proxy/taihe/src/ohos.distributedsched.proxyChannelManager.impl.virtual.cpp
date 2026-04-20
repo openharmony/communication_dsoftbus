@@ -58,7 +58,6 @@ void OnReceiveData(int32_t channelId,
 {
     (void)channelId;
     (void)callback;
-    ThrowBusinessException(DEVICE_NOT_SUPPORT);
     return;
 }
 
@@ -67,7 +66,6 @@ void OffReceiveData(int32_t channelId, ::taihe::optional_view<
 {
     (void)channelId;
     (void)callback;
-    ThrowBusinessException(DEVICE_NOT_SUPPORT);
     return;
 }
 
@@ -76,7 +74,6 @@ void OnChannelStateChange(int32_t channelId, ::taihe::callback_view<
 {
     (void)channelId;
     (void)callback;
-    ThrowBusinessException(DEVICE_NOT_SUPPORT);
     return;
 }
 
@@ -85,7 +82,6 @@ void OffChannelStateChange(int32_t channelId, ::taihe::optional_view<
 {
     (void)channelId;
     (void)callback;
-    ThrowBusinessException(DEVICE_NOT_SUPPORT);
     return;
 }
 } // namespace
