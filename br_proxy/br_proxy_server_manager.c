@@ -2298,9 +2298,14 @@ void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId)
             continue;
         }
         nodeInfo->isEnable = false;
-        nodeInfo->channel.close(&nodeInfo->channel, true);
-        TRANS_LOGI(TRANS_SVC, "[br_proxy] close channel, uinstall appIndex=%{public}d, userId=%{public}d",
-            appIndex, userId);
+        if (nodeInfo->channel.close != NULL) {
+            nodeInfo->channel.close(&nodeInfo->channel, true);
+            TRANS_LOGI(TRANS_SVC, "[br_proxy] close channel, uinstall appIndex=%{public}d, userId=%{public}d", appIndex,
+                userId);
+        } else {
+            TRANS_LOGW(
+                TRANS_SVC, "[br_proxy] close func is null, appIndex=%{public}d, userId=%{public}d", appIndex, userId);
+        }
     }
     (void)SoftBusMutexUnlock(&(g_proxyList->lock));
 
