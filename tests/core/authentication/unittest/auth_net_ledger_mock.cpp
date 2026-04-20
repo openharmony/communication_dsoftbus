@@ -210,9 +210,39 @@ void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defa
     return GetNetLedgerInterface()->LnnAnonymizeDeviceStr(deviceStr, strLen, defaultLen, anonymizedStr);
 }
 
-int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info)
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
-    return GetNetLedgerInterface()->LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, info);
+    return GetNetLedgerInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
+
+int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnGetLocalNumInfoByIfnameIdx(key, info, ifIdx);
+}
+
+void LnnDumpSparkCheck(const unsigned char *sparkCheck, const char *log)
+{
+    return GetNetLedgerInterface()->LnnDumpSparkCheck(sparkCheck, log);
+}
+
+bool LnnIsDefaultOhosAccount(void)
+{
+    return GetNetLedgerInterface()->LnnIsDefaultOhosAccount();
+}
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    return GetNetLedgerInterface()->LnnGetRemoteNodeInfoByKey(key, info);
+}
+
+int32_t LnnInitLocalLedger(void)
+{
+    return GetNetLedgerInterface()->LnnInitLocalLedger();
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetNetLedgerInterface()->LnnSetLocalByteInfo(key, info, len);
 }
 }
 

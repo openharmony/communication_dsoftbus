@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
+#include <gtest/gtest.h>
+#include <securec.h>
+#include <sys/time.h>
+
 #include "auth_common.h"
 #include "auth_common_mock.h"
 #include "auth_hichain.h"
@@ -22,7 +27,7 @@
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
 #include "lnn_connection_fsm.h"
-
+#include "lnn_connection_mock.h"
 #include "lnn_hichain_mock.h"
 #include "lnn_map.h"
 #include "lnn_socket_mock.h"
@@ -32,10 +37,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include <cinttypes>
-#include <gtest/gtest.h>
-#include <securec.h>
-#include <sys/time.h>
 
 namespace OHOS {
 using namespace testing;
@@ -53,13 +54,13 @@ const AuthConnInfo g_connInfo2 = {
 };
 uint32_t g_requestId = 88;
 const AuthVerifyCallback g_callback = {
-    .onVerifyPassed = AuthCommonInterfaceMock::OnVerifyPassed,
-    .onVerifyFailed = AuthCommonInterfaceMock::OnVerifyFailed,
+    .onVerifyPassed = LnnConnectInterfaceMock::OnVerifyPassed,
+    .onVerifyFailed = LnnConnectInterfaceMock::OnVerifyFailed,
 };
 
 const AuthConnCallback g_connCallback = {
-    .onConnOpened = AuthCommonInterfaceMock::OnConnOpened,
-    .onConnOpenFailed = AuthCommonInterfaceMock::OnConnOpenFailed,
+    .onConnOpened = LnnConnectInterfaceMock::OnConnOpened,
+    .onConnOpenFailed = LnnConnectInterfaceMock::OnConnOpenFailed,
 };
 static const int32_t MILLIS = 15;
 static constexpr int32_t DEFALUT_USERID = 100;
@@ -91,7 +92,7 @@ void AuthEnhanceMockTest::SetUp()
 
 void AuthEnhanceMockTest::TearDown() { }
 
-void AuthInitMock(AuthCommonInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock,
+void AuthInitMock(LnnConnectInterfaceMock &connMock, LnnHichainInterfaceMock &hichainMock,
     GroupAuthManager &authManager, DeviceGroupManager &groupManager)
 {
     groupManager.regDataChangeListener = LnnHichainInterfaceMock::InvokeDataChangeListener;
@@ -138,7 +139,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
         return;
     }
     hiChainParam.userId = DEFALUT_USERID;
-    NiceMock<AuthCommonInterfaceMock> connMock;
+    NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
@@ -157,7 +158,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
  */
 HWTEST_F(AuthEnhanceMockTest, AUTH_INIT_Test_001, TestSize.Level0)
 {
-    NiceMock<AuthCommonInterfaceMock> connMock;
+    NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
@@ -177,7 +178,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_INIT_Test_001, TestSize.Level0)
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1)
 {
-    NiceMock<AuthCommonInterfaceMock> connMock;
+    NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
@@ -217,7 +218,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1)
 {
-    NiceMock<AuthCommonInterfaceMock> connMock;
+    NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
     NiceMock<AuthCommonInterfaceMock> commMock;
@@ -258,7 +259,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
 {
-    NiceMock<AuthCommonInterfaceMock> connMock;
+    NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
@@ -270,10 +271,10 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     int32_t ret = AuthInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ON_CALL(connMock, ConnSetConnectCallback(_, _))
-        .WillByDefault(AuthCommonInterfaceMock::ActionofConnSetConnectCallback);
+        .WillByDefault(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
     ON_CALL(ledgermock, LnnGetLocalStrInfo(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(connMock, ConnConnectDevice(_, _, NotNull()))
-        .WillByDefault(AuthCommonInterfaceMock::ActionofOnConnectFailed);
+        .WillByDefault(LnnConnectInterfaceMock::ActionofOnConnectFailed);
     ON_CALL(connMock, ConnPostBytes(_, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
@@ -299,7 +300,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1)
 {
-    NiceMock<AuthCommonInterfaceMock> connMock;
+    NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     NiceMock<AuthNetLedgertInterfaceMock> ledgermock;
     NiceMock<LnnSocketInterfaceMock> socketMock;
@@ -312,11 +313,11 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
     int32_t ret = AuthInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ON_CALL(connMock, ConnSetConnectCallback(_, _))
-        .WillByDefault(AuthCommonInterfaceMock::ActionofConnSetConnectCallback);
+        .WillByDefault(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
     ON_CALL(ledgermock, LnnGetLocalStrInfo(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(ledgermock, LnnGetLocalNodeInfo).WillByDefault(Return(info));
     ON_CALL(connMock, ConnConnectDevice(_, _, NotNull()))
-        .WillByDefault(AuthCommonInterfaceMock::ActionofOnConnectSuccessed);
+        .WillByDefault(LnnConnectInterfaceMock::ActionofOnConnectSuccessed);
     ON_CALL(connMock, ConnPostBytes(_, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));

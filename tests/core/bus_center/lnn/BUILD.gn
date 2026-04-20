@@ -3080,6 +3080,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "$dsoftbus_root_path/tests/core/authentication/unittest/auth_common_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_identity_service_mock.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/bus_center_mock.cpp",
     "disc_mgr/disc_manager_mock.cpp",
     "disc_mgr/lnn_discovery_interface_test.cpp",

@@ -18,25 +18,24 @@
 
 #include <gmock/gmock.h>
 #include <mutex>
-#include <typeinfo>
 
 #include "auth_common.h"
-#include "auth_log.h"
+#include "auth_hichain.h"
 #include "device_auth.h"
-#include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_connection_fsm.h"
 #include "lnn_common_utils.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_listener.h"
+#include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_ohos_account_adapter.h"
-#include "map"
-#include "securec.h"
+#include "lnn_settingdata_event_monitor.h"
+#include "lnn_trans_lane.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_conn_interface.h"
 
 namespace OHOS {
 class AuthCommonInterface {
@@ -69,34 +68,20 @@ public:
     virtual int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen) = 0;
     virtual void LnnDeleteLinkFinderInfo(const char *peerUdid) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
-    virtual bool IdServiceIsPotentialTrustedDevice(
-        const char *udidHash, const char *accountIdHash, bool isSameAccount) = 0;
-    virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
-    virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
-    virtual void ConnUnSetConnectCallback(ConnModule moduleId) = 0;
-    virtual int32_t ConnConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result) = 0;
-    virtual int32_t ConnDisconnectDevice(uint32_t connectionId) = 0;
-    virtual uint32_t ConnGetHeadSize(void) = 0;
-    virtual int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data) = 0;
-    virtual bool CheckActiveConnection(const ConnectOption *option, bool needOccupy) = 0;
-    virtual int32_t ConnStartLocalListening(const LocalListenerInfo *info) = 0;
-    virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
-    virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
-    virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
-    virtual int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
-    virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
-    virtual int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info) = 0;
-    virtual int32_t LnnSetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uint32_t infoLen) = 0;
-    virtual int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len) = 0;
+    virtual int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId) = 0;
+    virtual int32_t UpdateLaneBusinessInfoItem(uint64_t oldLaneId, uint64_t newLaneId) = 0;
+    virtual int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid) = 0;
+    virtual uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
+    virtual int32_t RegHichainSaStatusListener(void) = 0;
+    virtual int32_t UnRegHichainSaStatusListener(void) = 0;
+    virtual int32_t InitDbListDelay(void) = 0;
+    virtual bool LnnIsNeedInterceptBroadcast(bool disableGlass) = 0;
+    virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para) = 0;
+    virtual void RestartCoapDiscovery(void) = 0;
+    virtual void HbEnableDiscovery(void) = 0;
     virtual int32_t LnnGetNetworkIdByUdidHash(
         const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline) = 0;
-    virtual int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin) = 0;
-    virtual int32_t BusCenterServerInit(void) = 0;
-    virtual int32_t LnnSyncP2pInfo(void) = 0;
-    virtual int32_t LnnInitLnnLooper(void) = 0;
-    virtual int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr) = 0;
-    virtual int32_t SoftBusMutexDestroy(SoftBusMutex *mutex) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -125,68 +110,19 @@ public:
     MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t(int32_t, const char *, uint32_t));
     MOCK_METHOD1(LnnDeleteLinkFinderInfo, void(const char *));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
-    MOCK_METHOD3(IdServiceIsPotentialTrustedDevice, bool(const char *, const char *, bool));
-    MOCK_METHOD2(ConnGetConnectionInfo, int32_t(uint32_t, ConnectionInfo *));
-    MOCK_METHOD2(ConnSetConnectCallback, int32_t(ConnModule, const ConnectCallback *));
-    MOCK_METHOD1(ConnUnSetConnectCallback, void(ConnModule));
-    MOCK_METHOD3(ConnConnectDevice, int32_t(const ConnectOption *, uint32_t, const ConnectResult *));
-    MOCK_METHOD1(ConnDisconnectDevice, int32_t(uint32_t));
-    MOCK_METHOD0(ConnGetHeadSize, uint32_t(void));
-    MOCK_METHOD2(ConnPostBytes, int32_t(uint32_t, ConnPostData *));
-    MOCK_METHOD2(CheckActiveConnection, bool(const ConnectOption *, bool));
-    MOCK_METHOD1(ConnStartLocalListening, int32_t(const LocalListenerInfo *));
-    MOCK_METHOD1(ConnStopLocalListening, int32_t(const LocalListenerInfo *));
-    MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
-    MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged));
-    MOCK_METHOD2(ConnUpdateConnection, int32_t(uint32_t, UpdateOption *));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
-    MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
-    MOCK_METHOD1(LnnGetLocalDeviceInfo, int32_t(NodeBasicInfo *));
-    MOCK_METHOD4(LnnSetNodeKeyInfo, int32_t(const char *, int32_t, uint8_t *, uint32_t));
-    MOCK_METHOD3(LnnGetNetworkIdByBtMac, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD2(UpdateReqListLaneId, int32_t(uint64_t, uint64_t));
+    MOCK_METHOD2(UpdateLaneBusinessInfoItem, int32_t(uint64_t, uint64_t));
+    MOCK_METHOD3(UpdateLaneResourceLaneId, int32_t(uint64_t, uint64_t, const char *));
+    MOCK_METHOD3(GenerateLaneId, uint64_t(const char *, const char *, LaneLinkType));
+    MOCK_METHOD0(RegHichainSaStatusListener, int32_t(void));
+    MOCK_METHOD0(UnRegHichainSaStatusListener, int32_t(void));
+    MOCK_METHOD0(InitDbListDelay, int32_t(void));
+    MOCK_METHOD1(LnnIsNeedInterceptBroadcast, bool(bool));
+    MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *));
+    MOCK_METHOD0(RestartCoapDiscovery, void(void));
+    MOCK_METHOD0(HbEnableDiscovery, void(void));
     MOCK_METHOD5(LnnGetNetworkIdByUdidHash, int32_t(const uint8_t *, uint32_t, char *, uint32_t, bool));
-    MOCK_METHOD3(LnnServerJoin, int32_t(ConnectionAddr *, const char *, bool));
-    MOCK_METHOD0(BusCenterServerInit, int32_t(void));
-    MOCK_METHOD0(LnnSyncP2pInfo, int32_t(void));
-    MOCK_METHOD0(LnnInitLnnLooper, int32_t(void));
-    MOCK_METHOD2(SoftBusMutexInit, int32_t(SoftBusMutex *, SoftBusMutexAttr *));
-    MOCK_METHOD1(SoftBusMutexDestroy, int32_t(SoftBusMutex *mutex));
-    static inline char *g_encryptData;
-    static inline ConnectCallback g_conncallback;
-    static inline ConnectResult g_connresultcb;
-    static int32_t ActionOfConnPostBytes(uint32_t connectionId, ConnPostData *data);
-    static int32_t ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback);
-    static int32_t ActionofOnConnectSuccessed(
-        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
-    static int32_t ActionofOnConnectFailed(
-        const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
-    static int32_t ActionofConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info);
-    static void ActionofConnUnSetConnectCallback(ConnModule moduleId);
-    static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
-    {
-        (void)requestId;
-        (void)authHandle;
-        (void)info;
-        return;
-    }
-    static void OnVerifyFailed(uint32_t requestId, int32_t reason)
-    {
-        (void)requestId;
-        (void)reason;
-        return;
-    }
-    static void OnConnOpened(uint32_t requestId, AuthHandle authHandle)
-    {
-        (void)requestId;
-        (void)authHandle;
-        return;
-    }
-    static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
-    {
-        (void)requestId;
-        (void)reason;
-        return;
-    }
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

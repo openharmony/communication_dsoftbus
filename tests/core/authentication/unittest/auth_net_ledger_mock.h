@@ -27,6 +27,7 @@
 #include "lnn_hichain_mock.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
+#include "lnn_ohos_account.h"
 #include "softbus_conn_manager.h"
 #include "softbus_json_utils.h"
 
@@ -70,7 +71,13 @@ public:
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual void LnnAnonymizeDeviceStr(const char *deviceStr, uint32_t strLen, uint32_t defaultLen,
         char **anonymizedStr) = 0;
-    virtual int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
+    virtual int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx) = 0;
+    virtual void LnnDumpSparkCheck(const unsigned char *sparkCheck, const char *log) = 0;
+    virtual bool LnnIsDefaultOhosAccount(void) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
+    virtual int32_t LnnInitLocalLedger(void) = 0;
+    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
 };
 
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
@@ -111,7 +118,13 @@ public:
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey, uint8_t *, uint32_t));
     MOCK_METHOD4(LnnAnonymizeDeviceStr, void(const char *deviceStr, uint32_t strLen, uint32_t defaultLen,
         char **anonymizedStr));
-    MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkIdPacked, int32_t(const char *, NodeInfo *));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
+    MOCK_METHOD3(LnnGetLocalNumInfoByIfnameIdx, int32_t(InfoKey, int32_t *, int32_t));
+    MOCK_METHOD2(LnnDumpSparkCheck, void(const unsigned char *sparkCheck, const char *log));
+    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));
+    MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t(const char *, NodeInfo *));
+    MOCK_METHOD0(LnnInitLocalLedger, int32_t (void));
+    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey key, const uint8_t *info, uint32_t len));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;
