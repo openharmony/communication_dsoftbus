@@ -314,4 +314,11 @@ void ISoftBusClient::OnErrorAuthResult(
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return;
 }
+
+int32_t ISoftBusClient::OnServerStopped(const char *name)
+{
+    (void)name;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

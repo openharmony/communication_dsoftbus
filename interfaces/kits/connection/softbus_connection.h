@@ -88,6 +88,15 @@ typedef struct {
      * @version 2.0
      */
     void (*OnServiceDied)(void);
+    
+    /**
+     * @brief Called when server side softbus_server process stopped.
+     *
+     * This callback is invoked when the server side softbus_server process stopped.
+     * @since 2.0
+     * @version 2.0
+     */
+    void (*OnServiceStopped)(const char *name);
 } IGeneralListener;
 
 /**

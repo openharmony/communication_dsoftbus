@@ -306,3 +306,23 @@ void ConnectionDeathNotify(void)
     (void)SoftBusMutexUnlock(&g_connectionListenerLock);
     CONN_LOGI(CONN_COMMON, "connection death notify succ");
 }
+
+int32_t ServerStopped(const char *name)
+{
+    CONN_LOGI(CONN_COMMON, "connect server stopped");
+    if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (g_connectionListener == NULL) {
+        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+        CONN_LOGE(CONN_COMMON, "notify server stopped fail, listener is null");
+        return SOFTBUS_NO_INIT;
+    }
+    if (name != NULL && g_connectionListener->OnServiceStopped != NULL) {
+        g_connectionListener->OnServiceStopped(name);
+    }
+    (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    CONN_LOGI(CONN_COMMON, "connect server stopped succ");
+    return SOFTBUS_OK;
+}

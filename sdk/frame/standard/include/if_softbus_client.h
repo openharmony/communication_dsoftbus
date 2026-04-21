@@ -105,6 +105,7 @@ public:
         const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData);
     virtual void OnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode,
         const char *returnData);
+    virtual int32_t OnServerStopped(const char *name);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");

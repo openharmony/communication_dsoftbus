@@ -45,3 +45,11 @@ int32_t ClientIpcOnDataReceived(const char *pkgName, int32_t pid, uint32_t handl
     (void)len;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t ClientIpcOnServerStopped(const char *pkgName, int32_t pid, const char *name)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)name;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

@@ -192,6 +192,11 @@ static void ConnectionDisconnected(GeneralConnectionParam *info, uint32_t genera
     (void)reason;
 }
 
+static void GeneralServerStopped(GeneralConnectionParam *info)
+{
+    (void)info;
+}
+
 const uint8_t *g_baseFuzzData = nullptr;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
@@ -229,6 +234,7 @@ void GeneralConnectionTest::SetUp(void)
         .onAcceptConnect = AcceptConnect,
         .onDataReceived = DataReceived,
         .onConnectionDisconnected = ConnectionDisconnected,
+        .onServerStopped =  GeneralServerStopped,
     };
 
     ret = manager->registerListener(&listener);
@@ -280,6 +286,9 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
     ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameServer");
     EXPECT_EQ(ret, EOK);
 
+    GeneralConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
+
     ret = manager->createServer(&param);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = manager->createServer(&param);
@@ -308,6 +317,37 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
 }
 
 /*
+* @tc.name: TestCreateServerConstraint
+* @tc.desc: test create server blocked by account constraint
+* @tc.type: FUNC
+* @tc.require:AR000GIRGE
+*/
+HWTEST_F(GeneralConnectionTest, TestCreateServerConstraint, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test createServer constraint in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    EXPECT_NE(manager, nullptr);
+    GeneralConnectionParam param = {0};
+
+    const char *pkgName = "testConstraintPkg";
+    int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameServer");
+    EXPECT_EQ(ret, EOK);
+
+    const char *name = "testConstraint";
+    ret = strcpy_s(param.name, GENERAL_NAME_LEN, name);
+    EXPECT_EQ(ret, EOK);
+
+    GeneralConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
+
+    ret = manager->createServer(&param);
+    EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+    CONN_LOGI(CONN_BLE, "test createServer constraint out");
+}
+
+/*
 * @tc.name: TestConnect
 * @tc.desc: test connect include to max count(10) and normal case
 * @tc.type: FUNC
@@ -330,6 +370,7 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
     const char *addr = "11:22:33:44:55:66";
     param.pid = 0;
     GeneralConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
     for (uint32_t i = 0; i < GENERAL_PKGNAME_MAX_COUNT; ++i) {
         string nameTemp = name + to_string(i);
@@ -354,6 +395,38 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
 }
 
 /*
+* @tc.name: TestConnectConstraint
+* @tc.desc: test connect blocked by account constraint
+* @tc.type: FUNC
+* @tc.require: AR000GIRGE
+*/
+HWTEST_F(GeneralConnectionTest, TestConnectConstraint, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test connect constraint in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    EXPECT_NE(manager, nullptr);
+    GeneralConnectionParam param = {0};
+
+    const char *pkgName = "testConstraintPkg";
+    int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
+    EXPECT_EQ(ret, EOK);
+    const char *name = "testConstraint";
+    ret = strcpy_s(param.name, GENERAL_NAME_LEN, name);
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameConnect");
+    EXPECT_EQ(ret, EOK);
+    const char *addr = "11:22:33:44:55:66";
+    param.pid = 0;
+
+    GeneralConnectionInterfaceMock mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
+
+    ret = manager->connect(&param, addr);
+    EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+    CONN_LOGI(CONN_BLE, "test connect constraint out");
+}
+
+/*
 * @tc.name: test send
 * @tc.desc: test send
 * @tc.type: FUNC
@@ -372,6 +445,7 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     const char *addr = "11:22:33:44:55:66";
     param.pid = 0;
     NiceMock<GeneralConnectionInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
     g_handle = manager->connect(&param, addr); // to get handle
     EXPECT_EQ(g_handle > 0, true);

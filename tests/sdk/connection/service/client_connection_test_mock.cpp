@@ -64,11 +64,17 @@ static void OnServiceDied(void)
     printf("OnServiceDied called\n");
 }
 
+static void OnServiceStopped(const char *name)
+{
+    printf("OnServiceStopped called, name: %s\n", name);
+}
+
 static IGeneralListener g_listener = {
     .OnAcceptConnect = OnAcceptConnect,
     .OnConnectionStateChange = OnConnectionStateChange,
     .OnDataReceived = OnDataRecevied,
     .OnServiceDied = OnServiceDied,
+    .OnServiceStopped = OnServiceStopped,
 };
 
 /*
