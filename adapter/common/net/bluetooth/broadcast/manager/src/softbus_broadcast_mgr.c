@@ -2499,6 +2499,7 @@ static int32_t CheckNotScaning(int32_t listenerId, SoftBusBcScanParams *adapterP
     int32_t filterSize = 0;
     int32_t ret = 0;
     if (g_scanManager[listenerId].addSize > 0) {
+        filterSize = g_scanManager[listenerId].addSize;
         GetAddFiltersByIndex(listenerId, &adapterFilter);
         ret = g_interface[g_scanManager[listenerId].protocol]->SetScanParams(g_scanManager[listenerId].adapterScanId,
             adapterParam, adapterFilter, filterSize, SOFTBUS_SCAN_FILTER_CMD_ADD);
@@ -2506,6 +2507,7 @@ static int32_t CheckNotScaning(int32_t listenerId, SoftBusBcScanParams *adapterP
         adapterFilter = NULL;
     }
     if (g_scanManager[listenerId].deleteSize > 0) {
+        filterSize = g_scanManager[listenerId].deleteSize;
         DeleteFilterByIndex(listenerId, &adapterFilter, adapterParam, filterSize);
         ReleaseSoftBusBcScanFilter(adapterFilter, filterSize);
         adapterFilter = NULL;
