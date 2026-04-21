@@ -106,6 +106,36 @@ void NapiLinkEnhanceConnection::DefineJSClass(napi_env env)
     napi_create_reference(env, constructor, 1, &consRef_);
 }
 
+void NapiLinkEnhanceConnection::ReleaseConnectionResource(napi_env env, NapiLinkEnhanceConnection* connection)
+{
+    if (connection == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::recursive_timed_mutex> guard(connection->lock_);
+        if (connection->connectResultRef_ != nullptr) {
+            napi_delete_reference(env, connection->connectResultRef_);
+            connection->connectResultRef_ = nullptr;
+        }
+        if (connection->dataReceivedRef_ != nullptr) {
+            napi_delete_reference(env, connection->dataReceivedRef_);
+            connection->dataReceivedRef_ = nullptr;
+        }
+        if (connection->disconnectRef_ != nullptr) {
+            napi_delete_reference(env, connection->disconnectRef_);
+            connection->disconnectRef_ = nullptr;
+        }
+    }
+    std::lock_guard<std::mutex> guard(connectionListMutex_);
+    for (auto iter = connectionList_.begin(); iter != connectionList_.end(); ++iter) {
+        if ((*iter)->handle_ == connection->handle_) {
+            COMM_LOGI(COMM_SDK, "erase connection, handle=%{public}u", connection->handle_);
+            connectionList_.erase(iter);
+            break;
+        }
+    }
+}
+
 napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_info info)
 {
     COMM_LOGD(COMM_SDK, "enter");
@@ -139,8 +169,9 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
         [](napi_env env, void *data, void *hint) {
             NapiLinkEnhanceConnection *connection = static_cast<NapiLinkEnhanceConnection *>(data);
             if (connection) {
+                ReleaseConnectionResource(env, connection);
+                (void)GeneralDisconnect(connection->handle_);
                 delete connection;
-                connection = nullptr;
             }
         },
         nullptr, nullptr);
@@ -195,25 +226,13 @@ napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
     }
     if (strcmp(funcName.c_str(), "connectResult") == 0) {
         COMM_LOGI(COMM_SDK, "register connectResult");
-        if (connection->connectResultRef_ != nullptr) {
-            napi_delete_reference(env, connection->connectResultRef_);
-        }
-        napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->connectResultRef_));
-        connection->SetConnectResultEnable(true);
+        connection->SetConnectResultEnable(true, env, args[ARGS_SIZE_ONE]);
     } else if (strcmp(funcName.c_str(), "dataReceived") == 0) {
         COMM_LOGI(COMM_SDK, "register dataReceived");
-        if (connection->dataReceivedRef_ != nullptr) {
-            napi_delete_reference(env, connection->dataReceivedRef_);
-        }
-        napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->dataReceivedRef_));
-        connection->SetEnableData(true);
+        connection->SetEnableData(true, env, args[ARGS_SIZE_ONE]);
     } else if (strcmp(funcName.c_str(), "disconnected") == 0) {
         COMM_LOGI(COMM_SDK, "register disconnected");
-        if (connection->disconnectRef_ != nullptr) {
-            napi_delete_reference(env, connection->disconnectRef_);
-        }
-        napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->disconnectRef_));
-        connection->SetEnableDisconnect(true);
+        connection->SetEnableDisconnect(true, env, args[ARGS_SIZE_ONE]);
     } else {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
@@ -232,21 +251,15 @@ napi_value NapiLinkEnhanceConnection::Off(napi_env env, napi_callback_info info)
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
     }
-    if (strcmp(funcName.c_str(), "connectResult") == 0 && connection->connectResultRef_ != nullptr) {
+    if (strcmp(funcName.c_str(), "connectResult") == 0) {
         COMM_LOGI(COMM_SDK, "unregister connectResult");
-        napi_delete_reference(env, connection->connectResultRef_);
-        connection->connectResultRef_ = nullptr;
-        connection->SetConnectResultEnable(false);
-    } else if (strcmp(funcName.c_str(), "dataReceived") == 0 && connection->dataReceivedRef_ != nullptr) {
+        connection->SetConnectResultEnable(false, env);
+    } else if (strcmp(funcName.c_str(), "dataReceived") == 0) {
         COMM_LOGI(COMM_SDK, "unregister dataReceived");
-        napi_delete_reference(env, connection->dataReceivedRef_);
-        connection->dataReceivedRef_ = nullptr;
-        connection->SetEnableData(false);
-    } else if (strcmp(funcName.c_str(), "disconnected") == 0 && connection->disconnectRef_ != nullptr) {
+        connection->SetEnableData(false, env);
+    } else if (strcmp(funcName.c_str(), "disconnected") == 0) {
         COMM_LOGI(COMM_SDK, "unregister disconnected");
-        napi_delete_reference(env, connection->disconnectRef_);
-        connection->disconnectRef_ = nullptr;
-        connection->SetEnableDisconnect(false);
+        connection->SetEnableDisconnect(false, env);
     } else {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
@@ -351,31 +364,8 @@ napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info inf
     connection->isEnableData_ = false;
     connection->isEnableDisconnect_ = false;
     connection->lock_.unlock();
-    if (connection->connectResultRef_ != nullptr) {
-        COMM_LOGI(COMM_SDK, "unregister connectResult");
-        napi_delete_reference(env, connection->connectResultRef_);
-        connection->connectResultRef_ = nullptr;
-    }
-    if (connection->dataReceivedRef_ != nullptr) {
-        COMM_LOGI(COMM_SDK, "unregister dataReceived");
-        napi_delete_reference(env, connection->dataReceivedRef_);
-        connection->dataReceivedRef_ = nullptr;
-    }
-    if (connection->disconnectRef_ != nullptr) {
-        COMM_LOGI(COMM_SDK, "unregister disconnected");
-        napi_delete_reference(env, connection->disconnectRef_);
-        connection->disconnectRef_ = nullptr;
-    }
-
+    ReleaseConnectionResource(env, connection);
     (void)GeneralDisconnect(connection->handle_);
-    std::lock_guard<std::mutex> guard(connectionListMutex_);
-    for (auto iter = connectionList_.begin(); iter != connectionList_.end(); ++iter) {
-        if ((*iter)->handle_ == connection->handle_) {
-            COMM_LOGI(COMM_SDK, "erase connection, handle=%{public}u", connection->handle_);
-            connectionList_.erase(iter);
-            break;
-        }
-    }
     return NapiGetUndefinedRet(env);
 }
 
