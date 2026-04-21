@@ -15,40 +15,20 @@
 
 #include "lnn_decision_db.h"
 
-#include <securec.h>
-#include <errno.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <sys/time.h>
 
 #include "anonymizer.h"
 #include "auth_deviceprofile.h"
-#include "auth_device_common_key.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_cipherkey_manager_struct.h"
-#include "lnn_device_info_recovery_struct.h"
 #include "lnn_ohos_account.h"
 #include "lnn_file_utils.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_huks_utils.h"
-#include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
-#include "lnn_p2p_info.h"
-#include "lnn_secure_storage_struct.h"
 #include "sqlite3_utils.h"
 #include "g_enhance_lnn_func_pack.h"
 
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_common.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
 
 typedef struct {
     ListNode node;

@@ -15,30 +15,20 @@
 
 #include "bus_center_manager.h"
 
-#include <stdint.h>
-#include <stdlib.h>
 
 #include "bus_center_decision_center.h"
-#include "bus_center_event.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_coap_discovery_impl.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account_adapter.h"
 #include "auth_pre_link.h"
 #include "legacy/softbus_adapter_xcollie.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "softbus_utils.h"
-#include "softbus_init_common.h"
 #include "softbus_permission.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"

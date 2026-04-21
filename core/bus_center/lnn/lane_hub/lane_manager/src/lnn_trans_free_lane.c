@@ -17,13 +17,10 @@
 
 #include <securec.h>
 
-#include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_dfx.h"
-#include "lnn_lane_interface.h"
-#include "lnn_log.h"
 #include "lnn_trans_lane.h"
 
 #define DELAY_DESTROY_LANE_TIME 5000

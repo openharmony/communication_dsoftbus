@@ -15,42 +15,21 @@
 
 #include "lnn_heartbeat_medium_mgr.h"
 
-#include <securec.h>
-#include <string.h>
-
 #include "anonymizer.h"
 #include "auth_manager.h"
-#include "auth_deviceprofile.h"
-#include "auth_interface.h"
 #include "auth_session_message_struct.h"
-#include "bus_center_event.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "common_list.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
-#include "lnn_device_info.h"
-#include "lnn_distributed_net_ledger.h"
 #include "lnn_distributed_net_ledger_common.h"
-#include "lnn_event.h"
 #include "lnn_feature_capability.h"
-#include "lnn_heartbeat_ctrl.h"
-#include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
-#include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
-#include "softbus_init_common.h"
 
 #define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 

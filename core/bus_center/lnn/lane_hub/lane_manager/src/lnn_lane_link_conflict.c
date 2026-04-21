@@ -18,15 +18,12 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_link_wifi_direct.h"
 #include "lnn_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_common.h"
-#include "softbus_def.h"
 #include "softbus_utils.h"
 
 #define CONFLICT_INFO_TIMELINESS 30000

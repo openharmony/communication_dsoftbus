@@ -16,30 +16,19 @@
 #include "bus_center_event.h"
 
 #include <securec.h>
-#include <stdlib.h>
 
 #include "anonymizer.h"
 #include "bus_center_decision_center.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_connId_callback_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_network_id.h"
-#include "lnn_p2p_info.h"
 #include "lnn_connection_addr_utils.h"
 #include "message_handler.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_init_common.h"
-#include "trans_log.h"
 
 typedef struct {
     ListNode node;

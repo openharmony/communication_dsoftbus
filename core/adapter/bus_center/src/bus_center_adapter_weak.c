@@ -19,7 +19,6 @@
 #include <securec.h>
 
 #include "bus_center_adapter.h"
-#include "softbus_error_code.h"
 
 #define DEFAULT_DEVICE_NAME "UNKNOWN"
 #define DEFAULT_UDID_NAME "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"

@@ -15,9 +15,6 @@
 
 #include "lnn_devicename_info.h"
 
-#include <securec.h>
-#include <string.h>
-
 #include "anonymizer.h"
 #include "auth_session_fsm.h"
 #include "bus_center_event.h"
@@ -25,20 +22,13 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_event_monitor_impl.h"
 #include "lnn_init_monitor.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_network_info.h"
 #include "lnn_net_builder.h"
-#include "lnn_sync_info_manager.h"
-#include "lnn_sync_item_info.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_adapter_json.h"
-#include "message_handler.h"
 
 #define KEY_NICK_NAME "KEY_NICK_NAME"
 #define KEY_ACCOUNT "KEY_ACCOUNT"

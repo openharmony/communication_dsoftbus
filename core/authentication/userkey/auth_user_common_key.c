@@ -23,11 +23,9 @@
 #include "auth_log.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_map.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
-#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
 #ifndef UDID_SHORT_HASH_HEX_STR

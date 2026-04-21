@@ -19,28 +19,14 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_communication_capability.h"
-#include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_ledger.h"
-#include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
-#include "lnn_net_capability.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_bus_center.h"
-#include "softbus_network_utils.h"
-#include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
-#include "softbus_init_common.h"
-#include "trans_event.h"
 
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
 #define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/

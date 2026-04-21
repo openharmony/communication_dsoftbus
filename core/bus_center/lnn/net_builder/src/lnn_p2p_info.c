@@ -15,26 +15,18 @@
 
 #include "lnn_p2p_info.h"
 
-#include <securec.h>
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_sync_info_manager.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_json_utils.h"
-#include "softbus_init_common.h"
 #include "wifi_direct_manager.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"

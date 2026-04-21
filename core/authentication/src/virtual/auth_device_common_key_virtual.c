@@ -16,7 +16,6 @@
 #include "auth_device_common_key.h"
 #include "softbus_error_code.h"
 
-
 void AuthLoadDeviceKey(void)
 {
 }

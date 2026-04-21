@@ -15,13 +15,7 @@
 
 #include "bus_center_manager.h"
 
-#include <securec.h>
-
 #include "lnn_bus_center_ipc.h"
-#include "lnn_event.h"
-#include "lnn_log.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
 #include "wifi_direct_manager.h"
 
 static void OnGroupStateChange(int32_t retCode)

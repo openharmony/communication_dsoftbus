@@ -23,17 +23,10 @@
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "lnn_log.h"
-#include "message_handler.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_feature_config.h"
-#include "softbus_init_common.h"
 
 #define TIME_SEC_TO_MSEC  1000L
 #define TIME_MSEC_TO_USEC 1000L
