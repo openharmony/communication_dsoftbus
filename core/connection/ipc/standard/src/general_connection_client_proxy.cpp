@@ -81,3 +81,18 @@ int32_t ClientIpcOnDataReceived(const char *pkgName, int32_t pid, uint32_t handl
 
     return clientProxy->OnDataReceived(handle, data, len);
 }
+
+int32_t ClientIpcOnServerStopped(const char *pkgName, int32_t pid, const char *name)
+{
+    if (pkgName == nullptr || name == nullptr) {
+        CONN_LOGE(CONN_COMMON, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<ConnectionClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        CONN_LOGE(CONN_COMMON, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+
+    return clientProxy->OnServerStopped(name);
+}

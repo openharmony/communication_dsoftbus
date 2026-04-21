@@ -223,11 +223,42 @@ static void OnServiceDiedAdapter(void)
     }
 }
 
+static void OnServiceStoppedAdapter(const char *name)
+{
+    COMM_LOGI(COMM_SDK, "service stopped");
+    if (name == nullptr) {
+        COMM_LOGE(COMM_SDK, "invalid service name");
+        return;
+    }
+    std::lock_guard<std::mutex> guard(NapiLinkEnhanceServer::serverMapMutex_);
+    auto iter = NapiLinkEnhanceServer::enhanceServerMap_.find(name);
+    if (iter == NapiLinkEnhanceServer::enhanceServerMap_.end()) {
+        COMM_LOGI(COMM_SDK, "server name not found");
+        return;
+    }
+    NapiLinkEnhanceServer *server = iter->second;
+    if (!server->IsStopEnable()) {
+        COMM_LOGI(COMM_SDK, "server not enable stop listener");
+        NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
+        return;
+    }
+    auto func = [server]() {
+        napi_value closeReason = NapiGetInt32Ret(server->env_, LINK_ENHANCE_SERVER_STOPPED);
+        napi_value argv[ARGS_SIZE_ONE] = { nullptr };
+        argv[ARGS_SIZE_ZERO] = closeReason;
+        NapiCallFunction(server->env_, server->serverStopRef_, argv, ARGS_SIZE_ONE);
+    };
+    
+    (void)DoInJsMainThread(server->env_, std::move(func));
+    NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
+}
+
 static IGeneralListener g_listener = {
     .OnAcceptConnect = OnAcceptConnectAdapter,
     .OnConnectionStateChange = OnConnectionStateChangeAdapter,
     .OnDataReceived = OnDataReceivedAdapter,
     .OnServiceDied = OnServiceDiedAdapter,
+    .OnServiceStopped = OnServiceStoppedAdapter,
 };
 
 /*

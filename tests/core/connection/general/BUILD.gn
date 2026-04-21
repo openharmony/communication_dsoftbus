@@ -20,6 +20,8 @@ module_output_path = "dsoftbus/soft_bus/connection/general"
 ohos_unittest("GeneralConnectionTest") {
   module_out_path = module_output_path
   include_dirs = [
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/connection/general",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/common/include",

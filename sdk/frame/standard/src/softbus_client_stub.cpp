@@ -70,6 +70,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_SESSIONKEY_AUTH_RESULT] = &SoftBusClientStub::OnSessionKeyAuthResultInner;
     memberFuncMap_[CLIENT_ON_FINISH_AUTH_RESULT] = &SoftBusClientStub::OnFinishAuthResultInner;
     memberFuncMap_[CLIENT_ON_ERROR_AUTH_RESULT] = &SoftBusClientStub::OnErrorAuthResultInner;
+    memberFuncMap_[CLIENT_GENERAL_SERVER_STOPPED] = &SoftBusClientStub::OnServerStoppedInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -1180,6 +1181,20 @@ int32_t SoftBusClientStub::OnDataReceivedInner(MessageParcel &data, MessageParce
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnServerStoppedInner(MessageParcel &data, MessageParcel &reply)
+{
+    char *name = (char *)data.ReadCString();
+    if (name == nullptr) {
+        COMM_LOGE(COMM_SDK, "OnServerStoppedInner read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = OnServerStopped(name);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "OnServerStoppedInner failed! ret=%{public}d", ret);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason)
 {
     COMM_LOGI(COMM_SDK, "OnConnectionStateChange handle=%{public}d, state=%{public}d, reason=%{public}d", handle, state,
@@ -1226,5 +1241,11 @@ void SoftBusClientStub::OnErrorAuthResult(
 {
     COMM_LOGI(COMM_SDK, "OnErrorAuthResult pkgName=%{public}s, requestId=%{public}" PRId64, pkgName, requestId);
     LnnOnErrorAuthResult(pkgName, requestId, operationCode, errorCode, returnData);
+}
+
+int32_t SoftBusClientStub::OnServerStopped(const char *name)
+{
+    COMM_LOGI(COMM_SDK, "OnServerStopped name=%{public}s", name);
+    return ServerStopped(name);
 }
 } // namespace OHOS

@@ -27,6 +27,7 @@ int32_t ConnectionStateChange(uint32_t handle, int32_t state, int32_t reason);
 int32_t AcceptConnect(const char *name, uint32_t handle);
 void DataReceived(uint32_t handle, const uint8_t *data, uint32_t len);
 void ConnectionDeathNotify(void);
+int32_t ServerStopped(const char *name);
 
 #ifdef __cplusplus
 }

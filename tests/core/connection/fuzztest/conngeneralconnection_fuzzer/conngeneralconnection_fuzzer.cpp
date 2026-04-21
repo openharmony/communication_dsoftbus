@@ -102,6 +102,11 @@ void OnConnectionDisconnectedFuzz(GeneralConnectionParam *info, uint32_t general
     (void)reason;
 }
 
+void OnServerStoppedFuzz(GeneralConnectionParam *info)
+{
+    (void)info;
+}
+
 void OnCommDataReceivedTest(FuzzedDataProvider &provider)
 {
     ConnModule moduleId = MODULE_BLE_GENERAL;
@@ -328,6 +333,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             .onConnectionDisconnected = OHOS::OnConnectionDisconnectedFuzz,
             .onConnectSuccess = OHOS::OnConnectSuccessFuzz,
             .onDataReceived = OHOS::OnDataReceivedFuzz,
+            .onServerStopped =  OHOS::OnServerStoppedFuzz,
         };
         RegisterListener(&listener);
         isInit = true;

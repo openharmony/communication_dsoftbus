@@ -16,6 +16,7 @@
 #ifndef SOFTBUS_CONN_GENERAL_CONNECTION_H
 #define SOFTBUS_CONN_GENERAL_CONNECTION_H
 
+#include "bus_center_event_struct.h"
 #include "softbus_conn_general_negotiation.h"
 #include "softbus_conn_interface.h"
 #include "softbus_utils.h"
@@ -69,6 +70,7 @@ typedef struct {
     void (*onAcceptConnect)(GeneralConnectionParam *info, uint32_t generalHandle);
     void (*onDataReceived)(GeneralConnectionParam *info, uint32_t generalHandle, const uint8_t *data, uint32_t dataLen);
     void (*onConnectionDisconnected)(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason);
+    void (*onServerStopped)(GeneralConnectionParam *info);
 } GeneralConnectionListener;
 
 typedef struct {
@@ -87,6 +89,8 @@ typedef struct {
 
 GeneralConnectionManager *GetGeneralConnectionManager(void);
 int32_t InitGeneralConnectionManager(void);
+int32_t ConnConstraintEventInit(void);
+void ConnConstraintEventDeInit(void);
 
 #ifdef __cplusplus
 }
