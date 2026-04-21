@@ -15,14 +15,9 @@
 
 #include "lnn_event_monitor.h"
 
-#include "bus_center_event.h"
 #include "lnn_event_monitor_impl.h"
-#include "lnn_devicename_info.h"
 #include "lnn_log.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
 
 typedef enum {
     MONITOR_IMPL_NETLINK_TYPE = 0,

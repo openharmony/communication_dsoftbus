@@ -16,16 +16,12 @@
 #include "lnn_lane_reliability.h"
 
 #include <securec.h>
-#include <string.h>
 #include "bus_center_manager.h"
 #include "lnn_lane_dfx.h"
-#include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
-#include "softbus_conn_interface.h"
-#include "softbus_error_code.h"
 #include "softbus_socket.h"
 
 #define WLAN_DETECT_TIMEOUT 3000

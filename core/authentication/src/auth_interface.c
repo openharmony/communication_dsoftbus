@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "auth_interface.h"
 
 #include <securec.h>
@@ -27,8 +28,6 @@
 #include "auth_manager.h"
 #include "auth_uk_manager.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
-#include "g_enhance_auth_func.h"
 #include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_decision_db.h"
@@ -38,8 +37,6 @@
 #include "lnn_log.h"
 #include "lnn_init_monitor.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_init_common.h"
 
 #define SHORT_ACCOUNT_HASH_LEN 2
 

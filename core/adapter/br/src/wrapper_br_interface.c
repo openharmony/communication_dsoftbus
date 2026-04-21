@@ -15,14 +15,10 @@
 
 #include "wrapper_br_interface.h"
 
-#include "c_header/ohos_bt_def.h"
-#include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_spp.h"
 #include "c_header/ohos_bt_socket.h"
 #include "conn_log.h"
 #include "securec.h"
-#include "softbus_error_code.h"
-#include "string.h"
 
 #define IS_BR_ENCRYPT false
 

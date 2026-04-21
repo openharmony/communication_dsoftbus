@@ -15,15 +15,12 @@
 
 #include "lnn_map.h"
 
-#include <stdlib.h>
-#include <string.h>
 
 #include <securec.h>
 
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_error_code.h"
 
 #define HDF_MIN_MAP_SIZE 8
 #define HDF_ENLARGE_FACTOR 2

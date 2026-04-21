@@ -15,22 +15,16 @@
 
 #include "lnn_topo_manager.h"
 
-#include <securec.h>
 
 #include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 

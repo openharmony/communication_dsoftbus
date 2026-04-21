@@ -15,11 +15,9 @@
 
 #include "lnn_async_callback_utils.h"
 
-#include "common_list.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_error_code.h"
 
 #define LNN_ASYNC_CALLBACK_HANDLER_NAME "LnnAsyncHandler"
 

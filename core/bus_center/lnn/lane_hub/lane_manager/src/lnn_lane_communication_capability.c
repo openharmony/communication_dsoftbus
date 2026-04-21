@@ -20,11 +20,8 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger_struct.h"
 #include "lnn_log.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 
 typedef struct {

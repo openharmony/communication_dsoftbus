@@ -18,15 +18,10 @@
 
 #include <stdlib.h>
 
-#include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_common.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 
 #define WIDE_CHAR_MAX_LEN 8
 #define WIDE_STR_MAX_LEN 128

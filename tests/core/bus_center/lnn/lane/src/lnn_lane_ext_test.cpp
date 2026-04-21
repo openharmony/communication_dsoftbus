@@ -32,6 +32,7 @@
 #include "lnn_lane_model.h"
 #include "lnn_lane_power_ctrl_deps_mock.h"
 #include "lnn_lane_reliability.c"
+#include "lnn_lane_reliability.h"
 #include "lnn_lane_select.h"
 #include "lnn_select_rule.h"
 #include "lnn_wifi_adpter_mock.h"

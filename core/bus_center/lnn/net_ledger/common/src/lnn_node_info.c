@@ -15,7 +15,6 @@
 
 #include "lnn_node_info.h"
 
-#include <string.h>
 
 #include <securec.h>
 
@@ -23,7 +22,6 @@
 #include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define DYNAMIC_LEVEL_INVALID 0xFFFF

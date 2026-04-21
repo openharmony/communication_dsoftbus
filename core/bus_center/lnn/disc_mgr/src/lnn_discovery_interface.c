@@ -20,7 +20,6 @@
 #include "lnn_event.h"
 #include "lnn_log.h"
 #include "softbus_adapter_perf.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 static void DfxRecordLnnDiscServiceEnd(int32_t serverType, const char *packageName, int32_t reason)

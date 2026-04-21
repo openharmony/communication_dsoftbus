@@ -13,21 +13,17 @@
  * limitations under the License.
  */
 
-#include <stdatomic.h>
 #include <securec.h>
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "cJSON.h"
 #include "g_enhance_adapter_func_pack.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_distributed_net_ledger_common.h"
 #include "lnn_sle_capability.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_sle_common_struct.h"
 #include "softbus_json_utils.h"
-#include "softbus_error_code.h"
 
 static void SleStateChangeEventHandler(int32_t state);
 

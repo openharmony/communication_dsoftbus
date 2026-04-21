@@ -20,7 +20,6 @@
 
 #include "anonymizer.h"
 #include "lnn_log.h"
-#include "softbus_def.h"
 #include "trans_channel_manager.h"
 #include "auth_tcp_connection.h"
 

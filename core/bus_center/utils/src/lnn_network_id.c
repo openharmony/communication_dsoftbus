@@ -15,9 +15,6 @@
 
 #include "lnn_network_id.h"
 
-#include <stdbool.h>
-#include <stdlib.h>
-
 #include <securec.h>
 
 #include "anonymizer.h"
@@ -26,9 +23,6 @@
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_file.h"
-#include "softbus_bus_center.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 static int32_t GetUuidFromFile(char *id, uint32_t len, bool isUpdate)

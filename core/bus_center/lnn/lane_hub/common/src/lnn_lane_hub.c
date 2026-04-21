@@ -14,15 +14,10 @@
  */
 
 #include "g_enhance_lnn_func_pack.h"
-#include "g_enhance_lnn_func.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_lane_hub.h"
 #include "lnn_lane.h"
-#include "lnn_log.h"
 #include "lnn_time_sync_manager.h"
-#include "softbus_error_code.h"
-#include "softbus_init_common.h"
 
 #define LNN_DUMP_CONTROL_LANE_GEOUP_INFO "control_lane_group_info"
 

@@ -14,7 +14,6 @@
  */
 
 #include "lnn_network_info.h"
-#include "lnn_devicename_info.h"
 
 void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
 {

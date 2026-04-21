@@ -15,14 +15,10 @@
 
 #include "lnn_device_info.h"
 
-#include <stddef.h>
-#include <string.h>
 
 #include <securec.h>
 #include "bus_center_adapter.h"
 #include "lnn_log.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 
 #define DEVICE_TYPE_MAX_LENGTH 3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH  (DEVICE_TYPE_MAX_LENGTH * 4)

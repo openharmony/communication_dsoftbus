@@ -15,13 +15,10 @@
 
 #include "lnn_heartbeat_ctrl.h"
 
-#include <securec.h>
 #include <stdatomic.h>
-#include <string.h>
 
 #include "anonymizer.h"
 #include "auth_apply_key_manager.h"
-#include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
 #include "g_enhance_adapter_func_pack.h"
@@ -32,32 +29,16 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
-#include "lnn_deviceinfo_to_profile.h"
-#include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
-#include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_kv_adapter_wrapper.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
-#include "lnn_meta_node_ledger.h"
-#include "lnn_net_builder.h"
-#include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_init_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_range.h"
-#include "softbus_broadcast_type.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_bus_center.h"
-#include "softbus_utils.h"
-#include "softbus_init_common.h"
 
 #define HB_LOOPBACK_IP "127.0.0.1"
 #define INVALID_DELAY_TIME (-1)

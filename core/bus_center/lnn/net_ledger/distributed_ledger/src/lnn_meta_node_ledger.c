@@ -16,14 +16,11 @@
 #include "lnn_meta_node_ledger.h"
 
 #include <securec.h>
-#include <string.h>
 
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 typedef struct {

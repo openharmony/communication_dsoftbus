@@ -18,11 +18,9 @@
 #include <securec.h>
 #include <zlib.h>
 
-#include "softbus_adapter_file.h"
-#include "softbus_error_code.h"
-#include "softbus_feature_config.h"
-#include "softbus_adapter_mem.h"
 #include "lnn_log.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
 
 #define CHUNK 4096
 #define GZIP_ENCODING 16

@@ -19,13 +19,10 @@
 
 #include "auth_common.h"
 #include "auth_log.h"
-#include "auth_session_fsm.h"
 #include "bus_center_manager.h"
-#include "device_auth.h"
 #include "device_auth_defines.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
