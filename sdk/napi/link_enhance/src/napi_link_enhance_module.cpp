@@ -38,11 +38,10 @@ static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
     std::string serverName = name;
     std::string deviceId = "";
     NapiLinkEnhanceServer *enhanceServer = nullptr;
-    {
-        std::lock_guard<std::mutex> guard(NapiLinkEnhanceServer::serverMapMutex_);
-        if (NapiLinkEnhanceServer::enhanceServerMap_.count(serverName) > 0) {
-            enhanceServer = NapiLinkEnhanceServer::enhanceServerMap_[serverName];
-        }
+
+    std::lock_guard<std::mutex> guard(NapiLinkEnhanceServer::serverMapMutex_);
+    if (NapiLinkEnhanceServer::enhanceServerMap_.count(serverName) > 0) {
+        enhanceServer = NapiLinkEnhanceServer::enhanceServerMap_[serverName];
     }
 
     if (enhanceServer == nullptr || enhanceServer->env_ == nullptr ||

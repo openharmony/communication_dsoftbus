@@ -33,6 +33,7 @@ public:
     static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value Stop(napi_env env, napi_callback_info info);
     static napi_value Close(napi_env env, napi_callback_info info);
+    static void ReleaseServerResource(napi_env env, NapiLinkEnhanceServer* server);
 
     NapiLinkEnhanceServer(const std::string &name)
     {
@@ -55,15 +56,37 @@ private:
     std::recursive_timed_mutex lock_;
     bool isAcceptedEnable_ = false;
     bool isStopEnable_ = false;
-    void SetAcceptedEnable(bool isAcceptedEnable)
+    void SetAcceptedEnable(bool isAcceptedEnable, napi_env env, napi_value callback = nullptr)
     {
+        if (isAcceptedEnable && callback == nullptr) {
+            return;
+        }
         this->lock_.lock();
+        if (this->acceptConnectRef_ != nullptr) {
+            napi_delete_reference(env, this->acceptConnectRef_);
+        }
+        if (isAcceptedEnable) {
+            napi_create_reference(env, callback, 1, &(this->acceptConnectRef_));
+        } else {
+            this->acceptConnectRef_ = nullptr;
+        }
         this->isAcceptedEnable_ = isAcceptedEnable;
         this->lock_.unlock();
     }
-    void SetStopEnable(bool isStopEnable)
+    void SetStopEnable(bool isStopEnable, napi_env env, napi_value callback = nullptr)
     {
+        if (isStopEnable && callback == nullptr) {
+            return;
+        }
         this->lock_.lock();
+        if (this->serverStopRef_ != nullptr) {
+            napi_delete_reference(env, this->serverStopRef_);
+        }
+        if (isStopEnable) {
+            napi_create_reference(env, callback, 1, &(this->serverStopRef_));
+        } else {
+            this->serverStopRef_ = nullptr;
+        }
         this->isStopEnable_ = isStopEnable;
         this->lock_.unlock();
     }
