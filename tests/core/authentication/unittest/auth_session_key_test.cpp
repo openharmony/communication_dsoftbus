@@ -20,8 +20,8 @@
 
 #include "auth_common.h"
 #include "auth_session_key.h"
-#include "softbus_adapter_mem.h"
 #include "common_list.h"
+#include "softbus_adapter_mem.h"
 
 namespace OHOS {
 using namespace testing::ext;
