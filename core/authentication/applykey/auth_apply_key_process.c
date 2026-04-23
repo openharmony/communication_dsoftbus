@@ -16,7 +16,6 @@
 #include "auth_apply_key_process.h"
 
 #include <securec.h>
-#include <stdatomic.h>
 
 #include "anonymizer.h"
 #include "auth_apply_key_manager.h"
@@ -45,14 +44,8 @@
 #define D2D_CLOSE_ACK                   "d2d_close_ack"
 #define APPLY_KEY_MAX_INSTANCE_CNT      0x2000000
 #define APPLY_KEY_NEGO_PROCESS_TIMEOUT  (10 * 1000LL)
-#define APPLY_KEY_SEQ_NETWORK_ID_BITS   16
-#define SEQ_TIME_STAMP_BITS             8
-#define SEQ_TIME_STAMP_MASK             0xFFL
-#define APPLY_KEY_SEQ_INTEGER_BITS      7
-#define APPLY_KEY_SEQ_INTEGER_MAX       0x0FFFFFFF
 #define APPLY_KEY_TRANSMIT_DATA_LEN_MAX 20000
 
-static uint32_t g_uniqueId = 0;
 // ApplyKey decay time: 180 days in milliseconds
 // 180 * 24 * 60 * 60 * 1000 = 15,552,000,000 ms
 static uint64_t g_applyKeyDecayTime = 15552000000;
@@ -1262,39 +1255,9 @@ int32_t AuthGenApplyKey(
     return SOFTBUS_OK;
 }
 
-static void UpdateUniqueId(void)
-{
-    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get local networkId fail");
-        return;
-    }
-    uint8_t hashId[SHA_256_HASH_LEN] = { 0 };
-    if (SoftBusGenerateStrHash((uint8_t *)networkId, strlen(networkId), hashId) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "GenerateStrHash fail");
-        return;
-    }
-    for (uint32_t i = 0; i < APPLY_KEY_SEQ_NETWORK_ID_BITS / BYTES_BIT_NUM; i++) {
-        g_uniqueId = (g_uniqueId << BYTES_BIT_NUM) | hashId[i];
-    }
-    uint64_t timeStamp = SoftBusGetSysTimeMs();
-    g_uniqueId = (g_uniqueId << SEQ_TIME_STAMP_BITS) | (SEQ_TIME_STAMP_MASK & timeStamp);
-}
-
 uint32_t GenApplyKeySeq(void)
 {
-    static atomic_uint integer = 0;
-    if (integer >= APPLY_KEY_SEQ_INTEGER_MAX) {
-        integer = 0;
-    }
-    if (integer == 0) {
-        UpdateUniqueId();
-    }
-    integer++;
-    /* |----GreaterZero(1)----|----NetworkIdHash(16)----|----TimeStamp(8)----|----AtomicInteger(7)----| */
-    uint32_t seq = integer;
-    seq = (g_uniqueId << APPLY_KEY_SEQ_INTEGER_BITS) | (seq & APPLY_KEY_SEQ_INTEGER_MAX);
-    return seq;
+    return GenAuthIdSeq();
 }
 
 bool AuthIsApplyKeyExpired(uint64_t time)

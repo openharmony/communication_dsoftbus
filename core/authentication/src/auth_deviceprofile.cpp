@@ -46,6 +46,33 @@ static std::set<std::string> g_notTrustedDevices;
 static std::mutex g_mutex;
 static constexpr const int32_t LONG_TO_STRING_MAX_LEN = 21;
 
+static constexpr uint32_t ACL_CMP_UDID       = (1 << 0);
+static constexpr uint32_t ACL_CMP_USER_ID    = (1 << 1);
+static constexpr uint32_t ACL_CMP_TOKEN_ID   = (1 << 2);
+static constexpr uint32_t ACL_CMP_ACCOUNT_ID = (1 << 3);
+
+typedef struct {
+    std::string srcUdid;
+    std::string sinkUdid;
+    std::string srcAccountId;
+    std::string sinkAccountId;
+    int32_t srcUserId;
+    int32_t sinkUserId;
+    int32_t srcTokenId;
+    int32_t sinkTokenId;
+} AssetAclProfileFields;
+
+typedef struct {
+    const char *srcUdid;
+    const char *sinkUdid;
+    int32_t srcUserId;
+    int32_t sinkUserId;
+    int32_t srcTokenId;
+    int32_t sinkTokenId;
+    const char *srcAccountId;
+    const char *sinkAccountId;
+} AssetAclMappedFields;
+
 static bool IsNotTrustDevice(std::string deviceIdHash)
 {
     std::lock_guard<std::mutex> autoLock(g_mutex);
@@ -853,111 +880,116 @@ void DelSessionKeyProfile(int32_t sessionKeyId)
     }
 }
 
+static void ExtractProfileFields(
+    const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile, AssetAclProfileFields *fields)
+{
+    fields->srcUdid = aclProfile.GetAccesser().GetAccesserDeviceId();
+    fields->sinkUdid = aclProfile.GetAccessee().GetAccesseeDeviceId();
+    fields->srcAccountId = aclProfile.GetAccesser().GetAccesserAccountId();
+    fields->sinkAccountId = aclProfile.GetAccessee().GetAccesseeAccountId();
+    fields->srcUserId = aclProfile.GetAccesser().GetAccesserUserId();
+    fields->sinkUserId = aclProfile.GetAccessee().GetAccesseeUserId();
+    fields->srcTokenId = static_cast<int32_t>(aclProfile.GetAccesser().GetAccesserTokenId());
+    fields->sinkTokenId = static_cast<int32_t>(aclProfile.GetAccessee().GetAccesseeTokenId());
+}
+
+static void MapAssetAclFields(const AuthACLInfo *acl, bool isSameSide, AssetAclMappedFields *mapped)
+{
+    if (isSameSide) {
+        mapped->srcUdid = acl->sourceUdid;
+        mapped->sinkUdid = acl->sinkUdid;
+        mapped->srcUserId = acl->sourceUserId;
+        mapped->sinkUserId = acl->sinkUserId;
+        mapped->srcTokenId = static_cast<int32_t>(acl->sourceTokenId);
+        mapped->sinkTokenId = static_cast<int32_t>(acl->sinkTokenId);
+        mapped->srcAccountId = acl->sourceAccountId;
+        mapped->sinkAccountId = acl->sinkAccountId;
+    } else {
+        mapped->srcUdid = acl->sinkUdid;
+        mapped->sinkUdid = acl->sourceUdid;
+        mapped->srcUserId = acl->sinkUserId;
+        mapped->sinkUserId = acl->sourceUserId;
+        mapped->srcTokenId = static_cast<int32_t>(acl->sinkTokenId);
+        mapped->sinkTokenId = static_cast<int32_t>(acl->sourceTokenId);
+        mapped->srcAccountId = acl->sinkAccountId;
+        mapped->sinkAccountId = acl->sourceAccountId;
+    }
+}
+
+static bool CompareAssetAclFields(
+    const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile, const AuthACLInfo *acl,
+    bool isSameSide, uint32_t flags)
+{
+    if (acl == nullptr) {
+        LNN_LOGE(LNN_STATE, "acl invalid param");
+        return false;
+    }
+    AssetAclProfileFields profile = {};
+    ExtractProfileFields(aclProfile, &profile);
+    AssetAclMappedFields mapped = {};
+    MapAssetAclFields(acl, isSameSide, &mapped);
+
+    if ((flags & ACL_CMP_UDID) &&
+        (profile.srcUdid.compare(std::string(mapped.srcUdid)) != 0 ||
+        profile.sinkUdid.compare(std::string(mapped.sinkUdid)) != 0)) {
+        LNN_LOGE(LNN_STATE, "udid compare fail");
+        return false;
+    }
+    if ((flags & ACL_CMP_USER_ID) &&
+        (profile.srcUserId != mapped.srcUserId || profile.sinkUserId != mapped.sinkUserId)) {
+        LNN_LOGE(LNN_STATE, "userId compare fail");
+        return false;
+    }
+    if ((flags & ACL_CMP_TOKEN_ID) &&
+        (profile.srcTokenId != mapped.srcTokenId || profile.sinkTokenId != mapped.sinkTokenId)) {
+        LNN_LOGE(LNN_STATE, "tokenId compare fail");
+        return false;
+    }
+    if ((flags & ACL_CMP_ACCOUNT_ID) &&
+        (strcmp(DEFAULT_ACCOUNT_UID, profile.srcAccountId.c_str()) == 0 ||
+        strcmp(DEFAULT_ACCOUNT_UID, profile.sinkAccountId.c_str()) == 0 ||
+        profile.srcAccountId.compare(std::string(mapped.srcAccountId)) != 0 ||
+        profile.sinkAccountId.compare(std::string(mapped.sinkAccountId)) != 0)) {
+        LNN_LOGE(LNN_STATE, "accountId compare fail");
+        return false;
+    }
+    return true;
+}
+
 static bool CompareAssetAclSameAccount(
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile, const AuthACLInfo *acl, bool isSameSide)
 {
-    std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
-    std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
-    std::string itemSourceAccountId = aclProfile.GetAccesser().GetAccesserAccountId();
-    std::string itemSinkAccountId = aclProfile.GetAccessee().GetAccesseeAccountId();
     if (aclProfile.GetBindType() != (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
         LNN_LOGE(LNN_STATE, "not same account");
         return false;
     }
-    if (isSameSide) {
-        if (itemSourceDeviceId.compare(std::string(acl->sourceUdid)) != 0 ||
-            itemSinkDeviceId.compare(std::string(acl->sinkUdid)) != 0 ||
-            itemSourceAccountId.compare(std::string(acl->sourceAccountId)) != 0 ||
-            itemSinkAccountId.compare(std::string(acl->sinkAccountId)) != 0 ||
-            strcmp(DEFAULT_ACCOUNT_UID, itemSourceAccountId.c_str()) == 0 ||
-            strcmp(DEFAULT_ACCOUNT_UID, itemSinkAccountId.c_str()) == 0 ||
-            aclProfile.GetAccesser().GetAccesserUserId() != acl->sourceUserId ||
-            aclProfile.GetAccessee().GetAccesseeUserId() != acl->sinkUserId) {
-            LNN_LOGE(LNN_STATE, "same side compare fail");
-            return false;
-        }
-        return true;
-    } else {
-        if (itemSourceDeviceId.compare(std::string(acl->sinkUdid)) != 0 ||
-            itemSinkDeviceId.compare(std::string(acl->sourceUdid)) != 0 ||
-            itemSourceAccountId.compare(std::string(acl->sinkAccountId)) != 0 ||
-            itemSinkAccountId.compare(std::string(acl->sourceAccountId)) != 0 ||
-            strcmp(DEFAULT_ACCOUNT_UID, itemSourceAccountId.c_str()) == 0 ||
-            strcmp(DEFAULT_ACCOUNT_UID, itemSinkAccountId.c_str()) == 0 ||
-            aclProfile.GetAccesser().GetAccesserUserId() != acl->sinkUserId ||
-            aclProfile.GetAccessee().GetAccesseeUserId() != acl->sourceUserId) {
-            LNN_LOGE(LNN_STATE, "diff side compare fail");
-            return false;
-        }
-        return true;
-    }
+    return CompareAssetAclFields(aclProfile, acl, isSameSide,
+        ACL_CMP_UDID | ACL_CMP_USER_ID | ACL_CMP_ACCOUNT_ID);
 }
 
 static bool CompareAssetAclDiffAccountWithUserLevel(
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile, const AuthACLInfo *acl, bool isSameSide)
 {
-    std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
-    std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
     if (aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
         aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE ||
         aclProfile.GetBindLevel() != (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER) {
         LNN_LOGE(LNN_STATE, "bind level is no user");
         return false;
     }
-    if (isSameSide) {
-        if (itemSourceDeviceId.compare(std::string(acl->sourceUdid)) != 0 ||
-            itemSinkDeviceId.compare(std::string(acl->sinkUdid)) != 0 ||
-            aclProfile.GetAccesser().GetAccesserUserId() != acl->sourceUserId ||
-            aclProfile.GetAccessee().GetAccesseeUserId() != acl->sinkUserId) {
-            LNN_LOGE(LNN_STATE, "same side compare fail");
-            return false;
-        }
-    } else {
-        if (itemSourceDeviceId.compare(std::string(acl->sinkUdid)) != 0 ||
-            itemSinkDeviceId.compare(std::string(acl->sourceUdid)) != 0 ||
-            aclProfile.GetAccesser().GetAccesserUserId() != acl->sinkUserId ||
-            aclProfile.GetAccessee().GetAccesseeUserId() != acl->sourceUserId) {
-            LNN_LOGE(LNN_STATE, "diff side compare fail");
-            return false;
-        }
-    }
-    return true;
+    return CompareAssetAclFields(aclProfile, acl, isSameSide, ACL_CMP_UDID | ACL_CMP_USER_ID);
 }
 
 static bool CompareAssetAclDiffAccount(
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile, const AuthACLInfo *acl, bool isSameSide)
 {
-    std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
-    std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
     if (aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT ||
         aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE ||
         aclProfile.GetBindLevel() == (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER) {
         LNN_LOGE(LNN_STATE, "is same account or share type");
         return false;
     }
-    if (isSameSide) {
-        if (itemSourceDeviceId.compare(std::string(acl->sourceUdid)) != 0 ||
-            itemSinkDeviceId.compare(std::string(acl->sinkUdid)) != 0 ||
-            aclProfile.GetAccesser().GetAccesserUserId() != acl->sourceUserId ||
-            aclProfile.GetAccessee().GetAccesseeUserId() != acl->sinkUserId ||
-            (int32_t)aclProfile.GetAccesser().GetAccesserTokenId() != (int32_t)acl->sourceTokenId ||
-            (int32_t)aclProfile.GetAccessee().GetAccesseeTokenId() != (int32_t)acl->sinkTokenId) {
-            LNN_LOGE(LNN_STATE, "same side compare fail");
-            return false;
-        }
-        return true;
-    } else {
-        if (itemSourceDeviceId.compare(std::string(acl->sinkUdid)) != 0 ||
-            itemSinkDeviceId.compare(std::string(acl->sourceUdid)) != 0 ||
-            aclProfile.GetAccesser().GetAccesserUserId() != acl->sinkUserId ||
-            aclProfile.GetAccessee().GetAccesseeUserId() != acl->sourceUserId ||
-            (int32_t)aclProfile.GetAccesser().GetAccesserTokenId() != (int32_t)acl->sinkTokenId ||
-            (int32_t)aclProfile.GetAccessee().GetAccesseeTokenId() != (int32_t)acl->sourceTokenId) {
-            LNN_LOGE(LNN_STATE, "diff side compare fail");
-            return false;
-        }
-        return true;
-    }
+    return CompareAssetAclFields(aclProfile, acl, isSameSide,
+        ACL_CMP_UDID | ACL_CMP_USER_ID | ACL_CMP_TOKEN_ID);
 }
 
 static bool CompareAssetAllAcl(OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile, const AuthACLInfo *acl,
@@ -1046,10 +1078,13 @@ static void UpdateAccessProfileSessionKeyId(
     LNN_LOGI(LNN_STATE, "sessionKey is invalid, UpdateAccessControlProfile ret=%{public}d", ret);
 }
 
-int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
+typedef bool (*AssetAclCompareFunc)(OHOS::DistributedDeviceProfile::AccessControlProfile, const AuthACLInfo *, bool);
+
+static int32_t GetAccessUkIdByCompare(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time,
+    AssetAclCompareFunc compareFunc, DpBindType bindType)
 {
     if (acl == nullptr || ukId == nullptr || time == nullptr) {
-        LNN_LOGE(LNN_STATE, "find uk acl is invalid param");
+        LNN_LOGE(LNN_STATE, "find uk info is invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
@@ -1065,7 +1100,7 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
     for (auto &aclProfile : aclProfiles) {
         LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
             aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
-        if (!CompareAssetAclSameAccount(aclProfile, acl, acl->isServer)) {
+        if (!compareFunc(aclProfile, acl, true) && !compareFunc(aclProfile, acl, false)) {
             continue;
         }
         GetLocalUkIdFromAccess(aclProfile, acl, ukId, time);
@@ -1073,7 +1108,7 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
             UpdateAccessProfileSessionKeyId(aclProfile, ukId);
         } else {
             InsertUserKeyToUKCache(acl, *ukId, *time, aclProfile.GetBindLevel() ==
-                (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER, DP_BIND_TYPE_SAME_ACCOUNT);
+                (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER, bindType);
         }
         LNN_LOGI(LNN_STATE, "user key find.");
         return SOFTBUS_OK;
@@ -1082,77 +1117,20 @@ int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t
     return SOFTBUS_AUTH_ACL_NOT_FOUND;
 }
 
+int32_t GetAccessUkIdSameAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
+{
+    return GetAccessUkIdByCompare(acl, ukId, time, CompareAssetAclSameAccount, DP_BIND_TYPE_SAME_ACCOUNT);
+}
+
 int32_t GetAccessUkIdDiffAccountWithUserLevel(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
 {
-    if (acl == nullptr || ukId == nullptr || time == nullptr) {
-        LNN_LOGE(LNN_STATE, "find uk info is invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
-    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
-    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
-        return SOFTBUS_AUTH_ACL_NOT_FOUND;
-    }
-    if (aclProfiles.empty()) {
-        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
-        return SOFTBUS_AUTH_ACL_NOT_FOUND;
-    }
-    *ukId = DEFAULT_USER_KEY_INDEX;
-
-    for (auto &aclProfile : aclProfiles) {
-        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
-            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
-        if (!CompareAssetAclDiffAccountWithUserLevel(aclProfile, acl, true) &&
-            !CompareAssetAclDiffAccountWithUserLevel(aclProfile, acl, false)) {
-            continue;
-        }
-        GetLocalUkIdFromAccess(aclProfile, acl, ukId, time);
-        if (!AuthIsUkExpired(*time)) {
-            UpdateAccessProfileSessionKeyId(aclProfile, ukId);
-        } else {
-            InsertUserKeyToUKCache(acl, *ukId, *time, aclProfile.GetBindLevel() ==
-                (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER, DP_BIND_TYPE_DIFF_ACCOUNT);
-        }
-        return SOFTBUS_OK;
-    }
-    LNN_LOGE(LNN_STATE, "not find uk");
-    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    return GetAccessUkIdByCompare(acl, ukId, time,
+        CompareAssetAclDiffAccountWithUserLevel, DP_BIND_TYPE_DIFF_ACCOUNT);
 }
 
 int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
 {
-    if (acl == nullptr || ukId == nullptr || time == nullptr) {
-        LNN_LOGE(LNN_STATE, "find uk info is invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
-    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
-    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
-        return SOFTBUS_AUTH_ACL_NOT_FOUND;
-    }
-    if (aclProfiles.empty()) {
-        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
-        return SOFTBUS_AUTH_ACL_NOT_FOUND;
-    }
-    for (auto &aclProfile : aclProfiles) {
-        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
-            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
-        if (!CompareAssetAclDiffAccount(aclProfile, acl, true) && !CompareAssetAclDiffAccount(aclProfile, acl, false)) {
-            continue;
-        }
-        GetLocalUkIdFromAccess(aclProfile, acl, ukId, time);
-        if (!AuthIsUkExpired(*time)) {
-            UpdateAccessProfileSessionKeyId(aclProfile, ukId);
-        } else {
-            InsertUserKeyToUKCache(acl, *ukId, *time, aclProfile.GetBindLevel() ==
-                (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER, DP_BIND_TYPE_DIFF_ACCOUNT);
-        }
-        return SOFTBUS_OK;
-    }
-    LNN_LOGE(LNN_STATE, "user key not found.");
-    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    return GetAccessUkIdByCompare(acl, ukId, time, CompareAssetAclDiffAccount, DP_BIND_TYPE_DIFF_ACCOUNT);
 }
 
 int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
