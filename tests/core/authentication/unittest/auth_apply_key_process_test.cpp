@@ -1182,4 +1182,189 @@ HWTEST_F(AuthApplyKeyProcessTest, PROCESS_APPLY_KEY_CLOSE_ACK_DATA_TEST_001, Tes
     ret = ProcessApplyKeyCloseAckData(requestId, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: CHECK_ACCOUNT_HASH_WITH_HICHAIN_Test_001
+ * @tc.desc: test CheckAccountHashWithHichain function with client mode and matching/non-matching hash
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, CHECK_ACCOUNT_HASH_WITH_HICHAIN_Test_001, TestSize.Level0)
+{
+    ApplyKeyNegoInstance instance;
+    (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
+    
+    instance.isServer = false;
+    EXPECT_EQ(strcpy_s(instance.info.peerAccountHash, SHA_256_HEX_HASH_LEN, "peer123456789"), EOK);
+
+    const char *testHash1 = "peer123456789";
+    bool result = CheckAccountHashWithHichain(testHash1, &instance);
+    EXPECT_EQ(result, true);
+
+    const char *testHash2 = "differenthash123";
+    result = CheckAccountHashWithHichain(testHash2, &instance);
+    EXPECT_EQ(result, false);
+}
+
+/*
+ * @tc.name: CHECK_ACCOUNT_HASH_WITH_HICHAIN_Test_002
+ * @tc.desc: test CheckAccountHashWithHichain function with server mode and matching/non-matching hashes
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, CHECK_ACCOUNT_HASH_WITH_HICHAIN_Test_002, TestSize.Level0)
+{
+    ApplyKeyNegoInstance instance;
+    (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
+
+    instance.isServer = true;
+    EXPECT_EQ(strcpy_s(instance.info.accountHash, D2D_ACCOUNT_HASH_STR_LEN, "server1234"), EOK);
+
+    char testHash1[D2D_ACCOUNT_HASH_STR_LEN] = "server1234";
+    bool result = CheckAccountHashWithHichain(testHash1, &instance);
+    EXPECT_EQ(result, true);
+
+    char testHash2[D2D_ACCOUNT_HASH_STR_LEN] = "diffServer";
+    result = CheckAccountHashWithHichain(testHash2, &instance);
+    EXPECT_EQ(result, false);
+}
+
+/*
+ * @tc.name: APPLY_KEY_MSG_HANDLER_Test_001
+ * @tc.desc: test ApplyKeyMsgHandler function with various parameters and data types
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, APPLY_KEY_MSG_HANDLER_Test_001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t requestId = GenApplyKeySeq();
+    const void *data = TEST_APPLY_KEY_DATA;
+    uint32_t dataLen = sizeof(TEST_APPLY_KEY_DATA);
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_DEVICE_ID,
+        .module = MODULE_APPLY_KEY_CONNECTION,
+        .seq = requestId,
+        .flag = CLIENT_SIDE_FLAG,
+        .len = dataLen,
+    };
+
+    int32_t ret = ApplyKeyMsgHandler(channelId, requestId, nullptr, data, dataLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ApplyKeyMsgHandler(channelId, requestId, &head, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    head.dataType = 999;
+    ret = ApplyKeyMsgHandler(0, requestId, &head, data, dataLen);
+    EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_HANDLE_DATA_FAIL);
+}
+
+/*
+ * @tc.name: APPLY_KEY_MSG_HANDLER_Test_002
+ * @tc.desc: test ApplyKeyMsgHandler function with different dataType
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, APPLY_KEY_MSG_HANDLER_Test_002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t requestId = GenApplyKeySeq();
+    uint32_t dataLen = strlen(TEST_DATA);
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_DEVICE_ID,
+        .module = MODULE_APPLY_KEY_CONNECTION,
+        .seq = requestId,
+        .flag = CLIENT_SIDE_FLAG,
+        .len = dataLen,
+    };
+
+    int32_t ret = ApplyKeyMsgHandler(channelId, requestId, &head, TEST_DATA, strlen(TEST_DATA));
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+
+    head.dataType = DATA_TYPE_AUTH;
+    head.len = sizeof(TEST_APPLY_KEY_DATA);
+    ret = ApplyKeyMsgHandler(0, requestId, &head, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
+    EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
+
+    head.dataType = DATA_TYPE_CLOSE_ACK;
+    ret = ApplyKeyMsgHandler(1, requestId, &head, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
+    EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
+}
+
+/*
+ * @tc.name: GENERATE_ACCOUNT_HASH_Test_001
+ * @tc.desc: test GenerateAccountHash function with NULL parameter
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, GENERATE_ACCOUNT_HASH_Test_001, TestSize.Level1)
+{
+    char accountHash[SHA_256_HEX_HASH_LEN] = {0};
+    char accountString[] = "test_account";
+
+    int32_t ret = GenerateAccountHash(nullptr, accountHash, SHA_256_HEX_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GenerateAccountHash(accountString, nullptr, SHA_256_HEX_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GENERATE_ACCOUNT_HASH_Test_002
+ * @tc.desc: test GenerateAccountHash function when SoftBusGenerateStrHash fails
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, GENERATE_ACCOUNT_HASH_Test_002, TestSize.Level1)
+{
+    AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
+    EXPECT_CALL(authApplyKeyMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_DECRYPT_ERR));
+    
+    char accountString[] = "test_account";
+    char accountHash[SHA_256_HEX_HASH_LEN] = {0};
+    
+    int32_t ret = GenerateAccountHash(accountString, accountHash, SHA_256_HEX_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
+}
+
+/*
+ * @tc.name: GENERATE_ACCOUNT_HASH_Test_003
+ * @tc.desc: test GenerateAccountHash function when ConvertBytesToHexString fails
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, GENERATE_ACCOUNT_HASH_Test_003, TestSize.Level1)
+{
+    AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
+    EXPECT_CALL(authApplyKeyMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_OK));
+    
+    char accountString[] = "test_account";
+    char accountHash[SHA_256_HEX_HASH_LEN - 1] = {0};
+    
+    int32_t ret = GenerateAccountHash(accountString, accountHash, SHA_256_HEX_HASH_LEN - 1);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR);
+}
+
+/*
+ * @tc.name: PROCESS_APPLY_KEY_DEVICEID_Test_001
+ * @tc.desc: test ProcessApplyKeyDeviceId function when UnpackApplyKeyAclParam fails due to invalid JSON
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, PROCESS_APPLY_KEY_DEVICEID_Test_001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t requestId = 1;
+    char testData[] = "invalid_json_data";
+    
+    int32_t ret = ProcessApplyKeyDeviceId(channelId, requestId, testData, strlen(testData));
+    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
+}
 } // namespace OHOS
