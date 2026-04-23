@@ -481,8 +481,9 @@ static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, 
     return false;
 }
 
-void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList)
+void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList, int32_t switchType)
 {
+#define BLOCK_MODE_OFFSET 12
     if (server == NULL || destroyList == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return;
@@ -494,6 +495,10 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
             sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server, NOT_MULTIPATH);
         if (destroyNode == NULL) {
+            continue;
+        }
+        if (switchType == BLOCK_MODE_OFFSET && sessionNode->role == SESSION_ROLE_SERVER) {
+            SoftBusFree(destroyNode);
             continue;
         }
         if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {

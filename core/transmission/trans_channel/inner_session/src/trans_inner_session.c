@@ -163,9 +163,14 @@ static int32_t TransOnSetChannelInfoByReqId(uint32_t reqId, int32_t channelId, i
     return g_InnerListener->OnSetChannelInfoByReqId(reqId, channelId, channelType);
 }
 
-static void TransOnLinkDownInner(const char *networkId)
+static void TransOnLinkDownInner(const char *networkId, int32_t routeType, const char *pkgName)
 {
+#define BLOCK_MODE_OFFSET 12
     (void)networkId;
+    bool isBlockMode = (bool)(((uint32_t)(routeType) >> BLOCK_MODE_OFFSET) & 0x1);
+    if (isBlockMode) {
+        TransCloseAllInnerSession(pkgName);
+    }
 }
 
 static ISessionListenerInner g_innerSessionListener = {

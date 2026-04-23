@@ -285,6 +285,7 @@ ohos_unittest("SoftbusProxyNetworkTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/proxy_channel/mock",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
@@ -628,6 +629,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel",
     "$softbus_adapter_common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
   ]
 
   deps = [
@@ -752,6 +754,7 @@ ohos_unittest("SoftbusProxyChannelManagerPagingTest") {
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel/mock",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
   ]
 
   cflags = [
@@ -896,6 +899,7 @@ ohos_unittest("TransProxySessionTest") {
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [

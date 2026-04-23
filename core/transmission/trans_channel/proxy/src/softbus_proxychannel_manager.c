@@ -52,6 +52,7 @@
 #include "trans_channel_common.h"
 #include "trans_channel_limit.h"
 #include "trans_channel_manager.h"
+#include "trans_tcp_direct_p2p.h"
 #include "trans_event.h"
 #include "trans_inner.h"
 #include "trans_log.h"
@@ -1714,6 +1715,13 @@ static AuthGenUkCallback proxyAuthGenUkCallback = {
 
 static int32_t TransHandleProxyChannelOpened(int32_t channelId, ProxyChannelInfo *chan, const AccessInfo *accessInfo)
 {
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channelId);
+        (void)TransProxyAckHandshake(chan->connId, chan, SOFTBUS_TRANS_BLOCK_MODE_REJECTED);
+        (void)OnProxyChannelClosed(channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(channelId);
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
     if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
         if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&
             chan->appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
@@ -1739,6 +1747,34 @@ static int32_t TransHandleProxyChannelOpened(int32_t channelId, ProxyChannelInfo
     return HandleProxyChanelOpened(chan, channelId);
 }
 
+static int32_t TransHandleD2DProxyChannelOpened(
+    int32_t channelId, int32_t openResult, ProxyChannelInfo *chan)
+{
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channelId);
+        (void)TransPagingAckHandshake(chan, SOFTBUS_TRANS_BLOCK_MODE_REJECTED);
+        (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
+    int32_t ret = TransProxyUpdateReplyCnt(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "TransProxyUpdateReplyCnt fail channelId=%{public}d", chan->channelId);
+        (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
+        return ret;
+    }
+    ret = TransPagingAckHandshake(chan, openResult);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL,
+            "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, chan->connId);
+        (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
+        TransProxyDelChanByChanId(chan->channelId);
+        return ret;
+    }
+    return OnProxyChannelBind(chan->channelId, &chan->appInfo);
+}
+
 int32_t TransDealProxyChannelOpenResult(
     int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
 {
@@ -1754,22 +1790,7 @@ int32_t TransDealProxyChannelOpenResult(
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     if (chan.isD2D) {
-        ret = TransProxyUpdateReplyCnt(channelId);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "TransProxyUpdateReplyCnt fail channelId=%{public}d", chan.channelId);
-            (void)OnProxyChannelClosed(chan.channelId, &(chan.appInfo));
-            TransProxyDelChanByChanId(chan.channelId);
-            return ret;
-        }
-        ret = TransPagingAckHandshake(&chan, openResult);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL,
-                "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan.channelId, chan.connId);
-            (void)OnProxyChannelClosed(chan.channelId, &(chan.appInfo));
-            TransProxyDelChanByChanId(chan.channelId);
-            return ret;
-        }
-        return OnProxyChannelBind(chan.channelId, &chan.appInfo);
+        return TransHandleD2DProxyChannelOpened(channelId, openResult, &chan);
     }
     (void)TransProxyUpdateSinkAccessInfo(channelId, accessInfo);
     ret = TransProxyGetChanByChanId(channelId, &chan);
@@ -2464,6 +2485,20 @@ static void TransNotifyOffLine(const LnnEventBasicInfo *info)
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_SLE);
 }
 
+static void TransNotifyBlockModeEnable(const LnnEventBasicInfo *info)
+{
+#define BLOCK_MODE_OFFSET 12
+    TRANS_CHECK_AND_RETURN_LOGE(info != NULL, TRANS_CTRL, "invalid Lnn info");
+    const LnnConstraintChangeEvent *event = (const LnnConstraintChangeEvent *)info;
+    bool isConstraint = event->isConstraint;
+    if (isConstraint) {
+        TransOnLinkDown("", "", "", "", ROUTE_TYPE_ALL | 1 << BLOCK_MODE_OFFSET);
+        StopP2pSessionListener();
+        ClearAllHmlListener();
+        TransCloseAllMetaSocketPacked();
+    }
+}
+
 static void TransNotifyUserSwitch(const LnnEventBasicInfo *info)
 {
 #define USER_SWITCH_OFFSET 10
@@ -2526,6 +2561,9 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "TransWifiStateChange register failed.");
 
     ret = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, TransNotifyUserSwitch);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register user switch event failed.");
+
+    ret = LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, TransNotifyBlockModeEnable);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register user switch event failed.");
 
     TRANS_LOGI(TRANS_INIT, "proxy channel init ok");
@@ -2881,7 +2919,6 @@ int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, 
         SoftBusHitraceChainEnd();
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-
     ProxyChannelInfo chan = { 0 };
     int32_t ret = TransProxyGetChanByChanId(channelId, &chan);
     if (ret != SOFTBUS_OK) {
@@ -2889,7 +2926,6 @@ int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, 
         SoftBusHitraceChainEnd();
         return ret;
     }
-
     ret = TransProxyUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "update waitOpenReplyCnt failed, channelId=%{public}d.", channelId);
@@ -2907,14 +2943,12 @@ int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, 
     if (ret != SOFTBUS_OK) {
         goto ERR_EXIT;
     }
-
     ret = OnProxyChannelOpened(channelId, &(chan.appInfo), PROXY_CHANNEL_SERVER);
     if (ret != SOFTBUS_OK) {
         goto ERR_EXIT;
     }
     SoftBusHitraceChainEnd();
     return SOFTBUS_OK;
-
 ERR_EXIT:
     (void)TransProxyAckHandshake(chan.connId, &chan, ret);
     TransProxyDelChanByChanId(channelId);

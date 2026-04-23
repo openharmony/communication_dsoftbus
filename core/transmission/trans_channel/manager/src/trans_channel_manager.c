@@ -28,6 +28,7 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 #include "message_handler.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
@@ -387,9 +388,8 @@ static void TransFreeLaneInner(uint32_t laneHandle, bool isQosLane, bool isAsync
     }
 }
 
-int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
+static int32_t TransCheckBlockStatus(const SessionParam *param, TransInfo *transInfo)
 {
-    SoftBusHitraceChainBegin("TransOpenChannel");
     if (param == NULL || transInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         SoftBusHitraceChainEnd();
@@ -400,13 +400,27 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftBusHitraceChainEnd();
         return SOFTBUS_TRANS_BIND_REQUEST_DENIED;
     }
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode: sessionId=%{public}d", param->sessionId);
+        SoftBusHitraceChainEnd();
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
+{
+    SoftBusHitraceChainBegin("TransOpenChannel");
+    int32_t ret = TransCheckBlockStatus(param, transInfo);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
     char *tmpName = NULL;
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel, sessionName=%{public}s, socket=%{public}d, actionId=%{public}d, "
                            "isQosLane=%{public}d, isAsync=%{public}d",
         AnonymizeWrapper(tmpName), param->sessionId, param->actionId, param->isQosLane, param->isAsync);
     AnonymizeFree(tmpName);
-    int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
@@ -689,13 +703,28 @@ EXIT_ERR:
     return NULL;
 }
 
+static int32_t TransCheckOpenAuthChannelBlockStatus(const char *sessionName, const ConnectOption *connOpt,
+    const ConnectParam *param)
+{
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL || param == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        SoftBusHitraceChainEnd();
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode");
+        SoftBusHitraceChainEnd();
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
     const char *reqId, const ConnectParam *param)
 {
     SoftBusHitraceChainBegin("TransOpenAuthChannel");
     int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL || param == NULL) {
-        SoftBusHitraceChainEnd();
+    if (TransCheckOpenAuthChannelBlockStatus(sessionName, connOpt, param) != SOFTBUS_OK) {
         return channelId;
     }
     char callerPkg[PKG_NAME_SIZE_MAX] = {0};

@@ -125,7 +125,7 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
             return SOFTBUS_NOT_FIND;
         }
         if (object.OnLinkDown != NULL) {
-            object.OnLinkDown(networkId);
+            object.OnLinkDown(networkId, routeType, data->msgPkgName);
         }
         return SOFTBUS_OK;
     }

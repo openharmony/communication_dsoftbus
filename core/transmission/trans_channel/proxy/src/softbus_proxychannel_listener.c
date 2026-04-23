@@ -18,6 +18,7 @@
 
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_lane_interface.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_access_token_adapter.h"
@@ -436,6 +437,10 @@ int32_t TransOpenNetWorkingChannel(
         return INVALID_CHANNEL_ID;
     }
 
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode");
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
     int32_t channelId = GenerateChannelId(false);
     if (channelId <= INVALID_CHANNEL_ID) {
         TRANS_LOGE(TRANS_CTRL, "generate channelid failed");

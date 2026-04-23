@@ -327,3 +327,15 @@ void TransD2dQosUnregisterPacked(int32_t channelId, char *sleMac, uint32_t macLe
     }
     return pfnTransEnhanceFuncList->transD2dQosUnregister(channelId, sleMac, macLen);
 }
+
+void TransCloseAllMetaSocketPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transCloseAllMetaSocket) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->transCloseAllMetaSocket();
+}

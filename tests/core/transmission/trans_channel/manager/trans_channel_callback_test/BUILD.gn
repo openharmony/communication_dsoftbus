@@ -39,6 +39,7 @@ ohos_unittest("TransChannelCallbackTest") {
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_dfx_path/interface/include/form",
     "unittest/common/",
+    "$dsoftbus_core_path/adapter/bus_center/include",
   ]
 
   deps = [

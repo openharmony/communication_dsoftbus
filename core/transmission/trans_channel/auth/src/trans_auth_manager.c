@@ -26,6 +26,7 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_net_builder.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -1474,6 +1475,24 @@ static int32_t TransSetAuthChannelReplyCnt(int32_t channelId)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
+static int32_t TransCheckBlockAndPostMsg(int32_t channelId, AuthChannelInfo *info, TransEventExtra *extra)
+{
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channelId);
+        TransPostAuthChannelErrMsg(info->authId, SOFTBUS_TRANS_BLOCK_MODE_REJECTED, "open auth channel failed");
+        TransCloseAuthChannel(channelId);
+        (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_AUTH, true);
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
+    int32_t ret = TransPostAuthChannelMsg(&info->appInfo, info->authId, AUTH_CHANNEL_REPLY);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "send reply failed, ret=%{public}d", ret);
+        TransHandleErrorAndCloseChannel(extra, info->authId, info->appInfo.linkType, info->appInfo.isClient, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pid_t callingPid)
 {
     AuthChannelInfo info;
@@ -1516,16 +1535,11 @@ int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pi
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "open auth channel failed, openResult=%{public}d", openResult);
         TransPostAuthChannelErrMsg(info.authId, openResult, "open auth channel failed");
-        TransHandleErrorAndCloseChannel(&extra, info.authId, info.appInfo.linkType, info.appInfo.isClient, openResult);
+        TransHandleErrorAndCloseChannel(
+            &extra, info.authId, info.appInfo.linkType, info.appInfo.isClient, openResult);
         return SOFTBUS_OK;
     }
-    ret = TransPostAuthChannelMsg(&info.appInfo, info.authId, AUTH_CHANNEL_REPLY);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "send reply failed, ret=%{public}d", ret);
-        TransHandleErrorAndCloseChannel(&extra, info.authId, info.appInfo.linkType, info.appInfo.isClient, ret);
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return TransCheckBlockAndPostMsg(channelId, &info, &extra);
 }
 
 static int32_t TransCheckAuthChannelOpenStatus(int32_t channelId, int32_t *curCount)

@@ -1008,9 +1008,9 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest27, TestSize.Level1)
     ClientSessionServer *server = GetNewSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName, g_pkgName, &g_sessionlistener);
     ASSERT_TRUE(server != nullptr);
     ListNode destroyList;
-    DestroyAllClientSession(nullptr, &destroyList);
-    DestroyAllClientSession(server, nullptr);
-    DestroyAllClientSession(server, &destroyList);
+    DestroyAllClientSession(nullptr, &destroyList, 0);
+    DestroyAllClientSession(server, nullptr, 0);
+    DestroyAllClientSession(server, &destroyList, 0);
     SoftBusFree(server);
     char sessionName[SESSION_NAME_SIZE_MAX + 2] = {0};
     memset_s(sessionName, sizeof(sessionName), 'A', SESSION_NAME_SIZE_MAX + 1);
@@ -1163,7 +1163,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest31, TestSize.Level1)
     EXPECT_TRUE(destroyInfo == nullptr);
     destroyInfo = CreateDestroySessionNode(sessionNode, SessionServer, NOT_MULTIPATH);
     ASSERT_TRUE(destroyInfo != nullptr);
-    ClientDestroySession(nullptr, SHUTDOWN_REASON_USER_SWICTH);
+    ClientDestroySession(nullptr, SHUTDOWN_REASON_BLOCK_MODE);
     SoftBusFree(destroyInfo);
     SoftBusFree(sessionNode);
     SoftBusFree(SessionServer);
