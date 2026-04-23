@@ -85,5 +85,9 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
 {
     return LnnCommonEventInterface()->JudgeDeviceTypeAndGetOsAccountIds();
 }
+
+void LnnUpdateConstraintMapForCurrentAccount(void)
+{
+}
 }
 } // namespace OHOS

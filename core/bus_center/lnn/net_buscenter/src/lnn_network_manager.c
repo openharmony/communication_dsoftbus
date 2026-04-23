@@ -34,6 +34,7 @@
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "lnn_connection_fsm.h"
@@ -351,7 +352,7 @@ static void NetDeviceRiskStateEventHandler(const LnnEventBasicInfo *info)
             AuthStopListening(AUTH_LINK_TYPE_WIFI);
             LnnStopPublish();
             LnnStopDiscovery();
-            RiskDeviceLeaveLnn();
+            LnnClearAllNode();
             break;
         case SOFTBUS_DEVICE_NOT_RISK:
             if (g_isDeviceRisk == true) {
@@ -362,6 +363,29 @@ static void NetDeviceRiskStateEventHandler(const LnnEventBasicInfo *info)
             break;
         default:
             break;
+    }
+}
+
+static void NetConstraintStateEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_CONSTRAINT_ENABLE) {
+        LNN_LOGE(LNN_BUILDER, "constraint state change evt handler get invalid param");
+        return;
+    }
+    const LnnConstraintChangeEvent *event = (const LnnConstraintChangeEvent *)info;
+    LNN_LOGI(LNN_BUILDER, "constraint state change, isConstraint=%{public}d", event->isConstraint);
+    if (event->isConstraint) {
+        AuthStopListening(AUTH_LINK_TYPE_WIFI);
+        LnnStopPublish();
+        LnnStopDiscovery();
+        bool addrType[CONNECTION_ADDR_MAX];
+        for (uint32_t i = 0; i < CONNECTION_ADDR_MAX; i++) {
+            addrType[i] = true;
+        }
+        (void)LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false);
+    } else {
+        NetRiskDeviceOpenAuthPort();
+        RestartCoapDiscovery();
     }
 }
 
@@ -849,6 +873,10 @@ static int32_t LnnRegisterEvent(void)
         LNN_LOGE(LNN_BUILDER, "Net regist device risk evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, NetConstraintStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist constraint evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -958,13 +986,14 @@ bool LnnIsAutoNetWorkingEnabled(void)
         LNN_LOGE(LNN_BUILDER, "Cannot get autoNetworkingSwitch from config file");
         return true;
     }
+    bool isConstraint = LnnIsOsAccountConstraint();
     LNN_LOGI(LNN_BUILDER,
         "wifi condition state:config=%{public}d, background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, "
-        "unlock=%{public}d, init check=%{public}d, DeviceRisk=%{public}d",
+        "unlock=%{public}d, init check=%{public}d, DeviceRisk=%{public}d, Constraint=%{public}d",
         isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock,
-        isInitCheckSuc, g_isDeviceRisk);
+        isInitCheckSuc, g_isDeviceRisk, isConstraint);
     return isConfigEnabled && (g_backgroundState == SOFTBUS_USER_FOREGROUND) && !g_isNightMode &&
-        g_isOOBEEnd && g_isUnLock && isInitCheckSuc && !g_isDeviceRisk;
+        g_isOOBEEnd && g_isUnLock && isInitCheckSuc && !g_isDeviceRisk && !isConstraint;
 }
 
 void LnnDeinitNetworkManager(void)
@@ -1001,6 +1030,7 @@ void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DEVICE_RISK_STATE_CHANGED, NetDeviceRiskStateEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, NetConstraintStateEventHandler);
     (void)SoftBusMutexDestroy(&g_dataShareLock);
 }
 

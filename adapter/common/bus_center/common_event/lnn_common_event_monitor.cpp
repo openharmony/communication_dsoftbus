@@ -20,6 +20,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
+#include "lnn_ohos_account_adapter.h"
 #include "power_mgr_client.h"
 #include "softbus_error_code.h"
 #include "lnn_init_monitor.h"
@@ -149,6 +150,7 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
     }
 
     if (action == CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+        LnnUpdateConstraintMapForCurrentAccount();
         LnnNotifyUserSwitchEvent(SOFTBUS_USER_SWITCHED);
     }
 }
