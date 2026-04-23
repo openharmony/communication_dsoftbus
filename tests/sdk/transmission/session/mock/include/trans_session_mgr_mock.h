@@ -56,7 +56,6 @@ public:
     virtual int32_t GetSupportTlvAndNeedAckById(
         int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck) = 0;
     virtual int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName) = 0;
-    virtual bool IsSessionExceedLimit(void) = 0;
     virtual int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D) = 0;
     virtual int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D) = 0;
     virtual int32_t ClientGetSessionNameByChannelId(
@@ -103,7 +102,6 @@ public:
     MOCK_METHOD4(GetSupportTlvAndNeedAckById, int32_t(
         int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck));
     MOCK_METHOD2(ClientGetSessionNameBySessionId, int32_t(int32_t sessionId, char *sessionName));
-    MOCK_METHOD0(IsSessionExceedLimit, bool(void));
     MOCK_METHOD3(ClientGetSessionIsD2DByChannelId, int32_t(int32_t channelId, int32_t channelType, bool *isD2D));
     MOCK_METHOD2(ClientCheckIsD2DBySessionId, int32_t(int32_t sessionId, bool *isD2D));
     MOCK_METHOD4(ClientGetSessionNameByChannelId,

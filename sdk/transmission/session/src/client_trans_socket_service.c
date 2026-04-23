@@ -271,10 +271,6 @@ static int32_t StartBindWaitTimer(int32_t socket, const QosTV qos[], uint32_t qo
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
     TRANS_LOGI(TRANS_SDK, "Bind: socket=%{public}d", socket);
-    if (IsSessionExceedLimit()) {
-        TRANS_LOGE(TRANS_SDK, "Bind failed, over session num limit");
-        return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
-    }
     int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
     if (ret == SOFTBUS_ALREADY_TRIGGERED) {
         TRANS_LOGW(TRANS_SDK, "already success, socket=%{public}d", socket);
@@ -297,10 +293,6 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
 int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
     TRANS_LOGI(TRANS_SDK, "Bind async socket=%{public}d", socket);
-    if (IsSessionExceedLimit()) {
-        TRANS_LOGE(TRANS_SDK, "Bind async failed, over session num limit");
-        return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
-    }
 
     int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
     if (ret == SOFTBUS_ALREADY_TRIGGERED) {
