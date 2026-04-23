@@ -128,6 +128,7 @@ typedef enum {
     SHUTDOWN_REASON_LINK_DOWN,     /**< Shutdown for link down */
     SHUTDOWN_REASON_USER_SWICTH,   /**< Shutdown for user switch */
     SHUTDOWN_REASON_PRIVILEGE_SHUTDOWN, /**< Shutdown for privilege shutdown */
+    SHUTDOWN_REASON_BLOCK_MODE,    /**< Shutdown for block mode */
 } ShutdownReason;
 
 /**

@@ -61,6 +61,7 @@ typedef void (*TransD2dQosUnregisterFunc)(int32_t channelId, char *sleMac, uint3
 typedef bool (*IsMultipathWhitelistFunc)(const char *processName, bool *isWhitelist);
 typedef bool (*CancelEncryptionCheckFunc)(const char *processName, pid_t callingUid);
 typedef bool (*PermissionCheckFunc)(void);
+typedef void (*TransCloseAllMetaSocketFunc)(void);
 
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
@@ -94,6 +95,7 @@ typedef struct TagTransEnhanceFuncList {
     IsMultipathWhitelistFunc isMultipathWhitelist;
     CancelEncryptionCheckFunc cancelEncryptionCheck;
     PermissionCheckFunc permissionCheck;
+    TransCloseAllMetaSocketFunc transCloseAllMetaSocket;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

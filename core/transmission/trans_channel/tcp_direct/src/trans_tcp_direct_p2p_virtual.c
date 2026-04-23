@@ -55,3 +55,8 @@ void ClearHmlListenerByUuid(const char *peerUuid)
     (void)peerUuid;
     return;
 }
+
+void ClearAllHmlListener(void)
+{
+    return;
+}

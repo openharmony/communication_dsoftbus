@@ -48,6 +48,7 @@ ohos_unittest("TransChannelManagerTest") {
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/manager/mock",
     "unittest/common/",
+    "$dsoftbus_core_path/adapter/bus_center/include",
   ]
 
   deps = [

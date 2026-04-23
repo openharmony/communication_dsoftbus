@@ -27,6 +27,7 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -1622,40 +1623,46 @@ static AuthGenUkCallback udpGenUkCallback = {
     .onGenFailed = OnUdpOnGenUkFailed,
 };
 
+static int32_t TransUdpUpdatePortAndCnt(int32_t channelId, int32_t udpPort)
+{
+    int32_t ret = TransUdpUpdateUdpPort(channelId, udpPort);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_CTRL, "get udpPort failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+    ret = TransUdpUpdateReplyCnt(channelId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
+        "update count failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+    return SOFTBUS_OK;
+}
+
 int32_t TransDealUdpChannelOpenResult(
     int32_t channelId, int32_t openResult, int32_t udpPort, const AccessInfo *accessInfo, pid_t callingPid)
 {
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
-
     int32_t ret = TransGetUdpChannelById(channelId, &channel);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-
     if (callingPid != 0 && channel.info.myData.pid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL,
-            "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
+        TRANS_LOGE(TRANS_CTRL, "pid not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
             channel.info.myData.pid, callingPid, channelId);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-
     (void)TransUdpUpdateAccessInfo(channelId, accessInfo);
-    ret = TransUdpUpdateUdpPort(channelId, udpPort);
+    ret = TransUdpUpdatePortAndCnt(channelId, udpPort);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-        TRANS_CTRL, "get udpPort failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-
+        TRANS_CTRL, "TransUdpUpdatePortAndCnt failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
     ret = TransGetUdpChannelById(channelId, &channel);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-
-    ret = TransUdpUpdateReplyCnt(channelId);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
-        "update count failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-
     char *errDesc = NULL;
     if (openResult != SOFTBUS_OK) {
         TransProcessAsyncOpenUdpChannelFailed(&channel, channelId, openResult, errDesc);
         return SOFTBUS_OK;
+    }
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channelId);
+        TransProcessAsyncOpenUdpChannelFailed(&channel, channelId, SOFTBUS_TRANS_BLOCK_MODE_REJECTED, errDesc);
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
     }
     if (GetCapabilityBit(channel.info.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
         if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&

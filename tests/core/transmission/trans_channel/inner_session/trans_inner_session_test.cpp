@@ -87,9 +87,9 @@ static int32_t OnSetChannelInfoByReqId(uint32_t reqId, int32_t channelId, int32_
     return SOFTBUS_OK;
 }
 
-static void OnLinkDown(const char *networkId)
+static void OnLinkDown(const char *networkId, int32_t routeType, const char *pkgName)
 {
-    TRANS_LOGI(TRANS_TEST, "link down, networkId=%{public}s", networkId);
+    TRANS_LOGI(TRANS_TEST, "link down, networkId=%{public}s, routeType=%{public}d", networkId, routeType);
 }
 
 static ISessionListenerInner g_innerSessionListener = {
@@ -187,7 +187,7 @@ HWTEST_F(TransInnerSessionTest, TransCreateSessionServerInnerTest001, TestSize.L
     int32_t ret = TransCreateSessionServerInner(
         PKG_NAME, SESSION_NAME, &g_innerSessionListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransOnLinkDownInner(NETWORK_ID);
+    TransOnLinkDownInner(NETWORK_ID, 1, PKG_NAME);
 }
 
 /*

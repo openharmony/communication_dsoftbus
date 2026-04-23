@@ -17,11 +17,13 @@
 
 #include <securec.h>
 
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_control.h"
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
@@ -48,6 +50,23 @@ static INetworkingListenerEntry *FindListenerEntry(const char *sessionName)
 int32_t NotifyNetworkingChannelOpened(
     const char *sessionName, int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
 {
+    if (sessionName == NULL || appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode:channelId=%{public}d", channelId);
+        ProxyChannelInfo chan = { 0 };
+        int32_t ret = TransProxyGetChanByChanId(channelId, &chan);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "TransProxyGetChanByChanId failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+        TransProxyCloseProxyChannel(channelId);
+        (void)TransProxyAckHandshake(chan.connId, &chan, SOFTBUS_TRANS_BLOCK_MODE_REJECTED);
+        (void)TransProxyOpenProxyChannelFail(channelId, appInfo, SOFTBUS_TRANS_BLOCK_MODE_REJECTED);
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
     INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
     if (entry == NULL || entry->listener.onChannelOpened == NULL) {
         TRANS_LOGE(TRANS_CTRL, "net onChannelOpened is null");
