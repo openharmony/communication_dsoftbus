@@ -17,19 +17,14 @@
 
 #include <securec.h>
 
-#include "auth_common.h"
 #include "auth_log.h"
-#include "auth_manager.h"
 #include "auth_pre_link.h"
 #include "auth_request.h"
 #include "auth_tcp_connection.h"
 #include "lnn_async_callback_utils.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_conn_interface.h"
-#include "softbus_def.h"
 #include "wifi_direct_manager.h"
 
 #define AUTH_CONN_DATA_HEAD_SIZE             24

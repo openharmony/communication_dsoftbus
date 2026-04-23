@@ -20,9 +20,7 @@
 #include "anonymizer.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_error_code.h"
 
 #define MAX_LINK_BUILD_INFO_NODE_SIZE 20
 static Map g_linkLedgerMap;

@@ -14,8 +14,8 @@
  */
 
 #include "lnn_distributed_net_ledger.h"
-#include "bus_center_manager.h"
 
+#include "bus_center_manager.h"
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 

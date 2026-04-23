@@ -23,13 +23,9 @@
 #include "bus_center_info_key.h"
 #include "parameter.h"
 #include "lnn_log.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 

@@ -13,17 +13,13 @@
  * limitations under the License.
  */
 
-#include "comm_log.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_init_monitor.h"
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
-#include "message_handler.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
-#include "softbus_type_def.h"
 
 typedef struct {
     InitDepsStatus status;

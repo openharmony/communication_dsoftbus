@@ -18,7 +18,6 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_deviceprofile.h"
@@ -27,17 +26,12 @@
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_normalize_request.h"
-#include "auth_request.h"
 #include "auth_pre_link.h"
 #include "auth_session_json.h"
 #include "auth_session_message.h"
 #include "auth_tcp_connection.h"
-#include "bus_center_adapter.h"
 #include "bus_center_manager.h"
-#include "comm_log.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "g_enhance_auth_func.h"
 #include "g_enhance_auth_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_async_callback_utils.h"
@@ -45,16 +39,9 @@
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_ohos_account_adapter.h"
-#include "lnn_ohos_account.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_base_listener.h"
-#include "softbus_def.h"
-#include "softbus_socket.h"
-#include "softbus_init_common.h"
 #include "wifi_direct_manager.h"
 
 #define AUTH_TIMEOUT_MS            (10 * 1000)

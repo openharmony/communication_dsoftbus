@@ -20,8 +20,6 @@
 #include "lnn_log.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 
 typedef enum {
     CONNID_CB_OK = 0,

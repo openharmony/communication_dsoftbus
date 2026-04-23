@@ -15,15 +15,8 @@
 
 #include "lnn_network_manager.h"
 
-#include <pthread.h>
-#include <securec.h>
-#include <unistd.h>
-
 #include "anonymizer.h"
-#include "auth_interface.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "disc_interface.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
@@ -31,20 +24,13 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_log.h"
-#include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_physical_subnet_manager.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_init_monitor.h"
-#include "lnn_network_manager.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "softbus_init_common.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","

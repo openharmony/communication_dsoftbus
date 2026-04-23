@@ -16,7 +16,6 @@
 #include "lnn_data_cloud_sync.h"
 
 #include <securec.h>
-#include <stdlib.h>
 
 #include "anonymizer.h"
 #include "g_enhance_lnn_func.h"
@@ -27,17 +26,10 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
-#include "lnn_map.h"
-#include "lnn_node_info.h"
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_error_code.h"
-#include "softbus_json_utils.h"
 #include "softbus_utils.h"
-#include "softbus_init_common.h"
 
 #define APPID                "dsoftbus"
 #define STOREID              "dsoftbus_kv_db"

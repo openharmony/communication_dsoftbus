@@ -24,7 +24,6 @@
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
 #include "wifi_direct_manager.h"
 
 static SoftBusMutex g_linkWifiDirectMutex;

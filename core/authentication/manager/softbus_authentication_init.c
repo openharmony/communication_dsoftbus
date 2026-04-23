@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "softbus_authentication_init.h"
-#include "softbus_init_common.h"
-#include "softbus_error_code.h"
 #include "comm_log.h"
 
 int32_t AuthOpenFuncInit(void *soHandle)

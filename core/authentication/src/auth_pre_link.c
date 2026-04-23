@@ -12,30 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "auth_pre_link.h"
 
 #include <securec.h>
 #include <stdatomic.h>
-#include "anonymizer.h"
 #include "auth_connection.h"
-#include "auth_deviceprofile.h"
 #include "auth_log.h"
-#include "auth_request.h"
-#include "auth_session_message.h"
-#include "bus_center_manager.h"
-#include "device_profile_listener.h"
-#include "legacy/softbus_adapter_hitrace.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "lnn_app_bind_interface.h"
-#include "lnn_decision_db.h"
-#include "lnn_heartbeat_ctrl.h"
-#include "lnn_local_net_ledger.h"
-#include "lnn_ohos_account_adapter.h"
-#include "lnn_map.h"
-#include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_init_common.h"
 #include "wifi_direct_manager.h"
 
 #define AUTH_GEN_CERT_PARA_EXPIRE_TIME 500

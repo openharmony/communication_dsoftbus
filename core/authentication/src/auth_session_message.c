@@ -15,7 +15,6 @@
 
 #include "auth_session_message.h"
 
-#include <math.h>
 #include <securec.h>
 
 #include "anonymizer.h"
@@ -24,31 +23,16 @@
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_request.h"
 #include "auth_session_json.h"
 #include "bus_center_manager.h"
-#include "lnn_common_utils.h"
 #include "lnn_compress.h"
 #include "lnn_event.h"
-#include "lnn_extdata_config.h"
-#include "lnn_feature_capability.h"
 #include "lnn_lane_link.h"
-#include "lnn_lane_listener.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_network_manager.h"
-#include "lnn_node_info.h"
 #include "lnn_trans_lane.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_socket.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_config_type.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "softbus_socket.h"
-#include "wifi_direct_manager.h"
 
 #define FLAG_COMPRESS_DEVICE_INFO   1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0

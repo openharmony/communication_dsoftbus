@@ -18,7 +18,6 @@
 #include <securec.h>
 #include <stdatomic.h>
 
-#include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_hichain.h"
 #include "auth_log.h"
@@ -26,7 +25,6 @@
 #include "device_auth.h"
 #include "device_auth_defines.h"
 #include "lnn_ohos_account_adapter.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 

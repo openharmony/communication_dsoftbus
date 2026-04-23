@@ -16,7 +16,6 @@
 #include "lnn_heartbeat_fsm.h"
 
 #include <securec.h>
-#include <string.h>
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
@@ -24,21 +23,13 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
-#include "lnn_node_info.h"
-#include "message_handler.h"
 
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
-#include "softbus_utils.h"
 
 #define TO_HEARTBEAT_FSM(ptr) CONTAINER_OF(ptr, LnnHeartbeatFsm, fsm)
 

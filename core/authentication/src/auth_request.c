@@ -20,7 +20,6 @@
 #include "auth_common.h"
 #include "auth_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
 
 static ListNode g_authRequestList = { &g_authRequestList, &g_authRequestList };
 

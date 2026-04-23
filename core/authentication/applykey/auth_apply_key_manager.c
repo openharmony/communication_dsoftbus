@@ -30,9 +30,7 @@
 #include "lnn_decision_db.h"
 #include "lnn_map.h"
 #include "lnn_ohos_account_adapter.h"
-#include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_init_common.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
