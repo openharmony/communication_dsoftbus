@@ -66,6 +66,7 @@ typedef enum {
     LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
     LNN_EVENT_DEVICE_RISK_STATE_CHANGED,
     LNN_EVENT_HA_LEAVE_META_NODE,
+    LNN_EVENT_CONSTRAINT_ENABLE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -339,6 +340,12 @@ typedef struct {
     LnnEventBasicInfo basic;
     int32_t type;
 } LnnHBInfoUpdateChangedEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    bool isConstraint;
+} LnnConstraintChangeEvent;
+
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 #ifdef __cplusplus
