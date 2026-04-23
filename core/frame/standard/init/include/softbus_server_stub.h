@@ -17,6 +17,7 @@
 #define SOFTBUS_SERVER_STUB_H_
 
 #include <map>
+#include <set>
 #include "if_softbus_server.h"
 #include "iremote_stub.h"
 #include "bus_center_manager.h"
@@ -99,15 +100,18 @@ private:
     int32_t StartAccountAuthInner(MessageParcel &data, MessageParcel &reply);
     int32_t ProcessAccountAuthInner(MessageParcel &data, MessageParcel &reply);
     int32_t PermissionVerify(uint32_t code);
+    int32_t CheckPermission(uint32_t code);
+    int32_t CheckAccountConstraint(uint32_t code);
 
     void InitMemberFuncMap();
     void InitMemberPermissionMap();
-    void InitPackNameMap();
+    void InitMemberConstraintSet();
 
     using SoftbusServerStubFunc =
         int32_t (SoftBusServerStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftbusServerStubFunc> memberFuncMap_;
     std::map<uint32_t, const char*> memberPermissionMap_;
+    std::set<uint32_t> memberConstraintSet_;
 };
 } // namespace OHOS
 

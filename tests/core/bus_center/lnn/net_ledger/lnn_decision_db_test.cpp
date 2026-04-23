@@ -405,7 +405,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_011, TestSize.Level1)
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_012, TestSize.Level1)
 {
     NiceMock<DecisionDbDepsInterfaceMock> decisionDbMock;
-    int64_t nowTime = 10000000;
     int64_t hukTime = 0;
     ON_CALL(decisionDbMock, LnnGenerateRandomByHuks(_, _))
         .WillByDefault(Return(SOFTBUS_OK));
@@ -678,7 +677,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_017, TestSize.Level1)
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_018, TestSize.Level1)
 {
     NiceMock<DecisionDbDepsInterfaceMock> decisionDbMock;
-    int64_t nowTime = 10000000;
     ON_CALL(decisionDbMock, LnnGetLocalDevInfo(_))
         .WillByDefault(Return(SOFTBUS_NOT_IMPLEMENT));
     ON_CALL(decisionDbMock, LnnRetrieveDeviceData(LNN_DATA_TYPE_REMOTE_DEVINFO, _, _))
@@ -735,7 +733,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_018, TestSize.Level1)
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_019, TestSize.Level1)
 {
     NiceMock<DecisionDbDepsInterfaceMock> decisionDbMock;
-    int64_t nowTime = 10000000;
     ON_CALL(decisionDbMock, LnnGetLocalDevInfo(_)).WillByDefault(Return(SOFTBUS_NOT_IMPLEMENT));
     ON_CALL(decisionDbMock, LnnRetrieveDeviceData(LNN_DATA_TYPE_REMOTE_DEVINFO, _, _))
         .WillByDefault(Return(SOFTBUS_OK));
@@ -847,7 +844,6 @@ HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_020, TestSize.Level1)
 HWTEST_F(LNNDbMockTest, LNN_INIT_DECISION_DB_DELAY_Test_021, TestSize.Level1)
 {
     NiceMock<DecisionDbDepsInterfaceMock> decisionDbMock;
-    int64_t nowTime = 10000000;
     int64_t hukTime = 0;
     ON_CALL(decisionDbMock, LnnGenerateRandomByHuks(_, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(decisionDbMock, LnnGenerateCeKeyByHuks(_, _)).WillByDefault(Return(SOFTBUS_OK));

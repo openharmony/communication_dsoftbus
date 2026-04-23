@@ -134,10 +134,10 @@ bool IsHeartbeatEnable(void)
         g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
     bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
     bool isDeviceRisk = g_hbConditionState.deviceRiskState == SOFTBUS_DEVICE_IS_RISK;
-
+    bool isConstraint = LnnIsOsAccountConstraint();
     return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
         (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
-        isInitCheckSuc && !isDeviceRisk;
+        isInitCheckSuc && !isDeviceRisk && !isConstraint;
 }
 
 bool IsHeartbeatEnableForMcu(void)
@@ -429,34 +429,14 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
     }
 }
 
-int32_t RiskDeviceLeaveLnn(void)
+int32_t LnnClearAllNode(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "enter RiskDeviceLeaveLnn");
-    int32_t i = 0;
-    int32_t infoNum = 0;
-    NodeBasicInfo *info = NULL;
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
-        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    bool addrType[CONNECTION_ADDR_MAX];
+    for (uint32_t i = 0; i < CONNECTION_ADDR_MAX; i++) {
+        addrType[i] = true;
     }
-    if (info == NULL || infoNum == 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
-        return SOFTBUS_NO_ONLINE_DEVICE;
-    }
-    int32_t ret;
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    for (i = 0; i < infoNum; ++i) {
-        ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
-        if (ret != SOFTBUS_OK) {
-            continue;
-        }
-        LNN_LOGI(LNN_HEART_BEAT, "device is risk, need to offline");
-        LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_NOT_TRUST);
-        AuthRemoveDeviceKeyByUdidPacked(nodeInfo.deviceInfo.deviceUdid);
-    }
-    SoftBusFree(info);
-    return SOFTBUS_OK;
+    LNN_LOGI(LNN_HEART_BEAT, "Lnn clear all nodes");
+    return LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false);
 }
 
 static int32_t HbHandleLeaveLnn(void)
@@ -756,7 +736,7 @@ static void HbDeviceRiskStateEventHandler(const LnnEventBasicInfo *info)
             if (g_hbConditionState.deviceRiskState != SOFTBUS_DEVICE_IS_RISK) {
                 g_hbConditionState.deviceRiskState = deviceRiskState;
                 HbConditionChanged(false);
-                RiskDeviceLeaveLnn();
+                LnnClearAllNode();
             } else {
                 LNN_LOGI(LNN_HEART_BEAT, "deviceRiskState is risk");
             }
@@ -772,6 +752,22 @@ static void HbDeviceRiskStateEventHandler(const LnnEventBasicInfo *info)
         default:
             LNN_LOGE(LNN_HEART_BEAT, "error deviceRiskState");
             break;
+    }
+}
+
+static void HbConstraintStateChangeHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_CONSTRAINT_ENABLE) {
+        LNN_LOGE(LNN_HEART_BEAT, "constraint state change evt handler get invalid param");
+        return;
+    }
+    const LnnConstraintChangeEvent *event = (const LnnConstraintChangeEvent *)info;
+    LNN_LOGI(LNN_HEART_BEAT, "constraint state change, isConstraint=%{public}d", event->isConstraint);
+    if (event->isConstraint) {
+        HbConditionChanged(false);
+        LnnClearAllNode();
+    } else {
+        HbConditionChanged(false);
     }
 }
 
@@ -1142,13 +1138,14 @@ static void DumpHeartbeatEnableInfo(void)
         g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
     bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
     bool isDeviceRisk = g_hbConditionState.deviceRiskState == SOFTBUS_DEVICE_IS_RISK;
-
+    bool isConstraint = LnnIsOsAccountConstraint();
     LNN_LOGI(LNN_INIT,
         "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
         "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
-        "request=%{public}d, init check=%{public}d, deviceRisk=%{public}d",
+        "request=%{public}d, init check=%{public}d, deviceRisk=%{public}d, constraint=%{public}d",
         isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
-        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc, isDeviceRisk);
+        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc, isDeviceRisk,
+        isConstraint);
 }
 
 static void PeriodDumpLocalInfo(void *para)
@@ -1478,6 +1475,8 @@ static int32_t LnnRegisterCommonEvent(void)
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist sle state change evt handler fail");
     ret = LnnRegisterEventHandler(LNN_EVENT_DEVICE_RISK_STATE_CHANGED, HbDeviceRiskStateEventHandler);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist device risk state evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, HbConstraintStateChangeHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist constraint state evt handler fail");
     return SOFTBUS_OK;
 }
 
@@ -1603,6 +1602,7 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler);
     LnnUnregisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, HbSleStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DEVICE_RISK_STATE_CHANGED, HbDeviceRiskStateEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, HbConstraintStateChangeHandler);
 }
 
 int32_t LnnTriggerDataLevelHeartbeat(void)

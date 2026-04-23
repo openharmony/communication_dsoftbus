@@ -2494,4 +2494,129 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest064, TestSize.Level1)
     ret = softBusServer->ProcessAccountAuthInner(data, reply);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: InitMemberConstraintSetTest001
+ * @tc.desc: Verify InitMemberConstraintSet initializes constraint set with expected codes
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, InitMemberConstraintSetTest001, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    EXPECT_GT(softBusServer->memberConstraintSet_.size(), 0u);
+
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_JOIN_LNN) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_LEAVE_LNN) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SET_NODE_DATA_CHANGE_FLAG) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_GET_NODE_KEY_INFO) > 0);
+}
+
+/*
+ * @tc.name: InitMemberConstraintSetTest002
+ * @tc.desc: Verify constraint set contains additional expected codes
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, InitMemberConstraintSetTest002, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_GET_NODE_KEY_INFO) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SET_NODE_DATA_CHANGE_FLAG) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SHIFT_LNN_GEAR) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_ACTIVE_META_NODE) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_DEACTIVE_META_NODE) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_GET_ALL_META_NODE_INFO) > 0);
+}
+
+/*
+ * @tc.name: InitMemberConstraintSetTest003
+ * @tc.desc: Verify constraint set contains data level codes
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, InitMemberConstraintSetTest003, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SET_DATA_LEVEL) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_REG_DATA_LEVEL_CHANGE_CB) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_UNREG_DATA_LEVEL_CHANGE_CB) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SYNC_TRUSTED_RELATION) > 0);
+}
+
+/*
+ * @tc.name: CheckAccountConstraintTest001
+ * @tc.desc: Verify CheckAccountConstraint returns SOFTBUS_OK when constraint is not enabled
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckAccountConstraintTest001, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    int32_t ret = softBusServer->CheckAccountConstraint(SERVER_JOIN_LNN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = softBusServer->CheckAccountConstraint(SERVER_PUBLISH_LNN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = softBusServer->CheckAccountConstraint(SERVER_REFRESH_LNN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: CheckAccountConstraintTest002
+ * @tc.desc: Verify CheckAccountConstraint returns SOFTBUS_OK for codes not in constraint set
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckAccountConstraintTest002, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    int32_t ret = softBusServer->CheckAccountConstraint(99999);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = softBusServer->CheckAccountConstraint(0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: CheckAccountConstraintTest003
+ * @tc.desc: Verify CheckAccountConstraint returns SOFTBUS_OK for all constraint codes when not enabled
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckAccountConstraintTest003, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    for (uint32_t code : softBusServer->memberConstraintSet_) {
+        int32_t ret = softBusServer->CheckAccountConstraint(code);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+}
+
+/*
+ * @tc.name: ConstraintSetSizeTest001
+ * @tc.desc: Verify constraint set has expected number of entries
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, ConstraintSetSizeTest001, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    EXPECT_EQ(softBusServer->memberConstraintSet_.size(), 12u);
+}
 }

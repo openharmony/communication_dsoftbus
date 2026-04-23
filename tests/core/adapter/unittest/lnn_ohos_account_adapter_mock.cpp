@@ -14,6 +14,7 @@
  */
 
 #include "lnn_ohos_account_adapter_mock.h"
+#include "bus_center_event.h"
 
 OHOS::AccountSA::OhosAccountKits &OHOS::AccountSA::OhosAccountKits::GetInstance()
 {
@@ -47,7 +48,7 @@ int32_t OHOS::AccountSA::OhosAccountKits::GetOsAccountDistributedInfo(int32_t lo
 {
     auto mock = OHOS::AccountSA::OhosAccountKitsMock::GetMock();
     if (mock == nullptr) {
-        return -1;
+        return OHOS::ERR_INVALID_OPERATION;
     }
     return mock->GetOsAccountDistributedInfo(localId, accountInfo);
 }
@@ -65,7 +66,7 @@ int32_t OHOS::AccountSA::OhosAccountKits::LnnGetLocalNumU64Info(InfoKey key, uin
 {
     auto mock = OHOS::AccountSA::OhosAccountKitsMock::GetMock();
     if (mock == nullptr) {
-        return -1;
+        return OHOS::ERR_INVALID_OPERATION;
     }
     return mock->LnnGetLocalNumU64Info(key, info);
 }
@@ -95,11 +96,18 @@ bool IsSameAccountGroupDevice(void)
 
 } // namespace OHOS::AccountSA
 
+extern "C" {
+void LnnNotifyConstraintStateChangeEvent(bool isConstraint)
+{
+    (void)isConstraint;
+}
+} // extern "C"
+
 OHOS::ErrCode OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t> &ids)
 {
     auto mock = OHOS::AccountSA::OsAccountManagerMock::GetMock();
     if (mock == nullptr) {
-        return -1;
+        return OHOS::ERR_INVALID_OPERATION;
     }
     return mock->QueryActiveOsAccountIds(ids);
 }
@@ -108,9 +116,48 @@ OHOS::ErrCode OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(const int32
 {
     auto mock = OHOS::AccountSA::OsAccountManagerMock::GetMock();
     if (mock == nullptr) {
-        return -1;
+        return OHOS::ERR_INVALID_OPERATION;
     }
     return mock->IsOsAccountVerified(id, isVerified);
+}
+
+OHOS::ErrCode OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromProcess(int32_t &id)
+{
+    auto mock = OHOS::AccountSA::OsAccountManagerMock::GetMock();
+    if (mock == nullptr) {
+        return OHOS::ERR_INVALID_OPERATION;
+    }
+    return mock->GetOsAccountLocalIdFromProcess(id);
+}
+
+OHOS::ErrCode OHOS::AccountSA::OsAccountManager::CheckOsAccountConstraintEnabled(
+    int32_t id, const std::string &constraint, bool &isEnabled)
+{
+    auto mock = OHOS::AccountSA::OsAccountManagerMock::GetMock();
+    if (mock == nullptr) {
+        return OHOS::ERR_INVALID_OPERATION;
+    }
+    return mock->CheckOsAccountConstraintEnabled(id, constraint, isEnabled);
+}
+
+OHOS::ErrCode OHOS::AccountSA::OsAccountManager::SubscribeOsAccountConstraints(
+    const std::shared_ptr<OsAccountConstraintSubscriber> &subscriber)
+{
+    auto mock = OHOS::AccountSA::OsAccountManagerMock::GetMock();
+    if (mock == nullptr) {
+        return OHOS::ERR_INVALID_OPERATION;
+    }
+    return mock->SubscribeOsAccountConstraints(subscriber);
+}
+
+OHOS::ErrCode OHOS::AccountSA::OsAccountManager::UnsubscribeOsAccountConstraints(
+    const std::shared_ptr<OsAccountConstraintSubscriber> &subscriber)
+{
+    auto mock = OHOS::AccountSA::OsAccountManagerMock::GetMock();
+    if (mock == nullptr) {
+        return OHOS::ERR_INVALID_OPERATION;
+    }
+    return mock->UnsubscribeOsAccountConstraints(subscriber);
 }
 
 namespace OHOS::AccountSA {

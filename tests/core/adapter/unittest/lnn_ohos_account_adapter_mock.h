@@ -23,6 +23,7 @@
 
 #include "account_info.h"
 #include "bus_center_info_key_struct.h"
+#include "os_account_constraint_subscriber.h"
 
 namespace OHOS::AccountSA {
 class OhosAccountKits {
@@ -65,6 +66,13 @@ public:
 
     virtual OHOS::ErrCode QueryActiveOsAccountIds(std::vector<int32_t> &ids);
     virtual OHOS::ErrCode IsOsAccountVerified(const int32_t id, bool &isVerified);
+    virtual OHOS::ErrCode GetOsAccountLocalIdFromProcess(int32_t &id);
+    virtual OHOS::ErrCode CheckOsAccountConstraintEnabled(
+        int32_t id, const std::string &constraint, bool &isEnabled);
+    virtual OHOS::ErrCode SubscribeOsAccountConstraints(
+        const std::shared_ptr<OsAccountConstraintSubscriber> &subscriber);
+    virtual OHOS::ErrCode UnsubscribeOsAccountConstraints(
+        const std::shared_ptr<OsAccountConstraintSubscriber> &subscriber);
 };
 
 class OsAccountManagerMock : public AccountSA::OsAccountManager {
@@ -73,6 +81,13 @@ public:
     ~OsAccountManagerMock() override;
     MOCK_METHOD1(QueryActiveOsAccountIds, OHOS::ErrCode(std::vector<int32_t> &ids));
     MOCK_METHOD2(IsOsAccountVerified, OHOS::ErrCode(const int32_t id, bool &isVerified));
+    MOCK_METHOD1(GetOsAccountLocalIdFromProcess, OHOS::ErrCode(int32_t &id));
+    MOCK_METHOD3(CheckOsAccountConstraintEnabled,
+        OHOS::ErrCode(int32_t id, const std::string &constraint, bool &isEnabled));
+    MOCK_METHOD1(SubscribeOsAccountConstraints,
+        OHOS::ErrCode(const std::shared_ptr<OsAccountConstraintSubscriber> &subscriber));
+    MOCK_METHOD1(UnsubscribeOsAccountConstraints,
+        OHOS::ErrCode(const std::shared_ptr<OsAccountConstraintSubscriber> &subscriber));
 
     static OsAccountManagerMock *GetMock()
     {

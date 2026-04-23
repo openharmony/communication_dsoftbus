@@ -50,5 +50,15 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
 {
     return GetLnnHeatbeatDeviceRiskInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
+
+int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
+{
+    return GetLnnHeatbeatDeviceRiskInterface()->LnnRequestLeaveByAddrType(type, typeLen, hasMcuRequestDisable);
+}
+
+bool LnnIsOsAccountConstraint(void)
+{
+    return GetLnnHeatbeatDeviceRiskInterface()->LnnIsOsAccountConstraint();
+}
 }
 } // namespace OHOS

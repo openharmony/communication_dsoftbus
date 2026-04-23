@@ -299,9 +299,24 @@ int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
     return GetDecisionDbDepsInterface()->SelectAllAcl(trustedInfoArray, num);
 }
 
+void LnnNotifyLpMcuUpdateHbInfo(int32_t type)
+{
+    return GetDecisionDbDepsInterface()->LnnNotifyLpMcuUpdateHbInfo(type);
+}
+
+bool LnnIsLocalSupportMcuFeature(void)
+{
+    return GetDecisionDbDepsInterface()->LnnIsLocalSupportMcuFeature();
+}
+
 void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy)
 {
     return GetDecisionDbDepsInterface()->LnnNotifyLpMcuInit(state, strategy);
+}
+
+bool LnnIsOsAccountConstraint(void)
+{
+    return GetDecisionDbDepsInterface()->LnnIsOsAccountConstraint();
 }
 } // extern "C"
 } // namespace OHOS

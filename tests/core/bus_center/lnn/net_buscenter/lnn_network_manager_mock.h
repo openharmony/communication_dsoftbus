@@ -62,6 +62,8 @@ public:
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual int32_t LnnInitDeviceNameMonitorImpl(void) = 0;
     virtual int32_t RegistUsbProtocolManager(void) = 0;
+    virtual bool LnnIsOsAccountConstraint(void) = 0;
+    virtual int32_t LnnClearAllNode(void) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -91,6 +93,8 @@ public:
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD0(LnnInitDeviceNameMonitorImpl, int32_t(void));
     MOCK_METHOD0(RegistUsbProtocolManager, int32_t(void));
+    MOCK_METHOD0(LnnIsOsAccountConstraint, bool(void));
+    MOCK_METHOD0(LnnClearAllNode, int32_t(void));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H
