@@ -18,20 +18,12 @@
 #include <securec.h>
 
 #include "auth_channel.h"
-#include "auth_common.h"
 #include "auth_log.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
-#include "g_enhance_auth_func.h"
 #include "g_enhance_auth_func_pack.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
-#include "softbus_def.h"
-#include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
-#include "softbus_init_common.h"
-#include "trans_lane_manager.h"
 
 #define MAGIC_NUMBER             0xBABEFACE
 #define AUTH_PKT_HEAD_LEN        24

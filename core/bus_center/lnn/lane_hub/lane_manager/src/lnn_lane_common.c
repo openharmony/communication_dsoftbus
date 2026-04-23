@@ -17,14 +17,7 @@
 
 #include <securec.h>
 
-#include "lnn_lane_def.h"
-#include "lnn_lane_interface.h"
-#include "lnn_lane_link.h"
 #include "lnn_log.h"
-#include "lnn_map.h"
-#include "message_handler.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 
 #define UINT_TO_STR_MAX_LEN 11
 

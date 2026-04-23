@@ -16,20 +16,11 @@
 #include "lnn_coap_discovery_impl.h"
 
 #include <securec.h>
-#include <unistd.h>
 
 #include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "lnn_log.h"
-#include "softbus_adapter_crypto.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
-#include "softbus_init_common.h"
 
 #define LNN_DISC_CAPABILITY "ddmpCapability"
 #define LNN_SUBSCRIBE_ID 0

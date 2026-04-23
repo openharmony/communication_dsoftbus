@@ -15,37 +15,21 @@
 
 #include "lnn_local_net_ledger.h"
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <securec.h>
-
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_file_utils.h"
-#include "lnn_log.h"
 #include "lnn_net_ledger.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_crypto.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_range.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
-#include "softbus_init_common.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_init_monitor.h"
-#include "lnn_net_ledger.h"
 #include "lnn_sle_capability.h"
 
 #define SOFTBUS_VERSION "hm.1.0.0"

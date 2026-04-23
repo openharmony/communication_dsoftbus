@@ -13,34 +13,17 @@
  * limitations under the License.
  */
 
-#include <securec.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "anonymizer.h"
-#include "auth_interface.h"
-#include "bus_center_adapter.h"
 #include "bus_center_event.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "disc_interface.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_common_utils.h"
 #include "lnn_connection_fsm.h"
-#include "lnn_discovery_manager.h"
 #include "lnn_ip_utils_adapter.h"
-#include "lnn_linkwatch.h"
 #include "lnn_local_net_ledger_struct.h"
 #include "lnn_log.h"
-#include "lnn_net_builder.h"
-#include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager.h"
-#include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_common.h"
-#include "softbus_def.h"
-#include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 
 #define IP_DEFAULT_PORT 0

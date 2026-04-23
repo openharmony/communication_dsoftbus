@@ -15,38 +15,25 @@
 
 #include "lnn_net_ledger.h"
 
-#include <string.h>
 #include <securec.h>
 #include "anonymizer.h"
 
-#include "auth_interface.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "g_enhance_auth_func.h"
 #include "g_enhance_auth_func_pack.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_event_monitor.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability.h"
 #include "lnn_file_utils.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_net_builder.h"
-#include "lnn_p2p_info.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_init_monitor.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "softbus_init_common.h"
 
 #define RETRY_TIMES                      5
 #define DELAY_REG_DP_TIME                1000

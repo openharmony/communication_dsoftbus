@@ -18,11 +18,9 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_common.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
 
 #define UDID_SHORT_HASH_STR 16
 

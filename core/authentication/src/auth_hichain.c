@@ -29,8 +29,6 @@
 #include "lnn_event.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_json_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"

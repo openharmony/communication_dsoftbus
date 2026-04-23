@@ -16,16 +16,11 @@
 #include "lnn_lane_query.h"
 
 #include <securec.h>
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_communication_capability.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_lane_link.h"
-#include "softbus_bus_center.h"
-#include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 

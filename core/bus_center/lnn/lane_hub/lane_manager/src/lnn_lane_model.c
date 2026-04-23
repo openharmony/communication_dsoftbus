@@ -17,15 +17,9 @@
 
 #include <securec.h>
 
-#include "common_list.h"
-#include "lnn_lane.h"
 #include "lnn_lane_common.h"
-#include "lnn_lane_def.h"
 #include "lnn_log.h"
-#include "lnn_map.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 
 #define LINK_TYPE_SHIFT 26
 #define TRANS_TYPE_SHIFT 22

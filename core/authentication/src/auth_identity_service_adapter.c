@@ -20,7 +20,6 @@
 #include "auth_log.h"
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
-#include "device_auth.h"
 #include "device_auth_defines.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"

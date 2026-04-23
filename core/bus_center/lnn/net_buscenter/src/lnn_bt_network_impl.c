@@ -14,21 +14,15 @@
  */
 
 #include <securec.h>
-#include <string.h>
 
 #include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
-#include "lnn_network_manager.h"
-#include "lnn_node_info_struct.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define LNN_BT_PROTOCOL_PRI 10

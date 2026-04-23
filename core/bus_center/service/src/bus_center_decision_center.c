@@ -15,18 +15,14 @@
 
 #include "bus_center_decision_center.h"
 
-#include <stdbool.h>
 #include <securec.h>
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_log.h"
 #include "lnn_net_builder.h"
-#include "lnn_ranging_manager.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define HCI_ERR_BR_CONN_PAGE_TIMEOUT 0x04

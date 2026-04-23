@@ -17,18 +17,10 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "cJSON.h"
-#include "comm_log.h"
-#include "common_list.h"
-#include "permission_utils.h"
 #include "regex.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_json_utils.h"
-#include "softbus_permission.h"
 #include "softbus_utils.h"
 
 #define ENFORCING 1

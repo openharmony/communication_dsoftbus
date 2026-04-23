@@ -15,28 +15,15 @@
 
 #include "lnn_distributed_net_ledger_common.h"
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "bus_center_manager.h"
-#include "g_enhance_auth_func.h"
 #include "g_enhance_auth_func_pack.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "g_enhance_auth_func_pack.h"
-#include "lnn_node_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_log.h"
-#include "lnn_node_info.h"
-#include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "softbus_init_common.h"
 #define INVALID_META_TYPE (-1)
 static uint64_t GetCurrentTime(void)
 {

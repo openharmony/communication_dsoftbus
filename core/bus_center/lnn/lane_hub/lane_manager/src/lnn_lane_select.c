@@ -19,17 +19,11 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "common_list.h"
-#include "lnn_common_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_select_rule.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 

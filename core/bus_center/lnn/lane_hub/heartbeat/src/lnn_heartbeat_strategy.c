@@ -18,21 +18,12 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "common_list.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_heartbeat_fsm.h"
-#include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 
-#include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_feature_capability.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_error_code.h"
 
 #define HB_GEARMODE_MAX_SET_CNT        100
 #define HB_DUMP_GEAR_MODE_LIST_MAX_NUM 10

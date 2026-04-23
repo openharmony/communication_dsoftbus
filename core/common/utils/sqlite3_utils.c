@@ -16,7 +16,6 @@
 #include "sqlite3_utils.h"
 
 #include <securec.h>
-#include <string.h>
 #include <sys/stat.h>
 
 #include "comm_log.h"
