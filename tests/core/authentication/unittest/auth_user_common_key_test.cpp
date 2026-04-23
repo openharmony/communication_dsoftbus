@@ -615,4 +615,139 @@ HWTEST_F(AuthUserCommonKeyTest, AUTH_USER_KEY_CLIENT_MODE_TEST_001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND);
     DeinitUserKeyList();
 }
+/*
+ * @tc.name: GET_USERKEY_INFO_GROUP_SHARE_Test_001
+ * @tc.desc: Test GetUserKeyInfoGroupShare via refactored GetUserKeyInfoByFilter
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_GROUP_SHARE_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthUserKeyInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthACLInfo aclInfo = {
+        .isServer = false,
+        .sinkUserId = 700,
+        .sourceUserId = 701,
+        .sourceTokenId = 702,
+        .sinkTokenId = 703,
+    };
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthUserKeyInfo userKeyInfo = {};
+    ret = GetUserKeyInfoGroupShare(nullptr, &userKeyInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetUserKeyInfoGroupShare(&aclInfo, &userKeyInfo);
+    EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND);
+    DeinitUserKeyList();
+}
+
+/*
+ * @tc.name: GET_USERKEY_INFO_GROUP_SHARE_Test_002
+ * @tc.desc: Test GetUserKeyInfoGroupShare inserts and retrieves share key
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_GROUP_SHARE_Test_002, TestSize.Level1)
+{
+    int32_t ret = AuthUserKeyInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthACLInfo aclInfo = {
+        .isServer = false,
+        .sinkUserId = 800,
+        .sourceUserId = 801,
+        .sourceTokenId = 802,
+        .sinkTokenId = 803,
+    };
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthUserKeyInfo userKeyInfo = {
+        .keyLen = SESSION_KEY_LENGTH,
+        .time = 54321,
+        .keyIndex = 10,
+    };
+    ret = AuthInsertUserKey(&aclInfo, &userKeyInfo, true, DP_BIND_TYPE_SHARE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthUserKeyInfo resultInfo = {};
+    ret = GetUserKeyInfoGroupShare(&aclInfo, &resultInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(resultInfo.keyIndex, 10);
+    DeinitUserKeyList();
+}
+
+/*
+ * @tc.name: GET_USERKEY_INFO_SAME_ACCOUNT_REFINED_Test_001
+ * @tc.desc: Test refactored GetUserKeyInfoSameAccount via FilterSameAccount
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_SAME_ACCOUNT_REFINED_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthUserKeyInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthACLInfo aclInfo = {
+        .isServer = false,
+        .sinkUserId = 900,
+        .sourceUserId = 901,
+        .sourceTokenId = 902,
+        .sinkTokenId = 903,
+    };
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthUserKeyInfo userKeyInfo = {
+        .keyLen = SESSION_KEY_LENGTH,
+        .time = 99999,
+        .keyIndex = 20,
+    };
+    ret = AuthInsertUserKey(&aclInfo, &userKeyInfo, false, DP_BIND_TYPE_DIFF_ACCOUNT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthUserKeyInfo resultInfo = {};
+    ret = GetUserKeyInfoSameAccount(&aclInfo, &resultInfo);
+    EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND);
+    DeinitUserKeyList();
+}
+
+/*
+ * @tc.name: GET_USERKEY_INFO_DIFF_ACCOUNT_REFINED_Test_001
+ * @tc.desc: Test refactored GetUserKeyInfoDiffAccount rejects non-diff-account bind type
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_REFINED_Test_001, TestSize.Level1)
+{
+    int32_t ret = AuthUserKeyInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthACLInfo aclInfo = {
+        .isServer = false,
+        .sinkUserId = 910,
+        .sourceUserId = 911,
+        .sourceTokenId = 912,
+        .sinkTokenId = 913,
+    };
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
+    EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthUserKeyInfo userKeyInfo = {
+        .keyLen = SESSION_KEY_LENGTH,
+        .time = 77777,
+        .keyIndex = 30,
+    };
+    ret = AuthInsertUserKey(&aclInfo, &userKeyInfo, false, DP_BIND_TYPE_SAME_ACCOUNT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    AuthUserKeyInfo resultInfo = {};
+    ret = GetUserKeyInfoDiffAccount(&aclInfo, &resultInfo);
+    EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND);
+    DeinitUserKeyList();
+}
 } // namespace OHOS

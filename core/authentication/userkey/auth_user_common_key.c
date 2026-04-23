@@ -228,7 +228,11 @@ void DelUserKeyByNetworkId(const char *networkId)
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
 }
 
-int32_t GetUserKeyInfoDiffAccountWithUserLevel(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo)
+typedef bool (*AclMatchFunc)(const AuthACLInfo *aclInfo, const AuthACLInfo *itemAcl, bool isSameSide);
+typedef bool (*KeyFilterFunc)(const UserKeyInfo *item, const AuthACLInfo *aclInfo, AclMatchFunc matchFunc);
+
+static int32_t GetUserKeyInfoByFilter(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo,
+    KeyFilterFunc filterFunc, AclMatchFunc matchFunc)
 {
     if (aclInfo == NULL || userKeyInfo == NULL) {
         AUTH_LOGE(AUTH_KEY, "param error");
@@ -238,16 +242,13 @@ int32_t GetUserKeyInfoDiffAccountWithUserLevel(const AuthACLInfo *aclInfo, AuthU
         AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
         return SOFTBUS_NO_INIT;
     }
-    const UserKeyInfo *item = NULL;
-
     if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_KEY, "get user key lock fail");
         return SOFTBUS_LOCK_ERR;
     }
+    const UserKeyInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
-        if (!item->isUserBindLevel || item->bindType != DP_BIND_TYPE_DIFF_ACCOUNT ||
-            !CompareByAclDiffAccountWithUserLevel(
-                aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
+        if (!filterFunc(item, aclInfo, matchFunc)) {
             continue;
         }
         if (memcpy_s(userKeyInfo, sizeof(AuthUserKeyInfo), &item->ukInfo, sizeof(AuthUserKeyInfo)) != EOK) {
@@ -255,126 +256,77 @@ int32_t GetUserKeyInfoDiffAccountWithUserLevel(const AuthACLInfo *aclInfo, AuthU
             AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
             return SOFTBUS_MEM_ERR;
         }
-        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
+        AUTH_LOGI(AUTH_KEY, "get user key item, index=%{public}d", item->ukInfo.keyIndex);
         (void)SoftBusMutexUnlock(&g_userKeyList->lock);
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_userKeyList->lock);
     AUTH_LOGE(AUTH_KEY, "user key not found.");
     return SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND;
+}
+
+static bool FilterDiffAccountWithUserLevel(const UserKeyInfo *item, const AuthACLInfo *aclInfo, AclMatchFunc matchFunc)
+{
+    if (!item->isUserBindLevel || item->bindType != DP_BIND_TYPE_DIFF_ACCOUNT) {
+        return false;
+    }
+    return matchFunc(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer);
+}
+
+static bool FilterDiffAccount(const UserKeyInfo *item, const AuthACLInfo *aclInfo, AclMatchFunc matchFunc)
+{
+    if (item->bindType != DP_BIND_TYPE_DIFF_ACCOUNT) {
+        return false;
+    }
+    return matchFunc(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer);
+}
+
+static bool FilterSameAccount(const UserKeyInfo *item, const AuthACLInfo *aclInfo, AclMatchFunc matchFunc)
+{
+    if (item->bindType != DP_BIND_TYPE_SAME_ACCOUNT) {
+        return false;
+    }
+    return matchFunc(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer);
+}
+
+static bool FilterGroupShare(const UserKeyInfo *item, const AuthACLInfo *aclInfo, AclMatchFunc matchFunc)
+{
+    (void)matchFunc;
+    if (item->bindType != DP_BIND_TYPE_SHARE) {
+        return false;
+    }
+    if (aclInfo->sinkUserId != item->aclInfo.sinkUserId ||
+        aclInfo->sourceUserId != item->aclInfo.sourceUserId ||
+        strcmp(aclInfo->sinkAccountId, item->aclInfo.sinkAccountId) != 0 ||
+        strcmp(aclInfo->sourceAccountId, item->aclInfo.sourceAccountId) != 0 ||
+        strcmp(aclInfo->sourceUdid, item->aclInfo.sourceUdid) != 0 ||
+        strcmp(aclInfo->sinkUdid, item->aclInfo.sinkUdid) != 0) {
+        return false;
+    }
+    return true;
+}
+
+int32_t GetUserKeyInfoDiffAccountWithUserLevel(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo)
+{
+    return GetUserKeyInfoByFilter(aclInfo, userKeyInfo, FilterDiffAccountWithUserLevel,
+        (AclMatchFunc)CompareByAclDiffAccountWithUserLevel);
 }
 
 int32_t GetUserKeyInfoDiffAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo)
 {
-    if (aclInfo == NULL || userKeyInfo == NULL) {
-        AUTH_LOGE(AUTH_KEY, "param error");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_userKeyList == NULL) {
-        AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
-        return SOFTBUS_NO_INIT;
-    }
-    const UserKeyInfo *item = NULL;
-
-    if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "get user key lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
-        if (item->bindType != DP_BIND_TYPE_DIFF_ACCOUNT) {
-            continue;
-        }
-        if (!CompareByAclDiffAccount(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
-            continue;
-        }
-        if (memcpy_s(userKeyInfo, sizeof(AuthUserKeyInfo), &item->ukInfo, sizeof(AuthUserKeyInfo)) != EOK) {
-            (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-            AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
-            return SOFTBUS_MEM_ERR;
-        }
-        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
-        (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-        return SOFTBUS_OK;
-    }
-    (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-    AUTH_LOGE(AUTH_KEY, "user key not found.");
-    return SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND;
+    return GetUserKeyInfoByFilter(aclInfo, userKeyInfo, FilterDiffAccount,
+        (AclMatchFunc)CompareByAclDiffAccount);
 }
 
 int32_t GetUserKeyInfoSameAccount(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo)
 {
-    if (aclInfo == NULL || userKeyInfo == NULL) {
-        AUTH_LOGE(AUTH_KEY, "param error");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_userKeyList == NULL) {
-        AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
-        return SOFTBUS_NO_INIT;
-    }
-    const UserKeyInfo *item = NULL;
-
-    if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "get user key lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
-        if (item->bindType != DP_BIND_TYPE_SAME_ACCOUNT ||
-            !CompareByAclSameAccount(aclInfo, &item->aclInfo, aclInfo->isServer == item->aclInfo.isServer)) {
-            continue;
-        }
-        if (memcpy_s(userKeyInfo, sizeof(AuthUserKeyInfo), &item->ukInfo, sizeof(AuthUserKeyInfo)) != EOK) {
-            (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-            AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
-            return SOFTBUS_MEM_ERR;
-        }
-        AUTH_LOGI(AUTH_KEY, "get user key item, no need insert, index=%{public}d", item->ukInfo.keyIndex);
-        (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-        return SOFTBUS_OK;
-    }
-    (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-    AUTH_LOGE(AUTH_KEY, "user key not found");
-    return SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND;
+    return GetUserKeyInfoByFilter(aclInfo, userKeyInfo, FilterSameAccount,
+        (AclMatchFunc)CompareByAclSameAccount);
 }
 
 int32_t GetUserKeyInfoGroupShare(const AuthACLInfo *aclInfo, AuthUserKeyInfo *userKeyInfo)
 {
-    if (aclInfo == NULL || userKeyInfo == NULL) {
-        AUTH_LOGE(AUTH_KEY, "param error");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_userKeyList == NULL) {
-        AUTH_LOGE(AUTH_KEY, "g_userKeyList is empty");
-        return SOFTBUS_NO_INIT;
-    }
-    const UserKeyInfo *item = NULL;
-    if (SoftBusMutexLock(&g_userKeyList->lock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "get user key lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    LIST_FOR_EACH_ENTRY(item, &g_userKeyList->list, UserKeyInfo, node) {
-        if (item->bindType != DP_BIND_TYPE_SHARE) {
-            continue;
-        }
-        if (aclInfo->sinkUserId != item->aclInfo.sinkUserId ||
-            aclInfo->sourceUserId != item->aclInfo.sourceUserId ||
-            (strcmp(aclInfo->sinkAccountId, item->aclInfo.sinkAccountId) != 0) ||
-            (strcmp(aclInfo->sourceAccountId, item->aclInfo.sourceAccountId) != 0) ||
-            (strcmp(aclInfo->sourceUdid, item->aclInfo.sourceUdid) != 0) ||
-            (strcmp(aclInfo->sinkUdid, item->aclInfo.sinkUdid) != 0)) {
-            continue;
-        }
-        if (memcpy_s(userKeyInfo, sizeof(AuthUserKeyInfo), &item->ukInfo, sizeof(AuthUserKeyInfo)) != EOK) {
-            (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-            AUTH_LOGE(AUTH_KEY, "memcpy_s user key info fail.");
-            return SOFTBUS_MEM_ERR;
-        }
-        AUTH_LOGI(AUTH_KEY, "get user key succ, user key id=%{public}d", item->ukInfo.keyIndex);
-        (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-        return SOFTBUS_OK;
-    }
-    (void)SoftBusMutexUnlock(&g_userKeyList->lock);
-    AUTH_LOGE(AUTH_KEY, "user key not found");
-    return SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND;
+    return GetUserKeyInfoByFilter(aclInfo, userKeyInfo, FilterGroupShare, NULL);
 }
 
 int32_t GetUserKeyByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)

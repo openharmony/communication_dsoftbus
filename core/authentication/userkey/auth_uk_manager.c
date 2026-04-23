@@ -59,15 +59,14 @@
 #define DEFAULT_CHANNEL_ID      0
 #define UK_MAX_INSTANCE_CNT     0x2000000
 #define UK_NEGO_PROCESS_TIMEOUT (10 * 1000LL)
-#define UK_SEQ_NETWORK_ID_BITS  16
-#define SEQ_TIME_STAMP_BITS     8
-#define SEQ_TIME_STAMP_MASK     0xFFL
-#define UK_SEQ_INTEGER_BITS     7
-#define UK_SEQ_INTEGER_MAX      0x0FFFFFFF
 #define PEER_OS_ACCOUNT_ID_STR  "peerOsAccountId"
 #define USER_KEY_TRANS_LEN_MAX  20000
 
-static uint32_t g_uniqueId = 0;
+#define ACL_COMPARE_UDID       (1 << 0)
+#define ACL_COMPARE_USER_ID    (1 << 1)
+#define ACL_COMPARE_TOKEN_ID   (1 << 2)
+#define ACL_COMPARE_ACCOUNT_ID (1 << 3)
+
 // UK key decay time: 180 days in milliseconds
 // 180 * 24 * 60 * 60 * 1000 = 15,552,000,000 ms
 static uint64_t g_ukDecayTime = 15552000000;
@@ -105,6 +104,17 @@ typedef struct {
     AuthGenUkCallback genCb;
     ListNode node;
 } UkNegotiateInstance;
+
+typedef struct {
+    const char *srcUdid;
+    const char *sinkUdid;
+    int32_t srcUserId;
+    int32_t sinkUserId;
+    int64_t srcTokenId;
+    int64_t sinkTokenId;
+    const char *srcAccountId;
+    const char *sinkAccountId;
+} AclMappedFields;
 
 static bool RequireUkNegotiateListLock(void)
 {
@@ -443,82 +453,82 @@ static void DeleteUkNegotiateInstance(uint32_t requestId)
     ReleaseUkNegotiateListLock();
 }
 
-bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
+static void MapAclFields(const AuthACLInfo *acl, bool isSameSide, AclMappedFields *mapped)
 {
-    if (oldAcl == NULL || newAcl == NULL) {
-        AUTH_LOGE(AUTH_CONN, "acl invalid param");
-        return false;
-    }
     if (isSameSide) {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId ||
-            oldAcl->sourceTokenId != newAcl->sourceTokenId || oldAcl->sinkTokenId != newAcl->sinkTokenId ||
-            strcmp(oldAcl->sourceAccountId, newAcl->sourceAccountId) != 0 ||
-            strcmp(oldAcl->sinkAccountId, newAcl->sinkAccountId) != 0) {
-            AUTH_LOGE(AUTH_CONN, "same side compare fail");
-            return false;
-        }
-        return true;
+        mapped->srcUdid = acl->sourceUdid;
+        mapped->sinkUdid = acl->sinkUdid;
+        mapped->srcUserId = acl->sourceUserId;
+        mapped->sinkUserId = acl->sinkUserId;
+        mapped->srcTokenId = acl->sourceTokenId;
+        mapped->sinkTokenId = acl->sinkTokenId;
+        mapped->srcAccountId = acl->sourceAccountId;
+        mapped->sinkAccountId = acl->sinkAccountId;
     } else {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId ||
-            oldAcl->sourceTokenId != newAcl->sinkTokenId || oldAcl->sinkTokenId != newAcl->sourceTokenId ||
-            strcmp(oldAcl->sourceAccountId, newAcl->sinkAccountId) != 0 ||
-            strcmp(oldAcl->sinkAccountId, newAcl->sourceAccountId) != 0) {
-            AUTH_LOGE(AUTH_CONN, "diff side compare fail");
-            return false;
-        }
-        return true;
+        mapped->srcUdid = acl->sinkUdid;
+        mapped->sinkUdid = acl->sourceUdid;
+        mapped->srcUserId = acl->sinkUserId;
+        mapped->sinkUserId = acl->sourceUserId;
+        mapped->srcTokenId = acl->sinkTokenId;
+        mapped->sinkTokenId = acl->sourceTokenId;
+        mapped->srcAccountId = acl->sinkAccountId;
+        mapped->sinkAccountId = acl->sourceAccountId;
     }
 }
 
-bool CompareByAclDiffAccountWithUserLevel(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
+static bool CompareAclFields(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl,
+    bool isSameSide, uint32_t flags)
 {
     if (oldAcl == NULL || newAcl == NULL) {
         AUTH_LOGE(AUTH_CONN, "acl invalid param");
         return false;
     }
 
-    if (isSameSide) {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId) {
-            AUTH_LOGE(AUTH_CONN, "same side compare fail");
-            return false;
-        }
-    } else {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId) {
-            AUTH_LOGE(AUTH_CONN, "diff side compare fail");
-            return false;
-        }
+    AclMappedFields oldMapped = { 0 };
+    AclMappedFields newMapped = { 0 };
+    MapAclFields(oldAcl, true, &oldMapped);
+    MapAclFields(newAcl, isSameSide, &newMapped);
+
+    if ((flags & ACL_COMPARE_UDID) &&
+        (strcmp(oldMapped.srcUdid, newMapped.srcUdid) != 0 ||
+        strcmp(oldMapped.sinkUdid, newMapped.sinkUdid) != 0)) {
+        AUTH_LOGE(AUTH_CONN, "udid compare fail");
+        return false;
+    }
+    if ((flags & ACL_COMPARE_USER_ID) &&
+        (oldMapped.srcUserId != newMapped.srcUserId || oldMapped.sinkUserId != newMapped.sinkUserId)) {
+        AUTH_LOGE(AUTH_CONN, "userId compare fail");
+        return false;
+    }
+    if ((flags & ACL_COMPARE_TOKEN_ID) &&
+        (oldMapped.srcTokenId != newMapped.srcTokenId || oldMapped.sinkTokenId != newMapped.sinkTokenId)) {
+        AUTH_LOGE(AUTH_CONN, "tokenId compare fail");
+        return false;
+    }
+    if ((flags & ACL_COMPARE_ACCOUNT_ID) &&
+        (strcmp(oldMapped.srcAccountId, newMapped.srcAccountId) != 0 ||
+        strcmp(oldMapped.sinkAccountId, newMapped.sinkAccountId) != 0)) {
+        AUTH_LOGE(AUTH_CONN, "accountId compare fail");
+        return false;
     }
     return true;
 }
 
+bool CompareByAllAcl(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
+{
+    return CompareAclFields(oldAcl, newAcl, isSameSide,
+        ACL_COMPARE_UDID | ACL_COMPARE_USER_ID | ACL_COMPARE_TOKEN_ID | ACL_COMPARE_ACCOUNT_ID);
+}
+
+bool CompareByAclDiffAccountWithUserLevel(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
+{
+    return CompareAclFields(oldAcl, newAcl, isSameSide, ACL_COMPARE_UDID | ACL_COMPARE_USER_ID);
+}
+
 bool CompareByAclDiffAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
 {
-    if (oldAcl == NULL || newAcl == NULL) {
-        AUTH_LOGE(AUTH_CONN, "acl invalid param");
-        return false;
-    }
-
-    if (isSameSide) {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId ||
-            oldAcl->sourceTokenId != newAcl->sourceTokenId || oldAcl->sinkTokenId != newAcl->sinkTokenId) {
-            AUTH_LOGE(AUTH_CONN, "same side compare fail");
-            return false;
-        }
-        return true;
-    } else {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId ||
-            oldAcl->sourceTokenId != newAcl->sinkTokenId || oldAcl->sinkTokenId != newAcl->sourceTokenId) {
-            AUTH_LOGE(AUTH_CONN, "diff side compare fail");
-            return false;
-        }
-        return true;
-    }
+    return CompareAclFields(oldAcl, newAcl, isSameSide,
+        ACL_COMPARE_UDID | ACL_COMPARE_USER_ID | ACL_COMPARE_TOKEN_ID);
 }
 
 bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAcl, bool isSameSide)
@@ -527,32 +537,14 @@ bool CompareByAclSameAccount(const AuthACLInfo *oldAcl, const AuthACLInfo *newAc
         AUTH_LOGE(AUTH_CONN, "acl invalid param");
         return false;
     }
-
     if (strcmp(DEFAULT_ACCOUNT_UID, newAcl->sourceAccountId) == 0 ||
         strcmp(DEFAULT_ACCOUNT_UID, newAcl->sinkAccountId) == 0 ||
         strcmp(newAcl->sourceAccountId, newAcl->sinkAccountId) != 0) {
         AUTH_LOGE(AUTH_CONN, "acl is not same account");
         return false;
     }
-    if (isSameSide) {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sourceUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sinkUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sourceUserId || oldAcl->sinkUserId != newAcl->sinkUserId ||
-            strcmp(oldAcl->sourceAccountId, newAcl->sourceAccountId) != 0 ||
-            strcmp(oldAcl->sinkAccountId, newAcl->sinkAccountId) != 0) {
-            AUTH_LOGE(AUTH_CONN, "same side compare fail");
-            return false;
-        }
-        return true;
-    } else {
-        if (strcmp(oldAcl->sourceUdid, newAcl->sinkUdid) != 0 || strcmp(oldAcl->sinkUdid, newAcl->sourceUdid) != 0 ||
-            oldAcl->sourceUserId != newAcl->sinkUserId || oldAcl->sinkUserId != newAcl->sourceUserId ||
-            strcmp(oldAcl->sourceAccountId, newAcl->sinkAccountId) != 0 ||
-            strcmp(oldAcl->sinkAccountId, newAcl->sourceAccountId) != 0) {
-            AUTH_LOGE(AUTH_CONN, "diff side compare fail");
-            return false;
-        }
-        return true;
-    }
+    return CompareAclFields(oldAcl, newAcl, isSameSide,
+        ACL_COMPARE_UDID | ACL_COMPARE_USER_ID | ACL_COMPARE_ACCOUNT_ID);
 }
 
 static void AsyncCallGenUkResultReceived(void *para)
@@ -1580,39 +1572,9 @@ static ISessionListenerInner g_sessionListener = {
     .OnSetChannelInfoByReqId = SecuritySetChannelInfoByReqId,
 };
 
-static void UpdateUniqueId(void)
-{
-    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get local networkId fail");
-        return;
-    }
-    uint8_t hashId[SHA_256_HASH_LEN] = { 0 };
-    if (SoftBusGenerateStrHash((uint8_t *)networkId, strlen(networkId), hashId) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "GenerateStrHash fail");
-        return;
-    }
-    for (uint32_t i = 0; i < UK_SEQ_NETWORK_ID_BITS / BYTES_BIT_NUM; i++) {
-        g_uniqueId = (g_uniqueId << BYTES_BIT_NUM) | hashId[i];
-    }
-    uint64_t timeStamp = SoftBusGetSysTimeMs();
-    g_uniqueId = (g_uniqueId << SEQ_TIME_STAMP_BITS) | (SEQ_TIME_STAMP_MASK & timeStamp);
-}
-
 uint32_t GenUkSeq(void)
 {
-    static uint32_t integer = 0;
-    if (integer >= UK_SEQ_INTEGER_MAX) {
-        integer = 0;
-    }
-    if (integer == 0) {
-        UpdateUniqueId();
-    }
-    integer++;
-    /* |----GreaterZero(1)----|----NetworkIdHash(16)----|----TimeStamp(8)----|----AtomicInteger(7)----| */
-    uint32_t seq = integer;
-    seq = (g_uniqueId << UK_SEQ_INTEGER_BITS) | (seq & UK_SEQ_INTEGER_MAX);
-    return seq;
+    return GenAuthIdSeq();
 }
 
 static int32_t CheckAclWithLocalUdid(const AuthACLInfo *oldAcl, AuthACLInfo *newAcl)

@@ -44,6 +44,17 @@
 #define SEQ_INTEGER_BITS    24
 #define SEQ_INTEGER_MAX     0xFFFFFF
 
+/* auth id seq (for UK and ApplyKey) */
+#define AUTH_ID_SEQ_NETWORK_ID_BITS 16
+#define AUTH_ID_SEQ_TIME_STAMP_BITS 8
+#define AUTH_ID_SEQ_TIME_STAMP_MASK 0xFFL
+#define AUTH_ID_SEQ_INTEGER_BITS    7
+#define AUTH_ID_SEQ_INTEGER_MAX     0x7F
+
+static uint32_t g_authIdUniqueId = 0;
+static uint32_t g_authIdSeqInteger = 0;
+static SoftBusMutex g_authIdSeqLock;
+
 #define AUTH_SUPPORT_AS_SERVER_MASK 0x01
 
 typedef struct {
@@ -58,6 +69,7 @@ typedef struct {
 } CompareByType;
 
 static uint64_t g_uniqueId = 0;
+static uint32_t g_seqInteger = 0;
 static SoftBusMutex g_authLock;
 static SoftBusHandler g_authHandler = { NULL, NULL, NULL };
 
@@ -246,18 +258,61 @@ static void UpdateUniqueId(void)
 
 int64_t GenSeq(bool isServer)
 {
-    static uint32_t integer = 0;
-    if (integer >= SEQ_INTEGER_MAX) {
-        integer = 0;
+    if (SoftBusMutexLock(&g_authIdSeqLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "seq lock fail");
+        return 0;
     }
-    if (integer == 0) {
+    if (g_seqInteger >= SEQ_INTEGER_MAX) {
+        g_seqInteger = 0;
+    }
+    if (g_seqInteger == 0) {
         UpdateUniqueId();
     }
-    integer += SEQ_INTERVAL;
-    uint64_t seq = isServer ? (integer + 1) : integer;
+    g_seqInteger += SEQ_INTERVAL;
+    uint64_t seq = isServer ? (g_seqInteger + 1) : g_seqInteger;
     /* |----NetworkIdHash(32)----|-----timeStamp(8)----|----AtomicInteger(24)----| */
     seq = (g_uniqueId << SEQ_INTEGER_BITS) | (seq & SEQ_INTEGER_MAX);
+    (void)SoftBusMutexUnlock(&g_authIdSeqLock);
     return (int64_t)seq;
+}
+
+static void UpdateAuthIdUniqueId(void)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local networkId fail");
+        return;
+    }
+    uint8_t hashId[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((uint8_t *)networkId, strlen(networkId), hashId) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "GenerateStrHash fail");
+        return;
+    }
+    for (uint32_t i = 0; i < AUTH_ID_SEQ_NETWORK_ID_BITS / BYTES_BIT_NUM; i++) {
+        g_authIdUniqueId = (g_authIdUniqueId << BYTES_BIT_NUM) | hashId[i];
+    }
+    uint64_t timeStamp = GetCurrentTimeMs();
+    g_authIdUniqueId = (g_authIdUniqueId << AUTH_ID_SEQ_TIME_STAMP_BITS) | (AUTH_ID_SEQ_TIME_STAMP_MASK & timeStamp);
+}
+
+uint32_t GenAuthIdSeq(void)
+{
+    if (SoftBusMutexLock(&g_authIdSeqLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "authIdSeq lock fail");
+        return 0;
+    }
+    if (g_authIdSeqInteger >= AUTH_ID_SEQ_INTEGER_MAX) {
+        g_authIdSeqInteger = 0;
+    }
+    if (g_authIdSeqInteger == 0) {
+        UpdateAuthIdUniqueId();
+    }
+    g_authIdSeqInteger++;
+    /* |----GreaterZero(1)----|----NetworkIdHash(16)----|----TimeStamp(8)----|----AtomicInteger(7)----| */
+    uint32_t seq = g_authIdSeqInteger;
+    seq = (g_authIdUniqueId << AUTH_ID_SEQ_INTEGER_BITS) | (seq & AUTH_ID_SEQ_INTEGER_MAX);
+    (void)SoftBusMutexUnlock(&g_authIdSeqLock);
+    return seq;
 }
 
 uint64_t GetCurrentTimeMs(void)
@@ -578,6 +633,11 @@ int32_t AuthCommonInit(void)
         AUTH_LOGE(AUTH_INIT, "auth mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }
+    if (SoftBusMutexInit(&g_authIdSeqLock, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_INIT, "authIdSeq mutex init fail");
+        (void)SoftBusMutexDestroy(&g_authLock);
+        return SOFTBUS_LOCK_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -588,6 +648,9 @@ void AuthCommonDeinit(void)
 
     if (SoftBusMutexDestroy(&g_authLock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "auth mutex destroy fail");
+    }
+    if (SoftBusMutexDestroy(&g_authIdSeqLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_INIT, "authIdSeq mutex destroy fail");
     }
 }
 

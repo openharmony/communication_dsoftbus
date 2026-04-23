@@ -103,7 +103,6 @@ void ProcessApplyKeyInfo(FuzzedDataProvider &provider, RequestBusinessInfo reqBu
     vector<uint8_t> applyKey = provider.ConsumeRemainingBytes<uint8_t>();
     AuthFindApplyKey(
         &reqBusInfo, applyKey.data(), (char *)localAccountShortHash.c_str(), localAccountShortHash.length());
-    UpdateUniqueId();
     GenApplyKeySeq();
     OnCommDisconnected(connId, &connInfo);
     uint64_t time = provider.ConsumeIntegral<uint64_t>();
