@@ -1154,12 +1154,10 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
 static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t cipherFlag, AuthHandle *authHandle)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(authHandle != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "authHandle is null");
-
     if (GetAuthHandleByChanId(channelId, authHandle) == SOFTBUS_OK && authHandle->authId != AUTH_INVALID_ID) {
         TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 " is not AUTH_INVALID_ID", authHandle->authId);
         return SOFTBUS_OK;
     }
-
     AppInfo appInfo;
     int32_t ret = GetAppInfoById(channelId, &appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get appInfo fail");
@@ -1172,7 +1170,6 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
             return SOFTBUS_OK;
         }
     }
-
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
     char uuid[UUID_BUF_LEN] = { 0 };
     struct WifiDirectManager *mgr = GetWifiDirectManager();
@@ -1198,10 +1195,13 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
         authHandle->authId = AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
         return SOFTBUS_OK;
     }
-
     bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
     authHandle->type = linkType;
     authHandle->authId = AuthGetIdByUuid(uuid, linkType, !fromAuthServer, isAuthMeta);
+    if ((cipherFlag & FLAG_AUTH_META) != 0) {
+        TRANS_LOGE(TRANS_CTRL, "not support meta auth.");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
     return SOFTBUS_OK;
 }
 
