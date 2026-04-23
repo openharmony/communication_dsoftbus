@@ -107,6 +107,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter.cpp",
     ]
+    bus_center_core_adapter_inc += [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
     bus_center_core_adapter_external_deps += [
       "os_account:libaccountkits",
       "os_account:os_account_innerkits",

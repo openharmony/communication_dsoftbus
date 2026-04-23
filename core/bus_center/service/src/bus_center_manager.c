@@ -220,6 +220,9 @@ static int32_t BusCenterServerInitFirstStep(void)
         LNN_LOGE(LNN_INIT, "init meta node fail");
         return SOFTBUS_NETWORK_META_NODE_INIT_FAILED;
     }
+    if (LnnInitOsAccountAdapter() != SOFTBUS_OK) {
+        LNN_LOGW(LNN_INIT, "init os account adapter fail, continue");
+    }
     if (IsActiveOsAccountUnlocked()) {
         LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");
         RestoreLocalDeviceInfo();
@@ -342,6 +345,7 @@ void BusCenterServerDeinit(void)
     DeinitDecisionCenter();
     LnnDeinitMetaNodePacked();
     LnnCoapConnectDeinitPacked();
+    LnnDeinitOsAccountAdapter();
     LnnDeinitLaneLooper();
     LnnDeinitLnnLooper();
     DeinitAuthGenCertParallelList();

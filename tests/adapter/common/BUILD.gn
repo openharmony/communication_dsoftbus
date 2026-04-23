@@ -104,7 +104,6 @@ ohos_unittest("LnnCommonEventMonitorTest") {
     "$dsoftbus_root_path/sdk/frame/standard/include",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/core/transmission/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/bus_center/wlan",

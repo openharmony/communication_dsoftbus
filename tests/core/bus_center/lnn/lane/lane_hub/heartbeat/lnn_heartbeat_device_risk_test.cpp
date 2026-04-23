@@ -62,24 +62,26 @@ void LnnHeartBeatDeviceRiskTest::TearDown()
 {}
 
 /*
- * @tc.name: RiskDeviceLeaveLnnTest001
+ * @tc.name: LnnClearAllNodeTest001
  * @tc.desc: use abnomal parameter
- *           Test the behavior of the RiskDeviceLeaveLnn function under different scenarios
+ *           Test the behavior of the LnnClearAllNode function under different scenarios
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnHeartBeatDeviceRiskTest, RiskDeviceLeaveLnnTest001, TestSize.Level1)
+HWTEST_F(LnnHeartBeatDeviceRiskTest, LnnClearAllNodeTest001, TestSize.Level1)
 {
     int ret = 0;
     NiceMock<LnnHeatbeatDeviceRiskInterfaceMock> lnnDeviceRiskMock;
 
-    EXPECT_CALL(lnnDeviceRiskMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = RiskDeviceLeaveLnn();
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+    EXPECT_CALL(lnnDeviceRiskMock, LnnRequestLeaveByAddrType(testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(SOFTBUS_OK));
+    ret = LnnClearAllNode();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-    EXPECT_CALL(lnnDeviceRiskMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = RiskDeviceLeaveLnn();
-    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
+    EXPECT_CALL(lnnDeviceRiskMock, LnnRequestLeaveByAddrType(testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR));
+    ret = LnnClearAllNode();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 }
 
 /*
