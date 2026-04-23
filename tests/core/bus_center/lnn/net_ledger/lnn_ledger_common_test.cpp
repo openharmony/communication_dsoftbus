@@ -57,8 +57,6 @@ constexpr char NODE_DEVICE_NAME[] = "node1_test";
 constexpr char INVALID_DEVICE_NAME[] = "ASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJK\
     LPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJ\
     KLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLP";
-constexpr char DEVICE_TYPE[] = "PAD";
-constexpr char INVALID_DEVICE_TYPE[] = "PADPAD";
 constexpr int32_t PORT = 1;
 constexpr uint64_t PROTOCOLS = 1;
 constexpr char LOCAL_NETWORKID[] = "123456LOCAL";
@@ -107,32 +105,65 @@ void LNNNetLedgerCommonTest::SetUp()
 void LNNNetLedgerCommonTest::TearDown() { }
 
 /*
- * @tc.name: LNN_DEVICE_INFO_Test_001
- * @tc.desc: Verify LNN device info functions including LnnGetDeviceName,
- *           LnnSetDeviceName and LnnGetDeviceTypeId with different parameters
+ * @tc.name: LNN_GET_DEVICE_NAME_Test_001
+ * @tc.desc: Verify LnnGetDeviceName with different parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_GET_DEVICE_NAME_Test_001, TestSize.Level1)
 {
     DeviceBasicInfo info;
-    uint16_t typeId = 0;
-    int32_t ret = memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
-    EXPECT_TRUE(ret == EOK);
+    (void)memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
     EXPECT_TRUE(LnnGetDeviceName(nullptr) == nullptr);
-    LnnGetDeviceName(&info);
+    EXPECT_TRUE(strcmp(LnnGetDeviceName(&info), "") == 0);
+}
+
+/*
+ * @tc.name: LNN_SET_DEVICE_NAME_Test_001
+ * @tc.desc: Verify LnnSetDeviceName with different parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_DEVICE_NAME_Test_001, TestSize.Level1)
+{
+    DeviceBasicInfo info;
+    (void)memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
     EXPECT_TRUE(LnnSetDeviceName(nullptr, NODE_DEVICE_NAME) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetDeviceName(&info, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetDeviceName(&info, INVALID_DEVICE_NAME) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetDeviceName(&info, NODE_DEVICE_NAME) == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_GET_DEVICE_TYPE_ID_Test_001
+ * @tc.desc: Verify LnnGetDeviceTypeId with different parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_GET_DEVICE_TYPE_ID_Test_001, TestSize.Level1)
+{
+    DeviceBasicInfo info;
+    uint16_t typeId = 1;
+    int32_t ret = memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
+    EXPECT_TRUE(ret == EOK);
     EXPECT_TRUE(LnnGetDeviceTypeId(nullptr, &typeId) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetDeviceTypeId(&info, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetDeviceTypeId(&info, &typeId) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnConvertDeviceTypeToId(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnConvertDeviceTypeToId(INVALID_DEVICE_TYPE, &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
-    EXPECT_TRUE(LnnConvertDeviceTypeToId(DEVICE_TYPE, &typeId) == SOFTBUS_OK);
-    typeId = 0;
+}
+
+/*
+ * @tc.name: LNN_CONVERT_ID_TO_DEVICE_TYPE_Test_001
+ * @tc.desc: Verify LnnConvertIdToDeviceType with different parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_CONVERT_ID_TO_DEVICE_TYPE_Test_001, TestSize.Level1)
+{
+    uint16_t typeId = 0;
     LnnConvertIdToDeviceType(TYPE_WATCH_ID);
     LnnConvertIdToDeviceType(typeId);
     typeId = ONE_BIT_MAX_HEX << LEFT_SHIFT_DEVICE_TYPE_LENGTH;
@@ -140,49 +171,130 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_HUKS_UTILS_Test_001
- * @tc.desc: Verify LNN huks utils functions including LnnGenerateKeyByHuks
- *           and LnnGenerateCeKeyByHuks with different parameters
+ * @tc.name: LNN_HUKS_UTILS_GENERATE_KEY_Test_001
+ * @tc.desc: Verify LnnGenerateKeyByHuks with different parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_GENERATE_KEY_Test_001, TestSize.Level1)
 {
     struct HksBlob keyAlias;
     (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
     EXPECT_TRUE(LnnGenerateKeyByHuks(nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGenerateKeyByHuks(&keyAlias) == SOFTBUS_HUKS_GENERATE_KEY_ERR);
-    EXPECT_TRUE(LnnDeleteKeyByHuks(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnDeleteKeyByHuks(&keyAlias) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnEncryptDataByHuks(nullptr, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnDecryptDataByHuks(nullptr, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
 
 /*
- * @tc.name: LNN_NET_CAPABILITY_Test_001
- * @tc.desc: Verify LnnSetNetCapability and LnnClearNetCapability
- *           handle null capability pointer correctly
+ * @tc.name: LNN_HUKS_UTILS_DELETE_KEY_Test_001
+ * @tc.desc: Verify LnnDeleteKeyByHuks with different parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_DELETE_KEY_Test_001, TestSize.Level1)
 {
-    uint32_t capability = 0;
-    EXPECT_TRUE(LnnSetNetCapability(nullptr, BIT_COUNT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnClearNetCapability(nullptr, BIT_COUNT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnClearNetCapability(&capability, BIT_BLE) == SOFTBUS_OK);
+    struct HksBlob keyAlias;
+    (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
+    EXPECT_TRUE(LnnDeleteKeyByHuks(nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnDeleteKeyByHuks(&keyAlias) == SOFTBUS_OK);
 }
 
 /*
- * @tc.name: LNN_NET_CAPABILITY_Test_002
+ * @tc.name: LNN_HUKS_UTILS_ENCRYPT_DATA_Test_001
+ * @tc.desc: Verify LnnEncryptDataByHuks with null parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_ENCRYPT_DATA_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnEncryptDataByHuks(nullptr, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_HUKS_UTILS_DECRYPT_DATA_Test_001
+ * @tc.desc: Verify LnnDecryptDataByHuks with null parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_HUKS_UTILS_DECRYPT_DATA_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnDecryptDataByHuks(nullptr, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_SET_DISCOVERY_TYPE_Test_001
+ * @tc.desc: test LnnSetDiscoveryType with valid and invalid parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_DISCOVERY_TYPE_Test_001, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    int32_t ret = LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetDiscoveryType(nullptr, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_HAS_DISCOVERY_TYPE_Test_001
+ * @tc.desc: test LnnHasDiscoveryType with various discovery types
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_HAS_DISCOVERY_TYPE_Test_001, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    (void)LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+
+    bool hasDiscoveryType = LnnHasDiscoveryType(nullptr, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(hasDiscoveryType, false);
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
+    EXPECT_EQ(hasDiscoveryType, false);
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(hasDiscoveryType, false);
+    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(hasDiscoveryType, true);
+}
+
+/*
+ * @tc.name: LNN_CLEAR_DISCOVERY_TYPE_Test_001
+ * @tc.desc: test LnnClearDiscoveryType with valid and invalid parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_CLEAR_DISCOVERY_TYPE_Test_001, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    (void)LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+
+    int32_t ret = LnnClearDiscoveryType(nullptr, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_NET_CAPABILITY_Test_001
  * @tc.desc: LNN net capability function test, LnnSetNetCapability, LnnHasCapability
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_002, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_001, TestSize.Level1)
 {
     uint32_t capability = 0;
     bool hasCapability = false;
@@ -223,13 +335,13 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_002, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_NET_CAPABILITY_Test_003
+ * @tc.name: LNN_NET_CAPABILITY_Test_002
  * @tc.desc: LNN net capability function test, LnnSetNetCapability, LnnClearNetCapability
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_003, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_002, TestSize.Level1)
 {
     uint32_t capability = 0;
     bool hasCapability = false;
@@ -343,90 +455,216 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_003, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_NODE_INFO_Test_001
- * @tc.desc: Verify LNN node info functions handle null pointer
- *           parameters correctly and return expected error codes
+ * @tc.name: LNN_DISCOVERY_TYPE_Test_001
+ * @tc.desc: Verify discovery type functions with null pointer
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DISCOVERY_TYPE_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnHasDiscoveryType(nullptr, DISCOVERY_TYPE_WIFI) == false);
-    EXPECT_TRUE(LnnGetDeviceUdid(nullptr) == nullptr);
-    EXPECT_TRUE(LnnSetDeviceUdid(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetDiscoveryType(nullptr, DISCOVERY_TYPE_WIFI) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnClearDiscoveryType(nullptr, DISCOVERY_TYPE_WIFI) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnIsNodeOnline(nullptr) == false);
-    LnnSetNodeConnStatus(nullptr, STATUS_ONLINE);
-    LnnGetBtMac(nullptr);
-    LnnSetBtMac(nullptr, nullptr);
-    LnnGetNetIfName(nullptr, WLAN_IF);
-    LnnSetNetIfName(nullptr, nullptr, WLAN_IF);
-    LnnGetWiFiIp(nullptr, WLAN_IF);
-    LnnSetWiFiIp(nullptr, nullptr, WLAN_IF);
-    EXPECT_TRUE(LnnGetMasterUdid(nullptr) == nullptr);
-    EXPECT_TRUE(LnnSetMasterUdid(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetAuthPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetAuthPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetSessionPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetSessionPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetProxyPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetP2pRole(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetP2pRole(nullptr) == 0);
-    EXPECT_TRUE(LnnSetP2pMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetP2pMac(nullptr) == nullptr);
-    EXPECT_TRUE(LnnSetP2pGoMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetWifiDirectAddr(nullptr) == nullptr);
-    EXPECT_TRUE(LnnSetWifiDirectAddr(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetP2pGoMac(nullptr) == nullptr);
-    EXPECT_TRUE(LnnGetSupportedProtocols(nullptr) == 0);
-    EXPECT_TRUE(LnnSetSupportedProtocols(nullptr, PROTOCOLS) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetPtk(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
 
 /*
- * @tc.name: LNN_NODE_INFO_Test_002
- * @tc.desc: LNN node info function test, LnnSetDiscoveryType, LnnHasDiscoveryType, LnnClearDiscoveryType
+ * @tc.name: LNN_DEVICE_UDID_Test_001
+ * @tc.desc: Verify device udid functions with null pointer
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_002, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_UDID_Test_001, TestSize.Level1)
 {
-    NodeInfo nodeInfo;
-    int32_t ret = LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnSetDiscoveryType(nullptr, DISCOVERY_TYPE_UNKNOWN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnSetDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_TRUE(LnnGetDeviceUdid(nullptr) == nullptr);
+    EXPECT_TRUE(LnnSetDeviceUdid(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+}
 
-    bool hasDiscoveryType = LnnHasDiscoveryType(nullptr, DISCOVERY_TYPE_LSA);
-    EXPECT_EQ(hasDiscoveryType, false);
-    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
-    EXPECT_EQ(hasDiscoveryType, false);
-    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
-    EXPECT_EQ(hasDiscoveryType, false);
-    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
-    EXPECT_EQ(hasDiscoveryType, true);
+/*
+ * @tc.name: LNN_NODE_STATUS_Test_001
+ * @tc.desc: Verify node status functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_STATUS_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnIsNodeOnline(nullptr) == false);
+    EXPECT_NO_FATAL_FAILURE(LnnSetNodeConnStatus(nullptr, STATUS_ONLINE));
+}
 
-    ret = LnnClearDiscoveryType(nullptr, DISCOVERY_TYPE_UNKNOWN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_COUNT);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+/*
+ * @tc.name: LNN_BT_MAC_Test_001
+ * @tc.desc: Verify bt mac functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_BT_MAC_Test_001, TestSize.Level1)
+{
+    const char* btMac = LnnGetBtMac(nullptr);
+    EXPECT_EQ(btMac, DEFAULT_MAC);
+    EXPECT_NO_FATAL_FAILURE(LnnSetBtMac(nullptr, nullptr));
+}
 
-    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_LSA);
-    EXPECT_EQ(hasDiscoveryType, false);
-    ret = LnnClearDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    hasDiscoveryType = LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_UNKNOWN);
-    EXPECT_EQ(hasDiscoveryType, false);
+/*
+ * @tc.name: LNN_NET_IF_Test_001
+ * @tc.desc: Verify network interface functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_IF_Test_001, TestSize.Level1)
+{
+    const char* netIfName = LnnGetNetIfName(nullptr, WLAN_IF);
+    EXPECT_EQ(netIfName, DEFAULT_IFNAME);
+    EXPECT_NO_FATAL_FAILURE(LnnSetNetIfName(nullptr, nullptr, WLAN_IF));
+    const char* wifiIp = LnnGetWiFiIp(nullptr, WLAN_IF);
+    EXPECT_EQ(wifiIp, DEFAULT_IP);
+    EXPECT_NO_FATAL_FAILURE(LnnSetWiFiIp(nullptr, nullptr, WLAN_IF));
+}
+
+/*
+ * @tc.name: LNN_MASTER_UDID_Test_001
+ * @tc.desc: Verify master udid functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_MASTER_UDID_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnGetMasterUdid(nullptr) == nullptr);
+    EXPECT_TRUE(LnnSetMasterUdid(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_AUTH_PORT_Test_001
+ * @tc.desc: Verify auth port functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_AUTH_PORT_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnGetAuthPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetAuthPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_SESSION_PORT_Test_001
+ * @tc.desc: Verify session port functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SESSION_PORT_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnGetSessionPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetSessionPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_PROXY_PORT_Test_001
+ * @tc.desc: Verify proxy port functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_PROXY_PORT_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnGetProxyPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_P2P_ROLE_Test_001
+ * @tc.desc: Verify p2p role functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_P2P_ROLE_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnSetP2pRole(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetP2pRole(nullptr) == 0);
+}
+
+/*
+ * @tc.name: LNN_P2P_MAC_Test_001
+ * @tc.desc: Verify p2p mac functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_P2P_MAC_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnSetP2pMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetP2pMac(nullptr) == nullptr);
+}
+
+/*
+ * @tc.name: LNN_P2P_GO_MAC_Test_001
+ * @tc.desc: Verify p2p go mac functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_P2P_GO_MAC_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnSetP2pGoMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetP2pGoMac(nullptr) == nullptr);
+}
+
+/*
+ * @tc.name: LNN_WIFI_DIRECT_ADDR_Test_001
+ * @tc.desc: Verify wifi direct addr functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_WIFI_DIRECT_ADDR_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnGetWifiDirectAddr(nullptr) == nullptr);
+    EXPECT_TRUE(LnnSetWifiDirectAddr(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_SUPPORTED_PROTOCOLS_Test_001
+ * @tc.desc: Verify supported protocols functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SUPPORTED_PROTOCOLS_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnGetSupportedProtocols(nullptr) == 0);
+    EXPECT_TRUE(LnnSetSupportedProtocols(nullptr, PROTOCOLS) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_STATIC_CAPABILITY_Test_001
+ * @tc.desc: Verify static capability functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_STATIC_CAPABILITY_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnSetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_PTK_Test_001
+ * @tc.desc: Verify ptk functions with null pointer
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_PTK_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnSetPtk(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -911,13 +1149,13 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_020, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_NODE_INFO_Test_021
+ * @tc.name: LNN_SET_SCREEN_STATUS_Test_001
  * @tc.desc: LNN node info function test LnnSetScreenStatus
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_021, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_SCREEN_STATUS_Test_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
 
@@ -932,13 +1170,13 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_021, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_NODE_INFO_Test_022
- * @tc.desc: LNN node info function test LnnSetScreenStatus
+ * @tc.name: LNN_SET_USER_ID_CHECK_SUM_Test_001
+ * @tc.desc: LNN node info function test LnnSetUserIdCheckSum
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_022, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_USER_ID_CHECK_SUM_Test_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -953,8 +1191,22 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_022, TestSize.Level1)
 
     ret = LnnSetUserIdCheckSum(&nodeInfo, data, USERID_CHECKSUM_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
 
-    ret = LnnGetUserIdCheckSum(nullptr, data, USERID_CHECKSUM_LEN);
+/*
+ * @tc.name: LNN_GET_USER_ID_CHECK_SUM_Test_001
+ * @tc.desc: LNN node info function test LnnGetUserIdCheckSum
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_GET_USER_ID_CHECK_SUM_Test_001, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    uint8_t data[USERID_CHECKSUM_LEN];
+
+    int32_t ret = LnnGetUserIdCheckSum(nullptr, data, USERID_CHECKSUM_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGetUserIdCheckSum(&nodeInfo, nullptr, USERID_CHECKSUM_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -1243,14 +1495,13 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_003, TestSize.Level
 }
 
 /*
- * @tc.name: LNN_FEATURE_CAPABILTY_001
- * @tc.desc: Verify LnnSetFeatureCapability and LnnClearFeatureCapability
- *           handle null pointer and invalid feature bits correctly
+ * @tc.name: LNN_SET_FEATURE_CAPABILITY_Test_001
+ * @tc.desc: Verify LnnSetFeatureCapability with different parameters
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_FEATURE_CAPABILTY_001, TestSize.Level1)
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_FEATURE_CAPABILITY_Test_001, TestSize.Level1)
 {
     uint64_t feature;
     int32_t ret = LnnSetFeatureCapability(nullptr, BIT_FEATURE_COUNT);
@@ -1259,10 +1510,22 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_FEATURE_CAPABILTY_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetFeatureCapability(&feature, BIT_FEATURE_COUNT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
     ret = LnnSetFeatureCapability(&feature, BIT_BR_DUP);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(IsFeatureSupport(feature, BIT_BR_DUP), true);
+}
+
+/*
+ * @tc.name: LNN_CLEAR_FEATURE_CAPABILITY_Test_001
+ * @tc.desc: Verify LnnClearFeatureCapability with different parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_CLEAR_FEATURE_CAPABILITY_Test_001, TestSize.Level1)
+{
+    uint64_t feature;
+    int32_t ret = LnnSetFeatureCapability(&feature, BIT_BR_DUP);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = LnnClearFeatureCapability(nullptr, BIT_FEATURE_COUNT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -1270,9 +1533,23 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_FEATURE_CAPABILTY_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnClearFeatureCapability(&feature, BIT_FEATURE_COUNT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
     ret = LnnClearFeatureCapability(&feature, BIT_BR_DUP);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: IS_FEATURE_SUPPORT_Test_001
+ * @tc.desc: Verify IsFeatureSupport with feature capability operations
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, IS_FEATURE_SUPPORT_Test_001, TestSize.Level1)
+{
+    uint64_t feature = 0;
+    LnnSetFeatureCapability(&feature, BIT_BR_DUP);
+    EXPECT_EQ(IsFeatureSupport(feature, BIT_BR_DUP), true);
+    LnnClearFeatureCapability(&feature, BIT_BR_DUP);
     EXPECT_EQ(IsFeatureSupport(feature, BIT_BR_DUP), false);
 }
 
@@ -1538,6 +1815,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_001, TestSiz
     EXPECT_TRUE(typeId == TYPE_SMART_DISPLAY_ID);
     EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_GLASS, &typeId) == SOFTBUS_OK);
     EXPECT_TRUE(typeId == TYPE_GLASS_ID);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(TYPE_PAD, &typeId) == SOFTBUS_OK);
+    EXPECT_TRUE(typeId == TYPE_PAD_ID);
 }
 
 /*
@@ -1648,6 +1927,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_002, TestSiz
 HWTEST_F(LNNNetLedgerCommonTest, LNN_CONVERT_DEVICE_TYPE_TO_ID_Test_003, TestSize.Level1)
 {
     uint16_t typeId = 0;
+    EXPECT_TRUE(LnnConvertDeviceTypeToId(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnConvertDeviceTypeToId("PADPAD", &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
     EXPECT_TRUE(LnnConvertDeviceTypeToId("1G", &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
     EXPECT_TRUE(LnnConvertDeviceTypeToId("ZZZ", &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
     EXPECT_TRUE(LnnConvertDeviceTypeToId("12G", &typeId) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
