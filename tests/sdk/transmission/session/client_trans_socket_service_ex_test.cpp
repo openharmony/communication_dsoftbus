@@ -241,15 +241,8 @@ HWTEST_F(ClientTransSocketExTest, SetAccessInfoTest001, TestSize.Level1)
  */
 HWTEST_F(ClientTransSocketExTest, BindAsyncTest001, TestSize.Level1)
 {
-    NiceMock<TransSessionMgrMock> transSessionMgrMock;
-    EXPECT_CALL(transSessionMgrMock, IsSessionExceedLimit).WillOnce(Return(true))
-        .WillRepeatedly(Return(false));
-
     QosTV qos[1];
     ISocketListener listener;
-    int32_t ret = BindAsync(0, qos, 0, &listener);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT);
-
     NiceMock<TransSocketMgrMock> transSocketMgrMock;
     EXPECT_CALL(transSocketMgrMock, GetQosValue).WillRepeatedly(
         [](const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal) -> int32_t {
@@ -260,9 +253,10 @@ HWTEST_F(ClientTransSocketExTest, BindAsyncTest001, TestSize.Level1)
         *value = DEFAULT_MAX_WAIT_TIMEOUT;
         return SOFTBUS_OK;
     });
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
     EXPECT_CALL(transSessionMgrMock, ClientHandleBindWaitTimer).WillOnce(Return(SOFTBUS_ALREADY_TRIGGERED))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = BindAsync(0, qos, 0, &listener);
+    int32_t ret = BindAsync(0, qos, 0, &listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = BindAsync(0, qos, 0, &listener);

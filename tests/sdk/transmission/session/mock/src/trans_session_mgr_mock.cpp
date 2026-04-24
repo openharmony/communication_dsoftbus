@@ -189,11 +189,6 @@ int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType,
     return GetManagerInterface()->ClientGetSessionIsD2DByChannelId(channelId, channelType, isD2D);
 }
 
-bool IsSessionExceedLimit(void)
-{
-    return GetManagerInterface()->IsSessionExceedLimit();
-}
-
 int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D)
 {
     return GetManagerInterface()->ClientCheckIsD2DBySessionId(sessionId, isD2D);
