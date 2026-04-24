@@ -95,10 +95,7 @@ public:
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
     virtual int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num) = 0;
-    virtual void LnnNotifyLpMcuUpdateHbInfo(int32_t type) = 0;
-    virtual bool LnnIsLocalSupportMcuFeature(void) = 0;
     virtual void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy) = 0;
-    virtual bool LnnIsOsAccountConstraint(void) = 0;
 };
 class DecisionDbDepsInterfaceMock : public DecisionDbDepsInterface {
 public:
@@ -150,10 +147,7 @@ public:
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
     MOCK_METHOD2(SelectAllAcl, int32_t(TrustedInfo **, uint32_t *));
-    MOCK_METHOD1(LnnNotifyLpMcuUpdateHbInfo, void(int32_t));
-    MOCK_METHOD0(LnnIsLocalSupportMcuFeature, bool(void));
     MOCK_METHOD2(LnnNotifyLpMcuInit, void(SoftBusHbApState, int32_t));
-    MOCK_METHOD0(LnnIsOsAccountConstraint, bool(void));
     static int32_t ActionOfSelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num);
 };
 } // namespace OHOS

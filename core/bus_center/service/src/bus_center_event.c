@@ -417,7 +417,7 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_EVENT, "count is 0");
         return;
     }
-
+    
     LnnEventHandler *handlesArray = (LnnEventHandler *)SoftBusCalloc(sizeof(LnnEventHandlerItem) * count);
     if (handlesArray == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc failed");
@@ -965,13 +965,6 @@ void LnnNotifyHaLeaveMetaNodeEvent(const char *metaNodeId)
         return;
     }
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
-}
-
-void LnnNotifyConstraintStateChangeEvent(bool isConstraint)
-{
-    LnnConstraintChangeEvent event = {
-        .basic.event = LNN_EVENT_CONSTRAINT_ENABLE, .isConstraint = isConstraint};
-    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType)

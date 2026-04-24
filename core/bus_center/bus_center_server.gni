@@ -57,7 +57,6 @@ bus_center_server_inc += [
   "$dsoftbus_root_path/core/bus_center/ipc/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/manager",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
   "$dsoftbus_root_path/core/authentication/include",
 ]
@@ -116,5 +115,4 @@ if (defined(ohos_lite)) {
       bus_center_core_adapter_external_deps + adapter_wifi_external_deps +
       adapter_hdi_external_deps
   bus_center_server_external_deps += [ "c_utils:utils" ]
-  bus_center_server_external_deps += [ "os_account:os_account_innerkits" ]
 }

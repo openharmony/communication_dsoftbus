@@ -146,15 +146,5 @@ int32_t RegistUsbProtocolManager(void)
 {
     return GetNetworkManagerInterface()->RegistUsbProtocolManager();
 }
-
-bool LnnIsOsAccountConstraint(void)
-{
-    return GetNetworkManagerInterface()->LnnIsOsAccountConstraint();
-}
-
-int32_t LnnClearAllNode(void)
-{
-    return GetNetworkManagerInterface()->LnnClearAllNode();
-}
 }
 } // namespace OHOS

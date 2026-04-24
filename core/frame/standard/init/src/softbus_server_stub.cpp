@@ -15,7 +15,6 @@
 
 #include "softbus_server_stub.h"
 
-#include "lnn_ohos_account_adapter.h"
 #include "securec.h"
 
 #include "accesstoken_kit.h"
@@ -150,7 +149,6 @@ SoftBusServerStub::SoftBusServerStub()
 {
     InitMemberFuncMap();
     InitMemberPermissionMap();
-    InitMemberConstraintSet();
     memberFuncMap_[MANAGE_REGISTER_BR_PROXY_SERVICE] = &SoftBusServerStub::SoftbusRegisterBrProxyServiceInner;
     memberFuncMap_[SERVER_OPEN_BR_PROXY] = &SoftBusServerStub::OpenBrProxyInner;
     memberFuncMap_[SERVER_CLOSE_BR_PROXY] = &SoftBusServerStub::CloseBrProxyInner;
@@ -289,63 +287,6 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_PROCESS_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
-void SoftBusServerStub::InitMemberConstraintSet()
-{
-    memberConstraintSet_.insert(SERVER_JOIN_LNN);
-    memberConstraintSet_.insert(SERVER_LEAVE_LNN);
-    memberConstraintSet_.insert(SERVER_SET_NODE_DATA_CHANGE_FLAG);
-    memberConstraintSet_.insert(SERVER_GET_NODE_KEY_INFO);
-    memberConstraintSet_.insert(SERVER_SHIFT_LNN_GEAR);
-    memberConstraintSet_.insert(SERVER_SYNC_TRUSTED_RELATION);
-    memberConstraintSet_.insert(SERVER_ACTIVE_META_NODE);
-    memberConstraintSet_.insert(SERVER_DEACTIVE_META_NODE);
-    memberConstraintSet_.insert(SERVER_GET_ALL_META_NODE_INFO);
-    memberConstraintSet_.insert(SERVER_SET_DATA_LEVEL);
-    memberConstraintSet_.insert(SERVER_REG_DATA_LEVEL_CHANGE_CB);
-    memberConstraintSet_.insert(SERVER_UNREG_DATA_LEVEL_CHANGE_CB);
-}
-
-int32_t SoftBusServerStub::CheckPermission(uint32_t code)
-{
-    auto itPerm = memberPermissionMap_.find(code);
-    if (itPerm == memberPermissionMap_.end()) {
-        return SOFTBUS_OK;
-    }
-    const char *permission = itPerm->second;
-    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if ((permission != nullptr) &&
-        (!SoftBusCheckIsAccessAndRecordAccessToken(callingTokenId, permission))) {
-        SoftbusReportPermissionFaultEvt(code);
-        COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s, tokenId=%{public}d",
-            permission, callingTokenId);
-        pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        TransAlarmExtra extra = {
-            .callerPid = (int32_t)callingPid,
-            .methodId = (int32_t)code,
-            .conflictName = nullptr,
-            .conflictedName = nullptr,
-            .occupyedName = nullptr,
-            .permissionName = permission,
-            .sessionName = nullptr,
-        };
-        TRANS_ALARM(NO_PERMISSION_ALARM, CONTROL_ALARM_TYPE, extra);
-        return SOFTBUS_ACCESS_TOKEN_DENIED;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::CheckAccountConstraint(uint32_t code)
-{
-    if (!LnnIsOsAccountConstraint()) {
-        return SOFTBUS_OK;
-    }
-    if (memberConstraintSet_.count(code) > 0) {
-        COMM_LOGE(COMM_SVC, "operation blocked by account constraint, code=%{public}u", code);
-        return SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusServerStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -362,13 +303,28 @@ int32_t SoftBusServerStub::OnRemoteRequest(
         return SOFTBUS_IPC_ERR;
     }
 
-    int32_t ret = CheckPermission(code);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    ret = CheckAccountConstraint(code);
-    if (ret != SOFTBUS_OK) {
-        return ret;
+    auto itPerm = memberPermissionMap_.find(code);
+    if (itPerm != memberPermissionMap_.end()) {
+        const char *permission = itPerm->second;
+        uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+        if ((permission != nullptr) &&
+            (!SoftBusCheckIsAccessAndRecordAccessToken(callingTokenId, permission))) {
+            SoftbusReportPermissionFaultEvt(code);
+            COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s, tokenId=%{public}d",
+                permission, callingTokenId);
+            pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+            TransAlarmExtra extra = {
+                .callerPid = (int32_t)callingPid,
+                .methodId = (int32_t)code,
+                .conflictName = NULL,
+                .conflictedName = NULL,
+                .occupyedName = NULL,
+                .permissionName = permission,
+                .sessionName = NULL,
+            };
+            TRANS_ALARM(NO_PERMISSION_ALARM, CONTROL_ALARM_TYPE, extra);
+            return SOFTBUS_ACCESS_TOKEN_DENIED;
+        }
     }
 
     const auto &itFunc = memberFuncMap_.find(code);
@@ -2600,7 +2556,7 @@ int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &dat
     }
     return SOFTBUS_OK;
 }
-
+ 
 int32_t SoftBusServerStub::OpenBrProxyInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *brMac = data.ReadCString();
@@ -2608,13 +2564,13 @@ int32_t SoftBusServerStub::OpenBrProxyInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "[br_proxy] read brMac failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
-
+ 
     const char *uuid = data.ReadCString();
     if (uuid == nullptr) {
         COMM_LOGE(COMM_SVC, "[br_proxy] read uuid failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
-
+ 
     int32_t retReply = OpenBrProxy(brMac, uuid);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
@@ -2622,7 +2578,7 @@ int32_t SoftBusServerStub::OpenBrProxyInner(MessageParcel &data, MessageParcel &
     }
     return SOFTBUS_OK;
 }
-
+ 
 int32_t SoftBusServerStub::CloseBrProxyInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
@@ -2630,7 +2586,7 @@ int32_t SoftBusServerStub::CloseBrProxyInner(MessageParcel &data, MessageParcel 
         COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-
+ 
     int32_t retReply = CloseBrProxy(channelId);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
@@ -2638,7 +2594,7 @@ int32_t SoftBusServerStub::CloseBrProxyInner(MessageParcel &data, MessageParcel 
     }
     return SOFTBUS_OK;
 }
-
+ 
 int32_t SoftBusServerStub::SendBrProxyDataInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
@@ -2646,17 +2602,17 @@ int32_t SoftBusServerStub::SendBrProxyDataInner(MessageParcel &data, MessageParc
         COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-
+ 
     uint32_t dataLen;
     if (!data.ReadUint32(dataLen)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] read dataLen failed!");
         return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
     }
-
+ 
     auto rawData = data.ReadRawData(dataLen);
     COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "[br_proxy] read data failed!");
     void *dataInfo = const_cast<void *>(rawData);
-
+ 
     int32_t retReply = SendBrProxyData(channelId, (char *)dataInfo, dataLen);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
@@ -2664,7 +2620,7 @@ int32_t SoftBusServerStub::SendBrProxyDataInner(MessageParcel &data, MessageParc
     }
     return SOFTBUS_OK;
 }
-
+ 
 int32_t SoftBusServerStub::SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t channelId;
@@ -2682,7 +2638,7 @@ int32_t SoftBusServerStub::SetBrProxyListenerStateInner(MessageParcel &data, Mes
         COMM_LOGE(COMM_SVC, "[br_proxy] read CbEnabled failed");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-
+ 
     int32_t retReply = SetListenerState(channelId, type, CbEnabled);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
@@ -2690,7 +2646,7 @@ int32_t SoftBusServerStub::SetBrProxyListenerStateInner(MessageParcel &data, Mes
     }
     return SOFTBUS_OK;
 }
-
+ 
 int32_t SoftBusServerStub::GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t uid;
@@ -2698,7 +2654,7 @@ int32_t SoftBusServerStub::GetBrProxyChannelStateInner(MessageParcel &data, Mess
         COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
-
+ 
     bool retReply = IsProxyChannelEnabled(uid);
     if (!reply.WriteBool(retReply)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");

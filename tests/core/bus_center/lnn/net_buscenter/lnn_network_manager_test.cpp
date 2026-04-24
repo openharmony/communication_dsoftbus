@@ -753,18 +753,19 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
 
 /*
  * @tc.name: Risk_Device_Leave_Lnn_Test_001
- * @tc.desc: Verify LnnClearAllNode calls LnnRequestLeaveByAddrType and returns its result
+ * @tc.desc: Verify RiskDeviceLeaveLnn returns SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR
+ *           when LnnGetAllOnlineNodeInfo fails
  * @tc.type: FUNC
  * @tc.require: NONE
  * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, Risk_Device_Leave_Lnn_Test_001, TestSize.Level1)
 {
-    int32_t ret = 0;
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    EXPECT_CALL(managerMock, LnnClearAllNode).WillOnce(Return(SOFTBUS_OK));
-    ret = LnnClearAllNode();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    int ret = 0;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    ret = RiskDeviceLeaveLnn();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
 }
 
 /*
@@ -800,101 +801,6 @@ HWTEST_F(LNNNetworkManagerMockTest, Net_Device_Risk_State_Event_Handler_001, Tes
     NetDeviceRiskStateEventHandler(&event->basic);
 
     EXPECT_EQ(event->status, 0);
-    SoftBusFree(event);
-}
-
-/*
- * @tc.name: Net_Constraint_State_Event_Handler_001
- * @tc.desc: Verify NetConstraintStateEventHandler handles null event and invalid event type
- * @tc.type: FUNC
- * @tc.require: NONE
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetworkManagerMockTest, Net_Constraint_State_Event_Handler_001, TestSize.Level1)
-{
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(NULL));
-
-    LnnConstraintChangeEvent *event =
-        reinterpret_cast<LnnConstraintChangeEvent *>(SoftBusCalloc(sizeof(LnnConstraintChangeEvent)));
-    ASSERT_TRUE(event != nullptr);
-    event->basic.event = LNN_EVENT_TYPE_MAX;
-    event->isConstraint = true;
-    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(&event->basic));
-    SoftBusFree(event);
-}
-
-/*
- * @tc.name: Net_Constraint_State_Event_Handler_002
- * @tc.desc: Verify NetConstraintStateEventHandler handles constraint enabled correctly,
- *           triggering AuthStopListening, LnnStopPublish, LnnStopDiscovery, LnnRequestLeaveByAddrType
- * @tc.type: FUNC
- * @tc.require: NONE
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetworkManagerMockTest, Net_Constraint_State_Event_Handler_002, TestSize.Level1)
-{
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    EXPECT_CALL(managerMock, LnnStopPublish).WillOnce(Return());
-    EXPECT_CALL(managerMock, LnnStopDiscovery).WillOnce(Return());
-    EXPECT_CALL(managerMock, LnnRequestLeaveByAddrType).WillOnce(Return(SOFTBUS_OK));
-
-    LnnConstraintChangeEvent *event =
-        reinterpret_cast<LnnConstraintChangeEvent *>(SoftBusCalloc(sizeof(LnnConstraintChangeEvent)));
-    ASSERT_TRUE(event != nullptr);
-    event->basic.event = LNN_EVENT_CONSTRAINT_ENABLE;
-    event->isConstraint = true;
-    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(&event->basic));
-    SoftBusFree(event);
-}
-
-/*
- * @tc.name: Net_Constraint_State_Event_Handler_003
- * @tc.desc: Verify NetConstraintStateEventHandler handles constraint disabled correctly
- * @tc.type: FUNC
- * @tc.require: NONE
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetworkManagerMockTest, Net_Constraint_State_Event_Handler_003, TestSize.Level1)
-{
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(managerMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
-
-    LnnConstraintChangeEvent *event =
-        reinterpret_cast<LnnConstraintChangeEvent *>(SoftBusCalloc(sizeof(LnnConstraintChangeEvent)));
-    ASSERT_TRUE(event != nullptr);
-    event->basic.event = LNN_EVENT_CONSTRAINT_ENABLE;
-    event->isConstraint = false;
-    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(&event->basic));
-    SoftBusFree(event);
-}
-
-/*
- * @tc.name: Net_Constraint_State_Event_Handler_004
- * @tc.desc: Verify NetConstraintStateEventHandler with wrong event type
- * @tc.type: FUNC
- * @tc.require: NONE
- * @tc.level: Level1
- */
-HWTEST_F(LNNNetworkManagerMockTest, Net_Constraint_State_Event_Handler_004, TestSize.Level1)
-{
-    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    LnnConstraintChangeEvent *event =
-        reinterpret_cast<LnnConstraintChangeEvent *>(SoftBusCalloc(sizeof(LnnConstraintChangeEvent)));
-    ASSERT_TRUE(event != nullptr);
-
-    event->basic.event = LNN_EVENT_IP_ADDR_CHANGED;
-    event->isConstraint = true;
-    EXPECT_CALL(managerMock, LnnStopPublish).Times(0);
-    EXPECT_CALL(managerMock, LnnStopDiscovery).Times(0);
-    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(&event->basic));
-
-    event->basic.event = LNN_EVENT_WIFI_STATE_CHANGED;
-    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(&event->basic));
-
     SoftBusFree(event);
 }
 } // namespace OHOS
