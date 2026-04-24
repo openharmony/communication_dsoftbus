@@ -42,9 +42,6 @@ public:
         DeviceLeaveReason leaveReason) = 0;
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
-    virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen,
-        bool hasMcuRequestDisable) = 0;
-    virtual bool LnnIsOsAccountConstraint(void) = 0;
 };
 
 class LnnHeatbeatDeviceRiskInterfaceMock : public LnnHeatbeatDeviceRiskInterface {
@@ -54,8 +51,6 @@ public:
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t(NodeBasicInfo **, int32_t *));
     MOCK_METHOD3(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType, DeviceLeaveReason));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *id, IdCategory type, NodeInfo *info));
-    MOCK_METHOD3(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t, bool));
-    MOCK_METHOD0(LnnIsOsAccountConstraint, bool(void));
 };
 } // namespace OHOS
 #endif // LNN_HEARTBEAT_SATIC_MOCK_H

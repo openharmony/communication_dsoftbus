@@ -98,8 +98,6 @@ void LnnNotifyDeviceRiskStateChangeEvent(void);
 
 void LnnNotifyHaLeaveMetaNodeEvent(const char *metaNodeId);
 
-void LnnNotifyConstraintStateChangeEvent(bool isConstraint);
-
 void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy);
 
 void LnnNotifyLpMcuUpdateHbInfo(int32_t type);

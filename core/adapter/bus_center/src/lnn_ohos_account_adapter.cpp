@@ -13,15 +13,9 @@
  * limitations under the License.
  */
 
-#include <atomic>
-#include <memory>
-#include <mutex>
-#include <set>
-#include <unordered_map>
 #include <vector>
 
 #include "anonymizer.h"
-#include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
@@ -30,30 +24,17 @@
 #include "lnn_ohos_account_adapter.h"
 #include "message_handler.h"
 #include "ohos_account_kits.h"
-#include "os_account_constraint_subscriber.h"
 #include "os_account_manager.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "auth_hichain_adapter.h"
 
+
 static const int32_t ACCOUNT_STRTOLL_BASE = 10;
 static const uint64_t CONTROL_PANEL_DISPLAY_ID = 0;
-static const int32_t OS_ACCOUNT_INIT_DELAY_LEN = 1000;
-static const uint32_t OS_ACCOUNT_MAX_RETRY_COUNT = 10;
-static const uint32_t CONSTRAINT_UPDATE_RETRY_COUNT = 10;
-static const uint32_t CONSTRAINT_UPDATE_RETRY_INTERVAL_MS = 50;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
-
-static std::mutex g_constraintMutex;
-static std::unordered_map<int32_t, bool> g_accountConstraintMap;
-static std::atomic<bool> g_isAccountAdapterInit(false);
-static std::atomic<uint32_t> g_osAccountInitRetryTimes(0);
-static std::atomic<uint32_t> g_constraintUpdateRetryTimes(0);
-static std::mutex g_subscriberMutex;
-static std::shared_ptr<OHOS::AccountSA::OsAccountConstraintSubscriber> g_subscriber;
-static constexpr const char *DISTRIBUTED_TRANSMISSION_OUTGOING_CONSTRAINT = "constraint.distributed.transmission";
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 {
@@ -118,7 +99,7 @@ int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len)
         LNN_LOGD(LNN_STATE, "not login account");
         return SOFTBUS_MEM_ERR;
     }
-    *id = static_cast<char *>(SoftBusCalloc(*len));
+    *id = (char *)SoftBusCalloc(*len);
     if (*id == nullptr) {
         LNN_LOGE(LNN_STATE, "malloc fail");
         return SOFTBUS_MEM_ERR;
@@ -134,7 +115,7 @@ int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len)
 
 int32_t GetCurrentAccount(int64_t *account)
 {
-    if (account == nullptr) {
+    if (account == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -313,219 +294,4 @@ int32_t GetOsAccountLocalIdFromUid(int32_t uid, int32_t *userId)
     }
     *userId = localId;
     return SOFTBUS_OK;
-}
-
-class LnnOsAccountConstraintSubscriber : public OHOS::AccountSA::OsAccountConstraintSubscriber {
-public:
-    explicit LnnOsAccountConstraintSubscriber(const std::set<std::string> &constraintSet)
-        : OHOS::AccountSA::OsAccountConstraintSubscriber(constraintSet)
-    {
-    }
-
-    void OnConstraintChanged(const OHOS::AccountSA::OsAccountConstraintStateData &constraintData) override;
-};
-
-void LnnOsAccountConstraintSubscriber::OnConstraintChanged(
-    const OHOS::AccountSA::OsAccountConstraintStateData &constraintData)
-{
-    if (constraintData.constraint.empty()) {
-        LNN_LOGW(LNN_STATE, "constraint data is empty, skip");
-        return;
-    }
-    if (constraintData.constraint != DISTRIBUTED_TRANSMISSION_OUTGOING_CONSTRAINT) {
-        LNN_LOGW(LNN_STATE, "unexpected constraint=%{public}s, skip",
-            constraintData.constraint.c_str());
-        return;
-    }
-    int32_t localId = constraintData.localId;
-    bool newState = constraintData.isEnabled;
-    bool oldState = false;
-    {
-        std::lock_guard<std::mutex> lock(g_constraintMutex);
-        auto it = g_accountConstraintMap.find(localId);
-        if (it != g_accountConstraintMap.end()) {
-            oldState = it->second;
-        }
-        g_accountConstraintMap[localId] = newState;
-    }
-
-    LNN_LOGI(LNN_STATE, "constraint changed, localId=%{public}d, newState=%{public}d, oldState=%{public}d",
-        localId, newState, oldState);
-    if (oldState == newState) {
-        return;
-    }
-    int32_t foregroundLocalId = JudgeDeviceTypeAndGetOsAccountIds();
-    if (foregroundLocalId < 0) {
-        LNN_LOGW(LNN_STATE, "get foreground localId failed, skip notify");
-        return;
-    }
-    if (localId != foregroundLocalId) {
-        LNN_LOGI(LNN_STATE, "localId=%{public}d is not foreground=%{public}d, skip notify",
-            localId, foregroundLocalId);
-        return;
-    }
-    LnnNotifyConstraintStateChangeEvent(newState);
-}
-
-static int32_t SubscribeOsAccountConstraintsLocked(void)
-{
-    std::lock_guard<std::mutex> lock(g_subscriberMutex);
-
-    if (g_subscriber != nullptr) {
-        LNN_LOGI(LNN_STATE, "os account adapter already initialized");
-        return SOFTBUS_OK;
-    }
-
-    LnnUpdateConstraintMapForCurrentAccount();
-
-    std::set<std::string> constraints;
-    constraints.insert(DISTRIBUTED_TRANSMISSION_OUTGOING_CONSTRAINT);
-    g_subscriber = std::make_shared<LnnOsAccountConstraintSubscriber>(constraints);
-    OHOS::ErrCode err = OHOS::AccountSA::OsAccountManager::SubscribeOsAccountConstraints(g_subscriber);
-    if (err != OHOS::ERR_OK) {
-        LNN_LOGE(LNN_STATE, "subscribe os account constraints failed, err=%{public}d", err);
-        g_subscriber = nullptr;
-        return SOFTBUS_NETWORK_SUBSCRIBE_FAILED;
-    }
-    LNN_LOGI(LNN_STATE, "subscribe os account constraints successful");
-    return SOFTBUS_OK;
-}
-
-static void LnnUpdateConstraintMapAsync(void *para)
-{
-    (void)para;
-
-    int32_t currentId = GetActiveOsAccountIds();
-    if (currentId < 0) {
-        LNN_LOGW(LNN_STATE, "get active os account id failed, assume not constraint");
-        return;
-    }
-    bool isEnabled = false;
-    OHOS::ErrCode err = OHOS::AccountSA::OsAccountManager::CheckOsAccountConstraintEnabled(
-        currentId, DISTRIBUTED_TRANSMISSION_OUTGOING_CONSTRAINT, isEnabled);
-    if (err == OHOS::ERR_OK) {
-        g_constraintUpdateRetryTimes.store(0);
-        {
-            std::lock_guard<std::mutex> constraintLock(g_constraintMutex);
-            g_accountConstraintMap[currentId] = isEnabled;
-        }
-        LNN_LOGI(LNN_STATE, "update constraint state=%{public}d, localId=%{public}d", isEnabled, currentId);
-        LnnNotifyConstraintStateChangeEvent(isEnabled);
-        return;
-    }
-    uint32_t retryTimes = g_constraintUpdateRetryTimes.fetch_add(1) + 1;
-    if (retryTimes >= CONSTRAINT_UPDATE_RETRY_COUNT) {
-        LNN_LOGW(LNN_STATE, "update constraint retry count exceeded, retryTimes=%{public}u, assume disabled",
-            retryTimes);
-        g_constraintUpdateRetryTimes.store(0);
-        return;
-    }
-    LNN_LOGI(LNN_STATE, "update constraint retry, retryTimes=%{public}u", retryTimes);
-    int32_t ret = LnnAsyncCallbackDelayHelper(
-        GetLooper(LOOP_TYPE_DEFAULT), LnnUpdateConstraintMapAsync, nullptr, CONSTRAINT_UPDATE_RETRY_INTERVAL_MS);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "async delay call fail, ret=%{public}d", ret);
-        g_constraintUpdateRetryTimes.store(0);
-    }
-}
-
-void LnnUpdateConstraintMapForCurrentAccount(void)
-{
-    int32_t ret = LnnAsyncCallbackDelayHelper(
-        GetLooper(LOOP_TYPE_DEFAULT), LnnUpdateConstraintMapAsync, nullptr, 0);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "async delay call fail for constraint update, ret=%{public}d", ret);
-    }
-}
-
-static void InitOsAccountAdapterAsync(void *para)
-{
-    (void)para;
-    if (g_isAccountAdapterInit.load()) {
-        LNN_LOGI(LNN_STATE, "os account adapter is already inited");
-        return;
-    }
-
-    int32_t ret = SubscribeOsAccountConstraintsLocked();
-    if (ret == SOFTBUS_OK) {
-        g_isAccountAdapterInit.store(true);
-        return;
-    }
-
-    g_osAccountInitRetryTimes.fetch_add(1);
-    if (g_osAccountInitRetryTimes.load() >= OS_ACCOUNT_MAX_RETRY_COUNT) {
-        LNN_LOGE(LNN_STATE, "retry count exceed limit, retryTimes=%{public}u", g_osAccountInitRetryTimes.load());
-        return;
-    }
-
-    ret = LnnAsyncCallbackDelayHelper(
-        GetLooper(LOOP_TYPE_DEFAULT), InitOsAccountAdapterAsync, nullptr, OS_ACCOUNT_INIT_DELAY_LEN);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "async delay call fail, ret=%{public}d", ret);
-    }
-}
-
-int32_t LnnInitOsAccountAdapter(void)
-{
-    if (g_isAccountAdapterInit.load()) {
-        LNN_LOGI(LNN_STATE, "os account adapter is already inited");
-        return SOFTBUS_OK;
-    }
-
-    g_osAccountInitRetryTimes.store(0);
-    int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitOsAccountAdapterAsync, nullptr, 0);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "async delay call fail, ret=%{public}d", ret);
-        return ret;
-    }
-    return SOFTBUS_OK;
-}
-
-void LnnClearOsAccountAdapterStatus(void)
-{
-    g_isAccountAdapterInit.store(false);
-    g_osAccountInitRetryTimes.store(0);
-}
-
-void LnnDeinitOsAccountAdapter(void)
-{
-    g_isAccountAdapterInit.store(false);
-    g_osAccountInitRetryTimes.store(0);
-    {
-        std::lock_guard<std::mutex> constraintLock(g_constraintMutex);
-        g_accountConstraintMap.clear();
-    }
-    std::lock_guard<std::mutex> lock(g_subscriberMutex);
-
-    if (g_subscriber != nullptr) {
-        OHOS::ErrCode err = OHOS::AccountSA::OsAccountManager::UnsubscribeOsAccountConstraints(g_subscriber);
-        if (err != OHOS::ERR_OK) {
-            LNN_LOGE(LNN_STATE, "unsubscribe os account constraints failed, err=%{public}d", err);
-        }
-        g_subscriber = nullptr;
-    }
-}
-
-static bool LnnIsOsAccountConstraintByLocalId(int32_t localId)
-{
-    if (localId < 0) {
-        LNN_LOGW(LNN_STATE, "invalid localId=%{public}d, assume not constraint", localId);
-        return false;
-    }
-    std::lock_guard<std::mutex> lock(g_constraintMutex);
-    auto it = g_accountConstraintMap.find(localId);
-    if (it == g_accountConstraintMap.end()) {
-        return false;
-    }
-    return it->second;
-}
-
-bool LnnIsOsAccountConstraint(void)
-{
-    int32_t currentId = GetActiveOsAccountIds();
-    if (currentId < 0) {
-        LNN_LOGW(LNN_STATE, "get active os account id failed, assume not constraint");
-        return false;
-    }
-    return LnnIsOsAccountConstraintByLocalId(currentId);
 }

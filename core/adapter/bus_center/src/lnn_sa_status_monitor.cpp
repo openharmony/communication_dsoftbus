@@ -20,7 +20,6 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_log.h"
 #include "lnn_network_info.h"
-#include "lnn_ohos_account_adapter.h"
 #include "message_handler.h"
 #include "refbase.h"
 #include "softbus_error_code.h"
@@ -29,7 +28,6 @@
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t MAX_RETRY_COUNT = 10;
-static const int32_t ACCOUNT_SA_ID = OHOS::SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN;
 
 namespace OHOS {
 class ServiceStatusMonitorManager : public RefBase {
@@ -58,9 +56,6 @@ void ServiceStatusMonitorManager::SaStatusListener::OnAddSystemAbility(int32_t s
                 LNN_LOGE(LNN_EVENT, "async notify fail, ret=%{public}d", ret);
             }
             break;
-        case ACCOUNT_SA_ID:
-            LnnInitOsAccountAdapter();
-            break;
         default:
             LNN_LOGE(LNN_EVENT, "invalid saId=%{public}d", saId);
             break;
@@ -71,13 +66,6 @@ void ServiceStatusMonitorManager::SaStatusListener::OnRemoveSystemAbility(int32_
 {
     (void)deviceId;
     LNN_LOGI(LNN_EVENT, "onRemove saId=%{public}d", saId);
-    switch (saId) {
-        case ACCOUNT_SA_ID:
-            LnnClearOsAccountAdapterStatus();
-            break;
-        default:
-            break;
-    }
 }
 
 int32_t ServiceStatusMonitorManager::SubscribeSaById(int32_t saId)
@@ -143,24 +131,6 @@ static void UnRegisterWifiService()
     g_serviceMonitorMgr->UnSubscribeSaById(OHOS::WIFI_DEVICE_SYS_ABILITY_ID);
 }
 
-static int32_t RegisterAccountService()
-{
-    if (g_serviceMonitorMgr == nullptr) {
-        LNN_LOGE(LNN_EVENT, "not init");
-        return SOFTBUS_NO_INIT;
-    }
-    return g_serviceMonitorMgr->SubscribeSaById(ACCOUNT_SA_ID);
-}
-
-static void UnRegisterAccountService()
-{
-    if (g_serviceMonitorMgr == nullptr) {
-        LNN_LOGE(LNN_EVENT, "not init");
-        return;
-    }
-    g_serviceMonitorMgr->UnSubscribeSaById(ACCOUNT_SA_ID);
-}
-
 static void InitSaStatusMonitor(void *para)
 {
     (void)para;
@@ -184,10 +154,6 @@ static void InitSaStatusMonitor(void *para)
         retryTimes++;
         return;
     }
-    ret = RegisterAccountService();
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "register account service fail, ret=%{public}d", ret);
-    }
     LNN_LOGI(LNN_EVENT, "init success");
 }
 
@@ -208,5 +174,4 @@ void LnnDeInitSaStatusMonitor(void)
         return;
     }
     UnRegisterWifiService();
-    UnRegisterAccountService();
 }

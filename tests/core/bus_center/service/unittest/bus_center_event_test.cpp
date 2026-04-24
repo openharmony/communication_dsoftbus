@@ -828,28 +828,4 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest037, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnNotifyOnlineState(isOnline, &info));
 }
 
-/*
- * @tc.name: BusCenterEventTest038
- * @tc.desc: Test the LnnNotifyConstraintStateChangeEvent function with constraint enabled.
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require: 1
- */
-HWTEST_F(BusCenterEventTest, BusCenterEventTest038, TestSize.Level1)
-{
-    EXPECT_NO_FATAL_FAILURE(LnnNotifyConstraintStateChangeEvent(true));
-}
-
-/*
- * @tc.name: BusCenterEventTest039
- * @tc.desc: Test the LnnNotifyConstraintStateChangeEvent function with constraint disabled.
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require: 1
- */
-HWTEST_F(BusCenterEventTest, BusCenterEventTest039, TestSize.Level1)
-{
-    EXPECT_NO_FATAL_FAILURE(LnnNotifyConstraintStateChangeEvent(false));
-}
-
 }

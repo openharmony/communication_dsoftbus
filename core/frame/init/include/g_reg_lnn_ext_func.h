@@ -378,7 +378,6 @@ typedef bool (*CheckVirtualLinkOnlyFunc)(void);
 typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
 typedef bool (*IsHeartbeatEnableForMcuFunc)(void);
 typedef bool (*LnnIsLocalSupportMcuFeatureFunc)(void);
-typedef bool (*LnnIsOsAccountConstraintFunc)(void);
 
 #ifdef __cplusplus
 }
