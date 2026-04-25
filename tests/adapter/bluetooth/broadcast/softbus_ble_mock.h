@@ -32,6 +32,7 @@ public:
     virtual int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
         void *para, uint64_t delayMillis) = 0;
     virtual int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time) = 0;
+    virtual bool DiscIsOsAccountConstraint() = 0;
 };
 
 class ManagerMock : public BleGattInterface {
@@ -50,6 +51,7 @@ public:
             void *para, uint64_t delayMillis), (override));
     MOCK_METHOD(int32_t, SoftBusCondWait,
         (SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time), (override));
+    MOCK_METHOD(bool, DiscIsOsAccountConstraint, (), (override));
 
     static const SoftbusBroadcastCallback *broadcastCallback;
     static const SoftbusScanCallback *scanCallback;

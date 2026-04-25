@@ -15,6 +15,7 @@
 
 #include "disc_event_manager.h"
 #include "disc_log.h"
+#include "disc_manager.h"
 #include "g_enhance_disc_func_pack.h"
 #include "softbus_error_code.h"
 
@@ -38,6 +39,9 @@ int32_t DiscEventManagerInit(void)
     ret = DiscShareNfcEventInitPacked();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init share nfc event fail");
 
+    ret = DiscConstraintEventInit();
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init constraint event event fail");
+
     DISC_LOGI(DISC_INIT, "disc event manager init succ");
     return SOFTBUS_OK;
 }
@@ -50,5 +54,6 @@ void DiscEventManagerDeinit(void)
     DiscOopBleEventDeinitPacked();
     DiscPcCollaborationEventDeinitPacked();
     DiscShareNfcEventDeinitPacked();
+    DiscConstraintEventDeInit();
 }
 
