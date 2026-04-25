@@ -25,6 +25,8 @@ adapter_ble_inc = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
   "$dsoftbus_root_path/core/broadcast/common/include",
   "$dsoftbus_root_path/dfx/event/src",
+  "$dsoftbus_root_path/core/discovery/manager/include",
+  "$dsoftbus_root_path/core/discovery/interface",
 ]
 adapter_ble_src = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_client.c",

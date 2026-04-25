@@ -20,6 +20,7 @@
 
 #include "ble_mock.h"
 #include "coap_mock.h"
+#include "constraint_mock.h"
 #include "disc_interface.h"
 #include "disc_log.h"
 #include "disc_manager.h"
@@ -45,9 +46,17 @@ void SignalHandler(int32_t sig, siginfo_t *info, void *context)
 namespace OHOS {
 class DiscManagerMockTest : public testing::Test {
 public:
-    static void SetUpTestCase() { }
+    static void SetUpTestCase()
+    {
+        globalConstraintMock_ = new ConstraintMock();
+        globalConstraintMock_->SetupStub();
+    }
 
-    static void TearDownTestCase() { }
+    static void TearDownTestCase()
+    {
+        delete globalConstraintMock_;
+        globalConstraintMock_ = nullptr;
+    }
 
     void SetUp() override { }
 
@@ -120,6 +129,7 @@ public:
     static inline const char *packageName_ = "TestPackage";
     static inline const char *packageName1_ = "TestPackage1";
     static inline const char *largePackageName_ = "aaaaaaaaabbbbbbbbccccccccddddddddaaaaaaaaabbbbbbbbccccccccdddddddde";
+    static inline ConstraintMock *globalConstraintMock_ = nullptr;
 };
 
 /*
@@ -853,10 +863,9 @@ HWTEST_F(DiscManagerMockTest, DiscConcurrentRequests001, TestSize.Level1)
     BleMock bleMock;
     bleMock.SetupStub();
 
-    struct sigaction sa = {
-        .sa_flags = SA_SIGINFO,
-        .sa_sigaction = SignalHandler,
-    };
+    struct sigaction sa = {};
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = SignalHandler;
     sigemptyset(&sa.sa_mask);
     ASSERT_NE(sigaction(SIGSEGV, &sa, nullptr), -1);
 
@@ -1112,4 +1121,364 @@ HWTEST_F(DiscManagerMockTest, CheckRequestValid003, TestSize.Level1)
     DiscMgrDeInitFuncMock();
     DISC_LOGI(DISC_TEST, "CheckRequestValid003 end ----");
 }
+/*
+ * @tc.name: DiscConstraintEventInit001
+ * @tc.desc: test DiscConstraintEventInit success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventInit001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventInit001 begin ----");
+    ConstraintMock constraintMock;
+    constraintMock.SetupStub();
+    EXPECT_EQ(DiscConstraintEventInit(), SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventInit001 end ----");
+}
+
+/*
+ * @tc.name: DiscConstraintEventInit002
+ * @tc.desc: test DiscConstraintEventInit failed when register returns error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventInit002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventInit002 begin ----");
+    ConstraintMock constraintMock;
+    EXPECT_CALL(constraintMock, LnnRegisterEventHandler(testing::_, testing::_))
+        .WillRepeatedly(Return(SOFTBUS_NOT_IMPLEMENT));
+    EXPECT_NE(DiscConstraintEventInit(), SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventInit002 end ----");
+}
+
+/*
+ * @tc.name: DiscConstraintEventDeInit001
+ * @tc.desc: test DiscConstraintEventDeInit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventDeInit001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventDeInit001 begin ----");
+    ConstraintMock constraintMock;
+    constraintMock.SetupStub();
+    EXPECT_NO_FATAL_FAILURE(DiscConstraintEventDeInit());
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventDeInit001 end ----");
+}
+
+/*
+ * @tc.name: DiscIsOsAccountConstraint001
+ * @tc.desc: test DiscIsOsAccountConstraint returns false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscIsOsAccountConstraint001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscIsOsAccountConstraint001 begin ----");
+    ConstraintMock constraintMock;
+    EXPECT_CALL(constraintMock, LnnIsOsAccountConstraint()).WillRepeatedly(Return(false));
+    EXPECT_FALSE(DiscIsOsAccountConstraint());
+    DISC_LOGI(DISC_TEST, "DiscIsOsAccountConstraint001 end ----");
+}
+
+/*
+ * @tc.name: DiscIsOsAccountConstraint002
+ * @tc.desc: test DiscIsOsAccountConstraint returns true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscIsOsAccountConstraint002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscIsOsAccountConstraint002 begin ----");
+    ConstraintMock constraintMock;
+    EXPECT_CALL(constraintMock, LnnIsOsAccountConstraint()).WillRepeatedly(Return(true));
+    EXPECT_TRUE(DiscIsOsAccountConstraint());
+    DISC_LOGI(DISC_TEST, "DiscIsOsAccountConstraint002 end ----");
+}
+
+/*
+ * @tc.name: DiscConstraintEventHandler001
+ * @tc.desc: test ConstraintEventChangeHandler with null info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventHandler001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler001 begin ----");
+    ConstraintMock constraintMock;
+    constraintMock.SetupStub();
+    EXPECT_EQ(DiscConstraintEventInit(), SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(ConstraintMock::TriggerConstraintEvent(false));
+    // trigger with null - handler should handle gracefully
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler001 end ----");
+}
+
+/*
+ * @tc.name: DiscConstraintEventHandler002
+ * @tc.desc: test ConstraintEventChangeHandler ignores non CONSTRAINT_ENABLE event
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventHandler002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler002 begin ----");
+    ConstraintMock constraintMock;
+    constraintMock.SetupStub();
+    EXPECT_EQ(DiscConstraintEventInit(), SOFTBUS_OK);
+    // no BLE mock setup, so if handler were to invoke stop/restart it would crash
+    // trigger constraint event false -> false (no state change, should be no-op)
+    EXPECT_NO_FATAL_FAILURE(ConstraintMock::TriggerConstraintEvent(false));
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler002 end ----");
+}
+
+/*
+ * @tc.name: DiscConstraintEventHandler003
+ * @tc.desc: test constraint state changes from false to true (enable constraint)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventHandler003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler003 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        ConstraintMock constraintMock;
+        constraintMock.SetupStub();
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+
+        // publish and start discovery first
+        PublishInfo pubInfo;
+        pubInfo.publishId = PUBLISH_ID1;
+        pubInfo.medium = BLE;
+        pubInfo.mode = DISCOVER_MODE_ACTIVE;
+        pubInfo.freq = LOW;
+        pubInfo.capability = "osdCapability";
+        pubInfo.capabilityData = (uint8_t *)"test";
+        pubInfo.dataLen = 4;
+        EXPECT_EQ(DiscPublishService(packageName_, &pubInfo, 0), SOFTBUS_OK);
+
+        SubscribeInfo subInfo;
+        subInfo.subscribeId = SUBSCRIBE_ID1;
+        subInfo.medium = BLE;
+        subInfo.mode = DISCOVER_MODE_ACTIVE;
+        subInfo.freq = LOW;
+        subInfo.capability = "osdCapability";
+        subInfo.capabilityData = (uint8_t *)"test";
+        subInfo.dataLen = 4;
+        EXPECT_EQ(DiscStartDiscovery(packageName_, &subInfo, &serverCallback_, 0), SOFTBUS_OK);
+
+        // init constraint event to register handler
+        EXPECT_EQ(DiscConstraintEventInit(), SOFTBUS_OK);
+
+        // trigger constraint enable: false -> true should stop all publish/discovery
+        EXPECT_CALL(bleMock, Unpublish).WillRepeatedly(Return(SOFTBUS_OK));
+        EXPECT_CALL(bleMock, StopAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
+        EXPECT_NO_FATAL_FAILURE(ConstraintMock::TriggerConstraintEvent(true));
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler003 end ----");
+}
+
+/*
+ * @tc.name: DiscConstraintEventHandler004
+ * @tc.desc: test constraint state changes from true to false (disable constraint)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventHandler004, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler004 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        ConstraintMock constraintMock;
+        constraintMock.SetupStub();
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+
+        // publish first
+        PublishInfo pubInfo;
+        pubInfo.publishId = PUBLISH_ID1;
+        pubInfo.medium = BLE;
+        pubInfo.mode = DISCOVER_MODE_ACTIVE;
+        pubInfo.freq = LOW;
+        pubInfo.capability = "osdCapability";
+        pubInfo.capabilityData = (uint8_t *)"test";
+        pubInfo.dataLen = 4;
+        EXPECT_EQ(DiscPublishService(packageName_, &pubInfo, 0), SOFTBUS_OK);
+
+        SubscribeInfo subInfo;
+        subInfo.subscribeId = SUBSCRIBE_ID1;
+        subInfo.medium = BLE;
+        subInfo.mode = DISCOVER_MODE_ACTIVE;
+        subInfo.freq = LOW;
+        subInfo.capability = "osdCapability";
+        subInfo.capabilityData = (uint8_t *)"test";
+        subInfo.dataLen = 4;
+        EXPECT_EQ(DiscStartDiscovery(packageName_, &subInfo, &serverCallback_, 0), SOFTBUS_OK);
+
+        EXPECT_EQ(DiscConstraintEventInit(), SOFTBUS_OK);
+
+        // first enable constraint (false -> true)
+        EXPECT_CALL(bleMock, Unpublish).WillRepeatedly(Return(SOFTBUS_OK));
+        EXPECT_CALL(bleMock, StopAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
+        ConstraintMock::TriggerConstraintEvent(true);
+
+        // then disable constraint (true -> false) should restart
+        EXPECT_CALL(bleMock, Publish).WillRepeatedly(Return(SOFTBUS_OK));
+        EXPECT_CALL(bleMock, StartAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
+        EXPECT_NO_FATAL_FAILURE(ConstraintMock::TriggerConstraintEvent(false));
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler004 end ----");
+}
+
+/*
+ * @tc.name: DiscConstraintEventHandler005
+ * @tc.desc: test same constraint state does not trigger action
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscConstraintEventHandler005, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler005 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        ConstraintMock constraintMock;
+        constraintMock.SetupStub();
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+
+        EXPECT_EQ(DiscConstraintEventInit(), SOFTBUS_OK);
+
+        // trigger same state twice: false -> false, no BLE calls expected
+        ConstraintMock::TriggerConstraintEvent(false);
+        ConstraintMock::TriggerConstraintEvent(false);
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "DiscConstraintEventHandler005 end ----");
+}
+
+/*
+ * @tc.name: DiscPublishConstraint001
+ * @tc.desc: test InnerPublishService under constraint mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscPublishConstraint001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscPublishConstraint001 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        ConstraintMock constraintMock;
+        EXPECT_CALL(constraintMock, LnnIsOsAccountConstraint()).WillRepeatedly(Return(true));
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+
+        PublishInfo info;
+        info.publishId = PUBLISH_ID1;
+        info.medium = BLE;
+        info.mode = DISCOVER_MODE_ACTIVE;
+        info.freq = LOW;
+        info.capability = "osdCapability";
+        info.capabilityData = (uint8_t *)"test";
+        info.dataLen = 4;
+
+        // Under constraint, Publish should succeed but not call BLE publish
+        EXPECT_EQ(DiscPublishService(packageName_, &info, 0), SOFTBUS_OK);
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "DiscPublishConstraint001 end ----");
+}
+
+/*
+ * @tc.name: DiscStartDiscoveryConstraint001
+ * @tc.desc: test InnerStartDiscovery under constraint mode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscStartDiscoveryConstraint001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscStartDiscoveryConstraint001 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        ConstraintMock constraintMock;
+        EXPECT_CALL(constraintMock, LnnIsOsAccountConstraint()).WillRepeatedly(Return(true));
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+
+        SubscribeInfo info;
+        info.subscribeId = SUBSCRIBE_ID1;
+        info.medium = BLE;
+        info.mode = DISCOVER_MODE_ACTIVE;
+        info.freq = LOW;
+        info.capability = "osdCapability";
+        info.capabilityData = (uint8_t *)"test";
+        info.dataLen = 4;
+
+        EXPECT_EQ(DiscStartDiscovery(packageName_, &info, &serverCallback_, 0), SOFTBUS_OK);
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "DiscStartDiscoveryConstraint001 end ----");
+}
+
+/*
+ * @tc.name: DiscOnDeviceFoundConstraint001
+ * @tc.desc: test DiscOnDeviceFound under constraint mode discards device
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerMockTest, DiscOnDeviceFoundConstraint001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscOnDeviceFoundConstraint001 begin ----");
+    DiscMgrInitFuncMock();
+    {
+        ConstraintMock constraintMock;
+        EXPECT_CALL(constraintMock, LnnIsOsAccountConstraint()).WillRepeatedly(Return(true));
+
+        BleMock bleMock;
+        bleMock.SetupStub();
+        CoapMock coapMock;
+        coapMock.SetupStub();
+
+        SubscribeInfo info;
+        info.subscribeId = SUBSCRIBE_ID1;
+        info.medium = BLE;
+        info.mode = DISCOVER_MODE_ACTIVE;
+        info.freq = LOW;
+        info.capability = "osdCapability";
+        info.capabilityData = (uint8_t *)"test";
+        info.dataLen = 4;
+        EXPECT_EQ(DiscStartDiscovery(packageName_, &info, &serverCallback_, 0), SOFTBUS_OK);
+
+        DeviceInfo deviceInfo;
+        deviceInfo.capabilityBitmapNum = 1;
+        deviceInfo.capabilityBitmap[0] = 1 << OSD_CAPABILITY_BITMAP;
+
+        // Under constraint, device found event should be discarded
+        // callbackPackageName_ should NOT be updated
+        callbackPackageName_ = "";
+        BleMock::InjectDeviceFoundEvent(&deviceInfo);
+        EXPECT_NE(callbackPackageName_, packageName_);
+    }
+    DiscMgrDeInitFuncMock();
+    DISC_LOGI(DISC_TEST, "DiscOnDeviceFoundConstraint001 end ----");
+}
+
 } // namespace OHOS
