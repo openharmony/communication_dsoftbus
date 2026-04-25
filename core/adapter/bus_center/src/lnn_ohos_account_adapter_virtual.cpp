@@ -77,3 +77,19 @@ int32_t GetOsAccountLocalIdFromUid(int32_t uid, int32_t *userId)
     (void)userId;
     return SOFTBUS_OK;
 }
+int32_t LnnInitOsAccountAdapter(void)
+{
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitOsAccountAdapter(void)
+{
+}
+
+void LnnClearOsAccountAdapterStatus(void)
+{
+}
+
+void LnnUpdateConstraintMapForCurrentAccount(void)
+{
+}

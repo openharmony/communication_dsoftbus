@@ -91,6 +91,11 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
     return ManagerMock::GetMock()->SoftBusCondWait(cond, mutex, time);
 }
 
+bool DiscIsOsAccountConstraint()
+{
+    return ManagerMock::GetMock()->DiscIsOsAccountConstraint();
+}
+
 static int32_t MockRegisterBroadcaster(int32_t *bcId, const SoftbusBroadcastCallback *cb)
 {
     ManagerMock::broadcastCallback = cb;

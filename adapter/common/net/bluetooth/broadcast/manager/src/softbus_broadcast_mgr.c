@@ -18,6 +18,7 @@
 
 #include "broadcast_dfx_event.h"
 #include "disc_log.h"
+#include "disc_manager.h"
 #include "g_enhance_adapter_func.h"
 #include "g_enhance_adapter_func_pack.h"
 #include "softbus_adapter_bt_common.h"
@@ -958,6 +959,11 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
 {
     DISC_LOGD(DISC_BROADCAST, "enter report scan cb");
     DISC_CHECK_AND_RETURN_LOGE(reportData != NULL, DISC_BROADCAST, "reportData is nullptr");
+
+    if (DiscIsOsAccountConstraint()) {
+        DISC_LOGW(DISC_BROADCAST, "broadcast is constrained, discard device found");
+        return;
+    }
 
     BroadcastReportInfo bcInfo;
     memset_s(&bcInfo, sizeof(bcInfo), 0, sizeof(bcInfo));

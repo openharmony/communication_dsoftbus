@@ -105,6 +105,10 @@ int32_t DiscSetDisplayName(const char *pkgName, const char *nameData, uint32_t l
 
 int32_t DiscGetDisplayName(char *displayName, uint32_t length, uint32_t remainLen);
 
+int32_t DiscConstraintEventInit(void);
+void DiscConstraintEventDeInit(void);
+bool DiscIsOsAccountConstraint(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
