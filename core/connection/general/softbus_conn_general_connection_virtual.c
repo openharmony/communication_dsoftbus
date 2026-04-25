@@ -90,3 +90,13 @@ int32_t InitGeneralConnectionManager(void)
 {
     return SOFTBUS_OK;
 }
+
+int32_t ConnConstraintEventInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+void ConnConstraintEventDeInit(void)
+{
+    return;
+}

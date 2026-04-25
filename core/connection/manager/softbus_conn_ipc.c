@@ -47,12 +47,18 @@ static void GeneralConnectSuccess(GeneralConnectionParam *info, uint32_t general
     ClientIpcOnConnectionStateChange(info->pkgName, info->pid, generalHandle, CONNECTION_STATE_CONNECTED_SUCCESS, 0);
 }
 
+static void GeneralServerStopped(GeneralConnectionParam *info)
+{
+    ClientIpcOnServerStopped(info->pkgName, info->pid, info->name);
+}
+
 GeneralConnectionListener g_baseListener = {
     .onConnectSuccess = GeneralConnectSuccess,
     .onConnectFailed = GeneralConnectFail,
     .onAcceptConnect = GeneralAcceptConnect,
     .onDataReceived = GeneralDataReceived,
     .onConnectionDisconnected = GeneralConnectionDisconnected,
+    .onServerStopped =  GeneralServerStopped,
 };
 
 void ClearGeneralConnection(const char *pkgName, int32_t pid)

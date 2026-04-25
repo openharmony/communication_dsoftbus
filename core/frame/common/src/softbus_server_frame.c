@@ -69,6 +69,7 @@ int __attribute__((weak)) ServerStubInit(void)
 
 static void ServerModuleDeinit(void)
 {
+    ConnEventManagerDeinit();
     DiscEventManagerDeinit();
     DiscServerDeinit();
     ConnServerDeinit();
@@ -190,6 +191,9 @@ static int32_t InitServicesAndModules(void)
 
     COMM_CHECK_AND_RETURN_RET_LOGE(TransServerInit() == SOFTBUS_OK,
         SOFTBUS_TRANS_SERVER_INIT_FAILED, COMM_SVC, "softbus trans server init failed.");
+
+    COMM_CHECK_AND_RETURN_RET_LOGE(ConnEventManagerInit() == SOFTBUS_OK,
+        SOFTBUS_CONN_EVENT_INIT_FAIL, COMM_SVC, "softbus conn event manager init failed.");
 
     COMM_CHECK_AND_RETURN_RET_LOGE(DiscEventManagerInit() == SOFTBUS_OK,
         SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, COMM_SVC, "softbus disc event manager init failed.");
