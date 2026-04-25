@@ -36,6 +36,7 @@
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
 #include "softbus_conn_ipc.h"
+#include "softbus_conn_general_connection.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
@@ -685,4 +686,18 @@ int32_t ConnConfigPostLimit(const LimitConfiguration *configuration)
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return g_connManager[configuration->type]->ConfigPostLimit(configuration);
+}
+
+int32_t ConnEventManagerInit(void)
+{
+    int32_t ret = ConnConstraintEventInit();
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "register conn constraint event fail");
+    
+    CONN_LOGI(CONN_COMMON, "register conn constraint event success.");
+    return SOFTBUS_OK;
+}
+
+void ConnEventManagerDeinit(void)
+{
+    ConnConstraintEventDeInit();
 }

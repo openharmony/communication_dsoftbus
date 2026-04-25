@@ -28,6 +28,8 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_manager.h"
 #include "bus_center_manager.h"
+#include "bus_center_event.h"
+#include "lnn_ohos_account_adapter.h"
 
 #define INVALID_UNDERLAY_HANDLE            (-1)
 #define GENERAL_CONNECT_TIMEOUT_MILLIS     (10 * 1000)
@@ -1151,14 +1153,104 @@ static int32_t RegisterListener(const GeneralConnectionListener *listener)
         "listener onConnectSuccess is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(listener->onConnectionDisconnected != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "listener onConnectionDisconnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(listener->onServerStopped != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "listener onServerStopped is null");
     g_generalConnectionListener = *listener;
     return SOFTBUS_OK;
+}
+
+static void ClearAllGeneralServers(void)
+{
+    CONN_LOGW(CONN_BLE, "clean up all servers");
+    ListNode waitNotifyStop = {0};
+    ListInit(&waitNotifyStop);
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.servers->lock) == SOFTBUS_OK, CONN_BLE,
+        "lock servers fail");
+    Server *serverIt = NULL;
+    Server *serverNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(serverIt, serverNext, &g_generalManager.servers->list, Server, node) {
+        ListDelete(&serverIt->node);
+        ListAdd(&waitNotifyStop, &serverIt->node);
+    }
+    (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
+
+    Server *serverItem = NULL;
+    Server *nextServer = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(serverItem, nextServer, &waitNotifyStop, Server, node) {
+        if (g_generalConnectionListener.onServerStopped != NULL) {
+            g_generalConnectionListener.onServerStopped(&serverItem->info);
+        }
+        ListDelete(&serverItem->node);
+        FreeServerNode(&serverItem);
+    }
+}
+
+static void ClearAllGeneralConnections(void)
+{
+    CONN_LOGW(CONN_BLE, "clean up all connections");
+    ListNode waitNotifyDisconnect = {0};
+    ListInit(&waitNotifyDisconnect);
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
+        "lock fail");
+    struct GeneralConnection *it = NULL;
+    struct GeneralConnection *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_generalManager.connections->list, struct GeneralConnection, node) {
+        ListDelete(&it->node);
+        ListAdd(&waitNotifyDisconnect, &it->node);
+    }
+    (void)SoftBusMutexUnlock(&g_generalManager.connections->lock);
+    
+    struct GeneralConnection *item = NULL;
+    struct GeneralConnection *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &waitNotifyDisconnect, struct GeneralConnection, node) {
+        NotifyConnectFailed(item, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+        ListDelete(&item->node);
+        GeneralSendResetMessage(item);
+        ConnReturnGeneralConnection(&item);
+    }
+}
+
+static void ClearAllGeneralInfo(void)
+{
+    ClearAllGeneralServers();
+    ClearAllGeneralConnections();
+}
+
+static void ConstraintStateChangeHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_CONSTRAINT_ENABLE) {
+        CONN_LOGE(CONN_BLE, "invalid param");
+        return;
+    }
+
+    const LnnConstraintChangeEvent *event = (const LnnConstraintChangeEvent *)info;
+    if (event->isConstraint) {
+        ClearAllGeneralInfo();
+    }
+}
+
+int32_t ConnConstraintEventInit(void)
+{
+    int32_t ret = LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, ConstraintStateChangeHandler);
+    CONN_LOGI(CONN_BLE, "regist constraint state evt ret =%{public}d", ret);
+    return ret;
+}
+
+void ConnConstraintEventDeInit(void)
+{
+    LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, ConstraintStateChangeHandler);
 }
 
 static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "param is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "addr is null");
+
+    if (LnnIsOsAccountConstraint()) {
+        CONN_LOGE(CONN_BLE, "Connect blocked by account constraint");
+        return SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE;
+    }
+
     ConnectResult result = {
         .OnConnectSuccessed = OnCommConnectSucc,
         .OnConnectFailed = OnCommConnectFail,
@@ -1211,6 +1303,12 @@ static struct GeneralConnection *GetConnectionByGeneralIdAndCheckPid(uint32_t ge
 static int32_t Send(uint32_t generalHandle, const uint8_t *data, uint32_t dataLen, int32_t pid)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "data is null");
+
+    if (LnnIsOsAccountConstraint()) {
+        CONN_LOGE(CONN_BLE, "SendData blocked by account constraint");
+        return SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE;
+    }
+
     struct GeneralConnection *generalConnection = GetConnectionByGeneralIdAndCheckPid(generalHandle, pid);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "invalid param, generalId=%{public}u", generalHandle);
@@ -1275,6 +1373,12 @@ static int32_t CreateServer(const GeneralConnectionParam *param)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "create server fail, param is null");
+
+    if (LnnIsOsAccountConstraint()) {
+        COMM_LOGE(CONN_BLE, "CreateServer blocked by account constraint");
+        return SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE;
+    }
+
     if (!IsAllowSave(param->bundleName, true)) {
         CONN_LOGE(CONN_BLE, "add pkg name is max");
         return SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX;

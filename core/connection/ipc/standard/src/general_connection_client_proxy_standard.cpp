@@ -122,4 +122,31 @@ int32_t ConnectionClientProxy::OnDataReceived(uint32_t handle, const uint8_t *da
     }
     return SOFTBUS_OK;
 }
+
+int32_t ConnectionClientProxy::OnServerStopped(const char *name)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        CONN_LOGE(CONN_COMMON, "remote is nullptr");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail.");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteCString(name)) {
+        CONN_LOGE(CONN_COMMON, "write name fail.");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    int32_t ret = remote->SendRequest(CLIENT_GENERAL_SERVER_STOPPED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "OnServerStopped send request fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

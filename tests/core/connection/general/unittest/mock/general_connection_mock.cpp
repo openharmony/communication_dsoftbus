@@ -150,6 +150,11 @@ int32_t ConnBlePostBytesMock(
     return GetGeneralConnectionInterface()->ConnBlePostBytesMock(connectionId, data, dataLen, pid, flag, module, seq);
 }
 
+bool LnnIsOsAccountConstraint(void)
+{
+    return GetGeneralConnectionInterface()->LnnIsOsAccountConstraint();
+}
+
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
     static ConnectFuncInterface bleFuncInterface = {

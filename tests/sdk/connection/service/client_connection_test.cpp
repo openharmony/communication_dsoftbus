@@ -87,11 +87,17 @@ static void OnServiceDied(void)
     printf("OnServiceDied called\n");
 }
 
+static void OnServiceStopped(const char *name)
+{
+    printf("OnServiceStopped called, name: %s\n", name);
+}
+
 static IGeneralListener g_listener = {
     .OnAcceptConnect = OnAcceptConnect,
     .OnConnectionStateChange = OnConnectionStateChange,
     .OnDataReceived = OnDataRecevied,
     .OnServiceDied = OnServiceDied,
+    .OnServiceStopped = OnServiceStopped,
 };
 
 /*
@@ -110,6 +116,7 @@ HWTEST_F(ClientConnectionTest, RegisterListenerTest, TestSize.Level0)
         .OnConnectionStateChange = nullptr,
         .OnDataReceived = nullptr,
         .OnServiceDied = nullptr,
+        .OnServiceStopped = nullptr,
     };
     ret = GeneralRegisterListener(&listener);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -194,6 +201,7 @@ HWTEST_F(ClientConnectionTest, DataReceivedTest, TestSize.Level0)
         .OnConnectionStateChange = OnConnectionStateChange,
         .OnDataReceived = OnDataRecevied,
         .OnServiceDied = OnServiceDied,
+        .OnServiceStopped = OnServiceStopped,
     };
     int32_t ret = GeneralRegisterListener(&listener);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -218,6 +226,7 @@ HWTEST_F(ClientConnectionTest, ConnectionDeathNotifyTest, TestSize.Level0)
         .OnConnectionStateChange = OnConnectionStateChange,
         .OnDataReceived = OnDataRecevied,
         .OnServiceDied = OnServiceDied,
+        .OnServiceStopped = OnServiceStopped,
     };
     int32_t ret = GeneralRegisterListener(&listener);
     ASSERT_EQ(ret, SOFTBUS_OK);

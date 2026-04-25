@@ -96,3 +96,9 @@ void ConnectionDeathNotify(void)
 {
     // empty
 }
+
+int32_t ServerStopped(const char *name)
+{
+    (void)name;
+    return SOFTBUS_OK;
+}

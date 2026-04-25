@@ -75,6 +75,7 @@ public:
         const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData) override;
     void OnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode,
         const char *returnData) override;
+    int32_t OnServerStopped(const char *name) override;
 
 private:
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
@@ -115,6 +116,7 @@ private:
     int32_t OnSessionKeyAuthResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnFinishAuthResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnErrorAuthResultInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnServerStoppedInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

@@ -30,6 +30,8 @@ public:
 
     int32_t OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len) override;
 
+    int32_t OnServerStopped(const char *name) override;
+
 private:
     static inline BrokerDelegator<ConnectionClientProxy> delegator_;
 };

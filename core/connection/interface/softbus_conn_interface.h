@@ -236,6 +236,10 @@ int32_t ConnConfigPostLimit(const LimitConfiguration *configuration);
 
 void ConnDeathCallback(const char *pkgName, int32_t pid);
 
+int32_t ConnEventManagerInit(void);
+
+void ConnEventManagerDeinit(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

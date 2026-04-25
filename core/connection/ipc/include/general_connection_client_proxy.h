@@ -32,6 +32,7 @@ int32_t ClientIpcOnConnectionStateChange(
     const char *pkgName, int32_t pid, uint32_t handle, int32_t state, int32_t reason);
 int32_t ClientIpcOnAcceptConnect(const char *pkgName, int32_t pid, const char *name, uint32_t handle);
 int32_t ClientIpcOnDataReceived(const char *pkgName, int32_t pid, uint32_t handle, const uint8_t *data, uint32_t len);
+int32_t ClientIpcOnServerStopped(const char *pkgName, int32_t pid, const char *name);
 
 #ifdef __cplusplus
 }
