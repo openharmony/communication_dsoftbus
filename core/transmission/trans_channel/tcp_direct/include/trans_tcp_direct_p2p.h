@@ -51,6 +51,8 @@ ListenerModule GetModuleByHmlIp(const char *ip);
 
 void ClearHmlListenerByUuid(const char *peerUuid);
 
+void ClearAllHmlListener(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

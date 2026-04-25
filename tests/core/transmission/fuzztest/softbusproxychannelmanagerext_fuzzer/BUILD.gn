@@ -50,6 +50,7 @@ ohos_fuzztest("SoftBusProxyChannelManagerExtFuzzTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
   ]
 
   cflags = [

@@ -26,7 +26,7 @@ typedef struct {
     int32_t (*OnSessionOpened)(int32_t channelId, int32_t channelType, char *peerNetworkId, int32_t result);
     void (*OnSessionClosed)(int32_t channelId);
     void (*OnBytesReceived)(int32_t channelId, const void *data, uint32_t dataLen);
-    void (*OnLinkDown)(const char *networkId);
+    void (*OnLinkDown)(const char *networkId, int32_t routeType, const char *pkgName);
     int32_t (*OnSetChannelInfoByReqId)(uint32_t reqId, int32_t channelId, int32_t channelType);
 } ISessionListenerInner;
 #ifdef __cplusplus

@@ -14,6 +14,7 @@
  */
 
 #include <securec.h>
+#include <stdint.h>
 #include <unistd.h>
 
 #include "message_handler.h"
@@ -234,6 +235,42 @@ static void DirectOnChannelClose(int32_t channelId, const char *pkgName)
         .msgPkgName = pkgName,
     };
     (void)ClientIpcOnChannelClosed(&data);
+}
+
+void TransCloseAllInnerSession(const char *pkgName)
+{
+    if (g_sessionList == NULL || pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "session list not init or pkgName is null");
+        return;
+    }
+
+    if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return;
+    }
+    if (g_sessionList->cnt == 0 || g_sessionList->cnt >= UINT32_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionList cnt is 0");
+        (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+        return;
+    }
+    int32_t *closeIdInfo = (int32_t *)SoftBusCalloc(sizeof(int32_t) * g_sessionList->cnt);
+    if (closeIdInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "closeIdInfo malloc failed");
+        (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+        return;
+    }
+    uint32_t index = 0;
+    TransInnerSessionInfo *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &(g_sessionList->list), TransInnerSessionInfo, node) {
+        closeIdInfo[index++] = pos->channelId;
+        TRANS_LOGI(TRANS_CTRL, "DeleteSession session when link down, channelId=%{public}d", pos->channelId);
+    }
+    (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+    for (uint32_t i = 0; i < index; i++) {
+        CloseSessionInner(closeIdInfo[i]);
+        DirectOnChannelClose(closeIdInfo[i], pkgName);
+    }
+    SoftBusFree(closeIdInfo);
 }
 
 void TransCloseInnerSessionByNetworkId(const char *networkId)

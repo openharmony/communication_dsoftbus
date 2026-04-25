@@ -1710,14 +1710,15 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest50, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest51, TestSize.Level1)
 {
+#define USER_SWITCH_OFFSET 10
     int32_t ret = ClientSignalSyncBind(-1, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
 
     ret = ClientSignalSyncBind(1, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
-    ClientTransOnUserSwitch();
+    ClientTransOnSwitch(USER_SWITCH_OFFSET);
     TransServerDeinit();
-    ClientTransOnUserSwitch();
+    ClientTransOnSwitch(USER_SWITCH_OFFSET);
 }
 
 /*
@@ -1920,6 +1921,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest59, TestSiz
  */
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest60, TestSize.Level1)
 {
+#define BLOCK_MODE_OFFSET 12
     int32_t channelId = TRANS_TEST_INVALID_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
     int32_t routeType = 0;
@@ -1945,7 +1947,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest60, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetRouteTypeByChannelId(channelId, channelType, &routeType);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ClientTransOnUserSwitch();
+    ClientTransOnSwitch(BLOCK_MODE_OFFSET);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     ClientCleanAllSessionWhenServerDeath(nullptr);
     EXPECT_EQ(ret,  SOFTBUS_OK);
