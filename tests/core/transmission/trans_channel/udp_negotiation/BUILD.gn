@@ -169,6 +169,7 @@ ohos_unittest("TransUdpNegoStaticTest") {
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
   ]
 
   deps = [
@@ -212,6 +213,7 @@ ohos_unittest("TransUdpStaticTest") {
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
+    "$dsoftbus_core_path/adapter/bus_center/include",
   ]
 
   deps = [

@@ -1676,8 +1676,10 @@ void ClientTransRegLnnOffline(void)
     }
 }
 
-void ClientTransOnUserSwitch(void)
+void ClientTransOnSwitch(int32_t switchType)
 {
+#define USER_SWITCH_OFFSET 10
+#define BLOCK_MODE_OFFSET 12
     if (LockClientSessionServerList() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
@@ -1687,10 +1689,14 @@ void ClientTransOnUserSwitch(void)
     ListNode destroyList;
     ListInit(&destroyList);
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        DestroyAllClientSession(serverNode, &destroyList);
+        DestroyAllClientSession(serverNode, &destroyList, switchType);
     }
     UnlockClientSessionServerList();
-    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_USER_SWICTH);
+    if (switchType == USER_SWITCH_OFFSET) {
+        (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_USER_SWICTH);
+    } else if (switchType == BLOCK_MODE_OFFSET) {
+        (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_BLOCK_MODE);
+    }
 }
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType)

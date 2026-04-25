@@ -53,7 +53,7 @@ ClientSessionServer *GetNewSessionServer(
 
 SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName);
 
-void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList);
+void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destroyList, int32_t switchType);
 
 void DestroyClientSessionByNetworkId(
     const ClientSessionServer *server, const char *networkId, int32_t type, ListNode *destroyList);

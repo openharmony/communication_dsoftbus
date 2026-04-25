@@ -36,6 +36,7 @@ void ClientTransInnerDataBufDeinit(void);
 int32_t TransInnerAddDataBufNode(int32_t channelId, int32_t fd, int32_t channelType);
 void InnerListDeinit(void);
 void TransCloseInnerSessionByNetworkId(const char *networkId);
+void TransCloseAllInnerSession(const char *pkgName);
 
 #ifdef __cplusplus
 }

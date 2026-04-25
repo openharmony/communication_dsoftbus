@@ -95,7 +95,7 @@ void TransClientDeinit(void);
 
 void ClientTransRegLnnOffline(void);
 
-void ClientTransOnUserSwitch(void);
+void ClientTransOnSwitch(int32_t switchType);
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 

@@ -78,7 +78,7 @@ static void OnBytesReceived(int32_t channelId, const void *data, uint32_t dataLe
     TRANS_LOGI(TRANS_TEST, "data recv, channelId=%{public}d", channelId);
 }
 
-static void OnLinkDown(const char *networkId)
+static void OnLinkDown(const char *networkId, int32_t routeType, const char *pkgName)
 {
     TRANS_LOGI(TRANS_TEST, "link down, networkId=%{public}s", networkId);
 }
@@ -193,7 +193,13 @@ void TransOnLinkDownInnerTest(FuzzedDataProvider &provider)
     if (strcpy_s(tmpNetworkId, NETWORK_ID_BUF_LEN, networkId.c_str()) != EOK) {
         return;
     }
-    (void)TransOnLinkDownInner(tmpNetworkId);
+    std::string pkgName = provider.ConsumeRandomLengthString(PKG_NAME_SIZE_MAX_LEN);
+    char tmpPkaName[PKG_NAME_SIZE_MAX_LEN] = { 0 };
+    if (strcpy_s(tmpPkaName, PKG_NAME_SIZE_MAX_LEN, pkgName.c_str()) != EOK) {
+        return;
+    }
+    int32_t routeType = provider.ConsumeIntegral<int32_t>();
+    (void)TransOnLinkDownInner(tmpNetworkId, routeType, tmpPkaName);
 }
 
 void TransOpenSessionInnerTest(FuzzedDataProvider &provider)

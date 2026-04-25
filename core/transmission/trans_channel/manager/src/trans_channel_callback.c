@@ -22,6 +22,7 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
@@ -118,6 +119,10 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
 
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channel->channelId);
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
         (void)TransAddTcpChannel(channel, pkgName, pid);
     }

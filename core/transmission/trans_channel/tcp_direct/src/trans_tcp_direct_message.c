@@ -1650,6 +1650,26 @@ static int32_t GetSessionConnSeqAndFlagByChannelId(int32_t channelId, SessionCon
     return SOFTBUS_OK;
 }
 
+static int32_t TransCheckTdcOpenBlock(
+    int32_t channelId, int32_t openResult, SessionConn *conn, uint64_t seq, uint32_t flags)
+{
+    if (openResult != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Tdc channel open failed, openResult=%{public}d", openResult);
+        TransProcessAsyncOpenTdcChannelFailed(conn, openResult, seq, flags);
+        return openResult;
+    }
+    if (LnnIsOsAccountConstraint()) {
+        TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channelId);
+        (void)NotifyChannelClosed(&conn->appInfo, channelId);
+        TransProcessAsyncOpenTdcChannelFailed(conn, SOFTBUS_TRANS_BLOCK_MODE_REJECTED, seq, flags);
+        return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
+    }
+    if (conn->appInfo.fastTransDataSize > 0 && conn->appInfo.fastTransData != NULL) {
+        NotifyFastDataRecv(conn, channelId);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransDealTdcChannelOpenResult(
     int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
 {
@@ -1677,13 +1697,8 @@ int32_t TransDealTdcChannelOpenResult(
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
 
-    if (openResult != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Tdc channel open failed, openResult=%{public}d", openResult);
-        TransProcessAsyncOpenTdcChannelFailed(&conn, openResult, seq, flags);
-        return SOFTBUS_OK;
-    }
-    if (conn.appInfo.fastTransDataSize > 0 && conn.appInfo.fastTransData != NULL) {
-        NotifyFastDataRecv(&conn, channelId);
+    if (TransCheckTdcOpenBlock(channelId, openResult, &conn, seq, flags) != SOFTBUS_OK) {
+        return openResult == SOFTBUS_OK ? SOFTBUS_TRANS_BLOCK_MODE_REJECTED : SOFTBUS_OK;
     }
     if (GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
         if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&

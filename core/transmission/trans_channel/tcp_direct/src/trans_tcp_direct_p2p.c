@@ -345,6 +345,26 @@ ListenerModule GetModuleByHmlIp(const char *ip)
     return UNUSE_BUTT;
 }
 
+void ClearAllHmlListener()
+{
+    if (g_hmlListenerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "hmlListenerList not init");
+        return;
+    }
+    HmlListenerInfo *item = NULL;
+    HmlListenerInfo *nextItem = NULL;
+    if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
+        int32_t module = item->moudleType; // item will free in StopHmlListener
+        StopHmlListener(item->moudleType);
+        TRANS_LOGI(TRANS_SVC, "StopHmlListener moudle=%{public}d succ", module);
+    }
+    (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+}
+
 void ClearHmlListenerByUuid(const char *peerUuid)
 {
     if (peerUuid == NULL) {

@@ -220,6 +220,7 @@ int32_t TransOnChannelLinkDown(const char *networkId, uint32_t routeType)
 {
 #define USER_SWITCH_OFFSET 10
 #define PRIVILEGE_CLOSE_OFFSET 11
+#define BLOCK_MODE_OFFSET 12
     if (networkId == NULL) {
         TRANS_LOGE(TRANS_SDK, "network id is null.");
         return SOFTBUS_INVALID_PARAM;
@@ -227,13 +228,19 @@ int32_t TransOnChannelLinkDown(const char *networkId, uint32_t routeType)
     bool isUserSwitchEvent = (bool)((routeType >> USER_SWITCH_OFFSET) & 0x1);
     if (isUserSwitchEvent) {
         TRANS_LOGI(TRANS_SDK, "user switch event.");
-        ClientTransOnUserSwitch();
+        ClientTransOnSwitch(USER_SWITCH_OFFSET);
         return SOFTBUS_OK;
     }
     bool isPrivilegeClose = (bool)((routeType >> PRIVILEGE_CLOSE_OFFSET) & 0x1);
     if (isPrivilegeClose) {
         TRANS_LOGI(TRANS_SDK, "privilege close event.");
         ClientTransOnPrivilegeClose(networkId);
+        return SOFTBUS_OK;
+    }
+    bool isBlockMode = (bool)((routeType >> BLOCK_MODE_OFFSET) & 0x1);
+    if (isBlockMode) {
+        TRANS_LOGI(TRANS_SDK, "isBlockMode close event.");
+        ClientTransOnSwitch(BLOCK_MODE_OFFSET);
         return SOFTBUS_OK;
     }
     ClientTransOnLinkDown(networkId, routeType);

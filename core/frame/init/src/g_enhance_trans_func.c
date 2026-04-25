@@ -59,5 +59,6 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.isMultipathWhitelist = dlsym(soHandle, "IsMultipathWhitelist");
     g_transEnhanceFuncList.cancelEncryptionCheck = dlsym(soHandle, "CancelEncryptionCheck");
     g_transEnhanceFuncList.permissionCheck = dlsym(soHandle, "PermissionCheck");
+    g_transEnhanceFuncList.transCloseAllMetaSocket = dlsym(soHandle, "TransCloseAllMetaSocket");
     return SOFTBUS_OK;
 }
