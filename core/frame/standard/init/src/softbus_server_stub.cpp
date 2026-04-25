@@ -291,18 +291,18 @@ void SoftBusServerStub::InitMemberPermissionMap()
 
 void SoftBusServerStub::InitMemberConstraintSet()
 {
+    memberConstraintSet_.insert(SERVER_START_TIME_SYNC);
+    memberConstraintSet_.insert(SERVER_STOP_TIME_SYNC);
     memberConstraintSet_.insert(SERVER_JOIN_LNN);
-    memberConstraintSet_.insert(SERVER_LEAVE_LNN);
     memberConstraintSet_.insert(SERVER_SET_NODE_DATA_CHANGE_FLAG);
-    memberConstraintSet_.insert(SERVER_GET_NODE_KEY_INFO);
     memberConstraintSet_.insert(SERVER_SHIFT_LNN_GEAR);
     memberConstraintSet_.insert(SERVER_SYNC_TRUSTED_RELATION);
     memberConstraintSet_.insert(SERVER_ACTIVE_META_NODE);
     memberConstraintSet_.insert(SERVER_DEACTIVE_META_NODE);
     memberConstraintSet_.insert(SERVER_GET_ALL_META_NODE_INFO);
+    memberConstraintSet_.insert(SERVER_GET_ALL_ONLINE_NODE_INFO);
     memberConstraintSet_.insert(SERVER_SET_DATA_LEVEL);
-    memberConstraintSet_.insert(SERVER_REG_DATA_LEVEL_CHANGE_CB);
-    memberConstraintSet_.insert(SERVER_UNREG_DATA_LEVEL_CHANGE_CB);
+    memberConstraintSet_.insert(SERVER_TRIGGER_RANGE_FOR_MSDP);
 }
 
 int32_t SoftBusServerStub::CheckPermission(uint32_t code)
