@@ -35,6 +35,7 @@
 #include "softbus_json_utils.h"
 #include "legacy/softbus_hisysevt_discreporter.h"
 #include "lnn_devicename_info.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_utils.h"
 
 #define SKIP_VALID_PID_VALUE             (-1)
@@ -131,6 +132,7 @@ static const char *g_discModuleMap[MODULE_MAX] = {
     "MODULE_LNN",
     "MODULE_CONN",
 };
+bool DiscIsOsAccountConstraint(void);
 
 static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {
@@ -418,6 +420,10 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
 {
     DISC_CHECK_AND_RETURN_LOGE(device != NULL, DISC_CONTROL, "device is null");
     DISC_CHECK_AND_RETURN_LOGE(additions != NULL, DISC_CONTROL, "additions is null");
+    if (DiscIsOsAccountConstraint()) {
+        DISC_LOGW(DISC_CONTROL, "discovery is constrained, discard device found");
+        return;
+    }
 
     DISC_LOGD(DISC_CONTROL,
         "capabilityBitmap=%{public}d, medium=%{public}d", device->capabilityBitmap[0], additions->medium);
@@ -869,6 +875,12 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
             break;
         }
 
+        if (DiscIsOsAccountConstraint()) {
+            DISC_LOGW(DISC_CONTROL, "disc publish constraint");
+            SoftBusMutexUnlock(&g_publishInfoList->lock);
+            return SOFTBUS_OK;
+        }
+
         DFX_RECORD_DISC_CALL_START(info, packageName, PUBLISH_FUNC);
         ret = CallInterfaceByMedium(info, packageName, PUBLISH_FUNC);
         if (ret != SOFTBUS_OK) {
@@ -896,6 +908,13 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
             DISC_LOGE(DISC_CONTROL, "delete info from list fail");
             ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE;
             break;
+        }
+
+        if (DiscIsOsAccountConstraint()) {
+            DISC_LOGW(DISC_CONTROL, "disc stop publish constraint");
+            FreeDiscInfo(infoNode, type);
+            SoftBusMutexUnlock(&g_publishInfoList->lock);
+            return SOFTBUS_OK;
         }
 
         DFX_RECORD_DISC_CALL_START(infoNode, packageName, UNPUBLISH_FUNC);
@@ -929,6 +948,12 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
             break;
         }
 
+        if (DiscIsOsAccountConstraint()) {
+            DISC_LOGW(DISC_CONTROL, "disc discovery constraint");
+            SoftBusMutexUnlock(&g_discoveryInfoList->lock);
+            return SOFTBUS_OK;
+        }
+
         UpdateDdmpStartDiscoveryTime(info);
         DFX_RECORD_DISC_CALL_START(info, packageName, STARTDISCOVERTY_FUNC);
         ret = CallInterfaceByMedium(info, packageName, STARTDISCOVERTY_FUNC);
@@ -958,6 +983,12 @@ static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, 
             DISC_LOGE(DISC_CONTROL, "delete info from list fail");
             ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE;
             break;
+        }
+        if (DiscIsOsAccountConstraint()) {
+            DISC_LOGW(DISC_CONTROL, "disc stop discovery constraint");
+            FreeDiscInfo(infoNode, type);
+            SoftBusMutexUnlock(&g_discoveryInfoList->lock);
+            return SOFTBUS_OK;
         }
 
         DFX_RECORD_DISC_CALL_START(infoNode, packageName, STOPDISCOVERY_FUNC);
@@ -1371,6 +1402,126 @@ void DiscMgrDeathCallback(const char *pkgName, int32_t pid)
     DISC_CHECK_AND_RETURN_LOGE(pid != getpid(), DISC_CONTROL, "pid is different");
     RemoveDiscInfoForPublish(pkgName, pid);
     RemoveDiscInfoForDiscovery(pkgName, pid);
+}
+
+bool DiscIsOsAccountConstraint()
+{
+    return LnnIsOsAccountConstraint();
+}
+
+static void DiscConstraintStop()
+{
+    DiscItem *itemNode = NULL;
+    DiscInfo *infoNode = NULL;
+    // stop discovery
+    int32_t ret = SoftBusMutexLock(&g_discoveryInfoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    LIST_FOR_EACH_ENTRY(itemNode, &(g_discoveryInfoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, STOPDISCOVERY_FUNC);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, STOPDISCOVERY_FUNC);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "constraint mode, call interface by medium fail, medium is %{public}d",
+                          infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_discoveryInfoList->lock);
+    // stop publish
+    ret = SoftBusMutexLock(&g_publishInfoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    LIST_FOR_EACH_ENTRY(itemNode, &(g_publishInfoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, UNPUBLISH_FUNC);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, UNPUBLISH_FUNC);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "constraint mode, call interface by medium fail, medium is %{public}d",
+                          infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_publishInfoList->lock);
+    return;
+}
+
+static void DiscConstraintRestart()
+{
+    DiscItem *itemNode = NULL;
+    DiscInfo *infoNode = NULL;
+    // restart discovery
+    int32_t ret = SoftBusMutexLock(&g_discoveryInfoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    LIST_FOR_EACH_ENTRY(itemNode, &(g_discoveryInfoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, STARTDISCOVERTY_FUNC);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, STARTDISCOVERTY_FUNC);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "constraint mode, call interface by medium fail, medium is %{public}d",
+                          infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_discoveryInfoList->lock);
+    // restart publish
+    ret = SoftBusMutexLock(&g_publishInfoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    LIST_FOR_EACH_ENTRY(itemNode, &(g_publishInfoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, PUBLISH_FUNC);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, PUBLISH_FUNC);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "constraint mode, call interface by medium fail, medium is %{public}d",
+                          infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_publishInfoList->lock);
+}
+
+static void DiscProcessConstraintChanged(bool curStatus)
+{
+    if (curStatus) {
+        // constraint enable
+        DiscConstraintStop();
+        return;
+    }
+
+    // constraint disable
+    DiscConstraintRestart();
+    return;
+}
+
+static void ConstraintEventChangeHandler(const LnnEventBasicInfo *info)
+{
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_CONTROL, "info is null");
+    if (info->event != LNN_EVENT_CONSTRAINT_ENABLE) {
+        return; // ignore other events
+    }
+
+    const LnnConstraintChangeEvent *event = (LnnConstraintChangeEvent *)info;
+    bool nowIsConstraint = event->isConstraint;
+    static bool oldIsConstraint = false;
+
+    if (oldIsConstraint == nowIsConstraint) {
+        return;
+    }
+    DISC_LOGW(DISC_CONTROL, "constraint state %{public}d->%{public}d", oldIsConstraint, nowIsConstraint);
+    oldIsConstraint = nowIsConstraint;
+    DiscProcessConstraintChanged(nowIsConstraint);
+}
+
+int32_t DiscConstraintEventInit(void)
+{
+    int32_t ret = LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, ConstraintEventChangeHandler);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init constraint event handler fail");
+
+    DISC_LOGI(DISC_INIT, "init disc constraint event succ");
+    return SOFTBUS_OK;
+}
+
+void DiscConstraintEventDeInit(void)
+{
+    LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, ConstraintEventChangeHandler);
 }
 
 int32_t DiscMgrInit(void)

@@ -26,6 +26,7 @@ extern "C" {
 
 typedef int32_t (*DiscCoapSendRspFunc)(const DeviceInfo *deviceInfo, uint8_t bType, bool isRemoveShareCap);
 typedef int32_t (*DiscGetDisplayNameFunc)(char *displayName, uint32_t length, uint32_t remainLen);
+typedef bool (*DiscIsOsAccountConstraintFunc)(void);
 typedef int32_t (*DiscCoapParseKeyValueStrFunc)(const char *src, const char *key, char *outValue, uint32_t outLen);
 typedef void (*DiscSoftbusBleSetHandleIdFunc)(uint32_t handleId);
 typedef uint32_t (*GetDiscCapabilityFunc)(void);
@@ -41,6 +42,7 @@ typedef int (*DiscVirlinkLinklessRegisterRecvCallbackFunc)(DiscVirlinkLinklessRe
 typedef struct TagDiscOpenFuncList {
     DiscCoapSendRspFunc discCoapSendRsp;
     DiscGetDisplayNameFunc discGetDisplayName;
+    DiscIsOsAccountConstraintFunc discIsOsAccountConstraint;
     DiscCoapParseKeyValueStrFunc discCoapParseKeyValueStr;
     DiscSoftbusBleSetHandleIdFunc discSoftbusBleSetHandleId;
     GetDiscCapabilityFunc getDiscCapability;
