@@ -128,5 +128,13 @@ int32_t UnregChangeListener(const char *appId)
 {
     return GetSoftbusServerStubTestInterface()->UnregChangeListener(appId);
 }
+
+bool LnnIsOsAccountConstraint(void)
+{
+    if (GetSoftbusServerStubTestInterface() == nullptr) {
+        return false;
+    }
+    return GetSoftbusServerStubTestInterface()->LnnIsOsAccountConstraint();
+}
 }
 }

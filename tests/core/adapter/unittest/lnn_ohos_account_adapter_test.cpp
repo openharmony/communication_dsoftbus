@@ -34,6 +34,17 @@
 using namespace std;
 using namespace testing::ext;
 
+// Declare LnnOsAccountConstraintSubscriber matching the definition in lnn_ohos_account_adapter.cpp
+// This allows testing OnConstraintChanged through the base class pointer
+class LnnOsAccountConstraintSubscriber : public OHOS::AccountSA::OsAccountConstraintSubscriber {
+public:
+    explicit LnnOsAccountConstraintSubscriber(const std::set<std::string> &constraintSet)
+        : OHOS::AccountSA::OsAccountConstraintSubscriber(constraintSet)
+    {
+    }
+    void OnConstraintChanged(const OHOS::AccountSA::OsAccountConstraintStateData &constraintData) override;
+};
+
 namespace OHOS::SoftBus {
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 #define INVALID_ACCOUNT_UID (-1)
@@ -1030,5 +1041,39 @@ HWTEST_F(LnnOhosAccountAdapterTest, LnnClearOsAccountAdapterStatus_003, TestSize
     EXPECT_NO_FATAL_FAILURE(LnnClearOsAccountAdapterStatus());
     EXPECT_NO_FATAL_FAILURE(LnnClearOsAccountAdapterStatus());
     EXPECT_EQ(LnnIsOsAccountConstraint(), false);
+}
+
+/*
+ * @tc.name: OnConstraintChanged_001
+ * @tc.desc: Verify OnConstraintChanged skips when constraint is empty
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, OnConstraintChanged_001, TestSize.Level1)
+{
+    std::set<std::string> constraints = {"constraint.distributed.transmission"};
+    auto subscriber = std::make_shared<LnnOsAccountConstraintSubscriber>(constraints);
+    OHOS::AccountSA::OsAccountConstraintStateData data;
+    data.constraint = "";
+    data.localId = 100;
+    data.isEnabled = true;
+    EXPECT_NO_FATAL_FAILURE(subscriber->OnConstraintChanged(data));
+}
+
+/*
+ * @tc.name: OnConstraintChanged_002
+ * @tc.desc: Verify OnConstraintChanged skips when constraint does not match
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, OnConstraintChanged_002, TestSize.Level1)
+{
+    std::set<std::string> constraints = {"constraint.distributed.transmission"};
+    auto subscriber = std::make_shared<LnnOsAccountConstraintSubscriber>(constraints);
+    OHOS::AccountSA::OsAccountConstraintStateData data;
+    data.constraint = "constraint.other";
+    data.localId = 100;
+    data.isEnabled = true;
+    EXPECT_NO_FATAL_FAILURE(subscriber->OnConstraintChanged(data));
 }
 } // namespace OHOS::SoftBus

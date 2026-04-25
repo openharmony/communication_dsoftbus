@@ -361,7 +361,6 @@ static void NetConstraintStateEventHandler(const LnnEventBasicInfo *info)
     const LnnConstraintChangeEvent *event = (const LnnConstraintChangeEvent *)info;
     LNN_LOGI(LNN_BUILDER, "constraint state change, isConstraint=%{public}d", event->isConstraint);
     if (event->isConstraint) {
-        AuthStopListening(AUTH_LINK_TYPE_WIFI);
         LnnStopPublish();
         LnnStopDiscovery();
         bool addrType[CONNECTION_ADDR_MAX];
@@ -370,7 +369,6 @@ static void NetConstraintStateEventHandler(const LnnEventBasicInfo *info)
         }
         (void)LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX, false);
     } else {
-        NetRiskDeviceOpenAuthPort();
         RestartCoapDiscovery();
     }
 }

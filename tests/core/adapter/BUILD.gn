@@ -318,7 +318,6 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
 ohos_unittest("LnnSaStatusMonitorTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_sa_status_monitor.cpp",
     "$dsoftbus_root_path/tests/core/adapter/unittest/lnn_sa_status_monitor_mock.cpp",
     "$dsoftbus_root_path/tests/core/adapter/unittest/lnn_sa_status_monitor_test.cpp",
   ]
@@ -330,7 +329,9 @@ ohos_unittest("LnnSaStatusMonitorTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
     "unittest",
   ]
 
