@@ -2619,4 +2619,110 @@ HWTEST_F(SoftbusServerStubTest, ConstraintSetSizeTest001, TestSize.Level1)
 
     EXPECT_EQ(softBusServer->memberConstraintSet_.size(), 12u);
 }
+
+/*
+ * @tc.name: CheckPermissionTest001
+ * @tc.desc: Verify CheckPermission returns SOFTBUS_OK for code not in permission map
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckPermissionTest001, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+    uint32_t unknownCode = 99999;
+    int32_t ret = softBusServer->CheckPermission(unknownCode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: CheckPermissionTest002
+ * @tc.desc: Verify CheckPermission returns SOFTBUS_OK when permission is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckPermissionTest002, TestSize.Level1)
+{
+    SetAccessTokenPermission("SoftBusServerStubTest");
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+    int32_t ret = softBusServer->CheckPermission(SERVER_SESSION_SENDMSG);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: CheckPermissionTest003
+ * @tc.desc: Verify CheckPermission returns SOFTBUS_OK when permission check passes
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckPermissionTest003, TestSize.Level1)
+{
+    SetAccessTokenPermission("SoftBusServerStubTest");
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+    int32_t ret = softBusServer->CheckPermission(SERVER_JOIN_LNN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = softBusServer->CheckPermission(SERVER_CREATE_SESSION_SERVER);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: CheckAccountConstraintTest004
+ * @tc.desc: Verify CheckAccountConstraint returns SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE when constraint enabled
+ *           and code is in constraint set
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckAccountConstraintTest004, TestSize.Level1)
+{
+    NiceMock<SoftbusServerStubTestInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+    int32_t ret = softBusServer->CheckAccountConstraint(SERVER_JOIN_LNN);
+    EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+    ret = softBusServer->CheckAccountConstraint(SERVER_LEAVE_LNN);
+    EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+    ret = softBusServer->CheckAccountConstraint(SERVER_SHIFT_LNN_GEAR);
+    EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+}
+
+/*
+ * @tc.name: CheckAccountConstraintTest005
+ * @tc.desc: Verify CheckAccountConstraint returns SOFTBUS_OK when constraint enabled
+ *           but code is not in constraint set
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckAccountConstraintTest005, TestSize.Level1)
+{
+    NiceMock<SoftbusServerStubTestInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+    int32_t ret = softBusServer->CheckAccountConstraint(SERVER_CREATE_SESSION_SERVER);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = softBusServer->CheckAccountConstraint(99999);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: CheckAccountConstraintTest006
+ * @tc.desc: Verify CheckAccountConstraint returns SOFTBUS_OK when constraint disabled
+ *           with mock returning false
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusServerStubTest, CheckAccountConstraintTest006, TestSize.Level1)
+{
+    NiceMock<SoftbusServerStubTestInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+    for (uint32_t code : softBusServer->memberConstraintSet_) {
+        int32_t ret = softBusServer->CheckAccountConstraint(code);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+    }
+}
 }
