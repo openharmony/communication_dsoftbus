@@ -44,7 +44,7 @@
 #define MAX_BLE_ADV_NUM                  7
 #define MGR_TIME_THOUSAND_MULTIPLIER     1000LL
 #define BC_WAIT_TIME_MICROSEC            (BC_WAIT_TIME_MS * MGR_TIME_THOUSAND_MULTIPLIER)
-#define MAX_FILTER_SIZE                  32
+#define MAX_FILTER_SIZE                  33
 #define REGISTER_INFO_MANAGER            "registerInfoMgr"
 
 typedef struct {
@@ -2738,6 +2738,26 @@ int32_t StopScan(int32_t listenerId)
     return SOFTBUS_OK;
 }
 
+static bool CompareSameUUIDFilter(BcScanFilter *srcFilter, BcScanFilter *dstFilter)
+{
+    return (srcFilter->serviceUuidDataLength == dstFilter->serviceUuidDataLength &&
+               srcFilter->serviceUuidId == dstFilter->serviceUuidId &&
+               srcFilter->serviceUuidLength == dstFilter->serviceUuidLength) &&
+        (((srcFilter->serviceUuidData != NULL && dstFilter->serviceUuidData != NULL &&
+              srcFilter->serviceUuidDataMask != NULL && dstFilter->serviceUuidDataMask != NULL &&
+              srcFilter->serviceUuid != NULL && dstFilter->serviceUuid != NULL &&
+              srcFilter->serviceUuidMask != NULL && dstFilter->serviceUuidMask != NULL) &&
+             (memcmp(srcFilter->serviceUuidData, dstFilter->serviceUuidData, srcFilter->serviceUuidDataLength) == 0 &&
+                 memcmp(srcFilter->serviceUuidDataMask, dstFilter->serviceUuidDataMask,
+                     srcFilter->serviceUuidDataLength) == 0 &&
+                 memcmp(srcFilter->serviceUuid, dstFilter->serviceUuid, srcFilter->serviceUuidLength) == 0 &&
+                 memcmp(srcFilter->serviceUuidMask, dstFilter->serviceUuidMask, srcFilter->serviceUuidLength) == 0)) ||
+            (srcFilter->serviceUuidData == NULL && dstFilter->serviceUuidData == NULL &&
+                srcFilter->serviceUuidDataMask == NULL && dstFilter->serviceUuidDataMask == NULL &&
+                srcFilter->serviceUuid == NULL && dstFilter->serviceUuid == NULL &&
+                srcFilter->serviceUuidMask == NULL && dstFilter->serviceUuidMask == NULL));
+}
+
 bool CompareSameFilter(BcScanFilter *srcFilter, BcScanFilter *dstFilter)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(srcFilter != NULL, false, DISC_BROADCAST, "left filter is null");
@@ -2760,7 +2780,8 @@ bool CompareSameFilter(BcScanFilter *srcFilter, BcScanFilter *dstFilter)
         memcmp(srcFilter->manufactureDataMask, dstFilter->manufactureDataMask,
             srcFilter->manufactureDataLength) == 0) ||
         (srcFilter->manufactureData == NULL && dstFilter->manufactureData == NULL &&
-        srcFilter->manufactureDataMask == NULL && dstFilter->manufactureDataMask == NULL));
+        srcFilter->manufactureDataMask == NULL && dstFilter->manufactureDataMask == NULL)) &&
+        (CompareSameUUIDFilter(srcFilter, dstFilter));
 }
 
 static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter, uint8_t filterNum)
