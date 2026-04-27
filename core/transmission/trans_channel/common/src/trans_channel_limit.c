@@ -50,6 +50,10 @@ static const SessionWhiteList g_sessionWhiteList[] = {
     {
         .sessionName = "ohos.distributedhardware.devicemanager.auth3rdDevice",
         .regexp = false,
+    },
+    {
+        .sessionName = "ohos.distributedhardware.devicemanager.auth3rdDeviceCred",
+        .regexp = false,
     }
 };
 
