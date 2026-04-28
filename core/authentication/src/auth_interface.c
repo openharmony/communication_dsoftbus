@@ -762,7 +762,7 @@ TrustedReturnType AuthHasTrustedRelation(void)
     uint32_t num = 0;
     char *udidArray = NULL;
 
-    if (LnnGetTrustedDevInfoFromDb(&udidArray, &num) != SOFTBUS_OK) {
+    if (LnnGetTrustedDevInfo(&udidArray, &num) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth get trusted dev info fail");
         return TRUSTED_RELATION_IGNORE;
     }

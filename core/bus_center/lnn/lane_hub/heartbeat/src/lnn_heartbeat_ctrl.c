@@ -1062,7 +1062,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                     LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
                 }
                 LnnUpdateOhosAccount(UPDATE_USER_SWITCH);
-                UpdateRecoveryDeviceInfoFromDb();
+                UpdateRecoveryDeviceInfo();
                 LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
                 HbConditionChanged(false);
                 RefreshBleBroadcastByUserSwitched();

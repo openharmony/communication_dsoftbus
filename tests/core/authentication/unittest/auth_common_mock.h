@@ -54,7 +54,7 @@ public:
     virtual int32_t LnnGetStaFrequency(const NodeInfo *info) = 0;
     virtual int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen) = 0;
     virtual int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen) = 0;
-    virtual int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num) = 0;
+    virtual int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num) = 0;
     virtual int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum) = 0;
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t LnnNotifyEmptySessionKey(int64_t authId) = 0;
@@ -98,7 +98,7 @@ public:
     MOCK_METHOD1(LnnGetStaFrequency, int32_t(const NodeInfo *));
     MOCK_METHOD4(LnnEncryptAesGcm, int32_t(AesGcmInputParam *, int32_t, uint8_t **, uint32_t *));
     MOCK_METHOD3(LnnDecryptAesGcm, int32_t(AesGcmInputParam *, uint8_t **, uint32_t *));
-    MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t(char **, uint32_t *));
+    MOCK_METHOD2(LnnGetTrustedDevInfo, int32_t(char **, uint32_t *));
     MOCK_METHOD1(LnnGetAllOnlineNodeNum, int32_t(int32_t *));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t(InfoKey, const char *));
     MOCK_METHOD1(LnnNotifyEmptySessionKey, int32_t(int64_t));

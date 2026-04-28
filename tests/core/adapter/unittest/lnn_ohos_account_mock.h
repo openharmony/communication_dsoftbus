@@ -54,7 +54,7 @@ public:
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
-    virtual int32_t UpdateRecoveryDeviceInfoFromDb(void) = 0;
+    virtual int32_t UpdateRecoveryDeviceInfo(void) = 0;
     virtual int32_t GetCurrentAccount(int64_t *account) = 0;
     virtual int32_t GetOsAccountUid(char *id, uint32_t idLen, uint32_t *len) = 0;
     virtual int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
@@ -201,7 +201,7 @@ public:
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *str, uint32_t len, unsigned char *hash));
     MOCK_METHOD3(GetOsAccountId, int32_t(char *id, uint32_t idLen, uint32_t *len));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
-    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t(void));
+    MOCK_METHOD0(UpdateRecoveryDeviceInfo, int32_t(void));
     MOCK_METHOD1(GetCurrentAccount, int32_t(int64_t *account));
     MOCK_METHOD3(GetOsAccountUid, int32_t(char *id, uint32_t idLen, uint32_t *len));
     MOCK_METHOD2(LnnGetOhosAccountInfo, int32_t(uint8_t *accountHash, uint32_t len));

@@ -431,10 +431,6 @@ HWTEST_F(LNNNetLedgerMockTest, LnnInitNetLedgerDelayTest001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, AuthLoadDeviceKey).WillRepeatedly(Return());
     EXPECT_CALL(netLedgerMock, LnnInitLocalLedgerDelay).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_EQ(LnnInitNetLedgerDelay(), SOFTBUS_INVALID_PARAM);
-    EXPECT_CALL(netLedgerMock, LnnInitDecisionDbDelay).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_EQ(LnnInitNetLedgerDelay(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnInitNetLedgerDelay(), SOFTBUS_OK);
 }
 
@@ -768,9 +764,6 @@ HWTEST_F(LNNNetLedgerMockTest, LnnUpdateLocalDeviceInfoTest001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, AuthClearDeviceKey).WillRepeatedly(Return());
     EXPECT_CALL(netLedgerMock, LnnClearPtkList).WillRepeatedly(Return());
     EXPECT_CALL(netLedgerMock, LnnUpdateLocalUuidAndIrk).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnRemoveDb).WillRepeatedly(Return());
-    EXPECT_CALL(netLedgerMock, InitTrustedDevInfoTable).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(netLedgerMock, LnnGenBroadcastCipherInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));

@@ -45,9 +45,9 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
     return GetLnnDisctributedNetLedgerInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
 }
 
-int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid)
+int32_t LnnFindDeviceUdidTrustedInfo(const char *udid)
 {
-    return GetLnnDisctributedNetLedgerInterface()->LnnFindDeviceUdidTrustedInfoFromDb(udid);
+    return GetLnnDisctributedNetLedgerInterface()->LnnFindDeviceUdidTrustedInfo(udid);
 }
 }
 } // namespace OHOS

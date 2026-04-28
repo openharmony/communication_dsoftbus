@@ -35,18 +35,13 @@ int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num)
 {
     (void)udidArray;
     (void)num;
 
     LNN_LOGE(LNN_LEDGER, "get trusted dev info not implemented");
     return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int32_t InitTrustedDevInfoTable(void)
-{
-    return SOFTBUS_OK;
 }
 
 bool LnnIsPotentialHomeGroup(const char *udid)
@@ -57,12 +52,6 @@ bool LnnIsPotentialHomeGroup(const char *udid)
     return false;
 }
 
-int32_t LnnInitDecisionDbDelay(void)
-{
-    LNN_LOGE(LNN_INIT, "init decision db not implemented");
-    return SOFTBUS_OK;
-}
-
 int32_t LnnGenerateCeParams(bool isUnlocked)
 {
     (void)isUnlocked;
@@ -70,7 +59,7 @@ int32_t LnnGenerateCeParams(bool isUnlocked)
     return SOFTBUS_OK;
 }
 
-int32_t UpdateRecoveryDeviceInfoFromDb(void)
+int32_t UpdateRecoveryDeviceInfo(void)
 {
     return SOFTBUS_OK;
 }
@@ -81,11 +70,7 @@ int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
     return SOFTBUS_OK;
 }
 
-void LnnRemoveDb(void)
-{
-}
-
-int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid)
+int32_t LnnFindDeviceUdidTrustedInfo(const char *udid)
 {
     (void)udid;
     LNN_LOGI(LNN_INIT, "no find trusted");

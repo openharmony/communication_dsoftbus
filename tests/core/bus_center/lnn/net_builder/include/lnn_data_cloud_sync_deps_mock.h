@@ -48,7 +48,7 @@ public:
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid) = 0;
-    virtual int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid) = 0;
+    virtual int32_t LnnFindDeviceUdidTrustedInfo(const char *udid) = 0;
 };
 
 class LnnDataCloudSyncInterfaceMock : public LnnDataCloudSyncInterface {
@@ -70,7 +70,7 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
     MOCK_METHOD2(LnnPackCloudSyncAckSeq, int32_t(cJSON *, char *));
-    MOCK_METHOD1(LnnFindDeviceUdidTrustedInfoFromDb, int32_t(const char *));
+    MOCK_METHOD1(LnnFindDeviceUdidTrustedInfo, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // LNN_DATA_CLOUD_SYNC_DEPS_MOCK_H

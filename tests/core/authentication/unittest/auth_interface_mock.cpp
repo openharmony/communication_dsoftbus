@@ -71,9 +71,9 @@ int32_t CustomizedSecurityProtocolInit(void)
     return GetAuthOtherInterfaceMock()->CustomizedSecurityProtocolInit();
 }
 
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num)
 {
-    return GetAuthOtherInterfaceMock()->LnnGetTrustedDevInfoFromDb(udidArray, num);
+    return GetAuthOtherInterfaceMock()->LnnGetTrustedDevInfo(udidArray, num);
 }
 
 bool IsSameAccountGroupDevice(void)

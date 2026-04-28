@@ -24,6 +24,9 @@ extern "C" {
 #endif
 
 #define LNN_HUKS_AES_COMMON_SIZE 1024
+#define LNN_HUKS_IV_SIZE           16
+#define LNN_HUKS_MAGIC_SIZE        2
+#define LNN_HUKS_HEADER_SIZE       (LNN_HUKS_MAGIC_SIZE + LNN_HUKS_IV_SIZE)
 
 int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias);
 int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked);

@@ -66,7 +66,7 @@ void InitLedgerMock(LedgerInterfaceMock &hbLnnMock)
     ON_CALL(hbLnnMock, LnnGetRemoteStrInfo(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbLnnMock, LnnRequestLeaveSpecific(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbLnnMock, LnnGetAllOnlineNodeInfo(_, _)).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(hbLnnMock, LnnGetTrustedDevInfoFromDb(_, _))
+    ON_CALL(hbLnnMock, LnnGetTrustedDevInfo(_, _))
         .WillByDefault(LedgerInterfaceMock::ActionOfGetTrustedDevInfoFromDb);
 }
 
