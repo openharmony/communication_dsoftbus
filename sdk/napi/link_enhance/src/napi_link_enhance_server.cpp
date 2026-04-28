@@ -85,6 +85,31 @@ void NapiLinkEnhanceServer::DefineJSClass(napi_env env)
     napi_create_reference(env, constructor, 1, &consRef_);
 }
 
+void NapiLinkEnhanceServer::ReleaseServerResource(napi_env env, NapiLinkEnhanceServer* server)
+{
+    if (server == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::recursive_timed_mutex> guard(server->lock_);
+        if (server->acceptConnectRef_ != nullptr) {
+            napi_delete_reference(env, server->acceptConnectRef_);
+            server->acceptConnectRef_ = nullptr;
+        }
+        if (server->serverStopRef_ != nullptr) {
+            napi_delete_reference(env, server->serverStopRef_);
+            server->serverStopRef_ = nullptr;
+        }
+    }
+    std::lock_guard<std::mutex> guard(serverMapMutex_);
+    auto it = enhanceServerMap_.find(server->name_);
+    if (it != enhanceServerMap_.end() && it->second == server) {
+        COMM_LOGI(COMM_SDK, "Server %{public}s removed from map in finalizer",
+            server->name_.c_str());
+        enhanceServerMap_.erase(it);
+    }
+}
+
 napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info info)
 {
     napi_value thisVar = nullptr;
@@ -119,12 +144,12 @@ napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info i
         [](napi_env env, void* data, void* hint) {
             NapiLinkEnhanceServer* server = static_cast<NapiLinkEnhanceServer*>(data);
             if (server) {
+                ReleaseServerResource(env, server);
+                (void)GeneralRemoveServer(PKG_NAME.c_str(), server->name_.c_str());
                 delete server;
-                server = nullptr;
             }
         },
-        nullptr,
-        nullptr);
+        nullptr, nullptr);
     if (status != napi_ok) {
         COMM_LOGE(COMM_SDK, "napi_wrap fail");
         delete enhanceServer;
@@ -177,18 +202,10 @@ napi_value NapiLinkEnhanceServer::On(napi_env env, napi_callback_info info)
 
     if (strcmp(funcName.c_str(), "connectionAccepted") == 0) {
         COMM_LOGI(COMM_SDK, "register connectionAccepted");
-        if (enhanceServer->acceptConnectRef_ != nullptr) {
-            napi_delete_reference(env, enhanceServer->acceptConnectRef_);
-        }
-        napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(enhanceServer->acceptConnectRef_));
-        enhanceServer->SetAcceptedEnable(true);
+        enhanceServer->SetAcceptedEnable(true, env, args[ARGS_SIZE_ONE]);
     } else if (strcmp(funcName.c_str(), "serverStopped") == 0) {
         COMM_LOGI(COMM_SDK, "register serverStopped");
-        if (enhanceServer->serverStopRef_ != nullptr) {
-            napi_delete_reference(env, enhanceServer->serverStopRef_);
-        }
-        napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(enhanceServer->serverStopRef_));
-        enhanceServer->SetStopEnable(true);
+        enhanceServer->SetStopEnable(true, env, args[ARGS_SIZE_ONE]);
     } else {
         COMM_LOGE(COMM_SDK, "unknown str, name=%{public}s", funcName.c_str());
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
@@ -210,17 +227,9 @@ napi_value NapiLinkEnhanceServer::Off(napi_env env, napi_callback_info info)
         return NapiGetUndefinedRet(env);
     }
     if (strcmp(funcName.c_str(), "connectionAccepted") == 0) {
-        if (enhanceServer->acceptConnectRef_ != nullptr) {
-            napi_delete_reference(env, enhanceServer->acceptConnectRef_);
-        }
-        enhanceServer->acceptConnectRef_ = nullptr;
-        enhanceServer->SetAcceptedEnable(false);
+        enhanceServer->SetAcceptedEnable(false, env);
     } else if (strcmp(funcName.c_str(), "serverStopped") == 0) {
-        if (enhanceServer->serverStopRef_ != nullptr) {
-            napi_delete_reference(env, enhanceServer->serverStopRef_);
-        }
-        enhanceServer->serverStopRef_ = nullptr;
-        enhanceServer->SetStopEnable(false);
+        enhanceServer->SetStopEnable(false, env);
     } else {
         COMM_LOGE(COMM_SDK, "unknown str, name=%{public}s", funcName.c_str());
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
@@ -310,29 +319,16 @@ napi_value NapiLinkEnhanceServer::Close(napi_env env, napi_callback_info info)
         COMM_LOGE(COMM_SDK, "get server fail");
         return NapiGetUndefinedRet(env);
     }
+    enhanceServer->lock_.lock();
+    enhanceServer->isAcceptedEnable_ = false;
+    enhanceServer->isStopEnable_ = false;
+    enhanceServer->lock_.unlock();
+    ReleaseServerResource(env, enhanceServer);
     int32_t ret = GeneralRemoveServer(PKG_NAME.c_str(), enhanceServer->name_.c_str());
     if (ret != 0) {
         COMM_LOGE(COMM_SDK, "remove server fail, ret=%{public}d", ret);
         if (ConvertToJsErrcode(ret) == LINK_ENHANCE_PERMISSION_DENIED) {
             HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
-        }
-    }
-    enhanceServer->lock_.lock();
-    enhanceServer->isAcceptedEnable_ = false;
-    enhanceServer->isStopEnable_ = false;
-    enhanceServer->lock_.unlock();
-    if (enhanceServer->acceptConnectRef_ != nullptr) {
-        napi_delete_reference(env, enhanceServer->acceptConnectRef_);
-        enhanceServer->acceptConnectRef_ = nullptr;
-    }
-    if (enhanceServer->serverStopRef_ != nullptr) {
-        napi_delete_reference(env, enhanceServer->serverStopRef_);
-        enhanceServer->serverStopRef_ = nullptr;
-    }
-    {
-        std::lock_guard<std::mutex> guard(serverMapMutex_);
-        if (enhanceServerMap_.find(enhanceServer->name_) != enhanceServerMap_.end()) {
-            enhanceServerMap_.erase(enhanceServer->name_);
         }
     }
     return NapiGetUndefinedRet(env);

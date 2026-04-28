@@ -32,6 +32,7 @@ public:
     static napi_value Connect(napi_env env, napi_callback_info info);
     static napi_value Disconnect(napi_env env, napi_callback_info info);
     static napi_value Close(napi_env env, napi_callback_info info);
+    static void ReleaseConnectionResource(napi_env env, NapiLinkEnhanceConnection* connection);
 
     static napi_value GetPeerDeviceId(napi_env env, napi_callback_info info);
     static napi_value SendData(napi_env env, napi_callback_info info);
@@ -63,23 +64,56 @@ private:
     bool isEnableConnectResult_ = false;
     bool isEnableData_ = false;
     bool isEnableDisconnect_ = false;
-    void SetConnectResultEnable(bool isEnableConnectResult)
+    void SetConnectResultEnable(bool isEnableConnectResult, napi_env env, napi_value callback = nullptr)
     {
+        if (isEnableConnectResult && callback == nullptr) {
+            return;
+        }
         this->lock_.lock();
+        if (this->connectResultRef_ != nullptr) {
+            napi_delete_reference(env, this->connectResultRef_);
+        }
+        if (isEnableConnectResult) {
+            napi_create_reference(env, callback, 1, &(this->connectResultRef_));
+        } else {
+            this->connectResultRef_ = nullptr;
+        }
         this->isEnableConnectResult_ = isEnableConnectResult;
         this->lock_.unlock();
     }
 
-    void SetEnableData(bool isEnableData)
+    void SetEnableData(bool isEnableData, napi_env env, napi_value callback = nullptr)
     {
+        if (isEnableData && callback == nullptr) {
+            return;
+        }
         this->lock_.lock();
+        if (this->dataReceivedRef_ != nullptr) {
+            napi_delete_reference(env, this->dataReceivedRef_);
+        }
+        if (isEnableData) {
+            napi_create_reference(env, callback, 1, &(this->dataReceivedRef_));
+        } else {
+            this->dataReceivedRef_ = nullptr;
+        }
         this->isEnableData_ = isEnableData;
         this->lock_.unlock();
     }
 
-    void SetEnableDisconnect(bool isEnableDisconnect)
+    void SetEnableDisconnect(bool isEnableDisconnect, napi_env env, napi_value callback = nullptr)
     {
+        if (isEnableDisconnect && callback == nullptr) {
+            return;
+        }
         this->lock_.lock();
+        if (this->disconnectRef_ != nullptr) {
+            napi_delete_reference(env, this->disconnectRef_);
+        }
+        if (isEnableDisconnect) {
+            napi_create_reference(env, callback, 1, &(this->disconnectRef_));
+        } else {
+            this->disconnectRef_ = nullptr;
+        }
         this->isEnableDisconnect_ = isEnableDisconnect;
         this->lock_.unlock();
     }
