@@ -694,7 +694,8 @@ static void TransProcessUdpCapability(AppInfo *appInfo)
         }
     } else {
         if (GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION) &&
-            !CancelEncryptionCheckPacked(NULL, (pid_t)appInfo->myData.uid)) {
+            (appInfo->businessType != BUSINESS_TYPE_FILE ||
+            !CancelEncryptionCheckPacked(NULL, (pid_t)appInfo->myData.uid))) {
             TRANS_LOGW(TRANS_CTRL, "No support cancel encryption, uid=%{public}d", appInfo->myData.uid);
             DisableCapabilityBit(&appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
         }
