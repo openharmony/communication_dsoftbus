@@ -68,6 +68,8 @@
 #define MAX_ERRDESC_LEN 128
 #define NCM_DEVICE_TYPE "ncm0"
 #define NCM_HOST_TYPE   "wwan0"
+#define COLLABORATION_FWK_UID 5520
+#define COLLABORATION_FWK_SESSION_NAME "ohos.collaborationcenter.DataTransmit"
 
 typedef struct {
     int32_t channelType;
@@ -1088,6 +1090,17 @@ static int32_t HandleDataBusReply(
     return SOFTBUS_OK;
 }
 
+static bool MetaAuthCheck(const char *sessionName)
+{
+    int32_t uid = 0;
+    int32_t pid = 0;
+    if (TransTdcGetUidAndPid(sessionName, &uid, &pid) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get uid and pid failed.");
+        return false;
+    }
+    return uid == COLLABORATION_FWK_UID && (strcmp(sessionName, COLLABORATION_FWK_SESSION_NAME) == 0);
+}
+
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, flags=%{public}d, seq=%{public}" PRIu64, channelId, flags, seq);
@@ -1101,6 +1114,11 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
             TRANS_LOGE(TRANS_CTRL, "not supporting access");
             return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
         }
+    }
+    if ((flags & FLAG_EXTERNAL_DEVICE) == 0 && (flags & FLAG_AUTH_META) != 0 &&
+        !MetaAuthCheck(conn->appInfo.myData.sessionName)) {
+        TRANS_LOGE(TRANS_CTRL, "not support meta auth.");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     TransEventExtra extra;
     char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
@@ -1198,10 +1216,6 @@ static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
     authHandle->type = linkType;
     authHandle->authId = AuthGetIdByUuid(uuid, linkType, !fromAuthServer, isAuthMeta);
-    if ((cipherFlag & FLAG_AUTH_META) != 0) {
-        TRANS_LOGE(TRANS_CTRL, "not support meta auth.");
-        return SOFTBUS_FUNC_NOT_SUPPORT;
-    }
     return SOFTBUS_OK;
 }
 
