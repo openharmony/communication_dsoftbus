@@ -718,11 +718,6 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
     }
 
     getAttr->attr.streamAttr.streamType = data.ReadInt32();
-    getAttr->fastTransDataSize = data.ReadUint16();
-    if (getAttr->fastTransDataSize != 0) {
-        getAttr->fastTransData =
-            const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(data.ReadRawData(getAttr->fastTransDataSize)));
-    }
 }
 
 static bool ReadQosInfo(MessageParcel &data, SessionParam &param)

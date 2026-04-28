@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -737,19 +737,10 @@ void TransProxyHandshakeUnpackErrMsgTest(FuzzedDataProvider &provider)
     msg.msgHead.myId = info->myId;
     msg.msgHead.peerId = info->peerId;
     int32_t errCode = provider.ConsumeIntegral<int32_t>();
-#define MAX_LEN 100
-    info->appInfo.fastTransDataSize = provider.ConsumeIntegral<uint16_t>() % MAX_LEN;
-    uint8_t *tmp = reinterpret_cast<uint8_t *>(SoftBusCalloc(info->appInfo.fastTransDataSize));
-    if (tmp == nullptr) {
-        SoftBusFree(info);
-        return;
-    }
-    info->appInfo.fastTransData = tmp;
-    uint16_t fastDataSize = info->appInfo.fastTransDataSize;
+
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
     (void)TransProxyProcessHandshakeAckMsg(&msg);
-    (void)TransProxyHandshakeUnpackRightMsg(info, &msg, errCode, nullptr);
-    (void)TransProxyHandshakeUnpackRightMsg(info, &msg, errCode, &fastDataSize);
+    (void)TransProxyHandshakeUnpackRightMsg(info, &msg, errCode);
     (void)TransProxyHandshakeUnpackErrMsg(info, &msg, nullptr);
     (void)TransProxyHandshakeUnpackErrMsg(info, &msg, &errCode);
     (void)TransProxyDelChanByChanId(channelId);

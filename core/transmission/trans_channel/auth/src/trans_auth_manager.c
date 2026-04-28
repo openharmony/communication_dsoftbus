@@ -1611,10 +1611,6 @@ static void TransAuthDestroyChannelList(const ListNode *destroyList)
         TransAuthCloseChannel(destroyNode->authId, destroyNode->appInfo.linkType, destroyNode->isClient);
         NotifyCloseAuthChannel(destroyNode->appInfo.myData.pkgName,
             destroyNode->appInfo.myData.pid, destroyNode->appInfo.myData.channelId);
-
-        if (destroyNode->appInfo.fastTransData != NULL) {
-            SoftBusFree((void *)destroyNode->appInfo.fastTransData);
-        }
         (void)memset_s(destroyNode->appInfo.sessionKey, sizeof(destroyNode->appInfo.sessionKey), 0,
             sizeof(destroyNode->appInfo.sessionKey));
         (void)memset_s(destroyNode->appInfo.sinkSessionKey, sizeof(destroyNode->appInfo.sinkSessionKey), 0,

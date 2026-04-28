@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,7 +161,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeErrMsgTest001, TestS
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
-    uint16_t fastDataSize = FAST_TRANS_DATASIZE;
 
     ProxyChannelInfo chan;
     ProxyChannelInfo outChannel;
@@ -173,7 +172,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest001, TestS
     chan.channelId = -1;
     msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg != nullptr);
-    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg), &fastDataSize);
+    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
 
     chan.channelId = TEST_MESSAGE_CHANNEL_ID;
@@ -181,7 +180,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest001, TestS
     msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg != nullptr);
     outChannel.myId = chan.channelId;
-    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg), &fastDataSize);
+    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
@@ -197,14 +196,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest002, TestS
 {
     ProxyChannelInfo chan;
     ProxyChannelInfo outChannel;
-    uint16_t fastDataSize = FAST_TRANS_DATASIZE;
 
     chan.appInfo.appType = APP_TYPE_NORMAL;
     chan.channelId = TEST_MESSAGE_CHANNEL_ID;
     char *msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg != nullptr);
 
-    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg), &fastDataSize);
+    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, sizeof(msg));
     EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_free(msg);
 }
@@ -663,165 +661,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest001, TestSize.Le
     /* test apptype is auth, and success */
     ret = TransProxyResetPeer(&chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-/*
- * @tc.name: TransProxyPackFastDataTest001
- * @tc.desc: test trans proxy pack fast data
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataTest001, TestSize.Level1)
-{
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    uint32_t outLen = TEST_INIT_OUTLEN;
-    char *sliceData = nullptr;
-
-    appInfo->businessType = BUSINESS_TYPE_MESSAGE;
-    appInfo->routeType = WIFI_STA;
-    appInfo->fastTransData = (uint8_t *)TEST_FAST_TRANS_DATA;
-
-    sliceData = TransProxyPackFastData(appInfo, &outLen);
-    EXPECT_EQ(nullptr, sliceData);
-
-    appInfo->businessType = BUSINESS_TYPE_BYTE;
-    appInfo->routeType = WIFI_STA;
-    sliceData = TransProxyPackFastData(appInfo, &outLen);
-    EXPECT_EQ(nullptr, sliceData);
-
-    appInfo->fastTransDataSize = FAST_TRANS_DATASIZE;
-    strcpy_s(appInfo->sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
-    sliceData = TransProxyPackFastData(appInfo, &outLen);
-    EXPECT_NE(nullptr, sliceData);
-    SoftBusFree(appInfo);
-    SoftBusFree(sliceData);
-}
-
-/*
- * @tc.name: TransProxyByteDataTest001
- * @tc.desc: test trans proxy byte data
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyByteDataTest001, TestSize.Level1)
-{
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    ProxyDataInfo *dataInfo = (ProxyDataInfo *)SoftBusCalloc(sizeof(ProxyDataInfo));
-    dataInfo->inData = nullptr;
-    uint8_t inData = TEST_CHANNEL_IDENTITY_LEN;
-
-    int32_t ret = TransProxyMessageData(appInfo, dataInfo);
-    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
-
-    dataInfo->inData = &inData;
-    appInfo->fastTransDataSize = FAST_TRANS_DATASIZE;
-    ret = TransProxyMessageData(appInfo, dataInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    appInfo->fastTransData = (uint8_t *)TEST_FAST_TRANS_DATA;
-    ret = TransProxyMessageData(appInfo, dataInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    SoftBusFree(appInfo);
-    SoftBusFree(dataInfo);
-}
-
-/*
- * @tc.name: TransFastDataPackSliceHeadTest001
- * @tc.desc: test fast data pack slice head
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransFastDataPackSliceHeadTest001, TestSize.Level1)
-{
-    SliceFastHead *data = (SliceFastHead *)SoftBusCalloc(sizeof(SliceFastHead));
-    data->priority = TEST_NUMBER_FIVE;
-    data->sliceNum = TEST_NUMBER_SIX;
-    data->sliceSeq = TEST_NUMBER_SEVEN;
-    data->reserved = TEST_NUMBER_EIGHT;
-
-    FastDataPackSliceHead(data);
-    EXPECT_EQ(TEST_NUMBER_FIVE, data->priority);
-    EXPECT_NE(TEST_NUMBER_FIVE, data->sliceNum);
-    EXPECT_NE(TEST_NUMBER_FIVE, data->sliceSeq);
-    EXPECT_NE(TEST_NUMBER_FIVE, data->reserved);
-    SoftBusFree(data);
-}
-
-/*
- * @tc.name: TransProxyPackFastDataHeadTest001
- * @tc.desc: test trans proxy pack fast data head
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataHeadTest001, TestSize.Level1)
-{
-    AppInfo *appInfo = nullptr;
-    ProxyDataInfo *dataInfo = (ProxyDataInfo *)SoftBusCalloc(sizeof(ProxyDataInfo));
-
-    int32_t ret = TransProxyPackFastDataHead(dataInfo, appInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    dataInfo->inLen = FAST_TRANS_DATASIZE;
-    dataInfo->inData = (uint8_t *)TEST_FAST_TRANS_DATA;
-    dataInfo->outLen = TEST_INIT_OUTLEN;
-    ret = TransProxyPackFastDataHead(dataInfo, appInfo);
-    EXPECT_NE(SOFTBUS_MEM_ERR, ret);
-
-    dataInfo->outLen = FAST_TRANS_DATASIZE;
-    strcpy_s(appInfo->sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
-    ret = TransProxyPackFastDataHead(dataInfo, appInfo);
-    EXPECT_NE(SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR, ret);
-
-    ret = TransProxyPackFastDataHead(dataInfo, appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    SoftBusFree(dataInfo);
-}
-
-/*
- * @tc.name: FastDataPackPacketHeadTest001
- * @tc.desc: test fast data pack packethead
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, FastDataPackPacketHeadTest001, TestSize.Level1)
-{
-    PacketFastHead *data = (PacketFastHead *)SoftBusCalloc(sizeof(PacketFastHead));
-    data->magicNumber = TEST_NUMBER_FIVE;
-    data->seq = TEST_NUMBER_SIX;
-    data->flags = TEST_NUMBER_SEVEN;
-    data->dataLen = TEST_NUMBER_EIGHT;
-
-    FastDataPackPacketHead(data);
-    EXPECT_EQ(TEST_NUMBER_FIVE, data->magicNumber);
-    EXPECT_NE(TEST_NUMBER_FIVE, data->seq);
-    EXPECT_NE(TEST_NUMBER_FIVE, data->flags);
-    EXPECT_NE(TEST_NUMBER_FIVE, data->dataLen);
-    SoftBusFree(data);
-}
-
-/*
- * @tc.name: TransProxyEncryptFastDataTest001
- * @tc.desc: test trans proxy encrypt fast data
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyEncryptFastDataTest001, TestSize.Level1)
-{
-    char sessionKey[FAST_TRANS_DATASIZE] = {0};
-    int32_t seq = TEST_NUMBER_FIVE;
-    char in[FAST_TRANS_DATASIZE] = {0};
-    uint32_t inLen = TEST_BASE_ENCODE_LEN;
-    char out[FAST_TRANS_DATASIZE] = {0};
-    uint32_t outLen = 0;
-
-    strcpy_s(in, TEST_CHANNEL_IDENTITY_LEN, TEST_FAST_TRANS_DATA);
-    strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
-    int32_t ret = TransProxyEncryptFastData(sessionKey, seq, in, inLen, out, &outLen);
-    EXPECT_NE(SOFTBUS_ENCRYPT_ERR, ret);
-
-    inLen = sizeof(in);
-    ret = TransProxyEncryptFastData(sessionKey, seq, in, inLen, out, &outLen);
-    EXPECT_NE(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
 /*

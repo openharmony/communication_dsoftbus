@@ -23,28 +23,23 @@
 #include "trans_uk_manager.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int32_t *errCode, int32_t len);
 int32_t TransProxyUnPackRestErrMsg(const char *msg, int32_t *errCode, int32_t len);
-int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
-    int32_t len, uint16_t *fastDataSize);
-char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
-char* TransProxyPackHandshakeErrMsg(int32_t errCode);
+int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len);
+char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
+char *TransProxyPackHandshakeErrMsg(int32_t errCode);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth);
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
-char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
+char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
-char* TransProxyPackIdentity(const char *identity);
+char *TransProxyPackIdentity(const char *identity);
 int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len);
-char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen);
 int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo);
 int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len);
-int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo,
-    ProxyChannelInfo *chan, bool needHash);
+int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash);
 int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg);
 char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan);
 void TransPagingProcessHandshakeMsg(
@@ -57,9 +52,6 @@ char *TransProxyPagingPackChannelId(int16_t channelId);
 int32_t TransProxyParseD2DData(const char *data, int32_t len);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* __cplusplus */
-
-#endif
+#endif /* SOFTBUS_PROXYCHANNEL_MESSAGE_H */

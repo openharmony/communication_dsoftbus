@@ -92,24 +92,6 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
     return module;
 }
 
-static int32_t CopyAppInfoFastTransData(SessionConn *conn, const AppInfo *appInfo)
-{
-    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
-        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
-        if (fastTransData == NULL) {
-            return SOFTBUS_MALLOC_ERR;
-        }
-        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
-            appInfo->fastTransDataSize) != EOK) {
-            SoftBusFree(fastTransData);
-            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
-            return SOFTBUS_MEM_ERR;
-        }
-        conn->appInfo.fastTransData = fastTransData;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
@@ -139,12 +121,9 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         SoftBusFree(newConn);
         return SOFTBUS_MEM_ERR;
     }
-    int32_t ret = CopyAppInfoFastTransData(newConn, appInfo);
-    if (ret != SOFTBUS_OK) {
-        SoftBusFree(newConn);
-        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
-        return ret;
-    }
+    newConn->appInfo.fastTransData = NULL;
+    newConn->appInfo.fastTransDataSize = 0;
+
     if (module == DIRECT_CHANNEL_SERVER_USB) {
         AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_USB, false, &newConn->authHandle);
         if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, newConn->appInfo.myData.addr,
@@ -175,14 +154,13 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     newConn->appInfo.fd = fd;
 
-    ret = AddTcpConnAndSessionInfo(newchannelId, fd, newConn, module);
+    int32_t ret = AddTcpConnAndSessionInfo(newchannelId, fd, newConn, module);
     if (ret != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
         return ret;
     }
     *channelId = newchannelId;
-    TRANS_LOGI(TRANS_CTRL,
-        "ok: channelId=%{public}d, module=%{public}d, fd=%{public}d",
-        newchannelId, (int32_t)module, fd);
+    TRANS_LOGI(
+        TRANS_CTRL, "ok: channelId=%{public}d, module=%{public}d, fd=%{public}d", newchannelId, (int32_t)module, fd);
     return SOFTBUS_OK;
 }

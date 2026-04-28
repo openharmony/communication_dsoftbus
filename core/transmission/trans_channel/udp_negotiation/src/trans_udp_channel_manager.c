@@ -120,12 +120,10 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
             TRANS_LOGW(TRANS_CTRL, "close udp channel time out, notify close.");
             (void)NotifyUdpChannelClosed(&(udpChannel->info), MESSAGE_TYPE_NOMAL);
         }
+        // fastTransData is always NULL in the UDP channel, no need to free
         ListDelete(&(udpChannel->node));
-        if (udpChannel->info.fastTransData != NULL) {
-            SoftBusFree((void *)udpChannel->info.fastTransData);
-        }
-        (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
-            sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(
+            udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0, sizeof(udpChannel->info.sessionKey));
         (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
             sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
@@ -209,12 +207,10 @@ void TransUdpChannelMgrDeinit(void)
     UdpChannelInfo *nextUdpChannel = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, nextUdpChannel, &g_udpChannelMgr->list, UdpChannelInfo, node) {
         ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
+        // fastTransData is always NULL in the UDP channel, no need to free
         ListDelete(&(udpChannel->node));
-        if (udpChannel->info.fastTransData != NULL) {
-            SoftBusFree((void *)udpChannel->info.fastTransData);
-        }
-        (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
-            sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(
+            udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0, sizeof(udpChannel->info.sessionKey));
         (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
             sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);
@@ -222,7 +218,6 @@ void TransUdpChannelMgrDeinit(void)
     (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
     DestroySoftBusList(g_udpChannelMgr);
     g_udpChannelMgr = NULL;
-    return;
 }
 
 int32_t TransAddUdpChannel(UdpChannelInfo *channel)
@@ -278,11 +273,9 @@ int32_t TransDelUdpChannel(int32_t channelId)
     LIST_FOR_EACH_ENTRY_SAFE(udpChannelNode, udpChannelNext, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.myData.channelId == channelId) {
             ReleaseUdpChannelId((int32_t)(udpChannelNode->info.myData.channelId));
+            // fastTransData is always NULL in the UDP channel, no need to free
             ListDelete(&(udpChannelNode->node));
             TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", channelId);
-            if (udpChannelNode->info.fastTransData != NULL) {
-                SoftBusFree((void *)(udpChannelNode->info.fastTransData));
-            }
             (void)memset_s(udpChannelNode->info.sessionKey, sizeof(udpChannelNode->info.sessionKey), 0,
                 sizeof(udpChannelNode->info.sessionKey));
             (void)memset_s(udpChannelNode->info.sinkSessionKey, sizeof(udpChannelNode->info.sinkSessionKey), 0,
@@ -305,14 +298,11 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
     UdpChannelInfo *udpChannelNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, udpChannelNext, udpChannelList, UdpChannelInfo, node) {
         (void)NotifyUdpChannelClosed(&udpChannel->info, MESSAGE_TYPE_NOMAL);
-
+        // fastTransData is always NULL in the UDP channel, no need to free
         ListDelete(&(udpChannel->node));
         TRANS_LOGI(TRANS_CTRL, "channelId=%{public}" PRId64, udpChannel->info.myData.channelId);
-        if (udpChannel->info.fastTransData != NULL) {
-            SoftBusFree((void *)(udpChannel->info.fastTransData));
-        }
-        (void)memset_s(udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0,
-            sizeof(udpChannel->info.sessionKey));
+        (void)memset_s(
+            udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0, sizeof(udpChannel->info.sessionKey));
         (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
             sizeof(udpChannel->info.sinkSessionKey));
         SoftBusFree(udpChannel);

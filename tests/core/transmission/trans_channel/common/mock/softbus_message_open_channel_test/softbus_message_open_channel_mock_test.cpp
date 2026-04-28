@@ -354,19 +354,6 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackReply002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransTdcPackFastData001
- * @tc.desc: TransTdcPackFastData001 test
- *           use the wrong parameter or normal parameter
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftBusMessageOpenChannelMockTest, TransTdcPackFastData001, TestSize.Level1)
-{
-    char *ret = TransTdcPackFastData(nullptr, nullptr);
-    EXPECT_EQ(nullptr, ret);
-}
-
-/*
  * @tc.name: JsonObjectPackRequestEx001
  * @tc.desc: JsonObjectPackRequestEx001 test
  *           use the wrong parameter or normal parameter
@@ -1201,26 +1188,6 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, TransUnpackMetaTypeSpecificData001, 
     int32_t ret = TransUnpackMetaTypeSpecificData(&cjson, appInfo);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: TransTdcEncrypt001
- * @tc.desc: TransTdcEncrypt test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftBusMessageOpenChannelMockTest, TransTdcEncrypt001, TestSize.Level1)
-{
-    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
-    const char *inData = "inData";
-    char outData[32];
-    uint32_t outDataLen;
-    (void)strcpy_s(sessionKey, SESSION_KEY_LENGTH, "test-sessionkey");
-
-    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
-    EXPECT_CALL(softbusMOpenChannelMock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
-    int32_t ret = TransTdcEncrypt(sessionKey, inData, strlen(inData), outData, &outDataLen);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
 /*

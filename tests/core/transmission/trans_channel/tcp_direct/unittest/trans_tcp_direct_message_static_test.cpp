@@ -183,29 +183,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpened0002, TestSize.Leve
 }
 
 /*
- * @tc.name: TransTdcPostFisrtData0003
- * @tc.desc: Test whether the return value of the TransTdcPostFisrtData function
- *           meets the expected result under specific conditions
- *           (expected return value: encryption error SOFTBUS_ENCRYPT_ERR)
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Level1)
-{
-    int32_t ret;
-    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == nullptr) {
-        return;
-    }
-
-    ret = TransTdcPostFastData(conn);
-    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
-
-    SoftBusFree(conn);
-    conn = nullptr;
-}
-
-/*
  * @tc.name: TransGetLocalConfig0004
  * @tc.desc: Test the local configuration retrieval function
  *           of the TCP direct message channel
@@ -518,23 +495,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SendFailToFlushDeviceTest001, TestSize
     conn->appInfo.peerData.deviceId[0] = '\0';
     SendFailToFlushDevice(conn);
     SoftBusFree(conn);
-}
-
-/*
- * @tc.name: TransTdcPostFisrtDataTest001
- * @tc.desc: Test the ability to handle exceptions in the fast data transmission function
- *           during TCP direct message transfer
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtDataTest001, TestSize.Level1)
-{
-    SessionConn *con = TestSetSessionConn();
-    EXPECT_NE(con, nullptr);
-
-    int32_t ret = TransTdcPostFastData(con);
-    EXPECT_NE(ret, SOFTBUS_OK);
-    SoftBusFree(con);
 }
 
 /*
