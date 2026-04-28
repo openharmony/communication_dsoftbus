@@ -60,48 +60,6 @@ char *PackError(int32_t errCode, const char *errDesc)
     return data;
 }
 
-static int32_t PackFirstData(const AppInfo *appInfo, cJSON *json)
-{
-    TRANS_LOGD(TRANS_CTRL, "begin to pack first data");
-    uint8_t *encodeFastData = (uint8_t *)SoftBusCalloc(BASE64_FAST_DATA_LEN);
-    if (encodeFastData == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc encode fast data failed.");
-        return SOFTBUS_MALLOC_ERR;
-    }
-
-    uint32_t outLen;
-    char *buf = TransTdcPackFastData(appInfo, &outLen);
-    if (buf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
-        SoftBusFree(encodeFastData);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    if (outLen != appInfo->fastTransDataSize + FAST_TDC_EXT_DATA_SIZE) {
-        TRANS_LOGE(TRANS_CTRL, "pack bytes len error, outlen=%{public}d", outLen);
-        SoftBusFree(buf);
-        SoftBusFree(encodeFastData);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    size_t fastDataSize = 0;
-    int32_t ret =
-        SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize, (const unsigned char *)buf, outLen);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "base64 encode failed.");
-        SoftBusFree(encodeFastData);
-        SoftBusFree(buf);
-        return SOFTBUS_DECRYPT_ERR;
-    }
-    if (!AddStringToJsonObject(json, FIRST_DATA, (char *)encodeFastData)) {
-        TRANS_LOGE(TRANS_CTRL, "add first data failed.");
-        SoftBusFree(encodeFastData);
-        SoftBusFree(buf);
-        return SOFTBUS_CREATE_JSON_ERR;
-    }
-    SoftBusFree(encodeFastData);
-    SoftBusFree(buf);
-    return SOFTBUS_OK;
-}
-
 static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsigned char *encodeSessionKey)
 {
     if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
@@ -155,11 +113,6 @@ char *PackRequest(const AppInfo *appInfo, int64_t requestId)
         return NULL;
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
-        cJSON_Delete(json);
-        return NULL;
-    }
-    if (appInfo->fastTransDataSize > 0 && PackFirstData(appInfo, json) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "pack first data failed");
         cJSON_Delete(json);
         return NULL;
     }
@@ -464,68 +417,6 @@ int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
     }
 
     return SOFTBUS_OK;
-}
-
-static int32_t TransTdcEncrypt(const char *sessionKey, const char *in, uint32_t inLen, char *out, uint32_t *outLen)
-{
-    AesGcmCipherKey cipherKey = { 0 };
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
-        return SOFTBUS_MEM_ERR;
-    }
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, outLen);
-    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "SoftBusEncryptData fail. ret=%{public}d", ret);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static void PackTcpFastDataPacketHead(TcpFastDataPacketHead *data)
-{
-    data->magicNumber = SoftBusHtoLl(data->magicNumber);
-    data->seq = (int32_t)SoftBusHtoLl((uint32_t)data->seq);
-    data->flags = SoftBusHtoLl(data->flags);
-    data->dataLen = SoftBusHtoLl(data->dataLen);
-}
-
-char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
-{
-#define MAGIC_NUMBER           0xBABEFACE
-#define TDC_PKT_HEAD_SEQ_START 1024
-    if ((appInfo == NULL) || (outLen == NULL) || (appInfo->fastTransData == NULL)) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param");
-        return NULL;
-    }
-    uint32_t dataLen = appInfo->fastTransDataSize + OVERHEAD_LEN;
-    char *buf = (char *)SoftBusCalloc(dataLen + FAST_DATA_HEAD_SIZE);
-    if (buf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc failed.");
-        return NULL;
-    }
-    static _Atomic int32_t tdcPktHeadSeq = TDC_PKT_HEAD_SEQ_START;
-    TcpFastDataPacketHead pktHead = {
-        .magicNumber = MAGIC_NUMBER,
-        .seq = atomic_fetch_add_explicit(&tdcPktHeadSeq, 1, memory_order_relaxed),
-        .flags = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE,
-        .dataLen = dataLen,
-    };
-    PackTcpFastDataPacketHead(&pktHead);
-    if (memcpy_s(buf, FAST_DATA_HEAD_SIZE, &pktHead, sizeof(TcpFastDataPacketHead)) != EOK) {
-        SoftBusFree(buf);
-        TRANS_LOGE(TRANS_CTRL, "memcpy_s error");
-        return NULL;
-    }
-    if (TransTdcEncrypt(appInfo->sessionKey, (const char *)appInfo->fastTransData, appInfo->fastTransDataSize,
-        buf + FAST_DATA_HEAD_SIZE, &dataLen) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "encrypt error");
-        SoftBusFree(buf);
-        return NULL;
-    }
-    *outLen = dataLen + FAST_DATA_HEAD_SIZE;
-    return buf;
 }
 
 static int32_t PackExternalDeviceJsonObject(const AppInfo *appInfo, cJSON *json, unsigned char *encodeSessionKey)

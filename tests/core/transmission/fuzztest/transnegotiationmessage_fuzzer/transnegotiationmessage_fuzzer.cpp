@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +106,7 @@ static bool ProxyChannelNegMessageAckFuzzTest(uint32_t index)
 {
     ProxyChannelInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
-    
+
     cJSON *root = cJSON_CreateObject();
     if (root == nullptr) {
         return false;
@@ -149,8 +149,7 @@ static bool ProxyChannelNegMessageAckFuzzTest(uint32_t index)
         return false;
     }
 
-    uint16_t fastDataSize = 0;
-    (void)TransProxyUnpackHandshakeAckMsg(msg, &info, strlen(msg), &fastDataSize);
+    (void)TransProxyUnpackHandshakeAckMsg(msg, &info, strlen(msg));
 
     cJSON_free(msg);
     cJSON_Delete(root);
@@ -421,9 +420,8 @@ static void ProxyChannelAbnormalAckMsg()
     ProxyChannelInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
 
-    uint16_t fastDataSize = 0;
     const char *msg = TRANS_FUZZ_STR_VAL.c_str();
-    (void)TransProxyUnpackHandshakeAckMsg(msg, &info, strlen(msg), &fastDataSize);
+    (void)TransProxyUnpackHandshakeAckMsg(msg, &info, strlen(msg));
 }
 
 static void ProxyChannelAbnormalHandshake()

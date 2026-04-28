@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -531,7 +531,7 @@ HWTEST_F(TransProxyMessageTest, PackHandshakeMsgForFastData001, TestSize.Level1)
     ASSERT_NE(ret, SOFTBUS_MALLOC_ERR);
 
     ret = PackHandshakeMsgForFastData(&appInfo, root);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PACK_FAST_DATA_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     cJSON_Delete(root);
 }
@@ -566,7 +566,6 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
 {
     ProxyChannelInfo chan;
     ProxyChannelInfo outChannel;
-    uint16_t fastDataSize;
     chan.appInfo.appType = APP_TYPE_NOT_CARE;
     char *msg = TransProxyPackHandshakeAckMsg(&chan);
     EXPECT_EQ(nullptr, msg);
@@ -575,7 +574,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     chan.channelId = -1;
     msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg != nullptr);
-    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg), &fastDataSize);
+    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg));
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 
     chan.channelId = TEST_MESSAGE_CHANNEL_ID;
@@ -583,7 +582,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg != nullptr);
     outChannel.myId = chan.channelId;
-    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg), &fastDataSize);
+    ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg));
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
     cJSON_free(msg);
 }
@@ -599,14 +598,13 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest002, TestSize.Level
 {
     ProxyChannelInfo chan;
     ProxyChannelInfo outChannel;
-    uint16_t fastDataSize;
 
     chan.appInfo.appType = APP_TYPE_NORMAL;
     chan.channelId = TEST_MESSAGE_CHANNEL_ID;
     char *msg = TransProxyPackHandshakeAckMsg(&chan);
     ASSERT_TRUE(msg != nullptr);
 
-    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg), &fastDataSize);
+    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg, &outChannel, strlen(msg));
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 
     cJSON_free(msg);

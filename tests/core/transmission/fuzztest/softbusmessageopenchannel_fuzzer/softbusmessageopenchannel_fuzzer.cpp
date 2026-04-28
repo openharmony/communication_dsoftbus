@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,18 +32,6 @@ public:
     {
     }
 };
-
-static void InitTcpFastDataPacketHead(FuzzedDataProvider &provider, TcpFastDataPacketHead *head)
-{
-    if (head == nullptr) {
-        COMM_LOGE(COMM_TEST, "PacketHead is nullptr!");
-        return;
-    }
-    head->magicNumber = provider.ConsumeIntegral<uint32_t>();
-    head->flags = provider.ConsumeIntegral<uint32_t>();
-    head->dataLen = provider.ConsumeIntegral<uint32_t>();
-    head->seq = provider.ConsumeIntegral<int32_t>();
-}
 
 static void InitTransFlowInfo(FuzzedDataProvider &provider, TransFlowInfo flowInfo)
 {
@@ -249,23 +237,6 @@ void PackErrorTest(FuzzedDataProvider &provider)
     (void)PackError(errCode, nullptr);
 }
 
-void PackFirstDataTest(FuzzedDataProvider &provider)
-{
-    AppInfo appInfo;
-    if (!InitAppInfo(provider, &appInfo)) {
-        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
-        return;
-    }
-    cJSON *json = cJSON_CreateObject();
-    if (json == nullptr) {
-        COMM_LOGE(COMM_TEST, "Init cJSON failed!");
-        return;
-    }
-
-    PackFirstData(&appInfo, json);
-    cJSON_Delete(json);
-}
-
 void JsonObjectPackRequestExTest(FuzzedDataProvider &provider)
 {
     AppInfo appInfo;
@@ -326,49 +297,6 @@ void PackReplyTest(FuzzedDataProvider &provider)
     }
 
     (void)PackReply(&appInfo);
-}
-
-void TransTdcEncryptTest(FuzzedDataProvider &provider)
-{
-    uint32_t inLen = provider.ConsumeIntegral<uint32_t>();
-    uint32_t outLen = provider.ConsumeIntegral<uint32_t>();
-
-    std::string str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
-    char sessionKey[UINT8_MAX] = { 0 };
-    if (strcpy_s(sessionKey, UINT8_MAX, str.c_str()) != EOK) {
-        return;
-    }
-    str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
-    char in[UINT8_MAX] = { 0 };
-    if (strcpy_s(in, UINT8_MAX, str.c_str()) != EOK) {
-        return;
-    }
-    str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
-    char out[UINT8_MAX] = { 0 };
-    if (strcpy_s(out, UINT8_MAX, str.c_str()) != EOK) {
-        return;
-    }
-    inLen = 0;
-    TransTdcEncrypt(sessionKey, in, inLen, out, &outLen);
-}
-
-void PackTcpFastDataPacketHeadTest(FuzzedDataProvider &provider)
-{
-    TcpFastDataPacketHead head;
-    InitTcpFastDataPacketHead(provider, &head);
-    PackTcpFastDataPacketHead(&head);
-}
-
-void TransTdcPackFastDataTest(FuzzedDataProvider &provider)
-{
-    AppInfo appInfo;
-    if (!InitAppInfo(provider, &appInfo)) {
-        COMM_LOGE(COMM_TEST, "Init appInfo failed!");
-        return;
-    }
-    uint32_t outLen = provider.ConsumeIntegral<uint32_t>();
-
-    (void)TransTdcPackFastData(&appInfo, &outLen);
 }
 
 void PackExternalDeviceJsonObjectTest(FuzzedDataProvider &provider)
@@ -519,14 +447,10 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
     OHOS::PackErrorTest(provider);
-    OHOS::PackFirstDataTest(provider);
     OHOS::JsonObjectPackRequestExTest(provider);
     OHOS::PackRequestTest(provider);
     OHOS::AddItemsToJsonObjectTest(provider);
     OHOS::PackReplyTest(provider);
-    OHOS::TransTdcEncryptTest(provider);
-    OHOS::PackTcpFastDataPacketHeadTest(provider);
-    OHOS::TransTdcPackFastDataTest(provider);
     OHOS::PackExternalDeviceJsonObjectTest(provider);
     OHOS::TransPackHASpecificDataTest(provider);
     OHOS::TransPackMetaTypeSpecificDataTest(provider);

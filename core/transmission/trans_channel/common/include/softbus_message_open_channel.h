@@ -86,8 +86,6 @@ char *PackError(int32_t errCode, const char *errDesc);
 
 int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode);
 
-char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen);
-
 int32_t UnpackExternalDeviceRequest(const cJSON *msg, AppInfo *appInfo);
 
 char *PackExternalDeviceRequest(const AppInfo *appInfo, int64_t requestId);

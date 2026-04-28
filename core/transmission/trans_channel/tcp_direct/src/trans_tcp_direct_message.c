@@ -602,36 +602,6 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
     return NotifyChannelOpenFailedBySessionConn(&conn, errCode);
 }
 
-static int32_t TransTdcPostFastData(SessionConn *conn)
-{
-    TRANS_LOGI(TRANS_CTRL, "enter.");
-    uint32_t outLen = 0;
-    char *buf = TransTdcPackFastData(&(conn->appInfo), &outLen);
-    if (buf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    if (outLen != conn->appInfo.fastTransDataSize + FAST_TDC_EXT_DATA_SIZE) {
-        TRANS_LOGE(TRANS_CTRL, "pack bytes len error, outLen=%{public}d", outLen);
-        SoftBusFree(buf);
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    uint32_t tos = (conn->appInfo.businessType == BUSINESS_TYPE_BYTE) ? FAST_BYTE_TOS : FAST_MESSAGE_TOS;
-    if (SetIpTos(conn->appInfo.fd, tos) != SOFTBUS_OK) {
-        SoftBusFree(buf);
-        return SOFTBUS_TCP_SOCKET_ERR;
-    }
-    ssize_t ret = ConnSendSocketData(conn->appInfo.fd, buf, outLen, 0);
-    if (ret != (ssize_t)outLen) {
-        TRANS_LOGE(TRANS_CTRL, "failed to send tcp data. ret=%{public}zd", ret);
-        SoftBusFree(buf);
-        return GetErrCodeBySocketErr(SOFTBUS_TRANS_SEND_TCP_DATA_FAILED);
-    }
-    SoftBusFree(buf);
-    buf = NULL;
-    return SOFTBUS_OK;
-}
-
 static const ConfigTypeMap g_configTypeMap[] = {
     {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
     {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
@@ -742,21 +712,13 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     ret = SetAppInfoById(channelId, &conn.appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "set app info by id failed.");
     SetByteChannelTos(&conn.appInfo);
-    if ((fastDataSize > 0 && (conn.appInfo.fastTransDataSize == fastDataSize)) || conn.appInfo.fastTransDataSize == 0) {
-        ret = NotifyChannelOpened(channelId);
-        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-        (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0,
-            sizeof(conn.appInfo.sinkSessionKey));
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
-    } else {
-        ret = TransTdcPostFastData(&conn);
-        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-        (void)memset_s(conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0,
-            sizeof(conn.appInfo.sinkSessionKey));
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "tdc send fast data failed");
-        ret = NotifyChannelOpened(channelId);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
-    }
+
+    ret = NotifyChannelOpened(channelId);
+    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+    (void)memset_s(
+        conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "notify channel open failed");
+
     BuildEventExtra(channelId);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;

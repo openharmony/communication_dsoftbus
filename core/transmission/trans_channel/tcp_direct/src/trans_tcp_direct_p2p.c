@@ -1394,24 +1394,6 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
     return ret;
 }
 
-static int32_t CopyAppInfoFastTransData(SessionConn *conn, const AppInfo *appInfo)
-{
-    if (appInfo->fastTransData != NULL && appInfo->fastTransDataSize > 0) {
-        uint8_t *fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize);
-        if (fastTransData == NULL) {
-            return SOFTBUS_MALLOC_ERR;
-        }
-        if (memcpy_s((char *)fastTransData, appInfo->fastTransDataSize, (const char *)appInfo->fastTransData,
-            appInfo->fastTransDataSize) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "memcpy fastTransData fail");
-            SoftBusFree(fastTransData);
-            return SOFTBUS_MEM_ERR;
-        }
-        conn->appInfo.fastTransData = fastTransData;
-    }
-    return SOFTBUS_OK;
-}
-
 static void FreeFastTransData(AppInfo *appInfo)
 {
     if (appInfo != NULL && appInfo->fastTransData != NULL) {
@@ -1421,26 +1403,21 @@ static void FreeFastTransData(AppInfo *appInfo)
 
 static int32_t BuildSessionConn(const AppInfo *appInfo, SessionConn **conn)
 {
-    int32_t ret = SOFTBUS_TRANS_P2P_DIRECT_FAILED;
     *conn = CreateNewSessinConn(DIRECT_CHANNEL_SERVER_P2P, false);
     if (*conn == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create new sessin conn fail");
         return SOFTBUS_MEM_ERR;
     }
 
+    // fastTransData is NULL，no need to copy, set NULL to avoid shallow copy issues
     if (memcpy_s(&((*conn)->appInfo), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy appInfo fail");
         SoftBusFree(*conn);
         *conn = NULL;
         return SOFTBUS_MEM_ERR;
     }
-    ret = CopyAppInfoFastTransData(*conn, appInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
-        SoftBusFree(*conn);
-        *conn = NULL;
-        return ret;
-    }
+    (*conn)->appInfo.fastTransData = NULL;
+    (*conn)->appInfo.fastTransDataSize = 0;
     return SOFTBUS_OK;
 }
 

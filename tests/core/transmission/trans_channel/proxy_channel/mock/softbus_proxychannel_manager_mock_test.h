@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,8 +34,7 @@ class SoftbusTransProxyChannelManagerInterface {
 public:
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int32_t *errCode, int32_t len) = 0;
-    virtual int32_t TransProxyUnpackHandshakeAckMsg(
-        const char *msg, ProxyChannelInfo *chanInfo, int32_t len, uint16_t *fastDataSize) = 0;
+    virtual int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len) = 0;
     virtual int32_t TransProxyGetPkgName(const char *sessionName, char *pkgName, uint16_t len) = 0;
     virtual int32_t TransProxyGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
@@ -71,7 +70,7 @@ public:
     MOCK_METHOD(int32_t, SoftbusGetConfig, (ConfigType type, unsigned char *val, uint32_t len), (override));
     MOCK_METHOD(int32_t, TransProxyUnPackHandshakeErrMsg, (const char *msg, int32_t *errCode, int32_t len), (override));
     MOCK_METHOD(int32_t, TransProxyUnpackHandshakeAckMsg,
-        (const char *msg, ProxyChannelInfo *chanInfo, int32_t len, uint16_t *fastDataSize), (override));
+        (const char *msg, ProxyChannelInfo *chanInfo, int32_t len), (override));
     MOCK_METHOD(int32_t, TransProxyGetPkgName, (const char *sessionName, char *pkgName, uint16_t len), (override));
     MOCK_METHOD(int32_t, TransProxyGetUidAndPidBySessionName, (const char *sessionName, int32_t *uid, int32_t *pid),
         (override));
