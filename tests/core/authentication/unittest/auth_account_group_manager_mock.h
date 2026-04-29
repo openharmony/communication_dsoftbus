@@ -34,6 +34,8 @@ public:
     virtual int32_t InitDeviceAuthService() = 0;
     virtual const LightAccountVerifier *GetLightAccountVerifierInstance() = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds() = 0;
+    virtual SoftBusList *CreateSoftBusList(void) = 0;
+    virtual void DestroySoftBusList(SoftBusList *list) = 0;
 };
 
 class AuthAccountManagerMock : public AuthAccountManagerMockInterface {
@@ -47,6 +49,8 @@ public:
     MOCK_METHOD0(InitDeviceAuthService, int32_t());
     MOCK_METHOD0(GetLightAccountVerifierInstance, const LightAccountVerifier *());
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t());
+    MOCK_METHOD0(CreateSoftBusList, SoftBusList *());
+    MOCK_METHOD1(DestroySoftBusList, void(SoftBusList *list));
 
     static AuthAccountManagerMock& GetMock();
 
@@ -54,4 +58,4 @@ private:
     static AuthAccountManagerMock *gMock;
 };
 }; // namespace OHOS
-#endif
+#endif
