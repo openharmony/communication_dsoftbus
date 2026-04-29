@@ -150,7 +150,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level
     char sessionName[TEST_NUMBER_256] = {0};
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
     int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, nullptr, 0);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     NotifyNetworkingChannelOpenFailed(sessionName, 1, nullptr);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelOpenFailedFlag);
@@ -173,7 +173,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
 
     int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, nullptr, 0);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     NotifyNetworkingChannelOpenFailed(sessionName, 1, nullptr);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelOpenFailedFlag);

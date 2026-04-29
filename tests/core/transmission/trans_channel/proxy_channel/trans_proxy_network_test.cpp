@@ -147,7 +147,6 @@ HWTEST_F(TransProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level1)
 {
     int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, 1, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
-    
     NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, 1, nullptr);
     EXPECT_NE(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(TEST_SESSION_NAME, 1);
@@ -167,7 +166,7 @@ HWTEST_F(TransProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     TransProxyNetworkTest::TestRegisterNetworkingChannelListener();
 
     int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, 1, nullptr, 0);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, 1, nullptr);
     EXPECT_EQ(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
