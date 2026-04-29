@@ -157,7 +157,8 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
         }
         connFsm->connInfo.authHandle = authHandle;
         connFsm->connInfo.nodeInfo = DupNodeInfo(info);
-        connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_AUTO;
+        connFsm->connInfo.flag |= authRequest.forceJoinInfo.isForceJoin ?
+            LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO;
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u start a connection fsm, authId=%{public}" PRId64,
             connFsm->id, authHandle.authId);
         if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
