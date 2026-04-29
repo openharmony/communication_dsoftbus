@@ -312,6 +312,9 @@ typedef struct TagLnnOpenFuncList {
     LnnIsLinkReadyFunc lnnIsLinkReady;
     CheckLnnPermissionFunc checkLnnPermission;
     LnnIsOsAccountConstraintFunc lnnIsOsAccountConstraint;
+
+    SendParamsToLpDeviceFunc sendParamsToLpDevice;
+    LnnNotifyVirLinkReportEventFunc lnnNotifyVirLinkReportEvent;
 } LnnOpenFuncList;
 
 #ifdef __cplusplus

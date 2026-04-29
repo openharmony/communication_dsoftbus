@@ -177,6 +177,7 @@ static const SrvTypeMap g_srvTypeMap[] = {
 typedef enum {
     SOFTBUS_HEARTBEAT_TYPE = 0,
     SOFTBUS_BURST_TYPE,
+    SOFTBUS_VIRTUAL_SCAN_TYPE,
     SOFTBUS_UNKNOW_TYPE,
 } LpServerType;
 

@@ -2944,6 +2944,34 @@ static int32_t ConstructBcScanFilter(int32_t listenerId, SoftBusLpScanParam *sca
     return SOFTBUS_OK;
 }
 
+bool BroadcastSetScanParam(LpServerType type, const LpScanParam *scanParam)
+{
+    DISC_LOGD(DISC_BROADCAST, "enter set scan param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(scanParam != NULL, false, DISC_BROADCAST, "invalid param scanParam");
+    DISC_CHECK_AND_RETURN_RET_LOGE(type < SOFTBUS_UNKNOW_TYPE && type >= SOFTBUS_HEARTBEAT_TYPE,
+        false, DISC_BROADCAST, "invalid app type");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[BROADCAST_PROTOCOL_BLE] != NULL,
+        false, DISC_BROADCAST, "interface is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[BROADCAST_PROTOCOL_BLE]->SetAdvFilterParam != NULL,
+        false, DISC_BROADCAST, "function is nullptr");
+
+    SoftBusLpBroadcastParam bcDstParam = {0};
+    SoftBusLpScanParam scanDstParam = {0};
+
+    bcDstParam.advHandle = -1;
+
+    BuildSoftBusBcScanParams(&scanParam->scanParam, &scanDstParam.scanParam);
+    int32_t ret = ConstructBcScanFilter(scanParam->listenerId, &scanDstParam);
+    if (ret != SOFTBUS_OK) {
+        return false;
+    }
+    DISC_LOGI(DISC_BROADCAST, "only scan param Id=%{public}d", scanParam->listenerId);
+    ret = g_interface[BROADCAST_PROTOCOL_BLE]->SetAdvFilterParam(type, &bcDstParam, &scanDstParam);
+    ReleaseSoftBusBcScanFilter(scanDstParam.filter, scanDstParam.filterSize);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret, false, DISC_BROADCAST, "call from adapter failed");
+    return true;
+}
+
 bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam)
 {
@@ -2956,7 +2984,9 @@ bool BroadcastSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcPar
         false, DISC_BROADCAST, "interface is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[BROADCAST_PROTOCOL_BLE]->SetAdvFilterParam != NULL,
         false, DISC_BROADCAST, "function is nullptr");
-
+    if (bcParam->bcHandle == -1) {
+        return BroadcastSetScanParam(type, scanParam);
+    }
     SoftBusLpBroadcastParam bcDstParam = {0};
     SoftBusLpScanParam scanDstParam = {0};
 
@@ -3110,5 +3140,19 @@ static int32_t RegisterInfoDump(int fd)
         SOFTBUS_DPRINTF(fd, "scan freq: %d, ", scanManager->freq);
         SOFTBUS_DPRINTF(fd, "serviceType : %s\n", GetSrvType(scanManager->srvType));
     }
+    return SOFTBUS_OK;
+}
+
+int32_t SendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type)
+{
+    DISC_LOGD(DISC_BROADCAST, "enter send param to lp");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[BROADCAST_PROTOCOL_BLE] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
+        DISC_BROADCAST, "interface is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[BROADCAST_PROTOCOL_BLE]->SendParamsToLpDevice != NULL,
+        SOFTBUS_BC_MGR_FUNC_NULL, DISC_BROADCAST, "function is nullptr");
+
+    int32_t ret = g_interface[BROADCAST_PROTOCOL_BLE]->SendParamsToLpDevice(data, dataSize, type);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "call from adapter failed");
+
     return SOFTBUS_OK;
 }

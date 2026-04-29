@@ -104,6 +104,8 @@ void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy);
 
 void LnnNotifyLpMcuUpdateHbInfo(int32_t type);
 
+void LnnNotifyVirLinkReportEvent(const uint8_t *data, uint32_t len);
+
 #ifdef __cplusplus
 }
 #endif

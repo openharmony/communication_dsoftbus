@@ -101,6 +101,7 @@ typedef struct {
     int32_t (*SetScanReportChannelToLpDevice)(int32_t scannerId, bool enable);
     int32_t (*SetLpDeviceParam)(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
         int32_t interval, int32_t bcHandle);
+    int32_t (*SendParamsToLpDevice)(const uint8_t *data, uint32_t dataSize, int32_t type);
 } SoftbusBroadcastMediumInterface;
 
 #ifdef __cplusplus

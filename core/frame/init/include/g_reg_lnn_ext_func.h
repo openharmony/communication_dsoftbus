@@ -380,6 +380,9 @@ typedef bool (*IsHeartbeatEnableForMcuFunc)(void);
 typedef bool (*LnnIsLocalSupportMcuFeatureFunc)(void);
 typedef bool (*LnnIsOsAccountConstraintFunc)(void);
 
+typedef int32_t (*SendParamsToLpDeviceFunc)(const uint8_t *data, uint32_t dataSize, int32_t type);
+typedef void (*LnnNotifyVirLinkReportEventFunc)(const uint8_t *data, uint32_t dataSize);
+
 #ifdef __cplusplus
 }
 #endif

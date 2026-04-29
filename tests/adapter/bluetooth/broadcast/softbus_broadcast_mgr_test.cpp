@@ -23,6 +23,7 @@
 #include "softbus_broadcast_utils.h"
 #include "softbus_error_code.h"
 #include "softbus_broadcast_mgr_mock.h"
+#include "softbus_common.h"
 
 using namespace testing::ext;
 using ::testing::Return;
@@ -2645,5 +2646,108 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastCheckAndStopScan005, TestSize.
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastCheckAndStopScan005 end ----");
+}
+
+ /*
+* @tc.name: BroadcastSetAdvDeviceParamScanOnly001
+* @tc.desc: Test BroadcastSetAdvDeviceParam with bcHandle == -1 for scan-only mode
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParamScanOnly001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParamScanOnly001 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetScanCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    LpScanParam lpScanParam = BuildLpScanParam();
+    lpScanParam.listenerId = bcId;
+    uint8_t filterNum = 1;
+    BcScanFilter *filter = GetBcScanFilter();
+    LpBroadcastParam lpBcParam;
+    lpBcParam.bcHandle = -1;
+    BuildBroadcastParam(&lpBcParam.bcParam);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(bcId, filter, filterNum));
+    EXPECT_FALSE(BroadcastSetAdvDeviceParam(SOFTBUS_VIRTUAL_SCAN_TYPE, &lpBcParam, &lpScanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParamScanOnly001 end ----");
+}
+
+/*
+* @tc.name: BroadcastSetAdvDeviceParamScanOnly002
+* @tc.desc: Test BroadcastSetAdvDeviceParam with bcHandle == -1 but no scan filter set
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParamScanOnly002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParamScanOnly002 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetScanCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    LpScanParam lpScanParam = BuildLpScanParam();
+    lpScanParam.listenerId = bcId;
+    LpBroadcastParam lpBcParam;
+    lpBcParam.bcHandle = -1;
+    BuildBroadcastParam(&lpBcParam.bcParam);
+
+    EXPECT_FALSE(BroadcastSetAdvDeviceParam(SOFTBUS_VIRTUAL_SCAN_TYPE, &lpBcParam, &lpScanParam));
+
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "BroadcastSetAdvDeviceParamScanOnly002 end ----");
+}
+
+/*
+* @tc.name: SendParamsToLpDevice001
+* @tc.desc: Test SendParamsToLpDevice returns SOFTBUS_OK when interface is registered
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusBroadcastMgrTest, SendParamsToLpDevice001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SendParamsToLpDevice001 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    uint8_t data[] = {0x01, 0x02, 0x03};
+    int32_t type = BLE_LPDEVICE_MSG_PAIRED_DEVICES;
+    int32_t ret = SendParamsToLpDevice(data, sizeof(data), type);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+    DISC_LOGI(DISC_TEST, "SendParamsToLpDevice001 end ----");
+}
+
+/*
+* @tc.name: SendParamsToLpDevice002
+* @tc.desc: Test SendParamsToLpDevice returns error when interface is not registered
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusBroadcastMgrTest, SendParamsToLpDevice002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "SendParamsToLpDevice002 begin ----");
+    ActionOfSoftbusBleAdapterInitNull();
+
+    uint8_t data[] = {0x01, 0x02, 0x03};
+    int32_t type = BLE_LPDEVICE_MSG_PAIRED_DEVICES;
+    int32_t ret = SendParamsToLpDevice(data, sizeof(data), type);
+    EXPECT_EQ(ret, SOFTBUS_BC_MGR_FUNC_NULL);
+
+    DISC_LOGI(DISC_TEST, "SendParamsToLpDevice002 end ----");
 }
 } // namespace OHOS

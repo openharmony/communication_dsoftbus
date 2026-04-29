@@ -90,6 +90,7 @@ public:
     virtual int32_t RegisterBroadcastMediumFunction(
         BroadcastProtocol type, const SoftbusBroadcastMediumInterface *interface) = 0;
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
+    virtual int32_t SendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type) = 0;
 };
 
 class MockBluetooth : public BluetoothInterface {
@@ -125,6 +126,9 @@ public:
     MOCK_METHOD(int32_t, DisableSyncDataToLpDevice, (), (override));
     MOCK_METHOD(int32_t, SetLpDeviceAdvParam,
         (int32_t duration, int32_t maxExtAdvEvents, int32_t window, int32_t interval, int32_t bcHandle), (override));
+
+    MOCK_METHOD(int32_t, SendParamsToLpDevice,
+ 	         (const uint8_t *data, uint32_t dataSize, int32_t type), (override));
 
     MOCK_METHOD(int32_t, BleGattcRegister, (BtUuid appUuid), (override));
     MOCK_METHOD(int32_t, BleGattcConnect,

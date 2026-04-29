@@ -852,4 +852,41 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest039, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnNotifyConstraintStateChangeEvent(false));
 }
 
+/*
+* @tc.name: BusCenterEventTest040
+* @tc.desc: Test LnnNotifyVirLinkReportEvent with null data
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest040, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyVirLinkReportEvent(nullptr, 0));
+}
+
+/*
+* @tc.name: BusCenterEventTest041
+* @tc.desc: Test LnnNotifyVirLinkReportEvent with valid data
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest041, TestSize.Level1)
+{
+    uint8_t data[] = {0x01, 0x02, 0x03, 0x04};
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyVirLinkReportEvent(data, sizeof(data)));
+}
+
+/*
+* @tc.name: BusCenterEventTest042
+* @tc.desc: Test LnnNotifyVirLinkReportEvent with empty data (len == 0)
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest042, TestSize.Level1)
+{
+    uint8_t data[] = {0x01};
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyVirLinkReportEvent(data, 0));
+}
 }

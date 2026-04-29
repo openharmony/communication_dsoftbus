@@ -721,6 +721,8 @@ typedef enum {
     DEVICE_LEAVE_REASON_MAX,
 } DeviceLeaveReason;
 
+#define BLE_LPDEVICE_MSG_PAIRED_DEVICES 0x21
+
 #ifdef __cplusplus
 }
 #endif

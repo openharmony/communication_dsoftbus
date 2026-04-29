@@ -67,6 +67,7 @@ typedef enum {
     LNN_EVENT_DEVICE_RISK_STATE_CHANGED,
     LNN_EVENT_HA_LEAVE_META_NODE,
     LNN_EVENT_CONSTRAINT_ENABLE,
+    LNN_EVENT_VIR_CONN_REPORT_SH,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -347,6 +348,12 @@ typedef struct {
 } LnnConstraintChangeEvent;
 
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    const uint8_t *data;
+    uint32_t dataLen;
+} LnnVirLinkReportEvent;
 
 #ifdef __cplusplus
 }

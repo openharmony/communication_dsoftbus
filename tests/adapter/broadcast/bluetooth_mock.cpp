@@ -184,6 +184,11 @@ int32_t SetLpDeviceAdvParam(
     return OHOS_BT_STATUS_SUCCESS;
 }
 
+int32_t SendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type)
+{
+    return MockBluetooth::GetMocker()->SendParamsToLpDevice(data, dataSize, type);
+}
+
 int32_t BleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam)
 {
     return MockBluetooth::GetMocker()->BleStartAdvEx(advId, rawData, advParam);

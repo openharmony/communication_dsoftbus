@@ -1123,3 +1123,24 @@ void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event)
     }
     NotifyEvent((const LnnEventBasicInfo *)event);
 }
+
+void LnnNotifyVirLinkReportEvent(const uint8_t *data, uint32_t len)
+{
+    if (data == NULL || len == 0) {
+        LNN_LOGW(LNN_EVENT, "bad virlink event data");
+        return;
+    }
+    uint8_t *dupData = (uint8_t *)SoftBusMalloc(len);
+    if (dupData == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc dupData fail");
+        return;
+    }
+    if (memcpy_s(dupData, len, data, len) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy_s dupData failed");
+        SoftBusFree(dupData);
+        return;
+    }
+    LnnVirLinkReportEvent event = {.basic.event = LNN_EVENT_VIR_CONN_REPORT_SH, .data = dupData, .dataLen = len};
+    NotifyEvent((const LnnEventBasicInfo *) &event);
+    SoftBusFree(dupData);
+}

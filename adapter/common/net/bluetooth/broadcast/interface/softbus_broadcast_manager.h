@@ -346,6 +346,8 @@ int32_t BroadcastSetScanReportChannelToLpDevice(int32_t listenerId, bool enable)
 int32_t BroadcastSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
     int32_t interval, int32_t bcHandle);
 
+int32_t SendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type);
+
 #ifdef __cplusplus
 }
 #endif
