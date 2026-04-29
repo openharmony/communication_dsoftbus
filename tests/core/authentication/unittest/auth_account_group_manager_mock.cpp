@@ -72,5 +72,15 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds()
     return GetMock()->JudgeDeviceTypeAndGetOsAccountIds();
 }
 
+SoftBusList *CreateSoftBusList(void)
+{
+    return GetMock()->CreateSoftBusList();
+}
+
+void DestroySoftBusList(SoftBusList *list)
+{
+    return GetMock()->DestroySoftBusList(list);
+}
+
 } // extern "C"
-} // namespace OHOS
+} // namespace OHOS

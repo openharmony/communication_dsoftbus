@@ -14,6 +14,7 @@
  */
 
 #include <cinttypes>
+#include <dlfcn.h>
 #include <gtest/gtest.h>
 #include <securec.h>
 
@@ -47,6 +48,33 @@ void AuthAccountManagerTest::TearDownTestCase()
 void AuthAccountManagerTest::SetUp() { }
 
 void AuthAccountManagerTest::TearDown() { }
+
+/*
+ * @tc.name: AUTH_ACCOUNT_REGISTER_ACCOUNT_AUTH_Test_001
+ * @tc.desc: RegisterAccountAuth invalid param test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthAccountManagerTest, AUTH_ACCOUNT_REGISTER_ACCOUNT_AUTH_Test_001, TestSize.Level1)
+{
+    IAccountAuthCallback cb = {
+        .onTransmit = nullptr,
+        .onSessionKeyReturned = nullptr,
+        .onFinish = nullptr,
+        .onError = nullptr,
+    };
+    SoftBusList list;
+    EXPECT_NO_FATAL_FAILURE(RegisterAccountAuth(nullptr));
+    AuthAccountManagerMock authAccountManagerMock;
+    EXPECT_CALL(authAccountManagerMock, CreateSoftBusList).WillOnce(Return(nullptr)).WillRepeatedly(Return(&list));
+    EXPECT_CALL(authAccountManagerMock, DestroySoftBusList).WillRepeatedly(Return());
+    EXPECT_NO_FATAL_FAILURE(RegisterAccountAuth(&cb));
+    EXPECT_NO_FATAL_FAILURE(RegisterAccountAuth(&cb));
+    EXPECT_EQ(LooperInit(), SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(RegisterAccountAuth(&cb));
+    g_accountAuthList = nullptr;
+    g_isAccountAuthCbInited = false;
+}
 
 static bool OnTransmitSuccess(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
@@ -154,6 +182,7 @@ HWTEST_F(AuthAccountManagerTest, AUTH_ON_FINISH_CALLBACK_Test_001, TestSize.Leve
     g_accountAuthCallback = &accountAuthSuccessCb;
     EXPECT_NO_FATAL_FAILURE(OnFinished(0, 0, data));
     accountAuthSuccessCb.onFinish = OnFinishedSuccess;
+    CreateAccountAuthInstance(0);
     EXPECT_NO_FATAL_FAILURE(OnFinished(0, 0, data));
 }
 
@@ -171,6 +200,7 @@ HWTEST_F(AuthAccountManagerTest, AUTH_ON_ERROR_CALLBACK_Test_001, TestSize.Level
     g_accountAuthCallback = &accountAuthSuccessCb;
     EXPECT_NO_FATAL_FAILURE(OnError(0, SOFTBUS_INVALID_PARAM, SOFTBUS_INVALID_PARAM, data));
     accountAuthSuccessCb.onError = OnErrorSuccess;
+    CreateAccountAuthInstance(0);
     EXPECT_NO_FATAL_FAILURE(OnError(0, SOFTBUS_INVALID_PARAM, SOFTBUS_INVALID_PARAM, data));
 }
 
@@ -263,19 +293,76 @@ HWTEST_F(AuthAccountManagerTest, AUTH_GET_LIGHT_ACCOUNT_INSTANCE_Test_001, TestS
 }
 
 /*
+ * @tc.name: AUTH_ACCOUNT_AUTH_LOCK_ERROR_Test_001
+ * @tc.desc: lock g_accountAuthList->lock error test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthAccountManagerTest, AUTH_ACCOUNT_AUTH_LOCK_ERROR_Test_001, TestSize.Level1)
+{
+    g_isAccountAuthCbInited = true;
+    int32_t ret = CreateAccountAuthInstance(1);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_NO_FATAL_FAILURE(DeleteAccountAuthInstance(1));
+
+    uint8_t data[] = "ProcessData";
+    AuthAccountManagerMock authAccountManagerMock;
+    EXPECT_CALL(authAccountManagerMock, InitDeviceAuthService).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authAccountManagerMock, GetLightAccountVerifierInstance)
+        .WillRepeatedly(Return(&g_lightAccountVerifier));
+    g_lightAccountVerifier.startLightAccountAuth = StartLightAccountAuthSuccess;
+    g_lightAccountVerifier.processLightAccountAuth = ProcessLightAccountAuthSuccess;
+    ret = StartGroupAccountAuth("auth_test", 0, "auth_service");
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ret = ProcessGroupAccountAuth("auth_test", 0, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    g_isAccountAuthCbInited = false;
+    g_lightAccountVerifier.startLightAccountAuth = nullptr;
+    g_lightAccountVerifier.processLightAccountAuth = nullptr;
+}
+
+/*
+ * @tc.name: AUTH_INIT_ACCOUNT_AUTH_INSTANCE_LIST_Test_001
+ * @tc.desc: InitAccountAuthInstanceList invalid param test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthAccountManagerTest, AUTH_INIT_ACCOUNT_AUTH_INSTANCE_LIST_Test_001, TestSize.Level1)
+{
+    AuthAccountManagerMock authAccountManagerMock;
+    using GetRealFunc = SoftBusList *(*)(void);
+    auto realGetFunc = reinterpret_cast<GetRealFunc>(dlsym(RTLD_NEXT, "CreateSoftBusList"));
+    EXPECT_NE(realGetFunc, nullptr);
+    EXPECT_CALL(authAccountManagerMock, CreateSoftBusList).WillOnce(Return(nullptr))
+        .WillRepeatedly(Invoke(realGetFunc));
+    int32_t ret = InitAccountAuthInstanceList();
+    EXPECT_EQ(ret, SOFTBUS_CREATE_LIST_ERR);
+    ret = InitAccountAuthInstanceList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = InitAccountAuthInstanceList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
  * @tc.name: AUTH_START_GROUP_ACCOUNT_Test_001
- * @tc.desc: StartGroupAccount test
+ * @tc.desc: StartGroupAccount invalid param test
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(AuthAccountManagerTest, AUTH_START_GROUP_ACCOUNT_Test_001, TestSize.Level1)
 {
+    int32_t ret = StartGroupAccountAuth(nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartGroupAccountAuth(nullptr, 0, "auth_service");
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = StartGroupAccountAuth("auth_test", 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     AuthAccountManagerMock authAccountManagerMock;
     EXPECT_CALL(authAccountManagerMock, InitDeviceAuthService).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authAccountManagerMock, GetLightAccountVerifierInstance)
         .WillRepeatedly(Return(&g_lightAccountVerifier));
-    int32_t ret = StartGroupAccountAuth("auth_test", 0, "auth_service");
+    ret = StartGroupAccountAuth("auth_test", 0, "auth_service");
     EXPECT_EQ(ret, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FAIL);
 
     EXPECT_CALL(authAccountManagerMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(0));
@@ -298,19 +385,25 @@ HWTEST_F(AuthAccountManagerTest, AUTH_START_GROUP_ACCOUNT_Test_001, TestSize.Lev
 
 /*
  * @tc.name: AUTH_PROCESS_GROUP_ACCOUNT_Test_001
- * @tc.desc: ProcessGroupAccountAuth test
+ * @tc.desc: ProcessGroupAccountAuth invalid param test
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(AuthAccountManagerTest, AUTH_PROCESS_GROUP_ACCOUNT_Test_001, TestSize.Level1)
 {
-    AuthAccountManagerMock authAccountManagerMock;
     uint8_t data[] = "ProcessData";
+    int32_t ret = ProcessGroupAccountAuth(nullptr, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessGroupAccountAuth(nullptr, 0, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProcessGroupAccountAuth("auth_test", 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    AuthAccountManagerMock authAccountManagerMock;
     EXPECT_CALL(authAccountManagerMock, InitDeviceAuthService).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authAccountManagerMock, GetLightAccountVerifierInstance)
         .WillRepeatedly(Return(&g_lightAccountVerifier));
-    int32_t ret = ProcessGroupAccountAuth("auth_test", 0, data, sizeof(data));
+    ret = ProcessGroupAccountAuth("auth_test", 0, data, sizeof(data));
     EXPECT_EQ(ret, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FAIL);
 
     EXPECT_CALL(authAccountManagerMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(0));
@@ -330,4 +423,111 @@ HWTEST_F(AuthAccountManagerTest, AUTH_PROCESS_GROUP_ACCOUNT_Test_001, TestSize.L
     ret = ProcessGroupAccountAuth("auth_test", 0, data, sizeof(data));
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
-} // namespace OHOS
+
+/*
+ * @tc.name: AUTH_ACCOUNT_AUTH_INSTANCE_Test_001
+ * @tc.desc: CreateAccountAuthInstance invalid param test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthAccountManagerTest, AUTH_ACCOUNT_AUTH_INSTANCE_Test_001, TestSize.Level1)
+{
+    g_isAccountAuthCbInited = true;
+    int32_t ret = CreateAccountAuthInstance(1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CreateAccountAuthInstance(2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_isAccountAuthCbInited = false;
+    bool isExist = IsAccountAuthInstanceExist(1);
+    EXPECT_EQ(isExist, false);
+    g_isAccountAuthCbInited = true;
+    isExist = IsAccountAuthInstanceExist(1);
+    EXPECT_EQ(isExist, true);
+    isExist = IsAccountAuthInstanceExist(3);
+    EXPECT_EQ(isExist, false);
+
+    g_isAccountAuthCbInited = false;
+    EXPECT_NO_FATAL_FAILURE(DeleteAccountAuthInstance(1));
+    g_isAccountAuthCbInited = true;
+    EXPECT_NO_FATAL_FAILURE(DeleteAccountAuthInstance(3));
+    EXPECT_NO_FATAL_FAILURE(DeleteAccountAuthInstance(1));
+    EXPECT_NO_FATAL_FAILURE(DeleteAccountAuthInstance(2));
+}
+
+/*
+ * @tc.name: AUTH_ACCOUNT_AUTH_TIMEOUT_Test_001
+ * @tc.desc: GenAccountAuthTimeoutProcess invalid param test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthAccountManagerTest, AUTH_ACCOUNT_AUTH_TIMEOUT_Test_001, TestSize.Level1)
+{
+    SoftBusMessage msg = {
+        .what = MSG_AUTH_ACCOUNT_TIMEOUT,
+        .arg1 = 1,
+    };
+    g_isAccountAuthCbInited = true;
+    int32_t ret = CreateAccountAuthInstance(1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(GenAccountAuthTimeoutProcess(&msg));
+    msg.arg1 = 2;
+    EXPECT_NO_FATAL_FAILURE(GenAccountAuthTimeoutProcess(&msg));
+}
+
+/*
+ * @tc.name: AUTH_ACCOUNT_FREE_MESSAGE_Test_001
+ * @tc.desc: AuthFreeMessage invalid param test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthAccountManagerTest, AUTH_ACCOUNT_FREE_MESSAGE_Test_001, TestSize.Level1)
+{
+    SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
+    EXPECT_NO_FATAL_FAILURE(AuthFreeMessage(nullptr));
+    msg->obj = nullptr;
+    EXPECT_NO_FATAL_FAILURE(AuthFreeMessage(msg));
+    msg = static_cast<SoftBusMessage *>(SoftBusCalloc(sizeof(SoftBusMessage)));
+    msg->obj = static_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    EXPECT_NO_FATAL_FAILURE(AuthFreeMessage(msg));
+}
+
+/*
+ * @tc.name: AUTH_ACCOUNT_COMPARE_LOOPER_Test_001
+ * @tc.desc: CompareLooperEventFunc invalid param test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthAccountManagerTest, AUTH_ACCOUNT_COMPARE_LOOPER_Test_001, TestSize.Level1)
+{
+    SoftBusMessage msg = {
+        .what = MSG_AUTH_ACCOUNT_TIMEOUT,
+        .arg1 = 1,
+        .arg2 = 0,
+        .obj = nullptr,
+    };
+    SoftBusMessage ctx = {
+        .what = -1,
+        .arg1 = -1,
+        .arg2 = -1,
+        .obj = nullptr,
+    };
+    int32_t ret = CompareLooperEventFunc(nullptr, nullptr);
+    EXPECT_EQ(ret, COMPARE_FAILED);
+    ret = CompareLooperEventFunc(&msg, nullptr);
+    EXPECT_EQ(ret, COMPARE_FAILED);
+    ret = CompareLooperEventFunc(nullptr, &ctx);
+    EXPECT_EQ(ret, COMPARE_FAILED);
+    ret = CompareLooperEventFunc(&msg, &ctx);
+    EXPECT_EQ(ret, COMPARE_FAILED);
+    ctx.what = MSG_AUTH_ACCOUNT_TIMEOUT;
+    ret = CompareLooperEventFunc(&msg, &ctx);
+    EXPECT_EQ(ret, COMPARE_FAILED);
+    ctx.arg1 = 1;
+    ret = CompareLooperEventFunc(&msg, &ctx);
+    EXPECT_EQ(ret, COMPARE_FAILED);
+    ctx.arg2 = 0;
+    ret = CompareLooperEventFunc(&msg, &ctx);
+    EXPECT_EQ(ret, COMPARE_SUCCESS);
+}
+} // namespace OHOS
