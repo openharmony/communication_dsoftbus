@@ -2628,7 +2628,7 @@ HWTEST_F(DiscManagerTest, DiscMgrGetMaxCallTimesTest001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest001 begin ----");
     int32_t ret = DiscMgrGetMaxCallTimes(-1);
     EXPECT_EQ(ret, NO_LIMITED_TIMES);
-    ret = DiscMgrGetMaxCallTimes(NFC_SHARE_CAPABILITY_BITMAP + 1);
+    ret = DiscMgrGetMaxCallTimes(CAPABILITY_MAX_BITNUM);
     EXPECT_EQ(ret, NO_LIMITED_TIMES);
     DISC_LOGI(DISC_TEST, "DiscMgrGetMaxCallTimesTest001 end ----");
 }

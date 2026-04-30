@@ -505,7 +505,11 @@ typedef enum {
     /**Pc Collaboration capability */
     PC_COLLABORATION_BITMAP,
     /**nfc capability */
-    NFC_SHARE_CAPABILITY_BITMAP
+    NFC_SHARE_CAPABILITY_BITMAP,
+    /**2mInterconnect capability */
+    HA_INTERCONNECT_CAPABILITY_BITMAP,
+    /**max of capability */
+    MAX_CAPABILITY_BITMAP
 } DataBitMap;
 
 typedef struct {
@@ -546,7 +550,8 @@ static const CapabilityMap g_capabilityMap[] = {
     {SD_CAPABILITY_BITMAP, (char *)"sd"},
     {RAISE_HAND_CAPABILITY_BITMAP, (char *)"raiseHand"},
     {PC_COLLABORATION_BITMAP, (char *)"pcCollaboration"},
-    {NFC_SHARE_CAPABILITY_BITMAP, (char *)"nfc_share"}
+    {NFC_SHARE_CAPABILITY_BITMAP, (char *)"nfc_share"},
+    {HA_INTERCONNECT_CAPABILITY_BITMAP, (char *)"2mInterconnect"}
 };
 
 /**

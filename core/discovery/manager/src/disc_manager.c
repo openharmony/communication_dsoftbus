@@ -1226,6 +1226,8 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE, DISC_CONTROL,
         "create info fail");
 
+    DISC_LOGD(DISC_CONTROL, "create discInfo for subscribe succ, id=%{public}d, cap=%{public}s",
+        info->subscribeId, info->capability);
     int32_t ret = InnerStartDiscovery(packageName, infoNode, cb, SUBSCRIBE_SERVICE);
     if (ret != SOFTBUS_OK) {
         FreeDiscInfo(infoNode, SUBSCRIBE_SERVICE);

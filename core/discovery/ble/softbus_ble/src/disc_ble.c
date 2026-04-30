@@ -573,6 +573,24 @@ static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
     return SOFTBUS_OK;
 }
 
+static bool ReportOnDeviceFoundNonPacket(DeviceInfo *foundInfo, InnerDeviceInfoAddtions *add)
+{
+    uint32_t tempCap = 0;
+    DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
+    DISC_CHECK_AND_RETURN_RET_LOGE(tempCap != 0, false, DISC_BLE,
+        "unsupported ble capability. capabilityBitmap=%{public}d", foundInfo->capabilityBitmap[0]);
+    foundInfo->capabilityBitmap[0] = 0;
+    foundInfo->capabilityBitmapNum = 1;
+    for (uint32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
+        if ((tempCap & (1U << i)) == 0) {
+            continue;
+        }
+        foundInfo->capabilityBitmap[0] = 1U << i;
+        g_discBleInnerCb->OnDeviceFound(foundInfo, add);
+    }
+    return true;
+}
+
 static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi, DeviceInfo *foundInfo)
 {
     static uint32_t callCount = 0;
@@ -607,13 +625,9 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
             "capabilityBitmap=%{public}u, bleMac=%{public}s, callCount=%{public}u", foundInfo->addrNum,
             foundInfo->addr[0].type, foundInfo->capabilityBitmap[0], AnonymizeWrapper(anonyLocalBleMac), callCount++);
         AnonymizeFree(anonyLocalBleMac);
-        uint32_t tempCap = 0;
-        DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
-        DISC_CHECK_AND_RETURN_LOGE(tempCap != 0, DISC_BLE, "unsupported ble capability. capabilityBitmap=%{public}d",
-            foundInfo->capabilityBitmap[0]);
-        foundInfo->capabilityBitmap[0] = tempCap;
-        foundInfo->capabilityBitmapNum = 1;
-        g_discBleInnerCb->OnDeviceFound(foundInfo, &add);
+        if (!ReportOnDeviceFoundNonPacket(foundInfo, &add)) {
+            return;
+        }
         SoftbusRecordDiscBleRssi(*(signed char *)(&rssi));
     }
 }

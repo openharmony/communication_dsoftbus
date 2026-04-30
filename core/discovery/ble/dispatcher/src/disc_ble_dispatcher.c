@@ -77,6 +77,7 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
     InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
+    DISC_LOGD(DISC_BLE, "begin to ble dispatch subscribe, capability=%{public}u", option->capabilityBitmap[0]);
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE, "dispatch subcribe action fail: no implement support capability. capability=%{public}u",
