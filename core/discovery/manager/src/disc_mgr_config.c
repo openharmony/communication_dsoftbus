@@ -74,7 +74,10 @@ static const DiscMgrConfig g_discMgrConfig[CAPABILITY_MAX_BITNUM] = {
     },
     [NFC_SHARE_CAPABILITY_BITMAP] = {
         .maxCallTimes = NO_LIMITED_TIMES,
-    }
+    },
+    [HA_INTERCONNECT_CAPABILITY_BITMAP] = {
+        .maxCallTimes = DEFAULT_CALL_TIMES,
+    },
 };
 
 int32_t DiscMgrGetMaxCallTimes(int32_t bitmap)

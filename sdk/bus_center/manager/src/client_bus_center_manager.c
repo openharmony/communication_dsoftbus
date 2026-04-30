@@ -67,6 +67,10 @@ typedef struct {
 } NodeStateCallbackItem;
 
 typedef struct {
+    IRefreshCallback cb;
+} RefreshCbItem;
+
+typedef struct {
     ListNode joinLNNCbList;
     ListNode leaveLNNCbList;
     ListNode nodeStateCbList;
@@ -74,6 +78,7 @@ typedef struct {
     int32_t nodeStateCbListCnt;
     IPublishCb publishCb;
     IRefreshCallback refreshCb;
+    RefreshCbItem refreshCbItems[MAX_CAPABILITY_BITMAP];
     IRefreshCallback refreshNfcCb;
     IDataLevelCb dataLevelCb;
     IRangeCallback rangeCb;
@@ -148,6 +153,24 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
             (addr1->info.session.type == addr2->info.session.type));
     }
     return false;
+}
+
+static uint32_t TransferStringCapToBitmap(const char *capability)
+{
+    if (capability == NULL) {
+        LNN_LOGE(LNN_STATE, "capability is null");
+        return MAX_CAPABILITY_BITMAP;
+    }
+
+    for (uint32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
+        if (strcmp(capability, g_capabilityMap[i].capability) != 0) {
+            continue;
+        }
+        LNN_LOGD(LNN_STATE, "trans capStr to capBitmap, capability=%{public}s", capability);
+        return g_capabilityMap[i].bitmap;
+    }
+
+    return MAX_CAPABILITY_BITMAP;
 }
 
 static JoinLNNCbListItem *FindJoinLNNCbItem(ConnectionAddr *addr, OnJoinLNNResult cb)
@@ -246,6 +269,47 @@ static int32_t AddTimeSyncCbItem(const char *networkId, ITimeSyncCb *cb)
     return SOFTBUS_OK;
 }
 
+static RefreshCbItem *FindRefreshCbItem(uint32_t capBit)
+{
+    if (capBit >= MAX_CAPABILITY_BITMAP) {
+        LNN_LOGE(LNN_STATE, "find refreshCb by invalid cap=%{public}u", capBit);
+        return NULL;
+    }
+    return &g_busCenterClient.refreshCbItems[capBit];
+}
+
+static int32_t AddRefreshCbItem(uint32_t capBit, IRefreshCallback cb)
+{
+    RefreshCbItem *item = FindRefreshCbItem(capBit);
+    if (item == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid capability");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    item->cb = cb;
+    return SOFTBUS_OK;
+}
+
+static int32_t AddRefreshCbItemSafe(const char *capability, IRefreshCallback cb)
+{
+    uint32_t capBitmap = TransferStringCapToBitmap(capability);
+    if (capBitmap >= MAX_CAPABILITY_BITMAP) {
+        LNN_LOGE(LNN_STATE, "invalid capability");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock refresh cb list in notify");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    int32_t ret = AddRefreshCbItem(capBitmap, cb);
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+    return ret;
+}
+
 static void ClearJoinLNNList(void)
 {
     JoinLNNCbListItem *item = NULL;
@@ -288,6 +352,37 @@ static void ClearNodeStateCbList(ListNode *list)
         ListDelete(&item->node);
         SoftBusFree(item);
     }
+}
+
+static void DeleteRefreshCbItem(uint32_t capBit)
+{
+    RefreshCbItem *item = FindRefreshCbItem(capBit);
+    if (item == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid capability");
+        return;
+    }
+    item->cb.OnDeviceFound = NULL;
+    item->cb.OnDiscoverResult = NULL;
+    return;
+}
+
+static void DeleteRefreshCbListItemSafe(uint32_t capBitmap)
+{
+    if (capBitmap >= MAX_CAPABILITY_BITMAP) {
+        LNN_LOGE(LNN_STATE, "invalid capability");
+        return;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock refresh cb list in notify");
+        return;
+    }
+
+    DeleteRefreshCbItem(capBitmap);
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
 }
 
 static void DuplicateNodeStateCbList(ListNode *list)
@@ -527,7 +622,7 @@ static int32_t AddDiscSubscribeMsg(const char *pkgName, const SubscribeInfo *inf
     return SOFTBUS_OK;
 }
 
-static int32_t DeleteDiscSubscribeMsg(const char *pkgName, int32_t refreshId)
+static int32_t DeleteDiscSubscribeMsg(const char *pkgName, int32_t refreshId, uint32_t *capBit)
 {
     LNN_CHECK_AND_RETURN_RET_LOGW(g_isInited, SOFTBUS_NO_INIT, LNN_STATE, "disc subscribe list not init");
     LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_discoveryMsgList->lock)) == SOFTBUS_OK,
@@ -538,6 +633,9 @@ static int32_t DeleteDiscSubscribeMsg(const char *pkgName, int32_t refreshId)
     LIST_FOR_EACH_ENTRY_SAFE(msgNode, next, &(g_discoveryMsgList->list), DiscSubscribeMsg, node) {
         if (msgNode->info->subscribeId == refreshId && strcmp(msgNode->pkgName, pkgName) == 0) {
             ListDelete(&(msgNode->node));
+            if (capBit != NULL) {
+                *capBit = TransferStringCapToBitmap(msgNode->info->capability);
+            }
             FreeDiscSubscribeMsg(&msgNode);
             break;
         }
@@ -609,6 +707,8 @@ void BusCenterClientDeinit(void)
     ClearLeaveLNNList();
     ClearTimeSyncList(&g_busCenterClient.timeSyncCbList);
     ClearNodeStateCbList(&g_busCenterClient.nodeStateCbList);
+    (void)memset_s(&g_busCenterClient.refreshCbItems, sizeof(g_busCenterClient.refreshCbItems), 0,
+        sizeof(g_busCenterClient.refreshCbItems));
     g_busCenterClient.nodeStateCbListCnt = 0;
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "unlock in deinit");
@@ -642,6 +742,8 @@ int32_t BusCenterClientInit(void)
     ListInit(&g_busCenterClient.leaveLNNCbList);
     ListInit(&g_busCenterClient.nodeStateCbList);
     ListInit(&g_busCenterClient.timeSyncCbList);
+    (void)memset_s(&g_busCenterClient.refreshCbItems, sizeof(g_busCenterClient.refreshCbItems), 0,
+        sizeof(g_busCenterClient.refreshCbItems));
     g_busCenterClient.isInit = true;
     if (BusCenterServerProxyInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "bus center server proxy init failed");
@@ -1171,32 +1273,43 @@ int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IR
         LNN_LOGE(LNN_STATE, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
+    LNN_LOGD(LNN_STATE, "RefreshLNNInner Start, id=%{public}d, cap=%{public}s", info->subscribeId, info->capability);
     if (strcmp(g_capabilityMap[NFC_SHARE_CAPABILITY_BITMAP].capability, info->capability) == 0) {
         g_busCenterClient.refreshNfcCb = *cb;
     } else {
         g_busCenterClient.refreshCb = *cb;
+        int32_t ret = AddRefreshCbItemSafe(info->capability, *cb);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "add cb to refreshCbList fail");
+            return ret;
+        }
     }
     int32_t ret = ServerIpcRefreshLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server RefreshLNNInner failed, ret=%{public}d", ret);
+        LNN_LOGE(LNN_STATE, "Server RefreshLNNInner failed, ret=%{public}d, id=%{public}d", ret, info->subscribeId);
         return ret;
     }
+    LNN_LOGD(LNN_STATE, "RefreshLNNInner Succ, id=%{public}d", info->subscribeId);
     if (AddDiscSubscribeMsg(pkgName, info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "add subscribe msg error");
+        LNN_LOGE(LNN_STATE, "add subscribe msg error, id=%{public}d", info->subscribeId);
     }
     return SOFTBUS_OK;
 }
 
 int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId)
 {
+    LNN_LOGD(LNN_STATE, "StopRefreshLNNInner Start, id=%{public}d", refreshId);
     int32_t ret = ServerIpcStopRefreshLNN(pkgName, refreshId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server StopRefreshLNNInner failed, ret=%{public}d", ret);
+        LNN_LOGE(LNN_STATE, "Server StopRefreshLNNInner failed, ret=%{public}d, id=%{public}d", ret, refreshId);
         return ret;
     }
-    if (DeleteDiscSubscribeMsg(pkgName, refreshId) != SOFTBUS_OK) {
+    LNN_LOGD(LNN_STATE, "StopRefreshLNNInner Succ, id=%{public}d", refreshId);
+    uint32_t capability = MAX_CAPABILITY_BITMAP;
+    if (DeleteDiscSubscribeMsg(pkgName, refreshId, &capability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "del subscribe msg error");
     }
+    DeleteRefreshCbListItemSafe(capability);
     return SOFTBUS_OK;
 }
 
@@ -1716,16 +1829,51 @@ void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
     }
 }
 
+static uint32_t GetCapBitFromBitmap(uint32_t capabilityBitmap)
+{
+    for (uint32_t capBit = HICALL_CAPABILITY_BITMAP; capBit < MAX_CAPABILITY_BITMAP; capBit++) {
+        if ((capabilityBitmap & (1U << capBit)) == 0) {
+            continue;
+        }
+        return capBit;
+    }
+    return MAX_CAPABILITY_BITMAP;
+}
+
 void LnnOnRefreshDeviceFound(const void *device)
 {
     const DeviceInfo *deviceInfo = (const DeviceInfo *)device;
-    if ((deviceInfo != NULL) && (deviceInfo->capabilityBitmap[0] & (1U << NFC_SHARE_CAPABILITY_BITMAP)) != 0) {
+    if (deviceInfo == NULL) {
+        LNN_LOGE(LNN_STATE, "deviceInfo is null");
+        return;
+    }
+    uint32_t capBit = GetCapBitFromBitmap(deviceInfo->capabilityBitmap[0]);
+    if (capBit == MAX_CAPABILITY_BITMAP) {
+        LNN_LOGE(LNN_STATE, "invalid capBitmap");
+        return;
+    }
+    if (capBit == NFC_SHARE_CAPABILITY_BITMAP) {
         if (g_busCenterClient.refreshNfcCb.OnDeviceFound != NULL) {
             g_busCenterClient.refreshNfcCb.OnDeviceFound(deviceInfo);
         }
-    } else if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
-        g_busCenterClient.refreshCb.OnDeviceFound(deviceInfo);
+        return;
     }
+
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock refresh cb list in notify");
+        return;
+    }
+
+    RefreshCbItem *item = FindRefreshCbItem(capBit);
+    if (item == NULL || item->cb.OnDeviceFound == NULL) {
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+        LNN_LOGE(LNN_STATE, "deviceInfo OnDeviceFound failed by invalid cb, cap=%{public}u", capBit);
+        return;
+    }
+    IRefreshCallback cb = item->cb;
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+    cb.OnDeviceFound(deviceInfo);
+    LNN_LOGD(LNN_STATE, "RefreshLNN finally OnDeviceFound, cap=%{public}u", capBit);
 }
 
 void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
