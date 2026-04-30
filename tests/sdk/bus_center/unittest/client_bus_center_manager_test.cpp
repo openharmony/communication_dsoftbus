@@ -516,15 +516,19 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_001, TestSize.Level1)
     info.freq = HIGH;
     info.isSameAccount = false;
     info.isWakeRemote = false;
-    info.capability = CAPABILITY;
+    info.capability = g_capabilityMap[HICALL_CAPABILITY_BITMAP].capability;
     info.capabilityData = const_cast<unsigned char *>(CAPABILITY_DATA);
     info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char *>(CAPABILITY_DATA)));
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    g_busCenterClient.isInit = true;
     LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
     LnnOnRefreshDeviceFound(nullptr);
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcRefreshLNN(_, _))
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NE(RefreshLNNInner(nullptr, &info, &cb), SOFTBUS_OK);
     EXPECT_TRUE(RefreshLNNInner(nullptr, &info, &cb) == SOFTBUS_OK);
     LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
@@ -551,15 +555,17 @@ HWTEST_F(ClientBusCentManagerTest, REFRESH_LNN_INNER_Test_002, TestSize.Level1)
     info.freq = HIGH;
     info.isSameAccount = false;
     info.isWakeRemote = false;
-    info.capability = CAPABILITY;
+    info.capability = g_capabilityMap[HICALL_CAPABILITY_BITMAP].capability;
     info.capabilityData = const_cast<unsigned char *>(CAPABILITY_DATA);
     info.dataLen = strlen(reinterpret_cast<const char *>(const_cast<unsigned char *>(CAPABILITY_DATA)));
-
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    g_busCenterClient.isInit = true;
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
     EXPECT_CALL(busCentManagerMock, ServerIpcRefreshLNN(_, _))
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
     LnnOnRefreshLNNResult(LNN_REFRESH_ID, RESULT_REASON);
     LnnOnRefreshDeviceFound(nullptr);
     EXPECT_EQ(RefreshLNNInner(nullptr, &info, &cb), SOFTBUS_SERVER_NOT_INIT);
