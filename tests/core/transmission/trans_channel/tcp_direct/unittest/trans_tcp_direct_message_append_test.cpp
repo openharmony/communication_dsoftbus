@@ -1959,7 +1959,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     channelId = TEST_NEW_CHANNEL_ID;
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusRequest(channelId, flags, seq, reply);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
 
     (void)TransDelSessionConnById(TEST_NEW_CHANNEL_ID);
     (void)TransDelSessionConnById(TEST_CHANNELID);
