@@ -91,9 +91,9 @@ int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
     return GetLedgerInterface()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
 
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num)
 {
-    return GetLedgerInterface()->LnnGetTrustedDevInfoFromDb(udidArray, num);
+    return GetLedgerInterface()->LnnGetTrustedDevInfo(udidArray, num);
 }
 
 int32_t LnnConvertDLidToUdid(const char *id, IdCategory type, char *udid, uint32_t len)
@@ -131,9 +131,9 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     return GetLedgerInterface()->AddNumber64ToJsonObject(json, string, num);
 }
 
-int32_t UpdateRecoveryDeviceInfoFromDb(void)
+int32_t UpdateRecoveryDeviceInfo(void)
 {
-    return GetLedgerInterface()->UpdateRecoveryDeviceInfoFromDb();
+    return GetLedgerInterface()->UpdateRecoveryDeviceInfo();
 }
 
 int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *netWorkId, InfoKey key, char *info, uint32_t len, int32_t ifIdx)

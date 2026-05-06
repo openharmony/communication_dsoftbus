@@ -1122,11 +1122,6 @@ int32_t LnnRemoveStorageConfigPath(LnnFileId id)
     return GetLocalLedgerDepsInterface()->LnnRemoveStorageConfigPath(id);
 }
 
-int32_t InitTrustedDevInfoTable(void)
-{
-    return GetLocalLedgerDepsInterface()->InitTrustedDevInfoTable();
-}
-
 int32_t LnnLoadLocalBroadcastCipherKeyPacked(void)
 {
     return GetLocalLedgerDepsInterface()->LnnLoadLocalBroadcastCipherKeyPacked();

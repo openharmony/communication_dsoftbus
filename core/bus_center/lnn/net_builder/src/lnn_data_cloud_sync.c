@@ -926,7 +926,7 @@ static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo
     oldInfo->heartbeatCapacity = newInfo->heartbeatCapacity;
     oldInfo->staticNetCap = newInfo->staticNetCap;
     oldInfo->sleRangeCapacity = newInfo->sleRangeCapacity;
-    if (LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+    if (LnnFindDeviceUdidTrustedInfo(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
         oldInfo->stateVersion = newInfo->stateVersion;
         oldInfo->localStateVersion = newInfo->localStateVersion;
     }

@@ -40,7 +40,7 @@ public:
 
     virtual int32_t RegHichainSaStatusListener(void) = 0;
     virtual int32_t CustomizedSecurityProtocolInit(void) = 0;
-    virtual int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num) = 0;
+    virtual int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num) = 0;
     virtual bool IsSameAccountGroupDevice(void) = 0;
     virtual bool LnnIsDefaultOhosAccount() = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
@@ -73,7 +73,7 @@ public:
     ~AuthOtherInterfaceMock() override;
     MOCK_METHOD0(RegHichainSaStatusListener, int32_t(void));
     MOCK_METHOD0(CustomizedSecurityProtocolInit, int32_t(void));
-    MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t(char **, uint32_t *));
+    MOCK_METHOD2(LnnGetTrustedDevInfo, int32_t(char **, uint32_t *));
     MOCK_METHOD0(IsSameAccountGroupDevice, bool(void));
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey, uint8_t *, uint32_t));

@@ -261,9 +261,9 @@ void LnnRemoveV0BroadcastAndCheckDev(void)
     return HeartBeatCtrlStaticInterface()->LnnRemoveV0BroadcastAndCheckDev();
 }
 
-int32_t UpdateRecoveryDeviceInfoFromDb(void)
+int32_t UpdateRecoveryDeviceInfo(void)
 {
-    return HeartBeatCtrlStaticInterface()->UpdateRecoveryDeviceInfoFromDb();
+    return HeartBeatCtrlStaticInterface()->UpdateRecoveryDeviceInfo();
 }
 
 int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)

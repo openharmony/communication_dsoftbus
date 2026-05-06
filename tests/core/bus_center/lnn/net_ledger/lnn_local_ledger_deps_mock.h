@@ -273,7 +273,6 @@ public:
     virtual uint32_t SoftBusCryptoRand(void);
     virtual int32_t LnnGetLocalDevInfoPacked(NodeInfo *deviceInfo) = 0;
     virtual int32_t LnnRemoveStorageConfigPath(LnnFileId id) = 0;
-    virtual int32_t InitTrustedDevInfoTable(void) = 0;
     virtual int32_t LnnLoadLocalBroadcastCipherKeyPacked(void) = 0;
     virtual int32_t LnnUpdateLocalBroadcastCipherKeyPacked(BroadcastCipherKey *broadcastKey) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
@@ -489,7 +488,6 @@ public:
     MOCK_METHOD0(SoftBusCryptoRand, uint32_t());
     MOCK_METHOD1(LnnGetLocalDevInfoPacked, int32_t(NodeInfo *));
     MOCK_METHOD1(LnnRemoveStorageConfigPath, int32_t(LnnFileId));
-    MOCK_METHOD0(InitTrustedDevInfoTable, int32_t(void));
     MOCK_METHOD0(LnnLoadLocalBroadcastCipherKeyPacked, int32_t(void));
     MOCK_METHOD1(LnnUpdateLocalBroadcastCipherKeyPacked, int32_t(BroadcastCipherKey *));
     MOCK_METHOD1(LnnGetLocalBroadcastCipherKeyPacked, int32_t(BroadcastCipherKey *));

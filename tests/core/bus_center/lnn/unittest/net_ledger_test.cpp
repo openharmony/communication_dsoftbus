@@ -103,7 +103,7 @@ HWTEST_F(NetLedgerTest, AUTH_TYPE_VALUE_SET_CLEAR_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001
- * @tc.desc: Verify LnnGetTrustedDevInfoFromDb retrieves trusted device info
+ * @tc.desc: Verify LnnGetTrustedDevInfo retrieves trusted device info
  *           from database successfully and returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.level: Level1
@@ -116,7 +116,7 @@ HWTEST_F(NetLedgerTest, LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001, TestSize.Leve
 
     char *udidArray = new char[TEST_DATA_LEN];
     ASSERT_NE(udidArray, nullptr);
-    ret = LnnGetTrustedDevInfoFromDb(&udidArray, &num);
+    ret = LnnGetTrustedDevInfo(&udidArray, &num);
     EXPECT_EQ(ret, SOFTBUS_OK);
     delete[] udidArray;
 }
@@ -302,7 +302,7 @@ HWTEST_F(NetLedgerTest, START_CHECK_HUK_KEY_TIME_PROC_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001
- * @tc.desc: Verify LnnFindDeviceUdidTrustedInfoFromDb with nullptr udid returns
+ * @tc.desc: Verify LnnFindDeviceUdidTrustedInfo with nullptr udid returns
  *           SOFTBUS_INVALID_PARAM; with valid but non-existent udid returns SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.level: Level1
@@ -312,9 +312,9 @@ HWTEST_F(NetLedgerTest, LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001, TestS
 {
     int32_t ret;
     constexpr char *strUdid = nullptr;
-    ret = LnnFindDeviceUdidTrustedInfoFromDb(strUdid);
+    ret = LnnFindDeviceUdidTrustedInfo(strUdid);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnFindDeviceUdidTrustedInfoFromDb(NODE1_UDID);
+    ret = LnnFindDeviceUdidTrustedInfo(NODE1_UDID);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
@@ -361,25 +361,6 @@ HWTEST_F(NetLedgerTest, IS_DEVICE_TRUSTED_Test_001, TestSize.Level1)
     EXPECT_FALSE(ret);
     ret = IsDeviceTrusted(NODE1_UDID, userId);
     EXPECT_FALSE(ret);
-}
-
-/*
- * @tc.name: TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001
- * @tc.desc: Verify InitTrustedDevInfoTable fails and TryRecoveryTrustedDevInfoTable
- *           attempts to recover and returns true
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(NetLedgerTest, TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001, TestSize.Level1)
-{
-    bool ret;
-    int32_t retVal = InitTrustedDevInfoTable();
-    EXPECT_EQ(retVal, SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED);
-    RecoveryTrustedDevInfoProcess();
-    ret = TryRecoveryTrustedDevInfoTable();
-    ClearRecoveryDeviceList();
-    EXPECT_TRUE(ret);
 }
 
 /*
@@ -434,7 +415,7 @@ HWTEST_F(NetLedgerTest, LNN_INSERT_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.
 
 /*
  * @tc.name: UPDATE_RECOVERY_DEVICE_INFO_FROM_DB_Test_001
- * @tc.desc: Verify InitDbListDelay and UpdateRecoveryDeviceInfoFromDb fail
+ * @tc.desc: Verify InitDbListDelay and UpdateRecoveryDeviceInfo fail
  *           when device info cannot be retrieved and return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR
  * @tc.type: FUNC
  * @tc.level: Level1
@@ -444,7 +425,7 @@ HWTEST_F(NetLedgerTest, UPDATE_RECOVERY_DEVICE_INFO_FROM_DB_Test_001, TestSize.L
 {
     int32_t retVal = InitDbListDelay();
     EXPECT_EQ(retVal, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
-    retVal = UpdateRecoveryDeviceInfoFromDb();
+    retVal = UpdateRecoveryDeviceInfo();
     EXPECT_EQ(retVal, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
 }
 } // namespace OHOS

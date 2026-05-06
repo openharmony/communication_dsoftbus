@@ -92,9 +92,9 @@ int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen)
     return GetCommonInterface()->LnnDecryptAesGcm(in, out, outLen);
 }
 
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
+int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num)
 {
-    return GetCommonInterface()->LnnGetTrustedDevInfoFromDb(udidArray, num);
+    return GetCommonInterface()->LnnGetTrustedDevInfo(udidArray, num);
 }
 
 int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum)

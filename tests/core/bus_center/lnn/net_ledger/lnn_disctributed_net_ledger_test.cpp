@@ -1821,10 +1821,10 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DEV_BASIC_INFO_TO_DLEDGER_Test_001, T
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
     oldInfo.discoveryType = 4;
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
-    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfoFromDb)
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfo)
         .WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
-    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
 }
 
@@ -1842,7 +1842,7 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DISTRIBUTED_LEDGER_Test_001, TestSize
     NodeInfo oldInfo;
     (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NiceMock<LnnDisctributedNetLedgerInterfaceMock> lnnDisctributedNetLedgerMock;
-    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnDisctributedNetLedgerMock, LnnFindDeviceUdidTrustedInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(nullptr, &oldInfo));
     EXPECT_NO_FATAL_FAILURE(UpdateDistributedLedger(&newInfo, nullptr));
     EXPECT_EQ(EOK, strcpy_s(newInfo.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID));

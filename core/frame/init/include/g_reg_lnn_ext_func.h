@@ -98,8 +98,10 @@ typedef int32_t (*LnnClearDiscoveryTypeFunc)(NodeInfo *info, DiscoveryType type)
 typedef bool (*LnnIsNodeOnlineFunc)(const NodeInfo *info);
 typedef void (*LnnDumpNodeInfoFunc)(const NodeInfo *deviceInfo, const char *log);
 typedef int32_t (*LnnSetPtkFunc)(NodeInfo *info, const char *remotePtk);
-typedef int32_t (*EncryptStorageDataFunc)(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
-typedef int32_t (*DecryptStorageDataFunc)(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
+typedef int32_t (*EncryptStorageDataFunc)(LnnEncryptDataLevel level, uint8_t *data, uint32_t len,
+    uint8_t **out, uint32_t *outLen);
+typedef int32_t (*DecryptStorageDataFunc)(LnnEncryptDataLevel level, uint8_t *data, uint32_t len,
+    uint8_t **out, uint32_t *outLen);
 typedef ReportCategory (*LnnAddOnlineNodeFunc)(NodeInfo *info);
 typedef void (*LnnRemoveNodeFunc)(const char *udid);
 typedef bool (*LnnSetRemoteScreenStatusInfoFunc)(const char *networkId, bool isScreenOn);

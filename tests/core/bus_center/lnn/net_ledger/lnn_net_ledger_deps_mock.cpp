@@ -207,11 +207,6 @@ int32_t LnnInitLocalLedgerDelay(void)
     return GetNetLedgerDepsInterface()->LnnInitLocalLedgerDelay();
 }
 
-int32_t LnnInitDecisionDbDelay(void)
-{
-    return GetNetLedgerDepsInterface()->LnnInitDecisionDbDelay();
-}
-
 int32_t LnnInitCommonEventMonitorImpl(void)
 {
     return GetNetLedgerDepsInterface()->LnnInitCommonEventMonitorImpl();
@@ -331,16 +326,6 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 int32_t GenerateNewLocalCipherKey(void)
 {
     return GetNetLedgerDepsInterface()->GenerateNewLocalCipherKey();
-}
-
-void LnnRemoveDb(void)
-{
-    return GetNetLedgerDepsInterface()->LnnRemoveDb();
-}
-
-int32_t InitTrustedDevInfoTable(void)
-{
-    return GetNetLedgerDepsInterface()->InitTrustedDevInfoTable();
 }
 
 int32_t LnnGenBroadcastCipherInfo(void)

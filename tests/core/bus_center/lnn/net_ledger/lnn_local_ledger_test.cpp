@@ -1197,8 +1197,6 @@ HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_001, TestSize.Leve
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = HandleDeviceInfoIfUdidChanged();
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
-    EXPECT_CALL(localLedgerMock, InitTrustedDevInfoTable)
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = HandleDeviceInfoIfUdidChanged();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_INVALID_DEV_INFO);
 }
@@ -1220,7 +1218,6 @@ HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_002, TestSize.Leve
         .WillRepeatedly(DoAll(SetArgPointee<0>(localNodeInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnRemoveStorageConfigPath).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, InitTrustedDevInfoTable).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = HandleDeviceInfoIfUdidChanged();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_INVALID_DEV_INFO);
 }

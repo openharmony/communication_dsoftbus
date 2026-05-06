@@ -79,7 +79,6 @@ public:
     virtual int32_t LnnLoadLocalBroadcastCipherKey(void) = 0;
     virtual void AuthLoadDeviceKey(void) = 0;
     virtual int32_t LnnInitLocalLedgerDelay(void) = 0;
-    virtual int32_t LnnInitDecisionDbDelay(void) = 0;
     virtual int32_t LnnInitCommonEventMonitorImpl(void) = 0;
     virtual void LnnDeinitMetaNodeLedger(void) = 0;
     virtual void LnnDeinitDistributedLedger(void) = 0;
@@ -105,8 +104,6 @@ public:
     virtual int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len) = 0;
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t GenerateNewLocalCipherKey(void) = 0;
-    virtual void LnnRemoveDb(void) = 0;
-    virtual int32_t InitTrustedDevInfoTable(void) = 0;
     virtual int32_t LnnGenBroadcastCipherInfo(void) = 0;
     virtual int32_t HandleDeviceInfoIfUdidChanged(void) = 0;
     virtual int32_t LnnInitHuksInterface(void) = 0;
@@ -175,7 +172,6 @@ public:
     MOCK_METHOD0(LnnLoadLocalBroadcastCipherKey, int32_t(void));
     MOCK_METHOD0(AuthLoadDeviceKey, void(void));
     MOCK_METHOD0(LnnInitLocalLedgerDelay, int32_t(void));
-    MOCK_METHOD0(LnnInitDecisionDbDelay, int32_t(void));
     MOCK_METHOD0(LnnInitCommonEventMonitorImpl, int32_t(void));
     MOCK_METHOD0(LnnDeinitMetaNodeLedger, void(void));
     MOCK_METHOD0(LnnDeinitDistributedLedger, void(void));
@@ -200,8 +196,6 @@ public:
     MOCK_METHOD2(LnnGenLocalNetworkId, int32_t(char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
     MOCK_METHOD0(GenerateNewLocalCipherKey, int32_t ());
-    MOCK_METHOD0(LnnRemoveDb, void ());
-    MOCK_METHOD0(InitTrustedDevInfoTable, int32_t ());
     MOCK_METHOD0(LnnGenBroadcastCipherInfo, int32_t ());
     MOCK_METHOD0(HandleDeviceInfoIfUdidChanged, int32_t ());
     MOCK_METHOD0(LnnInitHuksInterface, int32_t ());

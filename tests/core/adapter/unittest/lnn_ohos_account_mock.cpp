@@ -52,9 +52,9 @@ int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
     return GetLnnOhosAccountInterface()->LnnGetLocalByteInfo(key, info, len);
 }
 
-int32_t UpdateRecoveryDeviceInfoFromDb(void)
+int32_t UpdateRecoveryDeviceInfo(void)
 {
-    return GetLnnOhosAccountInterface()->UpdateRecoveryDeviceInfoFromDb();
+    return GetLnnOhosAccountInterface()->UpdateRecoveryDeviceInfo();
 }
 
 int32_t GetCurrentAccount(int64_t *account)

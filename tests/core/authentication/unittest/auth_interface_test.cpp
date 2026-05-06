@@ -152,7 +152,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_002, TestSize.Level1)
 /*
  * @tc.name: AUTH_HAS_TRUSTED_RELATION_TEST_001
  * @tc.desc: Verify that AuthHasTrustedRelation returns TRUSTED_RELATION_NO when
- *           LnnGetTrustedDevInfoFromDb successfully retrieves trusted device information.
+ *           LnnGetTrustedDevInfo successfully retrieves trusted device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -160,7 +160,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_002, TestSize.Level1)
 HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_001, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnGetTrustedDevInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetTrustedDevInfo).WillRepeatedly(Return(SOFTBUS_OK));
     TrustedReturnType ret = AuthHasTrustedRelation();
     EXPECT_EQ(ret, TRUSTED_RELATION_NO);
 }
@@ -168,7 +168,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_001, TestSize.Level1)
 /*
  * @tc.name: AUTH_HAS_TRUSTED_RELATION_TEST_002
  * @tc.desc: Verify that AuthHasTrustedRelation returns TRUSTED_RELATION_IGNORE when
- *           LnnGetTrustedDevInfoFromDb fails to retrieve trusted device information.
+ *           LnnGetTrustedDevInfo fails to retrieve trusted device information.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -176,7 +176,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_002, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnGetTrustedDevInfoFromDb).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(authMock, LnnGetTrustedDevInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     TrustedReturnType ret = AuthHasTrustedRelation();
     EXPECT_EQ(ret, TRUSTED_RELATION_IGNORE);
 }

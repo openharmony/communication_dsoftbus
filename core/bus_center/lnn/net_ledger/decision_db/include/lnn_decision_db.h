@@ -25,18 +25,17 @@ extern "C" {
 #endif
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid);
 int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId);
-int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num);
-int32_t InitTrustedDevInfoTable(void);
+int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num);
 bool LnnIsPotentialHomeGroup(const char *udid);
-int32_t UpdateRecoveryDeviceInfoFromDb(void);
+int32_t UpdateRecoveryDeviceInfo(void);
 
 int32_t LnnCheckGenerateSoftBusKeyByHuks(void);
-int32_t LnnInitDecisionDbDelay(void);
-int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
-int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
+int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *data, uint32_t len,
+    uint8_t **out, uint32_t *outLen);
+int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *data, uint32_t len,
+    uint8_t **out, uint32_t *outLen);
 int32_t LnnGenerateCeParams(bool isUnlocked);
-void LnnRemoveDb(void);
-int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid);
+int32_t LnnFindDeviceUdidTrustedInfo(const char *udid);
 int32_t InitDbListDelay(void);
 int32_t UpdateKeyAndLocalInfo(void);
 

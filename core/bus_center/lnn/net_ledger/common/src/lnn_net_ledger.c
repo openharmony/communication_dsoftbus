@@ -368,11 +368,6 @@ int32_t LnnInitNetLedgerDelay(void)
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
         return ret;
     }
-    ret = LnnInitDecisionDbDelay();
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "delay init decision db fail");
-        return ret;
-    }
     return SOFTBUS_OK;
 }
 
@@ -1183,12 +1178,6 @@ int32_t LnnUpdateLocalDeviceInfo(void)
     ret = GenerateNewLocalCipherKeyPacked();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate new local cipher key failed");
-        return ret;
-    }
-    LnnRemoveDb();
-    ret = InitTrustedDevInfoTable();
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init trusted device info failed");
         return ret;
     }
     ret = LnnGenBroadcastCipherInfo();

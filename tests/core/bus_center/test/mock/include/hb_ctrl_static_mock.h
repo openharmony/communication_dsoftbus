@@ -85,7 +85,7 @@ public:
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
     virtual int32_t LnnSyncBleOfflineMsg(void) = 0;
     virtual void LnnRemoveV0BroadcastAndCheckDev(void) = 0;
-    virtual int32_t UpdateRecoveryDeviceInfoFromDb(void) = 0;
+    virtual int32_t UpdateRecoveryDeviceInfo(void) = 0;
     virtual int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp) = 0;
     virtual int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp) = 0;
     virtual int32_t LnnStopSleOfflineTimingStrategy(const char *networkId) = 0;
@@ -143,7 +143,7 @@ public:
     MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t(LnnProcessSendOnceMsgPara *));
     MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t(void));
     MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void(void));
-    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t(void));
+    MOCK_METHOD0(UpdateRecoveryDeviceInfo, int32_t(void));
     MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
     MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
     MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));

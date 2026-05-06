@@ -1412,7 +1412,7 @@ static void UpdateTrustedDb(int64_t accountId, const char *deviceId)
     }
     int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if ((localAccountId == accountId && LnnIsDefaultOhosAccount()) || localAccountId != accountId) {
-        if (LnnFindDeviceUdidTrustedInfoFromDb(deviceId) == SOFTBUS_NOT_FIND &&
+        if (LnnFindDeviceUdidTrustedInfo(deviceId) == SOFTBUS_NOT_FIND &&
             DpHasAccessControlProfile(deviceId, true, localUserId)) {
             LnnInsertSpecificTrustedDevInfo(deviceId);
         }
@@ -1844,7 +1844,7 @@ static void UpdateDeviceNameToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 
 static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 {
-    if (LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+    if (LnnFindDeviceUdidTrustedInfo(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
         if (strcmp(newInfo->networkId, oldInfo->networkId) == 0 || oldInfo->status != STATUS_ONLINE ||
             !LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE)) {
             oldInfo->stateVersion = newInfo->stateVersion;
