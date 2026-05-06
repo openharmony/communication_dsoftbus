@@ -270,4 +270,40 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyTransSendMsgTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+/*
+ * @tc.name: TransProxyOpenNewConnChannelWithLocalCopyTest001
+ * @tc.desc: test TransProxyOpenNewConnChannel uses local copy of ConnectOption to avoid UAF
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyTransceiverTest, TransProxyOpenNewConnChannelWithLocalCopyTest001, TestSize.Level1)
+{
+    TransAuthInterfaceMock authMock;
+    TransConnInterfaceMock connMock;
+    TransCommInterfaceMock commMock;
+
+    EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(1));
+    EXPECT_CALL(commMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(connMock, ConnGetNewRequestId).WillRepeatedly(Return(100));
+    EXPECT_CALL(connMock, ConnConnectDevice)
+        .WillOnce([](const ConnectOption *option, uint32_t requestId, ConnectResult *result) {
+            EXPECT_NE(nullptr, option);
+            return SOFTBUS_OK;
+        })
+        .WillRepeatedly(Return(SOFTBUS_OK));
+
+    AppInfo appInfo;
+    appInfo.appType = APP_TYPE_NORMAL;
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+    int32_t channelId = -1;
+
+    int32_t ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_GT(channelId, INVALID_CHANNEL_ID);
+
+    sleep(1);
+}
+
 } // namespace OHOS
