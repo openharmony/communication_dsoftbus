@@ -690,7 +690,7 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(
-        (pkgName != NULL && nameData != NULL && len > 0), SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid param");
+        (pkgName != nullptr && nameData != nullptr && len > 0), SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid param");
     return LnnDisSetDisplayName(pkgName, nameData, len);
 }
 

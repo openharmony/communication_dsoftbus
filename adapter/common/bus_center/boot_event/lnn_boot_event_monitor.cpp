@@ -72,7 +72,7 @@ static void AccountBootEventCb(const char *key, const char *value, void *context
 
 int32_t LnnInitBootEventMonitorImpl(void)
 {
-    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, AccountBootEventCb, NULL);
+    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, AccountBootEventCb, nullptr);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "watch account server fail");
     }
@@ -81,7 +81,7 @@ int32_t LnnInitBootEventMonitorImpl(void)
 
 int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle)
 {
-    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, handle, NULL);
+    int32_t ret = WatchParameter(BOOTEVENT_ACCOUNT_READY, handle, nullptr);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "watch account server fail");
     }

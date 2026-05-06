@@ -83,7 +83,7 @@ int32_t NetInterfaceStateMonitor::OnInterfaceChanged(const std::string &ifName, 
 
 int32_t NetInterfaceStateMonitor::OnInterfaceLinkStateChanged(const std::string &ifName, bool isUp)
 {
-    if (strstr(ifName.c_str(), "eth") == NULL) {
+    if (strstr(ifName.c_str(), "eth") == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
@@ -133,7 +133,7 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
         LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IPV6_UPDATED, ifName.c_str());
         return SOFTBUS_OK;
     }
-    if (strstr(ifName.c_str(), "eth") == NULL) {
+    if (strstr(ifName.c_str(), "eth") == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_ethCountLock) != SOFTBUS_OK) {
