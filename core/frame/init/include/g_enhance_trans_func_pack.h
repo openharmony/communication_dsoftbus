@@ -58,6 +58,8 @@ bool IsMultipathWhitelistPacked(const char *processName, bool *isWhitelist);
 bool CancelEncryptionCheckPacked(const char *processName, pid_t callingUid);
 bool PermissionCheckPacked(void);
 void TransCloseAllMetaSocketPacked(void);
+void TransCloseAllD2DChannelPacked(
+    const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type);
 void TransD2dQosUnregisterPacked(int32_t channelId, char *sleMac, uint32_t macLen);
 #ifdef __cplusplus
 }

@@ -62,6 +62,8 @@ typedef bool (*IsMultipathWhitelistFunc)(const char *processName, bool *isWhitel
 typedef bool (*CancelEncryptionCheckFunc)(const char *processName, pid_t callingUid);
 typedef bool (*PermissionCheckFunc)(void);
 typedef void (*TransCloseAllMetaSocketFunc)(void);
+typedef void (*TransCloseAllD2DChannelFunc)(
+    const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type);
 
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
@@ -96,6 +98,7 @@ typedef struct TagTransEnhanceFuncList {
     CancelEncryptionCheckFunc cancelEncryptionCheck;
     PermissionCheckFunc permissionCheck;
     TransCloseAllMetaSocketFunc transCloseAllMetaSocket;
+    TransCloseAllD2DChannelFunc transCloseAllD2DChannel;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

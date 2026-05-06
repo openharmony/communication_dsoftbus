@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,15 @@ typedef struct TransReceiveData {
     uint32_t dataLen;
     int32_t dataType;
 } TransReceiveData;
+
+typedef struct {
+    const char *uuid;
+    const char *udid;
+    const char *peerIp;
+    const char *networkId;
+    int32_t routeType;
+} LinkDownInfo;
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

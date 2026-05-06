@@ -16,6 +16,7 @@
 #include "trans_session_manager.h"
 
 #include "anonymizer.h"
+#include "g_enhance_trans_func_pack.h"
 #include "lnn_lane_link.h"
 #include "permission_entry.h"
 #include "securec.h"
@@ -466,6 +467,10 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
             continue;
         }
         (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &info);
+    }
+
+    if (isBlockMode) {
+        TransCloseAllD2DChannelPacked(networkId, uuid, udid, peerIp, type);
     }
 
     if (routeType == WIFI_P2P) {
