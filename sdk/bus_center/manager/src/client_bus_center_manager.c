@@ -1829,51 +1829,45 @@ void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason)
     }
 }
 
-static uint32_t GetCapBitFromBitmap(uint32_t capabilityBitmap)
-{
-    for (uint32_t capBit = HICALL_CAPABILITY_BITMAP; capBit < MAX_CAPABILITY_BITMAP; capBit++) {
-        if ((capabilityBitmap & (1U << capBit)) == 0) {
-            continue;
-        }
-        return capBit;
-    }
-    return MAX_CAPABILITY_BITMAP;
-}
-
 void LnnOnRefreshDeviceFound(const void *device)
 {
     const DeviceInfo *deviceInfo = (const DeviceInfo *)device;
+    bool isReportAnyDevice = false;
     if (deviceInfo == NULL) {
         LNN_LOGE(LNN_STATE, "deviceInfo is null");
         return;
     }
-    uint32_t capBit = GetCapBitFromBitmap(deviceInfo->capabilityBitmap[0]);
-    if (capBit == MAX_CAPABILITY_BITMAP) {
-        LNN_LOGE(LNN_STATE, "invalid capBitmap");
-        return;
-    }
-    if (capBit == NFC_SHARE_CAPABILITY_BITMAP) {
-        if (g_busCenterClient.refreshNfcCb.OnDeviceFound != NULL) {
-            g_busCenterClient.refreshNfcCb.OnDeviceFound(deviceInfo);
+    LNN_LOGD(LNN_STATE, "RefreshLNN start OnDeviceFound, cap=%{public}u", deviceInfo->capabilityBitmap[0]);
+    for (uint32_t capBit = HICALL_CAPABILITY_BITMAP; capBit < MAX_CAPABILITY_BITMAP; capBit++) {
+        if ((deviceInfo->capabilityBitmap[0] & (1U << capBit)) == 0) {
+            continue;
         }
-        return;
-    }
-
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "lock refresh cb list in notify");
-        return;
-    }
-
-    RefreshCbItem *item = FindRefreshCbItem(capBit);
-    if (item == NULL || item->cb.OnDeviceFound == NULL) {
+        if (capBit == NFC_SHARE_CAPABILITY_BITMAP) {
+            if (g_busCenterClient.refreshNfcCb.OnDeviceFound != NULL) {
+                g_busCenterClient.refreshNfcCb.OnDeviceFound(deviceInfo);
+            }
+            isReportAnyDevice = true;
+            continue;
+        }
+        if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "lock refresh cb list in notify");
+            return;
+        }
+        RefreshCbItem *item = FindRefreshCbItem(capBit);
+        if (item == NULL || item->cb.OnDeviceFound == NULL) {
+            (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+            continue;
+        }
+        IRefreshCallback cb = item->cb;
         (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
-        LNN_LOGE(LNN_STATE, "deviceInfo OnDeviceFound failed by invalid cb, cap=%{public}u", capBit);
-        return;
+        cb.OnDeviceFound(deviceInfo);
+        LNN_LOGD(LNN_STATE, "RefreshLNN finally OnDeviceFound, cap=%{public}u", capBit);
+        isReportAnyDevice = true;
     }
-    IRefreshCallback cb = item->cb;
-    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
-    cb.OnDeviceFound(deviceInfo);
-    LNN_LOGD(LNN_STATE, "RefreshLNN finally OnDeviceFound, cap=%{public}u", capBit);
+    if (!isReportAnyDevice) {
+        LNN_LOGE(LNN_STATE, "deviceInfo OnDeviceFound failed by invalid cb, cap=%{public}u",
+            deviceInfo->capabilityBitmap[0]);
+    }
 }
 
 void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
