@@ -192,6 +192,8 @@ typedef struct TagLnnOpenFuncList {
     LnnMapSetFunc lnnMapSet;
     LnnMapGetFunc lnnMapGet;
     LnnMapEraseFunc lnnMapErase;
+    DataCompressFunc dataCompress;
+    DataDecompressFunc dataDecompress;
     LnnRegisterEventHandlerFunc lnnRegisterEventHandler;
     LnnUnregisterEventHandlerFunc lnnUnregisterEventHandler;
     LnnAsyncCallbackHelperFunc lnnAsyncCallbackHelper;
@@ -270,6 +272,8 @@ typedef struct TagLnnOpenFuncList {
     AuthGetLatestAuthSeqListFunc authGetLatestAuthSeqList;
     AuthHasTrustedRelationFunc authHasTrustedRelation;
     CompareConnInfoFunc compareConnInfo;
+    GetAuthManagerByAuthIdFunc getAuthManagerByAuthId;
+    AuthDeviceGetLatestIdByUuidFunc authDeviceGetLatestIdByUuid;
 
     // adapter
     SoftBusGetCurrentGroupFunc softBusGetCurrentGroup;

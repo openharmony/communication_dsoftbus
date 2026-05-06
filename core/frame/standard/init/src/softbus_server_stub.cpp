@@ -285,8 +285,8 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GENERAL_SEND] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_SET_NODE_KEY_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    memberPermissionMap_[SERVER_START_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    memberPermissionMap_[SERVER_PROCESS_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_START_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_PROCESS_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 void SoftBusServerStub::InitMemberConstraintSet()
@@ -2537,6 +2537,7 @@ int32_t SoftBusServerStub::StartAccountAuthInner(MessageParcel &data, MessagePar
     }
     return SOFTBUS_OK;
 }
+
 int32_t SoftBusServerStub::ProcessAccountAuthInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t ret = PermissionVerify(SERVER_PROCESS_ACCOUNT_AUTH);
