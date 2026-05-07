@@ -31,7 +31,6 @@ int32_t ServerSideSendAck(int32_t sessionId, int32_t result);
 int32_t TransSendData(int32_t channelId, const void *data, uint32_t len);
 int32_t DirectChannelCreateListener(int32_t fd);
 void CloseSessionInner(int32_t channelId);
-int32_t DeleteChannel(int32_t channelId);
 void ClientTransInnerDataBufDeinit(void);
 int32_t TransInnerAddDataBufNode(int32_t channelId, int32_t fd, int32_t channelType);
 void InnerListDeinit(void);

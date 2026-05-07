@@ -292,53 +292,6 @@ int32_t TransDelUdpChannel(int32_t channelId)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
-{
-    UdpChannelInfo *udpChannel = NULL;
-    UdpChannelInfo *udpChannelNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(udpChannel, udpChannelNext, udpChannelList, UdpChannelInfo, node) {
-        (void)NotifyUdpChannelClosed(&udpChannel->info, MESSAGE_TYPE_NOMAL);
-        // fastTransData is always NULL in the UDP channel, no need to free
-        ListDelete(&(udpChannel->node));
-        TRANS_LOGI(TRANS_CTRL, "channelId=%{public}" PRId64, udpChannel->info.myData.channelId);
-        (void)memset_s(
-            udpChannel->info.sessionKey, sizeof(udpChannel->info.sessionKey), 0, sizeof(udpChannel->info.sessionKey));
-        (void)memset_s(udpChannel->info.sinkSessionKey, sizeof(udpChannel->info.sinkSessionKey), 0,
-            sizeof(udpChannel->info.sinkSessionKey));
-        SoftBusFree(udpChannel);
-    }
-}
-
-void TransCloseUdpChannelByNetWorkId(const char *netWorkId)
-{
-    TRANS_LOGI(TRANS_CTRL, "enter.");
-    if ((g_udpChannelMgr == NULL) || (netWorkId == NULL)) {
-        return;
-    }
-    if (SoftBusMutexLock(&g_udpChannelMgr->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransCloseUdpChannelByAuId lock failed");
-        return;
-    }
-
-    ListNode udpDeleteChannelList;
-    ListInit(&udpDeleteChannelList);
-
-    UdpChannelInfo *udpChannel = NULL;
-    UdpChannelInfo *udpChannelNext = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(udpChannel, udpChannelNext, &g_udpChannelMgr->list, UdpChannelInfo, node) {
-        if (strcmp(udpChannel->info.peerNetWorkId, netWorkId) == 0) {
-            ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
-            ListDelete(&(udpChannel->node));
-            g_udpChannelMgr->cnt--;
-            UdpChannelStatistic(udpChannel, false);
-            ListAdd(&udpDeleteChannelList, &(udpChannel->node));
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
-
-    NotifyUdpChannelCloseInList(&udpDeleteChannelList);
-}
-
 int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel, bool isReply)
 {
     if (g_udpChannelMgr == NULL) {

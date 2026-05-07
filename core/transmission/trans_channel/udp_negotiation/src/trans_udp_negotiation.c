@@ -1407,20 +1407,6 @@ static void UdpModuleCb(AuthHandle authHandle, const AuthTransData *data)
     }
 }
 
-void TransUdpNodeOffLineProc(const LnnEventBasicInfo *info)
-{
-    if ((info == NULL) || (info->event != LNN_EVENT_NODE_ONLINE_STATE_CHANGED)) {
-        return;
-    }
-
-    LnnOnlineStateEventInfo *onlineStateInfo = (LnnOnlineStateEventInfo*)info;
-    if (onlineStateInfo->isOnline == true) {
-        return;
-    }
-
-    TransCloseUdpChannelByNetWorkId(onlineStateInfo->networkId);
-}
-
 int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
 {
     g_channelCb = callback;

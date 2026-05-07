@@ -1231,25 +1231,6 @@ void TransProxyNegoSessionKeySucc(int32_t channelId)
     SoftBusFree(channelInfo);
 }
 
-int32_t TransPagingLoadSaFail(const uint32_t businessFlag)
-{
-    if (SoftBusMutexLock(&g_proxyPagingWaitList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
-    ProxyPagingWaitInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_proxyPagingWaitList->list, ProxyPagingWaitInfo, node) {
-        if (item->businessFlag == businessFlag) {
-            item->isLoadFailed = true;
-            (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
-            return SOFTBUS_OK;
-        }
-    }
-    TRANS_LOGE(TRANS_CTRL, "not found wait listen, businessFlag=%{public}u", businessFlag);
-    (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
-    return SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND;
-}
-
 int32_t TransPagingWaitListenStatus(const uint32_t businessFlag, PagingWaitListenStatus status)
 {
     if (status < PAGING_WAIT_LISTEN_DONE || status > PAGING_WAIT_LISTEN_LOAD_SA_FAIL) {

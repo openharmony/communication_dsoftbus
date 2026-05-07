@@ -664,48 +664,6 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest019, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransUdpManagerTest020
- * @tc.desc: test TransUdpManager
- *           trans notify udp channel close list
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpManagerTest, TransUdpManagerTest020, TestSize.Level1)
-{
-    int32_t ret = TransUdpChannelMgrInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    UdpChannelInfo* channel = GetPackTest();
-    ASSERT_TRUE(channel != nullptr);
-    ret = TransAddUdpChannel(channel);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ListNode udpDeleteChannelList;
-    ListInit(&udpDeleteChannelList);
-    NotifyUdpChannelCloseInList(&udpDeleteChannelList);
-    TransUdpChannelMgrDeinit();
-}
-
-/*
- * @tc.name: TransUdpManagerTest021
- * @tc.desc: test TransUdpManager
- *           trans close udp channel by networkId
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpManagerTest, TransUdpManagerTest021, TestSize.Level1)
-{
-    string networkId = "invalid networlId";
-    TransCloseUdpChannelByNetWorkId(networkId.c_str());
-    int32_t ret = TransUdpChannelMgrInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    TransCloseUdpChannelByNetWorkId(nullptr);
-    UdpChannelInfo *channel = GetPackTest();
-    ASSERT_TRUE(channel != nullptr);
-    ret = TransAddUdpChannel(channel);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    TransUdpChannelMgrDeinit();
-}
-
-/*
  * @tc.name: TransUdpManagerTest022
  * @tc.desc: test TransUdpManager
  *           trans notify udp channel timeout use diff param
