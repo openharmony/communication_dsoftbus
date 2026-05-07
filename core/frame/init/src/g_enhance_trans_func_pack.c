@@ -339,3 +339,16 @@ void TransCloseAllMetaSocketPacked(void)
     }
     return pfnTransEnhanceFuncList->transCloseAllMetaSocket();
 }
+
+void TransCloseAllD2DChannelPacked(
+    const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transCloseAllD2DChannel) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->transCloseAllD2DChannel(networkId, uuid, udid, peerIp, type);
+}

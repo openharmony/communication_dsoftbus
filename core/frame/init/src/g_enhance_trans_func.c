@@ -60,5 +60,6 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.cancelEncryptionCheck = dlsym(soHandle, "CancelEncryptionCheck");
     g_transEnhanceFuncList.permissionCheck = dlsym(soHandle, "PermissionCheck");
     g_transEnhanceFuncList.transCloseAllMetaSocket = dlsym(soHandle, "TransCloseAllMetaSocket");
+    g_transEnhanceFuncList.transCloseAllD2DChannel = dlsym(soHandle, "TransCloseAllD2DChannel");
     return SOFTBUS_OK;
 }

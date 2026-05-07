@@ -724,8 +724,9 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
 {
     SoftBusHitraceChainBegin("TransOpenAuthChannel");
     int32_t channelId = INVALID_CHANNEL_ID;
-    if (TransCheckOpenAuthChannelBlockStatus(sessionName, connOpt, param) != SOFTBUS_OK) {
-        return channelId;
+    int32_t ret = TransCheckOpenAuthChannelBlockStatus(sessionName, connOpt, param);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     char callerPkg[PKG_NAME_SIZE_MAX] = {0};
     char localUdid[UDID_BUF_LEN] = {0};

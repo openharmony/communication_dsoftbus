@@ -39,14 +39,6 @@ typedef struct {
     int32_t (*OnChannelBind)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType);
 } IServerChannelCallBack;
 
-typedef struct {
-    const char *uuid;
-    const char *udid;
-    const char *peerIp;
-    const char *networkId;
-    int32_t routeType;
-} LinkDownInfo;
-
 IServerChannelCallBack *TransServerGetChannelCb(void);
 
 int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const LinkDownInfo *info);
