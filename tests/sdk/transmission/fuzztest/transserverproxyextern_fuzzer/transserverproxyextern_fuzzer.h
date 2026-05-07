@@ -22,6 +22,35 @@
 #include <cstdlib>
 #include <fcntl.h>
 
+#include "trans_server_proxy.h"
+
+#define LOOP_SLEEP_MILLS 100
 #define FUZZ_PROJECT_NAME "transserverproxyextern_fuzzer"
+
+namespace OHOS {
+class TransServerProxyExternTestEnv {
+public:
+    TransServerProxyExternTestEnv()
+    {
+        isInited_ = false;
+        (void)TransServerProxyInit();
+        isInited_ = true;
+    }
+
+    ~TransServerProxyExternTestEnv()
+    {
+        isInited_ = false;
+        TransServerProxyDeInit();
+    }
+
+    bool IsInited(void) const
+    {
+        return isInited_;
+    }
+
+private:
+    volatile bool isInited_;
+};
+} // namespace OHOS
 
 #endif
