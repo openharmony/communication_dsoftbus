@@ -1375,4 +1375,22 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceived001, TestSize.Leve
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
 }
+
+/*
+ * @tc.name: TransProxyOpenNewConnChannelWithLocalCopy001
+ * @tc.desc: test TransProxyOpenNewConnChannel uses local copy of ConnectOption to avoid UAF
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenNewConnChannelWithLocalCopy001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    appInfo.appType = APP_TYPE_NORMAL;
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+    int32_t channelId = INVALID_CHANNEL_ID;
+
+    int32_t ret = TransProxyOpenNewConnChannel(PROXY, &connInfo, channelId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
 } // namespace OHOS

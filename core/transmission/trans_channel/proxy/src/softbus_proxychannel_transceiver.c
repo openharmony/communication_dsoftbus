@@ -849,7 +849,15 @@ static int32_t TransProxyOpenNewConnChannel(ListenerModule moduleId, const Conne
         SoftBusFree(connChan);
         return SOFTBUS_TRANS_PROXY_CONN_REPEAT;
     }
-    int32_t ret = TransProxyConnectDevice(&connChan->connInfo, requestId);
+    ConnectOption connOption;
+    (void)memset_s(&connOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    if (memcpy_s(&connOption, sizeof(ConnectOption), &connChan->connInfo, sizeof(ConnectOption)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy_s connInfo failed");
+        TransDelConnByReqId(requestId);
+        TransProxyDelChanByChanId(channelId);
+        return SOFTBUS_MEM_ERR;
+    }
+    int32_t ret = TransProxyConnectDevice(&connOption, requestId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "connect device err");
         TransDelConnByReqId(requestId);
