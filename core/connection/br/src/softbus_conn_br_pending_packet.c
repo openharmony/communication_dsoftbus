@@ -75,7 +75,7 @@ static void Dereference(PendingPacket **pendingPtr)
     }
     SoftBusMutexUnlock(&pending->lock);
     if (!destruct) {
-        pending = NULL;
+        *pendingPtr = NULL;
         return;
     }
     SoftBusMutexDestroy(&pending->lock);
