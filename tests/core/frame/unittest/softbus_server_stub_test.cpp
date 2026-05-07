@@ -2428,6 +2428,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest063, TestSize.Level1)
     int32_t ret = softBusServer->StartAccountAuthInner(data, reply);
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, LnnIpcStartAccountAuth).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->StartAccountAuthInner(data, reply);
     EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
 
@@ -2469,6 +2470,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest064, TestSize.Level1)
     int32_t ret = softBusServer->ProcessAccountAuthInner(data, reply);
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, LnnIpcProcessAccountAuth).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->ProcessAccountAuthInner(data, reply);
     EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
 
@@ -2662,9 +2664,9 @@ HWTEST_F(SoftbusServerStubTest, CheckPermissionTest003, TestSize.Level1)
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(softBusServer, nullptr);
     int32_t ret = softBusServer->CheckPermission(SERVER_JOIN_LNN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     ret = softBusServer->CheckPermission(SERVER_CREATE_SESSION_SERVER);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /*

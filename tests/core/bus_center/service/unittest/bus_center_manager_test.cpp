@@ -224,7 +224,8 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
     EXPECT_CALL(BusCenterManagerMock,  SoftBusRunPeriodicalTask(_, _, _, _))
         .WillRepeatedly(Return());
     EXPECT_CALL(BusCenterManagerMock, LnnInitLaneHub()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(BusCenterManagerMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(BusCenterManagerMock, LnnAsyncCallbackDelayHelper(_, _, _, _))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
