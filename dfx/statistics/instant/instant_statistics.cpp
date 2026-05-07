@@ -1008,6 +1008,6 @@ void InstRegister(SoftBusMessage *msg)
     if (msg == nullptr) {
         (void)InstantRegisterMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), InstRegister, INST_MINUTE_TIME);
     } else {
-        RegisterRadarCbForOpenSrcPacked((void *)InstGetAllInfo);
+        RegisterRadarCbForOpenSrcPacked(reinterpret_cast<void *>(InstGetAllInfo));
     }
 }

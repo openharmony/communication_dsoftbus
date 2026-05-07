@@ -430,7 +430,7 @@ static void LooperPostMessageDelay(const SoftBusLooper *looper, SoftBusMessage *
         COMM_LOGE(COMM_UTILS, "LooperPostMessageDelay with nullqueue");
         return;
     }
-    msg->time = UptimeMicros() + (int64_t)delayMillis * TIME_THOUSANDS_MULTIPLIER;
+    msg->time = UptimeMicros() + static_cast<int64_t>(delayMillis) * TIME_THOUSANDS_MULTIPLIER;
     PostMessageWithFfrt(looper, msg, delayMillis * TIME_THOUSANDS_MULTIPLIER);
 }
 
