@@ -1360,6 +1360,16 @@ static int32_t UpdateLinkStatus(uint32_t laneReqId, BuildLinkStatus status, Lane
     return SOFTBUS_OK;
 }
 
+static void UpdateDfxEventInfo(uint32_t laneReqId, LaneLinkType firstLinkType, LaneLinkType finalLinkType)
+{
+    if (firstLinkType == finalLinkType || (firstLinkType == LANE_P2P && finalLinkType == LANE_HML)) {
+        return;
+    }
+    bool isRetry = true;
+    uint32_t isBuildRetry = (uint32_t)isRetry;
+    UpdateLaneEventInfo(laneReqId, EVENT_BUILD_RETRY, LANE_PROCESS_TYPE_UINT32, (void *)(&isBuildRetry));
+}
+
 static bool IsNeedNotifySucc(uint32_t laneReqId)
 {
     if (Lock() != SOFTBUS_OK) {
@@ -1373,6 +1383,7 @@ static bool IsNeedNotifySucc(uint32_t laneReqId)
         return false;
     }
     bool isBuilding = false;
+    LaneLinkType firstLinkType = nodeInfo->linkList->linkType[0];
     for (uint32_t i = 0; i < nodeInfo->listNum; i++) {
         LaneLinkType linkType = nodeInfo->linkList->linkType[i];
         if (linkType >= LANE_LINK_TYPE_BUTT) {
@@ -1387,6 +1398,7 @@ static bool IsNeedNotifySucc(uint32_t laneReqId)
         }
         if (!isBuilding && nodeInfo->statusList[linkType].status == BUILD_LINK_STATUS_SUCC) {
             nodeInfo->isCompleted = true;
+            UpdateDfxEventInfo(laneReqId, firstLinkType, linkType);
             Unlock();
             return true;
         }
@@ -1629,8 +1641,6 @@ static void BuildLinkRetry(uint32_t laneReqId)
     Unlock();
     if (needRetry) {
         LNN_LOGI(LNN_LANE, "continue to build link, laneReqId=%{public}u", laneReqId);
-        uint32_t isBuildRetry = (uint32_t)needRetry;
-        UpdateLaneEventInfo(laneReqId, EVENT_BUILD_RETRY, LANE_PROCESS_TYPE_UINT32, (void *)(&isBuildRetry));
         (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneReqId, 0, NULL, 0);
     }
 }
