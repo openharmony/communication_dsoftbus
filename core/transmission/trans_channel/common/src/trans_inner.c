@@ -57,10 +57,11 @@ typedef struct {
 #define MAGIC_NUMBER 0xBABEFACE
 #endif
 
-static ListenerModule g_baseListenerModule = (ListenerModule) - 1;
+static ListenerModule g_baseListenerModule = UNUSE_BUTT;
 static SoftBusList *g_sessionList = NULL;
 static SoftBusList *g_innerChannelSliceProcessorList = NULL;
 static SoftBusList *g_innerChannelDataBufList = NULL;
+static bool g_isInitedFlag = false;
 
 void ClientTransInnerSliceListDeinit(void)
 {
@@ -732,16 +733,11 @@ static int32_t DirectChannelOnDataEvent(ListenerModule module, int32_t events, i
 
 int32_t DirectChannelCreateListener(int32_t fd)
 {
-    static bool isInitedFlag = false;
-
-    if (!isInitedFlag) {
-        isInitedFlag = true;
-
+    if (!g_isInitedFlag) {
         static SoftbusBaseListener listener = {
             .onConnectEvent = DirectChannelOnConnectEvent,
             .onDataEvent = DirectChannelOnDataEvent,
         };
-
         g_baseListenerModule = (ListenerModule)CreateListenerModule();
         if (g_baseListenerModule == UNUSE_BUTT) {
             TRANS_LOGE(TRANS_CTRL, "create listener module fialed");
@@ -753,9 +749,29 @@ int32_t DirectChannelCreateListener(int32_t fd)
             return ret;
         }
         TRANS_LOGI(TRANS_CTRL, "init tcp direct channel success, fd=%{public}d", fd);
+        g_isInitedFlag = true;
     }
     TRANS_LOGI(TRANS_CTRL, "add fd=%{public}d", fd);
     return AddTrigger(g_baseListenerModule, fd, READ_TRIGGER);
+}
+
+void StopDirectChannelListener(void)
+{
+    if (g_baseListenerModule < 0 || g_baseListenerModule >= UNUSE_BUTT) {
+        TRANS_LOGE(TRANS_CTRL, "g_baseListenerModule not init");
+        return;
+    }
+    if (!g_isInitedFlag) {
+        TRANS_LOGE(TRANS_CTRL, " not start listener, no need to stop");
+        return;
+    }
+    int32_t ret = StopBaseListener(g_baseListenerModule);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "StopBaseListener failed, ret=%{public}d", ret);
+        return;
+    }
+    g_isInitedFlag = false;
+    g_baseListenerModule = UNUSE_BUTT;
 }
 
 int32_t TdcSendData(int32_t channelId, const void *data, uint32_t len)

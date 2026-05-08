@@ -37,6 +37,7 @@ int32_t TransInnerAddDataBufNode(int32_t channelId, int32_t fd, int32_t channelT
 void InnerListDeinit(void);
 void TransCloseInnerSessionByNetworkId(const char *networkId);
 void TransCloseAllInnerSession(const char *pkgName);
+void StopDirectChannelListener(void);
 
 #ifdef __cplusplus
 }
