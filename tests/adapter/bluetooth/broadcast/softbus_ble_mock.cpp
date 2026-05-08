@@ -230,6 +230,11 @@ static int32_t MockSetLpDeviceParam(
     return SOFTBUS_OK;
 }
 
+static int32_t MockSendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type)
+{
+    return SOFTBUS_OK;
+}
+
 static void ActionOfSoftbusBleAdapterInit()
 {
     DISC_LOGI(DISC_TEST, "enter");
@@ -257,6 +262,7 @@ static void ActionOfSoftbusBleAdapterInit()
         .DisableSyncDataToLpDevice = MockDisableSyncDataToLpDevice,
         .SetScanReportChannelToLpDevice = MockSetScanReportChannelToLpDevice,
         .SetLpDeviceParam = MockSetLpDeviceParam,
+        .SendParamsToLpDevice = MockSendParamsToLpDevice,
     };
     if (RegisterBroadcastMediumFunction(BROADCAST_PROTOCOL_BLE, &interface) != 0) {
         DISC_LOGE(DISC_TEST, "Register gatt interface failed.");

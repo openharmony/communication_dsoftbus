@@ -33,6 +33,8 @@
 #define LP_BT_UUID_HEARTBEAT        "43d4a49f-605d-45b5-9302-4ddbbfd538fd"
 #define LP_DELIVERY_MODE_REPLY      0xF0
 #define LP_ADV_DURATION_MS          0
+#define LP_BT_UUID_VLINK            "43d4a49f-606d-45b5-9302-4ddbbfd538fd"
+#define MAX_FILTER_SIZE 16
 
 typedef struct {
     bool isUsed;
@@ -56,6 +58,9 @@ static SoftBusMutex g_scannerLock = { 0 };
 static int32_t g_adapterBtStateListenerId = -1;
 static AdvChannel g_advChannel[GATT_ADV_MAX_NUM];
 static ScanChannel g_scanChannel[GATT_SCAN_MAX_NUM];
+static bool SoftbusSetScanLpParam(LpServerType type, const SoftBusLpBroadcastParam *bcParam,
+    const SoftBusLpScanParam *scanParam);
+static int32_t SoftbusSendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type);
 
 static int32_t SoftbusGattInit(void)
 {
@@ -997,6 +1002,9 @@ static int32_t SetBtUuidByBroadCastType(LpServerType type, BtUuid *btUuid)
         case SOFTBUS_BURST_TYPE:
             btUuid->uuid = LP_BT_UUID_BURST;
             break;
+        case SOFTBUS_VIRTUAL_SCAN_TYPE:
+            btUuid->uuid = LP_BT_UUID_VLINK;
+            break;
         default:
             DISC_LOGE(DISC_BLE_ADAPTER, "invalid type, type=%{public}d", type);
             return SOFTBUS_INVALID_PARAM;
@@ -1013,10 +1021,31 @@ static void FreeManufactureFilter(BleScanNativeFilter *nativeFilter, int32_t fil
     }
 }
 
+static bool AssembleAdvDataWithRsp(const SoftBusLpBroadcastParam *bcParam, BtLpDeviceParam *lpParam)
+{
+    lpParam->rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
+        (uint16_t *)&lpParam->rawData.advDataLen);
+    DISC_CHECK_AND_RETURN_RET_LOGE(
+        lpParam->rawData.advData != NULL, false, DISC_BLE_ADAPTER, "assemble advData failed");
+    if (bcParam->advData.rspData.payloadLen > 0 && bcParam->advData.rspData.payload != NULL) {
+        lpParam->rawData.rspData = (unsigned char *)AssembleRspData(&bcParam->advData.rspData,
+            (uint16_t *)&lpParam->rawData.rspDataLen);
+        if (lpParam->rawData.rspData == NULL) {
+            SoftBusFree(lpParam->rawData.advData);
+            DISC_LOGE(DISC_BLE_ADAPTER, "assemble rsp data failed, advHandle=%{public}d", bcParam->advHandle);
+            return false;
+        }
+    }
+    return true;
+}
+
 static bool SoftbusSetLpParam(LpServerType type,
     const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(bcParam != NULL && scanParam != NULL, false, DISC_BLE_ADAPTER, "invalid param");
+    if (bcParam->advHandle == -1) {
+        return SoftbusSetScanLpParam(type, bcParam, scanParam);
+    }
     BleScanConfigs scanConfig = {};
     scanConfig.scanMode = GetBtScanMode(scanParam->scanParam.scanInterval, scanParam->scanParam.scanWindow);
     BtLpDeviceParam lpParam = {};
@@ -1025,17 +1054,8 @@ static bool SoftbusSetLpParam(LpServerType type,
         DISC_LOGE(DISC_BLE_ADAPTER, "set bt uuid failed, advHandle=%{public}d", bcParam->advHandle);
         return false;
     }
-    lpParam.rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
-        (uint16_t *)&lpParam.rawData.advDataLen);
-    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, false, DISC_BLE_ADAPTER, "assemble advData failed");
-    if (bcParam->advData.rspData.payloadLen > 0 && bcParam->advData.rspData.payload != NULL) {
-        lpParam.rawData.rspData = (unsigned char *)AssembleRspData(&bcParam->advData.rspData,
-            (uint16_t *)&lpParam.rawData.rspDataLen);
-        if (lpParam.rawData.rspData == NULL) {
-            SoftBusFree(lpParam.rawData.advData);
-            DISC_LOGE(DISC_BLE_ADAPTER, "assemble rsp data failed, advHandle=%{public}d", bcParam->advHandle);
-            return false;
-        }
+    if (!AssembleAdvDataWithRsp(bcParam, &lpParam)) {
+        return false;
     }
     lpParam.filter = (BleScanNativeFilter *)SoftBusCalloc(sizeof(BleScanNativeFilter) * scanParam->filterSize);
     if (lpParam.filter == NULL) {
@@ -1044,7 +1064,7 @@ static bool SoftbusSetLpParam(LpServerType type,
         DISC_LOGE(DISC_BLE_ADAPTER, "malloc native filter failed, advHandle=%{public}d", bcParam->advHandle);
         return false;
     }
-    if (type == SOFTBUS_HEARTBEAT_TYPE) {
+    if (type == SOFTBUS_HEARTBEAT_TYPE || type == SOFTBUS_VIRTUAL_SCAN_TYPE) {
         SoftbusSetManufactureFilter(lpParam.filter, scanParam->filterSize);
     }
     SoftbusFilterToBt(lpParam.filter, scanParam->filter, scanParam->filterSize);
@@ -1056,7 +1076,7 @@ static bool SoftbusSetLpParam(LpServerType type,
     lpParam.advHandle = bcParam->advHandle;
     lpParam.duration = LP_ADV_DURATION_MS;
     int32_t ret = SetLpDeviceParam(&lpParam);
-    if (type == SOFTBUS_HEARTBEAT_TYPE) {
+    if (type == SOFTBUS_HEARTBEAT_TYPE || type == SOFTBUS_VIRTUAL_SCAN_TYPE) {
         FreeManufactureFilter(lpParam.filter, scanParam->filterSize);
     }
     FreeBtFilter(lpParam.filter, scanParam->filterSize);
@@ -1193,6 +1213,7 @@ void SoftbusBleAdapterInit(void)
         .DisableSyncDataToLpDevice = SoftbusDisableSyncDataToLp,
         .SetScanReportChannelToLpDevice = SoftbusSetScanReportChanToLp,
         .SetLpDeviceParam = SoftbusSetLpAdvParam,
+        .SendParamsToLpDevice = SoftbusSendParamsToLpDevice,
     };
     if (RegisterBroadcastMediumFunction(BROADCAST_PROTOCOL_BLE, &interface) != 0) {
         DISC_LOGE(DISC_BLE_ADAPTER, "register gatt interface failed");
@@ -1214,4 +1235,59 @@ void SoftbusBleAdapterDeInit(void)
         DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE_ADAPTER, "RemoveBtStateListener fail!");
         g_adapterBtStateListenerId = -1;
     }
+}
+
+static int32_t SoftbusSendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type)
+{
+    if (data == NULL || dataSize == 0) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SendParamsToLpDevice(data, dataSize, type);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        DISC_LOGW(DISC_BLE_ADAPTER, "set lp adv param failed, ret=%{public}d", ret);
+        return SOFTBUS_NETWORK_SEND_MSG_TO_MLPS_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool SoftbusSetScanLpParam(LpServerType type, const SoftBusLpBroadcastParam *bcParam,
+    const SoftBusLpScanParam *scanParam)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcParam != NULL && scanParam != NULL, false, DISC_BLE_ADAPTER, "invalid param");
+    if (scanParam->filterSize <= 0 || scanParam->filterSize > MAX_FILTER_SIZE) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "invalid filterSize=%{public}d", scanParam->filterSize);
+        return false;
+    }
+    BleScanConfigs scanConfig = {};
+    scanConfig.scanMode = GetBtScanMode(scanParam->scanParam.scanInterval, scanParam->scanParam.scanWindow);
+    BtLpDeviceParam lpParam = {};
+    lpParam.scanConfig = &scanConfig;
+    if (SetBtUuidByBroadCastType(type, &lpParam.uuid) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "set bt uuid failed, advHandle=%{public}d", bcParam->advHandle);
+        return false;
+    }
+    lpParam.rawData.advData = NULL;
+    lpParam.filter = (BleScanNativeFilter *)SoftBusCalloc(sizeof(BleScanNativeFilter) * scanParam->filterSize);
+    if (lpParam.filter == NULL) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "malloc native filter failed, advHandle=%{public}d", bcParam->advHandle);
+        return false;
+    }
+    if (type == SOFTBUS_HEARTBEAT_TYPE || type == SOFTBUS_VIRTUAL_SCAN_TYPE) {
+        SoftbusSetManufactureFilter(lpParam.filter, scanParam->filterSize);
+    }
+    SoftbusFilterToBt(lpParam.filter, scanParam->filter, scanParam->filterSize);
+    lpParam.filterSize = (unsigned int)scanParam->filterSize;
+    lpParam.activeDeviceInfo = NULL;
+    lpParam.activeDeviceSize = 0;
+    lpParam.deliveryMode = LP_DELIVERY_MODE_REPLY;
+    lpParam.advHandle = bcParam->advHandle;
+    lpParam.duration = LP_ADV_DURATION_MS;
+    int32_t ret = SetLpDeviceParam(&lpParam);
+    if (type == SOFTBUS_HEARTBEAT_TYPE || type == SOFTBUS_VIRTUAL_SCAN_TYPE) {
+        FreeManufactureFilter(lpParam.filter, scanParam->filterSize);
+    }
+    FreeBtFilter(lpParam.filter, scanParam->filterSize);
+    DISC_LOGI(DISC_BLE_ADAPTER, "advHandle=%{public}d, ret=%{public}d", bcParam->advHandle, ret);
+    return (ret == OHOS_BT_STATUS_SUCCESS) ? true : false;
 }
