@@ -169,7 +169,7 @@ void WifiDirectDfx::ReportReceiveAuthLinkMsg(const NegotiateMessage &msg, const 
         auto localNetworkId = WifiDirectUtils::GetLocalNetworkId();
         auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteDeviceId);
         ConnEventExtra extra = {
-            .requestId = (int32_t)msg.GetSessionId(),
+            .requestId = static_cast<int32_t>(msg.GetSessionId()),
             .challengeCode = challengeCodeStr.c_str(),
             .peerNetworkId = remoteNetworkId.c_str(),
             .localNetworkId = localNetworkId.c_str(),

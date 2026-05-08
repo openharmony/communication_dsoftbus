@@ -27,7 +27,7 @@ public:
     
     using InitFuncion = std::function<void()>;
 
-    void Init();
+    void Init() const;
     void Add(const InitFuncion &function);
 
 private:

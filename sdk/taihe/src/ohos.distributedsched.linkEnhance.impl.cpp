@@ -325,7 +325,7 @@ public:
             ThrowException(SOFTBUS_INVALID_PARAM);
             return;
         }
-        int32_t ret = GeneralSend(this->handle_, data.data(), (uint32_t)data.size());
+        int32_t ret = GeneralSend(this->handle_, data.data(), static_cast<uint32_t>(data.size()));
         if (ret != 0) {
             ThrowException(ret);
             return;

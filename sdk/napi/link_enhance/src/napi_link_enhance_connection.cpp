@@ -193,7 +193,7 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
 static NapiLinkEnhanceConnection *NapiGetEnhanceConnection(napi_env env, napi_value thisVar)
 {
     NapiLinkEnhanceConnection *connection = nullptr;
-    auto status = napi_unwrap(env, thisVar, (void **)&connection);
+    auto status = napi_unwrap(env, thisVar, reinterpret_cast<void **>(&connection));
     if (status != napi_ok) {
         return nullptr;
     }
