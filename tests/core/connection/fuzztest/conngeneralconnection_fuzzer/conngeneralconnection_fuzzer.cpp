@@ -247,7 +247,7 @@ void OnCommDisconnectedTest(FuzzedDataProvider &provider)
     if (g_generalConnection == nullptr) {
         return;
     }
-    g_generalConnection->underlayerHandle = 1;
+    g_generalConnection->underlayerHandle = provider.ConsumeIntegral<uint32_t>();
     SaveConnection(g_generalConnection);
     OnCommDisconnected(g_generalConnection->underlayerHandle, &info);
     DestroyConnection();
@@ -256,7 +256,7 @@ void OnCommDisconnectedTest(FuzzedDataProvider &provider)
     if (g_generalConnection == nullptr) {
         return;
     }
-    g_generalConnection->underlayerHandle = 1;
+    g_generalConnection->underlayerHandle = provider.ConsumeIntegral<uint32_t>();
     g_generalConnection->state = STATE_CONNECTED;
     SaveConnection(g_generalConnection);
     OnCommDisconnected(g_generalConnection->underlayerHandle, &info);

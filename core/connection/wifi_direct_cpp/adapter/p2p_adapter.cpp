@@ -275,7 +275,7 @@ int32_t P2pAdapter::GetSelfWifiConfigInfo(std::string &config)
     ret = SoftBusBase64Encode(encode, sizeof(encode), &encodeSize, wifiConfig, wifiConfigSize);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == WIFI_SUCCESS, ret, CONN_WIFI_DIRECT, "encode fail, ret=%{public}d", ret);
 
-    config = std::string((const char *)encode, encodeSize);
+    config = std::string(reinterpret_cast<const char *>(encode), encodeSize);
     return SOFTBUS_OK;
 }
 
@@ -286,7 +286,8 @@ int32_t P2pAdapter::SetPeerWifiConfigInfo(const std::string &config)
     size_t decodeLen = 0;
     CONN_CHECK_AND_RETURN_RET_LOGE(decodeCfg, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "alloc fail");
 
-    int32_t ret = SoftBusBase64Decode(decodeCfg, peerCfgLen, &decodeLen, (uint8_t *)config.c_str(), config.size());
+    int32_t ret = SoftBusBase64Decode(
+        decodeCfg, peerCfgLen, &decodeLen, reinterpret_cast<const uint8_t *>(config.c_str()), config.size());
     if (ret != SOFTBUS_OK) {
         delete[] decodeCfg;
         CONN_LOGI(CONN_WIFI_DIRECT, "decode wifi cfg fail, error=%{public}d", ret);

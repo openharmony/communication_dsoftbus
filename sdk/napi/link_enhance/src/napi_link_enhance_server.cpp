@@ -168,7 +168,7 @@ napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info i
 static NapiLinkEnhanceServer *NapiGetEnhanceServer(napi_env env, napi_value thisVar)
 {
     NapiLinkEnhanceServer *enhanceServer = nullptr;
-    auto status = napi_unwrap(env, thisVar, (void **)&enhanceServer);
+    auto status = napi_unwrap(env, thisVar, reinterpret_cast<void **>(&enhanceServer));
     if (status != napi_ok) {
         return nullptr;
     }

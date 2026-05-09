@@ -89,6 +89,7 @@ uint32_t WifiDirectUtils::BytesToInt(const uint8_t *data, uint32_t size)
 
 void WifiDirectUtils::IntToBytes(uint32_t data, uint32_t len, std::vector<uint8_t> &out)
 {
+    CONN_CHECK_AND_RETURN_LOGW(len <= sizeof(data), CONN_WIFI_DIRECT, "len=%{public}u invalid", len);
     data = htole32(data);
     std::vector<uint8_t> result(len);
     if (memcpy_s(result.data(), len, &data, len) != EOK) {
@@ -253,10 +254,10 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
-    auto ret = LnnGetLocalPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    auto ret = LnnGetLocalPtkByUuidPacked(remoteUuid.c_str(), reinterpret_cast<char *>(ptkBytes), sizeof(ptkBytes));
     if (ret == SOFTBUS_NOT_FIND) {
         ret = LnnGetLocalDefaultPtkByUuidPacked(remoteUuid.c_str(),
-            (char *)ptkBytes, sizeof(ptkBytes));
+            reinterpret_cast<char *>(ptkBytes), sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get local ptk fail");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
@@ -285,7 +286,7 @@ std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetw
         ptkBytes, sizeof(ptkBytes));
     if (ret == SOFTBUS_OK && memcmp(ptkBytes, zeroPtkBytes, PTK_DEFAULT_LEN) == 0) {
         ret = LnnGetRemoteDefaultPtkByUuidPacked(remoteUuid.c_str(),
-            (char *)ptkBytes, sizeof(ptkBytes));
+            reinterpret_cast<char *>(ptkBytes), sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk fail");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);

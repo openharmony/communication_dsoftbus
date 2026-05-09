@@ -21,7 +21,7 @@ WifiDirectInitiator& WifiDirectInitiator::GetInstance()
     return instance;
 }
 
-void WifiDirectInitiator::Init()
+void WifiDirectInitiator::Init() const
 {
     for (const auto &function : functions_) {
         function();
