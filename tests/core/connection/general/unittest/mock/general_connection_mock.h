@@ -20,6 +20,7 @@
 
 #include "conn_log.h"
 #include "softbus_conn_ble_connection.h"
+#include "bus_center_event.h"
 #include "bus_center_info_key.h"
 
 namespace OHOS {
@@ -32,6 +33,7 @@ public:
     virtual int32_t ConnBlePostBytesMock(uint32_t connectionId, uint8_t *data,
         uint32_t dataLen, int32_t pid, int32_t flag, int32_t module, int64_t seq) = 0;
     virtual bool LnnIsOsAccountConstraint(void) = 0;
+    virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
 };
 
 class GeneralConnectionInterfaceMock : public GeneralConnectionInterface {
@@ -43,6 +45,7 @@ public:
     MOCK_METHOD(int32_t, ConnBlePostBytesMock, (uint32_t connectionId, uint8_t *data,
         uint32_t dataLen, int32_t pid, int32_t flag, int32_t module, int64_t seq), (override));
     MOCK_METHOD(bool, LnnIsOsAccountConstraint, (), (override));
+    MOCK_METHOD(int32_t, LnnRegisterEventHandler, (LnnEventType event, LnnEventHandler handler), (override));
     
     static ConnectCallback *GetConnectCallbackMock();
     static ConnectResult *GetConnectResultMock();

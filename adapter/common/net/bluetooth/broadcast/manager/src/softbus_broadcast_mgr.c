@@ -961,7 +961,7 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
     DISC_CHECK_AND_RETURN_LOGE(reportData != NULL, DISC_BROADCAST, "reportData is nullptr");
 
     if (DiscIsOsAccountConstraint()) {
-        DISC_LOGW(DISC_BROADCAST, "broadcast is constrained, discard device found");
+        DISC_LOGD(DISC_BROADCAST, "broadcast is constrained, discard device found");
         return;
     }
 

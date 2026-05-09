@@ -486,6 +486,36 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
 }
 
 /*
+* @tc.name: TestSendConstraint
+* @tc.desc: test send blocked by account constraint
+* @tc.type: FUNC
+* @tc.require: AR000GIRGE
+*/
+HWTEST_F(GeneralConnectionTest, TestSendConstraint, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test send constraint in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    ASSERT_NE(manager, nullptr);
+    GeneralConnectionParam param = {
+        .pkgName = "testPkgConstraint",
+        .bundleName = "testBundleNameSend",
+        .name = "testConstraint",
+    };
+    param.pid = 0;
+    uint8_t *data = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    EXPECT_NE(data, nullptr);
+    NiceMock<GeneralConnectionInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = manager->send(g_handle, nullptr, sizeof(uint8_t), 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = manager->send(g_handle, data, sizeof(uint8_t), 0);
+    EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+    SoftBusFree(data);
+    CONN_LOGI(CONN_BLE, "test send constraint out");
+}
+
+/*
 * @tc.name: test recv
 * @tc.desc: test recv normal message
 * @tc.type: FUNC

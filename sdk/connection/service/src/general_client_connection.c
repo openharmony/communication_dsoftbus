@@ -31,7 +31,7 @@ const char *g_limitPkgName = "ohos.distributedschedule.dms";
 static bool IsValidListener(IGeneralListener *listener)
 {
     if (listener == NULL || listener->OnAcceptConnect == NULL || listener->OnConnectionStateChange == NULL ||
-        listener->OnDataReceived == NULL || listener->OnServiceDied == NULL) {
+        listener->OnDataReceived == NULL || listener->OnServiceDied == NULL || listener->OnServiceStopped == NULL) {
         CONN_LOGE(CONN_INIT, "invalid listener");
         return false;
     }
