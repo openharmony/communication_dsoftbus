@@ -155,6 +155,7 @@ typedef struct {
     uint8_t peerAddrType;
     uint8_t linkRole;
     uint8_t frameType;
+    uint8_t businessType;
     int8_t txPower;
     bool isSupportRpa;
     uint8_t ownIrk[SOFTBUS_IRK_LEN];
@@ -185,7 +186,7 @@ typedef struct {
     uint8_t *serviceDataMask;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
-    
+
     uint16_t serviceUuidId;
     uint8_t *serviceUuidData;
     uint8_t *serviceUuidDataMask;

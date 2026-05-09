@@ -385,6 +385,7 @@ typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
 typedef bool (*IsHeartbeatEnableForMcuFunc)(void);
 typedef bool (*LnnIsLocalSupportMcuFeatureFunc)(void);
 typedef bool (*LnnIsOsAccountConstraintFunc)(void);
+typedef int8_t (*BleGetAdvPowerFunc)(int32_t businessType);
 
 typedef int32_t (*SendParamsToLpDeviceFunc)(const uint8_t *data, uint32_t dataSize, int32_t type);
 typedef void (*LnnNotifyVirLinkReportEventFunc)(const uint8_t *data, uint32_t dataSize);

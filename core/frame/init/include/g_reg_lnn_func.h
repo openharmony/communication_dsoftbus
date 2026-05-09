@@ -319,6 +319,7 @@ typedef struct TagLnnOpenFuncList {
 
     SendParamsToLpDeviceFunc sendParamsToLpDevice;
     LnnNotifyVirLinkReportEventFunc lnnNotifyVirLinkReportEvent;
+    BleGetAdvPowerFunc bleGetAdvPower;
 } LnnOpenFuncList;
 
 #ifdef __cplusplus

@@ -36,6 +36,7 @@ using namespace testing;
 #define MANUFACTURE_COMPANY_ID  0x027D
 #define SERVICE_UUID            0xFDEE
 #define SRV_TYPE_INVALID        (-1)
+#define INVALID_ADV_POWER       127
 
 namespace OHOS {
 const uint8_t *BASE_FUZZ_DATA = nullptr;
@@ -2749,5 +2750,68 @@ HWTEST_F(SoftbusBroadcastMgrTest, SendParamsToLpDevice002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_BC_MGR_FUNC_NULL);
 
     DISC_LOGI(DISC_TEST, "SendParamsToLpDevice002 end ----");
+}
+
+/*
+ * @tc.name: BleGetAdvPower001
+ * @tc.desc: Test BleGetAdvPower
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BleGetAdvPower001, TestSize.Level1)
+{
+    EXPECT_EQ(INVALID_ADV_POWER, BleGetAdvPower(0x01));
+}
+
+/*
+ * @tc.name: BleGetAdvPower002
+ * @tc.desc: Test BleGetAdvPower
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BleGetAdvPower002, TestSize.Level1)
+{
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftbusBleAdapterInit).WillRepeatedly(ActionOfSoftbusBleAdapterInitNull);
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    EXPECT_EQ(INVALID_ADV_POWER, BleGetAdvPower(0x01));
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+}
+
+static int8_t GetAdvPowerStub(int32_t businessType)
+{
+    (void)businessType;
+    return -1;
+}
+
+static void ActionOfSoftbusBleAdapterInitGetAdvPower()
+{
+    DISC_LOGI(DISC_TEST, "enter");
+    static SoftbusBroadcastMediumInterface interface = {};
+    interface.GetAdvPower = GetAdvPowerStub;
+    if (RegisterBroadcastMediumFunction(BROADCAST_PROTOCOL_BLE, &interface) != 0) {
+        DISC_LOGE(DISC_TEST, "Register gatt interface failed.");
+    }
+}
+
+/*
+ * @tc.name: BleGetAdvPower003
+ * @tc.desc: Test BleGetAdvPower
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, BleGetAdvPower003, TestSize.Level1)
+{
+    ManagerMock managerMock;
+    EXPECT_CALL(managerMock, SoftbusBleAdapterInit).WillRepeatedly(ActionOfSoftbusBleAdapterInitGetAdvPower);
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    EXPECT_EQ(-1, BleGetAdvPower(0x01));
+
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 }
 } // namespace OHOS

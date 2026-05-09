@@ -440,6 +440,7 @@ typedef struct {
     int32_t maxInterval;
     uint8_t linkRole;
     uint8_t frameType;
+    uint8_t businessType;
 } BroadcastParam;
 
 /**
