@@ -59,6 +59,9 @@ if (dsoftbus_feature_lnn_frame) {
     auth_server_src += [ "$authentication_path/src/virtual/auth_identity_service_adapter_virtual.c" ]
     AUTH_SERVER_DEFINES += [ "DISABLE_IDENTITY_SERVICE" ]
   } else {
+    if (!support_jsapi) {
+      AUTH_SERVER_DEFINES += [ "DISABLE_AUTH_DEPS" ]
+    }
     auth_server_src +=
         [ "$authentication_path/src/auth_identity_service_adapter.c" ]
   }
@@ -108,19 +111,26 @@ if (defined(ohos_lite)) {
       [ "$authentication_path/src/auth_hichain_system_ability_monitor.cpp" ]
 }
 
-if (!defined(global_parts_info) ||
-    defined(global_parts_info.deviceprofile_device_info_manager)) {
-  auth_server_src += [
-    "$authentication_path/bind/auth_device_profile_listener.cpp",
-    "$authentication_path/src/auth_deviceprofile.cpp",
-  ]
-  auth_server_inc += [
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-  ]
-} else {
+if (!support_jsapi) {
   auth_server_src += [
     "$authentication_path/bind/auth_device_profile_listener_virtual.cpp",
     "$authentication_path/src/auth_deviceprofile_virtual.cpp",
   ]
+} else {
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.deviceprofile_device_info_manager)) {
+    auth_server_src += [
+      "$authentication_path/bind/auth_device_profile_listener.cpp",
+      "$authentication_path/src/auth_deviceprofile.cpp",
+    ]
+    auth_server_inc += [
+      "$dsoftbus_root_path/core/authentication/interface",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    ]
+  } else {
+    auth_server_src += [
+      "$authentication_path/bind/auth_device_profile_listener_virtual.cpp",
+      "$authentication_path/src/auth_deviceprofile_virtual.cpp",
+    ]
+  }
 }

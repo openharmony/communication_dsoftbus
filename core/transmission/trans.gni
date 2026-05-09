@@ -74,7 +74,9 @@ if (defined(ohos_lite)) {
   ]
 
   trans_session_src += br_proxy_sa_sources
-  trans_session_external_deps += br_proxy_external_deps
+  if (support_jsapi) {
+    trans_session_external_deps += br_proxy_external_deps
+  }
   trans_session_inc +=
   [
     "$dsoftbus_root_path/core/transmission/broadcast/include",

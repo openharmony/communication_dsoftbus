@@ -140,7 +140,7 @@
         "base_group":[],
         "fwk_group":[
           "//foundation/communication/dsoftbus/sdk:softbus_client",
-          "//foundation/communication/dsoftbus/br_proxy:br_proxy",
+          "//foundation/communication/dsoftbus/br_proxy/group:br_proxy",
           "//foundation/communication/dsoftbus/br_proxy/taihe:proxychannelmanager_taihe"
         ],
         "service_group":[
