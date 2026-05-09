@@ -849,8 +849,8 @@ void UpdateGroupShareToDp(
 
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, false, LNN_EVENT, "sessionKey is null");
-    LNN_CHECK_AND_RETURN_RET_LOGE(length != NULL, false, LNN_EVENT, "length is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != nullptr, false, LNN_EVENT, "sessionKey is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(length != nullptr, false, LNN_EVENT, "length is null");
     std::vector<uint8_t> vecSessionKey;
     int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (localUserId < 0) {
@@ -1253,7 +1253,7 @@ static bool CompareAssetAclGroupShare(
 
 int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
 {
-    if (acl == NULL || ukId == NULL || time == NULL) {
+    if (acl == nullptr || ukId == nullptr || time == nullptr) {
         LNN_LOGE(LNN_STATE, "find uk acl is invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

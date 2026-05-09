@@ -75,7 +75,7 @@ char *JSON_PrintUnformatted(const JsonObj *obj)
     }
     std::string jsonString = json->dump();
 
-    char *result = (char *)SoftBusCalloc(jsonString.length() + 1); /* 1 for '\0' */
+    char *result = static_cast<char *>(SoftBusCalloc(jsonString.length() + 1)); /* 1 for '\0' */
     if (result == nullptr) {
         COMM_LOGE(COMM_ADAPTER, "malloc array fail");
         return nullptr;
@@ -303,8 +303,8 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char *key, char **va
         COMM_LOGW(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
         return false;
     }
-    if ((unsigned long)(*len) < (unsigned long)item.size()) {
-        COMM_LOGE(COMM_ADAPTER, "item size invalid, size=%{public}lu.", (unsigned long)item.size());
+    if (static_cast<unsigned long>(*len) < static_cast<unsigned long>(item.size())) {
+        COMM_LOGE(COMM_ADAPTER, "item size invalid, size=%{public}lu.", static_cast<unsigned long>(item.size()));
         return false;
     }
     for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {

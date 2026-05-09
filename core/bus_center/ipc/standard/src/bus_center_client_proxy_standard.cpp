@@ -655,7 +655,7 @@ void BusCenterClientProxy::OnMsdpRangeResult(const RangeResultInnerInfo *rangeIn
         LNN_LOGE(LNN_EVENT, "write range info failed");
         return;
     }
-    if (rangeInfo->length > 0 && rangeInfo->length < MAX_ADDITION_DATA_LEN && rangeInfo->addition != NULL) {
+    if (rangeInfo->length > 0 && rangeInfo->length < MAX_ADDITION_DATA_LEN && rangeInfo->addition != nullptr) {
         if (!data.WriteRawData(rangeInfo->addition, rangeInfo->length)) {
             LNN_LOGE(LNN_EVENT, "write range info failed");
             return;

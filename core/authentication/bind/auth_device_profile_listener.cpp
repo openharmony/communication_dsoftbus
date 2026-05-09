@@ -56,12 +56,12 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileAdd(const TrustDeviceProf
         AUTH_LOGI(AUTH_INIT, "ignore same account udid");
         return SOFTBUS_OK;
     }
-    if (g_deviceProfileChange.onDeviceProfileAdd == NULL) {
+    if (g_deviceProfileChange.onDeviceProfileAdd == nullptr) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileAdd failed!");
         return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
     DelNotTrustDevice(profile.GetDeviceId().c_str());
-    g_deviceProfileChange.onDeviceProfileAdd(profile.GetDeviceId().c_str(), NULL);
+    g_deviceProfileChange.onDeviceProfileAdd(profile.GetDeviceId().c_str(), nullptr);
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileAdd success!");
     return SOFTBUS_OK;
 }
@@ -74,7 +74,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
-    if (g_deviceProfileChange.onDeviceProfileDeleted == NULL) {
+    if (g_deviceProfileChange.onDeviceProfileDeleted == nullptr) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete failed!");
         return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }

@@ -142,8 +142,8 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
         SetSoftBusWifiP2pConnState(code, &state);
     }
     if (state != SOFTBUS_WIFI_UNKNOWN) {
-        SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
-        if (notifyState == NULL) {
+        SoftBusWifiState *notifyState = static_cast<SoftBusWifiState *>(SoftBusMalloc(sizeof(SoftBusWifiState)));
+        if (notifyState == nullptr) {
             LNN_LOGE(LNN_EVENT, "notifyState malloc err");
             return;
         }
@@ -233,8 +233,8 @@ int32_t SubscribeEvent::SubscribeWifiP2pConnStateEvent()
 
 static void UpdateLocalWifiActiveCapability(void)
 {
-    SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
-    if (notifyState == NULL) {
+    SoftBusWifiState *notifyState = static_cast<SoftBusWifiState *>(SoftBusMalloc(sizeof(SoftBusWifiState)));
+    if (notifyState == nullptr) {
         LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
         return;
     }
@@ -254,8 +254,8 @@ static void UpdateLocalWifiActiveCapability(void)
 
 static void UpdateLocalWifiConnCapability(void)
 {
-    SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
-    if (notifyState == NULL) {
+    SoftBusWifiState *notifyState = static_cast<SoftBusWifiState *>(SoftBusMalloc(sizeof(SoftBusWifiState)));
+    if (notifyState == nullptr) {
         LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
         return;
     }
@@ -304,7 +304,7 @@ static void LnnSubscribeWifiService(void *para)
         LNN_LOGE(LNN_BUILDER, "subscribe wifiservice event fail");
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, DELAY_LEN) != SOFTBUS_OK) {
+        if (LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, nullptr, DELAY_LEN) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "LnnAsyncCallbackDelayHelper fail");
         }
     }
@@ -314,7 +314,7 @@ static void LnnSubscribeWifiService(void *para)
 int32_t LnnInitWifiServiceMonitorImpl(void)
 {
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, NULL, DELAY_LEN);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnSubscribeWifiService, nullptr, DELAY_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
     }

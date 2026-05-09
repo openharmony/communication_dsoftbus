@@ -53,7 +53,7 @@ void ServiceStatusMonitorManager::SaStatusListener::OnAddSystemAbility(int32_t s
     int32_t ret;
     switch (saId) {
         case WIFI_DEVICE_SYS_ABILITY_ID:
-            ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWifiServiceStart, NULL);
+            ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWifiServiceStart, nullptr);
             if (ret != SOFTBUS_OK) {
                 LNN_LOGE(LNN_EVENT, "async notify fail, ret=%{public}d", ret);
             }
@@ -180,7 +180,7 @@ static void InitSaStatusMonitor(void *para)
     int32_t ret = RegisterWifiService();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "register wifi service fail, ret=%{public}d, retryTimes=%{public}u", ret, retryTimes);
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitSaStatusMonitor, NULL, DELAY_LEN);
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitSaStatusMonitor, nullptr, DELAY_LEN);
         retryTimes++;
         return;
     }
@@ -193,7 +193,7 @@ static void InitSaStatusMonitor(void *para)
 
 void LnnInitSaStatusMonitor(void)
 {
-    int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitSaStatusMonitor, NULL, 0);
+    int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), InitSaStatusMonitor, nullptr, 0);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "async delay call fail, ret=%{public}d", ret);
         return;

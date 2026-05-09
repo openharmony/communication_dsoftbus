@@ -288,7 +288,7 @@ void BrProxyRegisterBtPermissionChangeCb(PermissionChangeCb cb)
 int32_t SoftBusGetAccessTokenType(uint64_t tokenId)
 {
     auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
-    return (int32_t)tokenType;
+    return static_cast<int32_t>(tokenType);
 }
 
 void SoftBusGetTokenNameByTokenType(
@@ -402,7 +402,7 @@ bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
 // only native services can be called.
 int32_t SoftBusGetNativeProcessName(uint64_t tokenId, char *processName, int32_t processNameLen)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(processName != NULL, SOFTBUS_INVALID_PARAM, COMM_ADAPTER, "invalid param");
+    COMM_CHECK_AND_RETURN_RET_LOGE(processName != nullptr, SOFTBUS_INVALID_PARAM, COMM_ADAPTER, "invalid param");
     NativeTokenInfo tokenInfo;
     int32_t ret = AccessTokenKit::GetNativeTokenInfo(tokenId, tokenInfo);
     COMM_CHECK_AND_RETURN_RET_LOGE(
