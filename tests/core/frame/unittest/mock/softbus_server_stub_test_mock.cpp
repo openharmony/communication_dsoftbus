@@ -136,5 +136,16 @@ bool LnnIsOsAccountConstraint(void)
     }
     return GetSoftbusServerStubTestInterface()->LnnIsOsAccountConstraint();
 }
+
+int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const char *serviceId)
+{
+    return GetSoftbusServerStubTestInterface()->LnnIpcStartAccountAuth(pkgName, pid, requestId, serviceId);
+}
+
+int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const uint8_t *data,
+    uint32_t dataLen)
+{
+    return GetSoftbusServerStubTestInterface()->LnnIpcProcessAccountAuth(pkgName, pid, requestId, data, dataLen);
+}
 }
 }

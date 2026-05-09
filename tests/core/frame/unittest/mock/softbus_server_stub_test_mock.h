@@ -62,6 +62,10 @@ public:
     virtual int32_t CheckLnnPermission(const char *interfaceName, const char *processName) = 0;
     virtual int32_t UnregChangeListener(const char *appId) = 0;
     virtual bool LnnIsOsAccountConstraint(void) = 0;
+    virtual int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t requestId,
+        const char *serviceId) = 0;
+    virtual int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t requestId,
+        const uint8_t *data, uint32_t dataLen) = 0;
 };
 class SoftbusServerStubTestInterfaceMock : public SoftbusServerStubTestInterface {
 public:
@@ -94,6 +98,8 @@ public:
     MOCK_METHOD2(CheckLnnPermission, int32_t (const char *interfaceName, const char *processName));
     MOCK_METHOD1(UnregChangeListener, int32_t (const char *appId));
     MOCK_METHOD0(LnnIsOsAccountConstraint, bool (void));
+    MOCK_METHOD4(LnnIpcStartAccountAuth, int32_t (const char *, int32_t, int64_t, const char *));
+    MOCK_METHOD5(LnnIpcProcessAccountAuth, int32_t (const char *, int32_t, int64_t, const uint8_t *, uint32_t));
 };
 }
 

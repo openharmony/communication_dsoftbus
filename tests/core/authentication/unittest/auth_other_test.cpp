@@ -1169,6 +1169,8 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.
     EXPECT_CALL(connMock, ConnStopLocalListening).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnStartLocalListening).WillRepeatedly(Return(0));
     EXPECT_NO_FATAL_FAILURE(AuthStopListeningForWifiDirect(AUTH_LINK_TYPE_P2P, AUTH_ENHANCED_P2P_START));
+    AuthTcpConnectionInterfaceMock tcpConnMock;
+    EXPECT_CALL(tcpConnMock, SocketGetConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     AuthDataHead head;
     const uint8_t data[TEST_DATA_LEN] = { 0 };
     (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
