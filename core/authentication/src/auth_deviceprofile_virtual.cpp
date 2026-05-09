@@ -16,7 +16,6 @@
 #include "auth_deviceprofile.h"
 
 extern "C" {
-
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint)
 {
     (void)deviceIdHash;
@@ -139,7 +138,7 @@ bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
 }
 
 void UpdateGroupShareToDp(SoftBusAclInfo *peerAclInfo, int32_t creIdType,
-                         SessionKey sessionKey, bool isNeedUpdateDk)
+                          SessionKey sessionKey, bool isNeedUpdateDk)
 {
     (void)peerAclInfo;
     (void)creIdType;
