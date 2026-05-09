@@ -608,35 +608,6 @@ void TransFreeAppInfo(AppInfo *appInfo)
     SoftBusFree(appInfo);
 }
 
-void TransFreeSessionParam(SessionParam *param)
-{
-    if (param == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param.");
-        return;
-    }
-    if (param->sessionName != NULL) {
-        SoftBusFree((void *)(param->sessionName));
-        param->sessionName = NULL;
-    }
-    if (param->peerSessionName != NULL) {
-        SoftBusFree((void *)(param->peerSessionName));
-        param->peerSessionName = NULL;
-    }
-    if (param->peerDeviceId != NULL) {
-        SoftBusFree((void *)(param->peerDeviceId));
-        param->peerDeviceId = NULL;
-    }
-    if (param->groupId != NULL) {
-        SoftBusFree((void *)(param->groupId));
-        param->groupId = NULL;
-    }
-    if (param->attr != NULL) {
-        SoftBusFree((void *)(param->attr));
-        param->attr = NULL;
-    }
-    SoftBusFree((void *)param);
-}
-
 void TransFreeLane(uint32_t laneHandle, bool isQosLane, bool isAsync)
 {
     TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d, isAsync=%{public}d",

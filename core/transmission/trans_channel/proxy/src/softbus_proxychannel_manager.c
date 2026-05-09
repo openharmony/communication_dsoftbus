@@ -409,25 +409,6 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-int32_t TransRefreshProxyTimesNative(int32_t channelId)
-{
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
-
-    ProxyChannelInfo *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->myId == channelId) {
-            item->timeout = 0;
-            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return SOFTBUS_TRANS_NODE_NOT_FOUND;
-}
-
 static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && chan != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL,

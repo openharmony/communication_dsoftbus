@@ -612,41 +612,6 @@ void TransProxyGetNameByChanIdTest(FuzzedDataProvider &provider)
     TransProxyDelChanByChanId(chanId);
 }
 
-void TransRefreshProxyTimesNativeTest(const uint8_t *data, size_t size)
-{
-    if (data == nullptr || size < sizeof(int32_t)) {
-        return;
-    }
-    DataGenerator::Write(data, size);
-    int32_t channelId = 0;
-    GenerateInt32(channelId);
-
-    (void)TransRefreshProxyTimesNative(channelId);
-    DataGenerator::Clear();
-}
-
-void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
-{
-    int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    FillAppInfo(provider, &appInfo);
-    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
-    char data[UINT8_MAX] = { 0 };
-    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
-        return;
-    }
-    appInfo.fastTransData = (uint8_t *)data;
-    appInfo.fastTransDataSize = UINT8_MAX;
-
-    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    proxyChannelInfo->channelId = channelId;
-    (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
-
-    (void)TransRefreshProxyTimesNative(channelId);
-    TransProxyDelChanByChanId(channelId);
-}
-
 void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
 {
     uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
@@ -1024,7 +989,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyChanProcessByReqIdTest(provider);
     OHOS::TransProxyGetAuthIdTest(provider);
     OHOS::TransProxyGetNameByChanIdTest(provider);
-    OHOS::TransRefreshProxyTimesNativeTest(provider);
     OHOS::TransProxyDeathCallbackTest(provider);
     OHOS::TransProxyGetAppInfoByChanIdTest(provider);
     OHOS::TransProxyGetConnIdByChanIdTest(provider);

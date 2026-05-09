@@ -82,8 +82,6 @@ int32_t TransCheckServerPermission(const char *mySessionName, const char *peerSe
 
 bool TransCheckMetaTypeQueryPermission(const char *pkgName, int32_t metaType);
 
-void TransFreeSessionParam(SessionParam *param);
-
 int32_t TransSetWakeUpInfo(int32_t channelType, int32_t channelId, bool needFastWakeUp);
 
 int32_t TransGetWakeUpInfo(int32_t channelType, int32_t channelId, char *uuid, int32_t uuidLen, bool *needFastWakeUp);

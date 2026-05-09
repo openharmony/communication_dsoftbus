@@ -1496,35 +1496,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateAckInfoTest001, TestSiz
 }
 
 /*@
- * @tc.name: TransProxyDelByConnIdTest003
- * @tc.desc: test proxy del proxy channel by connId
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest003, TestSize.Level1)
-{
-    int32_t channelId = 1;
-
-    int32_t ret = TransRefreshProxyTimesNative(channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == nullptr) {
-        return;
-    }
-    info->myId = 1;
-    ret = TransProxyAddChanItem(info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransRefreshProxyTimesNative(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    LnnEventBasicInfo lnnInfo;
-    TransWifiStateChange(nullptr);
-    TransWifiStateChange(&lnnInfo);
-}
-
-/*@
  * @tc.name: TransProxyDelByConnIdTest004
  * @tc.desc: test proxy del by connId
  * @tc.type: FUNC

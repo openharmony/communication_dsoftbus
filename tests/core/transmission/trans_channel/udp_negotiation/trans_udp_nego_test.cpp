@@ -715,34 +715,6 @@ HWTEST_F(TransUdpNegoTest, PrepareAppInfoForUdpOpen001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransUdpNodeOffLineProc001
- * @tc.desc: test TransUdpNodeOffLineProc
- *           Transmission udp Exchange UdpInfo requset
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransUdpNegoTest, TransUdpNodeOffLineProc001, TestSize.Level1)
-{
-    LnnEventBasicInfo *empty = nullptr;
-    LnnEventBasicInfo *info = (LnnEventBasicInfo*)SoftBusCalloc(sizeof(LnnEventBasicInfo));
-    ASSERT_TRUE(info != nullptr);
-    info->event = LNN_EVENT_WLAN_PARAM;
-    TransUdpNodeOffLineProc(empty);
-
-    TransUdpNodeOffLineProc(info);
-
-    int32_t ret = TransUdpChannelMgrInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    LnnEventBasicInfo tmpLnnEventBasicInfo = {
-    .event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
-    };
-    TransUdpNodeOffLineProc(&tmpLnnEventBasicInfo);
-
-    SoftBusFree(info);
-}
-
-/*
  * @tc.name: NotifyUdpChannelOpened001
  * @tc.desc: test NotifyUdpChannelOpened
  *           Trans notify udo channel opened

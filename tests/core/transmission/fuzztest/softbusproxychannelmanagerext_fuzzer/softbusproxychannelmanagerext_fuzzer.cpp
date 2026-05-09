@@ -209,41 +209,6 @@ void TransPagingBadKeyRetryTest(FuzzedDataProvider &provider)
     (void)TransProxyDelByChannelId(channelId, &tmpInfo);
 }
 
-void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
-{
-    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    if (info == nullptr) {
-        return;
-    }
-    int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    AppInfo appInfo;
-    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    FillAppInfo(provider, &appInfo);
-    (void)TransRefreshProxyTimesNative(info->channelId);
-    (void)TransProxySpecialUpdateChanInfo(info);
-    (void)TransProxyGetChanByChanId(info->channelId, info);
-    (void)TransProxyGetChanByReqId(info->reqId, info);
-    AccessInfo accessInfo;
-    (void)memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
-    (void)TransProxyUpdateSinkAccessInfo(info->channelId, &accessInfo);
-    accessInfo.localTokenId = provider.ConsumeIntegral<uint64_t>();
-    (void)TransProxyUpdateSinkAccessInfo(info->channelId, &accessInfo);
-    int32_t errCode = provider.ConsumeIntegral<int32_t>();
-    int32_t reqId = provider.ConsumeIntegral<int32_t>();
-
-    (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
-    (void)TransRefreshProxyTimesNative(info->channelId);
-    (void)TransProxySpecialUpdateChanInfo(info);
-    (void)TransProxyGetChanByChanId(info->channelId, info);
-    (void)TransProxyGetChanByReqId(info->reqId, info);
-    (void)TransProxyUpdateSinkAccessInfo(info->channelId, &accessInfo);
-    (void)TransProxyDelChanByReqId(reqId, errCode);
-    (void)TransProxyDelChanByReqId(info->reqId, errCode);
-    ProxyChannelInfo tmpInfo;
-    (void)memset_s(&tmpInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
-    (void)TransProxyDelByChannelId(channelId, &tmpInfo);
-}
-
 void TransProxyDelChanByChanIdTest(FuzzedDataProvider &provider)
 {
     ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -857,7 +822,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransPagingUpdatePagingChannelInfoTest(provider);
     OHOS::TransPagingUpdatePidAndDataTest(provider);
     OHOS::TransPagingBadKeyRetryTest(provider);
-    OHOS::TransRefreshProxyTimesNativeTest(provider);
     OHOS::TransProxyDelChanByChanIdTest(provider);
     OHOS::TransProxyGetSendMsgChanInfoTest(provider);
     OHOS::TransProxyProcessErrMsgTest(provider);

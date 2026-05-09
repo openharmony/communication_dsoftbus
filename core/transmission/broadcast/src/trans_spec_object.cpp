@@ -99,9 +99,4 @@ int32_t TransSpecObject::TransProxySendMetaCtrlData(int32_t socketId, const Meta
 {
     return SOFTBUS_NOT_IMPLEMENT;
 }
-
-int32_t TransCheckUidAndPid(pid_t callingUid, pid_t callingPid, const MetaCustomData *customData)
-{
-    return SOFTBUS_NOT_IMPLEMENT;
-}
 }
