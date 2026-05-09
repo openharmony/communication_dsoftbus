@@ -114,4 +114,30 @@ HWTEST_F(SoftbusTimeTest, SoftBusGetRealTime001, TestSize.Level1)
     int32_t ret = SoftBusGetRealTime(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/*
+ * @tc.name: SoftBusGetCalendarTime001
+ * @tc.desc: SoftBusGetCalendarTime returns timestamp greater than zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTimeTest, SoftBusGetCalendarTime001, TestSize.Level1)
+{
+    uint64_t timestamp = SoftBusGetCalendarTime();
+    EXPECT_GT(timestamp, 0ULL);
+}
+
+/*
+ * @tc.name: SoftBusGetCalendarTime002
+ * @tc.desc: SoftBusGetCalendarTime returns increasing timestamps
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTimeTest, SoftBusGetCalendarTime002, TestSize.Level1)
+{
+    uint64_t timestamp1 = SoftBusGetCalendarTime();
+    usleep(1000);
+    uint64_t timestamp2 = SoftBusGetCalendarTime();
+    EXPECT_GE(timestamp2, timestamp1);
+}
 } // namespace OHOS

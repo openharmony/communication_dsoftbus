@@ -130,7 +130,7 @@ void LnnTimeSyncImplDeinitPacked(void);
 int32_t LnnTimeChangeNotifyPacked(void);
 
 void SendDeviceStateToMlpsPacked(void *para);
-int32_t LnnUpdateLastAccLoginTimestampByUdidPacked(uint64_t timestamp ,const char *udid);
+int32_t LnnUpdateLastAccLoginTimestampByUdidPacked(uint64_t timestamp, const char *udid);
 int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info);
 void SetLpKeepAliveStatePacked(void *para);
 int32_t LnnSetRemoteBroadcastCipherInfoPacked(const char *value, const char *udid);

@@ -250,7 +250,7 @@ typedef int32_t (*AuthInsertDeviceKeyFunc)(const NodeInfo *deviceInfo,
                                            const AuthDeviceKeyInfo *deviceKey, AuthLinkType type);
 typedef void (*AuthUpdateKeyIndexFunc)(const char *udidHash, int32_t keyType, int64_t index, bool isServer);
 typedef bool (*CalcHKDFFunc)(const uint8_t *ikm, uint32_t ikmLen, uint8_t *out, uint32_t outLen);
-typedef int32_t (*LnnUpdateLastAccLoginTimestampByUdidFunc)(uint64_t timestamp ,const char *udid);
+typedef int32_t (*LnnUpdateLastAccLoginTimestampByUdidFunc)(uint64_t timestamp, const char *udid);
 typedef int32_t (*LnnRetrieveDeviceInfoByUdidFunc)(const char *udid, NodeInfo *deviceInfo);
 typedef int32_t (*LnnSyncBleOfflineMsgFunc)(void);
 typedef int32_t (*LnnInitBroadcastLinkKeyFunc)(void);

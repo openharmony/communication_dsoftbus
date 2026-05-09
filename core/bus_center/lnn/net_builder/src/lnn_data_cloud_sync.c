@@ -20,7 +20,6 @@
 #include "anonymizer.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "legacy/softbus_hisysevt_bus_center.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
@@ -30,6 +29,7 @@
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_utils.h"
 
 #define APPID                "dsoftbus"
@@ -978,7 +978,7 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck to cache info fail");
     }
-    oldInfo->lastAccLoginTimestamp = (uint64_t)LnnUpTimeMs();
+    oldInfo->lastCommTimestamp = SoftBusGetCalendarTime();
     UpdateDevBasicInfoToCache(newInfo, oldInfo);
     return SOFTBUS_OK;
 }

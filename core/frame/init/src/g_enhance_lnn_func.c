@@ -187,6 +187,7 @@ void Register4thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnUpdateLinkFinderInfo = dlsym(soHandle, "LnnUpdateLinkFinderInfo");
     g_lnnEnhanceFuncList.lnnRemoveLinkFinderInfo = dlsym(soHandle, "LnnRemoveLinkFinderInfo");
     g_lnnEnhanceFuncList.lnnInsertLinkFinderInfo = dlsym(soHandle, "LnnInsertLinkFinderInfo");
+    g_lnnEnhanceFuncList.lnnUpdateLastAccLoginTimestampByUdid = dlsym(soHandle, "LnnUpdateLastAccLoginTimestampByUdid");
     g_lnnEnhanceFuncList.registerOOBEMonitor = dlsym(soHandle, "RegisterOOBEMonitor");
     g_lnnEnhanceFuncList.lnnInitOOBEStateMonitorImpl = dlsym(soHandle, "LnnInitOOBEStateMonitorImpl");
     g_lnnEnhanceFuncList.lnnGetOOBEState = dlsym(soHandle, "LnnGetOOBEState");

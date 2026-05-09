@@ -958,7 +958,7 @@ int32_t LnnRemoveLinkFinderInfoPacked(const char *networkId)
     return pfnLnnEnhanceFuncList->lnnRemoveLinkFinderInfo(networkId);
 }
 
-int32_t LnnUpdateLastAccLoginTimestampByUdidPacked(uint64_t timestamp ,const char *udid)
+int32_t LnnUpdateLastAccLoginTimestampByUdidPacked(uint64_t timestamp, const char *udid)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnUpdateLastAccLoginTimestampByUdid) != SOFTBUS_OK) {
