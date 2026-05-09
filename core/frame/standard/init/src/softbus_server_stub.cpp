@@ -36,12 +36,12 @@
 
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_proxy.h"
-#include "g_enhance_trans_func_pack.h"
 #include "iservice_registry.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
 #include "system_ability_definition.h"
 #endif
+#include "g_enhance_trans_func_pack.h"
 
 #define SERVER_JOIN_LNN_NAME "SERVER_JOIN_LNN"
 #define SERVER_LEAVE_LNN_NAME "SERVER_LEAVE_LNN"

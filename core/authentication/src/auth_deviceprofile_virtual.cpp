@@ -15,6 +15,7 @@
 
 #include "auth_deviceprofile.h"
 
+extern "C" {
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint)
 {
     (void)deviceIdHash;
@@ -96,7 +97,7 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
 }
 
 void UpdateAssetSessionKeyByAcl(
-    AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount)
+    AuthACLInfo *info, uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount)
 {
     (void)info;
     (void)sessionKey;
@@ -135,3 +136,23 @@ bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
     (void)peerUdid;
     return false;
 }
+
+void UpdateGroupShareToDp(SoftBusAclInfo *peerAclInfo, int32_t creIdType,
+                          SessionKey sessionKey, bool isNeedUpdateDk)
+{
+    (void)peerAclInfo;
+    (void)creIdType;
+    (void)sessionKey;
+    (void)isNeedUpdateDk;
+}
+
+int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId,
+                                  uint64_t *time)
+{
+    (void)acl;
+    (void)ukId;
+    (void)time;
+    return SOFTBUS_AUTH_UK_NOT_FIND;
+}
+
+} // extern "C"

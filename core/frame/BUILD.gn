@@ -455,6 +455,13 @@ if (defined(ohos_lite)) {
           "safwk:system_ability_fwk",
           "samgr:samgr_proxy",
         ]
+        if (!support_jsapi) {
+          external_deps -= [
+            "kv_store:distributeddata_inner",
+            "netmanager_base:net_conn_manager_if",
+            "os_account:os_account_innerkits",
+          ]
+        }
         if (dsoftbus_access_token_feature) {
           external_deps += [
             "access_token:libaccesstoken_sdk",
