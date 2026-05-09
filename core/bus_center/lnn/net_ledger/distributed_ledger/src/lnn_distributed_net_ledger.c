@@ -1425,6 +1425,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         return REPORT_NONE;
     }
     info->onlineTimestamp = (uint64_t)LnnUpTimeMs();
+    info->lastAccLoginTimestamp = (uint64_t)LnnUpTimeMs();
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
         AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
@@ -1678,6 +1679,8 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     info->offlineTimestamp = (uint64_t)LnnUpTimeMs();
+    info->lastAccLoginTimestamp = (uint64_t)LnnUpTimeMs();
+    LnnUpdateLastAccLoginTimestampByUdidPacked(info->lastAccLoginTimestamp, udid);
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     LNN_LOGI(LNN_LEDGER, "need to report offline");
     DfxRecordLnnSetNodeOfflineEnd(udid, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
@@ -1926,6 +1929,7 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck fail");
     }
+    oldInfo->lastAccLoginTimestamp = (uint64_t)LnnUpTimeMs();
     UpdateDevBasicInfoToDLedger(newInfo, oldInfo);
 }
 
