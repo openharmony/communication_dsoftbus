@@ -309,6 +309,18 @@ int32_t SchedulerSetScanReportChannelToLpDevice(int32_t listenerId, bool enable)
 int32_t SchedulerSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
     int32_t interval, int32_t bcHandle);
 
+/**
+ * @brief get adv power parameters.
+ *
+ * @param businessType Indicates business type.
+ *
+ * @return Returns adv power.
+ *
+ * @since 7.0
+ * @version 1.0
+ */
+int8_t SchedulerGetAdvPower(int32_t businessType);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

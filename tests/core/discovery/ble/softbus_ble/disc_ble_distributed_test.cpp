@@ -19,6 +19,8 @@
 #include "disc_ble.c"
 #include "disc_log.h"
 #include "message_handler.h"
+#include "softbus_ble_gatt_public.h"
+#include "softbus_broadcast_adapter_interface.h"
 #include "softbus_broadcast_utils.h"
 #include "softbus_error_code.h"
 
@@ -434,6 +436,13 @@ HWTEST_F(DiscDistributedBleTest, GetNonDeviceInfo002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetNonDeviceInfo002, End");
 }
 
+int8_t g_advPower;
+static int8_t BleGetAdvPowerStub(int32_t businessType)
+{
+    (void)businessType;
+    return g_advPower;
+}
+
 /*
  * @tc.name: GetBroadcastData001
  * @tc.desc: Test GetBroadcastData should return SOFTBUS_OK when given CON_ADV_ID and NON_ADV_ID advId
@@ -456,10 +465,23 @@ HWTEST_F(DiscDistributedBleTest, GetBroadcastData001, TestSize.Level1)
     ret = GetBroadcastData(&advertiser, advId, &broadcastDataTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
+    static SoftbusBroadcastMediumInterface interface = {};
+    interface.GetAdvPower = BleGetAdvPowerStub;
+    ret = RegisterBroadcastMediumFunction(BROADCAST_PROTOCOL_BLE, &interface);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    g_advPower = 127;
     advId = NON_ADV_ID;
+    advertiser.deviceInfo.range = 1;
     ret = GetBroadcastData(&advertiser, advId, &broadcastDataTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
+    g_advPower = 3;
+    ret = GetBroadcastData(&advertiser, advId, &broadcastDataTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    
+    SoftbusBleAdapterDeInit();
+    SoftbusBleAdapterInit();
     DiscSoftBusBleDeinit();
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetBroadcastData001, End");
 }

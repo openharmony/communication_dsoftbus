@@ -140,6 +140,7 @@ void SoftbusAdvParamToBt(const SoftbusBroadcastParam *src, BleAdvParams *dst)
     dst->advFilterPolicy = SoftbusAdvFilterToBt(src->advFilterPolicy);
     dst->txPower = src->txPower;
     dst->duration = src->duration;
+    dst->appType = (BleApplicationType)src->businessType;
 }
 
 static uint8_t BtScanEventTypeToSoftbus(unsigned char eventType)

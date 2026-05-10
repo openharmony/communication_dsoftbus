@@ -54,6 +54,8 @@ ohos_unittest("DiscDistributedBleTest") {
     "$softbus_adapter_common/include",
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$softbus_adapter_common/net/bluetooth/include",
+    "$softbus_adapter_common/net/bluetooth/broadcast/adapter/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
   ]
 
   deps = [

@@ -46,6 +46,7 @@
 #define BC_WAIT_TIME_MICROSEC            (BC_WAIT_TIME_MS * MGR_TIME_THOUSAND_MULTIPLIER)
 #define MAX_FILTER_SIZE                  33
 #define REGISTER_INFO_MANAGER            "registerInfoMgr"
+#define INVALID_ADV_POWER                127
 
 typedef struct {
     bool isAdapterScanCbReg;
@@ -1920,6 +1921,7 @@ static void ConvertBcParams(BroadcastProtocol protocol,
     dstParam->isSupportRpa = srcParam->isSupportRpa;
     dstParam->linkRole = srcParam->linkRole;
     dstParam->frameType = srcParam->frameType;
+    dstParam->businessType = srcParam->businessType;
     if (memcpy_s(dstParam->ownIrk, SOFTBUS_IRK_LEN, srcParam->ownIrk, BC_IRK_LEN) != EOK) {
         DISC_LOGE(DISC_BROADCAST, "memcpy ownIrk failed");
         return;
@@ -3125,6 +3127,16 @@ int32_t BroadcastSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "call from adapter failed");
 
     return SOFTBUS_OK;
+}
+
+int8_t BleGetAdvPower(int32_t businessType)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[BROADCAST_PROTOCOL_BLE] != NULL, INVALID_ADV_POWER,
+        DISC_BROADCAST, "interface is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[BROADCAST_PROTOCOL_BLE]->GetAdvPower != NULL,
+        INVALID_ADV_POWER, DISC_BROADCAST, "function is nullptr");
+
+    return g_interface[BROADCAST_PROTOCOL_BLE]->GetAdvPower(businessType);
 }
 
 static int32_t RegisterInfoDump(int fd)

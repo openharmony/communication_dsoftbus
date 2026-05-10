@@ -348,6 +348,18 @@ int32_t BroadcastSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_
 
 int32_t SendParamsToLpDevice(const uint8_t *data, uint32_t dataSize, int32_t type);
 
+/**
+ * @brief get adv power parameters.
+ *
+ * @param businessType Indicates business type.
+ *
+ * @return Returns adv power.
+ *
+ * @since 7.0
+ * @version 1.0
+ */
+int8_t BleGetAdvPower(int32_t businessType);
+
 #ifdef __cplusplus
 }
 #endif

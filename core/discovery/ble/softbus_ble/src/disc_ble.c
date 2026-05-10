@@ -84,6 +84,9 @@
 #define BlE_ADVERTISER "bleAdvertiser"
 #define RECV_MESSAGE_INFO "recvMessageInfo"
 
+#define BLE_RANGING_APPROACH    0x02
+#define INVALID_ADV_POWER       127
+
 typedef enum {
     CON_FILTER_TYPE = 1,
     NON_FILTER_TYPE = 2,
@@ -982,8 +985,8 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
     (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
 #ifdef DISC_COMMUNITY
     if (info->range > 0) {
-        int8_t power = 0;
-        if (SoftBusGetBlePowerPacked(&power) == SOFTBUS_OK) {
+        int8_t power = SchedulerGetAdvPower(BLE_RANGING_APPROACH);
+        if (power != INVALID_ADV_POWER) {
             (void)AssembleTLV(broadcastData, TLV_TYPE_RANGE_POWER, (const void *)&power, RANGE_POWER_TYPE_LEN);
         }
     }
@@ -1096,6 +1099,7 @@ static void BuildAdvParam(BroadcastParam *advParam)
     advParam->peerAddrType = SOFTBUS_BC_PUBLIC_DEVICE_ADDRESS;
     advParam->channelMap = BLE_CHANNLE_MAP;
     advParam->txPower = BLE_ADV_TX_POWER_DEFAULT;
+    advParam->businessType = BLE_RANGING_APPROACH;
     (void)memset_s(advParam->localAddr.addr, BC_ADDR_MAC_LEN, 0, BC_ADDR_MAC_LEN);
 }
 
