@@ -32,6 +32,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_ohos_account.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 
 DistributedNetLedger g_distributedNetLedger;
@@ -1425,6 +1426,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         return REPORT_NONE;
     }
     info->onlineTimestamp = (uint64_t)LnnUpTimeMs();
+    info->lastCommTimestamp = SoftBusGetCalendarTime();
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
         AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
@@ -1638,7 +1640,7 @@ static void LnnClearIpInfo(NodeInfo *info, ConnectionAddrType type)
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
-
+    uint64_t lastCommTimestamp = 0;
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
@@ -1678,7 +1680,10 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     info->offlineTimestamp = (uint64_t)LnnUpTimeMs();
+    lastCommTimestamp = SoftBusGetCalendarTime();
+    info->lastCommTimestamp = lastCommTimestamp;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    LnnUpdateLastAccLoginTimestampByUdidPacked(lastCommTimestamp, udid);
     LNN_LOGI(LNN_LEDGER, "need to report offline");
     DfxRecordLnnSetNodeOfflineEnd(udid, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
     return REPORT_OFFLINE;
@@ -1926,6 +1931,7 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck fail");
     }
+    oldInfo->lastCommTimestamp = SoftBusGetCalendarTime();
     UpdateDevBasicInfoToDLedger(newInfo, oldInfo);
 }
 

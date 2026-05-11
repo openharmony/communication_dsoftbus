@@ -113,6 +113,16 @@ int32_t SoftBusGetRealTime(SoftBusSysTime *sysTime)
     return SOFTBUS_OK;
 }
 
+uint64_t SoftBusGetCalendarTime(void)
+{
+    struct timespec time = {0};
+    if (clock_gettime(CLOCK_REALTIME, &time) != 0) {
+        COMM_LOGE(COMM_ADAPTER, "get calendar time fail");
+        return 0;
+    }
+    return (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_nsec / (US_PER_MSECOND * NS_PER_USECOND);
+}
+
 uint64_t SoftBusGetSysTimeMs(void)
 {
     struct timeval time;
