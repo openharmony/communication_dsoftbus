@@ -135,6 +135,10 @@ HWTEST_F(ClientConnectionTest, RegisterListenerTest, TestSize.Level0)
 
     listener.OnServiceDied = OnServiceDied;
     ret = GeneralRegisterListener(&listener);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    listener.OnServiceStopped = OnServiceStopped;
+    ret = GeneralRegisterListener(&listener);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = GeneralUnregisterListener();

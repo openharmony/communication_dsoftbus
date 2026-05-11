@@ -1249,6 +1249,24 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnDataReceivedInnerTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnDataReceivedInner(data, reply), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: OnServerStoppedInner
+ * @tc.desc: OnServerStoppedInner, MessageParcel failed return SOFTBUS_IPC_ERR
+ * @tc.desc: OnServerStoppedInner, success return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnServerStoppedInnerTest, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnServerStoppedInner(data, reply), SOFTBUS_IPC_ERR);
+
+    data.WriteCString("OnServerStoppedInnerTest");
+    EXPECT_EQ(g_stub->OnServerStoppedInner(data, reply), SOFTBUS_OK);
+}
+
 static int32_t testCallback(void)
 {
 static int32_t cnt = 0;

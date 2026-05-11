@@ -421,7 +421,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
     DISC_CHECK_AND_RETURN_LOGE(device != NULL, DISC_CONTROL, "device is null");
     DISC_CHECK_AND_RETURN_LOGE(additions != NULL, DISC_CONTROL, "additions is null");
     if (DiscIsOsAccountConstraint()) {
-        DISC_LOGW(DISC_CONTROL, "discovery is constrained, discard device found");
+        DISC_LOGD(DISC_CONTROL, "discovery is constrained, discard device found");
         return;
     }
 

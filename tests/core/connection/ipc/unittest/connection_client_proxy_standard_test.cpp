@@ -63,5 +63,8 @@ HWTEST_F(ConnectionClientProxyStandardTest, ConnectionClientProxyStandardTest001
 
     ret = clientProxy->OnDataReceived(0, reinterpret_cast<const uint8_t *>("test"), strlen("test"));
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = clientProxy->OnServerStopped("test");
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

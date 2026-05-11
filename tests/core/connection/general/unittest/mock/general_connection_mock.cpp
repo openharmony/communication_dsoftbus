@@ -91,6 +91,14 @@ int32_t ClientIpcOnDataReceived(const char *pkgName, int32_t pid, uint32_t handl
     return SOFTBUS_OK;
 }
 
+int32_t ClientIpcOnServerStopped(const char *pkgName, int32_t pid, const char *name)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)name;
+    return SOFTBUS_OK;
+}
+
 ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId)
 {
     static ConnBleConnection connection = {
@@ -153,6 +161,11 @@ int32_t ConnBlePostBytesMock(
 bool LnnIsOsAccountConstraint(void)
 {
     return GetGeneralConnectionInterface()->LnnIsOsAccountConstraint();
+}
+
+int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    return GetGeneralConnectionInterface()->LnnRegisterEventHandler(event, handler);
 }
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)

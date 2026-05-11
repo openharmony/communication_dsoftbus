@@ -74,6 +74,15 @@ HWTEST_F(ConnectionClientProxyTest, ConnectionClientProxyTest001, TestSize.Level
 
     ret = ClientIpcOnDataReceived("test", 0, 0, reinterpret_cast<const uint8_t *>("test"), strlen("test"));
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    ret = ClientIpcOnServerStopped(nullptr, 0, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnServerStopped("test", 0, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnServerStopped("test", 0, "test");
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /*
@@ -101,6 +110,9 @@ HWTEST_F(ConnectionClientProxyTest, ConnectionClientProxyTest002, TestSize.Level
     EXPECT_NE(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 
     ret = ClientIpcOnDataReceived("test", 0, 0, reinterpret_cast<const uint8_t *>("test"), strlen("test"));
+    EXPECT_NE(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    ret = ClientIpcOnServerStopped("test", 0, "test");
     EXPECT_NE(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 }
 }

@@ -66,6 +66,10 @@ static void OnServiceDied(void)
 
 static void OnServiceStopped(const char *name)
 {
+    if (name == nullptr) {
+        printf("OnServiceStopped called with invalid name\n");
+        return;
+    }
     printf("OnServiceStopped called, name: %s\n", name);
 }
 
