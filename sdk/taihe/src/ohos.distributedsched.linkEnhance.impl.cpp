@@ -702,11 +702,34 @@ static void OnServiceDiedAdapter(void)
     }
 }
 
+static void OnServiceStoppedAdapter(const char *name)
+{
+    COMM_CHECK_AND_RETURN_LOGE(name != nullptr, COMM_SDK, "name is null");
+    COMM_LOGI(COMM_SDK, "service stopped, name=%{public}s", name);
+    std::lock_guard<std::mutex> guard(serverLock_);
+    for (auto it = serverList_.begin(); it != serverList_.end();) {
+        auto server = *it;
+        auto serverImpl = reinterpret_cast<ServerImpl *>(server->GetServerImpl());
+        if (serverImpl != nullptr && serverImpl->name_ == name) {
+            if (serverImpl->GetStopCallback() == nullptr) {
+                it = serverList_.erase(it);
+                return;
+            }
+            (*serverImpl->GetStopCallback())(static_cast<int32_t>(LINK_ENHANCE_SERVER_STOPPED));
+            it = serverList_.erase(it);
+            return;
+        } else {
+            it++;
+        }
+    }
+}
+
 static IGeneralListener g_listener = {
     .OnAcceptConnect = OnAcceptConnectAdapter,
     .OnConnectionStateChange = OnConnectionStateChangeAdapter,
     .OnDataReceived = OnDataReceivedAdapter,
     .OnServiceDied = OnServiceDiedAdapter,
+    .OnServiceStopped = OnServiceStoppedAdapter,
 };
 }
 
