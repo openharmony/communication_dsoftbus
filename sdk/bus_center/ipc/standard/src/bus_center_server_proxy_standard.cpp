@@ -220,9 +220,10 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_JOIN_LNN, data, reply, option) != 0) {
+    int32_t ret = remote->SendRequest(SERVER_JOIN_LNN, data, reply, option);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_IPC_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -527,9 +528,10 @@ int32_t BusCenterServerProxy::SetNodeDataChangeFlag(const char *pkgName, const c
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_SET_NODE_DATA_CHANGE_FLAG, data, reply, option) != 0) {
+    int32_t ret = remote->SendRequest(SERVER_SET_NODE_DATA_CHANGE_FLAG, data, reply, option);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_IPC_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -749,9 +751,10 @@ int32_t BusCenterServerProxy::StartTimeSync(const char *pkgName, const char *tar
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_START_TIME_SYNC, data, reply, option) != 0) {
+    int32_t ret = remote->SendRequest(SERVER_START_TIME_SYNC, data, reply, option);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_IPC_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -788,9 +791,10 @@ int32_t BusCenterServerProxy::StopTimeSync(const char *pkgName, const char *targ
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_STOP_TIME_SYNC, data, reply, option) != 0) {
+    int32_t ret = remote->SendRequest(SERVER_STOP_TIME_SYNC, data, reply, option);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_IPC_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -1002,9 +1006,10 @@ int32_t BusCenterServerProxy::ActiveMetaNode(const MetaNodeConfigInfo *info, cha
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_ACTIVE_META_NODE, data, reply, option) != 0) {
+    int32_t ret = remote->SendRequest(SERVER_ACTIVE_META_NODE, data, reply, option);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_IPC_ERR;
     }
     char *retBuf = const_cast<char *>(reply.ReadCString());
     if (retBuf == nullptr) {
@@ -1143,9 +1148,10 @@ int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *call
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_SHIFT_LNN_GEAR, data, reply, option) != 0) {
+    int32_t ret = remote->SendRequest(SERVER_SHIFT_LNN_GEAR, data, reply, option);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -1182,9 +1188,10 @@ int32_t BusCenterServerProxy::TriggerRangeForMsdp(const char *pkgName, const Ran
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_TRIGGER_RANGE_FOR_MSDP, data, reply, option) != 0) {
+    int32_t ret = remote->SendRequest(SERVER_TRIGGER_RANGE_FOR_MSDP, data, reply, option);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed");
-        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -1267,7 +1274,7 @@ int32_t BusCenterServerProxy::SyncTrustedRelationShip(const char *pkgName, const
     int32_t ret = remote->SendRequest(SERVER_SYNC_TRUSTED_RELATION, data, reply, option);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return SOFTBUS_IPC_ERR;
+        return ret == SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE ? ret : SOFTBUS_IPC_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
