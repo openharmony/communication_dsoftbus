@@ -19,8 +19,7 @@ import("../../../../../core/transmission/common/trans_common.gni")
 import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
-
-ohos_fuzztest("TransTcpProcessDataFuzzTest") {
+dsoftbus_fuzz_common = {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_test_path/core/transmission/fuzztest/transtcpprocessdata_fuzzer"
 
@@ -47,31 +46,256 @@ ohos_fuzztest("TransTcpProcessDataFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "transtcpprocessdata_fuzzer.cpp" ]
-
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "dsoftbus:softbus_client",
-      "hilog:libhilog",
-      "ipc:ipc_single",
-    ]
-  } else {
-    external_deps = [
-      "dsoftbus:softbus_client",
-      "hilog:libhilog",
-      "ipc:ipc_single",
-    ]
-  }
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
 }
+
+ohos_fuzztest("TransBuildDataHeadFuzzTest") {
+
+  sources = [ "transbuilddatahead_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransCheckBufLenAndCopyDataFuzzTest") {
+
+  sources = [ "transcheckbuflenandcopydata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransMoveNodeFuzzTest") {
+
+  sources = [ "transmovenode_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransPackDataFuzzTest") {
+
+  sources = [ "transpackdata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransPackTcpDataPacketHeadFuzzTest") {
+
+  sources = [ "transpacktcpdatapackethead_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransReleaseDataHeadResourceFuzzTest") {
+
+  sources = [ "transreleasedataheadresource_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransResizeDataBufferFuzzTest") {
+
+  sources = [ "transresizedatabuffer_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTcpDataTlvUnpackFuzzTest") {
+
+  sources = [ "transtcpdatatlvunpack_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcDecryptFuzzTest") {
+
+  sources = [ "transtdcdecrypt_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcEncryptWithSeqFuzzTest") {
+
+  sources = [ "transtdcencryptwithseq_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcPackAllDataFuzzTest") {
+
+  sources = [ "transtdcpackalldata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcParseTlvFuzzTest") {
+
+  sources = [ "transtdcparsetlv_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcRecvFirstDataFuzzTest") {
+
+  sources = [ "transtdcrecvfirstdata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcSendDataFuzzTest") {
+
+  sources = [ "transtdcsenddata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcUnpackAllDataFuzzTest") {
+
+  sources = [ "transtdcunpackalldata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcUnpackAllTlvDataFuzzTest") {
+
+  sources = [ "transtdcunpackalltlvdata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransTdcUnpackDataFuzzTest") {
+
+  sources = [ "transtdcunpackdata_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("TransUnpackTcpDataPacketHeadFuzzTest") {
+
+  sources = [ "transunpacktcpdatapackethead_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":TransTcpProcessDataFuzzTest" ]
+  deps = [
+    ":TransBuildDataHeadFuzzTest",
+    ":TransCheckBufLenAndCopyDataFuzzTest",
+    ":TransMoveNodeFuzzTest",
+    ":TransPackDataFuzzTest",
+    ":TransPackTcpDataPacketHeadFuzzTest",
+    ":TransReleaseDataHeadResourceFuzzTest",
+    ":TransResizeDataBufferFuzzTest",
+    ":TransTcpDataTlvUnpackFuzzTest",
+    ":TransTdcDecryptFuzzTest",
+    ":TransTdcEncryptWithSeqFuzzTest",
+    ":TransTdcPackAllDataFuzzTest",
+    ":TransTdcParseTlvFuzzTest",
+    ":TransTdcRecvFirstDataFuzzTest",
+    ":TransTdcSendDataFuzzTest",
+    ":TransTdcUnpackAllDataFuzzTest",
+    ":TransTdcUnpackAllTlvDataFuzzTest",
+    ":TransTdcUnpackDataFuzzTest",
+    ":TransUnpackTcpDataPacketHeadFuzzTest"
+  ]
 }

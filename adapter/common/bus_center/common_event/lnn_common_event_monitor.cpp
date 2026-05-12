@@ -214,6 +214,7 @@ int32_t LnnSubscribeCommonEvent(void)
     }
     LNN_LOGI(LNN_EVENT, "subscribe common event success");
     LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
+    LnnUpdateConstraintMapForCurrentAccount();
     if (!LnnIsDefaultOhosAccount()) {
         LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     }

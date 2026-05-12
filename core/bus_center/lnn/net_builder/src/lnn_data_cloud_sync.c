@@ -30,6 +30,7 @@
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
@@ -979,6 +980,7 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck to cache info fail");
     }
+    oldInfo->lastCommTimestamp = SoftBusGetCalendarTime();
     UpdateDevBasicInfoToCache(newInfo, oldInfo);
     return SOFTBUS_OK;
 }

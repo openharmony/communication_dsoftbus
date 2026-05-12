@@ -23,6 +23,36 @@
 #include <cstdlib>
 #include <fcntl.h>
 
+#include "softbus_proxychannel_manager.h"
+#include "trans_tcp_process_data.c"
+
 #define FUZZ_PROJECT_NAME "transtcpprocessdata_fuzzer"
 
+namespace OHOS {
+class TransTcpProcessData {
+public:
+    TransTcpProcessData()
+    {
+        isInited_ = false;
+        (void)TransProxyManagerInit(TransServerGetChannelCb());
+        (void)TransGetDataBufSize();
+        (void)TransGetTdcDataBufMaxSize();
+        isInited_ = true;
+    }
+
+    ~TransTcpProcessData()
+    {
+        isInited_ = false;
+        TransProxyManagerDeinit();
+    }
+
+    bool IsInited(void)
+    {
+        return isInited_;
+    }
+
+private:
+    volatile bool isInited_;
+};
+} // namespace OHOS
 #endif

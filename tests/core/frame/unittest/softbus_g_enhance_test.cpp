@@ -70,6 +70,13 @@ public:
     {}
 };
 
+static int32_t LnnUpdateLastAccLoginTimestampByUdidStub(uint64_t timestamp, const char *udid)
+{
+    (void)timestamp;
+    (void)udid;
+    return SOFTBUS_OK;
+}
+
 /*
  * @tc.name: InitSoftbusPagingPacked001
  * @tc.desc: AdapterRegisterEnhanceFunc function test
@@ -1156,5 +1163,41 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest033, TestSize.Level1)
 
     pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit = SoftbusMcuTimerDeinit;
     EXPECT_NO_FATAL_FAILURE(SoftbusMcuTimerDeinitPacked());
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest034
+ * @tc.desc: LnnUpdateLastAccLoginTimestampByUdidPacked function test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest034, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnUpdateLastAccLoginTimestampByUdid = nullptr;
+    int32_t ret = LnnUpdateLastAccLoginTimestampByUdidPacked(0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    pfnLnnEnhanceFuncList->lnnUpdateLastAccLoginTimestampByUdid = LnnUpdateLastAccLoginTimestampByUdidStub;
+    ret = LnnUpdateLastAccLoginTimestampByUdidPacked(0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest035
+ * @tc.desc: LnnUpdateLastAccLoginTimestampByUdidPacked function test with valid params
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest035, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnUpdateLastAccLoginTimestampByUdid = LnnUpdateLastAccLoginTimestampByUdidStub;
+    uint64_t timestamp = 1234567890;
+    const char *udid = "test_udid";
+    int32_t ret = LnnUpdateLastAccLoginTimestampByUdidPacked(timestamp, udid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }

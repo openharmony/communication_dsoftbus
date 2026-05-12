@@ -958,6 +958,15 @@ int32_t LnnRemoveLinkFinderInfoPacked(const char *networkId)
     return pfnLnnEnhanceFuncList->lnnRemoveLinkFinderInfo(networkId);
 }
 
+int32_t LnnUpdateLastAccLoginTimestampByUdidPacked(uint64_t timestamp, const char *udid)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnUpdateLastAccLoginTimestampByUdid) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnUpdateLastAccLoginTimestampByUdid(timestamp, udid);
+}
+
 int32_t LnnRetrieveDeviceInfoByUdidPacked(const char *udid, NodeInfo *deviceInfo)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
