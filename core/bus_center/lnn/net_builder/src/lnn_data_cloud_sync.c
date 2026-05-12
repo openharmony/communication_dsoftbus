@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "bus_center_manager.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
@@ -29,6 +30,7 @@
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
 #define APPID                "dsoftbus"
@@ -981,9 +983,13 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     return SOFTBUS_OK;
 }
 
-static void LnnIsdeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
+static void ProcessDeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
 {
-    if (strncmp(cacheInfo->deviceInfo.deviceName, oldCacheInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN)!= 0) {
+    if (strlen(oldCacheInfo->deviceInfo.deviceUdid) == 0) {
+        LNN_LOGI(LNN_BUILDER, "no cache info, no need to reply");
+        return;
+    }
+    if (strncmp(cacheInfo->deviceInfo.deviceName, oldCacheInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         NodeInfo info;
         (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
@@ -996,7 +1002,7 @@ static void LnnIsdeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheInfo
     }
 }
 
-static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
+static int32_t LnnSaveAndUpdateDistributedNode(bool isNeedAck, NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
 {
     if (cacheInfo == NULL || oldCacheInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
@@ -1023,7 +1029,9 @@ static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *ol
         AnonymizeFree(anonyLocalAccountId);
         return ret;
     }
-    LnnIsdeviceNameChangeAck(cacheInfo, oldCacheInfo);
+    if (isNeedAck) {
+        ProcessDeviceNameChangeAck(cacheInfo, oldCacheInfo);
+    }
     cacheInfo->localStateVersion = localCacheInfo.stateVersion;
     if (LnnUpdateOldCacheInfo(cacheInfo, oldCacheInfo) != SOFTBUS_OK ||
         LnnSaveRemoteDeviceInfoPacked(oldCacheInfo) != SOFTBUS_OK) {
@@ -1044,6 +1052,25 @@ static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *ol
     return SOFTBUS_OK;
 }
 
+static bool IsNeedReplyAck(cJSON *json)
+{
+    char buff[INT64_TO_STR_MAX_LEN] = {0};
+    char peerUdid[UDID_BUF_LEN] = {0};
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (GetJsonObjectStringItem(json, IS_ACK_SEQ, buff, INT64_TO_STR_MAX_LEN) &&
+        GetJsonObjectStringItem(json, DEVICE_INFO_PEER_UDID, peerUdid, UDID_BUF_LEN)) {
+        if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "get local udid failed");
+            return false;
+        }
+        if (strcmp(peerUdid, localUdid) != 0) {
+            LNN_LOGI(LNN_BUILDER, "not replying to this device");
+            return false;
+        }
+    }
+    return true;
+}
+
 int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
 {
     if (key == NULL || value == NULL) {
@@ -1061,6 +1088,7 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
         cJSON_Delete(json);
         return ret;
     }
+    bool isNeedAck = IsNeedReplyAck(json);
     cJSON_Delete(json);
     PrintSyncNodeInfo(&cacheInfo);
     char udidHash[UDID_HASH_HEX_LEN + 1] = { 0 };
@@ -1079,7 +1107,7 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
         LNN_LOGW(LNN_BUILDER, "not found device");
         oldCacheInfo.isAuthExchangeUdid = true;
     }
-    ret = LnnSaveAndUpdateDistributedNode(&cacheInfo, &oldCacheInfo);
+    ret = LnnSaveAndUpdateDistributedNode(isNeedAck, &cacheInfo, &oldCacheInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "save and update distribute node info fail");
         (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));

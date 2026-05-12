@@ -813,8 +813,168 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, Tes
 {
     NodeInfo cacheInfo = {};
     NodeInfo oldCacheInfo = {};
-    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(nullptr, &oldCacheInfo), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(&cacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(true, nullptr, &oldCacheInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(true, &cacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ProcessDeviceNameChangeAck_Test_001
+ * @tc.desc: ProcessDeviceNameChangeAck test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, ProcessDeviceNameChangeAck_Test_001, TestSize.Level1)
+{
+    NodeInfo cacheInfo = {};
+    NodeInfo oldCacheInfo = {};
+    EXPECT_NO_FATAL_FAILURE(ProcessDeviceNameChangeAck(&cacheInfo, &oldCacheInfo));
+
+    ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, "testUdid"));
+    EXPECT_NO_FATAL_FAILURE(ProcessDeviceNameChangeAck(&cacheInfo, &oldCacheInfo));
+}
+
+/*
+ * @tc.name: ProcessDeviceNameChangeAck_Test_002
+ * @tc.desc: ProcessDeviceNameChangeAck deviceName different and LnnGetLocalNodeInfoSafe fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, ProcessDeviceNameChangeAck_Test_002, TestSize.Level1)
+{
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    EXPECT_CALL(DataCloudSyncMock, LnnGetLocalNodeInfoSafe).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    NodeInfo cacheInfo = {};
+    NodeInfo oldCacheInfo = {};
+    ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, "testUdid"));
+    ASSERT_EQ(EOK, strcpy_s(cacheInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "newDeviceName"));
+    ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "oldDeviceName"));
+    EXPECT_NO_FATAL_FAILURE(ProcessDeviceNameChangeAck(&cacheInfo, &oldCacheInfo));
+}
+
+/*
+ * @tc.name: ProcessDeviceNameChangeAck_Test_003
+ * @tc.desc: ProcessDeviceNameChangeAck deviceName different and LnnLedgerAllDataSyncToDB fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, ProcessDeviceNameChangeAck_Test_003, TestSize.Level1)
+{
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    NodeInfo localInfo = {};
+    EXPECT_CALL(DataCloudSyncMock, LnnGetLocalNodeInfoSafe)
+        .WillOnce(DoAll(SetArgPointee<0>(localInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NodeInfo cacheInfo = {};
+    NodeInfo oldCacheInfo = {};
+    ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, "testUdid"));
+    ASSERT_EQ(EOK, strcpy_s(cacheInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "newDeviceName"));
+    ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "oldDeviceName"));
+    EXPECT_NO_FATAL_FAILURE(ProcessDeviceNameChangeAck(&cacheInfo, &oldCacheInfo));
+}
+
+/*
+ * @tc.name: ProcessDeviceNameChangeAck_Test_004
+ * @tc.desc: ProcessDeviceNameChangeAck deviceName different and all success
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, ProcessDeviceNameChangeAck_Test_004, TestSize.Level1)
+{
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    NodeInfo localInfo = {};
+    EXPECT_CALL(DataCloudSyncMock, LnnGetLocalNodeInfoSafe)
+        .WillRepeatedly(DoAll(SetArgPointee<0>(localInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NodeInfo cacheInfo = {};
+    NodeInfo oldCacheInfo = {};
+    ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, "testUdid"));
+    ASSERT_EQ(EOK, strcpy_s(cacheInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "newDeviceName"));
+    ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, "oldDeviceName"));
+    EXPECT_NO_FATAL_FAILURE(ProcessDeviceNameChangeAck(&cacheInfo, &oldCacheInfo));
+}
+
+/*
+ * @tc.name: IsNeedReplyAck_Test_001
+ * @tc.desc: IsNeedReplyAck json without IS_ACK_SEQ and DEVICE_INFO_PEER_UDID
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, IsNeedReplyAck_Test_001, TestSize.Level1)
+{
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_TRUE(json != nullptr);
+    EXPECT_EQ(IsNeedReplyAck(json), true);
+    cJSON_Delete(json);
+}
+
+/*
+ * @tc.name: IsNeedReplyAck_Test_002
+ * @tc.desc: IsNeedReplyAck LnnGetLocalStrInfo fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, IsNeedReplyAck_Test_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> NetLedgerMock;
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_TRUE(json != nullptr);
+    cJSON_AddStringToObject(json, IS_ACK_SEQ, "ackSeq");
+    cJSON_AddStringToObject(json, DEVICE_INFO_PEER_UDID, "peerUdidTest");
+    EXPECT_CALL(NetLedgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_EQ(IsNeedReplyAck(json), false);
+    cJSON_Delete(json);
+}
+
+/*
+ * @tc.name: IsNeedReplyAck_Test_003
+ * @tc.desc: IsNeedReplyAck peerUdid not match localUdid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, IsNeedReplyAck_Test_003, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> NetLedgerMock;
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_TRUE(json != nullptr);
+    cJSON_AddStringToObject(json, IS_ACK_SEQ, "ackSeq");
+    cJSON_AddStringToObject(json, DEVICE_INFO_PEER_UDID, "peerUdidTest");
+    auto setLocalStrInfo = [](InfoKey key, char *info, uint32_t len) {
+        (void)strcpy_s(info, len, "localUdidDifferent");
+        return SOFTBUS_OK;
+    };
+    EXPECT_CALL(NetLedgerMock, LnnGetLocalStrInfo).WillRepeatedly(Invoke(setLocalStrInfo));
+    EXPECT_EQ(IsNeedReplyAck(json), false);
+    cJSON_Delete(json);
+}
+
+/*
+ * @tc.name: IsNeedReplyAck_Test_004
+ * @tc.desc: IsNeedReplyAck peerUdid match localUdid
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, IsNeedReplyAck_Test_004, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> NetLedgerMock;
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_TRUE(json != nullptr);
+    cJSON_AddStringToObject(json, IS_ACK_SEQ, "ackSeq");
+    cJSON_AddStringToObject(json, DEVICE_INFO_PEER_UDID, "peerUdidMatch");
+    auto setLocalStrInfo = [](InfoKey key, char *info, uint32_t len) {
+        (void)strcpy_s(info, len, "peerUdidMatch");
+        return SOFTBUS_OK;
+    };
+    EXPECT_CALL(NetLedgerMock, LnnGetLocalStrInfo).WillRepeatedly(Invoke(setLocalStrInfo));
+    EXPECT_EQ(IsNeedReplyAck(json), true);
+    cJSON_Delete(json);
 }
 
 /*
