@@ -273,6 +273,11 @@ void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx)
     return GetLnnConnInterface()->LnnSetWiFiIp(info, ip, ifnameIdx);
 }
 
+bool LnnIsOsAccountConstraint(void)
+{
+    return GetLnnConnInterface()->LnnIsOsAccountConstraint();
+}
+
 int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
 {
     return GetLnnConnInterface()->JudgeDeviceTypeAndGetOsAccountIds();
