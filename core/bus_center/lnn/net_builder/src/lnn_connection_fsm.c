@@ -2006,6 +2006,11 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
+    if (LnnIsOsAccountConstraint()) {
+        LNN_LOGI(LNN_BUILDER, "account constraint enabled, reject online. [id=%{public}u]", connFsm->id);
+        CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
+        return;
+    }
     int32_t ret = IsRepeatDeviceId(connFsm->connInfo.nodeInfo) ? SOFTBUS_NETWORK_REPEATED_DEVICEID : SOFTBUS_OK;
     CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, ret);
     StartSparkGroupCreation(&connFsm->connInfo.addr);
