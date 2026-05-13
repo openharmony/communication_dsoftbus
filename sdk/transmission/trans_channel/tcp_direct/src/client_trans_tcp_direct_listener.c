@@ -152,6 +152,27 @@ int32_t TransTdcCreateListenerWithoutAddTrigger(int32_t fd)
     return SOFTBUS_OK;
 }
 
+void StopTdcListener(void)
+{
+    TdcLockInit();
+    if (SoftBusMutexLock(&g_lock.lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    if (!g_isInitedFlag) {
+        (void)SoftBusMutexUnlock(&g_lock.lock);
+        return;
+    }
+    int32_t ret = StopBaseListener(DIRECT_CHANNEL_CLIENT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "StopBaseListener failed, ret=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_lock.lock);
+        return;
+    }
+    g_isInitedFlag = false;
+    (void)SoftBusMutexUnlock(&g_lock.lock);
+}
+
 void TransTdcCloseFd(int32_t fd)
 {
     if (fd < 0) {

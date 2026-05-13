@@ -24,6 +24,7 @@
 #include "client_trans_file_listener.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_socket_manager.h"
+#include "client_trans_tcp_direct_listener.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "session_ipc_adapter.h"
@@ -1696,6 +1697,7 @@ void ClientTransOnSwitch(int32_t switchType)
         (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_USER_SWICTH);
     } else if (switchType == BLOCK_MODE_OFFSET) {
         (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_BLOCK_MODE);
+        StopTdcListener();
     }
 }
 

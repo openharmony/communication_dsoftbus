@@ -28,6 +28,7 @@ void TransTdcReleaseFd(int32_t fd);
 int32_t TransTdcStopRead(int32_t fd);
 void TransTdcCloseFd(int32_t fd);
 void TdcLockDeinit(void);
+void StopTdcListener(void);
 
 #ifdef __cplusplus
 }

@@ -170,6 +170,7 @@ static void TransOnLinkDownInner(const char *networkId, int32_t routeType, const
     bool isBlockMode = (bool)(((uint32_t)(routeType) >> BLOCK_MODE_OFFSET) & 0x1);
     if (isBlockMode) {
         TransCloseAllInnerSession(pkgName);
+        StopDirectChannelListener();
     }
 }
 
