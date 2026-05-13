@@ -547,6 +547,7 @@ static int32_t StartP2pListener(const char *ip, int32_t *port, const char *peerU
 static void OnChannelOpenFail(int32_t channelId, int32_t errCode)
 {
     TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d", channelId);
+    (void)CloseHtpChannelPacked(channelId);
     NotifyChannelOpenFailed(channelId, errCode);
     (void)TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
