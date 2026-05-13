@@ -703,11 +703,11 @@ void TransProxyHandshakeUnpackErrMsgTest(FuzzedDataProvider &provider)
     msg.msgHead.peerId = info->peerId;
     int32_t errCode = provider.ConsumeIntegral<int32_t>();
 
-    (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
-    (void)TransProxyProcessHandshakeAckMsg(&msg);
     (void)TransProxyHandshakeUnpackRightMsg(info, &msg, errCode);
     (void)TransProxyHandshakeUnpackErrMsg(info, &msg, nullptr);
     (void)TransProxyHandshakeUnpackErrMsg(info, &msg, &errCode);
+    (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
+    (void)TransProxyProcessHandshakeAckMsg(&msg);
     (void)TransProxyDelChanByChanId(channelId);
     if (msg.data != nullptr) {
         SoftBusFree(msg.data);
