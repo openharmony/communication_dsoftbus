@@ -164,13 +164,6 @@ int32_t FillDFileParam(NSTACKX_SessionParaMpV2 *para, const char *srvIp, int32_t
     return GetClientTransFileInterface()->FillDFileParam(para, srvIp, srvPort);
 }
 
-void NSTACKX_DFileClose(int32_t sessionId)
-{
-    if (GetClientTransFileInterface() != nullptr) {
-        GetClientTransFileInterface()->NSTACKX_DFileClose(sessionId);
-    }
-}
-
 int32_t NSTACKX_RemoveMpPath(int32_t sessionId, NSTACKX_SessionParaMpV2 para[], uint8_t paraNum)
 {
     if (GetClientTransFileInterface() != nullptr) {
