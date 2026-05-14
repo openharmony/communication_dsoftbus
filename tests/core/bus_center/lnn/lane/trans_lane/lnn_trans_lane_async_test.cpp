@@ -38,6 +38,7 @@ constexpr uint64_t LANE_ID_BASE = 1122334455667788;
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
 static bool g_isNeedCondWait = true;
+static constexpr int32_t WAIT_LOOPER_DONE_MS = 200;
 
 class LNNTransLaneAsyncTest : public testing::Test {
 public:
@@ -240,6 +241,7 @@ HWTEST_F(LNNTransLaneAsyncTest, LNN_LANE_BUILD_RETRY_TEST_001, TestSize.Level1)
     ret = transObj->freeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOOPER_DONE_MS));
 }
 
 /*
@@ -298,6 +300,7 @@ HWTEST_F(LNNTransLaneAsyncTest, LNN_LANE_BUILD_RETRY_TEST_002, TestSize.Level1)
     ret = transObj->freeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOOPER_DONE_MS));
 }
 
 /*
@@ -356,6 +359,7 @@ HWTEST_F(LNNTransLaneAsyncTest, LNN_LANE_BUILD_RETRY_TEST_003, TestSize.Level1)
     ret = transObj->freeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOOPER_DONE_MS));
 }
 
 /*
@@ -414,5 +418,6 @@ HWTEST_F(LNNTransLaneAsyncTest, LNN_LANE_BUILD_RETRY_TEST_004, TestSize.Level1)
     ret = transObj->freeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOOPER_DONE_MS));
 }
 } // namespace OHOS
