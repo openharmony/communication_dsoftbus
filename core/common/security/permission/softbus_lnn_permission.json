@@ -230,6 +230,12 @@
     ]
   },
   {
+    "INTERFACE_NAME": "EX_OBJ_CMD_REGISTER_DEVICE_MANAGER_HOOK",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
     "INTERFACE_NAME": "SERVER_START_ACCOUNT_AUTH",
     "PROCESS_NAME": [
       "caas_service"
