@@ -62,7 +62,6 @@ public:
     virtual int32_t StartNStackXDFileServerV2(const char *myIp, const uint8_t *key,
         DFileMsgReceiver msgReceiver, int32_t *filePort, int32_t linkType, uint32_t capabilityValue) = 0;
     virtual int32_t FillDFileParam(NSTACKX_SessionParaMpV2 *para, const char *srvIp, int32_t srvPort) = 0;
-    virtual void NSTACKX_DFileClose(int32_t sessionId) = 0;
     virtual int32_t NSTACKX_RemoveMpPath(int32_t sessionId, NSTACKX_SessionParaMpV2 para[], uint8_t paraNum) = 0;
     virtual int32_t NSTACKX_DFileSetStoragePath(int32_t sessionId, const char *path) = 0;
     virtual int32_t NSTACKX_DFileSetRenameHook(int32_t sessionId, OnDFileRenameFile onRenameFile) = 0;
@@ -113,7 +112,6 @@ public:
     MOCK_METHOD6(StartNStackXDFileServerV2, int32_t(const char *myIp, const uint8_t *key,
         DFileMsgReceiver msgReceiver, int32_t *filePort, int32_t linkType, uint32_t capabilityValue));
     MOCK_METHOD3(FillDFileParam, int32_t(NSTACKX_SessionParaMpV2 *para, const char *srvIp, int32_t srvPort));
-    MOCK_METHOD1(NSTACKX_DFileClose, void(int32_t sessionId));
     MOCK_METHOD3(NSTACKX_RemoveMpPath, int32_t(int32_t sessionId, NSTACKX_SessionParaMpV2 para[], uint8_t paraNum));
     MOCK_METHOD2(NSTACKX_DFileSetStoragePath, int32_t(int32_t sessionId, const char *path));
     MOCK_METHOD2(NSTACKX_DFileSetRenameHook, int32_t(int32_t sessionId, OnDFileRenameFile onRenameFile));
