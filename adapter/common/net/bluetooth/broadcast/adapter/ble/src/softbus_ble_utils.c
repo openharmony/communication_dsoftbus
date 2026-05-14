@@ -501,6 +501,10 @@ static int32_t ParsePayload(
         DISC_LOGW(DISC_BLE_ADAPTER, "parse no payload");
         return SOFTBUS_OK;
     }
+    if (data->payload != NULL) {
+        SoftBusFree(data->payload);
+        data->payload = NULL;
+    }
     data->payload = (uint8_t *)SoftBusCalloc(data->payloadLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(data->payload != NULL, SOFTBUS_MALLOC_ERR, DISC_BLE_ADAPTER,
         "malloc payload failed");
