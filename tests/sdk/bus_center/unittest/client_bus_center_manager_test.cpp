@@ -52,6 +52,46 @@ constexpr int32_t RESULT_REASON = -1;
 constexpr char PKGNAME[] = "softbustest";
 constexpr char IP_TEST[IP_LEN] = "192.168.51.170";
 constexpr char TEST_MSG[] = "testmsg";
+static int32_t g_deviceFoundCallCount = 0;
+static const DeviceInfo *g_lastFoundDevice = nullptr;
+
+static void ResetRefreshTestCounters()
+{
+    g_deviceFoundCallCount = 0;
+    g_lastFoundDevice = nullptr;
+}
+
+static void OnDeviceFoundCallback(const DeviceInfo *device)
+{
+    g_deviceFoundCallCount++;
+    g_lastFoundDevice = device;
+}
+
+static void OnDiscoverResultCallback(int32_t refreshId, RefreshResult reason)
+{
+    (void)refreshId;
+    (void)reason;
+}
+
+static void ResetBuscenterClientCbs()
+{
+    (void)memset_s(&g_busCenterClient.refreshCbItems, sizeof(g_busCenterClient.refreshCbItems), 0,
+        sizeof(g_busCenterClient.refreshCbItems));
+    (void)memset_s(&g_busCenterClient.refreshNfcCb, sizeof(g_busCenterClient.refreshNfcCb), 0,
+        sizeof(g_busCenterClient.refreshNfcCb));
+    (void)memset_s(&g_busCenterClient.refreshCb, sizeof(g_busCenterClient.refreshCb), 0,
+        sizeof(g_busCenterClient.refreshCb));
+}
+
+static DeviceInfo CreateDeviceInfo(uint32_t capabilityBitmap)
+{
+    DeviceInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    deviceInfo.capabilityBitmap[0] = capabilityBitmap;
+    deviceInfo.capabilityBitmapNum = 1;
+    return deviceInfo;
+}
+
 
 static void GroupOwnerDestroyListenerTest(int32_t retCode)
 {
@@ -1811,5 +1851,567 @@ HWTEST_F(ClientBusCentManagerTest, ON_ERROR_AUTH_RESULT_Test_001, TestSize.Level
     EXPECT_NO_FATAL_FAILURE(LnnOnErrorAuthResult(PKGNAME, 0, 0, 0, TEST_MSG));
     g_busCenterClient.accountAuthCb.onError = OnError;
     EXPECT_NO_FATAL_FAILURE(LnnOnErrorAuthResult(PKGNAME, 0, 0, 0, TEST_MSG));
+}
+
+/*
+* @tc.name: TransferStringCapToBitmap_Test_001
+* @tc.desc: test TransferStringCapToBitmap
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, TransferStringCapToBitmap_Test_001, TestSize.Level1)
+{
+    uint32_t ret = MAX_CAPABILITY_BITMAP;
+
+    ret = TransferStringCapToBitmap(nullptr);
+    EXPECT_EQ(ret, MAX_CAPABILITY_BITMAP);
+    ret = TransferStringCapToBitmap("invalidCap");
+    EXPECT_EQ(ret, MAX_CAPABILITY_BITMAP);
+    for (uint32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
+        uint32_t bitmap = TransferStringCapToBitmap(g_capabilityMap[i].capability);
+        EXPECT_EQ(bitmap, g_capabilityMap[i].bitmap);
+    }
+}
+
+/*
+* @tc.name: FindRefreshCbItem_Test_001
+* @tc.desc: test FindRefreshCbItem with valid and invalid capBit
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, FindRefreshCbItem_Test_001, TestSize.Level1)
+{
+    RefreshCbItem *item = nullptr;
+
+    item = FindRefreshCbItem(MAX_CAPABILITY_BITMAP);
+    EXPECT_EQ(item, nullptr);
+    item = FindRefreshCbItem(MAX_CAPABILITY_BITMAP + 1);
+    EXPECT_EQ(item, nullptr);
+    item = FindRefreshCbItem(HICALL_CAPABILITY_BITMAP);
+    EXPECT_NE(item, nullptr);
+}
+
+/*
+* @tc.name: AddRefreshCbItem_Test_001
+* @tc.desc: test AddRefreshCbItem success and invalid param
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, AddRefreshCbItem_Test_001, TestSize.Level1)
+{
+    IRefreshCallback cb;
+    (void)memset_s(&cb, sizeof(IRefreshCallback), 0, sizeof(IRefreshCallback));
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    cb.OnDiscoverResult = OnDiscoverResultCb;
+    EXPECT_EQ(AddRefreshCbItem(HICALL_CAPABILITY_BITMAP, cb), SOFTBUS_OK);
+    RefreshCbItem *item = FindRefreshCbItem(HICALL_CAPABILITY_BITMAP);
+    ASSERT_NE(item, nullptr);
+    EXPECT_EQ(item->cb.OnDeviceFound, OnDeviceFoundCb);
+    EXPECT_EQ(AddRefreshCbItem(MAX_CAPABILITY_BITMAP, cb), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: AddRefreshCbItemSafe_Test_001
+* @tc.desc: test AddRefreshCbItemSafe with various conditions
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, AddRefreshCbItemSafe_Test_001, TestSize.Level1)
+{
+    IRefreshCallback cb;
+    (void)memset_s(&cb, sizeof(IRefreshCallback), 0, sizeof(IRefreshCallback));
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    EXPECT_EQ(AddRefreshCbItemSafe(nullptr, cb), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(AddRefreshCbItemSafe("invalidCap", cb), SOFTBUS_INVALID_PARAM);
+    g_busCenterClient.isInit = false;
+    EXPECT_EQ(AddRefreshCbItemSafe(g_capabilityMap[HICALL_CAPABILITY_BITMAP].capability, cb), SOFTBUS_NO_INIT);
+    g_busCenterClient.isInit = true;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_EQ(AddRefreshCbItemSafe(g_capabilityMap[HICALL_CAPABILITY_BITMAP].capability, cb), SOFTBUS_LOCK_ERR);
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(AddRefreshCbItemSafe(g_capabilityMap[HICALL_CAPABILITY_BITMAP].capability, cb), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: DeleteRefreshCbItem_Test_001
+* @tc.desc: test DeleteRefreshCbItem
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, DeleteRefreshCbItem_Test_001, TestSize.Level1)
+{
+    IRefreshCallback cb;
+    (void)memset_s(&cb, sizeof(IRefreshCallback), 0, sizeof(IRefreshCallback));
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    cb.OnDiscoverResult = OnDiscoverResultCb;
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    (void)memset_s(&g_busCenterClient.refreshCbItems, sizeof(g_busCenterClient.refreshCbItems), 0,
+        sizeof(g_busCenterClient.refreshCbItems));
+    AddRefreshCbItem(HICALL_CAPABILITY_BITMAP, cb);
+    RefreshCbItem *item = FindRefreshCbItem(HICALL_CAPABILITY_BITMAP);
+    ASSERT_NE(item, nullptr);
+    EXPECT_NE(item->cb.OnDeviceFound, nullptr);
+    DeleteRefreshCbItem(HICALL_CAPABILITY_BITMAP);
+    EXPECT_EQ(item->cb.OnDeviceFound, nullptr);
+    EXPECT_EQ(item->cb.OnDiscoverResult, nullptr);
+    EXPECT_NO_FATAL_FAILURE(DeleteRefreshCbItem(MAX_CAPABILITY_BITMAP));
+}
+
+/*
+* @tc.name: DeleteRefreshCbListItemSafe_Test_001
+* @tc.desc: test DeleteRefreshCbListItemSafe with various conditions
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, DeleteRefreshCbListItemSafe_Test_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(DeleteRefreshCbListItemSafe(MAX_CAPABILITY_BITMAP));
+    g_busCenterClient.isInit = false;
+    EXPECT_NO_FATAL_FAILURE(DeleteRefreshCbListItemSafe(HICALL_CAPABILITY_BITMAP));
+    g_busCenterClient.isInit = true;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_NO_FATAL_FAILURE(DeleteRefreshCbListItemSafe(HICALL_CAPABILITY_BITMAP));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(DeleteRefreshCbListItemSafe(HICALL_CAPABILITY_BITMAP));
+}
+
+/*
+* @tc.name: LnnOnRefreshDeviceFound_Test_001
+* @tc.desc: test LnnOnRefreshDeviceFound with per-capability callback
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LnnOnRefreshDeviceFound_Test_001, TestSize.Level1)
+{
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    g_busCenterClient.isInit = true;
+    (void)memset_s(&g_busCenterClient.refreshCbItems, sizeof(g_busCenterClient.refreshCbItems), 0,
+        sizeof(g_busCenterClient.refreshCbItems));
+
+    // Test null deviceInfo
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(nullptr));
+
+    // Test deviceInfo with NFC_SHARE capability
+    DeviceInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    deviceInfo.capabilityBitmap[0] = 1U << NFC_SHARE_CAPABILITY_BITMAP;
+    deviceInfo.capabilityBitmapNum = 1;
+    (void)memset_s(&g_busCenterClient.refreshNfcCb, sizeof(IRefreshCallback), 0, sizeof(IRefreshCallback));
+    g_busCenterClient.refreshNfcCb.OnDeviceFound = OnDeviceFoundCb;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+
+    // Test NFC_SHARE with null callback
+    g_busCenterClient.refreshNfcCb.OnDeviceFound = nullptr;
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+
+    // Test with HICALL capability and registered callback
+    deviceInfo.capabilityBitmap[0] = 1U << HICALL_CAPABILITY_BITMAP;
+    IRefreshCallback cb;
+    (void)memset_s(&cb, sizeof(IRefreshCallback), 0, sizeof(IRefreshCallback));
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    AddRefreshCbItem(HICALL_CAPABILITY_BITMAP, cb);
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+
+    // Test with capability that has no registered callback
+    deviceInfo.capabilityBitmap[0] = 1U << DDMP_CAPABILITY_BITMAP;
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+
+    // Test with zero capability (no callback triggered)
+    deviceInfo.capabilityBitmap[0] = 0;
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+}
+
+/*
+* @tc.name: LnnOnRefreshDeviceFound_Test_002
+* @tc.desc: test LnnOnRefreshDeviceFound with multiple capability bits
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LnnOnRefreshDeviceFound_Test_002, TestSize.Level1)
+{
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    g_busCenterClient.isInit = true;
+    (void)memset_s(&g_busCenterClient.refreshCbItems, sizeof(g_busCenterClient.refreshCbItems), 0,
+        sizeof(g_busCenterClient.refreshCbItems));
+
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+
+    // Register callbacks for HICALL and DDMP
+    IRefreshCallback cb;
+    (void)memset_s(&cb, sizeof(IRefreshCallback), 0, sizeof(IRefreshCallback));
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    AddRefreshCbItem(HICALL_CAPABILITY_BITMAP, cb);
+    AddRefreshCbItem(DDMP_CAPABILITY_BITMAP, cb);
+
+    // Device with multiple capability bits
+    DeviceInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    deviceInfo.capabilityBitmap[0] = (1U << HICALL_CAPABILITY_BITMAP) | (1U << DDMP_CAPABILITY_BITMAP);
+    deviceInfo.capabilityBitmapNum = 1;
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+}
+
+/*
+* @tc.name: DeleteDiscSubscribeMsg_Test_001
+* @tc.desc: test DeleteDiscSubscribeMsg with capBit output parameter
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, DeleteDiscSubscribeMsg_Test_001, TestSize.Level1)
+{
+    g_isInited = false;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_EQ(BusCenterClientInit(), SOFTBUS_OK);
+
+    // Test with empty list and null capBit
+    int32_t ret = DeleteDiscSubscribeMsg(PKGNAME, LNN_SUBSCRIBE_ID, nullptr);
+    // Empty list, should not crash
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    // Add a subscribe msg first
+    SubscribeInfo info;
+    (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
+    info.subscribeId = LNN_SUBSCRIBE_ID;
+    info.capability = g_capabilityMap[HICALL_CAPABILITY_BITMAP].capability;
+    EXPECT_EQ(AddDiscSubscribeMsg(PKGNAME, &info), SOFTBUS_OK);
+
+    // Delete with capBit output
+    uint32_t capBit = MAX_CAPABILITY_BITMAP;
+    ret = DeleteDiscSubscribeMsg(PKGNAME, LNN_SUBSCRIBE_ID, &capBit);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(capBit, HICALL_CAPABILITY_BITMAP);
+
+    BusCenterClientDeinit();
+}
+
+/*
+* @tc.name: StopRefreshLNNInner_Test_002
+* @tc.desc: test StopRefreshLNNInner with DeleteRefreshCbListItemSafe integration
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, StopRefreshLNNInner_Test_002, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, ServerIpcStopRefreshLNN(_, _))
+        .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    
+    EXPECT_EQ(BusCenterClientInit(), SOFTBUS_OK);
+
+    // ServerIpcStopRefreshLNN fails - should return error and not delete callback
+    EXPECT_NE(StopRefreshLNNInner(nullptr, LNN_SUBSCRIBE_ID), SOFTBUS_OK);
+
+    // ServerIpcStopRefreshLNN succeeds
+    EXPECT_EQ(StopRefreshLNNInner(nullptr, LNN_SUBSCRIBE_ID), SOFTBUS_OK);
+
+    BusCenterClientDeinit();
+}
+
+/*
+* @tc.name: BusCenterClientInitDeinit_Test_001
+* @tc.desc: test BusCenterClientInit and Deinit clear refreshCbItems
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, BusCenterClientInitDeinit_Test_001, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_EQ(BusCenterClientInit(), SOFTBUS_OK);
+
+    // Add a refresh callback
+    IRefreshCallback cb;
+    (void)memset_s(&cb, sizeof(IRefreshCallback), 0, sizeof(IRefreshCallback));
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    AddRefreshCbItem(HICALL_CAPABILITY_BITMAP, cb);
+    RefreshCbItem *item = FindRefreshCbItem(HICALL_CAPABILITY_BITMAP);
+    ASSERT_NE(item, nullptr);
+    EXPECT_NE(item->cb.OnDeviceFound, nullptr);
+
+    // Deinit should clear refreshCbItems
+    BusCenterClientDeinit();
+    // After deinit, refreshCbItems should be cleared
+    // Note: access after deinit is for test verification only
+    item = FindRefreshCbItem(HICALL_CAPABILITY_BITMAP);
+    if (item != nullptr) {
+        EXPECT_EQ(item->cb.OnDeviceFound, nullptr);
+    }
+}
+
+/*
+* @tc.name: RefreshLNNInner_AddRefreshCbFail_Test_001
+* @tc.desc: test RefreshLNNInner when AddRefreshCbItemSafe fails
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, RefreshLNNInner_AddRefreshCbFail_Test_001, TestSize.Level1)
+{
+    SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
+    g_busCenterClient.isInit = true;
+
+    SubscribeInfo info;
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCb;
+    cb.OnDiscoverResult = OnDiscoverResultCb;
+    (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
+    info.subscribeId = LNN_SUBSCRIBE_ID;
+    info.mode = DISCOVER_MODE_PASSIVE;
+    info.medium = COAP;
+    info.freq = HIGH;
+    info.isSameAccount = false;
+    info.isWakeRemote = false;
+    info.capability = g_capabilityMap[HICALL_CAPABILITY_BITMAP].capability;
+
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    // Make AddRefreshCbItemSafe fail by making lock fail
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillOnce(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(RefreshLNNInner(nullptr, &info, &cb), SOFTBUS_LOCK_ERR);
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_001
+* @tc.desc: test LnnOnRefreshDeviceFound with NFC_SHARE capability, callback registered
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_001, TestSize.Level1)
+{
+    IRefreshCallback nfcCb;
+    nfcCb.OnDeviceFound = OnDeviceFoundCallback;
+    nfcCb.OnDiscoverResult = OnDiscoverResultCallback;
+    g_busCenterClient.refreshNfcCb = nfcCb;
+
+    DeviceInfo deviceInfo = CreateDeviceInfo(1U << NFC_SHARE_CAPABILITY_BITMAP);
+    ResetRefreshTestCounters();
+    LnnOnRefreshDeviceFound(&deviceInfo);
+    EXPECT_EQ(g_deviceFoundCallCount, 1);
+    EXPECT_EQ(g_lastFoundDevice, &deviceInfo);
+    ResetBuscenterClientCbs();
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_002
+* @tc.desc: test LnnOnRefreshDeviceFound with NFC_SHARE capability, callback is NULL
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_002, TestSize.Level1)
+{
+    g_busCenterClient.refreshNfcCb.OnDeviceFound = nullptr;
+
+    DeviceInfo deviceInfo = CreateDeviceInfo(1U << NFC_SHARE_CAPABILITY_BITMAP);
+    ResetRefreshTestCounters();
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+    EXPECT_EQ(g_deviceFoundCallCount, 0);
+    ResetBuscenterClientCbs();
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_003
+* @tc.desc: test LnnOnRefreshDeviceFound with multiple caps, some not registered
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_003, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ResetBuscenterClientCbs();
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCallback;
+    cb.OnDiscoverResult = OnDiscoverResultCallback;
+    g_busCenterClient.refreshCbItems[HICALL_CAPABILITY_BITMAP].cb = cb;
+    g_busCenterClient.refreshCbItems[DDMP_CAPABILITY_BITMAP].cb = cb;
+
+    uint32_t bitmap = (1U << HICALL_CAPABILITY_BITMAP) |
+        (1U << PROFILE_CAPABILITY_BITMAP) |
+        (1U << DDMP_CAPABILITY_BITMAP) |
+        (1U << OSD_CAPABILITY_BITMAP);
+    DeviceInfo deviceInfo = CreateDeviceInfo(bitmap);
+    ResetRefreshTestCounters();
+    LnnOnRefreshDeviceFound(&deviceInfo);
+    EXPECT_EQ(g_deviceFoundCallCount, 2);
+    ResetBuscenterClientCbs();
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_004
+* @tc.desc: test LnnOnRefreshDeviceFound with NFC_SHARE and other caps combined
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_004, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ResetBuscenterClientCbs();
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCallback;
+    cb.OnDiscoverResult = OnDiscoverResultCallback;
+    g_busCenterClient.refreshNfcCb = cb;
+    g_busCenterClient.refreshCbItems[HICALL_CAPABILITY_BITMAP].cb = cb;
+
+    uint32_t bitmap = (1U << NFC_SHARE_CAPABILITY_BITMAP) | (1U << HICALL_CAPABILITY_BITMAP);
+    DeviceInfo deviceInfo = CreateDeviceInfo(bitmap);
+    ResetRefreshTestCounters();
+    LnnOnRefreshDeviceFound(&deviceInfo);
+    EXPECT_EQ(g_deviceFoundCallCount, 2);
+    ResetBuscenterClientCbs();
+}
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_005
+* @tc.desc: test LnnOnRefreshDeviceFound with lock failure in middle of iteration
+* @tc.type: FUNC
+* @tc.level: Level2
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_005, TestSize.Level2)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ResetBuscenterClientCbs();
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCallback;
+    cb.OnDiscoverResult = OnDiscoverResultCallback;
+    g_busCenterClient.refreshCbItems[HICALL_CAPABILITY_BITMAP].cb = cb;
+    g_busCenterClient.refreshCbItems[PROFILE_CAPABILITY_BITMAP].cb = cb;
+    g_busCenterClient.refreshCbItems[HOMEVISIONPIC_CAPABILITY_BITMAP].cb = cb;
+
+    uint32_t bitmap = (1U << HICALL_CAPABILITY_BITMAP) |
+        (1U << PROFILE_CAPABILITY_BITMAP) |
+        (1U << HOMEVISIONPIC_CAPABILITY_BITMAP);
+    DeviceInfo deviceInfo = CreateDeviceInfo(bitmap);
+    ResetRefreshTestCounters();
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+    EXPECT_EQ(g_deviceFoundCallCount, 2);
+    ResetBuscenterClientCbs();
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_006
+* @tc.desc: test LnnOnRefreshDeviceFound - RefreshCbItem is NULL for bit
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_006, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ResetBuscenterClientCbs();
+    IRefreshCallback cb;
+    cb.OnDeviceFound = nullptr;
+    cb.OnDiscoverResult = nullptr;
+    g_busCenterClient.refreshCbItems[HICALL_CAPABILITY_BITMAP].cb = cb;
+
+    DeviceInfo deviceInfo = CreateDeviceInfo(1U << HICALL_CAPABILITY_BITMAP);
+    ResetRefreshTestCounters();
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+    EXPECT_EQ(g_deviceFoundCallCount, 0);
+    ResetBuscenterClientCbs();
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_007
+* @tc.desc: test LnnOnRefreshDeviceFound with single bit at high position
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_007, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ResetBuscenterClientCbs();
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCallback;
+    cb.OnDiscoverResult = OnDiscoverResultCallback;
+    g_busCenterClient.refreshCbItems[HA_INTERCONNECT_CAPABILITY_BITMAP].cb = cb;
+
+    DeviceInfo deviceInfo = CreateDeviceInfo(1U << HA_INTERCONNECT_CAPABILITY_BITMAP);
+    ResetRefreshTestCounters();
+    LnnOnRefreshDeviceFound(&deviceInfo);
+    EXPECT_EQ(g_deviceFoundCallCount, 1);
+    ResetBuscenterClientCbs();
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_008
+* @tc.desc: test LnnOnRefreshDeviceFound - RefreshCbItem is NULL for bit
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_008, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ResetBuscenterClientCbs();
+    IRefreshCallback cb;
+    cb.OnDeviceFound = nullptr;
+    cb.OnDiscoverResult = nullptr;
+    g_busCenterClient.refreshCbItems[HICALL_CAPABILITY_BITMAP].cb = cb;
+
+    DeviceInfo deviceInfo = CreateDeviceInfo(1U << HICALL_CAPABILITY_BITMAP);
+    ResetRefreshTestCounters();
+    EXPECT_NO_FATAL_FAILURE(LnnOnRefreshDeviceFound(&deviceInfo));
+    EXPECT_EQ(g_deviceFoundCallCount, 0);
+    ResetBuscenterClientCbs();
+}
+
+/*
+* @tc.name: LNN_ON_REFRESH_DEVICE_FOUND_Test_009
+* @tc.desc: test LnnOnRefreshDeviceFound with SHARE capability
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_009, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexLockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, SoftBusMutexUnlockInner(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ResetBuscenterClientCbs();
+    IRefreshCallback cb;
+    cb.OnDeviceFound = OnDeviceFoundCallback;
+    cb.OnDiscoverResult = OnDiscoverResultCallback;
+    g_busCenterClient.refreshCbItems[SHARE_CAPABILITY_BITMAP].cb = cb;
+
+    DeviceInfo deviceInfo = CreateDeviceInfo(1U << SHARE_CAPABILITY_BITMAP);
+    ResetRefreshTestCounters();
+    LnnOnRefreshDeviceFound(&deviceInfo);
+    EXPECT_EQ(g_deviceFoundCallCount, 1);
+    ResetBuscenterClientCbs();
 }
 } // namespace OHOS

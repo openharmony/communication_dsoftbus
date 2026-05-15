@@ -1976,6 +1976,155 @@ HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter004, TestSize.Level1)
 }
 
 /*
+* @tc.name: CompareSameFilter005
+* @tc.desc: CompareSameFilter with matching UUID data returns TRUE
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter005, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CompareSameFilter005 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    BcScanFilter srcFilter = {0};
+    BcScanFilter dstFilter = {0};
+    srcFilter.serviceId = SERVICE_UUID;
+    dstFilter.serviceId = SERVICE_UUID;
+    unsigned char serviceData[] = { 0x04, 0x05, 0x90 };
+    unsigned char serviceDataMask[] = { 0xFF, 0xFF, 0xFF };
+    srcFilter.serviceData = serviceData;
+    srcFilter.serviceDataMask = serviceDataMask;
+    srcFilter.serviceDataLength = sizeof(serviceData);
+    dstFilter.serviceData = serviceData;
+    dstFilter.serviceDataMask = serviceDataMask;
+    dstFilter.serviceDataLength = sizeof(serviceData);
+
+    // Set UUID fields to matching values
+    unsigned char uuidData[] = { 0xAA, 0xBB };
+    unsigned char uuidDataMask[] = { 0xFF, 0xFF };
+    unsigned char uuid[] = { 0xCC };
+    unsigned char uuidMask[] = { 0xFF };
+    srcFilter.serviceUuidData = uuidData;
+    srcFilter.serviceUuidDataMask = uuidDataMask;
+    srcFilter.serviceUuidDataLength = sizeof(uuidData);
+    srcFilter.serviceUuidId = SERVICE_UUID;
+    srcFilter.serviceUuid = uuid;
+    srcFilter.serviceUuidMask = uuidMask;
+    srcFilter.serviceUuidLength = sizeof(uuid);
+    dstFilter.serviceUuidData = uuidData;
+    dstFilter.serviceUuidDataMask = uuidDataMask;
+    dstFilter.serviceUuidDataLength = sizeof(uuidData);
+    dstFilter.serviceUuidId = SERVICE_UUID;
+    dstFilter.serviceUuid = uuid;
+    dstFilter.serviceUuidMask = uuidMask;
+    dstFilter.serviceUuidLength = sizeof(uuid);
+
+    EXPECT_TRUE(CompareSameFilter(&srcFilter, &dstFilter));
+    DISC_LOGI(DISC_TEST, "CompareSameFilter005 end ----");
+}
+
+/*
+* @tc.name: CompareSameFilter006
+* @tc.desc: CompareSameFilter with different UUID data returns FALSE
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter006, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CompareSameFilter006 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    BcScanFilter srcFilter = {0};
+    BcScanFilter dstFilter = {0};
+    srcFilter.serviceId = SERVICE_UUID;
+    dstFilter.serviceId = SERVICE_UUID;
+    unsigned char serviceData[] = { 0x04, 0x05, 0x90 };
+    unsigned char serviceDataMask[] = { 0xFF, 0xFF, 0xFF };
+    srcFilter.serviceData = serviceData;
+    srcFilter.serviceDataMask = serviceDataMask;
+    srcFilter.serviceDataLength = sizeof(serviceData);
+    dstFilter.serviceData = serviceData;
+    dstFilter.serviceDataMask = serviceDataMask;
+    dstFilter.serviceDataLength = sizeof(serviceData);
+
+    // Set UUID fields to different values
+    unsigned char uuidData1[] = { 0xAA, 0xBB };
+    unsigned char uuidData2[] = { 0xCC, 0xDD };
+    unsigned char uuidDataMask[] = { 0xFF, 0xFF };
+    unsigned char uuid[] = { 0xEE };
+    unsigned char uuidMask[] = { 0xFF };
+    srcFilter.serviceUuidData = uuidData1;
+    srcFilter.serviceUuidDataMask = uuidDataMask;
+    srcFilter.serviceUuidDataLength = sizeof(uuidData1);
+    srcFilter.serviceUuidId = SERVICE_UUID;
+    srcFilter.serviceUuid = uuid;
+    srcFilter.serviceUuidMask = uuidMask;
+    srcFilter.serviceUuidLength = sizeof(uuid);
+    dstFilter.serviceUuidData = uuidData2;
+    dstFilter.serviceUuidDataMask = uuidDataMask;
+    dstFilter.serviceUuidDataLength = sizeof(uuidData2);
+    dstFilter.serviceUuidId = SERVICE_UUID;
+    dstFilter.serviceUuid = uuid;
+    dstFilter.serviceUuidMask = uuidMask;
+    dstFilter.serviceUuidLength = sizeof(uuid);
+
+    EXPECT_FALSE(CompareSameFilter(&srcFilter, &dstFilter));
+    DISC_LOGI(DISC_TEST, "CompareSameFilter006 end ----");
+}
+
+/*
+* @tc.name: CompareSameFilter007
+* @tc.desc: CompareSameFilter with one NULL UUID and other non-NULL returns FALSE
+* @tc.type: FUNC
+* @tc.level: Level1
+*/
+HWTEST_F(SoftbusBroadcastMgrTest, CompareSameFilter007, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "CompareSameFilter007 begin ----");
+    ManagerMock managerMock;
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+
+    BcScanFilter srcFilter = {0};
+    BcScanFilter dstFilter = {0};
+    srcFilter.serviceId = SERVICE_UUID;
+    dstFilter.serviceId = SERVICE_UUID;
+    unsigned char serviceData[] = { 0x04, 0x05, 0x90 };
+    unsigned char serviceDataMask[] = { 0xFF, 0xFF, 0xFF };
+    srcFilter.serviceData = serviceData;
+    srcFilter.serviceDataMask = serviceDataMask;
+    srcFilter.serviceDataLength = sizeof(serviceData);
+    dstFilter.serviceData = serviceData;
+    dstFilter.serviceDataMask = serviceDataMask;
+    dstFilter.serviceDataLength = sizeof(serviceData);
+
+    // srcFilter has UUID data, dstFilter has NULL UUID data
+    unsigned char uuidData[] = { 0xAA };
+    unsigned char uuidDataMask[] = { 0xFF };
+    unsigned char uuid[] = { 0xCC };
+    unsigned char uuidMask[] = { 0xFF };
+    srcFilter.serviceUuidData = uuidData;
+    srcFilter.serviceUuidDataMask = uuidDataMask;
+    srcFilter.serviceUuidDataLength = sizeof(uuidData);
+    srcFilter.serviceUuidId = SERVICE_UUID;
+    srcFilter.serviceUuid = uuid;
+    srcFilter.serviceUuidMask = uuidMask;
+    srcFilter.serviceUuidLength = sizeof(uuid);
+    dstFilter.serviceUuidData = NULL;
+    dstFilter.serviceUuidDataMask = NULL;
+    dstFilter.serviceUuidDataLength = 0;
+    dstFilter.serviceUuidId = 0;
+    dstFilter.serviceUuid = NULL;
+    dstFilter.serviceUuidMask = NULL;
+    dstFilter.serviceUuidLength = 0;
+
+    EXPECT_FALSE(CompareSameFilter(&srcFilter, &dstFilter));
+    DISC_LOGI(DISC_TEST, "CompareSameFilter007 end ----");
+}
+ 	 
+
+/*
  * @tc.name: PerformSetBroadcastingParam001
  * @tc.desc: PerformSetBroadcastingParam001
  * @tc.type: FUNC
