@@ -185,6 +185,9 @@ ohos_unittest("SoftbusClientInfoManagerTest") {
 ohos_unittest("SoftbusGEnhanceTest") {
   module_out_path = module_output_path
   sources = [ "softbus_g_enhance_test.cpp" ]
+  if (support_jsapi) {
+    defines = [ "SUPPORT_JSAPI" ]
+  }
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
@@ -230,7 +233,7 @@ group("unittest") {
     ":SoftbusGEnhanceTest",
     ":SoftbusServerTest",
   ]
-  if (dsoftbus_access_token_feature) {
+  if (dsoftbus_access_token_feature && support_jsapi) {
     deps += [ ":SoftbusServerStubTest" ]
   }
 }

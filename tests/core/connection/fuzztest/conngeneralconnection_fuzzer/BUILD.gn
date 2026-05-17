@@ -84,14 +84,7 @@ ohos_fuzztest("ConnGeneralConnectionFuzzTest") {
     "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
-  if (dsoftbus_feature_conn_br) {
-    sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
-  } else {
-    sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common_virtual.c" ]
-  }
-
   external_deps = [
-    "bluetooth:btframework",
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
@@ -101,4 +94,11 @@ ohos_fuzztest("ConnGeneralConnectionFuzzTest") {
     "hitrace:libhitracechain",
     "init:libbegetutil",
   ]
+
+  if (dsoftbus_feature_conn_br && support_jsapi) {
+    sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
+    external_deps += [ "bluetooth:btframework" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common_virtual.c" ]
+  }
 }

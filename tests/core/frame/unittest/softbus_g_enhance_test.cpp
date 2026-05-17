@@ -934,6 +934,7 @@ void DiscShareNfcDeinitStub(void)
  * @tc.level: Level1
  * @tc.require:
  */
+#ifdef SUPPORT_JSAPI
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest029, TestSize.Level1)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
@@ -943,21 +944,21 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest029, TestSize.Level1)
     pfnDiscEnhanceFuncList->schedulerSetBroadcastParam = SchedulerSetBroadcastParamStub;
     ret = SchedulerSetBroadcastParamPacked(0, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
- 
+
     pfnDiscEnhanceFuncList->schedulerInitBroadcast = nullptr;
     ret = SchedulerInitBroadcastPacked();
     EXPECT_EQ(ret, SOFTBUS_OK);
     pfnDiscEnhanceFuncList->schedulerInitBroadcast = InitBroadcastMgrStub;
     ret = SchedulerInitBroadcastPacked();
     EXPECT_EQ(ret, SOFTBUS_OK);
- 
+
     pfnDiscEnhanceFuncList->schedulerDeinitBroadcast = nullptr;
     ret = SchedulerDeinitBroadcastPacked();
     EXPECT_EQ(ret, SOFTBUS_OK);
     pfnDiscEnhanceFuncList->schedulerDeinitBroadcast = DeInitBroadcastMgrStub;
     ret = SchedulerDeinitBroadcastPacked();
     EXPECT_EQ(ret, SOFTBUS_OK);
- 
+
     pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo = nullptr;
     DiscInnerCallback discCb = {0};
     ret = DiscCoapProcessDeviceInfoPacked(nullptr, nullptr, discCb);
@@ -988,6 +989,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest029, TestSize.Level1)
     ret = DiscFillBtypePacked(0, 0, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+#endif
 
 /**
  * @tc.name: SoftbusGEnhanceTest030

@@ -395,6 +395,7 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback003, TestSize.Level0)
     std::cout << "g_btPermissionChangeCb is empty." << std::endl;
 }
 
+#ifdef SUPPORT_JSAPI
 /**
  * @tc.name:PermStateChangeCallback004
  * @tc.desc: Test PermStateChangeCallback when vilide param
@@ -415,6 +416,7 @@ HWTEST_F(SoftbusPermissionTest, PermStateChangeCallback004, TestSize.Level0)
     EXPECT_NO_FATAL_FAILURE(accessTokenAdapterObj.PermStateChangeCallback(result));
     std::cout << "g_btPermissionChangeCb is not empty." << std::endl;
 }
+#endif
 
 /*
  * @tc.name:SoftBusRegisterPermission001

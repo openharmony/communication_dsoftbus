@@ -252,7 +252,7 @@ ohos_unittest("LNNOhosAccountMockTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
-  if (is_standard_system) {
+  if (is_standard_system && support_jsapi) {
     external_deps += [
       "os_account:libaccountkits",
       "os_account:os_account_innerkits",
@@ -407,11 +407,13 @@ ohos_unittest("WrapperBrInterfaceTest") {
   ]
 
   external_deps = [
-    "bluetooth:btframework",
     "c_utils:utils",
     "googletest:gmock_main",
     "hilog:libhilog",
   ]
+  if (support_jsapi) {
+    external_deps += [ "bluetooth:btframework" ]
+  }
 }
 
 group("unittest") {
@@ -420,18 +422,26 @@ group("unittest") {
   deps = [
     ":AdapterDsoftbusRsaCryptoTest",
     ":LNNKvStoreLaunchListenerTest",
-    ":LNNOhosAccountMockTest",
-    ":LNNOhosAccountTest",
     ":LnnSaStatusMonitorTest",
-    ":WrapperBrInterfaceTest",
   ]
+  if (support_jsapi) {
+    deps += [ ":WrapperBrInterfaceTest" ]
+  }
+  if (support_jsapi) {
+    deps += [
+      ":LNNOhosAccountMockTest",
+      ":LNNOhosAccountTest",
+    ]
+  }
   if (dsoftbus_feature_lnn_cloud_sync) {
     deps += [
       ":LnnKVAdapterTest",
       ":LnnKVAdapterWrapperTest",
-      ":LnnOhosAccountAdapterTest",
       ":LnnSettingdataEventMonitorTest",
     ]
+    if (support_jsapi) {
+      deps += [ ":LnnOhosAccountAdapterTest" ]
+    }
   }
   if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {
     deps += [ ":LnnUsbAdapterTest" ]
