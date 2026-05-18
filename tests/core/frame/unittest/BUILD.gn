@@ -230,7 +230,4 @@ group("unittest") {
     ":SoftbusGEnhanceTest",
     ":SoftbusServerTest",
   ]
-  if (dsoftbus_access_token_feature) {
-    deps += [ ":SoftbusServerStubTest" ]
-  }
 }

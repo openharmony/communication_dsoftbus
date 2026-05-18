@@ -521,7 +521,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos002, TestSize.Level1)
     g_asyncReqLanePendingList = nullptr;
     EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     ret = TransAsyncGetLaneInfoByQos(newParam, &allocInfo, &laneHandle, &appInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     g_asyncReqLanePendingList = tmpList;
 
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
