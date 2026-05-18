@@ -186,7 +186,7 @@ ohos_unittest("SoftbusGEnhanceTest") {
   module_out_path = module_output_path
   sources = [ "softbus_g_enhance_test.cpp" ]
   if (support_jsapi) {
-    defines = [ "SUPPORT_JSAPI" ]
+    defines += [ "SUPPORT_JSAPI" ]
   }
 
   include_dirs = [
