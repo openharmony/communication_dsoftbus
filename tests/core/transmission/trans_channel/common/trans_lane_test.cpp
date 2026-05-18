@@ -1020,7 +1020,7 @@ HWTEST_F(TransLaneTest, TransGetConnectTypeByChannelId001, TestSize.Level1)
         g_channelLaneList = nullptr;
     }
     int32_t ret = TransGetConnectTypeByChannelId(1024, &connectType);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**

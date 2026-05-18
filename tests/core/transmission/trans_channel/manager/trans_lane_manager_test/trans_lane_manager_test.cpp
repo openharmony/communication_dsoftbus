@@ -574,7 +574,7 @@ HWTEST_F(TransLaneManagerTest, TransGetTransLaneInfoByLaneHandle001, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     TransLaneInfo info;
     ret = TransGetTransLaneInfoByLaneHandle(1, &info);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     TransLaneMgrInit();
     ret = TransGetTransLaneInfoByLaneHandle(1, &info);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
