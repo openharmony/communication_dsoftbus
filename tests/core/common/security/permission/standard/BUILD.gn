@@ -20,7 +20,7 @@ ohos_unittest("SoftbusPermissionTest") {
   module_out_path = module_output_path
   sources = [ "unittest/softbus_permission_test.cpp" ]
   if (support_jsapi) {
-    defines = [ "SUPPORT_JSAPI" ]
+    defines += [ "SUPPORT_JSAPI" ]
   }
 
   include_dirs = [
