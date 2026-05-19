@@ -72,7 +72,7 @@ ohos_unittest("GeneralConnectionTest") {
     "$dsoftbus_root_path/tests/core/connection/general/unittest/softbus_conn_general_connection_test.cpp",
   ]
 
-  if (dsoftbus_feature_conn_br) {
+  if (dsoftbus_feature_conn_br && support_jsapi) {
     sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
   } else {
     sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common_virtual.c" ]
@@ -133,7 +133,7 @@ ohos_unittest("GeneralConnectionConstraintTest") {
     "$dsoftbus_root_path/tests/core/connection/general/unittest/softbus_conn_general_connection_constraint_test.cpp",
   ]
 
-  if (dsoftbus_feature_conn_br) {
+  if (dsoftbus_feature_conn_br && support_jsapi) {
     sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
   } else {
     sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common_virtual.c" ]
@@ -186,7 +186,7 @@ ohos_unittest("GeneralNegotiationTest") {
     "$dsoftbus_root_path/tests/core/connection/general/unittest/softbus_conn_general_negotiation_test.cpp",
   ]
 
-  if (dsoftbus_feature_conn_br) {
+  if (dsoftbus_feature_conn_br && support_jsapi) {
     sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
   } else {
     sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common_virtual.c" ]

@@ -110,8 +110,10 @@ ohos_unittest("TransScenarioManagerTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":TransScenarioManagerTest",
     ":TransSessionManagerTest",
     ":TransSessionServiceTest",
   ]
+  if (support_jsapi) {
+    deps += [ ":TransScenarioManagerTest" ]
+  }
 }

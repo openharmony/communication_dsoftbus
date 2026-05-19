@@ -865,8 +865,6 @@ ohos_unittest("AuthDeviceProfileTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_core",
-      "os_account:libaccountkits",
-      "os_account:os_account_innerkits",
     ]
   }
 }
@@ -1983,7 +1981,6 @@ group("unittest") {
     ":AuthApplyKeyManagerTest",
     ":AuthApplyKeyProcessTest",
     ":AuthConnectionTest",
-    ":AuthDeviceProfileTest",
     ":AuthEnhanceMockTest",
     ":AuthHichainIdServiceTest",
     ":AuthHichainMockTest",
@@ -2008,9 +2005,14 @@ group("unittest") {
     ":AuthUserCommonKeyNewTest",
     ":AuthUserCommonKeyTest",
   ]
+  if (support_jsapi) {
+    deps += [ ":AuthDeviceProfileTest" ]
+  }
   if (!defined(global_parts_info) ||
       defined(global_parts_info.deviceprofile_device_info_manager)) {
-    deps += [ ":AuthDeviceProfileListenerTest" ]
+    if (support_jsapi) {
+      deps += [ ":AuthDeviceProfileListenerTest" ]
+    }
   }
 }
 

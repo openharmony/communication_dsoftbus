@@ -2416,7 +2416,6 @@ ohos_unittest("LNNHeartBeatTest") {
   ]
 
   external_deps += [
-    "bluetooth:btframework",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -2506,7 +2505,6 @@ ohos_unittest("LnnHeartBeatDeviceRiskTest") {
   ]
 
   external_deps += [
-    "bluetooth:btframework",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -2596,7 +2594,6 @@ ohos_unittest("LnnHeartBeatConstraintTest") {
   ]
 
   external_deps += [
-    "bluetooth:btframework",
     "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
