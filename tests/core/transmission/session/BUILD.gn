@@ -84,27 +84,29 @@ ohos_unittest("TransSessionServiceTest") {
   ]
 }
 
-ohos_unittest("TransScenarioManagerTest") {
-  module_out_path = module_output_path
-  sources = [ "softbus_scenario_manager_test.cpp" ]
+if (support_jsapi) {
+  ohos_unittest("TransScenarioManagerTest") {
+    module_out_path = module_output_path
+    sources = [ "softbus_scenario_manager_test.cpp" ]
 
-  include_dirs = [
-    "$dsoftbus_core_path/common/include",
-    "$dsoftbus_core_path/transmission/session/include",
-    "$dsoftbus_core_path/transmission/session/src",
-  ]
+    include_dirs = [
+      "$dsoftbus_core_path/common/include",
+      "$dsoftbus_core_path/transmission/session/include",
+      "$dsoftbus_core_path/transmission/session/src",
+    ]
 
-  deps = [
-    "$dsoftbus_core_path/common:softbus_utils",
-    "$dsoftbus_core_path/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-  ]
+    deps = [
+      "$dsoftbus_core_path/common:softbus_utils",
+      "$dsoftbus_core_path/frame:softbus_server",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+    ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "wifi:wifi_sdk",
-  ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+      "wifi:wifi_sdk",
+    ]
+  }
 }
 
 group("unittest") {
