@@ -519,7 +519,7 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.mode = DISCOVER_MODE_PASSIVE;
 
-    testInfo.medium = (ExchangeMedium)(COAP1);
+    testInfo.medium = (ExchangeMedium)(MEDIUM_BUTT);
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.medium = (ExchangeMedium)(USB);
