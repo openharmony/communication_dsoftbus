@@ -21,7 +21,7 @@
 #include "auth_log.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "softbus_adapter_mem.h"
-#include "wifi_direct_manager.h"
+
 
 #define AUTH_GEN_CERT_PARA_EXPIRE_TIME 500
 #define AUTH_GEN_CERT_PARA_TIME 10
@@ -249,23 +249,6 @@ int32_t InitAuthPreLinkList(void)
     return SOFTBUS_OK;
 }
 
-static bool PreLinkCheckHasPtk(const char *uuid)
-{
-    if (uuid == NULL) {
-        AUTH_LOGE(AUTH_FSM, "uuid is null");
-        return false;
-    }
-    struct WifiDirectManager *wdMgr = GetWifiDirectManager();
-    if (wdMgr == NULL || wdMgr->linkHasPtk == NULL) {
-        AUTH_LOGE(AUTH_FSM, "get wifiDirect mgr fail");
-        return false;
-    }
-    if (wdMgr->linkHasPtk(uuid)) {
-        return true;
-    }
-    return false;
-}
-
 bool IsAuthPreLinkNodeExist(uint32_t requestId)
 {
     if (AuthPreLinkLock() != SOFTBUS_OK) {
@@ -281,11 +264,6 @@ bool IsAuthPreLinkNodeExist(uint32_t requestId)
     }
     AuthPreLinkUnlock();
     return false;
-}
-
-bool AuthPreLinkCheckNeedPtk(uint32_t requestId, const char *uuid)
-{
-    return IsAuthPreLinkNodeExist(requestId) && !PreLinkCheckHasPtk(uuid);
 }
 
 int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr)

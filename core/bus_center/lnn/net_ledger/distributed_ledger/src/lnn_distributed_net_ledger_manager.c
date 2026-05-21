@@ -1970,23 +1970,6 @@ int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetDLSleRangeCapacity(const char *networkId, uint32_t *sleRangeCapacity)
-{
-    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
-    if (nodeInfo == NULL) {
-        LNN_LOGE(LNN_LEDGER, "get info fail");
-        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-        return SOFTBUS_NOT_FIND;
-    }
-    *sleRangeCapacity = nodeInfo->sleRangeCapacity;
-    (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-    return SOFTBUS_OK;
-}
-
 int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
 {
     if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != SOFTBUS_OK) {

@@ -680,12 +680,6 @@ void LnnNotifySleStateChangeEvent(void *state)
     SoftBusFree(sleState);
 }
 
-void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
-{
-    LnnLaneVapChangeEvent event = {.basic.event = LNN_EVENT_LANE_VAP_CHANGE, .vapPreferChannel = preferChannel};
-    NotifyEvent((const LnnEventBasicInfo *)&event);
-}
-
 void LnnNotifyDeviceRiskStateChangeEvent(void)
 {
     SoftBusDeviceRiskState state = SOFTBUS_DEVICE_RISK_UNKNOWN;
@@ -783,13 +777,6 @@ void LnnNotifyNightModeStateChangeEvent(void *state)
         .status = (uint8_t)(*nightModeState)};
     NotifyEvent((const LnnEventBasicInfo *)&event);
     SoftBusFree(nightModeState);
-}
-
-void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state)
-{
-    LNN_LOGI(LNN_EVENT, "notify home group change");
-    LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_HOME_GROUP_CHANGED, .status = (uint8_t)state};
-    NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)

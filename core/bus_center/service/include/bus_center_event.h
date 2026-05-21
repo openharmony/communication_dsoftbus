@@ -51,7 +51,6 @@ void LnnNotifySleStateChangeEvent(void *state);
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state);
 void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state);
 void LnnNotifyUserStateChangeEvent(SoftBusUserState state);
-void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state);
 void LnnNotifyNightModeStateChangeEvent(void *state);
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);
 void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state);
@@ -80,7 +79,6 @@ void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state);
 
 void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state);
 
-void LnnNotifyVapInfoChangeEvent(int32_t preferChannel);
 
 void LnnNotifyStateForSession(char *udid, int32_t retCode);
 

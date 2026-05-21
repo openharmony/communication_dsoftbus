@@ -81,20 +81,6 @@ static AsyncCallbackInfo *CreateAsyncCallbackInfo(SoftBusLooper *looper, BleAsyn
     return info;
 }
 
-int32_t BleAsyncCallbackHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback, void *para)
-{
-    AsyncCallbackInfo *info = NULL;
-
-    DISC_CHECK_AND_RETURN_RET_LOGE(looper != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "looper is null");
-    DISC_CHECK_AND_RETURN_RET_LOGE(callback != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "callback is null");
-
-    info = CreateAsyncCallbackInfo(looper, callback, para, 0);
-    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_MEM_ERR, DISC_BROADCAST, "create callback info failed");
-
-    looper->PostMessage(looper, &info->msg);
-    return SOFTBUS_OK;
-}
-
 int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
     void *para, uint64_t delayMillis)
 {

@@ -56,11 +56,6 @@ bool SoftbusServerPluginLoadedFlagGet(void)
     return (g_soHandle[SOFTBUS_HANDLE_SERVER_PLUGIN] != NULL);
 }
 
-bool SoftbusClientPluginLoadedFlagGet(void)
-{
-    return (g_soHandle[SOFTBUS_HANDLE_CLIENT_PLUGIN] != NULL);
-}
-
 int32_t SoftBusDlopen(SoftBusHandleType type, void **dllHandle)
 {
     if (type >= SOFTBUS_HANDLE_BUTT || dllHandle == NULL) {
@@ -96,17 +91,6 @@ int32_t SoftBusDlsym(const void *DllHandle, const char *funcName, void **funcHan
     }
 
     return SOFTBUS_OK;
-}
-
-void SoftBusDlclose(SoftBusHandleType type)
-{
-    if (type >= SOFTBUS_HANDLE_BUTT || g_soHandle[type] == NULL) {
-        return;
-    }
-
-    dlclose((void *)g_soHandle[type]);
-    g_soHandle[type] = NULL;
-    return;
 }
 
 int32_t LnnCheckFuncPointer(void *func)

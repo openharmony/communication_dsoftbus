@@ -34,11 +34,6 @@ bool IsOOBEState(void)
     return state != SOFTBUS_OOBE_END;
 }
 
-bool IsScreenUnlock(void)
-{
-    return true;
-}
-
 int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen)
 {
     if (in == NULL || out == NULL || outLen == NULL) {

@@ -24,7 +24,6 @@ extern "C"{
 
 typedef void (*BleAsyncCallbackFunc)(void *para);
 
-int32_t BleAsyncCallbackHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback, void *para);
 int32_t BleAsyncCallbackDelayHelper(SoftBusLooper *looper, BleAsyncCallbackFunc callback,
     void *para, uint64_t delayMillis);
 
