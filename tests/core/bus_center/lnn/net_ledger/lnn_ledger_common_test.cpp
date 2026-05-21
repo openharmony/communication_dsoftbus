@@ -417,7 +417,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_002, TestSize.Level1)
 {
     uint32_t capability = 0;
     bool hasCapability = false;
-    int32_t ret = LnnSetStaticNetCap(NULL, STATIC_CAP_BIT_COUNT);
+    int32_t ret = LnnSetStaticNetCap(nullptr, STATIC_CAP_BIT_COUNT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
     EXPECT_EQ(ret, SOFTBUS_OK);

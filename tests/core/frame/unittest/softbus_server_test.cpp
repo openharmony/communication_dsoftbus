@@ -474,4 +474,151 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest017, TestSize.Level1)
     ret = softBusServer->ConnGetPeerDeviceId(0, nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: SoftbusServerTest018
+ * @tc.desc: OpenSession api param is null test.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerTest, SoftbusServerTest018, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServer> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    EXPECT_NE(softBusServer, nullptr);
+
+    int32_t ret = softBusServer->OpenSession(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SoftbusServerTest019
+ * @tc.desc: HandleTcpConnect api param is null test.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerTest, SoftbusServerTest019, TestSize.Level1)
+{
+    ConnectionAddr addrInfo;
+    ConnectOption connOpt;
+    memset_s(&addrInfo, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    int32_t ret = HandleTcpConnect(nullptr, &connOpt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleTcpConnect(&addrInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleTcpConnect(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SoftbusServerTest020
+ * @tc.desc: HandleBleConnect api param is null test.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerTest, SoftbusServerTest020, TestSize.Level1)
+{
+    ConnectionAddr addrInfo;
+    ConnectOption connOpt;
+    ConnectParam param;
+    memset_s(&addrInfo, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    int32_t ret = HandleBleConnect(nullptr, &connOpt, &param);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleBleConnect(&addrInfo, nullptr, &param);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleBleConnect(&addrInfo, &connOpt, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleBleConnect(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SoftbusServerTest021
+ * @tc.desc: HandleBrConnect api param is null test.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerTest, SoftbusServerTest021, TestSize.Level1)
+{
+    ConnectionAddr addrInfo;
+    ConnectOption connOpt;
+    memset_s(&addrInfo, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    int32_t ret = HandleBrConnect(nullptr, &connOpt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleBrConnect(&addrInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleBrConnect(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SoftbusServerTest022
+ * @tc.desc: HandleBleDirectConnect api param is null test.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerTest, SoftbusServerTest022, TestSize.Level1)
+{
+    ConnectionAddr addrInfo;
+    ConnectOption connOpt;
+    memset_s(&addrInfo, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    int32_t ret = HandleBleDirectConnect(nullptr, &connOpt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleBleDirectConnect(&addrInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleBleDirectConnect(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SoftbusServerTest023
+ * @tc.desc: NotifyAuthSuccess api param is null test.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerTest, SoftbusServerTest023, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServer> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    EXPECT_NE(softBusServer, nullptr);
+    int32_t channelId = 0;
+    int32_t ret = softBusServer->NotifyAuthSuccess(channelId, CHANNEL_TYPE_UNDEFINED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
+}
+
+/**
+ * @tc.name: SoftbusServerTest024
+ * @tc.desc: ConvertQosInfo api param is null test.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerTest, SoftbusServerTest024, TestSize.Level1)
+{
+    QosTV qos;
+    uint32_t qosCount = 1;
+    QosInfo qosInfo;
+    memset_s(&qos, sizeof(QosTV), 0, sizeof(QosTV));
+    memset_s(&qosInfo, sizeof(QosInfo), 0, sizeof(QosInfo));
+    EXPECT_NO_FATAL_FAILURE(ConvertQosInfo(nullptr, 0, &qosInfo));
+    EXPECT_NO_FATAL_FAILURE(ConvertQosInfo(&qos, 0, &qosInfo));
+    EXPECT_NO_FATAL_FAILURE(ConvertQosInfo(&qos, qosCount, &qosInfo));
+    qos.qos = QOS_TYPE_MIN_BW;
+    EXPECT_NO_FATAL_FAILURE(ConvertQosInfo(&qos, qosCount, &qosInfo));
+    qos.qos = QOS_TYPE_MAX_LATENCY;
+    EXPECT_NO_FATAL_FAILURE(ConvertQosInfo(&qos, qosCount, &qosInfo));
+    qos.qos = QOS_TYPE_MIN_LATENCY;
+    EXPECT_NO_FATAL_FAILURE(ConvertQosInfo(&qos, qosCount, &qosInfo));
+    qos.qos = QOS_TYPE_BUTT;
+    EXPECT_NO_FATAL_FAILURE(ConvertQosInfo(&qos, qosCount, &qosInfo));
+}
 }

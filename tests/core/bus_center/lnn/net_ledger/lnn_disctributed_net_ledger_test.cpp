@@ -2136,9 +2136,9 @@ HWTEST_F(LNNDisctributedLedgerTest, GetNodeInfoDiscovery_Test_001, TestSize.Leve
     (void)memset_s(&infoAbility, sizeof(NodeInfoAbility), 0, sizeof(infoAbility));
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(info));
     info.discoveryType = 1 << DISCOVERY_TYPE_BLE;
-    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(NULL, &info, &infoAbility));
+    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(nullptr, &info, &infoAbility));
     info.discoveryType = 1 << DISCOVERY_TYPE_WIFI;
-    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(NULL, &info, &infoAbility));
+    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(nullptr, &info, &infoAbility));
 }
 
 /*

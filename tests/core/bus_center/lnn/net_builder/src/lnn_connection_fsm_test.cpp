@@ -338,7 +338,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_POST_PC_ONLINE_UNIQUELY_TEST_001, TestSize.Le
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     PostPcOnlineUniquely(nullptr);
     NodeInfo *info = nullptr;
-    info = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    info = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(info != nullptr);
     info->deviceInfo.deviceTypeId = TYPE_PC_ID;
     (void)memcpy_s(info->networkId, NETWORK_ID_BUF_LEN, NETWORKID1, NETWORK_ID_BUF_LEN);
@@ -393,7 +393,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_001, Te
     int32_t ret = LnnStartConnectionFsm(connFsm4);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(para != nullptr);
     bool ret1 = CleanInvalidConnStateProcess(nullptr, FSM_MSG_TYPE_LEAVE_LNN, para);
     EXPECT_TRUE(ret1 == false);
@@ -413,7 +413,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CLEAN_INVALID_CONN_STATE_PROCESS_TEST_002, Te
     int32_t ret = LnnStartConnectionFsm(connFsm4);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(para != nullptr);
     bool ret1 = CleanInvalidConnStateProcess(nullptr, FSM_MSG_TYPE_LEAVE_LNN, para);
     EXPECT_TRUE(ret1 == false);
@@ -458,7 +458,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
     int32_t ret = LnnStartConnectionFsm(connFsm4);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(para != nullptr);
     ret = OnlineStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);
@@ -476,7 +476,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_002, TestSize.Level
     int32_t ret = LnnStartConnectionFsm(connFsm4);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(para != nullptr);
     ret = OnlineStateProcess(&(connFsm4->fsm), FSM_MSG_TYPE_AUTH_DONE, para);
     EXPECT_TRUE(ret == false);
@@ -492,7 +492,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_ONLINE_STATE_PROCESS_TEST_002, TestSize.Level
 HWTEST_F(LNNConnectionFsmTest, LNN_LEAVING_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(para != nullptr);
     int32_t ret = LeavingStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);

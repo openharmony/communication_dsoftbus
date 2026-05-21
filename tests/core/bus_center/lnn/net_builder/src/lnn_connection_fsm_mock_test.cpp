@@ -145,13 +145,13 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
     EXPECT_TRUE(connFsm != nullptr);
     void *para = nullptr;
-    para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int32_t)));
+    para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(para != nullptr);
     void *para1 = nullptr;
-    para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int32_t)));
+    para1 = reinterpret_cast<void *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(para1 != nullptr);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
     connFsm->isSession = false;
@@ -195,7 +195,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
     connFsm->isDead = false;
     connFsm->isNeedConnect = false;
     int32_t *retCode = nullptr;
-    retCode = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode != nullptr);
     *retCode = SOFTBUS_OK;
 
@@ -229,19 +229,19 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t *retCode = nullptr;
-    retCode = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode != nullptr);
     *retCode = SOFTBUS_OK;
     int32_t *retCode1 = nullptr;
-    retCode1 = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    retCode1 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode1 != nullptr);
     *retCode1 = SOFTBUS_OK;
     int32_t *retCode2 = nullptr;
-    retCode2 = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    retCode2 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode2 != nullptr);
     *retCode2 = SOFTBUS_OK;
     int32_t *retCode3 = nullptr;
-    retCode3 = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    retCode3 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode3 != nullptr);
     *retCode3 = SOFTBUS_OK;
     LnnConnectionFsm *connFsm = nullptr;
@@ -254,7 +254,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     connFsm->isDead = false;
     connFsm->fsm.flag = 0;
@@ -289,7 +289,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -297,7 +297,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
 
     OnlineStateEnter(nullptr);
     OnlineStateEnter(&connFsm->fsm);
-    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     OnlineStateEnter(&connFsm->fsm);
     LnnDestroyConnectionFsm(connFsm);
@@ -318,13 +318,13 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
         .type = CONNECTION_ADDR_BLE,
     };
     int32_t *retCode = nullptr;
-    retCode = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     *retCode = SOFTBUS_OK;
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     connFsm->fsm.flag = CONN_FLAG;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
@@ -372,7 +372,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
     };
-    int32_t *retCode = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    int32_t *retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     *retCode = SOFTBUS_OK;
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
@@ -425,7 +425,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
     };
-    int32_t *retCode = reinterpret_cast<int32_t *>(SoftBusMalloc(sizeof(int32_t)));
+    int32_t *retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     *retCode = SOFTBUS_OK;
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);

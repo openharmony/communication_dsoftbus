@@ -318,7 +318,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     WaitForSignal();
     char *data = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devIdHead);
-    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != NULL) {
+    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != nullptr) {
         LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data, TEST_DATA_LEN);
     }
     authManager.processData = LnnHichainInterfaceMock::ActionOfProcessData;
@@ -329,7 +329,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     WaitForSignal();
     SoftBusFree(data);
     char *data2 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devAuthHead);
-    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != NULL) {
+    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != nullptr) {
         LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data2, TEST_DATA_LEN);
     }
     WaitForSignal();
@@ -373,13 +373,13 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_002, TestSize.Level1)
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
     ClientFSMCreate(&mockInterface, authManager, groupManager);
     WaitForSignal();
-    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != NULL) {
+    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != nullptr) {
         LnnConnectInterfaceMock::g_conncallback.OnDataReceived(
             g_connId, MODULE_ID, SEQ_SERVER, LnnConnectInterfaceMock::g_encryptData, TEST_DATA_LEN);
     }
     WaitForSignal();
     char *data4 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, closeAckHead);
-    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != NULL) {
+    if (LnnConnectInterfaceMock::g_conncallback.OnDataReceived != nullptr) {
         LnnConnectInterfaceMock::g_conncallback.OnDataReceived(g_connId, MODULE_ID, SEQ_SERVER, data4, TEST_DATA_LEN);
     }
     WaitForSignal();

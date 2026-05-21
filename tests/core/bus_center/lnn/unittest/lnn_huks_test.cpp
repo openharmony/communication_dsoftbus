@@ -347,7 +347,7 @@ HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
  */
 HWTEST_F(LNNHuksUtilsTest, Generate_Random_Test_02, TestSize.Level0)
 {
-    int32_t ret = LnnGenerateRandomByHuks(NULL, LNN_HUKS_AES_COMMON_SIZE);
+    int32_t ret = LnnGenerateRandomByHuks(nullptr, LNN_HUKS_AES_COMMON_SIZE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -367,11 +367,11 @@ HWTEST_F(LNNHuksUtilsTest, CeDecrypt_Data_Test_01, TestSize.Level0)
     (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
     (void)memset_s(&inData, sizeof(HksBlob), 0, sizeof(HksBlob));
     (void)memset_s(&outData, sizeof(HksBlob), 0, sizeof(HksBlob));
-    int32_t ret = LnnCeDecryptDataByHuks(NULL, &inData, &outData);
+    int32_t ret = LnnCeDecryptDataByHuks(nullptr, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnCeDecryptDataByHuks(&keyAlias, NULL, &outData);
+    ret = LnnCeDecryptDataByHuks(&keyAlias, nullptr, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, NULL);
+    ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -414,11 +414,11 @@ HWTEST_F(LNNHuksUtilsTest, CeEncrypt_Data_Test_01, TestSize.Level0)
     (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
     (void)memset_s(&inData, sizeof(HksBlob), 0, sizeof(HksBlob));
     (void)memset_s(&outData, sizeof(HksBlob), 0, sizeof(HksBlob));
-    int32_t ret = LnnCeEncryptDataByHuks(NULL, &inData, &outData);
+    int32_t ret = LnnCeEncryptDataByHuks(nullptr, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnCeEncryptDataByHuks(&keyAlias, NULL, &outData);
+    ret = LnnCeEncryptDataByHuks(&keyAlias, nullptr, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, NULL);
+    ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -455,7 +455,7 @@ HWTEST_F(LNNHuksUtilsTest, CeEncrypt_Data_Test_02, TestSize.Level0)
  */
 HWTEST_F(LNNHuksUtilsTest, GenerateCeKey_Test_01, TestSize.Level0)
 {
-    int32_t ret = LnnGenerateCeKeyByHuks(NULL, true);
+    int32_t ret = LnnGenerateCeKeyByHuks(nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

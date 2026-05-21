@@ -388,7 +388,7 @@ HWTEST_F(PermissionEntrystaticTest, DynamicPermissionTest001, TestSize.Level1)
 HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry001, TestSize.Level0)
 {
     RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(nullptr);
-    EXPECT_TRUE(ret == NULL);
+    EXPECT_TRUE(ret == nullptr);
 }
 
 /*
@@ -407,7 +407,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry002, TestSize.Lev
     cJSON *msg = cJSON_Parse(permConfig);
     cJSON *object = cJSON_GetArrayItem(msg, 0);
     RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
-    EXPECT_FALSE(ret == NULL);
+    EXPECT_FALSE(ret == nullptr);
     cJSON_Delete(msg);
 }
 
@@ -426,7 +426,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry003, TestSize.Lev
     cJSON *msg = cJSON_Parse(permConfig);
     cJSON *object = cJSON_GetArrayItem(msg, 0);
     RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
-    EXPECT_TRUE(ret == NULL);
+    EXPECT_TRUE(ret == nullptr);
     cJSON_Delete(msg);
 }
 
@@ -445,7 +445,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry004, TestSize.Lev
     cJSON *msg = cJSON_Parse(permConfig);
     cJSON *object = cJSON_GetArrayItem(msg, 0);
     RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
-    EXPECT_TRUE(ret == NULL);
+    EXPECT_TRUE(ret == nullptr);
     cJSON_Delete(msg);
 }
 
@@ -464,7 +464,7 @@ HWTEST_F(PermissionEntrystaticTest, ProcessRpcSaPermissionEntry005, TestSize.Lev
     cJSON *msg = cJSON_Parse(permConfig);
     cJSON *object = cJSON_GetArrayItem(msg, 0);
     RpcSaPermissionEntry * ret = ProcessRpcSaPermissionEntry(object);
-    EXPECT_TRUE(ret == NULL);
+    EXPECT_TRUE(ret == nullptr);
     cJSON_Delete(msg);
 }
 } // namespace OHOS

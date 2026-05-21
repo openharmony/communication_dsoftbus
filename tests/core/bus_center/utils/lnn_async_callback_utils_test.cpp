@@ -33,7 +33,7 @@ static uint32_t g_callbackData = 0;
 static void TestCallback(void *para)
 {
     g_callbackExecuted = true;
-    if (para != NULL) {
+    if (para != nullptr) {
         g_callbackData = *(uint32_t *)para;
     }
 }
@@ -74,7 +74,7 @@ void LnnAsyncCallbackUtilsTest::TearDown()
  */
 HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_HELPER_TEST_001, TestSize.Level1)
 {
-    int32_t ret = LnnAsyncCallbackHelper((SoftBusLooper *)NULL, TestCallback, NULL);
+    int32_t ret = LnnAsyncCallbackHelper((SoftBusLooper *)nullptr, TestCallback, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -89,7 +89,7 @@ HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_HELPER_TEST_002, TestSize
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     ASSERT_NE(looper, nullptr);
 
-    int32_t ret = LnnAsyncCallbackHelper(looper, (LnnAsyncCallbackFunc)NULL, NULL);
+    int32_t ret = LnnAsyncCallbackHelper(looper, (LnnAsyncCallbackFunc)nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -105,7 +105,7 @@ HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_HELPER_TEST_003, TestSize
     ASSERT_NE(looper, nullptr);
 
     g_callbackExecuted = false;
-    int32_t ret = LnnAsyncCallbackHelper(looper, TestCallback, NULL);
+    int32_t ret = LnnAsyncCallbackHelper(looper, TestCallback, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     sleep(1);
@@ -141,7 +141,7 @@ HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_HELPER_TEST_004, TestSize
  */
 HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_DELAY_HELPER_TEST_001, TestSize.Level1)
 {
-    int32_t ret = LnnAsyncCallbackDelayHelper((SoftBusLooper *)NULL, TestCallback, NULL, TEST_DELAY_MILLIS);
+    int32_t ret = LnnAsyncCallbackDelayHelper((SoftBusLooper *)nullptr, TestCallback, nullptr, TEST_DELAY_MILLIS);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -156,7 +156,7 @@ HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_DELAY_HELPER_TEST_002, Te
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     ASSERT_NE(looper, nullptr);
 
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, (LnnAsyncCallbackFunc)NULL, NULL, TEST_DELAY_MILLIS);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, (LnnAsyncCallbackFunc)nullptr, nullptr, TEST_DELAY_MILLIS);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -172,7 +172,7 @@ HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_DELAY_HELPER_TEST_003, Te
     ASSERT_NE(looper, nullptr);
 
     g_callbackExecuted = false;
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, TestCallback, NULL, TEST_DELAY_MILLIS);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, TestCallback, nullptr, TEST_DELAY_MILLIS);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     sleep(1);
@@ -215,7 +215,7 @@ HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_DELAY_HELPER_TEST_005, Te
     ASSERT_NE(looper, nullptr);
 
     g_callbackExecuted = false;
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, TestCallback, NULL, 0);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, TestCallback, nullptr, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     sleep(1);
@@ -234,10 +234,10 @@ HWTEST_F(LnnAsyncCallbackUtilsTest, LNN_ASYNC_CALLBACK_HELPER_TEST_006, TestSize
     ASSERT_NE(looper, nullptr);
 
     g_callbackExecuted = false;
-    int32_t ret = LnnAsyncCallbackHelper(looper, TestCallback, NULL);
+    int32_t ret = LnnAsyncCallbackHelper(looper, TestCallback, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = LnnAsyncCallbackHelper(looper, TestCallback, NULL);
+    ret = LnnAsyncCallbackHelper(looper, TestCallback, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     sleep(2);

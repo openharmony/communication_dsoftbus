@@ -99,7 +99,7 @@ HWTEST_F(LnnHeartBeatDeviceRiskTest, HbDeviceRiskStateEventHandlerTest001, TestS
     event->basic.event = LNN_EVENT_TYPE_MAX;
     event->status = SOFTBUS_DEVICE_IS_RISK;
     g_hbConditionState.deviceRiskState = SOFTBUS_DEVICE_IS_RISK;
-    HbDeviceRiskStateEventHandler(NULL);
+    HbDeviceRiskStateEventHandler(nullptr);
 
     HbDeviceRiskStateEventHandler(&event->basic);
 

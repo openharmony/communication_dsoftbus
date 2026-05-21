@@ -394,7 +394,7 @@ HWTEST_F(AuthHichainMockTest, PACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
     int32_t ret = SOFTBUS_OK;
 
     JsonObj *obj = JSON_CreateObject();
-    EXPECT_NE(obj, NULL);
+    EXPECT_NE(obj, nullptr);
 
     EXPECT_CALL(hichainMock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
@@ -448,15 +448,15 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
     AuthSessionInfo info = { 0 };
     int64_t authSeq = 0;
     JsonObj *obj = JSON_CreateObject();
-    EXPECT_NE(obj, NULL);
+    EXPECT_NE(obj, nullptr);
 
     EXPECT_CALL(hichainMock, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     UnpackExternalAuthInfo(obj, &info, authSeq);
-    EXPECT_EQ(info.credId, NULL);
+    EXPECT_EQ(info.credId, nullptr);
 
     info.authVersion = (AuthVersion)2; // AUTH_VERSION_V2
     UnpackExternalAuthInfo(obj, &info, authSeq);
-    EXPECT_EQ(info.credId, NULL);
+    EXPECT_EQ(info.credId, nullptr);
 
     JSON_Delete(obj);
 }

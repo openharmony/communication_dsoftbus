@@ -699,12 +699,12 @@ HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionJsonTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 {
     JsonObj *obj = JSON_CreateObject();
-    if (obj == NULL) {
+    if (obj == nullptr) {
         return;
     }
 
     NodeInfo *info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         JSON_Delete(obj);
         return;
     }

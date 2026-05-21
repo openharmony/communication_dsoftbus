@@ -160,7 +160,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_localNetLedger.lock, NULL);
+    SoftBusMutexInit(&g_localNetLedger.lock, nullptr);
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR));
     EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR));
@@ -1168,7 +1168,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_UPDATE_SLE_CAP_AND_VERSION_001, TestSize.Level1)
     int32_t slecap = 1;
     int32_t ret = LnnUpdateSleCapacityAndVersion(slecap);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-    SoftBusMutexInit(&g_localNetLedger.lock, NULL);
+    SoftBusMutexInit(&g_localNetLedger.lock, nullptr);
     ret = LnnUpdateSleCapacityAndVersion(slecap);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -1265,7 +1265,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_INIT_LOCAL_NODE_INFO_001, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_HUM_U16_INFO_001, TestSize.Level1)
 {
-    int32_t ret = LnnGetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, NULL);
+    int32_t ret = LnnGetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     uint16_t info = 0;
     ret = LnnGetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, &info);

@@ -56,11 +56,11 @@ AuthApplyKeyManagerMock &AuthApplyKeyManagerMock::GetMock()
 int32_t AuthApplyKeyManagerMock::LnnRetrieveDeviceDataInner(LnnDataType dataType, char **data, uint32_t *dataLen)
 {
     cJSON *jsonArray = cJSON_CreateArray();
-    if (jsonArray == NULL) {
+    if (jsonArray == nullptr) {
         return SOFTBUS_CREATE_JSON_ERR;
     }
     cJSON *obj1 = cJSON_CreateObject();
-    if (obj1 == NULL) {
+    if (obj1 == nullptr) {
         cJSON_Delete(jsonArray);
         return SOFTBUS_CREATE_JSON_ERR;
     }
@@ -75,7 +75,7 @@ int32_t AuthApplyKeyManagerMock::LnnRetrieveDeviceDataInner(LnnDataType dataType
     }
     cJSON_AddItemToArray(jsonArray, obj1);
     cJSON *obj2 = cJSON_CreateObject();
-    if (obj2 == NULL) {
+    if (obj2 == nullptr) {
         cJSON_Delete(jsonArray);
         return SOFTBUS_CREATE_JSON_ERR;
     }

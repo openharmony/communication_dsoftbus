@@ -156,7 +156,7 @@ HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
     const char *uid = "testdata";
     int32_t ret;
 
-    ret = HichainStartAuth(authSeq, NULL, HICHAIN_AUTH_DEVICE);
+    ret = HichainStartAuth(authSeq, nullptr, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
         strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {

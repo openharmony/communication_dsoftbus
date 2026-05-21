@@ -544,7 +544,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_003, TestSize.Le
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(IdServiceMock, LnnInsertSpecificTrustedDevInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(IdServiceMock, LnnHbOnTrustedRelationIncreased).WillRepeatedly(Return());
-    if (msg1 != nullptr && msg2 != NULL && g_regListenerTest.onCredAdd != nullptr &&
+    if (msg1 != nullptr && msg2 != nullptr && g_regListenerTest.onCredAdd != nullptr &&
         g_regListenerTest.onCredUpdate != nullptr) {
         g_regListenerTest.onCredAdd(TEST_CREDID_INFO, msg1);
         g_regListenerTest.onCredUpdate(TEST_CREDID_INFO, msg2);
