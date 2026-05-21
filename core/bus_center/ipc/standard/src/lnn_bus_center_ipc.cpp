@@ -216,6 +216,18 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, int32_t callingPid, const ch
     return SOFTBUS_OK;
 }
 
+static void GetRequestPidToReport(std::vector<int32_t> &requestPid, const char *pkgName, uint32_t pkgNameLen,
+    int32_t subscribeId)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    for (const auto &iter : g_refreshLnnRequestInfo) {
+        if (strncmp(pkgName, iter->pkgName, pkgNameLen) != 0 || subscribeId != iter->subscribeId) {
+            continue;
+        }
+        requestPid.push_back(iter->pid);
+    }
+}
+
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
 {
@@ -230,13 +242,12 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     auto ret = memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo));
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, LNN_EVENT, "copy device info failed");
 
-    std::lock_guard<std::mutex> autoLock(g_lock);
-    for (const auto &iter : g_refreshLnnRequestInfo) {
-        if (strncmp(pkgName, iter->pkgName, pkgNameLen) != 0 || subscribeId != iter->subscribeId) {
-            continue;
-        }
+    std::vector<int32_t> requestPid;
+    GetRequestPidToReport(requestPid, pkgName, pkgNameLen, subscribeId);
+
+    for (const auto &pid : requestPid) {
         LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, additions);
-        (void)ClientOnRefreshDeviceFound(pkgName, (*iter).pid, &newDevice, sizeof(DeviceInfo));
+        (void)ClientOnRefreshDeviceFound(pkgName, pid, &newDevice, sizeof(DeviceInfo));
     }
     return SOFTBUS_OK;
 }
