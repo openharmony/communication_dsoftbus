@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,12 +23,17 @@ int32_t InitDdos(void)
     return SOFTBUS_OK;
 }
 
+void DeinitDdos(void)
+{
+    return;
+}
+
 void BrProxyClientDeathClearResource(pid_t callingPid)
 {
     return;
 }
 
-void DeinitDdos(void)
+void TransBrProxyInit(void)
 {
     return;
 }
