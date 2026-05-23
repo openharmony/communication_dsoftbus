@@ -81,6 +81,7 @@ ohos_unittest("GeneralConnectionTest") {
 
 ohos_unittest("GeneralConnectionConstraintTest") {
   module_out_path = module_output_path
+  defines += [ "ENABLE_OS_ACCOUNT_CONSTRAINT" ]
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/service/include",

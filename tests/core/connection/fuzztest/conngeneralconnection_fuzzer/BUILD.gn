@@ -19,6 +19,7 @@ import("../../../../../dsoftbus.gni")
 
 ohos_fuzztest("ConnGeneralConnectionFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
+  defines += [ "ENABLE_OS_ACCOUNT_CONSTRAINT" ]
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/fuzztest/conngeneralconnection_fuzzer"
 
   include_dirs = [

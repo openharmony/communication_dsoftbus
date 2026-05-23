@@ -953,14 +953,6 @@ int32_t LnnInitNetworkManagerDelay(void)
     return SOFTBUS_OK;
 }
 
-#ifdef DISABLE_AUTH_DEPS
-// Stub function for products without os_account depends
-bool LnnIsOsAccountConstraint()
-{
-    return false;
-}
-#endif
-
 bool LnnIsAutoNetWorkingEnabled(void)
 {
     int32_t localDevTypeId = 0;

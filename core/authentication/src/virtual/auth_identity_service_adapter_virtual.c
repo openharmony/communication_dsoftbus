@@ -95,3 +95,13 @@ void IdServiceUnRegCredMgr(void)
     AUTH_LOGI(AUTH_HICHAIN, "id service unreg cred manager not implement");
     return;
 }
+
+char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+    const char *udidHash)
+{
+    (void)localUserId;
+    (void)peerUserId;
+    (void)credType;
+    (void)udidHash;
+    return NULL;
+}
