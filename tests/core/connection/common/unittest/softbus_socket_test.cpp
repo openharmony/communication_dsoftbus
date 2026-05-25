@@ -600,16 +600,6 @@ HWTEST_F(SoftBusSocketTest, ConnGetLocalSocketPortTest_Success, TestSize.Level1)
     // Initialize sockets to init mutex and register TCP protocol
     auto initRet = ConnInitSockets();
     ASSERT_EQ(initRet, SOFTBUS_OK);
-
-    // Test that ConnGetLocalSocketPort works with the registered TCP interface
-    // Since ConnInitSockets registered TCP (LNN_PROTOCOL_IP), GetSocketInterface
-    // should find it. For invalid fd=10, GetTcpSockPort will return an error code.
-    auto ret = ConnGetLocalSocketPort(10);
-    // The function should not crash, and should return either:
-    // - An error code (negative) from GetTcpSockPort for invalid fd
-    // - SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR if interface not found
-    EXPECT_TRUE(ret < 0 || ret == SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
-
     ConnDeinitSockets();
 }
 

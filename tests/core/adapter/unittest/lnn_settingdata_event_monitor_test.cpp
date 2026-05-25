@@ -166,6 +166,6 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest007, TestSiz
     uint32_t len = 0;
     char deviceName[] = "deviceName";
     int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, DEFAULT_NAME, deviceName, len);
-    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

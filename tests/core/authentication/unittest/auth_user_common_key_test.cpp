@@ -188,17 +188,24 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_Test_001, TestSize
 {
     AuthACLInfo aclInfo = {
         .isServer = false,
-        .sinkUserId = 1,
-        .sourceUserId = 2,
-        .sourceTokenId = 3,
-        .sinkTokenId = 4,
+        .sinkUserId = 2,
+        .sourceUserId = 3,
+        .sourceTokenId = 4,
+        .sinkTokenId = 5,
     };
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkUdid, UDID_BUF_LEN, NODE2_UDID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
     EXPECT_EQ(EOK, strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
+    AuthUserKeyInfo userKeyInfo1 = {
+        .keyLen = strlen("testKey1"),
+        .time = 12345,
+        .keyIndex = 1,
+    };
+    int32_t ret = AuthInsertUserKey(&aclInfo, &userKeyInfo1, false, DP_BIND_TYPE_DIFF_ACCOUNT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     AuthUserKeyInfo userKeyInfo = {};
-    int32_t ret = GetUserKeyInfoDiffAccount(nullptr, &userKeyInfo);
+    ret = GetUserKeyInfoDiffAccount(nullptr, &userKeyInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetUserKeyInfoDiffAccount(&aclInfo, &userKeyInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -244,6 +251,9 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_WITH_USER_Test_001
     ret = GetUserKeyInfoDiffAccountWithUserLevel(&aclInfo, &userKeyInfo);
     EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_KEY_NOT_FOUND);
     aclInfo.isServer = false;
+    ret = GetUserKeyInfoDiffAccountWithUserLevel(&aclInfo, &userKeyInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    aclInfo.sourceTokenId = 4;
     ret = GetUserKeyInfoDiffAccountWithUserLevel(&aclInfo, &userKeyInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

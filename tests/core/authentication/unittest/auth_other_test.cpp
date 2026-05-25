@@ -1280,6 +1280,9 @@ HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(OnWiFiDisconnected(module, fd));
     module = AUTH_USB;
     EXPECT_NO_FATAL_FAILURE(OnWiFiDisconnected(module, fd));
+
+    AuthTcpConnectionInterfaceMock tcpConnMock;
+    EXPECT_CALL(tcpConnMock, StopSessionKeyListening).WillRepeatedly(Return());
     module = AUTH_SESSION_KEY;
     EXPECT_NO_FATAL_FAILURE(OnWiFiDisconnected(module, fd));
 
