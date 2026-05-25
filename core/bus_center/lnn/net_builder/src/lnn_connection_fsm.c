@@ -1709,6 +1709,7 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
     LNN_LOGI(LNN_BUILDER, "auth process. [id=%{public}u], msgType=%{public}d", connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_JOIN_LNN:
+        case FSM_MSG_TYPE_FORCE_JOIN_LNN:
             OnJoinLNN(connFsm);
             break;
         case FSM_MSG_TYPE_AUTH_DONE:
@@ -2186,6 +2187,7 @@ static bool LeavingStateProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     LNN_LOGI(LNN_BUILDER, "leaving process message. [id=%{public}u], msgType=%{public}d", connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_JOIN_LNN:
+        case FSM_MSG_TYPE_FORCE_JOIN_LNN:
             NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_JOIN_LEAVING);
             break;
         case FSM_MSG_TYPE_SYNC_OFFLINE_DONE:
