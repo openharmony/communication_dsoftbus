@@ -54,29 +54,6 @@ void AuthPreLinkTest::SetUp() { }
 
 void AuthPreLinkTest::TearDown() { }
 
-static bool AuthFsmTestTrueLinkHasPtk(const char *remoteDeviceId)
-{
-    (void)remoteDeviceId;
-    return true;
-}
-
-static bool AuthFsmTestFalseLinkHasPtk(const char *remoteDeviceId)
-{
-    (void)remoteDeviceId;
-    return false;
-}
-
-static struct WifiDirectManager g_manager1 = {
-    .linkHasPtk = AuthFsmTestTrueLinkHasPtk,
-};
-
-static struct WifiDirectManager g_manager2 = {
-    .linkHasPtk = AuthFsmTestFalseLinkHasPtk,
-};
-
-static struct WifiDirectManager g_manager3 = {
-    .linkHasPtk = NULL,
-};
 
 /*
  * @tc.name: ADD_AUTH_GEN_CER_PARA_NODE_TEST_001
@@ -311,24 +288,4 @@ HWTEST_F(AuthPreLinkTest, UPDATE_AUTH_PRE_LINK_UUID_BY_ID_TEST_001, TestSize.Lev
     DelAuthPreLinkById(requestId);
 }
 
-/*
- * @tc.name: PRE_LINK_CHECK_HAS_PTK_TEST_001
- * @tc.desc: PreLinkCheckHasPtk test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthPreLinkTest, PRE_LINK_CHECK_HAS_PTK_TEST_001, TestSize.Level1)
-{
-    NiceMock<AuthPreLinkInterfaceMock> mock;
-    EXPECT_CALL(mock, GetWifiDirectManager)
-        .WillOnce(Return(NULL))
-        .WillOnce(Return(&g_manager3))
-        .WillOnce(Return(&g_manager2))
-        .WillRepeatedly(Return(&g_manager1));
-    EXPECT_FALSE(PreLinkCheckHasPtk(NULL));
-    EXPECT_FALSE(PreLinkCheckHasPtk(TEST_UUID));
-    EXPECT_FALSE(PreLinkCheckHasPtk(TEST_UUID));
-    EXPECT_FALSE(PreLinkCheckHasPtk(TEST_UUID));
-    EXPECT_TRUE(PreLinkCheckHasPtk(TEST_UUID));
-}
 } // namespace OHOS

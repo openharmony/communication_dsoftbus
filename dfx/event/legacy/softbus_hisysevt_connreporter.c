@@ -478,30 +478,6 @@ static int32_t SoftBusReportProcessStepRecordEvt(void)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName)
-{
-    COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(pkgName, PKG_NAME_SIZE_MAX), SOFTBUS_INVALID_PKGNAME, COMM_EVENT,
-        "invalid param!");
-    char *anonyPkgName = NULL;
-    Anonymize(pkgName, &anonyPkgName);
-    COMM_LOGD(
-        COMM_EVENT, "record pid and pkg name, pid=%{public}d, pkgName=%{public}s", pId, AnonymizeWrapper(anonyPkgName));
-    AnonymizeFree(anonyPkgName);
-    int32_t ret = SoftBusMutexLock(&g_pIdOfNameLock);
-    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT, "pId of name lock fail");
-    PIdOfPkgNameNode *pIdOfPkgNameNode = GetPkgNameByPId(pId);
-    if (pIdOfPkgNameNode == NULL) {
-        ret = AddPIdOfPkgNameNode(&pIdOfPkgNameNode, pId, pkgName);
-        if (ret != SOFTBUS_OK) {
-            COMM_LOGE(COMM_EVENT, "add pId of pkg name node fail");
-            SoftBusMutexUnlock(&g_pIdOfNameLock);
-            return ret;
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_pIdOfNameLock);
-    return SOFTBUS_OK;
-}
-
 static void ConnResultRecordCount(ConnResultRecord *record, uint64_t costTime)
 {
     record->mConnTotalTime += costTime;

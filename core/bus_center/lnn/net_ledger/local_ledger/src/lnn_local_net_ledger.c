@@ -2741,10 +2741,6 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
     return LnnSetLocalInfo(key, (void *)&info);
 }
 
-int32_t LnnSetLocalNumU64Info(InfoKey key, uint64_t info)
-{
-    return LnnSetLocalInfo(key, (void *)&info);
-}
 
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {

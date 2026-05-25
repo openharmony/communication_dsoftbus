@@ -90,21 +90,6 @@ int32_t SchedulerSetScanFilter(int32_t listenerId, const BcScanFilter *scanFilte
     return SetScanFilter(listenerId, scanFilter, filterNum);
 }
 
-int32_t SchedulerGetScanFilter(int32_t listenerId, BcScanFilter **scanFilter, uint8_t *filterNum)
-{
-    return GetScanFilter(listenerId, scanFilter, filterNum);
-}
-
-int32_t SchedulerQueryBroadcastStatus(int32_t bcId, int32_t *status)
-{
-    return QueryBroadcastStatus(bcId, status);
-}
-
-bool SchedulerIsLpDeviceAvailable(void)
-{
-    return BroadcastIsLpDeviceAvailable();
-}
-
 bool SchedulerSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
     const LpScanParam *scanParam)
 {
@@ -114,27 +99,6 @@ bool SchedulerSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcPar
 int32_t SchedulerGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
 {
     return BroadcastGetBroadcastHandle(bcId, bcHandle);
-}
-
-int32_t SchedulerEnableSyncDataToLpDevice(void)
-{
-    return BroadcastEnableSyncDataToLpDevice();
-}
-
-int32_t SchedulerDisableSyncDataToLpDevice(void)
-{
-    return BroadcastDisableSyncDataToLpDevice();
-}
-
-int32_t SchedulerSetScanReportChannelToLpDevice(int32_t listenerId, bool enable)
-{
-    return BroadcastSetScanReportChannelToLpDevice(listenerId, enable);
-}
-
-int32_t SchedulerSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
-    int32_t interval, int32_t bcHandle)
-{
-    return BroadcastSetLpAdvParam(duration, maxExtAdvEvents, window, interval, bcHandle);
 }
 
 int8_t SchedulerGetAdvPower(int32_t businessType)

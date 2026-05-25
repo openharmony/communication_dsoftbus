@@ -17,13 +17,3 @@
 
 #include "softbus_error_code.h"
 
-int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen,
-    uint8_t *reply, uint32_t replyLen)
-{
-    (void)moduleId;
-    (void)cmd;
-    (void)cmdLen;
-    (void)reply;
-    (void)replyLen;
-    return SOFTBUS_OK;
-}

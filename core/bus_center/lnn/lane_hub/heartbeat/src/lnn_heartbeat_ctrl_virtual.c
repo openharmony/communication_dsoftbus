@@ -99,13 +99,6 @@ int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbea
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnTriggerSleRangeForMsdp(const char *pkgName, const RangeConfig *config)
-{
-    (void)pkgName;
-    (void)config;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
     (void)pkgName;

@@ -64,18 +64,6 @@ bool InetEqualZero(uint8_t af, const union InetAddr *a)
     return InetEqual(af, a, &zero);
 }
 
-bool InetEqualNone(uint8_t af, const union InetAddr *a)
-{
-    int i;
-    union InetAddr none;
-
-    for (i = 0; i < (int)sizeof(struct in6_addr); i++) {
-        none.in6.s6_addr[i] = 0xff; // INADDR_NONE 0xff
-    }
-
-    return InetEqual(af, a, &none);
-}
-
 bool InetEqualLoop(uint8_t af, const char *ip)
 {
     const char *loopIp = af == AF_INET ? IPV4_LOOP_IP : IPV6_LOOP_IP;
