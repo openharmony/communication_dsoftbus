@@ -24,9 +24,7 @@ int32_t LnnInitMetaNodeLedger(void)
     return SOFTBUS_OK;
 }
 
-void LnnDeinitMetaNodeLedger(void)
-{
-}
+void LnnDeinitMetaNodeLedger(void) { }
 
 int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
 {
@@ -47,3 +45,18 @@ int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
     (void)infoNum;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeInfo)
+{
+    (void)networkId;
+    (void)nodeInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
+{
+    (void)networkId;
+    (void)udid;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+

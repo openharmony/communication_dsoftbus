@@ -26,3 +26,14 @@ void DiscCoapDeinit(void)
 {
     return;
 }
+
+uint32_t GetDiscCapability(void)
+{
+    return 0;
+}
+
+uint32_t GetDiscPublishCapability(void)
+{
+    return 0;
+}
+

@@ -934,6 +934,16 @@ int32_t GetLocalUdidShortHash(char *localUdidHash)
     return SOFTBUS_OK;
 }
 
+static bool PackCredTypeInfo(cJSON *json, int32_t sinkUserId, int32_t credType, int32_t sourceUserId)
+{
+    if (!AddNumberToJsonObject(json, SINK_USERID, sinkUserId) ||
+        !AddNumberToJsonObject(json, CRED_TYPE, credType) ||
+        !AddNumberToJsonObject(json, SOURCE_USERID, sourceUserId)) {
+        return false;
+    }
+    return true;
+}
+
 static bool QueryAllCredTypeByQueryParam(CredTypeQueryParam *queryParam, cJSON *credTypesJson)
 {
     int32_t localUserId = queryParam->localUserId;
@@ -956,9 +966,7 @@ static bool QueryAllCredTypeByQueryParam(CredTypeQueryParam *queryParam, cJSON *
             AUTH_LOGE(AUTH_HICHAIN, "create credTypeJson fail");
             return false;
         }
-        if (!AddNumberToJsonObject(credTypeJson, SINK_USERID, peerUserId) ||
-            !AddNumberToJsonObject(credTypeJson, CRED_TYPE, credType) ||
-            !AddNumberToJsonObject(credTypeJson, SOURCE_USERID, localUserId) ||
+        if (!PackCredTypeInfo(credTypeJson, peerUserId, credType, localUserId) ||
             !cJSON_AddItemToArray(credTypesJson, credTypeJson)) {
             AUTH_LOGE(AUTH_HICHAIN, "add credTypeJson to credTypesJson fail");
             cJSON_Delete(credTypeJson);
@@ -1085,9 +1093,8 @@ static int32_t ChooseBestCredType(AuthSessionInfo *info, const char *localUdidHa
             SoftBusFree(credIdTmp);
             break;
         }
-        if (!cJSON_AddNumberToObject(localCredTypeJson, SINK_USERID, credTypeArray[i].peerUserId) ||
-            !cJSON_AddNumberToObject(localCredTypeJson, CRED_TYPE, credTypeArray[i].credType) ||
-            !cJSON_AddNumberToObject(localCredTypeJson, SOURCE_USERID, credTypeArray[i].localUserId)) {
+        if (!PackCredTypeInfo(localCredTypeJson, credTypeArray[i].peerUserId,
+            credTypeArray[i].credType, credTypeArray[i].localUserId)) {
             AUTH_LOGE(AUTH_FSM, "add to localCredTypeJson fail");
             cJSON_Delete(localCredTypeJson);
             SoftBusFree(credIdTmp);
@@ -1222,9 +1229,7 @@ static bool CredNegoStateDecideReceiver(AuthSessionInfo *info, const char *local
         AUTH_LOGE(AUTH_FSM, "create credTypeJson fail");
         return false;
     }
-    if (!cJSON_AddNumberToObject(credTypeJson, SINK_USERID, peerUserId) ||
-        !cJSON_AddNumberToObject(credTypeJson, CRED_TYPE, credType) ||
-        !cJSON_AddNumberToObject(credTypeJson, SOURCE_USERID, localUserId)) {
+    if (!PackCredTypeInfo(credTypeJson, peerUserId, credType, localUserId)) {
         AUTH_LOGE(AUTH_FSM, "add to credTypeJson fail");
         cJSON_Delete(credTypeJson);
         return false;
@@ -1614,7 +1619,7 @@ static bool PackCredTypesAndState(JsonObj *json, AuthSessionInfo *info, int64_t 
         cJSON_Delete(credNegoInfoJson);
         return false;
     }
-    if (!cJSON_AddNumberToObject(credNegoInfoJson, CRED_NEGO_STATE, info->credNegoState) ||
+    if (!AddNumberToJsonObject(credNegoInfoJson, CRED_NEGO_STATE, info->credNegoState) ||
         !cJSON_AddItemToObject(credNegoInfoJson, CRED_TYPE_INFO, credTypesJson)) {
         AUTH_LOGE(AUTH_FSM, "add to credNegoInfoJson fail");
         cJSON_Delete(credTypesJson);
@@ -1633,7 +1638,7 @@ static bool PackCredNegoState(JsonObj *json, AuthSessionInfo *info, int64_t auth
         AUTH_LOGE(AUTH_FSM, "create credNegoInfoJson fail");
         return false;
     }
-    if (!cJSON_AddNumberToObject(credNegoInfoJson, CRED_NEGO_STATE, info->credNegoState)) {
+    if (!AddNumberToJsonObject(credNegoInfoJson, CRED_NEGO_STATE, info->credNegoState)) {
         AUTH_LOGE(AUTH_FSM, "add item to credNegoInfoJson fail");
         cJSON_Delete(credNegoInfoJson);
         return false;

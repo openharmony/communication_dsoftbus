@@ -60,6 +60,7 @@ static const SocketInterface g_socketInterfaces = {
 
 const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 {
+    (void)protocolType;
     return &g_socketInterfaces;
 }
 
@@ -188,3 +189,62 @@ int32_t Ipv6AddrInToAddr(SoftBusSockAddrIn6 *addrIn6, char *addr, int32_t addrLe
     CONN_LOGE(CONN_COMMON, "not support");
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+void BindToInterface(const char *myIp, int32_t domain, int fd, char *ifName, int32_t ifNameMaxLen)
+{
+    (void)myIp;
+    (void)domain;
+    (void)fd;
+    (void)ifName;
+    (void)ifNameMaxLen;
+}
+
+int32_t ConnGetPeerSocketAddr6(int32_t fd, SocketAddr *socketAddr)
+{
+    (void)fd;
+    (void)socketAddr;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t ConnPreAssignPort(int32_t domain)
+{
+    (void)domain;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount)
+{
+    (void)fd;
+    (void)seconds;
+    (void)keepAliveIntvl;
+    (void)keepAliveCount;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t ConnSetTcpKeepaliveState(int32_t fd, bool needKeepalive)
+{
+    (void)fd;
+    (void)needKeepalive;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
+{
+    (void)fd;
+    (void)millSec;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
+{
+    (void)fd;
+    (void)isNonBlock;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t RegistSocketProtocol(const SocketInterface *interface)
+{
+    (void)interface;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+

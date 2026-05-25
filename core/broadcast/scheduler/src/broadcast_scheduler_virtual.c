@@ -180,3 +180,9 @@ int32_t SchedulerSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_
     (void)bcHandle;
     return SOFTBUS_OK;
 }
+
+int8_t SchedulerGetAdvPower(int32_t businessType)
+{
+    (void)businessType;
+    return 0;
+}

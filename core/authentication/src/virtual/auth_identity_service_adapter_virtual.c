@@ -95,3 +95,19 @@ void IdServiceUnRegCredMgr(void)
     AUTH_LOGI(AUTH_HICHAIN, "id service unreg cred manager not implement");
     return;
 }
+
+int32_t IdServiceGetCredInfoByUdid(const char *udid, SoftBusCredInfo *credInfo)
+{
+    (void)udid;
+    (void)credInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType)
+{
+    (void)userId;
+    (void)credId;
+    (void)credType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
