@@ -273,6 +273,7 @@ typedef struct TagLnnOpenFuncList {
     AuthHasTrustedRelationFunc authHasTrustedRelation;
     CompareConnInfoFunc compareConnInfo;
     GetAuthManagerByAuthIdFunc getAuthManagerByAuthId;
+    DelDupAuthManagerFunc delDupAuthManager;
     AuthDeviceGetLatestIdByUuidFunc authDeviceGetLatestIdByUuid;
 
     // adapter
