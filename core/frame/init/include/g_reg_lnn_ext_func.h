@@ -152,6 +152,7 @@ typedef int32_t (*LnnMapSetFunc)(Map *map, const char *key, const void *value, u
 typedef int32_t (*DataCompressFunc)(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLen);
 typedef int32_t (*DataDecompressFunc)(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLen);
 typedef AuthManager *(*GetAuthManagerByAuthIdFunc)(int64_t authId);
+typedef void (*DelDupAuthManagerFunc)(AuthManager *auth);
 typedef void (*AuthDeviceGetLatestIdByUuidFunc)(const char *uuid, AuthLinkType type, AuthHandle *authHandle);
 typedef void* (*LnnMapGetFunc)(const Map *map, const char *key);
 typedef int32_t (*LnnMapEraseFunc)(Map *map, const char *key);
