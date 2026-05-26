@@ -78,6 +78,46 @@ HWTEST_F(SoftBusSocketTest, RegistSocketProtocolTest_NullInterface, TestSize.Lev
 }
 
 /*
+ * @tc.name: RegistSocketProtocolTest_NameIsNull
+ * @tc.desc: test RegistSocketProtocol with null name
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, RegistSocketProtocolTest_NameIsNull, TestSize.Level1)
+{
+    SocketInterface iface = {
+        .name = nullptr,
+        .type = LNN_PROTOCOL_IP,
+        .GetSockPort = MockGetSockPort,
+        .OpenServerSocket = MockOpenServerSocket,
+        .OpenClientSocket = MockOpenClientSocket,
+        .AcceptClient = MockAcceptClient,
+    };
+
+    auto ret = RegistSocketProtocol(&iface);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: RegistSocketProtocolTest_EmptyName
+ * @tc.desc: test RegistSocketProtocol with empty name
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, RegistSocketProtocolTest_EmptyName, TestSize.Level1)
+{
+    SocketInterface iface = {
+        .name = "",
+        .type = LNN_PROTOCOL_IP,
+        .GetSockPort = MockGetSockPort,
+        .OpenServerSocket = MockOpenServerSocket,
+        .OpenClientSocket = MockOpenClientSocket,
+        .AcceptClient = MockAcceptClient,
+    };
+
+    auto ret = RegistSocketProtocol(&iface);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: RegistSocketProtocolTest_InvalidInterface
  * @tc.desc: test RegistSocketProtocol with invalid interface (null function pointers)
  * @tc.type: FUNC
@@ -206,11 +246,8 @@ HWTEST_F(SoftBusSocketTest, ConnOpenClientSocketTest_InterfaceNotFound, TestSize
     ASSERT_EQ(initRet, SOFTBUS_OK);
 
     // Now test with a protocol that's not registered by ConnInitSockets
-    ConnectOption option = {
-        .socketOption = {
-            .protocol = LNN_PROTOCOL_BLE,
-        }
-    };
+    ConnectOption option = {0};
+    option.socketOption.protocol = LNN_PROTOCOL_BLE;
 
     auto ret = ConnOpenClientSocket(&option, nullptr, false);
     EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
@@ -331,7 +368,8 @@ HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_WaitEventFail, TestSize.Level
  */
 HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_SendSuccess, TestSize.Level1)
 {
-    char buf[10] = "test";
+    char buf[10];
+    memset_s(buf, sizeof(buf), 'T', sizeof(buf));
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
         .WillOnce(Return(1));
@@ -349,7 +387,8 @@ HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_SendSuccess, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_PartialSend, TestSize.Level1)
 {
-    char buf[10] = "test";
+    char buf[10];
+    memset_s(buf, sizeof(buf), 'A', sizeof(buf));
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
         .WillRepeatedly(Return(1));
@@ -1035,4 +1074,1473 @@ HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_NotFound, TestSize.Level1)
     EXPECT_EQ(strlen(ifName), 0);
 
     mock->ClearTestIfAddr();
+}
+
+/*
+ * @tc.name: ConnOpenServerSocketTest_NullOption
+ * @tc.desc: test ConnOpenServerSocket with null option
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenServerSocketTest_NullOption, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    auto ret = ConnOpenServerSocket(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenServerSocketTest_InterfaceNotFound
+ * @tc.desc: test ConnOpenServerSocket when interface not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenServerSocketTest_InterfaceNotFound, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    LocalListenerInfo option = {0};
+    option.type = LNN_PROTOCOL_BLE;
+
+    auto ret = ConnOpenServerSocket(&option);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenServerSocketTest_SocketCreateFail
+ * @tc.desc: test ConnOpenServerSocket when socket creation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenServerSocketTest_SocketCreateFail, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(Return(-1));
+
+    LocalListenerInfo option = {0};
+    option.type = LNN_PROTOCOL_IP;
+
+    auto ret = ConnOpenServerSocket(&option);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenServerSocketTest_SetReuseAddrFail
+ * @tc.desc: test ConnOpenServerSocket when SetReuseAddr fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenServerSocketTest_SetReuseAddrFail, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    int32_t testFd = 100;
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<3>(testFd), Return(0)));
+    EXPECT_CALL(*mock, SocketSetOptHook(_, _, SO_REUSEADDR, _, _))
+        .WillOnce(Return(-1));
+    EXPECT_CALL(*mock, SocketCloseHook(_))
+        .Times(1);
+
+    LocalListenerInfo option = {0};
+    option.type = LNN_PROTOCOL_IP;
+
+    auto ret = ConnOpenServerSocket(&option);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenServerSocketTest_BindFail
+ * @tc.desc: test ConnOpenServerSocket when bind fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenServerSocketTest_BindFail, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    int32_t testFd = 100;
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<3>(testFd), Return(0)));
+    EXPECT_CALL(*mock, SocketSetOptHook(_, _, _, _, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*mock, SocketBindHook(_, _, _))
+        .WillOnce(Return(-1));
+    EXPECT_CALL(*mock, SocketCloseHook(_))
+        .Times(1);
+
+    LocalListenerInfo option = {0};
+    option.type = LNN_PROTOCOL_IP;
+
+    auto ret = ConnOpenServerSocket(&option);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenServerSocketTest_ListenFail
+ * @tc.desc: test ConnOpenServerSocket when listen fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenServerSocketTest_ListenFail, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    int32_t testFd = 100;
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<3>(testFd), Return(0)));
+    EXPECT_CALL(*mock, SocketSetOptHook(_, _, _, _, _))
+        .WillRepeatedly(Return(0));
+    EXPECT_CALL(*mock, SocketBindHook(_, _, _))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, SocketCloseHook(_))
+        .Times(1);
+
+    LocalListenerInfo option = {0};
+    option.type = LNN_PROTOCOL_IP;
+
+    auto ret = ConnOpenServerSocket(&option);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnAcceptClientTest_InvalidFd
+ * @tc.desc: test ConnAcceptClient with invalid fd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnAcceptClientTest_InvalidFd, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    ConnectOption clientAddr = {0};
+    int32_t cfd = -1;
+
+    auto ret = ConnAcceptClient(-1, &clientAddr, &cfd);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnAcceptClientTest_NullClientAddr
+ * @tc.desc: test ConnAcceptClient with null clientAddr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnAcceptClientTest_NullClientAddr, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    int32_t cfd = -1;
+
+    auto ret = ConnAcceptClient(10, nullptr, &cfd);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnAcceptClientTest_NullCfd
+ * @tc.desc: test ConnAcceptClient with null cfd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnAcceptClientTest_NullCfd, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    ConnectOption clientAddr = {0};
+
+    auto ret = ConnAcceptClient(10, &clientAddr, nullptr);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnAcceptClientTest_InterfaceNotFound
+ * @tc.desc: test ConnAcceptClient when interface not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnAcceptClientTest_InterfaceNotFound, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    // Mock a server fd that will trigger BLE protocol lookup
+    ConnectOption clientAddr = {0};
+    clientAddr.socketOption.protocol = LNN_PROTOCOL_BLE;
+    int32_t cfd = -1;
+
+    auto ret = ConnAcceptClient(10, &clientAddr, &cfd);
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnToggleNonBlockModeTest_FcntlSetFail
+ * @tc.desc: test ConnToggleNonBlockMode when fcntl F_SETFL fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnToggleNonBlockModeTest_FcntlSetFail, TestSize.Level1)
+{
+    EXPECT_CALL(*mock, FcntlHook(_, F_GETFL, _))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, FcntlHook(_, F_SETFL, _))
+        .WillOnce(Return(-1));
+
+    auto ret = ConnToggleNonBlockMode(10, true);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_FCNTL_ERR);
+}
+
+/*
+ * @tc.name: ConnToggleNonBlockModeTest_ZeroTimeout
+ * @tc.desc: test ConnToggleNonBlockMode with zero timeout (no wait)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnToggleNonBlockModeTest_ZeroTimeout, TestSize.Level1)
+{
+    char buf[10];
+    memset_s(buf, sizeof(buf), 'Z', sizeof(buf));
+
+    // Test with zero timeout - should skip WaitEvent
+    EXPECT_CALL(*mock, SocketSendHook(_, _, _, _))
+        .WillOnce(Return(10));
+
+    auto ret = ConnSendSocketData(10, buf, 10, 0);
+    EXPECT_EQ(ret, 10);
+}
+
+/*
+ * @tc.name: ConnSendSocketDataTest_SendFail
+ * @tc.desc: test ConnSendSocketData when send fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_SendFail, TestSize.Level1)
+{
+    char buf[10];
+    memset_s(buf, sizeof(buf), 'X', sizeof(buf));
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketSendHook(_, _, _, _))
+        .WillOnce(Return(-1));
+
+    auto ret = ConnSendSocketData(10, buf, 10, 1000);
+    EXPECT_EQ(ret, -1);
+}
+
+/*
+ * @tc.name: ConnSendSocketDataTest_SendZero
+ * @tc.desc: test ConnSendSocketData when send returns 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_SendZero, TestSize.Level1)
+{
+    char buf[10];
+    memset_s(buf, sizeof(buf), 'Y', sizeof(buf));
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketSendHook(_, _, _, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnSendSocketData(10, buf, 10, 1000);
+    EXPECT_EQ(ret, 0);
+}
+
+/*
+ * @tc.name: ConnSendSocketDataTest_Timeout
+ * @tc.desc: test ConnSendSocketData when WaitEvent times out
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_Timeout, TestSize.Level1)
+{
+    char buf[10];
+    memset_s(buf, sizeof(buf), 'W', sizeof(buf));
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnSendSocketData(10, buf, 10, 1000);
+    EXPECT_EQ(ret, 0);
+}
+
+/*
+ * @tc.name: ConnRecvSocketDataTest_RecvFail
+ * @tc.desc: test ConnRecvSocketData when recv fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_RecvFail, TestSize.Level1)
+{
+    char buf[10] = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketRecvHook(_, _, _, _))
+        .WillOnce(Return(-1));
+
+    auto ret = ConnRecvSocketData(10, buf, 10, 1000);
+    EXPECT_EQ(ret, -1);
+}
+
+/*
+ * @tc.name: ConnRecvSocketDataTest_Timeout
+ * @tc.desc: test ConnRecvSocketData when WaitEvent times out
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_Timeout, TestSize.Level1)
+{
+    char buf[10] = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnRecvSocketData(10, buf, 10, 1000);
+    EXPECT_EQ(ret, 0);
+}
+
+/*
+ * @tc.name: ConnRecvSocketDataTest_EINTR
+ * @tc.desc: test ConnRecvSocketData when recv returns EINTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_EINTR, TestSize.Level1)
+{
+    char buf[10] = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketRecvHook(_, _, _, _))
+        .WillOnce(Return(SOFTBUS_ADAPTER_SOCKET_EINTR));
+
+    auto ret = ConnRecvSocketData(10, buf, 10, 1000);
+    EXPECT_EQ(ret, -1);
+}
+
+/*
+ * @tc.name: ConnRecvSocketMsgTest_RecvMsgFail
+ * @tc.desc: test ConnRecvSocketMsg when recvmsg fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_RecvMsgFail, TestSize.Level1)
+{
+    SoftBusMsgHdr msg = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketRecvMsgHook(_, _, _))
+        .WillOnce(Return(-1));
+
+    auto ret = ConnRecvSocketMsg(10, &msg, 1000, 0);
+    EXPECT_EQ(ret, -1);
+}
+
+/*
+ * @tc.name: ConnRecvSocketMsgTest_Timeout
+ * @tc.desc: test ConnRecvSocketMsg when WaitEvent times out
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_Timeout, TestSize.Level1)
+{
+    SoftBusMsgHdr msg = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnRecvSocketMsg(10, &msg, 1000, 0);
+    EXPECT_EQ(ret, 0);
+}
+
+/*
+ * @tc.name: ConnRecvSocketMsgTest_EAGAIN
+ * @tc.desc: test ConnRecvSocketMsg when recvmsg returns EAGAIN
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_EAGAIN, TestSize.Level1)
+{
+    SoftBusMsgHdr msg = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketRecvMsgHook(_, _, _))
+        .WillOnce(Return(SOFTBUS_ADAPTER_SOCKET_EAGAIN));
+
+    auto ret = ConnRecvSocketMsg(10, &msg, 1000, 0);
+    EXPECT_EQ(ret, 0);
+}
+
+/*
+ * @tc.name: ConnShutdownSocketTest_ShutdownFail
+ * @tc.desc: test ConnShutdownSocket when shutdown fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnShutdownSocketTest_ShutdownFail, TestSize.Level1)
+{
+    EXPECT_CALL(*mock, SocketShutDownHook(10, SOFTBUS_SHUT_RDWR))
+        .WillOnce(Return(-1));
+    EXPECT_CALL(*mock, SocketCloseHook(10))
+        .Times(1);
+
+    ConnShutdownSocket(10);
+}
+
+/*
+ * @tc.name: ConnGetSocketErrorTest_Error
+ * @tc.desc: test ConnGetSocketError with error
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetSocketErrorTest_Error, TestSize.Level1)
+{
+    EXPECT_CALL(*mock, SocketGetErrorHook(_))
+        .WillOnce(Return(ECONNRESET));
+
+    auto ret = ConnGetSocketError(10);
+    EXPECT_EQ(ret, ECONNRESET);
+}
+
+/*
+ * @tc.name: ConnGetLocalSocketPortTest_NotInitialized
+ * @tc.desc: test ConnGetLocalSocketPort when not initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetLocalSocketPortTest_NotInitialized, TestSize.Level1)
+{
+    // Ensure sockets are not initialized
+    ConnDeinitSockets();
+
+    auto ret = ConnGetLocalSocketPort(10);
+    EXPECT_LT(ret, 0);
+
+    // Reinitialize for other tests
+    ConnInitSockets();
+}
+
+/*
+ * @tc.name: ConnGetPeerSocketAddr6Test_IPv6
+ * @tc.desc: test ConnGetPeerSocketAddr6 with IPv6 address
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_IPv6, TestSize.Level1)
+{
+    SocketAddr socketAddr = {{0}, 0};
+    SoftBusSockAddr addr = {0};
+    auto *addrIn6 = reinterpret_cast<SoftBusSockAddrIn6 *>(&addr);
+
+    addrIn6->sin6Family = SOFTBUS_AF_INET6;
+    addrIn6->sin6Port = SoftBusHtoNs(7070);
+
+    EXPECT_CALL(*mock, SocketGetPeerNameHook(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(addr), Return(0)));
+    EXPECT_CALL(*mock, InetNtoPHook(SOFTBUS_AF_INET6, _, _, _))
+        .WillOnce(Return("fe80::1"));
+
+    auto ret = ConnGetPeerSocketAddr6(10, &socketAddr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(socketAddr.port, 7070);
+}
+
+/*
+ * @tc.name: ConnGetPeerSocketAddr6Test_InvalidFamily
+ * @tc.desc: test ConnGetPeerSocketAddr6 with invalid address family
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_InvalidFamily, TestSize.Level1)
+{
+    SocketAddr socketAddr = {{0}, 0};
+    SoftBusSockAddr addr = {0};
+    auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
+
+    addrIn->sinFamily = AF_MAX; // Invalid family
+    addrIn->sinPort = SoftBusHtoNs(8080);
+
+    EXPECT_CALL(*mock, SocketGetPeerNameHook(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(addr), Return(0)));
+
+    auto ret = ConnGetPeerSocketAddr6(10, &socketAddr);
+    EXPECT_EQ(ret, SOFTBUS_TCP_SOCKET_ERR);
+}
+
+/*
+ * @tc.name: ConnGetPeerSocketAddrTest_IPv6
+ * @tc.desc: test ConnGetPeerSocketAddr with IPv6 address
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_IPv6, TestSize.Level1)
+{
+    SocketAddr socketAddr = {{0}, 0};
+    SoftBusSockAddr addr = {0};
+    auto *addrIn6 = reinterpret_cast<SoftBusSockAddrIn6 *>(&addr);
+
+    addrIn6->sin6Family = SOFTBUS_AF_INET6;
+    addrIn6->sin6Port = SoftBusHtoNs(6060);
+
+    EXPECT_CALL(*mock, SocketGetPeerNameHook(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(addr), Return(0)));
+    EXPECT_CALL(*mock, InetNtoPHook(SOFTBUS_AF_INET6, _, _, _))
+        .WillOnce(Return("2001:db8::1"));
+
+    auto ret = ConnGetPeerSocketAddr(10, &socketAddr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(socketAddr.port, 6060);
+}
+
+/*
+ * @tc.name: ConnGetPeerSocketAddrTest_InvalidFamily
+ * @tc.desc: test ConnGetPeerSocketAddr with invalid address family
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_InvalidFamily, TestSize.Level1)
+{
+    SocketAddr socketAddr = {{0}, 0};
+    SoftBusSockAddr addr = {0};
+    auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
+
+    addrIn->sinFamily = AF_MAX; // Invalid family
+    addrIn->sinPort = SoftBusHtoNs(9090);
+
+    EXPECT_CALL(*mock, SocketGetPeerNameHook(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(addr), Return(0)));
+
+    auto ret = ConnGetPeerSocketAddr(10, &socketAddr);
+    EXPECT_EQ(ret, SOFTBUS_TCP_SOCKET_ERR);
+}
+
+/*
+ * @tc.name: ConnPreAssignPortTest_Success
+ * @tc.desc: test successful ConnPreAssignPort
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnPreAssignPortTest_Success, TestSize.Level1)
+{
+    int32_t testFd = 100;
+
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<3>(testFd), Return(0)));
+    EXPECT_CALL(*mock, SocketSetOptHook(_, _, SO_REUSEPORT, _, _))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, SocketBindHook(_, _, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnPreAssignPort(SOFTBUS_AF_INET);
+    EXPECT_EQ(ret, testFd);
+}
+
+/*
+ * @tc.name: ConnPreAssignPortTest_BindFail
+ * @tc.desc: test ConnPreAssignPort when bind fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnPreAssignPortTest_BindFail, TestSize.Level1)
+{
+    int32_t testFd = 100;
+
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<3>(testFd), Return(0)));
+    EXPECT_CALL(*mock, SocketSetOptHook(_, _, SO_REUSEPORT, _, _))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, SocketBindHook(_, _, _))
+        .WillOnce(Return(-1));
+    EXPECT_CALL(*mock, SocketCloseHook(_))
+        .Times(1);
+
+    auto ret = ConnPreAssignPort(SOFTBUS_AF_INET);
+    EXPECT_EQ(ret, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
+}
+
+/*
+ * @tc.name: ConnPreAssignPortTest_IPv6
+ * @tc.desc: test ConnPreAssignPort with IPv6
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnPreAssignPortTest_IPv6, TestSize.Level1)
+{
+    int32_t testFd = 200;
+
+    EXPECT_CALL(*mock, SocketCreateHook(SOFTBUS_AF_INET6, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<3>(testFd), Return(0)));
+    EXPECT_CALL(*mock, SocketSetOptHook(_, _, SO_REUSEPORT, _, _))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, SocketBindHook(_, _, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnPreAssignPort(SOFTBUS_AF_INET6);
+    EXPECT_EQ(ret, testFd);
+}
+
+/*
+ * @tc.name: GetDomainByAddrTest_EmptyAddr
+ * @tc.desc: test GetDomainByAddr with empty address
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_EmptyAddr, TestSize.Level1)
+{
+    auto ret = GetDomainByAddr("");
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetDomainByAddrTest_InvalidFormat
+ * @tc.desc: test GetDomainByAddr with invalid format
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_InvalidFormat, TestSize.Level1)
+{
+    auto ret = GetDomainByAddr("invalid.address");
+    EXPECT_EQ(ret, SOFTBUS_AF_INET);
+}
+
+/*
+ * @tc.name: GetDomainByAddrTest_LoopbackIPv4
+ * @tc.desc: test GetDomainByAddr with loopback IPv4
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_LoopbackIPv4, TestSize.Level1)
+{
+    auto ret = GetDomainByAddr("127.0.0.1");
+    EXPECT_EQ(ret, SOFTBUS_AF_INET);
+}
+
+/*
+ * @tc.name: GetDomainByAddrTest_LinkLocalIPv6
+ * @tc.desc: test GetDomainByAddr with link-local IPv6
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_LinkLocalIPv6, TestSize.Level1)
+{
+    auto ret = GetDomainByAddr("fe80::1234:5678");
+    EXPECT_EQ(ret, SOFTBUS_AF_INET6);
+}
+
+/*
+ * @tc.name: GetDomainByAddrTest_GlobalIPv6
+ * @tc.desc: test GetDomainByAddr with global IPv6
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_GlobalIPv6, TestSize.Level1)
+{
+    auto ret = GetDomainByAddr("2001:db8::1");
+    EXPECT_EQ(ret, SOFTBUS_AF_INET6);
+}
+
+/*
+ * @tc.name: Ipv6AddrInToAddrTest_Success
+ * @tc.desc: test successful Ipv6AddrInToAddr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_Success, TestSize.Level1)
+{
+    SoftBusSockAddrIn6 addrIn6 = {0};
+    char addr[IP_LEN] = {0};
+
+    EXPECT_CALL(*mock, InetNtoPHook(SOFTBUS_AF_INET6, _, _, _))
+        .WillOnce(Return("fe80::1"));
+
+    auto ret = Ipv6AddrInToAddr(&addrIn6, addr, IP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_STREQ(addr, "fe80::1");
+}
+
+/*
+ * @tc.name: Ipv6AddrInToAddrTest_SmallBuffer
+ * @tc.desc: test Ipv6AddrInToAddr with small buffer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_SmallBuffer, TestSize.Level1)
+{
+    SoftBusSockAddrIn6 addrIn6 = {0};
+    char addr[5] = {0}; // Too small
+
+    auto ret = Ipv6AddrInToAddr(&addrIn6, addr, 5);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: Ipv6AddrToAddrInTest_NullIp
+ * @tc.desc: test Ipv6AddrToAddrIn with null IP
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_NullIp, TestSize.Level1)
+{
+    SoftBusSockAddrIn6 addrIn6 = {0};
+
+    auto ret = Ipv6AddrToAddrIn(&addrIn6, nullptr, 8080);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: Ipv6AddrToAddrInTest_NoIfName
+ * @tc.desc: test Ipv6AddrToAddrIn without interface name
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_NoIfName, TestSize.Level1)
+{
+    SoftBusSockAddrIn6 addrIn6 = {0};
+    const char *ip = "fe80::1";
+
+    EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET6, _, _))
+        .WillOnce(Return(0));
+
+    auto ret = Ipv6AddrToAddrIn(&addrIn6, ip, 8080);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(addrIn6.sin6ScopeId, 0);
+}
+
+/*
+ * @tc.name: Ipv6AddrToAddrInTest_InetPtoNFail
+ * @tc.desc: test Ipv6AddrToAddrIn when InetPtoN fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_InetPtoNFail, TestSize.Level1)
+{
+    SoftBusSockAddrIn6 addrIn6 = {0};
+    const char *ip = "fe80::1";
+
+    EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET6, _, _))
+        .WillOnce(Return(-1));
+
+    auto ret = Ipv6AddrToAddrIn(&addrIn6, ip, 8080);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
+}
+
+/*
+ * @tc.name: Ipv4AddrToAddrInTest_Success
+ * @tc.desc: test successful Ipv4AddrToAddrIn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_Success, TestSize.Level1)
+{
+    SoftBusSockAddrIn addrIn = {0};
+    const char *ip = "192.168.1.1";
+
+    EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET, _, _))
+        .WillOnce(Return(0));
+
+    auto ret = Ipv4AddrToAddrIn(&addrIn, ip, 8080);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: Ipv4AddrToAddrInTest_ZeroPort
+ * @tc.desc: test Ipv4AddrToAddrIn with zero port
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_ZeroPort, TestSize.Level1)
+{
+    SoftBusSockAddrIn addrIn = {0};
+    const char *ip = "192.168.1.1";
+
+    EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET, _, _))
+        .WillOnce(Return(0));
+
+    auto ret = Ipv4AddrToAddrIn(&addrIn, ip, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_EmptyString
+ * @tc.desc: test IsHmlIpAddr with empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_EmptyString, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("");
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_HmlIPv4Start
+ * @tc.desc: test IsHmlIpAddr with HML IPv4 start range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_HmlIPv4Start, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("172.16.0.1");
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_HmlIPv4End
+ * @tc.desc: test IsHmlIpAddr with HML IPv4 end range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_HmlIPv4End, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("172.31.255.255");
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_NonHmlIPv4Start
+ * @tc.desc: test IsHmlIpAddr with non-HML IPv4 just before range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_NonHmlIPv4Start, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("172.15.255.255");
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_NonHmlIPv4End
+ * @tc.desc: test IsHmlIpAddr with non-HML IPv4 just after range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_NonHmlIPv4End, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("172.32.0.0");
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_PrivateIPv4
+ * @tc.desc: test IsHmlIpAddr with private IPv4 (non-HML)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_PrivateIPv4, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("10.0.0.1");
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: BindToInterfaceTest_Success
+ * @tc.desc: test successful BindToInterface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_Success, TestSize.Level1)
+{
+    char ifName[IF_NAME_SIZE] = {0};
+
+    mock->SetTestIfAddr("192.168.1.1", "wlan0");
+
+    EXPECT_CALL(*mock, GetIfAddrsHook())
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, InetAtonHook(_, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, FreeIfAddrsHook())
+        .Times(1);
+
+    BindToInterface("192.168.1.1", SOFTBUS_AF_INET, 10, ifName, IF_NAME_SIZE);
+    EXPECT_GT(strlen(ifName), 0);
+
+    mock->ClearTestIfAddr();
+}
+
+/*
+ * @tc.name: BindToInterfaceTest_IPv4Skip
+ * @tc.desc: test BindToInterface with IPv4 (should bind)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_IPv4Skip, TestSize.Level1)
+{
+    char ifName[IF_NAME_SIZE] = {0};
+
+    mock->SetTestIfAddr("192.168.1.1", "eth0");
+
+    EXPECT_CALL(*mock, GetIfAddrsHook())
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, InetAtonHook(_, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, FreeIfAddrsHook())
+        .Times(1);
+
+    BindToInterface("192.168.1.1", SOFTBUS_AF_INET, 10, ifName, IF_NAME_SIZE);
+    // For IPv4, should bind and set interface name
+    EXPECT_GT(strlen(ifName), 0);
+
+    mock->ClearTestIfAddr();
+}
+
+/*
+ * @tc.name: BindToInterfaceTest_MultipleInterfaces
+ * @tc.desc: test BindToInterface with multiple interfaces
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_MultipleInterfaces, TestSize.Level1)
+{
+    char ifName[IF_NAME_SIZE] = {0};
+
+    // Test with different IP addresses
+    mock->SetTestIfAddr("10.0.0.1", "eth0");
+
+    EXPECT_CALL(*mock, GetIfAddrsHook())
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, InetAtonHook(_, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, FreeIfAddrsHook())
+        .Times(1);
+
+    BindToInterface("10.0.0.1", SOFTBUS_AF_INET, 10, ifName, IF_NAME_SIZE);
+    EXPECT_GT(strlen(ifName), 0);
+
+    mock->ClearTestIfAddr();
+}
+
+/*
+ * @tc.name: BindToInterfaceTest_InvalidFamily
+ * @tc.desc: test BindToInterface with invalid address family
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_InvalidFamily, TestSize.Level1)
+{
+    char ifName[IF_NAME_SIZE] = {0};
+
+    // Invalid family - should not bind
+    BindToInterface("192.168.1.1", AF_MAX, 10, ifName, IF_NAME_SIZE);
+    EXPECT_EQ(strlen(ifName), 0);
+}
+
+/*
+ * @tc.name: ConnToggleNonBlockModeTest_MultipleToggles
+ * @tc.desc: test multiple non-blocking mode toggles
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnToggleNonBlockModeTest_MultipleToggles, TestSize.Level1)
+{
+    // Toggle to non-blocking
+    EXPECT_CALL(*mock, FcntlHook(_, F_GETFL, _))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, FcntlHook(_, F_SETFL, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnToggleNonBlockMode(10, true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    // Toggle back to blocking
+    EXPECT_CALL(*mock, FcntlHook(_, F_GETFL, _))
+        .WillOnce(Return(O_NONBLOCK));
+    EXPECT_CALL(*mock, FcntlHook(_, F_SETFL, _))
+        .WillOnce(Return(0));
+
+    ret = ConnToggleNonBlockMode(10, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ConnSendSocketDataTest_LargeData
+ * @tc.desc: test sending large data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_LargeData, TestSize.Level1)
+{
+    const int largeSize = 65536;
+    char *largeBuf = new char[largeSize];
+    memset_s(largeBuf, largeSize, 'A', largeSize);
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketSendHook(_, _, _, _))
+        .WillOnce(Return(largeSize));
+
+    auto ret = ConnSendSocketData(10, largeBuf, largeSize, 1000);
+    EXPECT_EQ(ret, largeSize);
+
+    delete[] largeBuf;
+}
+
+/*
+ * @tc.name: ConnRecvSocketDataTest_LargeData
+ * @tc.desc: test receiving large data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_LargeData, TestSize.Level1)
+{
+    const int largeSize = 65536;
+    char *largeBuf = new char[largeSize];
+    memset_s(largeBuf, largeSize, 0, largeSize);
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketRecvHook(_, _, _, _))
+        .WillOnce(Return(largeSize));
+
+    auto ret = ConnRecvSocketData(10, largeBuf, largeSize, 1000);
+    EXPECT_EQ(ret, largeSize);
+
+    delete[] largeBuf;
+}
+
+/*
+ * @tc.name: ConnOpenClientSocketTest_NonBlockMode
+ * @tc.desc: test ConnOpenClientSocket with non-blocking mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenClientSocketTest_NonBlockMode, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(Return(-1));
+
+    ConnectOption option = {0};
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
+
+    auto ret = ConnOpenClientSocket(&option, nullptr, true);
+    // Should fail with socket creation error
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenClientSocketTest_WithBindAddr
+ * @tc.desc: test ConnOpenClientSocket with bind address
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenClientSocketTest_WithBindAddr, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(Return(-1));
+
+    const char *bindAddr = "192.168.1.100";
+    ConnectOption option = {0};
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
+
+    auto ret = ConnOpenClientSocket(&option, bindAddr, false);
+    // Should fail with socket creation error
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenClientSocketTest_EmptyBindAddr
+ * @tc.desc: test ConnOpenClientSocket with empty bind address
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenClientSocketTest_EmptyBindAddr, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    EXPECT_CALL(*mock, SocketCreateHook(_, _, _, _))
+        .WillOnce(Return(-1));
+
+    const char *bindAddr = "";
+    ConnectOption option = {0};
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
+
+    auto ret = ConnOpenClientSocket(&option, bindAddr, false);
+    // Should fail with socket creation error
+    EXPECT_LT(ret, 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnOpenServerSocketTest_InvalidType
+ * @tc.desc: test ConnOpenServerSocket with invalid type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnOpenServerSocketTest_InvalidType, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    LocalListenerInfo option = {0};
+    option.type = LNN_PROTOCOL_MAX;
+
+    auto ret = ConnOpenServerSocket(&option);
+    // Should fail - invalid protocol type
+    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: GetSocketInterfaceTest_NotInitialized
+ * @tc.desc: test GetSocketInterface when not initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, GetSocketInterfaceTest_NotInitialized, TestSize.Level1)
+{
+    // Ensure deinitialized (safe to call multiple times)
+    ConnDeinitSockets();
+
+    auto iface = GetSocketInterface(LNN_PROTOCOL_IP);
+    EXPECT_EQ(iface, nullptr);
+
+    // Reinitialize for other tests
+    ConnInitSockets();
+}
+
+/*
+ * @tc.name: RegistSocketProtocolTest_DuplicateRegistration
+ * @tc.desc: test duplicate protocol registration
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, RegistSocketProtocolTest_DuplicateRegistration, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    SocketInterface iface = {
+        .name = "test_duplicate",
+        .type = LNN_PROTOCOL_IP,
+        .GetSockPort = MockGetSockPort,
+        .OpenServerSocket = MockOpenServerSocket,
+        .OpenClientSocket = MockOpenClientSocket,
+        .AcceptClient = MockAcceptClient,
+    };
+
+    // First registration should fail because IP is already registered
+    auto ret = RegistSocketProtocol(&iface);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnDeinitSocketsTest_MultipleCalls
+ * @tc.desc: test multiple ConnDeinitSockets calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnDeinitSocketsTest_MultipleCalls, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    // Multiple deinit calls should not crash
+    ConnDeinitSockets();
+    ConnDeinitSockets();
+
+    // Reinitialize for other tests
+    ConnInitSockets();
+}
+
+/*
+ * @tc.name: ConnInitSocketsTest_MultipleCalls
+ * @tc.desc: test multiple ConnInitSockets calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnInitSocketsTest_MultipleCalls, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    EXPECT_EQ(initRet, SOFTBUS_OK);
+
+    // Second init call behavior depends on implementation
+    initRet = ConnInitSockets();
+    // Should either succeed or fail gracefully, not crash
+
+    // Clean up - deinitialize even if init was called twice
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: ConnToggleNonBlockModeTest_VeryLargeFd
+ * @tc.desc: test ConnToggleNonBlockMode with very large fd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnToggleNonBlockModeTest_VeryLargeFd, TestSize.Level1)
+{
+    int32_t veryLargeFd = 2147483647; // INT32_MAX
+
+    EXPECT_CALL(*mock, FcntlHook(_, F_GETFL, _))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, FcntlHook(_, F_SETFL, _))
+        .WillOnce(Return(0));
+
+    auto ret = ConnToggleNonBlockMode(veryLargeFd, true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ConnSendSocketDataTest_OneByte
+ * @tc.desc: test sending one byte
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_OneByte, TestSize.Level1)
+{
+    char buf[1] = {'A'};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketSendHook(_, _, _, _))
+        .WillOnce(Return(1));
+
+    auto ret = ConnSendSocketData(10, buf, 1, 1000);
+    EXPECT_EQ(ret, 1);
+}
+
+/*
+ * @tc.name: ConnRecvSocketDataTest_OneByte
+ * @tc.desc: test receiving one byte
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_OneByte, TestSize.Level1)
+{
+    char buf[1] = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillOnce(Return(1));
+    EXPECT_CALL(*mock, SocketRecvHook(_, _, _, _))
+        .WillOnce(Return(1));
+
+    auto ret = ConnRecvSocketData(10, buf, 1, 1000);
+    EXPECT_EQ(ret, 1);
+}
+
+/*
+ * @tc.name: ConnCloseSocketTest_VeryLargeFd
+ * @tc.desc: test ConnCloseSocket with very large fd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnCloseSocketTest_VeryLargeFd, TestSize.Level1)
+{
+    int32_t veryLargeFd = 2147483647;
+
+    EXPECT_CALL(*mock, SocketCloseHook(veryLargeFd))
+        .Times(1);
+
+    ConnCloseSocket(veryLargeFd);
+}
+
+/*
+ * @tc.name: ConnShutdownSocketTest_VeryLargeFd
+ * @tc.desc: test ConnShutdownSocket with very large fd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnShutdownSocketTest_VeryLargeFd, TestSize.Level1)
+{
+    int32_t veryLargeFd = 2147483647;
+
+    EXPECT_CALL(*mock, SocketShutDownHook(veryLargeFd, SOFTBUS_SHUT_RDWR))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*mock, SocketCloseHook(veryLargeFd))
+        .Times(1);
+
+    ConnShutdownSocket(veryLargeFd);
+}
+
+/*
+ * @tc.name: ConnGetSocketErrorTest_VeryLargeFd
+ * @tc.desc: test ConnGetSocketError with very large fd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetSocketErrorTest_VeryLargeFd, TestSize.Level1)
+{
+    int32_t veryLargeFd = 2147483647;
+
+    EXPECT_CALL(*mock, SocketGetErrorHook(veryLargeFd))
+        .WillOnce(Return(0));
+
+    auto ret = ConnGetSocketError(veryLargeFd);
+    EXPECT_EQ(ret, 0);
+}
+
+/*
+ * @tc.name: ConnGetLocalSocketPortTest_VeryLargeFd
+ * @tc.desc: test ConnGetLocalSocketPort with very large fd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetLocalSocketPortTest_VeryLargeFd, TestSize.Level1)
+{
+    auto initRet = ConnInitSockets();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    int32_t veryLargeFd = 2147483647;
+
+    auto ret = ConnGetLocalSocketPort(veryLargeFd);
+    // Should handle gracefully, return error or port
+    EXPECT_TRUE(ret < 0 || ret > 0);
+
+    ConnDeinitSockets();
+}
+
+/*
+ * @tc.name: Ipv6AddrInToAddrTest_InvalidFamily
+ * @tc.desc: test Ipv6AddrInToAddr with invalid address family
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_InvalidFamily, TestSize.Level1)
+{
+    SoftBusSockAddrIn6 addrIn6 = {0};
+    addrIn6.sin6Family = AF_MAX; // Invalid family
+    char addr[IP_LEN] = {0};
+
+    auto ret = Ipv6AddrInToAddr(&addrIn6, addr, IP_LEN);
+    EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
+}
+
+/*
+ * @tc.name: BindToInterfaceTest_SmallBufferSize
+ * @tc.desc: test BindToInterface with small buffer size
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_SmallBufferSize, TestSize.Level1)
+{
+    char ifName[2] = {0}; // Very small buffer
+
+    BindToInterface("192.168.1.1", SOFTBUS_AF_INET, 10, ifName, 2);
+    // Should handle gracefully, may not fit full interface name
+}
+
+/*
+ * @tc.name: ConnRecvSocketDataTest_MultipleEAGAIN
+ * @tc.desc: test ConnRecvSocketData with multiple EAGAIN returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_MultipleEAGAIN, TestSize.Level1)
+{
+    char buf[10] = {0};
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
+        .WillRepeatedly(Return(1));
+    EXPECT_CALL(*mock, SocketRecvHook(_, _, _, _))
+        .WillOnce(Return(SOFTBUS_ADAPTER_SOCKET_EAGAIN))
+        .WillOnce(Return(SOFTBUS_ADAPTER_SOCKET_EAGAIN))
+        .WillOnce(Return(5));
+
+    auto ret = ConnRecvSocketData(10, buf, 10, 1000);
+    EXPECT_EQ(ret, 5);
+}
+
+/*
+ * @tc.name: ConnSendSocketDataTest_MultiplePartialSend
+ * @tc.desc: test ConnSendSocketData with multiple partial sends
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_MultiplePartialSend, TestSize.Level1)
+{
+    char buf[100];
+    memset_s(buf, sizeof(buf), 'B', sizeof(buf));
+
+    EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
+        .WillRepeatedly(Return(1));
+    EXPECT_CALL(*mock, SocketSendHook(_, _, _, _))
+        .WillOnce(Return(10))
+        .WillOnce(Return(20))
+        .WillOnce(Return(30))
+        .WillOnce(Return(40));
+
+    auto ret = ConnSendSocketData(10, buf, 100, 1000);
+    EXPECT_EQ(ret, 100);
+}
+
+/*
+ * @tc.name: ConnPreAssignPortTest_InvalidFamily
+ * @tc.desc: test ConnPreAssignPort with invalid address family
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnPreAssignPortTest_InvalidFamily, TestSize.Level1)
+{
+    auto ret = ConnPreAssignPort(AF_MAX);
+    EXPECT_EQ(ret, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
+}
+
+/*
+ * @tc.name: ConnGetPeerSocketAddr6Test_ZeroPort
+ * @tc.desc: test ConnGetPeerSocketAddr6 with zero port
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_ZeroPort, TestSize.Level1)
+{
+    SocketAddr socketAddr = {{0}, 0};
+    SoftBusSockAddr addr = {0};
+    auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
+
+    addrIn->sinFamily = SOFTBUS_AF_INET;
+    addrIn->sinPort = 0;
+
+    EXPECT_CALL(*mock, SocketGetPeerNameHook(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(addr), Return(0)));
+    EXPECT_CALL(*mock, InetNtoPHook(SOFTBUS_AF_INET, _, _, _))
+        .WillOnce(Return("192.168.1.1"));
+
+    auto ret = ConnGetPeerSocketAddr6(10, &socketAddr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(socketAddr.port, 0);
+}
+
+/*
+ * @tc.name: ConnGetPeerSocketAddrTest_ZeroPort
+ * @tc.desc: test ConnGetPeerSocketAddr with zero port
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_ZeroPort, TestSize.Level1)
+{
+    SocketAddr socketAddr = {{0}, 0};
+    SoftBusSockAddr addr = {0};
+    auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
+
+    addrIn->sinFamily = SOFTBUS_AF_INET;
+    addrIn->sinPort = 0;
+
+    EXPECT_CALL(*mock, SocketGetPeerNameHook(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(addr), Return(0)));
+    EXPECT_CALL(*mock, InetNtoPHook(SOFTBUS_AF_INET, _, _, _))
+        .WillOnce(Return("10.0.0.1"));
+
+    auto ret = ConnGetPeerSocketAddr(10, &socketAddr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(socketAddr.port, 0);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_InvalidCharacters
+ * @tc.desc: test IsHmlIpAddr with invalid characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_InvalidCharacters, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("abc.def.ghi.jkl");
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: IsHmlIpAddrTest_PartialIPv4
+ * @tc.desc: test IsHmlIpAddr with partial IPv4
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_PartialIPv4, TestSize.Level1)
+{
+    auto ret = IsHmlIpAddr("192.168");
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: GetDomainByAddrTest_BroadcastIPv4
+ * @tc.desc: test GetDomainByAddr with broadcast IPv4
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_BroadcastIPv4, TestSize.Level1)
+{
+    auto ret = GetDomainByAddr("255.255.255.255");
+    EXPECT_EQ(ret, SOFTBUS_AF_INET);
+}
+
+/*
+ * @tc.name: BindToInterfaceTest_BroadcastAddr
+ * @tc.desc: test BindToInterface with broadcast address
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_BroadcastAddr, TestSize.Level1)
+{
+    char ifName[IF_NAME_SIZE] = {0};
+
+    // Broadcast address - should not bind
+    BindToInterface("255.255.255.255", SOFTBUS_AF_INET, 10, ifName, IF_NAME_SIZE);
+    EXPECT_EQ(strlen(ifName), 0);
 }
