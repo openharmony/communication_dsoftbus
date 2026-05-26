@@ -82,8 +82,6 @@ typedef struct {
     uint64_t startTime;
 } ConnectStatistics;
 
-int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName);
-
 int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusConnStatus status,
                                 uint64_t costTime, int32_t errCode);
 

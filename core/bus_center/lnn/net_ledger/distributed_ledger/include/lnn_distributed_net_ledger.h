@@ -53,7 +53,6 @@ int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnGetDLUpdateTimestamp(const char *udid, uint64_t *timestamp);
 int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp);
 int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity);
-int32_t LnnGetDLSleRangeCapacity(const char *networkId, uint32_t *sleRangeCapacity);
 bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability);

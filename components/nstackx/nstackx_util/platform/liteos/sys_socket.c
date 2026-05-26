@@ -66,11 +66,6 @@ int32_t SocketOpWouldBlock(void)
     return errno == EAGAIN || errno == EWOULDBLOCK;
 }
 
-int32_t SupportGSO(void)
-{
-    return 0;
-}
-
 void CheckGSOSupport(void)
 {
     LOGI(TAG, "kernel does not support UDP GSO");

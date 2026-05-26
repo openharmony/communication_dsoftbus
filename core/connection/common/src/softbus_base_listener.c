@@ -1031,6 +1031,8 @@ static void ProcessServerAcceptEvent(
                 if ((it->triggerSet & READ_TRIGGER) != 0) {
                     status = ProcessSpecifiedServerAcceptEvent(
                         node->module, listenFd, connectType, socketIf, listener, wakeupTrace);
+                    ListDelete(&it->node);
+                    SoftBusFree(it);
                 }
             }
         }

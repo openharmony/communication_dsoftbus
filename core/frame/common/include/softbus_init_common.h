@@ -38,10 +38,8 @@ extern "C" {
 #endif
 
 bool SoftbusServerPluginLoadedFlagGet(void);
-bool SoftbusClientPluginLoadedFlagGet(void);
 int32_t SoftBusDlopen(SoftBusHandleType type, void **dllHandle);
 int32_t SoftBusDlsym(const void *DllHandle, const char *funcName, void **funcHandle);
-void SoftBusDlclose(SoftBusHandleType type);
 int32_t LnnCheckFuncPointer(void *func);
 int32_t ConnCheckFuncPointer(void *func);
 int32_t DiscCheckFuncPointer(void *func);

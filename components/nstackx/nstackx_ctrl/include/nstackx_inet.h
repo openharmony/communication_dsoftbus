@@ -40,7 +40,6 @@ bool InetEqual(uint8_t af, const union InetAddr *a, const union InetAddr *b);
 
 bool InetEqualZero(uint8_t af, const union InetAddr *a);
 
-bool InetEqualNone(uint8_t af, const union InetAddr *a);
 
 bool InetEqualLoop(uint8_t af, const char *ip);
 #ifdef __cplusplus
