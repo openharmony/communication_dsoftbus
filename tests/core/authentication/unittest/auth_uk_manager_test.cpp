@@ -26,6 +26,9 @@
 #include "lnn_net_ledger.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
+
+#define UK_NEGO_ASYNC_TIME_MS (10 * 1000)
 
 namespace OHOS {
 using namespace testing;
@@ -1531,6 +1534,7 @@ HWTEST_F(AuthUkManagerTest, UPDATE_ALL_GEN_CB_CALLBACK_TEST_002, TestSize.Level1
     isSuccess = false;
     reason = SOFTBUS_AUTH_UK_INSTANCE_NOT_FIND;
     EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
+    SoftBusSleepMs(UK_NEGO_ASYNC_TIME_MS);
     for (uint32_t i = 0; i < 2; i++) {
         DeleteUkNegotiateInstance(400 + i);
     }
