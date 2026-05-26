@@ -123,8 +123,9 @@ HWTEST_F(LNNHuksUtilsTest, Encrypt_Data_Test_01, TestSize.Level0)
     inData.data = (uint8_t *)RANDOM_KEY;
 
     struct HksBlob outData = { 0 };
-    outData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
+    outData.data = (uint8_t *)SoftBusCalloc(strlen(RANDOM_KEY) + LNN_HUKS_HEADER_SIZE + 1);
     ASSERT_NE(outData.data, nullptr);
+    outData.size = strlen(RANDOM_KEY) + LNN_HUKS_HEADER_SIZE + 1;
 
     EXPECT_EQ(LnnGenerateKeyByHuks(&g_keyAlias), SOFTBUS_OK);
     EXPECT_EQ(LnnEncryptDataByHuks(&g_keyAlias, &inData, &outData), SOFTBUS_OK);
@@ -315,15 +316,17 @@ HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
     plainData.data = (uint8_t *)RANDOM_KEY;
 
     struct HksBlob encryptData = { 0 };
-    encryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
+    encryptData.data = (uint8_t *)SoftBusCalloc(strlen(RANDOM_KEY) + LNN_HUKS_HEADER_SIZE + 1);
     ASSERT_NE(encryptData.data, nullptr);
+    encryptData.size = strlen(RANDOM_KEY) + LNN_HUKS_HEADER_SIZE + 1;
 
     struct HksBlob decryptData = { 0 };
-    decryptData.data = (uint8_t *)SoftBusCalloc(LNN_HUKS_AES_COMMON_SIZE);
+    decryptData.data =(uint8_t *)SoftBusCalloc(strlen(RANDOM_KEY) + LNN_HUKS_HEADER_SIZE * 2 + 1);
     if (decryptData.data == nullptr) {
         SoftBusFree(encryptData.data);
         return;
     }
+    decryptData.size = strlen(RANDOM_KEY) + LNN_HUKS_HEADER_SIZE * 2 + 1;
     EXPECT_EQ(LnnGenerateKeyByHuks(&g_keyAlias), SOFTBUS_OK);
     EXPECT_EQ(LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData), SOFTBUS_OK);
     EXPECT_NE(memcmp(plainData.data, encryptData.data, plainData.size), 0);

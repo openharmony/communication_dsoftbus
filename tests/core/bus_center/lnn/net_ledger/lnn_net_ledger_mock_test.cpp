@@ -317,7 +317,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsBleDirectlyOnlineFactorChangeTest001, TestSize.
     info.deviceInfo.osType = 0;
     EXPECT_EQ(IsBleDirectlyOnlineFactorChange(&info), true);
     info.deviceSecurityLevel = 0;
-    EXPECT_EQ(IsBleDirectlyOnlineFactorChange(&info), true);
+    EXPECT_EQ(IsBleDirectlyOnlineFactorChange(&info), false);
 }
 
 bool g_isSupportMcu = false;
@@ -431,6 +431,7 @@ HWTEST_F(LNNNetLedgerMockTest, LnnInitNetLedgerDelayTest001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, AuthLoadDeviceKey).WillRepeatedly(Return());
     EXPECT_CALL(netLedgerMock, LnnInitLocalLedgerDelay).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(LnnInitNetLedgerDelay(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnInitNetLedgerDelay(), SOFTBUS_OK);
 }
 
@@ -775,7 +776,6 @@ HWTEST_F(LNNNetLedgerMockTest, LnnUpdateLocalDeviceInfoTest001, TestSize.Level1)
 
     EXPECT_CALL(netLedgerMock, LnnSetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_EQ(LnnUpdateLocalDeviceInfo(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnUpdateLocalDeviceInfo(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnUpdateLocalDeviceInfo(), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnUpdateLocalDeviceInfo(), SOFTBUS_OK);

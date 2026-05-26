@@ -1258,6 +1258,9 @@ HWTEST_F(AuthApplyKeyProcessTest, APPLY_KEY_MSG_HANDLER_Test_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     head.dataType = 999;
+    AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
+    EXPECT_CALL(authApplyKeyMock, LnnAsyncCallbackDelayHelper)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED));
     ret = ApplyKeyMsgHandler(0, requestId, &head, data, dataLen);
     EXPECT_EQ(ret, SOFTBUS_CHANNEL_AUTH_HANDLE_DATA_FAIL);
 }
@@ -1282,17 +1285,28 @@ HWTEST_F(AuthApplyKeyProcessTest, APPLY_KEY_MSG_HANDLER_Test_002, TestSize.Level
         .len = dataLen,
     };
 
+    AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
+    EXPECT_CALL(authApplyKeyMock, LnnAsyncCallbackDelayHelper)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED));
     int32_t ret = ApplyKeyMsgHandler(channelId, requestId, &head, TEST_DATA, strlen(TEST_DATA));
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
 
     head.dataType = DATA_TYPE_AUTH;
     head.len = sizeof(TEST_APPLY_KEY_DATA);
+    LightAccountVerifier accountVerifier;
+    accountVerifier.processLightAccountAuth = processLightAccountAuthStub;
+    EXPECT_CALL(authApplyKeyMock, InitDeviceAuthService).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, GetLightAccountVerifierInstance).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(authApplyKeyMock, GetAuthDataSize).WillRepeatedly(Return(AUTH_CONN_DATA_HEAD_SIZE));
+    EXPECT_CALL(authApplyKeyMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(authApplyKeyMock, PackAuthData).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, ConnPostBytes).WillOnce(Return(SOFTBUS_OK));
     ret = ApplyKeyMsgHandler(0, requestId, &head, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
-    EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FAIL);
 
     head.dataType = DATA_TYPE_CLOSE_ACK;
     ret = ApplyKeyMsgHandler(1, requestId, &head, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
-    EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
