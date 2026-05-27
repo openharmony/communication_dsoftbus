@@ -265,7 +265,7 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         return SOFTBUS_PARSE_JSON_ERR;
     }
     int32_t routeType = WIFI_STA;
-    if (GetJsonObjectNumberItem(msg, MSG_ROUTE_TYPE, &routeType) != SOFTBUS_OK) {
+    if (!GetJsonObjectNumberItem(msg, MSG_ROUTE_TYPE, &routeType)) {
         TRANS_LOGW(TRANS_CTRL, "Failed to get route type");
     }
     appInfo->routeType = (RouteType)routeType;

@@ -49,7 +49,7 @@ void TransScenarioManagerTest::SetUpTestCase(void)
 
 void TransScenarioManagerTest::TearDownTestCase(void)
 {
-    ScenarioManagerdestroyInstance();
+    ScenarioManagerDestroyInstance();
 }
 
 /*
@@ -203,16 +203,16 @@ HWTEST_F(TransScenarioManagerTest, ScenarioManagerClearScenarioItemList001, Test
 }
 
 /*
- * @tc.name: ScenarioManagerdestroyInstance001
+ * @tc.name: ScenarioManagerDestroyInstance001
  * @tc.desc: Transmission scenario manager
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransScenarioManagerTest, ScenarioManagerdestroyInstance001, TestSize.Level1)
+HWTEST_F(TransScenarioManagerTest, ScenarioManagerDestroyInstance001, TestSize.Level1)
 {
     if (g_manager != nullptr) {
         g_manager = nullptr;
     }
-    EXPECT_NO_FATAL_FAILURE(ScenarioManagerdestroyInstance());
+    EXPECT_NO_FATAL_FAILURE(ScenarioManagerDestroyInstance());
 }
 } // namespace OHOS
