@@ -1164,7 +1164,7 @@ HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_IPv6, TestSize.Level1)
 
 /*
  * @tc.name: ConnPreAssignPortTest_Success
- * @tc.desc: test successful ConnPreAssignPort
+ * @tc.desc: test success ConnPreAssignPort
  * @tc.type: FUNC
  */
 HWTEST_F(SoftBusSocketTest, ConnPreAssignPortTest_Success, TestSize.Level1)
