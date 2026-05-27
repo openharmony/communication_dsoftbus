@@ -147,7 +147,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
     ON_CALL(hichainMock, GetLnnTriggerInfo(_)).WillByDefault(Return());
     int32_t accountId = 100;
     NiceMock<AuthCommonInterfaceMock> authCommMock;
-    EXPECT_CALL(authCommMock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(accountId));
+    ON_CALL(authCommMock, JudgeDeviceTypeAndGetOsAccountIds).WillByDefault(Return(accountId));
     int32_t ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
