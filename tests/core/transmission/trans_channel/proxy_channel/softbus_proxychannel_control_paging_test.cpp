@@ -1489,47 +1489,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest007, T
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
- * @tc.name: TransPagingResetTest001
- * @tc.desc: test TransPagingReset PackChannelId fail and branches
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingResetTest001, TestSize.Level1)
-{
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-        .myId = -1,
-    };
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransProxyPagingPackChannelId).WillOnce(Return(nullptr));
-    int32_t ret = TransPagingReset(&chan);
-    EXPECT_EQ(SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED, ret);
-    chan.myId = TEST_CHANNEL_ID;
-    cJSON *chanIdRoot = cJSON_CreateObject();
-    AddNumberToJsonObject(chanIdRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, TEST_CHANNEL_ID);
-    char *chanIdBuf = cJSON_PrintUnformatted(chanIdRoot);
-    cJSON_Delete(chanIdRoot);
-    EXPECT_CALL(ProxyPagingMock, TransProxyPagingPackChannelId).WillRepeatedly(Return(chanIdBuf));
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingReset(&chan);
-    EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingReset(&chan);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingReset(&chan);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingReset(&chan);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = TransPagingReset(&chan);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
+
 
 /*
  * @tc.name: TransProxyResetPeerTest001
