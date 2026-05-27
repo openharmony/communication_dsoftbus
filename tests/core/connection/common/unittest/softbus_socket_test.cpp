@@ -16,7 +16,6 @@
 #include "softbus_socket.h"
 
 #include <securec.h>
-#include <string.h>
 #include <gtest/gtest.h>
 #include <cstring>
 #include <arpa/inet.h>
