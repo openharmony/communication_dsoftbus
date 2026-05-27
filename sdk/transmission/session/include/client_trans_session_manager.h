@@ -193,6 +193,8 @@ int32_t ClientGetCachedQosEventBySocket(int32_t socket, CachedQosEvent *cachedQo
 
 int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *maxIdleTime);
 
+int32_t GetMaxBufferLenBySocket(int32_t socket, uint32_t *maxBufferLen);
+
 int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime);
 
 void ClientTransOnPrivilegeClose(const char *peerNetworkId);

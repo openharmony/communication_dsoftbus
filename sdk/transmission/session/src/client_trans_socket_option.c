@@ -16,6 +16,7 @@
 #include "client_trans_socket_option.h"
 
 #include "client_trans_session_manager.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "trans_log.h"
 #include "trans_type.h"
@@ -29,29 +30,18 @@ typedef struct {
 static int32_t TransGetSocketMaxBufferLen(
     int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
 {
-    (void)socket;
-    (void)level;
-    (void)optType;
-    (void)optValue;
-    (void)optValueSize;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-static int32_t TransGetSocketFirstPackage(
-    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
-{
-    (void)socket;
-    (void)level;
-    (void)optType;
-    (void)optValue;
-    (void)optValueSize;
-    return SOFTBUS_NOT_IMPLEMENT;
+    if (socket <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid socket, socket=%{public}d", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *optValueSize = sizeof(uint32_t);
+    return GetMaxBufferLenBySocket(socket, (uint32_t *)optValue);
 }
 
 static int32_t TransGetSocketMaxIdleTime(
     int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
 {
-    if (socket < 0) {
+    if (socket <= 0) {
         TRANS_LOGE(TRANS_SDK, "invalid socket, socket=%{public}d", socket);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -62,7 +52,7 @@ static int32_t TransGetSocketMaxIdleTime(
 static int32_t TransSetSocketMaxIdleTime(
     int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
 {
-    if (socket < 0 || optValueSize < (int32_t)sizeof(uint32_t)) {
+    if (socket <= 0 || optValueSize < (int32_t)sizeof(uint32_t)) {
         TRANS_LOGE(TRANS_SDK, "invalid param, socket=%{public}d, optValueSize=%{public}d", socket, optValueSize);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -109,7 +99,7 @@ static int32_t TransGetLogicalBandwidth(
 
 static SocketOptMap g_socketOptMap[] = {
     { OPT_TYPE_MAX_BUFFER, TransGetSocketMaxBufferLen, NULL },
-    { OPT_TYPE_FIRST_PACKAGE, TransGetSocketFirstPackage, NULL },
+    { OPT_TYPE_FIRST_PACKAGE, NULL, NULL },
     { OPT_TYPE_MAX_IDLE_TIMEOUT, TransGetSocketMaxIdleTime, TransSetSocketMaxIdleTime },
     { OPT_TYPE_SUPPORT_ACK, TransGetSupportTlv, NULL },
     { OPT_TYPE_NEED_ACK, NULL, TransSetNeedAck },

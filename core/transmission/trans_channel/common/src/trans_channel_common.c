@@ -530,8 +530,8 @@ void TransBuildTransOpenChannelStartEvent(TransEventExtra *extra, AppInfo *appIn
     }
     extra->osType = appInfo->osType;
     extra->peerNetworkId = appInfo->peerNetWorkId;
-    extra->peerUdid = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceUdid : NULL,
-    extra->peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceVersion : NULL,
+    extra->peerUdid = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceUdid : NULL;
+    extra->peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceVersion : NULL;
     extra->result = EVENT_STAGE_RESULT_OK;
 }
 
