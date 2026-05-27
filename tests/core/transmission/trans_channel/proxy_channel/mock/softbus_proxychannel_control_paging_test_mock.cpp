@@ -74,5 +74,77 @@ char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
     return GetSoftbusProxychannelControlPagingInterface()->TransPagingPackHandshakeAckMsg(chan);
 }
+
+int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransProxyPackMessage(msg, authHandle, dataInfo);
+}
+
+char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransProxyPackHandshakeMsg(info);
+}
+
+char *TransProxyPackHandshakeErrMsg(int32_t errCode)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransProxyPackHandshakeErrMsg(errCode);
+}
+
+char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransProxyPackHandshakeAckMsg(chan);
+}
+
+char *TransProxyPackIdentity(const char *identity)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransProxyPackIdentity(identity);
+}
+
+char *TransProxyPagingPackChannelId(int16_t channelId)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransProxyPagingPackChannelId(channelId);
+}
+
+char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransPagingPackHandshakeErrMsg(errCode, channelId);
+}
+
+void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
+{
+    GetSoftbusProxychannelControlPagingInterface()->AuthGetLatestIdByUuid(uuid, type, isMeta, authHandle);
+}
+
+int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->TransProxySetAuthHandleByChanId(channelId, authHandle);
+}
+
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->AuthGetConnInfo(authHandle, connInfo);
+}
+
+int32_t AuthGetServerSide(int64_t authId, bool *isServer)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->AuthGetServerSide(authId, isServer);
+}
+
+int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->SoftBusEncryptData(
+        cipherKey, input, inLen, encryptData, encryptLen);
+}
+
+int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->ConnGetConnectionInfo(connectionId, info);
+}
+
+int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
+{
+    return GetSoftbusProxychannelControlPagingInterface()->ConnDisconnectDeviceAllConn(option);
+}
 }
 }
