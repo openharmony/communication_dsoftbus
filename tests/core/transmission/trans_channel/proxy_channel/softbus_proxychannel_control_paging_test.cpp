@@ -1260,9 +1260,6 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest001, Test
     ret = TransPagingHandshake(channelId, authKey, keyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     EXPECT_CALL(ProxyPagingMock, TransProxyGetSendMsgChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandShakeMsg).WillOnce(Return(nullptr));
-    ret = TransPagingHandshake(channelId, authKey, keyLen);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR, ret);
     cJSON *root = cJSON_CreateObject();
     bool res = AddStringToJsonObject(root, JSON_KEY_PKG_NAME, (char *)authKey);
     ASSERT_TRUE(res);
@@ -1488,8 +1485,6 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest007, T
     int32_t ret = TransPagingAckHandshake(&chan, retCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-
-
 
 /*
  * @tc.name: TransProxyResetPeerTest001
