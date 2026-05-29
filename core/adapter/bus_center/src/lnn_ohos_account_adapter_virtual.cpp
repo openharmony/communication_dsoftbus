@@ -90,6 +90,13 @@ void LnnClearOsAccountAdapterStatus(void)
 {
 }
 
+#ifndef ENABLE_OS_ACCOUNT_CONSTRAINT
+bool LnnIsOsAccountConstraint(void)
+{
+    return false;
+}
+#endif
+
 void LnnUpdateConstraintMapForCurrentAccount(void)
 {
 }
