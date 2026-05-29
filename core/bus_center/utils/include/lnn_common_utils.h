@@ -26,7 +26,6 @@ extern "C" {
 
 bool IsEnableSoftBusHeartbeat(void);
 bool IsOOBEState(void);
-bool IsScreenUnlock(void);
 int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen);
 int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen);
 

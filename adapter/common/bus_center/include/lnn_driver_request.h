@@ -30,8 +30,6 @@ typedef enum {
     LNN_DRIVER_MODULE_MAX_INDEX,
 } LnnDriverModuleId;
 
-int32_t LnnSendCmdToDriver(int32_t moduleId, const uint8_t *cmd, uint32_t cmdLen,
-    uint8_t *reply, uint32_t replyLen);
 
 #ifdef __cplusplus
 #if __cplusplus

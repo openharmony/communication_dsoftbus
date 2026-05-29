@@ -67,18 +67,6 @@ HWTEST_F(LnnCommonUtilsTest, LNN_IS_ENABLE_SOFTBUS_HEARTBEAT_TEST_001, TestSize.
 }
 
 /*
- * @tc.name: LNN_IS_SCREEN_UNLOCK_TEST_001
- * @tc.desc: Verify IsScreenUnlock returns true
- * @tc.type: FUNC
- * @tc.level: Level1
- */
-HWTEST_F(LnnCommonUtilsTest, LNN_IS_SCREEN_UNLOCK_TEST_001, TestSize.Level1)
-{
-    bool result = IsScreenUnlock();
-    EXPECT_TRUE(result);
-}
-
-/*
  * @tc.name: LNN_ENCRYPT_AES_GCM_TEST_002
  * @tc.desc: Verify LnnEncryptAesGcm handles null output parameter
  * @tc.type: FUNC

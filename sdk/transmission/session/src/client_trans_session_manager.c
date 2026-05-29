@@ -2492,7 +2492,7 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
 
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
 {
-    if (sessionId < 0 || callbackAdapter == NULL) {
+    if (sessionId < 0 || callbackAdapter == NULL || isServer == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -3391,6 +3391,38 @@ int32_t GetMaxIdleTimeBySocket(int32_t socket, uint32_t *optValue)
     }
     UnlockClientSessionServerList();
     return ret;
+}
+
+int32_t GetMaxBufferLenBySocket(int32_t socket, uint32_t *maxBufferLen)
+{
+    if (socket <= 0 || maxBufferLen == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    if (sessionNode->businessType != BUSINESS_TYPE_BYTE && sessionNode->businessType != BUSINESS_TYPE_MESSAGE) {
+        TRANS_LOGE(TRANS_SDK, "not support type=%{public}d", sessionNode->businessType);
+        UnlockClientSessionServerList();
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
+    }
+
+    *maxBufferLen = sessionNode->dataConfig;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
 }
 
 int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)

@@ -241,7 +241,7 @@ static bool ScenarioManagerAddIfaceNameByLocalMac(ScenarioManager *manager,
 
 static const char *ScenarioManagerFindIfaceNameByLocalMac(const char *localMac)
 {
-    // it's fake, gona replaced by wifi interface
+    // it's fake, gonna replaced by wifi interface
     static const char *LOCAL_MAC_1 = "18:65";
     static const char *LOCAL_MAC_2 = "82:13";
     if (strcmp(localMac, LOCAL_MAC_1) == 0) {
@@ -339,7 +339,7 @@ static void ScenarioManagerDelBusinessType(ScenarioItem *scenarioItem, BusinessC
     counter->totalCount--;
     (void)(*itemCount)--;
     TRANS_LOGI(TRANS_CTRL,
-        "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
+        "businessType=%{public}d, filecount=%{public}d, audiocount=%{public}d, videocount=%{public}d",
         businessType, scenarioItem->totalFileCount, scenarioItem->totalAudioCount,
         scenarioItem->totalVideoCount);
 }
@@ -367,7 +367,7 @@ static int32_t ScenarioManagerGetBitPosByBusinessType(int32_t businessType)
 static bool ScenarioManagerIsBusinesExisted(ScenarioItem *item, int32_t businessType)
 {
     TRANS_LOGI(TRANS_CTRL,
-        "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
+        "businessType=%{public}d, filecount=%{public}d, audiocount=%{public}d, videocount=%{public}d",
         businessType, item->totalFileCount, item->totalAudioCount, item->totalVideoCount);
     switch (businessType) {
         case SM_FILE_TYPE:
@@ -592,7 +592,7 @@ static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return;
     }
-    TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer=%{public}d", manager->macIfacePairList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList number=%{public}d", manager->macIfacePairList->cnt);
     MacIfacePair *pair = NULL;
     MacIfacePair *nextPair = NULL;
     if (SoftBusMutexLock(&(manager->macIfacePairList->lock)) != SOFTBUS_OK) {
@@ -604,7 +604,7 @@ static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
         SoftBusFree(pair);
         manager->macIfacePairList->cnt--;
     }
-    TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer=%{public}d", manager->macIfacePairList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "after clean : macIfacePairList number=%{public}d", manager->macIfacePairList->cnt);
     (void)SoftBusMutexUnlock(&(manager->macIfacePairList->lock));
 }
 
@@ -624,7 +624,7 @@ static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return;
     }
-    TRANS_LOGI(TRANS_CTRL, "before clean:scenarioItemList numer=%{public}d", manager->scenarioItemList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "before clean:scenarioItemList number=%{public}d", manager->scenarioItemList->cnt);
     ScenarioItem *item = NULL;
     ScenarioItem *tmp = NULL;
     if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != SOFTBUS_OK) {
@@ -637,7 +637,7 @@ static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
         SoftBusFree(item);
         manager->scenarioItemList->cnt--;
     }
-    TRANS_LOGI(TRANS_CTRL, "after clean:scenarioItemList numer=%{public}d", manager->scenarioItemList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "after clean:scenarioItemList number=%{public}d", manager->scenarioItemList->cnt);
     (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
 }
 
@@ -689,7 +689,7 @@ int32_t ScenarioManagerInit(void)
     return SOFTBUS_OK;
 }
 
-void ScenarioManagerdestroyInstance()
+void ScenarioManagerDestroyInstance(void)
 {
     if (g_manager == NULL) {
         TRANS_LOGE(TRANS_CTRL, "manager is null!");

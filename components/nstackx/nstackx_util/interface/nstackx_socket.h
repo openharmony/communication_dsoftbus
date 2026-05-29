@@ -45,7 +45,6 @@ Socket *AcceptSocket(Socket *serverSocket);
 int32_t SocketSend(const Socket *socket, const uint8_t *buffer, size_t length);
 int32_t SocketSendEx(const Socket *socket, uint16_t mss, const struct iovec *iov, uint32_t cnt);
 void CheckGSOSupport(void);
-int32_t SupportGSO(void);
 int32_t SocketRecv(Socket *socket, uint8_t *buffer, size_t length, struct sockaddr_in *srcAddr,
                    const socklen_t *addrLen);
 Socket *ClientSocketWithTargetDev(SocketProtocol protocol, const struct sockaddr_in *sockAddr,

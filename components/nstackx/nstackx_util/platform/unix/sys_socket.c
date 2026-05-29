@@ -26,13 +26,6 @@
 
 #define TAG "nStackXSocket"
 
-static int32_t g_gsoSupport = 0;
-
-int32_t SupportGSO(void)
-{
-    return g_gsoSupport;
-}
-
 void SocketModuleClean(void)
 {
 }
@@ -152,7 +145,6 @@ static void RecvUdpSegment(int32_t fd)
     if (err == DEFAULT_UDP_MSS) {
         err = recvfrom(fd, buf, sizeof(buf), 0, NULL, NULL);
         if (err == DEFAULT_UDP_MSS) {
-            g_gsoSupport = 1;
             LOGI(TAG, "kernel support UDP GSO");
         } else {
             LOGI(TAG, "kernel does not support UDP GSO");

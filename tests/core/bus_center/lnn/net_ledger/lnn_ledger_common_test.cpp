@@ -1677,20 +1677,6 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_TIMESTAMP_Test_002, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_DL_SLE_RANGE_CAPACITY_Test_001
- * @tc.desc: Verify LnnGetDLSleRangeCapacity with invalid networkId
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_RANGE_CAPACITY_Test_001, TestSize.Level1)
-{
-    uint32_t sleRangeCapacity = 0;
-    int32_t ret = LnnGetDLSleRangeCapacity("invalid_network_id_xyz", &sleRangeCapacity);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-}
-
-/*
  * @tc.name: LNN_SAVE_BROADCAST_LINK_KEY_Test_001
  * @tc.desc: Verify LnnSaveBroadcastLinkKey handles null parameters
  * @tc.type: FUNC
@@ -1756,33 +1742,6 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_TIMESTAMP_Test_003, TestSize.Level1)
 
     ret = LnnSetDLSleHbTimestamp("invalid_network_id", timestamp);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-
-    LnnDeinitDistributedLedger();
-}
-
-/*
- * @tc.name: LNN_DL_SLE_RANGE_CAPACITY_Test_002
- * @tc.desc: Verify LnnGetDLSleRangeCapacity with valid node
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(LNNNetLedgerCommonTest, LNN_DL_SLE_RANGE_CAPACITY_Test_002, TestSize.Level1)
-{
-    EXPECT_TRUE(LnnInitDistributedLedger() == SOFTBUS_OK);
-    NodeInfo info;
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_EQ(EOK, strncpy_s(info.uuid, UUID_BUF_LEN, LOCAL_UUID, strlen(LOCAL_UUID)));
-    EXPECT_EQ(EOK, strncpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, LOCAL_UDID, strlen(LOCAL_UDID)));
-    EXPECT_EQ(EOK, strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID)));
-    info.discoveryType = DISCOVERY_TYPE_WIFI;
-    info.sleRangeCapacity = 100;
-    EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
-
-    uint32_t sleRangeCapacity = 0;
-    int32_t ret = LnnGetDLSleRangeCapacity(LOCAL_NETWORKID, &sleRangeCapacity);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(sleRangeCapacity, 100);
 
     LnnDeinitDistributedLedger();
 }

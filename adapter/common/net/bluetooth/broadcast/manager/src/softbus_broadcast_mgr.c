@@ -378,16 +378,6 @@ static int32_t CheckBroadcastingParam(const BroadcastParam *param, const Broadca
     return SOFTBUS_OK;
 }
 
-void SoftbusBleAdapterDeInitPacked(void)
-{
-    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
-    if (pfnAdapterEnhanceFuncList->softbusBleAdapterDeInit == NULL) {
-        DISC_LOGE(DISC_BROADCAST, "go open source func");
-        return SoftbusBleAdapterDeInit();
-    }
-    return pfnAdapterEnhanceFuncList->softbusBleAdapterDeInit();
-}
-
 int32_t DeInitBroadcastMgr(void)
 {
     DISC_LOGI(DISC_BROADCAST, "deinit enter");
