@@ -1864,8 +1864,14 @@ void LnnOnRefreshDeviceFound(const void *device)
         LNN_LOGD(LNN_STATE, "RefreshLNN finally OnDeviceFound, cap=%{public}u", capBit);
         isReportAnyDevice = true;
     }
+    if (!isReportAnyDevice && g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
+        g_busCenterClient.refreshCb.OnDeviceFound(deviceInfo);
+        LNN_LOGD(LNN_STATE, "RefreshLNN finally OnDeviceFound by default cb, cap=%{public}u",
+            deviceInfo->capabilityBitmap[0]);
+        isReportAnyDevice = true;
+    }
     if (!isReportAnyDevice) {
-        LNN_LOGE(LNN_STATE, "deviceInfo OnDeviceFound failed by invalid cb, cap=%{public}u",
+        LNN_LOGE(LNN_STATE, "RefreshLNN OnDeviceFound report failed without cb, cap=%{public}u",
             deviceInfo->capabilityBitmap[0]);
     }
 }
