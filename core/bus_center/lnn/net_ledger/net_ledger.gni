@@ -16,7 +16,6 @@ import("../../../../dsoftbus.gni")
 bus_center_ledger_src = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_device_info.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
-  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_huks_utils.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_net_capability.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_net_ledger.c",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_node_info.c",
@@ -56,7 +55,10 @@ bus_center_ledger_external_deps = [ "huks:libhukssdk" ]
 net_ledger_native_source_path = rebase_path("$dsoftbus_root_path")
 
 if (defined(ohos_lite)) {
-  bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c" ]
+  bus_center_ledger_src += [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_huks_utils_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c",
+  ]
   bus_center_ledger_inc +=
       [ "//base/security/huks/interfaces/inner_api/huks_standard/main/include" ]
   if (ohos_kernel_type != "liteos_m") {
@@ -64,5 +66,8 @@ if (defined(ohos_lite)) {
         [ "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk" ]
   }
 } else {
-    bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c" ]
+  bus_center_ledger_src += [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_huks_utils.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c",
+  ]
 }

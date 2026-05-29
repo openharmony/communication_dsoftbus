@@ -59,9 +59,6 @@ if (dsoftbus_feature_lnn_frame) {
     auth_server_src += [ "$authentication_path/src/virtual/auth_identity_service_adapter_virtual.c" ]
     AUTH_SERVER_DEFINES += [ "DISABLE_IDENTITY_SERVICE" ]
   } else {
-    if (!support_jsapi) {
-      AUTH_SERVER_DEFINES += [ "DISABLE_AUTH_DEPS" ]
-    }
     auth_server_src +=
         [ "$authentication_path/src/auth_identity_service_adapter.c" ]
   }

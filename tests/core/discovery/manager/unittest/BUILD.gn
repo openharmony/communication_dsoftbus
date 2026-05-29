@@ -54,6 +54,7 @@ ohos_unittest("DiscManagerTest") {
 
 ohos_unittest("DiscManagerMockTest") {
   module_out_path = module_output_path
+  defines += [ "ENABLE_OS_ACCOUNT_CONSTRAINT" ]
   sources = [
     "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
     "$dsoftbus_core_path/discovery/manager/src/disc_mgr_config.c",

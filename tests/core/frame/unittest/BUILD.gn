@@ -20,6 +20,7 @@ softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 ohos_unittest("SoftbusServerStubTest") {
   module_out_path = module_output_path
+  defines += [ "ENABLE_OS_ACCOUNT_CONSTRAINT" ]
   sources = [
     "mock/softbus_server_stub_test_mock.cpp",
     "softbus_server_stub_test.cpp",

@@ -83,6 +83,7 @@ ohos_unittest("LNNConnAddrUtilsTest") {
 
 ohos_unittest("LNNFileUtilsTest") {
   module_out_path = module_output_path
+  defines += [ "ENABLE_OS_ACCOUNT_CONSTRAINT" ]
   sources = [
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_decision_db_deps_mock.cpp",
     "lnn_file_utils_test.cpp",
