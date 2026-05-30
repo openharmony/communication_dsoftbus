@@ -309,7 +309,7 @@ HWTEST_F(TransClientSocketServiceTest, GetSocketOpt001, TestSize.Level1)
 HWTEST_F(TransClientSocketServiceTest, GetSocketOpt002, TestSize.Level1)
 {
     OptLevel level = OPT_LEVEL_SOFTBUS;
-    OptType optType = OPT_TYPE_MAX_BUFFER;
+    OptType optType = OPT_TYPE_FIRST_PACKAGE;
     int socketId = 1;
     uint32_t optValueValid = 0;
     void *temp = &optValueValid;
@@ -519,7 +519,7 @@ HWTEST_F(TransClientSocketServiceTest, SetAccessInfo001, TestSize.Level1)
 HWTEST_F(TransClientSocketServiceTest, GetSocketOpt003, TestSize.Level1)
 {
     OptLevel level = OPT_LEVEL_SOFTBUS;
-    OptType optType = OPT_TYPE_MAX_BUFFER;
+    OptType optType = OPT_TYPE_FIRST_PACKAGE;
     int socketId = 1;
     uint32_t optValueValid = 0;
     void *temp = &optValueValid;
