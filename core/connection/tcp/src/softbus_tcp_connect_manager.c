@@ -229,6 +229,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
         return SOFTBUS_INVALID_PARAM;
     }
 
+    (void)ConnToggleNonBlockMode(cfd, true);
     if (module == AUTH_P2P) {
         CONN_LOGI(CONN_COMMON, "recv p2p conned. cfd=%{public}d", cfd);
         int32_t ret = TcpConnSetKeepalive(cfd, true);
