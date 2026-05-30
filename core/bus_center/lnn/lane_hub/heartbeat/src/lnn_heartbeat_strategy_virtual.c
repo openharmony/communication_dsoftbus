@@ -36,3 +36,166 @@ int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
     (void)msgPara;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+LnnHeartbeatStrategyType GetStrategyTypeByPolicy(int32_t policy)
+{
+    (void)policy;
+    return STRATEGY_HB_SEND_SINGLE;
+}
+
+int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
+{
+    (void)type;
+    (void)isEnable;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbeatType type)
+{
+    (void)mode;
+    (void)callerId;
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetHbStrategyManager(LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType,
+    LnnHeartbeatStrategyType strategyType)
+{
+    (void)mgr;
+    (void)hbType;
+    (void)strategyType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeartbeatType type)
+{
+    (void)param;
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnHbStrategyDeinit(void) { }
+
+int32_t LnnHbStrategyInit(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+bool LnnIsHeartbeatEnable(LnnHeartbeatType type)
+{
+    (void)type;
+    return false;
+}
+
+int32_t LnnRegistParamMgrByType(LnnHeartbeatType type)
+{
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnRemoveV0BroadcastAndCheckDev(void) { }
+
+int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type)
+{
+    (void)callerId;
+    (void)mode;
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetHbAsMasterNodeState(bool isMasterNode)
+{
+    (void)isMasterNode;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
+{
+    (void)param;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStartHbByTypeAndStrategyDirectly(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
+    bool isRelay, const char *networkId, uint64_t timeout)
+{
+    (void)hbType;
+    (void)strategyType;
+    (void)isRelay;
+    (void)networkId;
+    (void)timeout;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStartNewHbStrategyFsm(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
+{
+    (void)networkId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType)
+{
+    (void)registedHbType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
+{
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
+{
+    (void)networkId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStopV0HeartbeatAndNotTransState()
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnUnRegistParamMgrByType(LnnHeartbeatType type)
+{
+    (void)type;
+}
+
+int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
+{
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+

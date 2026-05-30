@@ -45,7 +45,6 @@ void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     (void)channelId;
     (void)moduleId;
-    return;
 }
 
 int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
@@ -61,10 +60,7 @@ int32_t SetSocketCallback(const SocketCallback *cb)
     return SOFTBUS_OK;
 }
 
-void UnsetSocketCallback(void)
-{
-    return;
-}
+void UnsetSocketCallback(void) { }
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
 {
@@ -80,7 +76,6 @@ void SocketDisconnectDevice(ListenerModule module, int32_t fd)
 {
     (void)module;
     (void)fd;
-    return;
 }
 
 int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *data)
@@ -111,5 +106,74 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
 void StopSocketListening(ListenerModule moduleId)
 {
     (void)moduleId;
+}
+
+int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
+{
+    (void)fd;
+    (void)cycle;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void AuthTcpConnFdLockDeinit(void) { }
+
+int32_t AuthTcpConnFdLockInit(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void DeleteAuthTcpConnFdItemByConnId(int32_t fd)
+{
+    (void)fd;
     return;
 }
+
+bool IsExistAuthTcpConnFdItemByConnId(int32_t fd)
+{
+    (void)fd;
+    return false;
+}
+
+int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode)
+{
+    (void)module;
+    (void)addr;
+    (void)port;
+    (void)isBlockMode;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void ReleaseAuthTcpConnFdListLock(void) { }
+
+bool RequireAuthTcpConnFdListLock(void)
+{
+    return false;
+}
+
+int32_t SocketConnectDeviceWithAllIp(const char *localIp, const char *remoteIp, int32_t port, bool isBlockMode)
+{
+    (void)localIp;
+    (void)remoteIp;
+    (void)port;
+    (void)isBlockMode;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SocketSetDevice(int32_t fd, bool isBlockMode)
+{
+    (void)fd;
+    (void)isBlockMode;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void StopSessionKeyListening(int32_t fd)
+{
+    (void)fd;
+}
+
+int32_t TryDeleteAuthTcpConnFdItemByConnId(int32_t fd)
+{
+    (void)fd;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+

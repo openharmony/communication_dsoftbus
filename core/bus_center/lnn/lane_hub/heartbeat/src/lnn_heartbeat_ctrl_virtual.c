@@ -138,3 +138,59 @@ bool LnnIsNeedInterceptBroadcast(bool disableGlass)
     (void)disableGlass;
     return false;
 }
+
+SoftBusScreenLockState GetScreenLockState(void)
+{
+    return SOFTBUS_SCREEN_LOCK_UNKNOWN;
+}
+
+void HbEnableDiscovery(void) { }
+
+int32_t LnnOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback)
+{
+    (void)callback;
+}
+
+void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
+{
+    (void)strategy;
+    (void)timeout;
+}
+
+void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+}
+
+int32_t LnnStopSleHeartbeat(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnTriggerDirectHeartbeat(const char *networkId, uint64_t timeout)
+{
+    (void)networkId;
+    (void)timeout;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnTriggerSleHeartbeat(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void LnnUnregBleRangeCb(void) { }
+
+void SetScreenState(SoftBusScreenState state)
+{
+    (void)state;
+}
+

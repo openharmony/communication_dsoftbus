@@ -77,7 +77,7 @@ int32_t GetAccessUkIdDiffAccountWithUserLevel(const AuthACLInfo *acl, int32_t *u
     (void)acl;
     (void)ukId;
     (void)time;
-    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t GetAccessUkIdDiffAccount(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
@@ -137,8 +137,7 @@ bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
     return false;
 }
 
-void UpdateGroupShareToDp(SoftBusAclInfo *peerAclInfo, int32_t creIdType,
-                          SessionKey sessionKey, bool isNeedUpdateDk)
+void UpdateGroupShareToDp(SoftBusAclInfo *peerAclInfo, int32_t creIdType, SessionKey sessionKey, bool isNeedUpdateDk)
 {
     (void)peerAclInfo;
     (void)creIdType;
@@ -146,13 +145,11 @@ void UpdateGroupShareToDp(SoftBusAclInfo *peerAclInfo, int32_t creIdType,
     (void)isNeedUpdateDk;
 }
 
-int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId,
-                                  uint64_t *time)
+int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId, uint64_t *time)
 {
     (void)acl;
     (void)ukId;
     (void)time;
-    return SOFTBUS_AUTH_UK_NOT_FIND;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
-
 } // extern "C"

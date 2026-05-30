@@ -16,6 +16,7 @@
 #include "conn_event.h"
 #include "disc_event.h"
 #include "lnn_event.h"
+#include "softbus_event.h"
 #include "trans_event.h"
 
 void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra *extra)
@@ -143,3 +144,16 @@ void TransAuditInner(int32_t scene, const char *func, int32_t line, TransAuditEx
     (void)line;
     (void)extra;
 }
+
+void SoftbusAuditInner(SoftbusEventModule module, SoftbusEventForm *form)
+{
+    (void)module;
+    (void)form;
+}
+
+void SoftbusEventInner(SoftbusEventModule module, SoftbusEventForm *form)
+{
+    (void)module;
+    (void)form;
+}
+

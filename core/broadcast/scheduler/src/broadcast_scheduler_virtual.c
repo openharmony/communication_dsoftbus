@@ -133,3 +133,8 @@ int32_t SchedulerGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
     return SOFTBUS_OK;
 }
 
+int8_t SchedulerGetAdvPower(int32_t businessType)
+{
+    (void)businessType;
+    return 0;
+}

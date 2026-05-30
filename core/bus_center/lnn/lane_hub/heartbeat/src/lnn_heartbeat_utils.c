@@ -568,13 +568,13 @@ uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
         return randMin - randMax;
     }
 
-    time_t currTime = time(NULL);
-    if (currTime == 0) {
-        LNN_LOGI(LNN_HEART_BEAT, "seed is 0, just ignore");
+    uint32_t random = 0;
+    if (SoftBusGenerateRandomArray((unsigned char *)&random, sizeof(uint32_t)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "generate random array fail");
+        srand(time(NULL));
+        random = (uint32_t)rand();
     }
-    srand(currTime);
-    uint32_t random = (uint32_t)rand() % (randMax - randMin);
-    return randMin + random;
+    return randMin + random % (randMax - randMin);
 }
 
 static int32_t GetOnlineInfoNum(int32_t *nums)

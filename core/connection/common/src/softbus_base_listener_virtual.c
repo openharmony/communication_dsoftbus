@@ -76,3 +76,14 @@ bool IsListenerNodeExist(ListenerModule module)
     CONN_LOGE(CONN_COMMON, "not support");
     return false;
 }
+
+uint32_t CreateListenerModule(void)
+{
+    return 0;
+}
+
+void DestroyBaseListener(ListenerModule module)
+{
+    (void)module;
+}
+

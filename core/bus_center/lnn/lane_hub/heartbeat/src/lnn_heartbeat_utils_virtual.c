@@ -67,3 +67,62 @@ int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
     (void)len;
     return SOFTBUS_OK;
 }
+
+uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
+{
+    (void)randMin;
+    (void)randMax;
+    return 0;
+}
+
+bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType)
+{
+    (void)srcType;
+    (void)dstType;
+    return false;
+}
+
+LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
+{
+    (void)addrType;
+    return HEARTBEAT_TYPE_MAX;
+}
+
+ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
+{
+    (void)type;
+    return CONNECTION_ADDR_MAX;
+}
+
+int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
+{
+    (void)type;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+    return false;
+}
+
+bool LnnIsMultiDeviceOnline(void)
+{
+    return false;
+}
+
+bool LnnIsSupportBurstFeature(const char *networkId)
+{
+    (void)networkId;
+    return false;
+}
+
+bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data)
+{
+    (void)callback;
+    (void)typeSet;
+    (void)data;
+    return false;
+}
+

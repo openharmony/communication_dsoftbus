@@ -96,3 +96,19 @@ void TransOnBrProxyOpened(pid_t pid, int32_t channelId, const char *brMac, const
     (void)uuid;
     return;
 }
+
+int32_t BtPermissionChange(int32_t state, const char *pkgName, int32_t pid)
+{
+    (void)state;
+    (void)pkgName;
+    (void)pid;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId)
+{
+    (void)bundleName;
+    (void)appIndex;
+    (void)userId;
+}
+

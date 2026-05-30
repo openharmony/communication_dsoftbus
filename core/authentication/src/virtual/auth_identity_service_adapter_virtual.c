@@ -96,6 +96,21 @@ void IdServiceUnRegCredMgr(void)
     return;
 }
 
+int32_t IdServiceGetCredInfoByUdid(const char *udid, SoftBusCredInfo *credInfo)
+{
+    (void)udid;
+    (void)credInfo;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType)
+{
+    (void)userId;
+    (void)credId;
+    (void)credType;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
     const char *udidHash)
 {
