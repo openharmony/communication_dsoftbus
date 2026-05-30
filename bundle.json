@@ -75,7 +75,8 @@
       "dsoftbus_feature_coap",
       "dsoftbus_feature_lnn_usb_ncm",
       "dsoftbus_feature_trans_mintp",
-      "dsoftbus_feature_lnn_d2d_auth"
+      "dsoftbus_feature_lnn_d2d_auth",
+      "dsoftbus_feature_trans_io_uring"
     ],
     "rom": "3000KB",
     "ram": "40MB",
@@ -122,7 +123,8 @@
         "napi",
         "resource_schedule_service",
         "device_standby",
-        "runtime_core"
+        "runtime_core",
+        "liburing"
       ],
       "third_party": [
         "cJSON",
