@@ -332,7 +332,7 @@ int32_t P2pAdapter::GetGroupInfo(WifiDirectP2pGroupInfo &groupInfoOut)
         sizeof(groupInfo->owner.randomDevAddr));
     groupInfoOut.groupOwner.address = WifiDirectUtils::MacArrayToString(devAddrArray);
     groupInfoOut.groupOwner.randomMac = WifiDirectUtils::MacArrayToString(devRandomAddrArray);
-    for (auto i = 0; i < groupInfo->clientDevicesSize; i++) {
+    for (auto i = 0; i < groupInfo->clientDevicesSize && i < MAX_DEVICES_NUM; i++) {
         std::vector<uint8_t> clientAddrArray(
             groupInfo->clientDevices[i].devAddr, groupInfo->clientDevices[i].devAddr +
                 sizeof(groupInfo->clientDevices[i].devAddr));
