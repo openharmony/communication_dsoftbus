@@ -36,6 +36,9 @@ using namespace testing::ext;
 #define TEST_IP "192.168.1.1"
 #define TEST_PORT 8888
 #define TEST_SESSION_NAME "test.file.session"
+#define TEST_MCAST_RATE 1024
+#define TEST_MCAST_BYTES 4096
+#define TEST_TOTAL_BYTES 6144
 
 namespace OHOS {
 
@@ -840,4 +843,222 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest016, TestSize.Level1)
     SoftBusFree(linkedChannel);
 }
 
+static FileEvent *g_currentCapturedFileEvent = nullptr;
+static bool *g_currentFileEventCaptured = nullptr;
+
+static void MockSocketSendCallback(int32_t socket, FileEvent *event)
+{
+    if (event != nullptr && g_currentCapturedFileEvent != nullptr && g_currentFileEventCaptured != nullptr) {
+        *g_currentCapturedFileEvent = *event;
+        *g_currentFileEventCaptured = true;
+    }
+}
+
+/*
+ * @tc.name: ReportMcastDfxEventTest001
+ * @tc.desc: Test ReportMcastDfxEvent emits DFX when mcastRate != 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, ReportMcastDfxEventTest001, TestSize.Level1)
+{
+    ResetTransEventState();
+
+    DFileMsg msgData;
+    (void)memset_s(&msgData, sizeof(DFileMsg), 0, sizeof(DFileMsg));
+    msgData.transferUpdate.bytesTransferred = TEST_TOTAL_BYTES;
+    msgData.transferUpdate.mcastBytesTransferred = TEST_MCAST_BYTES;
+    msgData.mcastRate = TEST_MCAST_RATE;
+
+    ReportMcastDfxEvent(TEST_SESSION_ID, &msgData);
+
+    EXPECT_TRUE(IsTransEventCalled());
+    TransEventExtra extra = GetLastTransEventExtra();
+    EXPECT_EQ(extra.sessionId, TEST_SESSION_ID);
+    EXPECT_EQ(extra.multicastRate, (uint32_t)TEST_MCAST_RATE);
+    EXPECT_EQ(extra.multicastBytes, (uint64_t)TEST_MCAST_BYTES);
+}
+
+/*
+ * @tc.name: ReportMcastDfxEventTest002
+ * @tc.desc: Test ReportMcastDfxEvent does not emit DFX when mcastRate == 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, ReportMcastDfxEventTest002, TestSize.Level1)
+{
+    ResetTransEventState();
+
+    DFileMsg msgData;
+    (void)memset_s(&msgData, sizeof(DFileMsg), 0, sizeof(DFileMsg));
+    msgData.mcastRate = 0;
+
+    ReportMcastDfxEvent(TEST_SESSION_ID, &msgData);
+
+    EXPECT_FALSE(IsTransEventCalled());
+}
+
+/*
+ * @tc.name: NotifySocketSendResultMcastTest001
+ * @tc.desc: Test NotifySocketSendResult sets multicast fields and emits DFX when mcastRate != 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, NotifySocketSendResultMcastTest001, TestSize.Level1)
+{
+    FileEvent capturedFileEvent;
+    bool fileEventCaptured = false;
+    (void)memset_s(&capturedFileEvent, sizeof(FileEvent), 0, sizeof(FileEvent));
+    g_currentCapturedFileEvent = &capturedFileEvent;
+    g_currentFileEventCaptured = &fileEventCaptured;
+    ResetTransEventState();
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    DFileMsg msgData;
+    (void)memset_s(&msgData, sizeof(DFileMsg), 0, sizeof(DFileMsg));
+    msgData.transferUpdate.bytesTransferred = TEST_TOTAL_BYTES;
+    msgData.transferUpdate.totalBytes = TEST_TOTAL_BYTES * 2;
+    msgData.transferUpdate.mcastBytesTransferred = TEST_MCAST_BYTES;
+    msgData.mcastRate = TEST_MCAST_RATE;
+    msgData.errorCode = NSTACKX_EOK;
+
+    FileListener listener;
+    (void)memset_s(&listener, sizeof(FileListener), 0, sizeof(FileListener));
+    listener.socketSendCallback = MockSocketSendCallback;
+
+    NotifySocketSendResult(TEST_SESSION_ID, DFILE_ON_FILE_SEND_SUCCESS, &msgData, &listener);
+
+    EXPECT_TRUE(fileEventCaptured);
+    EXPECT_EQ(capturedFileEvent.type, FILE_EVENT_SEND_FINISH);
+    EXPECT_EQ(capturedFileEvent.multicastRate, (uint32_t)TEST_MCAST_RATE);
+    EXPECT_EQ(capturedFileEvent.multicastBytesProcessed, (uint64_t)TEST_MCAST_BYTES);
+
+    EXPECT_TRUE(IsTransEventCalled());
+    TransEventExtra extra = GetLastTransEventExtra();
+    EXPECT_EQ(extra.multicastRate, (uint32_t)TEST_MCAST_RATE);
+    EXPECT_EQ(extra.multicastBytes, (uint64_t)TEST_MCAST_BYTES);
+
+    g_currentCapturedFileEvent = nullptr;
+    g_currentFileEventCaptured = nullptr;
+}
+
+/*
+ * @tc.name: NotifySocketSendResultMcastTest002
+ * @tc.desc: Test NotifySocketSendResult multicast fields with zero mcastRate, no DFX event emitted
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, NotifySocketSendResultMcastTest002, TestSize.Level1)
+{
+    FileEvent capturedFileEvent;
+    bool fileEventCaptured = false;
+    (void)memset_s(&capturedFileEvent, sizeof(FileEvent), 0, sizeof(FileEvent));
+    g_currentCapturedFileEvent = &capturedFileEvent;
+    g_currentFileEventCaptured = &fileEventCaptured;
+    ResetTransEventState();
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    DFileMsg msgData;
+    (void)memset_s(&msgData, sizeof(DFileMsg), 0, sizeof(DFileMsg));
+    msgData.transferUpdate.bytesTransferred = TEST_TOTAL_BYTES;
+    msgData.transferUpdate.totalBytes = TEST_TOTAL_BYTES * 2;
+    msgData.transferUpdate.mcastBytesTransferred = 0;
+    msgData.mcastRate = 0;
+    msgData.errorCode = NSTACKX_EOK;
+
+    FileListener listener;
+    (void)memset_s(&listener, sizeof(FileListener), 0, sizeof(FileListener));
+    listener.socketSendCallback = MockSocketSendCallback;
+
+    NotifySocketSendResult(TEST_SESSION_ID, DFILE_ON_FILE_SEND_SUCCESS, &msgData, &listener);
+
+    EXPECT_TRUE(fileEventCaptured);
+    EXPECT_EQ(capturedFileEvent.type, FILE_EVENT_SEND_FINISH);
+    EXPECT_EQ(capturedFileEvent.multicastRate, (uint32_t)0);
+    EXPECT_EQ(capturedFileEvent.multicastBytesProcessed, (uint64_t)0);
+
+    EXPECT_FALSE(IsTransEventCalled());
+
+    g_currentCapturedFileEvent = nullptr;
+    g_currentFileEventCaptured = nullptr;
+}
+
+/*
+ * @tc.name: FileSendListenerExMcastTest001
+ * @tc.desc: Test FileSendListenerEx routes DFILE_ON_FILE_SEND_SUCCESS to listener notification + multicast DFX
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, FileSendListenerExMcastTest001, TestSize.Level1)
+{
+    FileEvent capturedFileEvent;
+    bool fileEventCaptured = false;
+    (void)memset_s(&capturedFileEvent, sizeof(FileEvent), 0, sizeof(FileEvent));
+    g_currentCapturedFileEvent = &capturedFileEvent;
+    g_currentFileEventCaptured = &fileEventCaptured;
+    ResetTransEventState();
+
+    NiceMock<ClientTransFileInterfaceMock> mock;
+
+    UdpChannel *udpChannel = CreateTestUdpChannel();
+    ASSERT_NE(udpChannel, nullptr);
+    udpChannel->channelId = TEST_CHANNEL_ID;
+    (void)strcpy_s(udpChannel->info.mySessionName, SESSION_NAME_SIZE_MAX, TEST_SESSION_NAME);
+    (void)strcpy_s(udpChannel->info.peerDeviceId, DEVICE_ID_SIZE_MAX, "testPeerDeviceId");
+
+    FileListener fileListener;
+    (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
+    fileListener.socketSendCallback = MockSocketSendCallback;
+    EXPECT_CALL(mock, TransGetFileListener(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(fileListener), Return(SOFTBUS_OK)));
+
+    DFileMsg msgData;
+    (void)memset_s(&msgData, sizeof(DFileMsg), 0, sizeof(DFileMsg));
+    msgData.transferUpdate.bytesTransferred = TEST_TOTAL_BYTES;
+    msgData.transferUpdate.totalBytes = TEST_TOTAL_BYTES * 2;
+    msgData.transferUpdate.mcastBytesTransferred = TEST_MCAST_BYTES;
+    msgData.mcastRate = TEST_MCAST_RATE;
+    msgData.errorCode = NSTACKX_EOK;
+
+    FileSendListenerEx(udpChannel, DFILE_ON_FILE_SEND_SUCCESS, &msgData);
+
+    EXPECT_TRUE(IsTransEventCalled());
+    TransEventExtra extra = GetLastTransEventExtra();
+    EXPECT_EQ(extra.multicastRate, (uint32_t)TEST_MCAST_RATE);
+    EXPECT_EQ(extra.multicastBytes, (uint64_t)TEST_MCAST_BYTES);
+
+    EXPECT_TRUE(fileEventCaptured);
+    EXPECT_EQ(capturedFileEvent.type, FILE_EVENT_SEND_FINISH);
+
+    g_currentCapturedFileEvent = nullptr;
+    g_currentFileEventCaptured = nullptr;
+
+    SoftBusFree(udpChannel);
+}
+
+/*
+ * @tc.name: NotifySendRateNullParamTest001
+ * @tc.desc: Test NotifySendRate with null parameters for DFILE_ON_SESSION_TRANSFER_RATE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransFileTest, NotifySendRateNullParamTest001, TestSize.Level1)
+{
+    ResetTransEventState();
+
+    DFileMsg msgData;
+    (void)memset_s(&msgData, sizeof(DFileMsg), 0, sizeof(DFileMsg));
+
+    NotifySendRate(nullptr, DFILE_ON_SESSION_TRANSFER_RATE, &msgData);
+    EXPECT_FALSE(IsTransEventCalled());
+
+    UdpChannel *udpChannel = CreateTestUdpChannel();
+    ASSERT_NE(udpChannel, nullptr);
+    NotifySendRate(udpChannel, DFILE_ON_SESSION_TRANSFER_RATE, nullptr);
+    EXPECT_FALSE(IsTransEventCalled());
+
+    SoftBusFree(udpChannel);
+}
 } // namespace OHOS

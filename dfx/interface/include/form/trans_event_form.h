@@ -221,6 +221,8 @@ typedef struct {
     int32_t listenerType;       // LISTENER_TYPE
     int32_t listenerStatus;     // LISTENER_STATUS
     int32_t unrestrictedCallCount; // UNRESTRICTED_CALL_COUNT
+    uint32_t multicastRate;     // MULTICAST_RATE
+    uint64_t multicastBytes;    // MULTICAST_BYTES
 } TransEventExtra;
 
 typedef enum {

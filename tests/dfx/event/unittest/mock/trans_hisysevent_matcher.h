@@ -44,6 +44,13 @@ static void MatchTransEventNameTypeExtraInt32Param(const HiSysEventParam *params
     EXPECT_EQ(params[index].v.i32, extraParam);
 }
 
+static void MatchTransEventNameTypeExtraUint32Param(const HiSysEventParam *params, int32_t index, uint32_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(static_cast<uint32_t>(params[index].v.i32), extraParam);
+}
+
 static void MatchTransEventNameTypeExtraInt64Param(const HiSysEventParam *params, int32_t index, int64_t extraParam)
 {
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
@@ -156,6 +163,8 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.listenerType);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.listenerStatus);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.unrestrictedCallCount);
+    MatchTransEventNameTypeExtraUint32Param(params, ++index, extra.multicastRate);
+    MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.multicastBytes);
 
     EXPECT_EQ(++index, validSize);
     return true;
@@ -227,7 +236,15 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
     EXPECT_EQ(params[index].v.i64, extra.listenerStatus);
-    EXPECT_EQ(params[++index].v.i32, extra.unrestrictedCallCount);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i32, extra.unrestrictedCallCount);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i32, extra.multicastRate);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.multicastBytes);
     EXPECT_EQ(++index, validSize);
     return true;
 }

@@ -240,7 +240,9 @@ typedef struct {
     FileStatusList statusList;           /**< File status list */
     int32_t errorCode;                   /**< Error code */
     uint32_t rate;                       /**< Rate of the file transmission */
-    FilePriority filePriority;          /**< Priority of the file */
+    FilePriority filePriority;           /**< Priority of the file */
+    uint32_t multicastRate;              /**< Transmission rate in multicast mode (bps) */
+    uint64_t multicastBytesProcessed;    /**< Total amount of data transmitted in multicast mode (bytes) */
 } FileEvent;
 
 /**

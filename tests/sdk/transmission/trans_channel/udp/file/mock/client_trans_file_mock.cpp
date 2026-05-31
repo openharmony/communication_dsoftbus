@@ -14,6 +14,8 @@
  */
 
 #include "client_trans_file_mock.h"
+#include "softbus_event.h"
+#include "trans_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -21,6 +23,8 @@ using namespace testing::ext;
 namespace OHOS {
 
 static void *g_clientTransFileInterface = nullptr;
+static TransEventExtra g_lastTransEventExtra = {0};
+static bool g_transEventCalled = false;
 
 ClientTransFileInterfaceMock::ClientTransFileInterfaceMock()
 {
@@ -232,6 +236,56 @@ int32_t SaveAddrInfo(int32_t channelId, struct sockaddr_storge *addr, socklen_t 
     return GetClientTransFileInterface()->SaveAddrInfo(channelId, addr, addrLen);
 }
 
-} // extern "C"
+void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, TransEventExtra *extra)
+{
+    (void)scene;
+    (void)stage;
+    (void)func;
+    (void)line;
+    g_transEventCalled = true;
+    if (extra != nullptr) {
+        g_lastTransEventExtra = *extra;
+    }
+}
 
+void TransAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, TransAlarmExtra *extra)
+{
+    (void)scene;
+    (void)func;
+    (void)line;
+    (void)extra;
+}
+
+void TransStatsInner(int32_t scene, const char *func, int32_t line, TransStatsExtra *extra)
+{
+    (void)scene;
+    (void)extra;
+    (void)func;
+    (void)line;
+}
+
+void TransAuditInner(int32_t scene, const char *func, int32_t line, TransAuditExtra *extra)
+{
+    (void)scene;
+    (void)extra;
+    (void)func;
+    (void)line;
+}
+
+TransEventExtra GetLastTransEventExtra()
+{
+    return g_lastTransEventExtra;
+}
+
+bool IsTransEventCalled()
+{
+    return g_transEventCalled;
+}
+
+void ResetTransEventState()
+{
+    g_transEventCalled = false;
+    (void)memset_s(&g_lastTransEventExtra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+}
+} // extern "C"
 } // namespace OHOS

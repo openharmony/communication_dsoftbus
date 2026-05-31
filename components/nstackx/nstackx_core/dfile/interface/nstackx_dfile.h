@@ -175,9 +175,11 @@ typedef struct {
         uint16_t transId;
         uint64_t totalBytes;
         uint64_t bytesTransferred;
+        uint64_t mcastBytesTransferred;
     } transferUpdate;
     int32_t errorCode;
     uint32_t rate;
+    uint32_t mcastRate;
     struct sockaddr_in sockAddr[NSTACKX_MULTI_PATH_NUM];
     struct {
         DFileChangeType changeType;
