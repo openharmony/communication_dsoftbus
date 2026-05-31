@@ -16,14 +16,17 @@
 #ifndef CLIENT_TRANS_FILE_MOCK_H
 #define CLIENT_TRANS_FILE_MOCK_H
 
+#include <securec.h>
+
 #include <gmock/gmock.h>
+
 #include "client_trans_udp_manager.h"
 #include "client_trans_file_listener.h"
 #include "nstackx_dfile.h"
 #include "softbus_def.h"
+#include "trans_event.h"
 
 namespace OHOS {
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -129,8 +132,14 @@ public:
     MOCK_METHOD3(SaveAddrInfo, int32_t(int32_t channelId, struct sockaddr_storge *addr, socklen_t addrLen));
 };
 
+TransEventExtra GetLastTransEventExtra();
+bool IsTransEventCalled();
+void ResetTransEventState();
+void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, TransEventExtra *extra);
+void TransAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, TransAlarmExtra *extra);
+void TransStatsInner(int32_t scene, const char *func, int32_t line, TransStatsExtra *extra);
+void TransAuditInner(int32_t scene, const char *func, int32_t line, TransAuditExtra *extra);
 } // namespace OHOS
-
 #ifdef __cplusplus
 }
 #endif

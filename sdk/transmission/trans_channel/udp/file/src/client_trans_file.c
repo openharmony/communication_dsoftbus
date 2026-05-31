@@ -175,6 +175,22 @@ static void FillFileEventErrorCode(const DFileMsg *msgData, FileEvent *event)
     }
 }
 
+static void ReportMcastDfxEvent(int32_t socket, const DFileMsg *msgData)
+{
+    if (msgData->mcastRate == 0) {
+        return;
+    }
+    TransEventExtra mcastExtra;
+    (void)memset_s(&mcastExtra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    mcastExtra.sessionId = socket;
+    mcastExtra.multicastRate = msgData->mcastRate;
+    mcastExtra.multicastBytes = msgData->transferUpdate.mcastBytesTransferred;
+    TRANS_LOGI(TRANS_SDK,
+        "socketId=%{public}d, mcastRate=%{public}u, mcastBytes=%{public}" PRIu64 ", totalBytes=%{public}" PRIu64,
+        socket, mcastExtra.multicastRate, mcastExtra.multicastBytes, msgData->transferUpdate.totalBytes);
+    TRANS_EVENT(EVENT_SCENE_TRANS_FILE_RATE, EVENT_STAGE_TOTAL_RATE, mcastExtra);
+}
+
 static void NotifySocketSendResult(
     int32_t socket, DFileMsgType msgType, const DFileMsg *msgData, const FileListener *listener)
 {
@@ -210,6 +226,10 @@ static void NotifySocketSendResult(
         FillFileStatusList(msgData, &event);
     } else if (event.type == FILE_EVENT_SEND_PROCESS) {
         event.rate = msgData->rate;
+    } else if (event.type == FILE_EVENT_SEND_FINISH) {
+        event.multicastBytesProcessed = msgData->transferUpdate.mcastBytesTransferred;
+        event.multicastRate = msgData->mcastRate;
+        ReportMcastDfxEvent(socket, msgData);
     }
     FillFileEventErrorCode(msgData, &event);
     listener->socketSendCallback(socket, &event);
