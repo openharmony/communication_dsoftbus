@@ -114,6 +114,14 @@ void JsonProtocol::SetInput(const std::vector<uint8_t> &input)
     if (jsonObject_.is_discarded()) {
         CONN_LOGE(CONN_WIFI_DIRECT, "parse json fail");
         readPos_ = jsonObject_.end();
+        return;
+    }
+
+    // Check if JSON is object type (required for key() calls in Read)
+    if (!jsonObject_.is_object()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "json is not object type");
+        readPos_ = jsonObject_.end();
+        return;
     }
 }
 

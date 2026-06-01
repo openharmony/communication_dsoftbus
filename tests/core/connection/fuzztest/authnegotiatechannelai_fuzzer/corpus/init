@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+# Auth Negotiate Channel Fuzzer Seeds - 覆盖全部8个测试函数
+# tc[0-7]: Standard,NullData,Oversized,NullInnerData,Malformed,Boundary,Extreme,Random
+# 结构: [authId(8B)][type(4B)][module(4B)][flag(4B)][seq(8B)][len(4B)][data...]
+
+# ========== tc0: Standard - 正常认证数据 ==========
+AQAAAAAAABAAAAAAAAAAP8AAAAAAAAAAAA=
+# authId=1, type=0, module=-1, flag=0, seq=0, len=0
+
+AgAAAAAAABAAAAAAAAAAQAAAAAAAAaGVsbG8=
+# authId=2, type=0, module=1, flag=0, seq=0, len=5, data="hello"
+
+AwAAAAAAABAAAAAAAAAAgAAAAAehowdHkKAAAEAAAAAAAA
+# authId=3, type=0, module=2, flag=0, seq=1000, len=7, data={binary}
+
+BAAAAAAAABAAAAAAAAAAwAAAAAU29mdEJ1cwAAAA=
+# authId=4, type=0, module=3, flag=0, seq=0, len=7, data="SoftBus"
+
+# ========== tc1: NullData - 空指针测试 ==========
+BQAAAAAAABAAAAA=
+# authId=5, type=0
+
+BgAAAAAAABAAAAA=
+# authId=6, type=0
+
+BwAAAAAAABAAAAA=
+# authId=7, type=0
+
+# ========== tc2: Oversized - 超大数据边界检查 ==========
+CAAAAAAAABAAAAA=
+# authId=8, type=0
+
+CQAAAAAAABAAAAA=
+# authId=9, type=0
+
+# ========== tc3: NullInnerData - 内部数据为空 ==========
+CgAAAAAAABAAAAAAQAAAAAFAAAAAA==
+# authId=10, type=0, module=1, flag=0, seq=0, len=5, data=null
+
+CwAAAAAAABAAAAAAQAAAAABgAAAAA=
+# authId=11, type=0, module=1, flag=0, seq=0, len=6, data=null
+
+CwAAAAAAABAAAAAAQAAAAACAAAAAA=
+# authId=12, type=0, module=1, flag=0, seq=0, len=2, data=null
+
+# ========== tc4: Malformed - 格式错误数据 ==========
+DAAAAAAAABAAAAAAAAAAgAAAAAA//////////
+# authId=13, type=0, module=2, flag=0, seq=0, 错误数据
+
+DQAAAAAAABAAAAAAAAAAwAAAAAd29ybGQh
+# authId=14, type=0, module=3, flag=0, seq=0, len=6, data="world!"
+
+DgAAAAAAABAAAAAAAAAABgAAAAAHByb3h5
+# authId=15, type=0, module=6, flag=0, seq=0, len=5, data="proxy"
+
+# ========== tc5: BoundaryLength - 边界长度 (MODULE_P2P_LINK) ==========
+DwAAAAAAABAAAAAAAAAAAAAAAQAAAAA
+# authId=16, type=0, module=0, flag=0, seq=0, len=1
+
+EAAAAAAABAAAAAAAAAAIAAAAA
+# authId=17, type=0, module=0, flag=0, seq=0, len=2
+
+EQAAAAAABAAAAAAAAAAwAAAAA
+# authId=18, type=0, module=0, flag=0, seq=0, len=3
+
+EgAAAAAABAAAAAAAAABgAAAAA
+# authId=19, type=0, module=0, flag=0, seq=0, len=6
+
+EwAAAAAAABAAAAAAAAACAAAAAA
+# authId=20, type=0, module=0, flag=0, seq=0, len=8
+
+FAAAAAAABAAAAAAAAAMAAAAAA
+# authId=21, type=0, module=0, flag=0, seq=0, len=13
+
+# ========== tc6: ExtremeValues - 极值测试 ==========
+FQAAAAAABAAAAAAAAAEAAAAAA
+# len=15
+
+FgAAAAAABAAAAAAAAAGAAAAAA
+# len=31
+
