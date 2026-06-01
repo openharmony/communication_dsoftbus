@@ -19,15 +19,18 @@
 #include "softbus_common.h"
 #include "token_setproc.h"
 
+constexpr int32_t PERMISSION_CNT = 3;
+
 void SetAccessTokenPermission(const char *processName)
 {
     uint64_t tokenId;
-    const char **perms = new const char *[2];
+    const char **perms = new const char *[PERMISSION_CNT];
     perms[0] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     perms[1] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    perms[2] = OHOS_PERMISSION_SEC_ACCESS_UDID;
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 2,
+        .permsNum = PERMISSION_CNT,
         .aclsNum = 0,
         .dcaps = nullptr,
         .perms = perms,
