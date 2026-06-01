@@ -1499,6 +1499,31 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyResetPeerTest001, TestS
 }
 
 /*
+ * @tc.name: TransPagingResetTest001
+ * @tc.desc: test TransPagingReset
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingResetTest001, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {
+        .peerId = TEST_CHANNEL_ID,
+        .myId = -1,
+    };
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    chan.myId = TEST_CHANNEL_ID;
+    cJSON *chanIdRoot = cJSON_CreateObject();
+    AddNumberToJsonObject(chanIdRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, TEST_CHANNEL_ID);
+    char *chanIdBuf = cJSON_PrintUnformatted(chanIdRoot);
+    cJSON_Delete(chanIdRoot);
+    EXPECT_CALL(mock, TransProxyPagingPackChannelId).WillRepeatedly(Return(chanIdBuf));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingReset(&chan);
+    EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
+    cJSON_free(chanIdBuf);
+}
+
+/*
  * @tc.name: TransProxyResetPeerTest002
  * @tc.desc: test TransProxyResetPeer isD2D path
  *           TransProxyPagingPackChannelId fail
