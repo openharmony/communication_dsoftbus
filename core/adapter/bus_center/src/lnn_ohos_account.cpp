@@ -45,7 +45,7 @@ int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len
         return LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN);
     }
     if (localDevTypeId == TYPE_CAR_ID) {
-        LnnGetLocalNumInfo(NUM_KEY_USERID, &userId);
+        userId = JudgeDeviceTypeAndGetOsAccountIds();
         if (LnnGetOhosAccountInfoByUserId(userId, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "GetOhosAccountInfo get invalid param");
             return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
