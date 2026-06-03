@@ -832,6 +832,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, ProcessDeviceNameChangeAck_Test_001, TestSize
 
     ASSERT_EQ(EOK, strcpy_s(oldCacheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, "testUdid"));
     EXPECT_NO_FATAL_FAILURE(ProcessDeviceNameChangeAck(&cacheInfo, &oldCacheInfo));
+    oldCacheInfo.accountId = 2;
+    EXPECT_NO_FATAL_FAILURE(ProcessDeviceNameChangeAck(&cacheInfo, &oldCacheInfo));
 }
 
 /*
