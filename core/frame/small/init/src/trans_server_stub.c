@@ -323,7 +323,7 @@ int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply)
     int32_t channelId = 0;
     int32_t channelType = 0;
     const char *sessionName = NULL;
-    uint32_t size;
+    size_t size;
     ReadInt32(req, &channelId);
     ReadInt32(req, &channelType);
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
@@ -420,12 +420,12 @@ int32_t ServerPrivilegeCloseChannel(IpcIo *req, IpcIo *reply)
     uint64_t tokenId = 0;
     int32_t pid = 0;
     const char *peerNetworkId = NULL;
-    uint32_t size;
-    if (ReadUint64(req, &tokenId)) {
+    size_t size;
+    if (!ReadUint64(req, &tokenId)) {
         TRANS_LOGE(TRANS_CTRL, "failed to read tokenId");
         return SOFTBUS_IPC_ERR;
     }
-    if (ReadInt32(req, &pid)) {
+    if (!ReadInt32(req, &pid)) {
         TRANS_LOGE(TRANS_CTRL, "failed to read pid");
         return SOFTBUS_IPC_ERR;
     }
