@@ -192,4 +192,5 @@ ohos_unittest("GeneralNegotiationTest") {
   } else {
     sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common_virtual.c" ]
   }
+  deps += dsoftbus_log_label_deps
 }

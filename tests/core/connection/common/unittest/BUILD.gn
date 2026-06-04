@@ -44,6 +44,7 @@ ohos_unittest("SoftbusConnCommonTest") {
     "googletest:gmock",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("SoftbusRcTest") {

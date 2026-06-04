@@ -182,6 +182,7 @@ ohos_unittest("TransInnerTest") {
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "c_utils:utils",

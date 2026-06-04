@@ -218,6 +218,7 @@ if (defined(ohos_lite)) {
         "cJSON:cjson_static",
       ]
     }
+    deps += dsoftbus_log_label_deps
   }
 
   ohos_unittest("BusCenterHeartbeatSdkTest") {
@@ -254,6 +255,7 @@ if (defined(ohos_lite)) {
         "cJSON:cjson_static",
       ]
     }
+    deps += dsoftbus_log_label_deps
   }
 
   ohos_unittest("BusCenterMetaNodeSdkTest") {
@@ -341,6 +343,7 @@ if (defined(ohos_lite)) {
         "hilog:libhilog",
       ]
     }
+    deps += dsoftbus_log_label_deps
   }
 
   ohos_unittest("BusCenterServerTest") {

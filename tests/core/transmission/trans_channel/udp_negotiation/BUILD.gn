@@ -62,6 +62,7 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "c_utils:utils",
@@ -186,6 +187,7 @@ ohos_unittest("TransUdpNegoStaticTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("TransUdpStaticTest") {

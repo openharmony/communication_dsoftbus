@@ -64,6 +64,7 @@ ohos_fuzztest("SoftbusHtpSocketFuzzTest") {
       "ipc:ipc_single",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 group("fuzztest") {

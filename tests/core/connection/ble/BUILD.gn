@@ -91,6 +91,7 @@ ohos_unittest("ConnectionBleSwitchTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("BleConnectionServiceTest") {
@@ -114,6 +115,7 @@ ohos_unittest("BleConnectionServiceTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("BleConnectionManagerTest") {
@@ -191,6 +193,7 @@ ohos_unittest("BleTransTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "bluetooth:btframework",
@@ -228,6 +231,7 @@ ohos_unittest("ConnBleTransTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "bluetooth:btframework",

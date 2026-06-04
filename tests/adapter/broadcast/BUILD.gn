@@ -55,6 +55,7 @@ if (!defined(ohos_lite)) {
     include_dirs = bc_gatt_test_inc
     deps = bc_gatt_test_deps
     external_deps = bc_gatt_test_external_deps
+    deps += dsoftbus_log_label_deps
   }
 
   ohos_unittest("SoftbusBleUtilsTest") {
@@ -68,6 +69,7 @@ if (!defined(ohos_lite)) {
     external_deps += [
       "bounds_checking_function:libsec_static",
     ]
+    deps += dsoftbus_log_label_deps
   }
 
   group("unittest") {

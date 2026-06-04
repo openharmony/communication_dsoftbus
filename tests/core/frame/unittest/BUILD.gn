@@ -72,6 +72,7 @@ ohos_unittest("SoftbusServerStubTest") {
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
   ]
+  deps += dsoftbus_log_label_deps
 
   if (is_standard_system) {
     external_deps = [
@@ -213,6 +214,7 @@ ohos_unittest("SoftbusGEnhanceTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   if (is_standard_system) {
     external_deps = [
