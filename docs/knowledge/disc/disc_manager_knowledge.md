@@ -1,7 +1,5 @@
 # Discovery Manager 精练知识库
 
-> 路径：`core/discovery/manager` | 源码 ~2045 行 | 4 个源文件
-
 ---
 
 ## 一、模块功能
@@ -40,13 +38,11 @@ core/discovery/manager/
 │   ├── softbus_disc_init.h   — 动态库注册初始化接口
 │   └── softbus_disc_server.h — 服务端初始化/死亡回调接口
 └── src/
-    ├── disc_manager.c (1661行) — 核心管理逻辑：发布/订阅/分发/约束
-    ├── disc_mgr_config.c (89行) — 各能力的最大调用次数配置表
-    ├── softbus_disc_init.c (42行) — dlsym 动态加载 DiscRegisterOpenFunc
-    └── softbus_disc_server.c (40行) — 服务端薄封装层
+    ├── disc_manager.c        — 核心管理逻辑：发布/订阅/分发/约束
+    ├── disc_mgr_config.c     — 各能力的最大调用次数配置表
+    ├── softbus_disc_init.c   — dlsym 动态加载 DiscRegisterOpenFunc
+    └── softbus_disc_server.c — 服务端薄封装层
 ```
-
-**代码量分布**：核心管理 82% | 配置 5% | 接口定义 5% | 服务端 4% | 动态加载 4%
 
 **核心数据结构**：
 
@@ -79,8 +75,8 @@ g_capabilityList[DDMP_BITMAP]  (能力索引)
 
 | 模式 | 说明 | 位置 |
 |------|------|------|
-| **策略模式** | `DiscoveryFuncInterface` 函数指针表，四种媒介各自实现，管理器通过 `CallSpecificInterfaceFunc` 统一调度 | disc_manager.c:260 |
-| **观察者模式** | `g_capabilityList[bitmap]` 实现能力位图订阅，设备发现时遍历匹配的观察者列表分发通知 | disc_manager.c:419 |
+| **策略模式** | `DiscoveryFuncInterface` 函数指针表，四种媒介各自实现，管理器通过 `CallSpecificInterfaceFunc` 统一调度 | disc_manager.c |
+| **观察者模式** | `g_capabilityList[bitmap]` 实现能力位图订阅，设备发现时遍历匹配的观察者列表分发通知 | disc_manager.c |
 | **双层列表** | 外层 SoftBusList（按包名） + 内层 InfoList（按 ID） + capNode（挂到能力索引），三个维度管理同一批 DiscInfo | disc_manager.c |
 | **内外分离** | ServiceType 枚举区分内部/外部调用，回调分发、列表插入顺序（头/尾）、包名校验分别处理 | disc_manager.c |
 

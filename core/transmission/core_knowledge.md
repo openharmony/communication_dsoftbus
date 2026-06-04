@@ -45,10 +45,14 @@ core/transmission/
 │   ├─ trans_session_manager.c           # 服务端会话管理
 │   └─ trans_session_service.c           # 会话服务
 ├─ trans_channel/
-│   ├─ manager/
+│   ├─ manager/src/
 │   │   ├─ trans_channel_manager.c       # 通道创建/关闭
 │   │   ├─ trans_lane_manager.c          # 链路选择
 │   │   └─ trans_auth_negotiation.c      # 认证协商
+│   ├─ manager/include/
+│   │   ├─ trans_channel_manager.h
+│   │   ├─ trans_lane_manager.h
+│   │   └─ trans_auth_negotiation.h
 │   ├─ udp_negotiation/                  # UDP通道
 │   ├─ tcp_direct/                       # TCP直连
 │   ├─ proxy/                            # Proxy中继
@@ -89,19 +93,9 @@ core/frame/standard/init/src/
 
 ### IPC通信规则
 
-```cpp
-// 客户端→服务端请求码
-CREATE_SESSION_SERVER = 1
-REMOVE_SESSION_SERVER = 2
-OPEN_SESSION = 3
-CLOSE_CHANNEL = 4
-SEND_PROXY_DATA = 5
-
-// 服务端→客户端回调
-CLIENT_ON_BYTES_RECEIVED
-CLIENT_ON_SESSION_OPENED
-CLIENT_ON_SESSION_CLOSED
-```
+> ⚠ IPC 请求码随版本变动，禁止在 KB 中固化枚举值。
+> **事实来源**：`core/common/include/softbus_server_ipc_interface_code.h`
+> 当前服务端请求码以 `SERVER_*` 前缀、128 起编（如 `SERVER_CREATE_SESSION_SERVER = 128`），客户端回调码以 `CLIENT_*` 前缀。修改 IPC 相关逻辑时**必须**先读该头文件确认当前值。
 
 ### 权限检查规则
 
@@ -133,7 +127,7 @@ SA: softbus_server_stub.cpp
   ├─ CheckOpenSessionPermission()
   └─ TransOpenSession()
 
-Core: trans_channel_manager.c
+Core: manager/src/trans_channel_manager.c
   ├─ TransSelectLinkType()
   ├─ TransGetLaneInfo()
   └─ TransOpenChannel() → UDP/TCP/Proxy/Auth

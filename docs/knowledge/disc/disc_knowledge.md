@@ -1,10 +1,5 @@
 # 发现子系统 汇总知识库
 
-> 覆盖：Discovery Manager → BLE 发现 → Bluetooth 适配层（广播管理器）
-> 源码总计 ~12568 行 | 15 个源文件
-
----
-
 ## 一、四层架构与调用关系
 
 ```
@@ -15,7 +10,7 @@
                                │ 策略模式调度（CallInterfaceByMedium）
                                ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  L1: Discovery Manager (disc_manager.c, 1661行)                 │
+│  L1: Discovery Manager (disc_manager.c)                         │
 │  职责：发布/订阅生命周期管理、四媒介调度、能力位图分发              │
 │  关键结构：g_publishInfoList / g_discoveryInfoList              │
 │            g_capabilityList[bitmap] / DiscoveryFuncInterface    │
@@ -23,7 +18,7 @@
                                │ DiscoveryFuncInterface 函数指针
                                ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  L2: BLE 发现 (disc_ble.c, 2754行)                              │
+│  L2: BLE 发现 (disc_ble.c)                                      │
 │  职责：BLE 广播/扫描、TLV 编解码、消息驱动、能力引用计数           │
 │  关键结构：g_bleInfoManager[4] / g_bleAdvertiser[2]             │
 │            DiscBleMessage(16种) / g_discBleHandler(Looper)      │
@@ -31,7 +26,7 @@
                                │ broadcast_scheduler 接口
                                ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  L3: Bluetooth 适配层 (broadcast_mgr.c 3191行 + ble_gatt.c 1293行)│
+│  L3: Bluetooth 适配层 (broadcast_mgr.c + ble_gatt.c)            │
 │  职责：广播/扫描通道池管理、协议策略分发、BLE 数据组装/解析        │
 │  关键结构：g_bcManager[] / g_scanManager[] / g_advChannel[21]   │
 │            g_scanChannel[4] / g_interface[MEDIUM_NUM_MAX]       │
@@ -43,8 +38,6 @@
 │  BleStartAdvEx / BleStartScanEx / BleGattc* / BleGatts* / ...  │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
----
 
 ## 二、端到端数据流
 
@@ -81,8 +74,6 @@ OHOS BT GAP → WrapperStateChangeCallback
             → DiscBle Looper: 恢复或停止所有广播和扫描
 ```
 
----
-
 ## 三、跨模块共享设计模式
 
 | 模式 | L1 DiscMgr | L2 DiscBle | L3 BT Adapter |
@@ -94,8 +85,6 @@ OHOS BT GAP → WrapperStateChangeCallback
 | **Handler-Looper** | — | DiscBleMsgHandler（核心驱动） | — |
 | **引用计数** | callTimes[bitmap] | capCount[pos] | — |
 | **流控信号** | — | — | SoftBusBleSendSignal（mutex+cond+flag） |
-
----
 
 ## 四、跨模块一致的约束规则
 
@@ -128,8 +117,6 @@ OHOS BT GAP → WrapperStateChangeCallback
 | **数据流向单向** | 回调链路：L4 → L3 → L2 → L1 → 应用；调用链路反向 |
 | **AUTO = COAP + BLE** | L1 中 AUTO 媒介同时调用两种，任一成功即可 |
 
----
-
 ## 五、关键能力位图映射
 
 | 位 | 能力 | 调用限制 | 涉及模块 |
@@ -142,17 +129,7 @@ OHOS BT GAP → WrapperStateChangeCallback
 
 BLE 模块关心：`g_concernCapabilityMask = CAST | DVKIT | OSD`
 
----
-
 ## 六、快速参考
-
-### 模块代码量
-
-| 模块 | 核心文件 | 行数 | 占比 |
-|------|----------|------|------|
-| BT 适配层 | broadcast_mgr.c + ble_gatt.c + gatt_server.c + gatt_client.c + ble_utils.c + bt_common.c | 7056 | 56% |
-| BLE 发现 | disc_ble.c + disc_ble_utils.c | 3243 | 26% |
-| DiscMgr | disc_manager.c + config | 1832 | 15% |
 
 ### 初始化顺序
 
@@ -175,3 +152,17 @@ DiscMgrInit → DiscCoapInit / DiscBleInit / DiscUsbInit / DiscNfcInit
 | 广播启停间隔 | 50ms | BT Adapter (BC_WAIT_TIME_MS) |
 | GATT 写超时 | 动态计算 | BT Adapter (SoftBusComputeWaitBleSendDataTime) |
 | DFX 上报间隔 | 定时 | DiscBle (DFX_DELAY_RECORD) |
+
+
+## 子模块索引
+
+| 子模块 | 文档 | 核心职责 | 源码 |
+|--------|------|----------|------|
+| Discovery Manager | [disc_manager_knowledge.md](disc_manager_knowledge.md) | 发布/订阅生命周期管理、四媒介调度、能力位图分发 | `core/discovery/manager/` |
+| BLE 发现 | [disc_ble_knowledge.md](disc_ble_knowledge.md) | BLE 广播/扫描、TLV 编解码、Handler-Looper 消息驱动 | `core/discovery/ble/` |
+| Bluetooth 适配层 | [bluetooth_adapter_knowledge.md](bluetooth_adapter_knowledge.md) | GATT Client/Server、广播/扫描通道池、蓝牙状态管理 | `adapter/bluetooth/` |
+
+**快速路由**：
+- 发布/订阅管理、能力分发 → disc_manager_knowledge.md
+- BLE 广播数据组装/解析、消息驱动 → disc_ble_knowledge.md
+- GATT 操作、通道池、蓝牙状态监听 → bluetooth_adapter_knowledge.md

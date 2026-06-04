@@ -13,18 +13,20 @@
 
 ```
 core/transmission/trans_channel/manager/
-├─ trans_channel_manager.c              # 通道管理核心
-│                                        # - 通道创建/关闭
-│                                        # - 通道状态管理
-│                                        # - 通道信息查询
-├─ trans_lane_manager.c                 # 链路选择核心
-│                                        # - 链路类型选择
-│                                        # - 链路质量评估
-│                                        # - Lane信息获取
-├─ trans_auth_negotiation.c             # 认证协商
-│                                        # - Auth通道协商
-│                                        # - 认证密钥管理
-└─ trans_channel_manager.c.h            # 内部头文件
+├─ include/
+│   ├─ trans_channel_manager.h          # 通道管理接口
+│   ├─ trans_lane_manager.h             # 链路选择接口
+│   ├─ trans_auth_negotiation.h         # 认证协商接口
+│   ├─ trans_bind_request_manager.h     # 绑定请求管理
+│   ├─ trans_channel_callback.h         # 通道回调
+│   └─ trans_link_listener.h           # 链路监听
+└─ src/
+    ├─ trans_channel_manager.c          # 通道创建/关闭/状态管理
+    ├─ trans_lane_manager.c             # 链路类型选择/质量评估/Lane信息获取
+    ├─ trans_auth_negotiation.c         # Auth通道协商/认证密钥管理
+    ├─ trans_bind_request_manager.c     # 绑定请求管理
+    ├─ trans_channel_callback.c         # 通道回调处理
+    └─ trans_link_listener.c           # 链路状态监听
 ```
 
 ## 3. 模块设计约束及规则
@@ -43,7 +45,7 @@ core/transmission/trans_channel/manager/
 ```
 OpenSession/Bind请求
   ↓
-TransSelectLinkType()  [trans_lane_manager.c]
+TransSelectLinkType()  [src/trans_lane_manager.c]
   ├─ 解析SessionAttribute
   ├─ 获取linkType[]（用户指定）
   ├─ 查询LNN获取可用链路
@@ -54,7 +56,7 @@ TransGetLaneInfo()
   ├─ 查询链路详细信息
   └─ 返回LaneInfo
   ↓
-TransOpenChannel()  [trans_channel_manager.c]
+TransOpenChannel()  [src/trans_channel_manager.c]
   ├─ 根据channelType创建通道
   ├─ UDP: TransOpenUdpChannel()
   ├─ TCP: TransOpenTcpDirectChannel()
@@ -199,8 +201,8 @@ SetSessionAttribute(session, &attr, qos, 2);
 
 | 问题 | 定位文件 | 关键函数 |
 |------|----------|----------|
-| 通道选择错误 | `trans_lane_manager.c` | `TransSelectLinkType()` |
-| 无可用链路 | `trans_lane_manager.c` | `TransGetLaneInfo()` |
-| 通道创建失败 | `trans_channel_manager.c` | `TransOpenChannel()` |
-| 通道资源不足 | `trans_channel_manager.c` | 通道数量限制检查 |
-| 链路切换失败 | `trans_lane_manager.c` | 链路质量评估 |
+| 通道选择错误 | `src/trans_lane_manager.c` | `TransSelectLinkType()` |
+| 无可用链路 | `src/trans_lane_manager.c` | `TransGetLaneInfo()` |
+| 通道创建失败 | `src/trans_channel_manager.c` | `TransOpenChannel()` |
+| 通道资源不足 | `src/trans_channel_manager.c` | 通道数量限制检查 |
+| 链路切换失败 | `src/trans_lane_manager.c` | 链路质量评估 |
