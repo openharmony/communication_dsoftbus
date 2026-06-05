@@ -295,7 +295,7 @@ HWTEST_F(ClientBusCentManagerTest, GET_NODE_KEY_INFO_INNER_Test_001, TestSize.Le
     EXPECT_CALL(busCentManagerMock, ServerIpcGetNodeKeyInfo(_, _, _, _, _))
         .WillOnce(Return(SOFTBUS_SERVER_NOT_INIT))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen), SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_EQ(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen), SOFTBUS_SERVER_NOT_INIT);
     EXPECT_TRUE(GetNodeKeyInfoInner(nullptr, nullptr, NODE_KEY_UDID, nullptr, infoLen) == SOFTBUS_OK);
 }
 

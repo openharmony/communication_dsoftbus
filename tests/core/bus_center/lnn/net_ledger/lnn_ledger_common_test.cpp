@@ -504,7 +504,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_STATUS_Test_001, TestSize.Level1)
 HWTEST_F(LNNNetLedgerCommonTest, LNN_BT_MAC_Test_001, TestSize.Level1)
 {
     const char* btMac = LnnGetBtMac(nullptr);
-    EXPECT_EQ(btMac, DEFAULT_MAC);
+    EXPECT_STREQ(btMac, DEFAULT_MAC);
     EXPECT_NO_FATAL_FAILURE(LnnSetBtMac(nullptr, nullptr));
 }
 
@@ -518,10 +518,10 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_BT_MAC_Test_001, TestSize.Level1)
 HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_IF_Test_001, TestSize.Level1)
 {
     const char* netIfName = LnnGetNetIfName(nullptr, WLAN_IF);
-    EXPECT_EQ(netIfName, DEFAULT_IFNAME);
+    EXPECT_STREQ(netIfName, DEFAULT_IFNAME);
     EXPECT_NO_FATAL_FAILURE(LnnSetNetIfName(nullptr, nullptr, WLAN_IF));
     const char* wifiIp = LnnGetWiFiIp(nullptr, WLAN_IF);
-    EXPECT_EQ(wifiIp, DEFAULT_IP);
+    EXPECT_STREQ(wifiIp, DEFAULT_IP);
     EXPECT_NO_FATAL_FAILURE(LnnSetWiFiIp(nullptr, nullptr, WLAN_IF));
 }
 

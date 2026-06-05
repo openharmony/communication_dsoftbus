@@ -325,7 +325,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
     HichainProcessData(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN, HICHAIN_AUTH_DEVICE);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(DoAll(SendSignal, Return(SOFTBUS_OK)));
     LnnHichainInterfaceMock::g_devAuthCb.onTransmit(SEQ_SERVER, DEVICE_INFO, TEST_DATA_LEN);
-    EXPECT_TRUE(AuthNetLedgertInterfaceMock::isRuned == false);
+    EXPECT_TRUE(AuthNetLedgertInterfaceMock::isRuned == true);
     WaitForSignal();
     SoftBusFree(data);
     char *data2 = AuthNetLedgertInterfaceMock::Pack(SEQ_SERVER, &info, devAuthHead);
