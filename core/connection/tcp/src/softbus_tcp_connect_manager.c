@@ -40,6 +40,8 @@
 #define AUTH_P2P_KEEP_ALIVE_TIME 10
 #define AUTH_P2P_KEEP_ALIVE_INTERVAL 2
 #define AUTH_P2P_KEEP_ALIVE_COUNT 5
+#define SOCKET_EAGAIN_RETRY_MAX 30
+#define SOCKET_EAGAIN_RETRY_DELAY_MS 10
 
 #define TCP_CONNECT_INFO "tcpConnectInfo"
 
@@ -293,13 +295,23 @@ static char *RecvData(const ConnPktHead *head, int32_t fd, uint32_t len)
         CONN_LOGE(CONN_COMMON, "Tcp recv data copy head fail");
         goto EXIT;
     }
+    uint32_t retryCnt = 0;
     while (recvLen < len) {
         ssize_t n = ConnRecvSocketData(fd, data + headSize + recvLen, len - recvLen, g_tcpTimeOut);
         if (n < 0) {
             CONN_LOGE(CONN_COMMON, "receiveData: error occurred! recvLen=%{public}d, len=%{public}d", recvLen, len);
             goto EXIT;
+        } else if (n == 0) {
+            if (retryCnt > SOCKET_EAGAIN_RETRY_MAX) {
+                CONN_LOGE(CONN_COMMON, "receiveData: retry fail");
+                goto EXIT;
+            }
+            retryCnt++;
+            SoftBusSleepMs(SOCKET_EAGAIN_RETRY_DELAY_MS);
+            continue;
         }
         recvLen += (uint32_t)n;
+        retryCnt = 0;
     }
     return data;
 EXIT:
