@@ -60,6 +60,7 @@ ohos_unittest("BrConnTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "bluetooth:btframework",
@@ -220,6 +221,7 @@ ohos_unittest("BrHidumperTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "bluetooth:btframework",
@@ -311,6 +313,7 @@ ohos_unittest("ConnBrTransTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "bluetooth:btframework",

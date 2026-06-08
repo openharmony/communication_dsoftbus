@@ -58,6 +58,7 @@ ohos_unittest("ConnectionManagerTest") {
     "$dsoftbus_root_path/tests/core/connection/manager/unittest/softbus_conn_flow_control_test.cpp",
     "$dsoftbus_root_path/tests/core/connection/manager/unittest/softbus_conn_manager_test.cpp",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("SoftbusConnectionManagerTest") {

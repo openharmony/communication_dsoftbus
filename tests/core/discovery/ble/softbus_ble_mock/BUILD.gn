@@ -76,6 +76,7 @@ ohos_unittest("DiscBleTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",

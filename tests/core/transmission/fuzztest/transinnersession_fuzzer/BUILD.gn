@@ -80,6 +80,7 @@ ohos_fuzztest("TransInnerSessionFuzzTest") {
       "ipc:ipc_single",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 group("fuzztest") {

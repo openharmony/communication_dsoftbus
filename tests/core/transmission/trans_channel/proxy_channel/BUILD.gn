@@ -76,6 +76,7 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "cJSON:cjson",
@@ -174,6 +175,7 @@ ohos_unittest("SoftbusTransProxyMessageTest") {
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "cJSON:cjson",
@@ -533,6 +535,7 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
     "googletest:gmock",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("TransProxyNetworkTest") {
@@ -637,6 +640,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "c_utils:utils",

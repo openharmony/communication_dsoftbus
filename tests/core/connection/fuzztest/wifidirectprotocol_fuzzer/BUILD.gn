@@ -46,4 +46,5 @@ ohos_fuzztest("WifiDirectProtocolFuzzTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }

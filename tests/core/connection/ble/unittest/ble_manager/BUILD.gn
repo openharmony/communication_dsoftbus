@@ -80,4 +80,5 @@ ohos_unittest("BleManagerTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }

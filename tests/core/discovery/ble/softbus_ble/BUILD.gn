@@ -113,6 +113,7 @@ ohos_unittest("DiscBleUtilsTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "cJSON:cjson",

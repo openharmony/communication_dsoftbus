@@ -161,6 +161,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
     deps = [ "../../../adapter:softbus_adapter" ]
+    deps += dsoftbus_log_label_deps
     external_deps = [
       "bounds_checking_function:libsec_static",
       "googletest:gtest_main",
@@ -331,6 +332,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    deps += dsoftbus_log_label_deps
   }
 
   ohos_unittest("SoftbusSleMonitorTest") {
@@ -379,6 +381,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    deps += dsoftbus_log_label_deps
   }
 
   ohos_unittest("AdapterWlanExtendTest") {

@@ -15,7 +15,15 @@ import("../dsoftbus.gni")
 
 if (!dsoftbus_feature_compile_guard) {
   softbus_anonymizer_src = [ "anonymize/src/anonymizer.c" ]
-  softbus_log_src = [ "log/src/softbus_log.c" ]
+  softbus_log_src = [
+    "log/src/softbus_log.c",
+    "log/src/comm_log.c",
+    "log/src/conn_log.c",
+    "log/src/auth_log.c",
+    "log/src/disc_log.c",
+    "log/src/lnn_log.c",
+    "log/src/trans_log.c",
+  ]
   if (defined(ohos_lite)) {
     softbus_event_src = [ "event/src/softbus_event_virtual.c" ]
   } else {

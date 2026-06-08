@@ -198,6 +198,7 @@ ohos_unittest("NetLedgerTest") {
     "huks:libhukssdk",
     "ipc:ipc_single",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("NetBuilderTest") {
@@ -318,6 +319,7 @@ ohos_unittest("LNNHuksUtilsMockTest") {
     "huks:libhukssdk",
     "ipc:ipc_single",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LedgerLaneHubTest") {
@@ -356,6 +358,7 @@ ohos_unittest("LedgerLaneHubTest") {
     "huks:libhukssdk",
     "ipc:ipc_single",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LNNNetBuilderTest") {
@@ -635,6 +638,7 @@ ohos_unittest("LNNConnectionFsmMockTest") {
   ]
   deps = lnn_mock_test_deps
   deps += [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct" ]
+  deps += dsoftbus_log_label_deps
   if (is_standard_system) {
     external_deps = [
       "cJSON:cjson",
@@ -684,6 +688,7 @@ ohos_unittest("LNNBatteryInfoTest") {
       "hilog:libhilog",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LNNSyncInfoItemTest") {
@@ -718,6 +723,7 @@ ohos_unittest("LNNSyncInfoItemTest") {
       "hilog:libhilog",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LNNDeviceNameInfoTest") {
@@ -755,6 +761,7 @@ ohos_unittest("LNNDeviceNameInfoTest") {
       "hilog:libhilog",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LNNNetworkInfoTest") {
@@ -777,6 +784,7 @@ ohos_unittest("LNNNetworkInfoTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   if (is_standard_system) {
     external_deps = [
@@ -828,6 +836,7 @@ ohos_unittest("LNNNodeWeightTest") {
       "hilog:libhilog",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LNNP2pInfoTest") {
@@ -861,6 +870,7 @@ ohos_unittest("LNNP2pInfoTest") {
       "hilog:libhilog",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LNNSyncInfoManagerTest") {
@@ -901,6 +911,7 @@ ohos_unittest("LNNSyncInfoManagerTest") {
 
   deps = lnn_mock_test_deps
   deps += [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct" ]
+  deps += dsoftbus_log_label_deps
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
@@ -951,6 +962,7 @@ ohos_unittest("LNNTopoManagerTest") {
       "hilog:libhilog",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
 
 ohos_unittest("LNNBtNetworkImplMockTest") {
@@ -2236,6 +2248,7 @@ ohos_unittest("LNNTimeSyncTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "cJSON:cjson",

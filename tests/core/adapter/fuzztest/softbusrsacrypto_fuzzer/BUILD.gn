@@ -51,4 +51,5 @@ ohos_fuzztest("SoftBusRsaCryptoFuzzTest") {
       "hilog:libhilog",
     ]
   }
+  deps += dsoftbus_log_label_deps
 }
