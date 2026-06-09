@@ -1091,7 +1091,7 @@ HWTEST_F(LNNLedgerMockTest, LlSetLocalAccountUid003, TestSize.Level1)
     }
     overLenAccountUid[overLimitLen] = '\0';
     int32_t ret = LlSetLocalAccountUid(overLenAccountUid);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*

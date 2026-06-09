@@ -413,9 +413,10 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_002, TestSize.Level1
     uint32_t idLen = LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN;
     char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
     ASSERT_NE(accountInfo, nullptr);
-    OHOS::AccountSA::OhosAccountInfo oh_acc_info;
-    oh_acc_info.name_ = "teatsa";
-    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), -1);
+    OHOS::AccountSA::OhosAccountKitsMock mock;
+    EXPECT_CALL(mock, GetOsAccountDistributedInfo(userId, testing::_))
+        .WillOnce(testing::Return(OHOS::ERR_INVALID_OPERATION));
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), OHOS::ERR_INVALID_OPERATION);
     if (accountInfo != nullptr) {
         SoftBusFree(accountInfo);
     }
@@ -423,7 +424,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_002, TestSize.Level1
 
 /*
  * @tc.name: GetOsAccountUidByUserId_003
- * @tc.desc: Return -1 when Ohos account name is "ohosAnonymousName" with
+ * @tc.desc: Return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED when uid is empty with
  *           valid userId accountInfo buffer idLen and len
  * @tc.type: FUN
  * @tc.require: 1
@@ -436,8 +437,10 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_003, TestSize.Level1
     char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
     ASSERT_NE(accountInfo, nullptr);
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
-    oh_acc_info.name_ = "ohosAnonymousName";
-    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), -1);
+    OHOS::AccountSA::OhosAccountKitsMock mock;
+    EXPECT_CALL(mock, GetOsAccountDistributedInfo(userId, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgReferee<1>(oh_acc_info), testing::Return(OHOS::ERR_OK)));
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
     if (accountInfo != nullptr) {
         SoftBusFree(accountInfo);
     }
