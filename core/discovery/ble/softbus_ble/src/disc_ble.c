@@ -2412,8 +2412,8 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
                 } else {
                     StartAdvertiser(CON_ADV_ID);
                 }
-                StartScaner();
             }
+            StartScaner();
             break;
         case REPLY_PASSIVE_NON_BROADCAST:
             StartAdvertiser(NON_ADV_ID);
