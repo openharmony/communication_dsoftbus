@@ -469,12 +469,6 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
     return SOFTBUS_OK;
 }
 
-static bool CheckSystemAppSessionName(const char *sessionName, pid_t callingUid, uint64_t callingFullTokenId)
-{
-    return CheckNameContainServiceId(sessionName) ? SoftBusCheckIsSystemAppByUid(callingFullTokenId, callingUid) :
-                                                    SoftBusCheckIsSystemApp(callingFullTokenId, sessionName);
-}
-
 static int32_t CheckNormalAppSessionName(
     const char *sessionName, pid_t callingUid, std::string &strName, uint64_t callingFullTokenId)
 {
@@ -512,19 +506,6 @@ static int32_t CheckNormalAppSessionName(
             return SOFTBUS_STRCMP_ERR;
         }
         strName.erase(posId);
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t TransCheckSystemAppList(pid_t callingUid)
-{
-    std::string bundleName;
-    int32_t ret = GetBundleName(callingUid, bundleName);
-    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SVC, "get bundle name failed.");
-
-    if (!IsInWhitelistPacked(bundleName.c_str())) {
-        COMM_LOGE(COMM_SVC, "not found bundleName in system app whitelist.");
-        return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
     }
     return SOFTBUS_OK;
 }
@@ -626,16 +607,9 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         }
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (CheckSystemAppSessionName(sessionName, callingUid, callingFullTokenId)) {
-        if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
-            retReply = SOFTBUS_PERMISSION_DENIED;
-            goto EXIT;
-        }
-    } else {
-        if (CheckNormalAppSessionName(sessionName, callingUid, strName, callingFullTokenId) != SOFTBUS_OK) {
-            retReply = SOFTBUS_PERMISSION_DENIED;
-            goto EXIT;
-        }
+    if (CheckNormalAppSessionName(sessionName, callingUid, strName, callingFullTokenId) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
     }
     sessionName = strName.c_str();
 #endif

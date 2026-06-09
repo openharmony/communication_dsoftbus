@@ -49,7 +49,6 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.serverUpdateHtpChannel = dlsym(soHandle, "ServerUpdateHtpChannel");
     g_transEnhanceFuncList.checkHtpPermission = dlsym(soHandle, "CheckHtpPermission");
     g_transEnhanceFuncList.transProcessGroupTalkieInfo = dlsym(soHandle, "TransProcessGroupTalkieInfo");
-    g_transEnhanceFuncList.isInWhitelist = dlsym(soHandle, "IsInWhitelist");
     g_transEnhanceFuncList.checkAuthChannelSessionNameValid = dlsym(soHandle, "CheckAuthChannelSessionNameValid");
     g_transEnhanceFuncList.transCheckNetworkDelegate = dlsym(soHandle, "TransCheckNetworkDelegate");
     g_transEnhanceFuncList.transCheckP2pOnly = dlsym(soHandle, "TransCheckP2pOnly");

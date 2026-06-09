@@ -752,20 +752,6 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest023, TestSize.Level1)
 }
 
 /*
- * @tc.name: IsInWhitelistPacked024
- * @tc.desc: IsInWhitelistPacked function test
- * @tc.type: FUNC
- * @tc.level: Level1
- * @tc.require:
- */
-HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked024, TestSize.Level1)
-{
-    const char *appName = "ohos.samples.distributedmusicplayer";
-    bool ret = IsInWhitelistPacked(appName);
-    EXPECT_EQ(ret, true);
-}
-
-/*
  * @tc.name: SoftbusGEnhanceTest025
  * @tc.desc: Lnn6 function test
  * @tc.type: FUNC

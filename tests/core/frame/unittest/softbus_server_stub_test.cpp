@@ -2220,7 +2220,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest056, TestSize.Level1)
 
     datas.WriteCString(test);
     datas.WriteCString(test);
-    EXPECT_CALL(softbusServerStubMock, SoftBusCheckIsSystemApp).WillRepeatedly(Return(true));
+
     ret = softBusServer->CreateSessionServerInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

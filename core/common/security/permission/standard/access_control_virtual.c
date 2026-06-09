@@ -44,3 +44,10 @@ void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int
     (void)nameLen;
     (void)tokenType;
 }
+
+int32_t GetBundleNameByUid(pid_t callingUid, char *bundleNameStr)
+{
+    (void)callingUid;
+    (void)bundleNameStr;
+    return SOFTBUS_OK;
+}

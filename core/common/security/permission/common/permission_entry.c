@@ -16,6 +16,7 @@
 
 #include <securec.h>
 
+#include "access_control.h"
 #include "anonymizer.h"
 #include "regex.h"
 #include "softbus_adapter_file.h"
@@ -174,16 +175,11 @@ static SoftBusAppInfo *AppInfoMemoryRequest()
 
 static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
 {
-    if (object == NULL) {
-        COMM_LOGE(COMM_PERM, "object is null");
-        return NULL;
-    }
-
+    COMM_CHECK_AND_RETURN_RET_LOGE(object != NULL, NULL, COMM_PERM, "object is null.");
     SoftBusAppInfo *appInfo = AppInfoMemoryRequest();
     if (appInfo == NULL) {
         return NULL;
     }
-
     char mapKey[TEMP_STR_MAX_LEN];
     char *actionStr = NULL;
     int32_t ret = GetStringItemByJsonObject(object, APP_INFO_PKG_NAME_STR, appInfo->pkgName, PKG_NAME_SIZE_MAX);
@@ -202,6 +198,7 @@ static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
     } else {
         goto EXIT;
     }
+    (void) GetJsonObjectStringItem(object, "BUNDLE_NAME", appInfo->bundleName, BUNDLE_NAME_MAX_LEN);
     if (GetJsonObjectStringItem(object, APP_INFO_UID_STR, mapKey, TEMP_STR_MAX_LEN)) {
         appInfo->uid = atoi(mapKey);
     }
@@ -387,8 +384,9 @@ static int32_t CheckPermissionAppInfo(const SoftBusPermissionEntry *pe,
                 (CompareString(appInfo->pkgName, pItem->pkgName, false) != SOFTBUS_OK)) {
                 continue;
             }
-            if (appInfo->type == SYSTEM_APP || appInfo->type == NORMAL_APP) {
-                return permType;
+            if (appInfo->type == SYSTEM_APP && !StrIsEmpty(appInfo->bundleName) &&
+                (CompareString(appInfo->bundleName, pItem->bundleName, false) != SOFTBUS_OK)) {
+                continue;
             }
         }
         return permType;
@@ -705,6 +703,8 @@ SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32
     pItem->pid = pid;
     pItem->pkgName = (char *)pkgName;
     pItem->actions = actions;
+    (void)GetBundleNameByUid(uid, pItem->bundleName);
+
     return pItem;
 }
 
