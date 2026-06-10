@@ -2391,8 +2391,8 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
                 if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
                     UpdateAdvertiser(NON_ADV_ID);
                 }
-                StartScaner();
             }
+            StartScaner();
             break;
         case START_ACTIVE_DISCOVERY:
             ProcessStartAction(msg);
