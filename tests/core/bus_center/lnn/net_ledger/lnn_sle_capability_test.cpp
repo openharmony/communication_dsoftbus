@@ -163,9 +163,9 @@ HWTEST_F(LNNSleCapabilityTest, SleStateChangeEventHandlerTest001, TestSize.Level
     LnnSyncInfoType type = LNN_INFO_TYPE_SLE_MAC;
     uint32_t size = strlen(MSG) + 1;
     EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(LNN_INFO_TYPE_COUNT, NETWORK_ID, (const uint8_t *)MSG, size));
-    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NULL, (const uint8_t *)MSG, size));
-    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NETWORK_ID, NULL, size));
-    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NETWORK_ID, NULL, 0));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, nullptr, (const uint8_t *)MSG, size));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NETWORK_ID, nullptr, size));
+    EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NETWORK_ID, nullptr, 0));
     EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NETWORK_ID, (const uint8_t *)EMPTYMSG, 1));
     EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NETWORK_ID, (const uint8_t *)MSG, size + 1));
     EXPECT_NO_FATAL_FAILURE(OnReceiveSleMacChangedMsg(type, NETWORK_ID, (const uint8_t *)MSG, size));
@@ -184,7 +184,7 @@ HWTEST_F(LNNSleCapabilityTest, LocalLedgerInitSleCapacityTest001, TestSize.Level
     int32_t ret = 0;
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    ret = LocalLedgerInitSleCapacity(NULL);
+    ret = LocalLedgerInitSleCapacity(nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     EXPECT_CALL(sleCapabilityMock, GetSleRangeCapacityPacked)

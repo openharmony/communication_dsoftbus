@@ -488,7 +488,7 @@ HWTEST_F(BusCenterDecisionCenterTest, InitDecisionCenterTest_1, TestSize.Level1)
  */
 HWTEST_F(BusCenterDecisionCenterTest, InitDecisionCenterTest_2, TestSize.Level1)
 {
-    g_exceptionConnMgr.connections = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_exceptionConnMgr.connections = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_TRUE(g_exceptionConnMgr.connections != nullptr);
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(ret, SOFTBUS_OK);

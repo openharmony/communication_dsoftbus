@@ -116,7 +116,7 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_GENERATE_KEY_BY_HUKS_Test_001, TestSize.Level
  */
 HWTEST_F(LNNHuksUtilsMockTest, LNN_GENERATE_KEY_BY_HUKS_Test_002, TestSize.Level1)
 {
-    int32_t ret = LnnGenerateKeyByHuks(NULL);
+    int32_t ret = LnnGenerateKeyByHuks(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -153,7 +153,7 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_DELETE_KEY_BY_HUKS_Test_001, TestSize.Level1)
  */
 HWTEST_F(LNNHuksUtilsMockTest, LNN_DELETE_KEY_BY_HUKS_Test_002, TestSize.Level1)
 {
-    int32_t ret = LnnDeleteKeyByHuks(NULL);
+    int32_t ret = LnnDeleteKeyByHuks(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -171,15 +171,15 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_ENCRYPT_DATA_BY_HUKS_Test_001, TestSize.Level
     uint8_t outDataBuffer[256] = { 0 };
     struct HksBlob outData = { sizeof(outDataBuffer), outDataBuffer };
 
-    int32_t ret = LnnEncryptDataByHuks(NULL, &inData, &outData);
+    int32_t ret = LnnEncryptDataByHuks(nullptr, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     uint8_t aliasData[] = "test_key_alias";
     struct HksBlob keyAlias = { sizeof(aliasData), aliasData };
-    ret = LnnEncryptDataByHuks(&keyAlias, NULL, &outData);
+    ret = LnnEncryptDataByHuks(&keyAlias, nullptr, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = LnnEncryptDataByHuks(&keyAlias, &inData, NULL);
+    ret = LnnEncryptDataByHuks(&keyAlias, &inData, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -197,15 +197,15 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_DECRYPT_DATA_BY_HUKS_Test_001, TestSize.Level
     uint8_t outDataBuffer[256] = { 0 };
     struct HksBlob outData = { sizeof(outDataBuffer), outDataBuffer };
 
-    int32_t ret = LnnDecryptDataByHuks(NULL, &inData, &outData);
+    int32_t ret = LnnDecryptDataByHuks(nullptr, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     uint8_t aliasData[] = "test_key_alias";
     struct HksBlob keyAlias = { sizeof(aliasData), aliasData };
-    ret = LnnDecryptDataByHuks(&keyAlias, NULL, &outData);
+    ret = LnnDecryptDataByHuks(&keyAlias, nullptr, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = LnnDecryptDataByHuks(&keyAlias, &inData, NULL);
+    ret = LnnDecryptDataByHuks(&keyAlias, &inData, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -234,7 +234,7 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_GENERATE_RANDOM_BY_HUKS_Test_001, TestSize.Le
  */
 HWTEST_F(LNNHuksUtilsMockTest, LNN_GENERATE_RANDOM_BY_HUKS_Test_002, TestSize.Level1)
 {
-    int32_t ret = LnnGenerateRandomByHuks(NULL, 32);
+    int32_t ret = LnnGenerateRandomByHuks(nullptr, 32);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -271,7 +271,7 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_GENERATE_CE_KEY_BY_HUKS_Test_001, TestSize.Le
  */
 HWTEST_F(LNNHuksUtilsMockTest, LNN_GENERATE_CE_KEY_BY_HUKS_Test_002, TestSize.Level1)
 {
-    int32_t ret = LnnGenerateCeKeyByHuks(NULL, true);
+    int32_t ret = LnnGenerateCeKeyByHuks(nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -308,7 +308,7 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_DELETE_CE_KEY_BY_HUKS_Test_001, TestSize.Leve
  */
 HWTEST_F(LNNHuksUtilsMockTest, LNN_DELETE_CE_KEY_BY_HUKS_Test_002, TestSize.Level1)
 {
-    int32_t ret = LnnDeleteCeKeyByHuks(NULL, true);
+    int32_t ret = LnnDeleteCeKeyByHuks(nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -326,15 +326,15 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_CE_ENCRYPT_DATA_BY_HUKS_Test_001, TestSize.Le
     uint8_t outDataBuffer[256] = { 0 };
     struct HksBlob outData = { sizeof(outDataBuffer), outDataBuffer };
 
-    int32_t ret = LnnCeEncryptDataByHuks(NULL, &inData, &outData);
+    int32_t ret = LnnCeEncryptDataByHuks(nullptr, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     uint8_t aliasData[] = "test_ce_key_alias";
     struct HksBlob keyAlias = { sizeof(aliasData), aliasData };
-    ret = LnnCeEncryptDataByHuks(&keyAlias, NULL, &outData);
+    ret = LnnCeEncryptDataByHuks(&keyAlias, nullptr, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, NULL);
+    ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     struct HksBlob emptyInData = { 0, inDataBuffer };
@@ -356,15 +356,15 @@ HWTEST_F(LNNHuksUtilsMockTest, LNN_CE_DECRYPT_DATA_BY_HUKS_Test_002, TestSize.Le
     uint8_t outDataBuffer[256] = { 0 };
     struct HksBlob outData = { sizeof(outDataBuffer), outDataBuffer };
 
-    int32_t ret = LnnCeDecryptDataByHuks(NULL, &inData, &outData);
+    int32_t ret = LnnCeDecryptDataByHuks(nullptr, &inData, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     uint8_t aliasData[] = "test_ce_key_alias";
     struct HksBlob keyAlias = { sizeof(aliasData), aliasData };
-    ret = LnnCeDecryptDataByHuks(&keyAlias, NULL, &outData);
+    ret = LnnCeDecryptDataByHuks(&keyAlias, nullptr, &outData);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, NULL);
+    ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     struct HksBlob emptyInData = { 0, inDataBuffer };

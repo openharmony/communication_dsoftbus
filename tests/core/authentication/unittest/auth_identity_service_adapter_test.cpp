@@ -614,7 +614,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_
     int32_t peerUserId = 2;
     int32_t credType = ACCOUNT_RELATED;
     char udidHash[UDID_HASH_LEN] = {0};
-    char *ret = NULL;
+    char *ret = nullptr;
     AuthIdentityServiceAdapterInterfaceMock mock;
     EXPECT_CALL(mock, InitDeviceAuthService).WillOnce(Return(HC_ERROR)).WillRepeatedly(Return(HC_SUCCESS));
     EXPECT_CALL(mock, GetCredMgrInstance).WillOnce(Return(nullptr));
@@ -639,7 +639,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_
     int32_t peerUserId = 2;
     int32_t credType = ACCOUNT_RELATED;
     char udidHash[UDID_HASH_LEN] = {0};
-    char *ret = NULL;
+    char *ret = nullptr;
     AuthIdentityServiceAdapterInterfaceMock mock;
     CredManager manager = {0};
     manager.queryCredentialByParams = QueryCredentialByParams;
@@ -664,7 +664,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_
     int32_t peerUserId = 2;
     int32_t credType = ACCOUNT_RELATED;
     char udidHash[UDID_HASH_LEN] = {0};
-    char *ret = NULL;
+    char *ret = nullptr;
     AuthIdentityServiceAdapterInterfaceMock mock;
     CredManager manager = {0};
     cJSON *msg = (cJSON *)SoftBusCalloc(sizeof(cJSON));
@@ -702,7 +702,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GET_CREDID_BY_CREDTYPE_TEST_
     int32_t peerUserId = 2;
     int32_t credType = ACCOUNT_RELATED;
     char udidHash[UDID_HASH_LEN] = {0};
-    char *ret = NULL;
+    char *ret = nullptr;
     AuthIdentityServiceAdapterInterfaceMock mock;
     CredManager manager = {0};
     cJSON *msg = (cJSON *)SoftBusCalloc(sizeof(cJSON));

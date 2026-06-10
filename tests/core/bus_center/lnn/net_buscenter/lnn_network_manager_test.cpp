@@ -789,7 +789,7 @@ HWTEST_F(LNNNetworkManagerMockTest, Net_Device_Risk_State_Event_Handler_001, Tes
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
-    NetDeviceRiskStateEventHandler(NULL);
+    NetDeviceRiskStateEventHandler(nullptr);
 
     NetDeviceRiskStateEventHandler(&event->basic);
 
@@ -813,7 +813,7 @@ HWTEST_F(LNNNetworkManagerMockTest, Net_Device_Risk_State_Event_Handler_001, Tes
 HWTEST_F(LNNNetworkManagerMockTest, Net_Constraint_State_Event_Handler_001, TestSize.Level1)
 {
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
-    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(NULL));
+    EXPECT_NO_FATAL_FAILURE(NetConstraintStateEventHandler(nullptr));
 
     LnnConstraintChangeEvent *event =
         reinterpret_cast<LnnConstraintChangeEvent *>(SoftBusCalloc(sizeof(LnnConstraintChangeEvent)));

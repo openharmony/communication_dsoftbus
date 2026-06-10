@@ -206,7 +206,7 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_DEVICE_KEY_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionFsmTest, CLIENT_SET_EXCHANGE_ID_TYPE_TEST_001, TestSize.Level1)
 {
     NiceMock<AuthSessionFsmInterfaceMock> mock;
-    LnnAuditExtra *auditData = reinterpret_cast<LnnAuditExtra *>(SoftBusMalloc(sizeof(LnnAuditExtra)));
+    LnnAuditExtra *auditData = reinterpret_cast<LnnAuditExtra *>(SoftBusCalloc(sizeof(LnnAuditExtra)));
     EXPECT_TRUE(auditData != nullptr);
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
@@ -287,7 +287,7 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_TEST_001, TestSize.Level1)
     ASSERT_TRUE(memcpy_s(para.data, TMP_DATA_LEN, TMP_IN_DATA, TMP_DATA_LEN) == EOK);
     para.len = TMP_DATA_LEN;
     EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDevInfoEarly(&authFsm, &para));
-    authFsm.info.deviceInfoData = reinterpret_cast<uint8_t *>(SoftBusMalloc(TMP_DATA_LEN));
+    authFsm.info.deviceInfoData = reinterpret_cast<uint8_t *>(SoftBusCalloc(TMP_DATA_LEN));
     EXPECT_TRUE(authFsm.info.deviceInfoData != nullptr);
     para.len = 0;
     EXPECT_NO_FATAL_FAILURE(HandleMsgRecvDevInfoEarly(&authFsm, &para));
@@ -495,7 +495,7 @@ HWTEST_F(AuthSessionFsmTest, PROCESS_CLIENT_AUTH_STATE_TEST_002, TestSize.Level1
     info->authVersion = AUTH_VERSION_V2;
     info->idType = EXCHANGE_UDID;
     info->credNegoState = CRED_NEGO_STATE_FINISH;
-    info->credTypeInfo = NULL;
+    info->credTypeInfo = nullptr;
 
     ret = ProcessClientAuthState(&authFsm);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
@@ -518,7 +518,7 @@ HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_ENTER_TEST_001, TestSize.Level1)
     // succ
     authFsm.info.normalizedType = NORMALIZED_NOT_SUPPORT;
     authFsm.info.isSupportFastAuth = false;
-    authFsm.info.credId = NULL;
+    authFsm.info.credId = nullptr;
     authFsm.info.authVersion = AUTH_VERSION_V1;
     EXPECT_NO_FATAL_FAILURE(DeviceAuthStateEnter(&authFsm.fsm));
 }
@@ -1348,13 +1348,13 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_GET_USER_ID_TEST_001, TestSize.Level1)
     ListNodeInsert(&g_authFsmList, &authFsm.node);
 
     // no peerUserId
-    authFsm.info.credTypeInfo = NULL;
+    authFsm.info.credTypeInfo = nullptr;
     authFsm.info.userId = 0;
     userId = AuthSessionGetUserId(AUTH_SEQ);
     EXPECT_EQ(userId, 0);
 
     authFsm.info.credTypeInfo = cJSON_CreateObject();
-    if (authFsm.info.credTypeInfo == NULL ||
+    if (authFsm.info.credTypeInfo == nullptr ||
         !cJSON_AddNumberToObject(authFsm.info.credTypeInfo, SINK_USERID, TEST_USER_ID)) {
         cJSON_Delete(authFsm.info.credTypeInfo);
         ListInit(&g_authFsmList);

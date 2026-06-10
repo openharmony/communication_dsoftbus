@@ -281,7 +281,7 @@ char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *
     cJSON_Delete(obj);
     head.len = static_cast<uint32_t>(strlen(msg) + 1);
     uint32_t size = GetAuthDataSize(head.len);
-    uint8_t *buf = reinterpret_cast<uint8_t *>(SoftBusMalloc(size));
+    uint8_t *buf = reinterpret_cast<uint8_t *>(SoftBusCalloc(size));
     if (buf == nullptr) {
         cJSON_free(msg);
         return nullptr;

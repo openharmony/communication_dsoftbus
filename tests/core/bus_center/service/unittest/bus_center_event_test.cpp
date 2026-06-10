@@ -713,7 +713,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest030, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest031, TestSize.Level1)
 {
     SoftBusDifferentAccountState *difAccountState =
-        (SoftBusDifferentAccountState *)SoftBusMalloc(sizeof(SoftBusDifferentAccountState));
+        (SoftBusDifferentAccountState *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
     ASSERT_TRUE(difAccountState != nullptr);
     *difAccountState = SOFTBUS_DIF_ACCOUNT_DEV_CHANGE;
     EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent((void *)difAccountState));
@@ -728,7 +728,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest031, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest032, TestSize.Level1)
 {
     SoftBusDifferentAccountState *difAccountState =
-        (SoftBusDifferentAccountState *)SoftBusMalloc(sizeof(SoftBusDifferentAccountState));
+        (SoftBusDifferentAccountState *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
     ASSERT_TRUE(difAccountState != nullptr);
     *difAccountState = SOFTBUS_DIF_ACCOUNT_UNKNOWN;
     EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent((void *)difAccountState));
@@ -743,7 +743,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest032, TestSize.Level1)
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest033, TestSize.Level1)
 {
-    SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)SoftBusMalloc(sizeof(SoftBusNightModeState));
+    SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)SoftBusCalloc(sizeof(SoftBusNightModeState));
     ASSERT_TRUE(nightModeState != nullptr);
     *nightModeState = SOFTBUS_NIGHT_MODE_ON;
     EXPECT_NO_FATAL_FAILURE(LnnNotifyNightModeStateChangeEvent((void *)nightModeState));
@@ -757,7 +757,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest033, TestSize.Level1)
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest034, TestSize.Level1)
 {
-    SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)SoftBusMalloc(sizeof(SoftBusNightModeState));
+    SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)SoftBusCalloc(sizeof(SoftBusNightModeState));
     ASSERT_TRUE(nightModeState != nullptr);
     *nightModeState = SOFTBUS_NIGHT_MODE_UNKNOWN;
     EXPECT_NO_FATAL_FAILURE(LnnNotifyNightModeStateChangeEvent((void *)nightModeState));

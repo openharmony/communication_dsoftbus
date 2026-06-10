@@ -457,7 +457,7 @@ HWTEST_F(ClientProxyTest, ClientOnRefreshDeviceFound_02, TestSize.Level1)
 HWTEST_F(ClientProxyTest, ClientOnDataLevelChanged_01, TestSize.Level1)
 {
     const char *networkId = TEST_NETWORK_ID;
-    DataLevelInfo *dataLevelInfo = (DataLevelInfo *)SoftBusMalloc(sizeof(DataLevelInfo));
+    DataLevelInfo *dataLevelInfo = (DataLevelInfo *)SoftBusCalloc(sizeof(DataLevelInfo));
     ASSERT_TRUE(dataLevelInfo != nullptr);
     int32_t ret = ClientOnDataLevelChanged(nullptr, PID, networkId, dataLevelInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -473,7 +473,7 @@ HWTEST_F(ClientProxyTest, ClientOnDataLevelChanged_01, TestSize.Level1)
  */
 HWTEST_F(ClientProxyTest, ClientOnDataLevelChanged_02, TestSize.Level1)
 {
-    DataLevelInfo *dataLevelInfo = (DataLevelInfo *)SoftBusMalloc(sizeof(DataLevelInfo));
+    DataLevelInfo *dataLevelInfo = (DataLevelInfo *)SoftBusCalloc(sizeof(DataLevelInfo));
     ASSERT_TRUE(dataLevelInfo != nullptr);
     int32_t ret = ClientOnDataLevelChanged(TEST_PKGNAME, PID, nullptr, dataLevelInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -496,7 +496,7 @@ HWTEST_F(ClientProxyTest, ClientOnDataLevelChanged_03, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
-    DataLevelInfo *dataLevelInfo = (DataLevelInfo *)SoftBusMalloc(sizeof(DataLevelInfo));
+    DataLevelInfo *dataLevelInfo = (DataLevelInfo *)SoftBusCalloc(sizeof(DataLevelInfo));
     ASSERT_TRUE(dataLevelInfo != nullptr);
     int32_t ret = ClientOnDataLevelChanged(TEST_PKGNAME, PID, networkId, dataLevelInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -518,7 +518,7 @@ HWTEST_F(ClientProxyTest, OnChannelOpened_01, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
-    ChannelInfo *info = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(info != nullptr);
     int32_t ret = clientProxy->OnChannelOpened(TEST_SESSIONNAME, info);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -621,7 +621,7 @@ HWTEST_F(ClientProxyTest, OnChannelQosEvent_01, TestSize.Level1)
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
-    QosTv *tvList = (QosTv *)SoftBusMalloc(sizeof(QosTv));
+    QosTv *tvList = (QosTv *)SoftBusCalloc(sizeof(QosTv));
     ASSERT_TRUE(tvList != nullptr);
     int32_t ret = clientProxy->OnChannelQosEvent(CHANNELID, CHANNELTYPE, EVENTID, TVCOUNT, tvList);
     EXPECT_EQ(ret, SOFTBUS_OK);

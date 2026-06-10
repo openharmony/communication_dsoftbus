@@ -148,7 +148,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.L
     int64_t newLocalAuthSeq[2] = { 1, 2 };
     JsonObj json;
     (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
-    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(LEN));
     if (msg == nullptr) {
         return;
     }
@@ -272,7 +272,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_006, TestSize.L
     int64_t newLocalAuthSeq[2] = { 1, 2 };
     JsonObj json;
     (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
-    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(LEN));
     if (msg == nullptr) {
         return;
     }
@@ -311,7 +311,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_007, TestSize.L
     int64_t newLocalAuthSeq[2] = { 1, 2 };
     JsonObj json;
     (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
-    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(LEN));
     if (msg == nullptr) {
         return;
     }
@@ -352,7 +352,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008, TestSize.L
     int64_t newLocalAuthSeq[2] = { 1, 2 };
     JsonObj json;
     (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
-    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(LEN));
     if (msg == nullptr) {
         return;
     }
@@ -2687,7 +2687,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
 {
     JsonObj json;
     (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
-    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(LEN));
     if (msg == nullptr) {
         return;
     }
@@ -2721,7 +2721,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
 {
-    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(LEN));
     if (msg == nullptr) {
         return;
     }
@@ -2764,7 +2764,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_006, TestSize.Level1)
 {
-    char *msg = reinterpret_cast<char *>(SoftBusMalloc(LEN));
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(LEN));
     if (msg == nullptr) {
         return;
     }

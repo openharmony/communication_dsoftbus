@@ -100,7 +100,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, ReleaseUkNegotiateListLock002, TestSize.Level
  */
 HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList001, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
     SoftBusFree(g_ukNegotiateList);
@@ -157,7 +157,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest001, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest002, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     EXPECT_EQ(GetGenUkInstanceByChannel(1, nullptr), SOFTBUS_INVALID_PARAM);
     SoftBusFree(g_ukNegotiateList);
@@ -172,7 +172,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest002, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest003, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -189,7 +189,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest003, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest004, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -208,7 +208,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest004, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest005, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -225,7 +225,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest005, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest006, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -620,7 +620,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest003, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest004, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     g_ukNegotiateList->list.next = &g_ukNegotiateList->list;
     g_ukNegotiateList->list.prev = &g_ukNegotiateList->list;
@@ -637,7 +637,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest004, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest001, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     AuthACLInfo oldAcl;
     (void)memset_s(&oldAcl, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));

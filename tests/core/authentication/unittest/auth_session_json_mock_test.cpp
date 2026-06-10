@@ -101,7 +101,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     uint32_t dataLen = 1;
-    uint8_t *data = reinterpret_cast<uint8_t *>(SoftBusMalloc(dataLen));
+    uint8_t *data = reinterpret_cast<uint8_t *>(SoftBusCalloc(dataLen));
     if (data == nullptr) {
         return;
     }
@@ -153,7 +153,7 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     uint32_t dataLen = strlen("true");
-    uint8_t *data = reinterpret_cast<uint8_t *>(SoftBusMalloc(dataLen));
+    uint8_t *data = reinterpret_cast<uint8_t *>(SoftBusCalloc(dataLen));
     if (data == nullptr) {
         return;
     }
@@ -1407,7 +1407,7 @@ HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_PER_PEER_USERID_TEST_001, 
     };
     cJSON *peerUserIdsJson = cJSON_CreateObject();
     ASSERT_NE(peerUserIdsJson, nullptr);
-    cJSON *ret = NULL;
+    cJSON *ret = nullptr;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     cJSON *tmpJson1 = cJSON_CreateObject();
     cJSON *tmpJson2 = cJSON_CreateObject();
@@ -2335,7 +2335,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_NEGO_STATE_TEST_001, TestSize.Level1
     if (msg == nullptr) {
         FAIL() << "memory allocation failed";
     }
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(NULL)).WillOnce(Return(&tmpJson));
+    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr)).WillOnce(Return(&tmpJson));
     EXPECT_CALL(mocker, cJSON_PrintUnformatted).WillOnce(Return(msg));
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(true));
     EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(true));

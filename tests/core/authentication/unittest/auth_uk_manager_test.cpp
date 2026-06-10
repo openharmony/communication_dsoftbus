@@ -818,19 +818,19 @@ HWTEST_F(AuthUkManagerTest, UPDATE_UK_NEGOTIATE_INFO_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthUkManagerTest, ASYNC_CALL_GEN_UK_RESULT_RECEIVED_Test_001, TestSize.Level1)
 {
-    SyncGenUkResult *res = (SyncGenUkResult *)SoftBusMalloc(sizeof(SyncGenUkResult));
+    SyncGenUkResult *res = (SyncGenUkResult *)SoftBusCalloc(sizeof(SyncGenUkResult));
     ASSERT_TRUE(res != nullptr);
     res->requestId = 0;
     EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(AsyncCallGenUkResultReceived(nullptr));
     EXPECT_NO_FATAL_FAILURE(AsyncCallGenUkResultReceived(reinterpret_cast<void *>(res)));
-    SyncGenUkResult *res1 = (SyncGenUkResult *)SoftBusMalloc(sizeof(SyncGenUkResult));
+    SyncGenUkResult *res1 = (SyncGenUkResult *)SoftBusCalloc(sizeof(SyncGenUkResult));
     ASSERT_TRUE(res1 != nullptr);
     res1->requestId = 1;
     res1->isGenUkSuccess = true;
     EXPECT_NO_FATAL_FAILURE(AsyncCallGenUkResultReceived(reinterpret_cast<void *>(res1)));
     EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
-    SyncGenUkResult *res2 = (SyncGenUkResult *)SoftBusMalloc(sizeof(SyncGenUkResult));
+    SyncGenUkResult *res2 = (SyncGenUkResult *)SoftBusCalloc(sizeof(SyncGenUkResult));
     ASSERT_TRUE(res2 != nullptr);
     res2->requestId = 1;
     res2->isGenUkSuccess = false;
