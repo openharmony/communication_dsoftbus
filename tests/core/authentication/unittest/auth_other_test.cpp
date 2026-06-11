@@ -1286,4 +1286,45 @@ HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
     bool ret = IsSessionAuth(module);
     EXPECT_FALSE(ret);
 }
+
+/*
+ * @tc.name: IS_NEED_REOPEN_AUTH_CONNECTION_TEST_001
+ * @tc.desc: Verify that IsNeedReOpenAuthConnection returns false when uuid is null.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, IS_NEED_REOPEN_AUTH_CONNECTION_TEST_001, TestSize.Level1)
+{
+    bool ret = IsNeedReOpenAuthConnection(nullptr);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: IS_NEED_REOPEN_AUTH_CONNECTION_TEST_002
+ * @tc.desc: Verify that IsNeedReOpenAuthConnection returns false when uuid is empty string.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, IS_NEED_REOPEN_AUTH_CONNECTION_TEST_002, TestSize.Level1)
+{
+    const char *uuid = "";
+    bool ret = IsNeedReOpenAuthConnection(uuid);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: IS_NEED_REOPEN_AUTH_CONNECTION_TEST_003
+ * @tc.desc: Verify that IsNeedReOpenAuthConnection returns false for unknown uuid.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, IS_NEED_REOPEN_AUTH_CONNECTION_TEST_003, TestSize.Level1)
+{
+    const char *uuid = "unknown_uuid_test";
+    bool ret = IsNeedReOpenAuthConnection(uuid);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS

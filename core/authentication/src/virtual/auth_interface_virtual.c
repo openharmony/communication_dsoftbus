@@ -463,3 +463,9 @@ bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit)
     return false;
 }
 
+bool IsNeedReOpenAuthConnection(const char *uuid)
+{
+    (void)uuid;
+    return false;
+}
+
