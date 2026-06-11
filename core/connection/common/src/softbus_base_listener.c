@@ -293,7 +293,7 @@ static int32_t InitBaseListenerLock(void)
     if (ret != SOFTBUS_OK) {
         SoftBusMutexDestroy(&g_watchThreadStateLock);
         SoftBusMutexDestroy(&g_listenerListLock);
-        CONN_LOGE(CONN_INIT, "init listener list lock fail, error=%{public}d", ret);
+        CONN_LOGE(CONN_INIT, "init remove abnormal fd lock fail, error=%{public}d", ret);
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -549,20 +549,24 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         "listener onDataEvent is null, module=%{public}d", info->socketOption.moduleId);
 
     ListenerModule module = info->socketOption.moduleId;
-    SoftbusListenerNode *node = GetOrCreateListenerNode(module);
-    CONN_CHECK_AND_RETURN_RET_LOGW(
-        node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON, "get listener node fail, module=%{public}d", module);
     int32_t ret = SoftBusMutexLock(&g_removeAbnormalFdLock);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, error=%{public}d", module, ret);
-        ReturnListenerNode(&node);
         FillConnEventExtra(info, &extra, SOFTBUS_LOCK_ERR);
         CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
         return SOFTBUS_LOCK_ERR;
     }
+    SoftbusListenerNode *node = GetOrCreateListenerNode(module);
+    if (node == NULL) {
+        CONN_LOGE(CONN_COMMON, "get listener node fail, module=%{public}d", module);
+        SoftBusMutexUnlock(&g_removeAbnormalFdLock);
+        FillConnEventExtra(info, &extra, SOFTBUS_NOT_FIND);
+        CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
+        return SOFTBUS_NOT_FIND;
+    }
     ret = SoftBusMutexLock(&node->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, error=%{public}d", module, ret);
+        CONN_LOGE(CONN_COMMON, "lock node fail, module=%{public}d, error=%{public}d", module, ret);
         SoftBusMutexUnlock(&g_removeAbnormalFdLock);
         ReturnListenerNode(&node);
         FillConnEventExtra(info, &extra, SOFTBUS_LOCK_ERR);
@@ -654,7 +658,7 @@ static int32_t ShutdownBaseListener(SoftbusListenerNode *node)
         "lock fail, module=%{public}d, error=%{public}d", node->module, ret);
     ret = SoftBusMutexLock(&node->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, error=%{public}d", node->module, ret);
+        CONN_LOGE(CONN_COMMON, "lock node fail, module=%{public}d, error=%{public}d", node->module, ret);
         SoftBusMutexUnlock(&g_removeAbnormalFdLock);
         return SOFTBUS_LOCK_ERR;
     }
@@ -736,20 +740,19 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
         fd > 0, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid fd, module=%{public}d, fd=%{public}d", module, fd);
     CONN_CHECK_AND_RETURN_RET_LOGW(IsValidTriggerType(trigger), SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid trigger, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
-
-    SoftbusListenerNode *node = GetListenerNode(module);
-    CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
-        "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
     int32_t ret = SoftBusMutexLock(&g_removeAbnormalFdLock);
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
-                               "error=%{public}d", module, fd, trigger, ret);
-        ReturnListenerNode(&node);
-        return SOFTBUS_LOCK_ERR;
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock fail, "
+        "module=%{public}d, fd=%{public}d, trigger=%{public}d, error=%{public}d", module, fd, trigger, ret);
+    SoftbusListenerNode *node = GetListenerNode(module);
+    if (node == NULL) {
+        CONN_LOGE(CONN_COMMON, "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d",
+            module, fd, trigger);
+        (void)SoftBusMutexUnlock(&g_removeAbnormalFdLock);
+        return SOFTBUS_NOT_FIND;
     }
     ret = SoftBusMutexLock(&node->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
+        CONN_LOGE(CONN_COMMON, "lock node fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
                                "error=%{public}d", module, fd, trigger, ret);
         ReturnListenerNode(&node);
         (void)SoftBusMutexUnlock(&g_removeAbnormalFdLock);
@@ -825,19 +828,19 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
     CONN_CHECK_AND_RETURN_RET_LOGW(IsValidTriggerType(trigger), SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid trigger, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
 
-    SoftbusListenerNode *node = GetListenerNode(module);
-    CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
-        "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
     int32_t ret = SoftBusMutexLock(&g_removeAbnormalFdLock);
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
-                               "error=%{public}d", module, fd, trigger, ret);
-        ReturnListenerNode(&node);
-        return SOFTBUS_LOCK_ERR;
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON, "lock fail, "
+        "module=%{public}d, fd=%{public}d, trigger=%{public}d, error=%{public}d", module, fd, trigger, ret);
+    SoftbusListenerNode *node = GetListenerNode(module);
+    if (node == NULL) {
+        CONN_LOGE(CONN_COMMON, "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d",
+            module, fd, trigger);
+        (void)SoftBusMutexUnlock(&g_removeAbnormalFdLock);
+        return SOFTBUS_NOT_FIND;
     }
     ret = SoftBusMutexLock(&node->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
+        CONN_LOGE(CONN_COMMON, "lock node fail, module=%{public}d, fd=%{public}d, trigger=%{public}d, "
                                "error=%{public}d", module, fd, trigger, ret);
         ReturnListenerNode(&node);
         (void)SoftBusMutexUnlock(&g_removeAbnormalFdLock);
@@ -1178,38 +1181,8 @@ static void ProcessSpecifiedListenerNodeEvent(SoftbusListenerNode *node, ListNod
     SoftBusFree(fdArray);
 }
 
-static void CheckAndRemoveNodeFromList(ListNode *fdNode, int32_t fd, ListenerModule module)
+static bool NeedRemoveFdFromEpoll(int32_t fd)
 {
-    struct FdNode *it = NULL;
-    struct FdNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(it, next, fdNode, struct FdNode, node) {
-        if (it->fd == fd) {
-            CONN_LOGW(CONN_COMMON, "fd has been reassigned, fd=%{public}d, module=%{public}d", it->fd, module);
-            ListDelete(&it->node);
-            SoftBusFree(it);
-            break;
-        }
-    }
-}
-
-static void RemoveUnprocessedAndNotExistFd(ListNode *fdNode)
-{
-    struct FdNode *it = NULL;
-    struct FdNode *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(it, next, fdNode, struct FdNode, node) {
-        CONN_LOGE(CONN_COMMON, "need remove fd, fd=%{public}d", it->fd);
-        if (SoftBusSocketGetError(it->fd) != SOFTBUS_CONN_BAD_FD) {
-            (void)RemoveEvent(g_eventWatcher, it->fd);
-        }
-    }
-}
-
-static void RemoveUnprocessedFdFromEpoll(ListNode *fdNode)
-{
-    if (IsListEmpty(fdNode)) {
-        return;
-    }
-    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_removeAbnormalFdLock) == SOFTBUS_OK, CONN_COMMON, "lock fail");
     for (ListenerModule module = 0; module < UNUSE_BUTT; module++) {
         SoftbusListenerNode *node = GetListenerNode(module);
         if (node == NULL) {
@@ -1227,17 +1200,50 @@ static void RemoveUnprocessedFdFromEpoll(ListNode *fdNode)
             continue;
         }
 
-        CheckAndRemoveNodeFromList(fdNode, node->info.listenFd, module);
+        if (fd == node->info.listenFd) {
+            CONN_LOGW(CONN_COMMON, "fd has been reassigned, fd=%{public}d, module=%{public}d", fd, module);
+            SoftBusMutexUnlock(&node->lock);
+            ReturnListenerNode(&node);
+            return false;
+        }
         struct FdNode *it = NULL;
         struct FdNode *next = NULL;
         LIST_FOR_EACH_ENTRY_SAFE(it, next, &node->info.waitEventFds, struct FdNode, node) {
-            CheckAndRemoveNodeFromList(fdNode, it->fd, module);
+            if (fd == it->fd) {
+                CONN_LOGW(CONN_COMMON, "fd has been reassigned, fd=%{public}d, module=%{public}d", fd, module);
+                SoftBusMutexUnlock(&node->lock);
+                ReturnListenerNode(&node);
+                return false;
+            }
         }
         SoftBusMutexUnlock(&node->lock);
         ReturnListenerNode(&node);
     }
-    RemoveUnprocessedAndNotExistFd(fdNode);
+    return true;
+}
+
+static void RemoveUnprocessedFdFromEpoll(int32_t fd)
+{
+    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_removeAbnormalFdLock) == SOFTBUS_OK, CONN_COMMON, "lock fail");
+    if (NeedRemoveFdFromEpoll(fd)) {
+        CONN_LOGE(CONN_COMMON, "need remove fd, fd=%{public}d", fd);
+        if (SoftBusSocketGetError(fd) != SOFTBUS_CONN_BAD_FD) {
+            (void)RemoveEvent(g_eventWatcher, fd);
+        }
+    }
     SoftBusMutexUnlock(&g_removeAbnormalFdLock);
+}
+
+static void CheckAndRemoveFdFromEpoll(ListNode *fdNode)
+{
+    if (IsListEmpty(fdNode)) {
+        return;
+    }
+    struct FdNode *it = NULL;
+    struct FdNode *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(it, next, fdNode, struct FdNode, node) {
+        RemoveUnprocessedFdFromEpoll(it->fd);
+    }
 }
 
 static void ProcessEvent(ListNode *fdNode, const WatchThreadState *watchState, int32_t wakeupTrace)
@@ -1250,7 +1256,7 @@ static void ProcessEvent(ListNode *fdNode, const WatchThreadState *watchState, i
         ProcessSpecifiedListenerNodeEvent(node, fdNode, wakeupTrace);
         ReturnListenerNode(&node);
     }
-    RemoveUnprocessedFdFromEpoll(fdNode);
+    CheckAndRemoveFdFromEpoll(fdNode);
 }
 
 static void RemoveBadFd(void)
