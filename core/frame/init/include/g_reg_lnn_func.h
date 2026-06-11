@@ -275,6 +275,7 @@ typedef struct TagLnnOpenFuncList {
     GetAuthManagerByAuthIdFunc getAuthManagerByAuthId;
     DelDupAuthManagerFunc delDupAuthManager;
     AuthDeviceGetLatestIdByUuidFunc authDeviceGetLatestIdByUuid;
+    IsNeedReOpenAuthConnectionFunc isNeedReOpenAuthConnection;
 
     // adapter
     SoftBusGetCurrentGroupFunc softBusGetCurrentGroup;

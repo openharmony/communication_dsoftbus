@@ -108,6 +108,7 @@ void AuthDeinit(void);
 int32_t AuthRestoreAuthManager(const char *udidHash,
     const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId);
 int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist);
+bool IsNeedReOpenAuthConnection(const char *uuid);
 
 
 #ifdef __cplusplus

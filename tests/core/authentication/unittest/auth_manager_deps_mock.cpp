@@ -524,5 +524,11 @@ uint64_t GenConnId(int32_t connType, int32_t id)
 {
     return GetAuthMangerIf()->GenConnId(connType, id);
 }
+
+int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+    char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    return GetAuthMangerIf()->LnnConvertDlId(srcId, srcIdType, dstIdType, dstIdBuf, dstIdBufLen);
+}
 }
 } // namespace OHOS

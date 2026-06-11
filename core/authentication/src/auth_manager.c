@@ -2463,3 +2463,37 @@ void DelAuthManagerByConnectionId(uint32_t connectionId)
     /* Try to terminate authing session. */
     (void)AuthSessionHandleDeviceDisconnected(connId, false);
 }
+
+bool IsNeedReOpenAuthConnection(const char *uuid)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return false;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "convert uuid to networkId fail");
+        return false;
+    }
+    uint32_t value = 0;
+    if (LnnGetRemoteNumU32Info(networkId, NUM_KEY_META_NODE, &value) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get meta node info fail");
+        return false;
+    }
+    if ((value & (1 << ONLINE_METANODE)) == 0 || (value & (1 << ONLINE_HICHAIN)) == 0) {
+        AUTH_LOGI(AUTH_CONN, "not online metaNode or hichain, value=%{public}u", value);
+        return false;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "require auth lock fail");
+        return false;
+    }
+    AuthManager *client = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, false);
+    AuthManager *server = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, true);
+    ReleaseAuthLock();
+    if (client == NULL && server == NULL) {
+        AUTH_LOGI(AUTH_CONN, "no enhanced p2p auth found, need reopen");
+        return true;
+    }
+    return false;
+}

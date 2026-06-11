@@ -159,6 +159,8 @@ public:
     virtual int32_t GetFd(uint64_t connId) = 0;
     virtual void LnnClearAuthExchangeUdidPacked(const char *networkId) = 0;
     virtual uint64_t GenConnId(int32_t connType, int32_t id) = 0;
+    virtual int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
+        char *dstIdBuf, uint32_t dstIdBufLen) = 0;
 };
 class AuthManagerInterfaceMock : public AuthManagerInterface {
 public:
@@ -265,6 +267,7 @@ public:
     MOCK_METHOD1(GetFd, int32_t (uint64_t));
     MOCK_METHOD1(LnnClearAuthExchangeUdidPacked, void (const char *));
     MOCK_METHOD2(GenConnId, uint64_t (int32_t, int32_t));
+    MOCK_METHOD5(LnnConvertDlId, int32_t (const char *, IdCategory, IdCategory, char *, uint32_t));
 };
 } // namespace OHOS
 #endif // AUTH_MANAGER_DEPS_MOCK_H
