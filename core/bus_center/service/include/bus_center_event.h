@@ -104,6 +104,8 @@ void LnnNotifyLpMcuUpdateHbInfo(int32_t type);
 
 void LnnNotifyVirLinkReportEvent(const uint8_t *data, uint32_t len);
 
+void LnnNotifyDmHookRegisteredEvent(void);
+
 #ifdef __cplusplus
 }
 #endif

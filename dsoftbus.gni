@@ -194,6 +194,10 @@ if (dsoftbus_feature_deps_remoteP2p_service) {
   defines += [ "DSOFTBUS_DEVICE_CLOUD_CONVERGENCE" ]
 }
 
+if (dsoftbus_feature_lnn_push) {
+  defines += [ "DSOFTBUS_FEATURE_SUPPORT_PUSH" ]
+}
+
 if (dsoftbus_feature_trans_mintp) {
   defines += [ "DSOFTBUS_FEATURE_TRANS_MINTP" ]
 }
