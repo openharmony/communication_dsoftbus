@@ -75,7 +75,7 @@ public:
     AuthHandle GetAuthHandle();
 
     static void AddAuthConnection(const LnnEventBasicInfo *info);
-    static void RefreshAuthConnection(std::string remoteUuid);
+    static void RefreshAuthConnection(std::string remoteUuid, bool isIpv6);
     int SendMessage(const NegotiateMessage &msg) const override;
     NegotiateMessage SendMessageAndWaitResponse(const NegotiateMessage &msg);
     std::string GetRemoteDeviceId() const override;
@@ -83,6 +83,8 @@ public:
     using SyncDBACDataHook = std::function<void(const std::vector<uint8_t> &data)>;
     static void Register(const SyncDBACDataHook &syncDBACDataHook);
     static void SyncDBACData(const std::vector<uint8_t> &data);
+    void SetIpv6(bool isIpv6);
+    bool IsIpv6() const;
 
     NegotiateChannelType GetType() const override
     {
@@ -114,6 +116,7 @@ private:
     std::shared_ptr<std::promise<NegotiateMessage>> promise_;
     uint32_t timerId_;
     bool close_;
+    bool isIpv6_ = false;
 
     static inline SyncDBACDataHook syncDBACDataHook_;
 };
