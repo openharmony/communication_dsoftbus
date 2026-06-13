@@ -1378,11 +1378,7 @@ static int32_t LaneLinkOfBleReuseCommon(uint32_t reqId, const LinkRequest *reqIn
     BleProtocolType type)
 {
     char udid[UDID_BUF_LEN] = {0};
-    int32_t ret = LnnConvertDlId(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "convert networkid to udid fail");
-        return ret;
-    }
+    LnnConvertDLidToUdid(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID, udid, UDID_BUF_LEN);
     ConnBleConnection *connection = ConnBleGetConnectionByUdid(NULL, udid, type);
     if ((connection == NULL) || (connection->state != BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO)) {
         return SOFTBUS_INVALID_PARAM;
@@ -1395,7 +1391,7 @@ static int32_t LaneLinkOfBleReuseCommon(uint32_t reqId, const LinkRequest *reqIn
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     (void)memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
-    ret = SoftBusGenerateStrHash((uint8_t*)connection->udid, strlen(connection->udid),
+    int32_t ret = SoftBusGenerateStrHash((uint8_t*)connection->udid, strlen(connection->udid),
         (uint8_t*)linkInfo.linkInfo.ble.deviceIdHash);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "generate deviceId hash err");
@@ -1883,8 +1879,8 @@ static int32_t LaneLinkOfSoftApP2p(uint32_t reqId, const LinkRequest *reqInfo, c
 {
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID,
-        linkInfo.peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, linkInfo.peerUdid, UDID_BUF_LEN) !=
+        SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get udid error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }

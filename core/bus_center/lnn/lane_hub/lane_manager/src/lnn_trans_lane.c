@@ -1803,7 +1803,7 @@ static void MsgHandler(SoftBusMessage *msg)
             HandleLinkTimeout(msg);
             break;
         case MSG_TYPE_NOTIFY_FREE_LANE_RESULT:
-            HandelNotifyFreeLaneResult(msg);
+            HandleNotifyFreeLaneResult(msg);
             break;
         default:
             LNN_LOGE(LNN_LANE, "msg type=%{public}d cannot found", msg->what);

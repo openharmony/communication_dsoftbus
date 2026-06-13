@@ -19,8 +19,8 @@
 #include <stdint.h>
 
 #include "ble_range.h"
-#include "softbus_common.h"
 #include "data_level_inner.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +56,7 @@ typedef struct {
 int32_t LnnStartRange(const RangeConfig *config);
 int32_t LnnStopRange(const RangeConfig *config);
 int32_t LnnInitSleRange(void);
-int32_t LnnDeinitSleRange(void);
+void LnnDeinitSleRange(void);
 void SleRangeDeathCallback(void);
 
 void LnnRegSleRangeCb(const ISleRangeInnerCallback *callback);

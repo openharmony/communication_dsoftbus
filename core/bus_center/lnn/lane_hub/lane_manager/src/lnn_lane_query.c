@@ -271,13 +271,13 @@ static int32_t UsbLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "peer node not USB online");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
-
+ 
     int32_t ret = CheckStaticNetCap(networkId, LANE_USB);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "check static capability fail, errorCode: %{public}d", ret);
         return ret;
     }
-
+ 
     ret = CheckDynamicNetCap(networkId, LANE_USB);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "check dynamic capability fail, errorCode: %{public}d", ret);
@@ -286,7 +286,7 @@ static int32_t UsbLinkState(const char *networkId)
     LNN_LOGI(LNN_LANE, "usb link ok");
     return SOFTBUS_OK;
 }
-
+ 
 static LinkState g_linkState[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = {true,   BrLinkState},
     [LANE_BLE] = { true,   BleLinkState},

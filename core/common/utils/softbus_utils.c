@@ -882,6 +882,10 @@ static void RestoreLocale(const char *localeBefore)
 // Calculate the truncated length in wide characters, ensuring that the truncation is performed in wide character
 int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
 {
+    if (multiByteStr == NULL || truncatedSize == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     size_t multiByteStrLen = strlen(multiByteStr);
     if (multiByteStrLen == 0) {
         *truncatedSize = 0;
@@ -891,7 +895,6 @@ int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, ui
         COMM_LOGE(COMM_UTILS, "multi byte str too long: %{public}zu", multiByteStrLen);
         return SOFTBUS_INVALID_PARAM;
     }
-
     char *localeBefore = NULL;
     int32_t ret = SetLocale(&localeBefore);
     if (ret != SOFTBUS_OK) {
