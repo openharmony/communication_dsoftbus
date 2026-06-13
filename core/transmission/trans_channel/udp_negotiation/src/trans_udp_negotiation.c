@@ -750,16 +750,19 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get pkgName failed, ret=%{public}d", ret);
-    if (appInfo->osType == OTHER_OS_TYPE) {
-        if (!TransCheckMetaTypeQueryPermission(appInfo->myData.pkgName, appInfo->metaType)) {
-            TRANS_LOGE(TRANS_CTRL, "not supporting access");
-            return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
-        }
-    }
     ret = g_channelCb->GetUidAndPidBySessionName(appInfo->myData.sessionName, &appInfo->myData.uid,
         &appInfo->myData.pid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get uid and pid failed, ret=%{public}d", ret);
+    int32_t pid = 0;
+    ret = AuthMetaGetPidByAuthIdPacked(authHandle.authId, &pid);
+    if (ret == SOFTBUS_OK) {
+        if (pid != appInfo->myData.pid) {
+            TRANS_LOGE(TRANS_CTRL, "authMeta pid no match, authMeta pid=%{public}d, pid=%{public}d.",
+                pid, appInfo->myData.pid);
+            return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
+        }
+    }
     return ParseRequestAppInfoEx(appInfo, authHandle);
 }
 

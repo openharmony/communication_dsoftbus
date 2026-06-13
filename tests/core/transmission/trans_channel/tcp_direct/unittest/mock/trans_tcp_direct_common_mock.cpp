@@ -61,5 +61,10 @@ int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *local
 {
     return GetTransServerTcpDirectInterface()->AuthMetaGetLocalIpByMetaNodeIdPacked(metaNodeId, localIp, len);
 }
+
+int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid)
+{
+    return GetTransServerTcpDirectInterface()->AuthMetaGetPidByAuthIdPacked(authId, pid);
+}
 }
 }

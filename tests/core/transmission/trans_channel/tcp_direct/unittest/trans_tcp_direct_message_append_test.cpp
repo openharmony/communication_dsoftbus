@@ -1959,7 +1959,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     channelId = TEST_NEW_CHANNEL_ID;
     EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
     ret = OpenDataBusRequest(channelId, flags, seq, reply);
-    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     (void)TransDelSessionConnById(TEST_NEW_CHANNEL_ID);
     (void)TransDelSessionConnById(TEST_CHANNELID);
@@ -2014,5 +2014,159 @@ HWTEST_F(TransTcpDirectMessageAppendTest, SwitchAuthLinkTypeToFlagType, TestSize
 
     cipherFlag = SwitchAuthLinkTypeToFlagType(AUTH_LINK_TYPE_WIFI);
     EXPECT_EQ(AUTH_LINK_TYPE_WIFI, SwitchCipherTypeToAuthLinkType(cipherFlag));
+}
+
+/*
+ * @tc.name: OpenDataBusRequestTest007
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED when GetAuthHandleByChanId fails with FLAG_AUTH_META
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest007, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint64_t seq = TEST_SEQ;
+    uint32_t flags = FLAG_AUTH_META;
+    cJSON *request = cJSON_CreateObject();
+
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(AuthHandle{.authId = AUTH_INVALID_ID, .type = 0 }), Return(SOFTBUS_OK)));
+    ret = OpenDataBusRequest(channelId, flags, seq, request);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
+
+    (void)TransDelSessionConnById(channelId);
+    cJSON_Delete(request);
+}
+
+/*
+ * @tc.name: OpenDataBusRequestTest008
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED when AuthMetaGetPidByAuthIdPacked fails
+ *           with FLAG_AUTH_META
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest008, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint64_t seq = TEST_SEQ;
+    uint32_t flags = FLAG_AUTH_META;
+    cJSON *request = cJSON_CreateObject();
+
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(AuthHandle{.authId = 1, .type = 1 }), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, AuthMetaGetPidByAuthIdPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
+    ret = OpenDataBusRequest(channelId, flags, seq, request);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
+
+    (void)TransDelSessionConnById(channelId);
+    cJSON_Delete(request);
+}
+
+/*
+ * @tc.name: OpenDataBusRequestTest009
+ * @tc.desc: Should return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED when pid does not match with FLAG_AUTH_META
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest009, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint64_t seq = TEST_SEQ;
+    uint32_t flags = FLAG_AUTH_META;
+    cJSON *request = cJSON_CreateObject();
+
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    conn->appInfo.myData.pid = 100;
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(AuthHandle{.authId = 1, .type = 1 }), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, AuthMetaGetPidByAuthIdPacked)
+        .WillOnce(DoAll(SetArgPointee<1>(200), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, TransTdcGetUidAndPid(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<1>(1026), SetArgPointee<2>(100), Return(SOFTBUS_OK)));
+    ret = OpenDataBusRequest(channelId, flags, seq, request);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_QUERY_PERMISSION_FAILED);
+
+    (void)TransDelSessionConnById(channelId);
+    cJSON_Delete(request);
+}
+
+/*
+ * @tc.name: OpenDataBusRequestTest010
+ * @tc.desc: Should return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED when TransTdcGetUidAndPid fails
+ *           with FLAG_EXTERNAL_DEVICE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest010, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint64_t seq = TEST_SEQ;
+    uint32_t flags = FLAG_EXTERNAL_DEVICE;
+    cJSON *request = cJSON_CreateObject();
+
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillOnce(DoAll(SetArgPointee<1>(AuthHandle{.authId = 1, .type = 1 }), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, AuthMetaGetPidByAuthIdPacked)
+        .WillOnce(DoAll(SetArgPointee<1>(1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, TransTdcGetUidAndPid(_, _, _)).WillOnce(Return(SOFTBUS_MEM_ERR));
+    ret = OpenDataBusRequest(channelId, flags, seq, request);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED);
+
+    (void)TransDelSessionConnById(channelId);
+    cJSON_Delete(request);
+}
+
+/*
+ * @tc.name: OpenDataBusRequestTest011
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED when GetAuthHandleByChanId returns error
+ *           with FLAG_EXTERNAL_DEVICE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest011, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint64_t seq = TEST_SEQ;
+    uint32_t flags = FLAG_EXTERNAL_DEVICE;
+    cJSON *request = cJSON_CreateObject();
+
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _)).WillOnce(Return(SOFTBUS_NOT_FIND));
+    ret = OpenDataBusRequest(channelId, flags, seq, request);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
+
+    (void)TransDelSessionConnById(channelId);
+    cJSON_Delete(request);
 }
 }

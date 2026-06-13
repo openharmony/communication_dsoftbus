@@ -1202,4 +1202,19 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest035, TestSize.Level1)
     int32_t ret = LnnUpdateLastAccLoginTimestampByUdidPacked(timestamp, udid);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: SoftbusGEnhanceTest036
+ * @tc.desc: AuthMetaGetPidByAuthIdPacked function test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest036, TestSize.Level1)
+{
+    int32_t pid = 0;
+    int32_t ret = AuthMetaGetPidByAuthIdPacked(1, &pid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(pid, 0);
+}
 }

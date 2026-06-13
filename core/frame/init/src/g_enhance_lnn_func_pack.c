@@ -1822,3 +1822,15 @@ int32_t LnnInitMcuPacked(void)
     }
     return pfnLnnEnhanceFuncList->lnnInitMcu();
 }
+
+int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetPidByAuthId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->authMetaGetPidByAuthId(authId, pid);
+}

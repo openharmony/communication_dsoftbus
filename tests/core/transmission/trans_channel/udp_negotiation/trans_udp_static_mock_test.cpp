@@ -1063,4 +1063,149 @@ HWTEST_F(TransUdpStaticMockTest, BuildUdpReplyExtra001, TestSize.Level1)
     EXPECT_EQ(extra.authId, (int32_t)authId);
     EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
 }
+
+/**
+ * @tc.name: ParseRequestAppInfoTest003
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED when AuthMetaGetPidByAuthIdPacked fails
+ *           and isMeta is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest003, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 12345
+    };
+    cJSON *cJson = cJSON_CreateObject();
+    ASSERT_TRUE(cJson != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    appInfo.callingTokenId = 1;
+    (void)strcpy_s(appInfo.myData.sessionName, sizeof(appInfo.myData.sessionName), "test.session");
+    (void)strcpy_s(appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, "testDeviceId");
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(true));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
+    int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
+
+    TransUdpChannelDeinit();
+    cJSON_Delete(cJson);
+}
+
+/**
+ * @tc.name: ParseRequestAppInfoTest004
+ * @tc.desc: Should return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED when authMeta pid does not match local pid
+ *           and isMeta is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest004, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 12345
+    };
+    cJSON *cJson = cJSON_CreateObject();
+    ASSERT_TRUE(cJson != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    appInfo.callingTokenId = 1;
+    appInfo.myData.uid = 1026;
+    appInfo.myData.pid = 100;
+    (void)strcpy_s(appInfo.myData.sessionName, sizeof(appInfo.myData.sessionName), "test.session");
+    (void)strcpy_s(appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, "testDeviceId");
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(true));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked)
+        .WillOnce(DoAll(SetArgPointee<1>(200), Return(SOFTBUS_OK)));
+    int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_QUERY_PERMISSION_FAILED);
+
+    TransUdpChannelDeinit();
+    cJSON_Delete(cJson);
+}
+
+/**
+ * @tc.name: ParseRequestAppInfoTest005
+ * @tc.desc: Should pass pid check when authMeta pid matches local pid and isMeta is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest005, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 12345,
+        .type = AUTH_LINK_TYPE_P2P
+    };
+    cJSON *cJson = cJSON_CreateObject();
+    ASSERT_TRUE(cJson != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    appInfo.callingTokenId = 1;
+    appInfo.myData.uid = 1026;
+    appInfo.myData.pid = 100;
+    (void)strcpy_s(appInfo.myData.sessionName, sizeof(appInfo.myData.sessionName), "test.session");
+    (void)strcpy_s(appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, "testDeviceId");
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(true));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked)
+        .WillOnce(DoAll(SetArgPointee<1>(100), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
+    int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+
+    TransUdpChannelDeinit();
+    cJSON_Delete(cJson);
+}
+
+/**
+ * @tc.name: ParseRequestAppInfoTest006
+ * @tc.desc: Should skip pid check when isMeta is false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest006, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 12345,
+        .type = AUTH_LINK_TYPE_WIFI
+    };
+    cJSON *cJson = cJSON_CreateObject();
+    ASSERT_TRUE(cJson != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    appInfo.callingTokenId = 1;
+    (void)strcpy_s(appInfo.myData.sessionName, sizeof(appInfo.myData.sessionName), "test.session");
+    (void)strcpy_s(appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, "testDeviceId");
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(false));
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
+    int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+
+    TransUdpChannelDeinit();
+    cJSON_Delete(cJson);
+}
 }

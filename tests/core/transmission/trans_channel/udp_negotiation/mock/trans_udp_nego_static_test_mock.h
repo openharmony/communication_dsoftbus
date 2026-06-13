@@ -67,6 +67,8 @@ public:
     virtual int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len) = 0;
     virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
+    virtual int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid) = 0;
+    virtual bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId) = 0;
 };
 
 class TransUdpNegoStaticInterfaceMock : public TransUdpNegoStaticInterface {
@@ -108,6 +110,8 @@ public:
     MOCK_METHOD3(AuthMetaGetLocalIpByMetaNodeIdPacked, int32_t (const char *metaNodeId, char *localIp, int32_t len));
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager * (void));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
+    MOCK_METHOD2(AuthMetaGetPidByAuthIdPacked, int32_t (int64_t authId, int32_t *pid));
+    MOCK_METHOD1(TransGetAuthTypeByNetWorkId, bool (const char *peerNetWorkId));
 };
 } // namespace OHOS
 #endif // TRANS_UDP_NEGO_STATIC_TEST_MOCK_H

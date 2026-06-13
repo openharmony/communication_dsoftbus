@@ -298,5 +298,10 @@ int64_t AuthGetIdByIp(const char *ip)
 {
     return GetTransTcpDirectMessageInterface()->AuthGetIdByIp(ip);
 }
+
+int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid)
+{
+    return GetTransTcpDirectMessageInterface()->AuthMetaGetPidByAuthIdPacked(authId, pid);
+}
 }
 }
