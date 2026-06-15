@@ -56,3 +56,8 @@ int32_t TransSetStreamMultiLayer(int32_t channelId, const void *optValue)
     (void)optValue;
     return SOFTBUS_OK;
 }
+
+void TransDeleteVtpStreamAdaptor(int32_t channelId)
+{
+    (void)channelId;
+}
