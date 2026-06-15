@@ -991,6 +991,10 @@ static void ProcessDeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheIn
         LNN_LOGI(LNN_BUILDER, "no cache info, no need to reply");
         return;
     }
+    if (cacheInfo->accountId != oldCacheInfo->accountId) {
+        LNN_LOGI(LNN_BUILDER, "account is changed, no need to reply");
+        return;
+    }
     if (strncmp(cacheInfo->deviceInfo.deviceName, oldCacheInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN) != 0) {
         NodeInfo info;
         (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
