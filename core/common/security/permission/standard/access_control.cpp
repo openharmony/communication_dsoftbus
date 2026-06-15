@@ -22,6 +22,7 @@
 #include "anonymizer.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "bundle_mgr_proxy.h"
 #include "comm_log.h"
 #include "distributed_device_profile_client.h"
 #include "distributed_device_profile_enums.h"
@@ -441,3 +442,35 @@ void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int
         *tokenType = TOKEN_SHELL_TYPE;
     }
 }
+
+#ifdef SUPPORT_BUNDLENAME
+int32_t GetBundleNameByUid(pid_t callingUid, char *bundleNameStr)
+{
+    std::string bundleName;
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        COMM_LOGE(COMM_SVC, "Failed to get system ability manager.");
+        return SOFTBUS_TRANS_SYSTEM_ABILITY_MANAGER_FAILED;
+    }
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        COMM_LOGE(COMM_SVC, "Failed to get bundle manager service.");
+        return SOFTBUS_TRANS_GET_SYSTEM_ABILITY_FAILED;
+    }
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
+        COMM_LOGE(COMM_SVC, "iface_cast failed");
+        return SOFTBUS_TRANS_GET_BUNDLE_MGR_FAILED;
+    }
+    if (iBundleMgr->GetNameForUid(callingUid, bundleName) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get bundleName failed");
+        return SOFTBUS_TRANS_GET_BUNDLENAME_FAILED;
+    }
+    if (strcpy_s(bundleNameStr, BUNDLE_NAME_MAX_LEN, bundleName.c_str()) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy name failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+#endif

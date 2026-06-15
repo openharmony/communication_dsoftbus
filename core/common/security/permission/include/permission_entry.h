@@ -43,6 +43,7 @@ typedef struct {
     int32_t uid;
     int32_t pid;
     char *pkgName;
+    char bundleName[BUNDLE_NAME_MAX_LEN];
     uint32_t actions;
 } SoftBusPermissionItem;
 
@@ -50,6 +51,7 @@ typedef struct {
     ListNode node;
     int32_t type;
     char pkgName[PKG_NAME_SIZE_MAX];
+    char bundleName[BUNDLE_NAME_MAX_LEN];
     uint32_t actions;
     int32_t uid;
     int32_t pid;

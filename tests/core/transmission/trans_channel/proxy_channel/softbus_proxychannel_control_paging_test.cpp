@@ -1520,7 +1520,6 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingResetTest001, TestSize
     EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransPagingReset(&chan);
     EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
-    cJSON_free(chanIdBuf);
 }
 
 /*

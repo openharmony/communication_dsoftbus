@@ -38,6 +38,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId);
 int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionName);
 int32_t TransCheckServerAccessControl(const AppInfo *appInfo);
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType);
+int32_t GetBundleNameByUid(pid_t callingUid, char *bundleNameStr);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -208,18 +208,6 @@ void TransProcessGroupTalkieInfoPacked(const char *pkgName)
     return pfnTransEnhanceFuncList->transProcessGroupTalkieInfo(pkgName);
 }
 
-bool IsInWhitelistPacked(const char *app)
-{
-    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
-    if (pfnTransEnhanceFuncList == NULL) {
-        return true;
-    }
-    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->isInWhitelist) != SOFTBUS_OK) {
-        return true;
-    }
-    return pfnTransEnhanceFuncList->isInWhitelist(app);
-}
-
 bool IsMultipathWhitelistPacked(const char *processName, bool *isWhitelist)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();

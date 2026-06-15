@@ -57,6 +57,7 @@ int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, COMM_TEST, "strcpy failed");
     return SOFTBUS_OK;
 }
+
 } // extern "C"
 
 namespace OHOS {

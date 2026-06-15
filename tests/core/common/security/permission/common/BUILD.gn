@@ -86,10 +86,15 @@ ohos_unittest("PermissionEntryMockTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
 
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+  ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
