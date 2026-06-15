@@ -56,6 +56,7 @@ public:
     virtual int CreateStreamServerChannel(IpAndPort &local, Proto protocol,
         int streamType, std::pair<uint8_t*, uint32_t> sessionKey) = 0; // Non-block
     virtual bool DestroyStreamDataChannel() = 0;
+    virtual bool ClearSocketMap() = 0;
 
     virtual bool Send(std::unique_ptr<IStream>) = 0;
 

@@ -76,6 +76,8 @@ public:
 
     bool DestroyStreamDataChannel() override;
 
+    bool ClearSocketMap() override;
+
     bool Send(std::unique_ptr<IStream> data) override;
 
     bool SetOption(int32_t type, const StreamAttr &value) override;

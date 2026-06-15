@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -193,6 +193,34 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, CloseVtpStreamChannelTest001, TestSi
     int32_t channelId = 1;
     int32_t ret =  CloseVtpStreamChannel(channelId, g_pkgName);
     EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
+}
+
+/**
+ * @tc.name: DeleteVtpStreamAdaptorTest001
+ * @tc.desc: DeleteVtpStreamAdaptor error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpStreamInterfaceTest, DeleteVtpStreamAdaptorTest001, TestSize.Level1)
+{
+    int32_t channelId = -1;
+    int32_t ret = StartVtpStreamChannelClient(channelId, &g_clientParam1, &g_callback);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    DeleteVtpStreamAdaptor(channelId);
+}
+
+/**
+ * @tc.name: DeleteVtpStreamAdaptorTest002
+ * @tc.desc: StartVtpStreamChannelClient success DeleteVtpStreamAdaptor error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpStreamInterfaceTest, DeleteVtpStreamAdaptorTest002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t ret = StartVtpStreamChannelClient(channelId, &g_clientParam1, &g_callback);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeleteVtpStreamAdaptor(channelId);
 }
 
 /**

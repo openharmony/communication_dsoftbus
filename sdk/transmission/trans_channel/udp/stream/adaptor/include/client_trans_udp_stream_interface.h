@@ -67,6 +67,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
 int32_t SendVtpStream(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
 int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName);
 int32_t SetVtpStreamMultiLayerOpt(int32_t channelId, const void *optValue);
+void DeleteVtpStreamAdaptor(int32_t channelId);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -77,6 +77,7 @@ if (defined(ohos_lite)) {
 
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/adaptor/include",
       "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
       "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
       "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
@@ -175,8 +176,16 @@ if (defined(ohos_lite)) {
   group("unittest") {
     testonly = true
     deps = [
-      ":TransSdkFileTest",
       ":ClientTransFileTest",
     ]
+    if (dsoftbus_feature_trans_udp == true) {
+      if (dsoftbus_feature_trans_udp_stream == true) {
+        if (!defined(ohos_lite)) {
+          deps += [
+            ":TransSdkFileTest",
+          ]
+        }
+      }
+    }
   }
 }
