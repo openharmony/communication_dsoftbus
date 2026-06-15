@@ -65,8 +65,8 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 {
     auto mock = OHOS::SoftBus::BleConnectionTestMock::GetMock();
     if (mock == nullptr) {
-        return pthread_mutex_init((pthread_mutex_t *)mutex,
-            (pthread_mutexattr_t *)mutexAttr) == 0 ? SOFTBUS_OK : SOFTBUS_ERR;
+        return pthread_mutex_init(reinterpret_cast<pthread_mutex_t*>(mutex),
+            reinterpret_cast<pthread_mutexattr_t *>(mutexAttr)) == 0 ? SOFTBUS_OK : SOFTBUS_ERR;
     }
     return mock->SoftBusMutexInitHook(mutex, mutexAttr);
 }
@@ -75,7 +75,7 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 {
     auto mock = OHOS::SoftBus::BleConnectionTestMock::GetMock();
     if (mock == nullptr) {
-        pthread_mutex_destroy((pthread_mutex_t *)mutex);
+        pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(mutex));
         return SOFTBUS_ERR;
     }
     mock->SoftBusMutexDestroyHook(mutex);
@@ -86,7 +86,7 @@ int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 {
     auto mock = OHOS::SoftBus::BleConnectionTestMock::GetMock();
     if (mock == nullptr) {
-        return pthread_mutex_lock((pthread_mutex_t *)mutex) == 0 ? SOFTBUS_OK : SOFTBUS_ERR;
+        return pthread_mutex_lock(reinterpret_cast<pthread_mutex_t*>(mutex)) == 0 ? SOFTBUS_OK : SOFTBUS_ERR;
     }
     return mock->SoftBusMutexLockHook(mutex);
 }
@@ -95,7 +95,7 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 {
     auto mock = OHOS::SoftBus::BleConnectionTestMock::GetMock();
     if (mock == nullptr) {
-        return pthread_mutex_unlock((pthread_mutex_t *)mutex) == 0 ? SOFTBUS_OK : SOFTBUS_ERR;
+        return pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(mutex)) == 0 ? SOFTBUS_OK : SOFTBUS_ERR;
     }
     return mock->SoftBusMutexUnlockHook(mutex);
 }
@@ -250,7 +250,7 @@ bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32
         if (item == nullptr || !cJSON_IsNumber(item)) {
             return false;
         }
-        *target = (int32_t)cJSON_GetNumberValue(item);
+        *target = static_cast<int32_t>(cJSON_GetNumberValue(item));
         return true;
     }
     return mock->GetJsonObjectNumberItemHook(json, string, target);
@@ -264,7 +264,7 @@ bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string,
         if (item == nullptr || !cJSON_IsNumber(item)) {
             return false;
         }
-        *target = (int32_t)cJSON_GetNumberValue(item);
+        *target = static_cast<int32_t>(cJSON_GetNumberValue(item));
         return true;
     }
     return mock->GetJsonObjectSignedNumberItemHook(json, string, target);
@@ -278,7 +278,7 @@ bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uin
         if (item == nullptr || !cJSON_IsNumber(item)) {
             return false;
         }
-        *target = (uint16_t)cJSON_GetNumberValue(item);
+        *target = static_cast<uint16_t>(cJSON_GetNumberValue(item));
         return true;
     }
     return mock->GetJsonObjectNumber16ItemHook(json, string, target);
