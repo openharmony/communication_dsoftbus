@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,6 @@ namespace OHOS {
 #define CHANNEL_ID 5
 #define CHANNEL_ID_ERR 0
 #define SESSION_ID 2
-const char *BUNDLE_NAME = "testbundlename";
 
 class BrProxyServerManagerExtTest : public testing::Test {
 public:
@@ -85,7 +84,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest000, TestSize.L
 {
     NiceMock<BrProxyExtInterfaceMock> brProxyExtMock;
     EXPECT_CALL(brProxyExtMock, CreateSoftBusList).WillRepeatedly(Return(nullptr));
-    bool ret1 = IsBrProxy(BUNDLE_NAME);
+    bool ret1 = IsBrProxy("testbundlename");
     EXPECT_EQ(false, ret1);
     int32_t ret = GetServerListCount(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
