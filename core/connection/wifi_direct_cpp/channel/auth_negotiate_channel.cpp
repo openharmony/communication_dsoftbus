@@ -410,10 +410,10 @@ void AuthNegotiateChannel::AddAuthConnection(const LnnEventBasicInfo *info)
     LnnNotifyRawEnhanceP2pEvent *lnnNotifyRawEnhanceP2pEvent =
         reinterpret_cast<LnnNotifyRawEnhanceP2pEvent *>(const_cast<LnnEventBasicInfo *>(info));
     std::string remoteUuid = lnnNotifyRawEnhanceP2pEvent->uuid;
-    std::thread(AuthNegotiateChannel::RefreshAuthConnection, remoteUuid).detach();
+    std::thread(AuthNegotiateChannel::RefreshAuthConnection, remoteUuid, false).detach();
 }
 
-void AuthNegotiateChannel::RefreshAuthConnection(std::string remoteUuid)
+void AuthNegotiateChannel::RefreshAuthConnection(std::string remoteUuid, bool isIpv6)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "start refresh auth connection, remoteUuid=%{public}s",
         WifiDirectAnonymizeDeviceId(remoteUuid).c_str());
@@ -421,10 +421,10 @@ void AuthNegotiateChannel::RefreshAuthConnection(std::string remoteUuid)
     param.type = AUTH_LINK_TYPE_ENHANCED_P2P;
     param.remoteUuid = remoteUuid;
     bool res = LinkManager::GetInstance().ProcessIfPresent(
-        InnerLink::LinkType::HML, remoteUuid, [&param, &remoteUuid](InnerLink &link) {
+        InnerLink::LinkType::HML, remoteUuid, [&param, &remoteUuid, &isIpv6](InnerLink &link) {
             if (link.GetRemoteDeviceId() == remoteUuid) {
                 param.module = link.GetListenerModule();
-                param.remoteIp = link.GetRemoteIpv4();
+                param.remoteIp = isIpv6 ? link.GetRemoteIpv6() : link.GetRemoteIpv4();
                 param.remotePort = link.GetRemotePort();
                 return true;
             }
@@ -551,5 +551,15 @@ void AuthNegotiateChannel::SyncDBACData(const std::vector<uint8_t> &data)
 {
     CONN_CHECK_AND_RETURN_LOGE(syncDBACDataHook_ != nullptr, CONN_WIFI_DIRECT, "syncDBACData not support");
     syncDBACDataHook_(data);
+}
+
+void AuthNegotiateChannel::SetIpv6(bool isIpv6)
+{
+    isIpv6_ = isIpv6;
+}
+
+bool AuthNegotiateChannel::IsIpv6() const
+{
+    return isIpv6_;
 }
 } // namespace OHOS::SoftBus
