@@ -20,6 +20,7 @@
 #include "client_trans_file_listener.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_stream.h"
+#include "client_trans_udp_stream_interface.h"
 #include "g_enhance_sdk_func.h"
 #include "nstackx_dfile.h"
 #include "securec.h"
@@ -515,6 +516,8 @@ static int32_t CloseUdpChannelProc(UdpChannel *channel, int32_t channelId, Shutd
             TRANS_LOGE(TRANS_SDK, "del business channel failed. channelId=%{public}d", channelId);
             return ret;
         }
+    } else if (channel != NULL && reason == SHUTDOWN_REASON_UNEXPECTED) {
+        DeleteVtpStreamAdaptor(channelId);
     }
 
     if (reason != SHUTDOWN_REASON_LOCAL) {

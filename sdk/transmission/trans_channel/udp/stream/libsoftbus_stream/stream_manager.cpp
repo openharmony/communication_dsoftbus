@@ -115,6 +115,17 @@ bool StreamManager::DestroyStreamDataChannel()
     return false;
 }
 
+bool StreamManager::ClearSocketMap(void)
+{
+    auto it = socketMap_.find(curProtocol_);
+    if (it != socketMap_.end()) {
+        socketMap_.erase(it);
+        TRANS_LOGI(TRANS_STREAM, "curProtocol=%{public}d  success", curProtocol_);
+        return true;
+    }
+    return false;
+}
+
 bool StreamManager::Send(std::unique_ptr<IStream> data)
 {
     auto it = socketMap_.find(curProtocol_);

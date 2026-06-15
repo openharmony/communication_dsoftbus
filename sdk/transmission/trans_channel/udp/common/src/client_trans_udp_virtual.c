@@ -174,10 +174,25 @@ int32_t ClientTransCloseReserveUdpChannel(
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t TransSetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t addrLen)
+{
+    (void)channelId;
+    (void)*addr;
+    (void)addrLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t TransGetUdpChannelExtraInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t *addrLen)
 {
     (void)channelId;
     (void)*addr;
     (void)*addrLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t GetChannelTypeByChannelId(int32_t channelId, int32_t *channelType)
+{
+    (void)channelId;
+    (void)channelType;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

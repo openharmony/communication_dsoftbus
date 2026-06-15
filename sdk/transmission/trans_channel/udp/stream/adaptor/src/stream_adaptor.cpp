@@ -92,9 +92,9 @@ void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
     isRawStreamEncrypt_ = param->isRawStreamEncrypt;
 }
 
-void StreamAdaptor::ReleaseAdaptor()
+void StreamAdaptor::ReleaseAdaptor(bool isDestroyStreamSocket)
 {
-    streamManager_->DestroyStreamDataChannel();
+    isDestroyStreamSocket ? streamManager_->DestroyStreamDataChannel() : streamManager_->ClearSocketMap();
     streamManager_->DestroyEnvironment(pkgName_);
     channelId_ = -1;
     if (sessionKey_.first != nullptr) {

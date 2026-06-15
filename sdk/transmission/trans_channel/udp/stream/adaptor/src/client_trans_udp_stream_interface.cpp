@@ -285,3 +285,22 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 
     return SOFTBUS_OK;
 }
+
+void DeleteVtpStreamAdaptor(int32_t channelId)
+{
+    TRANS_LOGI(TRANS_STREAM, "delete stream adaptor channelId=%{public}d", channelId);
+    std::shared_ptr<StreamAdaptor> adaptor = nullptr;
+
+    {
+        std::lock_guard<std::mutex> lock(g_mutex);
+        auto it = g_adaptorMap.find(channelId);
+        if (it == g_adaptorMap.end()) {
+            TRANS_LOGI(TRANS_STREAM, "adaptor not existed!");
+            return;
+        }
+        adaptor = it->second;
+        g_adaptorMap.erase(it);
+    }
+
+    adaptor->ReleaseAdaptor(false);
+}
