@@ -314,6 +314,7 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",

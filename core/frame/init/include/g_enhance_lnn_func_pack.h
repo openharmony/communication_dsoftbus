@@ -235,6 +235,7 @@ int32_t AuthMetaGetConnectionTypeByMetaNodeIdPacked(const char *metaNodeId, Netw
 bool IsSupportMcuFeaturePacked(void);
 void LnnSendDeviceStateToMcuPacked(void *para);
 int32_t LnnInitMcuPacked(void);
+int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid);
 
 #ifdef __cplusplus
 }

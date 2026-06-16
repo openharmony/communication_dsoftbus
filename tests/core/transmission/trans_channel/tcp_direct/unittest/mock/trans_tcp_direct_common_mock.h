@@ -33,6 +33,7 @@ public:
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len) = 0;
+    virtual int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid) = 0;
 };
 
 class TransTcpDirectCommonInterfaceMock : public TransTcpDirectCommonInterface {
@@ -44,6 +45,7 @@ public:
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t authId, char *uuid, uint16_t size));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
     MOCK_METHOD3(AuthMetaGetLocalIpByMetaNodeIdPacked, int32_t (const char *metaNodeId, char *localIp, int32_t len));
+    MOCK_METHOD2(AuthMetaGetPidByAuthIdPacked, int32_t (int64_t authId, int32_t *pid));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_COMMON_MOCK_H

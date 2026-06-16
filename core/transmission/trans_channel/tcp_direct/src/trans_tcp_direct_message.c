@@ -25,6 +25,7 @@
 #include "auth_uk_manager.h"
 #include "bus_center_manager.h"
 #include "data_bus_native.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
@@ -1052,35 +1053,36 @@ static int32_t HandleDataBusReply(
     return SOFTBUS_OK;
 }
 
-static bool MetaAuthCheck(const char *sessionName)
-{
-    int32_t uid = 0;
-    int32_t pid = 0;
-    if (TransTdcGetUidAndPid(sessionName, &uid, &pid) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get uid and pid failed.");
-        return false;
-    }
-    return uid == COLLABORATION_FWK_UID && (strcmp(sessionName, COLLABORATION_FWK_SESSION_NAME) == 0);
-}
-
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, flags=%{public}d, seq=%{public}" PRIu64, channelId, flags, seq);
     SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request, flags);
     TRANS_CHECK_AND_RETURN_RET_LOGE(conn != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "conn is null");
-    if ((flags & FLAG_EXTERNAL_DEVICE) != 0) {
-        char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-        int32_t ret = TransTdcGetPkgName(conn->appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get pkg name fail.");
-        if (!TransCheckMetaTypeQueryPermission(pkgName, conn->appInfo.metaType)) {
-            TRANS_LOGE(TRANS_CTRL, "not supporting access");
+    if (((flags & FLAG_EXTERNAL_DEVICE) != 0) || ((flags & FLAG_AUTH_META) != 0)) {
+        AuthHandle authHandle = { 0 };
+        int32_t ret = GetAuthHandleByChanId(channelId, &authHandle);
+        if (ret != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
+            TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
+            return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+        }
+        int32_t pid = 0;
+        ret = AuthMetaGetPidByAuthIdPacked(authHandle.authId, &pid);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_BYTES, "get pid by auth id fail, channelId=%{public}d", channelId);
+            return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+        }
+        int32_t localUid = 0;
+        int32_t localPid = 0;
+        if (TransTdcGetUidAndPid(
+            conn->appInfo.myData.sessionName, &localUid, &localPid) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_BYTES, "get pid add uid by session name fail, channelId=%{public}d", channelId);
+            return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
+        }
+        if (pid != localPid) {
+            TRANS_LOGE(TRANS_CTRL, "authMeta pid no match, authMeta pid=%{public}d, pid=%{public}d.",
+                pid, localPid);
             return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
         }
-    }
-    if ((flags & FLAG_EXTERNAL_DEVICE) == 0 && (flags & FLAG_AUTH_META) != 0 &&
-        !MetaAuthCheck(conn->appInfo.myData.sessionName)) {
-        TRANS_LOGE(TRANS_CTRL, "not support meta auth.");
-        return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     TransEventExtra extra;
     char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };

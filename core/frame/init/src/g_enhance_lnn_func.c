@@ -271,6 +271,7 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.isSupportMcuFeature = dlsym(soHandle, "IsSupportMcuFeature");
     g_lnnEnhanceFuncList.lnnSendDeviceStateToMcu = dlsym(soHandle, "LnnSendDeviceStateToMcu");
     g_lnnEnhanceFuncList.lnnInitMcu = dlsym(soHandle, "LnnInitMcu");
+    g_lnnEnhanceFuncList.authMetaGetPidByAuthId = dlsym(soHandle, "AuthMetaGetPidByAuthId");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

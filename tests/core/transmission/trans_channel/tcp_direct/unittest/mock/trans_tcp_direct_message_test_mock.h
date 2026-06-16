@@ -96,6 +96,7 @@ public:
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual bool GetCapabilityBit(uint32_t value, uint32_t offset) = 0;
     virtual int64_t AuthGetIdByIp(const char *ip) = 0;
+    virtual int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -161,6 +162,7 @@ public:
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
     MOCK_METHOD2(GetCapabilityBit, bool (uint32_t value, uint32_t offset));
     MOCK_METHOD1(AuthGetIdByIp, int64_t (const char *ip));
+    MOCK_METHOD2(AuthMetaGetPidByAuthIdPacked, int32_t (int64_t authId, int32_t *pid));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H

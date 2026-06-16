@@ -190,5 +190,15 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetTransUdpNegoStaticInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
+
+int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid)
+{
+    return GetTransUdpNegoStaticInterface()->AuthMetaGetPidByAuthIdPacked(authId, pid);
+}
+
+bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
+{
+    return GetTransUdpNegoStaticInterface()->TransGetAuthTypeByNetWorkId(peerNetWorkId);
+}
 }
 }
