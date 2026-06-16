@@ -247,7 +247,7 @@ static void OnServiceStoppedAdapter(const char *name)
         argv[ARGS_SIZE_ZERO] = closeReason;
         NapiCallFunction(server->env_, server->serverStopRef_, argv, ARGS_SIZE_ONE);
     };
-    
+
     (void)DoInJsMainThread(server->env_, std::move(func));
     NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
 }
