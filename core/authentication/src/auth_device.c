@@ -338,7 +338,7 @@ void AuthDeviceNotTrust(const char *peerUdid)
     }
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
-    LnnDeleteSpecificTrustedDevInfo(peerUdid, JudgeDeviceTypeAndGetOsAccountIds());
+    LnnDeleteSpecificTrustedDevInfo(peerUdid);
     LnnHbOnTrustedRelationReduced();
     AuthRemoveDeviceKeyByUdidPacked(peerUdid);
     if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
@@ -389,7 +389,7 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
         LnnDeleteLinkFinderInfo(peerUdid);
     }
     if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {
-        LnnDeleteSpecificTrustedDevInfo(peerUdid, localUserId);
+        LnnDeleteSpecificTrustedDevInfo(peerUdid);
     }
     if (g_verifyListener.onDeviceNotTrusted == NULL) {
         AUTH_LOGW(AUTH_HICHAIN, "onDeviceNotTrusted not set");

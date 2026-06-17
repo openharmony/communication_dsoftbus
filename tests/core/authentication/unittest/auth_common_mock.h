@@ -69,6 +69,7 @@ public:
     virtual void LnnDeleteLinkFinderInfo(const char *peerUdid) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
+    virtual int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen) = 0;
     virtual int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId) = 0;
     virtual int32_t UpdateLaneBusinessInfoItem(uint64_t oldLaneId, uint64_t newLaneId) = 0;
     virtual int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid) = 0;
@@ -111,6 +112,7 @@ public:
     MOCK_METHOD1(LnnDeleteLinkFinderInfo, void(const char *));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
+    MOCK_METHOD2(GetAllForegroundAccountIds, int32_t(int32_t **, uint32_t *));
     MOCK_METHOD2(UpdateReqListLaneId, int32_t(uint64_t, uint64_t));
     MOCK_METHOD2(UpdateLaneBusinessInfoItem, int32_t(uint64_t, uint64_t));
     MOCK_METHOD3(UpdateLaneResourceLaneId, int32_t(uint64_t, uint64_t, const char *));

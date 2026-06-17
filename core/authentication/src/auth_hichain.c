@@ -280,6 +280,14 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
     (void)AuthSessionHandleAuthError(authSeq, authErrCode);
 }
 
+static void PackSourceUserId(cJSON *msg, int64_t authSeq)
+{
+    int32_t sourceUserId = AuthSessionGetSourceUserId(authSeq);
+    if (sourceUserId != 0 && !AddNumberToJsonObject(msg, "osAccountId", sourceUserId)) {
+        AUTH_LOGE(AUTH_HICHAIN, "pack sourceUserId fail");
+    }
+}
+
 static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
 {
     (void)reqParams;
@@ -323,7 +331,7 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
         cJSON_Delete(msg);
         return NULL;
     }
-
+    PackSourceUserId(msg, authSeq);
     char *msgStr = cJSON_PrintUnformatted(msg);
     if (msgStr == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "cJSON_PrintUnformatted fail");

@@ -14,6 +14,7 @@
  */
 
 #include "lnn_ohos_account_adapter.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #define ACCOUNT_ID 1
 
@@ -99,4 +100,18 @@ bool LnnIsOsAccountConstraint(void)
 
 void LnnUpdateConstraintMapForCurrentAccount(void)
 {
+}
+
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    if (userIds == nullptr || userIdsLen == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *userIdsLen = 1;
+    *userIds = static_cast<int32_t *>(SoftBusCalloc((*userIdsLen) * sizeof(int32_t)));
+    if (*userIds == nullptr) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (*userIds)[0] = ACCOUNT_ID;
+    return SOFTBUS_OK;
 }

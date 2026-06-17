@@ -49,6 +49,7 @@ public:
     virtual int32_t RegisterToDp(DeviceProfileChangeListener *deviceProfilePara) = 0;
     virtual int32_t GetUserKeyByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen) = 0;
     virtual int32_t CheckAclInfoIsAccesser(const AuthACLInfo *acl, bool *isAccesser) = 0;
+    virtual int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen) = 0;
     virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
@@ -73,6 +74,7 @@ public:
     MOCK_METHOD1(RegisterToDp, int32_t(DeviceProfileChangeListener *));
     MOCK_METHOD3(GetUserKeyByUkId, int32_t(int32_t, uint8_t *, uint32_t));
     MOCK_METHOD2(CheckAclInfoIsAccesser, int32_t(const AuthACLInfo *, bool *));
+    MOCK_METHOD2(GetAllForegroundAccountIds, int32_t(int32_t **, uint32_t *));
     MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));

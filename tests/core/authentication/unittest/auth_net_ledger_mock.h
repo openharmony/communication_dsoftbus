@@ -38,7 +38,7 @@ public:
     virtual ~AuthNetLedgerInterface() {};
 
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
-    virtual int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId) = 0;
+    virtual int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
     virtual int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
@@ -85,7 +85,7 @@ public:
     AuthNetLedgertInterfaceMock();
     ~AuthNetLedgertInterfaceMock() override;
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
-    MOCK_METHOD2(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *, int32_t));
+    MOCK_METHOD1(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *));
     MOCK_METHOD0(LnnGetLocalNodeInfo, const NodeInfo *());
     MOCK_METHOD2(LnnGetAuthPort, int32_t(const NodeInfo *, int32_t));
     MOCK_METHOD2(LnnGetSessionPort, int32_t(const NodeInfo *, int32_t));

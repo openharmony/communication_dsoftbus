@@ -2312,3 +2312,20 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
     }
     return info.userId;
 }
+
+int32_t AuthSessionGetSourceUserId(int64_t authSeq)
+{
+    int32_t sourceUserId = 0;
+    AuthSessionInfo info = { 0 };
+    if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
+        return DEFAULT_USERID;
+    }
+    if (info.credNegoState == CRED_NEGO_STATE_COMPATIBLE) {
+        return DEFAULT_USERID;
+    }
+    if (GetJsonObjectNumberItem(info.credTypeInfo, SOURCE_USERID, &sourceUserId)) {
+        return sourceUserId;
+    }
+    return DEFAULT_USERID;
+}

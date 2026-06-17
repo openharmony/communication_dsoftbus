@@ -157,7 +157,7 @@ public:
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId) = 0;
     virtual int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **genCertParaNode) = 0;
-    virtual int32_t GetAllForegroundAccountIds(int32_t **userIds, int32_t *userIdsLen) = 0;
+    virtual int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen) = 0;
     virtual char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
         const char *udidHash) = 0;
     virtual char *cJSON_PrintUnformatted(const cJSON *item) = 0;
@@ -276,7 +276,7 @@ public:
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD3(IsTrustedDeviceFromAccess, bool(const char *, const char *, int32_t));
     MOCK_METHOD2(FindAndWaitAuthGenCertParaNodeById, int32_t(int32_t, AuthGenCertNode **));
-    MOCK_METHOD2(GetAllForegroundAccountIds, int32_t(int32_t **userIds, int32_t *userIdsLen));
+    MOCK_METHOD2(GetAllForegroundAccountIds, int32_t(int32_t **, uint32_t *));
     MOCK_METHOD4(IdServiceGetCredIdByCredType, char *(int32_t localUserId, int32_t peerUserId, int32_t credType,
         const char *udidHash));
     MOCK_METHOD1(cJSON_PrintUnformatted, char *(const cJSON *item));

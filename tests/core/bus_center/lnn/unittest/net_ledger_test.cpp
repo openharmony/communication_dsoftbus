@@ -355,11 +355,10 @@ HWTEST_F(NetLedgerTest, LNN_IS_POTENTIAL_HOME_GROUP_Test_001, TestSize.Level1)
 HWTEST_F(NetLedgerTest, IS_DEVICE_TRUSTED_Test_001, TestSize.Level1)
 {
     bool ret;
-    int32_t userId = 12345;
     const char udid[] = "";
-    ret = IsDeviceTrusted(udid, userId);
+    ret = IsDeviceTrusted(udid);
     EXPECT_FALSE(ret);
-    ret = IsDeviceTrusted(NODE1_UDID, userId);
+    ret = IsDeviceTrusted(NODE1_UDID);
     EXPECT_FALSE(ret);
 }
 
@@ -375,8 +374,7 @@ HWTEST_F(NetLedgerTest, GET_ALL_DEV_NUM_Test_001, TestSize.Level1)
 {
     uint32_t num = 0;
     int32_t ret;
-    int32_t userId = 123;
-    ret = GetAllDevNums(&num, userId);
+    ret = GetAllDevNums(&num);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -391,9 +389,8 @@ HWTEST_F(NetLedgerTest, GET_ALL_DEV_NUM_Test_001, TestSize.Level1)
 HWTEST_F(NetLedgerTest, LNN_DELETE_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.Level1)
 {
     const char *udid = "672392378745";
-    int32_t localUserId = 123;
     int32_t ret;
-    ret = LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+    ret = LnnDeleteSpecificTrustedDevInfo(udid);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

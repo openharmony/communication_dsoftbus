@@ -221,6 +221,7 @@
 #define CRED_NEGO_INFO_MAX_LEN 512
 #define EXTERNAL_USER_IDS_MAX_LEN 512
 #define INVALID_USER_ID (-1)
+#define DEFAULT_MAIN_USERID_NUMS 1
 
 typedef bool (*CredNegoFunc)(AuthSessionInfo *info, const char *localUdidHash, const char *peerUdidHash,
     int64_t authSeq);
@@ -982,28 +983,38 @@ static cJSON *QueryAllCredTypePerPeerUserId(cJSON *peerUserIdsJson, CredTypeQuer
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return NULL;
     }
-    queryParam->localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     cJSON *credTypesJson = cJSON_CreateArray();
     if (credTypesJson == NULL) {
         AUTH_LOGE(AUTH_FSM, "create credTypesJson fail");
         return NULL;
     }
+    int32_t *userIds = NULL;
+    uint32_t userIdsLen = 0;
+    if (GetAllForegroundAccountIds(&userIds, &userIdsLen) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get all foreground userId fail");
+        cJSON_Delete(credTypesJson);
+        return NULL;
+    }
     bool ret = true;
     int32_t peerUserIdsJsonLen = GetArrayItemNum(peerUserIdsJson);
-    for (int32_t peerIdx = 0; peerIdx < peerUserIdsJsonLen; peerIdx++) {
-        cJSON *peerUserIdJson = GetArrayItemFromArray(peerUserIdsJson, peerIdx);
-        if (peerUserIdJson == NULL) {
-            AUTH_LOGE(AUTH_FSM, "get userIdJson from peerUserIdsJson fail");
-            ret = false;
-            break;
-        }
-        queryParam->peerUserId = (int32_t)cJSON_GetNumberValue(peerUserIdJson);
-        if (!QueryAllCredTypeByQueryParam(queryParam, credTypesJson)) {
-            AUTH_LOGE(AUTH_FSM, "query credType for single peerUserId fail");
-            ret = false;
-            break;
+    for (uint32_t idx = 0; idx < userIdsLen; idx++) {
+        queryParam->localUserId = userIds[idx];
+        for (int32_t peerIdx = 0; peerIdx < peerUserIdsJsonLen; peerIdx++) {
+            cJSON *peerUserIdJson = GetArrayItemFromArray(peerUserIdsJson, peerIdx);
+            if (peerUserIdJson == NULL) {
+                AUTH_LOGE(AUTH_FSM, "get userIdJson from peerUserIdsJson fail");
+                ret = false;
+                break;
+            }
+            queryParam->peerUserId = (int32_t)cJSON_GetNumberValue(peerUserIdJson);
+            if (!QueryAllCredTypeByQueryParam(queryParam, credTypesJson)) {
+                AUTH_LOGE(AUTH_FSM, "query credType for single peerUserId fail");
+                ret = false;
+                break;
+            }
         }
     }
+    SoftBusFree(userIds);
     if (!ret) {
         AUTH_LOGE(AUTH_FSM, "get credTypeList by peerUserId fail");
         cJSON_Delete(credTypesJson);
@@ -1648,6 +1659,63 @@ static bool PackCredNegoState(JsonObj *json, AuthSessionInfo *info, int64_t auth
     return ret;
 }
 
+static char *GetAllUserIdsJsonMsg(int32_t *userIds, uint32_t userIdsLen)
+{
+    cJSON *userIdsJson = cJSON_CreateArray();
+    if (userIdsJson == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create userIdsJson fail");
+        return NULL;
+    }
+    for (int32_t i = 0; i < userIdsLen; i++) {
+        cJSON *numItem = cJSON_CreateNumber(userIds[i]);
+        if (numItem == NULL) {
+            AUTH_LOGE(AUTH_FSM, "create number item fail");
+            cJSON_Delete(userIdsJson);
+            return NULL;
+        }
+        cJSON_AddItemToArray(userIdsJson, numItem);
+    }
+    char *msg = cJSON_PrintUnformatted(userIdsJson);
+    cJSON_Delete(userIdsJson);
+    return msg;
+}
+
+static bool PackCredNegoAllUserIds(JsonObj *json)
+{
+    int32_t *userIds = NULL;
+    uint32_t userIdsLen = 0;
+    if (GetAllForegroundAccountIds(&userIds, &userIdsLen) != SOFTBUS_OK) {
+        AUTH_LOGW(AUTH_FSM, "get all foreground userId fail, no need pack external userIds");
+        return true;
+    }
+    if (userIdsLen == DEFAULT_MAIN_USERID_NUMS) {
+        AUTH_LOGI(AUTH_FSM, "no need pack external userIds");
+        SoftBusFree(userIds);
+        return true;
+    }
+    char *msg = GetAllUserIdsJsonMsg(userIds, userIdsLen);
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_FSM, "print userIdsJson fail");
+        SoftBusFree(userIds);
+        return false;
+    }
+    SoftBusFree(userIds);
+    size_t msgLen = strlen(msg) + 1;
+    if (msgLen > EXTERNAL_USER_IDS_MAX_LEN) {
+        AUTH_LOGE(AUTH_FSM, "userIds msg length exceed max");
+        cJSON_free(msg);
+        return false;
+    }
+    if (!JSON_AddInt32ToObject(json, EXTERNAL_USER_IDS_LEN, msgLen) ||
+        !JSON_AddStringToObject(json, EXTERNAL_USER_IDS, msg)) {
+        AUTH_LOGE(AUTH_FSM, "add userIds to json fail");
+        cJSON_free(msg);
+        return false;
+    }
+    cJSON_free(msg);
+    return true;
+}
+
 static void PackCredNegoInfo(JsonObj *json, AuthSessionInfo *info, int64_t authSeq)
 {
 #ifdef DISABLE_IDENTITY_SERVICE
@@ -1656,7 +1724,7 @@ static void PackCredNegoInfo(JsonObj *json, AuthSessionInfo *info, int64_t authS
     bool ret = true;
     switch (info->credNegoState) {
         case CRED_NEGO_STATE_ASK:
-            ret = PackCredNegoState(json, info, authSeq);
+            ret = PackCredNegoState(json, info, authSeq) && PackCredNegoAllUserIds(json);
             break;
         case CRED_NEGO_STATE_REPLY:
             __attribute__((fallthrough));

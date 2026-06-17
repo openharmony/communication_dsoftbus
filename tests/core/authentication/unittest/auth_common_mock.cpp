@@ -158,6 +158,11 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
     return GetCommonInterface()->JudgeDeviceTypeAndGetOsAccountIds();
 }
 
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    return GetCommonInterface()->GetAllForegroundAccountIds(userIds, userIdsLen);
+}
+
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId)
 {
     return GetCommonInterface()->UpdateReqListLaneId(oldLaneId, newLaneId);

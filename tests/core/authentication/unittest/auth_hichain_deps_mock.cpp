@@ -20,6 +20,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 constexpr int64_t TEST_AUTH_SEQ = 1;
+static constexpr int32_t MOCK_SOURCE_USER_ID = 100;
 void *g_hichainMockInterface;
 
 AuthHichainInterfaceMock::AuthHichainInterfaceMock()
@@ -304,6 +305,28 @@ char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int3
 void CredTypesSort(int32_t *credTypes, int32_t credTypesLen)
 {
     return GetAuthHichainMockInterface()->CredTypesSort(credTypes, credTypesLen);
+}
+
+int32_t AuthSessionGetSourceUserId(int64_t authSeq)
+{
+    (void)authSeq;
+    return MOCK_SOURCE_USER_ID;
+}
+
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    if (userIds == nullptr || userIdsLen == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *userIds = nullptr;
+    *userIdsLen = 0;
+    return SOFTBUS_OK;
+}
+
+bool IsForegroundUserId(int32_t userId)
+{
+    (void)userId;
+    return true;
 }
 } // extern "C"
 } // namespace OHOS
