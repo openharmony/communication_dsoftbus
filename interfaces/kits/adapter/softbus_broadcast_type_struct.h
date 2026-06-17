@@ -511,6 +511,7 @@ typedef struct {
     int32_t listenerId;
 } LpScanParam;
 
+
 #ifdef __cplusplus
 }
 #endif

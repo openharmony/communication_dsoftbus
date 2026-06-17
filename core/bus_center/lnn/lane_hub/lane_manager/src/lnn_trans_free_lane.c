@@ -25,7 +25,16 @@
 
 #define DELAY_DESTROY_LANE_TIME 5000
 
-void HandelNotifyFreeLaneResult(SoftBusMessage *msg)
+typedef enum {
+    NOTIFY_TYPE_NORMAL,
+    NOTIFY_TYPE_FREE_BEFORE_ALLOC_SUCC,
+    NOTIFY_TYPE_ALLOC_SUCC_AFTER_FREE,
+    NOTIFY_TYPE_ALLOC_SUCC_AFTER_CANCEL,
+    NOTIFY_TYPE_UNUSED,
+    NOTIFY_TYPE_UNKNOWN,
+} NotifyFreeType;
+
+void HandleNotifyFreeLaneResult(SoftBusMessage *msg)
 {
     if (msg == NULL) {
         LNN_LOGE(LNN_LANE, "invalid parameter");
@@ -72,13 +81,16 @@ static void ReportLaneEventWithFreeLinkInfo(uint32_t laneReqId, int32_t errCode)
 
 static void NotifyFreeLaneCallback(const TransReqInfo *reqInfo, int32_t errCode)
 {
-    if (reqInfo->isWithQos && reqInfo->notifyFree && !reqInfo->hasNotifiedFree) {
-        UpdateFreeLaneStatus(reqInfo->laneReqId);
-        if (errCode == SOFTBUS_OK && reqInfo->listener.onLaneFreeSuccess != NULL) {
-            reqInfo->listener.onLaneFreeSuccess(reqInfo->laneReqId);
-        } else if (errCode != SOFTBUS_OK && reqInfo->listener.onLaneFreeFail != NULL) {
-            reqInfo->listener.onLaneFreeFail(reqInfo->laneReqId, errCode);
-        }
+    if (!reqInfo->isWithQos || !reqInfo->notifyFree || reqInfo->hasNotifiedFree) {
+        LNN_LOGW(LNN_LANE, "not need notify, isWithQos=%{public}d, notifyFree=%{public}d, hasNotifiedFree=%{public}d",
+            reqInfo->isWithQos, reqInfo->notifyFree, reqInfo->hasNotifiedFree);
+        return;
+    }
+    UpdateFreeLaneStatus(reqInfo->laneReqId);
+    if (errCode == SOFTBUS_OK && reqInfo->listener.onLaneFreeSuccess != NULL) {
+        reqInfo->listener.onLaneFreeSuccess(reqInfo->laneReqId);
+    } else if (errCode != SOFTBUS_OK && reqInfo->listener.onLaneFreeFail != NULL) {
+        reqInfo->listener.onLaneFreeFail(reqInfo->laneReqId, errCode);
     }
 }
 

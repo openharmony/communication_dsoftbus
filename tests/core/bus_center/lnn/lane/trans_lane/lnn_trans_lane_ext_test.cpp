@@ -79,13 +79,13 @@ static void OnLaneFreeFail(uint32_t laneHandle, int32_t errCode)
 
 /*
  * @tc.name: LNN_TRANS_LANE_EXT_001
- * @tc.desc: HandelNotifyFreeLaneResult
+ * @tc.desc: HandleNotifyFreeLaneResult
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(LNNTransLaneExtTest, LNN_TRANS_LANE_EXT_001, TestSize.Level1)
 {
-    EXPECT_NO_FATAL_FAILURE(HandelNotifyFreeLaneResult(nullptr));
+    EXPECT_NO_FATAL_FAILURE(HandleNotifyFreeLaneResult(nullptr));
     EXPECT_NO_FATAL_FAILURE(ReportLaneEventWithFreeLinkInfo(REQ_ID, SOFTBUS_INVALID_PARAM));
 }
 

@@ -23,6 +23,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/bus_center/ipc/standard/src/lnn_bus_center_ipc.cpp",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_ranging_manager_virtual.c",
     "$dsoftbus_root_path/core/frame/common/src/softbus_ddos.c",
     "disc_client_on_device_found_test.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
