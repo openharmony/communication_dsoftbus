@@ -47,6 +47,7 @@ ohos_unittest("TransLaneManagerTest") {
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/manager/mock",
     "unittest/common/",
   ]
 
@@ -61,7 +62,7 @@ ohos_unittest("TransLaneManagerTest") {
   external_deps = [
     "c_utils:utils",
     "dsoftbus:softbus_client",
-    "googletest:gtest_main",
+    "googletest:gmock",
     "hilog:libhilog",
   ]
 
