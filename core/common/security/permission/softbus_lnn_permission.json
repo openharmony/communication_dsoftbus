@@ -166,13 +166,15 @@
   {
     "INTERFACE_NAME": "EX_OBJ_CMD_GET_PRE_LINK_PARAM",
     "PROCESS_NAME": [
-      "CollaborationFwk"
+      "CollaborationFwk",
+      "car_distributed_engine"
     ]
   },
   {
     "INTERFACE_NAME": "EX_OBJ_CMD_REG_PRE_LINK_PARAM_CHANGE",
     "PROCESS_NAME": [
-      "CollaborationFwk"
+      "CollaborationFwk",
+      "car_distributed_engine"
     ]
   },
   {
