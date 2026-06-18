@@ -38,9 +38,9 @@ void TransLinkListenerTest::SetUpTestCase(void) { }
 
 void TransLinkListenerTest::TearDownTestCase(void) { }
 
-/*
- * @tc.name: ClearIpInfo001
- * @tc.desc: ClearIpInfo test, void return
+/**
+ * @tc.name: ClearIpInfo Test
+ * @tc.desc: ClearIpInfo001, void return
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -96,9 +96,9 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOffline002, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(OnWifiDirectDeviceOffline(peerMac, peerIp, peerUuid, peerIp));
 }
 
-/*
- * @tc.name: OnWifiDirectRoleChange001
- * @tc.desc: OnWifiDirectRoleChange test, void return
+/**
+ * @tc.name: OnWifiDirectRoleChange Test
+ * @tc.desc: OnWifiDirectRoleChange, void return
  * @tc.type: FUNC
  * @tc.require:
  */

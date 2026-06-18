@@ -133,9 +133,9 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
     TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
 }
 
-/*
+/**
  * @tc.name: TransProxyPostSessionDataTest001
- * @tc.desc: test proxy post session data
+ * @tc.desc: test proxy post session data.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -155,9 +155,9 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPostSessionDataTest001, TestSize.Lev
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyPostSessionDataTest002
- * @tc.desc: test proxy post session data
+ * @tc.desc: test proxy post session data.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -177,10 +177,9 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPostSessionDataTest002, TestSize.Lev
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyPostSessionDataTest003
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND
- *           when given invalid Channid
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid Channid.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -222,9 +221,9 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPostSessionDataTest003, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
 }
 
-/*
+/**
  * @tc.name: TransOnNormalMsgReceivedTest001
- * @tc.desc: test proxy on normal msg received input wrong param
+ * @tc.desc: test proxy on normal msg received input wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -258,9 +257,9 @@ HWTEST_F(SoftbusProxySessionTest, TransOnNormalMsgReceivedTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransOnNormalMsgReceivedTest002
- * @tc.desc: test proxy on normal msg received, and test no sub packet proc with worng param
+ * @tc.desc: test proxy on normal msg received, and test no sub packet proc with worng param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -318,9 +317,9 @@ HWTEST_F(SoftbusProxySessionTest, TransOnNormalMsgReceivedTest002, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransOnNormalMsgReceivedTest003
- * @tc.desc: test proxy on normal msg received, and test no sub packet proc
+ * @tc.desc: test proxy on normal msg received, and test no sub packet proc.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -366,9 +365,9 @@ HWTEST_F(SoftbusProxySessionTest, TransOnNormalMsgReceivedTest003, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransOnNormalMsgReceivedTest004
- * @tc.desc: test proxy on normal msg received, and test no sub packet proc
+ * @tc.desc: test proxy on normal msg received, and test no sub packet proc.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -398,9 +397,9 @@ HWTEST_F(SoftbusProxySessionTest, TransOnNormalMsgReceivedTest004, TestSize.Leve
     }
 }
 
-/*
+/**
  * @tc.name: TransOnNormalMsgReceivedTest005
- * @tc.desc: test proxy on normal msg received, and test sub packet proc
+ * @tc.desc: test proxy on normal msg received, and test sub packet proc.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -432,10 +431,9 @@ HWTEST_F(SoftbusProxySessionTest, TransOnNormalMsgReceivedTest005, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: NotifyClientMsgReceivedTest001
- * @tc.desc: Should return SOFTBUS_OK
- *           when given valid paramters
+ * @tc.desc: Should return SOFTBUS_OK when given valid paramters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -450,7 +448,7 @@ HWTEST_F(SoftbusProxySessionTest, NotifyClientMsgReceivedTest001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: NotifyClientMsgReceivedTest002
  * @tc.desc: NotifyClientMsgReceived
  * @tc.type: FUNC
@@ -466,7 +464,7 @@ HWTEST_F(SoftbusProxySessionTest, NotifyClientMsgReceivedTest002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: TransProxyTransNormalMsgTest001
  * @tc.desc: TransProxyTransNormalMsg
  * @tc.type: FUNC
@@ -483,7 +481,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyTransNormalMsgTest001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
-/*
+/**
  * @tc.name: TransProxyTransDataSendMsgTest001
  * @tc.desc: TransProxyTransDataSendMsg
  * @tc.type: FUNC
@@ -497,7 +495,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest001, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: TransProxyTransDataSendMsgTest002
  * @tc.desc: TransProxyTransDataSendMsg
  * @tc.type: FUNC
@@ -510,7 +508,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest002, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: TransProxyTransDataSendMsgTest003
  * @tc.desc: TransProxyTransDataSendMsg
  * @tc.type: FUNC
@@ -526,7 +524,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest003, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID);
 }
 
-/*
+/**
  * @tc.name: TransProxyTransDataSendMsgTest004
  * @tc.desc: TransProxyTransDataSendMsg
  * @tc.type: FUNC
@@ -543,7 +541,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest004, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
 }
 
-/*
+/**
  * @tc.name: TransProxyTransDataSendMsgTest005
  * @tc.desc: TransProxyTransDataSendMsg
  * @tc.type: FUNC
@@ -560,7 +558,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest005, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
 }
 
-/*
+/**
  * @tc.name: TransProxyPackAppNormalMsgTest001
  * @tc.desc: TransProxyPackAppNormalMsg
  * @tc.type: FUNC
@@ -574,7 +572,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPackAppNormalMsgTest001, TestSize.Le
     EXPECT_EQ(ret, nullptr);
 }
 
-/*
+/**
  * @tc.name: TransProxyPackAppNormalMsgTest002
  * @tc.desc: TransProxyPackAppNormalMsg
  * @tc.type: FUNC
@@ -589,7 +587,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPackAppNormalMsgTest002, TestSize.Le
     EXPECT_EQ(ret, nullptr);
 }
 
-/*
+/**
  * @tc.name: TransProxyPackAppNormalMsgTest003
  * @tc.desc: TransProxyPackAppNormalMsg
  * @tc.type: FUNC

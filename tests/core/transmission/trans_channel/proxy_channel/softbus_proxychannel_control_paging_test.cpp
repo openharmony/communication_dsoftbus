@@ -1053,8 +1053,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyKeepaliveTest004, TestS
 
 /*
  * @tc.name: TransProxyKeepaliveTest005
- * @tc.desc: test TransProxyKeepalive APP_TYPE_NORMAL encrypt
- *           PackMessage fail
+ * @tc.desc: test TransProxyKeepalive APP_TYPE_NORMAL encrypt PackMessage fail
  * @tc.type: FUNC
  * @tc.require:
  */
