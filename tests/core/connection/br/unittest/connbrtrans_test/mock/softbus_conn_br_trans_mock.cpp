@@ -20,7 +20,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 void *g_connectionBrTransInterface = nullptr;
-static struct ConnSlideWindowController *g_flowController = nullptr;
 
 ConnectionBrTransMock::ConnectionBrTransMock()
 {
@@ -30,7 +29,6 @@ ConnectionBrTransMock::ConnectionBrTransMock()
 ConnectionBrTransMock::~ConnectionBrTransMock()
 {
     g_connectionBrTransInterface = nullptr;
-    g_flowController = nullptr;
 }
 
 static ConnectionBrTransInterface *GetConnectionBrTransInterface()
