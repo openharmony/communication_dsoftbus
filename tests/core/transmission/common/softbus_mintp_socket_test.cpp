@@ -173,7 +173,7 @@ HWTEST_F(SoftBusMintpSocketTest, GetMintpSockPortTest006, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AcceptDettpClientTest007
  * @tc.desc: test AcceptDettpClient function.
  * @tc.type: FUNC
@@ -191,7 +191,7 @@ HWTEST_F(SoftBusMintpSocketTest, AcceptDettpClientTest007, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AcceptClientWithProtocolTest008
  * @tc.desc: test AcceptClientWithProtocol function.
  * @tc.type: FUNC
@@ -209,7 +209,7 @@ HWTEST_F(SoftBusMintpSocketTest, AcceptMintpClientTest008, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AcceptDettpClientTest009
  * @tc.desc: test AcceptDettpClient function.
  * @tc.type: FUNC
@@ -238,7 +238,7 @@ HWTEST_F(SoftBusMintpSocketTest, AcceptDettpClientTest009, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetDetTpProtocolTest010
  * @tc.desc: test GetDetTpProtocol function.
  * @tc.type: FUNC
@@ -250,7 +250,7 @@ HWTEST_F(SoftBusMintpSocketTest, GetDetTpProtocolTest010, TestSize.Level1)
     EXPECT_NE(interface, nullptr);
 }
 
-/**
+/*
  * @tc.name: GetMintpProtocolTest011
  * @tc.desc: test GetMintpProtocol function.
  * @tc.type: FUNC
