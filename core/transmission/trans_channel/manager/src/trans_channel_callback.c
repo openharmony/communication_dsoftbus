@@ -184,7 +184,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     }
     SoftbusHitraceStop();
     TRANS_LOGW(TRANS_CTRL,
-        "trasn server on channel open failed. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
+        "trans server on channel open failed. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
         pkgName, channelId, channelType);
     return SOFTBUS_OK;
 }
@@ -246,7 +246,7 @@ static int32_t TransServerOnChannelBind(const char *pkgName, int32_t pid, int32_
     char *anonymizePkgName = NULL;
     Anonymize(pkgName, &anonymizePkgName);
     TRANS_LOGI(TRANS_CTRL,
-        "trasn server on channel bind. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
+        "trans server on channel bind. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
         AnonymizeWrapper(anonymizePkgName), channelId, channelType);
     AnonymizeFree(anonymizePkgName);
     return SOFTBUS_OK;
