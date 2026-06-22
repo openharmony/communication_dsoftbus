@@ -272,6 +272,10 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnSendDeviceStateToMcu = dlsym(soHandle, "LnnSendDeviceStateToMcu");
     g_lnnEnhanceFuncList.lnnInitMcu = dlsym(soHandle, "LnnInitMcu");
     g_lnnEnhanceFuncList.authMetaGetPidByAuthId = dlsym(soHandle, "AuthMetaGetPidByAuthId");
+    g_lnnEnhanceFuncList.lnnGetAllRemoteDevInfo = dlsym(soHandle, "LnnGetAllRemoteDevInfo");
+    g_lnnEnhanceFuncList.lnnSendAgentData = dlsym(soHandle, "LnnSendAgentData");
+    g_lnnEnhanceFuncList.postLnnCloudEvent = dlsym(soHandle, "PostLnnCloudEvent");
+    g_lnnEnhanceFuncList.removeLnnCloudEvent = dlsym(soHandle, "RemoveLnnCloudEvent");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

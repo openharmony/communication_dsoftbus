@@ -18,6 +18,7 @@
 #define INTERFACES_INNERKITS_FRAME_SERVER_PROXY_STANDARD_H_
 
 #include "if_softbus_server.h"
+#include "softbus_agent_communication.h"
 
 namespace OHOS {
 class SoftBusServerProxyFrame : public IRemoteProxy<ISoftBusServer> {
@@ -66,6 +67,11 @@ public:
     int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
     int32_t RegisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) override;
+    int32_t PostConversationData(const char *deviceId, const ConversationBusiness *info,
+        const char *data, uint32_t len) override;
+    int32_t RegisterConversationListener(const ConversationBusiness *info) override;
+    void UnregisterConversationListener(const ConversationBusiness *info) override;
+    int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums) override;
 private:
     static inline BrokerDelegator<SoftBusServerProxyFrame> delegator_;
     static sptr<IRemoteObject> clientCallbackStub_;

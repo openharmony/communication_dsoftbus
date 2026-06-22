@@ -20,13 +20,17 @@
 
 #include "accesstoken_kit.h"
 #include "access_control.h"
+#include "access_token.h"
 #include "ipc_skeleton.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_agent_communication.h"
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "syspara/parameters.h"
+#include "tokenid_kit.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
@@ -226,6 +230,10 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_SET_NODE_KEY_INFO] = &SoftBusServerStub::SetNodeKeyInfoInner;
     memberFuncMap_[SERVER_START_ACCOUNT_AUTH] = &SoftBusServerStub::StartAccountAuthInner;
     memberFuncMap_[SERVER_PROCESS_ACCOUNT_AUTH] = &SoftBusServerStub::ProcessAccountAuthInner;
+    memberFuncMap_[SERVER_GET_TRUSTED_DEVICES] = &SoftBusServerStub::GetTrustedDevicesInner;
+    memberFuncMap_[SERVER_POST_CONVERSATION_DATA] = &SoftBusServerStub::PostConversationDataInner;
+    memberFuncMap_[SERVER_REGISTER_CONVERSATION_LISTENER] = &SoftBusServerStub::RegisterConversationListenerInner;
+    memberFuncMap_[SERVER_UNREGISTER_CONVERSATION_LISTENER] = &SoftBusServerStub::UnregisterConversationListenerInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -2689,6 +2697,194 @@ int32_t SoftBusServerStub::RegisterPushHookInner(MessageParcel &data, MessagePar
     return SOFTBUS_OK;
 }
 
+static int32_t CheckBundleName(const char *bundleName)
+{
+    if (bundleName == nullptr || strnlen(bundleName, BUNDLE_NAME_MAX_LEN) >= BUNDLE_NAME_MAX_LEN) {
+        COMM_LOGE(COMM_SVC, "invalid bundleName");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.check.sysytem.app", true);
+    if (!support) {
+        return SOFTBUS_OK;
+    }
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(tokenId));
+    if (tokenType != OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        COMM_LOGE(COMM_SVC, "not hap call");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    OHOS::Security::AccessToken::HapTokenInfo hapTokenInfoRes;
+    int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, hapTokenInfoRes);
+    if (ret != OHOS::Security::AccessToken::RET_SUCCESS) {
+        COMM_LOGE(COMM_SVC, "get hapTokenInfo fail, ret=%{public}d", ret);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (strcmp(bundleName, hapTokenInfoRes.bundleName.c_str()) != 0) {
+        COMM_LOGE(COMM_SVC, "invalid bundleName");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GetTrustedDevicesInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_SVC, "enter.");
+    int32_t ret = BasicPermissionVerify(SERVER_GET_TRUSTED_DEVICES);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    DeviceNodeInfo *nodeInfo = nullptr;
+    int32_t infoNum = 0;
+    int32_t retReply = GetTrustedDevices(&nodeInfo, &infoNum);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        SoftBusFree(nodeInfo);
+        return SOFTBUS_IPC_ERR;
+    }
+    if (retReply != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get info failed, retReply=%{public}d", retReply);
+        SoftBusFree(nodeInfo);
+        return retReply;
+    }
+    if (infoNum < 0 || (infoNum > 0 && nodeInfo == nullptr)) {
+        SoftBusFree(nodeInfo);
+        COMM_LOGE(COMM_SVC, "node info is invalid");
+        return retReply;
+    }
+    if (!reply.WriteInt32(infoNum)) {
+        COMM_LOGE(COMM_SVC, "write infoNum failed!");
+        SoftBusFree(nodeInfo);
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
+    }
+    COMM_LOGI(COMM_SVC, "infoNum=%{public}d", infoNum);
+    if (infoNum > 0) {
+        if (!reply.WriteRawData(nodeInfo, static_cast<int32_t>(sizeof(DeviceNodeInfo) * infoNum))) {
+            COMM_LOGE(COMM_SVC, "write node info failed!");
+            retReply = SOFTBUS_IPC_ERR;
+        }
+        SoftBusFree(nodeInfo);
+    }
+    return retReply;
+}
+
+int32_t SoftBusServerStub::PostConversationDataInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_SVC, "enter.");
+    int32_t ret = BasicPermissionVerify(SERVER_POST_CONVERSATION_DATA);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    uint32_t len = 0;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "read len failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    char *msg = (char *)data.ReadRawData(len);
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_SVC, "read msg failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    const char *deviceId = data.ReadCString();
+    if (deviceId == nullptr || strnlen(deviceId, NETWORK_ID_BUF_LEN) >= NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_SVC, "read deviceId failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    const char *abilityName = data.ReadCString();
+    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
+        COMM_LOGE(COMM_SVC, "read abilityName failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    const char *bundleName = data.ReadCString();
+    ret = CheckBundleName(bundleName);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "verify bundleName failed ret=%{public}d", ret);
+        return ret;
+    }
+    ConversationBusiness info {};
+    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
+        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
+        COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+
+    int32_t retReply = PostConversationData(deviceId, &info, msg, len);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RegisterConversationListenerInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_SVC, "enter");
+    int32_t ret = BasicPermissionVerify(SERVER_REGISTER_CONVERSATION_LISTENER);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *abilityName = data.ReadCString();
+    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
+        COMM_LOGE(COMM_SVC, "read abilityName failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    const char *bundleName = data.ReadCString();
+    ret = CheckBundleName(bundleName);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "verify bundleName failed ret=%{public}d", ret);
+        return ret;
+    }
+    ConversationBusiness info;
+    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
+        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
+        COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    int32_t retReply = RegisterConversationListener(&info);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::UnregisterConversationListenerInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_SVC, "enter");
+    int32_t ret = BasicPermissionVerify(SERVER_UNREGISTER_CONVERSATION_LISTENER);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *abilityName = data.ReadCString();
+    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
+        COMM_LOGE(COMM_SVC, "read abilityName failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    const char *bundleName = data.ReadCString();
+    ret = CheckBundleName(bundleName);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "verify bundleName failed ret=%{public}d", ret);
+        return ret;
+    }
+    ConversationBusiness info {};
+    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
+        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
+        COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    UnregisterConversationListener(&info);
+    int32_t retReply = SOFTBUS_OK;
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static std::map<uint32_t, std::string> tagNameMap = {
     { SERVER_JOIN_LNN, SERVER_JOIN_LNN_NAME },
     { SERVER_LEAVE_LNN, SERVER_LEAVE_LNN_NAME },
@@ -2744,6 +2940,28 @@ int32_t SoftBusServerStub::PermissionVerify(uint32_t code)
     if (CheckLnnPermission(tagName, nativeTokenInfo.processName.c_str()) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "the process does not have permission, code=%{public}u, processName=%{public}s",
             code, nativeTokenInfo.processName.c_str());
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::BasicPermissionVerify(uint32_t code)
+{
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.check.sysytem.app", true);
+    if (support && !OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingFullTokenId)) {
+        COMM_LOGE(COMM_SVC, "permission denied, is not system app");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        tokenId, OHOS_PERMISSION_SEC_ACCESS_UDID) != Security::AccessToken::PERMISSION_GRANTED) {
+        COMM_LOGE(COMM_SVC, "permission %{public}s denied.", OHOS_PERMISSION_SEC_ACCESS_UDID);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        tokenId, OHOS_PERMISSION_DISTRIBUTED_DATASYNC) != Security::AccessToken::PERMISSION_GRANTED) {
+        COMM_LOGE(COMM_SVC, "permission %{public}s denied.", OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
         return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;

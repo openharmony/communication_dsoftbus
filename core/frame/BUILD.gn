@@ -436,6 +436,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "$dsoftbus_root_path/sdk:softbus_client",
+        "$dsoftbus_root_path/core/bus_center/lnn/decision_center/adapter/ability_adapter:ability_adapter",
       ]
       external_deps = [ "cJSON:cjson" ]
       external_deps += auth_server_ex_deps

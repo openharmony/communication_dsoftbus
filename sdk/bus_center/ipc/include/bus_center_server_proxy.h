@@ -20,6 +20,7 @@
 
 #include "ble_range.h"
 #include "data_level.h"
+#include "softbus_agent_communication.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -64,6 +65,11 @@ int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerCo
 void ServerIpcDestroyGroupOwner(const char *pkgName);
 int32_t ServerIpcStartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId);
 int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen);
+int32_t ServerIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len);
+int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info);
+void ServerIpcUnregisterConversationListener(const ConversationBusiness *info);
+int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
 
 #ifdef __cplusplus
 #if __cplusplus

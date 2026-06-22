@@ -254,6 +254,11 @@
         "SetNodeKeyInfo";
         "StartAccountAuth";
         "ProcessAccountAuth";
+        "GetTrustedDevices";
+        "FreeDeviceNodeInfo";
+        "PostConversationData";
+        "RegisterConversationListener";
+        "UnregisterConversationListener";
     local:
         *;
 };

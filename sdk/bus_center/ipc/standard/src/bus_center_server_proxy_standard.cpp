@@ -18,13 +18,17 @@
 #include "ipc_skeleton.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_agent_communication.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_server_ipc_interface_code.h"
 
+#define MAX_TRUST_INFO_NUM 20
+
 namespace OHOS {
 sptr<IRemoteObject> g_remoteProxy = nullptr;
 sptr<IRemoteObject> g_oldRemoteProxy = nullptr;
+static sptr<BusCenterServerProxy> g_serverProxy = nullptr;
 uint32_t g_getSystemAbilityId = 2;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 static sptr<IRemoteObject> GetSystemAbility()
@@ -1554,5 +1558,192 @@ int32_t BusCenterServerProxy::ProcessAccountAuth(const char *pkgName, int64_t re
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;
     }
     return serverRet;
+}
+
+static int32_t ReadIPCReceiveTrustedDevices(DeviceNodeInfo **info, int32_t *nums, MessageParcel *reply)
+{
+    int32_t infoNum = -1;
+    if (!reply->ReadInt32(infoNum) || infoNum < 0) {
+        *nums = 0;
+        LNN_LOGE(LNN_EVENT, "read infoNum failed! infoNum=%{public}d", infoNum);
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    infoNum = infoNum > MAX_TRUST_INFO_NUM ? MAX_TRUST_INFO_NUM : infoNum;
+    *nums = 0;
+    *info = nullptr;
+    if (infoNum > 0) {
+        uint32_t infoTypeLen = sizeof(DeviceNodeInfo);
+        int32_t infoSize = infoNum * static_cast<int32_t>(infoTypeLen);
+        void *nodeInfo = const_cast<void *>(reply->ReadRawData(infoSize));
+        if (nodeInfo == nullptr) {
+            LNN_LOGE(LNN_EVENT, "read node info failed");
+            return SOFTBUS_IPC_ERR;
+        }
+        *info = static_cast<DeviceNodeInfo *>(SoftBusCalloc(infoSize));
+        if (*info == nullptr) {
+            LNN_LOGE(LNN_EVENT, "malloc failed");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        LNN_LOGI(LNN_EVENT, "infoSize=%{public}d", infoSize);
+        if (memcpy_s(*info, infoSize, nodeInfo, infoSize) != EOK) {
+            LNN_LOGE(LNN_EVENT, "copy node info failed");
+            SoftBusFree(*info);
+            *info = nullptr;
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    *nums = infoNum;
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(info != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid info");
+    LNN_CHECK_AND_RETURN_RET_LOGE(nums != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid nums");
+    sptr<IRemoteObject> remote = Remote();
+    LNN_CHECK_AND_RETURN_RET_LOGE(remote != nullptr, SOFTBUS_NETWORK_REMOTE_NULL, LNN_EVENT, "remote is nullptr");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write interface token failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_GET_TRUSTED_DEVICES, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed!");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    if (serverRet != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "serverRet failed, serverRet=%{public}d", serverRet);
+        return serverRet;
+    }
+    return ReadIPCReceiveTrustedDevices(info, nums, &reply);
+}
+
+int32_t BusCenterServerProxy::PostConversationData(const char *deviceId,
+    const ConversationBusiness *info, const char *data, uint32_t len)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(deviceId != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid deviceId");
+    LNN_CHECK_AND_RETURN_RET_LOGE(info != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid info");
+    LNN_CHECK_AND_RETURN_RET_LOGE(data != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid data");
+    sptr<IRemoteObject> remote = Remote();
+    LNN_CHECK_AND_RETURN_RET_LOGE(remote != nullptr, SOFTBUS_NETWORK_REMOTE_NULL, LNN_EVENT, "remote is nullptr");
+    MessageParcel msg;
+    if (!msg.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!msg.WriteUint32(len)) {
+        LNN_LOGE(LNN_EVENT, "write len failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!msg.WriteRawData(data, len)) {
+        LNN_LOGE(LNN_EVENT, "write data failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!msg.WriteCString(deviceId)) {
+        LNN_LOGE(LNN_EVENT, "write deviceId failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!msg.WriteCString(info->abilityName)) {
+        LNN_LOGE(LNN_EVENT, "write abilityName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!msg.WriteCString(info->bundleName)) {
+        LNN_LOGE(LNN_EVENT, "write bundleName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_POST_CONVERSATION_DATA, msg, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::RegisterConversationListener(const ConversationBusiness *info)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(info != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid info");
+    sptr<IRemoteObject> remote = Remote();
+    LNN_CHECK_AND_RETURN_RET_LOGE(remote != nullptr, SOFTBUS_NETWORK_REMOTE_NULL, LNN_EVENT, "remote is nullptr");
+    MessageParcel msg;
+    if (!msg.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!msg.WriteCString(info->abilityName)) {
+        LNN_LOGE(LNN_EVENT, "write abilityName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!msg.WriteCString(info->bundleName)) {
+        LNN_LOGE(LNN_EVENT, "write bundleName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_REGISTER_CONVERSATION_LISTENER, msg, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    return serverRet;
+}
+
+void BusCenterServerProxy::UnregisterConversationListener(const ConversationBusiness *info)
+{
+    if (info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid info");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel msg;
+    if (!msg.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!msg.WriteCString(info->abilityName)) {
+        LNN_LOGE(LNN_EVENT, "write abilityName failed");
+        return;
+    }
+    if (!msg.WriteCString(info->bundleName)) {
+        LNN_LOGE(LNN_EVENT, "write bundleName failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_UNREGISTER_CONVERSATION_LISTENER, msg, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+    }
 }
 } // namespace OHOS

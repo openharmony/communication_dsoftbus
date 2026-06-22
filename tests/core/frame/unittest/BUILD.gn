@@ -81,6 +81,7 @@ ohos_unittest("SoftbusServerStubTest") {
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
+      "init:libbegetutil",
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
