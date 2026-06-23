@@ -783,6 +783,80 @@ bool SetNodeDataChangeFlagFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
+bool StartAccountAuthInnerFuzzTest(const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size >= INT32_MAX - 1 ||
+        size < INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX + sizeof(int64_t)) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char pkgName[INPUT_NAME_SIZE_MAX] = "package-test";
+    char serviceId[NETWORKID_SIZE_MAX] = "serviceId-test";
+
+    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    if (memcpy_s(serviceId, NETWORKID_SIZE_MAX, reinterpret_cast<const char *>(data + offset),
+        NETWORKID_SIZE_MAX - 1) != EOK) {
+        return false;
+    }
+    serviceId[NETWORKID_SIZE_MAX - 1] = '\0';
+    offset += NETWORKID_SIZE_MAX;
+    int64_t requestId = *reinterpret_cast<const int64_t *>(data + offset);
+    offset += sizeof(int64_t);
+
+    MessageParcel datas;
+    datas.WriteCString(pkgName);
+    datas.WriteCString(serviceId);
+    datas.WriteInt64(requestId);
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->StartAccountAuthInner(datas, reply);
+    return true;
+}
+
+bool ProcessAccountAuthInnerFuzzTest(const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr || size >= INT32_MAX - 1 ||
+        size < INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX + sizeof(int32_t) + sizeof(uint32_t)) {
+        return false;
+    }
+    uint32_t offset = 0;
+    char pkgName[INPUT_NAME_SIZE_MAX] = "package-test";
+
+    if (memcpy_s(pkgName, INPUT_NAME_SIZE_MAX, reinterpret_cast<const char *>(data), INPUT_NAME_SIZE_MAX - 1) !=
+        EOK) {
+        return false;
+    }
+    pkgName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    offset += INPUT_NAME_SIZE_MAX;
+    int64_t requestId = *reinterpret_cast<const int64_t *>(data + offset);
+    offset += sizeof(int64_t);
+    uint32_t authDataLen = size;
+
+    MessageParcel datas;
+    datas.WriteCString(pkgName);
+    datas.WriteInt64(requestId);
+    datas.WriteUint32(authDataLen);
+    datas.WriteRawData(data, authDataLen);
+
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+    SoftBusServer->ProcessAccountAuthInner(datas, reply);
+    return true;
+}
+
 bool StartTimeSyncFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
@@ -1753,6 +1827,8 @@ bool RunFuzzTestCase(const uint8_t *data, size_t size)
     OHOS::GetNodeKeyInfoFuzzTest(data, size);
     OHOS::SetNodeKeyInfoFuzzTest(data, size);
     OHOS::SetNodeDataChangeFlagFuzzTest(data, size);
+    OHOS::StartAccountAuthInnerFuzzTest(data, size);
+    OHOS::ProcessAccountAuthInnerFuzzTest(data, size);
     OHOS::StartTimeSyncFuzzTest(data, size);
     OHOS::StopTimeSyncFuzzTest(data, size);
     OHOS::PublishLNNFuzzTest(data, size);
