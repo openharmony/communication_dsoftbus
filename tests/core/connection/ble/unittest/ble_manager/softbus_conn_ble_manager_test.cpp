@@ -502,7 +502,7 @@ HWTEST_F(BleManagerUnitTest, TestBleCheckActiveConnection001, TestSize.Level1)
 
     char hashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     int32_t ret = ConvertBytesToHexString(hashStr,
-        HEXIFY_LEN(SHORT_UDID_HASH_LEN), static_cast<unsigned char *>(udid), SHORT_UDID_HASH_LEN);
+        HEXIFY_LEN(SHORT_UDID_HASH_LEN), reinterpret_cast<unsigned char *>(udid), SHORT_UDID_HASH_LEN);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
     ret = strcpy_s(connection->udid, UDID_BUF_LEN, hashStr);
