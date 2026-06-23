@@ -28,8 +28,7 @@ class DiscEventTest : public testing::Test { };
 
 /*
  * @tc.name: DiscEventTest001
- * @tc.desc: test DiscEvent
- *           Test disc event form size
+ * @tc.desc: Test disc event form size
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -53,8 +52,7 @@ HWTEST_F(DiscEventTest, DiscEventTest001, TestSize.Level0)
 
 /*
  * @tc.name: DiscEventTest002
- * @tc.desc: test DiscEvent
- *           Test all valid disc event form items
+ * @tc.desc: Test all valid disc event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -109,8 +107,7 @@ HWTEST_F(DiscEventTest, DiscEventTest002, TestSize.Level0)
 
 /*
  * @tc.name: DiscEventTest003
- * @tc.desc: test DiscEvent
- *           Test all invalid disc event form items
+ * @tc.desc: Test all invalid disc event form items
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -156,8 +153,7 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
 
 /*
  * @tc.name: DiscEventTest004
- * @tc.desc: test DiscEvent
- *           Test empty disc event form
+ * @tc.desc: Test empty disc event form
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */

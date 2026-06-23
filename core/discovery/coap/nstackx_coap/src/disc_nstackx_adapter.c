@@ -244,7 +244,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
         DISC_CHECK_AND_RETURN_RET_LOGE(
             ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_COAP, "devName copy fail, ret=%{public}d", ret);
     }
-    
+
     return SOFTBUS_OK;
 }
 
@@ -376,7 +376,6 @@ static int32_t RegisterServiceData()
 
         ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, index);
         DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "get local port fail");
-        DISC_LOGI(DISC_COAP, "port=%{public}d, index=%{public}u", port, index);
         ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, ip, IP_STR_MAX_LEN, index);
         DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "get local ip fail");
 
