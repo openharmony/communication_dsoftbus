@@ -33,6 +33,7 @@ extern "C" {
 
 int32_t PostAuthEvent(EventType event, EventHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
+
 int32_t RemoveAuthEvent(EventType event, RemoveCompareFunc func, void *param);
 
 /* Auth Lock */
