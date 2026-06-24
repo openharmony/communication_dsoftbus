@@ -1281,8 +1281,7 @@ static void ProcessCredInfo(AuthSessionInfo *info, int64_t authSeq)
     };
     AUTH_LOGI(AUTH_FSM, "recv credNegoState=%{public}d", info->credNegoState);
     if (!negoFuncTable[info->credNegoState](info, localUdidHash, info->udidShortHash, authSeq)) {
-        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE"
-            ", authSeq=%{public}"
+        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, authSeq=%{public}"
             PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
     }
@@ -1409,15 +1408,13 @@ static void UnpackCredNegoInfo(JsonObj *obj, AuthSessionInfo *info, int64_t auth
         return;
     }
     if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth) {
-        AUTH_LOGI(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE,"
-            "authSeq=%{public}"
+        AUTH_LOGI(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, authSeq=%{public}"
             PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
         return;
     }
     if (!UnpackCredNegoInfoJson(obj, info, authSeq)) {
-        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE,"
-            "authSeq=%{public}"
+        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, authSeq=%{public}"
             PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
         return;
@@ -3185,7 +3182,7 @@ static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
     int32_t ret = ConvertHexStringToBytes(
         nodeInfo->userIdCheckSum, USERID_CHECKSUM_LEN, userIdCheckSumHexStr, strlen(userIdCheckSumHexStr));
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "ConvertHexStringToBytes fail! ret:%{public}d", ret);
+        AUTH_LOGE(AUTH_FSM, "ConvertHexStringToBytes fail! ret=%{public}d", ret);
     }
 }
 

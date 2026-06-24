@@ -681,8 +681,7 @@ static void SyncNegotiationEnter(FsmStateMachine *fsm)
         return;
     }
     authFsm->curState = STATE_SYNC_NEGOTIATION;
-    AUTH_LOGI(AUTH_FSM, "authFsmState: (none)->STATE_SYNC_NEGOTIATION,"
-        "authSeq=%{public}" PRId64, authFsm->authSeq);
+    AUTH_LOGI(AUTH_FSM, "authFsm->curState=STATE_SYNC_NEGOTIATION, authSeq=%{public}" PRId64, authFsm->authSeq);
     if (!authFsm->info.isServer) {
         if (PostDeviceIdMessage(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVID_FAIL);
@@ -716,8 +715,7 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
     }
     authFsm->curState = STATE_SYNC_DEVICE_ID;
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
-    AUTH_LOGI(AUTH_FSM, "authFsmState: (none)->STATE_SYNC_DEVICE_ID,"
-        " authSeq=%{public}" PRId64, authFsm->authSeq);
+    AUTH_LOGI(AUTH_FSM, "authFsm->curState=STATE_SYNC_DEVICE_ID, authSeq=%{public}" PRId64, authFsm->authSeq);
     if (!authFsm->info.isServer) {
         if (authFsm->info.localState == AUTH_STATE_START) {
             if (!AuthIsRepeatedAuthRequest(authFsm->authSeq) && AddConcurrentAuthRequest(authFsm) > 1) {
@@ -1443,8 +1441,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
         AUTH_LOGE(AUTH_FSM, "authFsm is null");
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "authFsmState: (none)->STATE_DEVICE_AUTH,"
-        " authSeq=%{public}" PRId64, authFsm->authSeq);
+    AUTH_LOGI(AUTH_FSM, "authFsm->curState=STATE_DEVICE_AUTH, authSeq=%{public}" PRId64, authFsm->authSeq);
     authFsm->curState = STATE_DEVICE_AUTH;
     AuthSessionInfo *info = &authFsm->info;
     if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth) {

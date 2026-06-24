@@ -206,8 +206,8 @@ static void SetCompressFlagByAuthInfo(
             *compressFlag = FLAG_COMPRESS_DEVICE_INFO;
             AUTH_LOGD(AUTH_FSM, "deviceInfo compress finish");
         }
-        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu"
-            "after compress, datalen=%{public}u", strlen(msg) + 1, *compressLen);
+        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu,"
+            " after compress, datalen=%{public}u", strlen(msg) + 1, *compressLen);
     }
 }
 
@@ -314,7 +314,8 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         } else {
             AUTH_LOGD(AUTH_FSM, "deviceInfo deCompress finish, decompress=%{public}d", decompressLen);
         }
-        AUTH_LOGD(AUTH_FSM, "after decompress, datalen=%{public}d", decompressLen);
+        AUTH_LOGI(AUTH_FSM, "before decompress, msgSize=%{public}u,"
+            " after decompress, datalen=%{public}d", msgSize, decompressLen);
     }
     DevInfoData devInfo = { NULL, 0, info->connInfo.type, info->version };
     if ((decompressData != NULL) && (decompressLen != 0)) {

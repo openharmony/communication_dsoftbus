@@ -207,6 +207,19 @@ void DestroyDeviceAuth(void)
     AUTH_LOGI(AUTH_HICHAIN, "hichain destroy succ");
 }
 
+static void PrintfUntrustedDeviceId(const char *deviceId)
+{
+    if (deviceId == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "deviceId not found");
+        return;
+    }
+    char *anonyDeviceId = NULL;
+    Anonymize(deviceId, &anonyDeviceId);
+    AUTH_LOGE(AUTH_HICHAIN, "not found trusted device, deviceId=%{public}s",
+        AnonymizeWrapper(anonyDeviceId));
+    AnonymizeFree(anonyDeviceId);
+}
+
 static bool IsTrustedDeviceInAGroup(const DeviceGroupManager *gmInstance, int32_t accountId,
     const char *groupId, const char *deviceId)
 {
@@ -254,11 +267,7 @@ static bool IsTrustedDeviceInAGroup(const DeviceGroupManager *gmInstance, int32_
         }
     }
     cJSON_Delete(devJson);
-    char *anonyDeviceId = NULL;
-    Anonymize(deviceId, &anonyDeviceId);
-    AUTH_LOGE(AUTH_HICHAIN, "not found trusted device, deviceId=%{public}s", 
-        AnonymizeWrapper(anonyDeviceId));
-    AnonymizeFree(anonyDeviceId);
+    PrintfUntrustedDeviceId(deviceId);
     gmInstance->destroyInfo(&returnDevInfoVec);
     return false;
 }
@@ -347,8 +356,7 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
     AUTH_CHECK_AND_RETURN_RET_LOGE(gmInstance != NULL, groupCnt, AUTH_HICHAIN, "hichain GetGmInstance fail");
 
     if (gmInstance->getJoinedGroups(0, AUTH_APPID, (GroupType)groupType, &accountGroups, &groupCnt) != 0) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain getJoinedGroups groupCnt fail,"
-            " groupType=%{public}d", groupType); //调用外部接口报错分支，打印传参
+        AUTH_LOGE(AUTH_HICHAIN, "hichain getJoinedGroups groupCnt fail, groupType=%{public}d", groupType);
         groupCnt = 0;
     }
     if (accountGroups != NULL) {
