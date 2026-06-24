@@ -40,7 +40,7 @@ int32_t ConnRegisterEnhanceFunc(void *soHandle)
     g_connEnhanceFuncList.connCocInitServerModule = dlsym(soHandle, "ConnCocInitServerModule");
     g_connEnhanceFuncList.connBleDirectConnectDevice = dlsym(soHandle, "ConnBleDirectConnectDevice");
     g_connEnhanceFuncList.connBleDirectIsEnable = dlsym(soHandle, "ConnBleDirectIsEnable");
-    g_connEnhanceFuncList.connBleDirectInit = dlsym(soHandle, "ConnBleDirectInit");
+    g_connEnhanceFuncList.connExtInit = dlsym(soHandle, "ConnExtInit");
 
     g_connEnhanceFuncList.connCoapStopServerListen = dlsym(soHandle, "ConnCoapStopServerListen");
     g_connEnhanceFuncList.connCoapStartServerListen = dlsym(soHandle, "ConnCoapStartServerListen");

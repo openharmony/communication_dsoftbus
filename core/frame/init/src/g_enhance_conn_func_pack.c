@@ -72,13 +72,13 @@ void SoftbusBleConflictRegisterListenerPacked(SoftBusBleConflictListener *listen
     return pfnConnEnhanceFuncList->softbusBleConflictRegisterListener(listener);
 }
 
-int32_t ConnBleDirectInitPacked(void)
+int32_t ConnExtInitPacked(void)
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
-    if (ConnCheckFuncPointer((void *)pfnConnEnhanceFuncList->connBleDirectInit) != SOFTBUS_OK) {
+    if (ConnCheckFuncPointer((void *)pfnConnEnhanceFuncList->connExtInit) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
-    return pfnConnEnhanceFuncList->connBleDirectInit();
+    return pfnConnEnhanceFuncList->connExtInit();
 }
 
 bool ConnBleDirectIsEnablePacked(BleProtocolType protocol)

@@ -30,5 +30,6 @@ const SoftBusLogLabel CONN_LABELS[CONN_LABEL_MAX] = {
     {CONN_SLE,          0xd005761,      "ConnSle"},
     {CONN_EVENT,        0xd00576a,      "ConnEvent"},
     {CONN_PROXY,        0xd005762,      "ConnProxy"},
+    {CONN_FARFIELD,     0xd005762,      "ConnFarField"},
     {CONN_TEST,         DOMAIN_ID_TEST, "ConnTest"},
 };
