@@ -17,6 +17,7 @@
 
 #include <string.h>
 
+#include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_log.h"
 #include "bus_center_manager.h"
@@ -88,12 +89,12 @@ static const GroupAuthManager *InitHichain(void)
 {
     int32_t ret = InitDeviceAuthService();
     if (ret != 0) {
-        AUTH_LOGE(AUTH_INIT, "hichain InitDeviceAuthService failed err=%{public}d", ret);
+        AUTH_LOGE(AUTH_INIT, "hichain InitDeviceAuthService fail err=%{public}d", ret);
         return NULL;
     }
     const GroupAuthManager *gaIns = GetGaInstance();
     if (gaIns == NULL) {
-        AUTH_LOGE(AUTH_INIT, "hichain GetGaInstance failed");
+        AUTH_LOGE(AUTH_INIT, "hichain GetGaInstance fail");
         DestroyDeviceAuthService();
         return NULL;
     }
@@ -115,11 +116,11 @@ int32_t RegChangeListener(const char *appId, DataChangeListener *listener)
 
     const DeviceGroupManager *gmInstance = GetGmInstance();
     AUTH_CHECK_AND_RETURN_RET_LOGE(gmInstance != NULL, SOFTBUS_AUTH_HICHAIN_INIT_FAIL, AUTH_HICHAIN,
-        "hichain GetGmInstance failed");
+        "hichain GetGmInstance fail");
 
     int32_t ret = gmInstance->regDataChangeListener(appId, listener);
     AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_AUTH_REG_DATA_FAIL, AUTH_HICHAIN,
-        "hichain regDataChangeListener failed=%{public}d", ret);
+        "hichain regDataChangeListener fail=%{public}d", ret);
 
     return SOFTBUS_OK;
 }
@@ -130,10 +131,10 @@ int32_t UnregChangeListener(const char *appId)
         "appId is null");
     const DeviceGroupManager *gmInstance = GetGmInstance();
     AUTH_CHECK_AND_RETURN_RET_LOGE(gmInstance != NULL, SOFTBUS_AUTH_HICHAIN_INIT_FAIL, AUTH_HICHAIN,
-        "hichain GetGmInstance failed");
+        "GetGmInstance fail");
     int32_t ret = gmInstance->unRegDataChangeListener(appId);
     AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_AUTH_UNREG_DATA_FAIL, AUTH_HICHAIN,
-        "hichain unRegDataChangeListener failed=%{public}d", ret);
+        "unRegDataChangeListener fail=%{public}d", ret);
 
     return SOFTBUS_OK;
 }
@@ -154,12 +155,12 @@ int32_t AuthDevice(int32_t userId, int64_t authReqId, const char *authParams, co
     for (int32_t i = 1; i < RETRY_TIMES; i++) {
         int32_t ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authReqId, authParams, cb);
         if (ret == HC_SUCCESS) {
-            AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice success, times=%{public}d", i);
+            AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ, times=%{public}d", i);
             return SOFTBUS_OK;
         }
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         if (ret != HC_ERR_INVALID_PARAMS) {
-            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed, err=%{public}d, authErrCode=%{public}d", ret,
+            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice fail, err=%{public}d, authErrCode=%{public}d", ret,
                 authErrCode);
             return authErrCode;
         }
@@ -182,7 +183,7 @@ int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, Devi
 
     int32_t ret = g_hichain->processData(authSeq, data, len, cb);
     if (ret != HC_SUCCESS) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain processData failed. ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_HICHAIN, "hichain processData fail. ret=%{public}d", ret);
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         return authErrCode;
@@ -238,10 +239,12 @@ static bool IsTrustedDeviceInAGroup(const DeviceGroupManager *gmInstance, int32_
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
         if (SoftBusGenerateStrHash((const unsigned char *)authId, strlen(authId), udidHash) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_HICHAIN, "SoftBusGenerateStrHash fail");
             continue;
         }
         if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash,
             CUST_UDID_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_HICHAIN, "ConvertBytesToHexString fail");
             continue;
         }
         if (strncmp(hashStr, deviceId, strlen(deviceId)) == 0) {
@@ -251,6 +254,11 @@ static bool IsTrustedDeviceInAGroup(const DeviceGroupManager *gmInstance, int32_
         }
     }
     cJSON_Delete(devJson);
+    char *anonyDeviceId = NULL;
+    Anonymize(deviceId, &anonyDeviceId);
+    AUTH_LOGE(AUTH_HICHAIN, "not found trusted device, deviceId=%{public}s", 
+        AnonymizeWrapper(anonyDeviceId));
+    AnonymizeFree(anonyDeviceId);
     gmInstance->destroyInfo(&returnDevInfoVec);
     return false;
 }
@@ -312,7 +320,7 @@ bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId
     }
     const DeviceGroupManager *gmInstance = GetGmInstance();
     if (gmInstance == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance failed");
+        AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance fail");
         return false;
     }
 
@@ -336,10 +344,11 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
     char *accountGroups = NULL;
 
     const DeviceGroupManager *gmInstance = GetGmInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(gmInstance != NULL, groupCnt, AUTH_HICHAIN, "hichain GetGmInstance failed");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(gmInstance != NULL, groupCnt, AUTH_HICHAIN, "hichain GetGmInstance fail");
 
     if (gmInstance->getJoinedGroups(0, AUTH_APPID, (GroupType)groupType, &accountGroups, &groupCnt) != 0) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain getJoinedGroups groupCnt fail");
+        AUTH_LOGE(AUTH_HICHAIN, "hichain getJoinedGroups groupCnt fail,"
+            " groupType=%{public}d", groupType); //调用外部接口报错分支，打印传参
         groupCnt = 0;
     }
     if (accountGroups != NULL) {
@@ -355,7 +364,7 @@ bool IsSameAccountGroupDevice(void)
 
     const DeviceGroupManager *gmInstance = GetGmInstance();
     if (gmInstance == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance failed");
+        AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance fail");
         return false;
     }
     int32_t accountId = JudgeDeviceTypeAndGetOsAccountIds();
@@ -375,7 +384,7 @@ bool IsSameAccountGroupDevice(void)
         gmInstance->destroyInfo(&returnGroupVec);
         return false;
     } else {
-        AUTH_LOGI(AUTH_HICHAIN, "getJoinedGroups: %{public}d", groupNum);
+        AUTH_LOGI(AUTH_HICHAIN, "getJoinedGroups groupNum=%{public}d", groupNum);
         gmInstance->destroyInfo(&returnGroupVec);
         return true;
     }

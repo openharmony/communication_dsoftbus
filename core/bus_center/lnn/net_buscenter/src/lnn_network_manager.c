@@ -716,7 +716,7 @@ static void SaveBrNetworkDevices(void)
             continue;
         }
         if (!LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BR)) {
-            LNN_LOGE(LNN_BUILDER, "night mode on: ignore no br network device.");
+            LNN_LOGI(LNN_BUILDER, "night mode on: ignore no br network device.");
             continue;
         }
         DeviceNightMode *modeInfo = (DeviceNightMode *)SoftBusMalloc(sizeof(DeviceNightMode));

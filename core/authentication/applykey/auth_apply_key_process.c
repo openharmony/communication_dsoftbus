@@ -282,7 +282,7 @@ static int32_t SetNegoInfoRecvFinish(uint32_t requestId, bool isRecv, char *acco
             uint64_t currentTime = SoftBusGetSysTimeMs();
             int32_t ret = AuthInsertApplyKey(&item->info, item->applyKey, item->applyKeyLen, currentTime, accountHash);
             if (ret != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_CONN, "insert apply key failed! ret=%{public}d", ret);
+                AUTH_LOGE(AUTH_CONN, "insert apply key fail! ret=%{public}d", ret);
                 ReleaseApplyKeyNegoListLock();
                 return ret;
             }
@@ -371,7 +371,7 @@ static void DeleteApplyKeyNegoInstance(uint32_t requestId)
 
 static void HandleAsyncNegoSuccess(ApplyKeyNegoInstance *instance, SyncGenApplyKeyResult *res)
 {
-    AUTH_LOGI(AUTH_CONN, "recv genapplyKey success, requestId=%{public}u", res->requestId);
+    AUTH_LOGI(AUTH_CONN, "recv genapplyKey succ, requestId=%{public}u", res->requestId);
     if (instance->genCb.onGenSuccess != NULL) {
         AUTH_LOGI(AUTH_CONN, "onGenSuccess callback");
         uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 0 };
@@ -418,7 +418,7 @@ static void AsyncCallbackGenResultReceived(void *para)
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq(res->requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         SoftBusFree(res);
         return;
     }
@@ -476,7 +476,7 @@ static void OnGenSuccess(uint32_t requestId)
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     if (!instance.negoInfo.isRecvSessionKeyEvent || !instance.negoInfo.isRecvFinishEvent ||
@@ -497,7 +497,7 @@ static void OnGenFailed(uint32_t requestId, int32_t reason)
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     UpdateAllGenCbCallback(&instance.info, false, reason);
@@ -623,7 +623,7 @@ static bool OnTransmitted(int64_t authSeq, const uint8_t *data, uint32_t len)
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return false;
     }
     AuthDataHead head = {
@@ -653,7 +653,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     if (SetNegoInfoRecvSessionKey(instance.requestId, true, sessionKey, sessionKeyLen) != SOFTBUS_OK) {
@@ -755,7 +755,7 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
     }
     int32_t ret = GetGenApplyKeyInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     if (!CheckAccountHashWithHichain(hichainReturnAccountHash, &instance)) {
@@ -768,7 +768,7 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
     }
     if (instance.isServer &&
         SendApplyKeyNegoCloseAckEvent(instance.connId, instance.requestId, instance.isServer) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "send close ack failed!");
+        AUTH_LOGE(AUTH_CONN, "send close ack fail!");
         return;
     }
     OnGenSuccess((uint32_t)authSeq);
@@ -780,13 +780,13 @@ static void OnError(int64_t authSeq, int32_t operationCode, int32_t errCode, con
     (void)errorReturn;
     uint32_t authErrCode = 0;
     (void)GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
-    AUTH_LOGE(AUTH_CONN, "applyKeynego OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
-        authSeq, errCode, authErrCode);
+    AUTH_LOGE(AUTH_CONN, "applyKeynego OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d "
+        "authErrCode=%{public}d", authSeq, errCode, authErrCode);
     ApplyKeyNegoInstance instance;
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     OnGenFailed((uint32_t)authSeq, authErrCode);
@@ -795,7 +795,8 @@ static void OnError(int64_t authSeq, int32_t operationCode, int32_t errCode, con
 static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
 {
     (void)reqParams;
-    AUTH_LOGI(AUTH_CONN, "applyKeynego OnRequest: authSeq=%{public}" PRId64 ", ret=%{public}d", authSeq, operationCode);
+    AUTH_LOGI(AUTH_CONN, "applyKeynego OnRequest: authSeq=%{public}"
+        PRId64 ", operationCode=%{public}d", authSeq, operationCode);
 
     cJSON *msg = cJSON_CreateObject();
     if (msg == NULL) {
@@ -848,7 +849,7 @@ static int32_t ProcessAuthHichainParam(uint32_t requestId, const DeviceAuthCallb
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         AUTH_LOGE(AUTH_CONN,
-            "hichain identity service authenticate credential failed, err=%{public}d, authErrCode=%{public}d", ret,
+            "hichain identity service authenticate credential fail, err=%{public}d, authErrCode=%{public}d", ret,
             authErrCode);
         return authErrCode;
     }
@@ -1038,7 +1039,7 @@ static int32_t StartApplyKeyHichain(uint32_t connId, const RequestBusinessInfo *
     }
     ret = SetApplyKeyStartState(requestId, GEN_APPLY_KEY_STATE_START);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return ret;
     }
     return ProcessAuthHichainParam(requestId, &g_hichainCallback);
@@ -1056,12 +1057,12 @@ static int32_t ProcessApplyKeyDeviceId(int32_t channelId, uint32_t requestId, co
     bool isLocalUdidGreater = false;
     int32_t ret = UnpackApplyKeyAclParam((const char *)data, dataLen, &info);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "UnpackApplyKeyAclParam failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "UnpackApplyKeyAclParam fail! ret=%{public}d", ret);
         return ret;
     }
     ret = CreateApplyKeyNegoInstance(&info, requestId, channelId, true, &cb);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "create new applyKeynego instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "create new applyKeynego instance fail! ret=%{public}d", ret);
         return ret;
     }
     ret = ProcessApplyKeyNegoState(&info, &isLocalUdidGreater);
@@ -1071,7 +1072,7 @@ static int32_t ProcessApplyKeyDeviceId(int32_t channelId, uint32_t requestId, co
     }
     ret = SetApplyKeyStartState(requestId, GEN_APPLY_KEY_STATE_START);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return ret;
     }
     return ProcessAuthHichainParam(requestId, &g_hichainCallback);
@@ -1084,7 +1085,7 @@ static int32_t ProcessApplyKeyData(uint32_t requestId, const uint8_t *data, uint
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return ret;
     }
     const LightAccountVerifier *lightAccountVerifier = ApplyKeyGetLightAccountInstance();
@@ -1099,7 +1100,7 @@ static int32_t ProcessApplyKeyData(uint32_t requestId, const uint8_t *data, uint
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)hichainRet, &authErrCode);
         AUTH_LOGE(AUTH_CONN,
-            "hichain identity service authenticate credential failed, err=%{public}d, authErrCode=%{public}d",
+            "hichain identity service authenticate credential fail, err=%{public}d, authErrCode=%{public}d",
             hichainRet, authErrCode);
         return authErrCode;
     }
@@ -1113,7 +1114,7 @@ static int32_t ProcessApplyKeyCloseAckData(uint32_t requestId, const uint8_t *da
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
     int32_t ret = GetGenApplyKeyInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return ret;
     }
     ret = SetNegoInfoRecvCloseAck(instance.requestId, true);
@@ -1123,7 +1124,7 @@ static int32_t ProcessApplyKeyCloseAckData(uint32_t requestId, const uint8_t *da
     }
     if (!instance.isServer &&
         SendApplyKeyNegoCloseAckEvent(instance.connId, instance.requestId, instance.isServer) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "send close ack failed!");
+        AUTH_LOGE(AUTH_CONN, "send close ack fail!");
         return SOFTBUS_AUTH_SEND_FAIL;
     }
     OnGenSuccess(requestId);
@@ -1149,6 +1150,7 @@ static int32_t ApplyKeyMsgHandler(
             ret = ProcessApplyKeyCloseAckData(requestId, (const uint8_t *)data, dataLen);
             break;
         default:
+            AUTH_LOGE(AUTH_CONN, "unknown dataType=%{public}d, handle apply key data fail", head->dataType);
             ret = SOFTBUS_CHANNEL_AUTH_HANDLE_DATA_FAIL;
             break;
     }
@@ -1173,7 +1175,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
 
     int32_t ret = GetGenApplyKeyInstanceByChannel(connectionId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail=%{public}d", ret);
         return;
     }
     DeleteApplyKeyNegoInstance(instance.requestId);
@@ -1219,7 +1221,7 @@ int32_t AuthFindApplyKey(
         AUTH_LOGE(AUTH_CONN, "find apply key fail");
         return SOFTBUS_AUTH_APPLY_KEY_NOT_FOUND;
     }
-    AUTH_LOGE(AUTH_CONN, "find apply key succ");
+    AUTH_LOGI(AUTH_CONN, "find apply key succ");
     return SOFTBUS_OK;
 }
 

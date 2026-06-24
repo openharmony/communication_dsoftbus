@@ -63,6 +63,7 @@ static int ConvertAclState(GapAclState state)
         case OHOS_GAP_ACL_STATE_LE_DISCONNECTED:
             return SOFTBUS_ACL_STATE_LE_DISCONNECTED;
         default:
+            COMM_LOGW(COMM_ADAPTER, "unknown acl state=%{public}d", state);
             break;
     }
     return SOFTBUS_COMM_BLUETOOTH_ACL_SWITCH_STATE_ERR;
@@ -106,6 +107,7 @@ static bool IsRepeatNotify(int status)
             g_isBrTurnOn = false;
             break;
         default:
+            COMM_LOGW(COMM_ADAPTER, "unknown br status=%{public}d", status);
             break;
     }
     (void)SoftBusMutexUnlock(&g_lock);

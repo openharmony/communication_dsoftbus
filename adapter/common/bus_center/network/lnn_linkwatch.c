@@ -105,7 +105,7 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
     while (true) {
         LNN_LOGI(LNN_BUILDER, "SoftBusSocketRecv begin");
         status = SoftBusSocketRecv(fd, answer, maxlen, 0);
-        LNN_LOGI(LNN_BUILDER, "SoftBusSocketRecv end");
+        LNN_LOGD(LNN_BUILDER, "SoftBusSocketRecv end");
         if (status < 0) {
             if (status == SOFTBUS_ADAPTER_SOCKET_EINTR || status == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
                 continue;

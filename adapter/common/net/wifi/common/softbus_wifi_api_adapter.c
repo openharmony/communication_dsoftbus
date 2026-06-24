@@ -453,6 +453,7 @@ SoftBusWifiDetailState SoftBusGetWifiState(void)
         case STATE_SEMI_ACTIVE:
             return SOFTBUS_WIFI_STATE_SEMIACTIVE;
         default:
+            LNN_LOGW(LNN_STATE, "unknown wifi state=%{public}d", wifiState);
             break;
     }
     return SOFTBUS_WIFI_STATE_UNKNOWN;

@@ -145,6 +145,7 @@ static uint32_t ModuleToDataType(int32_t module)
         case MODULE_APPLY_KEY_CONNECTION:
             return DATA_TYPE_APPLY_KEY_CONNECTION;
         default:
+            AUTH_LOGW(AUTH_CONN, "unknown module=%{public}d", module);
             break;
     }
     return DATA_TYPE_CONNECTION;
@@ -710,7 +711,7 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
     ConnectOption option = GetConnectOptionByIfname(ifnameIdx, port);
     if (ifnameIdx == USB_IF) {
         if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, localIp, MAX_ADDR_LEN, USB_IF) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "get local ip failed");
+            AUTH_LOGE(AUTH_CONN, "get local ip fail");
             return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
         }
     }
@@ -1055,7 +1056,7 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
     }
 
     AUTH_LOGI(AUTH_CONN,
-        "set tcp keepalive successful, fd=%{public}d, keepaliveIdle=%{public}d, keepaliveIntvl=%{public}d, "
+        "set tcp keepalive succ, fd=%{public}d, keepaliveIdle=%{public}d, keepaliveIntvl=%{public}d, "
         "keepaliveCount=%{public}d, userTimeout=%{public}u",
         fd, tcpKeepaliveOption.keepaliveIdle, tcpKeepaliveOption.keepaliveIntvl, tcpKeepaliveOption.keepaliveCount,
         tcpKeepaliveOption.userTimeout);

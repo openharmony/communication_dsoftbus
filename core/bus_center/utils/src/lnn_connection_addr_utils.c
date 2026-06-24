@@ -189,6 +189,7 @@ ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type)
         case DISCOVERY_TYPE_USB:
             return CONNECTION_ADDR_NCM;
         default:
+            LNN_LOGW(LNN_STATE, "unknown discovery type=%{public}d", type);
             break;
     }
     return CONNECTION_ADDR_MAX;

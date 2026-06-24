@@ -425,7 +425,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
             }
         }
     }
-    AUTH_LOGE(AUTH_CONN, "link type not support, info1-type: %{public}d.", info1->type);
+    AUTH_LOGE(AUTH_CONN, "link type not support, info1Type=%{public}d", info1->type);
     return false;
 }
 
@@ -586,6 +586,7 @@ DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
         case AUTH_LINK_TYPE_USB:
             return DISCOVERY_TYPE_USB;
         default:
+            AUTH_LOGW(AUTH_CONN, "unknown auth link type=%{public}d", type);
             break;
     }
     AUTH_LOGE(AUTH_CONN, "unexpected AuthLinkType=%{public}d", type);
@@ -658,7 +659,7 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid, uint32_t len)
     if (LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, &cacheInfo) == SOFTBUS_OK &&
         cacheInfo.deviceInfo.deviceUdid[0] != '\0') {
         if (strcpy_s(udid, len, cacheInfo.deviceInfo.deviceUdid) != EOK) {
-            AUTH_LOGE(AUTH_CONN, "copy deviceUdid failed");
+            AUTH_LOGE(AUTH_CONN, "copy deviceUdid fail");
             return SOFTBUS_STRCPY_ERR;
         }
         return SOFTBUS_OK;

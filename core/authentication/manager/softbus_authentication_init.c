@@ -27,12 +27,12 @@ int32_t AuthOpenFuncInit(void *soHandle)
 
     ret = SoftBusDlsym(soHandle, "AuthRegisterOpenFunc", (void**)&authRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "dlsym AuthRegisterOpenFunc failed, ret=%d", ret);
+        COMM_LOGE(COMM_SVC, "dlsym AuthRegisterOpenFunc fail, ret=%d", ret);
         return SOFTBUS_NETWORK_DLSYM_FAILED;
     }
     ret = authRegisterOpenfunc();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "AuthRegisterOpenFunc return failed, ret=%d", ret);
+        COMM_LOGE(COMM_SVC, "AuthRegisterOpenFunc return fail, ret=%d", ret);
         return SOFTBUS_NETWORK_AUTH_OPEN_FUNC_INIT_FAILED;
     }
 

@@ -68,6 +68,7 @@ int32_t LnnGetLocalWeight(void)
             weight += BASE_WEIGHT_PC_VALUE;
             break;
         default:
+            LNN_LOGW(LNN_BUILDER, "unknown localDevTypeId=%{public}d", localDevTypeId);
             break;
     }
     LNN_LOGD(LNN_BUILDER, "generate local weight=%{public}d", weight);

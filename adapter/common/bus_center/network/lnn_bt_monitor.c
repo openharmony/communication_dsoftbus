@@ -63,6 +63,7 @@ static void LnnOnBtStateChanged(int32_t listenerId, int32_t state)
             *notifyState = SOFTBUS_BR_TURN_OFF;
             break;
         default:
+            LNN_LOGW(LNN_STATE, "unknown bt state=%{public}d", btState);
             break;
     }
 

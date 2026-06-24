@@ -609,7 +609,7 @@ static int32_t ProcessSessionKey(SessionKeyList *list, int64_t *index, const Ses
         *index = info->normalizedIndex;
     }
     if (AddSessionKey(list, TO_INT32(*index), key, info->connInfo.type, isOldKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "failed to add a sessionKey");
+        AUTH_LOGE(AUTH_FSM, "fail to add a sessionKey");
         return SOFTBUS_AUTH_SESSION_KEY_PROC_ERR;
     }
     AUTH_LOGI(AUTH_FSM, "add session key index=%{public}d, new type=%{public}d", TO_INT32(*index), info->connInfo.type);
@@ -1678,7 +1678,7 @@ static void CorrectFromServer(uint64_t connId, const AuthConnInfo *connInfo, boo
         }
     }
     if (tmp != *fromServer) {
-        AUTH_LOGE(AUTH_CONN, "CorrectFromServer succ.");
+        AUTH_LOGI(AUTH_CONN, "CorrectFromServer succ.");
     }
 }
 
@@ -1721,6 +1721,7 @@ static void OnDataReceived(
             HandleUkConnectionData(connId, connInfo, fromServer, head, data);
             break;
         default:
+            AUTH_LOGW(AUTH_CONN, "unknown dataType=%{public}d, ignore", head->dataType);
             break;
     }
     SoftbusHitraceStop();
@@ -2422,7 +2423,7 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
     }
     if (LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_DEVICE_PROFILE, AuthRegisterToDpDelay, RETRY_TIMES,
         DELAY_REG_DP_TIME, true) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_INIT, "delay registertoDp failed");
+        AUTH_LOGE(AUTH_INIT, "delay registertoDp fail");
         return SOFTBUS_AUTH_INIT_FAIL;
     }
     AUTH_LOGI(AUTH_INIT, "auth init succ");

@@ -352,7 +352,7 @@ static int32_t GenerateAccountHash(int64_t accountId, char *accountHashBuf, uint
 static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen)
 {
     if (!info->isServer) {
-        AUTH_LOGI(AUTH_FSM, "client generate udid, connType is %{public}d", info->connInfo.type);
+        AUTH_LOGI(AUTH_FSM, "client generate udid, connType=%{public}d", info->connInfo.type);
         if (info->connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
             return GenerateUdidShortHash(info->connInfo.info.ipInfo.udid, udidBuf, bufLen);
         } else if (info->connInfo.type == AUTH_LINK_TYPE_SESSION) {
@@ -1038,7 +1038,7 @@ static CredTypeSortInfo *SortCredTypes(cJSON *peerCredTypesJson, int32_t credTyp
 {
     CredTypeSortInfo *credTypeArray = (CredTypeSortInfo *)SoftBusCalloc(sizeof(CredTypeSortInfo) * credTypesLen);
     if (credTypeArray == NULL) {
-        AUTH_LOGE(AUTH_FSM, "credTypeArray malloc failed");
+        AUTH_LOGE(AUTH_FSM, "credTypeArray malloc fail");
         return NULL;
     }
     bool ret = true;
@@ -1179,7 +1179,8 @@ static bool CredNegoStateAskReceiver(AuthSessionInfo *info, const char *localUdi
     }
     info->credTypeInfo = credTypesJson;
     info->credNegoState = CRED_NEGO_STATE_REPLY;
-    AUTH_LOGI(AUTH_FSM, "credNegoState turn to STATE_REPLY in receiver, credTypesLen=%{public}d, authSeq=%{public}"
+    AUTH_LOGI(AUTH_FSM, "credNegoState: STATE_ASK->STATE_REPLY"
+        ", credTypesLen=%{public}d, authSeq=%{public}"
         PRId64, GetArrayItemNum(info->credTypeInfo), authSeq);
     return true;
 }
@@ -1203,7 +1204,8 @@ static bool CredNegoStateReplyReceiver(AuthSessionInfo *info, const char *localU
     }
     info->credTypeInfo = chosenCredTypeInfo;
     info->credNegoState = CRED_NEGO_STATE_DECIDE;
-    AUTH_LOGI(AUTH_FSM, "credNegoState turn to STATE_DECIDE in receiver, credType=%{public}d, authSeq=%{public}"
+    AUTH_LOGI(AUTH_FSM, "credNegoState: STATE_REPLY->STATE_DECIDE"
+        ", credType=%{public}d, authSeq=%{public}"
         PRId64, chosenCredType, authSeq);
     return true;
 }
@@ -1252,9 +1254,9 @@ static bool CredNegoStateDecideReceiver(AuthSessionInfo *info, const char *local
     info->credTypeInfo = credTypeJson;
     info->credNegoState = CRED_NEGO_STATE_FINISH;
     AUTH_LOGI(AUTH_FSM,
-        "credNegoState turn to STATE_FINISH in receiver, chosen credType=%{public}d, "
-        "localUserId=%{public}d, peerUserId=%{public}d, authSeq=%{public}" PRId64,
-        credType, localUserId, peerUserId, authSeq);
+        "credNegoState: STATE_DECIDE->STATE_FINISH,"
+        "chosen credType=%{public}d, localUserId=%{public}d, peerUserId=%{public}d, authSeq=%{public}"
+        PRId64, credType, localUserId, peerUserId, authSeq);
     return true;
 }
 
@@ -1265,8 +1267,9 @@ static void ProcessCredInfo(AuthSessionInfo *info, int64_t authSeq)
     }
     char localUdidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     if (GetLocalUdidShortHash(localUdidHash) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get local udidShortHash fail, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
-            PRId64, authSeq);
+        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, "
+            "reason: get local udidShortHash fail, authSeq=%{public}"
+            PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
         return;
     }
@@ -1278,8 +1281,9 @@ static void ProcessCredInfo(AuthSessionInfo *info, int64_t authSeq)
     };
     AUTH_LOGI(AUTH_FSM, "recv credNegoState=%{public}d", info->credNegoState);
     if (!negoFuncTable[info->credNegoState](info, localUdidHash, info->udidShortHash, authSeq)) {
-        AUTH_LOGE(AUTH_FSM, "in receiver, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
-            PRId64, authSeq);
+        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE"
+            ", authSeq=%{public}"
+            PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
     }
 }
@@ -1405,14 +1409,16 @@ static void UnpackCredNegoInfo(JsonObj *obj, AuthSessionInfo *info, int64_t auth
         return;
     }
     if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth) {
-        AUTH_LOGI(AUTH_FSM, "Support SK, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
-            PRId64, authSeq);
+        AUTH_LOGI(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE,"
+            "authSeq=%{public}"
+            PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
         return;
     }
     if (!UnpackCredNegoInfoJson(obj, info, authSeq)) {
-        AUTH_LOGE(AUTH_FSM, "unpack credNegoInfo fail, credNegoState turn to STATE_COMPATIBLE, authSeq=%{public}"
-            PRId64, authSeq);
+        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE,"
+            "authSeq=%{public}"
+            PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
         return;
     }
@@ -1503,7 +1509,8 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
 
 static void PackUDIDAbatementFlag(JsonObj *obj, const AuthSessionInfo *info)
 {
-    if (IsSupportUDIDAbatementPacked() && !JSON_AddBoolToObject(obj, IS_NEED_PACK_CERT, IsNeedUDIDAbatementPacked(info))) {
+    if (IsSupportUDIDAbatementPacked() &&
+        !JSON_AddBoolToObject(obj, IS_NEED_PACK_CERT, IsNeedUDIDAbatementPacked(info))) {
         AUTH_LOGE(AUTH_FSM, "add pack cert flag fail.");
     }
 }
@@ -1574,7 +1581,7 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
         GenerateUdidShortHash(info->udid, (char *)info->connInfo.info.ipInfo.deviceIdHash, UDID_HASH_LEN);
         char *anonyUdidHash = NULL;
         Anonymize((char *)info->connInfo.info.ipInfo.deviceIdHash, &anonyUdidHash);
-        AUTH_LOGI(AUTH_FSM, "deviceIdHash is %{public}s", AnonymizeWrapper(anonyUdidHash));
+        AUTH_LOGI(AUTH_FSM, "deviceIdHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
         AnonymizeFree(anonyUdidHash);
     }
     return SOFTBUS_OK;
@@ -1674,7 +1681,8 @@ static void PackCredNegoInfo(JsonObj *json, AuthSessionInfo *info, int64_t authS
             break;
     }
     if (!ret) {
-        AUTH_LOGE(AUTH_FSM, "pack credNegoInfo fail, turn to STATE_COMPATIBLE, authSeq=%{public}" PRId64, authSeq);
+        AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, reason: pack credNegoInfo fail"
+            ", authSeq=%{public}" PRId64, info->credNegoState, authSeq);
         info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
     }
 }
@@ -1819,13 +1827,13 @@ static bool UnpackWifiSinglePassInfo(JsonObj *obj, AuthSessionInfo *info)
             socketAddr.addr, sizeof(socketAddr.addr));
     }
     if (ret == NULL) {
-        AUTH_LOGE(AUTH_FSM, "SoftBusInetNtoP error addr family %{public}hu", addr.saFamily);
+        AUTH_LOGE(AUTH_FSM, "SoftBusInetNtoP fail, addrFamily=%{public}hu", addr.saFamily);
         return true;
     }
     uint8_t hash[SHA_256_HASH_LEN] = { 0 };
     rc = SoftBusGenerateStrHash((const unsigned char *)socketAddr.addr, strlen(socketAddr.addr), hash);
     if (rc != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "generate hash failed rc=%{public}d", rc);
+        AUTH_LOGE(AUTH_FSM, "generate hash fail rc=%{public}d", rc);
         return true;
     }
     char socketIpHash[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -1873,7 +1881,7 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
                 AUTH_LOGE(AUTH_FSM, "need exchange udid, peer udid=%{public}s", AnonymizeWrapper(anonyUdid));
                 info->idType = EXCHANGE_UDID;
             } else {
-                AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%{public}s", AnonymizeWrapper(anonyUdid));
+                AUTH_LOGI(AUTH_FSM, "get peer udid succ, peer udid=%{public}s", AnonymizeWrapper(anonyUdid));
                 info->idType = EXCHANGE_NETWORKID;
             }
             if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
@@ -1896,7 +1904,7 @@ static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
 
     int32_t idType = -1;
     if (!JSON_GetInt32FromOject(obj, EXCHANGE_ID_TYPE, &idType)) {
-        AUTH_LOGI(AUTH_FSM, "parse idType failed, ignore");
+        AUTH_LOGI(AUTH_FSM, "parse idType fail, ignore");
         info->idType = EXCHANGE_UDID;
         return SOFTBUS_OK;
     }
@@ -2234,7 +2242,7 @@ static int32_t UpdateBroadcastCipherKey(const NodeInfo *info)
         return SOFTBUS_AUTH_CIPHER_KEY_PROC_ERR;
     }
     if (LnnUpdateLocalBroadcastCipherKeyPacked(&broadcastKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
+        AUTH_LOGE(AUTH_FSM, "update local broadcast key fail");
         (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         return SOFTBUS_AUTH_CIPHER_KEY_PROC_ERR;
     }
@@ -2341,7 +2349,7 @@ static int32_t PackNetCapacityByVersion(JsonObj *json, const NodeInfo *info, Sof
     }
     AUTH_LOGI(AUTH_FSM, "pack device info version=%{public}d, netCapacity=%{public}d", version, netCapacity);
     if (!JSON_AddInt32ToObject(json, CONN_CAP, netCapacity)) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     return SOFTBUS_OK;
@@ -2359,15 +2367,15 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
         !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info)) ||
         !JSON_AddBoolToObject(json, IS_SUPPORT_IPV6, true));
     if (isFalse) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
 
     char btMacUpper[BT_MAC_LEN] = { 0 };
     if (StringToUpperCase(LnnGetBtMac(info), btMacUpper, BT_MAC_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "btMac to upperCase failed.");
+        AUTH_LOGE(AUTH_FSM, "btMac to upperCase fail.");
         if (memcpy_s(btMacUpper, BT_MAC_LEN, LnnGetBtMac(info), BT_MAC_LEN) != EOK) {
-            AUTH_LOGE(AUTH_FSM, "btMac cpy failed.");
+            AUTH_LOGE(AUTH_FSM, "btMac cpy fail.");
             return SOFTBUS_MEM_ERR;
         }
     }
@@ -2392,7 +2400,7 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
         !JSON_AddInt32ToObject(json, SLE_RANGE_CAP, info->sleRangeCapacity) ||
         !JSON_AddStringToObject(json, SLE_MAC, info->connectInfo.sleMacAddr));
     if (isFalse) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     AUTH_LOGI(AUTH_FSM, "pack common succ.");
@@ -2439,18 +2447,18 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     if (PackCommonEx(json, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "data pack failed.");
+        AUTH_LOGE(AUTH_FSM, "data pack fail.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
     PackOsInfo(json, info);
     PackDeviceVersion(json, info);
     PackCommonFastAuth(json, info);
     if (!PackCipherKeySyncMsgPacked(json)) {
-        AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg failed.");
+        AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg fail.");
     }
     PackCommP2pInfo(json, info);
     if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key failed.");
+        AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key fail.");
     }
     if (!JSON_AddInt32ToObject(json, DEVICE_SECURITY_LEVEL, info->deviceSecurityLevel)) {
         AUTH_LOGE(AUTH_FSM, "pack deviceSecurityLevel fail.");
@@ -2777,7 +2785,7 @@ static int32_t PackWiFi(
     int32_t ret = SoftBusBase64Encode((unsigned char *)offlineCode, BASE64_OFFLINE_CODE_LEN, &len,
         (unsigned char *)info->offlineCode, sizeof(info->offlineCode));
     if (ret != 0) {
-        AUTH_LOGE(AUTH_FSM, "mbedtls base64 encode failed");
+        AUTH_LOGE(AUTH_FSM, "mbedtls base64 encode fail");
         return SOFTBUS_ENCRYPT_ERR;
     }
     (void)JSON_AddStringToObject(json, BLE_OFFLINE_CODE, offlineCode);
@@ -3056,11 +3064,11 @@ static int32_t PackUserIdCheckSum(JsonObj *json, const NodeInfo *nodeInfo)
     int32_t ret = ConvertBytesToHexString(userIdCheckSumHexStr, USERID_CHECKSUM_HEXSTRING_LEN, nodeInfo->userIdCheckSum,
         sizeof(nodeInfo->userIdCheckSum));
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "ConvertBytesToHexString failed.");
+        AUTH_LOGE(AUTH_FSM, "ConvertBytesToHexString fail.");
         return ret;
     }
     if (!JSON_AddStringToObject(json, USERID_CHECKSUM, userIdCheckSumHexStr)) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail.");
         return SOFTBUS_CREATE_JSON_ERR;
     }
     return SOFTBUS_OK;
@@ -3171,13 +3179,13 @@ static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = { 0 };
     OptInt(json, USERID, &nodeInfo->userId, 0);
     if (!JSON_GetStringFromObject(json, USERID_CHECKSUM, userIdCheckSumHexStr, sizeof(userIdCheckSumHexStr))) {
-        AUTH_LOGE(AUTH_FSM, "JSON_GetStringFromObject failed!");
+        AUTH_LOGE(AUTH_FSM, "JSON_GetStringFromObject fail!");
         return;
     }
     int32_t ret = ConvertHexStringToBytes(
         nodeInfo->userIdCheckSum, USERID_CHECKSUM_LEN, userIdCheckSumHexStr, strlen(userIdCheckSumHexStr));
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "ConvertHexStringToBytes failed! ret:%{public}d", ret);
+        AUTH_LOGE(AUTH_FSM, "ConvertHexStringToBytes fail! ret:%{public}d", ret);
     }
 }
 

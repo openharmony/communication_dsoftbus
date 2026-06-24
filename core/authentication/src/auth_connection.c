@@ -109,6 +109,7 @@ const char *GetConnTypeStr(uint64_t connId)
         case AUTH_LINK_TYPE_USB:
             return "usb";
         default:
+            AUTH_LOGW(AUTH_CONN, "unknown auth link type=%{public}d", type);
             break;
     }
     return "unknown";
@@ -837,6 +838,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
             break;
         }
         default:
+            AUTH_LOGW(AUTH_CONN, "unknown connType=%{public}d", connInfo->type);
             ret = SOFTBUS_OK;
             break;
     }
@@ -1108,14 +1110,14 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
     local.socketOption.port = port;
     local.socketOption.protocol = LNN_PROTOCOL_IP;
     int32_t ret = strcpy_s(local.socketOption.addr, sizeof(local.socketOption.addr), ip);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, AUTH_CONN, "copy ip failed");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, AUTH_CONN, "copy ip fail");
 
     if (type == AUTH_LINK_TYPE_P2P) {
         local.socketOption.moduleId = AUTH_P2P;
     } else if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
         local.socketOption.moduleId = (ListenerModule)(GetWifiDirectManager()->allocateListenerModuleId());
         AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId < UNUSE_BUTT,
-            SOFTBUS_AUTH_LISTENER_MODULE_INVALID, AUTH_CONN, "alloc listener module id failed");
+            SOFTBUS_AUTH_LISTENER_MODULE_INVALID, AUTH_CONN, "alloc listener module id fail");
     } else {
         AUTH_LOGE(AUTH_CONN, "invalid type=%{public}d", type);
         return SOFTBUS_INVALID_PARAM;
@@ -1126,7 +1128,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
         if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
             GetWifiDirectManager()->freeListenerModuleId(local.socketOption.moduleId);
         }
-        AUTH_LOGE(AUTH_CONN, "start local listening failed");
+        AUTH_LOGE(AUTH_CONN, "start local listening fail");
         return realPort;
     }
     AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);

@@ -38,6 +38,7 @@ LnnHeartbeatType LnnConvertConnAddrTypeToHbType(ConnectionAddrType addrType)
         case CONNECTION_ADDR_BLE:
             return HEARTBEAT_TYPE_BLE_V1;
         default:
+            LNN_LOGW(LNN_HEART_BEAT, "unknown addrType=%{public}d", addrType);
             break;
     }
     return HEARTBEAT_TYPE_MAX;
@@ -54,6 +55,7 @@ ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
         case HEARTBEAT_TYPE_SLE:
             return CONNECTION_ADDR_BLE;
         default:
+            LNN_LOGW(LNN_HEART_BEAT, "unknown heartbeat type=%{public}d", type);
             break;
     }
     return CONNECTION_ADDR_MAX;
@@ -264,7 +266,7 @@ int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
 
     if (accountHash == NULL || len < HB_SHORT_ACCOUNT_HASH_LEN || len > SHA_256_HASH_LEN) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB get accountHash get invaild param");
+        LNN_LOGE(LNN_HEART_BEAT, "HB get accountHash get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
@@ -286,7 +288,7 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
         return SOFTBUS_INVALID_PARAM;
     }
     if (brMacLen != BT_MAC_LEN || hashLen != BT_MAC_HASH_STR_LEN) {
-        LNN_LOGE(LNN_HEART_BEAT, "invaild len");
+        LNN_LOGE(LNN_HEART_BEAT, "invalid len");
         return SOFTBUS_INVALID_PARAM;
     }
     uint8_t btMacBin[BT_ADDR_LEN] = { 0 };
