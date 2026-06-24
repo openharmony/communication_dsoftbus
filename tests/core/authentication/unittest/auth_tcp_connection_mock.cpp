@@ -40,5 +40,10 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
 {
     return GetAuthTcpConnetionInterface()->SocketConnectDevice(ip, port, isBlockMode, ifnameIdx);
 }
+
+int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer, int32_t ifnameIdx)
+{
+    return GetAuthTcpConnetionInterface()->SocketGetConnInfo(fd, connInfo, isServer, ifnameIdx);
+}
 }
 } // namespace OHOS
