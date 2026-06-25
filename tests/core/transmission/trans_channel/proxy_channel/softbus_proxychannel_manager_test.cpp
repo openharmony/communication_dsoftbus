@@ -216,8 +216,8 @@ void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, Pro
 
 /*@
  * @tc.name: TransProxyOpenProxyChannelTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameters
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED when given invalid channelId
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED when given invalid channelId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -270,7 +270,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
 
 /*
   * @tc.name: TransProxyKeepAlvieChanTest001
-  * @tc.desc: test trans proxy get new chanseq
+  * @tc.desc: test trans proxy get new chanseq.
   * @tc.type: FUNC
   * @tc.require:
  */
@@ -293,7 +293,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyKeepAlvieChanTest001, TestSiz
 
 /*
  * @tc.name: TransProxyGetAuthIdTest001
- * @tc.desc: test proxy get auth id
+ * @tc.desc: test proxy get auth id.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -311,7 +311,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAuthIdTest001, TestSize.Le
 
 /*
  * @tc.name: TransProxyGetAuthIdTest002
- * @tc.desc: test proxy get auth id
+ * @tc.desc: test proxy get auth id.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -338,7 +338,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAuthIdTest002, TestSize.Le
 
 /*
  * @tc.name: TransProxyGetNameByChanIdTest001
- * @tc.desc: test proxy get auth id
+ * @tc.desc: test proxy get auth id.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,7 +364,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetNameByChanIdTest001, TestS
 
 /*
  * @tc.name: TransProxyGetSessionKeyByChanIdTest001
- * @tc.desc: test proxy get session key by chanId
+ * @tc.desc: test proxy get session key by chanId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -383,7 +383,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSessionKeyByChanIdTest001,
 
 /*
  * @tc.name: TransProxyGetSessionKeyByChanIdTest002
- * @tc.desc: test trans proxy check apptype and msghead
+ * @tc.desc: test trans proxy check apptype and msghead.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -404,7 +404,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSessionKeyByChanIdTest002,
 
 /*
  * @tc.name: TransProxyGetSessionKeyByChanIdTest003
- * @tc.desc: test trans proxy get sessionkey by channelId
+ * @tc.desc: test trans proxy get sessionkey by channelId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -428,7 +428,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSessionKeyByChanIdTest003,
 
 /*
  * @tc.name: TransProxyGetAppInfoByChanIdTest001
- * @tc.desc: test proxy get app info by chanId
+ * @tc.desc: test proxy get app info by chanId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -447,7 +447,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest001, Te
 
 /*
   * @tc.name: TransProxyGetAppInfoByChanIdTest002
-  * @tc.desc: test proxy get appinfo by chanid
+  * @tc.desc: test proxy get appinfo by chanid.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -465,7 +465,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest002, Te
 
 /*
  * @tc.name: TransProxyGetConnIdByChanIdTest001
- * @tc.desc: test proxy get conn id by chanId
+ * @tc.desc: test proxy get conn id by chanId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -484,7 +484,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest001, Tes
 
 /*
   * @tc.name: TransProxyGetConnIdByChanIdTest002
-  * @tc.desc: test proxy get connid by chanid
+  * @tc.desc: test proxy get connid by chanid.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -499,7 +499,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest002, Tes
 
 /*
  * @tc.name: TransProxyGetConnIdByChanIdTest003
- * @tc.desc: test proxy get connid by chanid
+ * @tc.desc: test proxy get connid by chanid.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -521,7 +521,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest003, Tes
 
 /*
  * @tc.name: TransProxyGetConnOptionByChanIdTest001
- * @tc.desc: test proxy get cpnn option by chanId
+ * @tc.desc: test proxy get cpnn option by chanId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -556,7 +556,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest001,
 
 /*
   * @tc.name: TransProxyGetConnOptionByChanIdTest002
-  * @tc.desc: test proxy get connoption by chanid
+  * @tc.desc: test proxy get connoption by chanid.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -579,7 +579,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest002,
 
 /*
  * @tc.name: TransProxyGetSendMsgChanInfoTest001
- * @tc.desc: test proxy get sendmsg chanInfo by chanId
+ * @tc.desc: test proxy get sendmsg chanInfo by chanId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -598,7 +598,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSendMsgChanInfoTest001, Te
 
 /*
  * @tc.name: TransProxyChanProcessByReqIdTest001
- * @tc.desc: test proxy get sendmsg chanInfo by chanId
+ * @tc.desc: test proxy get sendmsg chanInfo by chanId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -624,7 +624,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest001, Te
 
 /*
  * @tc.name: TransProxyChanProcessByReqIdTest002
- * @tc.desc: test proxy get sendmsg chanInfo by chanId
+ * @tc.desc: test proxy get sendmsg chanInfo by chanId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -647,7 +647,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest002, Te
 
 /*@
  * @tc.name: TransProxyOnMessageReceivedTest001
- * @tc.desc: test proxy received handshake message
+ * @tc.desc: test proxy received handshake message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -681,7 +681,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest001, Tes
 
 /*@
  * @tc.name: TransProxyOnMessageReceivedTest002
- * @tc.desc: test proxy received handshake ack message
+ * @tc.desc: test proxy received handshake ack message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -717,7 +717,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
 
 /*@
  * @tc.name: TransProxyOnMessageReceivedTest003
- * @tc.desc: test proxy received reset message
+ * @tc.desc: test proxy received reset message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -748,7 +748,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest003, Tes
 
 /*@
  * @tc.name: TransProxyOnMessageReceivedTest004
- * @tc.desc: test proxy received  keepalive message
+ * @tc.desc: test proxy received  keepalive message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -781,7 +781,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest004, Tes
 
 /*@
  * @tc.name: TransProxyOnMessageReceivedTest005
- * @tc.desc: test proxy received normal message
+ * @tc.desc: test proxy received normal message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -810,7 +810,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest005, Tes
 
 /*@
  * @tc.name: TransProxyCloseProxyChannelTest001
- * @tc.desc: test proxy close proxy channel
+ * @tc.desc: test proxy close proxy channel.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -828,7 +828,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyChannelTest001, Tes
 
 /*
   * @tc.name: TransProxyCloseProxyChannelTest002
-  * @tc.desc: test trans proxy close proxychannel
+  * @tc.desc: test trans proxy close proxychannel.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -863,7 +863,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyChannelTest002, Tes
 
 /*@
  * @tc.name: TransProxyFastDataRecvTest001
- * @tc.desc: test proxy fastdata recv
+ * @tc.desc: test proxy fastdata recv.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1234,7 +1234,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyReleaseChannelListTest001, Te
 
 /*@
  * @tc.name: TransProxyDelChanByChanIdTest001
- * @tc.desc: test proxy del proxy channel
+ * @tc.desc: test proxy del proxy channel.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1250,7 +1250,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelChanByChanIdTest001, TestS
 
 /*@
  * @tc.name: TransProxyDelChanByReqIdTest001
- * @tc.desc: test proxy del proxy channel by reqId
+ * @tc.desc: test proxy del proxy channel by reqId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1287,7 +1287,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelChanByReqIdTest002, TestSi
 
 /*@
  * @tc.name: TransProxyDelByConnIdTest001
- * @tc.desc: test proxy del proxy channel by connId
+ * @tc.desc: test proxy del proxy channel by connId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1303,7 +1303,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest001, TestSize.
 
 /*
   * @tc.name: TransProxyDelByConnIdTest002
-  * @tc.desc: test trans proxy get new chanseq
+  * @tc.desc: test trans proxy get new chanseq.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -1324,7 +1324,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest002, TestSize.
 
 /*@
  * @tc.name: TransProxyDeathCallbackTest001
- * @tc.desc: test proxy TransProxyDeathCallback
+ * @tc.desc: test proxy TransProxyDeathCallback.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1360,7 +1360,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
 
 /*
   * @tc.name: CheckAppTypeAndMsgHeadTest001
-  * @tc.desc: test trans proxy check apptype and msghead
+  * @tc.desc: test trans proxy check apptype and msghead.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -1388,7 +1388,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, CheckAppTypeAndMsgHeadTest001, TestSize
 
 /*
   * @tc.name: TransProxyGetChanByReqId001
-  * @tc.desc: test trans proxy get chan by reqid
+  * @tc.desc: test trans proxy get chan by reqid.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -1409,7 +1409,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByReqIdTest001, TestSi
 
 /*
  * @tc.name: TransChanIsEqualTest001
- * @tc.desc: TransChanIsEqualTest001, use the wrong parameter
+ * @tc.desc: TransChanIsEqualTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1433,7 +1433,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest001, TestSize.Level
 
 /*
  * @tc.name: TransResetChanIsEqualTest001
- * @tc.desc: TransResetChanIsEqualTest001, use the wrong parameter
+ * @tc.desc: TransResetChanIsEqualTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1463,7 +1463,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest001, TestSize.
 
 /*
  * @tc.name: TransProxyUpdateAckInfoTest001
- * @tc.desc: TransProxyUpdateAckInfoTest001, use the wrong parameter
+ * @tc.desc: TransProxyUpdateAckInfoTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1497,7 +1497,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateAckInfoTest001, TestSiz
 
 /*@
  * @tc.name: TransProxyDelByConnIdTest004
- * @tc.desc: test proxy del by connId
+ * @tc.desc: test proxy del by connId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1518,7 +1518,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest004, TestSize.
 
 /*@
  * @tc.name: TransProxyDelByChannelIdTest001
- * @tc.desc: test proxy del by channelId
+ * @tc.desc: test proxy del by channelId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1635,7 +1635,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyKeepAliveChanTest001, TestSiz
 
 /*@
  * @tc.name: TransProxyDelByChannelIdTest004
- * @tc.desc: test proxy del by channelId
+ * @tc.desc: test proxy del by channelId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1660,7 +1660,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByChannelIdTest004, TestSi
 
 /*
  * @tc.name: TransChanIsEqualTest002
- * @tc.desc: TransChanIsEqualTest001, use the wrong parameter
+ * @tc.desc: TransChanIsEqualTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1683,7 +1683,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransChanIsEqualTest002, TestSize.Level
 
 /*
  * @tc.name: TransResetChanIsEqualTest002
- * @tc.desc: TransResetChanIsEqualTest001, use the wrong parameter
+ * @tc.desc: TransResetChanIsEqualTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1713,7 +1713,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransResetChanIsEqualTest002, TestSize.
 
 /*
  * @tc.name: TransProxyUpdateAckInfoTest002
- * @tc.desc: TransProxyUpdateAckInfoTest001, use the wrong parameter
+ * @tc.desc: TransProxyUpdateAckInfoTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1747,7 +1747,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateAckInfoTest002, TestSiz
 
 /*
  * @tc.name: TransProxyGetLocalInfoTest001
- * @tc.desc: TransProxyGetLocalInfoTest001, use the wrong parameter
+ * @tc.desc: TransProxyGetLocalInfoTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1799,7 +1799,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
 
 /*
  * @tc.name: TransProxyGetAppInfoTypeTest001
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE when given invalid parameters
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1814,7 +1814,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSi
 
 /*
  * @tc.name: TransProxySpecialUpdateChanInfoTest001
- * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters
+ * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1840,7 +1840,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest001,
 
 /*
  * @tc.name: TransProxySpecialUpdateChanInfoTest002
- * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters
+ * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1864,7 +1864,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest002,
 
 /*
  * @tc.name: TransProxySpecialUpdateChanInfoTest003
- * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters
+ * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1895,8 +1895,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest003,
 
 /*
  * @tc.name: TransProxyGetChanByChanIdTest001
- * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null channelInfo
+ * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null channelInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1913,8 +1913,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestS
 
 /*
  * @tc.name: TransProxyProcessDataConfigTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo
- * @tc.desc: Should return SOFTBUS_OK when given valid parameter
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1936,8 +1936,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest001, Tes
 
 /*
  * @tc.name: TransProxyProcessDataConfigTest002
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo
- * @tc.desc: Should return SOFTBUS_OK when given valid parameter
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1954,8 +1954,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest002, Tes
 
 /*
  * @tc.name: TransProxyFillDataConfigTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo
- * @tc.desc: Should return SOFTBUS_OK when given valid parameter
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1978,8 +1978,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest001, TestSi
 
 /*
  * @tc.name: TransProxyFillDataConfigTest002
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo
- * @tc.desc: Should return SOFTBUS_OK when given valid parameter
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2004,8 +2004,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest002, TestSi
 
 /*
  * @tc.name: TransProxyFillChannelInfoTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo
- * @tc.desc: Should return SOFTBUS_OK when given valid parameter
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2033,7 +2033,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillChannelInfoTest001, TestS
 
 /*
  * @tc.name: TransProxySetAuthHandleByChanId001
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2048,7 +2048,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySetAuthHandleByChanId001, Tes
 
 /*
  * @tc.name: TransProxySetAuthHandleByChanId002
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2070,7 +2070,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySetAuthHandleByChanId002, Tes
 
 /*
  * @tc.name: TransProxyHandShakeUnpackErrMsg001
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2097,7 +2097,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackErrMsg001, Tes
 
 /*
  * @tc.name: TransProxyHandShakeUnpackRightMsg001
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2120,7 +2120,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackRightMsg001, T
 
 /*
  * @tc.name: TransProxyGetPrivilegeCloseList001
- * @tc.desc: TransProxyGetPrivilegeCloseList Test
+ * @tc.desc: TransProxyGetPrivilegeCloseList Test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2153,7 +2153,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, Tes
 
 /*
  * @tc.name: TransDealProxyCheckCollabResult001
- * @tc.desc: TransDealProxyCheckCollabResult Test
+ * @tc.desc: TransDealProxyCheckCollabResult Test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2185,7 +2185,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
 
 /*
  * @tc.name: TransDealProxyCheckCollabResult002
- * @tc.desc: TransDealProxyCheckCollabResult Test
+ * @tc.desc: TransDealProxyCheckCollabResult Test.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2209,7 +2209,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, Tes
 
 /*
  * @tc.name: TransProxyPostResetPeerMsgToLoop001
- * @tc.desc: test TransProxyPostResetPeerMsgToLoop
+ * @tc.desc: test TransProxyPostResetPeerMsgToLoop.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2230,7 +2230,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop001, Te
 
 /*
  * @tc.name: TransProxyPostResetPeerMsgToLoop002
- * @tc.desc: test TransProxyPostResetPeerMsgToLoop
+ * @tc.desc: test TransProxyPostResetPeerMsgToLoop.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2250,7 +2250,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop002, Te
 
 /*
  * @tc.name: TransProxyGetChannelCapaByChanId001
- * @tc.desc: test handshake uk msg
+ * @tc.desc: test handshake uk msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2285,7 +2285,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChannelCapaByChanId001, Te
 
 /*
  * @tc.name: TransProxySendHandShakeMsgWhenInner001
- * @tc.desc: test handshake uk msg
+ * @tc.desc: test handshake uk msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2315,7 +2315,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySendHandShakeMsgWhenInner001,
 
 /*
  * @tc.name: TransServerProxyChannelOpened001
- * @tc.desc: test handshake uk msg
+ * @tc.desc: test handshake uk msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2338,7 +2338,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransServerProxyChannelOpened001, TestS
 
 /*
  * @tc.name: TransAsyncProxyChannelTask001
- * @tc.desc: test handshake uk msg
+ * @tc.desc: test handshake uk msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2368,7 +2368,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransAsyncProxyChannelTask001, TestSize
 
 /*
  * @tc.name: TransAsyncProxyChannelTask002
- * @tc.desc: test handshake uk msg
+ * @tc.desc: test handshake uk msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2399,7 +2399,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransAsyncProxyChannelTask002, TestSize
 
 /*
  * @tc.name: TransProxyUpdateBlePriority001
- * @tc.desc: test handshake uk msg
+ * @tc.desc: test handshake uk msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2426,7 +2426,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateBlePriority001, TestSiz
 
 /*
  * @tc.name: TransProxyUpdateSinkAccessInfo001
- * @tc.desc: test update sink access info
+ * @tc.desc: test update sink access info.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2445,7 +2445,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateSinkAccessInfo001, Test
 
 /*
  * @tc.name: TransServerProxyChannelOpened002
- * @tc.desc: test trans proxy channel opened
+ * @tc.desc: test trans proxy channel opened.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2465,7 +2465,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransServerProxyChannelOpened002, TestS
 
 /*
  * @tc.name: TransProxySendHandShakeMsgWhenInner002
- * @tc.desc: test trans proxy channel send handshake msg
+ * @tc.desc: test trans proxy channel send handshake msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2487,7 +2487,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySendHandShakeMsgWhenInner002,
 
 /*
  * @tc.name: TransProxyUpdateSinkAccessInfo002
- * @tc.desc: test update sink access info
+ * @tc.desc: test update sink access info.
  * @tc.type: FUNC
  * @tc.require:
  */

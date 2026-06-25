@@ -78,10 +78,9 @@ static ProxyChannelInfo *TestCreateProxyChannelInfo(void)
     return chan;
 }
 
-/*
+/**@
  * @tc.name: TransPagingUpdatePagingChannelInfoTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -127,10 +126,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingUpdatePagingChannelInf
     g_proxyChannelList = nullptr;
 }
 
-/*
+/**@
  * @tc.name: TransPagingUpdatePidAndDataTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -172,10 +170,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingUpdatePidAndDataTest00
     g_proxyChannelList = nullptr;
 }
 
-/*
+/**@
  * @tc.name: TransUpdateAuthSeqByChannelIdTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param.
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -220,10 +217,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransUpdateAuthSeqByChannelIdTest
     TransOnGenFailed(requestId, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**@
  * @tc.name: TransPagingResetChanTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -265,10 +261,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingResetChanTest001, Test
     g_proxyChannelList = nullptr;
 }
 
-/*
+/**@
  * @tc.name: TransPagingHandshakeUnpackErrMsgTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -284,6 +279,7 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingHandshakeUnpackErrMsgT
         .data = const_cast<char *>(TEST_DATA),
         .dataLen = sizeof(TEST_DATA),
     };
+    int32_t channelId = TEST_CHANNEL_ID;
     int32_t errCode = SOFTBUS_OK;
     cJSON *root = cJSON_CreateObject();
     ASSERT_TRUE(root != nullptr);
@@ -307,12 +303,20 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingHandshakeUnpackErrMsgT
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     ret = TransPagingHandshakeUnPackErrMsg(&chan, &msg, &errCode);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    cJSON *testRootTest = cJSON_CreateObject();
+    ASSERT_TRUE(testRootTest != nullptr);
+    res = AddNumberToJsonObject(testRootTest, ERR_CODE, errCode);
+    EXPECT_EQ(true, res);
+    res = AddNumberToJsonObject(testRootTest, JSON_KEY_PAGING_SINK_CHANNEL_ID, channelId);
+    EXPECT_EQ(true, res);
+    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRootTest));
+    ret = TransPagingHandshakeUnPackErrMsg(&chan, &msg, &errCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**@
  * @tc.name: TransDealProxyChannelOpenResultTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -353,10 +357,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransDealProxyChannelOpenResultTe
     g_proxyChannelList = nullptr;
 }
 
-/*
+/**@
  * @tc.name: TransProxyCreatePagingChanInfoTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -379,10 +382,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransProxyCreatePagingChanInfoTes
     g_proxyChannelList = nullptr;
 }
 
-/*@
+/**@
  * @tc.name: TransProxyGetProxyChannelIdByAuthReqTest001
- * @tc.desc: test proxy open proxy channel
- *           use wrong param
+ * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
