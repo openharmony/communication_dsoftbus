@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+# TLV Protocol Fuzzer Seeds - 覆盖 SetInput/Read/外部数据解析
+# 聚焦于测试外部不可信 TLV 数据的解析和读取
+
+# ========== SetInput - 空/小/大数据 ==========
+AAQAAAAAAAAA
+AAQAAQECAwQ=
+AAQAAhEWFxo=
+
+# ========== Read - 写后读（用 Write 生成测试数据，实际测试 Read） ==========
+AgAAAAA=
+AgECAAAAAA=
+AgIDBAAAAA=
+
+# ========== InsufficientHeader - 头部不足（tag+length 数据不够） ==========
+BQAAAAA=
+BQEBAAAA=
+BQICAAAA=
+
+# ========== LengthExceedsData - 长度超限（length 大于剩余数据） ==========
+BgAAAAA=
+BgEBAP8AAQA=
+
+# ========== BoundaryLength - 边界值 0/1/2/3/7/8/15/16/31/32/63/64/127/128/255 ==========
+BwAAAAA=
+BwBAAAAA=
+BwCAAAAA
+BwDAAAAA=
+BwD/AAAA=
+
+# ========== VariousFormats - tagSize(1-4), lenSize(1-2) 不同格式配置 ==========
+CAEBAAIA=
+CACAAgIA=
+CAMAAwIA=
+CAAABAAIA=
+
+# ========== EmptyData - 空输入 ==========
+CQAAAAA=
+
+# ========== MultipleItems - 多个 TLV 项（测试读取多个项目） ==========
+CgAAAAA=
+CgBAAAAA=
+CgCAAAAA=
+CgDAAAAA=
+CgSAAAAA=
+
+# ========== MaxLength - 16位最大长度0xFFFF（测试大长度处理） ==========
+CwAAAAA=
+CwEBAP8A/wA/
