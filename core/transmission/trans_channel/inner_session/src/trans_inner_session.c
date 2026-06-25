@@ -137,7 +137,7 @@ static int32_t TransOnSessionOpenedInner(int32_t channelId, int32_t channelType,
 
 static void TransOnSessionClosedInner(int32_t channelId)
 {
-    if (g_InnerListener == NULL || g_InnerListener->OnSessionClosed== NULL) {
+    if (g_InnerListener == NULL || g_InnerListener->OnSessionClosed == NULL) {
         TRANS_LOGE(TRANS_CTRL, "inner session not create session server");
         return;
     }
@@ -156,7 +156,7 @@ static void TransOnBytesReceivedInner(int32_t channelId, const void *data, uint3
 
 static int32_t TransOnSetChannelInfoByReqId(uint32_t reqId, int32_t channelId, int32_t channelType)
 {
-    if (g_InnerListener == NULL || g_InnerListener->OnSetChannelInfoByReqId== NULL) {
+    if (g_InnerListener == NULL || g_InnerListener->OnSetChannelInfoByReqId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "inner session not create session server");
         return SOFTBUS_INVALID_PARAM;
     }

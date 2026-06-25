@@ -121,20 +121,20 @@ void TransAddTimestampToListTest(FuzzedDataProvider &provider)
     (void)TransAddTimestampToList(param.mySocketName, param.peerSocketName, param.peerNetworkId, timestamp);
 }
 
-void TransDelTimestampFormListTest(FuzzedDataProvider &provider)
+void TransDelTimestampFromListTest(FuzzedDataProvider &provider)
 {
     BindRequestParam param;
     (void)memset_s(&param, sizeof(BindRequestParam), 0, sizeof(BindRequestParam));
     FillBindRequestParam(provider, &param);
-    TransDelTimestampFormList(&param, 0);
+    TransDelTimestampFromList(&param, 0);
 
     (void)TransBindRequestManagerInit();
-    TransDelTimestampFormList(&param, 0);
+    TransDelTimestampFromList(&param, 0);
     uint64_t timestamp = provider.ConsumeIntegral<uint64_t>();
     (void)CreateBindRequestManager(param.mySocketName, param.peerSocketName, param.peerNetworkId);
-    TransDelTimestampFormList(&param, 0);
+    TransDelTimestampFromList(&param, 0);
 
-    TransDelTimestampFormList(&param, timestamp);
+    TransDelTimestampFromList(&param, timestamp);
     TransBindRequestManagerDeinit();
 }
 
@@ -185,7 +185,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::GenerateParamTest(provider);
     OHOS::CreateBindRequestManagerTest(provider);
     OHOS::TransAddTimestampToListTest(provider);
-    OHOS::TransDelTimestampFormListTest(provider);
+    OHOS::TransDelTimestampFromListTest(provider);
     OHOS::GetDeniedFlagByPeerTest(provider);
     OHOS::TransResetBindDeniedFlagTest(provider);
 

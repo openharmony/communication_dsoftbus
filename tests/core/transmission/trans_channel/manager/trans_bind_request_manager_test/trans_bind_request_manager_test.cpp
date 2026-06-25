@@ -106,19 +106,19 @@ HWTEST_F(TransBindRequestManagerTest, FreeBindRequestMessage001, TestSize.Level1
 }
 
 /**
- * @tc.name: TransDelTimestampFormList001
- * @tc.desc: TransDelTimestampFormListTest
+ * @tc.name: TransDelTimestampFromList001
+ * @tc.desc: TransDelTimestampFromListTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransBindRequestManagerTest, TransDelTimestampFormList001, TestSize.Level1)
+HWTEST_F(TransBindRequestManagerTest, TransDelTimestampFromList001, TestSize.Level1)
 {
     if (g_bindRequestList != nullptr) {
         g_bindRequestList = nullptr;
     }
 
     BindRequestParam bindRequestParam;
-    EXPECT_NO_FATAL_FAILURE(TransDelTimestampFormList(&bindRequestParam, 15844733));
+    EXPECT_NO_FATAL_FAILURE(TransDelTimestampFromList(&bindRequestParam, 15844733));
 }
 
 /**
