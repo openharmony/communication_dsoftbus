@@ -95,6 +95,7 @@ static void NotifyStreamChannelConnectedEvent(int32_t channelId)
             EVENT_TYPE_STREAM_CONNECTED);
         return;
     }
+    TRANS_LOGE(TRANS_STREAM, "OnEvent is NULL");
 }
 
 static void SetStreamChannelStatus(int32_t channelId, int32_t status)

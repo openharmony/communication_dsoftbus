@@ -41,6 +41,8 @@ public:
     virtual int32_t ClientDeleteSession(int32_t sessionId) = 0;
     virtual int32_t ClientGetSessionIdByChannelId(
         int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing) = 0;
+    virtual int32_t ClientGetSessionIdByChannelIdReserve(
+        int32_t channelIdReserve, int32_t channelTypeReserve, int32_t *sessionId, bool isClosingReserve) = 0;
     virtual int32_t ClientGetSessionCallbackAdapterById(
         int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) = 0;
     virtual int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enableStatus) = 0;
@@ -87,6 +89,8 @@ public:
     MOCK_METHOD1(ClientDeleteSession, int32_t(int32_t sessionId));
     MOCK_METHOD4(ClientGetSessionIdByChannelId, int32_t(
         int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing));
+    MOCK_METHOD4(ClientGetSessionIdByChannelIdReserve, int32_t(
+        int32_t channelIdReserve, int32_t channelTypeReserve, int32_t *sessionId, bool isClosingReserve));
     MOCK_METHOD3(ClientGetSessionCallbackAdapterById, int32_t(
         int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer));
     MOCK_METHOD2(ClientSetEnableStatusBySocket, int32_t(int32_t socket, SessionEnableStatus enableStatus));

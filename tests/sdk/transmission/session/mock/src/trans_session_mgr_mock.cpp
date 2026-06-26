@@ -128,6 +128,13 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
     return GetManagerInterface()->ClientGetSessionIdByChannelId(channelId, channelType, sessionId, isClosing);
 }
 
+int32_t ClientGetSessionIdByChannelIdReserve(
+    int32_t channelIdReserve, int32_t channelTypeReserve, int32_t *sessionId, bool isClosingReserve)
+{
+    return GetManagerInterface()->ClientGetSessionIdByChannelId(
+        channelIdReserve, channelTypeReserve, sessionId, isClosingReserve);
+}
+
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
 {
     return GetManagerInterface()->ClientGetSessionCallbackAdapterById(sessionId, callbackAdapter, isServer);

@@ -94,6 +94,7 @@ ChannelInfo *TransAddChannelInfoTest()
     channelInfo->algorithm = 1;
     channelInfo->crc = 1;
     channelInfo->isUdpFile = false;
+
     return channelInfo;
 }
 
