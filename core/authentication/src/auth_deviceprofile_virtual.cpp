@@ -97,7 +97,7 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
 }
 
 void UpdateAssetSessionKeyByAcl(
-    AuthACLInfo *info, uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount)
+    AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount)
 {
     (void)info;
     (void)sessionKey;

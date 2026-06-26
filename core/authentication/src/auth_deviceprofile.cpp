@@ -1305,7 +1305,7 @@ int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId, uint64_
 }
 
 void UpdateAssetSessionKeyByAcl(
-    AuthACLInfo *info, uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount)
+    AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount)
 {
     if (info == nullptr) {
         LNN_LOGE(LNN_STATE, "acl info is null");
