@@ -311,7 +311,7 @@ static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc
             dataResourceName, 0, 1, nullptr, nullptr, nullptr, CallDataJsCallback, &g_dataTsfn);
         if (status != napi_ok) {
             COMM_LOGE(COMM_SDK, "create data tsfn failed");
-            hrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
+            ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
             return nullptr;
         }
     }
