@@ -28,10 +28,12 @@ softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
 if (!dsoftbus_feature_compile_guard) {
   dsoftbus_server_common_src =
       auth_server_src + bus_center_server_src + conn_manager_src +
-      disc_server_src + trans_session_src + softbus_permission_src + broadcast_src
+      disc_server_src + trans_session_src + softbus_permission_src +
+      broadcast_src
   dsoftbus_server_common_inc =
       auth_server_inc + bus_center_server_inc + conn_manager_inc +
-      disc_server_inc + trans_session_inc + softbus_permission_inc + broadcast_inc
+      disc_server_inc + trans_session_inc + softbus_permission_inc +
+      broadcast_inc
   dsoftbus_server_common_deps =
       auth_server_deps + bus_center_server_deps + disc_server_deps +
       conn_manager_common_deps + trans_session_deps + softbus_permission_deps +
@@ -78,24 +80,24 @@ if (defined(ohos_lite)) {
       ]
 
       sources += [
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+        "$dsoftbus_root_path/adapter/manager/softbus_adapter_init.c",
+        "$dsoftbus_root_path/core/authentication/manager/softbus_authentication_init.c",
+        "$dsoftbus_root_path/core/bus_center/lnn/manager/softbus_lnn_init.c",
+        "$dsoftbus_root_path/core/connection/manager/softbus_conn_init.c",
+        "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_init.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
-        "$dsoftbus_root_path/core/bus_center/lnn/manager/softbus_lnn_init.c",
-        "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_init.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func_pack.c",
         "$dsoftbus_root_path/core/transmission/manager/softbus_trans_init.c",
-        "$dsoftbus_root_path/core/authentication/manager/softbus_authentication_init.c",
-        "$dsoftbus_root_path/core/connection/manager/softbus_conn_init.c",
-        "$dsoftbus_root_path/adapter/manager/softbus_adapter_init.c",
       ]
 
       include_dirs += [
@@ -133,25 +135,20 @@ if (defined(ohos_lite)) {
       }
       deps = dsoftbus_server_common_deps
       deps += [
-
         # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
         # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
-        "$dsoftbus_root_path/core/common:softbus_utils",
-
+        "$build_lite_path",
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
-        "$build_lite_path",
       ]
       public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
       external_deps = [ "device_auth:deviceauth_sdk" ]
       external_deps += auth_server_ex_deps
       if (defined(global_parts_info) &&
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
-        include_dirs += [
-          "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
-          "$dsoftbus_dfx_path/statistics/include",
-        ]
+        include_dirs += [ "$dsoftbus_dfx_path/statistics/include" ]
         sources += [
           "$dsoftbus_dfx_path/statistics/instant/bt_statistic.cpp",
           "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
@@ -164,9 +161,7 @@ if (defined(ohos_lite)) {
       }
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
-        deps += [
-          "$btframework_path",
-        ]
+        deps += [ "$btframework_path" ]
         include_dirs += [
           "$inner_api_path",
           "$inner_api_path/c_header",
@@ -175,15 +170,17 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("softbus_server_frame") {
-    if (dsoftbus_feature_compile_guard) {
-      install_enable = false
-    } else {
+      if (dsoftbus_feature_compile_guard) {
+        install_enable = false
+      } else {
         defines += AUTH_SERVER_DEFINES
         defines += DISC_SERVER_DEFINES
         defines += CONN_SERVER_DEFINES
         defines += [ "__STDC_FORMAT_MACROS" ]
-        defines += G_ENHANCE_DISC_FUNC_PACK_BLE_DEFINES
-        defines += G_ENHANCE_DISC_FUNC_PACK_DISC_COAP_DEFINES
+        if (!softbus_config_enhance) {
+          defines += G_ENHANCE_DISC_FUNC_PACK_BLE_DEFINES
+          defines += G_ENHANCE_DISC_FUNC_PACK_DISC_COAP_DEFINES
+        }
         include_dirs = dsoftbus_server_common_inc
         include_dirs += [
           "$dsoftbus_dfx_path/interface/include",
@@ -211,24 +208,24 @@ if (defined(ohos_lite)) {
           "small/init/src/trans_server_stub.c",
         ]
         sources += [
-          "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+          "$dsoftbus_root_path/adapter/manager/softbus_adapter_init.c",
+          "$dsoftbus_root_path/core/authentication/manager/softbus_authentication_init.c",
+          "$dsoftbus_root_path/core/bus_center/lnn/manager/softbus_lnn_init.c",
+          "$dsoftbus_root_path/core/connection/manager/softbus_conn_init.c",
+          "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_init.c",
+          "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
+          "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
           "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+          "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
           "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func.c",
+          "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
           "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func.c",
           "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func_pack.c",
-          "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
-          "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
+          "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
           "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
-          "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func_pack.c",
-          "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
           "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func.c",
-          "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
-          "$dsoftbus_root_path/core/bus_center/lnn/manager/softbus_lnn_init.c",
-          "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_init.c",
+          "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func_pack.c",
           "$dsoftbus_root_path/core/transmission/manager/softbus_trans_init.c",
-          "$dsoftbus_root_path/core/authentication/manager/softbus_authentication_init.c",
-          "$dsoftbus_root_path/core/connection/manager/softbus_conn_init.c",
-          "$dsoftbus_root_path/adapter/manager/softbus_adapter_init.c",
         ]
         include_dirs += [
           "$dsoftbus_root_path/adapter/manager",
@@ -251,18 +248,17 @@ if (defined(ohos_lite)) {
         cflags_cc = cflags
         deps = dsoftbus_server_common_deps
         deps += [
-          ":permission_json",
           ":lnn_permission_json",
+          ":permission_json",
           ":rpc_permission_json",
 
           # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
           # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
-          "$dsoftbus_root_path/core/common:softbus_utils",
-
+          "$cjson_shared_path",
           "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
           "$dsoftbus_root_path/adapter:softbus_adapter",
+          "$dsoftbus_root_path/core/common:softbus_utils",
           "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
-          "$cjson_shared_path",
           "$ipc_single_path",
           "$samgr_path",
         ]
@@ -273,10 +269,7 @@ if (defined(ohos_lite)) {
         external_deps += auth_server_ex_deps
         if (defined(global_parts_info) &&
             defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
-          include_dirs += [
-            "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
-            "$dsoftbus_dfx_path/statistics/include",
-          ]
+          include_dirs += [ "$dsoftbus_dfx_path/statistics/include" ]
           sources += [
             "$dsoftbus_dfx_path/statistics/instant/bt_statistic.cpp",
             "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
@@ -290,9 +283,7 @@ if (defined(ohos_lite)) {
         public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
         if (support_bluetooth &&
             (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
-          deps += [
-            "$btframework_path",
-          ]
+          deps += [ "$btframework_path" ]
           include_dirs += [
             "$inner_api_path",
             "$inner_api_path/c_header",
@@ -356,8 +347,10 @@ if (defined(ohos_lite)) {
       defines += DISC_SERVER_DEFINES
       defines += CONN_SERVER_DEFINES
       defines += [ "__STDC_FORMAT_MACROS" ]
-      defines += G_ENHANCE_DISC_FUNC_PACK_BLE_DEFINES
-      defines += G_ENHANCE_DISC_FUNC_PACK_DISC_COAP_DEFINES
+      if (!softbus_config_enhance) {
+        defines += G_ENHANCE_DISC_FUNC_PACK_BLE_DEFINES
+        defines += G_ENHANCE_DISC_FUNC_PACK_DISC_COAP_DEFINES
+      }
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
         "$dsoftbus_dfx_path/interface/include",
@@ -388,24 +381,24 @@ if (defined(ohos_lite)) {
         "common/src/softbus_server_frame.c",
       ]
       sources += [
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+        "$dsoftbus_root_path/adapter/manager/softbus_adapter_init.c",
+        "$dsoftbus_root_path/core/authentication/manager/softbus_authentication_init.c",
+        "$dsoftbus_root_path/core/bus_center/lnn/manager/softbus_lnn_init.c",
+        "$dsoftbus_root_path/core/connection/manager/softbus_conn_init.c",
+        "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_init.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func_pack.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
         "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func.c",
-        "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
-        "$dsoftbus_root_path/core/bus_center/lnn/manager/softbus_lnn_init.c",
-        "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_init.c",
+        "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func_pack.c",
         "$dsoftbus_root_path/core/transmission/manager/softbus_trans_init.c",
-        "$dsoftbus_root_path/core/authentication/manager/softbus_authentication_init.c",
-        "$dsoftbus_root_path/core/connection/manager/softbus_conn_init.c",
-        "$dsoftbus_root_path/adapter/manager/softbus_adapter_init.c",
       ]
       include_dirs += [
         "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
@@ -423,17 +416,16 @@ if (defined(ohos_lite)) {
       ]
       deps = dsoftbus_server_common_deps
       deps += [
-        ":softbus_permission_json",
         ":softbus_lnn_permission_json",
+        ":softbus_permission_json",
         ":softbus_rpc_sa_permission_json",
         ":softbus_server.rc",
 
         # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
         # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
-        "$dsoftbus_root_path/core/common:softbus_utils",
-
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "$dsoftbus_root_path/sdk:softbus_client",
       ]
@@ -477,6 +469,10 @@ if (defined(ohos_lite)) {
           ]
         }
         if (!defined(global_parts_info) ||
+            defined(global_parts_info.communication_netmanager_base)) {
+          external_deps += [ "netmanager_base:net_policy_manager_if" ]
+        }
+        if (!defined(global_parts_info) ||
             defined(global_parts_info.bundlemanager_bundle_framework)) {
           cflags = [ "-DSUPPORT_BUNDLENAME" ]
         }
@@ -490,16 +486,14 @@ if (defined(ohos_lite)) {
       }
       if (defined(global_parts_info) &&
           defined(global_parts_info.hmoshiviewdfx_hiview_xcommradar_plugin)) {
-        include_dirs += [
-          "$dsoftbus_root_path/../../../vendor/huawei/base/hiviewdfx/hiview_plugins/communication_radar_plugin/interfaces/inner_api/communication_radar",
-          "$dsoftbus_dfx_path/statistics/include",
-        ]
+        include_dirs += [ "$dsoftbus_dfx_path/statistics/include" ]
         sources += [
           "$dsoftbus_dfx_path/statistics/instant/bt_statistic.cpp",
           "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
           "$dsoftbus_dfx_path/statistics/instant/wifi_statistic.cpp",
         ]
-        external_deps += [ "hiview_xcommradar_plugin:communication_radar_client" ]
+        external_deps +=
+            [ "hiview_xcommradar_plugin:communication_radar_client" ]
       } else {
         sources += [ "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp" ]
       }

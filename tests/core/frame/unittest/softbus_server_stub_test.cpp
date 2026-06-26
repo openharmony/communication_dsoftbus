@@ -2511,9 +2511,9 @@ HWTEST_F(SoftbusServerStubTest, InitMemberConstraintSetTest001, TestSize.Level1)
     EXPECT_GT(softBusServer->memberConstraintSet_.size(), 0u);
 
     EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_JOIN_LNN) > 0);
-    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_LEAVE_LNN) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_START_TIME_SYNC) > 0);
     EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SET_NODE_DATA_CHANGE_FLAG) > 0);
-    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_GET_NODE_KEY_INFO) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_GET_ALL_ONLINE_NODE_INFO) > 0);
 }
 
 /*
@@ -2527,7 +2527,7 @@ HWTEST_F(SoftbusServerStubTest, InitMemberConstraintSetTest002, TestSize.Level1)
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(softBusServer, nullptr);
 
-    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_GET_NODE_KEY_INFO) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SET_DATA_LEVEL) > 0);
     EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SET_NODE_DATA_CHANGE_FLAG) > 0);
     EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SHIFT_LNN_GEAR) > 0);
     EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_ACTIVE_META_NODE) > 0);
@@ -2547,9 +2547,9 @@ HWTEST_F(SoftbusServerStubTest, InitMemberConstraintSetTest003, TestSize.Level1)
     ASSERT_NE(softBusServer, nullptr);
 
     EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SET_DATA_LEVEL) > 0);
-    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_REG_DATA_LEVEL_CHANGE_CB) > 0);
-    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_UNREG_DATA_LEVEL_CHANGE_CB) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_TRIGGER_RANGE_FOR_MSDP) > 0);
     EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_SYNC_TRUSTED_RELATION) > 0);
+    EXPECT_TRUE(softBusServer->memberConstraintSet_.count(SERVER_STOP_TIME_SYNC) > 0);
 }
 
 /*
@@ -2684,7 +2684,7 @@ HWTEST_F(SoftbusServerStubTest, CheckAccountConstraintTest004, TestSize.Level1)
     ASSERT_NE(softBusServer, nullptr);
     int32_t ret = softBusServer->CheckAccountConstraint(SERVER_JOIN_LNN);
     EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
-    ret = softBusServer->CheckAccountConstraint(SERVER_LEAVE_LNN);
+    ret = softBusServer->CheckAccountConstraint(SERVER_SET_NODE_DATA_CHANGE_FLAG);
     EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
     ret = softBusServer->CheckAccountConstraint(SERVER_SHIFT_LNN_GEAR);
     EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
