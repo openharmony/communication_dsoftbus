@@ -188,8 +188,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
 
 int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
 {
-    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) ||
-        !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) || !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = TransSessionServerDelItem(sessionName);

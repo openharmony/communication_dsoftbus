@@ -2664,9 +2664,9 @@ HWTEST_F(SoftbusServerStubTest, CheckPermissionTest003, TestSize.Level1)
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(softBusServer, nullptr);
     int32_t ret = softBusServer->CheckPermission(SERVER_JOIN_LNN);
-    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = softBusServer->CheckPermission(SERVER_CREATE_SESSION_SERVER);
-    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*

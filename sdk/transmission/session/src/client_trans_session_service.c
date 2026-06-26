@@ -637,7 +637,7 @@ int32_t GetSessionSide(int32_t sessionId)
 
 static bool IsValidFileReceivePath(const char *rootDir)
 {
-    if (!IsValidStringSafe(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX)) {
+    if (!IsValidStringSafe(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX + 1)) {
         TRANS_LOGE(TRANS_SDK, "recvPath invalid. recvPath=%{private}s", rootDir);
         return false;
     }

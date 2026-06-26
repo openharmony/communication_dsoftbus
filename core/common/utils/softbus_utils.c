@@ -322,7 +322,7 @@ bool IsValidStringSafe(const char *input, uint32_t maxLen)
         COMM_LOGE(COMM_UTILS, "input is null");
         return false;
     }
-    uint32_t len = strnlen(input, maxLen);
+    size_t len = strnlen(input, maxLen);
     if (len == 0) {
         COMM_LOGE(COMM_UTILS, "empty string");
         return false;

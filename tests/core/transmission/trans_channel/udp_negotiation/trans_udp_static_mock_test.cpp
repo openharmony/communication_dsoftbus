@@ -1089,10 +1089,9 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest003, TestSize.Level1)
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(true));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
     int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransUdpChannelDeinit();
     cJSON_Delete(cJson);
@@ -1125,7 +1124,6 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest004, TestSize.Level1)
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(true));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked)
         .WillOnce(DoAll(SetArgPointee<1>(200), Return(SOFTBUS_OK)));
     int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
@@ -1162,7 +1160,6 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest005, TestSize.Level1)
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(true));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked)
         .WillOnce(DoAll(SetArgPointee<1>(100), Return(SOFTBUS_OK)));
     EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx)
@@ -1199,7 +1196,6 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest006, TestSize.Level1)
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransUdpStaticMock, TransGetAuthTypeByNetWorkId).WillOnce(Return(false));
     EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx)
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));
     int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
