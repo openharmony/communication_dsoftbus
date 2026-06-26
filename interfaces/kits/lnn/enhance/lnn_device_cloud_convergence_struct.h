@@ -33,11 +33,12 @@ extern "C" {
 typedef enum {
     TYPE_LNN_FAST_OFFLINE = 0,
     TYPE_AGENT_COMMUNICATION,
+    WATCH_WECHAT,
     TYPE_BUFF,
-} CloudBusinessType;
+} FarFieldBusiness;
 
 typedef void (*FragmentRecvCallback)(const char *udid, const char *data,
-    uint32_t dataLen, CloudBusinessType businessType);
+    uint32_t dataLen, FarFieldBusiness businessType);
 
 typedef struct {
     uint8_t *buffer;
@@ -47,7 +48,7 @@ typedef struct {
 typedef struct {
     const char *msg;
     uint32_t msgLen;
-    CloudBusinessType businessType;
+    FarFieldBusiness businessType;
 } InputMsg;
 
 typedef struct {
