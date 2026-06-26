@@ -542,7 +542,7 @@ void TransBuildOpenAuthChannelStartEvent(TransEventExtra *extra, const char *ses
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return;
     }
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return;
     }

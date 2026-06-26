@@ -171,12 +171,12 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest006, TestSize.Level1)
     char networkId[NETWORK_ID_BUF_LEN] = "test";
     TransDataType dataType = DATA_TYPE_BYTES;
 
-    EXPECT_CALL(softbusServerMock, IsValidString(_, _))
+    EXPECT_CALL(softbusServerMock, IsValidStringSafe(_, _))
         .WillRepeatedly(Return(false));
     int32_t ret = softBusServer->EvaluateQos(networkId, dataType, nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    EXPECT_CALL(softbusServerMock, IsValidString(_, _))
+    EXPECT_CALL(softbusServerMock, IsValidStringSafe(_, _))
         .WillRepeatedly(Return(true));
     ret = softBusServer->EvaluateQos(networkId, dataType, nullptr, 0);
     EXPECT_EQ(SOFTBUS_NETWORK_NODE_OFFLINE, ret);
@@ -238,7 +238,7 @@ HWTEST_F(SoftbusServerTest, SoftbusServerTest009, TestSize.Level1)
     EXPECT_NE(softBusServer, nullptr);
 
     NiceMock<SoftbusServerTestInterfaceMock> softbusServerMock;
-    EXPECT_CALL(softbusServerMock, IsValidString(_, _))
+    EXPECT_CALL(softbusServerMock, IsValidStringSafe(_, _))
         .WillRepeatedly(Return(true));
 
     ConnectionAddr addr1;

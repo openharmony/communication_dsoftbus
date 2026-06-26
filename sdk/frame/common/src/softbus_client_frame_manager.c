@@ -245,7 +245,7 @@ ERR_EXIT:
 int32_t InitSoftBus(const char *pkgName)
 {
     ClientFuncInit();
-    COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1),
+    COMM_CHECK_AND_RETURN_RET_LOGE(IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX),
         SOFTBUS_INVALID_PKGNAME, COMM_SDK, "init softbus sdk fail. Package name is empty or length exceeds");
 
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(

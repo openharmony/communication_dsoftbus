@@ -106,7 +106,7 @@ static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
 
 int32_t CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) || !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidListener(listener)) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -149,7 +149,7 @@ int32_t CreateSessionServer(const char *pkgName, const char *sessionName, const 
 
 int32_t RemoveSessionServer(const char *pkgName, const char *sessionName)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) || !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -182,21 +182,21 @@ int32_t RemoveSessionServer(const char *pkgName, const char *sessionName)
 static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSessionName,
     const char *peerNetworkId, const char *groupId, const SessionAttribute *attr)
 {
-    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(mySessionName, SESSION_NAME_SIZE_MAX)) {
         char *tmpMyName = NULL;
         Anonymize(mySessionName, &tmpMyName);
         TRANS_LOGE(TRANS_SDK, "invalid mySessionName. tmpMyName=%{public}s", AnonymizeWrapper(tmpMyName));
         AnonymizeFree(tmpMyName);
         return SOFTBUS_TRANS_INVALID_SESSION_NAME;
     }
-    if (!IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(peerSessionName, SESSION_NAME_SIZE_MAX)) {
         char *tmpPeerName = NULL;
         Anonymize(peerSessionName, &tmpPeerName);
         TRANS_LOGE(TRANS_SDK, "invalid peerSessionName. tmpPeerName=%{public}s", AnonymizeWrapper(tmpPeerName));
         AnonymizeFree(tmpPeerName);
         return SOFTBUS_TRANS_INVALID_SESSION_NAME;
     }
-    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         char *tmpPeerNetworkId = NULL;
         Anonymize(peerNetworkId, &tmpPeerNetworkId);
         TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId. tmpPeerNetworkId=%{public}s", AnonymizeWrapper(tmpPeerNetworkId));
@@ -322,7 +322,7 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     if (GetJsonObjectStringItem(obj, "ETH_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
         GetJsonObjectNumberItem(obj, "ETH_PORT", &port)) {
         addrInfo->info.ip.port = (uint16_t)port;
-        if (IsValidString(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
+        if (IsValidStringSafe(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
             cJSON_Delete(obj);
             addrInfo->type = CONNECTION_ADDR_ETH;
             return SOFTBUS_OK;
@@ -331,7 +331,7 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
     if (GetJsonObjectStringItem(obj, "WIFI_IP", addrInfo->info.ip.ip, IP_STR_MAX_LEN) &&
         GetJsonObjectNumberItem(obj, "WIFI_PORT", &port)) {
         addrInfo->info.ip.port = (uint16_t)port;
-        if (IsValidString(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
+        if (IsValidStringSafe(addrInfo->info.ip.ip, IP_STR_MAX_LEN) && addrInfo->info.ip.port > 0) {
             cJSON_Delete(obj);
             addrInfo->type = CONNECTION_ADDR_WLAN;
             return SOFTBUS_OK;
@@ -401,7 +401,7 @@ static int32_t IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int32_t num)
 
 int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo, int32_t num, const char *mixAddr)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGW(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -637,7 +637,7 @@ int32_t GetSessionSide(int32_t sessionId)
 
 static bool IsValidFileReceivePath(const char *rootDir)
 {
-    if (!IsValidString(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX)) {
+    if (!IsValidStringSafe(rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX)) {
         TRANS_LOGE(TRANS_SDK, "recvPath invalid. recvPath=%{private}s", rootDir);
         return false;
     }
@@ -653,7 +653,7 @@ static bool IsValidFileReceivePath(const char *rootDir)
 int32_t SetFileReceiveListener(const char *pkgName, const char *sessionName,
     const IFileReceiveListener *recvListener, const char *rootDir)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) || !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidFileReceivePath(rootDir) || (recvListener == NULL)) {
         TRANS_LOGW(TRANS_SDK, "set file receive listener invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -671,7 +671,7 @@ int32_t SetFileReceiveListener(const char *pkgName, const char *sessionName,
 
 int32_t SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) ||
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) || !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX) ||
         sendListener == NULL) {
         TRANS_LOGW(TRANS_SDK, "set file send listener invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -923,7 +923,7 @@ bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName, i
 
 int32_t CreateSocket(const char *pkgName, const char *sessionName)
 {
-    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) || !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_SDK, "invalid pkgName or sessionName");
         return SOFTBUS_INVALID_PARAM;
     }

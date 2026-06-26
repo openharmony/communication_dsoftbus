@@ -37,13 +37,13 @@
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
-    if (!IsValidString(info->name, SESSION_NAME_SIZE_MAX - 1) ||
-        !IsValidString(info->pkgName, PKG_NAME_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(info->name, SESSION_NAME_SIZE_MAX) ||
+        !IsValidStringSafe(info->pkgName, PKG_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_SDK, "invalid name or package name of socket");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->peerName != NULL && !IsValidString(info->peerName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (info->peerName != NULL && !IsValidStringSafe(info->peerName, SESSION_NAME_SIZE_MAX)) {
         char *anonySessionName = NULL;
         Anonymize(info->peerName, &anonySessionName);
         TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
@@ -52,7 +52,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->peerNetworkId != NULL && !IsValidString(info->peerNetworkId, DEVICE_ID_SIZE_MAX - 1)) {
+    if (info->peerNetworkId != NULL && !IsValidStringSafe(info->peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         char *anonyNetworkId = NULL;
         Anonymize(info->peerNetworkId, &anonyNetworkId);
         TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId failed, peerNetworkId=%{public}s, peerNetworkIdLen=%{public}zu",
@@ -322,7 +322,7 @@ void Shutdown(int32_t socket)
 
 int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
 {
-    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) || dataType >= DATA_TYPE_BUTT ||
+    if (!IsValidStringSafe(peerNetworkId, DEVICE_ID_SIZE_MAX) || dataType >= DATA_TYPE_BUTT ||
         (qos == NULL && qosCount != 0) || (qosCount > QOS_TYPE_BUTT)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;

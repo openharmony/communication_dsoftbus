@@ -316,6 +316,24 @@ bool IsValidString(const char *input, uint32_t maxLen)
     return true;
 }
 
+bool IsValidStringSafe(const char *input, uint32_t maxLen)
+{
+    if (input == NULL) {
+        COMM_LOGE(COMM_UTILS, "input is null");
+        return false;
+    }
+    uint32_t len = strnlen(input, maxLen);
+    if (len == 0) {
+        COMM_LOGE(COMM_UTILS, "empty string");
+        return false;
+    }
+    if (len == maxLen) {
+        COMM_LOGE(COMM_UTILS, "string length exceeds maxLen=%{public}u, no room for terminator", maxLen);
+        return false;
+    }
+    return true;
+}
+
 int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac,
     uint32_t binMacLen)
 {

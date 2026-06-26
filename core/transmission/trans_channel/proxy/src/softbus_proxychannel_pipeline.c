@@ -178,7 +178,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
-    if (!IsValidString(networkId, ID_MAX_LEN)) {
+    if (!IsValidStringSafe(networkId, ID_MAX_LEN)) {
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "option invalid");
@@ -260,7 +260,7 @@ int32_t TransProxyPipelineSendMessage(
 int32_t TransProxyPipelineGetChannelIdByNetworkId(const char *networkId)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
-    if (!IsValidString(networkId, ID_MAX_LEN)) {
+    if (!IsValidStringSafe(networkId, ID_MAX_LEN)) {
         return SOFTBUS_INVALID_PARAM;
     }
     char uuid[UUID_BUF_LEN] = { 0 };
