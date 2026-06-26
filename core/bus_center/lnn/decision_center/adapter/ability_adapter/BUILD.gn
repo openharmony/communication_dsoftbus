@@ -16,33 +16,33 @@ import("../../../../../../dsoftbus.gni")
 
 ability_adapter_path = rebase_path(".")
 
-ability_adapter_src = [
-  "$ability_adapter_path/ability_adapter.cpp",
-]
-
 ability_adapter_inc = [
   "$ability_adapter_path",
 ]
 
 ohos_shared_library("ability_adapter") {
   include_dirs = ability_adapter_inc
-  sources = ability_adapter_src
-
-  deps = [
-    "$dsoftbus_dfx_path:softbus_dfx",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-  ]
-  external_deps = [
-    "c_utils:utils",
-    "ability_base:configuration",
-    "ability_runtime:ability_manager",
-    "ability_runtime:app_manager",
-    "ability_runtime:extension_manager",
-    "samgr:samgr_proxy",
-    "hicollie:libhicollie",
-    "hilog:libhilog",
-    "ipc:ipc_single",
-  ]
+  if (is_standard_system && (!defined(global_parts_info) ||
+    defined(global_parts_info.resourceschedule_device_standby))) {
+      deps = [
+        "$dsoftbus_dfx_path:softbus_dfx",
+        "$dsoftbus_root_path/core/common:softbus_utils",
+      ]
+      external_deps = [
+        "c_utils:utils",
+        "ability_base:configuration",
+        "ability_runtime:ability_manager",
+        "ability_runtime:app_manager",
+        "ability_runtime:extension_manager",
+        "samgr:samgr_proxy",
+        "hicollie:libhicollie",
+        "hilog:libhilog",
+        "ipc:ipc_single",
+      ]
+      sources = [ "$ability_adapter_path/ability_adapter.cpp" ]
+    } else {
+      sources = [ "$ability_adapter_path/ability_adapter_virtual.cpp" ]
+    }
 
   cflags = [
     "-fPIC",

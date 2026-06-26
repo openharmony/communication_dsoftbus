@@ -108,7 +108,7 @@ public:
         const char *data, uint32_t len);
     virtual int32_t RegisterConversationListener(const ConversationBusiness *info);
     virtual void UnregisterConversationListener(const ConversationBusiness *info);
-    virtual int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
+    virtual int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums);
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");
 };

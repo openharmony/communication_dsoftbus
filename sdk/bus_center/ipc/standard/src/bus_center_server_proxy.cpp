@@ -442,6 +442,6 @@ int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
         LNN_EVENT, "server not init");
-    int32_t ret = g_serverProxy->GetTrustedDevices(info, nums);
+    int32_t ret = g_serverProxy->GetTrustedDevice(info, nums);
     return ret;
 }

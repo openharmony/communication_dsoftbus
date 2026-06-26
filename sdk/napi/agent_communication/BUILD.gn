@@ -18,7 +18,7 @@ ohos_shared_library("agentcommunication") {
   sources = []
   deps = []
   external_deps = []
-  if (dsoftbus_feature_conn_general) {
+  if (!dsoftbus_feature_compile_guard) {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_sdk_path/napi/agent_communication/include",
@@ -39,6 +39,8 @@ ohos_shared_library("agentcommunication") {
     
     external_deps = [
       "c_utils:utils",
+      "access_token:libtokenid_sdk",
+      "ipc:ipc_core",
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "napi:ace_napi",

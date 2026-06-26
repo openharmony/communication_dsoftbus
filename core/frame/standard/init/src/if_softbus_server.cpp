@@ -285,7 +285,7 @@ int32_t ISoftBusServer::ProcessAccountAuth(const char *pkgName, int64_t requestI
     return SOFTBUS_IPC_ERR;
 }
 
-int32_t ISoftBusServer::GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+int32_t ISoftBusServer::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
 {
     (void)info;
     (void)nums;

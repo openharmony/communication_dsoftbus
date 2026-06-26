@@ -52,12 +52,12 @@ typedef struct {
  * @since 1.0
  * @version 1.0
  */
-int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
+int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums);
 
 /**
- * @brief Releases the memory returned by {@link GetTrustedDevices}.
+ * @brief Releases the memory returned by {@link GetTrustedDevice}.
  *
- * @param info Indicates the pointer to the memory returned by {@link GetTrustedDevices}.
+ * @param info Indicates the pointer to the memory returned by {@link GetTrustedDevice}.
  *
  * @since 1.0
  * @version 1.0

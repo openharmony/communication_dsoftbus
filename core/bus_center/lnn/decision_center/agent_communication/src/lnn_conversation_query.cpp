@@ -21,7 +21,6 @@
 #include <securec.h>
 #include <thread>
 
-#include "ability_connect_callback_stub.h"
 #include "anonymizer.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
@@ -44,7 +43,6 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_utils.h"
-#include "system_ability_definition.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"

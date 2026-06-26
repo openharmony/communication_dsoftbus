@@ -71,7 +71,7 @@ public:
         const char *data, uint32_t len) override;
     int32_t RegisterConversationListener(const ConversationBusiness *info) override;
     void UnregisterConversationListener(const ConversationBusiness *info) override;
-    int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums) override;
+    int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums) override;
 private:
     static inline BrokerDelegator<SoftBusServerProxyFrame> delegator_;
     static sptr<IRemoteObject> clientCallbackStub_;

@@ -73,16 +73,16 @@ HWTEST_F(BusCenterClientAgentTest, GetTrustedDevices_Test001, TestSize.Level1)
 {
     DeviceNodeInfo *info = nullptr;
     int32_t nums = 0;
-    int32_t ret = GetTrustedDevices(nullptr, nullptr);
+    int32_t ret = GetTrustedDevice(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
  
-    ret = GetTrustedDevices(&info, nullptr);
+    ret = GetTrustedDevice(&info, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
  
-    ret = GetTrustedDevices(nullptr, &nums);
+    ret = GetTrustedDevice(nullptr, &nums);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
  
-    ret = GetTrustedDevices(&info, &nums);
+    ret = GetTrustedDevice(&info, &nums);
     if (info != nullptr) {
         EXPECT_NO_FATAL_FAILURE(FreeDeviceNodeInfo(info));
     }

@@ -254,7 +254,7 @@
         "SetNodeKeyInfo";
         "StartAccountAuth";
         "ProcessAccountAuth";
-        "GetTrustedDevices";
+        "GetTrustedDevice";
         "FreeDeviceNodeInfo";
         "PostConversationData";
         "RegisterConversationListener";

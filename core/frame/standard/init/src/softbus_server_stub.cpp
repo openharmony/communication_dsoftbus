@@ -2739,7 +2739,7 @@ int32_t SoftBusServerStub::GetTrustedDevicesInner(MessageParcel &data, MessagePa
     }
     DeviceNodeInfo *nodeInfo = nullptr;
     int32_t infoNum = 0;
-    int32_t retReply = GetTrustedDevices(&nodeInfo, &infoNum);
+    int32_t retReply = GetTrustedDevice(&nodeInfo, &infoNum);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed!");
         SoftBusFree(nodeInfo);

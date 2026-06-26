@@ -31,6 +31,7 @@ constexpr size_t REGISTER_ARGS_SIZE = 3;
 bool ParseString(napi_env env, std::string &param, napi_value args);
 int32_t ConvertToJsErrcode(int32_t err);
 void ThrowBusinessError(const napi_env &env, int32_t errCode);
+napi_value CreateBusinessErrorValue(napi_env env, int32_t errCode);
  
 } // namespace Softbus
 } // namespace Communication

@@ -99,6 +99,27 @@ void ThrowBusinessError(const napi_env &env, int32_t errCode)
         napi_throw_error(env, std::to_string(errCode).c_str(), errMsg.c_str());
     }
 }
+
+napi_value CreateBusinessErrorValue(napi_env env, int32_t errCode)
+{
+    if (errCode == CONVERSATION_OK) {
+        napi_value undefined;
+        napi_get_undefined(env, &undefined);
+        return undefined;
+    }
+    std::string errMsg = "";
+    auto iter = napiErrMsgMap.find(errCode);
+    if (iter != napiErrMsgMap.end()) {
+        errMsg = iter->second;
+    }
+    napi_value code;
+    napi_create_int32(env, errCode, &code);
+    napi_value msg;
+    napi_create_string_utf8(env, errMsg.c_str(), errMsg.size(), &msg);
+    napi_value error;
+    napi_create_error(env, code, msg, &error);
+    return error;
+}
  
 } // namespace Softbus
 } // namespace Communication

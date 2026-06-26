@@ -151,7 +151,7 @@ void UnregisterConversationListener(const ConversationBusiness *info)
     UnregisterConversationListenerInner(info);
 }
 
-int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
 {
     LNN_LOGI(LNN_EVENT,  "enter");
     LNN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid info");

@@ -20,6 +20,8 @@
 #include "securec.h"
 #include <dlfcn.h>
 
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
@@ -34,6 +36,12 @@ static std::mutex g_callbackMutex;
 #define ARGC_ONE 1
 #define ARGC_TWO 2
 #define ARGC_THREE 3
+
+bool IsSystemApp()
+{
+    uint64_t tokenId = ::OHOS::IPCSkeleton::GetSelfTokenID();
+    return ::OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
 
 static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *context, void *rawData)
 {
@@ -104,7 +112,8 @@ static void CompleteSendMsg(napi_env env, napi_status status, void *data)
 
     SendMsgContext *ctx = static_cast<SendMsgContext *>(data);
     if (ctx->resultCode != CONVERSATION_OK) {
-        napi_reject_deferred(env, ctx->deferred, nullptr);
+        napi_value error = CreateBusinessErrorValue(env, ctx->resultCode);
+        napi_reject_deferred(env, ctx->deferred, error);
     } else {
         napi_value result;
         napi_get_undefined(env, &result);
@@ -121,10 +130,21 @@ static napi_value NapiGetTrustedDevicesSync(napi_env env, napi_value thisVar)
     napi_value resultArray;
     napi_create_array(env, &resultArray);
 
+    if (!IsSystemApp()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
+        return resultArray;
+    }
+
     DeviceNodeInfo *list = nullptr;
     int32_t nums = 0;
-    int32_t resultCode = ConvertToJsErrcode(GetTrustedDevices(&list, &nums));
-    if (resultCode == 0 && nums > 0) {
+    int32_t resultCode = ConvertToJsErrcode(GetTrustedDevice(&list, &nums));
+    if (resultCode != CONVERSATION_OK) {
+        if (list != nullptr) {
+            FreeDeviceNodeInfo(list);
+        }
+        ThrowBusinessError(env, resultCode);
+        return resultArray;
+    } else if (nums > 0) {
         for (int i = 0; i < nums; ++i) {
             napi_value jsDevice;
             napi_create_object(env, &jsDevice);
@@ -165,67 +185,74 @@ static napi_value NapiGetTrustedDevicesWrapper(napi_env env, napi_callback_info 
     napi_value thisVar = nullptr;
     return NapiGetTrustedDevicesSync(env, thisVar);
 }
-
-static napi_value NapiPostConversationDataAsync(napi_env env, napi_callback_info info)
+static bool ParseSendMsgParams(napi_env env, size_t argc, napi_value *argv, SendMsgContext *ctx)
 {
-    napi_value promise;
-    auto *ctx = new SendMsgContext();
-    ctx->env = env;
-    size_t argc = SEND_ARGS_SIZE;
-    napi_value argv[SEND_ARGS_SIZE];
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < SEND_ARGS_SIZE) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
-        delete ctx;
-        return nullptr;
+        return false;
     }
-    if (!ParseString(env, ctx->deviceId, argv[0]) || !ParseString(env, ctx->bundleName, argv[1]) ||
-        !ParseString(env, ctx->abilityName, argv[2])) {
+    if (!ParseString(env, ctx->deviceId, argv[0]) || !ParseString(env, ctx->bundleName, argv[ARGC_ONE]) ||
+        !ParseString(env, ctx->abilityName, argv[ARGC_TWO])) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
-        delete ctx;
-        return nullptr;
+        return false;
     }
- 
+
     napi_valuetype valueType;
-    napi_typeof(env, argv[3], &valueType);
+    napi_typeof(env, argv[ARGC_THREE], &valueType);
     if (valueType != napi_object) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
-        delete ctx;
-        return nullptr;
+        return false;
     }
- 
+
     bool isArrayBuffer = false;
-    napi_is_arraybuffer(env, argv[3], &isArrayBuffer);
+    napi_is_arraybuffer(env, argv[ARGC_THREE], &isArrayBuffer);
     if (!isArrayBuffer) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
-        delete ctx;
-        return nullptr;
+        return false;
     }
- 
+
     void *data = nullptr;
     size_t byteLen = 0;
-    napi_get_arraybuffer_info(env, argv[3], &data, &byteLen);
+    napi_get_arraybuffer_info(env, argv[ARGC_THREE], &data, &byteLen);
     if (data == nullptr || byteLen == 0) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
-        delete ctx;
-        return nullptr;
+        return false;
     }
- 
+
     ctx->msg = new uint8_t[byteLen];
     if (ctx->msg == nullptr) {
         ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
-        delete ctx;
-        return nullptr;
+        return false;
     }
     ctx->msgLen = static_cast<uint32_t>(byteLen);
     if (memcpy_s(ctx->msg, ctx->msgLen, data, byteLen) != 0) {
         delete[] ctx->msg;
         ctx->msg = nullptr;
         ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
+        return false;
+    }
+    return true;
+}
+
+static napi_value NapiPostConversationDataAsync(napi_env env, napi_callback_info info)
+{
+    if (!IsSystemApp()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
+        return nullptr;
+    }
+
+    auto *ctx = new SendMsgContext();
+    ctx->env = env;
+    size_t argc = SEND_ARGS_SIZE;
+    napi_value argv[SEND_ARGS_SIZE];
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (!ParseSendMsgParams(env, argc, argv, ctx)) {
         delete ctx;
         return nullptr;
     }
 
+    napi_value promise;
     napi_create_promise(env, &ctx->deferred, &promise);
     napi_value resourceName;
     napi_create_string_utf8(env, "SendMsgAsync", NAPI_AUTO_LENGTH, &resourceName);
@@ -327,6 +354,10 @@ static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc
 
 static napi_value NapiRegisterConversationListenerWarpper(napi_env env, napi_callback_info info)
 {
+    if (!IsSystemApp()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
+        return nullptr;
+    }
     size_t argc = REGISTER_ARGS_SIZE;
     napi_value argv[REGISTER_ARGS_SIZE];
     napi_value thisVar;
@@ -370,6 +401,10 @@ static napi_value NapiunRegisterConversationListenerSync(napi_env env, size_t ar
 
 static napi_value NapiUnregisterConversationListenerWarpper(napi_env env, napi_callback_info info)
 {
+    if (!IsSystemApp()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
+        return nullptr;
+    }
     size_t argc = ARGS_SIZE_TWO;
     napi_value argv[ARGS_SIZE_TWO];
     napi_value thisVar;

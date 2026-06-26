@@ -166,11 +166,11 @@ typedef enum {
     FIND_REMOTE_CIPHERKEY_FAILED = 32,
 } ConnectOnlineReason;
 
- typedef enum {
- 	     CONVERSATION_CHANNEL_NEARBY = 0,
- 	     CONVERSATION_CHANNEL_PUSH = 1,
- 	     CONVERSATION_CHANNEL_P2P = 2,
- 	 } ConversationChannelType;
+typedef enum {
+    CONVERSATION_CHANNEL_NEARBY = 0,
+    CONVERSATION_CHANNEL_PUSH = 1,
+    CONVERSATION_CHANNEL_P2P = 2,
+} ConversationChannelType;
 
 typedef struct {
     int32_t result;             // STAGE_RES
