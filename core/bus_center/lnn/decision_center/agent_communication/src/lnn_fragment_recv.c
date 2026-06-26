@@ -33,7 +33,7 @@
 typedef struct {
     ListNode node;
     uint32_t msgId;              // 消息 ID
-    CloudBusinessType moduleType; // 模块类型
+    FarFieldBusiness moduleType; // 模块类型
     uint64_t createTime;          // 创建时间戳，用于超时清理
 } FragmentRecvContext;
 
@@ -86,7 +86,7 @@ static FragmentRecvContext *FindFragmentContext(uint32_t msgId)
     return NULL;
 }
 
-static FragmentRecvContext *CreateFragmentContext(uint32_t msgId, CloudBusinessType moduleType)
+static FragmentRecvContext *CreateFragmentContext(uint32_t msgId, FarFieldBusiness moduleType)
 {
     FragmentRecvContext *ctx = (FragmentRecvContext *)SoftBusCalloc(sizeof(FragmentRecvContext));
     if (ctx == NULL) {
@@ -135,7 +135,7 @@ void FragmentRecvClearAll(void)
     LNN_LOGI(LNN_EVENT, "clear all fragment recv context");
 }
 
-static bool ParseModuleType(const uint8_t *data, CloudBusinessType *moduleType)
+static bool ParseModuleType(const uint8_t *data, FarFieldBusiness *moduleType)
 {
     // 解析 FarFiledPktHead 包头
     FarFiledPktHead header;
@@ -158,7 +158,7 @@ static bool ParseModuleType(const uint8_t *data, CloudBusinessType *moduleType)
         return false;
     }
 
-    *moduleType = (CloudBusinessType)header.type;
+    *moduleType = (FarFieldBusiness)header.type;
     if (*moduleType >= TYPE_BUFF) {
         LNN_LOGE(LNN_EVENT, "invalid moduleType=%{public}d", *moduleType);
         return false;
@@ -179,7 +179,7 @@ static void CleanupTimeoutContexts(void)
     }
 }
 
-static int32_t GetOrCreateFragmentContext(uint32_t msgId, CloudBusinessType moduleType)
+static int32_t GetOrCreateFragmentContext(uint32_t msgId, FarFieldBusiness moduleType)
 {
     SoftBusMutexLock(&g_fragmentMutex);
     FragmentRecvContext *ctx = FindFragmentContext(msgId);
@@ -222,7 +222,7 @@ static int32_t ProcessSingleFragment(const char *udid, const uint8_t *data, uint
         return SOFTBUS_INVALID_PARAM;
     }
 
-    CloudBusinessType moduleType = TYPE_BUFF;
+    FarFieldBusiness moduleType = TYPE_BUFF;
     if (!ParseModuleType(data + *offset, &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
@@ -281,7 +281,7 @@ int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t data
     SoftBusMutexUnlock(&g_fragmentMutex);
 
     // 解析模块类型，判断是否需要分片处理
-    CloudBusinessType moduleType = TYPE_BUFF;
+    FarFieldBusiness moduleType = TYPE_BUFF;
     if (!ParseModuleType(data, &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
