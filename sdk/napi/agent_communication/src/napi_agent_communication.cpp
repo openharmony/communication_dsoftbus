@@ -337,7 +337,6 @@ static napi_value NapiRegisterConversationListenerWarpper(napi_env env, napi_cal
 
 static napi_value NapiunRegisterConversationListenerSync(napi_env env, size_t argc, napi_value *argv)
 {
-    napi_value ret;
     if (argc < ARGC_TWO) {
         COMM_LOGE(COMM_SDK, "Need bundleName, abilityName");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
