@@ -349,6 +349,18 @@ ohos_fuzztest("SoftbusClientOnNodeOnlineStateChangedFuzzTest") {
   fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
 }
 
+ohos_fuzztest("SoftbusClientOnNodeStatusChangedFuzzTest") {
+
+  sources = [ "softbusclientonnodestatuschanged_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
 ohos_fuzztest("SoftbusClientOnPublishLNNResultFuzzTest") {
 
   sources = [ "softbusclientonpublishlnnresult_fuzzer.cpp" ]
@@ -510,6 +522,7 @@ group("fuzztest") {
     ":SoftbusClientOnLeaveMetaNodeResultFuzzTest",
     ":SoftbusClientOnNodeBasicInfoChangedFuzzTest",
     ":SoftbusClientOnNodeOnlineStateChangedFuzzTest",
+    ":SoftbusClientOnNodeStatusChangedFuzzTest",
     ":SoftbusClientOnPublishLNNResultFuzzTest",
     ":SoftbusClientOnRefreshDeviceFoundFuzzTest",
     ":SoftbusClientOnRefreshLNNResultFuzzTest",
