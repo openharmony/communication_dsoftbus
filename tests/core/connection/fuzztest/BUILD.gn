@@ -20,9 +20,12 @@ group("fuzztest") {
   if (dsoftbus_feature_conn_pv1 == true &&
       softbus_communication_wifi_feature == true) {
     deps = [
+      "authnegotiatechannelai_fuzzer:AuthNegotiateChannelAiFuzzTest",
       "authnegotiatechannelimproved_fuzzer:AuthNegotiateChannelImprovedFuzzTest",
+      "jsonprotocolai_fuzzer:JsonProtocolAiFuzzTest",
       "proxynegotiatechannelimproved_fuzzer:ProxyNegotiateChannelImprovedFuzzTest",
       "softbusnegotiatemessage_fuzzer:SoftBusNegotiateMessageFuzzTest",
+      "tlvprotocolai_fuzzer:TlvProtocolAiFuzzTest",
       "wifidirectp2padapter_fuzzer:WifiDirectP2pAdapterFuzzTest",
       "wifidirectprotocol_fuzzer:WifiDirectProtocolFuzzTest",
     ]

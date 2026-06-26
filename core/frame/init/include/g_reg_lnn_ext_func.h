@@ -396,6 +396,7 @@ typedef void (*LnnNotifyVirLinkReportEventFunc)(const uint8_t *data, uint32_t da
 typedef int32_t (*FragmentRecvProcessFunc)(const char *udid, const uint8_t *data, uint32_t dataLen,
     FragmentRecvCallback callback);
 typedef void (*OnRecvCloudQueryInfoFunc)(const char *udid, const char *data, uint32_t length);
+typedef void (*LnnNotifyDmHookRegisteredEventFunc)(void);
 
 #ifdef __cplusplus
 }

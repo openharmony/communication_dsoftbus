@@ -76,7 +76,8 @@
       "dsoftbus_feature_lnn_usb_ncm",
       "dsoftbus_feature_trans_mintp",
       "dsoftbus_feature_lnn_d2d_auth",
-      "dsoftbus_feature_trans_io_uring"
+      "dsoftbus_feature_trans_io_uring",
+      "dsoftbus_feature_lnn_push"
     ],
     "rom": "3000KB",
     "ram": "40MB",

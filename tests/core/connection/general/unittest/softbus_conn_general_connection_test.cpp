@@ -39,6 +39,13 @@ static bool g_isRecvNewConnection = false;
 static bool g_recvDataFlag = false;
 
 namespace OHOS {
+static void ConnectSuccess(GeneralConnectionParam *info, uint32_t generalHandle);
+static void ConnectFailed(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason);
+static void AcceptConnect(GeneralConnectionParam *info, uint32_t generalHandle);
+static void DataReceived(GeneralConnectionParam *info, uint32_t generalHandle, const uint8_t *data, uint32_t dataLen);
+static void ConnectionDisconnected(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason);
+static void GeneralServerStopped(GeneralConnectionParam *info);
+
 class GeneralConnectionTest : public testing::Test {
 public:
     GeneralConnectionTest() { }
@@ -49,14 +56,37 @@ public:
     void TearDown();
 };
 
-void GeneralConnectionTest::SetUpTestCase(void) { }
+void GeneralConnectionTest::SetUpTestCase(void)
+{
+    LooperInit();
+    SoftbusConfigInit();
+    auto ret = ConnServerInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
-void GeneralConnectionTest::TearDownTestCase(void) { }
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    EXPECT_NE(manager, nullptr);
 
-void GeneralConnectionTest::TearDown(void)
+    GeneralConnectionListener listener = {
+        .onConnectSuccess = ConnectSuccess,
+        .onConnectFailed = ConnectFailed,
+        .onAcceptConnect = AcceptConnect,
+        .onDataReceived = DataReceived,
+        .onConnectionDisconnected = ConnectionDisconnected,
+        .onServerStopped =  GeneralServerStopped,
+    };
+
+    ret = manager->registerListener(&listener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+void GeneralConnectionTest::TearDownTestCase(void)
 {
     ConnServerDeinit();
 }
+
+void GeneralConnectionTest::SetUp() { }
+
+void GeneralConnectionTest::TearDown() { }
 
 static OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t localId, uint32_t peerId)
 {
@@ -218,29 +248,6 @@ T GetConnGeneralRandomData()
     return objetct;
 }
 
-void GeneralConnectionTest::SetUp(void)
-{
-    LooperInit();
-    SoftbusConfigInit();
-    auto ret = ConnServerInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    GeneralConnectionManager *manager = GetGeneralConnectionManager();
-    EXPECT_NE(manager, nullptr);
-
-    GeneralConnectionListener listener = {
-        .onConnectSuccess = ConnectSuccess,
-        .onConnectFailed = ConnectFailed,
-        .onAcceptConnect = AcceptConnect,
-        .onDataReceived = DataReceived,
-        .onConnectionDisconnected = ConnectionDisconnected,
-        .onServerStopped =  GeneralServerStopped,
-    };
-
-    ret = manager->registerListener(&listener);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
 /*
 * @tc.name: TestInit
 * @tc.desc: test init general connection
@@ -252,7 +259,6 @@ HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
     CONN_LOGI(CONN_BLE, "test init in");
     const char *pkgName = "testName";
     ClearGeneralConnection(pkgName, 0);
-    ConnUnSetConnectCallback(MODULE_BLE_GENERAL);
     ClearGeneralConnection(pkgName, 0);
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);

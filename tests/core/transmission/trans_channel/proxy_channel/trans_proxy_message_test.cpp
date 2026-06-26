@@ -140,9 +140,9 @@ void TestCallbackFail(void)
     ASSERT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeErrMsgTest001
- * @tc.desc: test pack or unpack handshake err message
+ * @tc.desc: test pack or unpack handshake err message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -160,9 +160,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeErrMsgTest001, TestSize.Level
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeAckMsgTest001
- * @tc.desc: test pack or unpack handshake ack message
+ * @tc.desc: test pack or unpack handshake ack message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -193,10 +193,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeAckMsgTest002
- * @tc.desc: test pack or unpack handshake ack message
- *           test normal app type
+ * @tc.desc: test pack or unpack handshake ack message, test normal app type.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -216,9 +215,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest002, TestSize.Level
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeMsgTest001
- * @tc.desc: test pack or unpack handshake normal message
+ * @tc.desc: test pack or unpack handshake normal message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -250,9 +249,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeMsgTest002
- * @tc.desc: test pack or unpack handshake auth message
+ * @tc.desc: test pack or unpack handshake auth message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -282,9 +281,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeMsgTest003
- * @tc.desc: test pack or unpack handshake inner message
+ * @tc.desc: test pack or unpack handshake inner message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -311,9 +310,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyIdentityMsgTest001
- * @tc.desc: test pack or unpack identity message
+ * @tc.desc: test pack or unpack identity message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -328,10 +327,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyIdentityMsgTest001, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyPackMessageTest001
- * @tc.desc: test TransProxyPackMessageTest
- *           use the wrong parameter
+ * @tc.desc: TransProxyPackMessageTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -367,10 +365,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyPackMessageTest002
- * @tc.desc: test TransProxyPackMessageTest
- *           use normal param
+ * @tc.desc: TransProxyPackMessageTest002, use normal param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -409,10 +406,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyParseMessageTest001
-  * @tc.desc: test TransProxyParseMessageTest
-  *           use wrong param
+  * @tc.desc: TransProxyParseMessageTest001, use wrong param.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -456,10 +452,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
     SoftBusFree(buf);
 }
 
-/*
+/**
   * @tc.name: TransProxyParseMessageTest002
-  * @tc.desc: TransProxyParseMessageTest
-  *           use normal param, run normal message
+  * @tc.desc: TransProxyParseMessageTest002, use normal param, run normal message
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -492,10 +487,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
     SoftBusFree(buf);
 }
 
-/*
+/**
   * @tc.name: TransProxyParseMessageTest003
-  * @tc.desc: test TransProxyParseMessageTest
-  *           use normal param, run handshark message
+  * @tc.desc: TransProxyParseMessageTest003, use normal param, run handshark message
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -560,10 +554,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
     SoftBusFree(buf);
 }
 
-/*
+/**
   * @tc.name: TransProxyTransSendMsgTest001
-  * @tc.desc: test TransProxyTransSendMsgTest
-  *           use wrong param
+  * @tc.desc: TransProxyTransSendMsgTest001, use wrong param.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -598,10 +591,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyTransSendMsgTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyHandshakeTest001
-  * @tc.desc: test TransProxyHandshakeTest
-  *           use wrong param and normal param
+  * @tc.desc: TransProxyHandshakeTest001, use wrong param and normal param.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -658,10 +650,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyAckHandshakeTest001
-  * @tc.desc: test TransProxyAckHandshakeTest
-  *           use wrong param and normal param
+  * @tc.desc: TransProxyAckHandshakeTest001, use wrong param and normal param.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -696,9 +687,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyKeepAliveTest001
-  * @tc.desc: test proxy keepalive and keepalive ack message
+  * @tc.desc: test proxy keepalive and keepalive ack message.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -739,9 +730,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyKeepAliveTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyResetPeerTest001
-  * @tc.desc: test proxy reset peer
+  * @tc.desc: test proxy reset peer.
   * @tc.type: FUNC
   * @tc.require:
   */

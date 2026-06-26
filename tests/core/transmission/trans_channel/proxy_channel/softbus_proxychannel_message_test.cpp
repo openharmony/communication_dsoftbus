@@ -134,7 +134,7 @@ void TestCallbackFail(void)
 
 /*
  * @tc.name: TransProxyHandshakeErrMsgTest001
- * @tc.desc: test pack or unpack handshake err message
+ * @tc.desc: test pack or unpack handshake err message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -154,7 +154,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeErrMsgTest001, TestS
 
 /*
  * @tc.name: TransProxyHandshakeAckMsgTest001
- * @tc.desc: test pack or unpack handshake ack message
+ * @tc.desc: test pack or unpack handshake ack message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,8 +187,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest001, TestS
 
 /*
  * @tc.name: TransProxyHandshakeAckMsgTest002
- * @tc.desc: test pack or unpack handshake ack message
- *           test normal app type
+ * @tc.desc: test pack or unpack handshake ack message, test normal app type.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -209,7 +208,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeAckMsgTest002, TestS
 
 /*
  * @tc.name: TransProxyHandshakeMsgTest001
- * @tc.desc: test pack or unpack handshake normal message
+ * @tc.desc: test pack or unpack handshake normal message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -237,7 +236,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest001, TestSize
 
 /*
  * @tc.name: TransProxyHandshakeMsgTest002
- * @tc.desc: test pack or unpack handshake auth message
+ * @tc.desc: test pack or unpack handshake auth message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -264,7 +263,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest002, TestSize
 
 /*
  * @tc.name: TransProxyHandshakeMsgTest003
- * @tc.desc: test pack or unpack handshake inner message
+ * @tc.desc: test pack or unpack handshake inner message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -288,7 +287,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeMsgTest003, TestSize
 
 /*
  * @tc.name: TransProxyIdentityMsgTest001
- * @tc.desc: test pack or unpack identity message
+ * @tc.desc: test pack or unpack identity message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -307,8 +306,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyIdentityMsgTest001, TestSize.
 
 /*
  * @tc.name: TransProxyPackMessageTest001
- * @tc.desc: test TransProxyPackMessage
- *           use the wrong parameter
+ * @tc.desc: TransProxyPackMessageTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -346,8 +344,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.
 
 /*
  * @tc.name: TransProxyPackMessageTest002
- * @tc.desc: test TransProxyPackMessage
- *           use normal param
+ * @tc.desc: TransProxyPackMessageTest002, use normal param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -377,12 +374,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
 }
 
 /*
- * @tc.name: TransProxyParseMessageTest001
- * @tc.desc: test TransProxyParseMessage
- *           use wrong param
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyParseMessageTest001
+  * @tc.desc: TransProxyParseMessageTest001, use wrong param.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -425,12 +421,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
 }
 
 /*
- * @tc.name: TransProxyParseMessageTest002
- * @tc.desc: test TransProxyParseMessage
- *           use normal param, run normal message
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyParseMessageTest002
+  * @tc.desc: TransProxyParseMessageTest002, use normal param, run normal message
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
@@ -455,12 +450,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
 }
 
 /*
- * @tc.name: TransProxyParseMessageTest003
- * @tc.desc: test TransProxyParseMessage
- *           use normal param, run handshark message
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyParseMessageTest003
+  * @tc.desc: TransProxyParseMessageTest003, use normal param, run handshark message
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
@@ -510,12 +504,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
 }
 
 /*
- * @tc.name: TransProxyParseMessageTest004
- * @tc.desc: test TransProxyParseMessage
- *           use normal param
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyParseMessageTest004
+  * @tc.desc: TransProxyParseMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize.Level1)
 {
     AuthHandle auth;
@@ -531,12 +524,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize
 }
 
 /*
- * @tc.name: TransProxyHandshakeTest001
- * @tc.desc: test TransProxyHandshake
- *           use wrong param and normal param
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyHandshakeTest001
+  * @tc.desc: TransProxyHandshakeTest001, use wrong param and normal param.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
@@ -573,12 +565,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Le
 }
 
 /*
- * @tc.name: TransProxyAckHandshakeTest001
- * @tc.desc: test TransProxyAckHandshake
- *           use wrong param and normal param
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyAckHandshakeTest001
+  * @tc.desc: TransProxyAckHandshakeTest001, use wrong param and normal param.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
 {
     int32_t retCode = -1;
@@ -605,11 +596,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize
 }
 
 /*
- * @tc.name: TransProxyKeepAliveTest001
- * @tc.desc: test proxy keepalive and keepalive ack message
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyKeepAliveTest001
+  * @tc.desc: test proxy keepalive and keepalive ack message.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepAliveTest001, TestSize.Level1)
 {
     ProxyChannelInfo chanInfo;
@@ -639,11 +630,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepAliveTest001, TestSize.Le
 }
 
 /*
- * @tc.name: TransProxyResetPeerTest001
- * @tc.desc: test proxy reset peer
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyResetPeerTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
 {
     ProxyChannelInfo chanInfo;
@@ -690,12 +681,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
 }
 
 /*
- * @tc.name: TransProxyParseMessageHeadTest002
- * @tc.desc: test TransProxyParseMessageHead
- *           use normal param
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyParseMessageHeadTest002
+  * @tc.desc: TransProxyParseMessageHead
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest002, TestSize.Level1)
 {
     char data[TEST_DATA_LEN] = { 0x11, 0x22, 0x33, 0x44 };
@@ -707,11 +697,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest002, Test
 }
 
 /*
- * @tc.name: TransProxyGetRemoteTest001
- * @tc.desc: test proxy reset peer
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyGetRemoteTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetRemoteTest001, TestSize.Level1)
 {
     char brMac[BT_MAC_LEN] = {0};
@@ -725,11 +715,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetRemoteTest001, TestSize.Le
 }
 
 /*
- * @tc.name: TransProxyGetAuthConnInfoTest001
- * @tc.desc: test proxy reset peer
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyGetAuthConnInfoTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthConnInfoTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -740,11 +730,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthConnInfoTest001, TestS
 }
 
 /*
- * @tc.name: TransProxyConvertBrConnInfoTest001
- * @tc.desc: test proxy reset peer
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyConvertBrConnInfoTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBrConnInfoTest001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
@@ -753,11 +743,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBrConnInfoTest001, Tes
 }
 
 /*
- * @tc.name: TransProxyConvertBleConnInfoTest001
- * @tc.desc: test proxy reset peer
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyConvertBleConnInfoTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBleConnInfoTest001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
@@ -766,11 +756,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBleConnInfoTest001, Te
 }
 
 /*
- * @tc.name: TransProxyGetAuthIdTest001
- * @tc.desc: test proxy reset peer
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyGetAuthIdTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -783,11 +773,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Le
 }
 
 /*
- * @tc.name: TransProxyUnpackInnerHandshakeMsgTest001
- * @tc.desc: test trans proxy unpack inner handshakemsg
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyUnpackInnerHandshakeMsgTest001
+  * @tc.desc: test trans proxy unpack inner handshakemsg.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -806,11 +796,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
 }
 
 /*
- * @tc.name: TransProxyUnpackNormalHandshakeMsgTest001
- * @tc.desc: test trans proxy unpack inner handshakemsg
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyUnpackNormalHandshakeMsgTest001
+  * @tc.desc: test trans proxy unpack inner handshakemsg.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest001, TestSize.Level1)
 {
     char msg[FAST_ARRAY_SIZE] = {
@@ -836,11 +826,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest0
 }
 
 /*
- * @tc.name: UnpackPackHandshakeMsgForFastDataTest001
- * @tc.desc: test unpack pack handshakemsg for fastdata
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: UnpackPackHandshakeMsgForFastDataTest001
+  * @tc.desc: test unpack pack handshakemsg for fastdata.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -860,14 +850,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest00
 }
 
 /*
- * @tc.name: GetBrMacFromConnInfoTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM
- *           when given invalid len or null mac
- * @tc.desc: Should return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT
- *           when given invalid parameter
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: GetBrMacFromConnInfoTest001
+  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid len or null mac.
+  * @tc.desc: Should return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT when given invalid parameter.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.Level1)
 {
     char brMac[BT_MAC_LEN] = "testBrMac";
@@ -886,14 +874,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.L
 }
 
 /*
- * @tc.name: PackPlaintextMessageTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM
- *           when given null message or datainfo
- * @tc.desc: Should return SOFTBUS_OK
- *           when given valid parameter
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: PackPlaintextMessageTest001
+  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null message or datainfo.
+  * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.Level1)
 {
     ProxyMessageHead msg;
@@ -911,12 +897,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.L
 }
 
 /*
- * @tc.name: PackHandshakeMsgForFastDataTest001
- * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR
- *           when given invalid parameter
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: PackHandshakeMsgForFastDataTest001
+  * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid parameter.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -938,14 +923,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, Tes
 }
 
 /*
- * @tc.name: TransProxyUnpackNormalHandshakeMsgTest002
- * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR
- *           when given invalid msg
- * @tc.desc: Should return SOFTBUS_DECRYPT_ERR
- *           when given invalid msg
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyUnpackNormalHandshakeMsgTest002
+  * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid msg.
+  * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given invalid msg.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
@@ -987,16 +970,13 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest0
 }
 
 /*
- * @tc.name: TransProxyUnpackAuthHandshakeMsgTest001
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED
- *           when given null appInfo
- * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED
- *           when given invalid msg
- * @tc.desc: Should return SOFTBUS_OK
- *           when given valid parameters
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyUnpackAuthHandshakeMsgTest001
+  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED when given null appInfo.
+  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED when given invalid msg.
+  * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackAuthHandshakeMsgTest001, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
@@ -1014,12 +994,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackAuthHandshakeMsgTest001
 }
 
 /*
- * @tc.name: TransProxyUnpackInnerHandshakeMsgTest002
- * @tc.desc: Should return SOFTBUS_DECRYPT_ERR
- *           when given invalid parameters
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyUnpackInnerHandshakeMsgTest002
+  * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given invalid parameters.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
@@ -1037,11 +1016,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
 }
 
 /*
- * @tc.name: TransProxyParseD2DDataTest001
- * @tc.desc: test trans proxy parse
- * @tc.type: FUNC
- * @tc.require:
- */
+  * @tc.name: TransProxyParseD2DDataTest001
+  * @tc.desc: test trans proxy parse .
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseD2DDataTest001, TestSize.Level1)
 {
     int32_t len = 1;

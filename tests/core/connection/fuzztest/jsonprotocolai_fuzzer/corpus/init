@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+# JSON Protocol Fuzzer Seeds - 覆盖 SetInput/Read/外部数据解析
+# 聚焦于测试外部不可信数据的解析和读取
+
+# ========== 基本有效 JSON ==========
+{"KEY_VERSION":1}
+{"KEY_ROLE":0}
+{"test":true,"value":123}
+{"KEY_IP":"192.168.1.1","KEY_PORT":8080}
+{"a":1,"b":2,"c":3}
+{"string":"hello","bool":true}
+
+# ========== 错误格式 JSON ==========
+invalid{"json":data
+KEY_VERSION
+{"test":true,"number":123456789}
+
+# ========== 边界长度测试 ==========
+{"num1":0,"num2":255,"num3":256}
+{"max":65535,"min":-65535}
+{"level":0,"flag":1,"status":2}
+
+# ========== 空对象/最小 JSON ==========
+{}
+{"":""}
+{"a":1}
+{"multiple":"keys","here":true,"test":123}
+
+# ========== 已知 key (GC_CHANNEL_LIST=200) 用于测试递归 Read ==========
+{"KEY_GC_IP":"192.168.1.100"}
+{"KEY_INTERFACE_NAME":"wlan0"}
+{"KEY_CHANNEL_LIST":"1 6 11"}
+{"KEY_STATION_FREQUENCY":2412}
+{"KEY_WIDE_BAND_SUPPORTED":false}
+{"KEY_COMMAND_TYPE":1}
+
+# ========== 正负数测试 ==========
+{"largeNumber":2147483647}
+{"negativeNumber":-2147483648}
+{"unsignedNumber":4294967295}
+
+# ========== 渐进式增加字段数量 ==========
+{"a":1,"b":2}
+{"a":1,"b":2,"c":3}
+{"a":1,"b":2,"c":3,"d":4}
+{"a":1,"b":2,"c":3,"d":4,"e":5}
+{"x":null,"y":{},"z":[]}
+{"nested":{"level1":{"level2":"value"}}}
+{"arr":[1,2,3],"str":"test","bool":true}

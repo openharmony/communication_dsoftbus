@@ -52,7 +52,6 @@ constexpr int32_t LANE_REQUEST_ID = 0;
 constexpr uint32_t AUTH_REQUEST_ID = 1;
 constexpr uint32_t P2P_REQ_ID = 0;
 constexpr uint32_t NEW_P2P_REQ_ID = 1;
-constexpr uint32_t PORT = 22;
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
@@ -1374,33 +1373,6 @@ HWTEST_F(LNNLaneLinkP2pTest, HANDLE_ACTION_TRIGGER_ERROR_TEST_002, TestSize.Leve
 }
 
 /*
-* @tc.name: RETRY_ERR_CODE_AND_NOT_SUPPORT_P2P_ERROR_TEST_001
-* @tc.desc: IsGuideChannelRetryErrcode and HandleNotSupportP2pError test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkP2pTest, RETRY_ERR_CODE_AND_NOT_SUPPORT_P2P_ERROR_TEST_001, TestSize.Level1)
-{
-    NiceMock<LaneDepsInterfaceMock> linkMock;
-    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    LinkRequest linkRequest = {
-        .linkType = LANE_HML,
-    };
-    LaneLinkCb callback = {0};
-    bool result = IsGuideChannelRetryErrcode(P2P_REQ_ID, SOFTBUS_INVALID_PARAM);
-    EXPECT_FALSE(result);
-    EXPECT_NO_FATAL_FAILURE(HandleNotSupportP2pError(ASYNC_RESULT_P2P, P2P_REQ_ID));
-    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    result = IsGuideChannelRetryErrcode(P2P_REQ_ID, SOFTBUS_INVALID_PARAM);
-    EXPECT_FALSE(result);
-    EXPECT_NO_FATAL_FAILURE(HandleNotSupportP2pError(ASYNC_RESULT_P2P, P2P_REQ_ID));
-    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
 * @tc.name: OPEN_AUTH_TO_DISCONN_P2P_TEST_001
 * @tc.desc: OpenAuthToDisconnP2p test
 * @tc.type: FUNC
@@ -1503,101 +1475,6 @@ HWTEST_F(LNNLaneLinkP2pTest, ON_AUTH_TRIGGER_CONN_OPENED_TEST_002, TestSize.Leve
     EXPECT_NO_FATAL_FAILURE(OnAuthTriggerConnOpened(AUTH_REQUEST_ID, authHandle));
     authHandle.type = AUTH_LINK_TYPE_MAX;
     EXPECT_NO_FATAL_FAILURE(OnAuthTriggerConnOpened(AUTH_REQUEST_ID, authHandle));
-}
-
-/*
-* @tc.name: UPDATE_P2P_LINK_INFO_WITH_AUTH_TEST_001
-* @tc.desc: test not found branch
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkP2pTest, UPDATE_P2P_LINK_INFO_WITH_AUTH_TEST_001, TestSize.Level1)
-{
-    AuthHandle authHandle = {0};
-    int32_t ret = UpdateP2pLinkInfoWithAuth(AUTH_REQUEST_ID, authHandle);
-    EXPECT_EQ(ret, SOFTBUS_LANE_NOT_FOUND);
-    EXPECT_NO_FATAL_FAILURE(AuthChannelDetectSucc(LANEREQID, AUTH_REQUEST_ID, authHandle));
-}
-
-/*
-* @tc.name: DETECT_TEST_001
-* @tc.desc: Detect success or fail test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkP2pTest, DETECT_TEST_001, TestSize.Level1)
-{
-    LaneLinkInfo linkInfo = {};
-    EXPECT_NO_FATAL_FAILURE(DetectSuccess(LANEREQID, LANE_BLE, &linkInfo));
-    EXPECT_NO_FATAL_FAILURE(DetectFail(LANEREQID, SOFTBUS_INVALID_PARAM, LANE_BLE));
-    LinkRequest linkRequest;
-    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
-    LaneLinkCb callback = {0};
-    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, NEW_P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(DetectSuccess(LANEREQID, LANE_BLE, &linkInfo));
-    EXPECT_NO_FATAL_FAILURE(DetectFail(LANEREQID, SOFTBUS_INVALID_PARAM, LANE_BLE));
-    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, NEW_P2P_REQ_ID);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
-* @tc.name: GET_WLAN_INFO_TEST_001
-* @tc.desc: GetWlanInfo or fail test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkP2pTest, GET_WLAN_INFO_TEST_001, TestSize.Level1)
-{
-    LaneLinkInfo linkInfo = {
-        .linkInfo.wlan.connInfo.addr = "127.0.0.2",
-    };
-    NiceMock<LaneDepsInterfaceMock> linkMock;
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfoByIfnameIdx)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret = GetWlanInfo(NODE_NETWORK_ID, &linkInfo);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
-    EXPECT_CALL(linkMock, LnnGetRemoteNumInfoByIfnameIdx)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(DoAll(SetArgPointee<2>(PORT), Return(SOFTBUS_OK)));
-    ret = GetWlanInfo(NODE_NETWORK_ID, &linkInfo);
-    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
-    ret = GetWlanInfo(NODE_NETWORK_ID, &linkInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
-* @tc.name: GUIDE_CHANNEL_DETECT_TEST_001
-* @tc.desc: GuideChannelDetect test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkP2pTest, GUIDE_CHANNEL_DETECT_TEST_001, TestSize.Level1)
-{
-    AuthHandle authHandle = {
-        .type = AUTH_LINK_TYPE_WIFI,
-    };
-    EXPECT_NO_FATAL_FAILURE(GuideChannelDetect(AUTH_REQUEST_ID, authHandle));
-    LinkRequest linkRequest;
-    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
-    LaneLinkCb callback = {0};
-    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_AUTH, NEW_P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    char addr[MAX_SOCKET_ADDR_LEN] = "127.0.0.2";
-    NiceMock<LaneDepsInterfaceMock> linkMock;
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfoByIfnameIdx)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(*addr), Return(SOFTBUS_OK)));
-    EXPECT_CALL(linkMock, LnnGetRemoteNumInfoByIfnameIdx)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(PORT), Return(SOFTBUS_OK)));
-    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
-    EXPECT_CALL(laneLinkMock, LaneDetectReliability)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(GuideChannelDetect(AUTH_REQUEST_ID, authHandle));
-    EXPECT_NO_FATAL_FAILURE(GuideChannelDetect(AUTH_REQUEST_ID, authHandle));
-    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, NEW_P2P_REQ_ID);
-    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -1755,5 +1632,183 @@ HWTEST_F(LNNLaneLinkP2pTest, GENERATE_WIFI_DIRECT_INFO_TEST_001, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GenerateWifiDirectInfo(&reqInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_LANE_BUILD_LINK_TIMEOUT);
+}
+
+/*
+* @tc.name: HANDLE_PTK_NOT_MATCHED_TEST_001
+* @tc.desc: HandlePtkNotMatched test get p2p link req fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, HANDLE_PTK_NOT_MATCHED_TEST_001, TestSize.Level1)
+{
+    int32_t reason = SOFTBUS_LNN_PTK_NOT_MATCH;
+    EXPECT_NO_FATAL_FAILURE(HandlePtkNotMatched(P2P_REQ_ID, &reason));
+}
+
+/*
+* @tc.name: HANDLE_PTK_NOT_MATCHED_TEST_002
+* @tc.desc: HandlePtkNotMatched test success
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, HANDLE_PTK_NOT_MATCHED_TEST_002, TestSize.Level1)
+{
+    LinkRequest linkRequest;
+    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LaneLinkCb callback = {0};
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    
+    int32_t reason = SOFTBUS_LNN_PTK_NOT_MATCH;
+    LnnEnhanceFuncList funcList = { nullptr };
+    funcList.lnnSyncPtk = LnnSyncPtkSucc;
+    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    
+    EXPECT_NO_FATAL_FAILURE(HandlePtkNotMatched(P2P_REQ_ID, &reason));
+    EXPECT_EQ(reason, SOFTBUS_LANE_PTK_NOT_MATCH);
+    
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: HANDLE_NOT_SUPPORT_P2P_ERROR_TEST_001
+* @tc.desc: HandleNotSupportP2pError test get p2p link req fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, HANDLE_NOT_SUPPORT_P2P_ERROR_TEST_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(HandleNotSupportP2pError(P2P_REQ_ID));
+}
+
+/*
+* @tc.name: HANDLE_NOT_SUPPORT_P2P_ERROR_TEST_002
+* @tc.desc: HandleNotSupportP2pError test get udid fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, HANDLE_NOT_SUPPORT_P2P_ERROR_TEST_002, TestSize.Level1)
+{
+    LinkRequest linkRequest;
+    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LaneLinkCb callback = {0};
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(HandleNotSupportP2pError(P2P_REQ_ID));
+    
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: HANDLE_NOT_SUPPORT_P2P_ERROR_TEST_004
+* @tc.desc: HandleNotSupportP2pError test success
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, HANDLE_NOT_SUPPORT_P2P_ERROR_TEST_004, TestSize.Level1)
+{
+    LinkRequest linkRequest;
+    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LaneLinkCb callback = {0};
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HandleNotSupportP2pError(P2P_REQ_ID));
+    
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: IS_GUIDE_CHANNEL_RETRY_ERRCODE_TEST_001
+* @tc.desc: IsGuideChannelRetryErrcode test for new error code SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, IS_GUIDE_CHANNEL_RETRY_ERRCODE_TEST_001, TestSize.Level1)
+{
+    bool result = IsGuideChannelRetryErrcode(P2P_REQ_ID, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT);
+    EXPECT_TRUE(result);
+}
+
+/*
+* @tc.name: ON_WIFI_DIRECT_CONNECT_FAILURE_TEST_001
+* @tc.desc: OnWifiDirectConnectFailure test for SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, ON_WIFI_DIRECT_CONNECT_FAILURE_TEST_001, TestSize.Level1)
+{
+    LinkRequest linkRequest;
+    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LaneLinkCb callback = {0};
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(false));
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectConnectFailure(P2P_REQ_ID, SOFTBUS_CONN_HV2_WAIT_CONNECT_RESPONSE_TIMEOUT));
+
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: ON_WIFI_DIRECT_CONNECT_FAILURE_TEST_002
+* @tc.desc: OnWifiDirectConnectFailure test for SOFTBUS_CONN_HV3_WAIT_CONNECTION_TIMEOUT
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, ON_WIFI_DIRECT_CONNECT_FAILURE_TEST_002, TestSize.Level1)
+{
+    LinkRequest linkRequest;
+    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LaneLinkCb callback = {0};
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(false));
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    EXPECT_CALL(laneLinkMock, GetConflictTypeWithErrcode).WillRepeatedly(Return(CONFLICT_LINK_NUM_LIMITED));
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectConnectFailure(P2P_REQ_ID, SOFTBUS_CONN_HV3_WAIT_CONNECTION_TIMEOUT));
+
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: ON_WIFI_DIRECT_CONNECT_FAILURE_TEST_003
+* @tc.desc: OnWifiDirectConnectFailure test for SOFTBUS_CONN_P2P_STA_SAME_MAC
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, ON_WIFI_DIRECT_CONNECT_FAILURE_TEST_003, TestSize.Level1)
+{
+    LinkRequest linkRequest;
+    (void)memset_s(&linkRequest, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    LaneLinkCb callback = {0};
+    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, P2P_REQ_ID, LANEREQID, &linkRequest, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(false));
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    EXPECT_CALL(laneLinkMock, GetConflictTypeWithErrcode).WillRepeatedly(Return(CONFLICT_ROLE));
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectConnectFailure(P2P_REQ_ID, SOFTBUS_CONN_P2P_STA_SAME_MAC));
+
+    ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }

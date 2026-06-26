@@ -120,9 +120,9 @@ void TestCallbackFail(void)
     ASSERT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: GetRemoteUdidByBtMac001
- * @tc.desc: test get remote udid by btMac
+ * @tc.desc: test get remote udid by btMac.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -138,9 +138,9 @@ HWTEST_F(TransProxyMessageTest, GetRemoteUdidByBtMac001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_GET_REMOTE_UUID_ERR);
 }
 
-/*
+/**
  * @tc.name: GetRemoteUdidByBtMac002
- * @tc.desc: test get remote udid by btMac
+ * @tc.desc: test get remote udid by btMac.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -156,9 +156,9 @@ HWTEST_F(TransProxyMessageTest, GetRemoteUdidByBtMac002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: GetRemoteBtMacByUdidHash001
- * @tc.desc: test get remote btMac byUdidHash
+ * @tc.desc: test get remote btMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -174,9 +174,9 @@ HWTEST_F(TransProxyMessageTest, GetRemoteBtMacByUdidHash001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_GET_REMOTE_UUID_ERR);
 }
 
-/*
+/**
  * @tc.name: ConvertBrConnInfo2BleConnInfo001
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -193,9 +193,9 @@ HWTEST_F(TransProxyMessageTest, ConvertBrConnInfo2BleConnInfo001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: ConvertBrConnInfo2BleConnInfo002
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -212,9 +212,9 @@ HWTEST_F(TransProxyMessageTest, ConvertBrConnInfo2BleConnInfo002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: ConvertSleConnInfo2BleConnInfo001
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -227,9 +227,9 @@ HWTEST_F(TransProxyMessageTest, ConvertSleConnInfo2BleConnInfo001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: ConvertSleConnInfo2BleConnInfo002
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -245,9 +245,9 @@ HWTEST_F(TransProxyMessageTest, ConvertSleConnInfo2BleConnInfo002, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name: ConvertSleConnInfo2BleConnInfo003
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -263,9 +263,9 @@ HWTEST_F(TransProxyMessageTest, ConvertSleConnInfo2BleConnInfo003, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: ConvertBleConnInfo2BrConnInfo001
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -279,9 +279,9 @@ HWTEST_F(TransProxyMessageTest, ConvertBleConnInfo2BrConnInfo001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: GetAuthIdReDecrypt001
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -304,9 +304,9 @@ HWTEST_F(TransProxyMessageTest, GetAuthIdReDecrypt001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/*
+/**
  * @tc.name: GetAuthIdReDecrypt002
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -339,9 +339,9 @@ HWTEST_F(TransProxyMessageTest, GetAuthIdReDecrypt002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: TransProxyParseMessageNoDecrypt001
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -367,9 +367,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageNoDecrypt001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_MALLOC_ERR);
 }
 
-/*
+/**
  * @tc.name: TransProxyParseMessageNoDecrypt002
- * @tc.desc: test get remote bleMac byUdidHash
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -382,6 +382,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageNoDecrypt002, TestSize.Lev
     };
     msg.data = const_cast<char *>(reinterpret_cast<const char *>("test_data"));
     TransCommInterfaceMock commMock;
+
     EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
         return new uint8_t[size];
     });
@@ -392,9 +393,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageNoDecrypt002, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name:TransProxyGetAuthConnInfo001
- * @tc.desc: test get auth connInfo
+ * @tc.desc: test get auth connInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -411,9 +412,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyGetAuthConnInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name:TransProxyGetAuthConnInfo002
- * @tc.desc: test get auth connInfo
+ * @tc.desc: test get auth connInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -430,9 +431,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyGetAuthConnInfo002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name:TransProxyGetAuthConnInfo003
- * @tc.desc: test get auth connInfo
+ * @tc.desc: test get auth connInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -449,9 +450,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyGetAuthConnInfo003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name:TransProxyGetAuthConnInfo004
- * @tc.desc: test get auth connInfo
+ * @tc.desc: test get auth connInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -468,9 +469,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyGetAuthConnInfo004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_UNEXPECTED_CONN_TYPE);
 }
 
-/*
+/**
  * @tc.name:TransProxyGetAuthConnInfo005
- * @tc.desc: test get auth connInfo
+ * @tc.desc: test get auth connInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -487,9 +488,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyGetAuthConnInfo005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
   * @tc.name: TransProxyConvertBrConnInfoTest001
-  * @tc.desc: test proxy reset peer
+  * @tc.desc: test proxy reset peer.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -504,9 +505,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyConvertBrConnInfoTest001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
+/**
  * @tc.name:PackHandshakeMsgForFastData001
- * @tc.desc: test pack handShakeMsg for fastData
+ * @tc.desc: test pack handShakeMsg for fastData.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -536,9 +537,9 @@ HWTEST_F(TransProxyMessageTest, PackHandshakeMsgForFastData001, TestSize.Level1)
     cJSON_Delete(root);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeErrMsgTest001
- * @tc.desc: test pack or unpack handshake err message
+ * @tc.desc: test pack or unpack handshake err message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -556,9 +557,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeErrMsgTest001, TestSize.Level
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeAckMsgTest001
- * @tc.desc: test pack or unpack handshake ack message
+ * @tc.desc: test pack or unpack handshake ack message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -587,10 +588,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest001, TestSize.Level
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeAckMsgTest002
- * @tc.desc: test pack or unpack handshake ack message
- *           test normal app type
+ * @tc.desc: test pack or unpack handshake ack message, test normal app type.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -610,9 +610,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest002, TestSize.Level
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeMsgTest001
- * @tc.desc: test pack or unpack handshake normal message
+ * @tc.desc: test pack or unpack handshake normal message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -643,9 +643,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeMsgTest002
- * @tc.desc: test pack or unpack handshake auth message
+ * @tc.desc: test pack or unpack handshake auth message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -675,9 +675,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyHandshakeMsgTest003
- * @tc.desc: test pack or unpack handshake inner message
+ * @tc.desc: test pack or unpack handshake inner message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -708,9 +708,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyIdentityMsgTest001
- * @tc.desc: test pack or unpack identity message
+ * @tc.desc: test pack or unpack identity message.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -725,10 +725,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyIdentityMsgTest001, TestSize.Level1)
     cJSON_free(msg);
 }
 
-/*
+/**
  * @tc.name: TransProxyPackMessageTest001
- * @tc.desc: test TransProxyPackMessageTest
- *           use the wrong parameter
+ * @tc.desc: TransProxyPackMessageTest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -764,10 +763,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyPackMessageTest002
- * @tc.desc: test TransProxyPackMessageTest
- *           use normal param
+ * @tc.desc: test TransProxyPackMessageTest, use normal param.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -805,10 +803,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyParseMessageTest001
-  * @tc.desc: test TransProxyParseMessageTest
-  *           use wrong param
+  * @tc.desc: TransProxyParseMessageTest001, use wrong param.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -852,10 +849,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
     SoftBusFree(buf);
 }
 
-/*
+/**
   * @tc.name: TransProxyAckHandshakeTest001
-  * @tc.desc: test TransProxyAckHandshakeTest
-  *           use wrong param and normal param
+  * @tc.desc: TransProxyAckHandshakeTest001, use wrong param and normal param.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -893,9 +889,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyResetPeerTest001
-  * @tc.desc: test proxy reset peer
+  * @tc.desc: test proxy reset peer.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -928,10 +924,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
   * @tc.name: GetAuthIdByHandshakeMsgTest001
-  * @tc.desc: test GetAuthIdByHandshakeMsg
-  *           use wrong param and normal param
+  * @tc.desc: GetAuthIdByHandshakeMsg
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -975,10 +970,9 @@ HWTEST_F(TransProxyMessageTest, GetAuthIdByHandshakeMsgTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
   * @tc.name: GetBrMacFromConnInfoTest001
-  * @tc.desc: test GetBrMacFromConnInfo
-  *           use wrong param and normal param
+  * @tc.desc: GetBrMacFromConnInfo
   * @tc.type: FUNC
   * @tc.require:
   */

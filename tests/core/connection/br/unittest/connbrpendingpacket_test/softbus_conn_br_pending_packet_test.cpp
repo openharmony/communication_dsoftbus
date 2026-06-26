@@ -148,7 +148,9 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrCreateBrPendingPacketTest004, TestSize.L
 HWTEST_F(ConnBrPendingPacketTest, ConnBrDelBrPendingPacketTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrDelBrPendingPacket001, Start");
-    ConnBrInitBrPendingPacket();
+    int32_t ret = ConnBrInitBrPendingPacket();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     uint32_t id = 5;
     int64_t seq = 5;
     ConnBrDelBrPendingPacket(id, seq);
@@ -200,7 +202,9 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrDelBrPendingPacketTest003, TestSize.Leve
 HWTEST_F(ConnBrPendingPacketTest, ConnBrDelBrPendingPacketByIdTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrDelBrPendingPacketById001, Start");
-    ConnBrInitBrPendingPacket();
+    int32_t ret = ConnBrInitBrPendingPacket();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     uint32_t id = 8;
     ConnBrDelBrPendingPacketById(id);
 }

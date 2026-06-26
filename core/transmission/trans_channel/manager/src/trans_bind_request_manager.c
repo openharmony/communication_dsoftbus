@@ -96,7 +96,7 @@ static BindRequestManager *CreateBindRequestManager(
     bindRequest->count = 0;
     int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequest->bindRequestParam);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "genarate param failed");
+        TRANS_LOGE(TRANS_SVC, "generate param failed");
         SoftBusFree(bindRequest);
         return NULL;
     }
@@ -163,7 +163,7 @@ int32_t TransAddTimestampToList(
     }
     BindRequestParam bindRequestParam = { {0} };
     int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "genarate param failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_STRCPY_ERR, TRANS_SVC, "generate param failed");
     ret = SoftBusMutexLock(&g_bindRequestList->lock);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SVC, "lock failed");
 
@@ -198,7 +198,7 @@ int32_t TransAddTimestampToList(
     return SOFTBUS_OK;
 }
 
-static void TransDelTimestampFormList(BindRequestParam *bindRequestParam, uint64_t timestamp)
+static void TransDelTimestampFromList(BindRequestParam *bindRequestParam, uint64_t timestamp)
 {
     TRANS_CHECK_AND_RETURN_LOGE(g_bindRequestList != NULL, TRANS_SVC, "bind request list no init");
     int32_t ret = SoftBusMutexLock(&g_bindRequestList->lock);
@@ -213,7 +213,7 @@ static void TransDelTimestampFormList(BindRequestParam *bindRequestParam, uint64
                 ListDelete(&failItem->node);
                 SoftBusFree(failItem);
                 bindRequest->count--;
-                TRANS_LOGI(TRANS_SVC, "del timestamp form list success, count=%{public}d, timestamp=%{public}" PRId64,
+                TRANS_LOGI(TRANS_SVC, "del timestamp from list success, count=%{public}d, timestamp=%{public}" PRId64,
                     bindRequest->count, timestamp);
                 break;
             }
@@ -236,7 +236,7 @@ bool GetDeniedFlagByPeer(const char *mySocketName, const char *peerSocketName, c
     BindRequestParam bindRequestParam = { {0} };
     int32_t ret = GenerateParam(mySocketName, peerSocketName, peerNetworkId, &bindRequestParam);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "genarate param failed");
+        TRANS_LOGE(TRANS_SVC, "generate param failed");
         return flag;
     }
     ret = SoftBusMutexLock(&g_bindRequestList->lock);
@@ -261,7 +261,6 @@ static void TransResetBindDeniedFlag(BindRequestParam *bindRequestParam)
 
     BindRequestManager *bindRequest = GetBindRequestManagerByPeer(bindRequestParam);
     if (bindRequest != NULL) {
-        bindRequest->bindDeniedFlag = false;
         ListDelete(&bindRequest->node);
         SoftBusFree(bindRequest);
         TRANS_LOGI(TRANS_SVC, "close bind request protect.");
@@ -276,7 +275,7 @@ static void TransBindRequestLoopMsgHandler(SoftBusMessage *msg)
     switch (msg->what) {
         case LOOP_DELETE_TIMESTAMP: {
             uint64_t timestamp = msg->arg1;
-            TransDelTimestampFormList(bindRequestParam, timestamp);
+            TransDelTimestampFromList(bindRequestParam, timestamp);
             break;
         }
         case LOOP_RESET_BIND_DENIED_FLAG: {

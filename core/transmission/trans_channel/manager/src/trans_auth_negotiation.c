@@ -190,7 +190,6 @@ static void OnAuthSessionKeyGenFail(uint32_t authRequestId, int32_t errCode)
 // update session key, no need to notify request
 static void OnUpdateSessionKeySucc(uint32_t authRequestId, AuthHandle authHandle)
 {
-    (void)authRequestId;
     (void)authHandle;
     TRANS_LOGI(TRANS_SVC, "update success, authRequestId=%{public}u", authRequestId);
 }
@@ -198,8 +197,6 @@ static void OnUpdateSessionKeySucc(uint32_t authRequestId, AuthHandle authHandle
 // update session key, no need to notify request
 static void OnUpdateSessionKeyFail(uint32_t authRequestId, int32_t errCode)
 {
-    (void)authRequestId;
-    (void)errCode;
     TRANS_LOGE(TRANS_SVC, "update failure, authRequestId=%{public}u errCode=%{public}d", authRequestId, errCode);
 }
 

@@ -128,9 +128,9 @@ void TransProxySessionTest::TestRegisterNetworkingChannelListener(void)
     EXPECT_EQ(SOFTBUS_STRCPY_ERR, ret);
 }
 
-/*
+/**
  * @tc.name: NotifyNetworkingMsgReceived002
- * @tc.desc: Test the network message receiving notification function
+ * @tc.desc: TransNotifyDecryptNetworkingMsg
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -147,9 +147,9 @@ HWTEST_F(TransProxySessionTest, NotifyNetworkingMsgReceived002, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(NotifyNetworkingMsgReceived("test.com.session", 1024, data, 256));
 }
 
-/*
+/**
  * @tc.name: NotifyNetworkingMsgReceived003
- * @tc.desc: Test the network message receiving notification function
+ * @tc.desc: TransNotifyDecryptNetworkingMsg
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -166,13 +166,12 @@ HWTEST_F(TransProxySessionTest, NotifyNetworkingMsgReceived003, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(NotifyNetworkingMsgReceived(TEST_VALID_SESSIONNAME, 1024, data, 256));
 }
 
-/*
- * @tc.name: TransProxySendEncryptInnerMessage001
- * @tc.desc: Test the TransProxySendEncryptInnerMessage function to return an encryption error
- *           when encrypting data
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage001
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage001, TestSize.Level1)
 {
     ProxyChannelInfo info;
@@ -191,13 +190,12 @@ HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
-/*
- * @tc.name: TransProxySendEncryptInnerMessage002
- * @tc.desc: Test the error handling capability of the TransProxySendEncryptInnerMessage function
- *           when message packaging fails
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage002
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage002, TestSize.Level1)
 {
     ProxyChannelInfo info;
@@ -216,13 +214,12 @@ HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage002, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
-/*
- * @tc.name: TransProxySendEncryptInnerMessage003
- * @tc.desc: Test the TransProxySendEncryptInnerMessage function is handling logic
- *           when sending encrypted internal messages with an invalid packet length
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage003
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage003, TestSize.Level1)
 {
     ProxyChannelInfo info;
@@ -242,13 +239,12 @@ HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage003, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_PKT_LEN_INVALID);
 }
 
-/*
- * @tc.name: TransProxySendEncryptInnerMessage004
- * @tc.desc: Test the correctness of the TransProxySendEncryptInnerMessage function
- *           when encrypting and sending internal messages
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage004
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage004, TestSize.Level1)
 {
     ProxyChannelInfo info;
@@ -268,13 +264,12 @@ HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage004, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: TransProxySendInnerMessageTest001
- * @tc.desc: Test whether the TransProxySendInnerMessage function
- *           correctly sends messages under normal conditions
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxySendInnerMessageTest001
+  * @tc.desc: TransProxySendInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxySendInnerMessageTest001, TestSize.Level1)
 {
     ProxyChannelInfo info = {
@@ -293,13 +288,12 @@ HWTEST_F(TransProxySessionTest, TransProxySendInnerMessageTest001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: ConvertConnectType2AuthLinkTypeTest001
- * @tc.desc: Test the ConvertConnectType2AuthLinkType function
- *           from connection type to authentication link type
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: ConvertConnectType2AuthLinkTypeTest001
+  * @tc.desc: ConvertConnectType2AuthLinkType
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, ConvertConnectType2AuthLinkTypeTest001, TestSize.Level1)
 {
     ConnectType type = CONNECT_SLE;
@@ -311,13 +305,12 @@ HWTEST_F(TransProxySessionTest, ConvertConnectType2AuthLinkTypeTest001, TestSize
     EXPECT_EQ(ret, AUTH_LINK_TYPE_SLE);
 }
 
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest001
- * @tc.desc: Test the behavior of the SetCipherOfHandshakeMsg function under specific conditions
- *           particularly the return value when no channel is found
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: SetCipherOfHandshakeMsgTest001
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
 {
     uint8_t cipher;
@@ -333,14 +326,12 @@ HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
 }
 
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest002
- * @tc.desc: Test the behavior of the SetCipherOfHandshakeMsg function
- *           under specific conditions particularly the handling logic
- *           when AuthGetConnInfo returns SOFTBUS_AUTH_NOT_FOUND
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: SetCipherOfHandshakeMsgTest002
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
 {
     uint8_t cipher;
@@ -357,13 +348,12 @@ HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
 }
 
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest003
- * @tc.desc: Test whether the return value of the SetCipherOfHandshakeMsg function
- *           meets the expected results under specific conditions
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: SetCipherOfHandshakeMsgTest003
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest003, TestSize.Level1)
 {
     uint8_t cipher;
@@ -382,15 +372,12 @@ HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest004
- * @tc.desc: Test the behavior of the SetCipherOfHandshakeMsg function
- *           under specific conditions to ensure that it can successfully set the encryption method for
- *           handshake messages when the proxy channel information and authentication information
- *           are correctly configured
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: SetCipherOfHandshakeMsgTest004
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest004, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo;
@@ -416,15 +403,12 @@ HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest005
- * @tc.desc: Test the behavior of the SetCipherOfHandshakeMsg function
- *           under specific conditions to ensure that it can successfully set the encryption method for
- *           handshake messages when the proxy channel information and authentication information
- *           are correctly configured
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: SetCipherOfHandshakeMsgTest005
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest005, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo;
@@ -450,15 +434,12 @@ HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest006
- * @tc.desc: Test the behavior of the SetCipherOfHandshakeMsg function
- *           under specific conditions to ensure that it can successfully set the encryption method for
- *           handshake messages when the proxy channel information and authentication information
- *           are correctly configured
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: SetCipherOfHandshakeMsgTest006
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest006, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo;
@@ -484,13 +465,12 @@ HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest006, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: TransProxyHandshakeTest001
- * @tc.desc: Test the proxy is ability to handle errors under specific conditions
- *           during the hanshake process
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyHandshakeTest001
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo;
@@ -503,13 +483,12 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR);
 }
 
-/*
- * @tc.name: TransProxyHandshakeTest002
- * @tc.desc: Test the proxy is ability to handle errors under specific conditions
- *           during the hanshake process
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyHandshakeTest002
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest002, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo;
@@ -527,13 +506,12 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR);
 }
 
-/*
- * @tc.name: TransProxyHandshakeTest003
- * @tc.desc: Test the behavior of the proxy handshake function under specific conditions
- *           especially when encountering an operation not supported error while sending messages
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyHandshakeTest003
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest003, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo;
@@ -553,13 +531,12 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT);
 }
 
-/*
- * @tc.name: TransProxyHandshakeTest004
- * @tc.desc: test TransProxyHandshake
- *           Test the correctness of the proxy handshake function
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyHandshakeTest004
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest004, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo = {
@@ -581,14 +558,12 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: TransProxyKeepaliveTest001
- * @tc.desc: Test whether the keep-alive mechanism in the proxy session works properly，ensuring that the
- *           keep-alive function does not cause the program to crash or produce fatal errors under
- *           specific conditions (such as identity packaging failure)
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyKeepaliveTest001
+  * @tc.desc: TransProxyKeepalive
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyKeepaliveTest001, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo = {
@@ -604,13 +579,12 @@ HWTEST_F(TransProxySessionTest, TransProxyKeepaliveTest001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(TransProxyKeepalive(1234, &proxyChannelInfo));
 }
 
-/*
- * @tc.name: TransProxyAckKeepaliveTest001
- * @tc.desc: Testing failure scenarios of the keepalive acknowledgment function
- *           in proxy sessions
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyAckKeepaliveTest001
+  * @tc.desc: TransProxyAckKeepalive
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo = {
@@ -626,14 +600,12 @@ HWTEST_F(TransProxySessionTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED);
 }
 
-/*
- * @tc.name: TransProxyAckKeepaliveTest002
- * @tc.desc: Test whether the keep-alive mechanism of the proxy channel is functioning properly
- *           ensuring that when keep-alive acknowledgment messages are sent through the proxy channel
- *           the identity information and messages are correctly packaged and successfully transmitted
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyAckKeepaliveTest002
+  * @tc.desc: TransProxyAckKeepalive
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo = {
@@ -655,13 +627,12 @@ HWTEST_F(TransProxySessionTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: TransProxyResetPeerTest001
- * @tc.desc: Test the logic of the proxy channel handling keep-alive responses
- *           when packing identity information fails
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyResetPeerTest001
+  * @tc.desc: TransProxyResetPeer
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyResetPeerTest001, TestSize.Level1)
 {
     ProxyChannelInfo proxyChannelInfo = {
@@ -677,13 +648,12 @@ HWTEST_F(TransProxySessionTest, TransProxyResetPeerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED);
 }
 
-/*
- * @tc.name: TransProxyPackHandshakeErrMsgTest001
- * @tc.desc: Test the behavior of the TransProxyPackHandshakeErrMsg function
- *           when cJSON_CreateObject returns a null pointer
- * @tc.type: FUNC
- * @tc.require:
- */
+/**
+  * @tc.name: TransProxyPackHandshakeErrMsgTest001
+  * @tc.desc: TransProxyPackHandshakeErrMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(TransProxySessionTest, TransProxyPackHandshakeErrMsgTest001, TestSize.Level1)
 {
     SoftbusTransProxySessionMock networkObj;

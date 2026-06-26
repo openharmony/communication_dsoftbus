@@ -421,6 +421,66 @@ ohos_fuzztest("SoftbusClientOnNodeDeviceTrustedChangeFuzzTest") {
   fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
 }
 
+ohos_fuzztest("SoftbusClientOnTransmitAuthResultFuzzTest") {
+
+  sources = [ "softbusclientontransmitauthresult_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("SoftbusClientOnSessionKeyAuthResultFuzzTest") {
+
+  sources = [ "softbusclientonsessionkeyauthresult_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("SoftbusClientOnFinishAuthResultFuzzTest") {
+
+  sources = [ "softbusclientonfinishauthresult_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("SoftbusClientOnErrorAuthResultFuzzTest") {
+
+  sources = [ "softbusclientonerrorauthresult_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
+ohos_fuzztest("SoftbusClientOnServerStoppedInnerFuzzTest") {
+
+  sources = [ "softbusclientonserverstopped_fuzzer.cpp" ]
+
+  include_dirs = dsoftbus_fuzz_common.include_dirs
+  cflags = dsoftbus_fuzz_common.cflags
+  deps = dsoftbus_fuzz_common.deps
+  external_deps = dsoftbus_fuzz_common.external_deps
+  module_out_path = dsoftbus_fuzz_common.module_out_path
+  fuzz_config_file = dsoftbus_fuzz_common.fuzz_config_file
+}
+
 ###############################################################################
 group("fuzztest") {
   testonly = true
@@ -455,7 +515,12 @@ group("fuzztest") {
     ":SoftbusClientOnRefreshLNNResultFuzzTest",
     ":SoftbusClientOnTimeSyncResultFuzzTest",
     ":SoftbusClientSetChannelInfoFuzzTest",
-    ":SoftbusClientOnNodeDeviceTrustedChangeFuzzTest"
+    ":SoftbusClientOnNodeDeviceTrustedChangeFuzzTest",
+    ":SoftbusClientOnTransmitAuthResultFuzzTest",
+    ":SoftbusClientOnSessionKeyAuthResultFuzzTest",
+    ":SoftbusClientOnFinishAuthResultFuzzTest",
+    ":SoftbusClientOnErrorAuthResultFuzzTest",
+    ":SoftbusClientOnServerStoppedInnerFuzzTest"
   ]
 }
 ###############################################################################
