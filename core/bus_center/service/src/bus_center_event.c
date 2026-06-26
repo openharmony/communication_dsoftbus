@@ -1131,3 +1131,9 @@ void LnnNotifyVirLinkReportEvent(const uint8_t *data, uint32_t len)
     NotifyEvent((const LnnEventBasicInfo *) &event);
     SoftBusFree(dupData);
 }
+
+void LnnNotifyDmHookRegisteredEvent(void)
+{
+    LnnEventBasicInfo event = { .event = LNN_EVENT_DM_HOOK_REGISTERED };
+    NotifyEvent(&event);
+}

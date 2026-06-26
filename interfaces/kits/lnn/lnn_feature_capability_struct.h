@@ -51,6 +51,7 @@ typedef enum {
     BIT_BLE_SUPPORT_LP_MCU_CAPABILITY = 28, // support low power mcu capability
     BIT_SUPPORT_BR_FAST_VIRTUAL_SWITCH_REAL_LINK = 29, // support double enable virtual link through br channel
     BIT_SUPPORT_AGENT_COMMUNICATION = 30,
+    BIT_SUPPORT_PUSH = 31,
     BIT_FEATURE_COUNT,
 } FeatureCapability;
 

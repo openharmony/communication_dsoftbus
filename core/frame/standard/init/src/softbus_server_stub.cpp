@@ -212,6 +212,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
     memberFuncMap_[SERVER_GET_DATASYNC_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
+    memberFuncMap_[SERVER_GET_DM_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
     memberFuncMap_[SERVER_PROCESS_INNER_EVENT] = &SoftBusServerStub::ProcessInnerEventInner;
     memberFuncMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = &SoftBusServerStub::PrivilegeCloseChannelInner;
     memberFuncMap_[SERVER_SET_DISPLAY_NAME] = &SoftBusServerStub::SetDisplayNameInner;
@@ -274,6 +275,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_DATASYNC_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GET_DM_EX_OBJ] = OHOS_PERMISSION_ACCESS_SERVICE_DM;
     memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PROCESS_INNER_EVENT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;

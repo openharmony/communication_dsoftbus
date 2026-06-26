@@ -75,6 +75,10 @@ uint64_t LnnGetFeatureCapabilty(void)
     LnnClearFeatureCapability(&configValue, BIT_DEVICE_CLOUD_CONVERGENCE_CAPABILITY);
     LNN_LOGI(LNN_LEDGER, "clear feature DEVICE_CLOUD_CONVERGENCE configValue=%{public}" PRIu64, configValue);
 #endif
+#ifndef DSOFTBUS_FEATURE_SUPPORT_PUSH
+    LnnClearFeatureCapability(&configValue, BIT_SUPPORT_PUSH);
+    LNN_LOGI(LNN_LEDGER, "clear feature SUPPORT_PUSH configValue=%{public}" PRIu64, configValue);
+#endif
     if (IsSparkGroupEnabledPacked()) {
         LnnSetFeatureCapability(&configValue, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
         LNN_LOGI(LNN_LEDGER, "set feature BIT_SUPPORT_SPARK_GROUP_CAPABILITY configValue=%{public}" PRIu64,
