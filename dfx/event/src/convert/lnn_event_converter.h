@@ -92,6 +92,12 @@ LNN_ASSIGNER(Errcode, IsNoCapAlloc, isNoCapAlloc)
 LNN_ASSIGNER(Errcode, SourceType, sourceType)
 LNN_ASSIGNER(Errcode, DataType, dataType)
 LNN_ASSIGNER(Errcode, IsReliable, isReliable)
+LNN_ASSIGNER(Errcode, DataLen, dataLen)
+LNN_ASSIGNER(Errcode, ChannelType, channelType)
+LNN_ASSIGNER(Errcode, ChannelResult, channelResult)
+LNN_ASSIGNER(Errcode, ChannelRtt, channelRtt)
+LNN_ASSIGNER(Errcode, P2pResult, p2pResult)
+LNN_ASSIGNER(Errcode, P2pLatency, p2pLatency)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -106,8 +112,11 @@ LNN_ASSIGNER(AnonymizeString, LocalUdidHash, localUdidHash)
 LNN_ASSIGNER(AnonymizeString, PeerUdidHash, peerUdidHash)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
+LNN_ASSIGNER(String, BundleName, bundleName)
+LNN_ASSIGNER(String, AbilityName, abilityName)
+LNN_ASSIGNER(String, StatsTime, statsTime)
 
-#define LNN_ASSIGNER_SIZE 72 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 81 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",           HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -164,6 +173,12 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "IS_DELAY_FREE",        HISYSEVENT_UINT32, LnnAssignerIsDelayFree      },
     { "IS_BUILD_RETRY",       HISYSEVENT_UINT32, LnnAssignerIsBuildRetry     },
     { "IS_NO_CAP_ALLOC",      HISYSEVENT_UINT32, LnnAssignerIsNoCapAlloc     },
+    { "DATA_LEN",             HISYSEVENT_UINT32, LnnAssignerDataLen          },
+    { "CHANNEL_TYPE",         HISYSEVENT_UINT32, LnnAssignerChannelType      },
+    { "CHANNEL_RESULT",       HISYSEVENT_INT32,  LnnAssignerChannelResult    },
+    { "CHANNEL_RTT",          HISYSEVENT_INT32,  LnnAssignerChannelRtt       },
+    { "P2P_RESULT",           HISYSEVENT_INT32,  LnnAssignerP2pResult        },
+    { "P2P_LATENCY",          HISYSEVENT_INT32,  LnnAssignerP2pLatency       },
     { "SOURCE_TYPE",          HISYSEVENT_UINT8,  LnnAssignerSourceType       },
     { "DATA_TYPE",            HISYSEVENT_UINT8,  LnnAssignerDataType         },
     { "IS_RELIABLE",          HISYSEVENT_UINT8,  LnnAssignerIsReliable       },
@@ -181,6 +196,9 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "PEER_UDID_HASH",       HISYSEVENT_STRING, LnnAssignerPeerUdidHash     },
     { "HOST_PKG",             HISYSEVENT_STRING, LnnAssignerCallerPkg        },
     { "TO_CALL_PKG",          HISYSEVENT_STRING, LnnAssignerCalleePkg        },
+    { "BUNDLE_NAME",          HISYSEVENT_STRING, LnnAssignerBundleName       },
+    { "ABILITY_NAME",         HISYSEVENT_STRING, LnnAssignerAbilityName      },
+    { "STATS_TIME",           HISYSEVENT_STRING, LnnAssignerStatsTime        },
     // Modification Note: remember updating LNN_ASSIGNER_SIZE
 };
 

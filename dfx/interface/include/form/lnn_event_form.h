@@ -39,6 +39,7 @@ typedef enum {
     EVENT_SCENE_LANE = 4,
     EVENT_SCENE_DDOS = 5,
     EVENT_SCENE_SPARK_LINK = 6,
+    EVENT_SCENE_AGENT_COMM = 7,
 } LnnEventScene;
 
 typedef enum {
@@ -57,6 +58,10 @@ typedef enum {
     EVENT_STAGE_LNN_SCREEN_STATE_CHANGED = 13,
     EVENT_STAGE_LNN_USER_SWITCHED = 14,
     EVENT_STAGE_LNN_UPDATE_ACCOUNT = 15,
+    EVENT_STAGE_LNN_CONVERSATION_REGISTER = 16,
+    EVENT_STAGE_LNN_CONVERSATION_RESULT = 17,
+    EVENT_STAGE_LNN_CONVERSATION_CHANNEL_STATS = 18,
+    EVENT_STAGE_LNN_CONVERSATION_P2P_RESULT = 19,
 } LnnEventLnnStage;
 
 typedef enum {
@@ -161,6 +166,12 @@ typedef enum {
     FIND_REMOTE_CIPHERKEY_FAILED = 32,
 } ConnectOnlineReason;
 
+ typedef enum {
+ 	     CONVERSATION_CHANNEL_NEARBY = 0,
+ 	     CONVERSATION_CHANNEL_PUSH = 1,
+ 	     CONVERSATION_CHANNEL_P2P = 2,
+ 	 } ConversationChannelType;
+
 typedef struct {
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
@@ -217,6 +228,12 @@ typedef struct {
     uint32_t isDelayFree;        // IS_DELAY_FREE
     uint32_t isBuildRetry;       // IS_BUILD_RETRY
     uint32_t isNoCapAlloc;       // IS_NO_CAP_ALLOC_LANE
+    uint32_t dataLen;            // DATA_LEN
+    uint32_t channelType;        // CHANNEL_TYPE
+    int32_t channelResult;       // CHANNEL_RESULT
+    int32_t channelRtt;          // CHANNEL_RTT
+    int32_t p2pResult;           // P2P_RESULT
+    int32_t p2pLatency;          // P2P_LATENCY
     uint8_t sourceType;          // SPARK_SEND_SOURCE_TYPE
     uint8_t dataType;            // SPARK_SEND_DATA_TYPE
     uint8_t isReliable;          // SPARK_SEND_IS_RELIABLE
@@ -234,6 +251,9 @@ typedef struct {
     const char *peerUdidHash;   // PEER_UDID_HASH
     const char *callerPkg;      // HOST_PKG
     const char *calleePkg;      // TO_CALL_PKG
+    const char *bundleName;     // BUNDLE_NAME
+    const char *abilityName;    // ABILITY_NAME
+    const char *statsTime;      // STATS_TIME
 } LnnEventExtra;
 
 typedef struct {

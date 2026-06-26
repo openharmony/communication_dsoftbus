@@ -166,7 +166,8 @@ uint32_t GenerateMsgId(void)
     return msgId;
 }
 
-static int32_t SendSingleSlice(const DataFragmentInfo *header, const uint8_t *data, const char *udid)
+static int32_t SendSingleSlice(const DataFragmentInfo *header, const uint8_t *data,
+    const char *udid, LnnEventExtra *extra)
 {
     uint8_t *buffer = NULL;
     uint32_t bufferLen = 0;
@@ -177,7 +178,7 @@ static int32_t SendSingleSlice(const DataFragmentInfo *header, const uint8_t *da
         return ret;
     }
 
-    ret = LnnSendAgentDataPacked(udid, (const char *)buffer, bufferLen);
+    ret = LnnSendAgentDataPacked(udid, (const char *)buffer, bufferLen, extra);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send slice by cloud failed, offset=%{public}u, ret=%{public}d",
             header->offset, ret);
@@ -189,36 +190,36 @@ static int32_t SendSingleSlice(const DataFragmentInfo *header, const uint8_t *da
     return SOFTBUS_OK;
 }
 
-int32_t DataSlice(const uint8_t *data, uint32_t dataLen, uint32_t sliceLen,
-    const char *udid, uint32_t msgId)
+int32_t DataSlice(const char *udid, const DataFragmentMsgInfo *info, LnnEventExtra *extra)
 {
-    if (data == NULL || udid == NULL) {
+    if (info == NULL || info->data == NULL || udid == NULL) {
         LNN_LOGI(LNN_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (dataLen == 0 || sliceLen == 0 || sliceLen > MAX_SLICE_LEN || dataLen > MAX_ASSEMBLED_LEN) {
-        LNN_LOGE(LNN_EVENT, "invalid param, dataLen=%{public}u, sliceLen=%{public}u", dataLen, sliceLen);
+    if (info->dataLen == 0 || info->sliceLen == 0 || info->sliceLen > MAX_SLICE_LEN ||
+        info->dataLen > MAX_ASSEMBLED_LEN) {
+        LNN_LOGE(LNN_EVENT, "invalid param, dataLen=%{public}u, sliceLen=%{public}u", info->dataLen, info->sliceLen);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint32_t sliceTotal = (dataLen + sliceLen - 1) / sliceLen;
+    uint32_t sliceTotal = (info->dataLen + info->sliceLen - 1) / info->sliceLen;
     if (sliceTotal > MAX_FRAGMENT_NUM) {
         LNN_LOGE(LNN_EVENT, "sliceTotal too large, sliceTotal=%{public}u", sliceTotal);
         return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_EVENT, "dataLen=%{public}u, sliceLen=%{public}u, sliceTotal=%{public}u",
-        dataLen, sliceLen, sliceTotal);
+        info->dataLen, info->sliceLen, sliceTotal);
 
     for (uint32_t i = 0; i < sliceTotal; i++) {
-        uint32_t offset = i * sliceLen;
-        if (dataLen < offset) {
-            LNN_LOGE(LNN_EVENT, "invalid param, dataLen=%{public}u", dataLen);
+        uint32_t offset = i * info->sliceLen;
+        if (info->dataLen < offset) {
+            LNN_LOGE(LNN_EVENT, "invalid param, dataLen=%{public}u", info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
-        uint32_t size = (offset + sliceLen > dataLen) ? (dataLen - offset) : sliceLen;
+        uint32_t size = (offset + info->sliceLen > info->dataLen) ? (info->dataLen - offset) : info->sliceLen;
 
-        DataFragmentInfo header = {msgId, size, offset, dataLen};
-        int32_t ret = SendSingleSlice(&header, data + offset, udid);
+        DataFragmentInfo header = {info->msgId, size, offset, info->dataLen};
+        int32_t ret = SendSingleSlice(&header, info->data + offset, udid, extra);
         if (ret != SOFTBUS_OK) {
             return ret;
         }

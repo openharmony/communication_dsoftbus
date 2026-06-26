@@ -53,7 +53,8 @@ HWTEST_F(LnnCloudQueryFragmentTest, DATA_SLICE_TEST_001, TestSize.Level1)
     uint32_t sliceLen = MAX_SLICE_LEN;
     const char *networkId = "test_network_id";
     uint32_t msgId = 0;
-    int32_t ret = DataSlice(data, dataLen, sliceLen, networkId, msgId);
+    DataFragmentMsgInfo info = {data, dataLen, sliceLen, msgId};
+    int32_t ret = DataSlice(networkId, &info, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
  
@@ -70,7 +71,8 @@ HWTEST_F(LnnCloudQueryFragmentTest, DATA_SLICE_TEST_002, TestSize.Level1)
     uint32_t sliceLen = 0;
     const char *networkId = "test_network_id";
     uint32_t msgId = 0;
-    int32_t ret = DataSlice(data, dataLen, sliceLen, networkId, msgId);
+    DataFragmentMsgInfo info = {data, dataLen, sliceLen, msgId};
+    int32_t ret = DataSlice(networkId, &info, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
  
@@ -87,7 +89,8 @@ HWTEST_F(LnnCloudQueryFragmentTest, DATA_SLICE_TEST_003, TestSize.Level1)
     uint32_t sliceLen = MAX_SLICE_LEN + 1;
     const char *networkId = "test_network_id";
     uint32_t msgId = 0;
-    int32_t ret = DataSlice(data, dataLen, sliceLen, networkId, msgId);
+    DataFragmentMsgInfo info = {data, dataLen, sliceLen, msgId};
+    int32_t ret = DataSlice(networkId, &info, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
  
@@ -106,7 +109,8 @@ HWTEST_F(LnnCloudQueryFragmentTest, DATA_SLICE_TEST_004, TestSize.Level1)
     uint32_t sliceLen = MAX_SLICE_LEN;
     const char *networkId = "test_network_id";
     uint32_t msgId = 0;
-    int32_t ret = DataSlice(data, dataLen, sliceLen, networkId, msgId);
+    DataFragmentMsgInfo info = {data, dataLen, sliceLen, msgId};
+    int32_t ret = DataSlice(networkId, &info, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     free(data);
 }

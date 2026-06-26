@@ -39,6 +39,7 @@
 #include "lnn_cloud_query_fragment.h"
 #include "lnn_lane_interface_struct.h"
 #include "lnn_log.h"
+#include "lnn_event.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
@@ -156,6 +157,19 @@ typedef struct {
     ConversationType channel;
     uint32_t msgId;
 } ProcessReceivedDataInput;
+
+typedef struct {
+    const char *deviceId;
+    const ConversationBusiness *info;
+    uint32_t len;
+    int32_t peerDevType;
+    char *peerDevTypeStr;
+} ConDataEventParam;
+ 
+typedef struct {
+    const char *msg;
+    uint32_t msgLen;
+} SendMsgData;
 
 static std::mutex g_nearFieldChannelLock;
 using NearFieldChannelVec = std::vector<NearFieldChannelInfo>;
@@ -1200,10 +1214,10 @@ static int32_t GetMsgId(bool isAckMsg, uint32_t ackMsgId, uint32_t *msgId,
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t LnnSendCtrlMsgByFarField(const char *msg, uint32_t msgLen, const char *udid,
-    const ConversationBusiness *info, AckMsgInfo *ackInfo = nullptr)
+static int32_t LnnSendCtrlMsgByFarField(SendMsgData *msgData, const char *udid,
+    const ConversationBusiness *info, AckMsgInfo *ackInfo = nullptr, LnnEventExtra *extra = nullptr)
 {
-    if (udid == nullptr || info == nullptr) {
+    if (udid == nullptr || info == nullptr || msgData == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1217,13 +1231,14 @@ static int32_t LnnSendCtrlMsgByFarField(const char *msg, uint32_t msgLen, const 
         return SOFTBUS_SOURCE_IS_NOT_PRIMARY_USER;
     }
 
-    if (!isAckMsg && (msg == nullptr || msgLen == 0 || msgLen > COMMUNICATION_DATA_MAX_LEN)) {
-        LNN_LOGE(LNN_EVENT, "invalid param, msgLen=%{public}u", msgLen);
+    if (!isAckMsg && (msgData->msg == nullptr || msgData->msgLen == 0 ||
+        msgData->msgLen > COMMUNICATION_DATA_MAX_LEN)) {
+        LNN_LOGE(LNN_EVENT, "invalid param, msgLen=%{public}u", msgData->msgLen);
         return SOFTBUS_INVALID_PARAM;
     }
 
     CloudMsgOutput output = {nullptr, 0};
-    int32_t ret = PackAndCompressCloudMsg(msg, msgLen, info, &output, ackInfo);
+    int32_t ret = PackAndCompressCloudMsg(msgData->msg, msgData->msgLen, info, &output, ackInfo);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -1235,9 +1250,9 @@ static int32_t LnnSendCtrlMsgByFarField(const char *msg, uint32_t msgLen, const 
         return ret;
     }
 
-    ret = DataSlice(output.packData, output.packLen, MAX_SLICE_LEN, udid, msgId);
+    DataFragmentMsgInfo msgInfo = {output.packData, output.packLen, MAX_SLICE_LEN, msgId};
+    ret = DataSlice(udid, &msgInfo, extra);
     SoftBusFree(output.packData);
-
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "DataSlice failed, ret=%{public}d", ret);
         return ret;
@@ -1708,7 +1723,8 @@ static bool CheckAndSendPrimaryUserAck(const ProcessReceivedDataInput *input)
     int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     if (userId != PRIMARY_USER_ID && input->channel != CONVERSATION_NEAR_FIELD_WIFI_DIRECT) {
         AckMsgInfo ackInfo = {true, input->msgId, SOFTBUS_SINK_IS_NOT_PRIMARY_USER};
-        int32_t sendRet = LnnSendCtrlMsgByFarField("", 0, input->udid, input->info, &ackInfo);
+        SendMsgData msgData = {"", 0};
+        int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData, input->udid, input->info, &ackInfo);
         LNN_LOGI(LNN_EVENT, "send ack done, msgId=%{public}u, errCode=%{public}d, sendRet=%{public}d",
             input->msgId, SOFTBUS_SOURCE_IS_NOT_PRIMARY_USER, sendRet);
         return true;
@@ -1814,7 +1830,8 @@ static int32_t ProcessReceivedCloudQueryData(const ProcessReceivedDataInput *inp
             input->msgId, ret, sendRet);
     } else {
         AckMsgInfo ackInfo = {true, input->msgId, ret};
-        int32_t sendRet = LnnSendCtrlMsgByFarField("", 0, input->udid, input->info, &ackInfo);
+        SendMsgData msgData = {"", 0};
+        int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData, input->udid, input->info, &ackInfo);
         LNN_LOGI(LNN_EVENT, "send ack done, msgId=%{public}u, errCode=%{public}d, sendRet=%{public}d",
             input->msgId, ret, sendRet);
     }
@@ -2062,8 +2079,8 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t reason)
                 SoftBusFree(msg.data);
                 continue;
             }
-            int32_t sendRet = LnnSendCtrlMsgByFarField(msg.data, msg.length,
-                nodeInfo.deviceInfo.deviceUdid, &msg.info, nullptr);
+            SendMsgData msgData = {msg.data, msg.length};
+            int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData, msg.networkId, &msg.info, nullptr);
             LNN_LOGI(LNN_EVENT, "send cached msg done, ret=%{public}d", sendRet);
             SoftBusFree(msg.data);
         }
@@ -2321,6 +2338,51 @@ static bool IsLocalDeviceId(const char *deviceId)
     return false;
 }
 
+static uint64_t InitConverDataEventExtra(ConDataEventParam *param, LnnEventExtra *extra = nullptr)
+{
+    if (param == nullptr || extra == nullptr) {
+        return SoftBusGetTimeMs();
+    }
+ 
+    extra->statsTime = SoftBusFormatTimestamp(SoftBusGetSysTimeMs());
+    extra->channelType = ConversationChannelType::CONVERSATION_CHANNEL_NEARBY;
+
+    extra->dataLen = param->len;
+    extra->peerUdid = param->deviceId;
+    extra->bundleName = param->info->bundleName;
+    extra->abilityName = param->info->abilityName;
+ 
+    if (Int64ToString(param->peerDevType, param->peerDevTypeStr, INT64_TO_STR_MAX_LEN)) {
+        extra->peerDeviceType = param->peerDevTypeStr;
+    }
+ 
+    return SoftBusGetTimeMs();
+}
+ 
+static void DfxRecordPostConversationData(uint64_t beginTime, int32_t ret,
+    LnnEventExtra *extra = nullptr)
+{
+    if (extra == nullptr) {
+        return;
+    }
+ 
+    uint64_t endTime = SoftBusGetTimeMs();
+    extra->channelRtt = static_cast<int32_t>(endTime - beginTime);
+    extra->result = ret;
+    LNN_EVENT(EVENT_SCENE_AGENT_COMM, EVENT_STAGE_LNN_CONVERSATION_CHANNEL_STATS, *extra);
+}
+ 
+static int32_t PrintAndGetDeviceNodeInfo(uint32_t len, const char *deviceId, NodeInfo *nodeInfo)
+{
+    char *anonyDeviceId = nullptr;
+    Anonymize(deviceId, &anonyDeviceId);
+    LNN_LOGI(LNN_EVENT, "post agent data, deviceId=%{public}s, datalen=%{public}u",
+        AnonymizeWrapper(anonyDeviceId), len);
+    AnonymizeFree(anonyDeviceId);
+ 
+    return GetDeviceNodeInfo(deviceId, nodeInfo);
+}
+
 int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness *info, const char *data, uint32_t len)
 {
     if (data == nullptr || deviceId == nullptr || info == nullptr || len == 0 || len > COMMUNICATION_DATA_MAX_LEN ||
@@ -2328,19 +2390,20 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
         LNN_LOGE(LNN_EVENT, "invalid param, len=%{public}u", len);
         return SOFTBUS_INVALID_PARAM;
     }
-    char *anonyDeviceId = nullptr;
-    Anonymize(deviceId, &anonyDeviceId);
-    LNN_LOGI(LNN_EVENT, "post agent data, deviceId=%{public}s, datalen=%{public}u",
-        AnonymizeWrapper(anonyDeviceId), len);
-    AnonymizeFree(anonyDeviceId);
+
     NodeInfo nodeInfo;
     memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = GetDeviceNodeInfo(deviceId, &nodeInfo);
+    int32_t ret = PrintAndGetDeviceNodeInfo(len, deviceId, &nodeInfo);
     uint32_t msgId = GenerateMsgId();
     if (msgId == 0) {
         LNN_LOGE(LNN_EVENT, "generate msgId failed");
         return SOFTBUS_INVALID_PARAM;
     }
+    LnnEventExtra extra = { 0 };
+    char peerDevTypeStr[INT64_TO_STR_MAX_LEN] = { 0 };
+    ConDataEventParam param = { deviceId, info, len, nodeInfo.deviceInfo.deviceTypeId, peerDevTypeStr };
+    uint64_t beginTime = InitConverDataEventExtra(&param, &extra);
+    SendMsgData msgData = {data, len};
     if (ret == SOFTBUS_OK) {
         ret = AddAckWaitItem(msgId, nodeInfo.deviceInfo.deviceUdid, info);
         if (ret != SOFTBUS_OK) {
@@ -2352,7 +2415,7 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
             LNN_LOGI(LNN_EVENT, "send by near field ret=%{public}d", ret);
         }
         if (ret != SOFTBUS_OK && IsSupportFarField(&nodeInfo)) {
-            ret = LnnSendCtrlMsgByFarField(data, len, nodeInfo.deviceInfo.deviceUdid, info);
+            ret = LnnSendCtrlMsgByFarField(&msgData, nodeInfo.deviceInfo.deviceUdid, info, nullptr, &extra);
             LNN_LOGI(LNN_EVENT, "send by far field ret=%{public}d", ret);
         }
     } else {
@@ -2361,13 +2424,15 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
             return ret;
         }
         LNN_LOGI(LNN_EVENT, "device not found, just try send far field");
-        ret = LnnSendCtrlMsgByFarField(data, len, deviceId, info);
+        ret = LnnSendCtrlMsgByFarField(&msgData, deviceId, info, nullptr, &extra);
     }
 
     if (ret != SOFTBUS_OK) {
+        DfxRecordPostConversationData(beginTime, ret, &extra);
         RemoveAckWaitItem(msgId, ret);
         return ret;
     }
     ret = WaitForAck(msgId, info);
+    DfxRecordPostConversationData(beginTime, ret, &extra);
     return ret;
 }

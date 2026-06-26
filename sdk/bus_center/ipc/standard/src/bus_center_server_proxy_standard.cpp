@@ -1665,7 +1665,7 @@ int32_t BusCenterServerProxy::PostConversationData(const char *deviceId,
     int32_t ret = remote->SendRequest(SERVER_POST_CONVERSATION_DATA, msg, reply, option);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {

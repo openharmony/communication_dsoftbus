@@ -34,7 +34,7 @@ typedef enum {
     TYPE_LNN_FAST_OFFLINE = 0,
     TYPE_AGENT_COMMUNICATION,
     WATCH_WECHAT,
-    TYPE_BUFF,
+    FAR_FIELD_BUSINESS_MAX,
 } FarFieldBusiness;
 
 typedef void (*FragmentRecvCallback)(const char *udid, const char *data,

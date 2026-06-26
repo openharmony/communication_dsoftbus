@@ -176,6 +176,12 @@ BUSCENTER_BEHAVIOR:
   IS_DELAY_FREE: { type: INT32, desc: lane is delay free }
   IS_BUILD_RETRY: { type: UINT32, desc: lane is build retry }
   IS_NO_CAP_ALLOC: { type: UINT32, desc: lane is no cap alloc }
+  DATA_LEN: { type: UINT32, desc: data len }
+  CHANNEL_TYPE: { type: UINT32, desc: channel type }
+  CHANNEL_RESULT: { type: INT32, desc: channel result }
+  CHANNEL_RTT: { type: INT32, desc: channel Rtt }
+  P2P_RESULT: { type: INT32, desc: p2p result }
+  P2P_LATENCY: { type: INT32, desc: p2p latency }
   SOURCE_TYPE: { type: UINT8, desc: spark link send source type }
   DATA_TYPE: { type: UINT8, desc: spark link send data type }
   IS_RELIABLE: { type: UINT8, desc: spark link send data is reliable }
@@ -191,6 +197,9 @@ BUSCENTER_BEHAVIOR:
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
   LOCAL_UDID_HASH: { type: STRING, desc: local device udid hash}
   PEER_UDID_HASH: { type: STRING, desc: peer device udid hash}
+  BUNDLE_NAME: { type: STRING, desc: bundle name}
+  ABILITY_NAME: { type: STRING, desc: ability name}
+  STATS_TIME: { type: STRING, desc: stats time}
 
 BUSCENTER_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: bus center security audit }

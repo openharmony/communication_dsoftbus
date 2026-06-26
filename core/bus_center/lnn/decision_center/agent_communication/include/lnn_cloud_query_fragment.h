@@ -18,6 +18,8 @@
 
 #include <stdint.h>
 
+#include "lnn_event.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,10 +33,16 @@ typedef struct {
     uint32_t total;
 } DataFragmentInfo;
 
+typedef struct {
+    const uint8_t *data;
+    uint32_t dataLen;
+    uint32_t sliceLen;
+    uint32_t msgId;
+} DataFragmentMsgInfo;
+
 void DataFragmentInit(void);
 
-int32_t DataSlice(const uint8_t *data, uint32_t dataLen, uint32_t sliceLen,
-    const char *udid, uint32_t msgId);
+int32_t DataSlice(const char *udid, const DataFragmentMsgInfo *info, LnnEventExtra *extra);
 
 int32_t DataAggregate(const uint8_t *data, uint32_t dataLen, uint8_t **assembledData, uint32_t *assembledLen,
     uint32_t *msgId);
