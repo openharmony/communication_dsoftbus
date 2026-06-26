@@ -67,6 +67,7 @@ typedef int32_t(*LnnCloudRemoveCompareFunc)(const void *obj, void *param);
 typedef enum {
     MSG_TYPE_SOCKET_TIMEOUT,
     MSG_TYPE_HML_TIMEOUT,
+    MSG_TYPE_DELAY_DISCONNECT,
 } LnnCloudMsgType;
 
 typedef struct {
