@@ -1680,6 +1680,78 @@ bool IsDeviceHasRiskFactorPacked(void)
     return pfnLnnEnhanceFuncList->isDeviceHasRiskFactor();
 }
 
+void LnnDeinitLocalUserInfoPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitLocalUserInfo) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->lnnDeinitLocalUserInfo();
+}
+
+int32_t LnnPackCloudSyncUserInfoPacked(cJSON *json, const UserInfo *userInfo)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnPackCloudSyncUserInfo) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnPackCloudSyncUserInfo(json, userInfo);
+}
+
+int32_t LnnUnPackCloudSyncUserInfoPacked(cJSON *json, UserInfo *userInfo)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnUnPackCloudSyncUserInfo) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnUnPackCloudSyncUserInfo(json, userInfo);
+}
+
+bool LnnCheckUserExistsByAccountIdPacked(int64_t accountId)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnCheckUserExistsByAccountId) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->lnnCheckUserExistsByAccountId(accountId);
+}
+
+int32_t LnnSaveLocalUserInfoPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveLocalUserInfo) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnSaveLocalUserInfo();
+}
+
+int32_t LnnLoadLocalUserInfoPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnLoadLocalUserInfo) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnLoadLocalUserInfo();
+}
+
+int32_t LnnSaveRemoteUserInfoPacked(const char *udid, const UserInfo *userInfo)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveRemoteUserInfo) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnSaveRemoteUserInfo(udid, userInfo);
+}
+
+int32_t LnnLoadRemoteUserInfoPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnLoadRemoteUserInfo) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnLoadRemoteUserInfo();
+}
+
 int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();

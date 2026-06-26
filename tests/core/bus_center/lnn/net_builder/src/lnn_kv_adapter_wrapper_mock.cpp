@@ -72,9 +72,9 @@ int32_t LnnCloudSync(int32_t dbId)
     return GetKvAdapterInterface()->LnnCloudSync(dbId);
 }
 
-int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
+int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode)
 {
-    return GetKvAdapterInterface()->LnnSetCloudAbilityInner(dbId, isEnableCloud);
+    return GetKvAdapterInterface()->LnnSetCloudAbilityInner(dbId, isEnableCloud, filterMode);
 }
 }
 } // namespace OHOS

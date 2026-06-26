@@ -82,14 +82,14 @@ int32_t LnnAsyncCallbackDelayHelper(
     return HeartBeatCtrlStaticInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
 
-int32_t LnnSetCloudAbility(const bool isEnableCloud)
+int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
 {
-    return HeartBeatCtrlStaticInterface()->LnnSetCloudAbility(isEnableCloud);
+    return HeartBeatCtrlStaticInterface()->LnnSetCloudAbility(isEnableCloud, filterMode);
 }
 
-int32_t LnnDeleteSyncToDB(void)
+int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUserId)
 {
-    return HeartBeatCtrlStaticInterface()->LnnDeleteSyncToDB();
+    return HeartBeatCtrlStaticInterface()->LnnDeleteSyncToDB(userId, accountId, isMainScreenUserId);
 }
 
 void LnnOnOhosAccountLogout(void)
@@ -289,6 +289,16 @@ int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
 struct WifiDirectManager* GetWifiDirectManager(void)
 {
     return HeartBeatCtrlStaticInterface()->GetWifiDirectManager();
+}
+
+int32_t HbMultiUserHandleLogin(void)
+{
+    return HeartBeatCtrlStaticInterface()->HbMultiUserHandleLogin();
+}
+
+int32_t HbMultiUserHandleLogout(void)
+{
+    return HeartBeatCtrlStaticInterface()->HbMultiUserHandleLogout();
 }
 }
 } // namespace OHOS

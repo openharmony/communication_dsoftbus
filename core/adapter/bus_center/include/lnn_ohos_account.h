@@ -30,6 +30,7 @@ typedef enum {
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len);
 int32_t LnnGetOhosAccountInfoByUserId(int32_t userId, uint8_t *accountHash, uint32_t len);
+int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *accountHash, uint32_t len);
 int32_t LnnInitOhosAccount(void);
 void LnnUpdateOhosAccount(UpdateAccountReason reason);
 void LnnOnOhosAccountLogout(void);

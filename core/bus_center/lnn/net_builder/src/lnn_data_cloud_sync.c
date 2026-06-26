@@ -19,14 +19,19 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "common_list.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_distributed_user_info.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_local_user_info.h"
+#include "lnn_multi_user_process.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
@@ -822,7 +827,27 @@ static void PrintSyncNodeInfoEx(const NodeInfo *cacheInfo)
     AnonymizeFree(anonyModelName);
 }
 
-static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
+static void PrintUserInfo(const UserInfo *userInfo)
+{
+    if (userInfo == NULL || userInfo->userId < 0) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    char accountId[INT64_TO_STR_MAX_LEN] = { 0 };
+    if (!Int64ToString(userInfo->accountId, accountId, INT64_TO_STR_MAX_LEN)) {
+        LNN_LOGE(LNN_BUILDER, "accountId to str fail, please check accountId");
+        return;
+    }
+    char *anonyAccountId = NULL;
+    Anonymize(accountId, &anonyAccountId);
+    LNN_LOGI(LNN_BUILDER, "UserInfo: ACCOUNT_HASH=[%{public}02X, %{public}02X], USER_ID=%{public}d, "
+        "ACCOUNT_ID=%{public}s, DISPLAY_ID=%{public}" PRIu64 ", UPDATE_TIME=%{public}" PRIu64 "",
+        userInfo->accountHash[0], userInfo->accountHash[1], userInfo->userId,
+        AnonymizeWrapper(anonyAccountId), userInfo->displayId, userInfo->updateTimestamp);
+    AnonymizeFree(anonyAccountId);
+}
+
+static void PrintSyncNodeInfo(const NodeInfo *cacheInfo, const UserInfo *userInfo)
 {
     LNN_CHECK_AND_RETURN_LOGE(cacheInfo != NULL, LNN_BUILDER, "invalid param");
     char accountId[INT64_TO_STR_MAX_LEN] = {0};
@@ -865,6 +890,7 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyDeviceName);
     PrintSyncNodeInfoEx(cacheInfo);
+    PrintUserInfo(userInfo);
 }
 
 static void UpdateDeviceNameToCache(const NodeInfo *newInfo, NodeInfo *oldInfo)
@@ -991,6 +1017,10 @@ static void ProcessDeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheIn
         LNN_LOGI(LNN_BUILDER, "no cache info, no need to reply");
         return;
     }
+    if (cacheInfo->deviceInfo.deviceTypeId == TYPE_CAR_ID) {
+        LNN_LOGI(LNN_BUILDER, "peer device is car, no need to reply");
+        return;
+    }
     if (cacheInfo->accountId != oldCacheInfo->accountId) {
         LNN_LOGI(LNN_BUILDER, "account is changed, no need to reply");
         return;
@@ -999,7 +1029,11 @@ static void ProcessDeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheIn
         NodeInfo info;
         (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "save local device info fail");
+            LNN_LOGE(LNN_BUILDER, "get local node info fail");
+            return;
+        }
+        if (info.deviceInfo.deviceTypeId == TYPE_CAR_ID) {
+            LNN_LOGI(LNN_BUILDER, "local device is car, no need to reply");
             return;
         }
         if (LnnLedgerAllDataSyncToDB(&info, true, cacheInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
@@ -1008,32 +1042,73 @@ static void ProcessDeviceNameChangeAck(NodeInfo *cacheInfo, NodeInfo *oldCacheIn
     }
 }
 
-static int32_t LnnSaveAndUpdateDistributedNode(bool isNeedAck, NodeInfo *cacheInfo, NodeInfo *oldCacheInfo)
+static void LnnReportAccountIdMismatch(int64_t accountId, int64_t localAccountId)
 {
-    if (cacheInfo == NULL || oldCacheInfo == NULL) {
+    char accountIdStr[INT64_TO_STR_MAX_LEN] = {0};
+    char localAccountIdStr[INT64_TO_STR_MAX_LEN] = {0};
+    if (!Int64ToString(accountId, accountIdStr, INT64_TO_STR_MAX_LEN)) {
+        LNN_LOGE(LNN_BUILDER, "accountId to str fail");
+        return;
+    }
+    if (!Int64ToString(localAccountId, localAccountIdStr, INT64_TO_STR_MAX_LEN)) {
+        LNN_LOGE(LNN_BUILDER, "local accountId to str fail");
+        return;
+    }
+    char *anonyAccountId = NULL;
+    char *anonyLocalAccountId = NULL;
+    Anonymize(accountIdStr, &anonyAccountId);
+    Anonymize(localAccountIdStr, &anonyLocalAccountId);
+    LNN_LOGE(LNN_BUILDER, "don't set, accountId=%{public}s, local accountId=%{public}s",
+        AnonymizeWrapper(anonyAccountId), AnonymizeWrapper(anonyLocalAccountId));
+    AnonymizeFree(anonyAccountId);
+    AnonymizeFree(anonyLocalAccountId);
+}
+
+static bool IsAccountIdMatchForMultiUserScene(NodeInfo *cacheInfo, NodeInfo *localCacheInfo,
+    const UserInfo *userCacheInfo)
+{
+    bool isPeerCar = (cacheInfo->deviceInfo.deviceTypeId == TYPE_CAR_ID);
+    bool isLocalCar = (localCacheInfo->deviceInfo.deviceTypeId == TYPE_CAR_ID);
+    if (!isPeerCar && !isLocalCar) {
+        if (cacheInfo->accountId != localCacheInfo->accountId) {
+            LnnReportAccountIdMismatch(cacheInfo->accountId, localCacheInfo->accountId);
+            return false;
+        }
+        return true;
+    }
+    if (isPeerCar && !isLocalCar) {
+        if (userCacheInfo->accountId != localCacheInfo->accountId) {
+            LnnReportAccountIdMismatch(userCacheInfo->accountId, localCacheInfo->accountId);
+            return false;
+        }
+        return true;
+    }
+    if (!isPeerCar && isLocalCar) {
+        bool userExists = LnnCheckUserExistsByAccountIdPacked(cacheInfo->accountId);
+        if (!userExists) {
+            LNN_LOGE(LNN_BUILDER, "local user account not found");
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+static int32_t LnnSaveAndUpdateDistributedNode(
+    bool isNeedAck, NodeInfo *cacheInfo, NodeInfo *oldCacheInfo, const UserInfo *userInfo)
+{
+    if (cacheInfo == NULL || oldCacheInfo == NULL || userInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo localCacheInfo = { 0 };
     int32_t ret = LnnGetLocalCacheNodeInfoPacked(&localCacheInfo);
-    if (ret != SOFTBUS_OK || cacheInfo->accountId != localCacheInfo.accountId) {
-        char accountId[INT64_TO_STR_MAX_LEN] = {0};
-        char localAccountId[INT64_TO_STR_MAX_LEN] = {0};
-        if (!Int64ToString(cacheInfo->accountId, accountId, INT64_TO_STR_MAX_LEN)) {
-            LNN_LOGE(LNN_BUILDER, "accountId to str fail");
-        }
-        if (!Int64ToString(localCacheInfo.accountId, localAccountId, INT64_TO_STR_MAX_LEN)) {
-            LNN_LOGE(LNN_BUILDER, "local accountId to str fail");
-        }
-        char *anonyAccountId = NULL;
-        char *anonyLocalAccountId = NULL;
-        Anonymize(accountId, &anonyAccountId);
-        Anonymize(localAccountId, &anonyLocalAccountId);
-        LNN_LOGE(LNN_BUILDER, "don't set, ret=%{public}d, accountId=%{public}s, local accountId=%{public}s",
-            ret, AnonymizeWrapper(anonyAccountId), AnonymizeWrapper(anonyLocalAccountId));
-        AnonymizeFree(anonyAccountId);
-        AnonymizeFree(anonyLocalAccountId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local cache node info fail, ret=%{public}d", ret);
         return ret;
+    }
+    if (!IsAccountIdMatchForMultiUserScene(cacheInfo, &localCacheInfo, userInfo)) {
+        return SOFTBUS_INVALID_PARAM;
     }
     if (isNeedAck) {
         ProcessDeviceNameChangeAck(cacheInfo, oldCacheInfo);
@@ -1043,6 +1118,11 @@ static int32_t LnnSaveAndUpdateDistributedNode(bool isNeedAck, NodeInfo *cacheIn
         LnnSaveRemoteDeviceInfoPacked(oldCacheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "update cache info fail, use cloud sync data");
         (void)LnnSaveRemoteDeviceInfoPacked(cacheInfo);
+    }
+    if (cacheInfo->deviceInfo.deviceTypeId == TYPE_CAR_ID && userInfo->accountId > 0) {
+        if (LnnSaveRemoteUserInfoPacked(cacheInfo->deviceInfo.deviceUdid, userInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "save remote user info fail");
+        }
     }
     char *anonyUdid = NULL;
     Anonymize(cacheInfo->deviceInfo.deviceUdid, &anonyUdid);
@@ -1054,6 +1134,57 @@ static int32_t LnnSaveAndUpdateDistributedNode(bool isNeedAck, NodeInfo *cacheIn
     if (LnnUpdateDistributedNodeInfo(cacheInfo, cacheInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:Cache info sync to Ledger fail");
         return SOFTBUS_MEM_ERR;
+    }
+    if (cacheInfo->deviceInfo.deviceTypeId == TYPE_CAR_ID && userInfo->accountId > 0) {
+        if (LnnUpdateDistributedUserInfo(userInfo, cacheInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "fail:Cache info sync to user Ledger fail");
+            return SOFTBUS_NETWORK_UPDATE_MULTI_USER_FAILED;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ParseCloudSyncData(cJSON *json, NodeInfo *cacheInfo, UserInfo *userInfo)
+{
+    int32_t ret = LnnUnPackCloudSyncDeviceInfoPacked(json, cacheInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "unpack cloud sync device info fail");
+        return ret;
+    }
+    if (cacheInfo->deviceInfo.deviceTypeId != TYPE_CAR_ID) {
+        LNN_LOGD(LNN_BUILDER, "peer device is not car");
+        return SOFTBUS_OK;
+    }
+    ret = LnnUnPackCloudSyncUserInfoPacked(json, userInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "unpack cloud sync user info fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t HandleNodeInfoCloudSync(NodeInfo *cacheInfo, const UserInfo *userInfo, bool isNeedAck)
+{
+    char udidHash[UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (LnnGenerateHexStringHash((const unsigned char *)cacheInfo->deviceInfo.deviceUdid, udidHash,
+        UDID_HASH_HEX_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate UDID HexStringHash fail");
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    NodeInfo oldCacheInfo = { 0 };
+    int32_t ret = LnnRetrieveDeviceInfoPacked(udidHash, &oldCacheInfo);
+    if (ret == SOFTBUS_OK && IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp,
+        cacheInfo->stateVersion, cacheInfo->updateTimestamp)) {
+        return SOFTBUS_KV_IGNORE_OLD_DEVICE_INFO;
+    }
+    if (ret == SOFTBUS_NETWORK_NOT_FOUND) {
+        LNN_LOGW(LNN_BUILDER, "not found device");
+        oldCacheInfo.isAuthExchangeUdid = true;
+    }
+    ret = LnnSaveAndUpdateDistributedNode(isNeedAck, cacheInfo, &oldCacheInfo, userInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "save and update distribute node info fail");
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1089,36 +1220,22 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
         return SOFTBUS_PARSE_JSON_ERR;
     }
     NodeInfo cacheInfo = { 0 };
-    int32_t ret = LnnUnPackCloudSyncDeviceInfoPacked(json, &cacheInfo);
+    UserInfo userInfo = { 0 };
+    int32_t ret = ParseCloudSyncData(json, &cacheInfo, &userInfo);
     if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
         return ret;
     }
     bool isNeedAck = IsNeedReplyAck(json);
     cJSON_Delete(json);
-    PrintSyncNodeInfo(&cacheInfo);
-    char udidHash[UDID_HASH_HEX_LEN + 1] = { 0 };
-    if (LnnGenerateHexStringHash((const unsigned char *)cacheInfo.deviceInfo.deviceUdid, udidHash, UDID_HASH_HEX_LEN) !=
-        SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Generate UDID HexStringHash fail");
-        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
-    }
-    NodeInfo oldCacheInfo = { 0 };
-    ret = LnnRetrieveDeviceInfoPacked(udidHash, &oldCacheInfo);
-    if (ret == SOFTBUS_OK && IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp,
-        cacheInfo.stateVersion, cacheInfo.updateTimestamp)) {
-        return SOFTBUS_KV_IGNORE_OLD_DEVICE_INFO;
-    }
-    if (ret == SOFTBUS_NETWORK_NOT_FOUND) {
-        LNN_LOGW(LNN_BUILDER, "not found device");
-        oldCacheInfo.isAuthExchangeUdid = true;
-    }
-    ret = LnnSaveAndUpdateDistributedNode(isNeedAck, &cacheInfo, &oldCacheInfo);
+    PrintSyncNodeInfo(&cacheInfo, &userInfo);
+    ret = HandleNodeInfoCloudSync(&cacheInfo, &userInfo, isNeedAck);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "save and update distribute node info fail");
+        LNN_LOGE(LNN_BUILDER, "handle cloud sync info fail");
         (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
         return ret;
     }
+    LNN_LOGI(LNN_BUILDER, "db data change sync to cache success");
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     return SOFTBUS_OK;
 }
@@ -1219,43 +1336,68 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
+static int32_t BuildCloudSyncKey(char *putKey, NodeInfo *info, const UserInfo *userInfo, bool isMainScreenUserId)
 {
-    if (info == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid param, info is NULL");
-        return SOFTBUS_INVALID_PARAM;
+    int64_t accountId = (userInfo != NULL) ? userInfo->accountId : info->accountId;
+    if (isMainScreenUserId) {
+        if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", accountId, info->deviceInfo.deviceUdid) < 0) {
+            LNN_LOGE(LNN_BUILDER, "convert putKey failed");
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        int32_t userId = (userInfo != NULL) ? userInfo->userId : info->userId;
+        if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%d", accountId, info->deviceInfo.deviceUdid, userId) < 0) {
+            LNN_LOGE(LNN_BUILDER, "convert putKey failed, include userId");
+            return SOFTBUS_MEM_ERR;
+        }
     }
-    if (info->accountId == 0) {
-        LNN_LOGI(LNN_BUILDER, "ledger accountid is null, all data no need sync to cloud");
-        return SOFTBUS_KV_CLOUD_DISABLED;
+    return SOFTBUS_OK;
+}
+
+static int32_t PackCloudSyncJson(cJSON *json, NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid)
+{
+    int32_t ret = PackBroadcastCipherKeyInner(json, info);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
+    if (isAckSeq && peerudid != NULL && (ret = LnnPackCloudSyncAckSeqPacked(json, peerudid)) != SOFTBUS_OK) {
+        return ret;
+    }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if ((ret = PackUserInfoToJsonInner(json, userInfo)) != SOFTBUS_OK) {
+        return ret;
+    }
+#endif
+    return SOFTBUS_OK;
+}
+
+int32_t SyncLedgerInfoToCloud(NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid,
+    bool isMainScreenUserId)
+{
     char putKey[KEY_MAX_LEN] = { 0 };
-    if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", info->accountId, info->deviceInfo.deviceUdid) < 0) {
-        return SOFTBUS_MEM_ERR;
+    int32_t ret = BuildCloudSyncKey(putKey, info, userInfo, isMainScreenUserId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
+    uint32_t filterMode = isMainScreenUserId ? CLOSE_FILTER_USERID_MODE : OPEN_FILTER_USERID_MODE;
     info->updateTimestamp = SoftBusGetSysTimeMs();
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    int32_t ret = PackBroadcastCipherKeyInner(json, info);
+    ret = PackCloudSyncJson(json, info, userInfo, isAckSeq, peerudid);
     if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
         return ret;
     }
-    if (isAckSeq && peerudid != NULL && (ret = LnnPackCloudSyncAckSeqPacked(json, peerudid)) != SOFTBUS_OK) {
-        cJSON_Delete(json);
-        return ret;
-    }
     char *putValue = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
     if (putValue == NULL) {
         LNN_LOGE(LNN_BUILDER, "cJSON_PrintUnformatted fail");
-        cJSON_Delete(json);
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    cJSON_Delete(json);
     int32_t dbId = g_dbId;
-    LnnSetCloudAbility(true);
+    LnnSetCloudAbility(true, filterMode);
     ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
     cJSON_free(putValue);
     if (ret != SOFTBUS_OK) {
@@ -1266,6 +1408,23 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
     ret = LnnCloudSync(dbId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch cloud sync fail, errorcode=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param, info is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (info->accountId == 0) {
+        LNN_LOGI(LNN_BUILDER, "ledger accountId is null, all data no need sync to cloud");
+        return SOFTBUS_KV_CLOUD_DISABLED;
+    }
+    int32_t ret = SyncLedgerInfoToCloud(info, NULL, isAckSeq, peerudid, true);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "sync ledger info to cloud failed");
     }
     return ret;
 }
@@ -1297,7 +1456,7 @@ int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info)
     return rc;
 }
 
-int32_t LnnDeleteSyncToDB(void)
+int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUserId)
 {
     NodeInfo localCacheInfo = { 0 };
     int32_t ret = LnnGetLocalCacheNodeInfoPacked(&localCacheInfo);
@@ -1305,10 +1464,21 @@ int32_t LnnDeleteSyncToDB(void)
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
         return ret;
     }
+
     char key[KEY_MAX_LEN] = { 0 };
-    if (sprintf_s(key, KEY_MAX_LEN, "%ld#%s", localCacheInfo.accountId, localCacheInfo.deviceInfo.deviceUdid) < 0) {
-        LNN_LOGE(LNN_BUILDER, "sprintf_s key fail");
-        return SOFTBUS_SPRINTF_ERR;
+    int64_t existAccountId = (accountId == 0) ? localCacheInfo.accountId : accountId;
+    if (isMainScreenUserId) {
+        if (sprintf_s(key, KEY_MAX_LEN, "%ld#%s", existAccountId, localCacheInfo.deviceInfo.deviceUdid) < 0) {
+            LNN_LOGE(LNN_BUILDER, "sprintf_s key fail");
+            return SOFTBUS_SPRINTF_ERR;
+        }
+    } else {
+        int32_t existUserId = (userId == 0) ? localCacheInfo.userId : userId;
+        if (sprintf_s(key, KEY_MAX_LEN, "%ld#%s#%d", existAccountId,
+            localCacheInfo.deviceInfo.deviceUdid, existUserId) < 0) {
+            LNN_LOGE(LNN_BUILDER, "sprintf_s key fail, include userId");
+            return SOFTBUS_SPRINTF_ERR;
+        }
     }
 
     int32_t dbId = g_dbId;
@@ -1355,12 +1525,12 @@ int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetCloudAbility(const bool isEnableCloud)
+int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = 0;
     dbId = g_dbId;
-    int32_t ret = LnnSetCloudAbilityInner(dbId, isEnableCloud);
+    int32_t ret = LnnSetCloudAbilityInner(dbId, isEnableCloud, filterMode);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set cloud ability fail");
         return ret;

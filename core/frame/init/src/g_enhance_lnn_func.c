@@ -179,6 +179,14 @@ void Register3rdPartFunc(void *soHandle)
         dlsym(soHandle, "UpdateConcurrencyReuseLaneReqIdByActionId");
     g_lnnEnhanceFuncList.lnnPackCloudSyncAckSeq = dlsym(soHandle, "LnnPackCloudSyncAckSeq");
     g_lnnEnhanceFuncList.generateNewLocalCipherKey = dlsym(soHandle, "GenerateNewLocalCipherKey");
+    g_lnnEnhanceFuncList.lnnDeinitLocalUserInfo = dlsym(soHandle, "LnnDeinitLocalUserInfo");
+    g_lnnEnhanceFuncList.lnnPackCloudSyncUserInfo = dlsym(soHandle, "LnnPackCloudSyncUserInfo");
+    g_lnnEnhanceFuncList.lnnUnPackCloudSyncUserInfo = dlsym(soHandle, "LnnUnPackCloudSyncUserInfo");
+    g_lnnEnhanceFuncList.lnnCheckUserExistsByAccountId = dlsym(soHandle, "LnnCheckUserExistsByAccountId");
+    g_lnnEnhanceFuncList.lnnSaveLocalUserInfo = dlsym(soHandle, "LnnSaveLocalUserInfo");
+    g_lnnEnhanceFuncList.lnnLoadLocalUserInfo = dlsym(soHandle, "LnnLoadLocalUserInfo");
+    g_lnnEnhanceFuncList.lnnSaveRemoteUserInfo = dlsym(soHandle, "LnnSaveRemoteUserInfo");
+    g_lnnEnhanceFuncList.lnnLoadRemoteUserInfo = dlsym(soHandle, "LnnLoadRemoteUserInfo");
 }
 
 void Register4thPartFunc(void *soHandle)

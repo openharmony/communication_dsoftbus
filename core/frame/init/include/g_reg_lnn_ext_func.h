@@ -394,6 +394,8 @@ typedef int32_t (*SendParamsToLpDeviceFunc)(const uint8_t *data, uint32_t dataSi
 typedef void (*LnnNotifyVirLinkReportEventFunc)(const uint8_t *data, uint32_t dataSize);
 typedef void (*LnnNotifyDmHookRegisteredEventFunc)(void);
 
+typedef const SoftBusList *(*LnnGetLocalUserLedgerFunc)(void);
+
 #ifdef __cplusplus
 }
 #endif

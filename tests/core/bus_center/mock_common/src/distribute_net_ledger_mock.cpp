@@ -112,5 +112,10 @@ int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp)
 {
     return GetDistriLedgerInterface()->LnnSetDLSleHbTimestamp(networkId, timestamp);
 }
+
+void LnnRemoveUserInfoNode(const char *udid)
+{
+    return GetDistriLedgerInterface()->LnnRemoveUserInfoNode(udid);
+}
 }
 } // namespace OHOS

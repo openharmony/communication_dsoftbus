@@ -927,5 +927,6 @@ void LnnDeinitNetBuilder(void)
     LnnDeinitSyncInfoManager();
     LnnDeInitSaStatusMonitor();
     LnnDeinitConnIdCallbackManager();
+    LnnDeinitLocalUserInfoPacked();
     LnnGetNetBuilder()->isInit = false;
 }

@@ -34,6 +34,7 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_multi_user_process.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_init_monitor.h"
@@ -693,8 +694,13 @@ static void HbScreenOnOnceTryCloudSync(void)
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON && !g_isScreenOnOnce &&
         g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN &&
         g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK) {
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        HbTryCloudSync();
+        HbDelayConditionChanged(NULL);
+#else
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
             HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
+#endif
     }
 }
 
@@ -868,6 +874,41 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbHandleAccountLogin(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
+    LnnAsyncCallbackDelayHelper(
+        GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, HB_CLOUD_SYNC_DELAY_LEN);
+    LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
+        HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    (void)HbMultiUserHandleLogin();
+    HbDelayConditionChanged(NULL);
+#else
+    LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
+        HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
+#endif
+}
+
+static void HbHandleAccountLogout(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    (void)HbMultiUserHandleLogout();
+#else
+    LnnSetCloudAbility(false, CLOSE_FILTER_USERID_MODE);
+    if (LnnDeleteSyncToDB(0, 0, true) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB clear local cache fail");
+    }
+#endif
+    LnnOnOhosAccountLogout();
+    HbConditionChanged(false);
+    if (LnnStartHbByTypeAndStrategy(
+        HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
+    }
+}
+
 static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_ACCOUNT_CHANGED) {
@@ -879,26 +920,10 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     g_hbConditionState.accountState = accountState;
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
-            LnnAsyncCallbackDelayHelper(
-                GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, HB_CLOUD_SYNC_DELAY_LEN);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
-                HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
-            LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
-                HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
+            HbHandleAccountLogin();
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
-            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
-            LnnSetCloudAbility(false);
-            if (LnnDeleteSyncToDB() != SOFTBUS_OK) {
-                LNN_LOGE(LNN_LEDGER, "HB clear local cache fail");
-            }
-            LnnOnOhosAccountLogout();
-            HbConditionChanged(false);
-            if (LnnStartHbByTypeAndStrategy(
-                HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
-            }
+            HbHandleAccountLogout();
             break;
         default:
             return;

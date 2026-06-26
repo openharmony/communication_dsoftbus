@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,34 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef LNN_FILE_UTILS_STRUCT_H
-#define LNN_FILE_UTILS_STRUCT_H
-
-#include <stdbool.h>
-#include <stdint.h>
+#ifndef LNN_USER_INFO_RECOVERY_STRUCT_H
+#define LNN_USER_INFO_RECOVERY_STRUCT_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    LNN_FILE_ID_UUID,
-    LNN_FILE_ID_DB_KEY,
-    LNN_FILE_ID_LOCAL_DEVICE,
-    LNN_FILE_ID_REMOTE_DEVICE,
-    LNN_FILE_ID_COMM_KEY,
-    LNN_FILE_ID_BROADCAST_KEY,
-    LNN_FILE_ID_PTK_KEY,
-    LNN_FILE_ID_APPLY_KEY,
-    LNN_FILE_ID_ACCOUNT_INFO,
-    LNN_FILE_ID_IRK_KEY,
-    LNN_FILE_ID_BROADCAST_CIPHER,
-    LNN_FILE_ID_LOCAL_USER,
-    LNN_FILE_ID_REMOTE_USER,
-    LNN_FILE_ID_MAX
-} LnnFileId;
+#define USER_INFO_ACCOUNT_HASH "accountHash"
+#define USER_INFO_USER_ID "userId"
+#define USER_INFO_ACCOUNT_ID "accountId"
+#define USER_INFO_TYPE "displayId"
+#define USER_INFO_UPDATE_TIMESTAMP "updateTimestamp"
+#define JSON_KEY_UDID "udid"
+#define JSON_KEY_USER "user"
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_FILE_UTILS_STRUCT_H */
+
+#endif // LNN_USER_INFO_RECOVERY_STRUCT_H

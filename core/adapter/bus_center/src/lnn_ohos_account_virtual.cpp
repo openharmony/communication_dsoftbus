@@ -31,6 +31,15 @@ int32_t LnnGetOhosAccountInfoByUserId(int32_t userId, uint8_t *accountHash, uint
     return SOFTBUS_OK;
 }
 
+int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *accountHash, uint32_t len)
+{
+    (void)userId;
+    (void)accountId;
+    (void)accountHash;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitOhosAccount(void)
 {
     return SOFTBUS_OK;

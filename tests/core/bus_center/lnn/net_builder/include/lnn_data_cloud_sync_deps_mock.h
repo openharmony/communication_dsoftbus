@@ -49,6 +49,8 @@ public:
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
     virtual int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid) = 0;
     virtual int32_t LnnFindDeviceUdidTrustedInfo(const char *udid) = 0;
+    virtual int32_t LnnUpdateDistributedUserInfo(const UserInfo *userInfo, const char *udid) = 0;
+    virtual int32_t PackUserInfoToJsonInner(cJSON *json, const UserInfo *userInfo) = 0;
 };
 
 class LnnDataCloudSyncInterfaceMock : public LnnDataCloudSyncInterface {
@@ -71,6 +73,8 @@ public:
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
     MOCK_METHOD2(LnnPackCloudSyncAckSeq, int32_t(cJSON *, char *));
     MOCK_METHOD1(LnnFindDeviceUdidTrustedInfo, int32_t(const char *));
+    MOCK_METHOD2(LnnUpdateDistributedUserInfo, int32_t(const UserInfo *, const char *));
+    MOCK_METHOD2(PackUserInfoToJsonInner, int32_t(cJSON *, const UserInfo *));
 };
 } // namespace OHOS
 #endif // LNN_DATA_CLOUD_SYNC_DEPS_MOCK_H

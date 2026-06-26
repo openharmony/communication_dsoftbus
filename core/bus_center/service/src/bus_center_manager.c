@@ -22,6 +22,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
+#include "lnn_multi_user_process.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
@@ -168,6 +169,20 @@ static int32_t StartDelayInit(void)
     return ret;
 }
 
+static void RestoreDeviceInfoIfUnlocked(void)
+{
+    if (!IsActiveOsAccountUnlocked()) {
+        return;
+    }
+    LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");      
+    RestoreLocalDeviceInfo();
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    RestoreLocalUserInfo();
+#else
+    RestoreRemoteUserInfo();
+#endif
+}
+
 static int32_t BusCenterServerInitFirstStep(void)
 {
     if (LnnInitLnnLooper() != SOFTBUS_OK) {
@@ -213,10 +228,7 @@ static int32_t BusCenterServerInitFirstStep(void)
     if (LnnInitOsAccountAdapter() != SOFTBUS_OK) {
         LNN_LOGW(LNN_INIT, "init os account adapter fail, continue");
     }
-    if (IsActiveOsAccountUnlocked()) {
-        LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");
-        RestoreLocalDeviceInfo();
-    }
+    RestoreDeviceInfoIfUnlocked();
     return SOFTBUS_OK;
 }
 
@@ -262,6 +274,10 @@ static int32_t BusCenterServerInitSecondStep(void)
     if (InitUdidChangedEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initUdidChangedEvent fail");
     }
+    RestoreRemoteUserInfo();
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    RestoreLocalUserInfo();
+#endif
     return SOFTBUS_OK;
 }
 

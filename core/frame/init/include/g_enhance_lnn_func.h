@@ -179,6 +179,16 @@ typedef int32_t (*LnnUnPackCloudSyncDeviceInfoFunc)(cJSON *json, NodeInfo *cloud
 typedef void (*LnnUpdateAuthExchangeUdidFunc)(void);
 typedef void (*LnnClearAuthExchangeUdidFunc)(const char *networkId);
 
+/* lnn_user_info_recovery.h */
+typedef void (*LnnDeinitLocalUserInfoFunc)(void);
+typedef int32_t (*LnnPackCloudSyncUserInfoFunc)(cJSON *json, const UserInfo *userInfo);
+typedef int32_t (*LnnUnPackCloudSyncUserInfoFunc)(cJSON *json, UserInfo *userInfo);
+typedef bool (*LnnCheckUserExistsByAccountIdFunc)(int64_t accountId);
+typedef int32_t (*LnnSaveLocalUserInfoFunc)(void);
+typedef int32_t (*LnnLoadLocalUserInfoFunc)(void);
+typedef int32_t (*LnnSaveRemoteUserInfoFunc)(const char *udid, const UserInfo *userInfo);
+typedef int32_t (*LnnLoadRemoteUserInfoFunc)(void);
+
 /* lnn_fast_offline.h */
 typedef int32_t (*LnnInitFastOfflineFunc)(void);
 typedef int32_t (*LnnDeviceCloudConvergenceInitFunc)(void);
@@ -457,6 +467,14 @@ typedef struct TagLnnEnhanceFuncList {
     IsNeedSyncBroadcastLinkKeyFunc isNeedSyncBroadcastLinkKey;
     LnnSyncBroadcastLinkKeyFunc lnnSyncBroadcastLinkKey;
     IsDeviceHasRiskFactorFunc isDeviceHasRiskFactor;
+    LnnDeinitLocalUserInfoFunc lnnDeinitLocalUserInfo;
+    LnnPackCloudSyncUserInfoFunc lnnPackCloudSyncUserInfo;
+    LnnUnPackCloudSyncUserInfoFunc lnnUnPackCloudSyncUserInfo;
+    LnnCheckUserExistsByAccountIdFunc lnnCheckUserExistsByAccountId;
+    LnnSaveLocalUserInfoFunc lnnSaveLocalUserInfo;
+    LnnLoadLocalUserInfoFunc lnnLoadLocalUserInfo;
+    LnnSaveRemoteUserInfoFunc lnnSaveRemoteUserInfo;
+    LnnLoadRemoteUserInfoFunc lnnLoadRemoteUserInfo;
     // bus_center
     LnnSaveDeviceDataFunc lnnSaveDeviceData;
     LnnAsyncSaveDeviceDataFunc lnnAsyncSaveDeviceData;

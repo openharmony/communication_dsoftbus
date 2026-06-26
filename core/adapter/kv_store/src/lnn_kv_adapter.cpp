@@ -31,6 +31,7 @@ constexpr int32_t MAX_INIT_RETRY_TIMES = 3;
 constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 100 * 1000; // 100ms
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const char *DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
+constexpr int32_t CLOSE_FILTER_USERID_MODE = 0;
 } // namespace
 
 KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId)
@@ -297,7 +298,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
-        .cloudConfig = { .enableCloud = false, .autoSync = true }
+        .cloudConfig = { .enableCloud = false, .autoSync = true, .filterMode = CLOSE_FILTER_USERID_MODE}
     };
     DistributedKv::Status status;
     {
@@ -394,12 +395,13 @@ int32_t KVAdapter::DeRegisterDataChangeListener()
     return SOFTBUS_OK;
 }
 
-int32_t KVAdapter::SetCloudAbility(const bool isEnableCloud)
+int32_t KVAdapter::SetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
 {
-    LNN_LOGI(LNN_LEDGER, "call! isEnableCloud=%{public}d", isEnableCloud);
+    LNN_LOGI(LNN_LEDGER, "call! isEnableCloud=%{public}d, filterMode=%{public}u", isEnableCloud, filterMode);
     DistributedKv::CloudConfig cloudConfig = {
         .enableCloud = isEnableCloud,
-        .autoSync = true
+        .autoSync = true,
+        .filterMode = filterMode
     };
     DistributedKv::StoreConfig storeConfig = {
         .cloudConfig = cloudConfig

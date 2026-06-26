@@ -148,6 +148,7 @@ typedef struct TagLnnOpenFuncList {
     LnnGetRemoteNumInfoByIfnameIdxFunc lnnGetRemoteNumInfoByIfnameIdx;
     LnnDumpSparkCheckFunc lnnDumpSparkCheck;
     LnnNotifyHaLeaveMetaNodeEventFunc lnnNotifyHaLeaveMetaNodeEvent;
+    LnnGetLocalUserLedgerFunc lnnGetLocalUserLedger;
 
     // lane_manager
     GetAllDevIdWithLinkTypeFunc getAllDevIdWithLinkType;

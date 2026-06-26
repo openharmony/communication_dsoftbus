@@ -42,6 +42,8 @@ static FilePathInfo g_filePath[LNN_FILE_ID_MAX] = {
     { LNN_FILE_ID_ACCOUNT_INFO, "/dsoftbus/accountinfo" },
     { LNN_FILE_ID_IRK_KEY, "/dsoftbus/irk" },
     { LNN_FILE_ID_BROADCAST_CIPHER, "/dsoftbus/cipher" },
+    { LNN_FILE_ID_LOCAL_USER, "/dsoftbus/localuserinfo" },
+    { LNN_FILE_ID_REMOTE_USER, "/dsoftbus/userinfo" },
 };
 
 static int32_t InitStorageConfigPath(void)
