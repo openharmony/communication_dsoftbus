@@ -143,12 +143,10 @@ static void OnProxyChannelOpenFailed(int32_t channelRequestId, int32_t reason)
     (void)reason;
 }
 
-/*
+/**@
  * @tc.name: TransProxyPipelineGetChannelIdByNetworkIdTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM
- *           when given null networkId
- * @tc.desc: Should return INVALID_CHANNEL_ID
- *           when given invalid networkId
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null networkId.
+ * @tc.desc: Should return INVALID_CHANNEL_ID when given invalid networkId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -162,9 +160,9 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineGetChannelIdByNetwor
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyPipelineGetUuidByChannelIdTest001
- * @tc.desc: test trans proxy pipeline get uuid by channelid
+ * @tc.desc: test trans proxy pipeline get uuid by channelid.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -176,12 +174,10 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineGetUuidByChannelIdTe
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyPipelineCloseChannelTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM
- *           when given null parameters
- * @tc.desc: Should return SOFTBUS_OK
- *           when given valid parameters
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null parameters.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -207,12 +203,10 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineCloseChannelTest001,
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/*
+/**
  * @tc.name: TransProxyGetSessionKeyByChanIdTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM
- *           when given null uuid
- * @tc.desc: Should return SOFTBUS_OK
- *           when given valid parameters
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null uuid.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -228,12 +222,10 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyGetSessionKeyByChanIdTest001
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_UUID, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineOnChannelOpenedTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM
-  *           when given null uuid
-  * @tc.desc: Should return SOFTBUS_OK
-  *           when given valid parameters
+  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null uuid.
+  * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -249,9 +241,9 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenedTest0
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_UUID, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineOnChannelClosed001
-  * @tc.desc: test proxy get appinfo by chanid
+  * @tc.desc: test proxy get appinfo by chanid.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -269,10 +261,9 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelClosed001, 
     TransProxyPipelineOnChannelClosed(channelId);
 }
 
-/*
+/**
   * @tc.name: TransProxyReuseByChannelIdTest001
-  * @tc.desc: Should return SOFTBUS_NOT_FIND
-  *           when given invalid channelId
+  * @tc.desc: Should return SOFTBUS_NOT_FIND when given invalid channelId.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -283,9 +274,9 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyReuseByChannelIdTest001, Tes
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineGenRequestIdTest001
-  * @tc.desc: test generate a new requestid
+  * @tc.desc: test generate a new requestid.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -295,12 +286,10 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineGenRequestIdTest001,
     EXPECT_TRUE(ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineSendMessageTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM
-  *           when given invalid data or msgType
-  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID
-  *           when given invalid parameters
+  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid data or msgType.
+  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID when given invalid parameters.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -319,12 +308,10 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineSendMessageTest001, 
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineCloseChannelDelayTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM
-  *           when given invalid channelId
-  * @tc.desc: Should return SOFTBUS_OK
-  *           when given valid channelId
+  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid channelId.
+  * @tc.desc: Should return SOFTBUS_OK when given valid channelId.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -339,12 +326,10 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineCloseChannelDelayTes
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
   * @tc.name: InnerOnChannelOpenedTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM
-  *           when given invalid channelId
-  * @tc.desc: Should return SOFTBUS_OK
-  *           when given valid channelId
+  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid channelId.
+  * @tc.desc: Should return SOFTBUS_OK when given valid channelId.
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -355,7 +340,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, InnerOnChannelOpenedTest001, TestSize.
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/*
+/**
   * @tc.name: CompareByRequestIdTest001
   * @tc.desc: CompareByRequestId function test
   * @tc.type: FUNC
@@ -378,7 +363,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, CompareByRequestIdTest001, TestSize.Le
     SoftBusFree(item);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineHandleMessageTest001
   * @tc.desc: TransProxyPipelineHandleMessage function test
   * @tc.type: FUNC
@@ -411,7 +396,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineHandleMessageTest001
     TransProxyPipelineHandleMessage(&msg);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineOnChannelOpenedTest002
   * @tc.desc: TransProxyPipelineOnChannelOpened function test
   * @tc.type: FUNC
@@ -426,7 +411,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenedTest0
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineCloseChannelTest002
   * @tc.desc: TransProxyPipelineCloseChannel function test
   * @tc.type: FUNC
@@ -446,7 +431,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineCloseChannelTest002,
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineOpenChannelTest002
   * @tc.desc: TransProxyPipelineOpenChannel function test
   * @tc.type: FUNC
@@ -470,9 +455,9 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOpenChannelTest002, 
     sleep(SLEEP_TIME);
 }
 
-/*
+/**
   * @tc.name: TransProxyPipelineOnChannelOpenFailedTest001
-  * @tc.desc: test Trans Proxy Pipeline On Channel Open Failed
+  * @tc.desc: TransProxyPipelineOnChannelOpenFailed
   * @tc.type: FUNC
   * @tc.require:
   */
@@ -482,9 +467,9 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenFailedT
     EXPECT_NO_FATAL_FAILURE(TransProxyPipelineOnChannelOpenFailed(3088, uuid));
 }
 
-/*
+/**
   * @tc.name: TransProxyPackHandshakeMsgTest001
-  * @tc.desc: TransProxyPackHandshakeMsg function test
+  * @tc.desc: TransProxyPackHandshakeMsg
   * @tc.type: FUNC
   * @tc.require:
   */
