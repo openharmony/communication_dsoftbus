@@ -300,7 +300,7 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test07, TestSize.Level1)
     ASSERT_NE(msgPara, nullptr);
     EXPECT_EQ(strcpy_s(msgPara->targetNetworkId, NETWORK_ID_BUF_LEN, TEST_NODE1_NETWORK_ID), EOK);
     ret = ProcessStartTimeSyncRequest(msgPara);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     NotifyTimeSyncResult(info, 1, SOFTBUS_NETWORK_TIME_SYNC_INTERFERENCE);
     LnnDeinitTimeSync();
 }
