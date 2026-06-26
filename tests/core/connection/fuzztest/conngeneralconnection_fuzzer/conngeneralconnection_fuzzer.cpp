@@ -146,7 +146,7 @@ void ConnectTest(FuzzedDataProvider &provider)
         return;
     }
     std::string bundleName = provider.ConsumeRandomLengthString(BUNDLE_NAME_MAX - 1);
-    if (strcpy_s(param.bundleName, PKG_NAME_SIZE_MAX, bundleName.c_str()) != EOK) {
+    if (strcpy_s(param.bundleName, BUNDLE_NAME_MAX, bundleName.c_str()) != EOK) {
         return;
     }
     param.pid = provider.ConsumeIntegral<int32_t>();
@@ -165,7 +165,7 @@ void CreateServerTest(FuzzedDataProvider &provider)
         return;
     }
     std::string bundleName = provider.ConsumeRandomLengthString(BUNDLE_NAME_MAX - 1);
-    if (strcpy_s(param.bundleName, PKG_NAME_SIZE_MAX, bundleName.c_str()) != EOK) {
+    if (strcpy_s(param.bundleName, BUNDLE_NAME_MAX, bundleName.c_str()) != EOK) {
         return;
     }
     param.pid = provider.ConsumeIntegral<int32_t>();
@@ -185,7 +185,7 @@ void CloseServerTest(FuzzedDataProvider &provider)
         return;
     }
     std::string bundleName = provider.ConsumeRandomLengthString(BUNDLE_NAME_MAX - 1);
-    if (strcpy_s(param.bundleName, PKG_NAME_SIZE_MAX, bundleName.c_str()) != EOK) {
+    if (strcpy_s(param.bundleName, BUNDLE_NAME_MAX, bundleName.c_str()) != EOK) {
         return;
     }
 
