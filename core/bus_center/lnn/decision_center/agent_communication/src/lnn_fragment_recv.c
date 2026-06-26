@@ -159,7 +159,7 @@ static bool ParseModuleType(const uint8_t *data, FarFieldBusiness *moduleType)
     }
 
     *moduleType = (FarFieldBusiness)header.type;
-    if (*moduleType >= TYPE_BUFF) {
+    if (*moduleType >= FAR_FIELD_BUSINESS_MAX) {
         LNN_LOGE(LNN_EVENT, "invalid moduleType=%{public}d", *moduleType);
         return false;
     }
@@ -222,7 +222,7 @@ static int32_t ProcessSingleFragment(const char *udid, const uint8_t *data, uint
         return SOFTBUS_INVALID_PARAM;
     }
 
-    FarFieldBusiness moduleType = TYPE_BUFF;
+    FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
     if (!ParseModuleType(data + *offset, &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
@@ -281,7 +281,7 @@ int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t data
     SoftBusMutexUnlock(&g_fragmentMutex);
 
     // 解析模块类型，判断是否需要分片处理
-    FarFieldBusiness moduleType = TYPE_BUFF;
+    FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
     if (!ParseModuleType(data, &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
