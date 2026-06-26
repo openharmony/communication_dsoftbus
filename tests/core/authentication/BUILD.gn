@@ -1943,7 +1943,7 @@ ohos_unittest("AuthIdentityServiceAdapterTest") {
   deps += dsoftbus_log_label_deps
 }
 
-ohos_unittest("AuthDeviceMockTest") {
+ohos_unittest("AuthDeviceTest") {
   module_out_path = module_output_path
   sources = [
     "unittest/auth_device_deps_mock.cpp",
@@ -2070,7 +2070,7 @@ group("unittest") {
   deps = [
     ":AuthAccountGroupManagerTest",
     ":AuthApplyKeyManagerTest",
-    ":AuthDeviceMockTest",
+    ":AuthDeviceTest",
     ":AuthApplyKeyProcessTest",
     ":AuthConnectionTest",
     ":AuthEnhanceMockTest",
