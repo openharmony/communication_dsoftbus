@@ -93,8 +93,7 @@ void TransChannelManagerTest::TearDownTestCase(void)
 
 /*
  * @tc.name: TransChannelInit001
- * @tc.desc: TransChannelInit test
- *           use the wrong parameter
+ * @tc.desc: TransChannelInit001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -106,8 +105,7 @@ HWTEST_F(TransChannelManagerTest, TransChannelInit001, TestSize.Level1)
 
 /*
  * @tc.name: TransChannelDeinit001
- * @tc.desc: TransChannelDeinit test
- *           use the wrong parameter
+ * @tc.desc: TransChannelDeinit001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -121,8 +119,7 @@ HWTEST_F(TransChannelManagerTest, TransChannelDeinit001, TestSize.Level1)
 /*
  * @tc.name: GetAppInfo001
  * @tc.desc: TransOpenChannel
- * @tc.desc: GetAppInfo test
- *           use the wrong parameter
+ * @tc.desc: GetAppInfo, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -150,8 +147,7 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
 
 /*
  * @tc.name: TransOpenChannel002
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM
- *           when given null parameter
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -172,9 +168,106 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel002, TestSize.Level1)
 }
 
 /*
+ * @tc.name: TransOpenChannelSecond001
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond001, TestSize.Level1)
+{
+    int32_t ret = TransOpenChannelSecond(INVALID_CHANNEL_ID, INVALID_LANE_ID);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: TransOpenChannelSecond002
+ * @tc.desc: Should return SOFTBUS_NO_INIT when socket list no init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t laneId = 123456789;
+    int32_t ret = TransOpenChannelSecond(channelId, laneId);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/*
+ * @tc.name: TransOpenChannelSecond003
+ * @tc.desc: Should return error code when TransCommonGetAppInfo error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond003, TestSize.Level1)
+{
+    TransManagerInterfaceMock mock;
+    int32_t sessionId = 1;
+    int32_t channelId = 1;
+    int32_t laneId = 123456789;
+
+    int32_t ret = TransSocketLaneMgrInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionAttribute attr;
+    attr.dataType = TYPE_FILE;
+    SessionParam addParam = {
+        .sessionName = "testSessionName",
+        .peerSessionName = "testPeerSessionName",
+        .peerDeviceId = "testPeerDeviceId",
+        .groupId = "testGroupId",
+        .attr = &attr,
+    };
+    ret = TransAddSocketChannelInfoMultipath(
+        "testSessionName", sessionId, channelId, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransAddSessionParamBySessionId("testSessionName", sessionId, &addParam);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH));
+    ret = TransOpenChannelSecond(channelId, laneId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    TransSocketLaneMgrDeinit();
+}
+
+/*
+ * @tc.name: TransOpenChannelSecond004
+ * @tc.desc: Should return error code when TransUpdateSocketChannelInfo error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond004, TestSize.Level1)
+{
+    TransManagerInterfaceMock mock;
+    int32_t sessionId = 1;
+    int32_t channelId = 1;
+    int32_t laneId = 123456789;
+
+    int32_t ret = TransSocketLaneMgrInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionAttribute attr;
+    attr.dataType = TYPE_FILE;
+    SessionParam addParam = {
+        .sessionName = "testSessionName",
+        .peerSessionName = "testPeerSessionName",
+        .peerDeviceId = "testPeerDeviceId",
+        .groupId = "testGroupId",
+        .attr = &attr,
+    };
+    ret = TransAddSocketChannelInfoMultipath(
+        "testSessionName", sessionId, channelId, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = TransAddSessionParamBySessionId("testSessionName", sessionId, &addParam);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = TransOpenChannelSecond(channelId, laneId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    TransSocketLaneMgrDeinit();
+}
+
+/*
  * @tc.name: TransOpenAuthChannel001
- * @tc.desc: TransOpenAuthChannel test
- *           use the wrong parameter
+ * @tc.desc: TransOpenAuthChannel001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -209,8 +302,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
 
 /*
  * @tc.name: MergeStatsInterval001
- * @tc.desc: MergeStatsInterval test
- *           use the wrong parameter
+ * @tc.desc: MergeStatsInterval001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -244,10 +336,7 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
 
 /*
  * @tc.name: TransRippleStats001
- * @tc.name: TransStreamStats test
- *           use the wrong parameter
- * @tc.desc: TransRippleStats test
- *           use the wrong parameter
+ * @tc.desc: TransRippleStats001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -287,8 +376,7 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
 
 /*
  * @tc.name: TransNotifyAuthSuccess001
- * @tc.desc: TransNotifyAuthSuccess test
- *           use the wrong parameter
+ * @tc.desc: TransNotifyAuthSuccess, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -307,8 +395,7 @@ HWTEST_F(TransChannelManagerTest, TransNotifyAuthSuccess001, TestSize.Level1)
 
 /*
  * @tc.name: TransRequestQos001
- * @tc.desc: TransRequestQos test
- *           use the wrong parameter
+ * @tc.desc: TransRequestQos001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -325,8 +412,7 @@ HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
 
 /*
  * @tc.name: TransCloseChannel001
- * @tc.desc: TransCloseChannel test
- *           use the wrong parameter
+ * @tc.desc: TransCloseChannel001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -357,10 +443,8 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
 
 /*
  * @tc.name: TransSendMsg001
- * @tc.desc: TransSendMsg test
- *           use the wrong parameter
- * @tc.desc: TransChannelDeathCallback test
- *           use the wrong parameter
+ * @tc.desc: TransSendMsg, use the wrong parameter.
+ * @tc.desc: TransChannelDeathCallback, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -388,8 +472,7 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
 
 /*
  * @tc.name: TransGetNameByChanId001
- * @tc.desc: TransGetNameByChanId test
- *           use the wrong parameter
+ * @tc.desc: TransGetNameByChanId test use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -434,8 +517,7 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
 
 /*
  * @tc.name: TransGetAppInfoByChanId001
- * @tc.desc: TransGetAppInfoByChanId test
- *           use the wrong parameter
+ * @tc.desc: TransGetAppInfoByChanId001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -477,8 +559,7 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
 
 /*
  * @tc.name: TransGetConnByChanId Test
- * @tc.desc: TransGetConnByChanId test
- *           use the wrong parameter
+ * @tc.desc: TransGetConnByChanId001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -502,9 +583,8 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransGetConnByChanId002
- * @tc.desc: TransGetConnByChanId test
- *           use the wrong parameter
+ * @tc.name: TransGetConnByChanId Test
+ * @tc.desc: TransGetConnByChanId002, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -743,6 +823,39 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel006, TestSize.Level1)
     EXPECT_CALL(mock, TransGetLaneInfo).WillOnce(Return(SOFTBUS_NOT_FIND));
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    DestroySoftBusList(g_socketChannelList);
+    g_socketChannelList = nullptr;
+    SoftBusFree(param);
+    SoftBusFree(transInfo);
+}
+
+
+/*
+ * @tc.name: TransOpenChannel test
+ * @tc.desc: TransOpenChannel007
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannel007, TestSize.Level1)
+{
+    SessionParam *param = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(param != nullptr);
+    param->sessionName = TEST_SESSION_NAME;
+    param->sessionId = 1;
+    int32_t tmp = 0;
+    param->attr = &g_sessionAttr[tmp];
+    param->isQosLane = true;
+    param->enableMultipath = true;
+
+    TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
+    ASSERT_TRUE(transInfo != nullptr);
+
+    g_socketChannelList = CreateSoftBusList();
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransAsyncGetLaneInfo).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransOpenChannel(param, transInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     DestroySoftBusList(g_socketChannelList);
     g_socketChannelList = nullptr;
     SoftBusFree(param);

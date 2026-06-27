@@ -70,7 +70,7 @@ static int32_t TestInnerMessageHandler(int32_t sessionId, const void *data, uint
 
 /*
  * @tc.name: TransInnerAddDataBufNodeTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -90,7 +90,7 @@ HWTEST_F(TransInnerTest, TransInnerAddDataBufNodeTest001, TestSize.Level1)
 
 /*
  * @tc.name: InnerAddSessionTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -137,7 +137,7 @@ HWTEST_F(TransInnerTest, InnerAddSessionTest001, TestSize.Level1)
 
 /*
  * @tc.name: GetSessionInfoByFdTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -186,7 +186,7 @@ HWTEST_F(TransInnerTest, GetSessionInfoByFdTest001, TestSize.Level1)
 
 /*
  * @tc.name: GetSessionInfoByChanIdTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -223,7 +223,7 @@ HWTEST_F(TransInnerTest, GetSessionInfoByChanIdTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransInnerGetTdcDataBufByIdTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -247,7 +247,7 @@ HWTEST_F(TransInnerTest, TransInnerGetTdcDataBufByIdTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransInnerUpdateTdcDataBufWInfoTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -281,7 +281,7 @@ HWTEST_F(TransInnerTest, TransInnerUpdateTdcDataBufWInfoTest001, TestSize.Level1
 
 /*
  * @tc.name: TransTdcProcessInnerTlvDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -331,7 +331,7 @@ HWTEST_F(TransInnerTest, TransTdcProcessInnerTlvDataTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransInnerTdcProcAllTlvDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -395,7 +395,7 @@ HWTEST_F(TransInnerTest, TransInnerTdcProcAllTlvDataTest002, TestSize.Level1)
 
 /*
  * @tc.name: TransTdcProcessInnerDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -429,7 +429,7 @@ HWTEST_F(TransInnerTest, TransTdcProcessInnerDataTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransInnerTdcProcAllDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -493,7 +493,7 @@ HWTEST_F(TransInnerTest, TransInnerTdcProcAllDataTest002, TestSize.Level1)
 
 /*
  * @tc.name: TdcDataReceivedTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -542,7 +542,7 @@ HWTEST_F(TransInnerTest, TdcDataReceivedTest001, TestSize.Level1)
 
 /*
  * @tc.name: DirectChannelOnDataEventTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -559,7 +559,7 @@ HWTEST_F(TransInnerTest, DirectChannelOnDataEventTest001, TestSize.Level1)
 
 /*
  * @tc.name: DirectChannelCreateListenerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -577,7 +577,7 @@ HWTEST_F(TransInnerTest, DirectChannelCreateListenerTest001, TestSize.Level1)
 
 /*
  * @tc.name: TdcSendDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  * @tc.recvBuf、testRecvBuf、 and testRecvBufTest will free in TdcSendData return failed:
@@ -630,7 +630,7 @@ HWTEST_F(TransInnerTest, TdcSendDataTest001, TestSize.Level1)
 
 /*
  * @tc.name: ClientTransInnerProxyProcDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -664,7 +664,7 @@ HWTEST_F(TransInnerTest, ClientTransInnerProxyProcDataTest001, TestSize.Level1)
 
 /*
  * @tc.name: ClientTransProxyInnerNoSubPacketTlvProcTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -697,7 +697,7 @@ HWTEST_F(TransInnerTest, ClientTransProxyInnerNoSubPacketTlvProcTest001, TestSiz
 
 /*
  * @tc.name: ClientTransInnerProxyProcessSessionDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -734,7 +734,7 @@ HWTEST_F(TransInnerTest, ClientTransInnerProxyProcessSessionDataTest001, TestSiz
 
 /*
  * @tc.name: ClientTransProxyGetChannelSliceTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -756,7 +756,7 @@ HWTEST_F(TransInnerTest, ClientTransProxyGetChannelSliceTest001, TestSize.Level1
 
 /*
  * @tc.name: IsValidCheckoutSliceProcessTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -776,7 +776,7 @@ HWTEST_F(TransInnerTest, IsValidCheckoutSliceProcessTest001, TestSize.Level1)
 
 /*
  * @tc.name: ClientTransProxyLastSliceProcessTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -796,7 +796,7 @@ HWTEST_F(TransInnerTest, ClientTransProxyLastSliceProcessTest001, TestSize.Level
 
 /*
  * @tc.name: ClientTransProxySubPacketProcTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -826,7 +826,7 @@ HWTEST_F(TransInnerTest, ClientTransProxySubPacketProcTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransInnerProxyPackBytesTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -851,7 +851,7 @@ HWTEST_F(TransInnerTest, TransInnerProxyPackBytesTest001, TestSize.Level1)
 
 /*
  * @tc.name: ProxySendDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -873,7 +873,7 @@ HWTEST_F(TransInnerTest, ProxySendDataTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransSendDataTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -906,7 +906,7 @@ HWTEST_F(TransInnerTest, TransSendDataTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransSendDataTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -937,7 +937,7 @@ HWTEST_F(TransInnerTest, TransSendDataTest002, TestSize.Level1)
 
 /*
  * @tc.name: ServerSideSendAck001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null
+ * @tc.desc: Should return SOFTBUS_NO_INIT when g_sessionList is null.
  * @tc.type: FUNC
  * @tc.require:
  */

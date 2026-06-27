@@ -303,6 +303,7 @@ HWTEST_F(TransLanePendingTest, TransFreeLanePendingInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+
 /*
  * @tc.name: ClearSessionParamMemory001
  * @tc.desc: test ClearSessionParamMemory
@@ -521,7 +522,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos002, TestSize.Level1)
     g_asyncReqLanePendingList = nullptr;
     EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     ret = TransAsyncGetLaneInfoByQos(newParam, &allocInfo, &laneHandle, &appInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     g_asyncReqLanePendingList = tmpList;
 
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
@@ -548,6 +549,106 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos002, TestSize.Level1)
     newParam->attr = nullptr;
     SoftBusFree(newParam);
     newParam = nullptr;
+}
+
+/*
+ * @tc.name: TransAsyncGetReserveLaneInfoByQos001
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransAsyncGetReserveLaneInfoByQos001, TestSize.Level1)
+{
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    LaneAllocInfo allocInfo;
+    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    uint32_t laneHandle;
+    uint64_t laneId = 1;
+    int32_t ret = TransAsyncGetReserveLaneInfoByQos(nullptr, &allocInfo, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransAsyncGetReserveLaneInfoByQos(&param, nullptr, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransAsyncGetReserveLaneInfoByQos(&param, &allocInfo, &laneHandle, 0, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransAsyncGetReserveLaneInfoByQos(&param, &allocInfo, nullptr, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: TransAsyncGetReserveLaneInfoByQos002
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_LANE_INFO_ERR when GetLaneManager is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+ HWTEST_F(TransLanePendingTest, TransAsyncGetReserveLaneInfoByQos002, TestSize.Level1)
+{
+    SessionParam *newParam = TestCreateNewSessionParam();
+    ASSERT_TRUE(newParam != nullptr);
+    LaneAllocInfo allocInfo;
+    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    uint32_t laneHandle;
+    uint64_t laneId = 1;
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillOnce(Return(nullptr));
+    int32_t ret = TransAsyncGetReserveLaneInfoByQos(newParam, &allocInfo, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
+
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManagerApplyFail));
+    ret = TransAsyncGetReserveLaneInfoByQos(newParam, &allocInfo, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
+
+    SoftBusList *tmpList = g_asyncReqLanePendingList;
+    g_asyncReqLanePendingList = nullptr;
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
+    ret = TransAsyncGetReserveLaneInfoByQos(newParam, &allocInfo, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    g_asyncReqLanePendingList = tmpList;
+
+    int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
+    CoreSessionState state = CORE_SESSION_STATE_CANCELLING;
+    EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
+    ret =
+        TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    
+    ret = TransDeleteSocketChannelInfoBySession(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    state = CORE_SESSION_STATE_INIT;
+    ret =
+        TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    
+    ret = TransDeleteSocketChannelInfoBySession(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree((void *)(newParam->attr));
+    newParam->attr = nullptr;
+    SoftBusFree(newParam);
+    newParam = nullptr;
+}
+
+/*
+ * @tc.name: TransDelStateReserveTest001
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_LANE_INFO_ERR when GetLaneManager is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransDelStateReserveTest001, TestSize.Level1)
+{
+    SessionParam *param = TestCreateNewSessionParam();
+    int32_t ret = TransDelStateReserve(nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransDelStateReserve(param, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    SoftBusFree(param);
+    param = nullptr;
 }
 
 /*
@@ -840,6 +941,51 @@ HWTEST_F(TransLanePendingTest, TransOnAsyncLaneFail001, TestSize.Level1)
     EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     TransOnAsyncLaneFail(laneHandle, reason);
 
+    SoftBusFree(newParam);
+    newParam = nullptr;
+}
+
+/*
+ * @tc.name: TransOnAsyncLaneReserveFail001
+ * @tc.desc: TransOnAsyncLaneReserveFail test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransOnAsyncLaneReserveFail001, TestSize.Level1)
+{
+    uint32_t laneHandle = 0;
+    int32_t reason = SOFTBUS_CONN_BR_INVALID_ADDRESS_ERR;
+    CoreSessionState state = CORE_SESSION_STATE_INIT;
+    int32_t channelType = CHANNEL_TYPE_PROXY;
+
+    TransOnAsyncLaneReserveFail(laneHandle, reason);
+
+    laneHandle = TEST_LANE_ID;
+    SessionParam *newParam = TestCreateNewSessionParam();
+    ASSERT_TRUE(newParam != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    int32_t ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
+    EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
+    ret =
+        TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    TransOnAsyncLaneReserveFail(laneHandle, reason);
+
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    ret = TransAddAsyncLaneReqFromPendingList(TEST_NEW_LANE_ID, newParam, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret =
+        TransAddSocketChannelInfo(TEST_NEW_SESSION_NAME, TEST_NEW_SESSION_ID, TEST_NEW_CHANNEL_ID, channelType, state);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_CALL(TransLanePendingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    TransOnAsyncLaneReserveFail(laneHandle, reason);
+    
+    SoftBusFree((void *)(newParam->attr));
+    newParam->attr = nullptr;
     SoftBusFree(newParam);
     newParam = nullptr;
 }
@@ -1363,6 +1509,74 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfo002, TestSize.Level1)
 }
 
 /*
+ * @tc.name: TransAsyncGetLaneReserveInfo001
+ * @tc.desc: TransAsyncGetLaneReserveInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransAsyncGetLaneReserveInfo001, TestSize.Level1)
+{
+    SessionParam param;
+    uint32_t laneHandle;
+    uint64_t laneId = 1;
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    int32_t ret = TransAsyncGetLaneReserveInfo(nullptr, nullptr, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransAsyncGetLaneReserveInfo(&param, nullptr, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransAsyncGetLaneReserveInfo(nullptr, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: TransAsyncGetLaneReserveInfo002
+ * @tc.desc: TransAsyncGetLaneReserveInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransAsyncGetLaneReserveInfo002, TestSize.Level1)
+{
+    uint32_t laneHandle;
+    uint64_t laneId = 1;
+    NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
+    EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillOnce(Return(LANE_T_BUTT));
+    SessionParam *param = TestCreateSessionParamWithPara(TEST_SESSION_NAME);
+    ASSERT_TRUE(param != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    int32_t ret = TransAsyncGetLaneReserveInfo(param, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_TYPE, ret);
+    
+    EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillRepeatedly(Return(LANE_T_MSG));
+    EXPECT_CALL(TransLanePendingMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransLanePendingMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    EXPECT_CALL(TransLanePendingMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = TransAsyncGetLaneReserveInfo(param, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
+
+    int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
+    CoreSessionState state = CORE_SESSION_STATE_INIT;
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
+    EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
+    ret =
+        TransAddSocketChannelInfo(TEST_SESSION_NAME, TEST_SESSION_ID, TEST_CHANNEL_ID, channelType, state);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransAsyncGetLaneReserveInfo(param, &laneHandle, laneId, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
+
+    ret = TransDeleteSocketChannelInfoBySession(TEST_SESSION_NAME, TEST_SESSION_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree((void *)(param->attr));
+    param->attr = nullptr;
+    SoftBusFree(param);
+    param = nullptr;
+}
+
+/*
  * @tc.name: TransNotifyLaneQosEventTest001
  * @tc.desc: TransNotifyLaneQosEvent test
  * @tc.type: FUNC
@@ -1392,7 +1606,7 @@ HWTEST_F(TransLanePendingTest, TransNotifyLaneQosEventTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: DestroyNetworkingReqItemParamTest001
  * @tc.desc: DestroyNetworkingReqItemParam test
  * @tc.type: FUNC
@@ -1424,7 +1638,7 @@ HWTEST_F(TransLanePendingTest, DestroyNetworkingReqItemParamTest001, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransAddInfoByLaneHandleTest001
  * @tc.desc: TransAddInfoByLaneHandle test
  * @tc.type: FUNC
@@ -1440,7 +1654,7 @@ HWTEST_F(TransLanePendingTest, TransAddInfoByLaneHandleTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransAddInfoByLaneHandleTest002
  * @tc.desc: TransAddInfoByLaneHandle test
  * @tc.type: FUNC
@@ -1479,7 +1693,7 @@ HWTEST_F(TransLanePendingTest, TransAddInfoByLaneHandleTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetAppInfoTest001
  * @tc.desc: TransProxyGetAppInfo test
  * @tc.type: FUNC
@@ -1498,7 +1712,7 @@ HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetAppInfoTest002
  * @tc.desc: TransProxyGetAppInfo test
  * @tc.type: FUNC
@@ -1518,7 +1732,7 @@ HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_GET_REMOTE_UUID_ERR);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetAppInfoTest003
  * @tc.desc: TransProxyGetAppInfo test
  * @tc.type: FUNC
@@ -1544,7 +1758,7 @@ HWTEST_F(TransLanePendingTest, TransProxyGetAppInfoTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest001
  * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit = 0
  * @tc.type: FUNC
@@ -1565,7 +1779,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest001, TestSize.Le
     EXPECT_EQ(0, appInfo.udpChannelCapability);
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest002
  * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit > 0 and dataType != TYPE_FILE
  * @tc.type: FUNC
@@ -1592,7 +1806,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest002, TestSize.Le
     EXPECT_EQ(0, appInfo.udpChannelCapability);
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest003
  * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit > 0, dataType = TYPE_FILE, type = LANE_USB
  * @tc.type: FUNC
@@ -1619,7 +1833,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest003, TestSize.Le
     EXPECT_NE(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest004
  * @tc.desc: Test UpdateChannelCancelEncryption with cancelEncryptionBit > 0, dataType = TYPE_FILE, type != LANE_USB
  * @tc.type: FUNC
@@ -1646,7 +1860,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest004, TestSize.Le
     EXPECT_EQ(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest005
  * @tc.desc: Test UpdateChannelCancelEncryption with existing capability bits
  * @tc.type: FUNC
@@ -1676,7 +1890,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest005, TestSize.Le
     EXPECT_NE(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest006
  * @tc.desc: Test UpdateChannelCancelEncryption disables bit when cancelEncryptionBit = 0
  * @tc.type: FUNC
@@ -1705,7 +1919,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest006, TestSize.Le
     EXPECT_NE(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_MULTIPATH_OFFSET));
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest007
  * @tc.desc: Test UpdateChannelCancelEncryption with wrong link type bit
  * @tc.type: FUNC
@@ -1732,7 +1946,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest007, TestSize.Le
     EXPECT_EQ(0, appInfo.udpChannelCapability & (1 << UDP_CHANNEL_CANCEL_ENCRYPTION));
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest008
  * @tc.desc: Test UpdateChannelCancelEncryption with hml link type bit
  * @tc.type: FUNC
@@ -1759,7 +1973,7 @@ HWTEST_F(TransLanePendingTest, UpdateChannelCancelEncryptionTest008, TestSize.Le
     EXPECT_NE(0, appInfo.udpChannelCapability & (1u << UDP_CHANNEL_CANCEL_ENCRYPTION));
 }
 
-/**
+/*
  * @tc.name: UpdateChannelCancelEncryptionTest009
  * @tc.desc: Test UpdateChannelCancelEncryption with existing capability bits
  * @tc.type: FUNC

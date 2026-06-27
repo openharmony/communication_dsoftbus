@@ -56,7 +56,7 @@ void TransBindRequestManagerTest::TearDownTestCase(void)
 
 /*
  * @tc.name: TransAddTimestampToList001
- * @tc.desc: Use the wrong parameter and legal parameter to add timestamp
+ * @tc.desc: Use the wrong parameter and legal parameter to add timestamp.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -70,7 +70,7 @@ HWTEST_F(TransBindRequestManagerTest, TransAddTimestampToList001, TestSize.Level
 
 /*
  * @tc.name: GetDeniedFlagByPeer001
- * @tc.desc: Use the wrong parameter and legal parameter to get flag
+ * @tc.desc: Use the wrong parameter and legal parameter to get flag.
  * @tc.type: FUNC
  * @tc.require:
  */

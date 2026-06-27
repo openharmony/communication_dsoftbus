@@ -245,6 +245,7 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos002, TestSize.Level1)
     TransManagerTestInterfaceMock mock;
     EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnRequestQosOptimization).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
     int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
     EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
 }

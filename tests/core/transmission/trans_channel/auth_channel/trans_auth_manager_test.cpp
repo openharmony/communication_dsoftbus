@@ -68,7 +68,7 @@ void TransAuthManagerTest::TearDownTestCase(void)
 
 /*
  * @tc.name: TransAuthManagerTest01
- * @tc.desc: Transmission auth manager get name by channel id with invalid parameters
+ * @tc.desc: Transmission auth manager get name by channel id with invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -89,7 +89,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthManagerTest02
- * @tc.desc: Transmission auth manager open autn message channel with invalid parameters
+ * @tc.desc: Transmission auth manager open autn message channel with invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -110,7 +110,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthManagerTest03
- * @tc.desc: Transmission auth manager close autn channel with wrong parameters
+ * @tc.desc: Transmission auth manager close autn channel with wrong parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -126,7 +126,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthGetRoleByAuthIdTest001
- * @tc.desc: Transmission auth manager get role by authId with wrong parameters
+ * @tc.desc: Transmission auth manager get role by authId with wrong parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -146,7 +146,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthGetRoleByAuthIdTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthGetRoleByAuthIdTest002
- * @tc.desc: Transmission auth manager get role by authId with valid parameters
+ * @tc.desc: Transmission auth manager get role by authId with valid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */

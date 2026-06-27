@@ -194,7 +194,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_001, TestSize.Level0
 
 /*
  * @tc.name: GetLocalAccountUidByUserIdTest_002
- * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull.
+ * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenLenIsNull.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -299,7 +299,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_007, TestSize.Level1
 
 /*
  * @tc.name: FillHapSinkAclInfoToAppInfoTest_001
- * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleReturnImmediately_WhenAppInfoIsNull.
+ * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouldReturnImmediately_WhenAppInfoIsNull.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -310,7 +310,7 @@ HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_001, TestSize.Level
 
 /*
  * @tc.name: FillHapSinkAclInfoToAppInfoTest_002
- * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
+ * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouldFillAclInfo_WhenTokenTypeIsHAP.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -330,7 +330,7 @@ HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_002, TestSize.Level
 
 /*
  * @tc.name: FillHapSinkAclInfoToAppInfoTest_003
- * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
+ * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouldLogError_WhenGetAclInfoFails.
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -65,7 +65,7 @@ void TransAuthNegotiateTest::TearDownTestCase(void)
 
 /*
  * @tc.name: TransAuthPendingTest001
- * @tc.desc: Use the wrong parameter and legal parameter to test TransAddAuthReqToPendingList
+ * @tc.desc: Use the wrong parameter and legal parameter to test TransAddAuthReqToPendingList.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -80,7 +80,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthPendingTest002
- * @tc.desc: Use the wrong parameter and legal parameter to test TransUpdateAuthInfo
+ * @tc.desc: Use the wrong parameter and legal parameter to test TransUpdateAuthInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -101,7 +101,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest002, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthPendingTest003
- * @tc.desc: Use the wrong parameter and legal parameter to test TransCheckAuthNegoStatusByReqId
+ * @tc.desc: Use the wrong parameter and legal parameter to test TransCheckAuthNegoStatusByReqId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,7 +128,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest003, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthPendingTest004
- * @tc.desc: Use the wrong parameter and legal parameter to test WaitingForAuthNegoToBeDone
+ * @tc.desc: Use the wrong parameter and legal parameter to test WaitingForAuthNegoToBeDone.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -145,7 +145,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest004, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthPendingTest005
- * @tc.desc: Use the wrong parameter to test TransNegotiateSessionKey and TransReNegotiateSessionKey
+ * @tc.desc: Use the wrong parameter to test TransNegotiateSessionKey and TransReNegotiateSessionKey.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -168,7 +168,7 @@ HWTEST_F(TransAuthNegotiateTest, TransAuthPendingTest005, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthPendingTest006
- * @tc.desc: Use the wrong parameter to test GetAuthConnInfoByConnId
+ * @tc.desc: Use the wrong parameter to test GetAuthConnInfoByConnId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -244,8 +244,7 @@ HWTEST_F(TransAuthNegotiateTest, TransNegotiateSessionKey001, TestSize.Level1)
 
 /*
  * @tc.name: TransNegotiateSessionKey002
- * @tc.desc: TransNegotiateSessionKey test
- *           use normal param expected return ok
+ * @tc.desc: TransNegotiateSessionKey test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -266,8 +265,7 @@ HWTEST_F(TransAuthNegotiateTest, TransNegotiateSessionKey002, TestSize.Level1)
 
 /*
  * @tc.name: TransReNegotiateSessionKey001
- * @tc.desc: TransReNegotiateSessionKey test
- *           use normal param expected return ok
+ * @tc.desc: TransReNegotiateSessionKey test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -298,8 +296,7 @@ HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo001, TestSize.Level1)
 
 /*
  * @tc.name: SetWlanAuthConnInfo002
- * @tc.desc: SetWlanAuthConnInfo test
- *           use normal param expected return ok
+ * @tc.desc: SetWlanAuthConnInfo test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -320,8 +317,7 @@ HWTEST_F(TransAuthNegotiateTest, SetWlanAuthConnInfo002, TestSize.Level1)
 
 /*
  * @tc.name: SetBrAuthConnInfo001
- * @tc.desc: SetBrAuthConnInfo test
- *           use normal param expected return ok
+ * @tc.desc: SetBrAuthConnInfo test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -339,8 +335,7 @@ HWTEST_F(TransAuthNegotiateTest, SetBrAuthConnInfo001, TestSize.Level1)
 
 /*
  * @tc.name: SetBleAuthConnInfo001
- * @tc.desc: SetBleAuthConnInfo test
- *           use normal param expected return ok
+ * @tc.desc: SetBleAuthConnInfo test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -361,8 +356,7 @@ HWTEST_F(TransAuthNegotiateTest, SetBleAuthConnInfo001, TestSize.Level1)
 
 /*
  * @tc.name: ConvertConnInfoToAuthConnInfo001
- * @tc.desc: ConvertConnInfoToAuthConnInfo test
- *           use normal param expected return ok
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -381,8 +375,7 @@ HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo001, TestSize.Leve
 
 /*
  * @tc.name: ConvertConnInfoToAuthConnInfo002
- * @tc.desc: ConvertConnInfoToAuthConnInfo test
- *           use normal param expected return ok
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -398,8 +391,7 @@ HWTEST_F(TransAuthNegotiateTest, ConvertConnInfoToAuthConnInfo002, TestSize.Leve
 
 /*
  * @tc.name: ConvertConnInfoToAuthConnInfo003
- * @tc.desc: ConvertConnInfoToAuthConnInfo test
- *           use normal param expected return ok
+ * @tc.desc: ConvertConnInfoToAuthConnInfo test use normal param expected return ok
  * @tc.type: FUNC
  * @tc.require:
  */
