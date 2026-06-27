@@ -411,3 +411,37 @@ int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, cons
     int32_t ret = g_serverProxy->ProcessAccountAuth(pkgName, requestId, data, dataLen);
     return ret;
 }
+
+int32_t ServerIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->PostConversationData(deviceId, info, data, len);
+    return ret;
+}
+
+int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->RegisterConversationListener(info);
+    return ret;
+}
+
+void ServerIpcUnregisterConversationListener(const ConversationBusiness *info)
+{
+    if (CheckAndInitBusCenterServerProxyInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "server not init");
+        return;
+    }
+    g_serverProxy->UnregisterConversationListener(info);
+}
+
+int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->GetTrustedDevice(info, nums);
+    return ret;
+}

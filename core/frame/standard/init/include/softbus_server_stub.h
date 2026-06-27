@@ -99,6 +99,11 @@ private:
     int32_t RegisterPushHookInner(MessageParcel &data, MessageParcel &reply);
     int32_t StartAccountAuthInner(MessageParcel &data, MessageParcel &reply);
     int32_t ProcessAccountAuthInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetTrustedDevicesInner(MessageParcel &data, MessageParcel &reply);
+    int32_t PostConversationDataInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterConversationListenerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregisterConversationListenerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t BasicPermissionVerify(uint32_t code);
     int32_t PermissionVerify(uint32_t code);
     int32_t CheckPermission(uint32_t code);
     int32_t CheckAccountConstraint(uint32_t code);

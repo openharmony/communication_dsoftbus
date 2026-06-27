@@ -25,6 +25,7 @@
 #include "cJSON.h"
 #include "lnn_cipherkey_manager_struct.h"
 #include "lnn_data_cloud_sync_struct.h"
+#include "lnn_device_cloud_convergence_struct.h"
 #include "lnn_fast_offline_struct.h"
 #include "lnn_heartbeat_medium_mgr_struct.h"
 #include "lnn_heartbeat_utils_struct.h"
@@ -236,6 +237,11 @@ bool IsSupportMcuFeaturePacked(void);
 void LnnSendDeviceStateToMcuPacked(void *para);
 int32_t LnnInitMcuPacked(void);
 int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid);
+int32_t LnnGetAllRemoteDevInfoPacked(NodeInfo **info, int32_t *nums);
+int32_t LnnSendAgentDataPacked(const char *udid, const char *data, uint32_t length, LnnEventExtra *extra);
+int32_t PostLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudHandler handler,
+    const void *obj, uint32_t size, uint64_t delayMs);
+int32_t RemoveLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);
 
 #ifdef __cplusplus
 }

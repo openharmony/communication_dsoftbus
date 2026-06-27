@@ -13,5 +13,15 @@
 
 import("../../../../dsoftbus.gni")
 bus_center_decision_center_src = []
-bus_center_decision_center_inc = []
+bus_center_decision_center_inc = [
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
+]
 bus_center_decision_center_deps = []
+
+if (is_standard_system) {
+    bus_center_decision_center_src += [
+        "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/src/lnn_conversation_query.cpp",
+        "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/src/lnn_cloud_query_fragment.c",
+        "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/src/lnn_fragment_recv.c"
+    ]
+}

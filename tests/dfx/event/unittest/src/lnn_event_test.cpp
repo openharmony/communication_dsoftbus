@@ -82,6 +82,12 @@ static LnnEventExtra validExtra = {
     .isDelayFree = 49,
     .isBuildRetry = 50,
     .isNoCapAlloc = 51,
+    .dataLen = 1000,
+    .channelType = 1,
+    .channelResult = 0,
+    .channelRtt = 100,
+    .p2pResult = 0,
+    .p2pLatency = 100,
     .sourceType = 52,
     .dataType = 53,
     .isReliable = 54,
@@ -99,6 +105,9 @@ static LnnEventExtra validExtra = {
     .peerUdidHash = "9ada389cd0898797",
     .callerPkg = "testCallerPkg",
     .calleePkg = "testCalleePkg",
+    .bundleName = "testBundleName",
+    .abilityName = "testAbilityName",
+    .statsTime = "2026-06-16 14:25:20.335",
 };
 
 static LnnEventExtra invalidExtra = {
@@ -169,6 +178,9 @@ static LnnEventExtra invalidExtra = {
     .peerUdidHash = "",
     .callerPkg = "\0",
     .calleePkg = nullptr,
+    .bundleName = "",
+    .abilityName = "",
+    .statsTime = "",
 };
 
 /*

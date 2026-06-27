@@ -17,6 +17,7 @@
 #define BUS_CENTER_CLIENT_PROXY_H
 
 #include "data_level_inner.h"
+#include "softbus_agent_communication.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -57,6 +58,8 @@ void ClientOnFinishAuthResult(PkgNameAndPidInfo *info, int64_t requestId, int32_
     const char *returnData);
 void ClientOnErrorAuthResult(PkgNameAndPidInfo *info, int64_t requestId, int32_t operationCode, int32_t errorCode,
     const char *returnData);
+void ClientOnConversationRecvMsg(int32_t pid, const ConversationBusiness *info, const char *deviceId,
+    const char *data, uint32_t length);
 
 #ifdef __cplusplus
 #if __cplusplus

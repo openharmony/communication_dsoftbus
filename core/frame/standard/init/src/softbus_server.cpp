@@ -804,4 +804,27 @@ int32_t SoftBusServer::ProcessAccountAuth(const char *pkgName, int64_t requestId
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     return LnnIpcProcessAccountAuth(pkgName, (int32_t)callingPid, requestId, data, dataLen);
 }
+
+int32_t SoftBusServer::PostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len)
+{
+    return LnnIpcPostConversationData(deviceId, info, data, len);
+}
+
+int32_t SoftBusServer::RegisterConversationListener(const ConversationBusiness *info)
+{
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcRegisterConversationListener(info, callingPid);
+}
+
+void SoftBusServer::UnregisterConversationListener(const ConversationBusiness *info)
+{
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    LnnIpcUnregisterConversationListener(info, callingPid);
+}
+
+int32_t SoftBusServer::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+{
+    return LnnIpcGetTrustedDevices(info, nums);
+}
 } // namespace OHOS

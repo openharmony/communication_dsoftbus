@@ -853,4 +853,56 @@ void BusCenterClientProxy::OnErrorAuthResult(
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }
 }
+
+void BusCenterClientProxy::OnConversationRecvMsg(const ConversationBusiness *info,
+    const char *deviceId, const char *data, uint32_t length)
+{
+    if (length == 0 || length > COMMUNICATION_DATA_MAX_LEN || info == nullptr ||
+        deviceId == nullptr || data == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param, length=%{public}u", length);
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel msg;
+    if (!msg.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
+        return;
+    }
+    if (!msg.WriteCString(info->abilityName)) {
+        LNN_LOGE(LNN_EVENT, "write abilityName failed");
+        return;
+    }
+    if (!msg.WriteCString(info->bundleName)) {
+        LNN_LOGE(LNN_EVENT, "write bundleName failed");
+        return;
+    }
+    if (!msg.WriteCString(deviceId)) {
+        LNN_LOGE(LNN_EVENT, "write deviceId failed");
+        return;
+    }
+    if (!msg.WriteUint32(length)) {
+        LNN_LOGE(LNN_EVENT, "write length failed");
+        return;
+    }
+    if (!msg.WriteRawData(data, length)) {
+        LNN_LOGE(LNN_EVENT, "write data failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_ON_CONVERSATION_RECV_MSG, msg, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed! serverRet=%{public}d", serverRet);
+    }
+    return;
+}
 } // namespace OHOS

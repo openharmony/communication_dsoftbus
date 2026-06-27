@@ -24,10 +24,8 @@ constexpr int32_t PERMISSION_CNT = 3;
 void SetAccessTokenPermission(const char *processName)
 {
     uint64_t tokenId;
-    const char **perms = new const char *[PERMISSION_CNT];
-    perms[0] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
-    perms[1] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
-    perms[2] = OHOS_PERMISSION_SEC_ACCESS_UDID;
+    const char *perms[] = { OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER,
+        OHOS_PERMISSION_DISTRIBUTED_DATASYNC, OHOS_PERMISSION_SEC_ACCESS_UDID };
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = PERMISSION_CNT,

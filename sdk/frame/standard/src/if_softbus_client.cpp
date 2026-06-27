@@ -321,4 +321,14 @@ int32_t ISoftBusClient::OnServerStopped(const char *name)
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
+
+void ISoftBusClient::OnConversationRecvMsg(const ConversationBusiness *info, const char *deviceId,
+    const char *data, uint32_t length)
+{
+    (void)info;
+    (void)deviceId;
+    (void)data;
+    (void)length;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+}
 } // namespace OHOS

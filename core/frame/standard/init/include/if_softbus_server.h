@@ -19,6 +19,7 @@
 #include "ble_range.h"
 #include "data_level.h"
 #include "iremote_proxy.h"
+#include "softbus_agent_communication.h"
 #include "softbus_bus_center.h"
 #include "softbus_connection.h"
 #include "softbus_trans_def.h"
@@ -103,6 +104,11 @@ public:
     virtual int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId);
     virtual int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data,
         uint32_t dataLen);
+    virtual int32_t PostConversationData(const char *deviceId, const ConversationBusiness *info,
+        const char *data, uint32_t len);
+    virtual int32_t RegisterConversationListener(const ConversationBusiness *info);
+    virtual void UnregisterConversationListener(const ConversationBusiness *info);
+    virtual int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums);
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");
 };

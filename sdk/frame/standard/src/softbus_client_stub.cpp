@@ -71,6 +71,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_FINISH_AUTH_RESULT] = &SoftBusClientStub::OnFinishAuthResultInner;
     memberFuncMap_[CLIENT_ON_ERROR_AUTH_RESULT] = &SoftBusClientStub::OnErrorAuthResultInner;
     memberFuncMap_[CLIENT_GENERAL_SERVER_STOPPED] = &SoftBusClientStub::OnServerStoppedInner;
+    memberFuncMap_[CLIENT_ON_CONVERSATION_RECV_MSG] = &SoftBusClientStub::OnConversationRecvMsgInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -1016,6 +1017,48 @@ int32_t SoftBusClientStub::OnErrorAuthResultInner(MessageParcel &data, MessagePa
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnConversationRecvMsgInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_SDK, "enter");
+    const char *abilityName = data.ReadCString();
+    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
+        COMM_LOGE(COMM_SDK, "read abilityName failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    const char *bundleName = data.ReadCString();
+    if (bundleName == nullptr || strnlen(bundleName, BUNDLE_NAME_LEN) >= BUNDLE_NAME_LEN) {
+        COMM_LOGE(COMM_SDK, "read bundleName failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    ConversationBusiness info;
+    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
+        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
+        COMM_LOGE(COMM_SDK, "strcpy abilityName or bundleName failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    const char *deviceId = data.ReadCString();
+    if (deviceId == nullptr || strnlen(deviceId, NETWORK_ID_BUF_LEN) >= NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_SDK, "read deviceId failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    uint32_t length = 0;
+    if (!data.ReadUint32(length)) {
+        COMM_LOGE(COMM_SDK, "read len failed!");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    char *msg = (char *)data.ReadRawData(length);
+    if (msg == nullptr) {
+        COMM_LOGE(COMM_SDK, "read msg failed!");
+        return SOFTBUS_NETWORK_READRAWDATA_FAILED;
+    }
+    OnConversationRecvMsg(&info, deviceId, msg, length);
+    if (!reply.WriteInt32(SOFTBUS_OK)) {
+        COMM_LOGE(COMM_SDK, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     (void)addrTypeLen;
@@ -1247,5 +1290,12 @@ int32_t SoftBusClientStub::OnServerStopped(const char *name)
 {
     COMM_LOGI(COMM_SDK, "OnServerStopped name=%{public}s", name);
     return ServerStopped(name);
+}
+
+void SoftBusClientStub::OnConversationRecvMsg(const ConversationBusiness *info, const char *deviceId,
+    const char *data, uint32_t length)
+{
+    COMM_LOGI(COMM_SDK, "OnConversationRecvMsg");
+    LnnConversationRecvMsg(info, deviceId, data, length);
 }
 } // namespace OHOS

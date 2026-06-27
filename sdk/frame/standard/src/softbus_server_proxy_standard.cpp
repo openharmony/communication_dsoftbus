@@ -354,4 +354,32 @@ int32_t SoftBusServerProxyFrame::PrivilegeCloseChannel(uint64_t tokenId, int32_t
     (void)peerNetworkId;
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerProxyFrame::PostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len)
+{
+    (void)deviceId;
+    (void)info;
+    (void)data;
+    (void)len;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::RegisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+    return SOFTBUS_OK;
+}
+
+void SoftBusServerProxyFrame::UnregisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+}
+
+int32_t SoftBusServerProxyFrame::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+{
+    (void)info;
+    (void)nums;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

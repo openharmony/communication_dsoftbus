@@ -86,6 +86,11 @@ public:
     void BusCenterServerProxyStandardDeInit(void);
     int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId) override;
     int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen) override;
+    int32_t PostConversationData(const char *deviceId, const ConversationBusiness *info,
+        const char *data, uint32_t len) override;
+    int32_t RegisterConversationListener(const ConversationBusiness *info) override;
+    void UnregisterConversationListener(const ConversationBusiness *info) override;
+    int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums) override;
 
 private:
     static inline BrokerDelegator<BusCenterServerProxy> delegator_;
