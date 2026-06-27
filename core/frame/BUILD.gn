@@ -137,11 +137,12 @@ if (defined(ohos_lite)) {
       deps += [
         # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
         # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
-        "$build_lite_path",
+        "$dsoftbus_root_path/core/common:softbus_utils",
+
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+        "$build_lite_path",
       ]
       public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
       external_deps = [ "device_auth:deviceauth_sdk" ]
@@ -248,17 +249,18 @@ if (defined(ohos_lite)) {
         cflags_cc = cflags
         deps = dsoftbus_server_common_deps
         deps += [
-          ":lnn_permission_json",
           ":permission_json",
+          ":lnn_permission_json",
           ":rpc_permission_json",
 
           # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
           # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
-          "$cjson_shared_path",
+          "$dsoftbus_root_path/core/common:softbus_utils",
+
           "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
           "$dsoftbus_root_path/adapter:softbus_adapter",
-          "$dsoftbus_root_path/core/common:softbus_utils",
           "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+          "$cjson_shared_path",
           "$ipc_single_path",
           "$samgr_path",
         ]
@@ -416,16 +418,17 @@ if (defined(ohos_lite)) {
       ]
       deps = dsoftbus_server_common_deps
       deps += [
-        ":softbus_lnn_permission_json",
         ":softbus_permission_json",
+        ":softbus_lnn_permission_json",
         ":softbus_rpc_sa_permission_json",
         ":softbus_server.rc",
 
         # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
         # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
+        "$dsoftbus_root_path/core/common:softbus_utils",
+
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "$dsoftbus_root_path/sdk:softbus_client",
       ]
