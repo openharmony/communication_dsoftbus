@@ -185,7 +185,7 @@ HWTEST_F(LNNSleCapabilityTest, LocalLedgerInitSleCapacityTest001, TestSize.Level
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ret = LocalLedgerInitSleCapacity(nullptr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(sleCapabilityMock, GetSleRangeCapacityPacked)
         .WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));

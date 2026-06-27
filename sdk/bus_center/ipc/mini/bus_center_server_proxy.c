@@ -25,13 +25,13 @@
 
 int32_t BusCenterServerProxyInit(void)
 {
-    LNN_LOGE(LNN_EVENT, "bus center get server proxy ok");
+    LNN_LOGI(LNN_EVENT, "bus center get server proxy ok");
     return SOFTBUS_OK;
 }
 
 void BusCenterServerProxyDeInit(void)
 {
-    LNN_LOGE(LNN_EVENT, "bus center delete server proxy ok");
+    LNN_LOGI(LNN_EVENT, "bus center delete server proxy ok");
 }
 
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)

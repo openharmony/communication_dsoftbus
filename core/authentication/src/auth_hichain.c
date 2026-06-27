@@ -192,7 +192,7 @@ static int32_t GetDeviceSideFlag(int64_t authSeq, bool *flag)
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     *flag = authFsm->info.isServer;
-    AUTH_LOGI(AUTH_HICHAIN, "find authFsm success, side=%{public}s", GetAuthSideStr(*flag));
+    AUTH_LOGI(AUTH_HICHAIN, "find authFsm succ, side=%{public}s", GetAuthSideStr(*flag));
     ReleaseAuthLock();
     return SOFTBUS_OK;
 }
@@ -372,7 +372,7 @@ static void DeletePcRestrictNode(const char *udid)
         DeleteNodeFromPcRestrictMap(peerUdidHash);
         char *anonyUdid = NULL;
         Anonymize(udid, &anonyUdid);
-        AUTH_LOGI(AUTH_HICHAIN, "delete restrict node success. udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AUTH_LOGI(AUTH_HICHAIN, "delete restrict node succ. udid=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
     }
 }
@@ -480,7 +480,7 @@ static void OnDeviceNotTrusted(const char *udid)
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "LnnGetRemoteNodeInfoById failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_HICHAIN, "LnnGetRemoteNodeInfoById fail! ret=%{public}d", ret);
         return;
     }
     if (nodeInfo.deviceInfo.osType == OH_OS_TYPE) {
@@ -546,7 +546,7 @@ int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChai
         cJSON_free(authParams);
         return SOFTBUS_OK;
     }
-    AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed");
+    AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice fail");
     cJSON_free(authParams);
     return ret;
 }

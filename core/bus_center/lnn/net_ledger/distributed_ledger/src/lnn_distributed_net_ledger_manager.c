@@ -2012,7 +2012,7 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     int32_t ret = LnnRetrieveDeviceInfoByUdidPacked(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "retrive device info fail, ret=%{public}d", ret);
+        LNN_LOGE(LNN_LEDGER, "retrieve device info fail, ret=%{public}d", ret);
         if (LnnSaveRemoteDeviceInfoPacked(&tempNodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote info fail");
         }
@@ -2318,7 +2318,7 @@ int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, co
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     ret = LnnRetrieveDeviceInfoByUdidPacked(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "retrive device info fail, ret=%{public}d", ret);
+        LNN_LOGE(LNN_LEDGER, "retrieve device info fail, ret=%{public}d", ret);
         if (LnnSaveRemoteDeviceInfoPacked(&tempNodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote info fail");
         }

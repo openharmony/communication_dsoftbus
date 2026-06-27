@@ -514,7 +514,7 @@ int32_t InitApplyKeyManager(void)
 {
     int32_t ret = AuthApplyMapInit();
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "AuthApplyMapInit failed");
+        AUTH_LOGE(AUTH_CONN, "AuthApplyMapInit fail");
         return ret;
     }
     AuthRecoveryApplyKey();

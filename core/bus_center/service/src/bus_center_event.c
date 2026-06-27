@@ -615,7 +615,7 @@ void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncRes
     int32_t retCode)
 {
     if (pkgName == NULL || info == NULL) {
-        LNN_LOGW(LNN_EVENT, "invalid paramters");
+        LNN_LOGW(LNN_EVENT, "invalid parameters");
         return;
     }
     LNN_LOGI(LNN_EVENT, "notify time Sync result. retCode=%{public}d", retCode);
@@ -666,7 +666,7 @@ void LnnNotifyBtStateChangeEvent(void *state)
 void LnnNotifySleStateChangeEvent(void *state)
 {
     if (state  == NULL) {
-        LNN_LOGE(LNN_EVENT, "invaild state param");
+        LNN_LOGE(LNN_EVENT, "invalid state param");
         return;
     }
     SoftBusSleState *sleState = (SoftBusSleState *)state;

@@ -199,14 +199,15 @@ static void SetCompressFlagByAuthInfo(
 {
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_USB) &&
         info->isSupportCompress) {
-        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
+        AUTH_LOGD(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
         if (DataCompress((uint8_t *)msg, strlen(msg) + 1, compressData, compressLen) != SOFTBUS_OK) {
             *compressFlag = FLAG_UNCOMPRESS_DEVICE_INFO;
         } else {
             *compressFlag = FLAG_COMPRESS_DEVICE_INFO;
-            AUTH_LOGI(AUTH_FSM, "deviceInfo compress finish");
+            AUTH_LOGD(AUTH_FSM, "deviceInfo compress finish");
         }
-        AUTH_LOGI(AUTH_FSM, "after compress, datalen=%{public}u", *compressLen);
+        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu,"
+            " after compress, datalen=%{public}u", strlen(msg) + 1, *compressLen);
     }
 }
 
@@ -305,15 +306,16 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     uint32_t decompressLen = 0;
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_USB) &&
         info->isSupportCompress) {
-        AUTH_LOGI(AUTH_FSM, "before decompress, msgSize=%{public}u", msgSize);
+        AUTH_LOGD(AUTH_FSM, "before decompress, msgSize=%{public}u", msgSize);
         if (DataDecompress((uint8_t *)msg, msgSize, &decompressData, &decompressLen) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "data decompress fail");
             SoftBusFree(msg);
             return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
         } else {
-            AUTH_LOGI(AUTH_FSM, "deviceInfo deCompress finish, decompress=%{public}d", decompressLen);
+            AUTH_LOGD(AUTH_FSM, "deviceInfo deCompress finish, decompress=%{public}d", decompressLen);
         }
-        AUTH_LOGI(AUTH_FSM, "after decompress, datalen=%{public}d", decompressLen);
+        AUTH_LOGI(AUTH_FSM, "before decompress, msgSize=%{public}u,"
+            " after decompress, datalen=%{public}d", msgSize, decompressLen);
     }
     DevInfoData devInfo = { NULL, 0, info->connInfo.type, info->version };
     if ((decompressData != NULL) && (decompressLen != 0)) {
@@ -444,7 +446,7 @@ bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *hea
     }
     if (messageParse->messageType == CODE_TCP_KEEPALIVE) {
         if (JSON_GetInt32FromOject(json, TIME, (int32_t *)&messageParse->cycle)) {
-            AUTH_LOGI(AUTH_FSM, "parse keepalive cycle success, cycle=%{public}d", messageParse->cycle);
+            AUTH_LOGI(AUTH_FSM, "parse keepalive cycle succ, cycle=%{public}d", messageParse->cycle);
             result = true;
         }
     }

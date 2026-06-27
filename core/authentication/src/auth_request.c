@@ -121,7 +121,7 @@ int32_t GetAuthRequestNoLock(uint32_t requestId, AuthRequest *request)
     AUTH_CHECK_AND_RETURN_RET_LOGE(request != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "request is NULL");
     AuthRequest *item = FindAuthRequestByRequestId(requestId);
     if (item == NULL) {
-        AUTH_LOGE(AUTH_CONN, "find auth request failed");
+        AUTH_LOGE(AUTH_CONN, "find auth request fail");
         return SOFTBUS_NOT_FIND;
     }
     *request = *item;
@@ -242,11 +242,11 @@ void PerformVerifyCallback(uint32_t requestId, int32_t result, AuthHandle authHa
     }
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get auth request failed");
+        AUTH_LOGE(AUTH_CONN, "get auth request fail");
         return;
     }
     if (!CheckVerifyCallback(&request.verifyCb)) {
-        AUTH_LOGE(AUTH_CONN, "check verifyCb failed");
+        AUTH_LOGE(AUTH_CONN, "check verifyCb fail");
         return;
     }
     if (result == SOFTBUS_OK) {
@@ -260,11 +260,11 @@ void PerformAuthConnCallback(uint32_t requestId, int32_t result, int64_t authId)
 {
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get auth request failed");
+        AUTH_LOGE(AUTH_CONN, "get auth request fail");
         return;
     }
     if (!CheckAuthConnCallback(&request.connCb)) {
-        AUTH_LOGE(AUTH_CONN, "check connCb failed");
+        AUTH_LOGE(AUTH_CONN, "check connCb fail");
         return;
     }
     AuthHandle authHandle = { .authId = authId, .type = request.connInfo.type };

@@ -420,7 +420,7 @@ static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid,
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByHandle(srvcHandle, &callback);
     if (callback.characteristicAddCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "find callback by handle %{public}d fail", srvcHandle);
+        CONN_LOGE(CONN_BLE, "find callback by handle fail, srvcHandle=%{public}d", srvcHandle);
         return;
     }
     CONN_LOGI(CONN_BLE, "characteristicHandle:%{public}d)", characteristicHandle);
@@ -440,7 +440,7 @@ static void BleDescriptorAddCallback(int status, int serverId, BtUuid *uuid, int
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByHandle(srvcHandle, &callback);
     if (callback.descriptorAddCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "find callback by handle %{public}d fail", srvcHandle);
+        CONN_LOGE(CONN_BLE, "find callback by handle fail, srvcHandle=%{public}d", srvcHandle);
         return;
     }
     callback.descriptorAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle, descriptorHandle);
@@ -455,7 +455,7 @@ static void BleServiceStartCallback(int status, int serverId, int srvcHandle)
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByHandle(srvcHandle, &callback);
     if (callback.serviceStartCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "find callback by handle %{public}d fail", srvcHandle);
+        CONN_LOGE(CONN_BLE, "find callback by handle fail, srvcHandle=%{public}d", srvcHandle);
         return;
     }
     CONN_LOGI(CONN_BLE, "srvcHandle=%{public}d", srvcHandle);
@@ -471,7 +471,7 @@ static void BleServiceStopCallback(int status, int serverId, int srvcHandle)
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByHandle(srvcHandle, &callback);
     if (callback.serviceStopCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "find callback by handle %{public}d fail", srvcHandle);
+        CONN_LOGE(CONN_BLE, "find callback by handle fail, srvcHandle=%{public}d", srvcHandle);
         return;
     }
     callback.serviceStopCallback(status, srvcHandle);
@@ -486,7 +486,7 @@ static void BleServiceDeleteCallback(int status, int serverId, int srvcHandle)
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByHandle(srvcHandle, &callback);
     if (callback.serviceDeleteCallback == NULL) {
-        CONN_LOGE(CONN_BLE, "find callback by handle %{public}d fail", srvcHandle);
+        CONN_LOGE(CONN_BLE, "find callback by handle fail, srvcHandle=%{public}d", srvcHandle);
         return;
     }
     callback.serviceDeleteCallback(status, srvcHandle);
@@ -506,7 +506,7 @@ static void BleRequestReadCallback(BtReqReadCbPara readCbPara)
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByConnId(readCbPara.connId, &callback);
     if (callback.requestReadCallback == NULL) {
-        CONN_LOGI(CONN_BLE, "find callback by handle %{public}d fail", readCbPara.connId);
+        CONN_LOGI(CONN_BLE, "find callback by handle fail, connId=%{public}d", readCbPara.connId);
         return;
     }
     callback.requestReadCallback(req);
@@ -618,7 +618,7 @@ static void BleIndicationSentCallback(int connId, int status)
     SoftBusGattsCallback callback = { 0 };
     FindCallbackByConnId(connId, &callback);
     if (callback.notifySentCallback == NULL) {
-        CONN_LOGI(CONN_BLE, "find callback by connId %{public}d fail", connId);
+        CONN_LOGI(CONN_BLE, "find callback by connId fail, connId=%{public}d", connId);
         return;
     }
     callback.notifySentCallback(connId, status);
