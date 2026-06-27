@@ -267,7 +267,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest008, TestSize.Level1)
     SoftbusBleConflictNotifyDateReceivePacked(0, nullptr, 0);
     SoftbusBleConflictNotifyConnectResultPacked(0, 0, 0);
     SoftbusBleConflictRegisterListenerPacked(nullptr);
-    ret = ConnBleDirectInitPacked();
+    ret = ConnExtInitPacked();
     EXPECT_EQ(ret, SOFTBUS_OK);
     BleProtocolType protocol = BLE_PROTOCOL_MAX;
     ret = ConnBleDirectIsEnablePacked(protocol);

@@ -35,6 +35,7 @@ typedef enum {
     CONN_SLE,
     CONN_EVENT,
     CONN_PROXY,
+    CONN_FARFIELD,
     CONN_TEST,
     CONN_LABEL_MAX,
 } ConnLogLabelEnum;

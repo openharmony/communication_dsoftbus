@@ -201,7 +201,7 @@ static int32_t InitServicesAndModules(void)
     COMM_CHECK_AND_RETURN_RET_LOGE(GetWifiDirectManager()->init() == SOFTBUS_OK,
         SOFTBUS_WIFI_DIRECT_INIT_FAILED, COMM_SVC, "softbus wifi direct init failed.");
 
-    COMM_CHECK_AND_RETURN_RET_LOGE(ConnBleDirectInitPacked() == SOFTBUS_OK,
+    COMM_CHECK_AND_RETURN_RET_LOGE(ConnExtInitPacked() == SOFTBUS_OK,
         SOFTBUS_CONN_BLE_DIRECT_INIT_FAILED, COMM_SVC, "softbus ble direct init failed.");
     if (ConnPagingConnectInitPacked() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "paging connect init failed.");
