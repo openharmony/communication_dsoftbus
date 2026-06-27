@@ -20,6 +20,7 @@
 #include "wifi_direct_mock.h"
 #include "data/interface_info.h"
 #include "data/interface_manager.h"
+#include "dfx/interface_snapshot.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -124,4 +125,219 @@ HWTEST_F(InterfaceManagerTest, LockTest, TestSize.Level1)
     interfaceManager.UnlockInterface(type);
     EXPECT_EQ(interfaceManager.exclusives_[static_cast<int>(type)].owner_, "");
 }
+
+/*
+ * @tc.name: ReadInterfaceTest
+ * @tc.desc: test read interface
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, ReadInterfaceTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+        info.SetName(IF_NAME_P2P);
+        info.SetRole(LinkInfo::LinkMode::NONE);
+        return SOFTBUS_OK;
+    });
+    int32_t result = interfaceManager.ReadInterface(
+        InterfaceInfo::InterfaceType::P2P, [](const InterfaceInfo &info) {
+            EXPECT_EQ(info.GetName(), IF_NAME_P2P);
+            return SOFTBUS_OK;
+        });
+    EXPECT_EQ(result, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: UpdateInterfaceFailureTest
+ * @tc.desc: test update interface with failure callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, UpdateInterfaceFailureTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    int32_t result = interfaceManager.UpdateInterface(
+        InterfaceInfo::InterfaceType::HML, [](InterfaceInfo &info) {
+            return SOFTBUS_ERR;
+        });
+    EXPECT_EQ(result, SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: ReadInterfaceFailureTest
+ * @tc.desc: test read interface with failure callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, ReadInterfaceFailureTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    int32_t result = interfaceManager.ReadInterface(
+        InterfaceInfo::InterfaceType::P2P, [](const InterfaceInfo &info) {
+            return SOFTBUS_ERR;
+        });
+    EXPECT_EQ(result, SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: LockUnlockDifferentTypesTest
+ * @tc.desc: test lock/unlock with different interface types
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, LockUnlockDifferentTypesTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+
+    interfaceManager.LockInterface(InterfaceInfo::InterfaceType::P2P, "p2p_owner");
+    EXPECT_EQ(interfaceManager.exclusives_[static_cast<int>(InterfaceInfo::InterfaceType::P2P)].owner_, "p2p_owner");
+    interfaceManager.UnlockInterface(InterfaceInfo::InterfaceType::P2P);
+    EXPECT_EQ(interfaceManager.exclusives_[static_cast<int>(InterfaceInfo::InterfaceType::P2P)].owner_, "");
+
+    interfaceManager.LockInterface(InterfaceInfo::InterfaceType::HML, "hml_owner");
+    EXPECT_EQ(interfaceManager.exclusives_[static_cast<int>(InterfaceInfo::InterfaceType::HML)].owner_, "hml_owner");
+    interfaceManager.UnlockInterface(InterfaceInfo::InterfaceType::HML);
+    EXPECT_EQ(interfaceManager.exclusives_[static_cast<int>(InterfaceInfo::InterfaceType::HML)].owner_, "");
+}
+
+/*
+ * @tc.name: IsInterfaceAvailableForNotShareTest
+ * @tc.desc: test interface availability for non-share scenario
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, IsInterfaceAvailableForNotShareTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    InterfaceInfo::InterfaceType type = InterfaceInfo::InterfaceType::HML;
+    bool forShare = false;
+
+    interfaceManager.UpdateInterface(type, [](InterfaceInfo &info) {
+        info.SetIsEnable(false);
+        return SOFTBUS_OK;
+    });
+    bool result = interfaceManager.IsInterfaceAvailable(type, forShare);
+    EXPECT_FALSE(result);
+
+    interfaceManager.UpdateInterface(type, [](InterfaceInfo &info) {
+        info.SetIsEnable(true);
+        info.SetRole(LinkInfo::LinkMode::GO);
+        return SOFTBUS_OK;
+    });
+    result = interfaceManager.IsInterfaceAvailable(type, forShare);
+    EXPECT_TRUE(result);
+}
+
+/*
+ * @tc.name: UpdateInterfaceWithRoleChangeTest
+ * @tc.desc: test update interface with role change
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, UpdateInterfaceWithRoleChangeTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::HML, [](InterfaceInfo &info) {
+        info.SetRole(LinkInfo::LinkMode::GO);
+        return SOFTBUS_OK;
+    });
+
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::HML, [](InterfaceInfo &info) {
+        EXPECT_EQ(info.GetRole(), LinkInfo::LinkMode::GO);
+        return SOFTBUS_OK;
+    });
+}
+
+/*
+ * @tc.name: UpdateInterfaceWithMacChangeTest
+ * @tc.desc: test update interface with MAC address change
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, UpdateInterfaceWithMacChangeTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    std::string testMac = "AA:BB:CC:DD:EE:FF";
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, [testMac](InterfaceInfo &info) {
+        info.SetBaseMac(testMac);
+        return SOFTBUS_OK;
+    });
+
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, [testMac](InterfaceInfo &info) {
+        EXPECT_EQ(info.GetBaseMac(), testMac);
+        return SOFTBUS_OK;
+    });
+}
+
+/*
+ * @tc.name: GetInstanceTest
+ * @tc.desc: test singleton instance
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, GetInstanceTest, TestSize.Level1)
+{
+    auto &instance1 = InterfaceManager::GetInstance();
+    auto &instance2 = InterfaceManager::GetInstance();
+
+    EXPECT_EQ(&instance1, &instance2);
+}
+
+/*
+ * @tc.name: InterfaceTypeMaxTest
+ * @tc.desc: test interface type MAX boundary
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, InterfaceTypeMaxTest, TestSize.Level1)
+{
+    EXPECT_EQ(InterfaceInfo::InterfaceType::P2P, 0);
+    EXPECT_EQ(InterfaceInfo::InterfaceType::HML, 1);
+    EXPECT_EQ(InterfaceInfo::InterfaceType::MAX, 2);
+}
+
+/*
+ * @tc.name: UpdateInterfaceWithIpChangeTest
+ * @tc.desc: test update interface with IP change
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, UpdateInterfaceWithIpChangeTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    Ipv4Info testIp("192.168.1.100");
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::HML, [&testIp](InterfaceInfo &info) {
+        info.SetIpString(testIp);
+        return SOFTBUS_OK;
+    });
+
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::HML, [&testIp](InterfaceInfo &info) {
+        EXPECT_EQ(info.GetIpString(), testIp);
+        return SOFTBUS_OK;
+    });
+}
+
+/*
+ * @tc.name: ReadInterfaceWhenDisabledTest
+ * @tc.desc: test read interface when disabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InterfaceManagerTest, ReadInterfaceWhenDisabledTest, TestSize.Level1)
+{
+    InterfaceManager interfaceManager;
+    interfaceManager.UpdateInterface(InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+        info.SetIsEnable(false);
+        return SOFTBUS_OK;
+    });
+
+    bool isEnabled = true;
+    interfaceManager.ReadInterface(InterfaceInfo::InterfaceType::P2P, [&isEnabled](const InterfaceInfo &info) {
+        isEnabled = info.IsEnable();
+        return SOFTBUS_OK;
+    });
+    EXPECT_FALSE(isEnabled);
+}
+
 } // namespace OHOS::SoftBus

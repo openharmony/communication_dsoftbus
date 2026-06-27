@@ -19,6 +19,8 @@
 #include <set>
 #include "conn_log.h"
 #include "data/link_manager.h"
+#include "data/link_manager.h"
+#include "dfx/link_snapshot.h"
 
 using namespace testing::ext;
 
@@ -462,5 +464,215 @@ HWTEST_F(LinkManagerTest, GetRemoteMacByRemoteDeviceIdTest, TestSize.Level1)
     ASSERT_STREQ(result.c_str(), remoteMac.c_str());
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
     CONN_LOGI(CONN_WIFI_DIRECT, "GetRemoteMacByRemoteDeviceIdTest out");
+}
+
+/*
+ * @tc.name: GetLinkByIdTest
+ * @tc.desc: test GetLinkById method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, GetLinkByIdTest, TestSize.Level1)
+{
+    std::string remoteDeviceId("GetLinkByIdTestDeviceId");
+    std::string remoteMac("AA:BB:CC:DD:EE:FF");
+
+    auto link = LinkManager::GetInstance().GetLinkById(99999);
+    EXPECT_EQ(link, nullptr);
+
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceId, [&remoteMac, &remoteDeviceId](InnerLink &innerLink) {
+            innerLink.SetRemoteBaseMac(remoteMac);
+            innerLink.SetRemoteDeviceId(remoteDeviceId);
+        });
+
+    auto link2 = LinkManager::GetInstance().GetLinkById(-1);
+    EXPECT_EQ(link2, nullptr);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: GetReuseLinkByConnectTypeTest
+ * @tc.desc: test GetReuseLink by connect type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, GetReuseLinkByConnectTypeTest, TestSize.Level1)
+{
+    std::string remoteDeviceId("reuseTestDeviceId");
+
+    auto link = LinkManager::GetInstance().GetReuseLink(
+        WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML, remoteDeviceId);
+    EXPECT_EQ(link, nullptr);
+
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceId, [&remoteDeviceId](InnerLink &innerLink) {
+            innerLink.SetRemoteDeviceId(remoteDeviceId);
+        });
+
+    auto link2 = LinkManager::GetInstance().GetReuseLink(
+        WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML, remoteDeviceId);
+    EXPECT_EQ(link2, nullptr);
+
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: GetReuseLinkByLinkTypeTest
+ * @tc.desc: test GetReuseLink by link type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, GetReuseLinkByLinkTypeTest, TestSize.Level1)
+{
+    std::string remoteDeviceId("linkTypeTestDeviceId");
+
+    // Test with no links
+    auto link = LinkManager::GetInstance().GetReuseLink(
+        WIFI_DIRECT_LINK_TYPE_HML, remoteDeviceId);
+    EXPECT_EQ(link, nullptr);
+
+    // Create a link
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceId, [&remoteDeviceId](InnerLink &innerLink) {
+            innerLink.SetRemoteDeviceId(remoteDeviceId);
+        });
+
+    // Test again
+    auto link2 = LinkManager::GetInstance().GetReuseLink(
+        WIFI_DIRECT_LINK_TYPE_HML, remoteDeviceId);
+    EXPECT_EQ(link2, nullptr);
+
+    // Clean up
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: ProcessIfPresentByLinkIdTest
+ * @tc.desc: test ProcessIfPresent by link ID
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, ProcessIfPresentByLinkIdTest, TestSize.Level1)
+{
+    int testLinkId = 12345;
+    bool processed = false;
+
+    // Test with non-existent link ID
+    auto result = LinkManager::GetInstance().ProcessIfPresent(testLinkId,
+        [&processed](InnerLink &innerLink) {
+            processed = true;
+        });
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(processed);
+}
+
+/*
+ * @tc.name: GetInstanceTest
+ * @tc.desc: test singleton instance
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, GetInstanceTest, TestSize.Level1)
+{
+    auto &instance1 = LinkManager::GetInstance();
+    auto &instance2 = LinkManager::GetInstance();
+
+    EXPECT_EQ(&instance1, &instance2);
+}
+
+/*
+ * @tc.name: DifferentLinkTypesTest
+ * @tc.desc: test operations with different link types
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, DifferentLinkTypesTest, TestSize.Level1)
+{
+    std::string p2pDeviceId("p2pDeviceId");
+    std::string hmlDeviceId("hmlDeviceId");
+
+    // Create P2P link
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, p2pDeviceId, [](InnerLink &innerLink) {
+            innerLink.SetLinkType(InnerLink::LinkType::P2P);
+        });
+
+    // Create HML link
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, hmlDeviceId, [](InnerLink &innerLink) {
+            innerLink.SetLinkType(InnerLink::LinkType::HML);
+        });
+
+    // Verify both exist
+    bool p2pExists = LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::P2P, p2pDeviceId, [](InnerLink &innerLink) {});
+    EXPECT_TRUE(p2pExists);
+
+    bool hmlExists = LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::HML, hmlDeviceId, [](InnerLink &innerLink) {});
+    EXPECT_TRUE(hmlExists);
+
+    // Clean up
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: DumpWithSnapshotsTest
+ * @tc.desc: test Dump with snapshots
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, DumpWithSnapshotsTest, TestSize.Level1)
+{
+    std::list<std::shared_ptr<LinkSnapshot>> snapshots;
+
+    // Test with empty manager
+    LinkManager::GetInstance().Dump(snapshots);
+
+    // Create a link
+    std::string remoteDeviceId("dumpTestDeviceId");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceId, [&remoteDeviceId](InnerLink &innerLink) {
+            innerLink.SetRemoteDeviceId(remoteDeviceId);
+        });
+
+    // Test Dump with link
+    LinkManager::GetInstance().Dump(snapshots);
+
+    // Clean up
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+}
+
+/*
+ * @tc.name: MultipleLinksSameTypeTest
+ * @tc.desc: test multiple links of same type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, MultipleLinksSameTypeTest, TestSize.Level1)
+{
+    std::string deviceIds[] = {"device1", "device2", "device3"};
+
+    // Create multiple HML links
+    for (const auto &deviceId : deviceIds) {
+        LinkManager::GetInstance().ProcessIfAbsent(
+            InnerLink::LinkType::HML, deviceId, [&deviceId](InnerLink &innerLink) {
+                innerLink.SetRemoteDeviceId(deviceId);
+                innerLink.SetState(InnerLink::LinkState::CONNECTED);
+            });
+    }
+
+    // Verify all exist
+    for (const auto &deviceId : deviceIds) {
+        bool exists = LinkManager::GetInstance().ProcessIfPresent(
+            InnerLink::LinkType::HML, deviceId, [](InnerLink &innerLink) {});
+        EXPECT_TRUE(exists);
+    }
+
+    // Clean up
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 } // namespace OHOS::SoftBus
