@@ -146,47 +146,81 @@ static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash, bool isOnlyPointToPoint)
 {
-    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
-    for (const auto &trustDevice : trustDevices) {
-        if (isOnlyPointToPoint &&
-            trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
-            continue;
+    int32_t *userIds = nullptr;
+    uint32_t userIdsLen = 0;
+    if (GetAllForegroundAccountIds(&userIds, &userIdsLen) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get all foreground userId fail");
+        return false;
+    }
+    for (uint32_t idx = 0; idx < userIdsLen; idx++) {
+        int32_t localUserId = userIds[idx];
+        for (const auto &trustDevice : trustDevices) {
+            if (isOnlyPointToPoint &&
+                trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+                continue;
+            }
+            if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+                trustDevice.GetTrustDeviceId().empty() ||
+                trustDevice.GetStatus() == (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE ||
+                localUserId != GetAclLocalUserId(trustDevice)) {
+                continue;
+            }
+            char *anonyUdid = nullptr;
+            Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
+            LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s, localUserId=%{public}d",
+                AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyDeviceIdHash), localUserId);
+            AnonymizeFree(anonyUdid);
+            uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
+            char hashStr[CUST_UDID_LEN + 1] = { 0 };
+            if (SoftBusGenerateStrHash((const unsigned char *)trustDevice.GetTrustDeviceId().c_str(),
+                trustDevice.GetTrustDeviceId().length(), udidHash) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_STATE, "generate udidhash fail");
+                continue;
+            }
+            if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash, CUST_UDID_LEN / HEXIFY_UNIT_LEN) !=
+                SOFTBUS_OK) {
+                LNN_LOGE(LNN_STATE, "convert udidhash hex string fail");
+                continue;
+            }
+            if (strncmp(hashStr, deviceIdHash, strlen(deviceIdHash)) == 0) {
+                LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s",
+                    AnonymizeWrapper(anonyDeviceIdHash));
+                SoftBusFree(userIds);
+                return true;
+            }
         }
-        if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
-            trustDevice.GetTrustDeviceId().empty() ||
-            trustDevice.GetStatus() == (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE ||
-            localUserId != GetAclLocalUserId(trustDevice)) {
-            continue;
-        }
-        char *anonyUdid = nullptr;
-        Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", AnonymizeWrapper(anonyUdid),
-            AnonymizeWrapper(anonyDeviceIdHash));
-        AnonymizeFree(anonyUdid);
-        uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
-        char hashStr[CUST_UDID_LEN + 1] = { 0 };
-        if (SoftBusGenerateStrHash((const unsigned char *)trustDevice.GetTrustDeviceId().c_str(),
-            trustDevice.GetTrustDeviceId().length(), udidHash) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "generate udidhash fail");
-            continue;
-        }
-        if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash, CUST_UDID_LEN / HEXIFY_UNIT_LEN) !=
-            SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "convert udidhash hex string fail");
-            continue;
-        }
-        if (strncmp(hashStr, deviceIdHash, strlen(deviceIdHash)) == 0) {
-            LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s", anonyDeviceIdHash);
+    }
+    SoftBusFree(userIds);
+    return false;
+}
+
+static bool IsMatchAnyForegroundUserId(const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile,
+    const std::string &peerUdid, const std::string &localUdid, int32_t peerUserId)
+{
+    int32_t *userIds = nullptr;
+    uint32_t userIdsLen = 0;
+    if (GetAllForegroundAccountIds(&userIds, &userIdsLen) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get all userIds fail");
+        return false;
+    }
+    for (uint32_t idx = 0; idx < userIdsLen; idx++) {
+        if (((aclProfile.GetAccessee().GetAccesseeDeviceId() == peerUdid &&
+            aclProfile.GetAccesser().GetAccesserDeviceId() == localUdid) ||
+            (aclProfile.GetAccesser().GetAccesserDeviceId() == peerUdid &&
+            aclProfile.GetAccessee().GetAccesseeDeviceId() == localUdid)) &&
+            GetAclLocalUserId(aclProfile) == userIds[idx] &&
+            GetAclPeerUserId(aclProfile) == peerUserId) {
+            SoftBusFree(userIds);
             return true;
         }
     }
+    SoftBusFree(userIds);
     return false;
 }
 
 static bool CompareAclWithPeerDeviceInfo(const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile,
     const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
 {
-    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     char udid[UDID_BUF_LEN] = { 0 };
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     char localAccountString[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -218,14 +252,7 @@ static bool CompareAclWithPeerDeviceInfo(const OHOS::DistributedDeviceProfile::A
             return false;
         }
     }
-    if (((aclProfile.GetAccessee().GetAccesseeDeviceId() != peerUdid ||
-        aclProfile.GetAccesser().GetAccesserDeviceId() != localUdid) &&
-        (aclProfile.GetAccesser().GetAccesserDeviceId() != peerUdid ||
-        aclProfile.GetAccessee().GetAccesseeDeviceId() != localUdid)) ||
-        GetAclLocalUserId(aclProfile) != localUserId || GetAclPeerUserId(aclProfile) != peerUserId) {
-        return false;
-    }
-    return true;
+    return IsMatchAnyForegroundUserId(aclProfile, peerUdid, localUdid, peerUserId);
 }
 
 bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
@@ -852,18 +879,18 @@ bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *l
     LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != nullptr, false, LNN_EVENT, "sessionKey is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(length != nullptr, false, LNN_EVENT, "length is null");
     std::vector<uint8_t> vecSessionKey;
-    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
-    if (localUserId < 0) {
-        LNN_LOGE(LNN_STATE, "GetUserId failed");
-        return false;
-    }
-    int32_t rc = DpClient::GetInstance().GetSessionKey(localUserId, sessionKeyId, vecSessionKey);
+    int32_t rc = DpClient::GetInstance().GetSessionKey(sessionKeyId, vecSessionKey);
     if (rc != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
         LNN_LOGE(LNN_STATE, "GetSessionKey failed, ret=%{public}d", rc);
         return false;
     }
+    if (vecSessionKey.empty()) {
+        LNN_LOGE(LNN_STATE, "vecSessionKey is empty");
+        return false;
+    }
     std::copy(vecSessionKey.begin(), vecSessionKey.end(), sessionKey);
     *length = vecSessionKey.size();
+    (void)memset_s(vecSessionKey.data(), vecSessionKey.size(), 0, vecSessionKey.size());
     return true;
 }
 
@@ -1409,51 +1436,50 @@ bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *ud
 
 int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
 {
-    if (num == nullptr || trustedInfoArray == nullptr) {
-        LNN_LOGE(LNN_LEDGER, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(num != nullptr && trustedInfoArray != nullptr,
+        SOFTBUS_INVALID_PARAM, LNN_LEDGER, "invalid param");
     std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
     int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
-    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
-        return SOFTBUS_AUTH_ACL_NOT_FOUND;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == OHOS::DistributedDeviceProfile::DP_SUCCESS,
+        SOFTBUS_AUTH_ACL_NOT_FOUND, LNN_LEDGER, "GetAllAccessControlProfile ret=%{public}d", ret);
     if (aclProfiles.empty()) {
         LNN_LOGI(LNN_STATE, "aclProfiles is empty");
         return SOFTBUS_OK;
     }
-    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
-    std::unordered_set<std::string> matchAcl;
-    for (auto &aclProfile : aclProfiles) {
-        if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
-            aclProfile.GetTrustDeviceId().empty() || GetAclLocalUserId(aclProfile) != localUserId ||
-            aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
-            continue;
+    int32_t *userIds = nullptr;
+    uint32_t userIdsLen = 0;
+    ret = GetAllForegroundAccountIds(&userIds, &userIdsLen);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED, LNN_LEDGER, "get all foreground userId fail");
+    std::unordered_set<std::string> deviceSet;
+    for (uint32_t idx = 0; idx < userIdsLen; idx++) {
+        for (auto &aclProfile : aclProfiles) {
+            if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+                aclProfile.GetTrustDeviceId().empty() || GetAclLocalUserId(aclProfile) != userIds[idx] ||
+                aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+                continue;
+            }
+            char *anonyUdid = nullptr;
+            Anonymize(aclProfile.GetTrustDeviceId().c_str(), &anonyUdid);
+            LNN_LOGI(LNN_STATE, "trusted dev info, udid=%{public}s, localUserId=%{public}d",
+                AnonymizeWrapper(anonyUdid), userIds[idx]);
+            AnonymizeFree(anonyUdid);
+            deviceSet.insert(aclProfile.GetTrustDeviceId());
         }
-        char *anonyUdid = nullptr;
-        Anonymize(aclProfile.GetTrustDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "trusted dev info, udid=%{public}s, localUserId=%{public}d",
-            AnonymizeWrapper(anonyUdid), GetAclLocalUserId(aclProfile));
-        AnonymizeFree(anonyUdid);
-        matchAcl.insert(aclProfile.GetTrustDeviceId());
     }
-    if (matchAcl.empty()) {
-        LNN_LOGI(LNN_STATE, "matchAcl is empty");
-        return SOFTBUS_OK;
+    SoftBusFree(userIds);
+    if (deviceSet.empty()) {
+        LNN_LOGI(LNN_STATE, "deviceSet is empty");
+        return SOFTBUS_AUTH_ACL_NOT_FOUND;
     }
-    *trustedInfoArray = (TrustedInfo *)SoftBusCalloc(matchAcl.size() * sizeof(TrustedInfo));
-    if (*trustedInfoArray == nullptr) {
-        LNN_LOGE(LNN_STATE, "malloc fail.");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    for (auto item : matchAcl)  {
-        if (strcpy_s(((*trustedInfoArray) + (*num))->udid, UDID_BUF_LEN, item.c_str()) != EOK) {
+    *trustedInfoArray = (TrustedInfo *)SoftBusCalloc(deviceSet.size() * sizeof(TrustedInfo));
+    LNN_CHECK_AND_RETURN_RET_LOGE(*trustedInfoArray != nullptr, SOFTBUS_MALLOC_ERR, LNN_LEDGER, "malloc fail.");
+    for (const auto &deviceUdid : deviceSet) {
+        if (strcpy_s(((*trustedInfoArray) + (*num))->udid, UDID_BUF_LEN, deviceUdid.c_str()) != EOK) {
             LNN_LOGE(LNN_STATE, "udid str cpy fail");
             SoftBusFree(*trustedInfoArray);
             return SOFTBUS_STRCPY_ERR;
         }
-        ((*trustedInfoArray) + (*num))->userId = localUserId;
         (*num)++;
     }
     return SOFTBUS_OK;

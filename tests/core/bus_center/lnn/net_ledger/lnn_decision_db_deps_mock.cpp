@@ -23,7 +23,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-constexpr int32_t DEFAULT_USERID = 100;
 namespace OHOS {
 void *g_decisionDbDepsInterface;
 DecisionDbDepsInterfaceMock::DecisionDbDepsInterfaceMock()
@@ -68,7 +67,6 @@ int32_t DecisionDbDepsInterfaceMock::ActionOfSelectAllAcl(TrustedInfo **trustedI
         SoftBusFree(*trustedInfoArray);
         return SOFTBUS_MEM_ERR;
     }
-    (*trustedInfoArray)->userId = DEFAULT_USERID;
     return SOFTBUS_OK;
 }
 
@@ -317,6 +315,11 @@ void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy)
 bool LnnIsOsAccountConstraint(void)
 {
     return GetDecisionDbDepsInterface()->LnnIsOsAccountConstraint();
+}
+
+void LnnNotifyDifferentAccountChangeEvent(SoftBusDifferentAccountState state)
+{
+    return GetDecisionDbDepsInterface()->LnnNotifyDifferentAccountChangeEvent(state);
 }
 } // extern "C"
 } // namespace OHOS

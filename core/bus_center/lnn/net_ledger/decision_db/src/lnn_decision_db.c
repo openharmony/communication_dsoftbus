@@ -230,8 +230,12 @@ static void CompleteUpdateTrustedDevInfo(void *para)
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
 }
 
-static int32_t DeleteDeviceFromList(TrustedInfo *record)
+static int32_t DeleteDeviceFromList(const char *udid)
 {
+    if (udid == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param: udid is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (DeviceDbListLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -239,10 +243,9 @@ static int32_t DeleteDeviceFromList(TrustedInfo *record)
     DeviceDbInfo *item = NULL;
     DeviceDbInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_deviceInfoList, DeviceDbInfo, node) {
-        if (strcmp(item->infoRecord.udid, record->udid) == 0 &&
-            item->infoRecord.userId == record->userId) {
+        if (strcmp(item->infoRecord.udid, udid) == 0) {
             char *anonyUdid = NULL;
-            Anonymize(record->udid, &anonyUdid);
+            Anonymize(udid, &anonyUdid);
             LNN_LOGI(LNN_LEDGER, "delete device db from list. udid=%{public}s", AnonymizeWrapper(anonyUdid));
             AnonymizeFree(anonyUdid);
             ListDelete(&item->node);
@@ -254,16 +257,19 @@ static int32_t DeleteDeviceFromList(TrustedInfo *record)
     return SOFTBUS_OK;
 }
 
-static int32_t InsertDeviceToList(TrustedInfo *record)
+static int32_t InsertDeviceToList(const TrustedInfo *record)
 {
+    if (record == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param: record is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (DeviceDbListLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     DeviceDbInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
-        if (strcmp(item->infoRecord.udid, record->udid) == 0 &&
-            item->infoRecord.userId == record->userId) {
+        if (strcmp(item->infoRecord.udid, record->udid) == 0) {
             DeviceDbListUnlock();
             return SOFTBUS_OK;
         }
@@ -287,9 +293,9 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
         return SOFTBUS_INVALID_PARAM;
     }
     TrustedInfo record;
-    record.userId = JudgeDeviceTypeAndGetOsAccountIds();
+    (void)memset_s(&record, sizeof(TrustedInfo), 0, sizeof(TrustedInfo));
     if (strcpy_s(record.udid, sizeof(record.udid), udid) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s udid hash failed");
+        LNN_LOGE(LNN_LEDGER, "strcpy_s udid failed");
         return SOFTBUS_STRCPY_ERR;
     }
     if (InsertDeviceToList(&record) == SOFTBUS_OK) {
@@ -298,31 +304,23 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
     if (udid == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    TrustedInfo record;
-    record.userId = localUserId;
-    if (strcpy_s(record.udid, sizeof(record.udid), udid) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strcpy_s udid hash failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (DeleteDeviceFromList(&record) == SOFTBUS_OK) {
+    if (DeleteDeviceFromList(udid) == SOFTBUS_OK) {
         (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
     }
     return SOFTBUS_OK;
 }
 
-static int32_t GetAllDevNums(uint32_t *num, int32_t userId)
+static int32_t GetAllDevNums(uint32_t *num)
 {
     DeviceDbInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
-        if (item->infoRecord.userId == userId) {
-            (*num)++;
-        }
+        (*num)++;
     }
     return SOFTBUS_OK;
 }
@@ -331,12 +329,11 @@ int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE((udidArray != NULL) && (num != NULL), SOFTBUS_INVALID_PARAM, LNN_LEDGER,
         "invalid param");
-    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     if (DeviceDbListLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    GetAllDevNums(num, userId);
+    GetAllDevNums(num);
     if (*num == 0) {
         LNN_LOGD(LNN_LEDGER, "get none trusted dev info");
         *udidArray = NULL;
@@ -355,9 +352,6 @@ int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num)
     LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
         if (cur >= *num) {
             break;
-        }
-        if (item->infoRecord.userId != userId) {
-            continue;
         }
         if (strcpy_s(*udidArray + cur * UDID_BUF_LEN, UDID_BUF_LEN, item->infoRecord.udid) != EOK) {
             LNN_LOGE(LNN_LEDGER, "strcpy udid fail.");
@@ -382,22 +376,13 @@ static int32_t RecoveryTrustedDevInfoProcess(void)
         LNN_LOGE(LNN_LEDGER, "get none trusted dev info");
         return SOFTBUS_OK;
     }
-    if (DeviceDbListLock() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "db lock fail");
-        SoftBusFree(trustedInfoArray);
-        return SOFTBUS_LOCK_ERR;
-    }
     for (uint32_t i = 0; i < num; i++) {
-        DeviceDbInfo *info = (DeviceDbInfo *)SoftBusCalloc(sizeof(DeviceDbInfo));
-        if (info == NULL) {
-            LNN_LOGE(LNN_BUILDER, "malloc info fail");
-            continue;
+        if (InsertDeviceToList(&trustedInfoArray[i]) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "insert device fail");
         }
-        info->infoRecord = trustedInfoArray[i];
-        ListNodeInsert(&g_deviceInfoList, &info->node);
     }
-    DeviceDbListUnlock();
     SoftBusFree(trustedInfoArray);
+    LnnNotifyDifferentAccountChangeEvent(SOFTBUS_DIF_ACCOUNT_DEV_CHANGE);
     return SOFTBUS_OK;
 }
 
@@ -435,15 +420,14 @@ int32_t InitDbListDelay(void)
     return RecoveryTrustedDevInfoProcess();
 }
 
-static bool IsDeviceTrusted(const char *udid, int32_t userId)
+static bool IsDeviceTrusted(const char *udid)
 {
     if (udid == NULL) {
         return false;
     }
     DeviceDbInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_deviceInfoList, DeviceDbInfo, node) {
-        if (strcmp(udid, item->infoRecord.udid) == 0 &&
-            item->infoRecord.userId == userId) {
+        if (strcmp(udid, item->infoRecord.udid) == 0) {
             return true;
         }
     }
@@ -487,8 +471,7 @@ int32_t LnnFindDeviceUdidTrustedInfo(const char *deviceUdid)
         LNN_LOGE(LNN_LEDGER, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
-    if (!IsDeviceTrusted(deviceUdid, userId)) {
+    if (!IsDeviceTrusted(deviceUdid)) {
         LNN_LOGE(LNN_LEDGER, "not find trusted in db");
         DeviceDbListUnlock();
         return SOFTBUS_NOT_FIND;

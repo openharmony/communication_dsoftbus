@@ -105,6 +105,11 @@ int32_t CheckAclInfoIsAccesser(const AuthACLInfo *acl, bool *isAccesser)
     return GetInterface()->CheckAclInfoIsAccesser(acl, isAccesser);
 }
 
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    return GetInterface()->GetAllForegroundAccountIds(userIds, userIdsLen);
+}
+
 int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
 {
     return GetInterface()->LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, len);

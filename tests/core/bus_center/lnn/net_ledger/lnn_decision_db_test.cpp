@@ -30,7 +30,6 @@
 namespace OHOS {
 using namespace testing::ext;
 constexpr char NODE_UDID[] = "123456ABCDEF";
-constexpr int32_t DEFAULT_USERID = 100;
 #define WAIT_ONE_HOUR_QUERY_INTERVAL   (60 * 60 * 1000)
 #define WAIT_SEVEN_DAYS_QUERY_INTERVAL (7 * 24 * 60 * 60 * 1000)
 #define TEST_LEN 10
@@ -372,7 +371,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSiz
  */
 HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
 {
-    int32_t ret = LnnDeleteSpecificTrustedDevInfo(nullptr, DEFAULT_USERID);
+    int32_t ret = LnnDeleteSpecificTrustedDevInfo(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, GetLooper(_))
@@ -383,7 +382,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSiz
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED));
-    ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
+    ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -405,7 +404,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_002, TestSiz
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
+    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -425,7 +424,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSiz
         .WillRepeatedly(decisionDbMock.DecisionDbAsyncCallbackHelper);
     EXPECT_CALL(decisionDbMock, LnnGetLocalByteInfo(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR));
-    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
+    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -449,7 +448,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSiz
         .WillRepeatedly(Return(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_DATABASE_FAILED));
-    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
+    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -473,7 +472,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_005, TestSiz
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_DATABASE_FAILED));
-    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
+    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -501,7 +500,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_006, TestSiz
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_PATH_FAILED));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
+    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -528,7 +527,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_007, TestSiz
     EXPECT_CALL(decisionDbMock, LnnGetFullStoragePath(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_PATH_FAILED));
     EXPECT_CALL(decisionDbMock, CloseDatabase(_)).WillRepeatedly(Return(SOFTBUS_NETWORK_DATABASE_FAILED));
-    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
+    int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

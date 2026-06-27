@@ -45,6 +45,8 @@ static const uint32_t CONSTRAINT_UPDATE_RETRY_COUNT = 10;
 static const uint32_t CONSTRAINT_UPDATE_RETRY_INTERVAL_MS = 50;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
+#define INVALID_USER_ID (-1)
+#define FOREGROUND_ACCOUNT_MAX_SIZE 20
 
 static std::mutex g_constraintMutex;
 static std::unordered_map<int32_t, bool> g_accountConstraintMap;
@@ -197,22 +199,71 @@ int32_t GetActiveOsAccountIds(void)
     return accountId[0];
 }
 
-int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+static bool JudgeDeviceType(int32_t expectedDevTypeId)
 {
     int32_t localDevTypeId = 0;
-    int32_t userId = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "LnnGetLocalNumInfo get devTypeId fail");
+        return false;
+    }
+    return localDevTypeId == expectedDevTypeId;
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    int32_t userId = 0;
+    if (!JudgeDeviceType(TYPE_CAR_ID)) {
         return GetActiveOsAccountIds();
     }
-    if (localDevTypeId == TYPE_CAR_ID) {
-        if (GetActiveOsAccountIdsByDisplayId(&userId) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "get active OsAccountIds fail");
-            return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
-        }
-    } else {
-        userId = GetActiveOsAccountIds();
+    if (GetActiveOsAccountIdsByDisplayId(&userId) != SOFTBUS_OK) {
+        return GetActiveOsAccountIds();
     }
     return userId;
+}
+
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    if (userIds == nullptr || userIdsLen == nullptr) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t count = 0;
+    std::vector<OHOS::AccountSA::ForegroundOsAccount> foregroundAccountIds;
+    OHOS::ErrCode errCode = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccounts(foregroundAccountIds);
+    if (errCode != OHOS::ERR_OK || foregroundAccountIds.empty() ||
+        foregroundAccountIds.size() > FOREGROUND_ACCOUNT_MAX_SIZE) {
+        LNN_LOGE(LNN_STATE, "get foreground accounts fail");
+        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
+    }
+    count = foregroundAccountIds.size();
+    *userIds = static_cast<int32_t *>(SoftBusCalloc(count * sizeof(int32_t)));
+    if (*userIds == nullptr) {
+        LNN_LOGE(LNN_STATE, "malloc userIds fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    for (size_t i = 0; i < count; i++) {
+        (*userIds)[i] = foregroundAccountIds[i].localId;
+    }
+    *userIdsLen = static_cast<uint32_t>(count);
+    LNN_LOGD(LNN_STATE, "GetAllOsAccountIds succ, count=%{public}d", *userIdsLen);
+    return SOFTBUS_OK;
+}
+
+bool IsForegroundUserId(int32_t userId)
+{
+    std::vector<OHOS::AccountSA::ForegroundOsAccount> foregroundAccountIds;
+    OHOS::ErrCode errCode = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccounts(foregroundAccountIds);
+    if (errCode != OHOS::ERR_OK || foregroundAccountIds.empty() ||
+        foregroundAccountIds.size() > FOREGROUND_ACCOUNT_MAX_SIZE) {
+        LNN_LOGE(LNN_STATE, "get foreground accounts fail");
+        return false;
+    }
+    for (const auto &accountId : foregroundAccountIds) {
+        if (accountId.localId == userId) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool IsActiveOsAccountUnlocked(void)

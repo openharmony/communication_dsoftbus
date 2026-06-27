@@ -88,9 +88,9 @@ int32_t GetActiveOsAccountIds(void)
     return GetAuthHichainIdServiceInterfaceMock()->GetActiveOsAccountIds();
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
-    return GetAuthHichainIdServiceInterfaceMock()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+    return GetAuthHichainIdServiceInterfaceMock()->LnnDeleteSpecificTrustedDevInfo(udid);
 }
 
 void LnnHbOnTrustedRelationReduced(void)

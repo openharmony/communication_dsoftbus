@@ -25,6 +25,7 @@
 #include "lnn_app_bind_interface.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_decision_db.h"
+#include "lnn_device_info_struct.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_heartbeat_strategy.h"
@@ -49,6 +50,34 @@ AuthDeviceProfileListener::~AuthDeviceProfileListener()
     AUTH_LOGI(AUTH_INIT, "destruct");
 }
 
+static bool IsDeviceTypeExist(const char *udid, int32_t deviceType)
+{
+    if (udid == nullptr) {
+        AUTH_LOGE(AUTH_INIT, "invalid param");
+        return false;
+    }
+    int32_t localDevTypeId = TYPE_UNKNOW_ID;
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
+    if (ret == SOFTBUS_OK && localDevTypeId == deviceType) {
+        AUTH_LOGI(AUTH_INIT, "local is matched, deviceType=%{public}d", localDevTypeId);
+        return true;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_INIT, "GetRemoteNodeInfoById fail");
+        return false;
+    }
+    int32_t remoteDevTypeId = TYPE_UNKNOW_ID;
+    ret = LnnGetRemoteNumInfo(nodeInfo.networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
+    if (ret == SOFTBUS_OK && remoteDevTypeId == deviceType) {
+        AUTH_LOGI(AUTH_INIT, "remote is matched, deviceType=%{public}d", remoteDevTypeId);
+        return true;
+    }
+    return false;
+}
+
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileAdd(const TrustDeviceProfile &profile)
 {
     AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileAdd start!");
@@ -68,23 +97,33 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileAdd(const TrustDeviceProf
 
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceProfile &profile)
 {
+    std::string deviceId = profile.GetDeviceId();
+    if (deviceId.empty()) {
+        AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete udid is empty!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = deviceId.c_str();
     char *anonyUdid = nullptr;
-    Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
+    Anonymize(udid, &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileDelete start! "
         "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
+    if (IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
+        AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileDelete exist car");
+        return SOFTBUS_OK;
+    }
     if (g_deviceProfileChange.onDeviceProfileDeleted == nullptr) {
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete failed!");
         return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnGetRemoteNodeInfoById(profile.GetDeviceId().c_str(), CATEGORY_UDID, &nodeInfo);
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
     if (ret == SOFTBUS_OK && nodeInfo.localUserId != 0 && profile.GetLocalUserId() != nodeInfo.localUserId) {
         AUTH_LOGE(AUTH_INIT, "delete deviceprofile not current user");
-        if (!DpHasAccessControlProfile(profile.GetDeviceId().c_str(), true, profile.GetLocalUserId())) {
-            LnnDeleteSpecificTrustedDevInfo(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
+        if (!DpHasAccessControlProfile(udid, true, profile.GetLocalUserId())) {
+            LnnDeleteSpecificTrustedDevInfo(udid);
         }
         return SOFTBUS_OK;
     }
@@ -109,11 +148,17 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileUpdate(
 
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceProfile &profile)
 {
+    std::string deviceId = profile.GetDeviceId();
+    if (deviceId.empty()) {
+        AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileActive udid is empty!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = deviceId.c_str();
     char *anonyUdid = nullptr;
-    Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
+    Anonymize(udid, &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "dp active callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
-    DelNotTrustDevice(profile.GetDeviceId().c_str());
+    DelNotTrustDevice(udid);
     if (GetScreenState() == SOFTBUS_SCREEN_OFF && !LnnIsLocalSupportBurstFeature()) {
         AUTH_LOGI(AUTH_INIT, "screen off and not support burst. no need online");
         return SOFTBUS_OK;
@@ -131,15 +176,81 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceP
 
 int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDeviceProfile &profile)
 {
+    std::string deviceId = profile.GetDeviceId();
+    if (deviceId.empty()) {
+        AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileInactive udid is empty!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = deviceId.c_str();
     char *anonyUdid = nullptr;
-    Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
+    Anonymize(udid, &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "dp inactive callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
+    if (IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
+        AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileInactive ignore car type");
+        return SOFTBUS_OK;
+    }
     int32_t userId = profile.GetPeerUserId();
     AUTH_LOGI(AUTH_INIT, "userId:%{public}d", userId);
-    NotifyRemoteDevOffLineByUserId(userId, profile.GetDeviceId().c_str());
+    NotifyRemoteDevOffLineByUserId(userId, udid);
 
+    return SOFTBUS_OK;
+}
+
+int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByDelete(const TrustDeviceProfile &profile)
+{
+    std::string deviceId = profile.GetDeviceId();
+    if (deviceId.empty()) {
+        AUTH_LOGE(AUTH_INIT, "OnDeviceAclInactiveByDelete udid is empty!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = deviceId.c_str();
+    char *anonyUdid = nullptr;
+    Anonymize(udid, &anonyUdid);
+    AUTH_LOGI(AUTH_INIT, "OnDeviceAclInactiveByDelete start! "
+        "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
+    AnonymizeFree(anonyUdid);
+    if (!IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
+        AUTH_LOGI(AUTH_INIT, "OnDeviceAclInactiveByDelete only car device need handle");
+        return SOFTBUS_OK;
+    }
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
+    if (g_deviceProfileChange.onDeviceProfileDeleted != nullptr) {
+        g_deviceProfileChange.onDeviceProfileDeleted(udid, localUserId);
+    }
+    AUTH_LOGD(AUTH_INIT, "OnDeviceAclInactiveByDelete success!");
+    return SOFTBUS_OK;
+}
+
+int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByUpdate(const TrustDeviceProfile &profile)
+{
+    std::string deviceId = profile.GetDeviceId();
+    if (deviceId.empty()) {
+        AUTH_LOGE(AUTH_INIT, "OnDeviceAclInactiveByUpdate udid is empty!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = deviceId.c_str();
+    char *anonyUdid = nullptr;
+    Anonymize(udid, &anonyUdid);
+    AUTH_LOGI(AUTH_INIT, "OnDeviceAclInactiveByUpdate start! "
+        "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
+    AnonymizeFree(anonyUdid);
+    if (!IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
+        AUTH_LOGI(AUTH_INIT, "OnDeviceAclInactiveByDelete only car device need handle");
+        return SOFTBUS_OK;
+    }
+    int32_t userId = profile.GetPeerUserId();
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+    if (ret == SOFTBUS_OK && nodeInfo.userId != 0) {
+        userId = nodeInfo.userId;
+    }
+    AUTH_LOGD(AUTH_INIT, "userId=%{public}d", userId);
+    NotifyRemoteDevOffLineByUserId(userId, udid);
     return SOFTBUS_OK;
 }
 
@@ -210,7 +321,8 @@ static int32_t RegisterToDpHelper(void)
     std::string subscribeKey = "trust_device_profile";
     std::unordered_set<ProfileChangeType> subscribeTypes = { ProfileChangeType::TRUST_DEVICE_PROFILE_ADD,
         ProfileChangeType::TRUST_DEVICE_PROFILE_UPDATE, ProfileChangeType::TRUST_DEVICE_PROFILE_DELETE,
-        ProfileChangeType::TRUST_DEVICE_PROFILE_ACTIVE, ProfileChangeType::TRUST_DEVICE_PROFILE_INACTIVE};
+        ProfileChangeType::TRUST_DEVICE_PROFILE_ACTIVE, ProfileChangeType::TRUST_DEVICE_PROFILE_INACTIVE,
+        ProfileChangeType::DEVICE_ACL_INACTIVE_BY_DELETE, ProfileChangeType::DEVICE_ACL_INACTIVE_BY_UPDATE, };
 
     sptr<IProfileChangeListener> subscribeDPChangeListener = new (std::nothrow) AuthDeviceProfileListener;
     if (subscribeDPChangeListener == nullptr) {

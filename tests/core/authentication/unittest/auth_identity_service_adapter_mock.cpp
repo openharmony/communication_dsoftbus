@@ -81,9 +81,9 @@ int32_t GetActiveOsAccountIds(void)
     return GetInterfaceMock()->GetActiveOsAccountIds();
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
-    return GetInterfaceMock()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+    return GetInterfaceMock()->LnnDeleteSpecificTrustedDevInfo(udid);
 }
 
 void LnnHbOnTrustedRelationReduced(void)

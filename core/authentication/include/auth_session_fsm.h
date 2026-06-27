@@ -58,6 +58,7 @@ char *AuthSessionGetCredId(int64_t authSeq);
 int32_t AuthSessionGetAuthVersion(int64_t authSeq, int32_t *version);
 bool AuthSessionGetIsSameAccount(int64_t authSeq);
 int32_t AuthSessionGetUserId(int64_t authSeq);
+int32_t AuthSessionGetSourceUserId(int64_t authSeq);
 
 #ifdef __cplusplus
 #if __cplusplus

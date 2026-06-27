@@ -440,6 +440,11 @@ void IdServiceDestroyCredentialList(char **returnData)
     return GetInterface()->IdServiceDestroyCredentialList(returnData);
 }
 
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    return GetInterface()->GetAllForegroundAccountIds(userIds, userIdsLen);
+}
+
 int32_t GetActiveOsAccountIds(void)
 {
     return GetInterface()->GetActiveOsAccountIds();
