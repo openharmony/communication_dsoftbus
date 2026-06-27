@@ -29,6 +29,7 @@
 #include "g_enhance_conn_func.h"
 #include "g_enhance_conn_func_pack.h"
 #include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_disc_func.h"
 #include "g_enhance_adapter_func.h"
@@ -213,6 +214,7 @@ static int32_t InitServicesAndModules(void)
     if (LnnInitSle() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus lnn sle init failed.");
     }
+    LnnRegisterPushListenerPacked();
     InstRegister(NULL);
     return SOFTBUS_OK;
 }

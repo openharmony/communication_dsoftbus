@@ -234,6 +234,7 @@ void Register4thPartFunc(void *soHandle)
 
 void Register5thPartFunc(void *soHandle)
 {
+    g_lnnEnhanceFuncList.lnnRegisterPushListener = dlsym(soHandle, "LnnRegisterPushListener");
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfo = dlsym(soHandle, "LnnRetrieveDeviceInfo");
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfoByNetworkId = dlsym(soHandle, "LnnRetrieveDeviceInfoByNetworkId");
     g_lnnEnhanceFuncList.haveConcurrencyPreLinkNodeByLaneReqId = dlsym(soHandle,

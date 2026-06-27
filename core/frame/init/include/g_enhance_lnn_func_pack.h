@@ -214,6 +214,7 @@ void TriggerSparkGroupClearPacked(uint32_t state, uint32_t delayTime);
 void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime);
 int32_t InitControlPlanePacked(void);
 void DeinitControlPlanePacked(void);
+int32_t LnnRegisterPushListenerPacked(void);
 int32_t QueryControlPlaneNodeValidPacked(const char *deviceId);
 int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd);
 bool IsSparkGroupEnabledPacked(void);

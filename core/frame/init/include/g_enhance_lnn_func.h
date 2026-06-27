@@ -278,6 +278,7 @@ typedef void (*LnnRegSleRangeCbFunc)(const ISleRangeInnerCallback *callback);
 typedef int32_t (*LnnStopRangeFunc)(const RangeConfig *config);
 typedef int32_t (*LnnStartRangeFunc)(const RangeConfig *config);
 typedef void (*LnnDeinitSleRangeFunc)(void);
+typedef int32_t (*LnnRegisterPushListenerFunc)(void);
 typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
 typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
@@ -458,6 +459,7 @@ typedef struct TagLnnEnhanceFuncList {
     LnnSyncBroadcastLinkKeyFunc lnnSyncBroadcastLinkKey;
     IsDeviceHasRiskFactorFunc isDeviceHasRiskFactor;
     // bus_center
+    LnnRegisterPushListenerFunc lnnRegisterPushListener;
     LnnSaveDeviceDataFunc lnnSaveDeviceData;
     LnnAsyncSaveDeviceDataFunc lnnAsyncSaveDeviceData;
     LnnRetrieveDeviceDataFunc lnnRetrieveDeviceData;
