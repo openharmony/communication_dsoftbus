@@ -1550,6 +1550,18 @@ void LnnVirtualLinkDeinitPacked(void)
     pfnLnnEnhanceFuncList->lnnVirtualLinkDeinit();
 }
 
+int32_t LnnRegisterPushListenerPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnRegisterPushListener) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnRegisterPushListener();
+}
+
 int32_t DcTriggerVirtualLinkPacked(const char *peerNetworkId)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
