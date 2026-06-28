@@ -1709,29 +1709,29 @@ int32_t BusCenterServerProxy::RegisterConversationListener(const ConversationBus
     return serverRet;
 }
 
-void BusCenterServerProxy::UnregisterConversationListener(const ConversationBusiness *info)
+int32_t BusCenterServerProxy::UnregisterConversationListener(const ConversationBusiness *info)
 {
     if (info == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid info");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
-        return;
+        return SOFTBUS_NETWORK_REMOTE_NULL;
     }
     MessageParcel msg;
     if (!msg.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
-        return;
+        return SOFTBUS_IPC_ERR;
     }
     if (!msg.WriteCString(info->abilityName)) {
         LNN_LOGE(LNN_EVENT, "write abilityName failed");
-        return;
+        return SOFTBUS_IPC_ERR;
     }
     if (!msg.WriteCString(info->bundleName)) {
         LNN_LOGE(LNN_EVENT, "write bundleName failed");
-        return;
+        return SOFTBUS_IPC_ERR;
     }
 
     MessageParcel reply;
@@ -1739,11 +1739,13 @@ void BusCenterServerProxy::UnregisterConversationListener(const ConversationBusi
     int32_t ret = remote->SendRequest(SERVER_UNREGISTER_CONVERSATION_LISTENER, msg, reply, option);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
         LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
     }
+    return serverRet;
 }
 } // namespace OHOS

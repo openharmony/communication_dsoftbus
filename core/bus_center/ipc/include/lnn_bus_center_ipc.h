@@ -88,7 +88,7 @@ void OnConversationRecvMsg(const ConversationBusiness *info, const char *deviceI
 int32_t LnnIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
     const char *data, uint32_t len);
 int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int32_t pid);
-void LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid);
+int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid);
 int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
 
 #ifdef __cplusplus

@@ -115,7 +115,7 @@ int32_t RegisterConversationListener(const ConversationBusiness *info, const Con
  * @since 1.0
  * @version 1.0
  */
-void UnregisterConversationListener(const ConversationBusiness *info);
+int32_t UnregisterConversationListener(const ConversationBusiness *info);
 
 #ifdef __cplusplus
 }

@@ -2191,21 +2191,21 @@ int32_t RegisterConversationListenerInner(const ConversationBusiness *info, cons
     return ServerIpcRegisterConversationListener(info);
 }
  
-void UnregisterConversationListenerInner(const ConversationBusiness *info)
+int32_t UnregisterConversationListenerInner(const ConversationBusiness *info)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
  
     if (g_busCenterClient.g_conversationCbList == NULL) {
         LNN_LOGI(LNN_STATE, "g_conversationCbList is NULL");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
  
     if (SoftBusMutexLock(&(g_busCenterClient.g_conversationCbList->lock)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get lock failed");
-        return;
+        return SOFTBUS_LOCK_ERR;
     }
  
     ConversationCbListItem *item = NULL;
@@ -2228,10 +2228,11 @@ void UnregisterConversationListenerInner(const ConversationBusiness *info)
     (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
  
     if (found) {
-        ServerIpcUnregisterConversationListener(info);
+        return ServerIpcUnregisterConversationListener(info);
     } else {
         LNN_LOGE(LNN_STATE, "remove listener failed, abilityName=%{public}s, bundleName=%{public}s",
                  info->abilityName, info->bundleName);
+        return SOFTBUS_NOT_FIND;
     }
 }
  

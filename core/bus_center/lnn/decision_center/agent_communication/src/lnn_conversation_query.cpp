@@ -1506,19 +1506,19 @@ int32_t LnnRegisterConversationListener(const ConversationBusiness *info)
     return SOFTBUS_OK;
 }
 
-void LnnUnregisterConversationListener(const ConversationBusiness *info)
+int32_t LnnUnregisterConversationListener(const ConversationBusiness *info)
 {
     LNN_LOGI(LNN_EVENT, "enter");
     if (info == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid para");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     std::lock_guard<std::mutex> lock(g_conversationCbLock);
 
     if (g_conversationCbListVec.empty()) {
         LNN_LOGI(LNN_EVENT, "g_conversationCbListVec is empty");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     char *anonyBundlename = nullptr;
     char *anonyAbilityname = nullptr;
@@ -1538,12 +1538,15 @@ void LnnUnregisterConversationListener(const ConversationBusiness *info)
         }
     }
 
+    int32_t ret = SOFTBUS_OK;
     if (!found) {
         LNN_LOGE(LNN_EVENT, "remove listener failed, abilityName=%{public}s, bundleName=%{public}s",
             anonyAbilityname, anonyBundlename);
+        ret = SOFTBUS_NOT_FIND;
     }
     AnonymizeFree(anonyBundlename);
     AnonymizeFree(anonyAbilityname);
+    return ret;
 }
 
 static void HandleHmlLinkTimeout(const void *para)

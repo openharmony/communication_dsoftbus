@@ -20,6 +20,8 @@
 #include "securec.h"
 #include <dlfcn.h>
 
+#include "accesstoken_kit.h"
+#include "access_token.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "conn_log.h"
@@ -37,10 +39,26 @@ static std::mutex g_callbackMutex;
 #define ARGC_TWO 2
 #define ARGC_THREE 3
 
-bool IsSystemApp()
+static bool IsSystemApp(void)
 {
     uint64_t tokenId = ::OHOS::IPCSkeleton::GetSelfTokenID();
     return ::OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
+
+static bool CheckPermission(void)
+{
+    uint32_t tokenId = ::OHOS::IPCSkeleton::GetCallingTokenID();
+    if (::OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        tokenId, OHOS_PERMISSION_SEC_ACCESS_UDID) != ::OHOS::Security::AccessToken::PERMISSION_GRANTED) {
+        COMM_LOGE(COMM_SVC, "permission %{public}s denied.", OHOS_PERMISSION_SEC_ACCESS_UDID);
+        return false;
+    }
+    if (::OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(
+        tokenId, OHOS_PERMISSION_DISTRIBUTED_DATASYNC) != ::OHOS::Security::AccessToken::PERMISSION_GRANTED) {
+        COMM_LOGE(COMM_SVC, "permission %{public}s denied.", OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
+        return false;
+    }
+    return true;
 }
 
 static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *context, void *rawData)
@@ -134,6 +152,10 @@ static napi_value NapiGetTrustedDevicesSync(napi_env env, napi_value thisVar)
         ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
         return resultArray;
     }
+    if (!CheckPermission()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_ERR);
+        return resultArray;
+    }
 
     DeviceNodeInfo *list = nullptr;
     int32_t nums = 0;
@@ -192,7 +214,8 @@ static bool ParseSendMsgParams(napi_env env, size_t argc, napi_value *argv, Send
         return false;
     }
     if (!ParseString(env, ctx->deviceId, argv[0]) || !ParseString(env, ctx->bundleName, argv[ARGC_ONE]) ||
-        !ParseString(env, ctx->abilityName, argv[ARGC_TWO])) {
+        !ParseString(env, ctx->abilityName, argv[ARGC_TWO]) ||
+        ctx->bundleName.size() >= BUNDLE_NAME_LEN || ctx->abilityName.size() >= ABILITY_NAME_LEN) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return false;
     }
@@ -238,6 +261,10 @@ static napi_value NapiPostConversationDataAsync(napi_env env, napi_callback_info
 {
     if (!IsSystemApp()) {
         ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
+        return nullptr;
+    }
+    if (!CheckPermission()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_ERR);
         return nullptr;
     }
 
@@ -305,7 +332,8 @@ static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc
     std::string bundleName;
     std::string abilityName;
  
-    if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1])) {
+    if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1]) ||
+        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN) {
         COMM_LOGE(COMM_SDK, "Invalid business args");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return nullptr;
@@ -358,6 +386,10 @@ static napi_value NapiRegisterConversationListenerWarpper(napi_env env, napi_cal
         ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
         return nullptr;
     }
+    if (!CheckPermission()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_ERR);
+        return nullptr;
+    }
     size_t argc = REGISTER_ARGS_SIZE;
     napi_value argv[REGISTER_ARGS_SIZE];
     napi_value thisVar;
@@ -377,7 +409,8 @@ static napi_value NapiunRegisterConversationListenerSync(napi_env env, size_t ar
     std::string bundleName;
     std::string abilityName;
 
-    if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1])) {
+    if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1]) ||
+        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN) {
         COMM_LOGE(COMM_SDK, "Invalid business args");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return nullptr;
@@ -387,13 +420,17 @@ static napi_value NapiunRegisterConversationListenerSync(napi_env env, size_t ar
 
     FillConversationBusiness(business, bundleName, abilityName);
 
-    UnregisterConversationListener(&business);
+    int32_t result = ConvertToJsErrcode(UnregisterConversationListener(&business));
     {
         std::lock_guard<std::mutex> lock(g_callbackMutex);
         if (g_dataTsfn != nullptr) {
             napi_release_threadsafe_function(g_dataTsfn, napi_tsfn_release);
             g_dataTsfn = nullptr;
         }
+    }
+    if (result != CONVERSATION_OK) {
+        ThrowBusinessError(env, result);
+        return nullptr;
     }
 
     return nullptr;
@@ -403,6 +440,10 @@ static napi_value NapiUnregisterConversationListenerWarpper(napi_env env, napi_c
 {
     if (!IsSystemApp()) {
         ThrowBusinessError(env, CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
+        return nullptr;
+    }
+    if (!CheckPermission()) {
+        ThrowBusinessError(env, CONVERSATION_PERMISSION_ERR);
         return nullptr;
     }
     size_t argc = ARGS_SIZE_TWO;

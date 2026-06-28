@@ -122,7 +122,7 @@ int32_t DiscRecoverySubscribe(void);
 int32_t PostConversationDataInner(const char *networkId, const ConversationBusiness *info,
     const char *data, uint32_t len);
 int32_t RegisterConversationListenerInner(const ConversationBusiness *info, const ConversationListener *listener);
-void UnregisterConversationListenerInner(const ConversationBusiness *info);
+int32_t UnregisterConversationListenerInner(const ConversationBusiness *info);
 int32_t GetTrustedDevicesInner(DeviceNodeInfo **info, int32_t *nums);
 int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *udid, const char *data, uint32_t length);
 

@@ -158,7 +158,8 @@ HWTEST_F(BusCenterClientAgentTest, ConversationRegisterListener_Test002, TestSiz
  
 HWTEST_F(BusCenterClientAgentTest, ConversationRemoveListener_Test001, TestSize.Level1)
 {
-    EXPECT_NO_FATAL_FAILURE(UnregisterConversationListener(nullptr));
+    int32_t ret = UnregisterConversationListener(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
  
 HWTEST_F(BusCenterClientAgentTest, FreeDeviceNodeInfo_Test001, TestSize.Level1)

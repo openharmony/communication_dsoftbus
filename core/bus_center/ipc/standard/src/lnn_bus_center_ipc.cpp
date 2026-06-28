@@ -1289,10 +1289,10 @@ int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int
     return ret;
 }
 
-void LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid)
+int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid)
 {
     RemoveAgentCommunicationInfo(info);
-    LnnUnregisterConversationListener(info);
+    return LnnUnregisterConversationListener(info);
 }
 
 int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)

@@ -26,7 +26,7 @@ extern "C" {
 
 int32_t LnnGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
 int32_t LnnRegisterConversationListener(const ConversationBusiness *info);
-void LnnUnregisterConversationListener(const ConversationBusiness *info);
+int32_t LnnUnregisterConversationListener(const ConversationBusiness *info);
 void OnRecvCloudQueryInfo(const char *udid, const char *data, uint32_t length);
 int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness *info,
     const char *data, uint32_t len);

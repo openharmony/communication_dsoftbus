@@ -608,11 +608,12 @@ int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int
     LNN_LOGI(LNN_EVENT, "not implement");
     return SOFTBUS_OK;
 }
-void LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid)
+int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid)
 {
     (void)info;
     (void)pid;
     LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
 }
 
 int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)

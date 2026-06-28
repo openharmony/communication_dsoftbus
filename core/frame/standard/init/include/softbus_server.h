@@ -105,7 +105,7 @@ public:
     int32_t PostConversationData(const char *deviceId, const ConversationBusiness *info,
         const char *data, uint32_t len) override;
     int32_t RegisterConversationListener(const ConversationBusiness *info) override;
-    void UnregisterConversationListener(const ConversationBusiness *info) override;
+    int32_t UnregisterConversationListener(const ConversationBusiness *info) override;
     int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums) override;
 protected:
     void OnStart() override;

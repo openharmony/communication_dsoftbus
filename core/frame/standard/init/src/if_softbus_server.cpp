@@ -308,8 +308,9 @@ int32_t ISoftBusServer::RegisterConversationListener(const ConversationBusiness 
     return SOFTBUS_IPC_ERR;
 }
 
-void ISoftBusServer::UnregisterConversationListener(const ConversationBusiness *info)
+int32_t ISoftBusServer::UnregisterConversationListener(const ConversationBusiness *info)
 {
     (void)info;
+    return SOFTBUS_IPC_ERR;
 }
 } // namespace OHOS
