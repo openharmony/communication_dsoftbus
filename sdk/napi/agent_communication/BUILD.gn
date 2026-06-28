@@ -13,7 +13,7 @@
  
 import("../../../dsoftbus.gni")
  
-ohos_shared_library("agentcommunication") {
+ohos_shared_library("conversation") {
  
   sources = []
   deps = []
@@ -63,7 +63,7 @@ ohos_shared_library("agentcommunication") {
     debug = false
   }
  
-  relative_install_dir = "module/distributedsched"
+  relative_install_dir = "module/distributedSoftbus"
  
   subsystem_name = "communication"
   part_name = "dsoftbus"

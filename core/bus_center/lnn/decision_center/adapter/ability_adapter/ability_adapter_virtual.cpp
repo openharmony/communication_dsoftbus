@@ -15,14 +15,9 @@
 
 #include "ability_adapter.h"
 
-#include "softbus_error_code.h"
-
-constexpr int32_t ERR_OK = 0;
-#define GET_EXTENSION_UPPER_LIMIT 100
-
 int32_t StartAbility(const char *bundleName, const char *abilityName)
 {
-    return SOFTBUS_FUNC_NOT_SUPPORT;
+    return 0;
 }
 
 bool IsRunningProcess(const char *bundleName, int32_t userId)

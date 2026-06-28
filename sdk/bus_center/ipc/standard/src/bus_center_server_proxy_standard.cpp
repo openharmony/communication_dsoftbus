@@ -1612,7 +1612,7 @@ int32_t BusCenterServerProxy::GetTrustedDevice(DeviceNodeInfo **info, int32_t *n
     int32_t ret = remote->SendRequest(SERVER_GET_TRUSTED_DEVICES, data, reply, option);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return SOFTBUS_IPC_ERR;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -1699,7 +1699,7 @@ int32_t BusCenterServerProxy::RegisterConversationListener(const ConversationBus
     int32_t ret = remote->SendRequest(SERVER_REGISTER_CONVERSATION_LISTENER, msg, reply, option);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
-        return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
