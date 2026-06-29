@@ -31,6 +31,7 @@ extern "C" {
 #define IS_DISCONNECTED             false
 #define DEFAULT_APPINDEX            (-1)
 #define BR_PROXY_STOP_APP_DELAY_MS   10000
+#define PUSH_MAX_RETRY_TIME         1
 
 int32_t TransOpenBrProxy(const char *brMac, const char *uuid);
 int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall);
