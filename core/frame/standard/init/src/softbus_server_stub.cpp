@@ -1361,10 +1361,6 @@ int32_t SoftBusServerStub::SetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "read clientName or networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (strcmp(DM_PACKAGE_NAME, clientName) != 0) {
-        COMM_LOGE(COMM_SVC, "read clientName invalid!");
-        return SOFTBUS_IPC_ERR;
-    }
     char *anonyNetworkId = nullptr;
     Anonymize(networkId, &anonyNetworkId);
     COMM_LOGD(COMM_SVC, "networkId=%{public}s", anonyNetworkId);
