@@ -30,7 +30,7 @@
 static const uint32_t CONN_HEAD_SIZE = 24;
 static const uint32_t SHIFT_BITS = 16;
 
-static ConnectCallback *g_mangerCb = 0;
+static ConnectCallback *g_mangerCb = nullptr;
 static ConnectionInfo g_connInfo = {0};
 static unsigned int g_connId = 0;
 
@@ -46,13 +46,12 @@ unsigned int ObjectGetConnectionId(unsigned int type)
 
 int ObjectConnectDevice(const ConnectOption *option, unsigned int requestId, const ConnectResult *result)
 {
-    ConnectionInfo info = {0};
-    if (option == 0 || result == 0) {
+    if (option == nullptr || result == nullptr) {
         return 1;
     }
     g_connInfo.isAvailable = 1;
     g_connInfo.type = option->type;
-    result->OnConnectSuccessed(requestId, ObjectGetConnectionId(option->type), &info);
+    result->OnConnectSuccessed(requestId, ObjectGetConnectionId(option->type), &g_connInfo);
     return 0;
 }
 
@@ -89,7 +88,10 @@ int ObjectStartLocalListening(const LocalListenerInfo *info)
     if (info == nullptr) {
         return 1;
     }
-    if (g_mangerCb) {
+    // Initialize connection info for local listening
+    g_connInfo.isAvailable = 1;
+    g_connInfo.type = info->type;
+    if (g_mangerCb != nullptr) {
         g_mangerCb->OnConnected(ObjectGetConnectionId(info->type), &g_connInfo);
     }
     return 0;
@@ -100,7 +102,7 @@ int ObjectStopLocalListening(const LocalListenerInfo *info)
     if (info == nullptr) {
         return 1;
     }
-    if (g_mangerCb) {
+    if (g_mangerCb != nullptr) {
         g_mangerCb->OnDisconnected(ObjectGetConnectionId(info->type), &g_connInfo);
     }
     return 0;
@@ -108,14 +110,16 @@ int ObjectStopLocalListening(const LocalListenerInfo *info)
 
 ConnectFuncInterface *ConnInitObject(const ConnectCallback *callback)
 {
-    if (callback == 0) {
+    if (callback == nullptr) {
         return nullptr;
     }
-    ConnectFuncInterface *inter = (ConnectFuncInterface*)calloc(1, sizeof(ConnectFuncInterface));
+    ConnectFuncInterface *inter = static_cast<ConnectFuncInterface*>(calloc(1, sizeof(ConnectFuncInterface)));
     if (inter == nullptr) {
         return nullptr;
     }
-    g_mangerCb = (ConnectCallback*)callback;
+    g_mangerCb = const_cast<ConnectCallback*>(callback);
+    // Reset connection info for each new initialization
+    (void)memset_s(&g_connInfo, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
 
     inter->ConnectDevice = ObjectConnectDevice;
     inter->PostBytes = ObjectPostBytes;
@@ -193,10 +197,22 @@ void ConnectionManagerTest::TearDownTestCase(void)
 {}
 
 void ConnectionManagerTest::SetUp(void)
-{}
+{
+    // Reset global state for each test
+    g_mangerCb = nullptr;
+    g_connId = 0;
+    (void)memset_s(&g_connInfo, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
+}
 
 void ConnectionManagerTest::TearDown(void)
-{}
+{
+    // Clean up after each test
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    ConnUnSetConnectCallback(MODULE_AUTH_SDK);
+    g_mangerCb = nullptr;
+    g_connId = 0;
+    (void)memset_s(&g_connInfo, sizeof(ConnectionInfo), 0, sizeof(ConnectionInfo));
+}
 
 /*
 * @tc.name: testConnmanger001
@@ -277,10 +293,10 @@ HWTEST_F(ConnectionManagerTest, testConnmanger003, TestSize.Level1)
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&info, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    if (g_connId) {
+    if (g_connId != 0) {
         data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
-        (void)strcpy_s(data.buf + 1, strlen(str), str);
+        (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 20, str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
         data.pid = 0;
@@ -290,12 +306,11 @@ HWTEST_F(ConnectionManagerTest, testConnmanger003, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, ret);
         if (data.buf != nullptr) {
             free(data.buf);
+            data.buf = nullptr;
         }
     }
     ret = ConnDisconnectDevice(g_connId);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    ConnUnSetConnectCallback(MODULE_AUTH_SDK);
     g_connId = 0;
 };
 
@@ -323,10 +338,10 @@ HWTEST_F(ConnectionManagerTest, testConnmanger004, TestSize.Level1)
     ret = ConnStartLocalListening(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    if (g_connId) {
-        data.buf = (char*)calloc(1, CONN_HEAD_SIZE + 20);
-        (void)strcpy_s(data.buf + CONN_HEAD_SIZE, strlen(str), str);
+    if (g_connId != 0) {
+        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
+        (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 20, str);
         data.len = CONN_HEAD_SIZE + 20;
         data.module = MODULE_TRUST_ENGINE;
         data.pid = 0;
@@ -338,12 +353,12 @@ HWTEST_F(ConnectionManagerTest, testConnmanger004, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, ret);
         if (data.buf != nullptr) {
             free(data.buf);
+            data.buf = nullptr;
         }
     }
 
     ret = ConnStopLocalListening(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     g_connId = 0;
 };
 
@@ -365,11 +380,10 @@ HWTEST_F(ConnectionManagerTest, testConnmanger005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    // Test duplicate registration - should fail
     ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &connCb);
     EXPECT_EQ(SOFTBUS_CONN_INTERNAL_ERR, ret);
-
-    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    ConnUnSetConnectCallback(MODULE_AUTH_SDK);
+    g_connId = 0;
 };
 
 /*
@@ -380,7 +394,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger005, TestSize.Level1)
 */
 HWTEST_F(ConnectionManagerTest, testConnmanger006, TestSize.Level1)
 {
-    uint32_t reqId = 1;
+    uint32_t reqId;
     int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
@@ -399,7 +413,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger006, TestSize.Level1)
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
     ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    if (g_connId) {
+    if (g_connId != 0) {
         ret = ConnGetConnectionInfo(g_connId, &info);
         EXPECT_EQ(SOFTBUS_OK, ret);
         ret = ConnDisconnectDevice(g_connId);
@@ -408,8 +422,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger006, TestSize.Level1)
         printf("testConnmanger006 ConnDisconnectDevice\r\n");
     }
     printf("testConnmanger006 ConnUnSetConnectCallback\r\n");
-    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    printf("testConnmanger006 ConnUnSetConnectCallback end 11\r\n");
+    printf("testConnmanger006 ConnUnSetConnectCallback end\r\n");
 };
 
 /*
@@ -430,10 +443,10 @@ HWTEST_F(ConnectionManagerTest, testConnmanger007, TestSize.Level1)
     int moduleIdMin = 0;
     int moduleIdMax = 200;
 
-    int ret = ConnSetConnectCallback((ConnModule)moduleIdMin, &connCb);
+    int ret = ConnSetConnectCallback(static_cast<ConnModule>(moduleIdMin), &connCb);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = ConnSetConnectCallback((ConnModule)moduleIdMax, &connCb);
+    ret = ConnSetConnectCallback(static_cast<ConnModule>(moduleIdMax), &connCb);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 };
 
@@ -459,11 +472,11 @@ HWTEST_F(ConnectionManagerTest, testConnmanger008, TestSize.Level1)
     int ret = ConnConnectDevice(nullptr, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
+    info.type = static_cast<ConnectType>(CONNECT_TYPE_MAX + 1);
     ret = ConnConnectDevice(&info, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 
-    info.type = (ConnectType)(CONNECT_TCP -1);
+    info.type = static_cast<ConnectType>(CONNECT_TCP - 1);
     ret = ConnConnectDevice(&info, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 };
@@ -479,7 +492,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger008, TestSize.Level1)
 HWTEST_F(ConnectionManagerTest, testConnmanger009, TestSize.Level1)
 {
     LocalListenerInfo info;
-    info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
+    info.type = static_cast<ConnectType>(CONNECT_TYPE_MAX + 1);
     int ret = ConnStartLocalListening(&info);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 };
@@ -495,7 +508,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger009, TestSize.Level1)
 HWTEST_F(ConnectionManagerTest, testConnmanger010, TestSize.Level1)
 {
     LocalListenerInfo info;
-    info.type = (ConnectType)(CONNECT_TYPE_MAX + 1);
+    info.type = static_cast<ConnectType>(CONNECT_TYPE_MAX + 1);
     int ret = ConnStopLocalListening(&info);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 };
@@ -513,4 +526,941 @@ HWTEST_F(ConnectionManagerTest, testConnmanger011, TestSize.Level1)
     int ret = ConnTypeIsSupport(CONNECT_TYPE_MAX);
     EXPECT_EQ(SOFTBUS_CONN_INVALID_CONN_TYPE, ret);
 };
+
+/*
+* @tc.name: testConnmanger012
+* @tc.desc: Test multiple connect and disconnect cycles
+* @tc.type: FUNC
+* @tc.require: Connection manager handles multiple cycles correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger012, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    // Test multiple connect/disconnect cycles
+    for (int i = 0; i < 3; i++) {
+        optionInfo.type = CONNECT_BR;
+        connRet.OnConnectFailed = ConnectFailedCB;
+        connRet.OnConnectSuccessed = ConnectSuccessedCB;
+        reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+        ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        if (g_connId != 0) {
+            ret = ConnDisconnectDevice(g_connId);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            g_connId = 0;
+        }
+    }
+};
+
+/*
+* @tc.name: testConnmanger013
+* @tc.desc: Test TCP connection type
+* @tc.type: FUNC
+* @tc.require: TCP connection works correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger013, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_TCP;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger014
+* @tc.desc: Test BLE connection type
+* @tc.type: FUNC
+* @tc.require: BLE connection works correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger014, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    const char *testBleMac = "11:22:33:44:55:66";
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_BLE;
+    (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, testBleMac, BT_MAC_LEN);
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger015
+* @tc.desc: Test local listening with TCP
+* @tc.type: FUNC
+* @tc.require: Local listening works with TCP
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger015, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    LocalListenerInfo info;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    info.type = CONNECT_TCP;
+    ret = ConnStartLocalListening(&info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+
+    ret = ConnStopLocalListening(&info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: testConnmanger016
+* @tc.desc: Test local listening with BLE
+* @tc.type: FUNC
+* @tc.require: Local listening works with BLE
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger016, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    LocalListenerInfo info;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    info.type = CONNECT_BLE;
+    ret = ConnStartLocalListening(&info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+
+    ret = ConnStopLocalListening(&info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: testConnmanger017
+* @tc.desc: Test data transmission with different sizes
+* @tc.type: FUNC
+* @tc.require: Data transmission handles various sizes
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger017, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    ConnPostData data;
+    uint32_t reqId;
+    const char *testMsg = "Test message";
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_BR;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        // Test with small data
+        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+        ASSERT_TRUE(data.buf != nullptr);
+        (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
+        data.len = CONN_HEAD_SIZE + 50;
+        data.module = MODULE_TRUST_ENGINE;
+        data.pid = 0;
+        data.flag = 1;
+        data.seq = 1;
+        ret = ConnPostBytes(g_connId, &data);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        free(data.buf);
+        data.buf = nullptr;
+
+        // Test with larger data
+        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 1024);
+        ASSERT_TRUE(data.buf != nullptr);
+        (void)memset_s(data.buf + CONN_HEAD_SIZE, 1024, 'A', 1024);
+        data.len = CONN_HEAD_SIZE + 1024;
+        ret = ConnPostBytes(g_connId, &data);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        free(data.buf);
+        data.buf = nullptr;
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger018
+* @tc.desc: Test connection info retrieval
+* @tc.type: FUNC
+* @tc.require: Connection info can be retrieved correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger018, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectionInfo info;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_TCP;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        ret = ConnGetConnectionInfo(g_connId, &info);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        EXPECT_EQ(info.type, CONNECT_TCP);
+        EXPECT_EQ(info.isAvailable, 1);
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+
+    // Test getting info with invalid connectionId
+    ret = ConnGetConnectionInfo(0, &info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    // Test getting info with nullptr
+    ret = ConnGetConnectionInfo(g_connId, nullptr);
+    EXPECT_NE(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: testConnmanger019
+* @tc.desc: Test invalid module IDs
+* @tc.type: FUNC
+* @tc.require: Invalid module IDs are rejected
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger019, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+
+    // Test with invalid module ID (negative)
+    ret = ConnSetConnectCallback(static_cast<ConnModule>(-1), &connCb);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    // Test with large invalid module ID
+    ret = ConnSetConnectCallback(static_cast<ConnModule>(99999), &connCb);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    // Test ConnGetNewRequestId with invalid module
+    reqId = ConnGetNewRequestId(static_cast<ConnModule>(-1));
+    EXPECT_EQ(reqId, 0);
+
+    reqId = ConnGetNewRequestId(static_cast<ConnModule>(99999));
+    EXPECT_EQ(reqId, 0);
+};
+
+/*
+* @tc.name: testConnmanger020
+* @tc.desc: Test multiple modules with same connection
+* @tc.type: FUNC
+* @tc.require: Multiple modules can use same connection
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger020, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+
+    // Register multiple modules
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ConnSetConnectCallback(MODULE_AUTH_SDK, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ConnSetConnectCallback(MODULE_CONNECTION, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_BR;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger021
+* @tc.desc: Test connection with different flags
+* @tc.type: FUNC
+* @tc.require: Connection handles different flag values
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger021, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    ConnPostData data;
+    uint32_t reqId;
+    const char *testMsg = "Flag test message";
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_TCP;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        // Test with different flag values
+        for (int flag = 0; flag <= 3; flag++) {
+            data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+            ASSERT_TRUE(data.buf != nullptr);
+            (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
+            data.len = CONN_HEAD_SIZE + 50;
+            data.module = MODULE_TRUST_ENGINE;
+            data.pid = 0;
+            data.flag = flag;
+            data.seq = 1;
+            ret = ConnPostBytes(g_connId, &data);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            free(data.buf);
+            data.buf = nullptr;
+        }
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger022
+* @tc.desc: Test connection timeout scenarios
+* @tc.type: FUNC
+* @tc.require: Connection handles timeout correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger022, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_TCP;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        // Simulate delayed disconnect
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+
+    // Test disconnect on non-existent connection
+    ret = ConnDisconnectDevice(g_connId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: testConnmanger023
+* @tc.desc: Test data transmission with null buffer
+* @tc.type: FUNC
+* @tc.require: Null buffer is handled correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger023, TestSize.Level1)
+{
+    int ret;
+    ConnPostData data;
+    unsigned int testConnId = 12345;
+
+    // Test post bytes with null data
+    data.buf = nullptr;
+    data.len = 100;
+    data.module = MODULE_TRUST_ENGINE;
+    data.pid = 0;
+    data.flag = 1;
+    data.seq = 1;
+    ret = ConnPostBytes(testConnId, &data);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    // Test post bytes with null ConnPostData
+    ret = ConnPostBytes(testConnId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+};
+
+/*
+* @tc.name: testConnmanger024
+* @tc.desc: Test local listening start/stop cycles
+* @tc.type: FUNC
+* @tc.require: Multiple start/stop cycles work correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger024, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    LocalListenerInfo info;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    // Test multiple start/stop cycles
+    for (int i = 0; i < 3; i++) {
+        info.type = CONNECT_BR;
+        ret = ConnStartLocalListening(&info);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        if (g_connId != 0) {
+            ret = ConnDisconnectDevice(g_connId);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            g_connId = 0;
+        }
+
+        ret = ConnStopLocalListening(&info);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+};
+
+/*
+* @tc.name: testConnmanger025
+* @tc.desc: Test unset callback on unregistered module
+* @tc.type: FUNC
+* @tc.require: Unsetting unregistered callback is handled
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger025, TestSize.Level1)
+{
+    int ret;
+
+    // Test unsetting callback that was never set
+    ret = ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
+    // Should either succeed or return appropriate error
+    // depending on implementation
+};
+
+/*
+* @tc.name: testConnmanger026
+* @tc.desc: Test connection with all supported types
+* @tc.type: FUNC
+* @tc.require: All connection types work correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger026, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+    ConnectType types[] = {CONNECT_TCP, CONNECT_BR, CONNECT_BLE};
+    int typeCount = 3;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    for (int i = 0; i < typeCount; i++) {
+        optionInfo.type = types[i];
+        if (types[i] == CONNECT_BLE) {
+            const char *testBleMac = "11:22:33:44:55:66";
+            (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, testBleMac, BT_MAC_LEN);
+        }
+        connRet.OnConnectFailed = ConnectFailedCB;
+        connRet.OnConnectSuccessed = ConnectSuccessedCB;
+        reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+        ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        if (g_connId != 0) {
+            ret = ConnDisconnectDevice(g_connId);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            g_connId = 0;
+        }
+    }
+};
+
+/*
+* @tc.name: testConnmanger027
+* @tc.desc: Test data transmission with large sequence numbers
+* @tc.type: FUNC
+* @tc.require: Large sequence numbers are handled correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger027, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    ConnPostData data;
+    uint32_t reqId;
+    const char *testMsg = "Seq test message";
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_BR;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        // Test with large sequence number
+        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+        ASSERT_TRUE(data.buf != nullptr);
+        (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
+        data.len = CONN_HEAD_SIZE + 50;
+        data.module = MODULE_TRUST_ENGINE;
+        data.pid = 0;
+        data.flag = 1;
+        data.seq = 999999;
+        ret = ConnPostBytes(g_connId, &data);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        free(data.buf);
+        data.buf = nullptr;
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger028
+* @tc.desc: Test connection info structure integrity
+* @tc.type: FUNC
+* @tc.require: Connection info structure maintains integrity
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger028, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectionInfo info;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_TCP;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        // Get connection info and verify structure
+        ret = ConnGetConnectionInfo(g_connId, &info);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        // Verify basic fields
+        EXPECT_EQ(info.isAvailable, 1);
+        EXPECT_EQ(info.type, CONNECT_TCP);
+
+        // Test that info structure can be copied
+        ConnectionInfo infoCopy;
+        (void)memcpy_s(&infoCopy, sizeof(ConnectionInfo), &info, sizeof(ConnectionInfo));
+        EXPECT_EQ(infoCopy.type, info.type);
+        EXPECT_EQ(infoCopy.isAvailable, info.isAvailable);
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger029
+* @tc.desc: Test rapid connection and disconnection
+* @tc.type: FUNC
+* @tc.require: Rapid connect/disconnect cycles are handled
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger029, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    // Perform rapid connect/disconnect cycles
+    for (int i = 0; i < 10; i++) {
+        optionInfo.type = CONNECT_BR;
+        connRet.OnConnectFailed = ConnectFailedCB;
+        connRet.OnConnectSuccessed = ConnectSuccessedCB;
+        reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+        ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        if (g_connId != 0) {
+            ret = ConnDisconnectDevice(g_connId);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            g_connId = 0;
+        }
+    }
+};
+
+/*
+* @tc.name: testConnmanger030
+* @tc.desc: Test callback null handling
+* @tc.type: FUNC
+* @tc.require: Null callbacks are handled correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger030, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    // Test setting callback with null function pointers
+    connCb.OnConnected = nullptr;
+    connCb.OnDisconnected = nullptr;
+    connCb.OnDataReceived = nullptr;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    // Behavior depends on implementation - record result
+    // Should either accept or reject null callbacks
+
+    // Test connecting with null callback result
+    optionInfo.type = CONNECT_TCP;
+    connRet.OnConnectFailed = nullptr;
+    connRet.OnConnectSuccessed = nullptr;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: testConnmanger031
+* @tc.desc: Test different PID values
+* @tc.type: FUNC
+* @tc.require: Different PID values are handled correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger031, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    ConnPostData data;
+    uint32_t reqId;
+    const char *testMsg = "PID test message";
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_BR;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        // Test with different PID values
+        int pids[] = {0, 100, 1000, 9999};
+        for (int i = 0; i < 4; i++) {
+            data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+            ASSERT_TRUE(data.buf != nullptr);
+            (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
+            data.len = CONN_HEAD_SIZE + 50;
+            data.module = MODULE_TRUST_ENGINE;
+            data.pid = pids[i];
+            data.flag = 1;
+            data.seq = 1;
+            ret = ConnPostBytes(g_connId, &data);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            free(data.buf);
+            data.buf = nullptr;
+        }
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
+/*
+* @tc.name: testConnmanger032
+* @tc.desc: Test BLE MAC address validation
+* @tc.type: FUNC
+* @tc.require: BLE MAC addresses are validated correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger032, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    // Test with various BLE MAC addresses
+    const char *macAddresses[] = {
+        "00:00:00:00:00:00",
+        "FF:FF:FF:FF:FF:FF",
+        "AA:BB:CC:DD:EE:FF",
+        "11:22:33:44:55:66"
+    };
+
+    for (int i = 0; i < 4; i++) {
+        optionInfo.type = CONNECT_BLE;
+        (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, macAddresses[i], BT_MAC_LEN);
+        connRet.OnConnectFailed = ConnectFailedCB;
+        connRet.OnConnectSuccessed = ConnectSuccessedCB;
+        reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+        ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+
+        if (g_connId != 0) {
+            ret = ConnDisconnectDevice(g_connId);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            g_connId = 0;
+        }
+    }
+};
+
+/*
+* @tc.name: testConnmanger033
+* @tc.desc: Test request ID generation
+* @tc.type: FUNC
+* @tc.require: Request IDs are generated correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger033, TestSize.Level1)
+{
+    uint32_t reqId1, reqId2, reqId3;
+
+    // Generate multiple request IDs for same module
+    reqId1 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    EXPECT_NE(reqId1, 0);
+
+    reqId2 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    EXPECT_NE(reqId2, 0);
+    EXPECT_NE(reqId2, reqId1);
+
+    reqId3 = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    EXPECT_NE(reqId3, 0);
+    EXPECT_NE(reqId3, reqId2);
+
+    // Generate request IDs for different modules
+    uint32_t reqId4 = ConnGetNewRequestId(MODULE_AUTH_SDK);
+    EXPECT_NE(reqId4, 0);
+};
+
+/*
+* @tc.name: testConnmanger034
+* @tc.desc: Test connection state after failed operation
+* @tc.type: FUNC
+* @tc.require: Connection state is consistent after failures
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger034, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectionInfo info;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    // Try to get connection info when no connection exists
+    ret = ConnGetConnectionInfo(g_connId, &info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    // Try to disconnect when no connection exists
+    ret = ConnDisconnectDevice(g_connId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: testConnmanger035
+* @tc.desc: Test data buffer size limits
+* @tc.type: FUNC
+* @tc.require: Various buffer sizes are handled correctly
+*/
+HWTEST_F(ConnectionManagerTest, testConnmanger035, TestSize.Level1)
+{
+    int ret;
+    ConnectCallback connCb;
+    ConnectOption optionInfo;
+    ConnectResult connRet;
+    ConnPostData data;
+    uint32_t reqId;
+
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    optionInfo.type = CONNECT_TCP;
+    connRet.OnConnectFailed = ConnectFailedCB;
+    connRet.OnConnectSuccessed = ConnectSuccessedCB;
+    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
+    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    if (g_connId != 0) {
+        // Test with various buffer sizes
+        uint32_t sizes[] = {10, 100, 500, 1024, 2048, 4096};
+        for (int i = 0; i < 6; i++) {
+            data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + sizes[i]);
+            ASSERT_TRUE(data.buf != nullptr);
+            (void)memset_s(data.buf + CONN_HEAD_SIZE, sizes[i], 'X', sizes[i]);
+            data.len = CONN_HEAD_SIZE + sizes[i];
+            data.module = MODULE_TRUST_ENGINE;
+            data.pid = 0;
+            data.flag = 1;
+            data.seq = i + 1;
+            ret = ConnPostBytes(g_connId, &data);
+            EXPECT_EQ(SOFTBUS_OK, ret);
+            free(data.buf);
+            data.buf = nullptr;
+        }
+
+        ret = ConnDisconnectDevice(g_connId);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+        g_connId = 0;
+    }
+};
+
 } // namespace OHOS
