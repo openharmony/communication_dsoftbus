@@ -212,6 +212,8 @@ typedef struct TagLnnOpenFuncList {
     LnnGetLocalStrInfoByIfnameIdxFunc lnnGetLocalStrInfoByIfnameIdx;
     LnnNotifyAddressChangedEventFunc lnnNotifyAddressChangedEvent;
     LnnIsNeedInterceptBroadcastFunc lnnIsNeedInterceptBroadcast;
+    FragmentRecvProcessFunc fragmentRecvProcess;
+    OnRecvCloudQueryInfoFunc onRecvCloudQueryInfo;
 
     // common
     SoftBusFrequencyToChannelFunc softBusFrequencyToChannel;

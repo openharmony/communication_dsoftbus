@@ -49,8 +49,8 @@ typedef struct {
     uint32_t cancelEncryptionBit;
     int32_t pid;
     bool isLowLatency;
-    bool enableMultipath;
-    bool isMultiNeg;
+    bool enableMultipath;   /**> Indicates whether the session is configured to allow multipath. */
+    bool isMultiNeg;        /**> Indicates whether the session currently establish the second link. */
 } SessionParam;
 
 typedef struct {

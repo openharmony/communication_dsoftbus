@@ -1028,4 +1028,19 @@ HWTEST_F(TransLaneCommonTest, TransCheckMetaTypeQueryPermission005, TestSize.Lev
     bool retsult = TransCheckMetaTypeQueryPermission(pkgName, metaType);
     EXPECT_FALSE(retsult);
 }
+
+/*
+ * @tc.name: SetUdpChannelCapabilityTest001
+ * @tc.desc: test SetUdpChannelCapability
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, SetUdpChannelCapabilityTest001, TestSize.Level1)
+{
+    uint32_t value = 0;
+    SetUdpChannelCapability(true, &value, 1);
+    EXPECT_EQ(value, 2);
+    SetUdpChannelCapability(false, &value, 1);
+    EXPECT_EQ(value, 0);
+}
 } // namespace OHOS

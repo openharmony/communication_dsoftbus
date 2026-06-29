@@ -45,7 +45,7 @@ typedef int32_t (*ConnCocInitServerModuleFunc)(SoftBusLooper *looper, const Conn
 typedef int32_t (*ConnBleDirectConnectDeviceFunc)(
     const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
 typedef bool (*ConnBleDirectIsEnableFunc)(BleProtocolType protocol);
-typedef int32_t (*ConnBleDirectInitFunc)(void);
+typedef int32_t (*ConnExtInitFunc)(void);
 
 typedef void (*ConnCoapStopServerListenFunc)(void);
 typedef int32_t (*ConnCoapStartServerListenFunc)(void);
@@ -76,7 +76,7 @@ typedef struct TagConnEnhanceFuncList {
     // ble_direct
     ConnBleDirectConnectDeviceFunc connBleDirectConnectDevice;
     ConnBleDirectIsEnableFunc connBleDirectIsEnable;
-    ConnBleDirectInitFunc connBleDirectInit;
+    ConnExtInitFunc connExtInit;
     ConnDirectConnectDeviceFunc connDirectConnectDevice;
 
     // coap

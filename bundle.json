@@ -255,6 +255,7 @@
               "lnn/enhance/lnn_ble_lpdevice_struct.h",
               "lnn/enhance/lnn_cipherkey_manager_struct.h",
               "lnn/enhance/lnn_decision_center_struct.h",
+              "lnn/enhance/lnn_device_cloud_convergence_struct.h",
               "lnn/enhance/lnn_device_info_recovery_struct.h",
               "lnn/lnn_heartbeat_medium_mgr_struct.h",
               "lnn/lnn_heartbeat_utils_struct.h",

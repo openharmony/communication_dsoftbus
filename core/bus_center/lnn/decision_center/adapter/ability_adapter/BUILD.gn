@@ -1,0 +1,64 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("../../../../../../dsoftbus.gni")
+
+ability_adapter_path = rebase_path(".")
+
+ability_adapter_inc = [
+  "$ability_adapter_path",
+]
+
+ohos_shared_library("ability_adapter") {
+  include_dirs = ability_adapter_inc
+  if (is_standard_system && (!defined(global_parts_info) ||
+    defined(global_parts_info.resourceschedule_device_standby))) {
+      deps = [
+        "$dsoftbus_dfx_path:softbus_dfx",
+        "$dsoftbus_root_path/core/common:softbus_utils",
+      ]
+      external_deps = [
+        "c_utils:utils",
+        "ability_base:configuration",
+        "ability_runtime:ability_manager",
+        "ability_runtime:app_manager",
+        "ability_runtime:extension_manager",
+        "samgr:samgr_proxy",
+        "hicollie:libhicollie",
+        "hilog:libhilog",
+        "ipc:ipc_single",
+      ]
+      sources = [ "$ability_adapter_path/ability_adapter.cpp" ]
+    } else {
+      sources = [ "$ability_adapter_path/ability_adapter_virtual.cpp" ]
+    }
+
+  cflags = [
+    "-fPIC",
+    "-std=c99",
+  ]
+  cflags_cc = cflags
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  install_enable = true
+  relative_install_dir = ""
+
+  part_name = "dsoftbus"
+  subsystem_name = "communication"
+}

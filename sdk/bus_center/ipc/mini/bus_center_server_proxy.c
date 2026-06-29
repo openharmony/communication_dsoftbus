@@ -25,13 +25,13 @@
 
 int32_t BusCenterServerProxyInit(void)
 {
-    LNN_LOGE(LNN_EVENT, "bus center get server proxy ok");
+    LNN_LOGI(LNN_EVENT, "bus center get server proxy ok");
     return SOFTBUS_OK;
 }
 
 void BusCenterServerProxyDeInit(void)
 {
-    LNN_LOGE(LNN_EVENT, "bus center delete server proxy ok");
+    LNN_LOGI(LNN_EVENT, "bus center delete server proxy ok");
 }
 
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
@@ -211,5 +211,34 @@ int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, cons
     (void)requestId;
     (void)data;
     (void)dataLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len)
+{
+    (void)deviceId;
+    (void)info;
+    (void)data;
+    (void)len;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcUnregisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+{
+    (void)info;
+    (void)nums;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

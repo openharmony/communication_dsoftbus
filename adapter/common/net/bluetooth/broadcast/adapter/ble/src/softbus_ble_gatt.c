@@ -887,12 +887,12 @@ static int32_t SoftbusSetScanParams(int32_t scannerId, const SoftBusBcScanParams
             return SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL;
         }
         SoftbusFilterToBt(nativeFilter, scanFilter, filterSize);
-        DISC_LOGI(DISC_BLE_ADAPTER, "change scan params and filter scannerId is %{public}d",
+        DISC_LOGI(DISC_BLE_ADAPTER, "change scan params and filter, scannerId=%{public}d",
             scannerId);
         ret = BleChangeScanParams(g_scanChannel[scannerId].scannerId, &scanConfig, nativeFilter, filterSize, cmdId);
         FreeBtFilter(nativeFilter, filterSize);
     } else {
-        DISC_LOGI(DISC_BLE_ADAPTER, "change scan params scannerId is %{public}d", scannerId);
+        DISC_LOGI(DISC_BLE_ADAPTER, "change scan params, scannerId=%{public}d", scannerId);
         ret = BleChangeScanParams(g_scanChannel[scannerId].scannerId, &scanConfig, NULL, 0, cmdId);
     }
     if (ret == OHOS_BT_STATUS_SUCCESS) {

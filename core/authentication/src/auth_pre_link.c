@@ -279,7 +279,7 @@ int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *con
     }
     if (connAddr != NULL) {
         if (memcpy_s(&item->connAddr, sizeof(ConnectionAddr), connAddr, sizeof(ConnectionAddr)) != EOK) {
-            AUTH_LOGE(AUTH_CONN, "copy connection addr failed");
+            AUTH_LOGE(AUTH_CONN, "copy connection addr fail");
         }
     }
 
@@ -309,7 +309,7 @@ int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode)
     LIST_FOR_EACH_ENTRY(item, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (item->requestId == requestId && item->connAddr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
             if (memcpy_s(reuseNode, sizeof(AuthPreLinkNode), item, sizeof(AuthPreLinkNode)) != EOK) {
-                AUTH_LOGE(AUTH_CONN, "copy AuthPreLinkNode failed");
+                AUTH_LOGE(AUTH_CONN, "copy AuthPreLinkNode fail");
                 AuthPreLinkUnlock();
                 return SOFTBUS_MEM_ERR;
             }
@@ -333,7 +333,7 @@ int32_t FindAuthPreLinkNodeByUuid(const char *uuid, AuthPreLinkNode *preLinkNode
     LIST_FOR_EACH_ENTRY(item, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (memcmp(item->uuid, uuid, UUID_BUF_LEN) == 0) {
             if (memcpy_s(preLinkNode, sizeof(AuthPreLinkNode), item, sizeof(AuthPreLinkNode)) != EOK) {
-                AUTH_LOGE(AUTH_CONN, "copy AuthPreLinkNode failed");
+                AUTH_LOGE(AUTH_CONN, "copy AuthPreLinkNode fail");
                 AuthPreLinkUnlock();
                 return SOFTBUS_MEM_ERR;
             }
@@ -356,7 +356,7 @@ int32_t UpdateAuthPreLinkUuidById(uint32_t requestId, const char *uuid)
     LIST_FOR_EACH_ENTRY(item, &g_authPreLinkList.list, AuthPreLinkNode, node) {
         if (item->requestId == requestId && item->connAddr.type == CONNECTION_ADDR_SESSION_WITH_KEY) {
             if (memcpy_s(item->uuid, UUID_BUF_LEN, uuid, UUID_BUF_LEN) != EOK) {
-                AUTH_LOGE(AUTH_CONN, "memcpy uuid failed");
+                AUTH_LOGE(AUTH_CONN, "memcpy uuid fail");
                 AuthPreLinkUnlock();
                 return SOFTBUS_MEM_ERR;
             }

@@ -26,6 +26,7 @@
 #include "device_auth.h"
 #include "form/disc_event_form.h"
 #include "g_enhance_lnn_func.h"
+#include "lnn_device_cloud_convergence_struct.h"
 #include "lnn_node_info_struct.h"
 #include "lnn_heartbeat_medium_mgr_struct.h"
 #include "lnn_heartbeat_utils_struct.h"
@@ -185,7 +186,7 @@ typedef const NodeInfo *(*LnnGetLocalNodeInfoFunc)(void);
 typedef int32_t (*LnnGetLocalNodeInfoSafeFunc)(NodeInfo *info);
 typedef int32_t (*LnnGetRemoteNumInfoFunc)(const char *networkId, InfoKey key, int32_t *info);
 typedef int32_t (*LnnGetRemoteNumU64InfoFunc)(const char *networkId, InfoKey key, uint64_t *info);
-typedef int32_t (*LnnGetRemoteNumU32InfoFunc)(const char *networkId, InfoKey key, uint64_t *info);
+typedef int32_t (*LnnGetRemoteNumU32InfoFunc)(const char *networkId, InfoKey key, uint32_t *info);
 typedef int32_t (*LnnGetRemoteByteInfoFunc)(const char *networkId, InfoKey key, uint8_t *info, uint32_t len);
 typedef int32_t (*LnnSetLocalStrInfoFunc)(InfoKey key, const char *info);
 typedef int32_t (*LnnSetLocalNumInfoFunc)(InfoKey key, int32_t info);
@@ -392,6 +393,9 @@ typedef int8_t (*BleGetAdvPowerFunc)(int32_t businessType);
 
 typedef int32_t (*SendParamsToLpDeviceFunc)(const uint8_t *data, uint32_t dataSize, int32_t type);
 typedef void (*LnnNotifyVirLinkReportEventFunc)(const uint8_t *data, uint32_t dataSize);
+typedef int32_t (*FragmentRecvProcessFunc)(const char *udid, const uint8_t *data, uint32_t dataLen,
+    FragmentRecvCallback callback);
+typedef void (*OnRecvCloudQueryInfoFunc)(const char *udid, const char *data, uint32_t length);
 typedef void (*LnnNotifyDmHookRegisteredEventFunc)(void);
 
 typedef const SoftBusList *(*LnnGetLocalUserLedgerFunc)(void);

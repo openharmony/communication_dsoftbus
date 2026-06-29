@@ -33,7 +33,7 @@ void SoftbusBleConflictNotifyDisconnectPacked(const char *addr, const char *udid
 void SoftbusBleConflictNotifyDateReceivePacked(int32_t underlayerHandle, const uint8_t *data, uint32_t dataLen);
 void SoftbusBleConflictNotifyConnectResultPacked(uint32_t requestId, int32_t underlayerHandle, bool status);
 void SoftbusBleConflictRegisterListenerPacked(SoftBusBleConflictListener *listener);
-int32_t ConnBleDirectInitPacked(void);
+int32_t ConnExtInitPacked(void);
 bool ConnBleDirectIsEnablePacked(BleProtocolType protocol);
 int32_t ConnBleDirectConnectDevicePacked(const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
 ConnectFuncInterface *ConnSleInitPacked(const ConnectCallback *callback);

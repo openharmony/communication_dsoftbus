@@ -1790,6 +1790,7 @@ ohos_unittest("LNNLaneExtMockTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -1884,6 +1885,7 @@ ohos_unittest("LNNLaneSelectTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
@@ -1940,6 +1942,7 @@ ohos_unittest("LNNSelectRuleTest") {
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -2066,6 +2069,7 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -2153,6 +2157,7 @@ ohos_unittest("LNNLaneAllocTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -2370,6 +2375,7 @@ ohos_unittest("LNNHeartBeatTest") {
     "$dsoftbus_root_path/core/broadcast/scheduler/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -2460,6 +2466,7 @@ ohos_unittest("LnnHeartBeatDeviceRiskTest") {
     "$dsoftbus_root_path/core/broadcast/scheduler/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -2550,6 +2557,7 @@ ohos_unittest("LnnHeartBeatConstraintTest") {
     "$dsoftbus_root_path/core/broadcast/scheduler/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -2730,6 +2738,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -2823,6 +2832,7 @@ ohos_unittest("LNNLaneLinkP2pTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -2920,6 +2930,7 @@ ohos_unittest("LNNLaneLinkExtTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -3062,6 +3073,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -3333,6 +3345,7 @@ ohos_unittest("LNNLaneListenerTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -3663,6 +3676,7 @@ ohos_unittest("LNNLaneLinkWifiDirectTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -3775,6 +3789,7 @@ ohos_unittest("LNNLaneLinkConflictTest") {
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
@@ -4151,6 +4166,98 @@ ohos_unittest("LNNNetLedgerTest") {
   external_deps += [ "huks:libhukssdk" ]
 }
 
+ohos_unittest("LnnConversationQueryTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/decision_center/agent_communication/lnn_conversation_query_test.cpp",
+  ]
+ 
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
+ 
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+ 
+  external_deps = [
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+ 
+ohos_unittest("LnnCloudQueryFragmentTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/decision_center/agent_communication/lnn_cloud_query_fragment_test.cpp",
+  ]
+ 
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+  ]
+ 
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+ 
+  external_deps = [
+    "device_auth:deviceauth_sdk",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+ 
+ohos_unittest("BusCenterClientAgentTest") {
+  module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
+  }
+  sources = [ "unittest/bus_center_client_agent_test.cpp" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+  ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -4201,6 +4308,9 @@ group("unittest") {
     ":LnnHeartBeatDeviceRiskTest",
     ":NetBuilderTest",
     ":NetLedgerTest",
+    ":LnnConversationQueryTest",
+    ":LnnCloudQueryFragmentTest",
+    ":BusCenterClientAgentTest",
   ]
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [

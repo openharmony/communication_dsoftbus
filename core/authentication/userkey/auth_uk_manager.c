@@ -552,12 +552,12 @@ static void AsyncCallGenUkResultReceived(void *para)
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(res->requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         SoftBusFree(res);
         return;
     }
     if (res->isGenUkSuccess) {
-        AUTH_LOGI(AUTH_CONN, "recv genuk success, requestId=%{public}u", res->requestId);
+        AUTH_LOGI(AUTH_CONN, "recv genuk succ, requestId=%{public}u", res->requestId);
         if (instance.genCb.onGenSuccess != NULL) {
             AUTH_LOGI(AUTH_CONN, "onGenSuccess callback");
             instance.genCb.onGenSuccess(instance.requestId, res->ukId);
@@ -626,7 +626,7 @@ static void OnGenSuccess(uint32_t requestId)
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     if (!instance.negoInfo.isRecvSessionKeyEvent || !instance.negoInfo.isRecvFinishEvent ||
@@ -647,7 +647,7 @@ static void OnGenFailed(uint32_t requestId, int32_t reason)
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     UpdateAllGenCbCallback(&instance.info, false, reason, 0);
@@ -858,7 +858,7 @@ static bool OnTransmitted(int64_t authSeq, const uint8_t *data, uint32_t len)
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return false;
     }
     AuthDataHead head = {
@@ -902,7 +902,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     bool isSameAccount =
@@ -912,7 +912,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     ret = GetGenUkInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     instance.ukId = sessionKeyId;
@@ -920,7 +920,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     AUTH_LOGI(AUTH_CONN, "isRecvSessionKeyEvent=%{public}d", instance.negoInfo.isRecvSessionKeyEvent);
     ret = UpdateUkNegotiateInfo((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "update uknego instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "update uknego instance fail! ret=%{public}d", ret);
         return;
     }
 }
@@ -932,7 +932,7 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     UkNegotiateInfo *negoInfo = NULL;
@@ -968,7 +968,7 @@ static void OnError(int64_t authSeq, int32_t operationCode, int32_t errCode, con
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq((uint32_t)authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     OnGenFailed((uint32_t)authSeq, authErrCode);
@@ -1001,7 +1001,7 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(authSeq, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return NULL;
     }
     cJSON *msg = cJSON_CreateObject();
@@ -1018,7 +1018,7 @@ static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams
     if (instance.authMode == HICHAIN_AUTH_IDENTITY_SERVICE) {
         ret = GetUkNegoAuthParamInfo(&instance.info, instance.authMode, &authParam);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "get authparam failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "get authparam fail! ret=%{public}d", ret);
             cJSON_Delete(msg);
             return NULL;
         }
@@ -1142,7 +1142,7 @@ static int32_t UpdateExistAclInfo(
         instance->authMode = GetHichainAuthMode(&instance->info);
         int32_t ret = UpdateUkNegotiateInfo(requestId, instance);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "update uknego instance failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "update uknego instance fail! ret=%{public}d", ret);
             return ret;
         }
         return SOFTBUS_OK;
@@ -1160,15 +1160,15 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
     bool isLocalUdidGreater = false;
     int32_t ret = UnpackUkAclParam((const char *)data, dataLen, &info);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "UnpackUkAclParam failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "UnpackUkAclParam fail! ret=%{public}d", ret);
         return ret;
     }
     ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGW(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGW(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         ret = CreateUkNegotiateInstance(requestId, channelId, &info, &cb);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "create new uknego instance failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "create new uknego instance fail! ret=%{public}d", ret);
             return ret;
         }
     } else {
@@ -1183,7 +1183,7 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
     if (ret == SOFTBUS_OK && isLocalUdidGreater) {
         ret = GetGenUkInstanceByReq(requestId, &instance);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
             return ret;
         }
         instance.state = GENUK_STATE_START;
@@ -1200,7 +1200,7 @@ static int32_t ProcessUkData(uint32_t requestId, const uint8_t *data, uint32_t d
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return ret;
     }
     AUTH_LOGE(AUTH_CONN, "authMode=%{public}d", instance.authMode);
@@ -1249,7 +1249,7 @@ static int32_t ProcessCloseAckData(uint32_t requestId, const uint8_t *data, uint
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return ret;
     }
     UkNegotiateInfo *negoInfo = NULL;
@@ -1294,6 +1294,7 @@ static int32_t UkMsgHandler(
             ret = ProcessCloseAckData(requestId, (const uint8_t *)data, dataLen);
             break;
         default:
+            AUTH_LOGE(AUTH_CONN, "unknown dataType=%{public}d, handle uk data fail", head->dataType);
             ret = SOFTBUS_CHANNEL_AUTH_HANDLE_DATA_FAIL;
             break;
     }
@@ -1470,7 +1471,7 @@ static int32_t SecurityOnSessionOpened(int32_t channelId, int32_t channelType, c
     (void)peerNetworkId;
     AUTH_LOGI(AUTH_CONN, "inner channelId=%{public}d", channelId);
     if (result != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get session open failed! result=%{public}d", result);
+        AUTH_LOGE(AUTH_CONN, "get session open fail! result=%{public}d", result);
         return result;
     }
     UkNegotiateInstance instance;
@@ -1494,7 +1495,7 @@ static int32_t SecurityOnSessionOpened(int32_t channelId, int32_t channelType, c
             ret = ProcessAuthHichainParam(instance.requestId, &instance.info, instance.authMode);
         }
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "uknego auth failed! result=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "uknego auth fail! result=%{public}d", ret);
             return ret;
         }
         instance.isRecvDeviceId = true;
@@ -1512,7 +1513,7 @@ static void SecurityOnSessionClosed(int32_t channelId)
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByChannel(channelId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         return;
     }
     DeleteUkNegotiateInstance(instance.requestId);
@@ -1540,10 +1541,10 @@ static int32_t SecuritySetChannelInfoByReqId(uint32_t requestId, int32_t channel
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "get instance fail! ret=%{public}d", ret);
         ret = CreateUkNegotiateInstance(requestId, channelId, &info, &cb);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "create uknego instance failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "create uknego instance fail! ret=%{public}d", ret);
             return ret;
         }
     } else {
@@ -1551,7 +1552,7 @@ static int32_t SecuritySetChannelInfoByReqId(uint32_t requestId, int32_t channel
         instance.channelId = channelId;
         ret = UpdateUkNegotiateInfo(requestId, &instance);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "create uknego instance failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "create uknego instance fail! ret=%{public}d", ret);
             return ret;
         }
     }

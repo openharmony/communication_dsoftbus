@@ -247,7 +247,7 @@ static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
         if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfoPacked((const char *)udidHash,
             &nodeInfo) == SOFTBUS_OK &&
             IsNeedExchangeNetworkId(nodeInfo.authCapacity, BIT_SUPPORT_EXCHANGE_NETWORKID)) {
-            AUTH_LOGI(AUTH_FSM, "LnnRetrieveDeviceInfo success");
+            AUTH_LOGI(AUTH_FSM, "LnnRetrieveDeviceInfo succ");
             authFsm->info.idType = EXCHANGE_NETWORKID;
         }
     }
@@ -681,7 +681,7 @@ static void SyncNegotiationEnter(FsmStateMachine *fsm)
         return;
     }
     authFsm->curState = STATE_SYNC_NEGOTIATION;
-    AUTH_LOGI(AUTH_FSM, "SyncNegotiationState: auth fsm enter. authSeq=%{public}" PRId64, authFsm->authSeq);
+    AUTH_LOGI(AUTH_FSM, "authFsm->curState=STATE_SYNC_NEGOTIATION, authSeq=%{public}" PRId64, authFsm->authSeq);
     if (!authFsm->info.isServer) {
         if (PostDeviceIdMessage(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_SYNC_DEVID_FAIL);
@@ -715,7 +715,7 @@ static void SyncDevIdStateEnter(FsmStateMachine *fsm)
     }
     authFsm->curState = STATE_SYNC_DEVICE_ID;
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
-    AUTH_LOGI(AUTH_FSM, "SyncDevIdState: auth fsm enter. authSeq=%{public}" PRId64 "", authFsm->authSeq);
+    AUTH_LOGI(AUTH_FSM, "authFsm->curState=STATE_SYNC_DEVICE_ID, authSeq=%{public}" PRId64, authFsm->authSeq);
     if (!authFsm->info.isServer) {
         if (authFsm->info.localState == AUTH_STATE_START) {
             if (!AuthIsRepeatedAuthRequest(authFsm->authSeq) && AddConcurrentAuthRequest(authFsm) > 1) {
@@ -1195,23 +1195,23 @@ static int32_t SoftbusCertChainParallel(const AuthSessionInfo *info)
     }
     SoftbusCertChain *softbusCertChain = (SoftbusCertChain *)SoftBusCalloc(sizeof(SoftbusCertChain));
     if (softbusCertChain == NULL) {
-        AUTH_LOGI(AUTH_FSM, "malloc gencert parallel node failed. skip");
+        AUTH_LOGW(AUTH_FSM, "malloc gencert parallel node fail. skip");
         return SOFTBUS_OK;
     }
     if (AddAuthGenCertParaNode(info->requestId) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "add gencert parallel node failed. skip");
+        AUTH_LOGW(AUTH_FSM, "add gencert parallel node fail. skip");
     }
     if (GenerateCertificatePacked(softbusCertChain, info) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "GenerateCertificate fail");
+        AUTH_LOGW(AUTH_FSM, "GenerateCertificate fail");
         if (UpdateAuthGenCertParaNode(info->requestId, false, softbusCertChain) != SOFTBUS_OK) {
-            AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+            AUTH_LOGW(AUTH_FSM, "update gencert parallel node fail. skip");
             FreeSoftbusChainPacked(softbusCertChain);
             SoftBusFree(softbusCertChain);
         }
         return SOFTBUS_OK;
     }
     if (UpdateAuthGenCertParaNode(info->requestId, true, softbusCertChain) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "update gencert parallel node failed. skip");
+        AUTH_LOGW(AUTH_FSM, "update gencert parallel node fail. skip");
         FreeSoftbusChainPacked(softbusCertChain);
         SoftBusFree(softbusCertChain);
     }
@@ -1325,7 +1325,7 @@ static void PopulateDeviceTypeId(HiChainAuthParam *authParam, uint32_t requestId
     if (GetAuthRequest(requestId, &request) == SOFTBUS_OK) {
         if (request.deviceTypeId == TYPE_PC_ID) {
             authParam->deviceTypeId = request.deviceTypeId;
-            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from auth request success");
+            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from auth request succ");
             return;
         }
     }
@@ -1334,7 +1334,7 @@ static void PopulateDeviceTypeId(HiChainAuthParam *authParam, uint32_t requestId
     if (LnnGetRemoteNodeInfoById(authParam->udid, CATEGORY_UDID, &nodeInfoLedger) == SOFTBUS_OK) {
         if (nodeInfoLedger.deviceInfo.deviceTypeId == TYPE_PC_ID) {
             authParam->deviceTypeId = nodeInfoLedger.deviceInfo.deviceTypeId;
-            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from deviceInfo success");
+            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from deviceInfo succ");
             return;
         }
     }
@@ -1343,7 +1343,7 @@ static void PopulateDeviceTypeId(HiChainAuthParam *authParam, uint32_t requestId
     if (LnnRetrieveDeviceInfoByUdidPacked(authParam->udid, &nodeInfoPersistent) == SOFTBUS_OK) {
         if (nodeInfoPersistent.deviceInfo.deviceTypeId == TYPE_PC_ID) {
             authParam->deviceTypeId = nodeInfoPersistent.deviceInfo.deviceTypeId;
-            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from persistent deviceInfo success");
+            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from persistent deviceInfo succ");
             return;
         }
     }
@@ -1441,7 +1441,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
         AUTH_LOGE(AUTH_FSM, "authFsm is null");
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "auth state enter, authSeq=%{public}" PRId64, authFsm->authSeq);
+    AUTH_LOGI(AUTH_FSM, "authFsm->curState=STATE_DEVICE_AUTH, authSeq=%{public}" PRId64, authFsm->authSeq);
     authFsm->curState = STATE_DEVICE_AUTH;
     AuthSessionInfo *info = &authFsm->info;
     if (info->normalizedType == NORMALIZED_SUPPORT || info->isSupportFastAuth) {
@@ -1465,7 +1465,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
     }
     return;
 ERR_EXIT:
-    AUTH_LOGE(AUTH_FSM, "auth state enter, fail ret=%{public}d", ret);
+    AUTH_LOGE(AUTH_FSM, "authFsmState: enter STATE_DEVICE_AUTH fail, ret=%{public}d", ret);
     CompleteAuthSession(authFsm, ret);
 }
 
@@ -1921,7 +1921,7 @@ static bool IsPeerSupportNegoAuth(AuthSessionInfo *info)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     if (LnnRetrieveDeviceInfoPacked((const char *)udidHash, &nodeInfo) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "retrive deviceInfo fail");
+        AUTH_LOGE(AUTH_FSM, "retrieve deviceInfo fail");
         return true;
     }
     if (IsSupportFeatureByCapaBit(nodeInfo.authCapacity, BIT_SUPPORT_NEGOTIATION_AUTH)) {
@@ -2311,4 +2311,21 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
         }
     }
     return info.userId;
+}
+
+int32_t AuthSessionGetSourceUserId(int64_t authSeq)
+{
+    int32_t sourceUserId = 0;
+    AuthSessionInfo info = { 0 };
+    if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
+        return DEFAULT_USERID;
+    }
+    if (info.credNegoState == CRED_NEGO_STATE_COMPATIBLE) {
+        return DEFAULT_USERID;
+    }
+    if (GetJsonObjectNumberItem(info.credTypeInfo, SOURCE_USERID, &sourceUserId)) {
+        return sourceUserId;
+    }
+    return DEFAULT_USERID;
 }

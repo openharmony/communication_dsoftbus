@@ -50,8 +50,7 @@ void SoftBusMessageOpenChannelMockTest::TearDownTestCase(void)
 
 /*
  * @tc.name: PackError001
- * @tc.desc: PackError001 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackError001, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -69,8 +68,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackError001, TestSize.Level1)
 
 /*
  * @tc.name: PackError002
- * @tc.desc: PackError002 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackError002, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -89,8 +87,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackError002, TestSize.Level1)
 
 /*
  * @tc.name: PackError003
- * @tc.desc: PackError003 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackError003, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -110,8 +107,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackError003, TestSize.Level1)
 
 /*
  * @tc.name: PackRequest001
- * @tc.desc: PackRequest001 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackRequest001, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -132,8 +128,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest001, TestSize.Level3)
 
 /*
  * @tc.name: PackRequest002
- * @tc.desc: PackRequest002 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackRequest002, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -156,8 +151,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest002, TestSize.Level3)
 
 /*
  * @tc.name: PackRequest003
- * @tc.desc: PackRequest003 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackRequest003, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -185,8 +179,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest003, TestSize.Level3)
 
 /*
  * @tc.name: PackRequest004
- * @tc.desc: PackRequest004 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackRequest004, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -213,8 +206,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest004, TestSize.Level3)
 
 /*
  * @tc.name: PackReply001
- * @tc.desc: PackReply001 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackReply001, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -235,8 +227,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply001, TestSize.Level1)
 
 /*
  * @tc.name: PackReply002
- * @tc.desc: PackReply002 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackReply002, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -258,8 +249,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply002, TestSize.Level1)
 
 /*
  * @tc.name: PackReply003
- * @tc.desc: PackReply003 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackReply003, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -283,8 +273,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply003, TestSize.Level1)
 
 /*
  * @tc.name: PackReply004
- * @tc.desc: PackReply004 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackReply004, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -309,8 +298,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackReply004, TestSize.Level1)
 
 /*
  * @tc.name: UnpackReply001
- * @tc.desc: UnpackReply001 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackReply001, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -331,8 +319,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackReply001, TestSize.Level1)
 
 /*
  * @tc.name: UnpackReply002
- * @tc.desc: UnpackReply002 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackReply002, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -355,8 +342,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackReply002, TestSize.Level1)
 
 /*
  * @tc.name: JsonObjectPackRequestEx001
- * @tc.desc: JsonObjectPackRequestEx001 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: JsonObjectPackRequestEx001, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -371,8 +357,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, JsonObjectPackRequestEx001, TestSize
 
 /*
  * @tc.name: ParseMessageToAppInfo001
- * @tc.desc: ParseMessageToAppInfo001 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: ParseMessageToAppInfo001, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -393,8 +378,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, ParseMessageToAppInfo001, TestSize.L
 
 /*
  * @tc.name: ParseMessageToAppInfo002
- * @tc.desc: ParseMessageToAppInfo002 test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: ParseMessageToAppInfo002, use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -418,8 +402,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, ParseMessageToAppInfo002, TestSize.L
 
 /*
  * @tc.name: PackExternalDeviceRequest001
- * @tc.desc: PackExternalDeviceRequest test
- *           use the wrong parameter
+ * @tc.desc: PackExternalDeviceRequest test use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -430,8 +413,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest001, TestSi
 
 /*
  * @tc.name: PackExternalDeviceRequest002
- * @tc.desc: PackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -447,8 +429,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest002, TestSi
 
 /*
  * @tc.name: PackExternalDeviceRequest003
- * @tc.desc: PackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -469,8 +450,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest003, TestSi
 
 /*
  * @tc.name: PackExternalDeviceRequest004
- * @tc.desc: PackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -494,8 +474,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest004, TestSi
 
 /*
  * @tc.name: PackExternalDeviceRequest005
- * @tc.desc: PackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -531,8 +510,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest005, TestSi
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect001
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -557,8 +535,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect001, Tes
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect002
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -577,8 +554,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect002, Tes
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect003
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -600,8 +576,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect003, Tes
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect004
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -621,8 +596,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect004, Tes
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect005
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -645,8 +619,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect005, Tes
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect006
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -667,8 +640,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect006, Tes
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect007
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -697,8 +669,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect007, Tes
 
 /*
  * @tc.name: PackExternalDeviceJsonObiect008
- * @tc.desc: PackExternalDeviceJsonObject test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceJsonObject test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -770,8 +741,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect010, Tes
 
 /*
  * @tc.name: UnpackExternalDeviceRequest001
- * @tc.desc: UnpackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -794,8 +764,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest001, Test
 
 /*
  * @tc.name: UnpackExternalDeviceRequest002
- * @tc.desc: UnpackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -816,8 +785,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest002, Test
 
 /*
  * @tc.name: UnpackExternalDeviceRequest003
- * @tc.desc: UnpackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -838,8 +806,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest003, Test
 
 /*
  * @tc.name: UnpackExternalDeviceRequest004
- * @tc.desc: UnpackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -858,8 +825,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest004, Test
 
 /*
  * @tc.name: UnpackExternalDeviceRequest005
- * @tc.desc: UnpackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -881,8 +847,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest005, Test
 
 /*
  * @tc.name: UnpackExternalDeviceRequest006
- * @tc.desc: UnpackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -906,8 +871,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest006, Test
 
 /*
  * @tc.name: UnpackExternalDeviceRequest007
- * @tc.desc: UnpackExternalDeviceRequest test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceRequest test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -932,8 +896,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest007, Test
 
 /*
  * @tc.name: PackExternalDeviceReply001
- * @tc.desc: PackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -951,8 +914,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply001, TestSize
 
 /*
  * @tc.name: PackExternalDeviceReply002
- * @tc.desc: PackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -989,8 +951,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply002, TestSize
 
 /*
  * @tc.name: PackExternalDeviceReply003
- * @tc.desc: PackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1011,8 +972,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply003, TestSize
 
 /*
  * @tc.name: PackExternalDeviceReply004
- * @tc.desc: PackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1036,8 +996,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply004, TestSize
 
 /*
  * @tc.name: PackExternalDeviceReply005
- * @tc.desc: PackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1060,8 +1019,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply005, TestSize
 
 /*
  * @tc.name: PackExternalDeviceReply006
- * @tc.desc: PackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: PackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1091,8 +1049,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply006, TestSize
 
 /*
  * @tc.name: UnpackExternalDeviceReply001
- * @tc.desc: UnpackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1124,8 +1081,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceReply001, TestSi
 
 /*
  * @tc.name: UnpackExternalDeviceReply002
- * @tc.desc: UnpackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1148,8 +1104,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceReply002, TestSi
 
 /*
  * @tc.name: UnpackExternalDeviceReply003
- * @tc.desc: UnpackExternalDeviceReply test
- *           use the wrong parameter or normal parameter
+ * @tc.desc: UnpackExternalDeviceReply test use the wrong parameter or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */

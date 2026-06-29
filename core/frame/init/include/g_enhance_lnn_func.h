@@ -26,6 +26,7 @@
 #include "lnn_cipherkey_manager_struct.h"
 #include "lnn_data_cloud_sync_struct.h"
 #include "lnn_decision_center_struct.h"
+#include "lnn_device_cloud_convergence_struct.h"
 #include "lnn_device_info_recovery_struct.h"
 #include "lnn_fast_offline_struct.h"
 #include "lnn_heartbeat_utils_struct.h"
@@ -288,6 +289,7 @@ typedef void (*LnnRegSleRangeCbFunc)(const ISleRangeInnerCallback *callback);
 typedef int32_t (*LnnStopRangeFunc)(const RangeConfig *config);
 typedef int32_t (*LnnStartRangeFunc)(const RangeConfig *config);
 typedef void (*LnnDeinitSleRangeFunc)(void);
+typedef int32_t (*LnnRegisterPushListenerFunc)(void);
 typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
 typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
@@ -303,6 +305,10 @@ typedef int32_t (*AuthMetaGetIpByMetaNodeIdFunc)(const char *metaNodeId, char *i
 typedef int32_t (*AuthMetaGetLocalIpByMetaNodeIdFunc)(const char *metaNodeId, char *localIp, int32_t len);
 typedef int32_t (*AuthMetaGetConnectionTypeByMetaNodeIdFunc)(const char *metaNodeId,
     NetworkConnectionType *connectionType);
+typedef int32_t (*LnnSendAgentDataFunc)(const char *udid, const char *data, uint32_t length, LnnEventExtra *extra);
+typedef int32_t (*PostLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudHandler handler,
+    const void *obj, uint32_t size, uint64_t delayMs);
+typedef int32_t (*RemoveLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -476,6 +482,7 @@ typedef struct TagLnnEnhanceFuncList {
     LnnSaveRemoteUserInfoFunc lnnSaveRemoteUserInfo;
     LnnLoadRemoteUserInfoFunc lnnLoadRemoteUserInfo;
     // bus_center
+    LnnRegisterPushListenerFunc lnnRegisterPushListener;
     LnnSaveDeviceDataFunc lnnSaveDeviceData;
     LnnAsyncSaveDeviceDataFunc lnnAsyncSaveDeviceData;
     LnnRetrieveDeviceDataFunc lnnRetrieveDeviceData;
@@ -492,6 +499,9 @@ typedef struct TagLnnEnhanceFuncList {
     GenerateNewLocalCipherKeyFunc generateNewLocalCipherKey;
     InitActionBleConcurrencyFunc initActionBleConcurrency;
     InitActionStateAdapterFunc initActionStateAdapter;
+    LnnSendAgentDataFunc lnnSendAgentData;
+    PostLnnCloudEventFunc postLnnCloudEvent;
+    RemoveLnnCloudEventFunc removeLnnCloudEvent;
     // adapter bus_center
     LnnDeleteDeviceDataFunc lnnDeleteDeviceData;
     LnnLinkFinderInitFunc lnnLinkFinderInit;

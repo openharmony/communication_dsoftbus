@@ -51,7 +51,7 @@ static bool AuthMapInit(void)
     }
     LnnMapInit(&g_authLimitMap);
     g_isInit = true;
-    AUTH_LOGI(AUTH_FSM, "authLimit map init success");
+    AUTH_LOGI(AUTH_FSM, "authLimit map init succ");
     return true;
 }
 
@@ -141,7 +141,7 @@ void ClearAuthLimitMap(void)
         return;
     }
     LnnMapDelete(&g_authLimitMap);
-    AUTH_LOGI(AUTH_FSM, "ClearAuthLimitMap success");
+    AUTH_LOGI(AUTH_FSM, "ClearAuthLimitMap succ");
     (void)SoftBusMutexUnlock(&g_authLimitMutex);
 }
 
@@ -338,13 +338,13 @@ void AuthDeviceNotTrust(const char *peerUdid)
     }
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
-    LnnDeleteSpecificTrustedDevInfo(peerUdid, JudgeDeviceTypeAndGetOsAccountIds());
+    LnnDeleteSpecificTrustedDevInfo(peerUdid);
     LnnHbOnTrustedRelationReduced();
     AuthRemoveDeviceKeyByUdidPacked(peerUdid);
     if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "request leave specific fail");
     } else {
-        AUTH_LOGI(AUTH_HICHAIN, "request leave specific successful");
+        AUTH_LOGI(AUTH_HICHAIN, "request leave specific succ");
     }
 }
 
@@ -353,7 +353,7 @@ void AuthNotifyDeviceVerifyPassed(AuthHandle authHandle, const NodeInfo *nodeInf
     CHECK_NULL_PTR_RETURN_VOID(nodeInfo);
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
     if (auth == NULL) {
-        AUTH_LOGE(AUTH_FSM, "get auth manager failed");
+        AUTH_LOGE(AUTH_FSM, "get auth manager fail");
         return;
     }
     if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_P2P ||
@@ -389,7 +389,7 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
         LnnDeleteLinkFinderInfo(peerUdid);
     }
     if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {
-        LnnDeleteSpecificTrustedDevInfo(peerUdid, localUserId);
+        LnnDeleteSpecificTrustedDevInfo(peerUdid);
     }
     if (g_verifyListener.onDeviceNotTrusted == NULL) {
         AUTH_LOGW(AUTH_HICHAIN, "onDeviceNotTrusted not set");
@@ -448,7 +448,7 @@ static int32_t RetryRegTrustDataChangeListener(void)
     for (int32_t i = 1; i <= RETRY_REGDATA_TIMES; i++) {
         int32_t ret = RegTrustDataChangeListener(&trustListener);
         if (ret == SOFTBUS_OK) {
-            AUTH_LOGI(AUTH_HICHAIN, "regDataChangeListener success, times=%{public}d", i);
+            AUTH_LOGI(AUTH_HICHAIN, "regDataChangeListener succ, times=%{public}d", i);
             return SOFTBUS_OK;
         }
         AUTH_LOGW(AUTH_HICHAIN, "retry regDataChangeListener, current retry times=%{public}d, err=%{public}d", i, ret);
@@ -552,7 +552,7 @@ static int32_t VerifyDevice(AuthRequest *request)
     AUTH_LOGI(AUTH_CONN, "start verify device: requestId=%{public}u", request->requestId);
     if (!g_regDataChangeListener) {
         if (RetryRegTrustDataChangeListener() != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_HICHAIN, "hichain regDataChangeListener failed");
+            AUTH_LOGE(AUTH_HICHAIN, "hichain regDataChangeListener fail");
             SoftbusHitraceStop();
             return SOFTBUS_AUTH_INIT_FAIL;
         }
@@ -572,7 +572,7 @@ static int32_t VerifyDevice(AuthRequest *request)
         return SOFTBUS_OK;
     }
     if (ConnectAuthDevice(request->requestId, &request->connInfo, CONN_SIDE_ANY) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "connect auth device failed: requestId=%{public}u", request->requestId);
+        AUTH_LOGE(AUTH_CONN, "connect auth device fail: requestId=%{public}u", request->requestId);
         FindAndDelAuthRequestByConnInfo(request->requestId, &request->connInfo);
         SoftbusHitraceStop();
         return SOFTBUS_AUTH_CONN_FAIL;
@@ -770,6 +770,7 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
             DisconnectAuthDevice(&auth->connId[authHandle.type]);
             break;
         default:
+            AUTH_LOGW(AUTH_CONN, "unknown auth link type=%{public}d", auth->connInfo[authHandle.type].type);
             break;
     }
     DelDupAuthManager(auth);

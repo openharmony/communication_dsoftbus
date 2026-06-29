@@ -2245,7 +2245,6 @@ static void ClearCountInRetryList(pid_t uid)
 
 bool TransIsProxyChannelEnabled(pid_t uid)
 {
-    #define PUSH_MAX_RETRY_TIME 1
     if (CheckSessionExistByUid(uid)) {
         return true;
     }
@@ -2297,7 +2296,6 @@ void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId)
         if (nodeInfo->appIndex != appIndex || nodeInfo->userId != userId) {
             continue;
         }
-        nodeInfo->isEnable = false;
         if (nodeInfo->channel.close != NULL) {
             nodeInfo->channel.close(&nodeInfo->channel, true);
             TRANS_LOGI(TRANS_SVC, "[br_proxy] close channel, uinstall appIndex=%{public}d, userId=%{public}d", appIndex,

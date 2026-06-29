@@ -259,7 +259,7 @@ static bool OnTransmitted(int64_t authSeq, const uint8_t *data, uint32_t len)
     }
     bool ret = g_accountAuthCallback->onTransmit(authSeq, data, len);
     if (!ret) {
-        AUTH_LOGE(AUTH_CONN, "account auth transmit failed");
+        AUTH_LOGE(AUTH_CONN, "account auth transmit fail");
     }
     return ret;
 }
@@ -301,8 +301,8 @@ static void OnError(int64_t authSeq, int32_t operationCode, int32_t errCode, con
 {
     uint32_t authErrCode = 0;
     GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
-    AUTH_LOGE(AUTH_CONN, "account auth OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
-        authSeq, errCode, authErrCode);
+    AUTH_LOGE(AUTH_CONN, "account auth OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d "
+        "authErrCode=%{public}d", authSeq, errCode, authErrCode);
     if (g_accountAuthCallback == NULL) {
         AUTH_LOGE(AUTH_CONN, "account auth callback is null");
         return;
@@ -329,14 +329,14 @@ static char *OnRequest(int64_t authSeq, int32_t operationCode, const char *reqPa
         return NULL;
     }
     if (!AddStringToJsonObject(msg, FIELD_APP_ID, D2D_CAAS_APPID)) {
-        AUTH_LOGE(AUTH_CONN, "add appid failed");
+        AUTH_LOGE(AUTH_CONN, "add appid fail");
         cJSON_Delete(msg);
         return NULL;
     }
     char *msgStr = cJSON_PrintUnformatted(msg);
     cJSON_Delete(msg);
     if (msgStr == NULL) {
-        AUTH_LOGE(AUTH_CONN, "cJSON_PrintUnformatted failed");
+        AUTH_LOGE(AUTH_CONN, "cJSON_PrintUnformatted fail");
         return NULL;
     }
     return msgStr;
@@ -346,7 +346,7 @@ static const LightAccountVerifier *GetLightAccountInstance()
 {
     int32_t ret = InitDeviceAuthService();
     if (ret != HC_SUCCESS) {
-        AUTH_LOGE(AUTH_CONN, "init device auth service failed, err=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "init device auth service fail, err=%{public}d", ret);
         return NULL;
     }
     return GetLightAccountVerifierInstance();
@@ -375,7 +375,7 @@ int32_t StartGroupAccountAuth(const char *pkgName, int64_t requestId, const char
     if (hichainRet != HC_SUCCESS) {
         uint32_t authErrCode = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
         GetSoftbusHichainAuthErrorCode(hichainRet, &authErrCode);
-        AUTH_LOGE(AUTH_CONN, "hichain start light account auth failed, errcode=%{public}d", authErrCode);
+        AUTH_LOGE(AUTH_CONN, "hichain start light account auth fail, errcode=%{public}d", authErrCode);
         DeleteAccountAuthInstance(requestId);
         AuthRemoveMsgFromLooper(requestId);
         return authErrCode;
@@ -407,7 +407,7 @@ int32_t ProcessGroupAccountAuth(const char *pkgName, int64_t requestId, const ui
     if (hichainRet != HC_SUCCESS) {
         uint32_t authErrCode = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
         GetSoftbusHichainAuthErrorCode(hichainRet, &authErrCode);
-        AUTH_LOGE(AUTH_CONN, "hichain process light account auth failed, errcode=%{public}d", authErrCode);
+        AUTH_LOGE(AUTH_CONN, "hichain process light account auth fail, errcode=%{public}d", authErrCode);
         DeleteAccountAuthInstance(requestId);
         AuthRemoveMsgFromLooper(requestId);
         return authErrCode;

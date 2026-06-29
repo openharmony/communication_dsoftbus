@@ -114,7 +114,7 @@ int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
 
         if (ret == ETIMEDOUT) {
             retryCount++;
-            COMM_LOGE(COMM_ADAPTER, "The thread lock timeout, retry: %{public}d count,"
+            COMM_LOGW(COMM_ADAPTER, "The thread lock timeout, retry: %{public}d count,"
                       " mutex locked by thread: TID=%{public}d", retryCount, mutex->holder);
             continue;
         }

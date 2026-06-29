@@ -99,6 +99,7 @@ public:
     virtual bool LnnIsLocalSupportMcuFeature(void) = 0;
     virtual void LnnNotifyLpMcuInit(SoftBusHbApState state, int32_t strategy) = 0;
     virtual bool LnnIsOsAccountConstraint(void) = 0;
+    virtual void LnnNotifyDifferentAccountChangeEvent(SoftBusDifferentAccountState state) = 0;
 };
 class DecisionDbDepsInterfaceMock : public DecisionDbDepsInterface {
 public:
@@ -154,6 +155,7 @@ public:
     MOCK_METHOD0(LnnIsLocalSupportMcuFeature, bool(void));
     MOCK_METHOD2(LnnNotifyLpMcuInit, void(SoftBusHbApState, int32_t));
     MOCK_METHOD0(LnnIsOsAccountConstraint, bool(void));
+    MOCK_METHOD1(LnnNotifyDifferentAccountChangeEvent, void(SoftBusDifferentAccountState));
     static int32_t ActionOfSelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num);
 };
 } // namespace OHOS

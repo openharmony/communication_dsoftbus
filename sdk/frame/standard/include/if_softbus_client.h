@@ -20,6 +20,7 @@
 #include "iremote_proxy.h"
 #include "session.h"
 #include "socket.h"
+#include "softbus_agent_communication.h"
 #include "softbus_def.h"
 
 namespace OHOS {
@@ -106,6 +107,8 @@ public:
     virtual void OnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode,
         const char *returnData);
     virtual int32_t OnServerStopped(const char *name);
+    virtual void OnConversationRecvMsg(const ConversationBusiness *info, const char *deviceId,
+        const char *data, uint32_t length);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");

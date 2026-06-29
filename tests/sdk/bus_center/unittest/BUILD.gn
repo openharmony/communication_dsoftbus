@@ -232,6 +232,7 @@ if (defined(ohos_lite)) {
     include_dirs += [
       "$dsoftbus_root_path/core/authentication/include",
       "$dsoftbus_root_path/core/frame/init/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/include",
       "unittest/common/",
     ]
     deps = bus_center_sdk_test_deps

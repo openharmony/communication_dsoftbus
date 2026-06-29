@@ -958,6 +958,8 @@ static void HbDifferentAccountEventHandler(const LnnEventBasicInfo *info)
     SoftBusDifferentAccountState difAccountState = (SoftBusDifferentAccountState)event->status;
     if ((LnnEventType)difAccountState == LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED) {
         HbConditionChanged(false);
+        LnnUpdateSendInfoStrategy(UPDATE_HB_NETWORK_INFO);
+        RestartCoapDiscovery();
     }
 }
 

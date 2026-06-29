@@ -42,7 +42,6 @@ typedef enum {
 
 typedef struct {
     char udid[UDID_BUF_LEN];
-    int32_t userId;
 } TrustedInfo;
 
 typedef struct {

@@ -1779,6 +1779,63 @@ HWTEST_F(TransClientSessionTest, ClientGetServiceSocketInfoByIdTest55, TestSize.
 }
 
 /**
+ * @tc.name: ClientGetServiceSocketInfoByIdTest56
+ * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientGetServiceSocketInfoByIdTest56, TestSize.Level1)
+{
+    int32_t socketId = 1;
+    int32_t channelId = 1;
+    int32_t channelType = 0;
+
+    int32_t ret = GetChannelTypeBySessionId(-1, channelId, &channelType);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetChannelTypeBySessionId(socketId, channelId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetChannelTypeBySessionId(socketId, channelId, &channelType);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransClientSessionTest57
+ * @tc.desc: given invalid param return SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest57, TestSize.Level1)
+{
+    int32_t routeType = WIFI_USB;
+    bool onlyReserveLinkDown = false;
+    SessionInfo sessionNode;
+    memset_s(&sessionNode, sizeof(SessionInfo), 0, sizeof(SessionInfo));
+    sessionNode.enableMultipath = false;
+
+    bool ret = ClientTransNeedDelReserve(nullptr, routeType, &onlyReserveLinkDown);
+    EXPECT_EQ(ret, false);
+    ret = ClientTransNeedDelReserve(&sessionNode, INVALID_ROUTE_TYPE, &onlyReserveLinkDown);
+    EXPECT_EQ(ret, false);
+    ret = ClientTransNeedDelReserve(&sessionNode, routeType, nullptr);
+    EXPECT_EQ(ret, false);
+    ret = ClientTransNeedDelReserve(&sessionNode, routeType, &onlyReserveLinkDown);
+    EXPECT_EQ(ret, false);
+
+    sessionNode.enableMultipath = true;
+    sessionNode.routeType = routeType;
+    sessionNode.routeTypeReserve = ROUTE_TYPE_ALL;
+    ret = ClientTransNeedDelReserve(&sessionNode, routeType, &onlyReserveLinkDown);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(onlyReserveLinkDown, false);
+
+    sessionNode.routeType = ROUTE_TYPE_ALL;
+    sessionNode.routeTypeReserve = routeType;
+    ret = ClientTransNeedDelReserve(&sessionNode, routeType, &onlyReserveLinkDown);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(onlyReserveLinkDown, true);
+}
+
+/**
  * @tc.name: PrintCollabInfo001
  * @tc.desc: test PrintCollabInfo
  * @tc.type: FUNC

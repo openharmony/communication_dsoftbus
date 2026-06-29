@@ -22,6 +22,7 @@
 #include "ble_range.h"
 #include "data_level.h"
 #include "data_level_inner.h"
+#include "softbus_agent_communication.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -117,6 +118,13 @@ void LnnOnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operat
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);
+
+int32_t PostConversationDataInner(const char *networkId, const ConversationBusiness *info,
+    const char *data, uint32_t len);
+int32_t RegisterConversationListenerInner(const ConversationBusiness *info, const ConversationListener *listener);
+int32_t UnregisterConversationListenerInner(const ConversationBusiness *info);
+int32_t GetTrustedDevicesInner(DeviceNodeInfo **info, int32_t *nums);
+int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *udid, const char *data, uint32_t length);
 
 #ifdef __cplusplus
 }

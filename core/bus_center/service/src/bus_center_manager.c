@@ -19,6 +19,7 @@
 #include "bus_center_decision_center.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_conversation_query.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
@@ -232,6 +233,14 @@ static int32_t BusCenterServerInitFirstStep(void)
     return SOFTBUS_OK;
 }
 
+static void RestoreMultiUserInfo(void)
+{
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    RestoreLocalUserInfo();
+#else
+    RestoreRemoteUserInfo();
+}
+
 static int32_t BusCenterServerInitSecondStep(void)
 {
     SoftBusRunPeriodicalTask(WATCHDOG_TASK_NAME, WatchdogProcess, WATCHDOG_INTERVAL_TIME, WATCHDOG_DELAY_TIME);
@@ -274,10 +283,10 @@ static int32_t BusCenterServerInitSecondStep(void)
     if (InitUdidChangedEvent() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initUdidChangedEvent fail");
     }
-    RestoreRemoteUserInfo();
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    RestoreLocalUserInfo();
-#endif
+    if (InitConversationQuery() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initConversationQuery fail");
+    }
+    RestoreMultiUserInfo();
     return SOFTBUS_OK;
 }
 
@@ -356,5 +365,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitLnnLooper();
     DeinitAuthGenCertParallelList();
     DeinitAuthPreLinkList();
+    DeinitConversationQuery();
     LNN_LOGI(LNN_INIT, "bus center server deinit");
 }

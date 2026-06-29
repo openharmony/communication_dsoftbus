@@ -110,17 +110,7 @@ void LnnNotifyStateChangeEventFuzzTest()
 {
     string outData1;
     GenerateString(outData1);
-    char *state = (char *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
-    if (state == nullptr) {
-        COMM_LOGE(COMM_TEST, "state is null, softBusCalloc is failed!");
-        return;
-    }
-    if (strcpy_s(state, sizeof(SoftBusDifferentAccountState), outData1.c_str()) != EOK) {
-        COMM_LOGE(COMM_TEST, "state strcpy_s is failed");
-        SoftBusFree(state);
-        return;
-    }
-    LnnNotifyDifferentAccountChangeEvent(state);
+    LnnNotifyDifferentAccountChangeEvent(SOFTBUS_DIF_ACCOUNT_DEV_CHANGE);
 
     string outData2;
     GenerateString(outData2);

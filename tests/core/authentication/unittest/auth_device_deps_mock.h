@@ -85,7 +85,7 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
-    virtual int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId) = 0;
+    virtual int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
     virtual void LnnHbOnTrustedRelationIncreased(int32_t groupType) = 0;
     virtual void LnnHbOnTrustedRelationReduced(void) = 0;
@@ -148,7 +148,7 @@ public:
     MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t(const char *, NodeInfo *));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));
-    MOCK_METHOD2(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *, int32_t));
+    MOCK_METHOD1(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
     MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void(int32_t));
     MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void(void));

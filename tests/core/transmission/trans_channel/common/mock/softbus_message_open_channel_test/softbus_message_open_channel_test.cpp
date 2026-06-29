@@ -109,8 +109,7 @@ int32_t TestTransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
 
 /*
  * @tc.name: PackError001
- * @tc.desc: PackError001 test
- *           use the wrong parameter
+ * @tc.desc: PackError001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -132,8 +131,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackError001, TestSize.Level1)
 
 /*
  * @tc.name: PackRequest001
- * @tc.desc: PackRequest001 test
- *           use the wrong parameter
+ * @tc.desc: PackRequest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -164,8 +162,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
 
 /*
  * @tc.name: UnpackRequest001
- * @tc.desc: UnpackRequest001 test
- *           use the wrong parameter
+ * @tc.desc: UnpackRequest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -202,8 +199,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest001, TestSize.Level1)
 
 /*
  * @tc.name: UnpackRequest002
- * @tc.desc: UnpackRequest002 test
- *           use the wrong parameter
+ * @tc.desc: UnpackRequest001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -235,8 +231,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest002, TestSize.Level1)
 }
 /*
  * @tc.name: PackReply001
- * @tc.desc: PackReply001 test
- *           use the wrong parameter
+ * @tc.desc: PackReply001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -269,8 +264,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackReply001, TestSize.Level1)
 
 /*
  * @tc.name: UnpackReply001
- * @tc.desc: UnpackReply001 test
- *           use the wrong parameter
+ * @tc.desc: UnpackReply001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -302,8 +296,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReply001, TestSize.Level1)
 
 /*
  * @tc.name: UnpackReplyErrCode001
- * @tc.desc: UnpackReplyErrCode001 test
- *           use the wrong parameter
+ * @tc.desc: UnpackReplyErrCode001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */

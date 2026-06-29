@@ -535,6 +535,9 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest007, TestSize.Level1)
     NiceMock<ClientTransFileInterfaceMock> mock;
 
     UdpChannel *linkedChannel = CreateTestUdpChannel();
+    if (linkedChannel == nullptr) {
+        SoftBusFree(channelInfo);
+    }
     ASSERT_NE(linkedChannel, nullptr);
     linkedChannel->dfileId = TEST_DFILE_ID;
 
@@ -574,6 +577,9 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest008, TestSize.Level1)
     NiceMock<ClientTransFileInterfaceMock> mock;
 
     UdpChannel *linkedChannel = CreateTestUdpChannel();
+    if (linkedChannel == nullptr) {
+        SoftBusFree(channelInfo);
+    }
     ASSERT_NE(linkedChannel, nullptr);
     linkedChannel->dfileId = TEST_DFILE_ID;
 
@@ -788,6 +794,9 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest015, TestSize.Level1)
     NiceMock<ClientTransFileInterfaceMock> mock;
 
     UdpChannel *linkedChannel = CreateTestUdpChannel();
+    if (linkedChannel == nullptr) {
+        SoftBusFree(channelInfo);
+    }
     ASSERT_NE(linkedChannel, nullptr);
     linkedChannel->dfileId = TEST_DFILE_ID;
 
@@ -828,6 +837,9 @@ HWTEST_F(ClientTransFileTest, TransOnFileChannelOpenedTest016, TestSize.Level1)
     NiceMock<ClientTransFileInterfaceMock> mock;
 
     UdpChannel *linkedChannel = CreateTestUdpChannel();
+    if (linkedChannel == nullptr) {
+        SoftBusFree(channelInfo);
+    }
     ASSERT_NE(linkedChannel, nullptr);
     linkedChannel->dfileId = TEST_DFILE_ID;
 

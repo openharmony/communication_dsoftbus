@@ -54,6 +54,7 @@ static void LnnOnSleStateChanged(int32_t sleState)
             *notifyState = SOFTBUS_SLE_TURN_ON;
             break;
         default:
+            LNN_LOGW(LNN_STATE, "unknown sle state=%{public}d", sleState);
             break;
     }
 

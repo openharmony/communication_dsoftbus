@@ -144,7 +144,7 @@ int32_t LocalLedgerInitSleCapacity(NodeInfo* nodeInfo)
 {
     if (nodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "NodeInfo is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t sleCapacity = GetSleRangeCapacityPacked();
     char sleMacAddr[MAC_LEN] = { 0 };

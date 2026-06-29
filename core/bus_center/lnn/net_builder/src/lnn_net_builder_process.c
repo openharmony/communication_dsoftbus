@@ -802,7 +802,7 @@ static int32_t ProcessLeaveByAuthId(const void *para)
         if (item->connInfo.authHandle.authId != *authId || item->isDead) {
             continue;
         }
-        LNN_LOGI(LNN_BUILDER, "[id=%{public}u]leave reqeust, authId: %{public}" PRId64, item->id, *authId);
+        LNN_LOGI(LNN_BUILDER, "[id=%{public}u]leave request, authId: %{public}" PRId64, item->id, *authId);
         rc = LnnSendLeaveRequestToConnFsm(item);
         if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "send leaveReqeust to connection fsm[id=%{public}u] failed", item->id);

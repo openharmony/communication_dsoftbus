@@ -939,3 +939,32 @@ int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, cons
     (void)dataLen;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t ServerIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len)
+{
+    (void)deviceId;
+    (void)info;
+    (void)data;
+    (void)len;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcUnregisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+{
+    (void)info;
+    (void)nums;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

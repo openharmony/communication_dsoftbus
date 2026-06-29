@@ -288,7 +288,7 @@ int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         AUTH_LOGE(AUTH_HICHAIN,
-            "hichain identity service quere credential info failed, err=%{public}d, authErrCode=%{public}d",
+            "hichain identity service quere credential info fail, err=%{public}d, authErrCode=%{public}d",
             ret, authErrCode);
         return authErrCode;
     }
@@ -341,7 +341,7 @@ char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
         return NULL;
     }
 
-    AUTH_LOGD(AUTH_HICHAIN, "array size is %{public}d", arraySize);
+    AUTH_LOGD(AUTH_HICHAIN, "arraySize=%{public}d", arraySize);
 
     char *credId = NULL;
     char *credIdMem = NULL;
@@ -422,7 +422,7 @@ int32_t IdServiceAuthCredential(int32_t userId, int64_t authReqId, const char *a
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         AUTH_LOGE(AUTH_HICHAIN,
-            "hichain identity service authenticate credential failed, err=%{public}d, authErrCode=%{public}d",
+            "hichain identity service authenticate credential fail, err=%{public}d, authErrCode=%{public}d",
             ret, authErrCode);
         return authErrCode;
     }
@@ -445,7 +445,7 @@ int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t 
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         AUTH_LOGE(AUTH_HICHAIN,
-            "hichain identity service process cred data failed, ret=%{public}d, authErrCode=%{public}d",
+            "hichain identity service process cred data fail, ret=%{public}d, authErrCode=%{public}d",
             ret, authErrCode);
         return authErrCode;
     }
@@ -488,7 +488,7 @@ static int32_t GetCredInfoByUserIdAndCredId(int32_t userId, const char *credId, 
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         AUTH_LOGE(AUTH_HICHAIN,
-            "hichain identity service quere credential info failed, err=%{public}d, authErrCode=%{public}d", ret,
+            "hichain identity service quere credential info fail, err=%{public}d, authErrCode=%{public}d", ret,
             authErrCode);
         return authErrCode;
     }
@@ -606,7 +606,7 @@ static int32_t IdServiceQueryCredentialByUdid(int32_t userId, const char *udid, 
 
 static void OnCredAdd(const char *credId, const char *credInfo)
 {
-    AUTH_LOGI(AUTH_HICHAIN, "enter");
+    AUTH_LOGI(AUTH_HICHAIN, "OnCredAdd enter");
     if (credId == NULL || credInfo == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
         return;
@@ -618,12 +618,12 @@ static void OnCredDelete(const char *credId, const char *credInfo)
 {
     (void)credId;
     (void)credInfo;
-    AUTH_LOGI(AUTH_HICHAIN, "enter");
+    AUTH_LOGI(AUTH_HICHAIN, "OnCredDelete enter");
 }
 
 static void OnCredUpdate(const char *credId, const char *credInfo)
 {
-    AUTH_LOGI(AUTH_HICHAIN, "enter");
+    AUTH_LOGI(AUTH_HICHAIN, "OnCredUpdate enter");
     if (credId == NULL || credInfo == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "id service invalid param");
         return;
@@ -667,7 +667,7 @@ int32_t IdServiceGetCredInfoByUdid(const char *udid, SoftBusCredInfo *credInfo)
         uint32_t authErrCode = 0;
         (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
         AUTH_LOGE(AUTH_HICHAIN,
-            "hichain identity service quere credential info failed, err=%{public}d, authErrCode=%{public}d",
+            "hichain identity service quere credential info fail, err=%{public}d, authErrCode=%{public}d",
             ret, authErrCode);
         IdServiceDestroyCredentialList(&credInfoMsg);
         SoftBusFree(credId);

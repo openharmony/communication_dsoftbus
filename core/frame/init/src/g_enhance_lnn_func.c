@@ -242,6 +242,7 @@ void Register4thPartFunc(void *soHandle)
 
 void Register5thPartFunc(void *soHandle)
 {
+    g_lnnEnhanceFuncList.lnnRegisterPushListener = dlsym(soHandle, "LnnRegisterPushListener");
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfo = dlsym(soHandle, "LnnRetrieveDeviceInfo");
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfoByNetworkId = dlsym(soHandle, "LnnRetrieveDeviceInfoByNetworkId");
     g_lnnEnhanceFuncList.haveConcurrencyPreLinkNodeByLaneReqId = dlsym(soHandle,
@@ -280,6 +281,10 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnSendDeviceStateToMcu = dlsym(soHandle, "LnnSendDeviceStateToMcu");
     g_lnnEnhanceFuncList.lnnInitMcu = dlsym(soHandle, "LnnInitMcu");
     g_lnnEnhanceFuncList.authMetaGetPidByAuthId = dlsym(soHandle, "AuthMetaGetPidByAuthId");
+    g_lnnEnhanceFuncList.lnnGetAllRemoteDevInfo = dlsym(soHandle, "LnnGetAllRemoteDevInfo");
+    g_lnnEnhanceFuncList.lnnSendAgentData = dlsym(soHandle, "LnnSendAgentData");
+    g_lnnEnhanceFuncList.postLnnCloudEvent = dlsym(soHandle, "PostLnnCloudEvent");
+    g_lnnEnhanceFuncList.removeLnnCloudEvent = dlsym(soHandle, "RemoveLnnCloudEvent");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

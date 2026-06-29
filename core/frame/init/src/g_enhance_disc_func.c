@@ -108,7 +108,7 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.isUnknownDevice = dlsym(soHandle, "IsUnknownDevice");
     g_discEnhanceFuncList.discCoapExtInit = dlsym(soHandle, "DiscCoapExtInit");
     g_discEnhanceFuncList.discCoapExtDeinit = dlsym(soHandle, "DiscCoapExtDeinit");
-    
-    (void)DiscFeatureRegisterEnhanceFunc(soHandle);
+
+    DiscFeatureRegisterEnhanceFunc(soHandle);
     return SOFTBUS_OK;
 }

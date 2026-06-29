@@ -234,9 +234,9 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return GetAuthDeviceDepsIf()->LnnGetLocalNumInfo(key, info);
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
-    return GetAuthDeviceDepsIf()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+    return GetAuthDeviceDepsIf()->LnnDeleteSpecificTrustedDevInfo(udid);
 }
 
 int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
@@ -314,6 +314,22 @@ void SoftbusHitraceStart(uint32_t flags, uint64_t chainId)
 void SoftbusHitraceStop(void)
 {
     return GetAuthDeviceDepsIf()->SoftbusHitraceStop();
+}
+
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    if (userIds == nullptr || userIdsLen == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *userIds = nullptr;
+    *userIdsLen = 0;
+    return SOFTBUS_OK;
+}
+
+bool IsForegroundUserId(int32_t userId)
+{
+    (void)userId;
+    return true;
 }
 }
 } // namespace OHOS

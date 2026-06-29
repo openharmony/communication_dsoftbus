@@ -615,7 +615,7 @@ void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncRes
     int32_t retCode)
 {
     if (pkgName == NULL || info == NULL) {
-        LNN_LOGW(LNN_EVENT, "invalid paramters");
+        LNN_LOGW(LNN_EVENT, "invalid parameters");
         return;
     }
     LNN_LOGI(LNN_EVENT, "notify time Sync result. retCode=%{public}d", retCode);
@@ -666,7 +666,7 @@ void LnnNotifyBtStateChangeEvent(void *state)
 void LnnNotifySleStateChangeEvent(void *state)
 {
     if (state  == NULL) {
-        LNN_LOGE(LNN_EVENT, "invaild state param");
+        LNN_LOGE(LNN_EVENT, "invalid state param");
         return;
     }
     SoftBusSleState *sleState = (SoftBusSleState *)state;
@@ -741,18 +741,15 @@ void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifyDifferentAccountChangeEvent(void *state)
+void LnnNotifyDifferentAccountChangeEvent(SoftBusDifferentAccountState state)
 {
-    SoftBusDifferentAccountState *difAccountState = (SoftBusDifferentAccountState *)state;
-    if (*difAccountState < SOFTBUS_DIF_ACCOUNT_DEV_CHANGE || *difAccountState >= SOFTBUS_DIF_ACCOUNT_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad difAccountState=%{public}d", *difAccountState);
-        SoftBusFree(difAccountState);
+    if (state < SOFTBUS_DIF_ACCOUNT_DEV_CHANGE || state >= SOFTBUS_DIF_ACCOUNT_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad difAccountState=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED,
-        .status = (uint8_t)(*difAccountState)};
+        .status = (uint8_t)state};
     NotifyEvent((const LnnEventBasicInfo *)&event);
-    SoftBusFree(difAccountState);
 }
 
 void LnnNotifyUserStateChangeEvent(SoftBusUserState state)

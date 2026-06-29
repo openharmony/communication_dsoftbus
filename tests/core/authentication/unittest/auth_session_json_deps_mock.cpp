@@ -19,6 +19,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
+static constexpr int32_t MOCK_SOURCE_USER_ID = 100;
 void *g_authSessionJsonDepsInterface;
 AuthSessionJsonDepsInterfaceMock::AuthSessionJsonDepsInterfaceMock()
 {
@@ -486,7 +487,7 @@ int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **
     return GetInterface()->FindAndWaitAuthGenCertParaNodeById(requestId, genCertParaNode);
 }
 
-int32_t GetAllForegroundAccountIds(int32_t **userIds, int32_t *userIdsLen)
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
 {
     return GetInterface()->GetAllForegroundAccountIds(userIds, userIdsLen);
 }
@@ -601,6 +602,18 @@ cJSON *cJSON_Duplicate(const cJSON *item, cJSON_bool recurse)
 bool AddNumberToJsonObject(cJSON *json, const char *const string, int32_t num)
 {
     return GetInterface()->AddNumberToJsonObject(json, string, num);
+}
+
+int32_t AuthSessionGetSourceUserId(int64_t authSeq)
+{
+    (void)authSeq;
+    return MOCK_SOURCE_USER_ID;
+}
+
+bool IsForegroundUserId(int32_t userId)
+{
+    (void)userId;
+    return true;
 }
 }
 } // namespace OHOS

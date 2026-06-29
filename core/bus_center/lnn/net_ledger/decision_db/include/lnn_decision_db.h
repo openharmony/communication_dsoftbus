@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 int32_t LnnInsertSpecificTrustedDevInfo(const char *udid);
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId);
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid);
 int32_t LnnGetTrustedDevInfo(char **udidArray, uint32_t *num);
 bool LnnIsPotentialHomeGroup(const char *udid);
 int32_t UpdateRecoveryDeviceInfo(void);

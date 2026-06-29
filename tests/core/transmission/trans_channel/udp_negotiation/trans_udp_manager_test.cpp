@@ -1339,9 +1339,9 @@ HWTEST_F(TransUdpManagerTest, TransUdpUpdateAccessInfo001, TestSize.Level1)
     TransUdpChannelMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransUdpGetWakeUpInfoTest
- * @tc.desc: test TransGetUdpChannelById in different case.
+ * @tc.desc: test TransGetUdpChannelById in different case
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1393,9 +1393,9 @@ INSTANTIATE_TEST_SUITE_P(TransUdpGetWakeUpInfoTest, TransUdpGetWakeUpInfoTest, t
         SOFTBUS_OK, &g_testUdpChannelInfoRes, SOFTBUS_INVALID_PARAM, SOFTBUS_INVALID_PARAM}
 ));
 
-/**
+/*
  * @tc.name: TransUdpSetWakeUpInfoTest
- * @tc.desc: test TransSetUdpChannelById in different case.
+ * @tc.desc: test TransSetUdpChannelById in different case
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1443,4 +1443,37 @@ INSTANTIATE_TEST_SUITE_P(TransUdpSetWakeUpInfoTest, TransUdpSetWakeUpInfoTest, t
     // @tc.desc: test TransUdpSetWakeUpInfoTest node not found.
     TransUdpSetWakeUpInfoTestParam {TEST_CHANNEL_ID, true, true, nullptr, SOFTBUS_TRANS_NODE_NOT_FOUND}
 ));
+
+/*
+ * @tc.name: TransGetUdpChannelByPeerIdTest001
+ * @tc.desc: test TransGetUdpChannelByPeerId in different case
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpManagerTest, TransGetUdpChannelByPeerIdTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t ret = TransGetUdpChannelByPeerId(channelId, NULL);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransUdpChannelMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransGetUdpChannelByPeerId(channelId, NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    UdpChannelInfo channel;
+    (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+    ret = TransGetUdpChannelByPeerId(channelId, &channel);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
+
+    UdpChannelInfo *newChannel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    ASSERT_TRUE(newChannel != nullptr);
+    newChannel->info.peerData.channelId = channelId;
+    ret = TransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransGetUdpChannelByPeerId(channelId, &channel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransUdpChannelMgrDeinit();
+}
 }

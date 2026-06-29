@@ -964,11 +964,11 @@ static bool IsSupportCloudSync(DeviceInfo *device)
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     uint64_t localFeature = 0;
     if (LnnRetrieveDeviceInfoPacked(device->devId, &info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause retrive info fail");
+        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync because retrieve info fail");
         return false;
     }
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause get local feature fail");
+        LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync because get local feature fail");
         return false;
     }
     return IsFeatureSupport(localFeature, BIT_CLOUD_SYNC_DEVICE_INFO) &&

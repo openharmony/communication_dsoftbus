@@ -21,6 +21,7 @@
 
 #include "ble_range.h"
 #include "data_level.h"
+#include "softbus_agent_communication.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -82,6 +83,13 @@ int32_t LnnIpcAccountAuthInit(void);
 int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const char *serviceId);
 int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const uint8_t *data,
     uint32_t dataLen);
+void OnConversationRecvMsg(const ConversationBusiness *info, const char *deviceId,
+    const char *data, uint32_t length);
+int32_t LnnIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len);
+int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int32_t pid);
+int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid);
+int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
 
 #ifdef __cplusplus
 }

@@ -18,6 +18,7 @@
 #include <mutex>
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "auth_account_group_manager.h"
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
@@ -35,6 +36,7 @@
 #include "softbus_ddos.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
+#include "lnn_conversation_query.h"
 #include "lnn_ranging_manager.h"
 #include "softbus_init_common.h"
 
@@ -83,6 +85,11 @@ struct AccountAuthInfo {
     int32_t pid;
 };
 
+struct AgentCommunicationInfo {
+    ConversationBusiness info;
+    int32_t pid;
+};
+
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
@@ -91,6 +98,7 @@ static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
 static std::vector<MsdpRangeReqInfo *> g_msdpRangeReqInfo;
 static std::vector<TimeSyncReqInfo *> g_timeSyncRequestInfo;
 static std::vector<AccountAuthInfo *> g_accountAuthInfo;
+static std::vector<AgentCommunicationInfo *> g_agentCommunicationInfo;
 static std::shared_ptr<struct GroupStateChangeRequestInfo> g_groupStateChangeRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
@@ -1048,6 +1056,84 @@ static int32_t GetAccountAuthInfo(int64_t requestId, PkgNameAndPidInfo *info)
     return SOFTBUS_NOT_FIND;
 }
 
+static int32_t AddAgentCommunicationInfo(const ConversationBusiness *info, int32_t pid)
+{
+    AgentCommunicationInfo *item = new (std::nothrow) AgentCommunicationInfo();
+    if (item == nullptr) {
+        LNN_LOGE(LNN_EVENT, "create agent communication info fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (strncpy_s(item->info.bundleName, BUNDLE_NAME_LEN, info->bundleName, strlen(info->bundleName)) != EOK ||
+        strncpy_s(item->info.abilityName, ABILITY_NAME_LEN, info->abilityName, strlen(info->abilityName)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy bundleName or abilityName fail");
+        delete item;
+        return SOFTBUS_STRCPY_ERR;
+    }
+    item->pid = pid;
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    g_agentCommunicationInfo.push_back(item);
+    return SOFTBUS_OK;
+}
+
+static bool IsRepeatAgentCommunicationRequest(const ConversationBusiness *info)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    for (const auto &iter : g_agentCommunicationInfo) {
+        if (strncmp(info->bundleName, (*iter).info.bundleName, strlen(info->bundleName)) != 0 ||
+            strncmp(info->abilityName, (*iter).info.abilityName, strlen(info->abilityName)) != 0) {
+            continue;
+        }
+        return true;
+    }
+    return false;
+}
+
+static void RemoveAgentCommunicationInfo(const ConversationBusiness *info)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<AgentCommunicationInfo *>::iterator iter;
+    for (iter = g_agentCommunicationInfo.begin(); iter != g_agentCommunicationInfo.end();) {
+        if ((*iter) == nullptr) {
+            LNN_LOGE(LNN_EVENT, "iter is nullptr");
+            break;
+        }
+        if (strncmp(info->bundleName, (*iter)->info.bundleName, strlen(info->bundleName)) != 0 ||
+            strncmp(info->abilityName, (*iter)->info.abilityName, strlen(info->abilityName)) != 0) {
+            ++iter;
+            continue;
+        }
+        char *anonyBundlename = nullptr;
+        char *anonyAbilityname = nullptr;
+        Anonymize(info->bundleName, &anonyBundlename);
+        Anonymize(info->abilityName, &anonyAbilityname);
+        LNN_LOGI(LNN_EVENT, "delete success, bundlename=%{public}s, abilityname=%{public}s",
+            anonyBundlename, anonyAbilityname);
+        AnonymizeFree(anonyBundlename);
+        AnonymizeFree(anonyAbilityname);
+        delete *iter;
+        iter = g_agentCommunicationInfo.erase(iter);
+    }
+}
+
+static int32_t GetAgentCommunicationInfo(const ConversationBusiness *info, int32_t *pid)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<AgentCommunicationInfo *>::iterator iter;
+    for (iter = g_agentCommunicationInfo.begin(); iter != g_agentCommunicationInfo.end();) {
+        if ((*iter) == nullptr) {
+            LNN_LOGE(LNN_EVENT, "iter is nullptr");
+            break;
+        }
+        if (strncmp(info->bundleName, (*iter)->info.bundleName, strlen(info->bundleName)) == 0 ||
+            strncmp(info->abilityName, (*iter)->info.abilityName, strlen(info->abilityName)) == 0) {
+            *pid = (*iter)->pid;
+            return SOFTBUS_OK;
+        }
+        ++iter;
+    }
+    return SOFTBUS_NOT_FIND;
+}
+
 static bool OnTransmitAuthResult(int64_t requestId, const uint8_t *data, uint32_t dataLen)
 {
     if (data == nullptr) {
@@ -1160,4 +1246,56 @@ int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t reque
         return ret;
     }
     return ret;
+}
+
+void OnConversationRecvMsg(const ConversationBusiness *info, const char *deviceId,
+    const char *data, uint32_t length)
+{
+    int32_t pid = 0;
+    int32_t ret = GetAgentCommunicationInfo(info, &pid);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "GetAgentCommunicationInfo, ret=%{public}d", ret);
+        return;
+    }
+    ClientOnConversationRecvMsg(pid, info, deviceId, data, length);
+}
+
+int32_t LnnIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len)
+{
+    return LnnPostConversationData(deviceId, info, data, len);
+}
+
+int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int32_t pid)
+{
+    if (info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    if (!IsRepeatAgentCommunicationRequest(info)) {
+        ret = AddAgentCommunicationInfo(info, pid);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "add agent communication info failed, ret=%{public}d", ret);
+            return ret;
+        }
+    }
+    ret = LnnRegisterConversationListener(info);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "register failed, ret=%{public}d", ret);
+        RemoveAgentCommunicationInfo(info);
+        return ret;
+    }
+    return ret;
+}
+
+int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid)
+{
+    RemoveAgentCommunicationInfo(info);
+    return LnnUnregisterConversationListener(info);
+}
+
+int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+{
+    return LnnGetTrustedDevices(info, nums);
 }

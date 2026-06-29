@@ -335,3 +335,18 @@ void ClientOnErrorAuthResult(PkgNameAndPidInfo *info, int64_t requestId, int32_t
     }
     clientProxy->OnErrorAuthResult(info->pkgName, requestId, operationCode, errorCode, returnData);
 }
+
+void ClientOnConversationRecvMsg(int32_t pid, const ConversationBusiness *info, const char *deviceId,
+    const char *data, uint32_t length)
+{
+    if (info == nullptr || deviceId == nullptr || data == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return;
+    }
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->abilityName, pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return;
+    }
+    clientProxy->OnConversationRecvMsg(info, deviceId, data, length);
+}

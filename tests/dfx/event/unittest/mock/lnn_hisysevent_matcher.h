@@ -138,6 +138,12 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isDelayFree);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isBuildRetry);
     MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.isNoCapAlloc);
+    MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.dataLen);
+    MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.channelType);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.channelResult);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.channelRtt);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.p2pResult);
+    MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.p2pLatency);
     MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.sourceType);
     MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.dataType);
     MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.isReliable);
@@ -155,6 +161,9 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdidHash);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
     MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.bundleName);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.abilityName);
+    MatchLnnEventNameTypeExtraStrParam(params, ++index, extra.statsTime);
 
     EXPECT_EQ(++index, validSize);
     return true;

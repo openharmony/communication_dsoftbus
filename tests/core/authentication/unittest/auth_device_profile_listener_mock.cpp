@@ -79,9 +79,9 @@ bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t loca
     return GetInterface()->DpHasAccessControlProfile(udid, isNeedUserId, localUserId);
 }
 
-int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid)
 {
-    return GetInterface()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+    return GetInterface()->LnnDeleteSpecificTrustedDevInfo(udid);
 }
 
 SoftBusScreenState GetScreenState(void)
@@ -122,6 +122,41 @@ int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len
 int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
 {
     return GetInterface()->JudgeDeviceTypeAndGetOsAccountIds();
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    (void)key;
+    if (info != nullptr) {
+        *info = 0;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetRemoteNumInfo(const char *id, IdCategory type, int32_t *info)
+{
+    (void)id;
+    (void)type;
+    if (info != nullptr) {
+        *info = 0;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
+{
+    if (userIds == nullptr || userIdsLen == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *userIds = nullptr;
+    *userIdsLen = 0;
+    return SOFTBUS_OK;
+}
+
+bool IsForegroundUserId(int32_t userId)
+{
+    (void)userId;
+    return true;
 }
 }
 } // namespace OHOS

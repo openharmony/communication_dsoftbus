@@ -300,3 +300,47 @@ int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t reque
     LNN_LOGI(LNN_EVENT, "not implement");
     return SOFTBUS_OK;
 }
+
+void OnConversationRecvMsg(const ConversationBusiness *info, const char *deviceId,
+    const char *data, uint32_t length)
+{
+    (void)info;
+    (void)deviceId;
+    (void)data;
+    (void)length;
+    LNN_LOGI(LNN_EVENT, "not implement");
+}
+
+int32_t LnnIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
+    const char *data, uint32_t len)
+{
+    (void)deviceId;
+    (void)info;
+    (void)data;
+    (void)len;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int32_t pid)
+{
+    (void)info;
+    (void)pid;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid)
+{
+    (void)info;
+    (void)pid;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
+{
+    (void)info;
+    (void)nums;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}

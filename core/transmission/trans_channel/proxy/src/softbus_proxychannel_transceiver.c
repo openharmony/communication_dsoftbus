@@ -44,6 +44,7 @@
 #include "trans_log.h"
 
 #define ID_OFFSET (1)
+
 #define WAIT_LISTEN_CHECK_DELAY     (200)
 #define WAIT_LISTEN_CHECK_NUM       (50)
 

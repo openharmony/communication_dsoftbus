@@ -116,7 +116,7 @@ int32_t GetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len)
         return SOFTBUS_OK;
     }
     freeifaddrs(allAddr);
-    COMM_LOGE(COMM_ADAPTER, "not found ifname %{public}s ip", ifName);
+    COMM_LOGE(COMM_ADAPTER, "not found ip, ifName=%{public}s", ifName);
     return SOFTBUS_NETWORK_GET_IP_ADDR_FAILED;
 }
 

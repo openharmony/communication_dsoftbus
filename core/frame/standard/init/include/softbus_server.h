@@ -16,6 +16,7 @@
 #ifndef SOFTBUS_SERVER_H_
 #define SOFTBUS_SERVER_H_
 
+#include "softbus_agent_communication.h"
 #include "softbus_server_stub.h"
 #include "system_ability.h"
 
@@ -101,6 +102,11 @@ public:
     int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId) override;
     int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data,
         uint32_t dataLen) override;
+    int32_t PostConversationData(const char *deviceId, const ConversationBusiness *info,
+        const char *data, uint32_t len) override;
+    int32_t RegisterConversationListener(const ConversationBusiness *info) override;
+    int32_t UnregisterConversationListener(const ConversationBusiness *info) override;
+    int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums) override;
 protected:
     void OnStart() override;
     void OnStop() override;

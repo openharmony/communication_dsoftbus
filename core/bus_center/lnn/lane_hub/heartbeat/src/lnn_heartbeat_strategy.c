@@ -669,7 +669,7 @@ static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
     if (msgPara->strategyType != STRATEGY_HB_SEND_SINGLE) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB single send get invaild strategy");
+        LNN_LOGE(LNN_HEART_BEAT, "HB single send get invalid strategy");
         return SOFTBUS_INVALID_PARAM;
     }
     if (ProcessSendOnceStrategy(hbFsm, msgPara, NULL) != SOFTBUS_OK) {
@@ -700,7 +700,7 @@ static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
     if (msgPara->strategyType != STRATEGY_HB_SEND_FIXED_PERIOD) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB fixed period send get invaild strategy");
+        LNN_LOGE(LNN_HEART_BEAT, "HB fixed period send get invalid strategy");
         return SOFTBUS_INVALID_PARAM;
     }
     if (ProcessSendOnceStrategy(hbFsm, msgPara, NULL) != SOFTBUS_OK) {
@@ -722,7 +722,7 @@ static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
     if ((msgPara->hbType & HEARTBEAT_TYPE_BLE_V0) == 0 || msgPara->strategyType != STRATEGY_HB_SEND_ADJUSTABLE_PERIOD) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB adjustable send get invaild strategy");
+        LNN_LOGE(LNN_HEART_BEAT, "HB adjustable send get invalid strategy");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnRemoveProcessSendOnceMsg(hbFsm, msgPara->hbType, msgPara->strategyType);
@@ -751,7 +751,7 @@ static int32_t DirectAdvSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
     if (msgPara->strategyType != STRATEGY_HB_SEND_DIRECT) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB send get invaild strategy");
+        LNN_LOGE(LNN_HEART_BEAT, "HB send get invalid strategy");
         return SOFTBUS_INVALID_PARAM;
     }
     if (ProcessSendOnceStrategy(hbFsm, msgPara, NULL) != SOFTBUS_OK) {
@@ -1137,7 +1137,7 @@ int32_t LnnStartHbByTypeAndStrategyDirectly(LnnHeartbeatType hbType, LnnHeartbea
     bool isRelay, const char *networkId, uint64_t timeout)
 {
     if (networkId == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "invaild param");
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     LnnProcessSendOnceMsgPara msgPara = {

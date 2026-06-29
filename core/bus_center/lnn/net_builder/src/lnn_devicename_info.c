@@ -193,7 +193,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         return;
     }
     if (strcmp(peerNodeInfo.deviceInfo.nickName, nickName) == 0) {
-        LNN_LOGE(LNN_BUILDER, "nickName not change, ignore this msg");
+        LNN_LOGI(LNN_BUILDER, "nickName not change, ignore this msg");
         return;
     }
     if (!LnnSetDLDeviceNickName(networkId, nickName)) {

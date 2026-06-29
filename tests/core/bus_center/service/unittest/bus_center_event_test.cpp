@@ -712,11 +712,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest030, TestSize.Level1)
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest031, TestSize.Level1)
 {
-    SoftBusDifferentAccountState *difAccountState =
-        (SoftBusDifferentAccountState *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
-    ASSERT_TRUE(difAccountState != nullptr);
-    *difAccountState = SOFTBUS_DIF_ACCOUNT_DEV_CHANGE;
-    EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent((void *)difAccountState));
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent(SOFTBUS_DIF_ACCOUNT_DEV_CHANGE));
 }
 
 /* @tc.name: BusCenterEventTest032
@@ -727,11 +723,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest031, TestSize.Level1)
  */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest032, TestSize.Level1)
 {
-    SoftBusDifferentAccountState *difAccountState =
-        (SoftBusDifferentAccountState *)SoftBusCalloc(sizeof(SoftBusDifferentAccountState));
-    ASSERT_TRUE(difAccountState != nullptr);
-    *difAccountState = SOFTBUS_DIF_ACCOUNT_UNKNOWN;
-    EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent((void *)difAccountState));
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyDifferentAccountChangeEvent(SOFTBUS_DIF_ACCOUNT_UNKNOWN));
 }
 
 /*

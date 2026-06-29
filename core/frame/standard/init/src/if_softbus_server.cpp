@@ -284,4 +284,33 @@ int32_t ISoftBusServer::ProcessAccountAuth(const char *pkgName, int64_t requestI
     (void)dataLen;
     return SOFTBUS_IPC_ERR;
 }
+
+int32_t ISoftBusServer::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+{
+    (void)info;
+    (void)nums;
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::PostConversationData(const char *deviceId,
+    const ConversationBusiness *info, const char *data, uint32_t len)
+{
+    (void)deviceId;
+    (void)info;
+    (void)data;
+    (void)len;
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::RegisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::UnregisterConversationListener(const ConversationBusiness *info)
+{
+    (void)info;
+    return SOFTBUS_IPC_ERR;
+}
 } // namespace OHOS
