@@ -175,7 +175,7 @@ static void RestoreDeviceInfoIfUnlocked(void)
     if (!IsActiveOsAccountUnlocked()) {
         return;
     }
-    LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");      
+    LNN_LOGI(LNN_INIT, "user unlocked try load local deviceinfo");
     RestoreLocalDeviceInfo();
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     RestoreLocalUserInfo();
