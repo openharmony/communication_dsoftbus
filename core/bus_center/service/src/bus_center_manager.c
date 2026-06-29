@@ -240,6 +240,7 @@ static void RestoreMultiUserInfo(void)
 #else
     RestoreRemoteUserInfo();
 }
+#endif
 
 static int32_t BusCenterServerInitSecondStep(void)
 {
