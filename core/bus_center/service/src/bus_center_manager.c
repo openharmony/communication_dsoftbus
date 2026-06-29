@@ -239,8 +239,8 @@ static void RestoreMultiUserInfo(void)
     RestoreLocalUserInfo();
 #else
     RestoreRemoteUserInfo();
-}
 #endif
+}
 
 static int32_t BusCenterServerInitSecondStep(void)
 {
