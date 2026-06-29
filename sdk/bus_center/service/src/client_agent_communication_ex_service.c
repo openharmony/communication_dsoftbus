@@ -86,7 +86,7 @@ int32_t PostConversationData(const char *deviceId, const ConversationBusiness *i
     }
     int32_t ret = CommonInit(info->abilityName);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "common init fail, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
         DfxRecordSdkPostConversationData(deviceId, info, len, timeMs, ret);
         return ret;
     }
@@ -127,7 +127,7 @@ int32_t RegisterConversationListener(const ConversationBusiness *info, const Con
     }
     int32_t ret = CommonInit(info->abilityName);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "common init fail, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
         DfxRecordSdkRegisterConversationListener(info, ret);
         return ret;
     }
@@ -136,19 +136,19 @@ int32_t RegisterConversationListener(const ConversationBusiness *info, const Con
     return ret;
 }
 
-void UnregisterConversationListener(const ConversationBusiness *info)
+int32_t UnregisterConversationListener(const ConversationBusiness *info)
 {
     LNN_LOGI(LNN_EVENT,  "enter");
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT,  "invalid param");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(info->abilityName);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "common init fail, ret=%d", ret);
-        return;
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return ret;
     }
-    UnregisterConversationListenerInner(info);
+    return UnregisterConversationListenerInner(info);
 }
 
 int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)

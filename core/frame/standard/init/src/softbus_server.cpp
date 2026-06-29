@@ -817,10 +817,10 @@ int32_t SoftBusServer::RegisterConversationListener(const ConversationBusiness *
     return LnnIpcRegisterConversationListener(info, callingPid);
 }
 
-void SoftBusServer::UnregisterConversationListener(const ConversationBusiness *info)
+int32_t SoftBusServer::UnregisterConversationListener(const ConversationBusiness *info)
 {
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    LnnIpcUnregisterConversationListener(info, callingPid);
+    return LnnIpcUnregisterConversationListener(info, callingPid);
 }
 
 int32_t SoftBusServer::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)

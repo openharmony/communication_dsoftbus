@@ -123,7 +123,8 @@ HWTEST_F(LnnConversationQueryTest, LNN_CONVERSATION_REGISTER_LISTENER_TEST_001, 
  */
 HWTEST_F(LnnConversationQueryTest, LNN_CONVERSATION_REMOVE_LISTENER_TEST_001, TestSize.Level1)
 {
-    EXPECT_NO_FATAL_FAILURE(LnnUnregisterConversationListener(nullptr));
+    int32_t ret = LnnUnregisterConversationListener(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
  
 /*

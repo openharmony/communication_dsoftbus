@@ -429,13 +429,11 @@ int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info)
     return ret;
 }
 
-void ServerIpcUnregisterConversationListener(const ConversationBusiness *info)
+int32_t ServerIpcUnregisterConversationListener(const ConversationBusiness *info)
 {
-    if (CheckAndInitBusCenterServerProxyInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "server not init");
-        return;
-    }
-    g_serverProxy->UnregisterConversationListener(info);
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    return g_serverProxy->UnregisterConversationListener(info);
 }
 
 int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)

@@ -2878,8 +2878,7 @@ int32_t SoftBusServerStub::UnregisterConversationListenerInner(MessageParcel &da
         COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
         return SOFTBUS_STRCPY_ERR;
     }
-    UnregisterConversationListener(&info);
-    int32_t retReply = SOFTBUS_OK;
+    int32_t retReply = UnregisterConversationListener(&info);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed!");
         return SOFTBUS_IPC_ERR;

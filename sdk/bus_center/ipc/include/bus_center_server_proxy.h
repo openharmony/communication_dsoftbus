@@ -68,7 +68,7 @@ int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, cons
 int32_t ServerIpcPostConversationData(const char *deviceId, const ConversationBusiness *info,
     const char *data, uint32_t len);
 int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info);
-void ServerIpcUnregisterConversationListener(const ConversationBusiness *info);
+int32_t ServerIpcUnregisterConversationListener(const ConversationBusiness *info);
 int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
 
 #ifdef __cplusplus
