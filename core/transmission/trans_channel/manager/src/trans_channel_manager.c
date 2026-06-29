@@ -1069,7 +1069,7 @@ int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     int32_t ret = SOFTBUS_TRANS_NOT_MATCH;
     if (connInfo->type == CONNECT_TCP) {
         ret = CheckIsWifiAuthChannel(connInfo);

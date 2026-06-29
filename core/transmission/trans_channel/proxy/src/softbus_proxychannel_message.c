@@ -952,9 +952,8 @@ static void TransPagingParseMessageEx(
 
 static void PagingSendBadKeyMsg(ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash)
 {
-    if (msg->msgHead.type != PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
-        return;
-    }
+    TRANS_CHECK_AND_RETURN_LOGE(msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE,
+        TRANS_CTRL, "invalid message type, type=%{public}hhu", msg->msgHead.type);
     TRANS_LOGI(TRANS_CTRL, "send bad key by handshake");
     TransPagingSendBadKeyMsg(msg, accountHash, udidHash);
 }

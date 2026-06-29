@@ -228,7 +228,6 @@ int32_t TransOpenSessionInner(const char *sessionName, const char *peerNetworkId
         .pid = getpid(),
     };
     (void)memcpy_s(param.qos, sizeof(QosTV) * param.qosCount, info, sizeof(QosTV) * param.qosCount);
-    
     TransInfo transInfo = { 0 };
     int32_t ret = TransOpenChannel(&param, &transInfo);
     if (ret != SOFTBUS_OK) {

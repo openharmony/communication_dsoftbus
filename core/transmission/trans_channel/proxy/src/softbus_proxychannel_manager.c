@@ -241,16 +241,17 @@ int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info)
                 TRANS_LOGE(TRANS_SVC, "memcpy_s peerdata failed");
                 return SOFTBUS_MEM_ERR;
             }
-            if (TransPagingUpdateDataConfig(&item->appInfo) != SOFTBUS_OK) {
-                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-                TRANS_LOGE(TRANS_SVC, "update data config failed");
-                return SOFTBUS_GET_CONFIG_VAL_ERR;
-            }
             if (memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
                 return SOFTBUS_MEM_ERR;
             }
+            if (TransPagingUpdateDataConfig(&info->appInfo) != SOFTBUS_OK) {
+                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+                TRANS_LOGE(TRANS_SVC, "update data config failed");
+                return SOFTBUS_GET_CONFIG_VAL_ERR;
+            }
+            item->appInfo.myData.dataConfig = info->appInfo.myData.dataConfig;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
