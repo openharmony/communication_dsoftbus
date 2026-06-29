@@ -990,12 +990,12 @@ HWTEST_F(ConnBleTransTest, ConnBlePostBytesInner001, TestSize.Level1)
 
     uint8_t *data = static_cast<uint8_t *>(SoftBusMalloc(sizeof(uint8_t)));
     ASSERT_NE(nullptr, data);
-    ret = ConnBlePostBytesInner(connectionId, data, 0, 0, 0, 0, nullptr);
+    ret = ConnBlePostBytesInner(connectionId, data, 0, 0, 0, 0, 0, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     data = static_cast<uint8_t *>(SoftBusMalloc(sizeof(uint8_t)));
     ASSERT_NE(nullptr, data);
-    ret = ConnBlePostBytesInner(connectionId, data, MAX_DATA_LEN + 1, 0, 0, 0, nullptr);
+    ret = ConnBlePostBytesInner(connectionId, data, MAX_DATA_LEN + 1, 0, 0, 0, 0, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
