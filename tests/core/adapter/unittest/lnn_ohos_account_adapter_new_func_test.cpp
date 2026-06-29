@@ -46,47 +46,47 @@ void LNNOhosAccountAdapterNewFuncTest::SetUp() { }
 void LNNOhosAccountAdapterNewFuncTest::TearDown() { }
 
 /*
- * @tc.name: GetAllForegroundAccounts_Test_001
- * @tc.desc: Test GetAllForegroundAccounts with null userIds returns SOFTBUS_INVALID_PARAM
+ * @tc.name: GetAllForegroundAccountIds_Test_001
+ * @tc.desc: Test GetAllForegroundAccountIds with null userIds returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNOhosAccountAdapterNewFuncTest, GetAllForegroundAccounts_Test_001, TestSize.Level1)
+HWTEST_F(LNNOhosAccountAdapterNewFuncTest, GetAllForegroundAccountIds_Test_001, TestSize.Level1)
 {
     int32_t *userIds = nullptr;
     uint32_t userIdsLen = 0;
-    int32_t ret = GetAllForegroundAccounts(&userIds, &userIdsLen);
+    int32_t ret = GetAllForegroundAccountIds(&userIds, &userIdsLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
- * @tc.name: GetAllForegroundAccounts_Test_002
- * @tc.desc: Test GetAllForegroundAccounts with null userIdsLen returns SOFTBUS_INVALID_PARAM
+ * @tc.name: GetAllForegroundAccountIds_Test_002
+ * @tc.desc: Test GetAllForegroundAccountIds with null userIdsLen returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNOhosAccountAdapterNewFuncTest, GetAllForegroundAccounts_Test_002, TestSize.Level1)
+HWTEST_F(LNNOhosAccountAdapterNewFuncTest, GetAllForegroundAccountIds_Test_002, TestSize.Level1)
 {
     int32_t *userIds = nullptr;
     uint32_t *userIdsLen = nullptr;
-    int32_t ret = GetAllForegroundAccounts(&userIds, userIdsLen);
+    int32_t ret = GetAllForegroundAccountIds(&userIds, userIdsLen);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
- * @tc.name: GetAllForegroundAccounts_Test_003
- * @tc.desc: Test GetAllForegroundAccounts with valid params (returns MEM_ERR in mock)
+ * @tc.name: GetAllForegroundAccountIds_Test_003
+ * @tc.desc: Test GetAllForegroundAccountIds with valid params (returns MEM_ERR in mock)
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
  */
-HWTEST_F(LNNOhosAccountAdapterNewFuncTest, GetAllForegroundAccounts_Test_003, TestSize.Level1)
+HWTEST_F(LNNOhosAccountAdapterNewFuncTest, GetAllForegroundAccountIds_Test_003, TestSize.Level1)
 {
     int32_t *userIds = nullptr;
     uint32_t userIdsLen = 0;
-    int32_t ret = GetAllForegroundAccounts(&userIds, &userIdsLen);
+    int32_t ret = GetAllForegroundAccountIds(&userIds, &userIdsLen);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED);
 }
 
