@@ -498,4 +498,90 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransSendLimitChangeDataToCoreTest001,
     int32_t ret = TransSendLimitChangeDataToCore(TEST_CHANNELID, FILE_PRIORITY_BK, NSTACKX_EOK);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/*
+ * @tc.name: TransCheckIsSecondPathTest001
+ * @tc.desc: test TransCheckIsSecondPath
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransCheckIsSecondPathTest001, TestSize.Level1)
+{
+    int32_t ret = ClientTransChannelInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    int32_t routeType = -1;
+    bool isSecondPath = TransCheckIsSecondPath(TEST_CHANNELID, &routeType);
+    EXPECT_EQ(false, isSecondPath);
+
+    UdpChannel *udpChannel = static_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_TRUE(udpChannel != nullptr);
+    udpChannel->channelId = TEST_CHANNELID;
+    udpChannel->routeType = WIFI_USB;
+    udpChannel->isReserveChannel = true;
+    ret = ClientTransAddUdpChannel(udpChannel);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    isSecondPath = TransCheckIsSecondPath(TEST_CHANNELID, &routeType);
+    EXPECT_EQ(true, isSecondPath);
+    EXPECT_EQ(WIFI_USB, routeType);
+
+    (void)TransDeleteUdpChannel(udpChannel->channelId);
+}
+
+/*
+ * @tc.name: TransAddSecondPathFailTest001
+ * @tc.desc: test TransAddSecondPathFail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, TransAddSecondPathFailTest001, TestSize.Level1)
+{
+    int32_t ret = ClientTransChannelInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransAddSecondPathFail(INVALID_CHANNEL_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *udpChannel = static_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_TRUE(udpChannel != nullptr);
+    udpChannel->channelId = TEST_CHANNELID;
+    udpChannel->isReserveChannel = true;
+    ret = TransAddSecondPathFail(udpChannel->channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    (void)TransDeleteUdpChannel(udpChannel->channelId);
+}
+
+/*
+ * @tc.name: GetChannelTypeByChannelIdTest001
+ * @tc.desc: test GetChannelTypeByChannelId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerStaticTest, GetChannelTypeByChannelIdTest001, TestSize.Level1)
+{
+    int32_t channelId = 1000;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+    int32_t ret = ClientTransChannelInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    UdpChannel *channel = static_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->channelId = 1;
+
+    ret = GetChannelTypeByChannelId(channelId, &channelType);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+
+    ret = ClientTransAddUdpChannel(channel);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+
+    ret = GetChannelTypeByChannelId(channelId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+
+    ret = GetChannelTypeByChannelId(channel->channelId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    (void)TransDeleteUdpChannel(channel->channelId);
+    ClientTransUdpMgrDeinit();
+}
 } // namespace OHOS

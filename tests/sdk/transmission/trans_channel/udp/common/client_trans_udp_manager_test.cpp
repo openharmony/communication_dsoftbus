@@ -308,6 +308,21 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.
 }
 
 /*
+ * @tc.name: ClientTransCloseReserveUdpChannelTest001
+ * @tc.desc: client trans close reserve udp channel test
+ *           use the wrong or normal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseReserveUdpChannelTest001, TestSize.Level1)
+{
+    int32_t ret;
+    RouteType routeType = WIFI_P2P;
+    ret = ClientTransCloseReserveUdpChannel(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN, routeType, false);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
+}
+
+/*
  * @tc.name: TransUdpChannelSendStreamTest001
  * @tc.desc: trans udp channel send stream test
  *           use the wrong or normal parameter
@@ -880,5 +895,31 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest002, TestSize.Level
     ret = TransDeleteUdpChannel(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ClientTransUdpMgrDeinit();
+}
+
+/*
+ * @tc.name: TransSetUdpChannelExtraInfoTest
+ * @tc.desc: trans set udpchannel extra info test, use the wrong or normal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelExtraInfoTest, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t ret = TransSetUdpChannelExtraInfo(channelId, nullptr, 0);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/*
+ * @tc.name: TransGetUdpChannelExtraInfoTest
+ * @tc.desc: trans get udpchannel extra info test, use the wrong or normal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelExtraInfoTest, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t ret = TransGetUdpChannelExtraInfo(channelId, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // namespace OHOS

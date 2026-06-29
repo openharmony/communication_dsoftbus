@@ -121,6 +121,24 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 
+/**
+ * @tc.name: ClientTransCloseReserveChannelTest001
+ * @tc.desc: client trans channel manager test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseReserveChannelTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t ret = ClientTransCloseChannel(INVALID_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT, 1);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_BUTT, 1);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
+    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_UNDEFINED, 1);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+}
 
 /**
  * @tc.name: ClientTransChannelSendBytesTest001

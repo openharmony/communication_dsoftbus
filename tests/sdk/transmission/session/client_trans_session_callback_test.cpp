@@ -1042,6 +1042,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestS
     int32_t channelId = TRANS_TEST_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_BUTT;
     QoSEvent event = QOS_NOT_SATISFIED;
+    SocketEventType mulEvent = EVENT_TYPE_MULTIPATH;
     QosTV qos;
     uint32_t count = 0;
     uint64_t timestamp = 0;
@@ -1057,6 +1058,48 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest23, TestS
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ClientTransOnQos(channelId, channelType, event, &qos, count);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientTransOnEvent(channelId, channelType, mulEvent, nullptr, sizeof(MultipathEvent));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/*
+ * @tc.name: TransClientSessionCallbackTest24
+ * @tc.desc: test ClientTransOnEvent.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest24, TestSize.Level1)
+{
+    SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    TestGenerateCommParam(sessionParam);
+    SessionInfo *session = TestGenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    int32_t channelId = TRANS_TEST_CHANNEL_ID;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+    uint32_t count = 0;
+    uint64_t timestamp = 0;
+    SocketEventType event = EVENT_TYPE_MULTIPATH;
+    MultipathEvent eventData;
+    memset_s(&eventData, sizeof(MultipathEvent), 0, sizeof(MultipathEvent));
+
+    int32_t ret = ClientTransOnEvent(channelId, channelType, event, nullptr, count);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientTransOnEvent(channelId, channelType, event, (const void *)&eventData, count);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientTransOnEvent(channelId, channelType, event, (const void *)&eventData, count);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
