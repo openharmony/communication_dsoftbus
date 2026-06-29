@@ -64,7 +64,7 @@ ohos_shared_library("conversation") {
     debug = false
   }
  
-  relative_install_dir = "module/distributedSoftbus"
+  relative_install_dir = "module/distributedsoftbus"
  
   subsystem_name = "communication"
   part_name = "dsoftbus"
