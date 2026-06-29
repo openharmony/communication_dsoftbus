@@ -111,5 +111,11 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetTransManagerInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
+
+int32_t TransAsyncGetLaneReserveInfo(
+    const SessionParam *param, uint32_t *laneHandle, uint64_t laneId, const AppInfo *info)
+{
+    return GetTransManagerInterface()->TransAsyncGetLaneReserveInfo(param, laneHandle, laneId, info);
+}
 }
 }

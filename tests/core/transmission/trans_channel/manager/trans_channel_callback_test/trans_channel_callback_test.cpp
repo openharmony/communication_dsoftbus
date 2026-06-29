@@ -46,8 +46,7 @@ void TransChannelCallbackTest::TearDownTestCase(void)
 
 /*
  * @tc.name: TransServerOnChannelOpened001
- * @tc.desc: TransServerOnChannelOpened001 test
- *           use the wrong parameter
+ * @tc.desc: TransServerOnChannelOpened001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -83,8 +82,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
 
 /*
  * @tc.name: TransServerOnChannelOpenFailed001
- * @tc.desc: TransServerOnChannelOpenFailed001 test
- *           use the wrong parameter
+ * @tc.desc: TransServerOnChannelOpenFailed001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -100,8 +98,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpenFailed001, TestSize.L
 
 /*
  * @tc.name: TransServerOnMsgReceived001
- * @tc.desc: TransServerOnMsgReceived001 test
- *           use the wrong parameter
+ * @tc.desc: TransServerOnMsgReceived001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -139,8 +136,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
 
 /*
  * @tc.name: TransServerOnQosEvent001
- * @tc.desc: TransServerOnQosEvent001 test
- *           use the wrong parameter
+ * @tc.desc: TransServerOnQosEvent001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -175,8 +171,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnQosEvent001, TestSize.Level1)
 
 /*
  * @tc.name: TransServerOnChannelLinkDown001
- * @tc.desc: TransServerOnChannelLinkDown001 test
- *           use the wrong parameter
+ * @tc.desc: TransServerOnChannelLinkDown001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -208,8 +203,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelLinkDown001, TestSize.Lev
 
 /*
  * @tc.name: TransServerOnChannelClosed
- * @tc.desc: TransServerOnChannelClosed test
- *           use the wrong parameter
+ * @tc.desc: TransServerOnChannelClosed, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
