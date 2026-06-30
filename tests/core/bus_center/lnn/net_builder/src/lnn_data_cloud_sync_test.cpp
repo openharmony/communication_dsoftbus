@@ -95,7 +95,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Le
     char *key = nullptr;
     int32_t ret = LnnLedgerDataChangeSyncToDB(key, VALUE, strlen(VALUE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    LnnDeleteSyncToDB();
+    LnnDeleteSyncToDB(0, 0, false);
 }
 
 /*

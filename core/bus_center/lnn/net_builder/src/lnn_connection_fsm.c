@@ -28,6 +28,7 @@
 #include "lnn_connection_fsm_process.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_distributed_user_info.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_local_net_ledger.h"
@@ -1031,6 +1032,7 @@ static bool IsRepeatDeviceId(NodeInfo *info)
     }
     if (!LnnIsNodeOnline(&oldInfo)) {
         LnnRemoveNode(oldInfo.deviceInfo.deviceUdid);
+        LnnRemoveUserInfoNode(oldInfo.deviceInfo.deviceUdid);
         LNN_LOGE(LNN_BUILDER, "delete old info");
         return false;
     }
@@ -1160,6 +1162,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
         if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0 && !isMetaAuth) {
             LNN_LOGE(LNN_BUILDER, "remove node. [id=%{public}u]", connFsm->id);
             LnnRemoveNode(udid);
+            LnnRemoveUserInfoNode(udid);
         }
     }
     return needReportOffline;

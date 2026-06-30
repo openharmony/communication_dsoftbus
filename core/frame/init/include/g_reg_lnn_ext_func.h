@@ -398,6 +398,8 @@ typedef int32_t (*FragmentRecvProcessFunc)(const char *udid, const uint8_t *data
 typedef void (*OnRecvCloudQueryInfoFunc)(const char *udid, const char *data, uint32_t length);
 typedef void (*LnnNotifyDmHookRegisteredEventFunc)(void);
 
+typedef const SoftBusList *(*LnnGetLocalUserLedgerFunc)(void);
+
 #ifdef __cplusplus
 }
 #endif

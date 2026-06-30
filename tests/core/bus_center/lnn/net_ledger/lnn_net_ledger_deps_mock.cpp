@@ -458,5 +458,15 @@ bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
 {
     return GetNetLedgerDepsInterface()->IsFeatureSupport(feature, capaBit);
 }
+
+int32_t LnnInitDistributedUserLedger(void)
+{
+    return GetNetLedgerDepsInterface()->LnnInitDistributedUserLedger();
+}
+
+void LnnDeinitDistributedUserLedger(void)
+{
+    return GetNetLedgerDepsInterface()->LnnDeinitDistributedUserLedger();
+}
 } // extern "C"
 } // namespace OHOS

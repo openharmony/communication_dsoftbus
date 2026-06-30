@@ -132,6 +132,8 @@ public:
     virtual void AuthLoadDeviceKeyPacked(void) = 0;
     virtual int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len) = 0;
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
+    virtual int32_t LnnInitDistributedUserLedger(void) = 0;
+    virtual void LnnDeinitDistributedUserLedger(void) = 0;
 };
 
 class NetLedgerDepsInterfaceMock : public NetLedgerDepsInterface {
@@ -222,6 +224,8 @@ public:
     MOCK_METHOD0(AuthLoadDeviceKeyPacked, void(void));
     MOCK_METHOD3(LnnGetLocalPtkByUuidPacked, int32_t(const char *, char *, uint32_t));
     MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
+    MOCK_METHOD0(LnnInitDistributedUserLedger, int32_t());
+    MOCK_METHOD0(LnnDeinitDistributedUserLedger, void());
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_COMMON_MOCK_H

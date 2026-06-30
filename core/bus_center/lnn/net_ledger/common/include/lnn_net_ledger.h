@@ -31,6 +31,7 @@ void RestoreLocalDeviceInfo(void);
 void LnnDeinitNetLedger(void);
 void LnnLedgerInfoStatusSet(void);
 int32_t InitUdidChangedEvent(void);
+void RestoreRemoteUserInfo(void);
 
 #ifdef __cplusplus
 }

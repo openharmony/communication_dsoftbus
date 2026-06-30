@@ -24,11 +24,13 @@
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_distributed_user_info.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_feature_capability.h"
 #include "lnn_file_utils.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_local_user_info.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_net_builder.h"
@@ -56,6 +58,10 @@ int32_t LnnInitNetLedger(void)
         LNN_LOGE(LNN_LEDGER, "init distributed net ledger fail!");
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
+    if (LnnInitDistributedUserLedger() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "init distributed multi user ledger fail");
+        return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
+    }
     if (LnnInitMetaNodeLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ledger fail");
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
@@ -64,6 +70,12 @@ int32_t LnnInitNetLedger(void)
         LNN_LOGE(LNN_LEDGER, "init meta node ext ledger fail");
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if (LnnInitLocalUserLedger() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init local user ledger fail");
+        return SOFTBUS_NETWORK_USER_INFO_INIT_FAILED;
+    }
+#endif
     return SOFTBUS_OK;
 }
 
@@ -360,6 +372,14 @@ void RestoreLocalDeviceInfo(void)
     LnnLoadLocalBroadcastCipherKeyPacked();
 }
 
+void RestoreRemoteUserInfo(void)
+{
+    LNN_LOGI(LNN_LEDGER, "restore remote user info enter");
+    if (LnnLoadRemoteUserInfoPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "load remote user info fail");
+    }
+}
+
 int32_t LnnInitNetLedgerDelay(void)
 {
     AuthLoadDeviceKeyPacked();
@@ -393,8 +413,12 @@ int32_t LnnInitHuksCeParamsDelay(void)
 
 void LnnDeinitNetLedger(void)
 {
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LnnDeinitLocalUserLedger();
+#endif
     LnnDeinitMetaNodeLedger();
     LnnDeinitDistributedLedger();
+    LnnDeinitDistributedUserLedger();
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
     LnnDeinitMetaNodeExtLedgerPacked();

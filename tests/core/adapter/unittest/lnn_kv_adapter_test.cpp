@@ -326,7 +326,7 @@ HWTEST_F(KVAdapterTest, Get002, TestSize.Level1)
  */
 HWTEST_F(KVAdapterTest, SetCloudAbility001, TestSize.Level1)
 {
-    EXPECT_EQ(SOFTBUS_OK, kvStore->SetCloudAbility(true));
+    EXPECT_EQ(SOFTBUS_OK, kvStore->SetCloudAbility(true, 1));
 }
 
 /*
@@ -339,7 +339,7 @@ HWTEST_F(KVAdapterTest, SetCloudAbility001, TestSize.Level1)
 HWTEST_F(KVAdapterTest, SetCloudAbility002, TestSize.Level1)
 {
     kvStore->DeInit();
-    EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->SetCloudAbility(true));
+    EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->SetCloudAbility(true, 1));
 }
 
 /*

@@ -25,17 +25,22 @@
 extern "C" {
 #endif
 
+#define OPEN_FILTER_USERID_MODE 1
+#define CLOSE_FILTER_USERID_MODE 0
+
 void LnnInitCloudSyncModule(void);
 void LnnDeInitCloudSyncModule(void);
 int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid);
 int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info);
 int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t valueLength);
-int32_t LnnDeleteSyncToDB(void);
+int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUserId);
 int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId);
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType);
+int32_t SyncLedgerInfoToCloud(
+    NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid, bool isMainScreenUserId);
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize);
 int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value);
-int32_t LnnSetCloudAbility(const bool isEnableCloud);
+int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode);
 #ifdef __cplusplus
 }
 #endif

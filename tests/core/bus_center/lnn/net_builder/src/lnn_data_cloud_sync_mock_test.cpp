@@ -586,6 +586,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     NodeInfo cacheInfo = {
         .accountId = 12345,
     };
+    UserInfo userInfo = {};
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnUnPackCloudSyncDeviceInfo = LnnUnPackCloudSyncDeviceInfo;
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
@@ -596,8 +597,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.uuid, UUID_BUF_LEN, PEERUUID));
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.networkId, NETWORK_ID_BUF_LEN, NETWORKID));
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.deviceInfo.deviceVersion, DEVICE_VERSION_SIZE_MAX, SOFTBUSVERSION));
-    PrintSyncNodeInfo(nullptr);
-    PrintSyncNodeInfo(&cacheInfo);
+    PrintSyncNodeInfo(nullptr, &userInfo);
+    PrintSyncNodeInfo(&cacheInfo, &userInfo);
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnUnPackCloudSyncDeviceInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
@@ -608,6 +609,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     EXPECT_CALL(DataCloudSyncMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(DataCloudSyncMock, LnnUpdateDistributedUserInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(DataCloudSyncMock, PackUserInfoToJsonInner)
         .WillRepeatedly(Return(SOFTBUS_OK));
     const char *key = "key";
     const char *value = TMPMSG;
@@ -813,8 +818,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, Tes
 {
     NodeInfo cacheInfo = {};
     NodeInfo oldCacheInfo = {};
-    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(true, nullptr, &oldCacheInfo), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(true, &cacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
+    UserInfo userInfo = {};
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(true, nullptr, &oldCacheInfo, &userInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(true, &cacheInfo, nullptr, &userInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(true, &cacheInfo, &oldCacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
 }
 
 /*

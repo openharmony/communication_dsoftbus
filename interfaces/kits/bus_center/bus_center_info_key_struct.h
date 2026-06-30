@@ -28,6 +28,7 @@ extern "C" {
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11
 #define OTHER_OS_TYPE 12
+#define FOREGROUND_ACCOUNT_MAX_SIZE 20
 
 typedef enum {
     WLAN_IF = 0,

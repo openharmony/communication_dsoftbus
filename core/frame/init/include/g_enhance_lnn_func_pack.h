@@ -141,6 +141,14 @@ int32_t LnnUnPackCloudSyncDeviceInfoPacked(cJSON *json, NodeInfo *cloudSyncInfo)
 int32_t LnnPackCloudSyncDeviceInfoPacked(cJSON *json, const NodeInfo *cloudSyncInfo);
 int32_t LnnGetLocalBroadcastCipherInfoPacked(CloudSyncInfo *info);
 int32_t LnnPackCloudSyncAckSeqPacked(cJSON *json, char *peerudid);
+void LnnDeinitLocalUserInfoPacked(void);
+int32_t LnnPackCloudSyncUserInfoPacked(cJSON *json, const UserInfo *userInfo);
+int32_t LnnUnPackCloudSyncUserInfoPacked(cJSON *json, UserInfo *userInfo);
+bool LnnCheckUserExistsByAccountIdPacked(int64_t accountId);
+int32_t LnnSaveLocalUserInfoPacked(void);
+int32_t LnnLoadLocalUserInfoPacked(void);
+int32_t LnnSaveRemoteUserInfoPacked(const char *udid, const UserInfo *userInfo);
+int32_t LnnLoadRemoteUserInfoPacked(void);
 int32_t LnnInitCipherKeyManagerPacked(void);
 int32_t LnnSendNotTrustedInfoPacked(const NotTrustedDelayInfo *info, uint32_t num,
     LnnSyncInfoMsgComplete complete);

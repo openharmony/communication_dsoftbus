@@ -22,6 +22,8 @@
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_file_utils.h"
+#include "lnn_local_user_info.h"
+#include "lnn_multi_user_process.h"
 #include "lnn_net_ledger.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
@@ -705,9 +707,15 @@ static int32_t UpdateStateVersion(const void *buf)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "stateversion change sync nodeInfo to cloud failed");
+    }
+#else
     if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger stateversion change sync to cloud failed");
     }
+#endif
     return SOFTBUS_OK;
 }
 
@@ -1188,9 +1196,15 @@ static int32_t UpdateLocalDeviceName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "car device name change sync nodeInfo to cloud failed");
+        }
+#else
         if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger device name change sync to cloud failed");
         }
+#endif
     }
     return SOFTBUS_OK;
 }
@@ -1222,9 +1236,15 @@ static int32_t UpdateUnifiedName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "car ledger unified device name change sync to cloud failed");
+        }
+#else
         if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified device name change sync to cloud failed");
         }
+#endif
     }
     return SOFTBUS_OK;
 }
@@ -1256,9 +1276,15 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "car ledger unified default device name change sync to cloud failed");
+        }
+#else
         if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified default device name change sync to cloud failed");
         }
+#endif
     }
     return SOFTBUS_OK;
 }
@@ -1289,9 +1315,15 @@ static int32_t UpdateNickName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "car ledger nick name change sync to cloud failed");
+        }
+#else
         if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger nick name change sync to cloud failed");
         }
+#endif
     }
     return SOFTBUS_OK;
 }
@@ -1349,9 +1381,15 @@ static int32_t UpdateLocalNetworkId(const void *id)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "car ledger networkId change sync to cloud failed");
+    }
+#else
     if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger networkId change sync to cloud failed");
     }
+#endif
     return SOFTBUS_OK;
 }
 
@@ -1520,9 +1558,15 @@ static int32_t UpdateLocalBtMac(const void *mac)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "car ledger btMac change sync to cloud failed");
+    }
+#else
     if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger btMac change sync to cloud failed");
     }
+#endif
     return SOFTBUS_OK;
 }
 
@@ -1725,9 +1769,15 @@ void LnnUpdateStateVersion(StateVersionChangeReason reason)
         LNN_LOGE(LNN_LEDGER, "memcpy fail");
         return;
     }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if (LnnAsyncCallMultiUserAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "car ledger stateversion change sync to cloud failed");
+    }
+#else
     if (LnnAsyncCallLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger stateversion change sync to cloud failed");
     }
+#endif
 }
 
 static int32_t LlGetStaticCapLen(void *buf, uint32_t len)

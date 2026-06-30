@@ -49,8 +49,11 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnDeleteSyncToDB(void)
+int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUserId)
 {
+    (void)userId;
+    (void)accountId;
+    (void)isMainScreenUserId;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -77,9 +80,10 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnSetCloudAbility(const bool isEnableCloud)
+int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
 {
     (void)isEnableCloud;
+    (void)filterMode;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -87,5 +91,16 @@ int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId)
 {
     (void)udid;
     (void)accountId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SyncLedgerInfoToCloud(NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid,
+    bool isMainScreenUserId)
+{
+    (void)info;
+    (void)userInfo;
+    (void)isAckSeq;
+    (void)peerudid;
+    (void)isMainScreenUserId;
     return SOFTBUS_NOT_IMPLEMENT;
 }

@@ -76,13 +76,18 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF) {
         const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
         int32_t eventUserId = -1;
-        int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
         std::string userIdKey = "userId";
         eventUserId = wantParams.GetIntParam(userIdKey, -1);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        LNN_LOGI(LNN_EVENT, "eventUserId=%{public}d", eventUserId);
+        state = SOFTBUS_ACCOUNT_LOG_OUT;
+#else
+        int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
         LNN_LOGI(LNN_EVENT, "activeUserId=%{public}d, eventUserId=%{public}d", activeUserId, eventUserId);
         if (eventUserId == activeUserId) {
             state = SOFTBUS_ACCOUNT_LOG_OUT;
         }
+#endif
     }
     if (state != SOFTBUS_ACCOUNT_UNKNOWN) {
         LnnNotifyAccountStateChangeEvent(state);

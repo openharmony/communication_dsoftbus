@@ -31,6 +31,7 @@
 static const std::string DEFAULT_USER_ID = "0";
 static const std::string DEFAULT_ACCOUNT_UID = "ohosAnonymousUid";
 static bool g_accountIdInited = false;
+static const int32_t ACCOUNT_STRTOLL_BASE = 10;
 
 int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
 {
@@ -112,6 +113,36 @@ int32_t LnnGetOhosAccountInfoByUserId(int32_t userId, uint8_t *accountHash, uint
         LNN_LOGE(LNN_STATE, "GetOhosAccount generate str hash fail");
         SoftBusFree(accountInfo);
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    SoftBusFree(accountInfo);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *accountHash, uint32_t len)
+{
+    if (userId < 0 || accountId == nullptr || accountHash == nullptr || len != SHA_256_HASH_LEN) {
+        LNN_LOGE(LNN_STATE, "GetOhosAccount get invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char *accountInfo = nullptr;
+    uint32_t size = 0;
+    int32_t ret = GetOsAccountIdByUserId(userId, &accountInfo, &size);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get osAccountId by userId fail");
+        return ret;
+    }
+    if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(accountInfo), size,
+        reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "GetOhosAccount generate str hash fail");
+        SoftBusFree(accountInfo);
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    *accountId = strtoll(accountInfo, nullptr, ACCOUNT_STRTOLL_BASE);
+    if (*accountId == 0) {
+        SoftBusFree(accountInfo);
+        LNN_LOGE(LNN_STATE, "strtoll accountInfo fail");
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
     }
     SoftBusFree(accountInfo);
     return SOFTBUS_OK;

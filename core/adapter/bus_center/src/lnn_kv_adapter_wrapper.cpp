@@ -305,7 +305,7 @@ int32_t LnnSubcribeKvStoreService(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
+int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
@@ -317,5 +317,5 @@ int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
         LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
         return SOFTBUS_NOT_FIND;
     }
-    return (kvAdapter->SetCloudAbility(isEnableCloud));
+    return (kvAdapter->SetCloudAbility(isEnableCloud, filterMode));
 }

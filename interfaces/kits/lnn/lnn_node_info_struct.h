@@ -233,6 +233,24 @@ typedef struct {
     uint64_t displayId;
 } NodeInfo;
 
+typedef struct {
+    uint8_t accountHash[SHA_256_HASH_LEN];
+    int32_t userId;
+    int64_t accountId;
+    uint64_t displayId;
+    uint64_t updateTimestamp;
+} UserInfo;
+
+typedef struct {
+    UserInfo info;
+    ListNode node;
+} UserStorageInfo;
+
+typedef struct {
+    NodeInfo nodeInfo;
+    UserInfo userInfo;
+} ForegroundUserSyncInfo;
+
 #ifdef __cplusplus
 }
 #endif

@@ -111,5 +111,15 @@ int32_t LnnFindDeviceUdidTrustedInfo(const char *udid)
 {
     return GetDataCloudSyncInterface()->LnnFindDeviceUdidTrustedInfo(udid);
 }
+
+int32_t LnnUpdateDistributedUserInfo(const UserInfo *userInfo, const char *udid)
+{
+    return GetDataCloudSyncInterface()->LnnUpdateDistributedUserInfo(userInfo, udid);
+}
+
+int32_t PackUserInfoToJsonInner(cJSON *json, const UserInfo *userInfo)
+{
+    return GetDataCloudSyncInterface()->PackUserInfoToJsonInner(json, userInfo);
+}
 }
 } // namespace OHOS

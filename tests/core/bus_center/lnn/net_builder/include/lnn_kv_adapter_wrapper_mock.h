@@ -36,7 +36,7 @@ public:
     virtual int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *value, int32_t valueLen);
     virtual int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t keyPrefixLen);
     virtual int32_t LnnCloudSync(int32_t dbId);
-    virtual int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud);
+    virtual int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode);
 };
 
 class LnnKvAdapterInterfaceMock : public LnnKvAdapterInterface {
@@ -51,7 +51,7 @@ public:
     MOCK_METHOD5(LnnPutDBData, int32_t(int32_t, const char *, int32_t, const char *, int32_t));
     MOCK_METHOD3(LnnDeleteDBDataByPrefix, int32_t(int32_t, const char *, int32_t));
     MOCK_METHOD1(LnnCloudSync, int32_t(int32_t));
-    MOCK_METHOD2(LnnSetCloudAbilityInner, int32_t(int32_t, const bool));
+    MOCK_METHOD3(LnnSetCloudAbilityInner, int32_t(int32_t, const bool, uint32_t));
 };
 } // namespace OHOS
 #endif // LNN_KV_ADAPTER_WRAPPER_MOCK_H
