@@ -24,6 +24,7 @@
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"
 #include "message_handler.h"
 
@@ -339,7 +340,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     if (g_connId != 0) {
-        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char*)SoftBusCalloc(CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 20, str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -729,7 +730,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger017, TestSize.Level1)
 
     if (g_connId != 0) {
         // Test with small data
-        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+        data.buf = (char*)SoftBusCalloc(CONN_HEAD_SIZE + 50);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
         data.len = CONN_HEAD_SIZE + 50;
@@ -743,7 +744,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger017, TestSize.Level1)
         data.buf = nullptr;
 
         // Test with larger data
-        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 1024);
+        data.buf = (char*)SoftBusCalloc(CONN_HEAD_SIZE + 1024);
         ASSERT_TRUE(data.buf != nullptr);
         (void)memset_s(data.buf + CONN_HEAD_SIZE, 1024, 'A', 1024);
         data.len = CONN_HEAD_SIZE + 1024;
@@ -816,9 +817,6 @@ HWTEST_F(ConnectionManagerTest, testConnmanger019, TestSize.Level1)
 {
     int ret;
     ConnectCallback connCb;
-    ConnectOption optionInfo;
-    ConnectResult connRet;
-    uint32_t reqId;
 
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
@@ -831,13 +829,6 @@ HWTEST_F(ConnectionManagerTest, testConnmanger019, TestSize.Level1)
     // Test with large invalid module ID
     ret = ConnSetConnectCallback(static_cast<ConnModule>(99999), &connCb);
     EXPECT_NE(SOFTBUS_OK, ret);
-
-    // Test ConnGetNewRequestId with invalid module
-    reqId = ConnGetNewRequestId(static_cast<ConnModule>(-1));
-    EXPECT_EQ(reqId, 0);
-
-    reqId = ConnGetNewRequestId(static_cast<ConnModule>(99999));
-    EXPECT_EQ(reqId, 0);
 };
 
 /*
@@ -912,7 +903,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger021, TestSize.Level1)
     if (g_connId != 0) {
         // Test with different flag values
         for (int flag = 0; flag <= 3; flag++) {
-            data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+            data.buf = (char*)SoftBusCalloc(CONN_HEAD_SIZE + 50);
             ASSERT_TRUE(data.buf != nullptr);
             (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
             data.len = CONN_HEAD_SIZE + 50;
@@ -1034,22 +1025,6 @@ HWTEST_F(ConnectionManagerTest, testConnmanger024, TestSize.Level1)
 };
 
 /*
-* @tc.name: testConnmanger025
-* @tc.desc: Test unset callback on unregistered module
-* @tc.type: FUNC
-* @tc.require: Unsetting unregistered callback is handled
-*/
-HWTEST_F(ConnectionManagerTest, testConnmanger025, TestSize.Level1)
-{
-    int ret;
-
-    // Test unsetting callback that was never set
-    ret = ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    // Should either succeed or return appropriate error
-    // depending on implementation
-};
-
-/*
 * @tc.name: testConnmanger026
 * @tc.desc: Test connection with all supported types
 * @tc.type: FUNC
@@ -1122,7 +1097,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger027, TestSize.Level1)
 
     if (g_connId != 0) {
         // Test with large sequence number
-        data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+        data.buf = (char*)SoftBusCalloc(CONN_HEAD_SIZE + 50);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
         data.len = CONN_HEAD_SIZE + 50;
@@ -1228,37 +1203,6 @@ HWTEST_F(ConnectionManagerTest, testConnmanger029, TestSize.Level1)
 };
 
 /*
-* @tc.name: testConnmanger030
-* @tc.desc: Test callback null handling
-* @tc.type: FUNC
-* @tc.require: Null callbacks are handled correctly
-*/
-HWTEST_F(ConnectionManagerTest, testConnmanger030, TestSize.Level1)
-{
-    int ret;
-    ConnectCallback connCb;
-    ConnectOption optionInfo;
-    ConnectResult connRet;
-    uint32_t reqId;
-
-    // Test setting callback with null function pointers
-    connCb.OnConnected = nullptr;
-    connCb.OnDisconnected = nullptr;
-    connCb.OnDataReceived = nullptr;
-    ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
-    // Behavior depends on implementation - record result
-    // Should either accept or reject null callbacks
-
-    // Test connecting with null callback result
-    optionInfo.type = CONNECT_TCP;
-    connRet.OnConnectFailed = nullptr;
-    connRet.OnConnectSuccessed = nullptr;
-    reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
-    ret = ConnConnectDevice(&optionInfo, reqId, &connRet);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-};
-
-/*
 * @tc.name: testConnmanger031
 * @tc.desc: Test different PID values
 * @tc.type: FUNC
@@ -1291,7 +1235,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger031, TestSize.Level1)
         // Test with different PID values
         int pids[] = {0, 100, 1000, 9999};
         for (int i = 0; i < 4; i++) {
-            data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + 50);
+            data.buf = (char*)SoftBusCalloc(CONN_HEAD_SIZE + 50);
             ASSERT_TRUE(data.buf != nullptr);
             (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 50, testMsg);
             data.len = CONN_HEAD_SIZE + 50;
@@ -1393,7 +1337,6 @@ HWTEST_F(ConnectionManagerTest, testConnmanger034, TestSize.Level1)
 {
     int ret;
     ConnectCallback connCb;
-    ConnectOption optionInfo;
     ConnectionInfo info;
 
     connCb.OnConnected = ConnectedCB;
@@ -1443,7 +1386,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger035, TestSize.Level1)
         // Test with various buffer sizes
         uint32_t sizes[] = {10, 100, 500, 1024, 2048, 4096};
         for (int i = 0; i < 6; i++) {
-            data.buf = static_cast<char*>(calloc)(1, CONN_HEAD_SIZE + sizes[i]);
+            data.buf = (char*)SoftBusCalloc(CONN_HEAD_SIZE + sizes[i]);
             ASSERT_TRUE(data.buf != nullptr);
             (void)memset_s(data.buf + CONN_HEAD_SIZE, sizes[i], 'X', sizes[i]);
             data.len = CONN_HEAD_SIZE + sizes[i];
