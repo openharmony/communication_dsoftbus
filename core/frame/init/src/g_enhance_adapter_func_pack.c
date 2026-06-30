@@ -145,3 +145,21 @@ void SoftbusMcuTimerDeinitPacked(void)
     }
     return pfnAdapterEnhanceFuncList->softbusMcuTimerDeinit();
 }
+
+void AntiSleepHoldRunningLockPacked(int32_t timeOutMs)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->antiSleepHoldRunningLock) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnAdapterEnhanceFuncList->antiSleepHoldRunningLock(timeOutMs);
+}
+
+void AntiSleepUnHoldRunningLockPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->antiSleepUnHoldRunningLock) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnAdapterEnhanceFuncList->antiSleepUnHoldRunningLock();
+}

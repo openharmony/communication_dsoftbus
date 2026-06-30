@@ -42,5 +42,7 @@ int32_t AdapterRegisterEnhanceFunc(void *soHandle)
     g_adapterEnhanceFuncList.softbusSleAdapterDeInit = dlsym(soHandle, "SoftbusSleAdapterDeInit");
     g_adapterEnhanceFuncList.softbusMcuTimerInit = dlsym(soHandle, "SoftbusMcuTimerInit");
     g_adapterEnhanceFuncList.softbusMcuTimerDeinit = dlsym(soHandle, "SoftbusMcuTimerDeinit");
+    g_adapterEnhanceFuncList.antiSleepHoldRunningLock = dlsym(soHandle, "AntiSleepHoldRunningLock");
+    g_adapterEnhanceFuncList.antiSleepUnHoldRunningLock = dlsym(soHandle, "AntiSleepUnHoldRunningLock");
     return SOFTBUS_OK;
 }

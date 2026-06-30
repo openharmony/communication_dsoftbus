@@ -41,6 +41,8 @@ void SoftbusSleAdapterInitPacked(void);
 void SoftbusSleAdapterDeInitPacked(void);
 int32_t SoftbusMcuTimerInitPacked(void);
 void SoftbusMcuTimerDeinitPacked(void);
+void AntiSleepHoldRunningLockPacked(int32_t timeOutMs);
+void AntiSleepUnHoldRunningLockPacked(void);
 #ifdef __cplusplus
 }
 #endif

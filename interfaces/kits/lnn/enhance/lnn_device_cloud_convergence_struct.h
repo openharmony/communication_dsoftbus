@@ -69,6 +69,7 @@ typedef enum {
     MSG_TYPE_SOCKET_TIMEOUT,
     MSG_TYPE_HML_TIMEOUT,
     MSG_TYPE_DELAY_DISCONNECT,
+    MSG_TYPE_DELAY_CLOSE_NETWORK,
 } LnnCloudMsgType;
 
 typedef struct {
