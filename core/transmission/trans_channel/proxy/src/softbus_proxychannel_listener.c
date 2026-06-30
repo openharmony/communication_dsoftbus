@@ -432,8 +432,8 @@ EXIT_ERR:
 int32_t TransOpenNetWorkingChannel(
     const char *sessionName, const char *peerNetworkId, const LanePreferredLinkList *preferred)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
+    if (!IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX) ||
+        !IsValidStringSafe(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         return INVALID_CHANNEL_ID;
     }
 

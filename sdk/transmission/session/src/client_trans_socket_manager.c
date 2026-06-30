@@ -296,7 +296,7 @@ SessionInfo *CreateNonEncryptSessionInfo(const char *sessionName)
         TRANS_LOGW(TRANS_SDK, "Invalid param");
         return NULL;
     }
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
         return NULL;
     }
@@ -730,8 +730,8 @@ int32_t CheckBindSocketInfo(const SessionInfo *session)
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX - 1) ||
-        !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX - 1)) {
+    if (!IsValidStringSafe(session->info.peerSessionName, SESSION_NAME_SIZE_MAX) ||
+        !IsValidStringSafe(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX)) {
         char *anonySessionName = NULL;
         char *anonyNetworkId = NULL;
         Anonymize(session->info.peerSessionName, &anonySessionName);

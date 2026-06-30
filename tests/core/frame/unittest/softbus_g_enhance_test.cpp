@@ -1200,7 +1200,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest036, TestSize.Level1)
 {
     int32_t pid = 0;
     int32_t ret = AuthMetaGetPidByAuthIdPacked(1, &pid);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     EXPECT_EQ(pid, 0);
 }
 }

@@ -657,7 +657,7 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, SessionE
 
 int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1) || (sessionId == NULL)) {
+    if (!IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX) || (sessionId == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

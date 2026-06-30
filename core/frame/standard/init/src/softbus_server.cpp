@@ -517,7 +517,7 @@ static void ConvertQosInfo(const QosTV *qos, uint32_t qosCount, QosInfo *qosInfo
 int32_t SoftBusServer::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
     uint32_t qosCount)
 {
-    if (!IsValidString(peerNetworkId, NETWORK_ID_BUF_LEN - 1) || dataType >= DATA_TYPE_BUTT
+    if (!IsValidStringSafe(peerNetworkId, NETWORK_ID_BUF_LEN) || dataType >= DATA_TYPE_BUTT
         || qosCount > QOS_TYPE_BUTT) {
         COMM_LOGE(COMM_SVC, "SoftBusServer invalid param");
         return SOFTBUS_INVALID_PARAM;

@@ -706,7 +706,7 @@ EXIT_ERR:
 static int32_t TransCheckOpenAuthChannelBlockStatus(const char *sessionName, const ConnectOption *connOpt,
     const ConnectParam *param)
 {
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL || param == NULL) {
+    if (!IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL || param == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         SoftBusHitraceChainEnd();
         return SOFTBUS_INVALID_PARAM;

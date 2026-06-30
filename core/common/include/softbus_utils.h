@@ -93,6 +93,8 @@ int32_t GenerateRandomStr(char *str, uint32_t size);
 
 bool IsValidString(const char *input, uint32_t maxLen);
 
+bool IsValidStringSafe(const char *input, uint32_t maxLen);
+
 int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac, uint32_t binMacLen);
 
 int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen);
