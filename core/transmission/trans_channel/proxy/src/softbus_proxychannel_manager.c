@@ -131,6 +131,8 @@ static bool ResetChanIsEqual(int8_t status, ProxyChannelInfo *a, ProxyChannelInf
 int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *appType)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "fail to lock mutex!");
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
@@ -2624,6 +2626,8 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 void TransProxyCloseChannelByRequestId(uint32_t requestId)
 {
     TRANS_LOGI(TRANS_CTRL, "close channel by reqId=%{public}d", requestId);
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
     ListNode destroyList;
     ListInit(&destroyList);
     ProxyChannelInfo *item = NULL;
