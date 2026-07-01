@@ -41,6 +41,8 @@ typedef void (*SoftbusSleAdapterInit)(void);
 typedef void (*SoftbusSleAdapterDeInit)(void);
 typedef int32_t (*SoftbusMcuTimerInitFunc)(void);
 typedef void (*SoftbusMcuTimerDeinitFunc)(void);
+typedef void (*AntiSleepHoldRunningLockFunc)(int32_t);
+typedef void (*AntiSleepUnHoldRunningLockFunc)(void);
 
 typedef struct TagAdapterEnhanceFuncList {
     SoftBusRegRangeCbFunc softBusRegRangeCb;
@@ -59,6 +61,8 @@ typedef struct TagAdapterEnhanceFuncList {
     SoftbusSleAdapterDeInit softbusSleAdapterDeInit;
     SoftbusMcuTimerInitFunc softbusMcuTimerInit;
     SoftbusMcuTimerDeinitFunc softbusMcuTimerDeinit;
+    AntiSleepHoldRunningLockFunc antiSleepHoldRunningLock;
+    AntiSleepUnHoldRunningLockFunc antiSleepUnHoldRunningLock;
 } AdapterEnhanceFuncList;
 
 AdapterEnhanceFuncList *AdapterEnhanceFuncListGet(void);

@@ -24,6 +24,7 @@
 #include "anonymizer.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
@@ -58,6 +59,7 @@
 #define MAX_TRUSTED_DEVICE_NUM 20
 #define COMPARE_SUCCESS 0
 #define COMPARE_FAILED 1
+#define RUNNING_LOCK_TIMEOUT (60 * 1000)
 #ifdef __aarch64__
 #define ABILITY_ADAPTER_PATH "/system/lib64/libability_adapter.z.so"
 #else
@@ -2206,9 +2208,10 @@ static void OnNearFieldDataRecv(AuthHandle authHandle, const AuthTransData *data
         DelDupAuthManager(auth);
         return;
     }
-
+    AntiSleepHoldRunningLockPacked(RUNNING_LOCK_TIMEOUT);
     ProcessNearFieldReceivedData(auth, data, &header);
     DelDupAuthManager(auth);
+    AntiSleepUnHoldRunningLockPacked();
 }
 
 int32_t InitConversationQuery(void)
