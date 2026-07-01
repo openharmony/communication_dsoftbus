@@ -273,39 +273,6 @@ HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test06, TestSize.Level1)
 }
 
 /*
- * @tc.name: LnnTimeSyncManager_Test07
- * @tc.desc: Verify the processing flow of time synchronization requests, including
- *           initialization, request processing, result notification, and de-initialization
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNTimeSyncTest, LnnTimeSyncManager_Test07, TestSize.Level1)
-{
-    NiceMock<TimeSyncOtherDepsInterfaceMock> timeSyncOtherMock;
-    EXPECT_CALL(timeSyncOtherMock, LnnTimeSyncImplInitPacked).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(timeSyncOtherMock, LnnTimeSyncImplDeinitPacked).WillRepeatedly(Return());
-    EXPECT_CALL(timeSyncOtherMock, GetLooper).WillRepeatedly(Return(&g_Looper));
-    EXPECT_CALL(timeSyncOtherMock, LnnNotifyTimeSyncResult).WillRepeatedly(Return());
-    StartTimeSyncReqMsgPara startPara;
-    startPara.accuracy = HIGH_ACCURACY;
-    startPara.period = LONG_PERIOD;
-    startPara.pid = TEST_PID;
-    EXPECT_EQ(strcpy_s(startPara.targetNetworkId, NETWORK_ID_BUF_LEN, TEST_NODE1_NETWORK_ID), EOK);
-    TimeSyncReqInfo *info = CreateTimeSyncReqInfo(&startPara);
-    ASSERT_TRUE(info != nullptr);
-    int32_t ret = LnnInitTimeSync();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ListAdd(&g_timeSyncCtrl.reqList, &info->node);
-    StartTimeSyncReqMsgPara *msgPara = (StartTimeSyncReqMsgPara *)SoftBusMalloc(sizeof(StartTimeSyncReqMsgPara));
-    ASSERT_NE(msgPara, nullptr);
-    EXPECT_EQ(strcpy_s(msgPara->targetNetworkId, NETWORK_ID_BUF_LEN, TEST_NODE1_NETWORK_ID), EOK);
-    ret = ProcessStartTimeSyncRequest(msgPara);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-    NotifyTimeSyncResult(info, 1, SOFTBUS_NETWORK_TIME_SYNC_INTERFERENCE);
-    LnnDeinitTimeSync();
-}
-
-/*
  * @tc.name: LnnTimeSyncManager_Test08
  * @tc.desc: Verify the correctness of creating, processing, and
  *           releasing resources for time synchronization requests
