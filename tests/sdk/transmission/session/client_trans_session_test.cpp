@@ -1868,4 +1868,18 @@ HWTEST_F(TransClientSessionTest, PrintAnonymizedString001, TestSize.Level1)
 {
     EXPECT_NO_FATAL_FAILURE(PrintAnonymizedString(nullptr, "deviceId", "sink"));
 }
+
+/**
+ * @tc.name: SoftBusIsBtUnderlayerError001
+ * @tc.desc: test SoftBusIsBtUnderlayerError
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, SoftBusIsBtUnderlayerError001, TestSize.Level1)
+{
+    bool ret = SoftBusIsBtUnderlayerError(SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR);
+    EXPECT_EQ(ret, true);
+    ret = SoftBusIsBtUnderlayerError(SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, false);
+}
 }
