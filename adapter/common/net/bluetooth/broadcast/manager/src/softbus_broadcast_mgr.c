@@ -1213,8 +1213,8 @@ static int32_t GetSrvTypeIndex(BaseServiceType srvType)
     if (srvType == SRV_TYPE_LP_BURST || srvType == SRV_TYPE_LP_HB) {
         return CHANEL_LP;
     } else if (srvType == SRV_TYPE_CONN || srvType == SRV_TYPE_TRANS_MSG || srvType == SRV_TYPE_AUTH_CONN ||
-        srvType == SRV_TYPE_APPROACH || srvType == SRV_TYPE_OH_APPROACH || srvType == SRV_TYPE_VLINK ||
-        srvType == SRV_TYPE_FAST_OFFLINE || srvType == SRV_TYPE_RAW) {
+        srvType == SRV_TYPE_APPROACH || srvType == SRV_TYPE_OH_APPROACH || srvType == SRV_TYPE_FAST_OFFLINE ||
+        srvType == SRV_TYPE_RAW) {
         return CHANEL_STEADY;
     } else if (srvType == SRV_TYPE_SHARE || srvType == SRV_TYPE_TOUCH) {
         return CHANEL_SHARE;
@@ -1225,6 +1225,8 @@ static int32_t GetSrvTypeIndex(BaseServiceType srvType)
         return CHANEL_SLE_D2D_PAGING;
     } else if (srvType == SRV_TYPE_D2D_GROUP_TALKIE) {
         return CHANEL_SLE_D2D_TALKIE;
+    } else if (srvType == SRV_TYPE_VLINK) {
+        return CHANEL_VLINK;
     }
     return CHANEL_UNKNOW;
 }
@@ -1262,6 +1264,7 @@ static int32_t RegisterScanListenerSub(
         case CHANEL_UNSTEADY:
         case CHANEL_SLE_D2D_PAGING:
         case CHANEL_SLE_D2D_TALKIE:
+        case CHANEL_VLINK:
             return RegisterScanListenerForChannel(protocol, channel, adapterScanId, cb);
         default:
             DISC_LOGI(DISC_BROADCAST, "no server type channel srvType=%{public}s",
