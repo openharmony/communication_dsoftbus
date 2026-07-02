@@ -69,6 +69,10 @@ int32_t SessionInit(void)
 
 int32_t AddSessionToList(int32_t sessionId)
 {
+    if (g_sessionList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
+        return SOFTBUS_NO_INIT;
+    }
     int32_t ret = SOFTBUS_OK;
     SessionInfo *info = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
     if (info == NULL) {
