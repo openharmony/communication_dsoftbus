@@ -1365,9 +1365,11 @@ HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_BY_QUERY_PARAM_TEST_001, T
     bool ret = false;
     char *msg1 = reinterpret_cast<char *>(SoftBusCalloc(1));
     char *msg2 = reinterpret_cast<char *>(SoftBusCalloc(1));
-    if (msg1 == nullptr || msg2 == nullptr) {
+    cJSON *tmpJson1 = cJSON_CreateObject();
+    if (msg1 == nullptr || msg2 == nullptr || tmpJson1 == nullptr) {
         SoftBusFree(msg1);
         SoftBusFree(msg2);
+        cJSON_Delete(tmpJson1);
         FAIL() << "memory allocation failed";
     }
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
@@ -1389,6 +1391,7 @@ HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_BY_QUERY_PARAM_TEST_001, T
     EXPECT_EQ(ret, true);
 
     cJSON_Delete(credTypesJson);
+    cJSON_Delete(tmpJson1);
 }
 
 /*
@@ -1419,6 +1422,16 @@ HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_PER_PEER_USERID_TEST_001, 
         FAIL() << "memory allocation failed";
     }
     EXPECT_CALL(mocker, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, GetAllForegroundAccountIds).WillRepeatedly(
+        Invoke([](int32_t **userIds, uint32_t *userIdsLen) {
+            *userIds = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+            if (*userIds == nullptr) {
+                return SOFTBUS_MEM_ERR;
+            }
+            (*userIds)[0] = TEST_BASIC_USER_ID;
+            *userIdsLen = 1;
+            return SOFTBUS_OK;
+        }));
     EXPECT_CALL(mocker, cJSON_CreateArray).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson1))
         .WillOnce(Return(tmpJson2));
     EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(1)).WillOnce(Return(1));
@@ -1467,6 +1480,16 @@ HWTEST_F(AuthSessionJsonMockTest, QUERY_ALL_CRED_TYPE_PER_PEER_USERID_TEST_002, 
         SoftBusFree(msg1);
         FAIL() << "memory allocation failed";
     }
+    EXPECT_CALL(mocker, GetAllForegroundAccountIds).WillOnce(
+        Invoke([](int32_t **userIds, uint32_t *userIdsLen) {
+            *userIds = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+            if (*userIds == nullptr) {
+                return SOFTBUS_MEM_ERR;
+            }
+            (*userIds)[0] = TEST_BASIC_USER_ID;
+            *userIdsLen = 1;
+            return SOFTBUS_OK;
+        }));
     EXPECT_CALL(mocker, cJSON_CreateArray).WillOnce(Return(tmpJson1));
     EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(1));
     EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(peerUserIdsJson));
@@ -1577,7 +1600,7 @@ HWTEST_F(AuthSessionJsonMockTest, CHOOSE_BEST_CRED_TYPE_TEST_001, TestSize.Level
     EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(nullptr)).WillRepeatedly(Return(info.credTypeInfo));
     EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(nullptr)).WillOnce(Return(msg1));
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr)).WillRepeatedly(Return(info.credTypeInfo));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     // invalid param
     ret = ChooseBestCredType(&info, udidHash, udidHash, &chosenCredType);
     EXPECT_EQ(ret, ACCOUNT_BUTT);
@@ -1626,7 +1649,7 @@ HWTEST_F(AuthSessionJsonMockTest, CHOOSE_BEST_CRED_TYPE_TEST_002, TestSize.Level
     EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillOnce(Return(true))
         .WillOnce(DoAll(SetArgPointee<2>(ACCOUNT_UNRELATED), Return(true))).WillOnce(Return(true));
     EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(msg1));
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillRepeatedly(Return(info.credTypeInfo));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillRepeatedly(Return(true));
     // succ
     ret = ChooseBestCredType(&info, udidHash, udidHash, &chosenCredType);
     EXPECT_EQ(ret, ACCOUNT_UNRELATED);
@@ -1772,7 +1795,6 @@ HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_ASK_RECEIVER_TEST_002, TestSiz
     info.credNegoState = CRED_NEGO_STATE_ASK;
     char udidHash[SHA_256_HEX_HASH_LEN] = {0};
     int64_t authSeq = 1;
-    bool ret = false;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     char *msg1 = reinterpret_cast<char *>(SoftBusCalloc(1));
     cJSON *tmpJson1 = cJSON_CreateObject();
@@ -1793,18 +1815,25 @@ HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_ASK_RECEIVER_TEST_002, TestSiz
             }
             return true;
         }));
-    EXPECT_CALL(mocker, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(TEST_BASIC_USER_ID));
+    EXPECT_CALL(mocker, GetAllForegroundAccountIds).WillOnce(
+        Invoke([](int32_t **userIds, uint32_t *userIdsLen) {
+            *userIds = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+            if (*userIds == nullptr) {
+                return SOFTBUS_MEM_ERR;
+            }
+            (*userIds)[0] = TEST_BASIC_USER_ID;
+            *userIdsLen = 1;
+            return SOFTBUS_OK;
+        }));
     EXPECT_CALL(mocker, GetArrayItemNum).WillRepeatedly(Return(1));
     EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(tmpJson2));
     EXPECT_CALL(mocker, cJSON_GetNumberValue).WillOnce(Return(TEST_BASIC_USER_ID));
     EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(nullptr)).WillRepeatedly(Return(msg1));
     EXPECT_CALL(mocker, AddNumberToJsonObject).WillRepeatedly(Return(true));
     // succ
-    ret = CredNegoStateAskReceiver(&info, udidHash, udidHash, authSeq);
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(CredNegoStateAskReceiver(&info, udidHash, udidHash, authSeq));
     EXPECT_EQ(info.credTypeInfo, tmpJson2);
     EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_REPLY);
-
     cJSON_Delete(tmpJson2);
 }
 
@@ -1852,20 +1881,24 @@ HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_REPLY_RECEIVER_TEST_002, TestS
     int64_t authSeq = 1;
     bool ret = false;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    char msg[] = "";
+    char *msg = reinterpret_cast<char *>(SoftBusCalloc(1));
     cJSON *tmpJson1 = cJSON_CreateObject();
     cJSON *tmpJson2 = cJSON_CreateObject();
-    if (info.credTypeInfo == nullptr || tmpJson1 == nullptr || tmpJson2 == nullptr) {
+    if (info.credTypeInfo == nullptr || tmpJson1 == nullptr || tmpJson2 == nullptr || msg == nullptr) {
         cJSON_Delete(info.credTypeInfo);
         cJSON_Delete(tmpJson1);
         cJSON_Delete(tmpJson2);
+        SoftBusFree(msg);
         FAIL() << "memory allocation failed";
     }
     EXPECT_CALL(mocker, GetArrayItemNum).WillOnce(Return(1));
     EXPECT_CALL(mocker, GetArrayItemFromArray).WillOnce(Return(tmpJson1));
-    EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillRepeatedly(Return(msg));
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillRepeatedly(Return(tmpJson2));
+    EXPECT_CALL(mocker, GetJsonObjectNumberItem)
+        .WillOnce(DoAll(SetArgPointee<2>(TEST_BASIC_USER_ID), Return(true)))
+        .WillOnce(DoAll(SetArgPointee<2>(ACCOUNT_UNRELATED), Return(true)))
+        .WillOnce(DoAll(SetArgPointee<2>(TEST_BASIC_USER_ID), Return(true)));
+    EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(msg));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillRepeatedly(Return(true));
     // succ
     ret = CredNegoStateReplyReceiver(&info, udidHash, udidHash, authSeq);
     EXPECT_TRUE(ret);
@@ -1873,8 +1906,10 @@ HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_REPLY_RECEIVER_TEST_002, TestS
     EXPECT_EQ(info.credNegoState, CRED_NEGO_STATE_DECIDE);
     EXPECT_EQ(info.credId, msg);
 
+    cJSON_Delete(info.credTypeInfo);
     cJSON_Delete(tmpJson1);
     cJSON_Delete(tmpJson2);
+    SoftBusFree(msg);
 }
 
 /*
@@ -1902,7 +1937,7 @@ HWTEST_F(AuthSessionJsonMockTest, CRED_NEGO_STATE_DECIDE_RECEIVER_TEST_001, Test
         FAIL() << "memory allocation failed";
     }
     EXPECT_CALL(mocker, GetJsonObjectNumberItem).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr)).WillRepeatedly(Return(tmpJson1));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, IdServiceGetCredIdByCredType).WillOnce(Return(nullptr)).WillOnce(Return(msg));
     // invalid param
     ret = CredNegoStateDecideReceiver(nullptr, udidHash, udidHash, authSeq);
@@ -2271,7 +2306,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_TYPES_AND_STATE_TEST_001, TestSize.L
         FAIL() << "memory allocation failed";
     }
     EXPECT_CALL(mocker, cJSON_Duplicate).WillOnce(Return(nullptr)).WillOnce(Return(tmpJson1));
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillOnce(Return(false));
     // duplicate fail
     ret = PackCredTypesAndState(&json, &info, authSeq);
     EXPECT_EQ(ret, false);
@@ -2303,7 +2338,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_TYPES_AND_STATE_TEST_002, TestSize.L
         FAIL() << "memory allocation failed";
     }
     EXPECT_CALL(mocker, cJSON_Duplicate).WillOnce(Return(tmpJson1));
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(tmpJson1));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillOnce(Return(true));
     EXPECT_CALL(mocker, cJSON_AddItemToObject).WillOnce(Return(true));
     EXPECT_CALL(mocker, cJSON_PrintUnformatted).WillOnce(Return(msg));
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(true));
@@ -2331,11 +2366,10 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CRED_NEGO_STATE_TEST_001, TestSize.Level1
     bool ret = false;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     char *msg = reinterpret_cast<char *>(SoftBusCalloc(1));
-    cJSON tmpJson = {0};
     if (msg == nullptr) {
         FAIL() << "memory allocation failed";
     }
-    EXPECT_CALL(mocker, cJSON_AddNumberToObject).WillOnce(Return(nullptr)).WillOnce(Return(&tmpJson));
+    EXPECT_CALL(mocker, AddNumberToJsonObject).WillOnce(Return(false)).WillOnce(Return(true));
     EXPECT_CALL(mocker, cJSON_PrintUnformatted).WillOnce(Return(msg));
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(true));
     EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(true));
