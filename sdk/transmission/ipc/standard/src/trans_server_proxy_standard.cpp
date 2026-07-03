@@ -570,6 +570,10 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
 
 int32_t TransServerProxy::StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *statsData)
 {
+    if (statsData == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "statsData is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
@@ -608,6 +612,10 @@ int32_t TransServerProxy::StreamStats(int32_t channelId, int32_t channelType, co
 
 int32_t TransServerProxy::RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *statsData)
 {
+    if (statsData == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "statsData is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
