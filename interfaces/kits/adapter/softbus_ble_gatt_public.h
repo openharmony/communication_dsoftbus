@@ -40,6 +40,8 @@ extern "C"{
 #define CHANEL_SLE_D2D_PAGING       4
 #define CHANEL_SLE_D2D_TALKIE       5
 
+#define CHANEL_VLINK                6
+
 void SoftbusBleAdapterInit(void);
 void SoftbusBleAdapterDeInit(void);
 

@@ -2963,4 +2963,69 @@ HWTEST_F(SoftbusBroadcastMgrTest, BleGetAdvPower003, TestSize.Level1)
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 }
+
+/*
+ * @tc.name: VlinkBroadcaster001
+ * @tc.desc: Register/start/stop broadcaster with SRV_TYPE_VLINK success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, VlinkBroadcaster001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "VlinkBroadcaster001 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t bcId = -1;
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_VLINK, &bcId, GetBroadcastCallback()));
+    EXPECT_TRUE(bcId >= 0);
+
+    BroadcastParam bcParam = {};
+    BroadcastPacket packet = {};
+    BuildBroadcastParam(&bcParam);
+    BuildBroadcastPacketExceptPayload(&packet);
+    packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
+    packet.bcData.payload = BC_DATA_PAYLOAD;
+    packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
+
+    EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_OK, StopBroadcasting(bcId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "VlinkBroadcaster001 end ----");
+}
+
+/*
+ * @tc.name: VlinkScan001
+ * @tc.desc: Register/set filter/start/stop scan with SRV_TYPE_VLINK success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusBroadcastMgrTest, VlinkScan001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "VlinkScan001 begin ----");
+    ManagerMock managerMock;
+
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
+    int32_t listenerId = -1;
+    uint8_t filterNum = 1;
+    BcScanFilter *filter = GetBcScanFilter();
+    BcScanParams scanParam = {};
+    BuildScanParam(&scanParam);
+
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_VLINK, &listenerId, GetScanCallback()));
+    EXPECT_TRUE(listenerId >= 0);
+
+    EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
+    EXPECT_EQ(SOFTBUS_OK, StartScan(listenerId, &scanParam));
+    EXPECT_EQ(SOFTBUS_OK, StopScan(listenerId));
+    EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
+
+    DISC_LOGI(DISC_TEST, "VlinkScan001 end ----");
+}
 } // namespace OHOS

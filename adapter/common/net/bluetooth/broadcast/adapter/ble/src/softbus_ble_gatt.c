@@ -498,6 +498,21 @@ static void WrapperLpDeviceInfoCb3(BtUuid *uuid, int32_t type, uint8_t *data, ui
     WrapperLpDeviceInfoCb(CHANEL_UNSTEADY, uuid, type, data, dataSize);
 }
 
+static void WrapperScanResultCb4(BtScanResultData *data)
+{
+    WrapperScanResultCb(CHANEL_VLINK, data);
+}
+
+static void WrapperScanStateChangeCb4(int32_t resultCode, bool isStartScan)
+{
+    WrapperScanStateChangeCb(CHANEL_VLINK, resultCode, isStartScan);
+}
+
+static void WrapperLpDeviceInfoCb4(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
+{
+    WrapperLpDeviceInfoCb(CHANEL_VLINK, uuid, type, data, dataSize);
+}
+
 static BleScanCallbacks g_softbusBleScanCb[GATT_SCAN_MAX_NUM] = {
     {
         .scanResultCb = WrapperScanResultCb0,
@@ -518,6 +533,11 @@ static BleScanCallbacks g_softbusBleScanCb[GATT_SCAN_MAX_NUM] = {
         .scanResultCb = WrapperScanResultCb3,
         .scanStateChangeCb = WrapperScanStateChangeCb3,
         .lpDeviceInfoCb = WrapperLpDeviceInfoCb3,
+    },
+    {
+        .scanResultCb = WrapperScanResultCb4,
+        .scanStateChangeCb = WrapperScanStateChangeCb4,
+        .lpDeviceInfoCb = WrapperLpDeviceInfoCb4,
     },
 };
 
