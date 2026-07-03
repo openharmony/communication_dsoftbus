@@ -32,7 +32,6 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_ohos_account.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 
 DistributedNetLedger g_distributedNetLedger;

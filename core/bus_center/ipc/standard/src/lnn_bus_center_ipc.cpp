@@ -1220,6 +1220,7 @@ int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t request
     ret = StartGroupAccountAuth(pkgName, requestId, serviceId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "start account auth failed, ret=%{public}d", ret);
+        RemoveAccountAuthInfoByRequestId(requestId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -1243,6 +1244,7 @@ int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t reque
     ret = ProcessGroupAccountAuth(pkgName, requestId, data, dataLen);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "process account auth failed, ret=%{public}d", ret);
+        RemoveAccountAuthInfoByRequestId(requestId);
         return ret;
     }
     return ret;

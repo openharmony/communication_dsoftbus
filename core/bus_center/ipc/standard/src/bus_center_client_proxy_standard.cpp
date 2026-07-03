@@ -698,6 +698,10 @@ void BusCenterClientProxy::OnGroupStateChange(int32_t retCode)
 bool BusCenterClientProxy::OnTransmitAuthResult(
     const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen)
 {
+    if (pkgName == nullptr || data == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        return false;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
@@ -742,6 +746,10 @@ bool BusCenterClientProxy::OnTransmitAuthResult(
 void BusCenterClientProxy::OnSessionKeyAuthResult(
     const char *pkgName, int64_t requestId, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
+    if (pkgName == nullptr || sessionKey == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
@@ -779,6 +787,10 @@ void BusCenterClientProxy::OnSessionKeyAuthResult(
 void BusCenterClientProxy::OnFinishAuthResult(
     const char *pkgName, int64_t requestId, int32_t operationCode, const char *returnData)
 {
+    if (pkgName == nullptr || returnData == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
@@ -816,6 +828,10 @@ void BusCenterClientProxy::OnFinishAuthResult(
 void BusCenterClientProxy::OnErrorAuthResult(
     const char *pkgName, int64_t requestId, int32_t operationCode, int32_t errorCode, const char *returnData)
 {
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid parameters");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");

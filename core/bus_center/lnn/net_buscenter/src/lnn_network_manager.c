@@ -104,6 +104,26 @@ void __attribute__((weak)) LnnDeinitUsbChannelManager(void)
 {
 }
 
+static int32_t LnnInitUsbChannelManagerPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList->lnnInitUsbChannelManager == NULL) {
+        return LnnInitUsbChannelManager();
+    }
+
+    return pfnLnnEnhanceFuncList->lnnInitUsbChannelManager();
+}
+
+static void LnnDeinitUsbChannelManagerPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList->lnnDeinitUsbChannelManager == NULL) {
+        return LnnDeinitUsbChannelManager();
+    }
+
+    return pfnLnnEnhanceFuncList->lnnDeinitUsbChannelManager();
+}
+
 static LnnNetIfManagerBuilder g_netifBuilders[LNN_MAX_NUM_TYPE] = {0};
 
 static LnnProtocolManager *g_networkProtocols[LNN_NETWORK_MAX_PROTOCOL_COUNT] = {0};
@@ -899,7 +919,7 @@ int32_t LnnInitNetworkManager(void)
         return ret;
     }
 #endif
-    ret = LnnInitUsbChannelManager();
+    ret = LnnInitUsbChannelManagerPacked();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "init usb channel manager failed, ret=%{public}d", ret);
         return ret;
@@ -999,7 +1019,7 @@ void LnnDeinitNetworkManager(void)
 #ifdef ENABLE_FEATURE_LNN_WIFI
     LnnDeinitPhysicalSubnetManager();
 #endif
-    LnnDeinitUsbChannelManager();
+    LnnDeinitUsbChannelManagerPacked();
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {
         if (g_networkProtocols[i] == NULL || g_networkProtocols[i]->deinit == NULL) {
             continue;

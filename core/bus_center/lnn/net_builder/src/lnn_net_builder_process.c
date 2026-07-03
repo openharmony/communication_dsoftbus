@@ -353,6 +353,7 @@ static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, Au
         .localUserId = msgPara->nodeInfo->localUserId
     };
     UpdateDpSameAccount(&aclParams, sessionKey, false, msgPara->nodeInfo->aclState);
+    SetDpGroupShare(msgPara->nodeInfo, authHandle);
 }
 
 static int32_t GetPeerDeviceUdid(char *peerNetworkId, char *peerUdid, uint32_t udidLen)
@@ -676,6 +677,7 @@ static int32_t ProcessMasterElect(const void *para)
 static bool HasActiveHmlConnection(const char *networkId)
 {
     NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     char myIp[IP_LEN] = { 0 };
     struct WifiDirectManager *pManager = GetWifiDirectManager();
     if (pManager == NULL) {
@@ -686,11 +688,7 @@ static bool HasActiveHmlConnection(const char *networkId)
         LNN_LOGE(LNN_HEART_BEAT, "HB get node info fail");
         return false;
     }
-    if (pManager->getLocalIpByUuid(info.uuid, myIp, sizeof(myIp)) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "HB get HML ip success");
-        return true;
-    }
-    return false;
+    return (pManager->getLocalIpByUuid(info.uuid, myIp, sizeof(myIp)) == SOFTBUS_OK);
 }
 
 static int32_t ProcessLeaveByAddrType(const void *para)
@@ -814,6 +812,7 @@ static int32_t ProcessLeaveByAuthId(const void *para)
 
 static int32_t ProcessSetReSyncDeviceName(const void *para)
 {
+    (void)para;
     LnnConnectionFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &LnnGetNetBuilder()->fsmList, LnnConnectionFsm, node) {
         if (!item->isDead && (item->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
