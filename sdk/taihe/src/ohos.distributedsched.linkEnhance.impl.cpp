@@ -559,6 +559,7 @@ extern "C" {
 static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
 {
     COMM_LOGI(COMM_SDK, "accept new conn, handle=%{public}u", handle);
+    COMM_CHECK_AND_RETURN_RET_LOGE(name != nullptr, SOFTBUS_INVALID_PARAM, COMM_SDK, "name is nullptr");
     auto connection = taihe::make_holder<ConnectionImpl,
         ::ohos::distributedsched::linkEnhance::Connection>((const std::string)name, handle);
     {
