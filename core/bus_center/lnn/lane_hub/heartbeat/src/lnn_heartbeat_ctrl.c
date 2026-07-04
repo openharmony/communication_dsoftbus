@@ -896,7 +896,7 @@ static void HbHandleAccountLogout(void)
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     (void)HbMultiUserHandleLogout();
 #else
-    LnnSetCloudAbility(false, CLOSE_FILTER_USERID_MODE);
+    LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
     if (LnnDeleteSyncToDB(0, 0, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB clear local cache fail");
     }

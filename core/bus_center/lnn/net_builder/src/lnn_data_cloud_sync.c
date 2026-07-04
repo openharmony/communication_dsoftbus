@@ -1379,7 +1379,6 @@ int32_t SyncLedgerInfoToCloud(NodeInfo *info, const UserInfo *userInfo, bool isA
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    uint32_t filterMode = isMainScreenUserId ? CLOSE_FILTER_USERID_MODE : OPEN_FILTER_USERID_MODE;
     info->updateTimestamp = SoftBusGetSysTimeMs();
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
@@ -1397,7 +1396,7 @@ int32_t SyncLedgerInfoToCloud(NodeInfo *info, const UserInfo *userInfo, bool isA
         return SOFTBUS_CREATE_JSON_ERR;
     }
     int32_t dbId = g_dbId;
-    LnnSetCloudAbility(true, filterMode);
+    LnnSetCloudAbility(true, OPEN_FILTER_USERID_MODE);
     ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
     cJSON_free(putValue);
     if (ret != SOFTBUS_OK) {

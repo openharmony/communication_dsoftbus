@@ -198,8 +198,7 @@ int32_t LnnResetLogoutUserInfo(void)
         }
         if (!isActiveUser && user->info.accountId != 0) {
             bool isMainScreenUserId = (user->info.displayId == MAIN_SCREEN_USER_TYPE) ? true : false;
-            uint32_t filterMode = (isMainScreenUserId == true) ? CLOSE_FILTER_USERID_MODE : OPEN_FILTER_USERID_MODE;
-            LnnSetCloudAbility(false, filterMode);
+            LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
             if (LnnDeleteSyncToDB(user->info.userId, user->info.accountId, isMainScreenUserId) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LEDGER, "delete local cache failed");
             }
