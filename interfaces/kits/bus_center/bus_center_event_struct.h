@@ -16,10 +16,10 @@
 #ifndef BUS_CENTER_EVENT_STRUCT_H
 #define BUS_CENTER_EVENT_STRUCT_H
 
-#include "bus_center_info_key_struct.h"
-#include "softbus_bus_center.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include "bus_center_info_key_struct.h"
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -266,7 +266,7 @@ typedef struct {
     LnnEventBasicInfo basic;
     int32_t weight;
     bool isMasterNode;
-    const char *masterNodeUDID;
+    const char* masterNodeUDID;
 } LnnMasterNodeChangedEvent;
 
 typedef struct {
