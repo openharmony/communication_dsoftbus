@@ -148,16 +148,8 @@ static int32_t ProcessSingleUser(int32_t userId, int32_t mainScreenUserId, const
     (void)memset_s(&existUser, sizeof(UserInfo), 0, sizeof(UserInfo));
     ret = LnnGetUserInfoSafe(userId, &existUser);
     if (ret == SOFTBUS_OK && existUser.accountId != 0) {
-        if (existUser.accountId != accountId) {
-            // 时序反转兜底：新旧 accountId 不同，先清旧再写新
-            LNN_LOGI(LNN_LEDGER, "detect accountId changed (old=%{public}lld, new=%{public}lld), clear old first, userId=%{public}d",
-                (long long)existUser.accountId, (long long)accountId, userId);
-            (void)LnnClearLocalUserAccountByUserId(userId, existUser.displayId == MAIN_SCREEN_USER_TYPE);
-            // 清理后继续执行（不 return），走后续 LnnAddLocalUserInfo 覆盖分支
-        } else {
-            LNN_LOGI(LNN_LEDGER, "user already exists in local ledger, skip, userId=%{public}d", userId);
-            return SOFTBUS_ALREADY_EXISTED;
-        }
+        LNN_LOGI(LNN_LEDGER, "user already exists in local ledger, skip, userId=%{public}d", userId);
+        return SOFTBUS_ALREADY_EXISTED;
     }
     uint64_t displayId = (userId == mainScreenUserId) ? MAIN_SCREEN_USER_TYPE : OTHER_SCREEN_USER_TYPE;
     UserInfo userInfo = {

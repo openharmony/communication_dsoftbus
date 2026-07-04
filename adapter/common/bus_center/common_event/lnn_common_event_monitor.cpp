@@ -97,7 +97,11 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         std::string userIdKey = "userId";
         eventUserId = wantParams.GetIntParam(userIdKey, -1);
         LNN_LOGI(LNN_EVENT, "LOGIN eventUserId=%{public}d", eventUserId);
-        state = SOFTBUS_ACCOUNT_LOG_IN;
+        if (LnnIsSameAccountGroupDevice()) {
+            state = SOFTBUS_ACCOUNT_LOG_IN;
+        } else {
+            LNN_LOGI(LNN_EVENT, "LOGIN but no same account group, skip LOG_IN, wait for hichain onGroupCreated");
+        }
     }
 
     if (state != SOFTBUS_ACCOUNT_UNKNOWN) {
