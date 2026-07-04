@@ -1629,6 +1629,7 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, HbSleStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DEVICE_RISK_STATE_CHANGED, HbDeviceRiskStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, HbConstraintStateChangeHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_SWITCH_CHECK, HbAccountSwitchCheckHandler);
 }
 
 int32_t LnnTriggerDataLevelHeartbeat(void)

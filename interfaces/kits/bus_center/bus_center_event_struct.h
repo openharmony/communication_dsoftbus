@@ -365,11 +365,11 @@ typedef struct {
 
 typedef struct {
     LnnEventBasicInfo basic;
-    const char *udid;
+    char udid[UDID_BUF_LEN];
     int32_t localUserId;
     int32_t peerUserId;
     uint32_t serviceIdCount;
-    const int32_t *serviceIdList;
+    int32_t serviceIdList[FOREGROUND_ACCOUNT_MAX_SIZE];
 } LnnAccountAclChangeEvent;
 
 #ifdef __cplusplus

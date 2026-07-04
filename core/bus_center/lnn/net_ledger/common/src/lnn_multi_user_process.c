@@ -245,6 +245,9 @@ void HbCheckSingleUser(int32_t userId)
         if (LnnClearLocalUserAccountByUserId(userId, ledgerInfo.displayId == MAIN_SCREEN_USER_TYPE) != SOFTBUS_OK) {
             LNN_LOGW(LNN_LEDGER, "clear user account failed, userId=%{public}d", userId);
         }
+        // 清理后重新获取台账，避免使用陈旧数据
+        (void)memset_s(&ledgerInfo, sizeof(UserInfo), 0, sizeof(UserInfo));
+        (void)LnnGetUserInfoSafe(userId, &ledgerInfo);
     }
 
     // 场景2：系统侧已有新账号但台账没有，主动刷新（容错 LOGIN 丢失）

@@ -742,12 +742,19 @@ void LnnNotifyAccountAclChangeEvent(
     const char *udid, int32_t localUserId, int32_t peerUserId, const int32_t *serviceIdList, uint32_t serviceIdCount)
 {
     LnnAccountAclChangeEvent event;
+    (void)memset_s(&event, sizeof(event), 0, sizeof(event));
     event.basic.event = LNN_EVENT_ACCOUNT_ACL_CHANGE;
-    event.udid = udid;
+    if (udid != NULL) {
+        (void)strcpy_s(event.udid, UDID_BUF_LEN, udid);
+    }
     event.localUserId = localUserId;
     event.peerUserId = peerUserId;
-    event.serviceIdCount = serviceIdCount;
-    event.serviceIdList = serviceIdList;
+    event.serviceIdCount = (serviceIdCount > FOREGROUND_ACCOUNT_MAX_SIZE) ?
+        FOREGROUND_ACCOUNT_MAX_SIZE : serviceIdCount;
+    if (serviceIdList != NULL && event.serviceIdCount > 0) {
+        (void)memcpy_s(event.serviceIdList, sizeof(event.serviceIdList),
+            serviceIdList, event.serviceIdCount * sizeof(int32_t));
+    }
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
