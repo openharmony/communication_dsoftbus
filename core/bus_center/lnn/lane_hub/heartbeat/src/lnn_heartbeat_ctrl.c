@@ -34,6 +34,7 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_local_user_info.h"
 #include "lnn_multi_user_process.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
@@ -882,6 +883,9 @@ static void HbHandleAccountLogin(void)
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
         HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    // 新增：更新 NodeInfo 单实例的中控屏账号字段
+    LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
+    // 更新 g_localUserLedger per-user 台账
     (void)HbMultiUserHandleLogin();
     HbDelayConditionChanged(NULL);
 #else
@@ -894,6 +898,9 @@ static void HbHandleAccountLogout(void)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    // 新增：遍历 check 所有前台用户（对比系统侧，清理已登出的）
+    HbCheckAllForegroundUsers();
+    // 保留：仍调 HbMultiUserHandleLogout 清理其他已不在前台的用户
     (void)HbMultiUserHandleLogout();
 #else
     LnnSetCloudAbility(false, CLOSE_FILTER_USERID_MODE);
@@ -1101,6 +1108,20 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
         default:
             return;
     }
+}
+
+static void HbAccountSwitchCheckHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_ACCOUNT_SWITCH_CHECK) {
+        LNN_LOGE(LNN_HEART_BEAT, "account switch check evt handler get invalid param");
+        return;
+    }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    const LnnAccountSwitchCheckEvent *event = (const LnnAccountSwitchCheckEvent *)info;
+    HbCheckSingleUser(event->userId);
+#else
+    LNN_LOGI(LNN_HEART_BEAT, "account switch check skipped, multi foreground user not enabled");
+#endif
 }
 
 static void HbLpEventHandler(const LnnEventBasicInfo *info)
@@ -1510,6 +1531,10 @@ static int32_t LnnRegisterHeartbeatEvent(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, HbAccountStateChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist account change evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_SWITCH_CHECK, HbAccountSwitchCheckHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist account switch check evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED, HbDifferentAccountEventHandler) != SOFTBUS_OK) {

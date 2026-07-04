@@ -148,8 +148,16 @@ static int32_t ProcessSingleUser(int32_t userId, int32_t mainScreenUserId, const
     (void)memset_s(&existUser, sizeof(UserInfo), 0, sizeof(UserInfo));
     ret = LnnGetUserInfoSafe(userId, &existUser);
     if (ret == SOFTBUS_OK && existUser.accountId != 0) {
-        LNN_LOGI(LNN_LEDGER, "user already exists in local ledger, skip, userId=%{public}d", userId);
-        return SOFTBUS_ALREADY_EXISTED;
+        if (existUser.accountId != accountId) {
+            // 时序反转兜底：新旧 accountId 不同，先清旧再写新
+            LNN_LOGI(LNN_LEDGER, "detect accountId changed (old=%{public}lld, new=%{public}lld), clear old first, userId=%{public}d",
+                (long long)existUser.accountId, (long long)accountId, userId);
+            (void)LnnClearLocalUserAccountByUserId(userId, existUser.displayId == MAIN_SCREEN_USER_TYPE);
+            // 清理后继续执行（不 return），走后续 LnnAddLocalUserInfo 覆盖分支
+        } else {
+            LNN_LOGI(LNN_LEDGER, "user already exists in local ledger, skip, userId=%{public}d", userId);
+            return SOFTBUS_ALREADY_EXISTED;
+        }
     }
     uint64_t displayId = (userId == mainScreenUserId) ? MAIN_SCREEN_USER_TYPE : OTHER_SCREEN_USER_TYPE;
     UserInfo userInfo = {
@@ -224,4 +232,50 @@ void RestoreLocalUserInfo(void)
     if (LnnLoadLocalUserInfoPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "load local user info fail");
     }
+}
+
+void HbCheckSingleUser(int32_t userId)
+{
+    UserInfo ledgerInfo;
+    int64_t sysAccountId = 0;
+    uint8_t sysAccountHash[SHA_256_HASH_LEN] = {0};
+
+    if (LnnGetUserInfoSafe(userId, &ledgerInfo) != SOFTBUS_OK) {
+        return;
+    }
+    if (LnnGetAccountIdByUserId(userId, &sysAccountId, sysAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "get system accountId failed, assume not logged in, userId=%{public}d", userId);
+        // sysAccountId 已初始化为 0，无需再赋值
+    }
+
+    // 场景1：台账残留旧账号（已登出但台账未清），补清理
+    if (ledgerInfo.accountId > 0 && ledgerInfo.accountId != sysAccountId) {
+        if (LnnClearLocalUserAccountByUserId(userId, ledgerInfo.displayId == MAIN_SCREEN_USER_TYPE) != SOFTBUS_OK) {
+            LNN_LOGW(LNN_LEDGER, "clear user account failed, userId=%{public}d", userId);
+        }
+    }
+
+    // 场景2：系统侧已有新账号但台账没有，主动刷新（容错 LOGIN 丢失）
+    if (sysAccountId > 0 && ledgerInfo.accountId != sysAccountId) {
+        int32_t mainScreenUserId = JudgeDeviceTypeAndGetOsAccountIds();
+        NodeInfo nodeInfo;
+        (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        if (LnnGetLocalNodeInfoSafe(&nodeInfo) == SOFTBUS_OK) {
+            ProcessSingleUser(userId, mainScreenUserId, &nodeInfo);
+        }
+    }
+}
+
+void HbCheckAllForegroundUsers(void)
+{
+    int32_t *userIds = NULL;
+    uint32_t len = 0;
+    if (GetAllForegroundAccountIds(&userIds, &len) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get all foreground users failed");
+        return;
+    }
+    for (uint32_t i = 0; i < len; i++) {
+        HbCheckSingleUser(userIds[i]);
+    }
+    SoftBusFree(userIds);
 }

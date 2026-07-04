@@ -16,9 +16,9 @@
 #ifndef BUS_CENTER_EVENT_H
 #define BUS_CENTER_EVENT_H
 
-#include "softbus_bus_center.h"
-#include "bus_center_info_key.h"
 #include "bus_center_event_struct.h"
+#include "bus_center_info_key.h"
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,8 +30,7 @@ void LnnDeinitBusCenterEvent(void);
 int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
 void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler);
 
-void LnnNotifyJoinResult(ConnectionAddr *addr,
-    const char *networkId, int32_t retCode);
+void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode);
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info);
@@ -39,8 +38,7 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type);
 void LnnNotifyNodeStatusChanged(NodeStatus *info, NodeStatusType type);
 void LnnNotifyLocalNetworkIdChanged(void);
 void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen);
-void LnnNotifyHichainProofException(
-    const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
+void LnnNotifyHichainProofException(const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode);
 void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info);
 
 void LnnNotifyWlanStateChangeEvent(void *state);
@@ -54,14 +52,14 @@ void LnnNotifyUserStateChangeEvent(SoftBusUserState state);
 void LnnNotifyNightModeStateChangeEvent(void *state);
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);
 void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state);
-void LnnNotifyAddressChangedEvent(const char* ifName);
+void LnnNotifyAddressChangedEvent(const char *ifName);
 void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin);
 void LnnNotifyDeviceVerified(const char *udid);
 void LnnNotifySysTimeChangeEvent(void);
 
 void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncResultInfo *info, int32_t retCode);
 
-void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
+void LnnNotifyMasterNodeChanged(bool isMaster, const char *masterNodeUdid, int32_t weight);
 
 void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool isLocal);
 
@@ -78,7 +76,6 @@ void LnnNotifyHBRepeat(void);
 void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state);
 
 void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state);
-
 
 void LnnNotifyStateForSession(char *udid, int32_t retCode);
 
@@ -105,6 +102,11 @@ void LnnNotifyLpMcuUpdateHbInfo(int32_t type);
 void LnnNotifyVirLinkReportEvent(const uint8_t *data, uint32_t len);
 
 void LnnNotifyDmHookRegisteredEvent(void);
+
+void LnnNotifyAccountSwitchCheckEvent(int32_t userId);
+
+void LnnNotifyAccountAclChangeEvent(
+    const char *udid, int32_t localUserId, int32_t peerUserId, const int32_t *serviceIdList, uint32_t serviceIdCount);
 
 #ifdef __cplusplus
 }

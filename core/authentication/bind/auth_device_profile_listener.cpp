@@ -20,15 +20,16 @@
 #include "anonymizer.h"
 #include "auth_deviceprofile.h"
 #include "auth_log.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
-#include "lnn_distributed_net_ledger.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info_struct.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_heartbeat_utils.h"
 #include "lnn_heartbeat_strategy.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
@@ -105,7 +106,8 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
     const char *udid = deviceId.c_str();
     char *anonyUdid = nullptr;
     Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileDelete start! "
+    AUTH_LOGI(AUTH_INIT,
+        "OnTrustDeviceProfileDelete start! "
         "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
@@ -127,8 +129,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         }
         return SOFTBUS_OK;
     }
-    if (ret == SOFTBUS_OK && nodeInfo.userId != 0 &&
-        nodeInfo.userId != profile.GetPeerUserId()) {
+    if (ret == SOFTBUS_OK && nodeInfo.userId != 0 && nodeInfo.userId != profile.GetPeerUserId()) {
         AUTH_LOGE(AUTH_INIT, "no match peer user");
         return SOFTBUS_OK;
     }
@@ -165,9 +166,9 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceP
     }
     if (IsHeartbeatEnable()) {
         if (LnnStartHbByTypeAndStrategy(
-            HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_INIT, "start ble heartbeat fail");
-            }
+                HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_INIT, "start ble heartbeat fail");
+        }
     }
     RestartCoapDiscovery();
 
@@ -208,7 +209,8 @@ int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByDelete(const TrustDevice
     const char *udid = deviceId.c_str();
     char *anonyUdid = nullptr;
     Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_INIT, "OnDeviceAclInactiveByDelete start! "
+    AUTH_LOGI(AUTH_INIT,
+        "OnDeviceAclInactiveByDelete start! "
         "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
@@ -234,7 +236,8 @@ int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByUpdate(const TrustDevice
     const char *udid = deviceId.c_str();
     char *anonyUdid = nullptr;
     Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_INIT, "OnDeviceAclInactiveByUpdate start! "
+    AUTH_LOGI(AUTH_INIT,
+        "OnDeviceAclInactiveByUpdate start! "
         "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
@@ -251,6 +254,79 @@ int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByUpdate(const TrustDevice
     }
     AUTH_LOGD(AUTH_INIT, "userId=%{public}d", userId);
     NotifyRemoteDevOffLineByUserId(userId, udid);
+    return SOFTBUS_OK;
+}
+
+// 依赖 DP PR 1061: ACCOUNT_ACL_DELETE/INACTIVE 回调
+int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &profile)
+{
+    std::string deviceId = profile.GetDeviceId();
+    if (deviceId.empty()) {
+        AUTH_LOGE(AUTH_INIT, "OnAccountAclDelete udid is empty!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = deviceId.c_str();
+    char *anonyUdid = nullptr;
+    Anonymize(udid, &anonyUdid);
+    AUTH_LOGI(AUTH_INIT, "OnAccountAclDelete start! udid=%{public}s, localUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), profile.GetLocalUserId());
+    AnonymizeFree(anonyUdid);
+    // 只处理座舱设备（与现有 OnDeviceAclInactiveByDelete 一致）
+    if (!IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclDelete only car device need handle");
+        return SOFTBUS_OK;
+    }
+    // 用 profile.GetLocalUserId()（非中控屏单值），支持多用户精确
+    if (g_deviceProfileChange.onDeviceProfileDeleted != nullptr) {
+        g_deviceProfileChange.onDeviceProfileDeleted(udid, profile.GetLocalUserId());
+    }
+    // 新增：取 serviceIdList 通知传输侧
+    std::vector<int32_t> serviceIdList = profile.GetServiceIdList();
+    if (!serviceIdList.empty()) {
+        LnnNotifyAccountAclChangeEvent(udid, profile.GetLocalUserId(), profile.GetPeerUserId(), serviceIdList.data(),
+            static_cast<uint32_t>(serviceIdList.size()));
+    }
+    AUTH_LOGD(AUTH_INIT, "OnAccountAclDelete success!");
+    return SOFTBUS_OK;
+}
+
+// 依赖 DP PR 1061: ACCOUNT_ACL_DELETE/INACTIVE 回调
+int32_t AuthDeviceProfileListener::OnAccountAclInactive(const TrustDeviceProfile &profile)
+{
+    std::string deviceId = profile.GetDeviceId();
+    if (deviceId.empty()) {
+        AUTH_LOGE(AUTH_INIT, "OnAccountAclInactive udid is empty!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *udid = deviceId.c_str();
+    char *anonyUdid = nullptr;
+    Anonymize(udid, &anonyUdid);
+    AUTH_LOGI(AUTH_INIT,
+        "OnAccountAclInactive start! "
+        "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
+    AnonymizeFree(anonyUdid);
+    // 只处理座舱设备（与现有 OnDeviceAclInactiveByUpdate 一致）
+    if (!IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclInactive only car device need handle");
+        return SOFTBUS_OK;
+    }
+    // 复用现有 OnDeviceAclInactiveByUpdate 模式：nodeInfo.userId 兜底
+    int32_t userId = profile.GetPeerUserId();
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+    if (ret == SOFTBUS_OK && nodeInfo.userId != 0) {
+        userId = nodeInfo.userId;
+    }
+    AUTH_LOGD(AUTH_INIT, "userId=%{public}d", userId);
+    NotifyRemoteDevOffLineByUserId(userId, udid);
+    // 新增：取 serviceIdList 通知传输侧
+    std::vector<int32_t> serviceIdList = profile.GetServiceIdList();
+    if (!serviceIdList.empty()) {
+        LnnNotifyAccountAclChangeEvent(udid, profile.GetLocalUserId(), profile.GetPeerUserId(), serviceIdList.data(),
+            static_cast<uint32_t>(serviceIdList.size()));
+    }
     return SOFTBUS_OK;
 }
 
@@ -319,10 +395,17 @@ static int32_t RegisterToDpHelper(void)
     AUTH_LOGD(AUTH_INIT, "RegistertoDpHelper start!");
     uint32_t saId = SOFTBUS_SA_ID;
     std::string subscribeKey = "trust_device_profile";
-    std::unordered_set<ProfileChangeType> subscribeTypes = { ProfileChangeType::TRUST_DEVICE_PROFILE_ADD,
-        ProfileChangeType::TRUST_DEVICE_PROFILE_UPDATE, ProfileChangeType::TRUST_DEVICE_PROFILE_DELETE,
-        ProfileChangeType::TRUST_DEVICE_PROFILE_ACTIVE, ProfileChangeType::TRUST_DEVICE_PROFILE_INACTIVE,
-        ProfileChangeType::DEVICE_ACL_INACTIVE_BY_DELETE, ProfileChangeType::DEVICE_ACL_INACTIVE_BY_UPDATE, };
+    std::unordered_set<ProfileChangeType> subscribeTypes = {
+        ProfileChangeType::TRUST_DEVICE_PROFILE_ADD,
+        ProfileChangeType::TRUST_DEVICE_PROFILE_UPDATE,
+        ProfileChangeType::TRUST_DEVICE_PROFILE_DELETE,
+        ProfileChangeType::TRUST_DEVICE_PROFILE_ACTIVE,
+        ProfileChangeType::TRUST_DEVICE_PROFILE_INACTIVE,
+        ProfileChangeType::DEVICE_ACL_INACTIVE_BY_DELETE,
+        ProfileChangeType::DEVICE_ACL_INACTIVE_BY_UPDATE,
+        ProfileChangeType::ACCOUNT_ACL_DELETE,
+        ProfileChangeType::ACCOUNT_ACL_INACTIVE,
+    };
 
     sptr<IProfileChangeListener> subscribeDPChangeListener = new (std::nothrow) AuthDeviceProfileListener;
     if (subscribeDPChangeListener == nullptr) {

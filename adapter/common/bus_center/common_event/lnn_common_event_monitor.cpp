@@ -15,6 +15,7 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include "bus_center_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
@@ -89,8 +90,30 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         }
 #endif
     }
+
+    if (action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN) {
+        const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
+        int32_t eventUserId = -1;
+        std::string userIdKey = "userId";
+        eventUserId = wantParams.GetIntParam(userIdKey, -1);
+        LNN_LOGI(LNN_EVENT, "LOGIN eventUserId=%{public}d", eventUserId);
+        state = SOFTBUS_ACCOUNT_LOG_IN;
+    }
+
     if (state != SOFTBUS_ACCOUNT_UNKNOWN) {
         LnnNotifyAccountStateChangeEvent(state);
+    }
+
+    // SWITCHED 事件处理（账号切换 check）
+    if (action == CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED) {
+        const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
+        int32_t userId = wantParams.GetIntParam("userId", -1);
+        if (userId < 0) {
+            LNN_LOGE(LNN_EVENT, "SWITCHED event missing userId, skip check, need business side to locate");
+        } else {
+            LNN_LOGI(LNN_EVENT, "SWITCHED event for userId=%{public}d", userId);
+            LnnNotifyAccountSwitchCheckEvent(userId);
+        }
     }
 
     if (action == CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
@@ -113,6 +136,8 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);

@@ -31,6 +31,7 @@ int32_t LnnAddLocalUserInfo(const UserInfo *userInfo);
 int32_t LnnGetUserInfoSafe(int32_t userId, UserInfo *userInfo);
 const SoftBusList *LnnGetLocalUserLedger(void);
 int32_t LnnResetLogoutUserInfo(void);
+int32_t LnnClearLocalUserAccountByUserId(int32_t userId, bool isMainScreen);
 
 #ifdef __cplusplus
 }

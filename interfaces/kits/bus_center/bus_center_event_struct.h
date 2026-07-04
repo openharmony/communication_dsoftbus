@@ -16,10 +16,10 @@
 #ifndef BUS_CENTER_EVENT_STRUCT_H
 #define BUS_CENTER_EVENT_STRUCT_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include "bus_center_info_key_struct.h"
 #include "softbus_bus_center.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,6 +69,8 @@ typedef enum {
     LNN_EVENT_HA_LEAVE_META_NODE,
     LNN_EVENT_CONSTRAINT_ENABLE,
     LNN_EVENT_VIR_CONN_REPORT_SH,
+    LNN_EVENT_ACCOUNT_SWITCH_CHECK,
+    LNN_EVENT_ACCOUNT_ACL_CHANGE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -264,7 +266,7 @@ typedef struct {
     LnnEventBasicInfo basic;
     int32_t weight;
     bool isMasterNode;
-    const char* masterNodeUDID;
+    const char *masterNodeUDID;
 } LnnMasterNodeChangedEvent;
 
 typedef struct {
@@ -355,6 +357,20 @@ typedef struct {
     const uint8_t *data;
     uint32_t dataLen;
 } LnnVirLinkReportEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    int32_t userId;
+} LnnAccountSwitchCheckEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    const char *udid;
+    int32_t localUserId;
+    int32_t peerUserId;
+    uint32_t serviceIdCount;
+    const int32_t *serviceIdList;
+} LnnAccountAclChangeEvent;
 
 #ifdef __cplusplus
 }
