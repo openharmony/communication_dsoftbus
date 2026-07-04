@@ -40,6 +40,7 @@
 #include "wifi_direct_scheduler_factory.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
+static std::atomic<uint32_t> g_hmlConnectingCount = 0;
 static std::list<WifiDirectStatusListener> g_listeners;
 static std::recursive_mutex g_promiseMaplock;
 static std::map<uint32_t, std::shared_ptr<std::promise<int32_t>>> g_promiseMap;
@@ -55,6 +56,30 @@ static OnRefreshNfcData g_onRefreshNfcData = nullptr;
 static uint32_t GetRequestId(void)
 {
     return g_requestId++;
+}
+
+static void OperationHmlConnectingCount(bool isIncrease, WifiDirectConnectType connectType)
+{
+    switch (connectType) {
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML:
+            if (isIncrease) {
+                g_hmlConnectingCount++;
+                CONN_LOGI(CONN_WIFI_DIRECT, "HML connecting count increased to %{public}u",
+                    g_hmlConnectingCount.load());
+                return;
+            }
+            g_hmlConnectingCount--;
+            CONN_LOGI(CONN_WIFI_DIRECT, "HML connecting count decreased to %{public}u",
+                g_hmlConnectingCount.load());
+            return;
+        default:
+            CONN_LOGE(CONN_WIFI_DIRECT, "The created link is a P2P link, no action needed.");
+            return;
+    }
 }
 
 static void AddPtkMismatchListener(PtkMismatchListener listener)
@@ -126,6 +151,9 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P ||
         OHOS::SoftBus::WifiDirectUtils::SupportHml(), SOFTBUS_NOT_IMPLEMENT, CONN_WIFI_DIRECT, "not support hml");
+    
+    enum WifiDirectConnectType connectType = info->connectType;
+    OperationHmlConnectingCount(true, connectType);
 
     OHOS::SoftBus::DurationStatistic::GetInstance().Start(info->requestId,
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
@@ -137,8 +165,15 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
 
     int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
         info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role fail");
+    if (ret != SOFTBUS_OK) {
+        OperationHmlConnectingCount(false, connectType);
+        CONN_LOGW(CONN_WIFI_DIRECT, "get expected role fail");
+        return ret;
+    }
+
     ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+
+    OperationHmlConnectingCount(false, connectType);
 
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
@@ -743,6 +778,11 @@ static void NotifyFrequencyChanged(int32_t frequency)
 
 static bool CheckOnlyVirtualLink(void)
 {
+    if (g_hmlConnectingCount > 0) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "has HML connecting, g_hmlConnectingCount=%{public}u",
+            g_hmlConnectingCount.load());
+        return false;
+    }
     return OHOS::SoftBus::LinkManager::GetInstance().CheckOnlyVirtualLink();
 }
 
@@ -868,6 +908,7 @@ static struct WifiDirectManager g_manager = {
 
     .addFrequencyChangedListener = AddFrequencyChangedListener,
     .notifyFrequencyChanged = NotifyFrequencyChanged,
+    .operationHmlConnectingCount = OperationHmlConnectingCount,
     .checkOnlyVirtualLink = CheckOnlyVirtualLink,
     .checkAndForceDisconnectVirtualLink = CheckAndForceDisconnectVirtualLink,
     .getHmlLinkCount = GetHmlLinkCount,

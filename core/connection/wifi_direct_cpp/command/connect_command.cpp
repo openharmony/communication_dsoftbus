@@ -20,6 +20,7 @@
 #include "data/link_manager.h"
 #include "dfx/wifi_direct_dfx.h"
 #include "processor_selector_factory.h"
+#include "wifi_direct_manager.h"
 #include "wifi_direct_scheduler_factory.h"
 
 namespace OHOS::SoftBus {
@@ -27,11 +28,19 @@ ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDire
     : callback_(callback)
 {
     info_.info_ = info;
+    connectType_ = info.connectType;
+    GetWifiDirectManager()->operationHmlConnectingCount(true, connectType_);
+
     if (strlen(info.remoteNetworkId) != 0) {
         remoteDeviceId_ = WifiDirectUtils::NetworkIdToUuid(info_.info_.remoteNetworkId);
         return;
     }
     CONN_LOGE(CONN_WIFI_DIRECT, "remoteNetworkId empty!!");
+}
+
+ConnectCommand::~ConnectCommand()
+{
+    GetWifiDirectManager()->operationHmlConnectingCount(false, connectType_);
 }
 
 std::string ConnectCommand::GetRemoteDeviceId() const
