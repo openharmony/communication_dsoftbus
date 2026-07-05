@@ -255,6 +255,15 @@ int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByUpdate(const TrustDevice
     return SOFTBUS_OK;
 }
 
+static void NotifyServiceIdListIfNeeded(const char *udid, const TrustDeviceProfile &profile)
+{
+    std::vector<int32_t> serviceIdList = profile.GetServiceIdList();
+    if (!serviceIdList.empty()) {
+        LnnNotifyAccountAclChangeEvent(udid, profile.GetLocalUserId(), profile.GetPeerUserId(),
+            serviceIdList.data(), static_cast<uint32_t>(serviceIdList.size()));
+    }
+}
+
 int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &profile)
 {
     std::string deviceId = profile.GetDeviceId();
@@ -276,11 +285,7 @@ int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &
     if (g_deviceProfileChange.onDeviceProfileDeleted != nullptr) {
         g_deviceProfileChange.onDeviceProfileDeleted(udid, profile.GetLocalUserId());
     }
-    std::vector<int32_t> serviceIdList = profile.GetServiceIdList();
-    if (!serviceIdList.empty()) {
-        LnnNotifyAccountAclChangeEvent(udid, profile.GetLocalUserId(), profile.GetPeerUserId(),
-            serviceIdList.data(), static_cast<uint32_t>(serviceIdList.size()));
-    }
+    NotifyServiceIdListIfNeeded(udid, profile);
     AUTH_LOGD(AUTH_INIT, "OnAccountAclDelete success!");
     return SOFTBUS_OK;
 }
@@ -312,11 +317,7 @@ int32_t AuthDeviceProfileListener::OnAccountAclInactive(const TrustDeviceProfile
     }
     AUTH_LOGD(AUTH_INIT, "userId=%{public}d", userId);
     NotifyRemoteDevOffLineByUserId(userId, udid);
-    std::vector<int32_t> serviceIdList = profile.GetServiceIdList();
-    if (!serviceIdList.empty()) {
-        LnnNotifyAccountAclChangeEvent(udid, profile.GetLocalUserId(), profile.GetPeerUserId(),
-            serviceIdList.data(), static_cast<uint32_t>(serviceIdList.size()));
-    }
+    NotifyServiceIdListIfNeeded(udid, profile);
     return SOFTBUS_OK;
 }
 

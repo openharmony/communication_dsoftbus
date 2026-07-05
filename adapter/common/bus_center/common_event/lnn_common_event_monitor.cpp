@@ -132,26 +132,31 @@ static void HandleUserSwitched(const CommonEventData &data)
 
 static void HandleSubProfileCreated(const CommonEventData &data)
 {
+    (void)data;
     LNN_LOGI(LNN_EVENT, "sub profile created");
 }
 
 static void HandleSubProfileDeleted(const CommonEventData &data)
 {
+    (void)data;
     LNN_LOGI(LNN_EVENT, "sub profile deleted");
 }
 
 static void HandleSubProfileSwitching(const CommonEventData &data)
 {
+    (void)data;
     LNN_LOGI(LNN_EVENT, "sub profile switching");
 }
 
 static void HandleDistributedAccountBound(const CommonEventData &data)
 {
+    (void)data;
     LNN_LOGI(LNN_EVENT, "distributed account bound");
 }
 
 static void HandleDistributedAccountUnbound(const CommonEventData &data)
 {
+    (void)data;
     LNN_LOGI(LNN_EVENT, "distributed account unbound");
 }
 
