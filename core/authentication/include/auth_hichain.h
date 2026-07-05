@@ -55,13 +55,6 @@ typedef struct {
     void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceNotTrusted)(const char *udid, int32_t localUserId);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
-    void (*onTrustedDeviceNumChanged)(int curTrustedDeviceNum);
-    void (*onGroupActiveInUser)(const char *returnInfo);
-    void (*onGroupInactiveInUser)(const char *returnInfo);
-    void (*onDeviceActiveInUser)(const char *udid, const char *returnInfo);
-    void (*onDeviceInactiveInUser)(const char *udid, const char *returnInfo);
-#endif
 } TrustDataChangeListener;
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
 void UnregTrustDataChangeListener(void);

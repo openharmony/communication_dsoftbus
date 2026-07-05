@@ -33,7 +33,6 @@
 #include "lnn_net_builder.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_json_utils.h"
 
 #define DELAY_AUTH_TIME                    (8 * 1000L)
 
@@ -438,58 +437,6 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
 }
 
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
-static int32_t ParseOsAccountIdFromReturnInfo(const char *returnInfo)
-{
-    if (returnInfo == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "returnInfo is null");
-        return -1;
-    }
-    cJSON *json = cJSON_Parse(returnInfo);
-    if (json == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "parse returnInfo failed");
-        return -1;
-    }
-    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, "osAccountId");
-    int32_t osAccountId = -1;
-    if (cJSON_IsNumber(item)) {
-        osAccountId = item->valueint;
-    }
-    cJSON_Delete(json);
-    return osAccountId;
-}
-
-static void OnTrustedDeviceNumChanged(int curTrustedDeviceNum)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "trusted device num changed, curNum=%{public}d", curTrustedDeviceNum);
-}
-
-static void OnGroupActiveInUser(const char *returnInfo)
-{
-    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
-    AUTH_LOGI(AUTH_HICHAIN, "group active in user, osAccountId=%{public}d", osAccountId);
-}
-
-static void OnGroupInactiveInUser(const char *returnInfo)
-{
-    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
-    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, osAccountId=%{public}d, start fast offline", osAccountId);
-    LnnSyncTrustedRelationShipPacked(NULL, NULL, 0);
-}
-
-static void OnDeviceActiveInUser(const char *udid, const char *returnInfo)
-{
-    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
-    AUTH_LOGI(AUTH_HICHAIN, "device active in user, osAccountId=%{public}d", osAccountId);
-}
-
-static void OnDeviceInactiveInUser(const char *udid, const char *returnInfo)
-{
-    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
-    AUTH_LOGI(AUTH_HICHAIN, "device inactive in user, osAccountId=%{public}d", osAccountId);
-}
-#endif
-
 static int32_t RetryRegTrustDataChangeListener(void)
 {
     TrustDataChangeListener trustListener = {
@@ -497,13 +444,6 @@ static int32_t RetryRegTrustDataChangeListener(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
-        .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
-        .onGroupActiveInUser = OnGroupActiveInUser,
-        .onGroupInactiveInUser = OnGroupInactiveInUser,
-        .onDeviceActiveInUser = OnDeviceActiveInUser,
-        .onDeviceInactiveInUser = OnDeviceInactiveInUser,
-#endif
     };
     for (int32_t i = 1; i <= RETRY_REGDATA_TIMES; i++) {
         int32_t ret = RegTrustDataChangeListener(&trustListener);
@@ -524,13 +464,6 @@ int32_t RegTrustListenerOnHichainSaStart(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
-        .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
-        .onGroupActiveInUser = OnGroupActiveInUser,
-        .onGroupInactiveInUser = OnGroupInactiveInUser,
-        .onDeviceActiveInUser = OnDeviceActiveInUser,
-        .onDeviceInactiveInUser = OnDeviceInactiveInUser,
-#endif
     };
     if (RegTrustDataChangeListener(&trustListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "RegTrustDataChangeListener fail");
