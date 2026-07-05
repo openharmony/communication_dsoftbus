@@ -243,12 +243,12 @@ void HbCheckSingleUser(int32_t userId)
     // 场景1：台账残留旧账号（已登出但台账未清），补清理
     if (ledgerInfo.accountId > 0 && ledgerInfo.accountId != sysAccountId) {
         if (LnnClearLocalUserAccountByUserId(userId, ledgerInfo.displayId == MAIN_SCREEN_USER_TYPE) != SOFTBUS_OK) {
-            LNN_LOGW(LNN_LEDGER, "clear user account failed, userId=%{public}d", userId);
+            LNN_LOGW(LNN_LEDGER, "clear user account failed, please check ledger, userId=%{public}d", userId);
         }
         // 清理后重新获取台账，避免使用陈旧数据
         (void)memset_s(&ledgerInfo, sizeof(UserInfo), 0, sizeof(UserInfo));
         if (LnnGetUserInfoSafe(userId, &ledgerInfo) != SOFTBUS_OK) {
-            LNN_LOGW(LNN_LEDGER, "re-get user info failed after clear, userId=%{public}d", userId);
+            LNN_LOGW(LNN_LEDGER, "re-get user info failed after clear, please check ledger, userId=%{public}d", userId);
             return;
         }
     }
@@ -269,7 +269,7 @@ void HbCheckAllForegroundUsers(void)
     int32_t *userIds = NULL;
     uint32_t len = 0;
     if (GetAllForegroundAccountIds(&userIds, &len) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get all foreground users failed");
+        LNN_LOGE(LNN_LEDGER, "get all foreground users failed, please check foreground accounts");
         return;
     }
     for (uint32_t i = 0; i < len; i++) {

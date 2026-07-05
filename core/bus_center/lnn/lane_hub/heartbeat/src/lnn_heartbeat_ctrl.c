@@ -883,7 +883,7 @@ static void HbHandleAccountLogin(void)
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
         HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    // 新增：更新 NodeInfo 单实例的中控屏账号字段
+    // 更新 NodeInfo 单实例的中控屏账号字段
     LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
     // 更新 g_localUserLedger per-user 台账
     (void)HbMultiUserHandleLogin();
@@ -898,9 +898,9 @@ static void HbHandleAccountLogout(void)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    // 新增：遍历 check 所有前台用户（对比系统侧，清理已登出的）
+    // 遍历 check 所有前台用户（对比系统侧，清理已登出的）
     HbCheckAllForegroundUsers();
-    // 保留：仍调 HbMultiUserHandleLogout 清理其他已不在前台的用户
+    // 仍调 HbMultiUserHandleLogout 清理其他已不在前台的用户
     (void)HbMultiUserHandleLogout();
 #else
     LnnSetCloudAbility(false, CLOSE_FILTER_USERID_MODE);

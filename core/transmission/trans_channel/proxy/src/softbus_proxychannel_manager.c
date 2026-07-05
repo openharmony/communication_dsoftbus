@@ -2472,7 +2472,9 @@ static void TransNotifyAccountAclChange(const LnnEventBasicInfo *info)
     }
     const LnnAccountAclChangeEvent *event = (const LnnAccountAclChangeEvent *)info;
     TRANS_LOGI(TRANS_CTRL, "account acl change, serviceIdCount=%{public}u", event->serviceIdCount);
-    for (uint32_t i = 0; i < event->serviceIdCount; i++) {
+    uint32_t count = (event->serviceIdCount > FOREGROUND_ACCOUNT_MAX_SIZE) ?
+        FOREGROUND_ACCOUNT_MAX_SIZE : event->serviceIdCount;
+    for (uint32_t i = 0; i < count; i++) {
         TransNotifyServiceIdChanged(event->udid, event->serviceIdList[i]);
     }
 }
