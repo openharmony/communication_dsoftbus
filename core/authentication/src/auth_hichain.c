@@ -32,6 +32,7 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
+#include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -500,6 +501,72 @@ static void OnDeviceNotTrusted(const char *udid)
     }
 }
 
+#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
+static int32_t ParseOsAccountIdFromReturnInfo(const char *returnInfo)
+{
+    if (returnInfo == NULL) {
+        AUTH_LOGW(AUTH_HICHAIN, "returnInfo is null");
+        return -1;
+    }
+    cJSON *json = cJSON_Parse(returnInfo);
+    if (json == NULL) {
+        AUTH_LOGW(AUTH_HICHAIN, "parse returnInfo failed");
+        return -1;
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(json, "osAccountId");
+    int32_t osAccountId = -1;
+    if (cJSON_IsNumber(item)) {
+        osAccountId = item->valueint;
+    }
+    cJSON_Delete(json);
+    return osAccountId;
+}
+
+static void OnTrustedDeviceNumChanged(int curTrustedDeviceNum)
+{
+    AUTH_LOGI(AUTH_HICHAIN, "trusted device num changed, curNum=%{public}d", curTrustedDeviceNum);
+    if (g_dataChangeListener.onTrustedDeviceNumChanged != NULL) {
+        g_dataChangeListener.onTrustedDeviceNumChanged(curTrustedDeviceNum);
+    }
+}
+
+static void OnGroupActiveInUser(const char *returnInfo)
+{
+    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
+    AUTH_LOGI(AUTH_HICHAIN, "group active in user, osAccountId=%{public}d", osAccountId);
+    if (g_dataChangeListener.onGroupActiveInUser != NULL) {
+        g_dataChangeListener.onGroupActiveInUser(returnInfo);
+    }
+}
+
+static void OnGroupInactiveInUser(const char *returnInfo)
+{
+    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
+    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, osAccountId=%{public}d, start fast offline", osAccountId);
+    if (g_dataChangeListener.onGroupInactiveInUser != NULL) {
+        g_dataChangeListener.onGroupInactiveInUser(returnInfo);
+    }
+}
+
+static void OnDeviceActiveInUser(const char *udid, const char *returnInfo)
+{
+    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
+    AUTH_LOGI(AUTH_HICHAIN, "device active in user, osAccountId=%{public}d", osAccountId);
+    if (g_dataChangeListener.onDeviceActiveInUser != NULL) {
+        g_dataChangeListener.onDeviceActiveInUser(udid, returnInfo);
+    }
+}
+
+static void OnDeviceInactiveInUser(const char *udid, const char *returnInfo)
+{
+    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
+    AUTH_LOGI(AUTH_HICHAIN, "device inactive in user, osAccountId=%{public}d", osAccountId);
+    if (g_dataChangeListener.onDeviceInactiveInUser != NULL) {
+        g_dataChangeListener.onDeviceInactiveInUser(udid, returnInfo);
+    }
+}
+#endif
+
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 {
     if (listener == NULL) {
@@ -513,6 +580,13 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
     hichainListener.onGroupDeleted = OnGroupDeleted;
     hichainListener.onDeviceNotTrusted = OnDeviceNotTrusted;
     hichainListener.onDeviceBound = OnDeviceBound;
+#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
+    hichainListener.onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged;
+    hichainListener.onGroupActiveInUser = OnGroupActiveInUser;
+    hichainListener.onGroupInactiveInUser = OnGroupInactiveInUser;
+    hichainListener.onDeviceActiveInUser = OnDeviceActiveInUser;
+    hichainListener.onDeviceInactiveInUser = OnDeviceInactiveInUser;
+#endif
     if (RegChangeListener(AUTH_APPID, &hichainListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain regDataChangeListener fail");
         return SOFTBUS_AUTH_REG_DATA_FAIL;

@@ -437,6 +437,43 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
 }
 
+#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
+static void OnTrustedDeviceNumChanged(int curTrustedDeviceNum)
+{
+    if (g_groupChangeListener.onTrustedDeviceNumChanged != NULL) {
+        g_groupChangeListener.onTrustedDeviceNumChanged(curTrustedDeviceNum);
+    }
+}
+
+static void OnGroupActiveInUser(const char *returnInfo)
+{
+    if (g_groupChangeListener.onGroupActiveInUser != NULL) {
+        g_groupChangeListener.onGroupActiveInUser(returnInfo);
+    }
+}
+
+static void OnGroupInactiveInUser(const char *returnInfo)
+{
+    if (g_groupChangeListener.onGroupInactiveInUser != NULL) {
+        g_groupChangeListener.onGroupInactiveInUser(returnInfo);
+    }
+}
+
+static void OnDeviceActiveInUser(const char *udid, const char *returnInfo)
+{
+    if (g_groupChangeListener.onDeviceActiveInUser != NULL) {
+        g_groupChangeListener.onDeviceActiveInUser(udid, returnInfo);
+    }
+}
+
+static void OnDeviceInactiveInUser(const char *udid, const char *returnInfo)
+{
+    if (g_groupChangeListener.onDeviceInactiveInUser != NULL) {
+        g_groupChangeListener.onDeviceInactiveInUser(udid, returnInfo);
+    }
+}
+#endif
+
 static int32_t RetryRegTrustDataChangeListener(void)
 {
     TrustDataChangeListener trustListener = {
@@ -444,6 +481,13 @@ static int32_t RetryRegTrustDataChangeListener(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
+#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
+        .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
+        .onGroupActiveInUser = OnGroupActiveInUser,
+        .onGroupInactiveInUser = OnGroupInactiveInUser,
+        .onDeviceActiveInUser = OnDeviceActiveInUser,
+        .onDeviceInactiveInUser = OnDeviceInactiveInUser,
+#endif
     };
     for (int32_t i = 1; i <= RETRY_REGDATA_TIMES; i++) {
         int32_t ret = RegTrustDataChangeListener(&trustListener);
@@ -464,6 +508,13 @@ int32_t RegTrustListenerOnHichainSaStart(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
+#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
+        .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
+        .onGroupActiveInUser = OnGroupActiveInUser,
+        .onGroupInactiveInUser = OnGroupInactiveInUser,
+        .onDeviceActiveInUser = OnDeviceActiveInUser,
+        .onDeviceInactiveInUser = OnDeviceInactiveInUser,
+#endif
     };
     if (RegTrustDataChangeListener(&trustListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "RegTrustDataChangeListener fail");
