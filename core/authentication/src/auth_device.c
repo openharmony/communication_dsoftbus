@@ -454,6 +454,9 @@ static void OnGroupActiveInUser(const char *returnInfo)
 
 static void OnGroupInactiveInUser(const char *returnInfo)
 {
+    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
+    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, osAccountId=%{public}d, trigger account logout", osAccountId);
+    LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT);
     if (g_groupChangeListener.onGroupInactiveInUser != NULL) {
         g_groupChangeListener.onGroupInactiveInUser(returnInfo);
     }
