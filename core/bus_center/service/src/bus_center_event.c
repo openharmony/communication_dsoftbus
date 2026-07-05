@@ -745,7 +745,10 @@ void LnnNotifyAccountAclChangeEvent(
     (void)memset_s(&event, sizeof(event), 0, sizeof(event));
     event.basic.event = LNN_EVENT_ACCOUNT_ACL_CHANGE;
     if (udid != NULL) {
-        (void)strcpy_s(event.udid, UDID_BUF_LEN, udid);
+        if (strcpy_s(event.udid, UDID_BUF_LEN, udid) != EOK) {
+            LNN_LOGE(LNN_EVENT, "strcpy_s udid failed");
+            return;
+        }
     }
     event.localUserId = localUserId;
     event.peerUserId = peerUserId;
