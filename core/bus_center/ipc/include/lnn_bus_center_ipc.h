@@ -72,6 +72,7 @@ int32_t LnnIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config);
 int32_t LnnIpcRegRangeCbForMsdp(const char *pkgName, int32_t callingPid);
 int32_t LnnIpcUnregRangeCbForMsdp(const char *pkgName, int32_t callingPid);
 int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t LnnIpcProcessPushMsg(const uint8_t *data, uint32_t len);
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 int32_t LnnIpcCreateGroupOwner(const char *pkgName, int32_t callingPid, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result);

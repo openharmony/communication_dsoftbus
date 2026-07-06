@@ -814,6 +814,12 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_PARAM_CHECK_Test001, TestSize.Level1)
     EXPECT_EQ(SyncTrustedRelationShip(nullptr, msg, strlen(msg)), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(SyncTrustedRelationShip(TEST_PKG_NAME, nullptr, strlen(msg)), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(SyncTrustedRelationShip(TEST_PKG_NAME, msg, strlen(msg)), SOFTBUS_IPC_ERR);
+    PushMsg pushMsg{};
+    EXPECT_EQ(ProcessPushMsg(pushMsg), SOFTBUS_INVALID_PARAM);
+    pushMsg.len = MAX_PUSH_MSG_SIZE + 1;
+    EXPECT_EQ(ProcessPushMsg(pushMsg), SOFTBUS_INVALID_PARAM);
+    pushMsg.len = strlen(msg);
+    EXPECT_NE(ProcessPushMsg(pushMsg), SOFTBUS_OK);
 }
 
 /*

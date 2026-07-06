@@ -382,6 +382,22 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcSyncTrustedRelationShip_TEST_001, Te
 }
 
 /*
+ * @tc.name: ServerIpcProcessPushMsg_TEST_001
+ * @tc.desc: test ServerIpcProcessPushMsg
+ *           ServerIpcProcessPushMsg return value is not equal to SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyTest, ServerIpcProcessPushMsg_TEST_001, TestSize.Level1)
+{
+    uint8_t data[] = {1, 2, 3};
+    uint32_t len = sizeof(data);
+    int32_t ret = ServerIpcProcessPushMsg(data, len);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
  * @tc.name: ServerIpcStartAccountAuth_TEST_001
  * @tc.desc: ServerIpcStartAccountAuth test
  * @tc.type: FUNC

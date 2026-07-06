@@ -84,6 +84,7 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
 int32_t TriggerRangeForMsdpInner(const char *pkgName, const RangeConfig *config);
 int32_t StopRangeForMsdpInner(const char *pkgName, const RangeConfig *config);
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t ProcessPushMsgInner(const uint8_t *data, uint32_t len);
 int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len);
 int32_t CreateGroupOwnerInner(const char *pkgName, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result, GroupOwnerDestroyListener listener);
