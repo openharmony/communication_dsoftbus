@@ -881,4 +881,79 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest042, TestSize.Level1)
     uint8_t data[] = {0x01};
     EXPECT_NO_FATAL_FAILURE(LnnNotifyVirLinkReportEvent(data, 0));
 }
+
+/*
+* @tc.name: BusCenterEventTest043
+* @tc.desc: Test LnnNotifyAccountSwitchCheckEvent
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest043, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountSwitchCheckEvent(100));
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountSwitchCheckEvent(-1));
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountSwitchCheckEvent(0));
+}
+
+/*
+* @tc.name: BusCenterEventTest044
+* @tc.desc: Test LnnNotifyAccountAclChangeEvent with valid params
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest044, TestSize.Level1)
+{
+    const char *udid = "test_udid_12345";
+    int32_t serviceIdList[] = {1, 2, 3};
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountAclChangeEvent(udid, 100, 200,
+        serviceIdList, 3));
+}
+
+/*
+* @tc.name: BusCenterEventTest045
+* @tc.desc: Test LnnNotifyAccountAclChangeEvent with null udid
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest045, TestSize.Level1)
+{
+    int32_t serviceIdList[] = {1};
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountAclChangeEvent(nullptr, 100, 200,
+        serviceIdList, 1));
+}
+
+/*
+* @tc.name: BusCenterEventTest046
+* @tc.desc: Test LnnNotifyAccountAclChangeEvent with null serviceIdList
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest046, TestSize.Level1)
+{
+    const char *udid = "test_udid";
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountAclChangeEvent(udid, 100, 200,
+        nullptr, 0));
+}
+
+/*
+* @tc.name: BusCenterEventTest047
+* @tc.desc: Test LnnNotifyAccountAclChangeEvent with oversized serviceIdCount
+* @tc.type: FUNC
+* @tc.level: Level1
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterEventTest, BusCenterEventTest047, TestSize.Level1)
+{
+    const char *udid = "test_udid";
+    int32_t serviceIdList[FOREGROUND_ACCOUNT_MAX_SIZE + 5] = {0};
+    for (int i = 0; i < FOREGROUND_ACCOUNT_MAX_SIZE + 5; i++) {
+        serviceIdList[i] = i;
+    }
+    EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountAclChangeEvent(udid, 100, 200,
+        serviceIdList, FOREGROUND_ACCOUNT_MAX_SIZE + 5));
+}
 }

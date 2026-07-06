@@ -236,8 +236,8 @@ void HbCheckSingleUser(int32_t userId)
         return;
     }
     if (LnnGetAccountIdByUserId(userId, &sysAccountId, sysAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LEDGER, "get system accountId failed, assume not logged in, userId=%{public}d", userId);
-        // sysAccountId 已初始化为 0，无需再赋值
+        LNN_LOGW(LNN_LEDGER, "get system accountId failed, skip check, userId=%{public}d", userId);
+        return;
     }
 
     // 场景1：台账残留旧账号（已登出但台账未清），补清理

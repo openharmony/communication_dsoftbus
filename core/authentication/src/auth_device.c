@@ -455,8 +455,13 @@ static void OnGroupActiveInUser(const char *returnInfo)
 static void OnGroupInactiveInUser(const char *returnInfo)
 {
     int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
-    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, osAccountId=%{public}d, trigger account logout", osAccountId);
-    LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT);
+    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, osAccountId=%{public}d", osAccountId);
+    // TODO: 需跟HiChain/DM/DP团队确认以下问题后再实现：
+    // 1. onGroupInactiveInUser 与 DP OnAccountAclInactive 是否互斥（单-单 vs 单-双场景）
+    // 2. 若不互斥，需防重入避免与 DP ACL 路径重复触发 SOFTBUS_ACCOUNT_LOG_OUT
+    // 3. returnInfo 完整字段定义（osAccountId/foregroundUid 及其他）
+    // 初步方案：等价于同账号群组不可用，调 LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT)
+    // 触发完整离线链路（心跳清台账+信任关系减少+清理applykey），但需确认去重后再启用
     if (g_groupChangeListener.onGroupInactiveInUser != NULL) {
         g_groupChangeListener.onGroupInactiveInUser(returnInfo);
     }
