@@ -80,6 +80,7 @@ private:
     int32_t RegRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply);
     int32_t SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ProcessPushMsgInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetSoftbusSpecObjectInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBusCenterExObjInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetDisplayNameInner(MessageParcel &data, MessageParcel &reply);

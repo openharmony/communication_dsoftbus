@@ -706,6 +706,11 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
     return LnnSyncTrustedRelationShipPacked(pkgName, msg, msgLen);
 }
 
+int32_t LnnIpcProcessPushMsg(const uint8_t *data, uint32_t len)
+{
+    return LnnProcessPushMsgPacked(data, len);
+}
+
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(

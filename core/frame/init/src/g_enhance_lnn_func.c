@@ -160,6 +160,7 @@ void Register3rdPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnGetMetaPtk = dlsym(soHandle, "LnnGetMetaPtk");
     g_lnnEnhanceFuncList.lnnGetLocalPtkByUuid = dlsym(soHandle, "LnnGetLocalPtkByUuid");
     g_lnnEnhanceFuncList.lnnSyncTrustedRelationShip = dlsym(soHandle, "LnnSyncTrustedRelationShip");
+    g_lnnEnhanceFuncList.lnnProcessPushMsg = dlsym(soHandle, "LnnProcessPushMsg");
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfoByUdid = dlsym(soHandle, "LnnRetrieveDeviceInfoByUdid");
     g_lnnEnhanceFuncList.lnnSyncBleOfflineMsg = dlsym(soHandle, "LnnSyncBleOfflineMsg");
     g_lnnEnhanceFuncList.lnnInitBroadcastLinkKey = dlsym(soHandle, "LnnInitBroadcastLinkKey");

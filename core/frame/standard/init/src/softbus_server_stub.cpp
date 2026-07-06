@@ -212,6 +212,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_REG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::RegRangeCbForMsdpInner;
     memberFuncMap_[SERVER_UNREG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::UnregRangeCbForMsdpInner;
     memberFuncMap_[SERVER_SYNC_TRUSTED_RELATION] = &SoftBusServerStub::SyncTrustedRelationShipInner;
+    memberFuncMap_[SERVER_PROCESS_PUSH_MSG] = &SoftBusServerStub::ProcessPushMsgInner;
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
@@ -299,6 +300,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_SET_NODE_KEY_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_START_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PROCESS_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_PROCESS_PUSH_MSG] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 void SoftBusServerStub::InitMemberConstraintSet()
@@ -2105,6 +2107,27 @@ int32_t SoftBusServerStub::SyncTrustedRelationShipInner(MessageParcel &data, Mes
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t retReply = SyncTrustedRelationShip(pkgName, msg, msgLen);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::ProcessPushMsgInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    uint32_t len = data.ReadUint32();
+    if (len == 0 || len > MAX_PUSH_MSG_SIZE) {
+        COMM_LOGE(COMM_SVC, "invalid msg len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const uint8_t *buf = reinterpret_cast<const uint8_t *>(data.ReadRawData(len));
+    if (buf == nullptr) {
+        COMM_LOGE(COMM_SVC, "read msg data failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t retReply = ProcessPushMsg(buf, len);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;

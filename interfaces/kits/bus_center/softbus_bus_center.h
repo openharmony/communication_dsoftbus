@@ -162,6 +162,14 @@ extern "C" {
 #define OS_VERSION_BUF_LEN 128
 
 /**
+ * @brief Indicates the maximum size of a push message data, see {@link PushMsg}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define MAX_PUSH_MSG_SIZE 4096
+
+/**
  * @brief Enumerates keys for an online device.
  * The key can be obtained via {@link GetNodeKeyInfo}.
  *
@@ -713,6 +721,17 @@ struct GroupOwnerResult {
 };
 
 /**
+ * @brief Defines a push message.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef struct {
+    uint8_t data[MAX_PUSH_MSG_SIZE];  /**< The data of push message */
+    uint32_t len;                     /**< The length of push message data */
+} PushMsg;
+
+/**
  * @brief Called when a device is added to a LNN via {@link JoinLNN}.
  *
  * @param addr Indicates the pointer to the address of the peer device.
@@ -1159,6 +1178,19 @@ int32_t StartAccountAuth(const char *pkgName, int64_t requestId, const char *ser
  */
 int32_t ProcessAccountAuth(const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen,
     const IAccountAuthCallback *cb);
+
+/**
+ * @brief Process a push message.
+ *
+ * @param msg Indicates the push message to process. For details, see {@link PushMsg}.
+ *
+ * @return Returns <b>0</b> if the push message is processed successfully;
+ * returns any other value otherwise.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t ProcessPushMsg(PushMsg msg);
 #ifdef __cplusplus
 }
 #endif

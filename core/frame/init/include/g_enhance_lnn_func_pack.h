@@ -84,6 +84,7 @@ void ProcessCipherKeySyncInfoPacked(const void *json, const char *networkId);
 void FreeSoftbusChainPacked(SoftbusCertChain *softbusCertChain);
 int32_t InitSoftbusChainPacked(SoftbusCertChain *softbusCertChain);
 int32_t LnnSyncTrustedRelationShipPacked(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t LnnProcessPushMsgPacked(const uint8_t *data, uint32_t len);
 void LnnCoapConnectPacked(const char *ip);
 void LnnDestroyCoapConnectListPacked(void);
 bool IsSupportLowLatencyPacked(const TransReqInfo *reqInfo, const LaneLinkInfo *laneLinkInfo);

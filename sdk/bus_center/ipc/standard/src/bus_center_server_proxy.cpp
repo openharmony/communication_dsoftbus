@@ -364,6 +364,17 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     return ret;
 }
 
+int32_t ServerIpcProcessPushMsg(const uint8_t *data, uint32_t len)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->ProcessPushMsg(data, len);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "process push msg failed");
+    }
+    return ret;
+}
+
 int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
     LNN_LOGI(LNN_EVENT, "enter");
