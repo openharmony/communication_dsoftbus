@@ -427,6 +427,7 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
         .localUserId = info->localUserId
     };
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
+    SetDpGroupShare(info, authHandle);
 }
 
 static void UpdateDeviceInfoToMcu(const char *udid)
@@ -545,7 +546,8 @@ static void SetLnnConnNodeInfo(
         connInfo->nodeInfo->isSupportSv = true;
     }
     bool isAccountChanged = IsAccountHashChanged(connInfo);
-    bool isNetCapChanged = IsNetCapChanged(connInfo);
+    bool isNeedUpdateLp = (IsNetCapChanged(connInfo) && LnnHasDiscoveryType(connInfo->nodeInfo, DISCOVERY_TYPE_BLE)) ||
+        connInfo->addr.type == CONNECTION_ADDR_BLE;
     CheckRemoteAccountId(connInfo->nodeInfo);
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     TryTriggerSparkJoinAgain(connInfo, isAccountChanged);
@@ -560,11 +562,9 @@ static void SetLnnConnNodeInfo(
     LNN_LOGI(LNN_BUILDER, "peer feature=%{public}" PRIu64 ", local=%{public}" PRIu64 "",
         connInfo->nodeInfo->feature, localFeature);
     if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
-        IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
-        ((isNetCapChanged && LnnHasDiscoveryType(connInfo->nodeInfo, DISCOVERY_TYPE_BLE)) ||
-        connInfo->addr.type == CONNECTION_ADDR_BLE)) {
+        IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT) && isNeedUpdateLp) {
         UpdateDeviceInfoToMlps(connInfo->nodeInfo->deviceInfo.deviceUdid);
-    } else if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_MCU_CAPABILITY)) {
+    } else if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_MCU_CAPABILITY) && isNeedUpdateLp) {
         UpdateDeviceInfoToMcu(connInfo->nodeInfo->deviceInfo.deviceUdid);
     }
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
@@ -1062,7 +1062,6 @@ static void TryUpdateRawEnhanceP2p(LnnConnectionFsm *connFsm)
     if (NeedUpdateRawEnhanceP2p(connFsm)) {
         LNN_LOGI(LNN_BUILDER, "notify add raw auth connection");
         LnnNotifyRawEnhanceP2pEvent event = {.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P};
-        event.basic.event = LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P;
         event.type = connFsm->connInfo.addr.type;
         event.uuid = connFsm->connInfo.nodeInfo->uuid;
         event.networkId = connFsm->connInfo.nodeInfo->networkId;

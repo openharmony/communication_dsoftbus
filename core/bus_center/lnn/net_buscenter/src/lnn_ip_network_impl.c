@@ -300,7 +300,7 @@ static int32_t SetLocalIpInfo(const char *ipAddr, const char *ifName)
 static void LeaveOldIpNetwork(const char *ifCurrentName)
 {
     ConnectionAddrType type = CONNECTION_ADDR_MAX;
-    bool addrType[CONNECTION_ADDR_MAX] = {false};
+    bool addrType[CONNECTION_ADDR_MAX] = { false };
 
     if (LnnGetAddrTypeByIfName(ifCurrentName, &type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetAddrTypeByIfName failed ifName=%{public}s", ifCurrentName);
@@ -513,7 +513,6 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         }
         return;
     }
-    
     IpSubnetManagerEvent event = IP_SUBNET_MANAGER_EVENT_MAX;
     if (status == NULL) {
         if (subnet->status == LNN_SUBNET_RUNNING) {

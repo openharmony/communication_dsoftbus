@@ -892,7 +892,7 @@ static int32_t DlGetServiceFindCap(const char *networkId, bool checkOnline, void
         LNN_LOGE(LNN_LEDGER, "copy p2pIp to buf fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "get serviceFindCap[0]=%{public}d", info->serviceFindCap[0]);
+    LNN_LOGI(LNN_LEDGER, "get serviceFindCap=%{public}s", info->serviceFindCap);
     return SOFTBUS_OK;
 }
 

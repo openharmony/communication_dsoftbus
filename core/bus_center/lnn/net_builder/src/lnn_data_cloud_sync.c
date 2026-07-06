@@ -35,8 +35,6 @@
 #include "lnn_p2p_info.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
 #define APPID                "dsoftbus"

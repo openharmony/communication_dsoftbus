@@ -1066,8 +1066,8 @@ static int32_t SoftbusDumpPrintServiceFindCap(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     NodeDeviceInfoKey key = NODE_KEY_SERVICE_FIND_CAP;
-    unsigned char capacity[SERVICE_FIND_CAP_LEN] = {0};
-    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, capacity, SERVICE_FIND_CAP_LEN) != SOFTBUS_OK) {
+    char capacity[SERVICE_FIND_CAP_LEN] = {0};
+    if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)capacity, SERVICE_FIND_CAP_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get service find capacity failed");
         return SOFTBUS_NOT_FIND;
     }

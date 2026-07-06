@@ -203,9 +203,9 @@ static void AccountUpdateProcess(uint8_t *localAccountHash, uint8_t *accountHash
     ClearAuthLimitMap();
     ClearLnnBleReportExtraMap();
     ClearPcRestrictMap();
-    LNN_LOGI(LNN_STATE,
-        "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X], "
-        "reason:%{public}d", localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1], reason);
+    LNN_LOGI(LNN_STATE, "accountHash update. localAccountHash=[%{public}02X, %{public}02X], "
+        "accountHash=[%{public}02X, %{public}02X], reason=%{public}d",
+        localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1], reason);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
