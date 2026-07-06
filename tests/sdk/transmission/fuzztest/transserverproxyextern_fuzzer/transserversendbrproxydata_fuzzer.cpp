@@ -28,8 +28,8 @@ namespace OHOS {
 void ServerIpcSendBrProxyDataTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
-    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    uint32_t dataLen = provider.ConsumeIntegralInRange<uint32_t>(0, UINT8_MAX - 1);
+    std::string providerData = provider.ConsumeBytesAsString(dataLen);
     char data[UINT8_MAX] = { 0 };
     if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
         return;
