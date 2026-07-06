@@ -104,7 +104,8 @@ static void HandleDistributedAccountLogin(const CommonEventData &data)
     std::string userIdKey = "userId";
     eventUserId = wantParams.GetIntParam(userIdKey, -1);
     LNN_LOGI(LNN_EVENT, "login eventUserId=%{public}d", eventUserId);
-    if (LnnIsSameAccountGroupDevice()) {
+    LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
+    if (LnnIsSameAccountGroupDeviceByUserId(eventUserId)) {
         LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     } else {
         LNN_LOGI(LNN_EVENT, "login but no same account group, skip LOG_IN, wait for hichain onGroupCreated");

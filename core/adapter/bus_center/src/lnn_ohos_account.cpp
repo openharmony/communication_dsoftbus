@@ -320,3 +320,8 @@ bool LnnIsSameAccountGroupDevice(void)
 {
     return IsSameAccountGroupDevice();
 }
+
+bool LnnIsSameAccountGroupDeviceByUserId(int32_t userId)
+{
+    return IsSameAccountGroupDeviceByUserId(userId);
+}

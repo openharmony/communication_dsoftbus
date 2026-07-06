@@ -367,6 +367,12 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
 
 bool IsSameAccountGroupDevice(void)
 {
+    int32_t accountId = JudgeDeviceTypeAndGetOsAccountIds();
+    return IsSameAccountGroupDeviceByUserId(accountId);
+}
+
+bool IsSameAccountGroupDeviceByUserId(int32_t userId)
+{
     uint32_t groupNum = 0;
     char *returnGroupVec = NULL;
 
@@ -375,15 +381,14 @@ bool IsSameAccountGroupDevice(void)
         AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance fail");
         return false;
     }
-    int32_t accountId = JudgeDeviceTypeAndGetOsAccountIds();
-    if (accountId <= 0) {
-        AUTH_LOGE(AUTH_HICHAIN, "accountId is invalid");
+    if (userId <= 0) {
+        AUTH_LOGE(AUTH_HICHAIN, "userId is invalid");
         return false;
     }
 
-    if (gmInstance->getJoinedGroups(accountId, AUTH_APPID, SAME_ACCOUNT_GROUY_TYPE, &returnGroupVec, &groupNum) !=
+    if (gmInstance->getJoinedGroups(userId, AUTH_APPID, SAME_ACCOUNT_GROUY_TYPE, &returnGroupVec, &groupNum) !=
         SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "getJoinedGroups fail, accountId=%{public}d", accountId);
+        AUTH_LOGE(AUTH_HICHAIN, "getJoinedGroups fail, userId=%{public}d", userId);
         gmInstance->destroyInfo(&returnGroupVec);
         return false;
     }

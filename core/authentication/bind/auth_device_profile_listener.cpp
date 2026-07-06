@@ -282,9 +282,6 @@ int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &
         AUTH_LOGI(AUTH_INIT, "OnAccountAclDelete only car device need handle");
         return SOFTBUS_OK;
     }
-    if (g_deviceProfileChange.onDeviceProfileDeleted != nullptr) {
-        g_deviceProfileChange.onDeviceProfileDeleted(udid, profile.GetLocalUserId());
-    }
     NotifyServiceIdListIfNeeded(udid, profile);
     AUTH_LOGD(AUTH_INIT, "OnAccountAclDelete success!");
     return SOFTBUS_OK;
@@ -308,15 +305,6 @@ int32_t AuthDeviceProfileListener::OnAccountAclInactive(const TrustDeviceProfile
         AUTH_LOGI(AUTH_INIT, "OnAccountAclInactive only car device need handle");
         return SOFTBUS_OK;
     }
-    int32_t userId = profile.GetPeerUserId();
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
-    if (ret == SOFTBUS_OK && nodeInfo.userId != 0) {
-        userId = nodeInfo.userId;
-    }
-    AUTH_LOGD(AUTH_INIT, "userId=%{public}d", userId);
-    NotifyRemoteDevOffLineByUserId(userId, udid);
     NotifyServiceIdListIfNeeded(udid, profile);
     return SOFTBUS_OK;
 }
