@@ -101,6 +101,7 @@ struct WifiDirectManager {
     /* for virtual connection */
     void (*addFrequencyChangedListener)(FrequencyChangedListener listener);
     void (*notifyFrequencyChanged)(int32_t frequency);
+    void (*operationHmlConnectingCount)(bool isIncrease, enum WifiDirectConnectType connectType);
     bool (*checkOnlyVirtualLink)(void);
     void (*checkAndForceDisconnectVirtualLink)(void);
     int32_t (*getHmlLinkCount)(void);
