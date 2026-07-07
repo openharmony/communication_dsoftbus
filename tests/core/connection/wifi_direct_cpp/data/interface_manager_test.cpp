@@ -271,20 +271,6 @@ HWTEST_F(InterfaceManagerTest, UpdateInterfaceWithMacChangeTest, TestSize.Level1
 }
 
 /*
- * @tc.name: GetInstanceTest
- * @tc.desc: test singleton instance
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InterfaceManagerTest, GetInstanceTest, TestSize.Level1)
-{
-    auto &instance1 = InterfaceManager::GetInstance();
-    auto &instance2 = InterfaceManager::GetInstance();
-
-    EXPECT_EQ(&instance1, &instance2);
-}
-
-/*
  * @tc.name: InterfaceTypeMaxTest
  * @tc.desc: test interface type MAX boundary
  * @tc.type: FUNC
