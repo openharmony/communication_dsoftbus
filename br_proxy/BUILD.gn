@@ -47,6 +47,7 @@ ohos_shared_library("proxychannelmanager") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
 
   relative_install_dir = "module/distributedsched"
 
@@ -60,6 +61,7 @@ ohos_shared_library("br_proxy_adapter") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   sources = []
   if (is_standard_system && (!defined(global_parts_info) ||
     defined(global_parts_info.resourceschedule_device_standby))) {
@@ -98,6 +100,7 @@ ohos_shared_library("br_proxy_utils") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   sources = [
     "br_proxy_session_manager.c",
     "common/src/br_proxy_error_code.c",
