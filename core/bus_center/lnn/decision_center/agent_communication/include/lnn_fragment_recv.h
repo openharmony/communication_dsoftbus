@@ -37,7 +37,7 @@ void FragmentRecvDeinit(void);
 
 // 分片数据处理入口
 int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t dataLen,
-    FragmentRecvCallback callback);
+    ConversationChannelType channelType, FragmentRecvCallback callback);
 
 // 清理指定msgId的缓存
 void FragmentRecvClear(uint32_t msgId);

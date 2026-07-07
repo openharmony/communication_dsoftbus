@@ -144,6 +144,8 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.channelRtt);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.p2pResult);
     MatchLnnEventNameTypeExtraInt32Param(params, ++index, extra.p2pLatency);
+    MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.pushTxCount);
+    MatchLnnEventNameTypeExtraUint32Param(params, ++index, extra.pushRxCount);
     MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.sourceType);
     MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.dataType);
     MatchLnnEventNameTypeExtraUint8Param(params, ++index, extra.isReliable);

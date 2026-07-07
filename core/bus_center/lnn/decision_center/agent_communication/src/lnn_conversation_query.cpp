@@ -84,13 +84,6 @@ typedef struct {
 } NearFieldChannelInfo;
 
 typedef enum {
-    CONVERSATION_FAR_FIELD_PUSH = 0,
-    CONVERSATION_FAR_FIELD_P2P,
-    CONVERSATION_NEAR_FIELD_WIFI_DIRECT,
-    CONVERSATION_MAX,
-} ConversationType;
-
-typedef enum {
     TLV_TYPE_BUNDLE_NAME = 0,
     TLV_TYPE_ABILITY_NAME = 1,
     TLV_TYPE_ERROR_CODE = 2,
@@ -102,7 +95,7 @@ typedef struct {
     char *data;
     uint32_t length;
     uint64_t timestamp;
-    ConversationType channel;
+    ConversationChannelType channel;
     ConversationBusiness info;
 } CloudQueryMsgCache;
 
@@ -154,7 +147,7 @@ typedef struct {
     const ConversationBusiness *info;
     const char *actualMsg;
     uint32_t actualMsgLen;
-    ConversationType channel;
+    ConversationChannelType channel;
     uint32_t msgId;
 } ProcessReceivedDataInput;
 
@@ -338,7 +331,7 @@ static void ClearAllCacheWithoutLock(void)
 }
 
 static CloudQueryMsgCache *CreateCacheNodeWithoutLock(const char *udid, const char *data, uint32_t length,
-    const ConversationBusiness *info, ConversationType channel)
+    const ConversationBusiness *info, ConversationChannelType channel)
 {
     if (length == 0) {
         LNN_LOGE(LNN_EVENT, "invalid length=0");
@@ -466,7 +459,7 @@ static void FreeTempCacheVec(CloudQueryMsgCacheVec &tempVec)
 }
 
 static int32_t AddMsgToCache(const char *udid, const char *data, uint32_t length,
-    const ConversationBusiness *info, ConversationType channel)
+    const ConversationBusiness *info, ConversationChannelType channel)
 {
     std::lock_guard<std::mutex> lock(g_recvMsgCacheLock);
 
@@ -1975,7 +1968,7 @@ typedef struct {
     ConversationBusiness info;
 } CachedMsgToSend;
 
-static std::vector<CachedMsgToSend> ExtractCachedMessagesToSend(const char *networkId, ConversationType channel)
+static std::vector<CachedMsgToSend> ExtractCachedMessagesToSend(const char *networkId, ConversationChannelType channel)
 {
     std::vector<CachedMsgToSend> msgsToSend;
 
@@ -2349,7 +2342,7 @@ static uint64_t InitConverDataEventExtra(ConDataEventParam *param, LnnEventExtra
     }
  
     extra->statsTime = SoftBusFormatTimestamp(SoftBusGetSysTimeMs());
-    extra->channelType = ConversationChannelType::CONVERSATION_CHANNEL_NEARBY;
+    extra->channelType = ConvChannelType::CONVERSATION_CHANNEL_NEARBY;
 
     extra->dataLen = param->len;
     extra->peerUdid = param->deviceId;
