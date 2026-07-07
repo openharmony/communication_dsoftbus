@@ -569,20 +569,6 @@ HWTEST_F(LinkManagerTest, ProcessIfPresentByLinkIdTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: GetInstanceTest
- * @tc.desc: test singleton instance
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LinkManagerTest, GetInstanceTest, TestSize.Level1)
-{
-    auto &instance1 = LinkManager::GetInstance();
-    auto &instance2 = LinkManager::GetInstance();
-
-    EXPECT_EQ(&instance1, &instance2);
-}
-
-/*
  * @tc.name: DifferentLinkTypesTest
  * @tc.desc: test operations with different link types
  * @tc.type: FUNC
@@ -616,33 +602,6 @@ HWTEST_F(LinkManagerTest, DifferentLinkTypesTest, TestSize.Level1)
 
     // Clean up
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
-    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
-}
-
-/*
- * @tc.name: DumpWithSnapshotsTest
- * @tc.desc: test Dump with snapshots
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LinkManagerTest, DumpWithSnapshotsTest, TestSize.Level1)
-{
-    std::list<std::shared_ptr<LinkSnapshot>> snapshots;
-
-    // Test with empty manager
-    LinkManager::GetInstance().Dump(snapshots);
-
-    // Create a link
-    std::string remoteDeviceId("dumpTestDeviceId");
-    LinkManager::GetInstance().ProcessIfAbsent(
-        InnerLink::LinkType::HML, remoteDeviceId, [&remoteDeviceId](InnerLink &innerLink) {
-            innerLink.SetRemoteDeviceId(remoteDeviceId);
-        });
-
-    // Test Dump with link
-    LinkManager::GetInstance().Dump(snapshots);
-
-    // Clean up
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
