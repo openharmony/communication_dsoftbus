@@ -883,9 +883,6 @@ static void HbHandleAccountLogin(void)
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
         HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    // 更新 NodeInfo 单实例的中控屏账号字段
-    LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
-    // 更新 g_localUserLedger per-user 台账
     (void)HbMultiUserHandleLogin();
     HbDelayConditionChanged(NULL);
 #else

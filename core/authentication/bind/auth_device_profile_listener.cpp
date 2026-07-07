@@ -255,6 +255,7 @@ int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByUpdate(const TrustDevice
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
 static void NotifyServiceIdListIfNeeded(const char *udid, const TrustDeviceProfile &profile)
 {
     std::vector<int32_t> serviceIdList = profile.GetServiceIdList();
@@ -263,6 +264,7 @@ static void NotifyServiceIdListIfNeeded(const char *udid, const TrustDeviceProfi
             serviceIdList.data(), static_cast<uint32_t>(serviceIdList.size()));
     }
 }
+#endif
 
 int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &profile)
 {
@@ -278,12 +280,16 @@ int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &
         "udid=%{public}s, localUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId());
     AnonymizeFree(anonyUdid);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (!IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
         AUTH_LOGI(AUTH_INIT, "OnAccountAclDelete only car device need handle");
         return SOFTBUS_OK;
     }
     NotifyServiceIdListIfNeeded(udid, profile);
     AUTH_LOGD(AUTH_INIT, "OnAccountAclDelete success!");
+#else
+    AUTH_LOGI(AUTH_INIT, "OnAccountAclDelete not supported without multi foreground user feature");
+#endif
     return SOFTBUS_OK;
 }
 
@@ -301,11 +307,15 @@ int32_t AuthDeviceProfileListener::OnAccountAclInactive(const TrustDeviceProfile
         "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (!IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
         AUTH_LOGI(AUTH_INIT, "OnAccountAclInactive only car device need handle");
         return SOFTBUS_OK;
     }
     NotifyServiceIdListIfNeeded(udid, profile);
+#else
+    AUTH_LOGI(AUTH_INIT, "OnAccountAclInactive not supported without multi foreground user feature");
+#endif
     return SOFTBUS_OK;
 }
 
@@ -377,8 +387,11 @@ static int32_t RegisterToDpHelper(void)
     std::unordered_set<ProfileChangeType> subscribeTypes = { ProfileChangeType::TRUST_DEVICE_PROFILE_ADD,
         ProfileChangeType::TRUST_DEVICE_PROFILE_UPDATE, ProfileChangeType::TRUST_DEVICE_PROFILE_DELETE,
         ProfileChangeType::TRUST_DEVICE_PROFILE_ACTIVE, ProfileChangeType::TRUST_DEVICE_PROFILE_INACTIVE,
-        ProfileChangeType::DEVICE_ACL_INACTIVE_BY_DELETE, ProfileChangeType::DEVICE_ACL_INACTIVE_BY_UPDATE,
-        ProfileChangeType::ACCOUNT_ACL_DELETE, ProfileChangeType::ACCOUNT_ACL_INACTIVE, };
+        ProfileChangeType::DEVICE_ACL_INACTIVE_BY_DELETE, ProfileChangeType::DEVICE_ACL_INACTIVE_BY_UPDATE, };
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    subscribeTypes.insert(ProfileChangeType::ACCOUNT_ACL_DELETE);
+    subscribeTypes.insert(ProfileChangeType::ACCOUNT_ACL_INACTIVE);
+#endif
 
     sptr<IProfileChangeListener> subscribeDPChangeListener = new (std::nothrow) AuthDeviceProfileListener;
     if (subscribeDPChangeListener == nullptr) {
