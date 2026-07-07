@@ -32,9 +32,9 @@
 
 typedef struct {
     ListNode node;
-    uint32_t msgId;              // 消息 ID
-    FarFieldBusiness moduleType; // 模块类型
-    uint64_t createTime;          // 创建时间戳，用于超时清理
+    uint32_t msgId;
+    FarFieldBusiness moduleType;
+    uint64_t createTime;
 } FragmentRecvContext;
 
 typedef struct {
@@ -237,7 +237,7 @@ static int32_t ProcessSingleFragment(SingleFragmentData *singleData, Conversatio
 
     DataFragmentInfo header = { 0 };
     if (ParseFragmentHeader(singleData->data + *(singleData->offset) + FAR_FIELD_PKT_HEAD_SIZE,
-            FRAGMENT_HEADER_SIZE, &header) != SOFTBUS_OK) {
+        FRAGMENT_HEADER_SIZE, &header) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "parse fragment header failed");
         return SOFTBUS_INVALID_PARAM;
     }

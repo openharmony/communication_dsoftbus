@@ -66,6 +66,9 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
     DataCallbackData *cb = static_cast<DataCallbackData *>(rawData);
  
     if (env == nullptr || jsCallback == nullptr || cb == nullptr) {
+        if (cb != nullptr && cb->data != nullptr) {
+            delete[] cb->data;
+        }
         delete cb;
         return;
     }
@@ -77,11 +80,21 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
     napi_create_string_utf8(env, cb->deviceId.c_str(), NAPI_AUTO_LENGTH, &networkId);
 
     napi_value msg;
-    napi_create_arraybuffer(env, cb->dataLen, nullptr, &msg);
-    void *msgData = nullptr;
-    napi_get_arraybuffer_info(env, msg, &msgData, nullptr);
-    if (msgData != nullptr && cb->data != nullptr) {
-        memcpy_s(msgData, cb->dataLen, cb->data, cb->dataLen);
+    void *msgData;
+    napi_status status = napi_create_arraybuffer(env, cb->dataLen, &msgData, &msg);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create arraybuffer failed");
+        napi_close_handle_scope(env, scope);
+        delete[] cb->data;
+        delete cb;
+        return;
+    }
+    if (memcpy_s(msgData, cb->dataLen, cb->data, cb->dataLen) != EOK) {
+        COMM_LOGE(COMM_SDK, "memcpy data failed");
+        napi_close_handle_scope(env, scope);
+        delete[] cb->data;
+        delete cb;
+        return;
     }
  
     napi_value argv[2];
@@ -91,10 +104,11 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
     napi_value global;
     napi_get_global(env, &global);
 
-    napi_status status = napi_call_function(env, global, jsCallback, 2, argv, nullptr);
-    COMM_LOGI(COMM_SDK, "CallDataJsCallback status=%{public}d", status);
+    status = napi_call_function(env, global, jsCallback, ARGC_TWO, argv, nullptr);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "call js callback failed");
+    }
     napi_close_handle_scope(env, scope);
-
     delete[] cb->data;
     delete cb;
 }
