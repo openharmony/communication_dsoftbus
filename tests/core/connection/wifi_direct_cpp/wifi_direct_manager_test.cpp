@@ -1097,4 +1097,25 @@ HWTEST_F(WifiDirectManagerCppTest, AddSyncPtkListenerTest, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(NotifyPtkSyncResult(remoteDeviceId.c_str(), result));
     EXPECT_EQ(syncPtkListenerCalled, true);
 }
+
+/*
+ * @tc.name: OperationHmlConnectingCountAllHmlTypesTest
+ * @tc.desc: check OperationHmlConnectingCount with all HML types
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, OperationHmlConnectingCountAllHmlTypesTest, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "OperationHmlConnectingCountAllHmlTypesTest in");
+    GetWifiDirectManager()->operationHmlConnectingCount(true, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
+    GetWifiDirectManager()->operationHmlConnectingCount(true, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML);
+    GetWifiDirectManager()->operationHmlConnectingCount(false, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML);
+    GetWifiDirectManager()->operationHmlConnectingCount(true, WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML);
+    GetWifiDirectManager()->operationHmlConnectingCount(true, WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML);
+    GetWifiDirectManager()->operationHmlConnectingCount(true, WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML);
+    GetWifiDirectManager()->operationHmlConnectingCount(true, WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML);
+    auto isOnlyVirtual = GetWifiDirectManager()->checkOnlyVirtualLink();
+    EXPECT_EQ(isOnlyVirtual, false);
+    CONN_LOGI(CONN_WIFI_DIRECT, "OperationHmlConnectingCountAllHmlTypesTest out");
+}
 } // namespace OHOS::SoftBus
