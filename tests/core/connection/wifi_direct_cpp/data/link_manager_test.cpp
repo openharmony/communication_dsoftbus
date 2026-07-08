@@ -159,6 +159,31 @@ HWTEST_F(LinkManagerTest, ProcessIfXXXByRemoteMac, TestSize.Level1)
 }
 
 /*
+ * @tc.name: ProcessIfXXXByName
+ * @tc.desc: check ProcessIfAbsent and ProcessIfPresent by name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, ProcessIfXXXByName, TestSize.Level1)
+{
+    std::string remoteMac("00:00:00:00:00:00");
+    std::string name("123456");
+    bool result = LinkManager::GetInstance().ProcessIfPresentByName(name, [](InnerLink &innerLink) {});
+    EXPECT_FALSE(result);
+
+    result = LinkManager::GetInstance().ProcessIfAbsent(remoteMac, [remoteMac, name](InnerLink &innerLink) {
+        innerLink.SetRemoteBaseMac(remoteMac);
+        innerLink.SetGroupName(name);
+    });
+    EXPECT_TRUE(result);
+    std::string groupName("456789");
+    result = LinkManager::GetInstance().ProcessIfPresent(groupName, [](InnerLink &innerLink) {});
+    EXPECT_FALSE(result);
+    result = LinkManager::GetInstance().ProcessIfPresent(name, [](InnerLink &innerLink) {});
+    EXPECT_FALSE(result);
+}
+
+/*
  * @tc.name: AllocateLinkIdTest
  * @tc.desc: test method
  * @tc.type: FUNC
