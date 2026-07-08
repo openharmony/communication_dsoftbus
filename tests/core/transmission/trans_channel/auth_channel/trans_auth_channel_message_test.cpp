@@ -31,8 +31,8 @@ namespace OHOS {
 
 class TransAuthChannelMessageTest : public testing::Test {
 public:
-    TransAuthChannelMessageTest() { }
-    ~TransAuthChannelMessageTest() { }
+    TransAuthChannelMessageTest(void) { }
+    ~TransAuthChannelMessageTest(void) { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override { }
@@ -46,43 +46,26 @@ void TransAuthChannelMessageTest::TearDownTestCase(void)
 {}
 
 /*
- * @tc.name: PackUsbLinkTypeMsg001
- * @tc.desc: PackUsbLinkTypeMsg test
+ * @tc.name: PackUsbLinkTypeMsgTest001
+ * @tc.desc: PackUsbLinkTypeMsg with different type
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, PackUsbLinkTypeMsg001, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, PackUsbLinkTypeMsgTest001, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
-    appInfo->linkType = LANE_P2P;
 
+    appInfo->linkType = LANE_P2P;
     int32_t ret = PackUsbLinkTypeMsg(obj, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    cJSON_Delete(obj);
-    SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: PackUsbLinkTypeMsg002
- * @tc.desc: PackUsbLinkTypeMsg test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransAuthChannelMessageTest, PackUsbLinkTypeMsg002, TestSize.Level1)
-{
-    cJSON *obj = cJSON_CreateObject();
-    ASSERT_TRUE(obj != nullptr);
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_TRUE(appInfo != nullptr);
-    appInfo->linkType = LANE_USB;
-
     AuthChannelInterfaceMock authChannelObj;
     EXPECT_CALL(authChannelObj, AddNumberToJsonObject).WillOnce(Return(false));
-    int32_t ret = PackUsbLinkTypeMsg(obj, appInfo);
+    appInfo->linkType = LANE_USB;
+    ret = PackUsbLinkTypeMsg(obj, appInfo);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
 
     cJSON_Delete(obj);
@@ -90,16 +73,16 @@ HWTEST_F(TransAuthChannelMessageTest, PackUsbLinkTypeMsg002, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransAuthChannelMsgPack001
- * @tc.desc: TransAuthChannelMsgPack test
+ * @tc.name: TransAuthChannelMsgPackTest001
+ * @tc.desc: TransAuthChannelMsgPack with GenerateRandomStr failing returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack001, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPackTest001, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     appInfo->reqId[0] = '\0';
 
@@ -114,16 +97,16 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack001, TestSize.Level
 }
 
 /*
- * @tc.name: TransAuthChannelMsgPack002
- * @tc.desc: TransAuthChannelMsgPack test
+ * @tc.name: TransAuthChannelMsgPackTest002
+ * @tc.desc: TransAuthChannelMsgPack with AddNumberToJsonObject returning false returns SOFTBUS_CREATE_JSON_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack002, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPackTest002, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     (void)strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, "1033");
 
@@ -137,17 +120,17 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack002, TestSize.Level
 }
 
 /*
- * @tc.name: TransAuthChannelMsgPack003
- * @tc.desc: TransAuthChannelMsgPack test
+ * @tc.name: TransAuthChannelMsgPackTest003
+ * @tc.desc: TransAuthChannelMsgPack with different type
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack003, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPackTest003, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
 
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     *appInfo = {
         .myData = {
@@ -176,17 +159,17 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack003, TestSize.Level
 }
 
 /*
- * @tc.name: TransAuthChannelMsgPack004
- * @tc.desc: TransAuthChannelMsgPack test
+ * @tc.name: TransAuthChannelMsgPackTest004
+ * @tc.desc: TransAuthChannelMsgPack with different type
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack004, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPackTest004, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
 
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     *appInfo = {
         .myData = {
@@ -219,17 +202,17 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack004, TestSize.Level
 }
 
 /*
- * @tc.name: TransAuthChannelMsgPack005
- * @tc.desc: TransAuthChannelMsgPack test, given invalid LaneLInkType should return SOFTBUS_CREATE_JSON_ERR
+ * @tc.name: TransAuthChannelMsgPackTest005
+ * @tc.desc: TransAuthChannelMsgPack with different type
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack005, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPackTest005, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
 
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     *appInfo = {
         .myData = {
@@ -261,17 +244,17 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack005, TestSize.Level
 }
 
 /*
- * @tc.name: TransAuthChannelMsgPack006
- * @tc.desc: TransAuthChannelMsgPack test, given invalid ip should return SOFTBUS_CREATE_JSON_ERR
+ * @tc.name: TransAuthChannelMsgPackTest006
+ * @tc.desc: TransAuthChannelMsgPack with different type
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack006, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPackTest006, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
 
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     *appInfo = {
         .myData = {
@@ -304,103 +287,17 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack006, TestSize.Level
 }
 
 /*
- * @tc.name: TransAuthChannelMsgPack007
- * @tc.desc: TransAuthChannelMsgPack test, given invalid ip should return SOFTBUS_CREATE_JSON_ERR
+ * @tc.name: TransAuthChannelMsgPackTest007
+ * @tc.desc: TransAuthChannelMsgPack with all JSON calls succeeding returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack007, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPackTest007, TestSize.Level1)
 {
     cJSON *obj = cJSON_CreateObject();
     ASSERT_TRUE(obj != nullptr);
 
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_TRUE(appInfo != nullptr);
-    *appInfo = {
-        .myData = {
-            .deviceId = "DEV_001_ABCD1234",
-            .pkgName = "com.example.app.v1.0.0",
-            .sessionName = "my_SESS_2023Q3_7X9B2Y",
-            .dataConfig = SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
-            .apiVersion = API_V1
-        },
-        .peerData = {
-            .sessionName = "peer_name_2023_258X"
-        },
-        .peerNetWorkId = "NET_192.168.1.100_5G",
-        .reqId = "REQ_8877665544332211",
-        .routeType = BT_BR,
-        .linkType = LANE_HML_RAW
-    };
-
-    AuthChannelInterfaceMock authChannelObj;
-    EXPECT_CALL(authChannelObj, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(authChannelObj, AddStringToJsonObject).Times(7)
-    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
-    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
-    .WillOnce(testing::Return(false));
-    int32_t ret = TransAuthChannelMsgPack(obj, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
-
-    cJSON_Delete(obj);
-    SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: TransAuthChannelMsgPack008
- * @tc.desc: TransAuthChannelMsgPack test, given invalid peer_ip should return SOFTBUS_CREATE_JSON_ERR
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack008, TestSize.Level1)
-{
-    cJSON *obj = cJSON_CreateObject();
-    ASSERT_TRUE(obj != nullptr);
-
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_TRUE(appInfo != nullptr);
-    *appInfo = {
-        .myData = {
-            .deviceId = "DEV_001_ABCD1234",
-            .pkgName = "com.example.app.v1.0.0",
-            .sessionName = "my_SESS_2023Q3_7X9B2Y",
-            .dataConfig = SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH,
-            .apiVersion = API_V1
-        },
-        .peerData = {
-            .sessionName = "peer_name_2023_258X"
-        },
-        .peerNetWorkId = "NET_192.168.1.100_5G",
-        .reqId = "REQ_8877665544332211",
-        .routeType = BT_BR,
-        .linkType = LANE_HML_RAW
-    };
-
-    AuthChannelInterfaceMock authChannelObj;
-    EXPECT_CALL(authChannelObj, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(authChannelObj, AddStringToJsonObject).Times(8)
-    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
-    .WillOnce(testing::Return(true)).WillOnce(testing::Return(true)).WillOnce(testing::Return(true))
-    .WillOnce(testing::Return(true)).WillOnce(testing::Return(false));
-    int32_t ret = TransAuthChannelMsgPack(obj, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
-
-    cJSON_Delete(obj);
-    SoftBusFree(appInfo);
-}
-
-/*
- * @tc.name: TransAuthChannelMsgPack009
- * @tc.desc: TransAuthChannelMsgPack test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack009, TestSize.Level1)
-{
-    cJSON *obj = cJSON_CreateObject();
-    ASSERT_TRUE(obj != nullptr);
-
-    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
     *appInfo = {
         .myData = {
@@ -430,16 +327,16 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack009, TestSize.Level
 }
 
 /*
- * @tc.name: TransAuthChannelErrorPack001
- * @tc.desc: TransAuthChannelErrorPack test
+ * @tc.name: TransAuthChannelErrorPackTest001
+ * @tc.desc: TransAuthChannelErrorPack with AddStringToJsonObject returning false returns SOFTBUS_CREATE_JSON_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack001, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPackTest001, TestSize.Level1)
 {
     int32_t errcode = SOFTBUS_OK;
     char cJsonStr = '\0';
-    char *errMsg = static_cast<char *>(SoftBusCalloc(sizeof(ERR_MSG_MAX_LEN)));
+    char *errMsg = reinterpret_cast<char *>(SoftBusCalloc(ERR_MSG_MAX_LEN));
     ASSERT_TRUE(errMsg != nullptr);
 
     AuthChannelInterfaceMock authChannelObj;
@@ -456,18 +353,18 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack001, TestSize.Lev
 }
 
 /*
- * @tc.name: TransAuthChannelErrorPack002
- * @tc.desc: TransAuthChannelErrorPack test
+ * @tc.name: TransAuthChannelErrorPackTest002
+ * @tc.desc: TransAuthChannelErrorPack with cJSON_PrintUnformatted returning nullptr returns SOFTBUS_CREATE_JSON_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack002, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPackTest002, TestSize.Level1)
 {
     int32_t errcode = SOFTBUS_OK;
-    char *cJsonStr = static_cast<char *>(SoftBusCalloc(sizeof(ERR_MSG_MAX_LEN)));
+    char *cJsonStr = reinterpret_cast<char *>(SoftBusCalloc(ERR_MSG_MAX_LEN));
     ASSERT_TRUE(cJsonStr != nullptr);
 
-    char *errMsg = static_cast<char *>(SoftBusCalloc(sizeof(ERR_MSG_MAX_LEN)));
+    char *errMsg = reinterpret_cast<char *>(SoftBusCalloc(ERR_MSG_MAX_LEN));
     ASSERT_TRUE(errMsg != nullptr);
 
     AuthChannelInterfaceMock authChannelObj;
@@ -486,16 +383,16 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack002, TestSize.Lev
 }
 
 /*
- * @tc.name: TransAuthChannelErrorPack003
- * @tc.desc: TransAuthChannelErrorPack test
+ * @tc.name: TransAuthChannelErrorPackTest003
+ * @tc.desc: TransAuthChannelErrorPack with all JSON calls succeeding returns SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack003, TestSize.Level1)
+HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPackTest003, TestSize.Level1)
 {
     int32_t errcode = SOFTBUS_OK;
 
-    char *cJsonStr = static_cast<char *>(SoftBusCalloc(ERR_MSG_MAX_LEN));
+    char *cJsonStr = reinterpret_cast<char *>(SoftBusCalloc(ERR_MSG_MAX_LEN));
     ASSERT_TRUE(cJsonStr != nullptr);
 
     AuthChannelInterfaceMock authChannelObj;
@@ -505,7 +402,7 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack003, TestSize.Lev
     .WillOnce(testing::Return(true));
     EXPECT_CALL(authChannelObj, AddStringToJsonObject).WillOnce(testing::Return(true));
 
-    char *data = static_cast<char *>(SoftBusCalloc(20));
+    char *data = reinterpret_cast<char *>(SoftBusCalloc(20));
     (void)strcpy_s(data, 20, "hfohfOHFEPJFHWQ");
     EXPECT_CALL(authChannelObj, cJSON_PrintUnformatted).WillOnce(Return(data));
 
