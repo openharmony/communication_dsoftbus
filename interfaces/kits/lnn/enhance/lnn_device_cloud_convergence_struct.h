@@ -37,8 +37,15 @@ typedef enum {
     FAR_FIELD_BUSINESS_MAX,
 } FarFieldBusiness;
 
+typedef enum {
+    CONVERSATION_FAR_FIELD_PUSH = 0,
+    CONVERSATION_FAR_FIELD_P2P,
+    CONVERSATION_NEAR_FIELD_WIFI_DIRECT,
+    CONVERSATION_MAX,
+} ConversationChannelType;
+
 typedef void (*FragmentRecvCallback)(const char *udid, const char *data,
-    uint32_t dataLen, FarFieldBusiness businessType);
+    uint32_t dataLen, ConversationChannelType channelType, FarFieldBusiness businessType);
 
 typedef struct {
     uint8_t *buffer;
