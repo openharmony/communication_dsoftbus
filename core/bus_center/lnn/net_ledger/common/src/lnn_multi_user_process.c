@@ -240,12 +240,10 @@ void HbCheckSingleUser(int32_t userId)
         return;
     }
 
-    // 场景1：台账残留旧账号（已登出但台账未清），补清理
     if (ledgerInfo.accountId > 0 && ledgerInfo.accountId != sysAccountId) {
         if (LnnClearLocalUserAccountByUserId(userId, ledgerInfo.displayId == MAIN_SCREEN_USER_TYPE) != SOFTBUS_OK) {
             LNN_LOGW(LNN_LEDGER, "clear user account failed, please check ledger, userId=%{public}d", userId);
         }
-        // 清理后重新获取台账，避免使用陈旧数据
         (void)memset_s(&ledgerInfo, sizeof(UserInfo), 0, sizeof(UserInfo));
         if (LnnGetUserInfoSafe(userId, &ledgerInfo) != SOFTBUS_OK) {
             LNN_LOGW(LNN_LEDGER, "re-get user info failed after clear, please check ledger, userId=%{public}d", userId);
@@ -253,7 +251,6 @@ void HbCheckSingleUser(int32_t userId)
         }
     }
 
-    // 场景2：系统侧已有新账号但台账没有，主动刷新（容错 LOGIN 丢失）
     if (sysAccountId > 0 && ledgerInfo.accountId != sysAccountId) {
         int32_t mainScreenUserId = JudgeDeviceTypeAndGetOsAccountIds();
         NodeInfo nodeInfo;

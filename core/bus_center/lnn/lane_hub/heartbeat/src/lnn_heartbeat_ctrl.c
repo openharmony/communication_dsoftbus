@@ -895,9 +895,7 @@ static void HbHandleAccountLogout(void)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    // 遍历 check 所有前台用户（对比系统侧，清理已登出的）
     HbCheckAllForegroundUsers();
-    // 仍调 HbMultiUserHandleLogout 清理其他已不在前台的用户
     (void)HbMultiUserHandleLogout();
 #else
     LnnSetCloudAbility(false, CLOSE_FILTER_USERID_MODE);

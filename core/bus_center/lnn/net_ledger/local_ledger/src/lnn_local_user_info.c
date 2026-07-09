@@ -228,11 +228,9 @@ int32_t LnnClearLocalUserAccountByUserId(int32_t userId, bool isMainScreen)
         (void)SoftBusMutexUnlock(&g_localUserLedger->lock);
         return SOFTBUS_NOT_FIND;
     }
-    // 持锁保存 oldAccountId，避免竞态
     int64_t oldAccountId = user->accountId;
     user->accountId = 0;
     (void)GenerateDefaultAccountHash(user->accountHash, SHA_256_HASH_LEN);
     (void)SoftBusMutexUnlock(&g_localUserLedger->lock);
-    // 解锁后删云端，用持锁时保存的 oldAccountId
     return LnnDeleteSyncToDB(userId, oldAccountId, isMainScreen);
 }
