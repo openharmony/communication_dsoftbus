@@ -2086,8 +2086,12 @@ int32_t DiscRecoverySubscribe()
 int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *networkId,
     const char *data, uint32_t length)
 {
-    if (info == NULL || data == NULL) {
+    if (info == NULL || data == NULL || networkId == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (length == 0 || length > COMMUNICATION_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_STATE, "invalid length=%{public}u", length);
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_busCenterClient.g_conversationCbList == NULL) {
@@ -2111,14 +2115,20 @@ int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *net
     }
     (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
 
+    char *anonyBundlename = NULL;
+    char *anonyAbilityname = NULL;
+    Anonymize(info->bundleName, &anonyBundlename);
+    Anonymize(info->abilityName, &anonyAbilityname);
     if (!found) {
         LNN_LOGI(LNN_STATE, "callback not exist, abilityName=%{public}s, bundleName=%{public}s",
-            info->abilityName, info->bundleName);
+            AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
     } else if (found && listener.OnDataReceived != NULL) {
         listener.OnDataReceived(networkId, data, length);
         LNN_LOGI(LNN_STATE, "notify abilityName=%{public}s, bundleName=%{public}s",
-            info->abilityName, info->bundleName);
+            AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
     }
+    AnonymizeFree(anonyBundlename);
+    AnonymizeFree(anonyAbilityname);
     return SOFTBUS_OK;
 }
  

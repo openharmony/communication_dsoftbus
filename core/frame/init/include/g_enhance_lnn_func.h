@@ -305,7 +305,8 @@ typedef int32_t (*AuthMetaGetIpByMetaNodeIdFunc)(const char *metaNodeId, char *i
 typedef int32_t (*AuthMetaGetLocalIpByMetaNodeIdFunc)(const char *metaNodeId, char *localIp, int32_t len);
 typedef int32_t (*AuthMetaGetConnectionTypeByMetaNodeIdFunc)(const char *metaNodeId,
     NetworkConnectionType *connectionType);
-typedef int32_t (*LnnSendAgentDataFunc)(const char *udid, const char *data, uint32_t length, LnnEventExtra *extra);
+typedef int32_t (*LnnSendAgentDataFunc)(const char *udid, const char *data, uint32_t length,
+    LnnEventExtra *extra, bool isAckMsg);
 typedef int32_t (*PostLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
 typedef int32_t (*RemoveLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);

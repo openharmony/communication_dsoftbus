@@ -26,9 +26,6 @@
 extern "C" {
 #endif
 
-#define FRAGMENT_HEADER_SIZE  16
-#define MODULE_TYPE_SIZE      4
-
 void FragmentRecvInit(void);
 
 void FragmentRecvDeinit(void);
