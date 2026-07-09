@@ -161,6 +161,11 @@ typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
     void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
+    void (*onTrustedDeviceNumChanged)(int curTrustedDeviceNum);
+    void (*onGroupActiveInUser)(const char *returnInfo);
+    void (*onGroupInactiveInUser)(const char *returnInfo);
+    void (*onDeviceActiveInUser)(const char *udid, const char *returnInfo);
+    void (*onDeviceInactiveInUser)(const char *udid, const char *returnInfo);
 } GroupChangeListener;
 
 typedef enum {

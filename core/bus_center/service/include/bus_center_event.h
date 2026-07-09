@@ -109,7 +109,7 @@ void LnnNotifyDmHookRegisteredEvent(void);
 void LnnNotifyAccountSwitchCheckEvent(int32_t userId);
 
 void LnnNotifyAccountAclChangeEvent(
-    const char *udid, int32_t localUserId, int32_t peerUserId, const int32_t *serviceIdList, uint32_t serviceIdCount);
+    const char *udid, int32_t localUserId, int32_t peerUserId, const int64_t *serviceIdList, uint32_t serviceIdCount);
 
 #ifdef __cplusplus
 }

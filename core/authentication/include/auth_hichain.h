@@ -55,16 +55,23 @@ typedef struct {
     void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceNotTrusted)(const char *udid, int32_t localUserId);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
     void (*onTrustedDeviceNumChanged)(int curTrustedDeviceNum);
     void (*onGroupActiveInUser)(const char *returnInfo);
     void (*onGroupInactiveInUser)(const char *returnInfo);
     void (*onDeviceActiveInUser)(const char *udid, const char *returnInfo);
     void (*onDeviceInactiveInUser)(const char *udid, const char *returnInfo);
-#endif
 } TrustDataChangeListener;
+
+#define HICHAIN_RETURN_GROUP_ID_LEN 65
+typedef struct {
+    int32_t osAccountId;
+    int32_t groupType;
+    char groupId[HICHAIN_RETURN_GROUP_ID_LEN];
+} HichainReturnInfo;
+
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
 void UnregTrustDataChangeListener(void);
+int32_t AuthHichainParseReturnInfo(const char *returnInfo, HichainReturnInfo *out);
 
 int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChainAuthMode authMode);
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode);

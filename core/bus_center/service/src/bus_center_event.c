@@ -739,7 +739,7 @@ void LnnNotifyAccountSwitchCheckEvent(int32_t userId)
 }
 
 void LnnNotifyAccountAclChangeEvent(
-    const char *udid, int32_t localUserId, int32_t peerUserId, const int32_t *serviceIdList, uint32_t serviceIdCount)
+    const char *udid, int32_t localUserId, int32_t peerUserId, const int64_t *serviceIdList, uint32_t serviceIdCount)
 {
     LnnAccountAclChangeEvent event;
     (void)memset_s(&event, sizeof(event), 0, sizeof(event));
@@ -756,7 +756,7 @@ void LnnNotifyAccountAclChangeEvent(
         FOREGROUND_ACCOUNT_MAX_SIZE : serviceIdCount;
     if (serviceIdList != NULL && event.serviceIdCount > 0) {
         (void)memcpy_s(event.serviceIdList, sizeof(event.serviceIdList),
-            serviceIdList, event.serviceIdCount * sizeof(int32_t));
+            serviceIdList, event.serviceIdCount * sizeof(int64_t));
     }
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }

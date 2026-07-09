@@ -369,7 +369,7 @@ typedef struct {
     int32_t localUserId;
     int32_t peerUserId;
     uint32_t serviceIdCount;
-    int32_t serviceIdList[FOREGROUND_ACCOUNT_MAX_SIZE];
+    int64_t serviceIdList[FOREGROUND_ACCOUNT_MAX_SIZE];
 } LnnAccountAclChangeEvent;
 
 #ifdef __cplusplus

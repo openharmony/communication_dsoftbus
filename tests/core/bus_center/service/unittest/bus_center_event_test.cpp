@@ -906,7 +906,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest043, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest044, TestSize.Level1)
 {
     const char *udid = "test_udid_12345";
-    int32_t serviceIdList[] = {1, 2, 3};
+    int64_t serviceIdList[] = {1, 2, 3};
     EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountAclChangeEvent(udid, 100, 200,
         serviceIdList, 3));
 }
@@ -920,7 +920,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest044, TestSize.Level1)
 */
 HWTEST_F(BusCenterEventTest, BusCenterEventTest045, TestSize.Level1)
 {
-    int32_t serviceIdList[] = {1};
+    int64_t serviceIdList[] = {1};
     EXPECT_NO_FATAL_FAILURE(LnnNotifyAccountAclChangeEvent(nullptr, 100, 200,
         serviceIdList, 1));
 }
@@ -949,7 +949,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest046, TestSize.Level1)
 HWTEST_F(BusCenterEventTest, BusCenterEventTest047, TestSize.Level1)
 {
     const char *udid = "test_udid";
-    int32_t serviceIdList[FOREGROUND_ACCOUNT_MAX_SIZE + 5] = {0};
+    int64_t serviceIdList[FOREGROUND_ACCOUNT_MAX_SIZE + 5] = {0};
     for (int i = 0; i < FOREGROUND_ACCOUNT_MAX_SIZE + 5; i++) {
         serviceIdList[i] = i;
     }

@@ -437,50 +437,55 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
 }
 
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
 static void OnTrustedDeviceNumChanged(int curTrustedDeviceNum)
 {
+    AUTH_LOGI(AUTH_HICHAIN, "trusted device num changed, curNum=%{public}d", curTrustedDeviceNum);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onTrustedDeviceNumChanged != NULL) {
         g_groupChangeListener.onTrustedDeviceNumChanged(curTrustedDeviceNum);
     }
+#endif
 }
 
 static void OnGroupActiveInUser(const char *returnInfo)
 {
+    AUTH_LOGI(AUTH_HICHAIN, "group active in user");
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onGroupActiveInUser != NULL) {
         g_groupChangeListener.onGroupActiveInUser(returnInfo);
     }
+#endif
 }
 
 static void OnGroupInactiveInUser(const char *returnInfo)
 {
-    int32_t osAccountId = ParseOsAccountIdFromReturnInfo(returnInfo);
-    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, osAccountId=%{public}d", osAccountId);
-    // TODO: 需跟HiChain/DM/DP团队确认以下问题后再实现：
-    // 1. onGroupInactiveInUser 与 DP OnAccountAclInactive 是否互斥（单-单 vs 单-双场景）
-    // 2. 若不互斥，需防重入避免与 DP ACL 路径重复触发 SOFTBUS_ACCOUNT_LOG_OUT
-    // 3. returnInfo 完整字段定义（osAccountId/foregroundUid 及其他）
-    // 初步方案：等价于同账号群组不可用，调 LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT)
-    // 触发完整离线链路（心跳清台账+信任关系减少+清理applykey），但需确认去重后再启用
+    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, forward to lnn");
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onGroupInactiveInUser != NULL) {
         g_groupChangeListener.onGroupInactiveInUser(returnInfo);
     }
+#endif
 }
 
 static void OnDeviceActiveInUser(const char *udid, const char *returnInfo)
 {
+    AUTH_LOGI(AUTH_HICHAIN, "device active in user");
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onDeviceActiveInUser != NULL) {
         g_groupChangeListener.onDeviceActiveInUser(udid, returnInfo);
     }
+#endif
 }
 
 static void OnDeviceInactiveInUser(const char *udid, const char *returnInfo)
 {
+    AUTH_LOGI(AUTH_HICHAIN, "device inactive in user");
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onDeviceInactiveInUser != NULL) {
         g_groupChangeListener.onDeviceInactiveInUser(udid, returnInfo);
     }
-}
 #endif
+}
 
 static int32_t RetryRegTrustDataChangeListener(void)
 {
@@ -489,13 +494,11 @@ static int32_t RetryRegTrustDataChangeListener(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
         .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
         .onGroupActiveInUser = OnGroupActiveInUser,
         .onGroupInactiveInUser = OnGroupInactiveInUser,
         .onDeviceActiveInUser = OnDeviceActiveInUser,
         .onDeviceInactiveInUser = OnDeviceInactiveInUser,
-#endif
     };
     for (int32_t i = 1; i <= RETRY_REGDATA_TIMES; i++) {
         int32_t ret = RegTrustDataChangeListener(&trustListener);
@@ -516,13 +519,11 @@ int32_t RegTrustListenerOnHichainSaStart(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-#ifdef HICHAIN_USER_LEVEL_CALLBACK_ENABLE
         .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
         .onGroupActiveInUser = OnGroupActiveInUser,
         .onGroupInactiveInUser = OnGroupInactiveInUser,
         .onDeviceActiveInUser = OnDeviceActiveInUser,
         .onDeviceInactiveInUser = OnDeviceInactiveInUser,
-#endif
     };
     if (RegTrustDataChangeListener(&trustListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "RegTrustDataChangeListener fail");

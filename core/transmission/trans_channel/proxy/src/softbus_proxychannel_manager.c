@@ -2458,11 +2458,11 @@ static void TransNotifyUserSwitch(const LnnEventBasicInfo *info)
     }
 }
 
-__attribute__((weak)) void TransNotifyServiceIdChanged(const char *udid, int32_t serviceId)
+__attribute__((weak)) void TransNotifyServiceIdChanged(const char *udid, int64_t serviceId)
 {
     (void)udid;
     (void)serviceId;
-    TRANS_LOGI(TRANS_CTRL, "TransNotifyServiceIdChanged called, serviceId=%{public}d", serviceId);
+    TRANS_LOGI(TRANS_CTRL, "TransNotifyServiceIdChanged called, serviceId=%{public}lld", serviceId);
 }
 
 static void TransNotifyAccountAclChange(const LnnEventBasicInfo *info)

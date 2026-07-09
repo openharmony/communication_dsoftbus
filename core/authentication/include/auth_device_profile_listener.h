@@ -35,6 +35,8 @@ public:
     int32_t OnDeviceAclInactiveByUpdate(const TrustDeviceProfile &profile);
     int32_t OnAccountAclDelete(const TrustDeviceProfile &profile);
     int32_t OnAccountAclInactive(const TrustDeviceProfile &profile);
+    int32_t OnAccountAclAdd(const TrustDeviceProfile &profile);
+    int32_t OnAccountAclActive(const TrustDeviceProfile &profile);
     int32_t OnDeviceProfileAdd(const DeviceProfile &profile);
     int32_t OnDeviceProfileDelete(const DeviceProfile &profile);
     int32_t OnDeviceProfileUpdate(const DeviceProfile &oldProfile, const DeviceProfile &newProfile);

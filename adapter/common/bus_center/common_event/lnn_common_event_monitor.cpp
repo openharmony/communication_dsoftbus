@@ -79,12 +79,21 @@ static void HandleBootCompleted(const CommonEventData &data)
     LnnNotifyDeviceRiskStateChangeEvent();
 }
 
-static void HandleDistributedAccountLogout(const CommonEventData &data)
+static void HandleDistributedAccountChange(const CommonEventData &data)
 {
     const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
-    int32_t eventUserId = -1;
-    std::string userIdKey = "userId";
-    eventUserId = wantParams.GetIntParam(userIdKey, -1);
+    int32_t eventUserId = wantParams.GetIntParam("userId", -1);
+    std::string action = data.GetWant().GetAction();
+    if (action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN) {
+        LNN_LOGI(LNN_EVENT, "login eventUserId=%{public}d", eventUserId);
+        LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
+        if (LnnIsSameAccountGroupDeviceByUserId(eventUserId)) {
+            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+        } else {
+            LNN_LOGI(LNN_EVENT, "login but no same account group, skip LOG_IN, wait for hichain onGroupCreated");
+        }
+        return;
+    }
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     LNN_LOGI(LNN_EVENT, "logout eventUserId=%{public}d", eventUserId);
     LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT);
@@ -95,21 +104,6 @@ static void HandleDistributedAccountLogout(const CommonEventData &data)
         LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT);
     }
 #endif
-}
-
-static void HandleDistributedAccountLogin(const CommonEventData &data)
-{
-    const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
-    int32_t eventUserId = -1;
-    std::string userIdKey = "userId";
-    eventUserId = wantParams.GetIntParam(userIdKey, -1);
-    LNN_LOGI(LNN_EVENT, "login eventUserId=%{public}d", eventUserId);
-    LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
-    if (LnnIsSameAccountGroupDeviceByUserId(eventUserId)) {
-        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
-    } else {
-        LNN_LOGI(LNN_EVENT, "login but no same account group, skip LOG_IN, wait for hichain onGroupCreated");
-    }
 }
 
 static void HandleSubProfileSwitched(const CommonEventData &data)
@@ -131,36 +125,6 @@ static void HandleUserSwitched(const CommonEventData &data)
     LnnNotifyUserSwitchEvent(SOFTBUS_USER_SWITCHED);
 }
 
-static void HandleSubProfileCreated(const CommonEventData &data)
-{
-    (void)data;
-    LNN_LOGI(LNN_EVENT, "sub profile created");
-}
-
-static void HandleSubProfileDeleted(const CommonEventData &data)
-{
-    (void)data;
-    LNN_LOGI(LNN_EVENT, "sub profile deleted");
-}
-
-static void HandleSubProfileSwitching(const CommonEventData &data)
-{
-    (void)data;
-    LNN_LOGI(LNN_EVENT, "sub profile switching");
-}
-
-static void HandleDistributedAccountBound(const CommonEventData &data)
-{
-    (void)data;
-    LNN_LOGI(LNN_EVENT, "distributed account bound");
-}
-
-static void HandleDistributedAccountUnbound(const CommonEventData &data)
-{
-    (void)data;
-    LNN_LOGI(LNN_EVENT, "distributed account unbound");
-}
-
 class CommonEventMonitor : public CommonEventSubscriber {
 public:
     explicit CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo);
@@ -180,15 +144,10 @@ CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscribe
     eventHandlers_[CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY] = HandleDataShareReady;
     eventHandlers_[CommonEventSupport::COMMON_EVENT_TIME_CHANGED] = HandleTimeChanged;
     eventHandlers_[CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED] = HandleBootCompleted;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT] = HandleDistributedAccountLogout;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF] = HandleDistributedAccountLogout;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN] = HandleDistributedAccountLogin;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT] = HandleDistributedAccountChange;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF] = HandleDistributedAccountChange;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN] = HandleDistributedAccountChange;
     eventHandlers_[CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED] = HandleSubProfileSwitched;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_CREATED] = HandleSubProfileCreated;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_DELETED] = HandleSubProfileDeleted;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHING] = HandleSubProfileSwitching;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_BOUND] = HandleDistributedAccountBound;
-    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_UNBOUND] = HandleDistributedAccountUnbound;
     eventHandlers_[CommonEventSupport::COMMON_EVENT_USER_SWITCHED] = HandleUserSwitched;
 }
 
@@ -218,11 +177,6 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_CREATED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_DELETED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHING);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_BOUND);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_UNBOUND);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
