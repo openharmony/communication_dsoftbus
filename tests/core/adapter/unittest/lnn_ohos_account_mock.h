@@ -175,7 +175,7 @@ public:
     virtual void LnnDeinitWifiDirect(void);
     virtual void LnnHbClearRecvList(void);
     virtual void LnnIpAddrChangeEventHandler(void);
-    virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state);
+    virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId);
     virtual void LnnNotifyAllTypeOffline(ConnectionAddrType type);
     virtual void LnnNotifyHBRepeat(void);
     virtual void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
@@ -258,7 +258,7 @@ public:
     MOCK_METHOD1(LnnDiscTypeToConnAddrType, ConnectionAddrType(DiscoveryType));
     MOCK_METHOD1(LnnGenerateKeyByHuks, int32_t(struct HksBlob *));
     MOCK_METHOD1(LnnIsLinkReady, bool(const char *));
-    MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState));
+    MOCK_METHOD2(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState, int32_t));
     MOCK_METHOD1(LnnNotifyAllTypeOffline, void(ConnectionAddrType));
     MOCK_METHOD1(LnnNotifyNetworkStateChanged, void(SoftBusNetworkState));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void(SoftBusOOBEState));

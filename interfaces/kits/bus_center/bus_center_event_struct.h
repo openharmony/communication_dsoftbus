@@ -233,6 +233,7 @@ typedef struct {
 typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
+    int32_t userId;
 } LnnMonitorHbStateChangedEvent;
 
 typedef struct {
@@ -369,7 +370,7 @@ typedef struct {
     int32_t localUserId;
     int32_t peerUserId;
     uint32_t serviceIdCount;
-    int64_t serviceIdList[FOREGROUND_ACCOUNT_MAX_SIZE];
+    int64_t *serviceIdList;
 } LnnAccountAclChangeEvent;
 
 #ifdef __cplusplus

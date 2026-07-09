@@ -35,7 +35,6 @@
 #include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
-#define GROUPID_BUF_LEN 65
 #define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
 #define PC_AUTH_ERRCODE                36870
 
@@ -516,7 +515,7 @@ int32_t AuthHichainParseReturnInfo(const char *returnInfo, HichainReturnInfo *ou
     }
     (void)GetJsonObjectNumberItem(json, FIELD_OS_ACCOUNT_ID, &out->osAccountId);
     (void)GetJsonObjectNumberItem(json, FIELD_GROUP_TYPE, &out->groupType);
-    (void)GetJsonObjectStringItem(json, FIELD_GROUP_ID, out->groupId, HICHAIN_RETURN_GROUP_ID_LEN);
+    (void)GetJsonObjectStringItem(json, FIELD_GROUP_ID, out->groupId, GROUPID_BUF_LEN);
     cJSON_Delete(json);
     return SOFTBUS_OK;
 }

@@ -62,11 +62,11 @@ typedef struct {
     void (*onDeviceInactiveInUser)(const char *udid, const char *returnInfo);
 } TrustDataChangeListener;
 
-#define HICHAIN_RETURN_GROUP_ID_LEN 65
+#define GROUPID_BUF_LEN 65
 typedef struct {
     int32_t osAccountId;
     int32_t groupType;
-    char groupId[HICHAIN_RETURN_GROUP_ID_LEN];
+    char groupId[GROUPID_BUF_LEN];
 } HichainReturnInfo;
 
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);

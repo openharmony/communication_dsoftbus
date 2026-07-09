@@ -167,9 +167,9 @@ bool LnnIsLocalSupportBurstFeature(void)
     return HeartBeatCtrlStaticInterface()->LnnIsLocalSupportBurstFeature();
 }
 
-void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId)
 {
-    return HeartBeatCtrlStaticInterface()->LnnNotifyAccountStateChangeEvent(state);
+    return HeartBeatCtrlStaticInterface()->LnnNotifyAccountStateChangeEvent(state, userId);
 }
 
 void AuthLoadDeviceKey(void)

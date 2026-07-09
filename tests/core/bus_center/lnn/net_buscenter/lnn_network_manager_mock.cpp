@@ -123,9 +123,9 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
     return GetNetworkManagerInterface()->LnnNotifyOOBEStateChangeEvent(state);
 }
 
-void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId)
 {
-    return GetNetworkManagerInterface()->LnnNotifyAccountStateChangeEvent(state);
+    return GetNetworkManagerInterface()->LnnNotifyAccountStateChangeEvent(state, userId);
 }
 
 void LnnDeinitPhysicalSubnetManager(void)

@@ -297,9 +297,9 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest009, TestSize.Level1)
     EXPECT_CALL(BusCenterEventMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     SoftBusAccountState mockState = (SoftBusAccountState)(SOFTBUS_ACCOUNT_UNKNOWN + 1);
 
-    LnnNotifyAccountStateChangeEvent(mockState);
+    LnnNotifyAccountStateChangeEvent(mockState, 0);
     mockState = SOFTBUS_ACCOUNT_LOG_IN;
-    LnnNotifyAccountStateChangeEvent(mockState);
+    LnnNotifyAccountStateChangeEvent(mockState, 0);
     int32_t ret = LnnInitBusCenterEvent();
     LnnDeinitBusCenterEvent();
     EXPECT_NE(ret, SOFTBUS_OK);

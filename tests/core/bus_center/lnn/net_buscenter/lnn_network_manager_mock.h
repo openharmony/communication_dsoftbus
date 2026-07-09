@@ -56,7 +56,7 @@ public:
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
-    virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
+    virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId) = 0;
     virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
     virtual void LnnDeinitPhysicalSubnetManager(void) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
@@ -87,7 +87,7 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t(LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void(SoftBusOOBEState));
-    MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState));
+    MOCK_METHOD2(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState, int32_t));
     MOCK_METHOD2(DfxRecordTriggerTime, void(LnnTriggerReason, LnnEventLnnStage));
     MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void(void));
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));

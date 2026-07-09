@@ -49,7 +49,7 @@ void LnnNotifyDifferentAccountChangeEvent(SoftBusDifferentAccountState state);
 void LnnNotifyBtStateChangeEvent(void *state);
 void LnnNotifySleStateChangeEvent(void *state);
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state);
-void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state);
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId);
 void LnnNotifyUserStateChangeEvent(SoftBusUserState state);
 void LnnNotifyNightModeStateChangeEvent(void *state);
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);

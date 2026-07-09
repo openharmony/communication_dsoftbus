@@ -628,7 +628,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
     LnnHbOnTrustedRelationIncreased(groupType);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
-        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, JudgeDeviceTypeAndGetOsAccountIds());
     }
     RestartCoapDiscovery();
     DfxRecordWifiTriggerTimestamp(WIFI_GROUP_CREATED);

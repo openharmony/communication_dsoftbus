@@ -839,7 +839,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         AuthRecoveryApplyKey();
         LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {
-            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, JudgeDeviceTypeAndGetOsAccountIds());
         }
     }
     lockState = lockState == SOFTBUS_USER_UNLOCK ? SOFTBUS_SCREEN_UNLOCK : lockState;
@@ -895,7 +895,6 @@ static void HbHandleAccountLogout(void)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    HbCheckAllForegroundUsers();
     (void)HbMultiUserHandleLogout();
 #else
     LnnSetCloudAbility(false, CLOSE_FILTER_USERID_MODE);

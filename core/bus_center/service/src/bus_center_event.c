@@ -719,14 +719,14 @@ void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId)
 {
     if (state < SOFTBUS_ACCOUNT_LOG_IN || state >= SOFTBUS_ACCOUNT_UNKNOWN) {
         LNN_LOGE(LNN_EVENT, "bad accountState=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_ACCOUNT_CHANGED,
-        .status = (uint8_t)state};
+        .status = (uint8_t)state, .userId = userId};
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
@@ -752,13 +752,20 @@ void LnnNotifyAccountAclChangeEvent(
     }
     event.localUserId = localUserId;
     event.peerUserId = peerUserId;
-    event.serviceIdCount = (serviceIdCount > FOREGROUND_ACCOUNT_MAX_SIZE) ?
-        FOREGROUND_ACCOUNT_MAX_SIZE : serviceIdCount;
-    if (serviceIdList != NULL && event.serviceIdCount > 0) {
-        (void)memcpy_s(event.serviceIdList, sizeof(event.serviceIdList),
-            serviceIdList, event.serviceIdCount * sizeof(int64_t));
+    event.serviceIdCount = serviceIdCount;
+    if (serviceIdList != NULL && serviceIdCount > 0) {
+        event.serviceIdList = (int64_t *)SoftBusCalloc(serviceIdCount * sizeof(int64_t));
+        if (event.serviceIdList == NULL) {
+            LNN_LOGE(LNN_EVENT, "calloc serviceIdList failed");
+            return;
+        }
+        (void)memcpy_s(event.serviceIdList, serviceIdCount * sizeof(int64_t),
+            serviceIdList, serviceIdCount * sizeof(int64_t));
     }
     NotifyEvent((const LnnEventBasicInfo *)&event);
+    if (event.serviceIdList != NULL) {
+        SoftBusFree(event.serviceIdList);
+    }
 }
 
 void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state)

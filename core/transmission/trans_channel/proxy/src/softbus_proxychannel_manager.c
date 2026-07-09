@@ -2458,27 +2458,6 @@ static void TransNotifyUserSwitch(const LnnEventBasicInfo *info)
     }
 }
 
-__attribute__((weak)) void TransNotifyServiceIdChanged(const char *udid, int64_t serviceId)
-{
-    (void)udid;
-    (void)serviceId;
-    TRANS_LOGI(TRANS_CTRL, "TransNotifyServiceIdChanged called, serviceId=%{public}lld", serviceId);
-}
-
-static void TransNotifyAccountAclChange(const LnnEventBasicInfo *info)
-{
-    if (info == NULL || info->event != LNN_EVENT_ACCOUNT_ACL_CHANGE) {
-        return;
-    }
-    const LnnAccountAclChangeEvent *event = (const LnnAccountAclChangeEvent *)info;
-    TRANS_LOGI(TRANS_CTRL, "account acl change, serviceIdCount=%{public}u", event->serviceIdCount);
-    uint32_t count = (event->serviceIdCount > FOREGROUND_ACCOUNT_MAX_SIZE) ?
-        FOREGROUND_ACCOUNT_MAX_SIZE : event->serviceIdCount;
-    for (uint32_t i = 0; i < count; i++) {
-        TransNotifyServiceIdChanged(event->udid, event->serviceIdList[i]);
-    }
-}
-
 static int32_t TransProxyManagerInitInner(const IServerChannelCallBack *cb)
 {
     int32_t ret = TransProxySetCallBack(cb);
@@ -2526,9 +2505,6 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 
     ret = LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, TransNotifyBlockModeEnable);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register user switch event failed.");
-
-    ret = LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_ACL_CHANGE, TransNotifyAccountAclChange);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register account acl change event failed.");
 
     TRANS_LOGI(TRANS_INIT, "proxy channel init ok");
     return SOFTBUS_OK;
