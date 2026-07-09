@@ -200,16 +200,15 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDevic
 }
 
 static bool GetUdidFromProfile(const TrustDeviceProfile &profile, const char *callbackName,
-    std::string &deviceId, const char *&udid)
+    std::string &deviceId)
 {
     deviceId = profile.GetDeviceId();
     if (deviceId.empty()) {
         AUTH_LOGE(AUTH_INIT, "%{public}s udid is empty!", callbackName);
         return false;
     }
-    udid = deviceId.c_str();
     char *anonyUdid = nullptr;
-    Anonymize(udid, &anonyUdid);
+    Anonymize(deviceId.c_str(), &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "%{public}s start! udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         callbackName, AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
@@ -250,33 +249,30 @@ static void NotifyServiceIdListIfNeeded(const char *udid, const TrustDeviceProfi
 int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByDelete(const TrustDeviceProfile &profile)
 {
     std::string deviceId;
-    const char *udid = nullptr;
-    if (!GetUdidFromProfile(profile, "OnDeviceAclInactiveByDelete", deviceId, udid)) {
+    if (!GetUdidFromProfile(profile, "OnDeviceAclInactiveByDelete", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    HandleDeviceAclInactive("OnDeviceAclInactiveByDelete", udid);
+    HandleDeviceAclInactive("OnDeviceAclInactiveByDelete", deviceId.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByUpdate(const TrustDeviceProfile &profile)
 {
     std::string deviceId;
-    const char *udid = nullptr;
-    if (!GetUdidFromProfile(profile, "OnDeviceAclInactiveByUpdate", deviceId, udid)) {
+    if (!GetUdidFromProfile(profile, "OnDeviceAclInactiveByUpdate", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    HandleDeviceAclInactive("OnDeviceAclInactiveByUpdate", udid);
+    HandleDeviceAclInactive("OnDeviceAclInactiveByUpdate", deviceId.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &profile)
 {
     std::string deviceId;
-    const char *udid = nullptr;
-    if (!GetUdidFromProfile(profile, "OnAccountAclDelete", deviceId, udid)) {
+    if (!GetUdidFromProfile(profile, "OnAccountAclDelete", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    NotifyServiceIdListIfNeeded(udid, profile);
+    NotifyServiceIdListIfNeeded(deviceId.c_str(), profile);
     AUTH_LOGD(AUTH_INIT, "OnAccountAclDelete success!");
     return SOFTBUS_OK;
 }
@@ -284,11 +280,10 @@ int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &
 int32_t AuthDeviceProfileListener::OnAccountAclInactive(const TrustDeviceProfile &profile)
 {
     std::string deviceId;
-    const char *udid = nullptr;
-    if (!GetUdidFromProfile(profile, "OnAccountAclInactive", deviceId, udid)) {
+    if (!GetUdidFromProfile(profile, "OnAccountAclInactive", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    NotifyServiceIdListIfNeeded(udid, profile);
+    NotifyServiceIdListIfNeeded(deviceId.c_str(), profile);
     AUTH_LOGD(AUTH_INIT, "OnAccountAclInactive success!");
     return SOFTBUS_OK;
 }
@@ -296,22 +291,20 @@ int32_t AuthDeviceProfileListener::OnAccountAclInactive(const TrustDeviceProfile
 int32_t AuthDeviceProfileListener::OnAccountAclAdd(const TrustDeviceProfile &profile)
 {
     std::string deviceId;
-    const char *udid = nullptr;
-    if (!GetUdidFromProfile(profile, "OnAccountAclAdd", deviceId, udid)) {
+    if (!GetUdidFromProfile(profile, "OnAccountAclAdd", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    HandleAccountAclAvailable("OnAccountAclAdd", udid);
+    HandleAccountAclAvailable("OnAccountAclAdd", deviceId.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t AuthDeviceProfileListener::OnAccountAclActive(const TrustDeviceProfile &profile)
 {
     std::string deviceId;
-    const char *udid = nullptr;
-    if (!GetUdidFromProfile(profile, "OnAccountAclActive", deviceId, udid)) {
+    if (!GetUdidFromProfile(profile, "OnAccountAclActive", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    HandleAccountAclAvailable("OnAccountAclActive", udid);
+    HandleAccountAclAvailable("OnAccountAclActive", deviceId.c_str());
     return SOFTBUS_OK;
 }
 
