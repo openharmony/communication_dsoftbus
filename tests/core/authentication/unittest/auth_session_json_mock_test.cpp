@@ -2499,6 +2499,6 @@ HWTEST_F(AuthSessionJsonMockTest, OLD_VERSION_INVALID_ECTERNAL_AUTH_INFO_TEST_00
     EXPECT_CALL(mocker, IsSKIdFindAclInfo)
         .WillOnce(DoAll(SetArrayArgument<1>(udid, udid + strlen(udid) + 1), Return(SOFTBUS_OK)));
     ret = OldVersionInvalidExternalAuthInfo(&info);
-    EXPECT_TRUE(false);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS
