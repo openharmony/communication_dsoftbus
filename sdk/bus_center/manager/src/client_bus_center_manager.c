@@ -2115,7 +2115,7 @@ int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *net
         LNN_LOGI(LNN_STATE, "callback not exist, abilityName=%{public}s, bundleName=%{public}s",
             info->abilityName, info->bundleName);
     } else if (found && listener.OnDataReceived != NULL) {
-        listener.OnDataReceived(networkId, data, length);
+        listener.OnDataReceived(networkId, data, length, info->abilityName);
         LNN_LOGI(LNN_STATE, "notify abilityName=%{public}s, bundleName=%{public}s",
             info->abilityName, info->bundleName);
     }
