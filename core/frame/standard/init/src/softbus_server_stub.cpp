@@ -311,6 +311,7 @@ void SoftBusServerStub::InitMemberConstraintSet()
     memberConstraintSet_.insert(SERVER_SET_NODE_DATA_CHANGE_FLAG);
     memberConstraintSet_.insert(SERVER_SHIFT_LNN_GEAR);
     memberConstraintSet_.insert(SERVER_SYNC_TRUSTED_RELATION);
+    memberConstraintSet_.insert(SERVER_PROCESS_PUSH_MSG);
     memberConstraintSet_.insert(SERVER_ACTIVE_META_NODE);
     memberConstraintSet_.insert(SERVER_DEACTIVE_META_NODE);
     memberConstraintSet_.insert(SERVER_GET_ALL_META_NODE_INFO);

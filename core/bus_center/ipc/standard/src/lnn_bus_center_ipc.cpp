@@ -708,6 +708,11 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
 
 int32_t LnnIpcProcessPushMsg(const uint8_t *data, uint32_t len)
 {
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_PROCESS_PUSH_MSG);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
     return LnnProcessPushMsgPacked(data, len);
 }
 
