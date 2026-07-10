@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,16 @@
 #include <gtest/gtest.h>
 #include <map>
 #include <vector>
+
 #include "securec.h"
 #include "session.h"
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 
-#define TEST_TMP_BUF "tmpBuf"
+#define TEST_TMP_BUF     "tmpBuf"
 #define TEST_TMP_BUF_LEN 10
-#define STR_LEN 100000
-#define TMP_NUM 97
+#define STR_LEN          100000
+#define TMP_NUM          97
 
 char g_tmpBuf[] = "tmpBuf";
 
@@ -40,10 +41,8 @@ std::map<int, std::vector<uint64_t>> g_speedStat;
 
 class TransQosStatClientTest : public testing::Test {
 public:
-    TransQosStatClientTest()
-    {}
-    ~TransQosStatClientTest()
-    {}
+    TransQosStatClientTest() { }
+    ~TransQosStatClientTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override
@@ -96,11 +95,17 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest001, TestSize.Level1)
 {
     int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateSessionServer(nullptr, UDP_TEST_SESSION_NAME, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CreateSessionServer(UDP_TEST_PKG_NAME, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
 /**
  * @tc.name: TransQosStatClientTest002
- * @tc.desc: sessionListener without onQosEvent
+ * @tc.desc: stream session with null sessionListener, verify CreateSessionServer returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -114,16 +119,15 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level1)
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
-    SessionAttribute attr = {0};
+    SessionAttribute attr = { 0 };
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
-    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME,
-        info[0].networkId, "0", &attr);
+    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME, info[0].networkId, "0", &attr);
     EXPECT_NE(-1, sessionId);
     sleep(2);
 
     char sendStringData[STR_LEN];
-    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
+    (void)memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
         STR_LEN,
@@ -147,7 +151,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level1)
 
 /**
  * @tc.name: TransQosStatClientTest003
- * @tc.desc: sessionListener with onQosEvent
+ * @tc.desc: stream session with null sessionListener, verify no QoS event count and time diff
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -161,16 +165,15 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
-    SessionAttribute attr = {0};
+    SessionAttribute attr = { 0 };
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
-    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME,
-        info[0].networkId, "0", &attr);
+    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME, info[0].networkId, "0", &attr);
     EXPECT_NE(-1, sessionId);
     sleep(2);
 
     char sendStringData[STR_LEN];
-    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
+    (void)memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
         STR_LEN,
@@ -195,7 +198,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
 
 /**
  * @tc.name: TransQosStatClientTest004
- * @tc.desc: sessionListener with onQosEvent multichannel
+ * @tc.desc: multichannel stream session, verify QoS event count across multiple sessions
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -210,18 +213,18 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level1)
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
-    SessionAttribute attr = {0};
+    SessionAttribute attr = { 0 };
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
     for (int32_t index = 0; index < numChannels; index++) {
         std::string groupId = std::to_string(index);
-        int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME,
-            info[0].networkId, groupId.c_str(), &attr);
+        int32_t sessionId =
+            OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME, info[0].networkId, groupId.c_str(), &attr);
         EXPECT_NE(-1, sessionId);
     }
     sleep(2);
     char sendStringData[STR_LEN];
-    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
+    (void)memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = { sendStringData, STR_LEN };
     StreamData d2 = { g_tmpBuf, TEST_TMP_BUF_LEN };
     StreamFrameInfo tmpf = {};
@@ -248,7 +251,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level1)
 
 /**
  * @tc.name: TransQosStatClientTest005
- * @tc.desc: sessionListener with onQosEvent speedUp
+ * @tc.desc: stream session with large data then small data, verify speed comparison
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -264,17 +267,16 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level1)
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
-    SessionAttribute attr = {0};
+    SessionAttribute attr = { 0 };
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
-    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME,
-        info[0].networkId, "0", &attr);
+    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME, info[0].networkId, "0", &attr);
     EXPECT_NE(-1, sessionId);
     sleep(2);
 
     // big speed
     char sendStringData[STR_LEN];
-    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
+    (void)memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
         STR_LEN,
@@ -309,7 +311,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level1)
 
 /**
  * @tc.name: TransQosStatClientTest006
- * @tc.desc: sessionListener with onQosEvent speedDown
+ * @tc.desc: stream session with small data then large data, verify speed comparison
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -325,17 +327,16 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level1)
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_INIT);
-    SessionAttribute attr = {0};
+    SessionAttribute attr = { 0 };
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
-    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME,
-        info[0].networkId, "0", &attr);
+    int32_t sessionId = OpenSession(UDP_TEST_SESSION_NAME, UDP_TEST_SESSION_NAME, info[0].networkId, "0", &attr);
     EXPECT_NE(-1, sessionId);
     sleep(2);
 
     // small speed
     char sendStringData[STR_LEN];
-    memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
+    (void)memset_s(sendStringData, sizeof(sendStringData), TMP_NUM, sizeof(sendStringData));
     StreamData d1 = {
         sendStringData,
         STR_LEN,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ ConnectionAddr g_addrInfo[CONN_ADDR_INFO_COUNT];
 ISessionListener g_sessionlistener;
 int32_t g_openCount = 0;
 const char *g_testModuleName = "com.plrdtest";
-const char *g_testSessionName   = "com.plrdtest.dsoftbus";
+const char *g_testSessionName = "com.plrdtest.dsoftbus";
 const char *g_testData = "{\"data\":\"open auth session test!!!\"}";
 
 int32_t g_sessionId = -1;
@@ -228,10 +228,8 @@ void TestCloseSessionTwo(void)
 
 class AuthSessionTest : public testing::Test {
 public:
-    AuthSessionTest()
-    {}
-    ~AuthSessionTest()
-    {}
+    AuthSessionTest() { }
+    ~AuthSessionTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -254,11 +252,9 @@ void AuthSessionTest::SetUpTestCase(void)
     getchar();
 }
 
-void AuthSessionTest::TearDownTestCase(void)
-{}
+void AuthSessionTest::TearDownTestCase(void) { }
 
-void AuthSessionTest::SetUp(void)
-{}
+void AuthSessionTest::SetUp(void) { }
 
 void AuthSessionTest::TearDown(void)
 {
@@ -280,11 +276,11 @@ int32_t AuthSessionTest::TestWaitOpenSession(int32_t count)
 }
 
 /*
-* @tc.name: testPassiveOpenAuthSession001
-* @tc.desc: test passive open auth session
-* @tc.type: FUNC
-* @tc.require:AR000GIRGG
-*/
+ * @tc.name: testPassiveOpenAuthSession001
+ * @tc.desc: test passive open auth session
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGG
+ */
 HWTEST_F(AuthSessionTest, testPassiveOpenAuthSession001, TestSize.Level1)
 {
     if (g_testWay != PASSIVE_OPENAUTHSESSION_WAY) {
@@ -307,14 +303,14 @@ HWTEST_F(AuthSessionTest, testPassiveOpenAuthSession001, TestSize.Level1)
     sleep(CONN_SLEEP_TIME);
     sleep(CONN_SLEEP_TIME);
     TestCloseSession();
-};
+}
 
 /*
-* @tc.name: testActiveOpenAuthSession001
-* @tc.desc: test active open auth session
-* @tc.type: FUNC
-* @tc.require:AR000GIRGG
-*/
+ * @tc.name: testActiveOpenAuthSession001
+ * @tc.desc: test active open auth session
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGG
+ */
 HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
@@ -340,7 +336,7 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
         return;
     }
-    char *testData = (char *)SoftBusCalloc(SEND_DATA_SIZE_40K + 1);
+    char *testData = reinterpret_cast<char *>(SoftBusCalloc(SEND_DATA_SIZE_40K + 1));
     if (testData == nullptr) {
         printf("SoftBusCalloc error!\n");
         EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
@@ -361,14 +357,14 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession001, TestSize.Level1)
         SoftBusSleepMs(CLOSE_DELAY_TIME);
     }
     SoftBusFree(testData);
-};
+}
 
 /*
-* @tc.name: testActiveOpenAuthSession002
-* @tc.desc: test active open 2 auth session
-* @tc.type: FUNC
-* @tc.require:AR000GIRGG
-*/
+ * @tc.name: testActiveOpenAuthSession002
+ * @tc.desc: test active open 2 auth session
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGG
+ */
 HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
@@ -378,7 +374,7 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
     printf("test begin testActiveOpenAuthSession002 \r\n");
     int32_t ret = TestCreateSessionServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    char *testData = (char *)SoftBusCalloc(SEND_DATA_SIZE_1K);
+    char *testData = reinterpret_cast<char *>(SoftBusCalloc(SEND_DATA_SIZE_1K));
     if (testData == nullptr) {
         printf("SoftBusCalloc error!\n");
         EXPECT_EQ(SOFTBUS_OK, INPUT_ERR);
@@ -399,5 +395,5 @@ HWTEST_F(AuthSessionTest, testActiveOpenAuthSession002, TestSize.Level1)
     TestCloseSessionTwo();
     SoftBusSleepMs(CLOSE_DELAY_TIME);
     SoftBusFree(testData);
-};
+}
 } // namespace OHOS

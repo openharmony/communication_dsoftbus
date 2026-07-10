@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,43 +30,47 @@ const int32_t G_VALID_QUALITY = 1;
 
 class TransQosTest : public testing::Test {
 public:
-    TransQosTest()
-    {}
-    ~TransQosTest()
-    {}
+    TransQosTest() { }
+    ~TransQosTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void TransQosTest::SetUpTestCase(void)
-{}
+void TransQosTest::SetUpTestCase(void) { }
 
-void TransQosTest::TearDownTestCase(void)
-{}
+void TransQosTest::TearDownTestCase(void) { }
 
 /**
- * @tc.name: TransQosTest001
- * @tc.desc: test the wrong parameter.
+ * @tc.name: QosReportTest001
+ * @tc.desc: QosReport with various session id and qos level combinations, expect not SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransQosTest, QosReportTest001, TestSize.Level1)
 {
-    int32_t ret;
-    ret = QosReport(G_INVALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE);
+    int32_t ret = QosReport(G_INVALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE);
     EXPECT_NE(ret, SOFTBUS_OK);
-
     ret = QosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_RECOVER);
     EXPECT_NE(ret, SOFTBUS_OK);
-
     ret = QosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE);
     EXPECT_NE(ret, SOFTBUS_OK);
+}
 
-    ret = ClientQosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE, G_VALID_QUALITY);
+/**
+ * @tc.name: ClientQosReportTest001
+ * @tc.desc: ClientQosReport with various session id, app type, qos level and quality combinations
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransQosTest, ClientQosReportTest001, TestSize.Level1)
+{
+    int32_t ret = ClientQosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE, G_VALID_QUALITY);
     EXPECT_NE(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = ClientQosReport(G_INVALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE, G_VALID_QUALITY);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    ret = ClientQosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_RECOVER, G_VALID_QUALITY);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
