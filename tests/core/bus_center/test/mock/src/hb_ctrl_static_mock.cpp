@@ -296,9 +296,9 @@ int32_t HbMultiUserHandleLogin(void)
     return HeartBeatCtrlStaticInterface()->HbMultiUserHandleLogin();
 }
 
-int32_t HbMultiUserHandleLogout(void)
+int32_t HbMultiUserHandleLogout(int32_t userId)
 {
-    return HeartBeatCtrlStaticInterface()->HbMultiUserHandleLogout();
+    return HeartBeatCtrlStaticInterface()->HbMultiUserHandleLogout(userId);
 }
 }
 } // namespace OHOS
