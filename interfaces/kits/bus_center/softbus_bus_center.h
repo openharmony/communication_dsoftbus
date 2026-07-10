@@ -727,8 +727,8 @@ struct GroupOwnerResult {
  * @version 1.0
  */
 typedef struct {
-    uint8_t data[MAX_PUSH_MSG_SIZE];  /**< The data of push message */
-    uint32_t len;                     /**< The length of push message data */
+    const uint8_t *data;  /**< The data of push message */
+    uint32_t len;         /**< The length of push message data */
 } PushMsg;
 
 /**

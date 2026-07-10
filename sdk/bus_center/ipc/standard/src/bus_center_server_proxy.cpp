@@ -370,7 +370,7 @@ int32_t ServerIpcProcessPushMsg(const uint8_t *data, uint32_t len)
         LNN_EVENT, "server not init");
     int32_t ret = g_serverProxy->ProcessPushMsg(data, len);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "process push msg failed");
+        LNN_LOGE(LNN_EVENT, "process push msg failed, ret=%{public}d", ret);
     }
     return ret;
 }

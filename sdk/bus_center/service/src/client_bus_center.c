@@ -705,7 +705,7 @@ int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t m
 
 int32_t ProcessPushMsg(PushMsg msg)
 {
-    if (msg.len == 0 || msg.len > MAX_PUSH_MSG_SIZE) {
+    if (msg.data == NULL || msg.len == 0 || msg.len > MAX_PUSH_MSG_SIZE) {
         LNN_LOGE(LNN_STATE, "invalid ProcessPushMsg para");
         return SOFTBUS_INVALID_PARAM;
     }
