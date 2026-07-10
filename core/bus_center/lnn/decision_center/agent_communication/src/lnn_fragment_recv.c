@@ -60,7 +60,13 @@ void FragmentRecvInit(void)
         LNN_LOGE(LNN_EVENT, "init fragment mutex failed");
         return;
     }
+    SoftBusMutexLock(&g_fragmentMutex);
+    if (g_isInit) {
+        SoftBusMutexUnlock(&g_fragmentMutex);
+        return;
+    }
     g_isInit = true;
+    SoftBusMutexUnlock(&g_fragmentMutex);
     LNN_LOGI(LNN_EVENT, "fragment recv init success");
 }
 
@@ -142,9 +148,12 @@ void FragmentRecvClearAll(void)
     LNN_LOGI(LNN_EVENT, "clear all fragment recv context");
 }
 
-static bool ParseModuleType(const uint8_t *data, FarFieldBusiness *moduleType)
+static bool ParseModuleType(const uint8_t *data, uint32_t dataLen, FarFieldBusiness *moduleType)
 {
-    // 解析 FarFiledPktHead 包头
+    if (dataLen < FAR_FIELD_PKT_HEAD_SIZE) {
+        LNN_LOGE(LNN_EVENT, "data too short for pkt head, dataLen=%{public}u", dataLen);
+        return false;
+    }
     FarFiledPktHead header;
     uint32_t magic = 0;
     uint32_t type = 0;
@@ -159,9 +168,12 @@ static bool ParseModuleType(const uint8_t *data, FarFieldBusiness *moduleType)
     header.type = ntohl(type);
     header.len = ntohl(len);
 
-    // 验证 magic
     if (header.magic != 0xBABEFACE) {
         LNN_LOGE(LNN_EVENT, "invalid magic=%{public}x", header.magic);
+        return false;
+    }
+    if (header.len > dataLen) {
+        LNN_LOGE(LNN_EVENT, "header.len=%{public}u exceeds dataLen=%{public}u", header.len, dataLen);
         return false;
     }
 
@@ -223,21 +235,22 @@ static int32_t ExtractFragmentData(const uint8_t *data, uint32_t offset, uint32_
 static int32_t ProcessSingleFragment(SingleFragmentData *singleData, ConversationChannelType channelType,
     FragmentRecvCallback callback)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     if (singleData->dataLen - *(singleData->offset) < totalHeaderSize) {
         LNN_LOGE(LNN_EVENT, "data too short for header");
         return SOFTBUS_INVALID_PARAM;
     }
 
     FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
-    if (!ParseModuleType(singleData->data + *(singleData->offset), &moduleType)) {
+    if (!ParseModuleType(singleData->data + *(singleData->offset),
+        singleData->dataLen - *(singleData->offset), &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
     DataFragmentInfo header = { 0 };
     if (ParseFragmentHeader(singleData->data + *(singleData->offset) + FAR_FIELD_PKT_HEAD_SIZE,
-        FRAGMENT_HEADER_SIZE, &header) != SOFTBUS_OK) {
+        FRAGMENT_HEADER_LEN, &header) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "parse fragment header failed");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -289,7 +302,7 @@ int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t data
 
     // 解析模块类型，判断是否需要分片处理
     FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
-    if (!ParseModuleType(data, &moduleType)) {
+    if (!ParseModuleType(data, dataLen, &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
     }

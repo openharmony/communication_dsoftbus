@@ -25,7 +25,7 @@
 #include "want.h"
 
 constexpr int32_t ERR_OK = 0;
-#define GET_EXTENSION_UPPER_LIMIT 100
+constexpr int32_t GET_EXTENSION_UPPER_LIMIT = 100;
 
 int32_t StartAbility(const char *bundleName, const char *abilityName)
 {
@@ -33,14 +33,14 @@ int32_t StartAbility(const char *bundleName, const char *abilityName)
         LNN_LOGE(LNN_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    OHOS::AAFwk::Want want;
-    want.SetElementName(bundleName, abilityName);
-    want.SetParam("launch_type", std::string("softbus_agent_communication"));
     auto client = OHOS::AAFwk::AbilityManagerClient::GetInstance();
     if (client == nullptr) {
         LNN_LOGE(LNN_EVENT, "client is nullptr");
         return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
     }
+    OHOS::AAFwk::Want want;
+    want.SetElementName(bundleName, abilityName);
+    want.SetParam("launch_type", std::string("softbus_agent_communication"));
     return client->StartAbility(want);
 }
 
@@ -66,10 +66,6 @@ bool IsRunningProcess(const char *bundleName, int32_t userId)
         return false;
     }
     OHOS::sptr<OHOS::AppExecFwk::IAppMgr> appMgr = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(appObj);
-    if (appMgr == nullptr) {
-        LNN_LOGE(LNN_EVENT, "appMgr is nullptr");
-        return false;
-    }
     std::vector<OHOS::AppExecFwk::RunningProcessInfo> processInfos;
     int32_t ret = appMgr->GetRunningProcessInformation(bundleName, userId, processInfos);
     LNN_LOGI(LNN_EVENT, "RunningProcessInfo size: %{public}zu", processInfos.size());
@@ -88,7 +84,7 @@ bool IsExtensionAbility(const char *bundleName, const char *abilityName, int32_t
         return false;
     }
     auto &client = OHOS::AAFwk::ExtensionManagerClient::GetInstance();
-    std::vector<OHOS::AAFwk::ExtensionRunningInfo> extensionInfos;
+    std::vector<OHOS::AAFwk::ExtensionRunningInfo> extensionInfos = {};
     int32_t ret = client.GetExtensionRunningInfos(upperLimit, extensionInfos);
     if (ret != ERR_OK) {
         LNN_LOGE(LNN_EVENT, "get extension failed ret=%{public}d", ret);
@@ -100,6 +96,25 @@ bool IsExtensionAbility(const char *bundleName, const char *abilityName, int32_t
     for (const auto& extensionInfo : extensionInfos) {
         if (extensionInfo.extension.GetBundleName() == targetBundle &&
             extensionInfo.extension.GetAbilityName() == targetAbility) {
+            return true;
+        }
+    }
+
+    auto abilityMgrClient = OHOS::AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgrClient == nullptr) {
+        LNN_LOGE(LNN_EVENT, "get ability mgr client failed");
+        return false;
+    }
+    std::vector<OHOS::AAFwk::AbilityRunningInfo> abilityRunningInfos = {};
+    ret = abilityMgrClient->GetAbilityRunningInfos(abilityRunningInfos);
+    if (ret != ERR_OK) {
+        LNN_LOGE(LNN_EVENT, "get ability info failed ret=%{public}d", ret);
+        return false;
+    }
+    LNN_LOGI(LNN_EVENT, "GetAbilityRunningInfos size: %{public}zu", abilityRunningInfos.size());
+    for (const auto& abilityRunningInfo : abilityRunningInfos) {
+        if (abilityRunningInfo.ability.GetBundleName() == targetBundle &&
+            abilityRunningInfo.ability.GetAbilityName() == targetAbility) {
             return true;
         }
     }

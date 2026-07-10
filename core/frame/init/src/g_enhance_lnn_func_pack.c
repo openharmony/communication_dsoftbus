@@ -1931,7 +1931,8 @@ int32_t LnnGetAllRemoteDevInfoPacked(NodeInfo **info, int32_t *nums)
     return pfnLnnEnhanceFuncList->lnnGetAllRemoteDevInfo(info, nums);
 }
 
-int32_t LnnSendAgentDataPacked(const char *udid, const char *data, uint32_t length, LnnEventExtra *extra)
+int32_t LnnSendAgentDataPacked(const char *udid, const char *data, uint32_t length,
+    LnnEventExtra *extra, bool isAckMsg)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (pfnLnnEnhanceFuncList == NULL) {
@@ -1940,7 +1941,7 @@ int32_t LnnSendAgentDataPacked(const char *udid, const char *data, uint32_t leng
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSendAgentData) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnLnnEnhanceFuncList->lnnSendAgentData(udid, data, length, extra);
+    return pfnLnnEnhanceFuncList->lnnSendAgentData(udid, data, length, extra, isAckMsg);
 }
 
 int32_t PostLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudHandler handler,

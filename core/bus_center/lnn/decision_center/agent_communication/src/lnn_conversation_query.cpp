@@ -57,6 +57,7 @@
 #define ACK_TIMEOUT_MS (20 * 1000)
 #define GET_EXTENSION_UPPER_LIMIT 100
 #define MAX_TRUSTED_DEVICE_NUM 20
+#define MAX_RECENT_MSG_ID_COUNT 32
 #define COMPARE_SUCCESS 0
 #define COMPARE_FAILED 1
 #define RUNNING_LOCK_TIMEOUT (60 * 1000)
@@ -179,6 +180,7 @@ static std::mutex g_sendMsgCacheLock;
 using CloudQueryMsgCacheVec = std::vector<CloudQueryMsgCache>;
 static CloudQueryMsgCacheVec g_recvMsgCacheVec;
 static AbilityAdapterLoader g_adapterLoader = { 0 };
+static std::mutex g_adapterLoaderLock;
 static std::mutex g_recvMsgCacheLock;
 
 typedef struct {
@@ -195,7 +197,7 @@ static std::mutex g_ackWaitLock;
 
 typedef struct {
     char udid[UDID_BUF_LEN];
-    uint32_t lastMsgId;
+    std::vector<uint32_t> recentMsgIds;
 } AntiReplayEntry;
 static std::vector<AntiReplayEntry> g_antiReplayList;
 static std::mutex g_antiReplayLock;
@@ -216,7 +218,7 @@ static bool IsSameAccount(int64_t accountId)
 
 static int LnnLoadAbilityAdapter()
 {
-    std::lock_guard<std::mutex> lock(g_recvMsgCacheLock);
+    std::lock_guard<std::mutex> lock(g_adapterLoaderLock);
     if (g_adapterLoader.handle != nullptr) {
         LNN_LOGI(LNN_EVENT, "already opened");
         return SOFTBUS_OK;
@@ -257,7 +259,7 @@ static bool IsRegisterListener(const ConversationBusiness *info)
     Anonymize(info->bundleName, &anonyBundlename);
     Anonymize(info->abilityName, &anonyAbilityname);
     LNN_LOGE(LNN_EVENT, "no register listener bundleName=%{public}s, abilityName=%{public}s",
-        anonyBundlename, anonyAbilityname);
+        AnonymizeWrapper(anonyBundlename), AnonymizeWrapper(anonyAbilityname));
     AnonymizeFree(anonyBundlename);
     AnonymizeFree(anonyAbilityname);
     return false;
@@ -274,7 +276,7 @@ static bool IsProcExist(const ConversationBusiness *info)
     Anonymize(info->bundleName, &anonyBundlename);
     Anonymize(info->abilityName, &anonyAbilityname);
     LNN_LOGI(LNN_EVENT, "find bundleName=%{public}s, abilityName=%{public}s",
-        anonyBundlename, anonyAbilityname);
+        AnonymizeWrapper(anonyBundlename), AnonymizeWrapper(anonyAbilityname));
     AnonymizeFree(anonyBundlename);
     AnonymizeFree(anonyAbilityname);
 
@@ -316,18 +318,6 @@ static void FreeCacheNodeWithoutLock(CloudQueryMsgCache *node)
         node->data = nullptr;
     }
     SoftBusFree(node);
-}
-
-static void ClearAllCacheWithoutLock(void)
-{
-    int32_t count = 0;
-    for (auto item = g_recvMsgCacheVec.begin(); item != g_recvMsgCacheVec.end();) {
-        SoftBusFree(item->data);
-        item = g_recvMsgCacheVec.erase(item);
-        count++;
-    }
-    LNN_LOGI(LNN_EVENT, "clear all cache count=%{public}d", count);
-    g_recvMsgCacheVec.clear();
 }
 
 static CloudQueryMsgCache *CreateCacheNodeWithoutLock(const char *udid, const char *data, uint32_t length,
@@ -406,47 +396,6 @@ static void ClearExpiredCacheWithoutLock(void)
         timeoutCount, g_recvMsgCacheVec.size());
 }
 
-static CloudQueryMsgCache *DeepCopyCacheNode(const CloudQueryMsgCache *src)
-{
-    if (src == nullptr) {
-        return nullptr;
-    }
-
-    CloudQueryMsgCache *dst = static_cast<CloudQueryMsgCache *>(SoftBusCalloc(sizeof(CloudQueryMsgCache)));
-    if (dst == nullptr) {
-        LNN_LOGE(LNN_EVENT, "calloc cache node failed");
-        return nullptr;
-    }
-
-    if (memcpy_s(dst->udid, UDID_BUF_LEN, src->udid, strlen(src->udid)) != EOK ||
-        memcpy_s(dst->networkId, NETWORK_ID_BUF_LEN, src->networkId, strlen(src->networkId)) != EOK ||
-        memcpy_s(&dst->info, sizeof(ConversationBusiness), &src->info, sizeof(ConversationBusiness)) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy cache node failed");
-        SoftBusFree(dst);
-        return nullptr;
-    }
-
-    dst->data = static_cast<char *>(SoftBusCalloc(src->length));
-    if (dst->data == nullptr) {
-        LNN_LOGE(LNN_EVENT, "calloc data failed");
-        SoftBusFree(dst);
-        return nullptr;
-    }
-
-    if (memcpy_s(dst->data, src->length, src->data, src->length) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy data failed");
-        SoftBusFree(dst->data);
-        SoftBusFree(dst);
-        return nullptr;
-    }
-
-    dst->length = src->length;
-    dst->timestamp = src->timestamp;
-    dst->channel = src->channel;
-
-    return dst;
-}
-
 static void FreeTempCacheVec(CloudQueryMsgCacheVec &tempVec)
 {
     for (auto &item : tempVec) {
@@ -502,6 +451,10 @@ static int32_t CalculateCloudQueryDataLength(const CloudQueryDataPack *pack,
 static int32_t PackCloudQueryDataHeader(uint8_t *buf, uint32_t totalLen,
     uint16_t optionLen, const CloudQueryDataPack *pack)
 {
+    if (totalLen < sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t)) {
+        LNN_LOGE(LNN_EVENT, "buffer too small, totalLen=%{public}u", totalLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t offset = 0;
     uint8_t capability = 0;
 
@@ -517,7 +470,6 @@ static int32_t PackCloudQueryDataHeader(uint8_t *buf, uint32_t totalLen,
     buf[offset] = capability;
     offset += sizeof(uint8_t);
     *reinterpret_cast<uint16_t *>(buf + offset) = optionLen;
-    offset += sizeof(uint16_t);
 
     return SOFTBUS_OK;
 }
@@ -527,30 +479,28 @@ static int32_t PackCloudQueryDataTlv(uint8_t *buf, uint32_t totalLen, const Clou
     uint32_t offset = sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t);
     uint16_t bundleNameLen = static_cast<uint16_t>(strnlen(pack->info->bundleName, BUNDLE_NAME_LEN));
     uint16_t abilityNameLen = static_cast<uint16_t>(strnlen(pack->info->abilityName, ABILITY_NAME_LEN));
-    if (bundleNameLen > 0) {
-        buf[offset] = TLV_TYPE_BUNDLE_NAME;
-        offset += sizeof(uint8_t);
-        *reinterpret_cast<uint16_t *>(buf + offset) = bundleNameLen;
-        offset += sizeof(uint16_t);
-        if (memcpy_s(buf + offset, totalLen - offset,
-            pack->info->bundleName, bundleNameLen) != EOK) {
-            LNN_LOGE(LNN_EVENT, "copy bundleName failed");
-            return SOFTBUS_MEM_ERR;
-        }
-        offset += bundleNameLen;
+
+    buf[offset] = TLV_TYPE_BUNDLE_NAME;
+    offset += sizeof(uint8_t);
+    *reinterpret_cast<uint16_t *>(buf + offset) = bundleNameLen;
+    offset += sizeof(uint16_t);
+    if (bundleNameLen > 0 &&
+        memcpy_s(buf + offset, totalLen - offset, pack->info->bundleName, bundleNameLen) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy bundleName failed");
+        return SOFTBUS_MEM_ERR;
     }
-    if (abilityNameLen > 0) {
-        buf[offset] = TLV_TYPE_ABILITY_NAME;
-        offset += sizeof(uint8_t);
-        *reinterpret_cast<uint16_t *>(buf + offset) = abilityNameLen;
-        offset += sizeof(uint16_t);
-        if (memcpy_s(buf + offset, totalLen - offset,
-            pack->info->abilityName, abilityNameLen) != EOK) {
-            LNN_LOGE(LNN_EVENT, "copy abilityName failed");
-            return SOFTBUS_MEM_ERR;
-        }
-        offset += abilityNameLen;
+    offset += bundleNameLen;
+
+    buf[offset] = TLV_TYPE_ABILITY_NAME;
+    offset += sizeof(uint8_t);
+    *reinterpret_cast<uint16_t *>(buf + offset) = abilityNameLen;
+    offset += sizeof(uint16_t);
+    if (abilityNameLen > 0 &&
+        memcpy_s(buf + offset, totalLen - offset, pack->info->abilityName, abilityNameLen) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy abilityName failed");
+        return SOFTBUS_MEM_ERR;
     }
+    offset += abilityNameLen;
 
     buf[offset] = TLV_TYPE_ERROR_CODE;
     offset += sizeof(uint8_t);
@@ -764,6 +714,11 @@ static int32_t UnpackCloudQueryDataPayload(const uint8_t *data, uint32_t length,
     uint16_t dataLen = *reinterpret_cast<const uint16_t *>(data + offset);
     offset += sizeof(uint16_t);
 
+    if (dataLen > COMMUNICATION_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_EVENT, "dataLen exceeds max, dataLen=%{public}u, max=%{public}d",
+            dataLen, COMMUNICATION_DATA_MAX_LEN);
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (length < offset || length - offset < dataLen) {
         LNN_LOGE(LNN_EVENT, "data length insufficient, length=%{public}u, offset=%{public}u, dataLen=%{public}u",
             length, offset, dataLen);
@@ -905,15 +860,11 @@ static int32_t AddAckWaitItem(uint32_t msgId, const char *udid, const Conversati
     return SOFTBUS_OK;
 }
 
-static void RemoveAckWaitItem(uint32_t msgId, int32_t errCode)
+static void RemoveAckWaitItem(uint32_t msgId)
 {
     std::unique_lock<std::mutex> lock(g_ackWaitLock);
     for (auto it = g_ackWaitList.begin(); it != g_ackWaitList.end(); ++it) {
         if (it->msgId == msgId) {
-            if (errCode != SOFTBUS_OK && it->futureRetrieved) {
-                it->promise.set_value(errCode);
-                it->futureRetrieved = true;
-            }
             g_ackWaitList.erase(it);
             LNN_LOGI(LNN_EVENT, "remove ack wait item, msgId=%{public}u", msgId);
             return;
@@ -922,43 +873,39 @@ static void RemoveAckWaitItem(uint32_t msgId, int32_t errCode)
     LNN_LOGW(LNN_EVENT, "ack wait item not found, msgId=%{public}u", msgId);
 }
 
-static int32_t WaitForAck(uint32_t msgId, const ConversationBusiness *info)
+static int32_t WaitForAck(uint32_t msgId)
 {
-    AckWaitItem *waitItem = nullptr;
+    std::future<int32_t> future;
     {
         std::unique_lock<std::mutex> lock(g_ackWaitLock);
         for (auto &item : g_ackWaitList) {
             if (item.msgId == msgId) {
-                waitItem = &item;
+                if (item.futureRetrieved) {
+                    LNN_LOGE(LNN_EVENT, "future already retrieved, msgId=%{public}u", msgId);
+                    return SOFTBUS_INVALID_PARAM;
+                }
+                future = item.promise.get_future();
+                item.futureRetrieved = true;
                 break;
             }
         }
     }
 
-    int32_t ret = SOFTBUS_OK;
-    if (waitItem != nullptr) {
-        if (waitItem->futureRetrieved) {
-            LNN_LOGE(LNN_EVENT, "future already retrieved, msgId=%{public}u", msgId);
-            return SOFTBUS_INVALID_PARAM;
-        }
-        auto future = waitItem->promise.get_future();
-        waitItem->futureRetrieved = true;
-        std::chrono::milliseconds timeout(ACK_TIMEOUT_MS);
-
-        if (future.wait_for(timeout) == std::future_status::timeout) {
-            LNN_LOGE(LNN_EVENT, "wait ack timeout, msgId=%{public}u", msgId);
-            RemoveAckWaitItem(msgId, SOFTBUS_TIMOUT);
-            ret = SOFTBUS_TIMOUT;
-        } else {
-            ret = future.get();
-            LNN_LOGI(LNN_EVENT, "ack received, msgId=%{public}u, ret=%{public}d", msgId, ret);
-            RemoveAckWaitItem(msgId, SOFTBUS_OK);
-        }
-    } else {
+    if (!future.valid()) {
         LNN_LOGE(LNN_EVENT, "wait item not found, msgId=%{public}u", msgId);
-        ret = SOFTBUS_NOT_FIND;
+        return SOFTBUS_NOT_FIND;
     }
 
+    std::chrono::milliseconds timeout(ACK_TIMEOUT_MS);
+    int32_t ret = SOFTBUS_OK;
+    if (future.wait_for(timeout) == std::future_status::timeout) {
+        LNN_LOGE(LNN_EVENT, "wait ack timeout, msgId=%{public}u", msgId);
+        ret = SOFTBUS_TIMOUT;
+    } else {
+        ret = future.get();
+        LNN_LOGI(LNN_EVENT, "ack received, msgId=%{public}u, ret=%{public}d", msgId, ret);
+    }
+    RemoveAckWaitItem(msgId);
     return ret;
 }
 
@@ -1050,17 +997,18 @@ static void ProcessCachedMessages(const ConversationBusiness *info)
         uint64_t currentTime = SoftBusGetTimeMs();
         for (auto item = g_recvMsgCacheVec.begin(); item != g_recvMsgCacheVec.end();) {
             if (currentTime - item->timestamp > CACHE_TIMEOUT_MS) {
-                ++item;
+                if (item->data != nullptr) {
+                    SoftBusFree(item->data);
+                }
+                item = g_recvMsgCacheVec.erase(item);
                 timeoutCount++;
                 continue;
             }
             if (strcmp(item->info.bundleName, info->bundleName) == 0 &&
                 strcmp(item->info.abilityName, info->abilityName) == 0) {
-                CloudQueryMsgCache *copyNode = DeepCopyCacheNode(&(*item));
-                if (copyNode != nullptr) {
-                    tempMsgVec.push_back(*copyNode);
-                    SoftBusFree(copyNode);
-                }
+                tempMsgVec.push_back(std::move(*item));
+                item = g_recvMsgCacheVec.erase(item);
+                continue;
             }
             ++item;
         }
@@ -1074,11 +1022,6 @@ static void ProcessCachedMessages(const ConversationBusiness *info)
     }
 
     FreeTempCacheVec(tempMsgVec);
-
-    {
-        std::lock_guard<std::mutex> lock(g_recvMsgCacheLock);
-        ClearAllCacheWithoutLock();
-    }
 
     LNN_LOGI(LNN_EVENT, "process cached messages done, processed=%{public}d, timeoutCount=%{public}d",
         processedCount, timeoutCount);
@@ -1244,7 +1187,7 @@ static int32_t LnnSendCtrlMsgByFarField(SendMsgData *msgData, const char *udid,
     }
 
     DataFragmentMsgInfo msgInfo = {output.packData, output.packLen, MAX_SLICE_LEN, msgId};
-    ret = DataSlice(udid, &msgInfo, extra);
+    ret = DataSlice(udid, &msgInfo, extra, isAckMsg);
     SoftBusFree(output.packData);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "DataSlice failed, ret=%{public}d", ret);
@@ -1489,7 +1432,7 @@ int32_t LnnRegisterConversationListener(const ConversationBusiness *info)
         Anonymize(info->bundleName, &anonyBundlename);
         Anonymize(info->abilityName, &anonyAbilityname);
         LNN_LOGI(LNN_EVENT, "register success, bundleName=%{public}s, abilityName=%{public}s",
-            anonyBundlename, anonyAbilityname);
+            AnonymizeWrapper(anonyBundlename), AnonymizeWrapper(anonyAbilityname));
         AnonymizeFree(anonyBundlename);
         AnonymizeFree(anonyAbilityname);
     }
@@ -1527,7 +1470,7 @@ int32_t LnnUnregisterConversationListener(const ConversationBusiness *info)
             it = g_conversationCbListVec.erase(it);
             found = true;
             LNN_LOGI(LNN_EVENT, "remove listener success, abilityName=%{public}s, bundleName=%{public}s",
-                anonyAbilityname, anonyBundlename);
+                AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
         } else {
             ++it;
         }
@@ -1536,7 +1479,7 @@ int32_t LnnUnregisterConversationListener(const ConversationBusiness *info)
     int32_t ret = SOFTBUS_OK;
     if (!found) {
         LNN_LOGE(LNN_EVENT, "remove listener failed, abilityName=%{public}s, bundleName=%{public}s",
-            anonyAbilityname, anonyBundlename);
+            AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
         ret = SOFTBUS_NOT_FIND;
     }
     AnonymizeFree(anonyBundlename);
@@ -1577,8 +1520,9 @@ static int32_t CreateFragmentDataForNearField(uint32_t msgId, CloudMsgOutput *ou
     }
 
     DataFragmentInfo header = {msgId, output->packLen, 0, output->packLen};
-    WriteFragmentHeader(*fragmentData, *totalLen, &header);
-    if (memcpy_s(*fragmentData + FRAGMENT_HEADER_LEN, *totalLen - FRAGMENT_HEADER_LEN,
+    int32_t ret = WriteFragmentHeader(*fragmentData, *totalLen, &header);
+    if (ret != SOFTBUS_OK ||
+        memcpy_s(*fragmentData + FRAGMENT_HEADER_LEN, *totalLen - FRAGMENT_HEADER_LEN,
         output->packData, output->packLen) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy_s failed");
         SoftBusFree(*fragmentData);
@@ -1742,6 +1686,21 @@ static const char *GetDeviceIdByUdid(const char *udid, NodeInfo *nodeInfo)
     return reinterpret_cast<const char *>(nodeInfo->networkId);
 }
 
+static bool IsMsgIdInRecentList(const std::vector<uint32_t> &recentMsgIds, uint32_t msgId, const char *udid)
+{
+    for (uint32_t id : recentMsgIds) {
+        if (id == msgId) {
+            char *anonyUdid = nullptr;
+            Anonymize(udid, &anonyUdid);
+            LNN_LOGI(LNN_EVENT, "replay message detected, udid=%{public}s, msgId=%{public}u",
+                AnonymizeWrapper(anonyUdid), msgId);
+            AnonymizeFree(anonyUdid);
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool IsReplayMessage(const char *udid, uint32_t msgId)
 {
     if (udid == nullptr) {
@@ -1749,12 +1708,8 @@ static bool IsReplayMessage(const char *udid, uint32_t msgId)
     }
     std::unique_lock<std::mutex> lock(g_antiReplayLock);
     for (auto &item : g_antiReplayList) {
-        if (strcmp(item.udid, udid) == 0 && item.lastMsgId == msgId) {
-            char *anonyUdid = nullptr;
-            Anonymize(udid, &anonyUdid);
-            LNN_LOGI(LNN_EVENT, "del send mag cache, udid=%{public}s", AnonymizeWrapper(anonyUdid));
-            AnonymizeFree(anonyUdid);
-            return true;
+        if (strcmp(item.udid, udid) == 0) {
+            return IsMsgIdInRecentList(item.recentMsgIds, msgId, udid);
         }
     }
     return false;
@@ -1768,7 +1723,10 @@ static void UpdateAntiReplayList(const char *udid, uint32_t msgId)
     std::unique_lock<std::mutex> lock(g_antiReplayLock);
     for (auto &item : g_antiReplayList) {
         if (strcmp(item.udid, udid) == 0) {
-            item.lastMsgId = msgId;
+            if (item.recentMsgIds.size() >= MAX_RECENT_MSG_ID_COUNT) {
+                item.recentMsgIds.erase(item.recentMsgIds.begin());
+            }
+            item.recentMsgIds.push_back(msgId);
             return;
         }
     }
@@ -1778,8 +1736,8 @@ static void UpdateAntiReplayList(const char *udid, uint32_t msgId)
     AntiReplayEntry entry;
     (void)memset_s(&entry, sizeof(AntiReplayEntry), 0, sizeof(AntiReplayEntry));
     if (strcpy_s(entry.udid, UDID_BUF_LEN, udid) == EOK) {
-        entry.lastMsgId = msgId;
-        g_antiReplayList.push_back(entry);
+        entry.recentMsgIds.push_back(msgId);
+        g_antiReplayList.push_back(std::move(entry));
     }
 }
 
@@ -2076,7 +2034,8 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t reason)
                 continue;
             }
             SendMsgData msgData = {msg.data, msg.length};
-            int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData, msg.networkId, &msg.info, nullptr);
+            int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData,
+                nodeInfo.deviceInfo.deviceUdid, &msg.info, nullptr);
             LNN_LOGI(LNN_EVENT, "send cached msg done, ret=%{public}d", sendRet);
             SoftBusFree(msg.data);
         }
@@ -2426,10 +2385,10 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
 
     if (ret != SOFTBUS_OK) {
         DfxRecordPostConversationData(beginTime, ret, &extra);
-        RemoveAckWaitItem(msgId, ret);
+        RemoveAckWaitItem(msgId);
         return ret;
     }
-    ret = WaitForAck(msgId, info);
+    ret = WaitForAck(msgId);
     DfxRecordPostConversationData(beginTime, ret, &extra);
     return ret;
 }

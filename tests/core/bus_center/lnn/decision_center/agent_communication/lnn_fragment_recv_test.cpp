@@ -234,7 +234,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_FastOfflineDataTooShort_Test, 
  */
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_AgentCommunicationType_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -279,7 +279,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DataTooShortForHeader_Test, Te
  */
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DataTooShortForFragment_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 5];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -330,7 +330,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvClearAll_Success_Test, TestSize.Level1
  */
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_WatchWechatType_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -353,7 +353,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_WatchWechatType_Test, TestSize
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MultipleFragments_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint32_t totalDataSize = 30;
     
     uint8_t data[totalHeaderSize * 2 + 20];
@@ -395,7 +395,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MultipleFragments_Test, TestSi
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_InvalidFragmentHeader_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -466,7 +466,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvClearAll_AfterProcess_Test, TestSize.L
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DifferentMsgId_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     
     uint8_t data1[totalHeaderSize + 10];
     memset_s(data1, sizeof(data1), 0, sizeof(data1));
@@ -510,7 +510,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MemcpyFailedInParse_Test, Test
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_OffsetOutOfRange_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
