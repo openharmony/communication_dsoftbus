@@ -80,6 +80,7 @@ void UpdateAssetSessionKeyByAcl(
     AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount);
 bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId);
 bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid);
+int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid);
 
 #ifdef __cplusplus
 #if __cplusplus

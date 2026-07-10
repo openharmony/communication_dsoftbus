@@ -152,4 +152,11 @@ int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId, uint64_
     (void)time;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid)
+{
+    (void)sessionKeyId;
+    (void)peerUdid;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
 } // extern "C"
