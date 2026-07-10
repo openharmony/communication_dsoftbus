@@ -2230,4 +2230,3 @@ HWTEST_F(TransChannelManagerTest, CheckAuthChannelIsExit004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_NOT_MATCH);
 }
 } // namespace OHOS
-
