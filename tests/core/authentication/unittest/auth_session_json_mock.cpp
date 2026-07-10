@@ -480,5 +480,10 @@ void CredTypesSort(int32_t *credTypes, int32_t credTypesLen)
 {
     return GetInterface()->CredTypesSort(credTypes, credTypesLen);
 }
+
+int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid)
+{
+    return GetInterface()->IsSKIdFindAclInfo(sessionKeyId, peerUdid);
+}
 }
 } // namespace OHOS
