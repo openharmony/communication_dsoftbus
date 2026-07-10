@@ -2209,8 +2209,12 @@ int32_t UnregisterConversationListenerInner(const ConversationBusiness *info)
     }
  
     if (g_busCenterClient.g_conversationCbList == NULL) {
-        LNN_LOGI(LNN_STATE, "g_conversationCbList is NULL");
-        return SOFTBUS_INVALID_PARAM;
+        LNN_LOGI(LNN_STATE, "init g_busCenterClient.g_conversationCbList");
+        g_busCenterClient.g_conversationCbList = CreateSoftBusList();
+        if (g_busCenterClient.g_conversationCbList == NULL) {
+            LNN_LOGE(LNN_STATE, "init g_busCenterClient.g_conversationCbList failed");
+            return SOFTBUS_MALLOC_ERR;
+        }
     }
  
     if (SoftBusMutexLock(&(g_busCenterClient.g_conversationCbList->lock)) != SOFTBUS_OK) {
@@ -2240,9 +2244,9 @@ int32_t UnregisterConversationListenerInner(const ConversationBusiness *info)
     if (found) {
         return ServerIpcUnregisterConversationListener(info);
     } else {
-        LNN_LOGE(LNN_STATE, "remove listener failed, abilityName=%{public}s, bundleName=%{public}s",
+        LNN_LOGW(LNN_STATE, "remove success, listener not found, abilityName=%{public}s, bundleName=%{public}s",
                  info->abilityName, info->bundleName);
-        return SOFTBUS_NOT_FIND;
+        return SOFTBUS_OK;
     }
 }
  
