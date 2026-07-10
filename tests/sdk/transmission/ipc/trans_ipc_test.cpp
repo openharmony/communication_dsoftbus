@@ -18,6 +18,7 @@
 
 #include "softbus_def.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_trans_def.h"
 #include "trans_server_proxy.h"
 #include "trans_server_proxy_standard.cpp"
 #include "client_trans_session_manager.h"
@@ -347,7 +348,7 @@ HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level1)
     (void)memset_s(statsData, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
 
     int32_t ret = transServerProxy.StreamStats(channelId, channelType, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.StreamStats(channelId, channelType, statsData);
@@ -372,7 +373,7 @@ HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level1)
     (void)memset_s(statsData, sizeof(TrafficStats), 0, sizeof(TrafficStats));
 
     int32_t ret = transServerProxy.RippleStats(channelId, channelType, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.RippleStats(channelId, channelType, statsData);
@@ -678,14 +679,16 @@ HWTEST_F(TransIpcStandardTest, ServerIpcStreamStatsTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
+    StreamSendStats *statsData = (StreamSendStats*)SoftBusCalloc(sizeof(StreamSendStats));
+    ASSERT_TRUE(statsData != nullptr);
     int32_t ret = ServerIpcStreamStats(channelId, chanType, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ServerIpcStreamStats(channelId, chanType, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    ret = ServerIpcStreamStats(channelId, chanType, statsData);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 
     TransClientDeinit();
 }
@@ -700,14 +703,16 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
+    TrafficStats *statsData = (TrafficStats*)SoftBusCalloc(sizeof(TrafficStats));
+    ASSERT_TRUE(statsData != nullptr);
     int32_t ret = ServerIpcRippleStats(channelId, chanType, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ServerIpcRippleStats(channelId, chanType, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    ret = ServerIpcRippleStats(channelId, chanType, statsData);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     TransClientDeinit();
 }
