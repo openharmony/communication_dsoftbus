@@ -64,6 +64,7 @@ taihe_shared_library("linkEnhance_taihe_native") {
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "napi:ace_napi",
+      "libuv:uv",
     ]
   } else {
     sources += [
@@ -77,6 +78,7 @@ taihe_shared_library("linkEnhance_taihe_native") {
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "napi:ace_napi",
+      "libuv:uv",
     ]
   }
   taihe_generated_file_path = "$taihe_generated_file_path"

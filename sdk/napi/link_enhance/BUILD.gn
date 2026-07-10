@@ -45,13 +45,15 @@ ohos_shared_library("linkenhance") {
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
   } else {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/connection"
     ]
     external_deps += [
-      "napi:ace_napi"
+      "napi:ace_napi",
+      "node:node_header_notice",
     ]
     sources += [
       "$dsoftbus_sdk_path/napi/link_enhance/virtual/napi_link_enhance_connection_virtual.cpp",
