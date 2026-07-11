@@ -860,11 +860,15 @@ static int32_t AddAckWaitItem(uint32_t msgId, const char *udid, const Conversati
     return SOFTBUS_OK;
 }
 
-static void RemoveAckWaitItem(uint32_t msgId)
+static void RemoveAckWaitItem(uint32_t msgId, bool isNeedSet)
 {
     std::unique_lock<std::mutex> lock(g_ackWaitLock);
     for (auto it = g_ackWaitList.begin(); it != g_ackWaitList.end(); ++it) {
         if (it->msgId == msgId) {
+            if (isNeedSet) {
+                LNN_LOGI(LNN_EVENT, "need set");
+                it->promise.set_value(SOFTBUS_TIMOUT);
+            }
             g_ackWaitList.erase(it);
             LNN_LOGI(LNN_EVENT, "remove ack wait item, msgId=%{public}u", msgId);
             return;
@@ -901,11 +905,12 @@ static int32_t WaitForAck(uint32_t msgId)
     if (future.wait_for(timeout) == std::future_status::timeout) {
         LNN_LOGE(LNN_EVENT, "wait ack timeout, msgId=%{public}u", msgId);
         ret = SOFTBUS_TIMOUT;
+        RemoveAckWaitItem(msgId, true);
     } else {
         ret = future.get();
         LNN_LOGI(LNN_EVENT, "ack received, msgId=%{public}u, ret=%{public}d", msgId, ret);
+        RemoveAckWaitItem(msgId, false);
     }
-    RemoveAckWaitItem(msgId);
     return ret;
 }
 
@@ -2385,7 +2390,7 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
 
     if (ret != SOFTBUS_OK) {
         DfxRecordPostConversationData(beginTime, ret, &extra);
-        RemoveAckWaitItem(msgId);
+        RemoveAckWaitItem(msgId, true);
         return ret;
     }
     ret = WaitForAck(msgId);
