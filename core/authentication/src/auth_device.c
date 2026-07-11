@@ -381,12 +381,22 @@ void AuthNotifyDeviceDisconnect(AuthHandle authHandle)
     g_verifyListener.onDeviceDisconnect(authHandle);
 }
 
-static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
+static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId, HandleNotTrustedType type)
 {
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
     if (!DpHasAccessControlProfile(peerUdid, false, localUserId)) {
         LnnDeleteLinkFinderInfo(peerUdid);
+    }
+    LnnHbOnTrustedRelationReduced();
+    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
+    if (type == DP_USER_TYPE) {
+        LnnDeleteSpecificTrustedDevInfo(peerUdid);
+        char networkId[NETWORK_ID_BUF_LEN] = {0};
+        if (LnnGetNetworkIdByUdid(peerUdid, networkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK) {
+            LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
+        }
+        return;
     }
     if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {
         LnnDeleteSpecificTrustedDevInfo(peerUdid);
@@ -396,8 +406,6 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
         return;
     }
     g_verifyListener.onDeviceNotTrusted(peerUdid);
-    LnnHbOnTrustedRelationReduced();
-    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
 }
 
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
@@ -437,55 +445,39 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
 }
 
-static void OnTrustedDeviceNumChanged(int curTrustedDeviceNum)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "trusted device num changed, curNum=%{public}d", curTrustedDeviceNum);
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if (g_groupChangeListener.onTrustedDeviceNumChanged != NULL) {
-        g_groupChangeListener.onTrustedDeviceNumChanged(curTrustedDeviceNum);
-    }
-#endif
-}
-
-static void OnGroupActiveInUser(const char *returnInfo)
+static void OnGroupActiveInUser(const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "group active in user");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onGroupActiveInUser != NULL) {
-        g_groupChangeListener.onGroupActiveInUser(returnInfo);
+        g_groupChangeListener.onGroupActiveInUser(groupActiveInfo);
     }
-#endif
 }
 
-static void OnGroupInactiveInUser(const char *returnInfo)
+static void OnGroupInactiveInUser(const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, forward to lnn");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onGroupInactiveInUser != NULL) {
-        g_groupChangeListener.onGroupInactiveInUser(returnInfo);
+        g_groupChangeListener.onGroupInactiveInUser(groupActiveInfo);
     }
-#endif
 }
 
-static void OnDeviceActiveInUser(const char *udid, const char *returnInfo)
+static void OnDeviceActiveInUser(const char *udid, const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "device active in user");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onDeviceActiveInUser != NULL) {
-        g_groupChangeListener.onDeviceActiveInUser(udid, returnInfo);
+        g_groupChangeListener.onDeviceActiveInUser(udid, groupActiveInfo);
     }
-#endif
 }
 
-static void OnDeviceInactiveInUser(const char *udid, const char *returnInfo)
+static void OnDeviceInactiveInUser(const char *udid, const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "device inactive in user");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_groupChangeListener.onDeviceInactiveInUser != NULL) {
-        g_groupChangeListener.onDeviceInactiveInUser(udid, returnInfo);
+        g_groupChangeListener.onDeviceInactiveInUser(udid, groupActiveInfo);
     }
-#endif
 }
+#endif
 
 static int32_t RetryRegTrustDataChangeListener(void)
 {
@@ -494,11 +486,12 @@ static int32_t RetryRegTrustDataChangeListener(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-        .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
         .onGroupActiveInUser = OnGroupActiveInUser,
         .onGroupInactiveInUser = OnGroupInactiveInUser,
         .onDeviceActiveInUser = OnDeviceActiveInUser,
         .onDeviceInactiveInUser = OnDeviceInactiveInUser,
+#endif
     };
     for (int32_t i = 1; i <= RETRY_REGDATA_TIMES; i++) {
         int32_t ret = RegTrustDataChangeListener(&trustListener);
@@ -519,11 +512,12 @@ int32_t RegTrustListenerOnHichainSaStart(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-        .onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged,
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
         .onGroupActiveInUser = OnGroupActiveInUser,
         .onGroupInactiveInUser = OnGroupInactiveInUser,
         .onDeviceActiveInUser = OnDeviceActiveInUser,
         .onDeviceInactiveInUser = OnDeviceInactiveInUser,
+#endif
     };
     if (RegTrustDataChangeListener(&trustListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "RegTrustDataChangeListener fail");

@@ -78,7 +78,7 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
         SoftBusFree(msg);
         return;
     }
-    hiChainParam.userId = DEFALUT_USERID;
+    hiChainParam.peerUserId = DEFALUT_USERID;
     static char *ptr = GenDeviceLevelParam(&hiChainParam);
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, AddStringToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
@@ -366,7 +366,7 @@ HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
         strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
         return;
     }
-    hiChainParam.userId = DEFALUT_USERID;
+    hiChainParam.peerUserId = DEFALUT_USERID;
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(hiChainParam.udid, nullptr));
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(nullptr, groupInfo));
     int32_t ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);

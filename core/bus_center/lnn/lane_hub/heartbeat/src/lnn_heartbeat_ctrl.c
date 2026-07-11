@@ -1110,12 +1110,7 @@ static void HbAccountSwitchCheckHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_HEART_BEAT, "account switch check evt handler get invalid param");
         return;
     }
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    const LnnAccountSwitchCheckEvent *event = (const LnnAccountSwitchCheckEvent *)info;
-    HbCheckSingleUser(event->userId);
-#else
-    LNN_LOGI(LNN_HEART_BEAT, "account switch check skipped, multi foreground user not enabled");
-#endif
+    LNN_LOGI(LNN_HEART_BEAT, "account switch check, no process");
 }
 
 static void HbLpEventHandler(const LnnEventBasicInfo *info)

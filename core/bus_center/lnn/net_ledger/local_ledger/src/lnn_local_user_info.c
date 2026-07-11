@@ -212,25 +212,3 @@ int32_t LnnResetLogoutUserInfo(void)
     SoftBusFree(userIds);
     return SOFTBUS_OK;
 }
-
-int32_t LnnClearLocalUserAccountByUserId(int32_t userId, bool isMainScreen)
-{
-    if (g_localUserLedger == NULL) {
-        LNN_LOGE(LNN_LEDGER, "g_localUserLedger is null");
-        return SOFTBUS_NETWORK_USER_INFO_INIT_FAILED;
-    }
-    if (SoftBusMutexLock(&g_localUserLedger->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "lock local user list failed");
-        return SOFTBUS_LOCK_ERR;
-    }
-    UserInfo *user = FindUserByUserId(g_localUserLedger, userId);
-    if (user == NULL || user->accountId == 0) {
-        (void)SoftBusMutexUnlock(&g_localUserLedger->lock);
-        return SOFTBUS_NOT_FIND;
-    }
-    int64_t oldAccountId = user->accountId;
-    user->accountId = 0;
-    (void)GenerateDefaultAccountHash(user->accountHash, SHA_256_HASH_LEN);
-    (void)SoftBusMutexUnlock(&g_localUserLedger->lock);
-    return LnnDeleteSyncToDB(userId, oldAccountId, isMainScreen);
-}

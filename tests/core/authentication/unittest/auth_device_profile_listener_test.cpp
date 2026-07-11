@@ -56,10 +56,11 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     (void)groupInfo;
 }
 
-static void OnDeviceNotTrusted(const char *udid, int32_t localUserId)
+static void OnDeviceNotTrusted(const char *udid, int32_t localUserId, HandleNotTrustedType type)
 {
     (void)udid;
     (void)localUserId;
+    (void)type;
 }
 
 static DeviceProfileChangeListener g_deviceProfilePara = {

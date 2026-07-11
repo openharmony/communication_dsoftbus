@@ -138,7 +138,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
         strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
         return;
     }
-    hiChainParam.userId = DEFALUT_USERID;
+    hiChainParam.peerUserId = DEFALUT_USERID;
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     GroupAuthManager authManager;

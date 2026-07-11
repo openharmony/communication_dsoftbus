@@ -66,7 +66,7 @@ char *GenDeviceLevelParam(HiChainAuthParam *hiChainParam)
             AUTH_LOGE(AUTH_HICHAIN, "add json meta node fail");
         }
     }
-    if (hiChainParam->userId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", hiChainParam->userId)) {
+    if (hiChainParam->peerUserId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", hiChainParam->peerUserId)) {
         AUTH_LOGE(AUTH_HICHAIN, "add json userId fail");
     }
 #ifdef AUTH_ACCOUNT

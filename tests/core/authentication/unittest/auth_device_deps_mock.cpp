@@ -290,7 +290,7 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
     return GetAuthDeviceDepsIf()->RegTrustDataChangeListener(listener);
 }
 
-int32_t AuthHichainParseReturnInfo(const char *returnInfo, HichainReturnInfo *out)
+int32_t AuthHichainParseReturnInfo(const char *returnInfo, GroupActiveInfo *out)
 {
     (void)returnInfo;
     if (out != NULL) {

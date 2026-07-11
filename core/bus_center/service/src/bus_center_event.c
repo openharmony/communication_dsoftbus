@@ -752,15 +752,16 @@ void LnnNotifyAccountAclChangeEvent(
     }
     event.localUserId = localUserId;
     event.peerUserId = peerUserId;
-    event.serviceIdCount = serviceIdCount;
-    if (serviceIdList != NULL && serviceIdCount > 0) {
-        event.serviceIdList = (int64_t *)SoftBusCalloc(serviceIdCount * sizeof(int64_t));
+    event.serviceIdCount = (serviceIdCount > DP_SERVICE_ID_LIST_MAX_SIZE) ?
+        DP_SERVICE_ID_LIST_MAX_SIZE : serviceIdCount;
+    if (serviceIdList != NULL && event.serviceIdCount > 0) {
+        event.serviceIdList = (int64_t *)SoftBusCalloc(event.serviceIdCount * sizeof(int64_t));
         if (event.serviceIdList == NULL) {
             LNN_LOGE(LNN_EVENT, "calloc serviceIdList failed");
             return;
         }
-        (void)memcpy_s(event.serviceIdList, serviceIdCount * sizeof(int64_t),
-            serviceIdList, serviceIdCount * sizeof(int64_t));
+        (void)memcpy_s(event.serviceIdList, event.serviceIdCount * sizeof(int64_t),
+            serviceIdList, event.serviceIdCount * sizeof(int64_t));
     }
     NotifyEvent((const LnnEventBasicInfo *)&event);
     if (event.serviceIdList != NULL) {

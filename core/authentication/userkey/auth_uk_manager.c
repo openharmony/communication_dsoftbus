@@ -813,7 +813,8 @@ static int32_t GenerateAuthParam(NodeInfo *localNodeInfo, NodeInfo *remoteNodeIn
         }
         SoftBusFree(credId);
     }
-    authParam->userId = remoteUserId;
+    authParam->peerUserId = remoteUserId;
+    authParam->localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     return SOFTBUS_OK;
 }
 

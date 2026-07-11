@@ -51,29 +51,23 @@ AuthDeviceProfileListener::~AuthDeviceProfileListener()
     AUTH_LOGI(AUTH_INIT, "destruct");
 }
 
-static bool IsDeviceTypeExist(const char *udid, int32_t deviceType)
+static bool IsSingleFrameCarDeviceExist(const char *udid)
 {
-    if (udid == nullptr) {
-        AUTH_LOGE(AUTH_INIT, "invalid param");
-        return false;
-    }
     int32_t localDevTypeId = TYPE_UNKNOW_ID;
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
-    if (ret == SOFTBUS_OK && localDevTypeId == deviceType) {
-        AUTH_LOGI(AUTH_INIT, "local is matched, deviceType=%{public}d", localDevTypeId);
+    int32_t localOsType = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
+        LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &localOsType) == SOFTBUS_OK &&
+        localDevTypeId == TYPE_CAR_ID && localOsType == OH_OS_TYPE) {
         return true;
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_INIT, "GetRemoteNodeInfoById fail");
+    if (LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo) != SOFTBUS_OK) {
         return false;
     }
     int32_t remoteDevTypeId = TYPE_UNKNOW_ID;
-    ret = LnnGetRemoteNumInfo(nodeInfo.networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
-    if (ret == SOFTBUS_OK && remoteDevTypeId == deviceType) {
-        AUTH_LOGI(AUTH_INIT, "remote is matched, deviceType=%{public}d", remoteDevTypeId);
+    if (LnnGetRemoteNumInfo(nodeInfo.networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId) == SOFTBUS_OK &&
+        remoteDevTypeId == TYPE_CAR_ID && nodeInfo.deviceInfo.osType == OH_OS_TYPE) {
         return true;
     }
     return false;
@@ -110,8 +104,8 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         "udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d",
         AnonymizeWrapper(anonyUdid), profile.GetLocalUserId(), profile.GetPeerUserId());
     AnonymizeFree(anonyUdid);
-    if (IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
-        AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileDelete exist car");
+    if (IsSingleFrameCarDeviceExist(udid)) {
+        AUTH_LOGI(AUTH_INIT, "single frame car skip");
         return SOFTBUS_OK;
     }
     if (g_deviceProfileChange.onDeviceProfileDeleted == nullptr) {
@@ -133,7 +127,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         AUTH_LOGE(AUTH_INIT, "no match peer user");
         return SOFTBUS_OK;
     }
-    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
+    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str(), profile.GetLocalUserId(), DP_USER_TYPE);
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileDelete success!");
     return SOFTBUS_OK;
 }
@@ -188,8 +182,8 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDevic
     AUTH_LOGI(AUTH_INIT, "dp inactive callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
-    if (IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
-        AUTH_LOGI(AUTH_INIT, "OnTrustDeviceProfileInactive ignore car type");
+    if (IsSingleFrameCarDeviceExist(udid)) {
+        AUTH_LOGI(AUTH_INIT, "single frame car skip");
         return SOFTBUS_OK;
     }
     int32_t userId = profile.GetPeerUserId();
@@ -215,15 +209,14 @@ static bool GetUdidFromProfile(const TrustDeviceProfile &profile, const char *ca
     return true;
 }
 
-static void HandleDeviceAclInactive(const char *callbackName, const char *udid)
+static void HandleDeviceAclInactive(const char *callbackName, const char *udid, int32_t localUserId)
 {
-    if (!IsDeviceTypeExist(udid, TYPE_CAR_ID)) {
-        AUTH_LOGI(AUTH_INIT, "%{public}s only car device need handle", callbackName);
+    if (!IsSingleFrameCarDeviceExist(udid)) {
+        AUTH_LOGI(AUTH_INIT, "%{public}s skip non-both-single-frame-car", callbackName);
         return;
     }
-    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (g_deviceProfileChange.onDeviceProfileDeleted != nullptr) {
-        g_deviceProfileChange.onDeviceProfileDeleted(udid, localUserId);
+        g_deviceProfileChange.onDeviceProfileDeleted(udid, localUserId, DP_DEVICE_TYPE);
     }
     AUTH_LOGD(AUTH_INIT, "%{public}s success!", callbackName);
 }
@@ -252,7 +245,7 @@ int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByDelete(const TrustDevice
     if (!GetUdidFromProfile(profile, "OnDeviceAclInactiveByDelete", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    HandleDeviceAclInactive("OnDeviceAclInactiveByDelete", deviceId.c_str());
+    HandleDeviceAclInactive("OnDeviceAclInactiveByDelete", deviceId.c_str(), profile.GetLocalUserId());
     return SOFTBUS_OK;
 }
 
@@ -262,7 +255,7 @@ int32_t AuthDeviceProfileListener::OnDeviceAclInactiveByUpdate(const TrustDevice
     if (!GetUdidFromProfile(profile, "OnDeviceAclInactiveByUpdate", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    HandleDeviceAclInactive("OnDeviceAclInactiveByUpdate", deviceId.c_str());
+    HandleDeviceAclInactive("OnDeviceAclInactiveByUpdate", deviceId.c_str(), profile.GetLocalUserId());
     return SOFTBUS_OK;
 }
 
@@ -271,6 +264,10 @@ int32_t AuthDeviceProfileListener::OnAccountAclDelete(const TrustDeviceProfile &
     std::string deviceId;
     if (!GetUdidFromProfile(profile, "OnAccountAclDelete", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsSingleFrameCarDeviceExist(deviceId.c_str())) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclDelete skip non-single-frame-car");
+        return SOFTBUS_OK;
     }
     NotifyServiceIdListIfNeeded(deviceId.c_str(), profile);
     AUTH_LOGD(AUTH_INIT, "OnAccountAclDelete success!");
@@ -283,6 +280,10 @@ int32_t AuthDeviceProfileListener::OnAccountAclInactive(const TrustDeviceProfile
     if (!GetUdidFromProfile(profile, "OnAccountAclInactive", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (!IsSingleFrameCarDeviceExist(deviceId.c_str())) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclInactive skip non-single-frame-car");
+        return SOFTBUS_OK;
+    }
     NotifyServiceIdListIfNeeded(deviceId.c_str(), profile);
     AUTH_LOGD(AUTH_INIT, "OnAccountAclInactive success!");
     return SOFTBUS_OK;
@@ -294,6 +295,14 @@ int32_t AuthDeviceProfileListener::OnAccountAclAdd(const TrustDeviceProfile &pro
     if (!GetUdidFromProfile(profile, "OnAccountAclAdd", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (!IsSingleFrameCarDeviceExist(deviceId.c_str())) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclAdd skip non-single-frame-car");
+        return SOFTBUS_OK;
+    }
+    if (profile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclAdd skip same account");
+        return SOFTBUS_OK;
+    }
     HandleAccountAclAvailable("OnAccountAclAdd", deviceId.c_str());
     return SOFTBUS_OK;
 }
@@ -303,6 +312,14 @@ int32_t AuthDeviceProfileListener::OnAccountAclActive(const TrustDeviceProfile &
     std::string deviceId;
     if (!GetUdidFromProfile(profile, "OnAccountAclActive", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsSingleFrameCarDeviceExist(deviceId.c_str())) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclActive skip non-single-frame-car");
+        return SOFTBUS_OK;
+    }
+    if (profile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+        AUTH_LOGI(AUTH_INIT, "OnAccountAclActive skip same account");
+        return SOFTBUS_OK;
     }
     HandleAccountAclAvailable("OnAccountAclActive", deviceId.c_str());
     return SOFTBUS_OK;

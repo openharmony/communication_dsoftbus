@@ -89,10 +89,11 @@ static void OnGroupDeleted(const char *groupId, int32_t groupType)
     return;
 }
 
-static void OnDeviceNotTrusted(const char *udid, int32_t localUserId)
+static void OnDeviceNotTrusted(const char *udid, int32_t localUserId, HandleNotTrustedType type)
 {
     (void)udid;
     (void)localUserId;
+    (void)type;
     return;
 }
 

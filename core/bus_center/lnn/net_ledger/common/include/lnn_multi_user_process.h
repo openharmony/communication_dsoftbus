@@ -28,8 +28,6 @@ int32_t LnnAsyncCallMultiUserAllDataSyncToDB(const NodeInfo *info);
 int32_t HbMultiUserHandleLogin(void);
 int32_t HbMultiUserHandleLogout(void);
 void RestoreLocalUserInfo(void);
-void HbCheckSingleUser(int32_t userId);
-void HbCheckAllForegroundUsers(void);
 
 #ifdef __cplusplus
 }

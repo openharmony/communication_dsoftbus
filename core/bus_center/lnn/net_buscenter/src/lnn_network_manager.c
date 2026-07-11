@@ -669,7 +669,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
 
 static void OnGroupInactiveInUser(const char *returnInfo)
 {
-    HichainReturnInfo info;
+    GroupActiveInfo info;
     if (AuthHichainParseReturnInfo(returnInfo, &info) != SOFTBUS_OK) {
         LNN_LOGW(LNN_BUILDER, "group inactive in user, parse returnInfo failed");
         return;

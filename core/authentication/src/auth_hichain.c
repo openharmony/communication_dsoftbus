@@ -496,21 +496,21 @@ static void OnDeviceNotTrusted(const char *udid)
         return;
     }
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
-        g_dataChangeListener.onDeviceNotTrusted(udid, JudgeDeviceTypeAndGetOsAccountIds());
+        g_dataChangeListener.onDeviceNotTrusted(udid, JudgeDeviceTypeAndGetOsAccountIds(), HICHAIN_DEVICE);
     }
 }
 
-int32_t AuthHichainParseReturnInfo(const char *returnInfo, HichainReturnInfo *out)
+int32_t AuthHichainParseReturnInfo(const char *groupActiveInfo, GroupActiveInfo *out)
 {
-    if (returnInfo == NULL || out == NULL) {
+    if (groupActiveInfo == NULL || out == NULL) {
         AUTH_LOGW(AUTH_HICHAIN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    (void)memset_s(out, sizeof(HichainReturnInfo), 0, sizeof(HichainReturnInfo));
+    (void)memset_s(out, sizeof(GroupActiveInfo), 0, sizeof(GroupActiveInfo));
     out->osAccountId = -1;
-    cJSON *json = cJSON_Parse(returnInfo);
+    cJSON *json = cJSON_Parse(groupActiveInfo);
     if (json == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "parse returnInfo failed");
+        AUTH_LOGW(AUTH_HICHAIN, "parse groupActiveInfo failed");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     (void)GetJsonObjectNumberItem(json, FIELD_OS_ACCOUNT_ID, &out->osAccountId);
@@ -530,42 +530,42 @@ static void OnTrustedDeviceNumChanged(int curTrustedDeviceNum)
 #endif
 }
 
-static void OnGroupActiveInUser(const char *returnInfo)
+static void OnGroupActiveInUser(const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "group active in user");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_dataChangeListener.onGroupActiveInUser != NULL) {
-        g_dataChangeListener.onGroupActiveInUser(returnInfo);
+        g_dataChangeListener.onGroupActiveInUser(groupActiveInfo);
     }
 #endif
 }
 
-static void OnGroupInactiveInUser(const char *returnInfo)
+static void OnGroupInactiveInUser(const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "group inactive in user");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_dataChangeListener.onGroupInactiveInUser != NULL) {
-        g_dataChangeListener.onGroupInactiveInUser(returnInfo);
+        g_dataChangeListener.onGroupInactiveInUser(groupActiveInfo);
     }
 #endif
 }
 
-static void OnDeviceActiveInUser(const char *udid, const char *returnInfo)
+static void OnDeviceActiveInUser(const char *udid, const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "device active in user");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_dataChangeListener.onDeviceActiveInUser != NULL) {
-        g_dataChangeListener.onDeviceActiveInUser(udid, returnInfo);
+        g_dataChangeListener.onDeviceActiveInUser(udid, groupActiveInfo);
     }
 #endif
 }
 
-static void OnDeviceInactiveInUser(const char *udid, const char *returnInfo)
+static void OnDeviceInactiveInUser(const char *udid, const char *groupActiveInfo)
 {
     AUTH_LOGI(AUTH_HICHAIN, "device inactive in user");
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     if (g_dataChangeListener.onDeviceInactiveInUser != NULL) {
-        g_dataChangeListener.onDeviceInactiveInUser(udid, returnInfo);
+        g_dataChangeListener.onDeviceInactiveInUser(udid, groupActiveInfo);
     }
 #endif
 }

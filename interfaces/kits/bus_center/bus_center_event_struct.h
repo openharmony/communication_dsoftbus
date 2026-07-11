@@ -364,6 +364,7 @@ typedef struct {
     int32_t userId;
 } LnnAccountSwitchCheckEvent;
 
+#define DP_SERVICE_ID_LIST_MAX_SIZE 1000
 typedef struct {
     LnnEventBasicInfo basic;
     char udid[UDID_BUF_LEN];

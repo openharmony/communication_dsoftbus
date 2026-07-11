@@ -422,7 +422,7 @@ HWTEST_F(AuthManagerTest, RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001, TestSiz
     authHandle.authId = AUTH_SEQ_2;
     EXPECT_NO_FATAL_FAILURE(AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo));
     EXPECT_NO_FATAL_FAILURE(AuthNotifyDeviceDisconnect(authHandle));
-    EXPECT_NO_FATAL_FAILURE(OnDeviceNotTrusted(UDID_TEST, DEFAULT_USERID));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceNotTrusted(UDID_TEST, DEFAULT_USERID, HICHAIN_DEVICE));
     EXPECT_NO_FATAL_FAILURE(OnGroupCreated("myId", GROUP_TYPE));
     EXPECT_NO_FATAL_FAILURE(OnGroupDeleted("myId", GROUP_TYPE));
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(UDID_TEST, "groupInfo"));
