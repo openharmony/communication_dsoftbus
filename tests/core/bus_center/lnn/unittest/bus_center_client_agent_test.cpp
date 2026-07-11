@@ -62,11 +62,12 @@ void BusCenterClientAgentTest::TearDown()
 {
 }
  
-static void OnDataReceived(const char *networkId, const char *data, uint32_t len)
+static void OnDataReceived(const char *networkId, const char *data, uint32_t len, const char *abilityName)
 {
     (void)networkId;
     (void)data;
     (void)len;
+    (void)abilityName;
 }
  
 HWTEST_F(BusCenterClientAgentTest, GetTrustedDevices_Test001, TestSize.Level1)
