@@ -46,6 +46,7 @@ ohos_shared_library("linkenhance") {
       "hilog:libhilog",
       "napi:ace_napi",
       "node:node_header_notice",
+      "libuv:uv",
     ]
   } else {
     include_dirs = [
@@ -54,6 +55,7 @@ ohos_shared_library("linkenhance") {
     external_deps += [
       "napi:ace_napi",
       "node:node_header_notice",
+      "libuv:uv",
     ]
     sources += [
       "$dsoftbus_sdk_path/napi/link_enhance/virtual/napi_link_enhance_connection_virtual.cpp",
