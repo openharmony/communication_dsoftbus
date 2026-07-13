@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
+
 #include <gtest/gtest.h>
+#include <iostream>
 #include <securec.h>
 
 #include "client_trans_session_manager.h"
@@ -24,32 +25,28 @@
 #include "softbus_adapter_mem.h"
 #include "trans_server_proxy.h"
 
-#define TEST_CHANNELID 1025
+#define TEST_CHANNELID       1025
+#define TEST_NORMALCHANNELID 12
 
 using namespace testing::ext;
+
 namespace OHOS {
 class ClientTransStreamTest : public testing::Test {
 public:
-    ClientTransStreamTest()
-    {}
-    ~ClientTransStreamTest()
-    {}
+    ClientTransStreamTest(void) { }
+    ~ClientTransStreamTest(void) { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp(void) override { }
+    void TearDown(void) override { }
 };
 
-void ClientTransStreamTest::SetUpTestCase(void)
-{}
+void ClientTransStreamTest::SetUpTestCase(void) { }
 
-void ClientTransStreamTest::TearDownTestCase(void)
-{}
+void ClientTransStreamTest::TearDownTestCase(void) { }
 
-static void TestOnStreamReceived(int32_t channelId, const StreamData *data, const StreamData *ext,
-    const StreamFrameInfo *param)
+static void TestOnStreamReceived(
+    int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     (void)channelId;
     (void)data;
@@ -111,271 +108,482 @@ static UdpChannelMgrCb g_testUdpChannelCb = {
 };
 
 /**
- * @tc.name: RegisterStreamCb001
- * @tc.desc: RegisterStreamCb error.
- * @tc.desc: UnregisterStreamCb error.
- * @tc.desc: SetStreamChannelStatus error.
+ * @tc.name: RegisterStreamCbTest001
+ * @tc.desc: register stream callback with nullptr and zeroed struct, callback not registered
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level1)
+HWTEST_F(ClientTransStreamTest, RegisterStreamCbTest001, TestSize.Level1)
 {
     RegisterStreamCb(nullptr);
-    UnregisterStreamCb();
-    int32_t channelId = 12;
-    int32_t status = 2;
-    SetStreamChannelStatus(channelId, status);
-
-    UdpChannelMgrCb *streamCb = (UdpChannelMgrCb*)SoftBusMalloc(sizeof(UdpChannelMgrCb));
-    ASSERT_TRUE(streamCb != nullptr);
-    (void)memset_s(streamCb, sizeof(UdpChannelMgrCb), 0, sizeof(UdpChannelMgrCb));
-
-    IClientSessionCallBack *cb = GetClientSessionCb();
-    int32_t ret = ClientTransUdpMgrInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    RegisterStreamCb(streamCb);
-    SetStreamChannelStatus(channelId, status);
-
-    status = STREAM_CONNECTED;
-    SetStreamChannelStatus(channelId, status);
-
-    status = STREAM_CLOSED;
-    SetStreamChannelStatus(channelId, status);
-
-    status = STREAM_INIT;
-    SetStreamChannelStatus(channelId, status);
-
-    status = STREAM_OPENING;
-    SetStreamChannelStatus(channelId, status);
-
-    status = STREAM_CONNECTING;
-    SetStreamChannelStatus(channelId, status);
-
-    status = STREAM_CLOSING;
-    SetStreamChannelStatus(channelId, status);
-
-    status = STREAM_OPENED;
-    SetStreamChannelStatus(channelId, status);
-
-    OnStreamReceived(channelId, nullptr, nullptr, nullptr);
-    UnregisterStreamCb();
-    OnStreamReceived(channelId, nullptr, nullptr, nullptr);
-    if (streamCb != nullptr) {
-        SoftBusFree(streamCb);
-    }
+    UdpChannelMgrCb zeroedCb = { };
+    RegisterStreamCb(&zeroedCb);
+    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**
- * @tc.name: OnQosEvent001
- * @tc.desc: OnQosEvent error.
+ * @tc.name: RegisterStreamCbTest002
+ * @tc.desc: register stream callback with valid callback struct, callback registered successfully
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, OnQosEvent001, TestSize.Level1)
+HWTEST_F(ClientTransStreamTest, RegisterStreamCbTest002, TestSize.Level1)
 {
-    QosTv *tvList = (QosTv*)SoftBusMalloc(sizeof(QosTv));
-    ASSERT_TRUE(tvList != nullptr);
-    (void)memset_s(tvList, sizeof(QosTv), 0, sizeof(QosTv));
-    int32_t channelId = 12;
-    int32_t eventId = 21;
-    int32_t tvCount = 3;
-
-    OnQosEvent(channelId, eventId, tvCount, tvList);
-
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    OnQosEvent(channelId, eventId, tvCount, tvList);
-
+    RegisterStreamCb(&g_testUdpChannelCb);
+    ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    UnregisterStreamCb();
     ClientTransUdpMgrDeinit();
-    if (tvList != nullptr) {
-        SoftBusFree(tvList);
-    }
 }
 
 /**
- * @tc.name: OnFrameStats001
- * @tc.desc: OnFrameStats error.
- * @tc.desc: OnRippleStats error.
+ * @tc.name: UnregisterStreamCbTest001
+ * @tc.desc: unregister stream callback after registration, callback removed
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, OnFrameStats001, TestSize.Level1)
+HWTEST_F(ClientTransStreamTest, UnregisterStreamCbTest001, TestSize.Level1)
 {
-    StreamSendStats *dataStreamSendStats = (StreamSendStats*)SoftBusMalloc(sizeof(StreamSendStats));
-    ASSERT_TRUE(dataStreamSendStats != nullptr);
-    (void)memset_s(dataStreamSendStats, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
-    TrafficStats *dataTrafficStats = (TrafficStats*)SoftBusMalloc(sizeof(TrafficStats));
-    ASSERT_TRUE(dataTrafficStats != nullptr);
-    (void)memset_s(dataTrafficStats, sizeof(TrafficStats), 0, sizeof(TrafficStats));
-    UdpChannelMgrCb *streamCb = (UdpChannelMgrCb*)SoftBusMalloc(sizeof(UdpChannelMgrCb));
-    ASSERT_TRUE(streamCb != nullptr);
-    (void)memset_s(streamCb, sizeof(UdpChannelMgrCb), 0, sizeof(UdpChannelMgrCb));
-    int32_t channelId = 12;
-
-    OnFrameStats(channelId, dataStreamSendStats);
-    OnRippleStats(channelId, dataTrafficStats);
-    
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    RegisterStreamCb(streamCb);
- 
-    OnFrameStats(channelId, dataStreamSendStats);
-    OnRippleStats(channelId, dataTrafficStats);
-
+    RegisterStreamCb(&g_testUdpChannelCb);
     UnregisterStreamCb();
-    if (dataStreamSendStats != nullptr) {
-        SoftBusFree(dataStreamSendStats);
-    }
-    if (dataTrafficStats != nullptr) {
-        SoftBusFree(dataTrafficStats);
-    }
-    if (streamCb != nullptr) {
-        SoftBusFree(streamCb);
-    }
+    ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ClientTransUdpMgrDeinit();
 }
 
 /**
- * @tc.name: TransSendStream001
- * @tc.desc: TransSendStream error.
- * @tc.desc: OnRippleStats error.
+ * @tc.name: SetStreamChannelStatusTest001
+ * @tc.desc: set stream channel status without callback registered, early return for various status values
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level1)
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest001, TestSize.Level1)
 {
-    StreamData *dataStreamData = (StreamData*)SoftBusMalloc(sizeof(StreamData));
-    ASSERT_TRUE(dataStreamData != nullptr);
-    (void)memset_s(dataStreamData, sizeof(StreamData), 0, sizeof(StreamData));
-
-    StreamData *extStreamData = (StreamData*)SoftBusMalloc(sizeof(StreamData));
-    ASSERT_TRUE(extStreamData != nullptr);
-    (void)memset_s(extStreamData, sizeof(StreamData), 0, sizeof(StreamData));
-
-    StreamFrameInfo *paramStreamFrameInfo = (StreamFrameInfo*)SoftBusMalloc(sizeof(StreamFrameInfo));
-    ASSERT_TRUE(paramStreamFrameInfo != nullptr);
-    (void)memset_s(paramStreamFrameInfo, sizeof(StreamFrameInfo), 0, sizeof(StreamFrameInfo));
-
-    int32_t channelId = 12;
-    int32_t ret = TransSendStream(channelId, dataStreamData, extStreamData, paramStreamFrameInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    if (dataStreamData != nullptr) {
-        SoftBusFree(dataStreamData);
-    }
-    if (extStreamData != nullptr) {
-        SoftBusFree(extStreamData);
-    }
-    if (paramStreamFrameInfo != nullptr) {
-        SoftBusFree(paramStreamFrameInfo);
-    }
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_INIT);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_CLOSED);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_CONNECTING);
+    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
 /**
- * @tc.name: TransOnstreamChannelOpened001
- * @tc.desc: Should return SOFTBUS_NO_INIT when given invalid parameters.
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given nullptr parameters.
- * @tc.desc: OnRippleStats error.
+ * @tc.name: SetStreamChannelStatusTest002
+ * @tc.desc: set stream channel status to STREAM_CONNECTED with callback, notify connected event
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level1)
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest002, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_CONNECTED);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: SetStreamChannelStatusTest003
+ * @tc.desc: set stream channel status to STREAM_CLOSED with callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest003, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_CLOSED);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: SetStreamChannelStatusTest004
+ * @tc.desc: set stream channel status to STREAM_INIT with callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest004, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_INIT);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: SetStreamChannelStatusTest005
+ * @tc.desc: set stream channel status to STREAM_OPENING with callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest005, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_OPENING);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: SetStreamChannelStatusTest006
+ * @tc.desc: set stream channel status to STREAM_CONNECTING with callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest006, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_CONNECTING);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: SetStreamChannelStatusTest007
+ * @tc.desc: set stream channel status to STREAM_CLOSING with callback, close stream udp channel
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest007, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_CLOSING);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: SetStreamChannelStatusTest008
+ * @tc.desc: set stream channel status to unsupported status value, default branch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, SetStreamChannelStatusTest008, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    SetStreamChannelStatus(TEST_CHANNELID, STREAM_OPENED);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: OnStreamReceivedTest001
+ * @tc.desc: on stream received without callback registered, early return for various channel ids
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnStreamReceivedTest001, TestSize.Level1)
+{
+    OnStreamReceived(TEST_CHANNELID, nullptr, nullptr, nullptr);
+    OnStreamReceived(0, nullptr, nullptr, nullptr);
+    OnStreamReceived(-1, nullptr, nullptr, nullptr);
+    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/**
+ * @tc.name: OnStreamReceivedTest002
+ * @tc.desc: on stream received with callback registered, call callback function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnStreamReceivedTest002, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    OnStreamReceived(TEST_CHANNELID, nullptr, nullptr, nullptr);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: OnQosEventTest001
+ * @tc.desc: on qos event without callback registered, early return
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnQosEventTest001, TestSize.Level1)
+{
+    QosTv *tvList = reinterpret_cast<QosTv *>(SoftBusCalloc(sizeof(QosTv)));
+    ASSERT_TRUE(tvList != nullptr);
+    OnQosEvent(TEST_CHANNELID, 21, 3, tvList);
+    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    SoftBusFree(tvList);
+}
+
+/**
+ * @tc.name: OnQosEventTest002
+ * @tc.desc: on qos event with callback registered, call callback function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnQosEventTest002, TestSize.Level1)
+{
+    QosTv *tvList = reinterpret_cast<QosTv *>(SoftBusCalloc(sizeof(QosTv)));
+    ASSERT_TRUE(tvList != nullptr);
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    OnQosEvent(TEST_CHANNELID, 21, 3, tvList);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+    SoftBusFree(tvList);
+}
+
+/**
+ * @tc.name: OnFrameStatsTest001
+ * @tc.desc: on frame stats with various channel ids, notify server via ipc
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnFrameStatsTest001, TestSize.Level1)
+{
+    StreamSendStats *data = reinterpret_cast<StreamSendStats *>(SoftBusCalloc(sizeof(StreamSendStats)));
+    ASSERT_TRUE(data != nullptr);
+    OnFrameStats(TEST_NORMALCHANNELID, data);
+    OnFrameStats(0, data);
+    OnFrameStats(-1, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: OnRippleStatsTest001
+ * @tc.desc: on ripple stats with various channel ids, notify server via ipc
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnRippleStatsTest001, TestSize.Level1)
+{
+    TrafficStats *data = reinterpret_cast<TrafficStats *>(SoftBusCalloc(sizeof(TrafficStats)));
+    ASSERT_TRUE(data != nullptr);
+    OnRippleStats(TEST_NORMALCHANNELID, data);
+    OnRippleStats(0, data);
+    OnRippleStats(-1, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: TransSendStreamTest001
+ * @tc.desc: trans send stream with invalid and non-existent channel, returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, TransSendStreamTest001, TestSize.Level1)
+{
+    int32_t ret = TransSendStream(-1, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    StreamData *data = reinterpret_cast<StreamData *>(SoftBusCalloc(sizeof(StreamData)));
+    StreamData *ext = reinterpret_cast<StreamData *>(SoftBusCalloc(sizeof(StreamData)));
+    StreamFrameInfo *param = reinterpret_cast<StreamFrameInfo *>(SoftBusCalloc(sizeof(StreamFrameInfo)));
+    if (data == nullptr || ext == nullptr || param == nullptr) {
+        SoftBusFree(data);
+        SoftBusFree(ext);
+        SoftBusFree(param);
+        return;
+    }
+    ret = TransSendStream(TEST_NORMALCHANNELID, data, ext, param);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(data);
+    SoftBusFree(ext);
+    SoftBusFree(param);
+}
+
+/**
+ * @tc.name: TransOnstreamChannelOpenedTest001
+ * @tc.desc: trans on stream channel opened with null params, returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpenedTest001, TestSize.Level1)
 {
     int32_t ret = TransClientInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ChannelInfo *channel = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
+    ChannelInfo *channel = reinterpret_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
     ASSERT_TRUE(channel != nullptr);
-
     int32_t streamPort = 2;
     ret = TransOnstreamChannelOpened(nullptr, &streamPort, nullptr);
-
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransOnstreamChannelOpened(channel, nullptr, nullptr);
-
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransOnstreamChannelOpened(nullptr, nullptr, nullptr);
-
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channel->streamType = INVALID;
-    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channel->streamType = VIDEO_SLICE_STREAM;
-    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channel->streamType = RAW_STREAM;
-    channel->isServer = false;
-    channel->channelId = -1;
-    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-
-    channel->isServer = true;
-    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-
-    if (channel != nullptr) {
-        SoftBusFree(channel);
-    }
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channel);
     TransClientDeinit();
 }
 
 /**
- * @tc.name: TransCloseStreamChannel001
- * @tc.desc: TransCloseStreamChannel error.
- * @tc.desc: OnRippleStats error.
+ * @tc.name: TransOnstreamChannelOpenedTest002
+ * @tc.desc: trans on stream channel opened with INVALID stream type, returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level1)
+HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpenedTest002, TestSize.Level1)
 {
-    int32_t channelId = -1;
-    int32_t ret = TransCloseStreamChannel(channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channelId = 1;
-    ret = TransCloseStreamChannel(channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
-
-    ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    channelId = -1;
-    ret = TransSendStream(channelId, nullptr, nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channelId = TEST_CHANNELID;
-    ret = TransSendStream(channelId, nullptr, nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channelId = -1;
-    ret = TransSetStreamMultiLayer(channelId, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    channelId = TEST_CHANNELID;
-    ret = TransSetStreamMultiLayer(channelId, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ChannelInfo *channel = reinterpret_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    int32_t streamPort = 2;
+    channel->streamType = INVALID;
+    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channel);
+    TransClientDeinit();
 }
 
 /**
- * @tc.name: ClientTransStreamTest001
- * @tc.desc: TransCloseStreamChannel error.
- * @tc.desc: OnRippleStats error.
+ * @tc.name: TransOnstreamChannelOpenedTest003
+ * @tc.desc: trans on stream channel opened with VIDEO_SLICE_STREAM type, returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level1)
+HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpenedTest003, TestSize.Level1)
 {
-    int32_t channelId = -1;
-    RegisterStreamCb(&g_testUdpChannelCb);
-    OnQosEvent(TEST_CHANNELID, TEST_CHANNELID, TEST_CHANNELID, nullptr);
-    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    UnregisterStreamCb();
-#define TEST_NORMALCHANNELID 12
-    NotifyStreamChannelConnectedEvent(TEST_NORMALCHANNELID);
-    NotifyStreamChannelConnectedEvent(channelId);
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ChannelInfo *channel = reinterpret_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    int32_t streamPort = 2;
+    channel->streamType = VIDEO_SLICE_STREAM;
+    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channel);
+    TransClientDeinit();
 }
-} // OHOS
+
+/**
+ * @tc.name: TransOnstreamChannelOpenedTest004
+ * @tc.desc: trans on stream channel opened with RAW_STREAM type without callback, returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpenedTest004, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ChannelInfo *channel = reinterpret_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    int32_t streamPort = 2;
+    channel->streamType = RAW_STREAM;
+    channel->isServer = false;
+    channel->channelId = -1;
+    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(channel);
+    TransClientDeinit();
+}
+
+/**
+ * @tc.name: TransCloseStreamChannelTest001
+ * @tc.desc: trans close stream channel with invalid channel ids, returns error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, TransCloseStreamChannelTest001, TestSize.Level1)
+{
+    int32_t ret = TransCloseStreamChannel(-1);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    ret = TransCloseStreamChannel(0);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    ret = TransCloseStreamChannel(1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED);
+}
+
+/**
+ * @tc.name: OnStreamUdpChannelOpenedTest001
+ * @tc.desc: on stream udp channel opened without callback, returns SOFTBUS_NO_INIT for various channel ids
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnStreamUdpChannelOpenedTest001, TestSize.Level1)
+{
+    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = OnStreamUdpChannelOpened(0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = OnStreamUdpChannelOpened(-1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/**
+ * @tc.name: OnStreamUdpChannelOpenedTest002
+ * @tc.desc: on stream udp channel opened with callback, returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, OnStreamUdpChannelOpenedTest002, TestSize.Level1)
+{
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSetStreamMultiLayerTest001
+ * @tc.desc: trans set stream multi layer with invalid channel ids, returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, TransSetStreamMultiLayerTest001, TestSize.Level1)
+{
+    int32_t ret = TransSetStreamMultiLayer(-1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransSetStreamMultiLayer(0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransSetStreamMultiLayer(TEST_CHANNELID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyStreamChannelConnectedEventTest001
+ * @tc.desc: notify stream channel connected event with negative and valid channel ids
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransStreamTest, NotifyStreamChannelConnectedEventTest001, TestSize.Level1)
+{
+    NotifyStreamChannelConnectedEvent(-1);
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    int32_t ret = ClientTransUdpMgrInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    RegisterStreamCb(&g_testUdpChannelCb);
+    NotifyStreamChannelConnectedEvent(TEST_NORMALCHANNELID);
+    UnregisterStreamCb();
+    ClientTransUdpMgrDeinit();
+}
+} // namespace OHOS
