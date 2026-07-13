@@ -180,7 +180,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVICE_TEST_004, TestSize.Level1)
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     DelNotTrustDevice(nullptr);
     UpdateDpAclParams aclParams = { .accountId = accountId, .deviceId = nullptr, .peerUserId = peerUserId };
-    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
+    bool isNeedUpdateAclState = false;
+    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT, &isNeedUpdateAclState);
     bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
     EXPECT_EQ(ret, false);
 }
@@ -692,8 +693,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003, TestSize
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     DelNotTrustDevice(nullptr);
     UpdateDpAclParams aclParams = { .accountId = accountId, .deviceId = nullptr, .peerUserId = peerUserId };
-    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_NOT_WRITE);
-    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
+    bool isNeedUpdateAclState = false;
+    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_NOT_WRITE, &isNeedUpdateAclState);
+    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT, &isNeedUpdateAclState);
     ret = IsTrustedDeviceFromAccess(accountHash, udid, 100);
     EXPECT_EQ(ret, false);
 }

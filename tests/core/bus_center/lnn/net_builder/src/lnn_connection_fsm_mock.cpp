@@ -177,15 +177,17 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetLnnConnInterface()->GetAuthRequest(requestId, request);
 }
 
-void UpdateDpSameAccount(
-    UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk, AclWriteState aclState)
+void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey,
+    bool isNeedUpdateDk, AclWriteState aclState, bool *isNeedUpdateAclState)
 {
-    return GetLnnConnInterface()->UpdateDpSameAccount(aclParams, sessionKey, isNeedUpdateDk, aclState);
+    return GetLnnConnInterface()->UpdateDpSameAccount(aclParams, sessionKey,
+        isNeedUpdateDk, aclState, isNeedUpdateAclState);
 }
 
-void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState,
+    bool *isNeedUpdateAclState)
 {
-    return GetLnnConnInterface()->UpdateDpSameAccountWithoutUserKey(aclParams, aclState);
+    return GetLnnConnInterface()->UpdateDpSameAccountWithoutUserKey(aclParams, aclState, isNeedUpdateAclState);
 }
 
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)

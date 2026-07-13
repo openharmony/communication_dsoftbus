@@ -315,6 +315,7 @@ void SoftBusServerStub::InitMemberConstraintSet()
     memberConstraintSet_.insert(SERVER_GET_ALL_ONLINE_NODE_INFO);
     memberConstraintSet_.insert(SERVER_SET_DATA_LEVEL);
     memberConstraintSet_.insert(SERVER_TRIGGER_RANGE_FOR_MSDP);
+    memberConstraintSet_.insert(SERVER_POST_CONVERSATION_DATA);
 }
 
 int32_t SoftBusServerStub::CheckPermission(uint32_t code)

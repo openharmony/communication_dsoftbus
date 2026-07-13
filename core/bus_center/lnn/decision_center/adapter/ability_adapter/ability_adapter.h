@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int32_t StartAbility(const char *bundleName, const char *abilityName);
+int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t userId);
 
 bool IsRunningProcess(const char *bundleName, int32_t userId);
 

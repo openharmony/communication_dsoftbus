@@ -612,10 +612,11 @@ static UpdateDpAclResult PutDpAclUkByUserId(
 }
 
 void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
-    AclWriteState aclState)
+    AclWriteState aclState, bool *isNeedUpdateAclState)
 {
-    if (aclParams == nullptr || aclParams->deviceId == nullptr) {
-        LNN_LOGE(LNN_STATE, "deviceId is null");
+    if (aclParams == nullptr || aclParams->deviceId == nullptr ||
+        isNeedUpdateAclState == nullptr) {
+        LNN_LOGE(LNN_STATE, "param is null");
         return;
     }
     if (aclState == ACL_NOT_WRITE) {
@@ -634,19 +635,24 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
         }
     }
     if (isNeedUpdateDk || IsSameAccount(aclParams->accountId) || (aclState == ACL_CAN_WRITE)) {
+        *isNeedUpdateAclState = true;
         if (UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, aclParams->peerUserId,
             sessionKeyId) != UPDATE_ACL_SUCC
             && UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, DEFAULT_USERID,
             sessionKeyId) != UPDATE_ACL_SUCC) {
             InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId, aclParams->localUserId);
         }
+    } else {
+        *isNeedUpdateAclState = false;
     }
 }
 
-void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState,
+    bool *isNeedUpdateAclState)
 {
-    if (aclParams == nullptr || aclParams->deviceId == nullptr) {
-        LNN_LOGE(LNN_STATE, "deviceId is null");
+    if (aclParams == nullptr || aclParams->deviceId == nullptr ||
+        isNeedUpdateAclState == nullptr) {
+        LNN_LOGE(LNN_STATE, "param is null");
         return;
     }
     if (aclState == ACL_NOT_WRITE) {
@@ -657,12 +663,15 @@ void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteSta
     std::string peerUdid(aclParams->deviceId);
 
     if (IsSameAccount(aclParams->accountId) || (aclState == ACL_CAN_WRITE)) {
+        *isNeedUpdateAclState = true;
         if (UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, aclParams->peerUserId,
             sessionKeyId) != UPDATE_ACL_SUCC
             && UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, DEFAULT_USERID,
             sessionKeyId) != UPDATE_ACL_SUCC) {
             InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId, aclParams->localUserId);
         }
+    } else {
+        *isNeedUpdateAclState = false;
     }
 }
 

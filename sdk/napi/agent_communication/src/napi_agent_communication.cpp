@@ -63,21 +63,32 @@ static bool CheckPermission(void)
     return true;
 }
 
+static void DelDataCallbackData(DataCallbackData *cb)
+{
+    if (cb != nullptr && cb->data != nullptr) {
+        delete[] cb->data;
+    }
+    if (cb != nullptr) {
+        delete cb;
+    }
+}
+
 static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *context, void *rawData)
 {
     DataCallbackData *cb = static_cast<DataCallbackData *>(rawData);
- 
+
     if (env == nullptr || jsCallback == nullptr || cb == nullptr) {
-        if (cb != nullptr && cb->data != nullptr) {
-            delete[] cb->data;
-        }
-        delete cb;
+        DelDataCallbackData(cb);
         return;
     }
 
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-
+    napi_status statu = napi_open_handle_scope(env, &scope);
+    if (statu != napi_ok || scope == nullptr) {
+        COMM_LOGE(COMM_SDK, "open handle scope failed");
+        DelDataCallbackData(cb);
+        return;
+    }
     napi_value networkId;
     napi_create_string_utf8(env, cb->deviceId.c_str(), NAPI_AUTO_LENGTH, &networkId);
 
@@ -87,21 +98,19 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
     if (status != napi_ok) {
         COMM_LOGE(COMM_SDK, "create arraybuffer failed");
         napi_close_handle_scope(env, scope);
-        delete[] cb->data;
-        delete cb;
+        DelDataCallbackData(cb);
         return;
     }
     if (memcpy_s(msgData, cb->dataLen, cb->data, cb->dataLen) != EOK) {
         COMM_LOGE(COMM_SDK, "memcpy data failed");
         napi_close_handle_scope(env, scope);
-        delete[] cb->data;
-        delete cb;
+        DelDataCallbackData(cb);
         return;
     }
- 
-    napi_value argv[2];
+
+    napi_value argv[ARGC_TWO];
     argv[0] = networkId;
-    argv[1] = msg;
+    argv[ARGC_ONE] = msg;
 
     napi_value global;
     napi_get_global(env, &global);
@@ -111,8 +120,7 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
         COMM_LOGE(COMM_SDK, "call js callback failed");
     }
     napi_close_handle_scope(env, scope);
-    delete[] cb->data;
-    delete cb;
+    DelDataCallbackData(cb);
 }
 
 static void FillConversationBusiness(ConversationBusiness &business, const std::string &bundleName,

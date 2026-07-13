@@ -352,8 +352,15 @@ static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, Au
         .peerUserId = msgPara->nodeInfo->userId,
         .localUserId = msgPara->nodeInfo->localUserId
     };
-    UpdateDpSameAccount(&aclParams, sessionKey, false, msgPara->nodeInfo->aclState);
+    bool isNeedUpdateAclState = false;
+    UpdateDpSameAccount(&aclParams, sessionKey, false,
+        msgPara->nodeInfo->aclState, &isNeedUpdateAclState);
     SetDpGroupShare(msgPara->nodeInfo, authHandle);
+    if (isNeedUpdateAclState) {
+        LnnUpdateAclState(msgPara->nodeInfo->deviceInfo.deviceUdid, ACL_CAN_WRITE);
+    } else {
+        LnnUpdateAclState(msgPara->nodeInfo->deviceInfo.deviceUdid, ACL_WRITE_DEFAULT);
+    }
 }
 
 static int32_t GetPeerDeviceUdid(char *peerNetworkId, char *peerUdid, uint32_t udidLen)

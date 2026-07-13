@@ -15,7 +15,7 @@
 
 #include "ability_adapter.h"
 
-int32_t StartAbility(const char *bundleName, const char *abilityName)
+int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t userId)
 {
     return 0;
 }

@@ -117,5 +117,10 @@ void LnnRemoveUserInfoNode(const char *udid)
 {
     return GetDistriLedgerInterface()->LnnRemoveUserInfoNode(udid);
 }
+
+void LnnUpdateAclState(const char *udid, AclWriteState aclState)
+{
+    return GetDistriLedgerInterface()->LnnUpdateAclState(udid, aclState);
+}
 }
 } // namespace OHOS
