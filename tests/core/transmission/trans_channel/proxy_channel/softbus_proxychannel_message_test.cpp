@@ -62,9 +62,9 @@ public:
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
+    void SetUp(void) override
     {}
-    void TearDown() override
+    void TearDown(void) override
     {}
 };
 
@@ -83,7 +83,7 @@ void SoftbusProxyChannelMessageTest::TearDownTestCase(void)
 void TestMessageAddProxyChannel(int32_t channelId, AppType appType, const char *identity, ProxyChannelStatus status)
 {
     AppInfo appInfo;
-    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(chan != nullptr);
     chan->authHandle.authId = channelId;
     chan->connId = channelId;
@@ -334,8 +334,8 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.
     ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    dataInfo.inData = (uint8_t *)"1";
-    dataInfo.inLen = strlen((const char*)dataInfo.inData);
+    dataInfo.inData = reinterpret_cast<uint8_t *>(const_cast<char *>("1"));
+    dataInfo.inLen = strlen("1");
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
     ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
@@ -353,8 +353,8 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
     ProxyMessageHead msg;
     ProxyDataInfo dataInfo;
 
-    dataInfo.inData = (uint8_t *)"12345";
-    dataInfo.inLen = strlen((const char*)dataInfo.inData);
+    dataInfo.inData = reinterpret_cast<uint8_t *>(const_cast<char *>("12345"));
+    dataInfo.inLen = strlen("12345");
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
@@ -374,142 +374,297 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
 }
 
 /*
-  * @tc.name: TransProxyParseMessageTest001
-  * @tc.desc: TransProxyParseMessageTest001, use wrong param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyParseMessageTest001
+ * @tc.desc: test proxy parse message with invalid len.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
 {
     ProxyMessage msg;
-    int32_t len = sizeof(ProxyMessage);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
     ASSERT_TRUE(buf != nullptr);
 
-    /* test invalid len */
     int32_t ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
-
-    /* test invalid head version */
-    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_INVALID_HEAD_VERSION << VERSION_SHIFT);
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    /* test invalid head type */
-    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    /* test message no encrypte */
-    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    msg.msgHead.cipher = 0;
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    /* test normal message encrypte, and channel not exist */
-    msg.msgHead.cipher = 1;
-    msg.msgHead.peerId = -1;
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
     SoftBusFree(buf);
 }
 
 /*
-  * @tc.name: TransProxyParseMessageTest002
-  * @tc.desc: TransProxyParseMessageTest002, use normal param, run normal message
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyParseMessageTest002
+ * @tc.desc: test proxy parse message with invalid head version.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
+{
+    ProxyMessage msg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_INVALID_HEAD_VERSION << VERSION_SHIFT);
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest003
+ * @tc.desc: test proxy parse message with invalid head type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
+{
+    ProxyMessage msg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest004
+ * @tc.desc: test proxy parse message with no encryption.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize.Level1)
+{
+    ProxyMessage msg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    msg.msgHead.cipher = 0;
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest005
+ * @tc.desc: test proxy parse message with encrypted normal message and channel not exist.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest005, TestSize.Level1)
+{
+    ProxyMessage msg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    msg.msgHead.cipher = 1;
+    msg.msgHead.peerId = -1;
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest006
+ * @tc.desc: test proxy parse normal encrypted message with channel exist.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest006, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
     int32_t len = sizeof(ProxyMessage);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
     ASSERT_TRUE(buf != nullptr);
     msg.msgHead.cipher = 1;
     msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
     TestMessageAddProxyChannel(TEST_PARSE_MESSAGE_CHANNEL, APP_TYPE_AUTH, "44", PROXY_CHANNEL_STATUS_COMPLETED);
 
-    /* test normal message encrypte */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
     int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
     SoftBusFree(buf);
 }
 
 /*
-  * @tc.name: TransProxyParseMessageTest003
-  * @tc.desc: TransProxyParseMessageTest003, use normal param, run handshark message
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
+ * @tc.name: TransProxyParseMessageTest007
+ * @tc.desc: test proxy parse normal encrypted message repeated.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest007, TestSize.Level1)
 {
     ProxyMessage msg, outMsg;
     int32_t len = sizeof(ProxyMessage);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+    msg.msgHead.cipher = 1;
+    msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
+    TestMessageAddProxyChannel(TEST_PARSE_MESSAGE_CHANNEL, APP_TYPE_AUTH, "44", PROXY_CHANNEL_STATUS_COMPLETED);
+
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest008
+ * @tc.desc: test proxy parse handshake message with auth conn info error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest008, TestSize.Level1)
+{
+    ProxyMessage msg, outMsg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
     ASSERT_TRUE(buf != nullptr);
 
     msg.msgHead.cipher = 1;
     msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
 
-    ConnectionInfo errInfo;
-    errInfo.type = CONNECT_TYPE_MAX;
-    ConnectionInfo tcpInfo;
-    tcpInfo.type = CONNECT_TCP;
-    ConnectionInfo brInfo;
-    brInfo.type = CONNECT_BR;
-
-    /* test get auth connection info or type err */
     int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test auth connection type is invalid */
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test auth connection type is tcp, and isBr is false */
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test auth connection type is tcp, and isBr is true */
-    msg.msgHead.cipher |= USE_BLE_CIPHER;
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    /* test connection type is br */
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
     SoftBusFree(buf);
 }
 
 /*
-  * @tc.name: TransProxyParseMessageTest004
-  * @tc.desc: TransProxyParseMessage
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize.Level1)
+ * @tc.name: TransProxyParseMessageTest009
+ * @tc.desc: test proxy parse handshake message with invalid auth conn type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest009, TestSize.Level1)
+{
+    ProxyMessage msg, outMsg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.cipher = 1;
+    msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+
+    ConnectionInfo errInfo;
+    errInfo.type = CONNECT_TYPE_MAX;
+
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest010
+ * @tc.desc: test proxy parse handshake message with tcp conn type and isBr false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest010, TestSize.Level1)
+{
+    ProxyMessage msg, outMsg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.cipher = 1;
+    msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+
+    ConnectionInfo tcpInfo;
+    tcpInfo.type = CONNECT_TCP;
+
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest011
+ * @tc.desc: test proxy parse handshake message with tcp conn type and isBr true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest011, TestSize.Level1)
+{
+    ProxyMessage msg, outMsg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.cipher = 1 | USE_BLE_CIPHER;
+    msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+
+    ConnectionInfo tcpInfo;
+    tcpInfo.type = CONNECT_TCP;
+
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest012
+ * @tc.desc: test proxy parse handshake message with br conn type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest012, TestSize.Level1)
+{
+    ProxyMessage msg, outMsg;
+    int32_t len = sizeof(ProxyMessage);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(buf != nullptr);
+
+    msg.msgHead.cipher = 1 | USE_BLE_CIPHER;
+    msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
+    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+    EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
+
+    ConnectionInfo brInfo;
+    brInfo.type = CONNECT_BR;
+
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(buf);
+}
+
+/*
+ * @tc.name: TransProxyParseMessageTest013
+ * @tc.desc: test proxy parse keepalive message.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest013, TestSize.Level1)
 {
     AuthHandle auth;
     char data[TEST_DATA_LEN] = { 0x11, 0x22, 0x33, 0x44 };
@@ -524,71 +679,97 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize
 }
 
 /*
-  * @tc.name: TransProxyHandshakeTest001
-  * @tc.desc: TransProxyHandshakeTest001, use wrong param and normal param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyHandshakeTest001
+ * @tc.desc: test proxy handshake with invalid channel and app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
+    ProxyChannelInfo channelInfo;
+    channelInfo.channelId = -1;
+    channelInfo.appInfo.appType = APP_TYPE_INNER;
+
+    int32_t ret = TransProxyHandshake(&channelInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    ProxyChannelInfo *info = nullptr;
+    ret = TransProxyHandshake(info);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: TransProxyHandshakeTest002
+ * @tc.desc: test proxy handshake with valid params, multiple attempts.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest002, TestSize.Level1)
+{
     ProxyChannelInfo info;
-    info.channelId = -1;
-    info.appInfo.appType = APP_TYPE_INNER;
-
-    /* test info is null */
-    ret = TransProxyHandshake(nullptr);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test appType no auth and invalid channel */
-    ret = TransProxyHandshake(&info);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
     AuthConnInfo wifiInfo, bleInfo;
     wifiInfo.type = AUTH_LINK_TYPE_WIFI;
     bleInfo.type = AUTH_LINK_TYPE_BLE;
     info.channelId = TEST_PARSE_MESSAGE_CHANNEL;
-    ret = TransProxyHandshake(&info);
+    info.appInfo.appType = APP_TYPE_INNER;
+    int32_t ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test pack message failed after pass packhandshakemsg */
     ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test pack message success and send msg fail */
     ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test send msg success */
     ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
-  * @tc.name: TransProxyAckHandshakeTest001
-  * @tc.desc: TransProxyAckHandshakeTest001, use wrong param and normal param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyAckHandshakeTest001
+ * @tc.desc: test proxy ack handshake with null channel info.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
 {
     int32_t retCode = -1;
     uint32_t connId = -1;
-    ProxyChannelInfo channelInfo;
-    /* test channelInfo is null */
-    int32_t ret = TransProxyAckHandshake(connId, nullptr, retCode);
+    ProxyChannelInfo *channelInfo = nullptr;
+    int32_t ret = TransProxyAckHandshake(connId, channelInfo, retCode);
     EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(nullptr, channelInfo);
+}
 
-    /* test payLoad is NULL */
-    retCode = SOFTBUS_OK;
+/*
+ * @tc.name: TransProxyAckHandshakeTest002
+ * @tc.desc: test proxy ack handshake with not care app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest002, TestSize.Level1)
+{
+    uint32_t connId = -1;
+    ProxyChannelInfo channelInfo;
     channelInfo.appInfo.appType = APP_TYPE_NOT_CARE;
-    ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
+    int32_t ret = TransProxyAckHandshake(connId, &channelInfo, SOFTBUS_OK);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test retCode not SOFTBUS_OK and pack message fail */
-    retCode = SOFTBUS_INVALID_PARAM;
-    ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
+}
+
+/*
+ * @tc.name: TransProxyAckHandshakeTest003
+ * @tc.desc: test proxy ack handshake with invalid ret code and send fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest003, TestSize.Level1)
+{
+    uint32_t connId = -1;
+    ProxyChannelInfo channelInfo;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
+    int32_t ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test pack message success and send fail */
     ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyAckHandshake(connId, &channelInfo, retCode);
@@ -596,67 +777,111 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest001, TestSize
 }
 
 /*
-  * @tc.name: TransProxyKeepAliveTest001
-  * @tc.desc: test proxy keepalive and keepalive ack message.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepAliveTest001, TestSize.Level1)
+ * @tc.name: TransProxyKeepaliveTest001
+ * @tc.desc: test proxy keepalive with inner app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepaliveTest001, TestSize.Level1)
 {
     ProxyChannelInfo chanInfo;
     uint32_t connId = -1;
-    TransProxyKeepalive(connId, nullptr);
     chanInfo.appInfo.appType = APP_TYPE_INNER;
-    /* test auth encrypt fail */
     TransProxyKeepalive(connId, &chanInfo);
-    /* test send msg fail */
     TransProxyKeepalive(connId, &chanInfo);
-    /* test app type is auth */
+
+    ProxyChannelInfo *info = nullptr;
+    EXPECT_NO_FATAL_FAILURE(TransProxyKeepalive(connId, info));
+}
+
+/*
+ * @tc.name: TransProxyKeepaliveTest002
+ * @tc.desc: test proxy keepalive with auth app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyKeepaliveTest002, TestSize.Level1)
+{
+    ProxyChannelInfo chanInfo;
+    uint32_t connId = -1;
     chanInfo.appInfo.appType = APP_TYPE_AUTH;
+    EXPECT_EQ(APP_TYPE_AUTH, chanInfo.appInfo.appType);
     TransProxyKeepalive(connId, &chanInfo);
-    /* test ack keepalive info null */
-    int32_t ret = TransProxyAckKeepalive(nullptr);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test pack message fail */
+}
+
+/*
+ * @tc.name: TransProxyAckKeepaliveTest001
+ * @tc.desc: test proxy ack keepalive with inner app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
+{
+    ProxyChannelInfo chanInfo;
     chanInfo.appInfo.appType = APP_TYPE_INNER;
+    int32_t ret = TransProxyAckKeepalive(&chanInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyAckKeepalive(&chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test send message fail and pack success */
-    ret = TransProxyAckKeepalive(&chanInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    chanInfo.appInfo.appType = APP_TYPE_AUTH;
-    ret = TransProxyAckKeepalive(&chanInfo);
+
+    ProxyChannelInfo *info = nullptr;
+    ret = TransProxyAckKeepalive(info);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
-  * @tc.name: TransProxyResetPeerTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyAckKeepaliveTest002
+ * @tc.desc: test proxy ack keepalive with auth app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
+{
+    ProxyChannelInfo chanInfo;
+    chanInfo.appInfo.appType = APP_TYPE_AUTH;
+    EXPECT_EQ(APP_TYPE_AUTH, chanInfo.appInfo.appType);
+    int32_t ret = TransProxyAckKeepalive(&chanInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: TransProxyResetPeerTest001
+ * @tc.desc: test proxy reset peer with inner app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
 {
     ProxyChannelInfo chanInfo;
-
-    int32_t ret = TransProxyResetPeer(nullptr);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    /* test apptype is inner, and pack message fail */
     chanInfo.appInfo.appType = APP_TYPE_INNER;
+    int32_t ret = TransProxyResetPeer(&chanInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyResetPeer(&chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test send msg fail */
-    ret = TransProxyResetPeer(&chanInfo);
+
+    ProxyChannelInfo *info = nullptr;
+    ret = TransProxyResetPeer(info);
     EXPECT_NE(SOFTBUS_OK, ret);
-    /* test apptype is auth, and success */
-    ret = TransProxyResetPeer(&chanInfo);
+}
+
+/*
+ * @tc.name: TransProxyResetPeerTest002
+ * @tc.desc: test proxy reset peer with auth app type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest002, TestSize.Level1)
+{
+    ProxyChannelInfo chanInfo;
+    chanInfo.appInfo.appType = APP_TYPE_AUTH;
+    EXPECT_EQ(APP_TYPE_AUTH, chanInfo.appInfo.appType);
+    int32_t ret = TransProxyResetPeer(&chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
  * @tc.name: TransProxyParseMessageHeadTest001
- * @tc.desc: test proxy reset peer
+ * @tc.desc: test proxy parse message head
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -664,12 +889,12 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
 {
     ProxyMessage msg;
     int32_t len = sizeof(ProxyMessage);
-    char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
+    char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
     ASSERT_TRUE(buf != nullptr);
     int32_t ret = TransProxyParseMessageHead(buf, len, &msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    char *bufHead = (char *)SoftBusCalloc(sizeof(ProxyMessage)+2);
+    char *bufHead = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage) + 2));
     ASSERT_TRUE(bufHead != nullptr);
     ret = TransProxyParseMessageHead(bufHead, len, &msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -681,11 +906,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
 }
 
 /*
-  * @tc.name: TransProxyParseMessageHeadTest002
-  * @tc.desc: TransProxyParseMessageHead
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyParseMessageHeadTest002
+ * @tc.desc: TransProxyParseMessageHead
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest002, TestSize.Level1)
 {
     char data[TEST_DATA_LEN] = { 0x11, 0x22, 0x33, 0x44 };
@@ -697,11 +922,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest002, Test
 }
 
 /*
-  * @tc.name: TransProxyGetRemoteTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyGetRemoteTest001
+ * @tc.desc: test proxy get remote udid by bt mac.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetRemoteTest001, TestSize.Level1)
 {
     char brMac[BT_MAC_LEN] = {0};
@@ -715,11 +940,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetRemoteTest001, TestSize.Le
 }
 
 /*
-  * @tc.name: TransProxyGetAuthConnInfoTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyGetAuthConnInfoTest001
+ * @tc.desc: test proxy get auth conn info.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthConnInfoTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -730,37 +955,45 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthConnInfoTest001, TestS
 }
 
 /*
-  * @tc.name: TransProxyConvertBrConnInfoTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyConvertBrConnInfoTest001
+ * @tc.desc: test proxy convert br conn info to ble.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBrConnInfoTest001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     int32_t ret = ConvertBrConnInfo2BleConnInfo(&connInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    connInfo.type = AUTH_LINK_TYPE_BR;
+    ret = ConvertBrConnInfo2BleConnInfo(&connInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
-  * @tc.name: TransProxyConvertBleConnInfoTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyConvertBleConnInfoTest001
+ * @tc.desc: test proxy convert ble conn info to br.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyConvertBleConnInfoTest001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     int32_t ret = ConvertBleConnInfo2BrConnInfo(&connInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    ret = ConvertBleConnInfo2BrConnInfo(&connInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
-  * @tc.name: TransProxyGetAuthIdTest001
-  * @tc.desc: test proxy reset peer.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyGetAuthIdTest001
+ * @tc.desc: test proxy get auth id by handshake msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Level1)
 {
     ProxyMessage msg;
@@ -773,11 +1006,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Le
 }
 
 /*
-  * @tc.name: TransProxyUnpackInnerHandshakeMsgTest001
-  * @tc.desc: test trans proxy unpack inner handshakemsg.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyUnpackInnerHandshakeMsgTest001
+ * @tc.desc: test trans proxy unpack inner handshakemsg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -789,18 +1022,18 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
         }"
     };
     cJSON *root = cJSON_ParseWithLength(msg, FAST_TRANS_DATASIZE);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     char sessionKey[FAST_TRANS_DATASIZE] = {0};
     int32_t ret = TransProxyUnpackInnerHandshakeMsg(root, appInfo, sessionKey, FAST_TRANS_DATASIZE);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
-  * @tc.name: TransProxyUnpackNormalHandshakeMsgTest001
-  * @tc.desc: test trans proxy unpack inner handshakemsg.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest001
+ * @tc.desc: test trans proxy unpack inner handshakemsg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest001, TestSize.Level1)
 {
     char msg[FAST_ARRAY_SIZE] = {
@@ -819,18 +1052,18 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest0
         }"
     };
     cJSON *root = cJSON_ParseWithLength(msg, FAST_TRANS_DATASIZE);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     char sessionKey[FAST_TRANS_DATASIZE] = {0};
     int32_t ret = TransProxyUnpackNormalHandshakeMsg(root, appInfo, sessionKey, BASE64KEY);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
-  * @tc.name: UnpackPackHandshakeMsgForFastDataTest001
-  * @tc.desc: test unpack pack handshakemsg for fastdata.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: UnpackPackHandshakeMsgForFastDataTest001
+ * @tc.desc: test unpack pack handshakemsg for fastdata.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -841,7 +1074,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest00
         }"
     };
     cJSON *root = cJSON_ParseWithLength(msg, FAST_TRANS_DATASIZE);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
     appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
@@ -850,12 +1083,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, UnpackPackHandshakeMsgForFastDataTest00
 }
 
 /*
-  * @tc.name: GetBrMacFromConnInfoTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid len or null mac.
-  * @tc.desc: Should return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT when given invalid parameter.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: GetBrMacFromConnInfoTest001
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid len or null mac.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.Level1)
 {
     char brMac[BT_MAC_LEN] = "testBrMac";
@@ -868,26 +1100,38 @@ HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest001, TestSize.L
     len = 20;
     ret = GetBrMacFromConnInfo(connId, brMac, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    len = 10;
-    ret = GetBrMacFromConnInfo(connId, brMac, len);
+}
+
+/*
+ * @tc.name: GetBrMacFromConnInfoTest002
+ * @tc.desc: Should return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT when given unsupported conn type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, GetBrMacFromConnInfoTest002, TestSize.Level1)
+{
+    char brMac[BT_MAC_LEN] = "testBrMac";
+    uint32_t connId = 1;
+    uint32_t len = 10;
+    int32_t ret = GetBrMacFromConnInfo(connId, brMac, len);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
 /*
-  * @tc.name: PackPlaintextMessageTest001
-  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null message or datainfo.
-  * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: PackPlaintextMessageTest001
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null message or datainfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.Level1)
 {
     ProxyMessageHead msg;
-    memset_s(&msg, sizeof(ProxyMessageHead), 0, sizeof(ProxyMessageHead));
+    (void)memset_s(&msg, sizeof(ProxyMessageHead), 0, sizeof(ProxyMessageHead));
     ProxyDataInfo dataInfo;
-    memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
     dataInfo.inLen = FAST_TRANS_DATASIZE;
-    dataInfo.inData = (uint8_t *)TEST_FAST_TRANS_DATA;
+    dataInfo.inData = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_FAST_TRANS_DATA));
     int32_t ret = PackPlaintextMessage(nullptr, &dataInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = PackPlaintextMessage(&msg, nullptr);
@@ -897,11 +1141,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.L
 }
 
 /*
-  * @tc.name: PackHandshakeMsgForFastDataTest001
-  * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid parameter.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: PackHandshakeMsgForFastDataTest001
+ * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, TestSize.Level1)
 {
     char msg[FAST_TRANS_DATASIZE] = {
@@ -913,7 +1157,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, Tes
     };
     cJSON *root = cJSON_ParseWithLength(msg, FAST_TRANS_DATASIZE);
     AppInfo appInfo;
-    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo.fastTransDataSize = 1;
     int32_t ret = PackHandshakeMsgForFastData(&appInfo, root);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
@@ -923,89 +1167,304 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackHandshakeMsgForFastDataTest001, Tes
 }
 
 /*
-  * @tc.name: TransProxyUnpackNormalHandshakeMsgTest002
-  * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given invalid msg.
-  * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given invalid msg.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest002
+ * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given msg with only UID.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
     char sessionKey[FAST_TRANS_DATASIZE] = {0};
-    strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
     AppInfo appInfo;
-    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
     int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest003
+ * @tc.desc: Should return SOFTBUS_PARSE_JSON_ERR when given msg with UID and PID only.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest003, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
     (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest004
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg with UID, PID, and PKG_NAME.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest004, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
     (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    (void)AddNumberToJsonObject(msg, "ENCRYPT", APP_INFO_FILE_FEATURES_SUPPORT);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    (void)AddNumberToJsonObject(msg, "ALGORITHM", APP_INFO_ALGORITHM_AES_GCM_256);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    (void)AddNumberToJsonObject(msg, "CRC", APP_INFO_FILE_FEATURES_NO_SUPPORT);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", BUSINESS_TYPE_NOT_CARE);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    (void)AddNumberToJsonObject(msg, "MY_HANDLE_ID", -1);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    (void)AddNumberToJsonObject(msg, "PEER_HANDLE_ID", -1);
-    ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
     cJSON_Delete(msg);
 }
 
 /*
-  * @tc.name: TransProxyUnpackAuthHandshakeMsgTest001
-  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED when given null appInfo.
-  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED when given invalid msg.
-  * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest005
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg with UID, PID, PKG_NAME, and SESSION_KEY.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest005, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
+    (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest006
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg with UID, PID, PKG_NAME, SESSION_KEY, and ENCRYPT.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest006, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
+    (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
+    (void)AddNumberToJsonObject(msg, "ENCRYPT", APP_INFO_FILE_FEATURES_SUPPORT);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest007
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest007, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
+    (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
+    (void)AddNumberToJsonObject(msg, "ENCRYPT", APP_INFO_FILE_FEATURES_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "ALGORITHM", APP_INFO_ALGORITHM_AES_GCM_256);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest008
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg with all fields except CRC.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest008, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
+    (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
+    (void)AddNumberToJsonObject(msg, "ENCRYPT", APP_INFO_FILE_FEATURES_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "ALGORITHM", APP_INFO_ALGORITHM_AES_GCM_256);
+    (void)AddNumberToJsonObject(msg, "CRC", APP_INFO_FILE_FEATURES_NO_SUPPORT);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest009
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg with all fields except BUSINESS_TYPE.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest009, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
+    (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
+    (void)AddNumberToJsonObject(msg, "ENCRYPT", APP_INFO_FILE_FEATURES_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "ALGORITHM", APP_INFO_ALGORITHM_AES_GCM_256);
+    (void)AddNumberToJsonObject(msg, "CRC", APP_INFO_FILE_FEATURES_NO_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", BUSINESS_TYPE_NOT_CARE);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest010
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg with all fields except MY_HANDLE_ID.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest010, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
+    (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
+    (void)AddNumberToJsonObject(msg, "ENCRYPT", APP_INFO_FILE_FEATURES_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "ALGORITHM", APP_INFO_ALGORITHM_AES_GCM_256);
+    (void)AddNumberToJsonObject(msg, "CRC", APP_INFO_FILE_FEATURES_NO_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", BUSINESS_TYPE_NOT_CARE);
+    (void)AddNumberToJsonObject(msg, "MY_HANDLE_ID", -1);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackNormalHandshakeMsgTest011
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given msg with all fields.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest011, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    char sessionKey[FAST_TRANS_DATASIZE] = {0};
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddNumberToJsonObject(msg, "UID", TEST_UID);
+    (void)AddNumberToJsonObject(msg, "PID", TEST_PID);
+    (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
+    (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
+    (void)AddNumberToJsonObject(msg, "ENCRYPT", APP_INFO_FILE_FEATURES_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "ALGORITHM", APP_INFO_ALGORITHM_AES_GCM_256);
+    (void)AddNumberToJsonObject(msg, "CRC", APP_INFO_FILE_FEATURES_NO_SUPPORT);
+    (void)AddNumberToJsonObject(msg, "BUSINESS_TYPE", BUSINESS_TYPE_NOT_CARE);
+    (void)AddNumberToJsonObject(msg, "MY_HANDLE_ID", -1);
+    (void)AddNumberToJsonObject(msg, "PEER_HANDLE_ID", -1);
+    int32_t ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackAuthHandshakeMsgTest001
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED when given null msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackAuthHandshakeMsgTest001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    cJSON *msg = nullptr;
+    int32_t ret = TransProxyUnpackAuthHandshakeMsg(msg, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED, ret);
+    EXPECT_EQ(nullptr, msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackAuthHandshakeMsgTest002
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED when given msg missing PKG_NAME.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackAuthHandshakeMsgTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
     AppInfo appInfo;
-    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    int32_t ret = TransProxyUnpackAuthHandshakeMsg(nullptr, &appInfo);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED, ret);
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     (void)AddStringToJsonObject(msg, "REQUEST_ID", TEST_REQUEST_ID);
-    ret = TransProxyUnpackAuthHandshakeMsg(msg, &appInfo);
+    int32_t ret = TransProxyUnpackAuthHandshakeMsg(msg, &appInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED, ret);
+    cJSON_Delete(msg);
+}
+
+/*
+ * @tc.name: TransProxyUnpackAuthHandshakeMsgTest003
+ * @tc.desc: Should return SOFTBUS_OK when given valid msg with PKG_NAME.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackAuthHandshakeMsgTest003, TestSize.Level1)
+{
+    cJSON *msg = cJSON_CreateObject();
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)AddStringToJsonObject(msg, "REQUEST_ID", TEST_REQUEST_ID);
     (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
-    ret = TransProxyUnpackAuthHandshakeMsg(msg, &appInfo);
+    int32_t ret = TransProxyUnpackAuthHandshakeMsg(msg, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     cJSON_Delete(msg);
 }
 
 /*
-  * @tc.name: TransProxyUnpackInnerHandshakeMsgTest002
-  * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given invalid parameters.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyUnpackInnerHandshakeMsgTest002
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when given invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
     char sessionKey[FAST_TRANS_DATASIZE] = {0};
-    strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
+    (void)strcpy_s(sessionKey, TEST_CHANNEL_IDENTITY_LEN, TEST_SESSION_KEY);
     AppInfo appInfo;
-    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
     int32_t ret = TransProxyUnpackInnerHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
@@ -1016,11 +1475,11 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
 }
 
 /*
-  * @tc.name: TransProxyParseD2DDataTest001
-  * @tc.desc: test trans proxy parse .
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+ * @tc.name: TransProxyParseD2DDataTest001
+ * @tc.desc: test trans proxy parse .
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseD2DDataTest001, TestSize.Level1)
 {
     int32_t len = 1;
