@@ -2484,8 +2484,10 @@ HWTEST_F(AuthSessionJsonMockTest, OLD_VERSION_INVALID_ECTERNAL_AUTH_INFO_TEST_00
     AuthSessionInfo info;
     char udid[] = "1111";
     memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
-    bool ret = OldVersionInvalidExternalAuthInfo(nullptr);
+    info.deviceKeyId.hasDeviceKeyId = false;
+    bool ret = OldVersionInvalidExternalAuthInfo(&info);
     EXPECT_FALSE(ret);
+    info.deviceKeyId.hasDeviceKeyId = true;
     EXPECT_CALL(mocker, IsSKIdFindAclInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = OldVersionInvalidExternalAuthInfo(&info);
     EXPECT_TRUE(ret);
