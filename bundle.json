@@ -128,7 +128,8 @@
         "runtime_core",
         "liburing",
         "node",
-        "libuv"
+        "libuv",
+        "taihe_ffi_gen"
       ],
       "third_party": [
         "cJSON",
