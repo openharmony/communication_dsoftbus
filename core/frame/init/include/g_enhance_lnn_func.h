@@ -254,6 +254,7 @@ typedef void (*AuthMetaCheckMetaExistFunc)(const AuthConnInfo *connInfo, bool *i
 typedef void (*AuthMetaDeinitFunc)(void);
 typedef void (*DelAuthMetaManagerByPidFunc)(const char *pkgName, int32_t pid);
 typedef int32_t (*LnnSyncTrustedRelationShipFunc)(const char *pkgName, const char *msg, uint32_t msgLen);
+typedef int32_t (*LnnProcessPushMsgFunc)(const uint8_t *data, uint32_t len);
 typedef int32_t (*LnnGetCurrChannelScoreFunc)(int32_t channelId);
 typedef int32_t (*CustomizedSecurityProtocolInitFunc)(void);
 typedef void (*CustomizedSecurityProtocolDeinitFunc)(void);
@@ -466,6 +467,7 @@ typedef struct TagLnnEnhanceFuncList {
     LnnGetMetaPtkFunc lnnGetMetaPtk;
     LnnGetLocalPtkByUuidFunc lnnGetLocalPtkByUuid;
     LnnSyncTrustedRelationShipFunc lnnSyncTrustedRelationShip;
+    LnnProcessPushMsgFunc lnnProcessPushMsg;
     LnnUpdateLastAccLoginTimestampByUdidFunc lnnUpdateLastAccLoginTimestampByUdid;
     LnnRetrieveDeviceInfoByUdidFunc lnnRetrieveDeviceInfoByUdid;
     LnnSyncBleOfflineMsgFunc lnnSyncBleOfflineMsg;
