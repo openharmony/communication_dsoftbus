@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <stdatomic.h>
 #include "securec.h"
 
 #include "ble_protocol_interface_factory.h"
@@ -39,7 +40,7 @@
 
 #define GENERAL_PKGNAME_MAX_COUNT          (10)
 
-static uint64_t g_seq = 0;
+static _Atomic uint64_t g_seq = 0;
 
 enum GeneralFeatureCapability {
     GENERAL_FEATURE_SUPPORT_COC = 1
@@ -146,7 +147,7 @@ static void GeneralManagerMsgHandler(SoftBusMessage *msg)
 static int32_t SendInner(OutData *outData, uint32_t underlayerHandle, int32_t module, int32_t pid)
 {
     ConnPostData buff = {0};
-    buff.seq = g_seq++;
+    buff.seq = atomic_fetch_add_explicit(&g_seq, 1, memory_order_relaxed);
     buff.flag = CONN_HIGH;
     buff.pid = pid;
 
