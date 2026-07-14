@@ -213,9 +213,10 @@ int32_t HbMultiUserHandleLogin(void)
     return SOFTBUS_OK;
 }
 
-int32_t HbMultiUserHandleLogout(void)
+int32_t HbMultiUserHandleLogout(int32_t userId)
 {
-    return LnnResetLogoutUserInfo();
+    LNN_LOGI(LNN_LEDGER, "userId=%{public}d", userId);
+    return LnnResetLogoutUserInfo(userId);
 }
 
 void RestoreLocalUserInfo(void)

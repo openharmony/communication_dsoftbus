@@ -19,6 +19,7 @@
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_log.h"
+#include "lnn_multi_user_process.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
 #include "power_mgr_client.h"
@@ -79,8 +80,8 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         std::string userIdKey = "userId";
         eventUserId = wantParams.GetIntParam(userIdKey, -1);
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-        LNN_LOGI(LNN_EVENT, "eventUserId=%{public}d", eventUserId);
         state = SOFTBUS_ACCOUNT_LOG_OUT;
+        (void)HbMultiUserHandleLogout(eventUserId);
 #else
         int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
         LNN_LOGI(LNN_EVENT, "activeUserId=%{public}d, eventUserId=%{public}d", activeUserId, eventUserId);

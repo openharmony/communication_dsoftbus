@@ -898,9 +898,7 @@ static void HbHandleAccountLogin(void)
 static void HbHandleAccountLogout(void)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    (void)HbMultiUserHandleLogout();
-#else
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
     if (LnnDeleteSyncToDB(0, 0, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB clear local cache fail");
