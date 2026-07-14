@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,11 @@
 
 #include "gtest/gtest.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <cinttypes>
 #include <iostream>
 #include <semaphore.h>
 #include <string>
@@ -83,8 +83,8 @@ const int32_t WSLEEP_PTHREAD_SEND_FILE_WAIT_TIME = 500;
 const uint32_t TEST_SEND_FILE_COUNT = 2;
 
 struct TransTestInfo {
-    string mySessionName;
-    string peerSessionName;
+    std::string mySessionName;
+    std::string peerSessionName;
     int32_t testCnt;
     int32_t sendNum;
     int32_t dataType;
@@ -93,8 +93,8 @@ struct TransTestInfo {
     int32_t sfileCnt;
 };
 
-unordered_set<string> networkIdSet_;
-unordered_set<int32_t> sessionSet_;
+std::unordered_set<std::string> networkIdSet_;
+std::unordered_set<int32_t> sessionSet_;
 sem_t localSem_;
 int32_t openSessionSuccessCnt_ = 0;
 const SoftbusTestEntry *testEntryArgs_ = nullptr;
@@ -117,8 +117,8 @@ int32_t WaitDeviceOnline(const char *pkgName)
         }
         cout << "online device num: " << onlineNum << endl;
         for (int32_t i = 0; i < onlineNum; i++) {
-            networkIdSet_.insert(string(onlineDevices[i].networkId));
-            cout << "online idex " << i << " : " << string(onlineDevices[i].networkId) << endl;
+            networkIdSet_.insert(std::string(onlineDevices[i].networkId));
+            cout << "online idex " << i << " : " << std::string(onlineDevices[i].networkId) << endl;
         }
         FreeNodeInfo(onlineDevices);
         break;
@@ -230,10 +230,8 @@ static IFileReceiveListener g_fileRecvListener = {
 
 class AuthSessionTest : public testing::Test {
 public:
-    AuthSessionTest()
-    {}
-    ~AuthSessionTest()
-    {}
+    AuthSessionTest() { }
+    ~AuthSessionTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -241,15 +239,15 @@ public:
 
     static void Wsleep(uint32_t count, int32_t usl);
     static void ServerWait(int32_t waitTime);
-    static void OpenAllSession(int32_t dataType, const string &mySessionName, const string &peerSessionName);
+    static void OpenAllSession(int32_t dataType, const std::string &mySessionName, const std::string &peerSessionName);
     static void TestServerSide(void);
 
     static void CloseAllSession(void);
     static void TestSendMessage(int32_t sendCnt, const char *data, uint32_t len, bool ex = false);
     static void TestSendBytes(int32_t sendCnt, const char *data, uint32_t len, bool ex = false);
 
-    static void TestSendFile(int32_t sendCnt, const char *sfileList[], const char *dfileList[],
-        int32_t cnt, bool ex = false);
+    static void TestSendFile(
+        int32_t sendCnt, const char *sfileList[], const char *dfileList[], int32_t cnt, bool ex = false);
 
     static void TransTest(struct TransTestInfo &transInfo, int32_t testDataType, bool ex = false);
     static void *TestSendFileThread(void *arg);
@@ -324,7 +322,8 @@ void AuthSessionTest::ServerWait(int32_t waitTime)
     }
 }
 
-void AuthSessionTest::OpenAllSession(int32_t dataType, const string &mySessionName, const string &peerSessionName)
+void AuthSessionTest::OpenAllSession(
+    int32_t dataType, const std::string &mySessionName, const std::string &peerSessionName)
 {
     for (auto networkId : networkIdSet_) {
         SessionAttribute attribute;
@@ -360,11 +359,11 @@ void AuthSessionTest::TestServerSide(void)
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = CreateSessionServer(FILE_TEST_PKG_NAME.c_str(), FILE_SESSION_NAME_DEMO.c_str(), &g_listener);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = SetFileReceiveListener(FILE_TEST_PKG_NAME.c_str(), FILE_SESSION_NAME.c_str(),
-        &g_fileRecvListener, RECV_ROOT_PATH);
+    ret = SetFileReceiveListener(
+        FILE_TEST_PKG_NAME.c_str(), FILE_SESSION_NAME.c_str(), &g_fileRecvListener, RECV_ROOT_PATH);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = SetFileReceiveListener(FILE_TEST_PKG_NAME.c_str(), FILE_SESSION_NAME_DEMO.c_str(),
-        &g_fileRecvListener, RECV_ROOT_PATH);
+    ret = SetFileReceiveListener(
+        FILE_TEST_PKG_NAME.c_str(), FILE_SESSION_NAME_DEMO.c_str(), &g_fileRecvListener, RECV_ROOT_PATH);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ServerWait(testEntryArgs_->aliveTime_);
     ret = RemoveSessionServer(FILE_TEST_PKG_NAME.c_str(), FILE_SESSION_NAME.c_str());
@@ -409,8 +408,8 @@ void AuthSessionTest::TestSendBytes(int32_t sendCnt, const char *data, uint32_t 
     }
     Wsleep(WSLEEP_COMM_TIME, WSLEEP_SEC_TYPE);
 }
-void AuthSessionTest::TestSendFile(int32_t sendCnt, const char *sfileList[], const char *dfileList[],
-    int32_t cnt, bool ex)
+void AuthSessionTest::TestSendFile(
+    int32_t sendCnt, const char *sfileList[], const char *dfileList[], int32_t cnt, bool ex)
 {
     for (auto session : sessionSet_) {
         cout << "send file, session id = " << session << endl;
@@ -436,19 +435,17 @@ void AuthSessionTest::TransTest(struct TransTestInfo &transInfo, int32_t testDat
     cout << "testCnt = " << transInfo.sendNum << endl;
     OpenAllSession(transInfo.dataType, transInfo.mySessionName, transInfo.peerSessionName);
     if (testDataType == TYPE_BYTES) {
-        char *data = (char *)malloc(SEND_DATA_SIZE_1M);
+        char *data = reinterpret_cast<char *>(SoftBusCalloc(SEND_DATA_SIZE_1M));
         ASSERT_NE(data, nullptr);
         (void)memset_s(data, SEND_DATA_SIZE_1M, 0, SEND_DATA_SIZE_1M);
-        ASSERT_NE(data, nullptr);
         int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1M, g_testData, strlen(g_testData));
         EXPECT_EQ(ret, EOK);
         TestSendBytes(transInfo.sendNum, data, ex ? SEND_DATA_SIZE_1M : SEND_DATA_SIZE_4K, ex);
         free(data);
     } else if (testDataType == TYPE_MESSAGE) {
-        char *data = (char *)malloc(SEND_DATA_SIZE_1M);
+        char *data = reinterpret_cast<char *>(SoftBusCalloc(SEND_DATA_SIZE_1M));
         ASSERT_NE(data, nullptr);
         (void)memset_s(data, SEND_DATA_SIZE_1M, 0, SEND_DATA_SIZE_1M);
-        ASSERT_NE(data, nullptr);
         int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1M, g_testData, strlen(g_testData));
         EXPECT_EQ(ret, EOK);
         TestSendMessage(transInfo.sendNum, data, ex ? SEND_DATA_SIZE_1M : SEND_DATA_SIZE_1K, ex);
@@ -467,19 +464,19 @@ void AuthSessionTest::TransTest(struct TransTestInfo &transInfo, int32_t testDat
 }
 
 /*
-* @tc.name: testSendFile001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testSendFile001
+ * @tc.desc: test send file with active and passive open session
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthSessionTest, testSendFile001, TestSize.Level1)
 {
     if (testEntryArgs_->testSide_ == PASSIVE_OPENSESSION_WAY) {
         TestServerSide();
         return;
     }
-    const char *sfileList[10] = {nullptr};
-    const char *dfileList[10] = {nullptr};
+    const char *sfileList[10] = { nullptr };
+    const char *dfileList[10] = { nullptr };
     sfileList[0] = SFILE_NAME_1K;
     sfileList[1] = SFILE_NAME_5M;
     dfileList[0] = DFILE_NAME_1K;
@@ -512,14 +509,14 @@ HWTEST_F(AuthSessionTest, testSendFile001, TestSize.Level1)
     TransTest(transInfo, TYPE_FILE);
     ret = RemoveSessionServer(pkgName.c_str(), transInfo.mySessionName.c_str());
     EXPECT_EQ(ret, SOFTBUS_OK);
-};
+}
 
 void *AuthSessionTest::TestSendFileThread(void *arg)
 {
     Wsleep(WSLEEP_PTHREAD_SEND_FILE_WAIT_TIME, WSLEEP_MSEC_TYPE);
     cout << "TestSendFileThread start" << endl;
-    const char *sfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
-    const char *dfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
+    const char *sfileList[TEST_SEND_FILE_COUNT + 1] = { nullptr };
+    const char *dfileList[TEST_SEND_FILE_COUNT + 1] = { nullptr };
     sfileList[0] = SFILE_NAME_1K;
     sfileList[1] = SFILE_NAME_5M;
     dfileList[0] = DFILE_NAME_1K_3;
@@ -529,11 +526,11 @@ void *AuthSessionTest::TestSendFileThread(void *arg)
     return nullptr;
 }
 /*
-* @tc.name: testSendFile002
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testSendFile002
+ * @tc.desc: test send file with concurrent threads
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthSessionTest, testSendFile002, TestSize.Level1)
 {
     if (testEntryArgs_->testSide_ == PASSIVE_OPENSESSION_WAY) {
@@ -559,8 +556,8 @@ HWTEST_F(AuthSessionTest, testSendFile002, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = SetFileSendListener(pkgName.c_str(), mySessionName.c_str(), &g_fileSendListener);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    const char *sfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
-    const char *dfileList[TEST_SEND_FILE_COUNT + 1] = {nullptr};
+    const char *sfileList[TEST_SEND_FILE_COUNT + 1] = { nullptr };
+    const char *dfileList[TEST_SEND_FILE_COUNT + 1] = { nullptr };
     sfileList[0] = SFILE_NAME_1K;
     sfileList[1] = SFILE_NAME_5M;
     dfileList[0] = DFILE_NAME_1K_2;
@@ -578,22 +575,22 @@ HWTEST_F(AuthSessionTest, testSendFile002, TestSize.Level1)
     CloseAllSession();
     ret = RemoveSessionServer(pkgName.c_str(), mySessionName.c_str());
     EXPECT_EQ(ret, SOFTBUS_OK);
-};
+}
 
 /*
-* @tc.name: testOpenSessionEx001
-* @tc.desc:
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: testOpenSessionEx001
+ * @tc.desc: test send file with error file name and invalid parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(AuthSessionTest, testSendFileEx001, TestSize.Level1)
 {
     if (testEntryArgs_->testSide_ == PASSIVE_OPENSESSION_WAY) {
         TestServerSide();
         return;
     }
-    const char *sfileList[1] = {nullptr};
-    const char *dfileList[1] = {nullptr};
+    const char *sfileList[1] = { nullptr };
+    const char *dfileList[1] = { nullptr };
     sfileList[0] = SFILE_NAME_ERR;
     dfileList[0] = SFILE_NAME_ERR;
     struct TransTestInfo transInfo = {
@@ -634,5 +631,5 @@ HWTEST_F(AuthSessionTest, testSendFileEx001, TestSize.Level1)
 
     ret = RemoveSessionServer(pkgName.c_str(), transInfo.mySessionName.c_str());
     EXPECT_EQ(ret, SOFTBUS_OK);
-};
+}
 } // namespace OHOS

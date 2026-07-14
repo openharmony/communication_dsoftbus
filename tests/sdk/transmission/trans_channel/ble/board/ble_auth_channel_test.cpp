@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 
 #include "inner_session.h"
 #include "session.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 using namespace testing::ext;
@@ -55,16 +56,12 @@ ConnectionAddr g_addr;
 ConnectionAddr g_addr1;
 class BleAuthChannelTest : public testing::Test {
 public:
-    BleAuthChannelTest()
-    {}
-    ~BleAuthChannelTest()
-    {}
+    BleAuthChannelTest() { }
+    ~BleAuthChannelTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 void BleAuthChannelTest::SetUpTestCase(void)
@@ -85,8 +82,7 @@ void BleAuthChannelTest::SetUpTestCase(void)
     getchar();
 }
 
-void BleAuthChannelTest::TearDownTestCase(void)
-{}
+void BleAuthChannelTest::TearDownTestCase(void) { }
 
 static SubscribeInfo g_sInfo = {
     .subscribeId = 1,
@@ -94,7 +90,7 @@ static SubscribeInfo g_sInfo = {
     .mode = DISCOVER_MODE_ACTIVE,
     .freq = MID,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata3",
+    .capabilityData = reinterpret_cast<unsigned char *>(const_cast<char *>("capdata3")),
     .dataLen = sizeof("capdata3"),
     .isSameAccount = false,
     .isWakeRemote = false
@@ -106,15 +102,15 @@ static PublishInfo g_pInfo = {
     .mode = DISCOVER_MODE_PASSIVE,
     .freq = MID,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata4",
+    .capabilityData = reinterpret_cast<unsigned char *>(const_cast<char *>("capdata4")),
     .dataLen = sizeof("capdata4")
 };
 
 static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("[test]session opened,sesison id = %d\r\n", sessionId);
-    EXPECT_TRUE(g_sessionId == sessionId);
-    EXPECT_TRUE(g_testCount == TEST_DEVICEFOUND);
+    EXPECT_EQ(g_sessionId, sessionId);
+    EXPECT_EQ(g_testCount, TEST_DEVICEFOUND);
     g_testCount++;
     Start();
     return 0;
@@ -123,7 +119,7 @@ static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 static void OnSessionClosed(int32_t sessionId)
 {
     printf("[test]session closed, session id = %d\r\n", sessionId);
-    EXPECT_TRUE(g_testCount == TEST_DATARECEIVE);
+    EXPECT_EQ(g_testCount, TEST_DATARECEIVE);
     g_testCount++;
     Start();
 }
@@ -134,7 +130,7 @@ static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int le
     if (g_testWay == PASSIVE_OPENAUTHSESSION_WAY) {
         SendBytes(sessionId, "{\"received ok\"}", strlen("{\"received ok\"}"));
     }
-    EXPECT_TRUE(g_testCount == TEST_SESSIONOPEN);
+    EXPECT_EQ(g_testCount, TEST_SESSIONOPEN);
     g_testCount++;
     Start();
 }
@@ -166,7 +162,7 @@ static void Start(void)
     g_state = true;
 }
 
-static int32_t TestCreateSessionServer()
+static int32_t TestCreateSessionServer(void)
 {
     printf("[test]TestCreateSessionServer enter\r\n");
     int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
@@ -175,12 +171,12 @@ static int32_t TestCreateSessionServer()
     return ret;
 }
 
-static int32_t TestOpenSession()
+static int32_t TestOpenSession(void)
 {
     printf("[test]TestOpenSession enter\r\n");
     g_addr1.type = CONNECTION_ADDR_BLE;
     int32_t ret = OpenAuthSession(g_sessionName, &g_addr1, 1, nullptr);
-    EXPECT_TRUE(ret >= 0);
+    EXPECT_GE(ret, 0);
     printf("[test]TestOpenSession end\r\n");
     return ret;
 }
@@ -188,13 +184,13 @@ static int32_t TestOpenSession()
 static int32_t TestSendData(const char *data, int32_t len)
 {
     printf("[test]TestSendData enter\r\n");
-    int32_t  ret = SendBytes(g_sessionId, data, len);
+    int32_t ret = SendBytes(g_sessionId, data, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
     printf("[test]TestSendData end\r\n");
     return ret;
 }
 
-static void TestCloseSeeesion()
+static void TestCloseSession(void)
 {
     printf("[test]TestCloseSession enter\n");
     if (g_sessionId > 0) {
@@ -204,7 +200,7 @@ static void TestCloseSeeesion()
     printf("[test]TestCloseSession end\n");
 }
 
-static int32_t TestRemoveSessionServer()
+static int32_t TestRemoveSessionServer(void)
 {
     printf("[test]TestRemoveSessionServer enter\r\n");
     int32_t ret = RemoveSessionServer(g_pkgName, g_sessionName);
@@ -214,8 +210,8 @@ static int32_t TestRemoveSessionServer()
 }
 
 /**
- * @tc.name: PublishServiceTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.name: ProcessActive001
+ * @tc.desc: Active open auth session full process test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -223,39 +219,38 @@ HWTEST_F(BleAuthChannelTest, ProcessActive001, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
         printf("[test]active test skip...\r\n");
-        EXPECT_TRUE(TEST_INICIAL == 0);
+        EXPECT_EQ(TEST_INICIAL, 0);
         goto END;
     }
     int32_t ret;
     g_testCount = TEST_BEGIN;
     Wait();
     ret = TestCreateSessionServer();
-    EXPECT_TRUE(ret == 0);
-    EXPECT_TRUE(g_testCount == TEST_DEVICEFOUND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(g_testCount, TEST_DEVICEFOUND);
     for (int32_t i = 0; i < g_testTimes; i++) {
         g_testCount = TEST_DEVICEFOUND;
         g_sessionId = TestOpenSession();
-        EXPECT_TRUE(g_sessionId >= 0);
+        EXPECT_GE(g_sessionId, 0);
         Wait();
-        EXPECT_TRUE(g_testCount == TEST_SESSIONOPEN);
+        EXPECT_EQ(g_testCount, TEST_SESSIONOPEN);
         ret = TestSendData(g_testData, strlen(g_testData) + 1);
-        EXPECT_TRUE(ret == 0);
+        EXPECT_EQ(ret, SOFTBUS_OK);
         Wait();
-        EXPECT_TRUE(g_testCount == TEST_DATARECEIVE);
-        TestCloseSeeesion();
+        EXPECT_EQ(g_testCount, TEST_DATARECEIVE);
+        TestCloseSession();
         sleep(3);
-        EXPECT_TRUE(g_testCount == TEST_DATARECEIVE);
+        EXPECT_EQ(g_testCount, TEST_DATARECEIVE);
     }
     ret = TestRemoveSessionServer();
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 END:
-    EXPECT_TRUE(TEST_INICIAL == 0);
-};
-
+    EXPECT_EQ(TEST_INICIAL, 0);
+}
 
 /**
- * @tc.name: PublishServiceTest001
- * @tc.desc: Verify wrong parameter
+ * @tc.name: ProcessPassive001
+ * @tc.desc: Passive open auth session full process test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -263,27 +258,27 @@ HWTEST_F(BleAuthChannelTest, ProcessPassive001, TestSize.Level1)
 {
     if (g_testWay != PASSIVE_OPENAUTHSESSION_WAY) {
         printf("[test]passive test skip...\r\n");
-        EXPECT_TRUE(TEST_INICIAL == 0);
+        EXPECT_EQ(TEST_INICIAL, 0);
         goto END;
     }
     int32_t ret;
     ret = TestCreateSessionServer();
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     for (int32_t i = 0; i < g_testTimes; i++) {
         g_testCount = TEST_DEVICEFOUND;
         printf("[test][times:%d],Waiting for session opening...\r\n", i);
         Wait();
-        EXPECT_TRUE(g_testCount == TEST_SESSIONOPEN);
+        EXPECT_EQ(g_testCount, TEST_SESSIONOPEN);
         printf("[test][times:%d],session opened,Waiting for data receiving...\r\n", i);
         Wait();
-        EXPECT_TRUE(g_testCount == TEST_DATARECEIVE);
+        EXPECT_EQ(g_testCount, TEST_DATARECEIVE);
         printf("[test][times:%d],data received,Waiting for session closing...\r\n", i);
         Wait();
-        EXPECT_TRUE(g_testCount == TEST_SESSIONCLOSE);
+        EXPECT_EQ(g_testCount, TEST_SESSIONCLOSE);
         printf("[test][times:%d],session closed,time time over\r\n", i);
     }
     printf("passive test over\r\n");
 END:
-    EXPECT_TRUE(TEST_INICIAL == 0);
-};
+    EXPECT_EQ(TEST_INICIAL, 0);
 }
+} // namespace OHOS

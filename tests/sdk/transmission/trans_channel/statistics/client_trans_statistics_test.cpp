@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,8 @@ namespace OHOS {
 
 ConnectionAddr g_addrInfo;
 
-#define INVALID_VALUE (-1)
-#define SESSIONKEY_LEN 46
+#define INVALID_VALUE   (-1)
+#define SESSIONKEY_LEN  46
 #define SESSION_KEY_LEN 46
 static const char *g_sessionName = "ohos.distributedschedule.dms.test";
 char g_peerSessionName[SESSIONKEY_LEN] = "ohos.distributedschedule.dms.test";
@@ -35,38 +35,30 @@ char g_peerSessionKey[SESSION_KEY_LEN] = "clientkey";
 static int32_t g_fd = 0;
 std::string g_testData = "TransSessionTest_GetSessionKeyTestData";
 
-#define TEST_FILE_NAME "test.filename.01"
-#define TEST_PKG_NAME_LEN (64)
+#define TEST_FILE_NAME        "test.filename.01"
+#define TEST_PKG_NAME_LEN     (64)
 #define TEST_SESSION_NAME_LEN (64)
-#define TEST_NETWORK_ID_LEN (64)
-#define TEST_GROUP_ID_LEN (64)
-#define TRANS_TEST_ID 1
+#define TEST_NETWORK_ID_LEN   (64)
+#define TEST_GROUP_ID_LEN     (64)
+#define TRANS_TEST_ID         1
 
 class ClientTransStatisticsTest : public testing::Test {
 public:
-    ClientTransStatisticsTest()
-    {}
-    ~ClientTransStatisticsTest()
-    {}
+    ClientTransStatisticsTest() { }
+    ~ClientTransStatisticsTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void ClientTransStatisticsTest::SetUpTestCase(void)
-{
-}
+void ClientTransStatisticsTest::SetUpTestCase(void) { }
 
-void ClientTransStatisticsTest::TearDownTestCase(void)
-{
-}
+void ClientTransStatisticsTest::TearDownTestCase(void) { }
 
 ChannelInfo *TestGetErrorChannelInfo(void)
 {
-    ChannelInfo *info = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *info = reinterpret_cast<ChannelInfo *>(SoftBusMalloc(sizeof(ChannelInfo)));
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = g_peerSessionName;
     info->channelId = TRANS_TEST_ID;
@@ -78,7 +70,7 @@ ChannelInfo *TestGetErrorChannelInfo(void)
 
 ChannelInfo *TestGetServerChannelInfo(void)
 {
-    ChannelInfo *info = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *info = reinterpret_cast<ChannelInfo *>(SoftBusMalloc(sizeof(ChannelInfo)));
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = g_peerSessionName;
     info->channelId = TRANS_TEST_ID;
@@ -92,7 +84,7 @@ ChannelInfo *TestGetServerChannelInfo(void)
 
 ChannelInfo *TestGetRightChannelInfo(void)
 {
-    ChannelInfo *info = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ChannelInfo *info = reinterpret_cast<ChannelInfo *>(SoftBusMalloc(sizeof(ChannelInfo)));
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = g_peerSessionName;
     info->channelId = TRANS_TEST_ID;
@@ -106,8 +98,7 @@ ChannelInfo *TestGetRightChannelInfo(void)
 
 /*
  * @tc.name: AddSocketResourceTest001
- * @tc.desc: test AddSocketResource
- *           use the wrong or normal parameter
+ * @tc.desc: AddSocketResource with null channel and null sessionName
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -117,7 +108,18 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level1)
 
     ChannelInfo *errChannel = TestGetErrorChannelInfo();
     EXPECT_NO_THROW(AddSocketResource(nullptr, errChannel));
+    SoftBusFree(errChannel);
+}
 
+/*
+ * @tc.name: AddSocketResourceTest003
+ * @tc.desc: AddSocketResource with error, server, and right channel
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest003, TestSize.Level1)
+{
+    ChannelInfo *errChannel = TestGetErrorChannelInfo();
     EXPECT_NO_THROW(AddSocketResource(g_sessionName, errChannel));
     SoftBusFree(errChannel);
 
@@ -132,8 +134,7 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest001, TestSize.Level1)
 
 /*
  * @tc.name: UpdateChannelStatisticsTest001
- * @tc.desc: test UpdateChannelStatistics
- *           use the wrong or normal parameter
+ * @tc.desc: UpdateChannelStatistics after init, update and delete
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -155,8 +156,7 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest001, TestSize.Lev
 
 /*
  * @tc.name: CreateSocketResourceTest001
- * @tc.desc: test CreateSocketResource
- *           use the wrong or normal parameter
+ * @tc.desc: CreateSocketResource with null and valid item
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -177,12 +177,12 @@ HWTEST_F(ClientTransStatisticsTest, CreateSocketResourceTest001, TestSize.Level1
     CreateSocketResource(item, sessionName, channel);
     EXPECT_NE(item, nullptr);
     SoftBusFree(item);
+    SoftBusFree(channel);
 }
 
 /*
  * @tc.name: AddSocketResourceTest002
- * @tc.desc: test AddSocketResource
- *           use the wrong or normal parameter
+ * @tc.desc: AddSocketResource when list is full and with invalid channel id
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -210,8 +210,7 @@ HWTEST_F(ClientTransStatisticsTest, AddSocketResourceTest002, TestSize.Level1)
 
 /*
  * @tc.name: UpdateChannelStatisticsTest002
- * @tc.desc: test UpdateChannelStatistics
- *           use the wrong or normal parameter
+ * @tc.desc: UpdateChannelStatistics when list is null and with valid socket
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -239,8 +238,7 @@ HWTEST_F(ClientTransStatisticsTest, UpdateChannelStatisticsTest002, TestSize.Lev
 
 /*
  * @tc.name: PackStatisticsTest001
- * @tc.desc: test PackStatistics
- *           use the wrong or normal parameter
+ * @tc.desc: PackStatistics with null and valid parameters
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -258,8 +256,7 @@ HWTEST_F(ClientTransStatisticsTest, PackStatisticsTest001, TestSize.Level1)
 
 /*
  * @tc.name: CloseChannelAndSendStatisticsTest001
- * @tc.desc: test CloseChannelAndSendStatistics
- *           use the wrong or normal parameter
+ * @tc.desc: CloseChannelAndSendStatistics with null and valid resource
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -274,8 +271,7 @@ HWTEST_F(ClientTransStatisticsTest, CloseChannelAndSendStatisticsTest001, TestSi
 
 /*
  * @tc.name: DeleteSocketResourceByChannelIdTest002
- * @tc.desc: test DeleteSocketResourceByChannelId
- *           use the wrong or normal parameter
+ * @tc.desc: DeleteSocketResourceByChannelId when list is null and with valid channel
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -310,8 +306,7 @@ HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceByChannelIdTest002, Test
 
 /*
  * @tc.name: ClientTransStatisticsDeinitTest001
- * @tc.desc: test ClientTransStatisticsDeinit
- *           use the wrong or normal parameter.
+ * @tc.desc: ClientTransStatisticsDeinit when list is null and after init
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */
@@ -334,8 +329,7 @@ HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize
 
 /*
  * @tc.name: DeleteSocketResourceBySocketIdTest002
- * @tc.desc: test DeleteSocketResourceBySocketId
- *           use the wrong or normal parameter
+ * @tc.desc: DeleteSocketResourceBySocketId when list is null and with valid socket
  * @tc.type: FUNC
  * @tc.require: I5HZ6N
  */

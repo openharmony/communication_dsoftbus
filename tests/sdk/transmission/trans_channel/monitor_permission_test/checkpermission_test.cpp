@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,15 @@
  */
 
 #include <gtest/gtest.h>
-#include "session.h"
-#include "softbus_error_code.h"
-#include "softbus_def.h"
-#include "client_trans_session_manager.h"
-#include "client_trans_socket_manager.h"
-#include "softbus_feature_config.h"
-#include "client_trans_session_service.h"
 #include <string>
+
+#include "client_trans_session_manager.h"
+#include "client_trans_session_service.h"
+#include "client_trans_socket_manager.h"
+#include "session.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
+#include "softbus_feature_config.h"
 
 using namespace testing::ext;
 
@@ -47,19 +48,15 @@ static ISessionListener g_sessionlistener = {
 
 class CheckPermissionTest : public testing::Test {
 public:
-    CheckPermissionTest()
-    {}
-    ~CheckPermissionTest()
-    {}
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp()
-    {}
-    void TearDown()
-    {}
+    CheckPermissionTest() { }
+    ~CheckPermissionTest() { }
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp(void) { }
+    void TearDown(void) { }
 };
 
-void CheckPermissionTest::SetUpTestCase()
+void CheckPermissionTest::SetUpTestCase(void)
 {
     (void)TransClientInit();
     SoftbusConfigInit();
@@ -79,73 +76,107 @@ void CheckPermissionTest::SetUpTestCase()
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-void CheckPermissionTest::TearDownTestCase()
-{
-}
-
+void CheckPermissionTest::TearDownTestCase(void) { }
 
 /**
- * @tc.name: CheckPermissionTest001
- * @tc.desc: CheckpermissionAPI.
+ * @tc.name: SendBytesPermissionTest001
+ * @tc.desc: SendBytes permission check with valid session id
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CheckPermissionTest, CheckPermissionTest001, TestSize.Level0)
+HWTEST_F(CheckPermissionTest, SendBytesPermissionTest001, TestSize.Level0)
 {
     const char *data = "testdata";
     uint32_t len = strlen(data);
 
     int32_t ret = SendBytes(g_sessionId, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
 
-    ret = SendBytes(INVALID_SESSION_ID, data, len);
+/**
+ * @tc.name: SendBytesPermissionTest002
+ * @tc.desc: SendBytes permission check with invalid session id
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CheckPermissionTest, SendBytesPermissionTest002, TestSize.Level0)
+{
+    const char *data = "testdata";
+    uint32_t len = strlen(data);
+
+    int32_t ret = SendBytes(INVALID_SESSION_ID, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: CheckPermissionTest002
- * @tc.desc: CheckpermissionAPI.
+ * @tc.name: SendMessagePermissionTest001
+ * @tc.desc: SendMessage permission check with valid session id
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CheckPermissionTest, CheckPermissionTest002, TestSize.Level0)
+HWTEST_F(CheckPermissionTest, SendMessagePermissionTest001, TestSize.Level0)
 {
     const char *data = "testdata";
     uint32_t len = strlen(data);
 
     int32_t ret = SendMessage(g_sessionId, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
 
-    ret = SendMessage(INVALID_SESSION_ID, data, len);
+/**
+ * @tc.name: SendMessagePermissionTest002
+ * @tc.desc: SendMessage permission check with invalid session id
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CheckPermissionTest, SendMessagePermissionTest002, TestSize.Level0)
+{
+    const char *data = "testdata";
+    uint32_t len = strlen(data);
+
+    int32_t ret = SendMessage(INVALID_SESSION_ID, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: CheckPermissionTest003
- * @tc.desc: CheckpermissionAPI.
+ * @tc.name: SendStreamPermissionTest001
+ * @tc.desc: SendStream permission check with valid session id
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CheckPermissionTest, CheckPermissionTest003, TestSize.Level0)
+HWTEST_F(CheckPermissionTest, SendStreamPermissionTest001, TestSize.Level0)
 {
-    const StreamData streamData = {0};
-    const StreamData ext = {0};
-    const StreamFrameInfo param = {0};
+    const StreamData streamData = { 0 };
+    const StreamData ext = { 0 };
+    const StreamFrameInfo param = { 0 };
 
     int32_t ret = SendStream(g_sessionId, &streamData, &ext, &param);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
 
-    ret = SendStream(INVALID_SESSION_ID, &streamData, &ext, &param);
+/**
+ * @tc.name: SendStreamPermissionTest002
+ * @tc.desc: SendStream permission check with invalid session id
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CheckPermissionTest, SendStreamPermissionTest002, TestSize.Level0)
+{
+    const StreamData streamData = { 0 };
+    const StreamData ext = { 0 };
+    const StreamFrameInfo param = { 0 };
+
+    int32_t ret = SendStream(INVALID_SESSION_ID, &streamData, &ext, &param);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: CheckPermissionTest004
- * @tc.desc: CheckpermissionAPI.
+ * @tc.name: SendFilePermissionTest001
+ * @tc.desc: SendFile permission check with valid session id
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(CheckPermissionTest, CheckPermissionTest004, TestSize.Level0)
+HWTEST_F(CheckPermissionTest, SendFilePermissionTest001, TestSize.Level0)
 {
     const char *sfileList[] = {
         "/data/big.tar",
@@ -155,8 +186,23 @@ HWTEST_F(CheckPermissionTest, CheckPermissionTest004, TestSize.Level0)
     };
     int32_t ret = SendFile(g_sessionId, sfileList, nullptr, FILE_NUM);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
 
-    ret = SendFile(INVALID_SESSION_ID, sfileList, nullptr, FILE_NUM);
+/**
+ * @tc.name: SendFilePermissionTest002
+ * @tc.desc: SendFile permission check with invalid session id
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(CheckPermissionTest, SendFilePermissionTest002, TestSize.Level0)
+{
+    const char *sfileList[] = {
+        "/data/big.tar",
+        "/data/richu.jpg",
+        "/data/richu-002.jpg",
+        "/data/richu-003.jpg",
+    };
+    int32_t ret = SendFile(INVALID_SESSION_ID, sfileList, nullptr, FILE_NUM);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
