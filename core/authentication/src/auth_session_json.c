@@ -3333,10 +3333,10 @@ static bool IsInvalidDeviceInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSess
     if (authVersion < AUTH_VERSION_V2) {
         return OldVersionInvalidExternalAuthInfo(info);
     }
-    if (authVersion >= AUTH_VERSION_V2 && IsInvalidExternalAuthInfo(obj, nodeInfo, info)) {	 
-        AUTH_LOGE(AUTH_FSM, "is invalid ExternalAuthInfo!");	 
-        return true;	 
-     }
+    if (authVersion >= AUTH_VERSION_V2 && IsInvalidExternalAuthInfo(obj, nodeInfo, info)) {
+        AUTH_LOGE(AUTH_FSM, "is invalid ExternalAuthInfo!");
+        return true;
+    }
     return false;
 }
 
