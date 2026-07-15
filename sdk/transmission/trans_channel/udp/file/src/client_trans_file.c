@@ -284,9 +284,14 @@ static void FileSendErrorEvent(UdpChannel *udpChannel, FileListener *fileListene
     } else if (fileListener->sendListener.OnFileTransError != NULL) {
         fileListener->sendListener.OnFileTransError(sessionId);
     }
-    TRANS_LOGI(TRANS_SDK, "OnFile error. msgType=%{public}d", msgType);
+    TRANS_LOGI(TRANS_SDK, "OnFile send error. msgType=%{public}d", msgType);
+    UdpChannel reserveChannel;
+    (void)memset_s(&reserveChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    if (TransGetReserveUdpChannelByFileId(udpChannel->dfileId, &reserveChannel) == SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "close reserve channel, channelId=%{public}d", reserveChannel.channelId);
+        TransOnUdpChannelClosed(reserveChannel.channelId, SHUTDOWN_REASON_SEND_FILE_ERR);
+    }
     TransOnUdpChannelClosed(udpChannel->channelId, SHUTDOWN_REASON_SEND_FILE_ERR);
-    return;
 }
 
 static void NotifySendRate(UdpChannel *udpChannel, DFileMsgType msgType, const DFileMsg *msgData)
@@ -500,8 +505,14 @@ static void FileRecvErrorEvent(UdpChannel *udpChannel, FileListener *fileListene
     } else if (fileListener->recvListener.OnFileTransError != NULL) {
         fileListener->recvListener.OnFileTransError(sessionId);
     }
+    TRANS_LOGI(TRANS_SDK, "OnFile recv error. msgType=%{public}d", msgType);
+    UdpChannel reserveChannel;
+    (void)memset_s(&reserveChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    if (TransGetReserveUdpChannelByFileId(udpChannel->dfileId, &reserveChannel) == SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "close reserve channel, channelId=%{public}d", reserveChannel.channelId);
+        TransOnUdpChannelClosed(reserveChannel.channelId, SHUTDOWN_REASON_RECV_FILE_ERR);
+    }
     TransOnUdpChannelClosed(udpChannel->channelId, SHUTDOWN_REASON_RECV_FILE_ERR);
-    return;
 }
 
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
