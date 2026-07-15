@@ -100,9 +100,9 @@ static void LogListenerEntry(const std::string &bundleName, const std::string &a
     AnonymizeFree(anonyAbilityName);
 }
 
-::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo> GetTrustedDevices()
+::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo> GetTrustedDevice()
 {
-    COMM_LOGI(COMM_SDK, "GetTrustedDevices start");
+    COMM_LOGI(COMM_SDK, "GetTrustedDevice start");
     if (!IsSystemApp()) {
         ThrowBusinessException(CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
         return ::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo>({});
@@ -276,7 +276,7 @@ void UnregisterConversationListener(::taihe::string_view bundleName, ::taihe::st
 } // namespace Softbus
 } // namespace Communication
 
-TH_EXPORT_CPP_API_GetTrustedDevices(Communication::OHOS::Softbus::GetTrustedDevices);
+TH_EXPORT_CPP_API_GetTrustedDevices(Communication::OHOS::Softbus::GetTrustedDevice);
 TH_EXPORT_CPP_API_PostConversationDataAsync(Communication::OHOS::Softbus::PostConversationDataAsync);
 TH_EXPORT_CPP_API_RegisterConversationListener(Communication::OHOS::Softbus::RegisterConversationListener);
 TH_EXPORT_CPP_API_UnregisterConversationListener(Communication::OHOS::Softbus::UnregisterConversationListener);

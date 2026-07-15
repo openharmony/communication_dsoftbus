@@ -28,7 +28,7 @@ struct DeviceNodeInfo {
     udid: String;
 }
 
-function GetTrustedDevices(): Array<DeviceNodeInfo>;
+function GetTrustedDevice(): Array<DeviceNodeInfo>;
 
 @gen_promise("postConversationData")
 function PostConversationDataAsync(deviceId: String, bundleName: String, abilityName: String,

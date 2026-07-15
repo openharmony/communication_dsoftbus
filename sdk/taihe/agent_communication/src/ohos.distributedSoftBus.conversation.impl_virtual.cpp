@@ -29,7 +29,7 @@ static void ThrowNotSupport(void)
     taihe::set_business_error(CONVERSATION_DEVICE_NOT_SUPPORT, CONVERSATION_DESCRIPTION);
 }
 
-::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo> GetTrustedDevices()
+::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo> GetTrustedDevice()
 {
     ThrowNotSupport();
     return ::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo>({});
@@ -65,7 +65,7 @@ void UnregisterConversationListener(::taihe::string_view bundleName, ::taihe::st
 } // namespace Softbus
 } // namespace Communication
 
-TH_EXPORT_CPP_API_GetTrustedDevices(Communication::OHOS::Softbus::GetTrustedDevices);
+TH_EXPORT_CPP_API_GetTrustedDevices(Communication::OHOS::Softbus::GetTrustedDevice);
 TH_EXPORT_CPP_API_PostConversationDataAsync(Communication::OHOS::Softbus::PostConversationDataAsync);
 TH_EXPORT_CPP_API_RegisterConversationListener(Communication::OHOS::Softbus::RegisterConversationListener);
 TH_EXPORT_CPP_API_UnregisterConversationListener(Communication::OHOS::Softbus::UnregisterConversationListener);
