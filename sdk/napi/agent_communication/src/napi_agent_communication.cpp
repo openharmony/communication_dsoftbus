@@ -175,7 +175,7 @@ static napi_value NapiGetTrustedDevicesSync(napi_env env, napi_value thisVar)
 
     DeviceNodeInfo *list = nullptr;
     int32_t nums = 0;
-    int32_t resultCode = ConvertToJsErrcode(GetTrustedDevice(&list, &nums));
+    int32_t resultCode = ConvertToJsErrcode(GetTrustedDevices(&list, &nums));
     if (resultCode != CONVERSATION_OK) {
         if (list != nullptr) {
             FreeDeviceNodeInfo(list);

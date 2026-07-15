@@ -828,7 +828,7 @@ int32_t SoftBusServer::UnregisterConversationListener(const ConversationBusiness
     return LnnIpcUnregisterConversationListener(info, callingPid);
 }
 
-int32_t SoftBusServer::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+int32_t SoftBusServer::GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     return LnnIpcGetTrustedDevices(info, nums);
 }

@@ -377,7 +377,7 @@ int32_t SoftBusServerProxyFrame::UnregisterConversationListener(const Conversati
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+int32_t SoftBusServerProxyFrame::GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     (void)info;
     (void)nums;
