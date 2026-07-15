@@ -13,10 +13,11 @@
 import("../dsoftbus.gni")
 ohos_shared_library("proxychannelmanager") {
   if (dsoftbus_feature_compile_guard) {
-    sources = [
-      "br_proxy_module_virtual.c",
+    sources = [ "br_proxy_module_virtual.c" ]
+    external_deps = [
+      "napi:ace_napi",
+      "node:node_header_notice",
     ]
-    external_deps = ["napi:ace_napi"]
   } else {
     sources = [
       "br_proxy_module.c",
@@ -24,23 +25,21 @@ ohos_shared_library("proxychannelmanager") {
     ]
     deps = [
       "$dsoftbus_dfx_path:softbus_dfx",
+      "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "$dsoftbus_root_path/br_proxy:br_proxy_utils",
       "$dsoftbus_root_path/core/common:softbus_utils",
-      "$dsoftbus_root_path/sdk:softbus_client",
       "$dsoftbus_root_path/core/frame:softbus_server",
-      "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump"
+      "$dsoftbus_root_path/sdk:softbus_client",
     ]
- 
     external_deps = [
-      "c_utils:utils",
       "bounds_checking_function:libsec_shared",
+      "c_utils:utils",
       "hilog:libhilog",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
-    include_dirs = [
-      "common/include"
-    ]
+    include_dirs = [ "common/include" ]
   }
   sanitize = {
     cfi = true
@@ -63,33 +62,28 @@ ohos_shared_library("br_proxy_adapter") {
   }
   branch_protector_ret = "pac_ret"
   sources = []
-  if (is_standard_system && (!defined(global_parts_info) ||
-    defined(global_parts_info.resourceschedule_device_standby))) {
-    sources += [
-      "br_proxy_adapter.cpp",
-    ]
-    deps = [
-      "$dsoftbus_dfx_path:softbus_dfx",
-    ]
+  if (is_standard_system &&
+      (!defined(global_parts_info) ||
+       defined(global_parts_info.resourceschedule_device_standby))) {
+    sources += [ "br_proxy_adapter.cpp" ]
+    deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
     external_deps = [
-      "c_utils:utils",
       "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_manager",
+      "ability_runtime:app_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "ipc:ipc_single",
-      "samgr:samgr_proxy",
-      "resource_schedule_service:ressched_client",
+      "c_utils:utils",
       "device_standby:standby_innerkits",
-      "ability_runtime:app_manager",
+      "ipc:ipc_single",
+      "resource_schedule_service:ressched_client",
+      "samgr:samgr_proxy",
     ]
   } else {
     sources += [ "br_proxy_adapter_virtual.cpp" ]
   }
 
-  include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits/common",
-  ]
+  include_dirs = [ "$dsoftbus_root_path/interfaces/kits/common" ]
   subsystem_name = "communication"
   part_name = "dsoftbus"
 }
@@ -123,9 +117,7 @@ ohos_shared_library("br_proxy_utils") {
 
 group("br_proxy") {
   if (dsoftbus_feature_compile_guard) {
-    deps = [
-      ":proxychannelmanager",
-    ]
+    deps = [ ":proxychannelmanager" ]
   } else {
     deps = [
       ":br_proxy_adapter",
