@@ -15,6 +15,7 @@
 
 #include "ability_adapter.h"
 
+#include "anonymizer.h"
 #include "ability_manager_client.h"
 #include "appmgr/app_mgr_client.h"
 #include "bundle_mgr_proxy.h"
@@ -58,14 +59,21 @@ static bool IsSystemApp(const char *bundleName, int32_t userId)
         static_cast<int32_t>(OHOS::AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
     OHOS::AppExecFwk::ApplicationInfo appInfo;
     int32_t ret = bundleMgr->GetApplicationInfoV9(std::string(bundleName), flag, userId, appInfo);
+    char *anonyBundlename = nullptr;
+    Anonymize(bundleName, &anonyBundlename);
     if (ret != ERR_OK) {
-        LNN_LOGE(LNN_EVENT, "GetApplicationInfoV9 failed, ret=%{public}d", ret);
+        LNN_LOGE(LNN_EVENT,
+            "GetApplicationInfoV9 failed, ret=%{public}d, userId=%{public}d, bundleName=%{public}s",
+            ret, userId, AnonymizeWrapper(anonyBundlename));
+        AnonymizeFree(anonyBundlename);
         return false;
     }
     if (!appInfo.isSystemApp) {
-        LNN_LOGE(LNN_EVENT, "not system app.");
+        LNN_LOGE(LNN_EVENT, "not system app. bundleName=%{public}s", AnonymizeWrapper(anonyBundlename));
+        AnonymizeFree(anonyBundlename);
         return false;
     }
+    AnonymizeFree(anonyBundlename);
     return true;
 }
 

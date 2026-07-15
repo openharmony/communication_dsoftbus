@@ -619,6 +619,7 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
         LNN_LOGE(LNN_STATE, "param is null");
         return;
     }
+    *isNeedUpdateAclState = false;
     if (aclState == ACL_NOT_WRITE) {
         LNN_LOGE(LNN_STATE, "no need write acl");
         return;
@@ -642,8 +643,6 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
             sessionKeyId) != UPDATE_ACL_SUCC) {
             InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId, aclParams->localUserId);
         }
-    } else {
-        *isNeedUpdateAclState = false;
     }
 }
 
@@ -655,6 +654,7 @@ void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteSta
         LNN_LOGE(LNN_STATE, "param is null");
         return;
     }
+    *isNeedUpdateAclState = false;
     if (aclState == ACL_NOT_WRITE) {
         LNN_LOGE(LNN_STATE, "no need write acl");
         return;
@@ -670,8 +670,6 @@ void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteSta
             sessionKeyId) != UPDATE_ACL_SUCC) {
             InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId, aclParams->localUserId);
         }
-    } else {
-        *isNeedUpdateAclState = false;
     }
 }
 

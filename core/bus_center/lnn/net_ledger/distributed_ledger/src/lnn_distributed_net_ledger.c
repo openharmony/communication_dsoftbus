@@ -2001,7 +2001,10 @@ void LnnUpdateAclState(const char *udid, AclWriteState aclState)
         return;
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-    LNN_LOGE(LNN_LEDGER, "not found.");
+    char *anonyUdid = NULL;
+    Anonymize(udid, &anonyUdid);
+    LNN_LOGE(LNN_LEDGER, "udid=%{public}s not found.", anonyUdid);
+    AnonymizeFree(anonyUdid);
 }
 
 static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum, bool isNeedMeta)
