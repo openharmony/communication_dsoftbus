@@ -69,7 +69,7 @@ ohos_shared_library("linkenhance") {
     cfi_cross_dso = true
     debug = false
   }
-
+  branch_protector_ret = "pac_ret"
   relative_install_dir = "module/distributedsched"
 
   subsystem_name = "communication"
