@@ -62,27 +62,28 @@ void BusCenterClientAgentTest::TearDown()
 {
 }
  
-static void OnDataReceived(const char *networkId, const char *data, uint32_t len)
+static void OnDataReceived(const char *networkId, const char *data, uint32_t len, const char *abilityName)
 {
     (void)networkId;
     (void)data;
     (void)len;
+    (void)abilityName;
 }
  
 HWTEST_F(BusCenterClientAgentTest, GetTrustedDevices_Test001, TestSize.Level1)
 {
     DeviceNodeInfo *info = nullptr;
     int32_t nums = 0;
-    int32_t ret = GetTrustedDevice(nullptr, nullptr);
+    int32_t ret = GetTrustedDevices(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
  
-    ret = GetTrustedDevice(&info, nullptr);
+    ret = GetTrustedDevices(&info, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
  
-    ret = GetTrustedDevice(nullptr, &nums);
+    ret = GetTrustedDevices(nullptr, &nums);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
  
-    ret = GetTrustedDevice(&info, &nums);
+    ret = GetTrustedDevices(&info, &nums);
     if (info != nullptr) {
         EXPECT_NO_FATAL_FAILURE(FreeDeviceNodeInfo(info));
     }

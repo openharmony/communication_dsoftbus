@@ -32,10 +32,17 @@
 
 typedef struct {
     ListNode node;
-    uint32_t msgId;              // 消息 ID
-    FarFieldBusiness moduleType; // 模块类型
-    uint64_t createTime;          // 创建时间戳，用于超时清理
+    uint32_t msgId;
+    FarFieldBusiness moduleType;
+    uint64_t createTime;
 } FragmentRecvContext;
+
+typedef struct {
+    const char *udid;
+    const uint8_t *data;
+    uint32_t dataLen;
+    uint32_t *offset;
+} SingleFragmentData;
 
 static ListNode g_fragmentList;
 static SoftBusMutex g_fragmentMutex = {0};
@@ -53,7 +60,13 @@ void FragmentRecvInit(void)
         LNN_LOGE(LNN_EVENT, "init fragment mutex failed");
         return;
     }
+    SoftBusMutexLock(&g_fragmentMutex);
+    if (g_isInit) {
+        SoftBusMutexUnlock(&g_fragmentMutex);
+        return;
+    }
     g_isInit = true;
+    SoftBusMutexUnlock(&g_fragmentMutex);
     LNN_LOGI(LNN_EVENT, "fragment recv init success");
 }
 
@@ -135,9 +148,12 @@ void FragmentRecvClearAll(void)
     LNN_LOGI(LNN_EVENT, "clear all fragment recv context");
 }
 
-static bool ParseModuleType(const uint8_t *data, FarFieldBusiness *moduleType)
+static bool ParseModuleType(const uint8_t *data, uint32_t dataLen, FarFieldBusiness *moduleType)
 {
-    // 解析 FarFiledPktHead 包头
+    if (dataLen < FAR_FIELD_PKT_HEAD_SIZE) {
+        LNN_LOGE(LNN_EVENT, "data too short for pkt head, dataLen=%{public}u", dataLen);
+        return false;
+    }
     FarFiledPktHead header;
     uint32_t magic = 0;
     uint32_t type = 0;
@@ -152,9 +168,12 @@ static bool ParseModuleType(const uint8_t *data, FarFieldBusiness *moduleType)
     header.type = ntohl(type);
     header.len = ntohl(len);
 
-    // 验证 magic
     if (header.magic != 0xBABEFACE) {
         LNN_LOGE(LNN_EVENT, "invalid magic=%{public}x", header.magic);
+        return false;
+    }
+    if (header.len > dataLen) {
+        LNN_LOGE(LNN_EVENT, "header.len=%{public}u exceeds dataLen=%{public}u", header.len, dataLen);
         return false;
     }
 
@@ -213,24 +232,25 @@ static int32_t ExtractFragmentData(const uint8_t *data, uint32_t offset, uint32_
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessSingleFragment(const char *udid, const uint8_t *data, uint32_t dataLen,
-    uint32_t *offset, FragmentRecvCallback callback)
+static int32_t ProcessSingleFragment(SingleFragmentData *singleData, ConversationChannelType channelType,
+    FragmentRecvCallback callback)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
-    if (dataLen - *offset < totalHeaderSize) {
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
+    if (singleData->dataLen - *(singleData->offset) < totalHeaderSize) {
         LNN_LOGE(LNN_EVENT, "data too short for header");
         return SOFTBUS_INVALID_PARAM;
     }
 
     FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
-    if (!ParseModuleType(data + *offset, &moduleType)) {
+    if (!ParseModuleType(singleData->data + *(singleData->offset),
+        singleData->dataLen - *(singleData->offset), &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
     DataFragmentInfo header = { 0 };
-    if (ParseFragmentHeader(data + *offset + FAR_FIELD_PKT_HEAD_SIZE, FRAGMENT_HEADER_SIZE, &header) !=
-        SOFTBUS_OK) {
+    if (ParseFragmentHeader(singleData->data + *(singleData->offset) + FAR_FIELD_PKT_HEAD_SIZE,
+        FRAGMENT_HEADER_LEN, &header) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "parse fragment header failed");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -240,14 +260,14 @@ static int32_t ProcessSingleFragment(const char *udid, const uint8_t *data, uint
     }
 
     uint32_t fragmentTotalSize = totalHeaderSize + header.size;
-    if (dataLen - *offset < fragmentTotalSize) {
+    if (singleData->dataLen - *(singleData->offset) < fragmentTotalSize) {
         LNN_LOGE(LNN_EVENT, "data too short for fragment");
         return SOFTBUS_INVALID_PARAM;
     }
 
     uint8_t *buffer = NULL;
     uint32_t fragmentDataSize = 0;
-    ret = ExtractFragmentData(data, *offset, fragmentTotalSize, &buffer, &fragmentDataSize);
+    ret = ExtractFragmentData(singleData->data, *(singleData->offset), fragmentTotalSize, &buffer, &fragmentDataSize);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -255,15 +275,15 @@ static int32_t ProcessSingleFragment(const char *udid, const uint8_t *data, uint
     LNN_LOGI(LNN_EVENT, "fragment received, msgId=%{public}u, size=%{public}u, offset=%{public}u, total=%{public}u",
         header.msgId, header.size, header.offset, header.total);
 
-    callback(udid, (const char *)buffer, fragmentDataSize, moduleType);
+    callback(singleData->udid, (const char *)buffer, fragmentDataSize, channelType, moduleType);
     SoftBusFree(buffer);
 
-    *offset += fragmentTotalSize;
+    *(singleData->offset) += fragmentTotalSize;
     return SOFTBUS_OK;
 }
 
 int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t dataLen,
-    FragmentRecvCallback callback)
+    ConversationChannelType channelType, FragmentRecvCallback callback)
 {
     if (udid == NULL || data == NULL || callback == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid param");
@@ -282,7 +302,7 @@ int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t data
 
     // 解析模块类型，判断是否需要分片处理
     FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
-    if (!ParseModuleType(data, &moduleType)) {
+    if (!ParseModuleType(data, dataLen, &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -295,14 +315,16 @@ int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t data
             LNN_LOGE(LNN_EVENT, "data too short for TYPE_LNN_FAST_OFFLINE");
             return SOFTBUS_INVALID_PARAM;
         }
-        callback(udid, (const char *)(data + FAR_FIELD_PKT_HEAD_SIZE), dataLen - FAR_FIELD_PKT_HEAD_SIZE, moduleType);
+        callback(udid, (const char *)(data + FAR_FIELD_PKT_HEAD_SIZE), dataLen - FAR_FIELD_PKT_HEAD_SIZE,
+            channelType, moduleType);
         return SOFTBUS_OK;
     }
 
     // TYPE_AGENT_COMMUNICATION 需要分片处理
     uint32_t offset = 0;
     while (offset < dataLen) {
-        int32_t ret = ProcessSingleFragment(udid, data, dataLen, &offset, callback);
+        SingleFragmentData singleData = { udid, data, dataLen, &offset };
+        int32_t ret = ProcessSingleFragment(&singleData, channelType, callback);
         if (ret != SOFTBUS_OK) {
             return ret;
         }

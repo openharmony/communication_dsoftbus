@@ -312,12 +312,10 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
         if (laneLinkInfo->type == LANE_HML) {
             RemoveDelayDestroyMessage(resourceItem.laneId);
         }
-        DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
     if (laneLinkInfo->type == LANE_HML &&
         FindLaneResourceByLinkType(peerUdid, LANE_HML_RAW, &resourceItem) == SOFTBUS_OK) {
-        DelLogicAndLaneRelationship(resourceItem.laneId);
         ClearLaneResourceByLaneId(resourceItem.laneId);
     }
     uint32_t resNum;

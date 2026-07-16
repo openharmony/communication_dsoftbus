@@ -26,7 +26,6 @@ extern "C" {
 #endif
 
 #define OPEN_FILTER_USERID_MODE 1
-#define CLOSE_FILTER_USERID_MODE 0
 
 void LnnInitCloudSyncModule(void);
 void LnnDeInitCloudSyncModule(void);

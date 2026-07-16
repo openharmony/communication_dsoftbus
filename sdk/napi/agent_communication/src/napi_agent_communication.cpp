@@ -16,7 +16,9 @@
 #include "napi_agent_communication.h"
 
 #include <cstring>
+#include <map>
 #include <mutex>
+#include <string>
 #include "securec.h"
 #include <dlfcn.h>
 
@@ -33,7 +35,7 @@
 namespace Communication {
 namespace OHOS::Softbus {
 
-static napi_threadsafe_function g_dataTsfn = nullptr;
+static std::map<std::string, napi_threadsafe_function> g_dataTsfnMap;
 static std::mutex g_callbackMutex;
 #define ARGC_ONE 1
 #define ARGC_TWO 2
@@ -66,6 +68,9 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
     DataCallbackData *cb = static_cast<DataCallbackData *>(rawData);
  
     if (env == nullptr || jsCallback == nullptr || cb == nullptr) {
+        if (cb != nullptr && cb->data != nullptr) {
+            delete[] cb->data;
+        }
         delete cb;
         return;
     }
@@ -77,11 +82,21 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
     napi_create_string_utf8(env, cb->deviceId.c_str(), NAPI_AUTO_LENGTH, &networkId);
 
     napi_value msg;
-    napi_create_arraybuffer(env, cb->dataLen, nullptr, &msg);
-    void *msgData = nullptr;
-    napi_get_arraybuffer_info(env, msg, &msgData, nullptr);
-    if (msgData != nullptr && cb->data != nullptr) {
-        memcpy_s(msgData, cb->dataLen, cb->data, cb->dataLen);
+    void *msgData;
+    napi_status status = napi_create_arraybuffer(env, cb->dataLen, &msgData, &msg);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create arraybuffer failed");
+        napi_close_handle_scope(env, scope);
+        delete[] cb->data;
+        delete cb;
+        return;
+    }
+    if (memcpy_s(msgData, cb->dataLen, cb->data, cb->dataLen) != EOK) {
+        COMM_LOGE(COMM_SDK, "memcpy data failed");
+        napi_close_handle_scope(env, scope);
+        delete[] cb->data;
+        delete cb;
+        return;
     }
  
     napi_value argv[2];
@@ -91,10 +106,11 @@ static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *contex
     napi_value global;
     napi_get_global(env, &global);
 
-    napi_status status = napi_call_function(env, global, jsCallback, 2, argv, nullptr);
-    COMM_LOGI(COMM_SDK, "CallDataJsCallback status=%{public}d", status);
+    status = napi_call_function(env, global, jsCallback, ARGC_TWO, argv, nullptr);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "call js callback failed");
+    }
     napi_close_handle_scope(env, scope);
-
     delete[] cb->data;
     delete cb;
 }
@@ -159,7 +175,7 @@ static napi_value NapiGetTrustedDevicesSync(napi_env env, napi_value thisVar)
 
     DeviceNodeInfo *list = nullptr;
     int32_t nums = 0;
-    int32_t resultCode = ConvertToJsErrcode(GetTrustedDevice(&list, &nums));
+    int32_t resultCode = ConvertToJsErrcode(GetTrustedDevices(&list, &nums));
     if (resultCode != CONVERSATION_OK) {
         if (list != nullptr) {
             FreeDeviceNodeInfo(list);
@@ -215,7 +231,8 @@ static bool ParseSendMsgParams(napi_env env, size_t argc, napi_value *argv, Send
     }
     if (!ParseString(env, ctx->deviceId, argv[0]) || !ParseString(env, ctx->bundleName, argv[ARGC_ONE]) ||
         !ParseString(env, ctx->abilityName, argv[ARGC_TWO]) ||
-        ctx->bundleName.size() >= BUNDLE_NAME_LEN || ctx->abilityName.size() >= ABILITY_NAME_LEN) {
+        ctx->bundleName.size() >= BUNDLE_NAME_LEN || ctx->abilityName.size() >= ABILITY_NAME_LEN ||
+        ctx->bundleName.empty() || ctx->abilityName.empty()) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return false;
     }
@@ -288,12 +305,19 @@ static napi_value NapiPostConversationDataAsync(napi_env env, napi_callback_info
     return promise;
 }
 
-static void OnDataRecvCallback(const char *deviceId, const char *data, uint32_t length)
+static void OnDataRecvCallback(const char *deviceId, const char *data, uint32_t length, const char *abilityName)
 {
-    std::lock_guard<std::mutex> lock(g_callbackMutex);
-
-    if (g_dataTsfn == nullptr) {
-        COMM_LOGE(COMM_SDK, "tsfn is null");
+    std::string abilityKey = (abilityName != nullptr) ? abilityName : "";
+    napi_threadsafe_function tsfn = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(g_callbackMutex);
+        auto it = g_dataTsfnMap.find(abilityKey);
+        if (it != g_dataTsfnMap.end()) {
+            tsfn = it->second;
+        }
+    }
+    if (tsfn == nullptr) {
+        COMM_LOGE(COMM_SDK, "tsfn not found, abilityName=%{public}s", abilityKey.c_str());
         return;
     }
     DataCallbackData *cb = new DataCallbackData();
@@ -313,12 +337,47 @@ static void OnDataRecvCallback(const char *deviceId, const char *data, uint32_t 
             }
         }
     }
-    napi_status status = napi_call_threadsafe_function(g_dataTsfn, cb, napi_tsfn_nonblocking);
+    napi_status status = napi_call_threadsafe_function(tsfn, cb, napi_tsfn_nonblocking);
     if (status != napi_ok) {
         COMM_LOGE(COMM_SDK, "napi_call_threadsafe_function failed");
         delete[] cb->data;
         delete cb;
     }
+}
+
+static void RemoveTsfnFromMap(const std::string &abilityName)
+{
+    std::lock_guard<std::mutex> lock(g_callbackMutex);
+    auto it = g_dataTsfnMap.find(abilityName);
+    if (it != g_dataTsfnMap.end()) {
+        if (it->second != nullptr) {
+            napi_release_threadsafe_function(it->second, napi_tsfn_release);
+        }
+        g_dataTsfnMap.erase(it);
+    }
+}
+
+static bool StoreTsfn(napi_env env, napi_value dataCallback, const std::string &abilityName, bool &isExisting)
+{
+    std::lock_guard<std::mutex> lock(g_callbackMutex);
+    if (g_dataTsfnMap.find(abilityName) != g_dataTsfnMap.end()) {
+        COMM_LOGI(COMM_SDK, "conversation listener already exist");
+        isExisting = true;
+        return true;
+    }
+    napi_value dataResourceName;
+    napi_create_string_utf8(env, "CloudDataCallback", NAPI_AUTO_LENGTH, &dataResourceName);
+    napi_threadsafe_function tsfn = nullptr;
+    napi_status status = napi_create_threadsafe_function(env, dataCallback, nullptr,
+        dataResourceName, 0, 1, nullptr, nullptr, nullptr, CallDataJsCallback, &tsfn);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create data tsfn failed");
+        ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
+        return false;
+    }
+    g_dataTsfnMap[abilityName] = tsfn;
+    isExisting = false;
+    return true;
 }
 
 static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc, napi_value *argv)
@@ -331,19 +390,17 @@ static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc
 
     std::string bundleName;
     std::string abilityName;
- 
     if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1]) ||
-        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN) {
+        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN ||
+        bundleName.empty() || abilityName.empty()) {
         COMM_LOGE(COMM_SDK, "Invalid business args");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return nullptr;
     }
- 
-    napi_value dataCallback = argv[2];
 
+    napi_value dataCallback = argv[2];
     napi_valuetype dataType;
     napi_typeof(env, dataCallback, &dataType);
-
     if (dataType != napi_function) {
         COMM_LOGE(COMM_SDK, "dataCallback must be function");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
@@ -352,28 +409,17 @@ static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc
 
     ConversationBusiness business;
     FillConversationBusiness(business, bundleName, abilityName);
-    {
-        std::lock_guard<std::mutex> lock(g_callbackMutex);
-
-        if (g_dataTsfn != nullptr) {
-            napi_release_threadsafe_function(g_dataTsfn, napi_tsfn_release);
-            g_dataTsfn = nullptr;
-        }
-
-        napi_value dataResourceName;
-        napi_create_string_utf8(env, "CloudDataCallback", NAPI_AUTO_LENGTH, &dataResourceName);
-        napi_status status = napi_create_threadsafe_function(env, dataCallback, nullptr,
-            dataResourceName, 0, 1, nullptr, nullptr, nullptr, CallDataJsCallback, &g_dataTsfn);
-        if (status != napi_ok) {
-            COMM_LOGE(COMM_SDK, "create data tsfn failed");
-            ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
-            return nullptr;
-        }
+    bool isExisting = false;
+    if (!StoreTsfn(env, dataCallback, abilityName, isExisting)) {
+        return nullptr;
     }
 
     static ConversationListener listener = {.OnDataReceived = OnDataRecvCallback};
     int32_t result = ConvertToJsErrcode(RegisterConversationListener(&business, &listener));
     if (result != CONVERSATION_OK) {
+        if (!isExisting) {
+            RemoveTsfnFromMap(abilityName);
+        }
         ThrowBusinessError(env, result);
         return nullptr;
     }
@@ -410,7 +456,8 @@ static napi_value NapiunRegisterConversationListenerSync(napi_env env, size_t ar
     std::string abilityName;
 
     if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1]) ||
-        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN) {
+        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN ||
+        bundleName.empty() || abilityName.empty()) {
         COMM_LOGE(COMM_SDK, "Invalid business args");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return nullptr;
@@ -421,13 +468,7 @@ static napi_value NapiunRegisterConversationListenerSync(napi_env env, size_t ar
     FillConversationBusiness(business, bundleName, abilityName);
 
     int32_t result = ConvertToJsErrcode(UnregisterConversationListener(&business));
-    {
-        std::lock_guard<std::mutex> lock(g_callbackMutex);
-        if (g_dataTsfn != nullptr) {
-            napi_release_threadsafe_function(g_dataTsfn, napi_tsfn_release);
-            g_dataTsfn = nullptr;
-        }
-    }
+    RemoveTsfnFromMap(abilityName);
     if (result != CONVERSATION_OK) {
         ThrowBusinessError(env, result);
         return nullptr;

@@ -1385,6 +1385,11 @@ int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint3
     return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
+int32_t ProcessPushMsgInner(const uint8_t *data, uint32_t len)
+{
+    return ServerIpcProcessPushMsg(data, len);
+}
+
 int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len)
 {
     return ServerIpcSetDisplayName(pkgName, nameData, len);
@@ -2086,8 +2091,12 @@ int32_t DiscRecoverySubscribe()
 int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *networkId,
     const char *data, uint32_t length)
 {
-    if (info == NULL || data == NULL) {
+    if (info == NULL || data == NULL || networkId == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (length == 0 || length > COMMUNICATION_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_STATE, "invalid length=%{public}u", length);
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_busCenterClient.g_conversationCbList == NULL) {
@@ -2111,14 +2120,20 @@ int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *net
     }
     (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
 
+    char *anonyBundlename = NULL;
+    char *anonyAbilityname = NULL;
+    Anonymize(info->bundleName, &anonyBundlename);
+    Anonymize(info->abilityName, &anonyAbilityname);
     if (!found) {
         LNN_LOGI(LNN_STATE, "callback not exist, abilityName=%{public}s, bundleName=%{public}s",
-            info->abilityName, info->bundleName);
+            AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
     } else if (found && listener.OnDataReceived != NULL) {
-        listener.OnDataReceived(networkId, data, length);
+        listener.OnDataReceived(networkId, data, length, info->abilityName);
         LNN_LOGI(LNN_STATE, "notify abilityName=%{public}s, bundleName=%{public}s",
-            info->abilityName, info->bundleName);
+            AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
     }
+    AnonymizeFree(anonyBundlename);
+    AnonymizeFree(anonyAbilityname);
     return SOFTBUS_OK;
 }
  
@@ -2199,8 +2214,12 @@ int32_t UnregisterConversationListenerInner(const ConversationBusiness *info)
     }
  
     if (g_busCenterClient.g_conversationCbList == NULL) {
-        LNN_LOGI(LNN_STATE, "g_conversationCbList is NULL");
-        return SOFTBUS_INVALID_PARAM;
+        LNN_LOGI(LNN_STATE, "init g_busCenterClient.g_conversationCbList");
+        g_busCenterClient.g_conversationCbList = CreateSoftBusList();
+        if (g_busCenterClient.g_conversationCbList == NULL) {
+            LNN_LOGE(LNN_STATE, "init g_busCenterClient.g_conversationCbList failed");
+            return SOFTBUS_MALLOC_ERR;
+        }
     }
  
     if (SoftBusMutexLock(&(g_busCenterClient.g_conversationCbList->lock)) != SOFTBUS_OK) {
@@ -2230,9 +2249,9 @@ int32_t UnregisterConversationListenerInner(const ConversationBusiness *info)
     if (found) {
         return ServerIpcUnregisterConversationListener(info);
     } else {
-        LNN_LOGE(LNN_STATE, "remove listener failed, abilityName=%{public}s, bundleName=%{public}s",
+        LNN_LOGW(LNN_STATE, "remove success, listener not found, abilityName=%{public}s, bundleName=%{public}s",
                  info->abilityName, info->bundleName);
-        return SOFTBUS_NOT_FIND;
+        return SOFTBUS_OK;
     }
 }
  

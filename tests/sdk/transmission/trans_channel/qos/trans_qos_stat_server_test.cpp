@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,16 +26,12 @@ static const char *UDP_TEST_SESSION_NAME = "com.plrdtest.dsoftbus.JtSendRawStrea
 int32_t g_testWay = 0;
 class TransQosStatServerTest : public testing::Test {
 public:
-    TransQosStatServerTest()
-    {}
-    ~TransQosStatServerTest()
-    {}
+    TransQosStatServerTest() { }
+    ~TransQosStatServerTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
 void TransQosStatServerTest::SetUpTestCase(void)
@@ -48,8 +44,7 @@ void TransQosStatServerTest::SetUpTestCase(void)
     std::cin >> g_testWay;
 }
 
-void TransQosStatServerTest::TearDownTestCase(void)
-{}
+void TransQosStatServerTest::TearDownTestCase(void) { }
 
 static int32_t OnSessionOpend(int32_t sessionId, int32_t result)
 {
@@ -62,15 +57,28 @@ static void OnSessionClosed(int32_t sessionId)
     printf("on session closed[sessionId = %d]\n", sessionId);
 }
 
-static void OnStreamReceived(int32_t sessionId, const StreamData *data,
-                             const StreamData *ext, const StreamFrameInfo *param)
-{}
+static void OnStreamReceived(
+    int32_t sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+{
+    (void)sessionId;
+    (void)data;
+    (void)ext;
+    (void)param;
+}
 
 static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int dataLen)
-{}
+{
+    (void)sessionId;
+    (void)data;
+    (void)dataLen;
+}
 
 static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int dataLen)
-{}
+{
+    (void)sessionId;
+    (void)data;
+    (void)dataLen;
+}
 
 static void OnQosEvent(int32_t sessionId, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {

@@ -45,9 +45,9 @@ public:
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
+    void SetUp(void) override
     {}
-    void TearDown() override
+    void TearDown(void) override
     {}
 };
 
@@ -61,7 +61,7 @@ void SoftbusProxyChannelManagerPagingTest::TearDownTestCase(void)
 
 static ProxyChannelInfo *TestCreateProxyChannelInfo(void)
 {
-    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (chan == nullptr) {
         return nullptr;
     }
@@ -78,9 +78,9 @@ static ProxyChannelInfo *TestCreateProxyChannelInfo(void)
     return chan;
 }
 
-/**@
+/**
  * @tc.name: TransPagingUpdatePagingChannelInfoTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans paging update paging channel info.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -126,9 +126,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingUpdatePagingChannelInf
     g_proxyChannelList = nullptr;
 }
 
-/**@
+/**
  * @tc.name: TransPagingUpdatePidAndDataTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans paging update pid and data.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -170,9 +170,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingUpdatePidAndDataTest00
     g_proxyChannelList = nullptr;
 }
 
-/**@
+/**
  * @tc.name: TransUpdateAuthSeqByChannelIdTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans update auth seq by channel id.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -217,9 +217,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransUpdateAuthSeqByChannelIdTest
     TransOnGenFailed(requestId, SOFTBUS_INVALID_PARAM);
 }
 
-/**@
+/**
  * @tc.name: TransPagingResetChanTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans paging reset chan.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -261,9 +261,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingResetChanTest001, Test
     g_proxyChannelList = nullptr;
 }
 
-/**@
+/**
  * @tc.name: TransPagingHandshakeUnpackErrMsgTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans paging handshake unpack err msg.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -314,9 +314,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingHandshakeUnpackErrMsgT
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**@
+/**
  * @tc.name: TransDealProxyChannelOpenResultTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans deal proxy channel open result.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -357,9 +357,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransDealProxyChannelOpenResultTe
     g_proxyChannelList = nullptr;
 }
 
-/**@
+/**
  * @tc.name: TransProxyCreatePagingChanInfoTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans proxy create paging chan info.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -382,9 +382,9 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransProxyCreatePagingChanInfoTes
     g_proxyChannelList = nullptr;
 }
 
-/**@
+/**
  * @tc.name: TransProxyGetProxyChannelIdByAuthReqTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: test trans proxy get proxy channel id by auth req.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -419,4 +419,3 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransProxyGetProxyChannelIdByAuth
     g_proxyChannelList = nullptr;
 }
 } // namespace OHOS
-

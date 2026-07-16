@@ -126,6 +126,14 @@ int32_t ISoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char 
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t ISoftBusServer::ProcessPushMsg(const uint8_t *data, uint32_t len)
+{
+    (void)data;
+    (void)len;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
     COMM_LOGE(COMM_SVC, "ipc default impl");
@@ -285,7 +293,7 @@ int32_t ISoftBusServer::ProcessAccountAuth(const char *pkgName, int64_t requestI
     return SOFTBUS_IPC_ERR;
 }
 
-int32_t ISoftBusServer::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+int32_t ISoftBusServer::GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     (void)info;
     (void)nums;

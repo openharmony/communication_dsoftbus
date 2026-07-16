@@ -59,6 +59,7 @@ public:
         int32_t frequency;
         std::string interface;
         std::string goIpAddr;
+        std::string groupName;
         WifiDirectP2pDeviceInfo groupOwner;
         std::vector<WifiDirectP2pDeviceInfo> clientDevices;
     };

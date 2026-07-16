@@ -62,6 +62,8 @@ typedef enum {
     EVENT_STAGE_LNN_CONVERSATION_RESULT = 17,
     EVENT_STAGE_LNN_CONVERSATION_CHANNEL_STATS = 18,
     EVENT_STAGE_LNN_CONVERSATION_P2P_RESULT = 19,
+    EVENT_STAGE_LNN_CONVERSATION_PUSH_STATS = 20,
+    EVENT_STAGE_LNN_CONVERSATION_PUSH_WAKE = 21,
 } LnnEventLnnStage;
 
 typedef enum {
@@ -170,7 +172,7 @@ typedef enum {
     CONVERSATION_CHANNEL_NEARBY = 0,
     CONVERSATION_CHANNEL_PUSH = 1,
     CONVERSATION_CHANNEL_P2P = 2,
-} ConversationChannelType;
+} ConvChannelType;
 
 typedef struct {
     int32_t result;             // STAGE_RES
@@ -234,6 +236,8 @@ typedef struct {
     int32_t channelRtt;          // CHANNEL_RTT
     int32_t p2pResult;           // P2P_RESULT
     int32_t p2pLatency;          // P2P_LATENCY
+    uint32_t pushTxCount;        // PUSH_TX_COUNT
+    uint32_t pushRxCount;        // PUSH_RX_COUNT
     uint8_t sourceType;          // SPARK_SEND_SOURCE_TYPE
     uint8_t dataType;            // SPARK_SEND_DATA_TYPE
     uint8_t isReliable;          // SPARK_SEND_IS_RELIABLE

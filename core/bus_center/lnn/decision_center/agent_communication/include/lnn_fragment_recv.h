@@ -26,23 +26,15 @@
 extern "C" {
 #endif
 
-#define FRAGMENT_HEADER_SIZE  16
-#define MODULE_TYPE_SIZE      4
-
-// 初始化（模块初始化时调用）
 void FragmentRecvInit(void);
 
-// 销毁（模块退出时调用）
 void FragmentRecvDeinit(void);
 
-// 分片数据处理入口
 int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t dataLen,
-    FragmentRecvCallback callback);
+    ConversationChannelType channelType, FragmentRecvCallback callback);
 
-// 清理指定msgId的缓存
 void FragmentRecvClear(uint32_t msgId);
 
-// 清理所有缓存（连接断开时）
 void FragmentRecvClearAll(void);
 
 #ifdef __cplusplus

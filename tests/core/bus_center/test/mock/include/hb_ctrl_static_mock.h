@@ -92,7 +92,7 @@ public:
     virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
     virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
     virtual int32_t HbMultiUserHandleLogin(void) = 0;
-    virtual int32_t HbMultiUserHandleLogout(void) = 0;
+    virtual int32_t HbMultiUserHandleLogout(int32_t userId) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -152,7 +152,7 @@ public:
     MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
     MOCK_METHOD0(HbMultiUserHandleLogin, int32_t(void));
-    MOCK_METHOD0(HbMultiUserHandleLogout, int32_t(void));
+    MOCK_METHOD1(HbMultiUserHandleLogout, int32_t(int32_t));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

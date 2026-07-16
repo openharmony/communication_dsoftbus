@@ -71,10 +71,9 @@ typedef enum {
     EXCUTE_IN_SIXTH_TIME
 } ExcuteTimes;
 
-/*
+/**
  * @tc.name: CheckSendLenForBoosterTest01
- * @tc.desc: test CheckSendLenForBooster
- *           CheckSendLenForBooster with different parameters
+ * @tc.desc: CheckSendLenForBooster with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -94,10 +93,9 @@ HWTEST_F(TransClientMsgServiceExTest, CheckSendLenForBoosterTest01, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: TransClientMsgServiceTest01
- * @tc.desc: test TransClientMsgService
- *           Transmission sdk message service check send length with different parameters
+ * @tc.desc: Transmission sdk message service check send length with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -131,10 +129,9 @@ HWTEST_F(TransClientMsgServiceExTest, TransClientMsgServiceTest01, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: CheckBusinessTypeAndOsTypeBySessionIdTest01
- * @tc.desc: test CheckBusinessTypeAndOsTypeBySessionId
- *           CheckBusinessTypeAndOsTypeBySessionId with different parameters
+ * @tc.desc: CheckBusinessTypeAndOsTypeBySessionId with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -222,10 +219,9 @@ int32_t ActionOfGetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelTy
     return SOFTBUS_OK;
 }
 
-/*
+/**
  * @tc.name: CheckAsyncSendBytesFuncTest01
- * @tc.desc: test CheckAsyncSendBytesFunc
- *           CheckAsyncSendBytesFunc with different parameters
+ * @tc.desc: CheckAsyncSendBytesFunc with different parameters.
  * @tc.type: FUNC
  * @tc.require:
  */

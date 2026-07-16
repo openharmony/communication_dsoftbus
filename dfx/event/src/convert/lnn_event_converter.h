@@ -92,12 +92,14 @@ LNN_ASSIGNER(Errcode, IsNoCapAlloc, isNoCapAlloc)
 LNN_ASSIGNER(Errcode, SourceType, sourceType)
 LNN_ASSIGNER(Errcode, DataType, dataType)
 LNN_ASSIGNER(Errcode, IsReliable, isReliable)
-LNN_ASSIGNER(Errcode, DataLen, dataLen)
+LNN_ASSIGNER(Uint32, DataLen, dataLen)
 LNN_ASSIGNER(Errcode, ChannelType, channelType)
 LNN_ASSIGNER(Errcode, ChannelResult, channelResult)
-LNN_ASSIGNER(Errcode, ChannelRtt, channelRtt)
+LNN_ASSIGNER(Int32, ChannelRtt, channelRtt)
 LNN_ASSIGNER(Errcode, P2pResult, p2pResult)
-LNN_ASSIGNER(Errcode, P2pLatency, p2pLatency)
+LNN_ASSIGNER(Int32, P2pLatency, p2pLatency)
+LNN_ASSIGNER(Uint32, PushTxCount, pushTxCount)
+LNN_ASSIGNER(Uint32, PushRxCount, pushRxCount)
 LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 LNN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -116,7 +118,7 @@ LNN_ASSIGNER(String, BundleName, bundleName)
 LNN_ASSIGNER(String, AbilityName, abilityName)
 LNN_ASSIGNER(String, StatsTime, statsTime)
 
-#define LNN_ASSIGNER_SIZE 81 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 83 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",           HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -179,6 +181,8 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "CHANNEL_RTT",          HISYSEVENT_INT32,  LnnAssignerChannelRtt       },
     { "P2P_RESULT",           HISYSEVENT_INT32,  LnnAssignerP2pResult        },
     { "P2P_LATENCY",          HISYSEVENT_INT32,  LnnAssignerP2pLatency       },
+    { "PUSH_TX_COUNT",        HISYSEVENT_UINT32, LnnAssignerPushTxCount      },
+    { "PUSH_RX_COUNT",        HISYSEVENT_UINT32, LnnAssignerPushRxCount      },
     { "SOURCE_TYPE",          HISYSEVENT_UINT8,  LnnAssignerSourceType       },
     { "DATA_TYPE",            HISYSEVENT_UINT8,  LnnAssignerDataType         },
     { "IS_RELIABLE",          HISYSEVENT_UINT8,  LnnAssignerIsReliable       },

@@ -274,23 +274,27 @@ static void HbSleStateEventHandler(const LnnEventBasicInfo *info)
 
 static void HbUpdateEnableStatusToMcu(void)
 {
-    bool isBleEnable = IsHeartbeatEnableForMcu();
-
     if (!LnnIsLocalSupportMcuFeature()) {
+        LNN_LOGD(LNN_HEART_BEAT, "not support mcu, no need handle");
         return;
     }
+    bool isBleEnable = IsHeartbeatEnableForMcu();
     if (isBleEnable == g_enableStateMcu) {
+        LNN_LOGD(LNN_HEART_BEAT, "ctrl ignore same request");
         return;
     }
     g_enableStateMcu = isBleEnable;
     SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
     LnnNotifyLpMcuInit(state, 0);
+    LNN_LOGI(LNN_HEART_BEAT, "isBleEnable=%{public}d", isBleEnable);
 }
 
 static void HbConditionChanged(bool isOnlySetState)
 {
     HbRefreshConditionState();
-    HbUpdateEnableStatusToMcu();
+    if (LnnIsLocalSupportMcuFeature()) {
+        HbUpdateEnableStatusToMcu();
+    }
     bool isEnable = IsHeartbeatEnable();
     if (g_enableState == isEnable) {
         LNN_LOGI(LNN_HEART_BEAT, "ctrl ignore same enable request, isEnable=%{public}d", isEnable);
@@ -385,6 +389,7 @@ static int32_t SameAccountDevDisableDiscoveryProcess(bool hasMcuRequestDisable)
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 {
+    LNN_LOGI(LNN_HEART_BEAT, "LnnRequestBleDiscoveryProcess enter, strategy=%{public}d", strategy);
     if (LnnIsLocalSupportMcuFeature()) {
         SoftBusHbApState state = g_enableStateMcu ? SOFTBUS_HB_AP_ENABLE : SOFTBUS_HB_AP_DISABLE;
         LnnNotifyLpMcuInit(state, strategy);
@@ -894,10 +899,8 @@ static void HbHandleAccountLogin(void)
 static void HbHandleAccountLogout(void)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    (void)HbMultiUserHandleLogout();
-#else
-    LnnSetCloudAbility(false, CLOSE_FILTER_USERID_MODE);
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
     if (LnnDeleteSyncToDB(0, 0, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB clear local cache fail");
     }

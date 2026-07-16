@@ -76,6 +76,7 @@ public:
     int32_t RegisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;
+    int32_t ProcessPushMsg(const uint8_t *data, uint32_t len) override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
@@ -106,7 +107,7 @@ public:
         const char *data, uint32_t len) override;
     int32_t RegisterConversationListener(const ConversationBusiness *info) override;
     int32_t UnregisterConversationListener(const ConversationBusiness *info) override;
-    int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums) override;
+    int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums) override;
 protected:
     void OnStart() override;
     void OnStop() override;

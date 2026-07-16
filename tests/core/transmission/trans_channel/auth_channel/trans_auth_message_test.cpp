@@ -33,9 +33,9 @@ const char *g_reqId = "test reqId";
 
 class TransAuthMessageTest : public testing::Test {
 public:
-    TransAuthMessageTest()
+    TransAuthMessageTest(void)
     {}
-    ~TransAuthMessageTest()
+    ~TransAuthMessageTest(void)
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -52,16 +52,16 @@ void TransAuthMessageTest::TearDownTestCase(void)
 {}
 
 /*
- * @tc.name: TransAuthMessageTest001
- * @tc.desc: TransAuthChannelMsgUnpack, Transmission auth message pack and unpack with invalid parameters.
+ * @tc.name: TransAuthChannelMsgPackTest001
+ * @tc.desc: TransAuthChannelMsgPack with null params returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
+HWTEST_F(TransAuthMessageTest, TransAuthChannelMsgPackTest001, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusMalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
 
     int32_t ret = TransAuthChannelMsgPack(nullptr, appInfo);
@@ -70,44 +70,73 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageTest001, TestSize.Level1)
     ret = TransAuthChannelMsgPack(msg, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransAuthChannelMsgUnpack(nullptr, appInfo, 0);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, nullptr, 0);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, appInfo, 0);
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
-
-    char cJsonStr[ERR_MSG_MAX_LEN] = {0};
-    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, nullptr, cJsonStr, ERR_MSG_MAX_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, g_errMsg, nullptr, ERR_MSG_MAX_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
 }
 
 /*
- * @tc.name: TransAuthMessageUnpackTest001
- * @tc.desc: Transmission auth message unpack.
+ * @tc.name: TransAuthChannelMsgUnpackTest001
+ * @tc.desc: TransAuthChannelMsgUnpack with null params returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
+HWTEST_F(TransAuthMessageTest, TransAuthChannelMsgUnpackTest001, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusMalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+
+    int32_t ret = TransAuthChannelMsgUnpack(nullptr, appInfo, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransAuthChannelInvalidParamTest001
+ * @tc.desc: TransAuthChannelMsgUnpack with len=0 and TransAuthChannelErrorPack with null params return error codes
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthMessageTest, TransAuthChannelInvalidParamTest001, TestSize.Level1)
+{
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusMalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+
+    int32_t ret = TransAuthChannelMsgUnpack(TEST_AUTH_DATA, appInfo, 0);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+
+    char cJsonStr[ERR_MSG_MAX_LEN] = {0};
+    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, nullptr, cJsonStr, ERR_MSG_MAX_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransAuthChannelErrorPack(SOFTBUS_INVALID_PARAM, g_errMsg, nullptr, ERR_MSG_MAX_LEN);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    SoftBusFree(appInfo);
+}
+
+/*
+ * @tc.name: TransAuthChannelMsgUnpackTest003
+ * @tc.desc: TransAuthChannelMsgUnpack with progressively added JSON fields returns SOFTBUS_PARSE_JSON_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthMessageTest, TransAuthChannelMsgUnpackTest003, TestSize.Level1)
+{
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusMalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
 
     bool res = AddNumberToJsonObject(msg, "CODE", CODE_OPEN_AUTH_MSG_CHANNEL);
     EXPECT_TRUE(res);
 
     char *data = cJSON_PrintUnformatted(msg);
-    int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
+    int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, strlen(data));
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
@@ -115,21 +144,21 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
     ASSERT_TRUE(res);
 
     data = cJSON_PrintUnformatted(msg);
-    ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
+    ret = TransAuthChannelMsgUnpack(data, appInfo, strlen(data));
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
     res = AddStringToJsonObject(msg, "PKG_NAME", g_pkgName);
     ASSERT_TRUE(res);
     data = cJSON_PrintUnformatted(msg);
-    ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
+    ret = TransAuthChannelMsgUnpack(data, appInfo, strlen(data));
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
     res = AddStringToJsonObject(msg, "SRC_BUS_NAME", g_sessionName);
     ASSERT_TRUE(res);
     data = cJSON_PrintUnformatted(msg);
-    ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
+    ret = TransAuthChannelMsgUnpack(data, appInfo, strlen(data));
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
@@ -137,7 +166,7 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
     EXPECT_TRUE(res);
 
     data = cJSON_PrintUnformatted(msg);
-    ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
+    ret = TransAuthChannelMsgUnpack(data, appInfo, strlen(data));
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_free(data);
 
@@ -145,8 +174,8 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
     EXPECT_TRUE(res);
 
     data = cJSON_PrintUnformatted(msg);
-    ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    ret = TransAuthChannelMsgUnpack(data, appInfo, strlen(data));
+    EXPECT_EQ(ret, SOFTBUS_OK);
  
     cJSON_free(data);
     cJSON_Delete(msg);
@@ -154,27 +183,28 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TransAuthMessageUnpackTest002
- * @tc.desc: Transmission auth message unpack errcode.
+ * @tc.name: TransAuthChannelMsgUnpackTest004
+ * @tc.desc: TransAuthChannelMsgUnpack with ERR_CODE and ERR_DESC fields returns SOFTBUS_PARSE_JSON_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest002, TestSize.Level1)
+HWTEST_F(TransAuthMessageTest, TransAuthChannelMsgUnpackTest004, TestSize.Level1)
 {
-    AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusMalloc(sizeof(AppInfo)));
     ASSERT_TRUE(appInfo != nullptr);
-    memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
 
-    bool res = AddNumberToJsonObject(msg, "ERR_CODE", 1);
+    int32_t errorCode = 1;
+    bool res = AddNumberToJsonObject(msg, "ERR_CODE", errorCode);
     EXPECT_TRUE(res);
 
     res = AddStringToJsonObject(msg, "ERR_DESC", g_errMsg);
     EXPECT_TRUE(res);
 
     char *data = cJSON_PrintUnformatted(msg);
-    int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, strlen(data));
+    EXPECT_EQ(ret, errorCode);
 
     cJSON_free(data);
     cJSON_Delete(msg);

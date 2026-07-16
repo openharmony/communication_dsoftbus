@@ -23,6 +23,7 @@
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_log.h"
+#include "lnn_multi_user_process.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
 #include "power_mgr_client.h"
@@ -100,6 +101,7 @@ static void HandleDistributedAccountChange(const CommonEventData &data)
     }
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     LNN_LOGI(LNN_EVENT, "logout eventUserId=%{public}d", eventUserId);
+    (void)HbMultiUserHandleLogout(eventUserId);
     LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT, eventUserId);
 #else
     int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();

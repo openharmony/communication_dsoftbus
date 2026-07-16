@@ -17,7 +17,9 @@
 
 #include "conn_log.h"
 
+#include "meta_socket_struct.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_utils.h"
 #include "wifi_direct_manager.h"
 
 namespace OHOS::SoftBus {
@@ -108,6 +110,30 @@ bool LinkManager::ProcessIfPresent(const std::string &remoteMac, const Handler &
     });
     if (iterator == links_.end()) {
         CONN_LOGE(CONN_WIFI_DIRECT, "remoteMac=%{public}s not found", WifiDirectAnonymizeMac(remoteMac).c_str());
+        return false;
+    }
+
+    handler(*iterator->second);
+    return true;
+}
+
+static constexpr const char* const ZERO_MAC = "00:00:00:00:00:00";
+bool LinkManager::ProcessIfPresentByName(const std::string &groupName, const Handler &handler)
+{
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
+    std::lock_guard lock(lock_);
+    auto iterator = std::find_if(links_.begin(), links_.end(), [&groupName](const auto &link) {
+        if (link.second->GetRemoteBaseMac() != ZERO_MAC) {
+            return false;
+        }
+        if (link.second->GetGroupName() != groupName) {
+            return false;
+        }
+        auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(link.second->GetRemoteDeviceId());
+        return WifiDirectUtils::GetMetaType(remoteNetworkId.c_str()) == META_TYPE_SDK;
+    });
+    if (iterator == links_.end()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "groupName=%{public}s not found", WifiDirectAnonymizeSsid(groupName).c_str());
         return false;
     }
 

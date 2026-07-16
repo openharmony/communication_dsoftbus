@@ -27,11 +27,13 @@ namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
 
-static void TestCallback(const char *udid, const char *data, uint32_t dataLen, FarFieldBusiness businessType)
+static void TestCallback(const char *udid, const char *data, uint32_t dataLen,
+    ConversationChannelType channelType, FarFieldBusiness businessType)
 {
     (void)udid;
     (void)data;
     (void)dataLen;
+    (void)channelType;
     (void)businessType;
 }
 
@@ -92,7 +94,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvDeinit_MultipleDeinit_Test, TestSize.L
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_NullUdid_Test, TestSize.Level1)
 {
     uint8_t data[100] = {0};
-    int32_t ret = FragmentRecvProcess(nullptr, data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess(nullptr, data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -104,7 +106,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_NullUdid_Test, TestSize.Level1
  */
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_NullData_Test, TestSize.Level1)
 {
-    int32_t ret = FragmentRecvProcess("test_udid", nullptr, 100, TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", nullptr, 100, CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -117,7 +119,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_NullData_Test, TestSize.Level1
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_NullCallback_Test, TestSize.Level1)
 {
     uint8_t data[100] = {0};
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), nullptr);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -130,7 +132,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_NullCallback_Test, TestSize.Le
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_ZeroDataLen_Test, TestSize.Level1)
 {
     uint8_t data[100] = {0};
-    int32_t ret = FragmentRecvProcess("test_udid", data, 0, TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, 0, CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -145,7 +147,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DataLenTooLarge_Test, TestSize
     uint8_t *data = static_cast<uint8_t *>(SoftBusCalloc(MAX_MSG_LEN + 1));
     ASSERT_NE(data, nullptr);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, MAX_MSG_LEN + 1, TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, MAX_MSG_LEN + 1, CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     SoftBusFree(data);
@@ -165,7 +167,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_InvalidMagic_Test, TestSize.Le
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(TYPE_LNN_FAST_OFFLINE);
     *reinterpret_cast<uint32_t *>(data + 8) = htonl(10);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -182,7 +184,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_InvalidModuleType_Test, TestSi
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(FAR_FIELD_BUSINESS_MAX);
     *reinterpret_cast<uint32_t *>(data + 8) = htonl(10);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -203,7 +205,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_FastOfflineType_Test, TestSize
         data[FAR_FIELD_PKT_HEAD_SIZE + i] = 'a' + i;
     }
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -220,7 +222,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_FastOfflineDataTooShort_Test, 
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(TYPE_LNN_FAST_OFFLINE);
     *reinterpret_cast<uint32_t *>(data + 8) = htonl(0);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -232,7 +234,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_FastOfflineDataTooShort_Test, 
  */
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_AgentCommunicationType_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -249,7 +251,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_AgentCommunicationType_Test, T
         data[totalHeaderSize + i] = 'a' + i;
     }
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -265,7 +267,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DataTooShortForHeader_Test, Te
     *reinterpret_cast<uint32_t *>(data) = htonl(0xBABEFACE);
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(TYPE_AGENT_COMMUNICATION);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -277,7 +279,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DataTooShortForHeader_Test, Te
  */
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DataTooShortForFragment_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 5];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -290,7 +292,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DataTooShortForFragment_Test, 
     *reinterpret_cast<uint32_t *>(data + FAR_FIELD_PKT_HEAD_SIZE + 8) = htonl(0);
     *reinterpret_cast<uint32_t *>(data + FAR_FIELD_PKT_HEAD_SIZE + 12) = htonl(10);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -328,7 +330,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvClearAll_Success_Test, TestSize.Level1
  */
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_WatchWechatType_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -345,13 +347,13 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_WatchWechatType_Test, TestSize
         data[totalHeaderSize + i] = 'w' + i;
     }
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MultipleFragments_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint32_t totalDataSize = 30;
     
     uint8_t data[totalHeaderSize * 2 + 20];
@@ -386,13 +388,14 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MultipleFragments_Test, TestSi
         data[offset + totalHeaderSize + i] = 'b' + i;
     }
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, offset + totalHeaderSize + 10, TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, offset + totalHeaderSize + 10,
+        CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_InvalidFragmentHeader_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -405,7 +408,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_InvalidFragmentHeader_Test, Te
     *reinterpret_cast<uint32_t *>(data + FAR_FIELD_PKT_HEAD_SIZE + 8) = htonl(0);
     *reinterpret_cast<uint32_t *>(data + FAR_FIELD_PKT_HEAD_SIZE + 12) = htonl(10);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -416,7 +419,8 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_EmptyData_Test, TestSize.Level
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(TYPE_LNN_FAST_OFFLINE);
     *reinterpret_cast<uint32_t *>(data + 8) = htonl(0);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, FAR_FIELD_PKT_HEAD_SIZE, TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, FAR_FIELD_PKT_HEAD_SIZE,
+        CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -429,7 +433,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MaxMsgLen_Test, TestSize.Level
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(TYPE_LNN_FAST_OFFLINE);
     *reinterpret_cast<uint32_t *>(data + 8) = htonl(MAX_MSG_LEN - FAR_FIELD_PKT_HEAD_SIZE);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, MAX_MSG_LEN, TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, MAX_MSG_LEN, CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     SoftBusFree(data);
@@ -453,7 +457,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvClearAll_AfterProcess_Test, TestSize.L
         data[FAR_FIELD_PKT_HEAD_SIZE + i] = 'a' + i;
     }
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     EXPECT_NO_FATAL_FAILURE(FragmentRecvClearAll());
@@ -462,7 +466,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvClearAll_AfterProcess_Test, TestSize.L
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DifferentMsgId_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     
     uint8_t data1[totalHeaderSize + 10];
     memset_s(data1, sizeof(data1), 0, sizeof(data1));
@@ -475,7 +479,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DifferentMsgId_Test, TestSize.
     *reinterpret_cast<uint32_t *>(data1 + FAR_FIELD_PKT_HEAD_SIZE + 8) = htonl(0);
     *reinterpret_cast<uint32_t *>(data1 + FAR_FIELD_PKT_HEAD_SIZE + 12) = htonl(10);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data1, sizeof(data1), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data1, sizeof(data1), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     uint8_t data2[totalHeaderSize + 10];
@@ -489,7 +493,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_DifferentMsgId_Test, TestSize.
     *reinterpret_cast<uint32_t *>(data2 + FAR_FIELD_PKT_HEAD_SIZE + 8) = htonl(0);
     *reinterpret_cast<uint32_t *>(data2 + FAR_FIELD_PKT_HEAD_SIZE + 12) = htonl(10);
     
-    ret = FragmentRecvProcess("test_udid", data2, sizeof(data2), TestCallback);
+    ret = FragmentRecvProcess("test_udid", data2, sizeof(data2), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     EXPECT_NO_FATAL_FAILURE(FragmentRecvClear(111));
@@ -500,13 +504,13 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MemcpyFailedInParse_Test, Test
 {
     uint8_t data[5] = {0};
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_OffsetOutOfRange_Test, TestSize.Level1)
 {
-    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_SIZE;
+    uint32_t totalHeaderSize = FAR_FIELD_PKT_HEAD_SIZE + FRAGMENT_HEADER_LEN;
     uint8_t data[totalHeaderSize + 10];
     memset_s(data, sizeof(data), 0, sizeof(data));
     
@@ -519,7 +523,8 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_OffsetOutOfRange_Test, TestSiz
     *reinterpret_cast<uint32_t *>(data + FAR_FIELD_PKT_HEAD_SIZE + 8) = htonl(1000);
     *reinterpret_cast<uint32_t *>(data + FAR_FIELD_PKT_HEAD_SIZE + 12) = htonl(10);
     
-    EXPECT_NO_FATAL_FAILURE(FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback));
+    EXPECT_NO_FATAL_FAILURE(FragmentRecvProcess("test_udid", data, sizeof(data),
+        CONVERSATION_FAR_FIELD_PUSH, TestCallback));
 }
 
 HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MagicValidation_Test, TestSize.Level1)
@@ -530,11 +535,11 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_MagicValidation_Test, TestSize
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(TYPE_LNN_FAST_OFFLINE);
     *reinterpret_cast<uint32_t *>(data + 8) = htonl(10);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     *reinterpret_cast<uint32_t *>(data) = htonl(0xBABEFACE - 1);
-    ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -546,7 +551,7 @@ HWTEST_F(LnnFragmentRecvTest, FragmentRecvProcess_ModuleTypeBoundary_Test, TestS
     *reinterpret_cast<uint32_t *>(data + 4) = htonl(FAR_FIELD_BUSINESS_MAX - 1);
     *reinterpret_cast<uint32_t *>(data + 8) = htonl(10);
     
-    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), TestCallback);
+    int32_t ret = FragmentRecvProcess("test_udid", data, sizeof(data), CONVERSATION_FAR_FIELD_PUSH, TestCallback);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

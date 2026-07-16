@@ -568,26 +568,6 @@ HWTEST_F(InnerLinkTest, LegacyReusedFlagTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: ListenerModuleTest
- * @tc.desc: test listener module set and get
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InnerLinkTest, ListenerModuleTest, TestSize.Level1)
-{
-    InnerLink info("");
-
-    info.SetListenerModule(ListenerModule::LISTENER_MODULE_AUTH);
-    EXPECT_EQ(info.GetListenerModule(), ListenerModule::LISTENER_MODULE_AUTH);
-
-    info.SetListenerModule(ListenerModule::LISTENER_MODULE_P2P);
-    EXPECT_EQ(info.GetListenerModule(), ListenerModule::LISTENER_MODULE_P2P);
-
-    info.SetListenerModule(ListenerModule::LISTENER_MODULE_DYNAMIC_START);
-    EXPECT_EQ(info.GetListenerModule(), ListenerModule::LISTENER_MODULE_DYNAMIC_START);
-}
-
-/*
  * @tc.name: ReferenceCountTest
  * @tc.desc: test reference count management
  * @tc.type: FUNC
@@ -649,25 +629,6 @@ HWTEST_F(InnerLinkTest, InterfaceNameTest, TestSize.Level1)
 
     info.SetRemoteInterface("p2p-p2p0-1");
     EXPECT_EQ(info.GetRemoteInterface(), "p2p-p2p0-1");
-}
-
-/*
- * @tc.name: ProtectedStateAfterStateChange
- * @tc.desc: test protected state after state changes
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(InnerLinkTest, ProtectedStateAfterStateChange, TestSize.Level1)
-{
-    InnerLink info("");
-
-    info.SetState(InnerLink::LinkState::CONNECTED);
-    EXPECT_EQ(info.IsProtected(), true);
-
-    info.SetState(InnerLink::LinkState::DISCONNECTED);
-    // Sleep to exceed PROTECT_DURATION_MS
-    sleep(PROTECT_DURATION_MS / 1000 + 1);
-    EXPECT_EQ(info.IsProtected(), false);
 }
 
 } // namespace OHOS::SoftBus

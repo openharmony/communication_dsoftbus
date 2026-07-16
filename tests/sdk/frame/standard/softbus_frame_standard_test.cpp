@@ -142,7 +142,7 @@ void SoftBusServerProxyFrameTest::TearDownTestCase()
     g_mock = nullptr;
 }
 
-/*
+/**
  * @tc.name: InnerRegisterServiceTest
  * @tc.desc: InnerRegisterServiceTest, Initialization failure
  * @tc.desc: InnerRegisterServiceTest, Successful initialization
@@ -162,10 +162,9 @@ HWTEST_F(SoftBusServerProxyFrameTest, InnerRegisterServiceTest, TestSize.Level1)
     EXPECT_EQ(InnerRegisterService(&sessionServerList), SOFTBUS_TRANS_GET_CLIENT_NAME_FAILED);
 }
 
-/*
+/**
  * @tc.name: GetSystemAbilityTest
- * @tc.desc: test GetSystemAbility
- *           Get interface return is not empty
+ * @tc.desc: GetSystemAbilityTest, Get interface return is not empty
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -174,10 +173,9 @@ HWTEST_F(SoftBusServerProxyFrameTest, GetSystemAbilityTest, TestSize.Level1)
     EXPECT_TRUE(GetSystemAbility() != nullptr);
 }
 
-/*
+/**
  * @tc.name: ClientRegisterServiceTest
- * @tc.desc: test ClientRegisterService
- *           Initializing registration succeeded. Procedure
+ * @tc.desc: ClientRegisterServiceTest, Initializing registration succeeded. Procedure
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,10 +185,9 @@ HWTEST_F(SoftBusServerProxyFrameTest, ClientRegisterServiceTest, TestSize.Level1
     EXPECT_EQ(ClientRegisterService("ClientRegisterServiceTest"), SOFTBUS_SERVER_NOT_INIT);
 }
 
-/*
+/**
  * @tc.name: ClientStubInitTest
- * @tc.desc: test ClientStubInit
- *           Successful initialization
+ * @tc.desc: ClientStubInitTest, Successful initialization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -199,7 +196,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, ClientStubInitTest, TestSize.Level1)
     EXPECT_EQ(ClientStubInit(), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: SoftbusRegisterServiceTest
  * @tc.desc: SoftbusRegisterServiceTest, remote is nullptr return SOFTBUS_ERR
  * @tc.desc: SoftbusRegisterServiceTest, SoftbusRegisterService success return SOFTBUS_OK
@@ -225,7 +222,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, SoftbusRegisterServiceTest, TestSize.Level
         serverProxyFrame->SoftbusRegisterService(nullptr, nullptr, nullptr), SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
 }
 
-/*
+/**
  * @tc.name: OnRemoteRequestTest
  * @tc.desc: OnRemoteRequestTest, ReadInterfaceToken faild return SOFTBUS_ERR
  * @tc.desc: OnRemoteRequestTest, OnRemoteRequest Call default return IPC_STUB_UNKNOW_TRANS_ERR
@@ -252,7 +249,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteRequestTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnClientPermissionChangeInnerTest
  * @tc.desc: OnClientPermissionChangeInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnClientPermissionChangeInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -275,7 +272,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnClientPermissionChangeInnerTest, TestSiz
     EXPECT_EQ(g_stub->OnClientPermissionChangeInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnClientTransLimitChangeInnerTest
  * @tc.desc: OnClientTransLimitChangeInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnClientTransLimitChangeInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -301,7 +298,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnClientTransLimitChangeInnerTest, TestSiz
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnChannelQosEventInnerTest
  * @tc.desc: OnChannelQosEventInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnChannelQosEventInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -345,7 +342,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelQosEventInnerTest, TestSize.Level
     EXPECT_NE(g_stub->OnChannelQosEventInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnChannelOnQosInnerTest
  * @tc.desc: OnChannelOnQosInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnChannelOnQosInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -393,7 +390,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOnQosInnerTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnChannelOnQosInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: SetChannelInfoInnerTest
  * @tc.desc: SetChannelInfoInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: SetChannelInfoInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -449,7 +446,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnJoinLNNResultInnerTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 }
 
-/*
+/**
  * @tc.name: OnLeaveLNNResultInnerTest
  * @tc.desc: OnLeaveLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnLeaveLNNResultInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -472,7 +469,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnLeaveLNNResultInnerTest, TestSize.Level1
     EXPECT_EQ(g_stub->OnLeaveLNNResultInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnNodeOnlineStateChangedInnerTest
  * @tc.desc: OnNodeOnlineStateChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnNodeOnlineStateChangedInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -507,7 +504,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnNodeOnlineStateChangedInnerTest, TestSiz
     EXPECT_EQ(g_stub->OnNodeOnlineStateChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 }
 
-/*
+/**
  * @tc.name: OnNodeStatusChangedInnerTest
  * @tc.desc: OnNodeStatusChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnNodeStatusChangedInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -542,7 +539,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnNodeStatusChangedInnerTest, TestSize.Lev
     EXPECT_EQ(g_stub->OnNodeStatusChangedInner(data, reply), SOFTBUS_NETWORK_READRAWDATA_FAILED);
 }
 
-/*
+/**
  * @tc.name: OnNodeBasicInfoChangedInnerTest
  * @tc.desc: OnNodeBasicInfoChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnNodeBasicInfoChangedInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -577,7 +574,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnNodeBasicInfoChangedInnerTest, TestSize.
     EXPECT_EQ(g_stub->OnNodeBasicInfoChangedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 }
 
-/*
+/**
  * @tc.name: OnLocalNetworkIdChangedInnerTest
  * @tc.desc: OnLocalNetworkIdChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnLocalNetworkIdChangedInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -600,7 +597,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnLocalNetworkIdChangedInnerTest, TestSize
     EXPECT_EQ(g_stub->OnLocalNetworkIdChangedInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnNodeDeviceTrustedChangeInnerTest
  * @tc.desc: OnNodeDeviceTrustedChangeInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnNodeDeviceTrustedChangeInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -641,7 +638,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnNodeDeviceTrustedChangeInnerTest, TestSi
     EXPECT_EQ(g_stub->OnNodeDeviceTrustedChangeInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnHichainProofExceptionInnerTest
  * @tc.desc: OnHichainProofExceptionInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnHichainProofExceptionInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -685,7 +682,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnHichainProofExceptionInnerTest, TestSize
     EXPECT_EQ(g_stub->OnHichainProofExceptionInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnTimeSyncResultInnerTest
  * @tc.desc: OnTimeSyncResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnTimeSyncResultInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -715,7 +712,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnTimeSyncResultInnerTest, TestSize.Level1
     EXPECT_EQ(g_stub->OnTimeSyncResultInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnPublishLNNResultInnerTest
  * @tc.desc: OnPublishLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnPublishLNNResultInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -739,7 +736,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnPublishLNNResultInnerTest, TestSize.Leve
     EXPECT_EQ(g_stub->OnPublishLNNResultInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnRefreshLNNResultInnerTest
  * @tc.desc: OnRefreshLNNResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnRefreshLNNResultInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -762,7 +759,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRefreshLNNResultInnerTest, TestSize.Leve
     EXPECT_EQ(g_stub->OnRefreshLNNResultInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnRefreshDeviceFoundInnerTest
  * @tc.desc: OnRefreshDeviceFoundInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnRefreshDeviceFoundInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -781,7 +778,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRefreshDeviceFoundInnerTest, TestSize.Le
     EXPECT_EQ(g_stub->OnRefreshDeviceFoundInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 }
 
-/*
+/**
  * @tc.name: OnDataLevelChangedInnerTest
  * @tc.desc: OnDataLevelChangedInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnDataLevelChangedInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -805,7 +802,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnDataLevelChangedInnerTest, TestSize.Leve
     EXPECT_EQ(g_stub->OnDataLevelChangedInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnRangeResultInnerTest
  * @tc.desc: OnRangeResultInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnRangeResultInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -831,7 +828,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRangeResultInnerTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnMsdpRangeResultInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnChannelBindInnerTest
  * @tc.desc: OnChannelBindInnerTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnChannelBindInnerTest, ReadCString faild return SOFTBUS_ERR
@@ -854,7 +851,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelBindInnerTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnChannelBindInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnCheckCollabRelationTest
  * @tc.desc: OnCheckCollabRelationTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnCheckCollabRelationTest, ReadCString faild return SOFTBUS_ERR
@@ -880,7 +877,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnCheckCollabRelationTest, TestSize.Level1
     SoftBusFree(sinkInfo);
 }
 
-/*
+/**
  * @tc.name: OnClientChannelOnQosTest
  * @tc.desc: OnClientChannelOnQosTest, ReadInt32 faild return SOFTBUS_ERR
  * @tc.desc: OnClientChannelOnQosTest, ReadCString faild return SOFTBUS_ERR
@@ -911,10 +908,9 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnClientChannelOnQosTest, TestSize.Level1)
     SoftBusFree(qos);
 }
 
-/*
+/**
  * @tc.name: OnChannelOpenedInnerTest001
- * @tc.desc: tset OnChannelOpenedInner
- *           MessageParcel read failed return SOFTBUS_ERR
+ * @tc.desc: OnChannelOpenedInnerTest001, MessageParcel read failed return SOFTBUS_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -960,10 +956,9 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest001, TestSize.Leve
     EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 }
 
-/*
+/**
  * @tc.name: OnChannelOpenedInnerTest002
- * @tc.desc: test OnChannelOpenedInnerTest
- *           MessageParcel read failed return SOFTBUS_ERR
+ * @tc.desc: OnChannelOpenedInnerTest002, MessageParcel read failed return SOFTBUS_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1004,7 +999,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest002, TestSize.Leve
     EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 }
 
-/*
+/**
  * @tc.name: OnChannelOpenFailedInnerTest
  * @tc.desc: OnChannelOpenFailedInnerTest, ReadInt32 failed return SOFTBUS_ERR
  * @tc.desc: OnChannelOpenFailedInnerTest, success return SOFTBUS_OK
@@ -1031,7 +1026,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenFailedInnerTest, TestSize.Lev
     EXPECT_EQ(g_stub->OnChannelOpenFailedInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnChannelLinkDownInnerTest
  * @tc.desc: OnChannelLinkDownInnerTest, ReadCString failed return SOFTBUS_ERR
  * @tc.desc: OnChannelLinkDownInnerTest, ReadInt32 failed return SOFTBUS_ERR
@@ -1054,7 +1049,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelLinkDownInnerTest, TestSize.Level
     EXPECT_EQ(g_stub->OnChannelLinkDownInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnChannelClosedInnerTest
  * @tc.desc: OnChannelClosedInnerTest, ReadInt32 failed return SOFTBUS_ERR
  * @tc.desc: OnChannelClosedInnerTest, success return SOFTBUS_OK
@@ -1076,7 +1071,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelClosedInnerTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_IPC_ERR);
 }
 
-/*
+/**
  * @tc.name: OnChannelMsgReceivedInnerTest
  * @tc.desc: OnChannelMsgReceivedInnerTest, MessageParcel failed return SOFTBUS_ERR
  * @tc.desc: OnChannelMsgReceivedInnerTest, success return SOFTBUS_OK
@@ -1117,10 +1112,9 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelMsgReceivedInnerTest, TestSize.Le
     EXPECT_EQ(g_stub->OnChannelMsgReceivedInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: ISoftBusClientTest001
- * @tc.desc: test ISoftBusClientTest
- *           use normal or wrong param
+ * @tc.desc: ISoftBusClientTest, use normal or wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1163,10 +1157,9 @@ HWTEST_F(SoftBusServerProxyFrameTest, ISoftBusClientTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnRemoteDiedTest
- * @tc.desc: test OnRemoteDiedTest
- *           use normal or wrong param
+ * @tc.desc: OnRemoteDiedTest, use normal or wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1176,7 +1169,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteDiedTest, TestSize.Level1)
     g_mock->OnRemoteDied(nullptr);
 }
 
-/*
+/**
  * @tc.name: OnConnectionStateChangeInner
  * @tc.desc: OnConnectionStateChangeInner, MessageParcel failed return SOFTBUS_IPC_ERR
  * @tc.desc: OnConnectionStateChangeInner, success return SOFTBUS_OK
@@ -1203,7 +1196,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnConnectionStateChangeInnerTest, TestSize
     EXPECT_EQ(g_stub->OnConnectionStateChangeInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnAcceptConnectInner
  * @tc.desc: OnAcceptConnectInner, MessageParcel failed return SOFTBUS_IPC_ERR
  * @tc.desc: OnAcceptConnectInner, success return SOFTBUS_OK
@@ -1225,7 +1218,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnAcceptConnectInnerTest, TestSize.Level1)
     EXPECT_EQ(g_stub->OnAcceptConnectInner(data, reply), SOFTBUS_OK);
 }
 
-/*
+/**
  * @tc.name: OnDataReceivedInner
  * @tc.desc: OnDataReceivedInner, MessageParcel failed return SOFTBUS_IPC_ERR
  * @tc.desc: OnDataReceivedInner, success return SOFTBUS_OK

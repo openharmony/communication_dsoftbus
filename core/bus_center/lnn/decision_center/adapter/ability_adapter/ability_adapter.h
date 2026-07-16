@@ -32,4 +32,4 @@ bool IsExtensionAbility(const char *bundleName, const char *abilityName, int32_t
 }
 #endif
 
-#endif
+#endif // ABILITY_ADAPTER_H

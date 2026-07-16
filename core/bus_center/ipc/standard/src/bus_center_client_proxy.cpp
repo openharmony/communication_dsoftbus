@@ -15,6 +15,8 @@
 
 #include "bus_center_client_proxy.h"
 
+#include "securec.h"
+
 #include "bus_center_client_proxy_standard.h"
 #include "lnn_log.h"
 #include "softbus_client_info_manager.h"
@@ -343,7 +345,16 @@ void ClientOnConversationRecvMsg(int32_t pid, const ConversationBusiness *info, 
         LNN_LOGE(LNN_EVENT, "param is invalid");
         return;
     }
-    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(info->abilityName, pid);
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = sprintf_s(pkgName, PKG_NAME_SIZE_MAX, "pkg_%d", pid);
+    if (ret < 0 || ret >= static_cast<int32_t>(PKG_NAME_SIZE_MAX - 1)) {
+        LNN_LOGE(LNN_EVENT, "pkgName err");
+        return;
+    }
+    LNN_LOGI(LNN_EVENT, "init ablilityName to pkgName: %{public}s", pkgName);
+
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
         return;

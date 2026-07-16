@@ -78,6 +78,7 @@ public:
     virtual int32_t RegisterRangeCallbackForMsdp(const char *pkgName) = 0;
     virtual int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) = 0;
     virtual int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+    virtual int32_t ProcessPushMsg(const uint8_t *data, uint32_t len);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);
     virtual int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
@@ -108,7 +109,7 @@ public:
         const char *data, uint32_t len);
     virtual int32_t RegisterConversationListener(const ConversationBusiness *info);
     virtual int32_t UnregisterConversationListener(const ConversationBusiness *info);
-    virtual int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums);
+    virtual int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");
 };

@@ -24,6 +24,8 @@
 
 #include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
+#include "softbus_utils.h"
 
 #define HB_GEARMODE_MAX_SET_CNT        100
 #define HB_DUMP_GEAR_MODE_LIST_MAX_NUM 10
@@ -684,12 +686,14 @@ static uint64_t GetFixedPeriodByMsgPara(LnnProcessSendOnceMsgPara *msgPara)
     uint64_t period = 0;
     switch (msgPara->hbType) {
         case HEARTBEAT_TYPE_BLE_V1:
+        case HEARTBEAT_TYPE_UDP:
             period = (uint64_t)LOW_FREQ_CYCLE * HB_TIME_FACTOR;
             break;
         case HEARTBEAT_TYPE_SLE:
             period = (uint64_t)HB_SEND_SLE_HB_MODE;
             break;
         default:
+            LNN_LOGE(LNN_HEART_BEAT, "HB invalid type=%{public}d", msgPara->hbType);
             break;
     }
     return period;
@@ -1187,6 +1191,9 @@ int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
     if (LnnPostStopMsgToHbFsm(g_hbFsm, type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB stop heartbeat by type post msg fail");
         return SOFTBUS_NETWORK_POST_MSG_FAIL;
+    }
+    if ((type & HEARTBEAT_TYPE_SLE) == HEARTBEAT_TYPE_SLE) {
+        return SOFTBUS_OK;
     }
     LnnHbClearRecvList();
     if (type ==

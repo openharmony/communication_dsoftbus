@@ -22,7 +22,6 @@
 #include "lnn_data_cloud_sync.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
-#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
@@ -169,37 +168,14 @@ static int32_t GenerateDefaultAccountHash(uint8_t *accountHash, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t LnnResetLogoutUserInfo(void)
+static void ProcessUserLogoutInfo(int32_t userId)
 {
-    if (g_localUserLedger == NULL) {
-        LNN_LOGI(LNN_LEDGER, "g_localUserLedger is null");
-        return SOFTBUS_OK;
-    }
-    int32_t *userIds = NULL;
-    uint32_t userIdsLen = 0;
-    if (GetAllForegroundAccountIds(&userIds, &userIdsLen) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get all foreground users failed, please check accounts");
-        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
-    }
-    if (SoftBusMutexLock(&g_localUserLedger->lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "lock local user list failed");
-        SoftBusFree(userIds);
-        return SOFTBUS_LOCK_ERR;
-    }
     UserStorageInfo *user = NULL;
     UserStorageInfo *userNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(user, userNext, &g_localUserLedger->list, UserStorageInfo, node) {
-        bool isActiveUser = false;
-        for (uint32_t i = 0; i < userIdsLen; i++) {
-            if (user->info.userId == userIds[i]) {
-                isActiveUser = true;
-                break;
-            }
-        }
-        if (!isActiveUser && user->info.accountId != 0) {
+        if (user->info.userId == userId && user->info.accountId != 0) {
             bool isMainScreenUserId = (user->info.displayId == MAIN_SCREEN_USER_TYPE) ? true : false;
-            uint32_t filterMode = (isMainScreenUserId == true) ? CLOSE_FILTER_USERID_MODE : OPEN_FILTER_USERID_MODE;
-            LnnSetCloudAbility(false, filterMode);
+            LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
             if (LnnDeleteSyncToDB(user->info.userId, user->info.accountId, isMainScreenUserId) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LEDGER, "delete local cache failed");
             }
@@ -208,7 +184,19 @@ int32_t LnnResetLogoutUserInfo(void)
             LNN_LOGI(LNN_LEDGER, "reset logout user successful, userId=%{public}d", user->info.userId);
         }
     }
+}
+
+int32_t LnnResetLogoutUserInfo(int32_t userId)
+{
+    if (g_localUserLedger == NULL) {
+        LNN_LOGI(LNN_LEDGER, "g_localUserLedger is null");
+        return SOFTBUS_OK;
+    }
+    if (SoftBusMutexLock(&g_localUserLedger->lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock local user list failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ProcessUserLogoutInfo(userId);
     (void)SoftBusMutexUnlock(&g_localUserLedger->lock);
-    SoftBusFree(userIds);
     return SOFTBUS_OK;
 }

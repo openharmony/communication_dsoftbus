@@ -254,6 +254,7 @@ typedef void (*AuthMetaCheckMetaExistFunc)(const AuthConnInfo *connInfo, bool *i
 typedef void (*AuthMetaDeinitFunc)(void);
 typedef void (*DelAuthMetaManagerByPidFunc)(const char *pkgName, int32_t pid);
 typedef int32_t (*LnnSyncTrustedRelationShipFunc)(const char *pkgName, const char *msg, uint32_t msgLen);
+typedef int32_t (*LnnProcessPushMsgFunc)(const uint8_t *data, uint32_t len);
 typedef int32_t (*LnnGetCurrChannelScoreFunc)(int32_t channelId);
 typedef int32_t (*CustomizedSecurityProtocolInitFunc)(void);
 typedef void (*CustomizedSecurityProtocolDeinitFunc)(void);
@@ -305,7 +306,8 @@ typedef int32_t (*AuthMetaGetIpByMetaNodeIdFunc)(const char *metaNodeId, char *i
 typedef int32_t (*AuthMetaGetLocalIpByMetaNodeIdFunc)(const char *metaNodeId, char *localIp, int32_t len);
 typedef int32_t (*AuthMetaGetConnectionTypeByMetaNodeIdFunc)(const char *metaNodeId,
     NetworkConnectionType *connectionType);
-typedef int32_t (*LnnSendAgentDataFunc)(const char *udid, const char *data, uint32_t length, LnnEventExtra *extra);
+typedef int32_t (*LnnSendAgentDataFunc)(const char *udid, const char *data, uint32_t length,
+    LnnEventExtra *extra, bool isAckMsg);
 typedef int32_t (*PostLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
 typedef int32_t (*RemoveLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);
@@ -465,6 +467,7 @@ typedef struct TagLnnEnhanceFuncList {
     LnnGetMetaPtkFunc lnnGetMetaPtk;
     LnnGetLocalPtkByUuidFunc lnnGetLocalPtkByUuid;
     LnnSyncTrustedRelationShipFunc lnnSyncTrustedRelationShip;
+    LnnProcessPushMsgFunc lnnProcessPushMsg;
     LnnUpdateLastAccLoginTimestampByUdidFunc lnnUpdateLastAccLoginTimestampByUdid;
     LnnRetrieveDeviceInfoByUdidFunc lnnRetrieveDeviceInfoByUdid;
     LnnSyncBleOfflineMsgFunc lnnSyncBleOfflineMsg;

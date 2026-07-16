@@ -1725,8 +1725,9 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     params.gcIp = gcIp;
     params.goIp = msg.GetLegacyP2pGoIp();
     LinkManager::GetInstance().ProcessIfAbsent(
-        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [&msg] (InnerLink &link) {
+        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [&msg, &configs] (InnerLink &link) {
             link.SetRemoteBaseMac(msg.GetLegacyP2pMac());
+            link.SetGroupName(configs[P2P_GROUP_CONFIG_INDEX_SSID]);
         });
     auto result = P2pEntity::GetInstance().Connect(params);
     if (result.errorCode_ != SOFTBUS_OK) {

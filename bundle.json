@@ -126,7 +126,9 @@
         "resource_schedule_service",
         "device_standby",
         "runtime_core",
-        "liburing"
+        "liburing",
+        "node",
+        "libuv"
       ],
       "third_party": [
         "cJSON",

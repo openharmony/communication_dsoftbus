@@ -409,6 +409,11 @@ int32_t SoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *
     return LnnIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
+int32_t SoftBusServer::ProcessPushMsg(const uint8_t *data, uint32_t len)
+{
+    return LnnIpcProcessPushMsg(data, len);
+}
+
 int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {
@@ -823,7 +828,7 @@ int32_t SoftBusServer::UnregisterConversationListener(const ConversationBusiness
     return LnnIpcUnregisterConversationListener(info, callingPid);
 }
 
-int32_t SoftBusServer::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+int32_t SoftBusServer::GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     return LnnIpcGetTrustedDevices(info, nums);
 }

@@ -42,11 +42,19 @@ static void DfxRecordSdkPostConversationData(const char *deviceId, const Convers
 
 static int32_t CommonInit(const char *ablilityName)
 {
-    if (InitSoftBus(ablilityName) != SOFTBUS_OK) {
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = sprintf_s(pkgName, PKG_NAME_SIZE_MAX, "pkg_%d", getpid());
+    if (ret < 0 || ret >= (int32_t)(PKG_NAME_SIZE_MAX - 1)) {
+        LNN_LOGE(LNN_INIT, "pkgName err");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    LNN_LOGI(LNN_INIT, "init ablilityName to pkgName: %{public}s", pkgName);
+
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init softbus failed");
         return SOFTBUS_NETWORK_NOT_INIT;
     }
-    if (CheckPackageName(ablilityName) != SOFTBUS_OK) {
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "check ablilityName failed");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -151,7 +159,7 @@ int32_t UnregisterConversationListener(const ConversationBusiness *info)
     return UnregisterConversationListenerInner(info);
 }
 
-int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     LNN_LOGI(LNN_EVENT,  "enter");
     LNN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid info");

@@ -706,6 +706,16 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
     return LnnSyncTrustedRelationShipPacked(pkgName, msg, msgLen);
 }
 
+int32_t LnnIpcProcessPushMsg(const uint8_t *data, uint32_t len)
+{
+    int32_t pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = IsOverThreshold(std::to_string(pid).c_str(), SERVER_PROCESS_PUSH_MSG);
+    if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
+        LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
+    return LnnProcessPushMsgPacked(data, len);
+}
+
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(
@@ -1056,8 +1066,18 @@ static int32_t GetAccountAuthInfo(int64_t requestId, PkgNameAndPidInfo *info)
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t AddAgentCommunicationInfo(const ConversationBusiness *info, int32_t pid)
+static int32_t AddOrUpdateAgentCommunicationInfo(const ConversationBusiness *info, int32_t pid)
 {
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    for (const auto &iter : g_agentCommunicationInfo) {
+        if (strncmp(info->bundleName, (*iter).info.bundleName, BUNDLE_NAME_LEN) == 0 &&
+            strncmp(info->abilityName, (*iter).info.abilityName, ABILITY_NAME_LEN) == 0) {
+            (*iter).pid = pid;
+            LNN_LOGI(LNN_EVENT, "update pid=%{public}d success", pid);
+            return SOFTBUS_OK;
+        }
+    }
+
     AgentCommunicationInfo *item = new (std::nothrow) AgentCommunicationInfo();
     if (item == nullptr) {
         LNN_LOGE(LNN_EVENT, "create agent communication info fail");
@@ -1070,22 +1090,9 @@ static int32_t AddAgentCommunicationInfo(const ConversationBusiness *info, int32
         return SOFTBUS_STRCPY_ERR;
     }
     item->pid = pid;
-    std::lock_guard<std::mutex> autoLock(g_lock);
+    LNN_LOGI(LNN_EVENT, "add pid=%{public}d success", pid);
     g_agentCommunicationInfo.push_back(item);
     return SOFTBUS_OK;
-}
-
-static bool IsRepeatAgentCommunicationRequest(const ConversationBusiness *info)
-{
-    std::lock_guard<std::mutex> autoLock(g_lock);
-    for (const auto &iter : g_agentCommunicationInfo) {
-        if (strncmp(info->bundleName, (*iter).info.bundleName, strlen(info->bundleName)) != 0 ||
-            strncmp(info->abilityName, (*iter).info.abilityName, strlen(info->abilityName)) != 0) {
-            continue;
-        }
-        return true;
-    }
-    return false;
 }
 
 static void RemoveAgentCommunicationInfo(const ConversationBusiness *info)
@@ -1107,7 +1114,7 @@ static void RemoveAgentCommunicationInfo(const ConversationBusiness *info)
         Anonymize(info->bundleName, &anonyBundlename);
         Anonymize(info->abilityName, &anonyAbilityname);
         LNN_LOGI(LNN_EVENT, "delete success, bundlename=%{public}s, abilityname=%{public}s",
-            anonyBundlename, anonyAbilityname);
+            AnonymizeWrapper(anonyBundlename), AnonymizeWrapper(anonyAbilityname));
         AnonymizeFree(anonyBundlename);
         AnonymizeFree(anonyAbilityname);
         delete *iter;
@@ -1220,6 +1227,7 @@ int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t request
     ret = StartGroupAccountAuth(pkgName, requestId, serviceId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "start account auth failed, ret=%{public}d", ret);
+        RemoveAccountAuthInfoByRequestId(requestId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -1243,6 +1251,7 @@ int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t reque
     ret = ProcessGroupAccountAuth(pkgName, requestId, data, dataLen);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "process account auth failed, ret=%{public}d", ret);
+        RemoveAccountAuthInfoByRequestId(requestId);
         return ret;
     }
     return ret;
@@ -1272,13 +1281,10 @@ int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int
         LNN_LOGE(LNN_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SOFTBUS_OK;
-    if (!IsRepeatAgentCommunicationRequest(info)) {
-        ret = AddAgentCommunicationInfo(info, pid);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "add agent communication info failed, ret=%{public}d", ret);
-            return ret;
-        }
+    int32_t ret = AddOrUpdateAgentCommunicationInfo(info, pid);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "add agent communication info failed, ret=%{public}d", ret);
+        return ret;
     }
     ret = LnnRegisterConversationListener(info);
     if (ret != SOFTBUS_OK) {
