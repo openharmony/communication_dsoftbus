@@ -45,13 +45,15 @@ ohos_shared_library("conversation") {
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "napi:ace_napi",
+      "node:node_header_notice"
     ]
   } else {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/bus_center",
     ]
     external_deps += [
-      "napi:ace_napi"
+      "napi:ace_napi",
+      "node:node_header_notice"
     ]
     sources += [
       "$dsoftbus_sdk_path/napi/agent_communication/virtual/napi_agent_communication_virtual.cpp",
