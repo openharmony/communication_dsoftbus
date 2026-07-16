@@ -290,17 +290,6 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
     return GetAuthDeviceDepsIf()->RegTrustDataChangeListener(listener);
 }
 
-int32_t AuthHichainParseReturnInfo(const char *returnInfo, GroupActiveInfo *out)
-{
-    (void)returnInfo;
-    if (out != NULL) {
-        out->osAccountId = -1;
-        out->groupType = 0;
-        out->groupId[0] = '\0';
-    }
-    return SOFTBUS_OK;
-}
-
 int SoftBusSleepMs(unsigned int ms)
 {
     GetAuthDeviceDepsIf()->SoftBusSleepMsMock(ms);

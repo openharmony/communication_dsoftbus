@@ -57,23 +57,10 @@ typedef struct {
     void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceNotTrusted)(const char *udid, int32_t localUserId, HandleNotTrustedType type);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
-    void (*onTrustedDeviceNumChanged)(int curTrustedDeviceNum);
-    void (*onGroupActiveInUser)(const char *groupActiveInfo);
-    void (*onGroupInactiveInUser)(const char *groupActiveInfo);
-    void (*onDeviceActiveInUser)(const char *udid, const char *groupActiveInfo);
-    void (*onDeviceInactiveInUser)(const char *udid, const char *groupActiveInfo);
 } TrustDataChangeListener;
-
-#define GROUPID_BUF_LEN 65
-typedef struct {
-    int32_t osAccountId;
-    int32_t groupType;
-    char groupId[GROUPID_BUF_LEN];
-} GroupActiveInfo;
 
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
 void UnregTrustDataChangeListener(void);
-int32_t AuthHichainParseReturnInfo(const char *groupActiveInfo, GroupActiveInfo *out);
 
 int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChainAuthMode authMode);
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode);

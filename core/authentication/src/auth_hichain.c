@@ -35,6 +35,7 @@
 #include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
+#define GROUPID_BUF_LEN 65
 #define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
 #define PC_AUTH_ERRCODE                36870
 
@@ -500,76 +501,6 @@ static void OnDeviceNotTrusted(const char *udid)
     }
 }
 
-int32_t AuthHichainParseReturnInfo(const char *groupActiveInfo, GroupActiveInfo *out)
-{
-    if (groupActiveInfo == NULL || out == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    (void)memset_s(out, sizeof(GroupActiveInfo), 0, sizeof(GroupActiveInfo));
-    out->osAccountId = -1;
-    cJSON *json = cJSON_Parse(groupActiveInfo);
-    if (json == NULL) {
-        AUTH_LOGW(AUTH_HICHAIN, "parse groupActiveInfo failed");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    (void)GetJsonObjectNumberItem(json, FIELD_OS_ACCOUNT_ID, &out->osAccountId);
-    (void)GetJsonObjectNumberItem(json, FIELD_GROUP_TYPE, &out->groupType);
-    (void)GetJsonObjectStringItem(json, FIELD_GROUP_ID, out->groupId, GROUPID_BUF_LEN);
-    cJSON_Delete(json);
-    return SOFTBUS_OK;
-}
-
-static void OnTrustedDeviceNumChanged(int curTrustedDeviceNum)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "trusted device num changed, curNum=%{public}d", curTrustedDeviceNum);
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if (g_dataChangeListener.onTrustedDeviceNumChanged != NULL) {
-        g_dataChangeListener.onTrustedDeviceNumChanged(curTrustedDeviceNum);
-    }
-#endif
-}
-
-static void OnGroupActiveInUser(const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "group active in user");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if (g_dataChangeListener.onGroupActiveInUser != NULL) {
-        g_dataChangeListener.onGroupActiveInUser(groupActiveInfo);
-    }
-#endif
-}
-
-static void OnGroupInactiveInUser(const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if (g_dataChangeListener.onGroupInactiveInUser != NULL) {
-        g_dataChangeListener.onGroupInactiveInUser(groupActiveInfo);
-    }
-#endif
-}
-
-static void OnDeviceActiveInUser(const char *udid, const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "device active in user");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if (g_dataChangeListener.onDeviceActiveInUser != NULL) {
-        g_dataChangeListener.onDeviceActiveInUser(udid, groupActiveInfo);
-    }
-#endif
-}
-
-static void OnDeviceInactiveInUser(const char *udid, const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "device inactive in user");
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if (g_dataChangeListener.onDeviceInactiveInUser != NULL) {
-        g_dataChangeListener.onDeviceInactiveInUser(udid, groupActiveInfo);
-    }
-#endif
-}
-
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 {
     if (listener == NULL) {
@@ -583,11 +514,6 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
     hichainListener.onGroupDeleted = OnGroupDeleted;
     hichainListener.onDeviceNotTrusted = OnDeviceNotTrusted;
     hichainListener.onDeviceBound = OnDeviceBound;
-    hichainListener.onTrustedDeviceNumChanged = OnTrustedDeviceNumChanged;
-    hichainListener.onGroupActiveInUser = OnGroupActiveInUser;
-    hichainListener.onGroupInactiveInUser = OnGroupInactiveInUser;
-    hichainListener.onDeviceActiveInUser = OnDeviceActiveInUser;
-    hichainListener.onDeviceInactiveInUser = OnDeviceInactiveInUser;
     if (RegChangeListener(AUTH_APPID, &hichainListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain regDataChangeListener fail");
         return SOFTBUS_AUTH_REG_DATA_FAIL;

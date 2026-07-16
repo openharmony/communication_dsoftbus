@@ -445,40 +445,6 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
 }
 
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-static void OnGroupActiveInUser(const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "group active in user");
-    if (g_groupChangeListener.onGroupActiveInUser != NULL) {
-        g_groupChangeListener.onGroupActiveInUser(groupActiveInfo);
-    }
-}
-
-static void OnGroupInactiveInUser(const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "group inactive in user, forward to lnn");
-    if (g_groupChangeListener.onGroupInactiveInUser != NULL) {
-        g_groupChangeListener.onGroupInactiveInUser(groupActiveInfo);
-    }
-}
-
-static void OnDeviceActiveInUser(const char *udid, const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "device active in user");
-    if (g_groupChangeListener.onDeviceActiveInUser != NULL) {
-        g_groupChangeListener.onDeviceActiveInUser(udid, groupActiveInfo);
-    }
-}
-
-static void OnDeviceInactiveInUser(const char *udid, const char *groupActiveInfo)
-{
-    AUTH_LOGI(AUTH_HICHAIN, "device inactive in user");
-    if (g_groupChangeListener.onDeviceInactiveInUser != NULL) {
-        g_groupChangeListener.onDeviceInactiveInUser(udid, groupActiveInfo);
-    }
-}
-#endif
-
 static int32_t RetryRegTrustDataChangeListener(void)
 {
     TrustDataChangeListener trustListener = {
@@ -486,12 +452,6 @@ static int32_t RetryRegTrustDataChangeListener(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-        .onGroupActiveInUser = OnGroupActiveInUser,
-        .onGroupInactiveInUser = OnGroupInactiveInUser,
-        .onDeviceActiveInUser = OnDeviceActiveInUser,
-        .onDeviceInactiveInUser = OnDeviceInactiveInUser,
-#endif
     };
     for (int32_t i = 1; i <= RETRY_REGDATA_TIMES; i++) {
         int32_t ret = RegTrustDataChangeListener(&trustListener);
@@ -512,12 +472,6 @@ int32_t RegTrustListenerOnHichainSaStart(void)
         .onGroupDeleted = OnGroupDeleted,
         .onDeviceNotTrusted = OnDeviceNotTrusted,
         .onDeviceBound = OnDeviceBound,
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-        .onGroupActiveInUser = OnGroupActiveInUser,
-        .onGroupInactiveInUser = OnGroupInactiveInUser,
-        .onDeviceActiveInUser = OnDeviceActiveInUser,
-        .onDeviceInactiveInUser = OnDeviceInactiveInUser,
-#endif
     };
     if (RegTrustDataChangeListener(&trustListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "RegTrustDataChangeListener fail");

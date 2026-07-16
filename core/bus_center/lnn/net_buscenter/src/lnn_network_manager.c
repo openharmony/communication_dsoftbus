@@ -26,7 +26,6 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
-#include "auth_hichain.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_init_monitor.h"
@@ -667,26 +666,10 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     DfxRecordWifiTriggerTimestamp(WIFI_DEVICE_BOUND);
 }
 
-static void OnGroupInactiveInUser(const char *returnInfo)
-{
-    GroupActiveInfo info;
-    if (AuthHichainParseReturnInfo(returnInfo, &info) != SOFTBUS_OK) {
-        LNN_LOGW(LNN_BUILDER, "group inactive in user, parse returnInfo failed");
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "group inactive in user, osAccountId=%{public}d, groupType=%{public}d",
-        info.osAccountId, info.groupType);
-    if (info.groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
-        LnnOnOhosAccountLogout();
-    }
-    LnnHbOnTrustedRelationReduced();
-}
-
 static GroupChangeListener g_groupChangeListener = {
     .onGroupCreated = OnGroupCreated,
     .onGroupDeleted = OnGroupDeleted,
     .onDeviceBound = OnDeviceBound,
-    .onGroupInactiveInUser = OnGroupInactiveInUser,
 };
 
 static VisitNextChoice GetAllProtocols(const LnnProtocolManager *manager, void *data)
