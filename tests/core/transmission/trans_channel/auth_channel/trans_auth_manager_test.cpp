@@ -35,9 +35,9 @@ static IServerChannelCallBack *cb = nullptr;
 
 class TransAuthManagerTest : public testing::Test {
 public:
-    TransAuthManagerTest()
+    TransAuthManagerTest(void)
     {}
-    ~TransAuthManagerTest()
+    ~TransAuthManagerTest(void)
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -67,12 +67,12 @@ void TransAuthManagerTest::TearDownTestCase(void)
 }
 
 /*
- * @tc.name: TransAuthManagerTest01
- * @tc.desc: Transmission auth manager get name by channel id with invalid parameters.
+ * @tc.name: TransAuthGetNameByChanIdTest001
+ * @tc.desc: TransAuthGetNameByChanId with null params returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
+HWTEST_F(TransAuthManagerTest, TransAuthGetNameByChanIdTest001, TestSize.Level1)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
@@ -82,51 +82,92 @@ HWTEST_F(TransAuthManagerTest, TransAuthManagerTest01, TestSize.Level1)
     ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, pkgName, nullptr,
                              PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, pkgName, sessionName,
+}
+
+/*
+ * @tc.name: TransAuthGetNameByChanIdTest002
+ * @tc.desc: TransAuthGetNameByChanId with valid params and non-existent channel returns SOFTBUS_TRANS_NODE_NOT_FOUND
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, TransAuthGetNameByChanIdTest002, TestSize.Level1)
+{
+    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    char pkgName[PKG_NAME_SIZE_MAX] = {0};
+    int32_t ret = TransAuthGetNameByChanId(TRANS_TEST_CHANNEL_ID, pkgName, sessionName,
                              PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
 }
 
 /*
- * @tc.name: TransAuthManagerTest02
- * @tc.desc: Transmission auth manager open autn message channel with invalid parameters.
+ * @tc.name: TransOpenAuthMsgChannelTest001
+ * @tc.desc: TransOpenAuthMsgChannel with null connOpt and null channelId returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthManagerTest, TransAuthManagerTest02, TestSize.Level1)
+HWTEST_F(TransAuthManagerTest, TransOpenAuthMsgChannelTest001, TestSize.Level1)
 {
-    ConnectOption *connOpt = (ConnectOption*)SoftBusCalloc(sizeof(ConnectOption));
-    ASSERT_TRUE(connOpt != nullptr);
     int32_t channelId = 0;
-    int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId, nullptr);
+    int32_t ret = TransOpenAuthMsgChannel(g_sessionName, nullptr, &channelId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ConnectOption *connOpt = reinterpret_cast<ConnectOption *>(SoftBusCalloc(sizeof(ConnectOption)));
+    ASSERT_TRUE(connOpt != nullptr);
     connOpt->type = CONNECT_TCP;
     ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, nullptr, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransOpenAuthMsgChannel(g_sessionName, nullptr, &channelId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(connOpt);
 }
 
 /*
- * @tc.name: TransAuthManagerTest03
- * @tc.desc: Transmission auth manager close autn channel with wrong parameters.
+ * @tc.name: TransOpenAuthMsgChannelTest002
+ * @tc.desc: TransOpenAuthMsgChannel with connOpt of unspecified type returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransAuthManagerTest, TransAuthManagerTest03, TestSize.Level1)
+HWTEST_F(TransAuthManagerTest, TransOpenAuthMsgChannelTest002, TestSize.Level1)
+{
+    ConnectOption *connOpt = reinterpret_cast<ConnectOption *>(SoftBusCalloc(sizeof(ConnectOption)));
+    ASSERT_TRUE(connOpt != nullptr);
+    int32_t channelId = 0;
+    int32_t ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(connOpt);
+}
+
+/*
+ * @tc.name: TransCloseAuthChannelTest001
+ * @tc.desc: TransCloseAuthChannel with non-existent channel returns SOFTBUS_TRANS_NODE_NOT_FOUND
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, TransCloseAuthChannelTest001, TestSize.Level1)
 {
     int32_t ret = TransAuthInit(cb);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransCloseAuthChannel(TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
-    GetAuthChannelListHead();
+    TransAuthDeinit();
+}
+
+/*
+ * @tc.name: GetAuthChannelListHeadTest001
+ * @tc.desc: GetAuthChannelListHead with initialized list returns non-null head
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, GetAuthChannelListHeadTest001, TestSize.Level1)
+{
+    int32_t ret = TransAuthInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SoftBusList *head = GetAuthChannelListHead();
+    EXPECT_NE(head, nullptr);
     TransAuthDeinit();
 }
 
 /*
  * @tc.name: TransAuthGetRoleByAuthIdTest001
- * @tc.desc: Transmission auth manager get role by authId with wrong parameters.
+ * @tc.desc: TransAuthGetRoleByAuthId without init returns SOFTBUS_NO_INIT, null isClient returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -136,7 +177,6 @@ HWTEST_F(TransAuthManagerTest, TransAuthGetRoleByAuthIdTest001, TestSize.Level1)
     bool *isClient = nullptr;
     int32_t ret = TransAuthGetRoleByAuthId(authId, isClient);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
-
     ret = TransAuthInit(cb);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransAuthGetRoleByAuthId(authId, isClient);
@@ -146,7 +186,7 @@ HWTEST_F(TransAuthManagerTest, TransAuthGetRoleByAuthIdTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransAuthGetRoleByAuthIdTest002
- * @tc.desc: Transmission auth manager get role by authId with valid parameters.
+ * @tc.desc: TransAuthGetRoleByAuthId with valid params and non-existent authId returns SOFTBUS_TRANS_NODE_NOT_FOUND
  * @tc.type: FUNC
  * @tc.require:
  */
