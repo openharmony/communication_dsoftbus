@@ -15,8 +15,10 @@
 
 #include "ability_adapter.h"
 
+#include "anonymizer.h"
 #include "ability_manager_client.h"
 #include "appmgr/app_mgr_client.h"
+#include "bundle_mgr_proxy.h"
 #include "extension_manager_client.h"
 #include "iservice_registry.h"
 #include "lnn_log.h"
@@ -27,11 +29,63 @@
 constexpr int32_t ERR_OK = 0;
 constexpr int32_t GET_EXTENSION_UPPER_LIMIT = 100;
 
-int32_t StartAbility(const char *bundleName, const char *abilityName)
+static OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> GetBundleMgrProxy()
 {
-    if (bundleName == nullptr || abilityName == nullptr) {
+    auto samgr = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        LNN_LOGE(LNN_EVENT, "samgr is nullptr");
+        return nullptr;
+    }
+    auto remoteObj = samgr->GetSystemAbility(OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remoteObj is nullptr");
+        return nullptr;
+    }
+    return OHOS::iface_cast<OHOS::AppExecFwk::IBundleMgr>(remoteObj);
+}
+
+static bool IsSystemApp(const char *bundleName, int32_t userId)
+{
+    if (bundleName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bundleName is nullptr");
+        return false;
+    }
+    auto bundleMgr = GetBundleMgrProxy();
+    if (bundleMgr == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bundleMgr is nullptr");
+        return false;
+    }
+    int32_t flag =
+        static_cast<int32_t>(OHOS::AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
+    OHOS::AppExecFwk::ApplicationInfo appInfo;
+    int32_t ret = bundleMgr->GetApplicationInfoV9(std::string(bundleName), flag, userId, appInfo);
+    char *anonyBundlename = nullptr;
+    Anonymize(bundleName, &anonyBundlename);
+    if (ret != ERR_OK) {
+        LNN_LOGE(LNN_EVENT,
+            "GetApplicationInfoV9 failed, ret=%{public}d, userId=%{public}d, bundleName=%{public}s",
+            ret, userId, AnonymizeWrapper(anonyBundlename));
+        AnonymizeFree(anonyBundlename);
+        return false;
+    }
+    if (!appInfo.isSystemApp) {
+        LNN_LOGE(LNN_EVENT, "not system app. bundleName=%{public}s", AnonymizeWrapper(anonyBundlename));
+        AnonymizeFree(anonyBundlename);
+        return false;
+    }
+    AnonymizeFree(anonyBundlename);
+    return true;
+}
+
+int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t userId)
+{
+    if (bundleName == nullptr || abilityName == nullptr || userId < 0) {
         LNN_LOGE(LNN_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsSystemApp(bundleName, userId)) {
+        LNN_LOGE(LNN_EVENT, "only system app can start ability");
+        return SOFTBUS_PERMISSION_DENIED;
     }
     auto client = OHOS::AAFwk::AbilityManagerClient::GetInstance();
     if (client == nullptr) {

@@ -68,7 +68,7 @@
 #endif
 
 using namespace OHOS;
-typedef int32_t (*StartAbilityWrapperFunc)(const char *bundleName, const char *abilityName);
+typedef int32_t (*StartAbilityWrapperFunc)(const char *bundleName, const char *abilityName, int32_t userId);
 typedef bool (*IsRunningProcessWrapperFunc)(const char *bundleName, int32_t userId);
 typedef bool (*IsExtensionAbilityWrapperFunc)(const char *bundleName, const char *abilityName, int32_t upperLimit);
 
@@ -330,10 +330,10 @@ static CloudQueryMsgCache *CreateCacheNodeWithoutLock(const char *udid, const ch
     const char *deviceId = nullptr;
     NodeInfo nodeInfo;
     memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnRetrieveDeviceInfoByUdidPacked(udid, &nodeInfo);
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get retrieve node failed");
-        ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
+        LNN_LOGE(LNN_EVENT, "get remote node failed");
+        ret = LnnRetrieveDeviceInfoByUdidPacked(udid, &nodeInfo);
     }
     if (ret != SOFTBUS_OK) {
         LNN_LOGI(LNN_EVENT, "use default deviceId");
@@ -965,7 +965,8 @@ static int32_t PullUpHap(const ConversationBusiness *info)
         LNN_LOGE(LNN_EVENT, "startAbility func is null");
         return SOFTBUS_NETWORK_DLSYM_FAILED;
     }
-    ret = g_adapterLoader.startAbility(info->bundleName, info->abilityName);
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
+    ret = g_adapterLoader.startAbility(info->bundleName, info->abilityName, userId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "pull up hap failed. ret=%{public}d", ret);
         return ret;
@@ -1040,6 +1041,10 @@ static bool IsSupportNearField(const NodeInfo *nodeInfo)
     }
     if (!IsSameAccount(nodeInfo->accountId)) {
         LNN_LOGE(LNN_EVENT, "not same account or local dev");
+        return false;
+    }
+    if (nodeInfo->aclState != ACL_CAN_WRITE) {
+        LNN_LOGE(LNN_EVENT, "aclState not ready, aclState=%{public}d", nodeInfo->aclState);
         return false;
     }
     if (!IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_AGENT_COMMUNICATION)) {
@@ -1679,10 +1684,10 @@ static bool CheckAndSendPrimaryUserAck(const ProcessReceivedDataInput *input)
 
 static const char *GetDeviceIdByUdid(const char *udid, NodeInfo *nodeInfo)
 {
-    int32_t ret = LnnRetrieveDeviceInfoByUdidPacked(udid, nodeInfo);
+    int32_t ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, nodeInfo);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get retrieve node failed");
-        ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, nodeInfo);
+        LNN_LOGE(LNN_EVENT, "get remote node failed");
+        ret = LnnRetrieveDeviceInfoByUdidPacked(udid, nodeInfo);
     }
     if (ret != SOFTBUS_OK) {
         LNN_LOGI(LNN_EVENT, "use default deviceId");
@@ -1974,20 +1979,20 @@ static std::vector<CachedMsgToSend> ExtractCachedMessagesToSend(const char *netw
 
 static int32_t GetDeviceNodeInfo(const char *deviceId, NodeInfo *nodeInfo)
 {
-    if (LnnRetrieveDeviceInfoByNetworkIdPacked(deviceId, nodeInfo) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_EVENT, "get retrieve node by networkId success");
-        return SOFTBUS_OK;
-    }
-    if (LnnRetrieveDeviceInfoByUdidPacked(deviceId, nodeInfo) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_EVENT, "get retrieve node by udid success");
-        return SOFTBUS_OK;
-    }
     if (LnnGetRemoteNodeInfoById(deviceId, CATEGORY_NETWORK_ID, nodeInfo) == SOFTBUS_OK) {
         LNN_LOGI(LNN_EVENT, "get remote node by networkId success");
         return SOFTBUS_OK;
     }
     if (LnnGetRemoteNodeInfoById(deviceId, CATEGORY_UDID, nodeInfo) == SOFTBUS_OK) {
         LNN_LOGI(LNN_EVENT, "get remote node by udid success");
+        return SOFTBUS_OK;
+    }
+    if (LnnRetrieveDeviceInfoByNetworkIdPacked(deviceId, nodeInfo) == SOFTBUS_OK) {
+        LNN_LOGI(LNN_EVENT, "get retrieve node by networkId success");
+        return SOFTBUS_OK;
+    }
+    if (LnnRetrieveDeviceInfoByUdidPacked(deviceId, nodeInfo) == SOFTBUS_OK) {
+        LNN_LOGI(LNN_EVENT, "get retrieve node by udid success");
         return SOFTBUS_OK;
     }
     return SOFTBUS_NOT_FIND;
@@ -2157,6 +2162,18 @@ static void OnNearFieldDataRecv(AuthHandle authHandle, const AuthTransData *data
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
     if (auth == nullptr) {
         LNN_LOGE(LNN_EVENT, "auth is nullptr");
+        return;
+    }
+    NodeInfo nodeInfo;
+    memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(auth->udid, CATEGORY_UDID, &nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_EVENT, "get remote node by udid failed");
+        DelDupAuthManager(auth);
+        return;
+    }
+    if (nodeInfo.aclState != ACL_CAN_WRITE) {
+        LNN_LOGE(LNN_EVENT, "aclState not ready, aclState=%{public}d", nodeInfo.aclState);
+        DelDupAuthManager(auth);
         return;
     }
 

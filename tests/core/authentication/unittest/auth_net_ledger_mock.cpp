@@ -244,6 +244,11 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
 {
     return GetNetLedgerInterface()->LnnSetLocalByteInfo(key, info, len);
 }
+
+void LnnUpdateAclState(const char *udid, AclWriteState aclState)
+{
+    return GetNetLedgerInterface()->LnnUpdateAclState(udid, aclState);
+}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)

@@ -1982,6 +1982,31 @@ int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid)
     return SOFTBUS_OK;
 }
 
+void LnnUpdateAclState(const char *udid, AclWriteState aclState)
+{
+    if (udid == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param error");
+        return;
+    }
+    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return;
+    }
+    NodeInfo *nodeInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    if (nodeInfo != NULL) {
+        nodeInfo->aclState = aclState;
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        LNN_LOGI(LNN_LEDGER, "update aclState=%{public}d.", aclState);
+        return;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    char *anonyUdid = NULL;
+    Anonymize(udid, &anonyUdid);
+    LNN_LOGE(LNN_LEDGER, "udid=%{public}s not found.", anonyUdid);
+    AnonymizeFree(anonyUdid);
+}
+
 static int32_t GetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum, bool isNeedMeta)
 {
     if (info == NULL || infoNum == NULL) {
