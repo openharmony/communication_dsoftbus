@@ -114,9 +114,9 @@ static void LogListenerEntry(const std::string &bundleName, const std::string &a
 
     DeviceNodeInfo *list = nullptr;
     int32_t nums = 0;
-    int32_t ret = ::GetTrustedDevice(&list, &nums);
+    int32_t ret = ::GetTrustedDevices(&list, &nums);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "GetTrustedDevice fail, ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "GetTrustedDevices fail, ret=%{public}d", ret);
         if (list != nullptr) {
             ::FreeDeviceNodeInfo(list);
         }
