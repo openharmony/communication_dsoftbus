@@ -37,6 +37,7 @@ public:
     bool ProcessIfPresent(const std::string &remoteMac, const Handler &handler);
     bool ProcessIfAbsent(const std::string &remoteMac, const Handler &handler);
 
+    bool ProcessIfPresentByName(const std::string &groupName, const Handler &handler);
     bool ProcessIfPresent(int linkId, const Handler &handler);
     void RemoveLink(InnerLink::LinkType type, const std::string &remoteDeviceId);
     void RemoveLink(const std::string &remoteMac);

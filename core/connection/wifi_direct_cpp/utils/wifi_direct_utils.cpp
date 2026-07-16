@@ -718,6 +718,15 @@ int32_t WifiDirectUtils::GetDeviceType()
     return deviceTypeId;
 }
 
+int32_t WifiDirectUtils::GetMetaType(const char *networkId)
+{
+    int32_t metaType = 0;
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumInfo(networkId, NUM_KEY_META_TYPE, &metaType);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, metaType, CONN_WIFI_DIRECT, "get remote meta type fail");
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfx remote meta type %{public}d", metaType);
+    return metaType;
+}
+
 int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature)
 {
     uint64_t connSubFeature = 0;
