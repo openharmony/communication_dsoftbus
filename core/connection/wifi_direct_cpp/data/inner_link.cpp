@@ -245,6 +245,16 @@ void InnerLink::SetRemotePort(int port)
     Set(InnerLinKey::REMOTE_PORT, port);
 }
 
+std::string InnerLink::GetGroupName() const
+{
+    return Get(InnerLinKey::GROUP_NAME, std::string(""));
+}
+
+void InnerLink::SetGroupName(const std::string &groupName)
+{
+    Set(InnerLinKey::GROUP_NAME, groupName);
+}
+
 ListenerModule InnerLink::GetListenerModule() const
 {
     return Get(InnerLinKey::LISTENER_MODULE_ID, static_cast<ListenerModule>(UNUSE_BUTT));

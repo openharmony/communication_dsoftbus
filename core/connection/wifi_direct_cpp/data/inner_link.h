@@ -56,6 +56,7 @@ enum class InnerLinKey {
     IS_LEGACY_REUSED = 26,
     REMOTE_PORT = 27,
     VIRTUAL_FLAG = 28,
+    GROUP_NAME = 29,
 };
 
 struct LinkIdStruct {
@@ -135,6 +136,9 @@ public:
 
     int GetRemotePort() const;
     void SetRemotePort(int port);
+
+    std::string GetGroupName() const;
+    void SetGroupName(const std::string &groupName);
 
     ListenerModule GetListenerModule() const;
     void SetListenerModule(ListenerModule module);

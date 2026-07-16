@@ -406,6 +406,11 @@ void P2pEntity::OnP2pConnectionChangeEvent(
             WifiDirectAnonymizeMac(groupInfo->groupOwner.address).c_str());
         result = LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner.address, [] (InnerLink &link) {
             });
+        // check the zero mac for hiplay tv
+        if (!result) {
+            result = LinkManager::GetInstance().ProcessIfPresentByName(groupInfo->groupName, [] (InnerLink &link) {
+            });
+        }
     }
     if (result) {
         state_->PreprocessP2pConnectionChangeEvent(info, groupInfo);

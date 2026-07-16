@@ -51,6 +51,7 @@ ohos_unittest("P2pAdapterTest") {
     "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/conncect",
     "$dsoftbus_root_path/interfaces/kits/connect",
