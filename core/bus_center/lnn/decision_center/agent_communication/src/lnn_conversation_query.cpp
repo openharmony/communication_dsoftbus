@@ -839,7 +839,8 @@ static int32_t AddAckWaitItem(uint32_t msgId, const char *udid, const Conversati
             strcmp(item.info.abilityName, info->abilityName) == 0) {
             char *anonyUdid = nullptr;
             Anonymize(udid, &anonyUdid);
-            LNN_LOGE(LNN_EVENT, "ack wait item already exists for udid=%{public}s", anonyUdid);
+            LNN_LOGE(LNN_EVENT, "ack wait item already exists for udid=%{public}s",
+                AnonymizeWrapper(anonyUdid));
             AnonymizeFree(anonyUdid);
             return SOFTBUS_AGENT_BUSY;
         }
@@ -1150,7 +1151,8 @@ static int32_t GetMsgId(bool isAckMsg, uint32_t ackMsgId, uint32_t *msgId,
     }
     char *anonyUdid = nullptr;
     Anonymize(udid, &anonyUdid);
-    LNN_LOGE(LNN_EVENT, "ack wait item not exists for udid=%{public}s", anonyUdid);
+    LNN_LOGE(LNN_EVENT, "ack wait item not exists for udid=%{public}s",
+        AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     return SOFTBUS_NOT_FIND;
 }
@@ -1296,7 +1298,8 @@ static int32_t CollectCloudDevices(NodeInfo *basicInfo, int32_t basicInfoNum,
             continue;
         }
         if (!IsSameAccount(basicInfo[i].accountId) || IsLocalDeviceInfo(basicInfo[i].deviceInfo.deviceUdid)) {
-            LNN_LOGE(LNN_EVENT, "not same account or local dev, networkid=%{public}s", anonyNetworkId);
+            LNN_LOGE(LNN_EVENT, "not same account or local dev, networkid=%{public}s",
+                AnonymizeWrapper(anonyNetworkId));
             AnonymizeFree(anonyNetworkId);
             continue;
         }
@@ -1304,7 +1307,8 @@ static int32_t CollectCloudDevices(NodeInfo *basicInfo, int32_t basicInfoNum,
         bool isDuplicate = false;
         for (int32_t j = 0; j < count; ++j) {
             if (strcmp(infoArray[j].networkId, basicInfo[i].networkId) == 0) {
-                LNN_LOGE(LNN_EVENT, "duplicate device found, networkid=%{public}s, skip", anonyNetworkId);
+                LNN_LOGE(LNN_EVENT, "duplicate device found, networkid=%{public}s, skip",
+                    AnonymizeWrapper(anonyNetworkId));
                 isDuplicate = true;
                 break;
             }
@@ -1313,7 +1317,7 @@ static int32_t CollectCloudDevices(NodeInfo *basicInfo, int32_t basicInfoNum,
             AnonymizeFree(anonyNetworkId);
             continue;
         }
-        LNN_LOGI(LNN_EVENT, "get device, networkid=%{public}s", anonyNetworkId);
+        LNN_LOGI(LNN_EVENT, "get device, networkid=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         if (strcpy_s(infoArray[count].deviceName, DEVICE_NAME_BUF_LEN, basicInfo[i].deviceInfo.deviceName) != EOK ||
             strcpy_s(infoArray[count].networkId, NETWORK_ID_BUF_LEN, basicInfo[i].networkId) != EOK ||
@@ -1850,12 +1854,13 @@ static int32_t GetNearFieldLaneHandleByNetworkId(const char *networkId, uint32_t
     for (const auto &item : g_nearFieldChannelVec) {
         if (strcmp(item.networkId, networkId) == 0) {
             *laneHandle = item.laneHandle;
-            LNN_LOGI(LNN_EVENT, "get near field channel node, networkId=%{public}s", anonyNetworkId);
+            LNN_LOGI(LNN_EVENT, "get near field channel node, networkId=%{public}s",
+                AnonymizeWrapper(anonyNetworkId));
             AnonymizeFree(anonyNetworkId);
             return SOFTBUS_OK;
         }
     }
-    LNN_LOGE(LNN_EVENT, "not found, networkId=%{public}s", anonyNetworkId);
+    LNN_LOGE(LNN_EVENT, "not found, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     return SOFTBUS_NOT_FIND;
 }
@@ -1892,7 +1897,8 @@ static int32_t AddSendMsgCache(const char *networkId, const char *msg, uint32_t 
     newItem->timestamp = SoftBusGetSysTimeMs();
     char *anonyNetworkId = nullptr;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_EVENT, "add send msg cache success, networkId=%{public}s, len=%{public}u", anonyNetworkId, msgLen);
+    LNN_LOGI(LNN_EVENT, "add send msg cache success, networkId=%{public}s, len=%{public}u",
+        AnonymizeWrapper(anonyNetworkId), msgLen);
     AnonymizeFree(anonyNetworkId);
 
     std::unique_lock<std::mutex> lock(g_sendMsgCacheLock);
@@ -1914,13 +1920,14 @@ static void DelSendMsgCacheByNetworkId(const char *networkId)
         if (strcmp(it->networkId, networkId) == 0) {
             SoftBusFree(it->data);
             it = g_sendMsgCacheVec.erase(it);
-            LNN_LOGI(LNN_EVENT, "del send msg cache, networkId=%{public}s", anonyNetworkId);
+            LNN_LOGI(LNN_EVENT, "del send msg cache, networkId=%{public}s",
+                AnonymizeWrapper(anonyNetworkId));
             continue;
         } else {
             ++it;
         }
     }
-    LNN_LOGE(LNN_EVENT, "not found, networkId=%{public}s", anonyNetworkId);
+    LNN_LOGE(LNN_EVENT, "not found, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
 }
 
@@ -2014,7 +2021,7 @@ static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *connInfo
     char *anonyNetworkId = nullptr;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_EVENT, "send cached msg count=%{public}zu, networkId=%{public}s",
-        msgsToSend.size(), anonyNetworkId);
+        msgsToSend.size(), AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     PostLnnCloudEventPacked(MSG_TYPE_HML_TIMEOUT, HandleHmlLinkTimeout,
         networkId, NETWORK_ID_BUF_LEN, HML_LINK_TIMEOUT_MS);
@@ -2076,7 +2083,7 @@ static void OnNearFieldDisconnected(AuthHandle authHandle)
     char *anonyNetworkId = nullptr;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_EVENT, "destroy near field channel, laneHandle=%{public}u, networkId=%{public}s",
-        laneHandle, anonyNetworkId);
+        laneHandle, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     DelNearFieldChannelNodeByLaneHandle(laneHandle);
 }
@@ -2245,7 +2252,7 @@ int32_t DestroyNearFieldChannel(const char *networkId)
     char *anonyNetworkId = nullptr;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_EVENT, "destroy near field channel, laneHandle=%{public}u, networkId=%{public}s",
-        laneHandle, anonyNetworkId);
+        laneHandle, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     DelNearFieldChannelNodeByLaneHandle(laneHandle);
     if (GetLaneManager() == nullptr || GetLaneManager()->lnnFreeLane == nullptr) {

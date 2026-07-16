@@ -373,6 +373,8 @@ static bool StoreTsfn(napi_env env, napi_value dataCallback, const std::string &
     if (status != napi_ok) {
         COMM_LOGE(COMM_SDK, "create data tsfn failed");
         ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
+        tsfn = nullptr;
         return false;
     }
     g_dataTsfnMap[abilityName] = tsfn;
