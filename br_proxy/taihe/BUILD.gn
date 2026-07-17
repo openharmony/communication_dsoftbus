@@ -52,9 +52,12 @@ taihe_shared_library("proxychannelmanager_taihe_native") {
       "src/ani_constructor.cpp",
       "src/ohos.distributedsched.proxyChannelManager.impl.virtual.cpp",
     ]
-    deps = [":run_proxychannelmanager_taihe"]
-    external_deps = ["napi:ace_napi"]
-    } else {
+    deps = [ ":run_proxychannelmanager_taihe" ]
+    external_deps = [
+      "napi:ace_napi",
+      "node:node_header_notice",
+    ]
+  } else {
     sources += [
       "src/ani_constructor.cpp",
       "src/ohos.distributedsched.proxyChannelManager.impl.cpp",
@@ -71,6 +74,7 @@ taihe_shared_library("proxychannelmanager_taihe_native") {
     external_deps = [
       "hilog:libhilog",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
   }
 }

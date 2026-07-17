@@ -156,7 +156,7 @@ static int32_t GetChannelInfoParam(napi_env env, napi_value arg, AsyncOpenChanne
     if (status != napi_ok) {
         goto EXIT;
     }
-    status = napi_get_value_int32(env, linkTypeValue, &asyncData->channelInfo.linktype);
+    status = napi_get_value_int32(env, linkTypeValue, (int32_t *)&asyncData->channelInfo.linktype);
     if (status != napi_ok) {
         goto EXIT;
     }
@@ -784,8 +784,10 @@ static void SetCallbackInternal(napi_env env, napi_value callback, int32_t chann
                 napi_release_threadsafe_function(tsfn_data_received, napi_tsfn_abort);
                 tsfn_data_received = NULL;
             }
+            napi_value dataReceived;
+            napi_create_string_utf8(env, "DataReceived", NAPI_AUTO_LENGTH, &dataReceived);
             napi_create_threadsafe_function(
-                env, callback, NULL, "DataReceived",
+                env, callback, NULL, dataReceived,
                 0, 1, NULL, NULL, NULL,
                 DataReceivedCallback, &tsfn_data_received);
             ret = SetListenerState(channelId, DATA_RECEIVE, true);
@@ -801,8 +803,10 @@ static void SetCallbackInternal(napi_env env, napi_value callback, int32_t chann
                 napi_release_threadsafe_function(tsfn_channel_status, napi_tsfn_abort);
                 tsfn_channel_status = NULL;
             }
+            napi_value channelStatus;
+            napi_create_string_utf8(env, "ChannelStatus", NAPI_AUTO_LENGTH, &channelStatus);
             napi_create_threadsafe_function(
-                env, callback, NULL, "ChannelStatus",
+                env, callback, NULL, channelStatus,
                 0, 1, NULL, NULL, NULL,
                 ChannelStatusCallback, &tsfn_channel_status);
             ret = SetListenerState(channelId, CHANNEL_STATE, true);
