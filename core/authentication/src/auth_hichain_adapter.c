@@ -32,7 +32,7 @@
 #define AUTH_ID "authId"
 #define RETRY_TIMES 16
 #define RETRY_MILLSECONDS 500
-#define SAME_ACCOUNT_GROUY_TYPE 1
+#define SAME_ACCOUNT_GROUP_TYPE 1
 static const GroupAuthManager *g_hichain = NULL;
 #define CUST_UDID_LEN 16
 #define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
@@ -67,7 +67,7 @@ char *GenDeviceLevelParam(HiChainAuthParam *hiChainParam)
         }
     }
     if (hiChainParam->peerUserId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", hiChainParam->peerUserId)) {
-        AUTH_LOGE(AUTH_HICHAIN, "add json userId fail");
+        AUTH_LOGE(AUTH_HICHAIN, "add json peer userId fail");
     }
 #ifdef AUTH_ACCOUNT
     AUTH_LOGI(AUTH_HICHAIN, "in account auth mode");
@@ -299,7 +299,7 @@ static bool HasTrustedRelationWithLocalDevice(const DeviceGroupManager *gmInstan
         char groupId[UDID_BUF_LEN] = {0};
         if (isPointToPoint) {
             int groupType = 0;
-            if ((GetJsonObjectNumberItem(groupItem, GROUP_TYPE, &groupType) && groupType == SAME_ACCOUNT_GROUY_TYPE)) {
+            if ((GetJsonObjectNumberItem(groupItem, GROUP_TYPE, &groupType) && groupType == SAME_ACCOUNT_GROUP_TYPE)) {
                 AUTH_LOGD(AUTH_HICHAIN, "ignore same account group");
                 continue;
             }
@@ -386,7 +386,7 @@ bool IsSameAccountGroupDeviceByUserId(int32_t userId)
         return false;
     }
 
-    if (gmInstance->getJoinedGroups(userId, AUTH_APPID, SAME_ACCOUNT_GROUY_TYPE, &returnGroupVec, &groupNum) !=
+    if (gmInstance->getJoinedGroups(userId, AUTH_APPID, SAME_ACCOUNT_GROUP_TYPE, &returnGroupVec, &groupNum) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "getJoinedGroups fail, userId=%{public}d", userId);
         gmInstance->destroyInfo(&returnGroupVec);

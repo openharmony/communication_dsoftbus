@@ -32,7 +32,6 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
-#include "softbus_json_utils.h"
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
@@ -541,14 +540,13 @@ int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChai
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_CREATE_JSON_ERR;
     }
-    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     int32_t ret = SOFTBUS_OK;
     if (hiChainParam->cb == NULL) {
         ret = g_hiChainAuthInterface[authMode].authenticate(
-            localUserId, authSeq, authParams, &g_hichainCallback);
+            hiChainParam->localUserId, authSeq, authParams, &g_hichainCallback);
     } else {
         ret = g_hiChainAuthInterface[authMode].authenticate(
-            localUserId, authSeq, authParams, hiChainParam->cb);
+            hiChainParam->localUserId, authSeq, authParams, hiChainParam->cb);
     }
     if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");

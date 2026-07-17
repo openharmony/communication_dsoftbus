@@ -65,9 +65,7 @@ static bool IsSingleFrameCarDeviceExist(const char *udid)
     if (LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo) != SOFTBUS_OK) {
         return false;
     }
-    int32_t remoteDevTypeId = TYPE_UNKNOW_ID;
-    if (LnnGetRemoteNumInfo(nodeInfo.networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId) == SOFTBUS_OK &&
-        remoteDevTypeId == TYPE_CAR_ID && nodeInfo.deviceInfo.osType == OH_OS_TYPE) {
+    if (nodeInfo.deviceInfo.deviceTypeId == TYPE_CAR_ID && nodeInfo.deviceInfo.osType == OH_OS_TYPE) {
         return true;
     }
     return false;
@@ -127,7 +125,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         AUTH_LOGE(AUTH_INIT, "no match peer user");
         return SOFTBUS_OK;
     }
-    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str(), profile.GetLocalUserId(), DP_USER_TYPE);
+    g_deviceProfileChange.onDeviceProfileDeleted(profile.GetDeviceId().c_str(), profile.GetLocalUserId(), DP_DEVICE_TYPE);
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileDelete success!");
     return SOFTBUS_OK;
 }
@@ -295,10 +293,6 @@ int32_t AuthDeviceProfileListener::OnAccountAclAdd(const TrustDeviceProfile &pro
     if (!GetUdidFromProfile(profile, "OnAccountAclAdd", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!IsSingleFrameCarDeviceExist(deviceId.c_str())) {
-        AUTH_LOGI(AUTH_INIT, "OnAccountAclAdd skip non-single-frame-car");
-        return SOFTBUS_OK;
-    }
     if (profile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
         AUTH_LOGI(AUTH_INIT, "OnAccountAclAdd skip same account");
         return SOFTBUS_OK;
@@ -312,10 +306,6 @@ int32_t AuthDeviceProfileListener::OnAccountAclActive(const TrustDeviceProfile &
     std::string deviceId;
     if (!GetUdidFromProfile(profile, "OnAccountAclActive", deviceId)) {
         return SOFTBUS_INVALID_PARAM;
-    }
-    if (!IsSingleFrameCarDeviceExist(deviceId.c_str())) {
-        AUTH_LOGI(AUTH_INIT, "OnAccountAclActive skip non-single-frame-car");
-        return SOFTBUS_OK;
     }
     if (profile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
         AUTH_LOGI(AUTH_INIT, "OnAccountAclActive skip same account");

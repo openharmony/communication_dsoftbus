@@ -388,14 +388,14 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId, Handle
     if (!DpHasAccessControlProfile(peerUdid, false, localUserId)) {
         LnnDeleteLinkFinderInfo(peerUdid);
     }
-    LnnHbOnTrustedRelationReduced();
-    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
-    if (type == DP_USER_TYPE) {
+    if (type == DP_DEVICE_TYPE) {
         LnnDeleteSpecificTrustedDevInfo(peerUdid);
         char networkId[NETWORK_ID_BUF_LEN] = {0};
         if (LnnGetNetworkIdByUdid(peerUdid, networkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK) {
             LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
         }
+        LnnHbOnTrustedRelationReduced();
+        AuthRemoveDeviceKeyByUdidPacked(peerUdid);
         return;
     }
     if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {

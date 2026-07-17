@@ -1560,12 +1560,7 @@ static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
         AUTH_LOGI(AUTH_FSM, "lower version don't need check acl");
         return true;
     }
-    if (info->credNegoState == CRED_NEGO_STATE_COMPATIBLE) {
-        if (IsTrustedDeviceFromAccess(info->accountHash, info->udid, info->userId)) {
-            AUTH_LOGI(AUTH_FSM, "has trust device acl");
-            return true;
-        }
-    } else if (info->externalUserIds != NULL) {
+    if (info->credNegoState != CRED_NEGO_STATE_COMPATIBLE && info->externalUserIds != NULL) {
         int32_t size = GetArrayItemNum(info->externalUserIds);
         for (int32_t i = 0; i < size; i++) {
             cJSON *item = GetArrayItemFromArray(info->externalUserIds, i);
@@ -1578,6 +1573,10 @@ static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
                 return true;
             }
         }
+    }
+    if (IsTrustedDeviceFromAccess(info->accountHash, info->udid, info->userId)) {
+        AUTH_LOGI(AUTH_FSM, "has trust device acl");
+        return true;
     }
     char *anonyDeviceIdHash = NULL;
     Anonymize(info->udid, &anonyDeviceIdHash);
