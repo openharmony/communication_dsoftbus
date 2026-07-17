@@ -103,6 +103,7 @@ static int32_t MessageParcelWriteEx(MessageParcel &data, const ChannelInfo *chan
     }
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isMultiNeg, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->linkedChannelId, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->keyType, SOFTBUS_IPC_ERR);
     return SOFTBUS_OK;
 }
 

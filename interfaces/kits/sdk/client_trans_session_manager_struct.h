@@ -144,6 +144,7 @@ typedef struct {
     int32_t routeTypeReserve;
     uint64_t startTimestamp;
     uint32_t cancelEncryptionBit;
+    int32_t keyType;
 } SessionInfo;
 
 typedef struct {

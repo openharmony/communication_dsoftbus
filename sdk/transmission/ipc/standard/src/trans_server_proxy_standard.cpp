@@ -272,6 +272,7 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     WRITE_PARCEL_WITH_RET(data, Uint32, param->flowInfo.sessionType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Uint32, param->flowInfo.flowQosType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, Uint32, param->cancelEncryptionBit, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Int32, param->keyType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     if (!TransWriteSessionAttrs(param->attr, data)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;

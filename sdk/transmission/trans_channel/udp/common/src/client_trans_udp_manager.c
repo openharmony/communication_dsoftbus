@@ -224,6 +224,7 @@ static int32_t OnUdpChannelOpened(int32_t channelId, SocketAccessInfo *accessInf
     info.businessType = channel.businessType;
     info.tokenType = channel.tokenType;
     info.enableMultipath = channel.enableMultipath;
+    info.keyType = channel.keyType;
     if (channel.tokenType > ACCESS_TOKEN_TYPE_HAP && channel.info.isServer) {
         info.peerUserId = channel.peerUserId;
         info.peerTokenId = channel.peerTokenId;
@@ -254,6 +255,7 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
     newChannel->tokenType = channel->tokenType;
     newChannel->enableMultipath = channel->enableMultipath;
     newChannel->isReserveChannel = channel->isMultiNeg;
+    newChannel->keyType = channel->keyType;
     if (strcpy_s(newChannel->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(newChannel->info.mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         strcpy_s(newChannel->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||

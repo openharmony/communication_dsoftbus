@@ -319,6 +319,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
     GetRemoteUdidWithNetworkId(appInfo->peerNetWorkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
     TransGetRemoteDeviceVersion(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, appInfo->peerVersion,
         sizeof(appInfo->peerVersion));
+    appInfo->keyType = param->keyType;
     return SOFTBUS_OK;
 }
 

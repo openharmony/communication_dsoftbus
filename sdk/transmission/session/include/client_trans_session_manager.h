@@ -267,6 +267,10 @@ int32_t GetChannelTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t 
 
 int32_t ClientCancelEncryption(int32_t socket, const LinkMediumType type);
 
+int32_t ClientSetKeyTypeBySocket(int32_t socket, int32_t keyType);
+
+int32_t TransGetKeyTypeBySocketId(int32_t socket, int32_t *keyType);
+
 #ifdef __cplusplus
 }
 #endif

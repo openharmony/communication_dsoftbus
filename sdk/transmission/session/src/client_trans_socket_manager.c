@@ -668,6 +668,7 @@ static void ClientInitSession(SessionInfo *session, const SessionParam *param)
     session->actionId = param->actionId;
     session->multipathStrategy = MULTIPATH_STRATEGY_MAX;
     session->enableMultipath = false;
+    session->keyType = KEY_TYPE_DEFAULT;
     session->channelIdReserve = INVALID_CHANNEL_ID;
     session->channelTypeReserve = CHANNEL_TYPE_BUTT;
 }
@@ -777,6 +778,7 @@ void FillSessionParam(
     param->flowInfo.flowSize = sessionNode->flowInfo.flowSize;
     param->flowInfo.sessionType = sessionNode->flowInfo.sessionType;
     param->flowInfo.flowQosType = sessionNode->flowInfo.flowQosType;
+    param->keyType = sessionNode->keyType;
 }
 
 void ClientConvertRetVal(int32_t socket, int32_t *retOut)

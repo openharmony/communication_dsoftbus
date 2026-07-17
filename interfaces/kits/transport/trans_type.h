@@ -299,6 +299,7 @@ typedef enum {
     OPT_TYPE_SUPPORT_ACK,
     OPT_TYPE_NEED_ACK,
     OPT_TYPE_LOGICAL_BANDWIDTH,
+    OPT_TYPE_KEY_TYPE,                     /**< @reserved key type used by the current socket. */
     OPT_TYPE_END,
 } OptType;
 
@@ -387,6 +388,13 @@ typedef struct {
     LinkMediumType linkMediumType;
     int32_t reason;
 } MultipathEvent;
+
+typedef enum {
+    KEY_TYPE_DEFAULT = 0, /**< Default attribute, which is automatically selected. Only active when set. */
+    KEY_TYPE_NORMAL,
+    KEY_TYPE_META,
+    KEY_TYPE_BUTT,
+} KeyType;
 #ifdef __cplusplus
 }
 #endif

@@ -78,6 +78,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     }
     WriteInt32(&io, channel->routeType);
     WriteBool(&io, channel->isSupportTlv);
+    WriteInt32(&io, channel->keyType);
     MessageOption option;
     MessageOptionInit(&option);
     option.flags = TF_OP_ASYNC;

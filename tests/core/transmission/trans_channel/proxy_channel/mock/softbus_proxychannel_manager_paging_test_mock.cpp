@@ -74,5 +74,10 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
 {
     return GetSoftbusProxychannelManagerPagingInterface()->OnProxyChannelClosed(channelId, appInfo);
 }
+
+int32_t GetAuthManagerType(int64_t authId, bool *isMeta)
+{
+    return GetSoftbusProxychannelManagerPagingInterface()->GetAuthManagerType(authId, isMeta);
+}
 }
 }

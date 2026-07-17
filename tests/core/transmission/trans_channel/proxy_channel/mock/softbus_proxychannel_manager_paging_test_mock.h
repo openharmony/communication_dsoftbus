@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "auth_apply_key_struct.h"
+#include "auth_interface.h"
 #include "cJSON.h"
 #include "softbus_app_info.h"
 #include "softbus_proxychannel_message_struct.h"
@@ -39,6 +40,7 @@ public:
     virtual int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo) = 0;
     virtual int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo) = 0;
     virtual void ReleaseProxyChannelId(int32_t channelId) = 0;
+    virtual int32_t GetAuthManagerType(int64_t authId, bool *isMeta) = 0;
 };
 
 class SoftbusProxychannelManagerPagingInterfaceMock : public SoftbusProxychannelManagerPagingInterface {
@@ -55,6 +57,7 @@ public:
     MOCK_METHOD2(OnProxyChannelBind, int32_t (int32_t channelId, const AppInfo *appInfo));
     MOCK_METHOD2(OnProxyChannelClosed, int32_t (int32_t channelId, const AppInfo *appInfo));
     MOCK_METHOD1(ReleaseProxyChannelId, void (int32_t channelId));
+    MOCK_METHOD2(GetAuthManagerType, int32_t (int64_t authId, bool *isMeta));
 };
 } // namespace OHOS
 #endif // SOFTBUS_PROXYCHANNEL_MANAGER_PAGING_TEST_H

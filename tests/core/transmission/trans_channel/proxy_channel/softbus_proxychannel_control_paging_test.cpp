@@ -1694,4 +1694,86 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyResetPeerTest008, TestS
     int32_t ret = TransProxyResetPeer(&chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+/*
+ * @tc.name: SetCipherOfHandshakeMsgTest008
+ * @tc.desc: test SetCipherOfHandshakeMsg keyType KEY_TYPE_META isMeta true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest008, TestSize.Level1)
+{
+    ProxyChannelInfo info = {0};
+    info.appInfo.peerData.deviceId[0] = '1';
+    info.type = CONNECT_TCP;
+    info.appInfo.keyType = KEY_TYPE_META;
+    uint8_t cipher = 0;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
+    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, true, _)).WillOnce(SetArgPointee<3>(validHandle));
+    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(info.appInfo.keyType, KEY_TYPE_META);
+    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
+}
+
+/*
+ * @tc.name: SetCipherOfHandshakeMsgTest009
+ * @tc.desc: test SetCipherOfHandshakeMsg keyType KEY_TYPE_NORMAL isMeta false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest009, TestSize.Level1)
+{
+    ProxyChannelInfo info = {0};
+    info.appInfo.peerData.deviceId[0] = '1';
+    info.type = CONNECT_TCP;
+    info.appInfo.keyType = KEY_TYPE_NORMAL;
+    uint8_t cipher = 0;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
+    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, false, _)).WillOnce(SetArgPointee<3>(validHandle));
+    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(info.appInfo.keyType, KEY_TYPE_NORMAL);
+    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
+}
+
+/*
+ * @tc.name: SetCipherOfHandshakeMsgTest010
+ * @tc.desc: test SetCipherOfHandshakeMsg keyType out of range reassigned to KEY_TYPE_NORMAL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest010, TestSize.Level1)
+{
+    ProxyChannelInfo info = {0};
+    info.appInfo.peerData.deviceId[0] = '1';
+    info.type = CONNECT_TCP;
+    info.appInfo.keyType = KEY_TYPE_DEFAULT;
+    uint8_t cipher = 0;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
+    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, false, _)).WillOnce(SetArgPointee<3>(validHandle));
+    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
+}
 } // namespace OHOS

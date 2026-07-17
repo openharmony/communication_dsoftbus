@@ -236,6 +236,7 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     WriteString(&request, param->groupId);
     WriteBool(&request, param->isAsync);
     WriteInt32(&request, param->sessionId);
+    WriteInt32(&request, param->keyType);
     if (!TransWriteIpcSessionAttrs(&request, param->attr)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;

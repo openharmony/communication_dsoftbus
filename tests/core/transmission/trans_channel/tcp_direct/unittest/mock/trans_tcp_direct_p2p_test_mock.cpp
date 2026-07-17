@@ -156,5 +156,10 @@ SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
 {
     return GetTransTcpDirectP2pInterface()->CreateNewSessinConn(module, isServerSid);
 }
+
+bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
+{
+    return GetTransTcpDirectP2pInterface()->TransGetAuthTypeByNetWorkId(peerNetWorkId);
+}
 }
 }

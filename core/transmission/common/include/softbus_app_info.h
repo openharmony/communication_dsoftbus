@@ -160,6 +160,7 @@ typedef struct {
     int32_t linkType;
     int32_t connectType;
     int32_t channelType;
+    int32_t keyType;
     int32_t errorCode;
     uint64_t callingTokenId; // for transmission access control
     int32_t osType;

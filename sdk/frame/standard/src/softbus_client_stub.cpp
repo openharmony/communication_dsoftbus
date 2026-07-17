@@ -228,6 +228,7 @@ static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
     }
     READ_PARCEL_WITH_RET(data, Bool, channel->isMultiNeg, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->linkedChannelId, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->keyType, SOFTBUS_IPC_ERR);
     return SOFTBUS_OK;
 }
 

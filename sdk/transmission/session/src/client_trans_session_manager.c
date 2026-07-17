@@ -1500,6 +1500,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 *sessionId = sessionNode->sessionId;
                 sessionNode->isSupportTlv = channel->isSupportTlv;
                 sessionNode->enableMultipath = channel->enableMultipath;
+                sessionNode->keyType = channel->keyType;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt || channel->isD2D) {
                     ClientSetAuthSessionTimer(serverNode, sessionNode);
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
@@ -4078,4 +4079,96 @@ int32_t ClientCancelEncryption(int32_t socket, const LinkMediumType type)
     sessionNode->cancelEncryptionBit |= 1 << type;
     UnlockClientSessionServerList();
     return ret;
+}
+
+static int32_t ClientCheckSetKeyTypePermission(const SessionInfo *sessionNode)
+{
+    if (sessionNode->role != SESSION_ROLE_CLIENT) {
+        TRANS_LOGE(TRANS_SDK, "socket=%{public}d is not client.", sessionNode->sessionId);
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+    if (sessionNode->lifecycle.sessionState != SESSION_STATE_INIT) {
+        TRANS_LOGE(TRANS_SDK, "socket=%{public}d is not in the init state.", sessionNode->sessionId);
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+    if (sessionNode->channelType == CHANNEL_TYPE_AUTH) {
+        TRANS_LOGE(TRANS_SDK, "AUTH channel not support, socket=%{public}d", sessionNode->sessionId);
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientSetKeyTypeBySocket(int32_t socket, int32_t keyType)
+{
+    if (socket <= 0 || keyType < KEY_TYPE_DEFAULT || keyType >= KEY_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, socket=%{public}d, keyType=%{public}d", socket, keyType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed ret=%{public}d", ret);
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    ret = GetSessionById(socket, &serverNode, &sessionNode);
+    if (ret != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found, socket=%{public}d ret=%{public}d", socket, ret);
+        return ret;
+    }
+    ret = ClientCheckSetKeyTypePermission(sessionNode);
+    if (ret != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "ClientCheckSetKeyTypePermission fail, socket=%{public}d ret=%{public}d", socket, ret);
+        return ret;
+    }
+    sessionNode->keyType = keyType;
+    UnlockClientSessionServerList();
+    TRANS_LOGI(TRANS_SDK, "socketId=%{public}d set keyType=%{public}d", socket, keyType);
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientCheckGetKeyTypePermission(const SessionInfo *sessionNode)
+{
+    if (sessionNode->enableStatus != ENABLE_STATUS_SUCCESS) {
+        TRANS_LOGE(TRANS_SDK, "socket=%{public}d is not in the success state.", sessionNode->sessionId);
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+    if (sessionNode->channelType == CHANNEL_TYPE_AUTH) {
+        TRANS_LOGE(TRANS_SDK, "AUTH channel not support, socket=%{public}d", sessionNode->sessionId);
+        return SOFTBUS_TRANS_FUNC_NOT_SUPPORT;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransGetKeyTypeBySocketId(int32_t socket, int32_t *keyType)
+{
+    if (keyType == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, keyType is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    ret = GetSessionById(socket, &serverNode, &sessionNode);
+    if (ret != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found, socket=%{public}d ret=%{public}d", socket, ret);
+        return ret;
+    }
+    ret = ClientCheckGetKeyTypePermission(sessionNode);
+    if (ret != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "ClientCheckGetKeyTypePermission fail, socket=%{public}d ret=%{public}d", socket, ret);
+        return ret;
+    }
+    *keyType = sessionNode->keyType;
+    UnlockClientSessionServerList();
+    TRANS_LOGI(TRANS_SDK, "socketId=%{public}d get keyType=%{public}d", socket, *keyType);
+    return SOFTBUS_OK;
 }

@@ -51,6 +51,7 @@ typedef struct {
     bool isLowLatency;
     bool enableMultipath;   /**> Indicates whether the session is configured to allow multipath. */
     bool isMultiNeg;        /**> Indicates whether the session currently establish the second link. */
+    int32_t keyType;
 } SessionParam;
 
 typedef struct {
