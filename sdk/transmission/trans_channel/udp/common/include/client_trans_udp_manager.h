@@ -45,6 +45,8 @@ int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], cons
 
 int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel);
 
+int32_t TransGetReserveUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel);
+
 int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *udpChannel);
 
 void TransUdpDeleteFileListener(const char *sessionName);

@@ -961,4 +961,170 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelTosTest004, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
     ClientTransUdpMgrDeinit();
 }
+
+/*
+ * @tc.name: TransGetUdpChannelByFileIdTest003
+ * @tc.desc: trans get udp channel by file id returns invalid param when udpChannel is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest003, TestSize.Level1)
+{
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetUdpChannelByFileId(TEST_DATA_TYPE, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetUdpChannelByFileId(TEST_ERR_SESSIONID, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/*
+ * @tc.name: TransGetReserveUdpChannelByFileIdTest001
+ * @tc.desc: trans get reserve udp channel by file id returns invalid param when udpChannel is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetReserveUdpChannelByFileIdTest001, TestSize.Level1)
+{
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetReserveUdpChannelByFileId(TEST_DATA_TYPE, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetReserveUdpChannelByFileId(TEST_ERR_SESSIONID, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetReserveUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/*
+ * @tc.name: TransGetReserveUdpChannelByFileIdTest002
+ * @tc.desc: trans get reserve udp channel by file id returns channel not found when no reserve channel exists
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetReserveUdpChannelByFileIdTest002, TestSize.Level1)
+{
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    int32_t ret = TransGetReserveUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = TransGetReserveUdpChannelByFileId(TEST_ERR_SESSIONID, &udpChannel);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/*
+ * @tc.name: TransGetReserveUdpChannelByFileIdTest003
+ * @tc.desc: trans get reserve udp channel by file id returns no init when manager uninitialized
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetReserveUdpChannelByFileIdTest003, TestSize.Level1)
+{
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    ClientTransUdpMgrDeinit();
+    int32_t ret = TransGetReserveUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: TransGetReserveUdpChannelByFileIdTest004
+ * @tc.desc: trans get reserve udp channel by file id returns channel not found when channel is not reserve
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetReserveUdpChannelByFileIdTest004, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t dfileId = TEST_SESSIONID;
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
+    newChannel->channelId = channelId;
+    newChannel->dfileId = dfileId;
+    newChannel->isReserveChannel = false;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    ret = TransGetReserveUdpChannelByFileId(dfileId, &udpChannel);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/*
+ * @tc.name: TransGetReserveUdpChannelByFileIdTest005
+ * @tc.desc: trans get reserve udp channel by file id returns ok when reserve channel found
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetReserveUdpChannelByFileIdTest005, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    int32_t dfileId = TEST_SESSIONID;
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *newChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(newChannel, nullptr);
+    newChannel->channelId = channelId;
+    newChannel->dfileId = dfileId;
+    newChannel->isReserveChannel = true;
+    ret = ClientTransAddUdpChannel(newChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    ret = TransGetReserveUdpChannelByFileId(dfileId, &udpChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(channelId, udpChannel.channelId);
+    ret = TransDeleteUdpChannel(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
+/*
+ * @tc.name: TransGetReserveUdpChannelByFileIdTest006
+ * @tc.desc: trans get reserve udp channel by file id skips non-reserve and returns ok for reserve with same dfileId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpManagerTest, TransGetReserveUdpChannelByFileIdTest006, TestSize.Level1)
+{
+    int32_t channelId1 = TEST_CHANNELID;
+    int32_t channelId2 = TEST_CHANNELID + 1;
+    int32_t dfileId = TEST_SESSIONID;
+    int32_t ret = ClientTransUdpMgrInit(&g_sessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *normalChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(normalChannel, nullptr);
+    normalChannel->channelId = channelId1;
+    normalChannel->dfileId = dfileId;
+    normalChannel->isReserveChannel = false;
+    ret = ClientTransAddUdpChannel(normalChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel *reserveChannel = reinterpret_cast<UdpChannel *>(SoftBusCalloc(sizeof(UdpChannel)));
+    ASSERT_NE(reserveChannel, nullptr);
+    reserveChannel->channelId = channelId2;
+    reserveChannel->dfileId = dfileId;
+    reserveChannel->isReserveChannel = true;
+    ret = ClientTransAddUdpChannel(reserveChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    UdpChannel udpChannel;
+    (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
+    ret = TransGetReserveUdpChannelByFileId(dfileId, &udpChannel);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(channelId2, udpChannel.channelId);
+    ret = TransDeleteUdpChannel(channelId1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDeleteUdpChannel(channelId2);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ClientTransUdpMgrDeinit();
+}
+
 } // namespace OHOS

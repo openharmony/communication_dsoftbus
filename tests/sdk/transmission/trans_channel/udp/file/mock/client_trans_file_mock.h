@@ -39,6 +39,7 @@ public:
 
     // UDP Manager methods
     virtual int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel) = 0;
+    virtual int32_t TransGetReserveUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel) = 0;
     virtual int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *udpChannel) = 0;
     virtual int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType,
         char *sessionName, uint32_t len) = 0;
@@ -89,6 +90,7 @@ public:
 
     // UDP Manager mocks
     MOCK_METHOD2(TransGetUdpChannelByFileId, int32_t(int32_t dfileId, UdpChannel *udpChannel));
+    MOCK_METHOD2(TransGetReserveUdpChannelByFileId, int32_t(int32_t dfileId, UdpChannel *udpChannel));
     MOCK_METHOD2(TransGetUdpChannel, int32_t(int32_t channelId, UdpChannel *udpChannel));
     MOCK_METHOD4(ClientGetSessionNameByChannelId, int32_t(int32_t channelId, int32_t channelType,
         char *sessionName, uint32_t len));

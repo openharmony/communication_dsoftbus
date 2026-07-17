@@ -870,6 +870,10 @@ int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], cons
 
 int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
 {
+    if (udpChannel == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_NO_INIT;
@@ -892,6 +896,43 @@ int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
                 return SOFTBUS_MEM_ERR;
             }
             TRANS_LOGI(TRANS_FILE, "find channelId=%{public}d, with dfileId=%{public}d.",
+                channelNode->channelId, dfileId);
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
+}
+
+int32_t TransGetReserveUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
+{
+    if (udpChannel == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    UdpChannel *channelNode = NULL;
+    LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
+        if (channelNode->dfileId == dfileId) {
+            if (!channelNode->isReserveChannel) {
+                continue;
+            }
+            if (memcpy_s(udpChannel, sizeof(UdpChannel), channelNode, sizeof(UdpChannel)) != EOK) {
+                TRANS_LOGE(TRANS_FILE, "memcpy_s failed.");
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+                return SOFTBUS_MEM_ERR;
+            }
+            TRANS_LOGI(TRANS_FILE, "find reserve channelId=%{public}d, with dfileId=%{public}d.",
                 channelNode->channelId, dfileId);
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
