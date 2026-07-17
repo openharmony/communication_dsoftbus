@@ -215,6 +215,7 @@ typedef struct {
     int peerHandleId;
     int32_t linkType;
     int32_t connectType;
+    int32_t keyType;
     uint32_t dataConfig;
     int32_t osType;
     int64_t timeStart;

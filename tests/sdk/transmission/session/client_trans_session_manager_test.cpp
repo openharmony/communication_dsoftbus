@@ -2705,4 +2705,324 @@ HWTEST_F(TransClientSessionManagerTest, GetMaxBufferLenBySocket10, TestSize.Leve
     SoftBusFree(sessionParam);
     TransClientDeinit();
 }
+
+/*
+ * @tc.name: ClientSetKeyTypeBySocketInvalidParamTest001
+ * @tc.desc: test ClientSetKeyTypeBySocket with all invalid param combinations that hit the
+ *           SOFTBUS_INVALID_PARAM branch (invalid socket and invalid keyType range)
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientSetKeyTypeBySocketInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = ClientSetKeyTypeBySocket(0, KEY_TYPE_NORMAL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientSetKeyTypeBySocket(-1, KEY_TYPE_NORMAL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientSetKeyTypeBySocket(1, -1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientSetKeyTypeBySocket(1, KEY_TYPE_BUTT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransGetKeyTypeBySocketIdNullParamTest001
+ * @tc.desc: test TransGetKeyTypeBySocketId with null keyType output pointer returns
+ *           SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransGetKeyTypeBySocketIdNullParamTest001, TestSize.Level1)
+{
+    TransClientInit();
+    int32_t ret = TransGetKeyTypeBySocketId(1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    int32_t keyTypeOut = 0;
+    ret = TransGetKeyTypeBySocketId(0, &keyTypeOut);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientSetKeyTypeBySocketSessionNotFoundTest001
+ * @tc.desc: test ClientSetKeyTypeBySocket returns SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND
+ *           when session does not exist for the given socket
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientSetKeyTypeBySocketSessionNotFoundTest001, TestSize.Level1)
+{
+    TransClientInit();
+    int32_t socket = TRANS_TEST_SESSION_ID;
+    int32_t ret = ClientSetKeyTypeBySocket(socket, KEY_TYPE_NORMAL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: TransGetKeyTypeBySocketIdSessionNotFoundTest001
+ * @tc.desc: test TransGetKeyTypeBySocketId returns SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND
+ *           when session does not exist for the given socket
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransGetKeyTypeBySocketIdSessionNotFoundTest001, TestSize.Level1)
+{
+    TransClientInit();
+    int32_t keyTypeOut = 0;
+    int32_t ret = TransGetKeyTypeBySocketId(TRANS_TEST_SESSION_ID, &keyTypeOut);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientSetKeyTypeBySocketRoleNotClientTest001
+ * @tc.desc: test ClientSetKeyTypeBySocket returns SOFTBUS_TRANS_SESSION_NO_ENABLE
+ *           when session role is SESSION_ROLE_SERVER
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientSetKeyTypeBySocketRoleNotClientTest001, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_PROXY;
+    session->role = SESSION_ROLE_SERVER;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientSetKeyTypeBySocket(session->sessionId, KEY_TYPE_NORMAL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NO_ENABLE);
+    ret = ClientDeleteSession(session->sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientSetKeyTypeBySocketSessionStateNotInitTest001
+ * @tc.desc: test ClientSetKeyTypeBySocket returns SOFTBUS_TRANS_SESSION_NO_ENABLE
+ *           when session lifecycle.sessionState is not SESSION_STATE_INIT
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientSetKeyTypeBySocketSessionStateNotInitTest001, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_PROXY;
+    session->role = SESSION_ROLE_CLIENT;
+    session->lifecycle.sessionState = SESSION_STATE_OPENED;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientSetKeyTypeBySocket(session->sessionId, KEY_TYPE_NORMAL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NO_ENABLE);
+    ret = ClientDeleteSession(session->sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientSetKeyTypeBySocketAuthChannelTest001
+ * @tc.desc: test ClientSetKeyTypeBySocket returns SOFTBUS_TRANS_FUNC_NOT_SUPPORT
+ *           when session channelType is CHANNEL_TYPE_AUTH
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientSetKeyTypeBySocketAuthChannelTest001, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_AUTH;
+    session->role = SESSION_ROLE_CLIENT;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientSetKeyTypeBySocket(session->sessionId, KEY_TYPE_NORMAL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_FUNC_NOT_SUPPORT);
+    ret = ClientDeleteSession(session->sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: ClientSetKeyTypeBySocketSuccessTest001
+ * @tc.desc: test ClientSetKeyTypeBySocket success when role is SESSION_ROLE_CLIENT
+ *           and lifecycle.sessionState is SESSION_STATE_INIT and channelType is not AUTH
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientSetKeyTypeBySocketSuccessTest001, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_PROXY;
+    session->role = SESSION_ROLE_CLIENT;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientSetKeyTypeBySocket(session->sessionId, KEY_TYPE_META);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSession(session->sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: TransGetKeyTypeBySocketIdEnableStatusNotSuccessTest001
+ * @tc.desc: test TransGetKeyTypeBySocketId returns SOFTBUS_TRANS_SESSION_NO_ENABLE
+ *           when session enableStatus is not ENABLE_STATUS_SUCCESS
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransGetKeyTypeBySocketIdEnableStatusNotSuccessTest001, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_PROXY;
+    session->enableStatus = ENABLE_STATUS_INIT;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    int32_t keyTypeOut = 0;
+    ret = TransGetKeyTypeBySocketId(session->sessionId, &keyTypeOut);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NO_ENABLE);
+    ret = ClientDeleteSession(session->sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: TransGetKeyTypeBySocketIdAuthChannelTest001
+ * @tc.desc: test TransGetKeyTypeBySocketId returns SOFTBUS_TRANS_FUNC_NOT_SUPPORT
+ *           when session channelType is CHANNEL_TYPE_AUTH
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransGetKeyTypeBySocketIdAuthChannelTest001, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_AUTH;
+    session->enableStatus = ENABLE_STATUS_SUCCESS;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    int32_t keyTypeOut = 0;
+    ret = TransGetKeyTypeBySocketId(session->sessionId, &keyTypeOut);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_FUNC_NOT_SUPPORT);
+    ret = ClientDeleteSession(session->sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
+
+/*
+ * @tc.name: TransGetKeyTypeBySocketIdSuccessTest001
+ * @tc.desc: test TransGetKeyTypeBySocketId success when enableStatus is ENABLE_STATUS_SUCCESS
+ *           and channelType is not AUTH
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransGetKeyTypeBySocketIdSuccessTest001, TestSize.Level1)
+{
+    TransClientInit();
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != nullptr);
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_PROXY;
+    session->enableStatus = ENABLE_STATUS_SUCCESS;
+    session->keyType = KEY_TYPE_META;
+    ret = ClientAddNewSession(g_sessionName, session);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    int32_t keyTypeOut = 0;
+    ret = TransGetKeyTypeBySocketId(session->sessionId, &keyTypeOut);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(keyTypeOut, KEY_TYPE_META);
+    ret = ClientDeleteSession(session->sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
 } // namespace OHOS

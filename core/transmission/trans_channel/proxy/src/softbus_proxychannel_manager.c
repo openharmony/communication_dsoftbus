@@ -1540,12 +1540,21 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     TransEventExtra extra = { 0 };
     FillProxyHandshakeExtra(&extra, chan, tmpSocketName, &nodeInfo);
     chan->connId = msg->connId;
+    bool isMeta = false;
     int32_t proxyChannelId = chan->channelId;
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(proxyChannelId);
         ReleaseChannelInfo(chan);
         goto EXIT_ERR;
     }
+    ret = GetAuthManagerType(msg->authHandle.authId, &isMeta);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "GetAuthManagerType fail. channelId=%{public}d, ret=%{public}d", proxyChannelId, ret);
+        chan->appInfo.keyType = KEY_TYPE_DEFAULT;
+    } else {
+        chan->appInfo.keyType = isMeta ? KEY_TYPE_META : KEY_TYPE_NORMAL;
+    }
+
     ret = TransProxySaveAndOnOpen(chan, proxyChannelId, &extra);
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
@@ -2961,4 +2970,26 @@ int32_t TransDisableConnBrIdleCheck(int32_t channelId)
         }
     };
     return ConnUpdateConnection(connId, &option);
+}
+
+void TransProxySetKeyTypeByChanId(int32_t channelId, int32_t keyType)
+{
+    TRANS_CHECK_AND_RETURN_LOGE((g_proxyChannelList != NULL), TRANS_CTRL,
+        "trans proxy get channel param nullptr!");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
+
+    ProxyChannelInfo *item = NULL;
+    ProxyChannelInfo *nextNode = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->channelId == channelId) {
+            item->appInfo.keyType = keyType;
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    TRANS_LOGW(TRANS_CTRL, "proxy channel not found by channelId=%{public}d", channelId);
+    return;
 }

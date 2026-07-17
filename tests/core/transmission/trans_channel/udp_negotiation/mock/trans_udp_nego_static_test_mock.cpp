@@ -200,5 +200,10 @@ bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId)
 {
     return GetTransUdpNegoStaticInterface()->TransGetAuthTypeByNetWorkId(peerNetWorkId);
 }
+
+int32_t GetAuthManagerType(int64_t authId, bool *isMeta)
+{
+    return GetTransUdpNegoStaticInterface()->GetAuthManagerType(authId, isMeta);
+}
 }
 }

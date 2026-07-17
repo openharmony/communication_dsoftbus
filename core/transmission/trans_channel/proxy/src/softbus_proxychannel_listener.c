@@ -84,6 +84,7 @@ static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool 
     info->timeStart = appInfo->timeStart;
     info->linkType = appInfo->linkType;
     info->connectType = appInfo->connectType;
+    info->keyType = appInfo->keyType;
     info->osType = appInfo->osType;
     info->isD2D = appInfo->isD2D;
     if (appInfo->isD2D) {

@@ -125,10 +125,16 @@ static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
 
 static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
 {
+    bool isMeta = false;
+    if (info->appInfo.keyType > KEY_TYPE_DEFAULT && info->appInfo.keyType < KEY_TYPE_BUTT) {
+        isMeta = (info->appInfo.keyType == KEY_TYPE_META) ? true : false;
+    } else {
+        (void)TransProxySetKeyTypeByChanId(info->channelId, KEY_TYPE_NORMAL);
+    }
     AuthGetLatestIdByUuid(info->appInfo.peerData.deviceId, ConvertConnectType2AuthLinkType(info->type),
-                          false, &info->authHandle);
+                          isMeta, &info->authHandle);
     if (info->authHandle.authId == AUTH_INVALID_ID) {
-        TRANS_LOGE(TRANS_CTRL, "get authId for cipher err");
+        TRANS_LOGE(TRANS_CTRL, "get authId for cipher err, isMeta=%{public}d", isMeta);
         return SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED;
     }
 

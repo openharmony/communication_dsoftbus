@@ -59,6 +59,7 @@ typedef struct {
     sessionNeed info;
     int32_t routeType;
     int32_t sessionId;
+    int32_t keyType;
     OnRenameFileCallback onRenameFile;
     bool isEnable;
     bool isTosSet;

@@ -61,6 +61,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     }
     ReadInt32(data, &(channel.routeType));
     ReadBool(data, &(channel.isSupportTlv));
+    ReadInt32(data, &(channel.keyType));
     int ret = TransOnChannelOpened(sessionName, &channel);
     if (ret < 0) {
         TRANS_LOGE(TRANS_CTRL, "TransOnChannelOpened fail, errcode=%{public}d.", ret);

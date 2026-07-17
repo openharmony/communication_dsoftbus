@@ -381,6 +381,7 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->dataConfig = conn->appInfo.myData.dataConfig;
     info->timeStart = conn->appInfo.timeStart;
     info->connectType = conn->appInfo.connectType;
+    info->keyType = conn->appInfo.keyType;
     info->osType = conn->appInfo.osType;
     info->tokenType = conn->appInfo.myData.tokenType;
     info->isLowLatency = conn->appInfo.isLowLatency;
@@ -793,10 +794,7 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
 static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request, uint32_t flags)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "conn calloc failed");
-        return NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(conn != NULL, NULL, TRANS_CTRL, "conn calloc failed");
     if (GetSessionConnById(channelId, conn) != SOFTBUS_OK) {
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "get session conn failed");
@@ -835,6 +833,11 @@ static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
             return NULL;
         }
         EnableCapabilityBit(&conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
+    }
+    if (((flags & FLAG_EXTERNAL_DEVICE) != 0) || ((flags & FLAG_AUTH_META) != 0)) {
+        conn->appInfo.keyType = KEY_TYPE_META;
+    } else {
+        conn->appInfo.keyType = KEY_TYPE_NORMAL;
     }
     return conn;
 }

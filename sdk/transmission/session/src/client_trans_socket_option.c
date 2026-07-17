@@ -97,6 +97,46 @@ static int32_t TransGetLogicalBandwidth(
     return GetLogicalBandwidth(socket, (int32_t *)optValue, optValueSize);
 }
 
+static int32_t TransSetKeyType(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
+{
+    if (socket <= 0 || optValue == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, socket=%{public}d", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (level != OPT_LEVEL_SOFTBUS) {
+        TRANS_LOGE(TRANS_SDK, "invalid level, socket=%{public}d, level=%{public}d", socket, level);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (optValueSize != (int32_t)sizeof(KeyType)) {
+        TRANS_LOGE(TRANS_SDK, "invalid optValueSize=%{public}d", optValueSize);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    KeyType keyType = *(KeyType *)optValue;
+    return ClientSetKeyTypeBySocket(socket, keyType);
+}
+
+static int32_t TransGetKeyType(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+{
+    if (socket <= 0 || optValue == NULL || optValueSize == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, socket=%{public}d", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (level != OPT_LEVEL_SOFTBUS) {
+        TRANS_LOGE(TRANS_SDK, "invalid level, socket=%{public}d, level=%{public}d", socket, level);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = TransGetKeyTypeBySocketId(socket, (int32_t *)optValue);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "TransGetKeyTypeBySocketId fail, socket=%{public}d, ret=%{public}d", socket, ret);
+        return ret;
+    }
+    *optValueSize = sizeof(KeyType);
+    return SOFTBUS_OK;
+}
+
 static SocketOptMap g_socketOptMap[] = {
     { OPT_TYPE_MAX_BUFFER, TransGetSocketMaxBufferLen, NULL },
     { OPT_TYPE_FIRST_PACKAGE, NULL, NULL },
@@ -104,6 +144,7 @@ static SocketOptMap g_socketOptMap[] = {
     { OPT_TYPE_SUPPORT_ACK, TransGetSupportTlv, NULL },
     { OPT_TYPE_NEED_ACK, NULL, TransSetNeedAck },
     { OPT_TYPE_LOGICAL_BANDWIDTH, TransGetLogicalBandwidth, NULL},
+    { OPT_TYPE_KEY_TYPE, TransGetKeyType, TransSetKeyType },
 };
 
 int32_t GetCommonSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)

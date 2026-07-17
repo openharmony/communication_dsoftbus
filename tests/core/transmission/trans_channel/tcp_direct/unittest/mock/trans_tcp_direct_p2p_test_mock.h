@@ -59,6 +59,7 @@ public:
     virtual int32_t TransProxyReuseByChannelId(int32_t channelId) = 0;
     virtual int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId) = 0;
     virtual SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid) = 0;
+    virtual bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId) = 0;
 };
 
 class TransTcpDirectP2pInterfaceMock : public TransTcpDirectP2pInterface {
@@ -92,6 +93,7 @@ public:
     MOCK_METHOD1(TransProxyReuseByChannelId, int32_t (int32_t channelId));
     MOCK_METHOD1(TransProxyPipelineCloseChannelDelay, int32_t (int32_t channelId));
     MOCK_METHOD2(CreateNewSessinConn, SessionConn *(ListenerModule module, bool isServerSid));
+    MOCK_METHOD1(TransGetAuthTypeByNetWorkId, bool (const char *peerNetWorkId));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_P2P_TEST_MOCK_H

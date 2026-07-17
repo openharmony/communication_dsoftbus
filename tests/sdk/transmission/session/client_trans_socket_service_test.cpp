@@ -960,4 +960,50 @@ HWTEST_F(TransClientSocketServiceTest, ServiceSocketPeerNetworkId003, TestSize.L
     int32_t socket = ServiceSocket(info);
     ASSERT_EQ(socket, SOFTBUS_TRANS_SESSION_ADDPKG_FAILED);
 }
+
+/*
+ * @tc.name: SetSocketOptKeyTypeInvalidParamTest001
+ * @tc.desc: test SetSocketOpt with OPT_TYPE_KEY_TYPE invalid param combinations that
+ *           hit the SOFTBUS_INVALID_PARAM branch (invalid socket, level, null optValue,
+ *           invalid optValueSize)
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, SetSocketOptKeyTypeInvalidParamTest001, TestSize.Level1)
+{
+    KeyType keyType = KEY_TYPE_NORMAL;
+    int32_t keyTypeSize = static_cast<int32_t>(sizeof(KeyType));
+    int32_t ret = SetSocketOpt(0, OPT_LEVEL_SOFTBUS, OPT_TYPE_KEY_TYPE, &keyType, keyTypeSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSocketOpt(1, OPT_LEVEL_BUTT, OPT_TYPE_KEY_TYPE, &keyType, keyTypeSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSocketOpt(1, OPT_LEVEL_SOFTBUS, OPT_TYPE_KEY_TYPE, nullptr, keyTypeSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSocketOpt(1, OPT_LEVEL_SOFTBUS, OPT_TYPE_KEY_TYPE, &keyType, -1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetSocketOptKeyTypeInvalidParamTest001
+ * @tc.desc: test GetSocketOpt with OPT_TYPE_KEY_TYPE invalid param combinations that
+ *           hit the SOFTBUS_INVALID_PARAM branch (invalid socket, level, null optValue,
+ *           null optValueSize)
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, GetSocketOptKeyTypeInvalidParamTest001, TestSize.Level1)
+{
+    KeyType keyType = KEY_TYPE_DEFAULT;
+    int32_t optValueSize = 0;
+    int32_t ret = GetSocketOpt(0, OPT_LEVEL_SOFTBUS, OPT_TYPE_KEY_TYPE, &keyType, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketOpt(1, OPT_LEVEL_BUTT, OPT_TYPE_KEY_TYPE, &keyType, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketOpt(1, OPT_LEVEL_SOFTBUS, OPT_TYPE_KEY_TYPE, nullptr, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketOpt(1, OPT_LEVEL_SOFTBUS, OPT_TYPE_KEY_TYPE, &keyType, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

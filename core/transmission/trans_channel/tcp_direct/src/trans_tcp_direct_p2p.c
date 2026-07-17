@@ -1493,7 +1493,12 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         goto EXIT_ERR;
     }
     UpdateHmlModule(conn->appInfo.myData.addr, appInfo->peerData.deviceId, &(conn->listenMod));
-    conn->isMeta = (appInfo->osType == OTHER_OS_TYPE) ? true : TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
+    if (appInfo->keyType > KEY_TYPE_DEFAULT && appInfo->keyType < KEY_TYPE_BUTT) {
+        conn->isMeta = (appInfo->keyType == KEY_TYPE_META) ? true : false;
+    } else {
+        conn->isMeta = (appInfo->osType == OTHER_OS_TYPE) ? true : TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
+        conn->appInfo.keyType = conn->isMeta ? KEY_TYPE_META : KEY_TYPE_NORMAL;
+    }
 
     ret = TransTdcAddSessionConn(conn);
     if (ret != SOFTBUS_OK) {

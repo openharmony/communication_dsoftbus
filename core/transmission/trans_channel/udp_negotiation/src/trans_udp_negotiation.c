@@ -212,6 +212,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
     info.connectType = appInfo->connectType;
+    info.keyType = appInfo->keyType;
     info.isMultiNeg = GetCapabilityBit(appInfo->udpChannelCapability, CHANNEL_ISMULTINEG_OFFSET);
     info.enableMultipath = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_MULTIPATH_OFFSET);
     info.cancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
@@ -375,10 +376,9 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
 {
     TRANS_LOGI(TRANS_CTRL, "process udp channel open state[as server].");
     int32_t udpChannelId = GenerateUdpChannelId();
-    if (udpChannelId == INVALID_ID) {
-        TRANS_LOGE(TRANS_CTRL, "generate udp channel id failed.");
-        return SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(udpChannelId > INVALID_ID,
+        SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID, TRANS_CTRL, "generate udp channel id failed.");
+
     appInfo->myData.channelId = udpChannelId;
     int32_t ret = LnnGetNetworkIdByUuid(
         (const char *)appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
@@ -386,10 +386,8 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
         TRANS_LOGE(TRANS_CTRL, "get network id by uuid failed.");
     }
     ret = CheckAndGenerateSinkSessionKey(appInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "generate sink session key failed.");
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "generate sink session key failed.");
+
     FillHapSinkAclInfoToAppInfo(appInfo);
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
     if (newChannel == NULL) {
@@ -407,6 +405,15 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
         SoftBusFree(newChannel);
         return SOFTBUS_MEM_ERR;
     }
+    bool isMeta = false;
+    ret = GetAuthManagerType(authHandle->authId, &isMeta);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "GetAuthManagerType fail. channelId=%{public}d, ret=%{public}d", udpChannelId, ret);
+        newChannel->info.keyType = KEY_TYPE_DEFAULT;
+    } else {
+        newChannel->info.keyType = isMeta ? KEY_TYPE_META : KEY_TYPE_NORMAL;
+    }
+    appInfo->keyType = newChannel->info.keyType;
     if (TransAddUdpChannel(newChannel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add new udp channel failed.");
         ReleaseUdpChannelId(appInfo->myData.channelId);
@@ -417,11 +424,8 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
     ret = CheckCollabRelation(appInfo, udpChannelId, CHANNEL_TYPE_UDP);
     if (ret == SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
         ret = NotifyUdpChannelOpened(appInfo, true);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "Trans send on channel opened request fail. ret=%{public}d.", ret);
-            return ret;
-        }
-        return SOFTBUS_OK;
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_CTRL, "Trans send on channel opened request fail. ret=%{public}d.", ret);
     }
 
     return SOFTBUS_OK;
@@ -1215,7 +1219,13 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     }
     channelObj->requestId = requestId;
     channelObj->status = UDP_CHANNEL_STATUS_OPEN_AUTH;
-    bool isMeta = TransUdpGetAuthType(channel->info.peerNetWorkId, channel->info.myData.sessionName);
+    bool isMeta = false;
+    if (channelObj->info.keyType > KEY_TYPE_DEFAULT && channelObj->info.keyType < KEY_TYPE_BUTT) {
+        isMeta = (channelObj->info.keyType == KEY_TYPE_META) ? true : false;
+    } else {
+        isMeta = TransUdpGetAuthType(channel->info.peerNetWorkId, channel->info.myData.sessionName);
+        channelObj->info.keyType = isMeta ? KEY_TYPE_META : KEY_TYPE_NORMAL;
+    }
     ReleaseUdpChannelLock();
 
     TransEventExtra extra = {

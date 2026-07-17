@@ -855,3 +855,33 @@ void AuthServerDeathCallback(const char *pkgName, int32_t pid)
     DelAuthMetaManagerByPidPacked(pkgName, pid);
     ClearMetaNodeRequestByPidPacked(pkgName, pid);
 }
+
+int32_t GetAuthManagerType(int64_t authId, bool *isMeta)
+{
+    if (isMeta == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    bool isAuth = false;
+    bool isMetaAuth = false;
+    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (auth != NULL) {
+        isAuth = true;
+        DelDupAuthManager(auth);
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    int32_t ret = AuthMetaGetDeviceUuidPacked(authId, uuid, UUID_BUF_LEN);
+    if (ret == SOFTBUS_OK) {
+        isMetaAuth = true;
+    }
+    if (isMetaAuth && isAuth) {
+        AUTH_LOGE(AUTH_CONN, "same authId err.");
+        return SOFTBUS_AUTH_SAME_ID_ERR;
+    }
+    if (!isMetaAuth && !isAuth) {
+        AUTH_LOGE(AUTH_CONN, "not found authId=%{public}" PRId64, authId);
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    *isMeta = isMetaAuth ? true : false;
+    return SOFTBUS_OK;
+}

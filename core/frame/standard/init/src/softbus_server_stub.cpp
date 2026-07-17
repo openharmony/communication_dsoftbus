@@ -762,6 +762,7 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.flowInfo.sessionType = (FlowSessionType)data.ReadUint32();
     param.flowInfo.flowQosType = (FlowQosType)data.ReadUint32();
     param.cancelEncryptionBit = data.ReadUint32();
+    param.keyType = data.ReadInt32();
 }
 
 static bool WhitelistPermissionCheck(void)

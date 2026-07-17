@@ -217,6 +217,7 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     param.groupId = (const char *)ReadString(req, &size);
     ReadBool(req, &param.isAsync);
     ReadInt32(req, &param.sessionId);
+    ReadInt32(req, &param.keyType);
     ServerReadSessionAttrs(req, &getAttr);
     param.attr = &getAttr;
     if (!ReadQosInfo(req, &param)) {

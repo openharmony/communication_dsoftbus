@@ -83,6 +83,7 @@ static int32_t FillSessionInfo(SessionInfo *session, const ChannelInfo *channel,
     session->lifecycle.sessionState = SESSION_STATE_CALLBACK_FINISHED;
     session->isSupportTlv = channel->isSupportTlv;
     session->tokenType = channel->tokenType;
+    session->keyType = channel->keyType;
     if (channel->isD2D) {
         session->isD2D = channel->isD2D;
         session->dataLen = channel->dataLen;
@@ -497,9 +498,9 @@ static void AnonymizeLogTransOnSessionOpenedInfo(const char *sessionName, const 
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK,
         "TransOnSessionOpened: sessionName=%{public}s, channelId=%{public}d, channelType=%{public}d, flag=%{public}d,"
-        "isServer=%{public}d, type=%{public}d, crc=%{public}d",
+        "isServer=%{public}d, type=%{public}d, crc=%{public}d, keyType=%{public}d",
         AnonymizeWrapper(tmpName), channel->channelId, channel->channelType, flag, channel->isServer,
-        channel->routeType, channel->crc);
+        channel->routeType, channel->crc, channel->keyType);
     AnonymizeFree(tmpName);
 }
 

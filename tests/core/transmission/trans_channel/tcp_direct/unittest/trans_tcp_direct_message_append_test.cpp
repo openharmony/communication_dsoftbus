@@ -2169,4 +2169,91 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest011, TestSize.Le
     (void)TransDelSessionConnById(channelId);
     cJSON_Delete(request);
 }
+
+/*
+ * @tc.name: GetSessionConnFromDataBusRequestKeyTypeTest001
+ * @tc.desc: test GetSessionConnFromDataBusRequest keyType KEY_TYPE_META when FLAG_AUTH_META
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestKeyTypeTest001, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint32_t flags = FLAG_AUTH_META;
+    cJSON *request = cJSON_CreateObject();
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, GetJsonObjectNumber64Item).WillRepeatedly(Return(false));
+    EXPECT_CALL(TcpMessageMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    SessionConn *result = GetSessionConnFromDataBusRequest(channelId, request, flags);
+    ASSERT_TRUE(result != nullptr);
+    EXPECT_EQ(result->appInfo.keyType, KEY_TYPE_META);
+
+    (void)TransDelSessionConnById(channelId);
+    SoftBusFree(result);
+    cJSON_Delete(request);
+}
+
+/*
+ * @tc.name: GetSessionConnFromDataBusRequestKeyTypeTest002
+ * @tc.desc: test GetSessionConnFromDataBusRequest keyType KEY_TYPE_META when FLAG_EXTERNAL_DEVICE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestKeyTypeTest002, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint32_t flags = FLAG_EXTERNAL_DEVICE;
+    cJSON *request = cJSON_CreateObject();
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnpackExternalDeviceRequest).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, GetJsonObjectNumber64Item).WillRepeatedly(Return(false));
+    EXPECT_CALL(TcpMessageMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    SessionConn *result = GetSessionConnFromDataBusRequest(channelId, request, flags);
+    ASSERT_TRUE(result != nullptr);
+    EXPECT_EQ(result->appInfo.keyType, KEY_TYPE_META);
+
+    (void)TransDelSessionConnById(channelId);
+    SoftBusFree(result);
+    cJSON_Delete(request);
+}
+
+/*
+ * @tc.name: GetSessionConnFromDataBusRequestKeyTypeTest003
+ * @tc.desc: test GetSessionConnFromDataBusRequest keyType KEY_TYPE_NORMAL when no meta flags
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestKeyTypeTest003, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNELID;
+    uint32_t flags = 0;
+    cJSON *request = cJSON_CreateObject();
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    int32_t ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, UnpackRequest).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, GetJsonObjectNumber64Item).WillRepeatedly(Return(false));
+    EXPECT_CALL(TcpMessageMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    SessionConn *result = GetSessionConnFromDataBusRequest(channelId, request, flags);
+    ASSERT_TRUE(result != nullptr);
+    EXPECT_EQ(result->appInfo.keyType, KEY_TYPE_NORMAL);
+
+    (void)TransDelSessionConnById(channelId);
+    SoftBusFree(result);
+    cJSON_Delete(request);
+}
 }
