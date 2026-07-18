@@ -1353,6 +1353,7 @@ static int32_t ReallocateDeviceInfoArray(const DeviceNodeInfo *infoArray,
     }
     if (memcpy_s(*actualArray, sizeof(DeviceNodeInfo) * actualCount, infoArray,
         sizeof(DeviceNodeInfo) * actualCount) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy device info array failed, count=%{public}d", actualCount);
         SoftBusFree(*actualArray);
         *actualArray = nullptr;
         return SOFTBUS_MEM_ERR;
@@ -2047,6 +2048,7 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t reason)
             NodeInfo nodeInfo;
             ret = GetDeviceNodeInfo(msg.networkId, &nodeInfo);
             if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_EVENT, "get device node info failed, skip cached msg, ret=%{public}d", ret);
                 SoftBusFree(msg.data);
                 continue;
             }

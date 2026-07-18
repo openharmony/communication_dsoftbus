@@ -2772,6 +2772,7 @@ int32_t SoftBusServerStub::GetTrustedDevicesInner(MessageParcel &data, MessagePa
         SoftBusFree(nodeInfo);
         return retReply;
     }
+    COMM_LOGI(COMM_SVC, "infoNum=%{public}d", infoNum);
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == nullptr)) {
         SoftBusFree(nodeInfo);
         COMM_LOGE(COMM_SVC, "node info is invalid");
@@ -2782,7 +2783,6 @@ int32_t SoftBusServerStub::GetTrustedDevicesInner(MessageParcel &data, MessagePa
         SoftBusFree(nodeInfo);
         return SOFTBUS_NETWORK_WRITEINT32_FAILED;
     }
-    COMM_LOGI(COMM_SVC, "infoNum=%{public}d", infoNum);
     if (infoNum > 0) {
         if (!reply.WriteRawData(nodeInfo, static_cast<int32_t>(sizeof(DeviceNodeInfo) * infoNum))) {
             COMM_LOGE(COMM_SVC, "write node info failed!");

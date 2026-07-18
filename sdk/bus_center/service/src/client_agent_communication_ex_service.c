@@ -88,7 +88,7 @@ int32_t PostConversationData(const char *deviceId, const ConversationBusiness *i
         return SOFTBUS_INVALID_PARAM;
     }
     if (len == 0 || len > COMMUNICATION_DATA_MAX_LEN) {
-        LNN_LOGI(LNN_EVENT,  "invalid len=%{public}u", len);
+        LNN_LOGI(LNN_EVENT, "invalid len=%{public}u", len);
         DfxRecordSdkPostConversationData(deviceId, info, len, timeMs, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -99,15 +99,16 @@ int32_t PostConversationData(const char *deviceId, const ConversationBusiness *i
         return ret;
     }
     ret = PostConversationDataInner(deviceId, info, data, len);
+    LNN_LOGI(LNN_EVENT, "ret=%{public}d", ret);
     DfxRecordSdkPostConversationData(deviceId, info, len, timeMs, ret);
     return ret;
 }
 
 void FreeDeviceNodeInfo(DeviceNodeInfo *info)
 {
-    LNN_LOGI(LNN_EVENT,  "enter");
+    LNN_LOGI(LNN_EVENT, "enter");
     if (info == NULL) {
-        LNN_LOGI(LNN_EVENT,  "info is null");
+        LNN_LOGI(LNN_EVENT, "info is null");
         return;
     }
     SoftBusFree(info);
@@ -127,9 +128,9 @@ static void DfxRecordSdkRegisterConversationListener(const ConversationBusiness 
 
 int32_t RegisterConversationListener(const ConversationBusiness *info, const ConversationListener *listener)
 {
-    LNN_LOGI(LNN_EVENT,  "enter");
+    LNN_LOGI(LNN_EVENT, "enter");
     if (info == NULL || listener == NULL || listener->OnDataReceived == NULL) {
-        LNN_LOGE(LNN_EVENT,  "invalid param");
+        LNN_LOGE(LNN_EVENT, "invalid param");
         DfxRecordSdkRegisterConversationListener(info, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -146,9 +147,9 @@ int32_t RegisterConversationListener(const ConversationBusiness *info, const Con
 
 int32_t UnregisterConversationListener(const ConversationBusiness *info)
 {
-    LNN_LOGI(LNN_EVENT,  "enter");
+    LNN_LOGI(LNN_EVENT, "enter");
     if (info == NULL) {
-        LNN_LOGE(LNN_EVENT,  "invalid param");
+        LNN_LOGE(LNN_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(info->abilityName);
@@ -161,7 +162,7 @@ int32_t UnregisterConversationListener(const ConversationBusiness *info)
 
 int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
-    LNN_LOGI(LNN_EVENT,  "enter");
+    LNN_LOGI(LNN_EVENT, "enter");
     LNN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid info");
     LNN_CHECK_AND_RETURN_RET_LOGE(nums != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid nums");
     return GetTrustedDevicesInner(info, nums);
