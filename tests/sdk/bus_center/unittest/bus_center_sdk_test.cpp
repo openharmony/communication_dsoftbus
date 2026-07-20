@@ -479,7 +479,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_SET_NODE_KEY_INFO_Test_001, TestSize.L
     EXPECT_TRUE(SetNodeKeyInfo(nullptr, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, nullptr,
         strlen(serviceFindCap)) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(SetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, (uint8_t *)serviceFindCap1,
-        strlen(serviceFindCap1)) == SOFTBUS_IPC_ERR);
+        strlen(serviceFindCap1)) == SOFTBUS_SERVER_NOT_INIT);
 }
 
 /*

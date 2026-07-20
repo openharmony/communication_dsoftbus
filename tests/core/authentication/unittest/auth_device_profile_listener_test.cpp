@@ -129,6 +129,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001,
 {
     RegisterToDp(&g_deviceProfilePara);
     AuthToDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_device_id");
     AuthDeviceProfileListenerInterfaceMock mocker;
     int32_t ret = listener->OnTrustDeviceProfileDelete(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -307,6 +308,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_UPDATE_TEST, T
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, TestSize.Level1)
 {
     DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_device_id");
     AuthDeviceProfileListenerInterfaceMock mocker;
     EXPECT_CALL(mocker, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_OFF));
     EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillOnce(Return(false));
@@ -331,6 +333,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST, T
 {
     AuthDeviceProfileListenerInterfaceMock mocker;
     DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_device_id");
     EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = listener->OnTrustDeviceProfileInactive(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);

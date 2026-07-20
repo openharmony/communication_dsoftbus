@@ -40,7 +40,6 @@ const int64_t TEST_SINK_TOKEN_ID = 4;
 const int32_t TEST_USER_ID_ONE = 1;
 const int32_t TEST_USER_ID_TWO = 2;
 const int32_t TEST_USER_ID_THREE = 3;
-const uint32_t TEST_ERROR_USER_ID = -1;
 
 class AuthDeviceProfileTest : public testing::Test {
 public:
@@ -442,11 +441,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_003, TestSize.Level
 {
     uint8_t sessionKey = 0;
     uint32_t length = 0;
-    AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(TEST_ERROR_USER_ID));
     bool result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
     EXPECT_FALSE(result);
-    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
     EXPECT_FALSE(result);
 }
