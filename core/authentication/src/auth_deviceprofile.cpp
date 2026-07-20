@@ -1538,3 +1538,53 @@ bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
     }
     return false;
 }
+
+static int32_t IsSKIdAclInfoInner(int32_t sessionKeyId, char *peerUdid,
+    OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile)
+{
+    std::string sourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
+    std::string sinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
+    if (aclProfile.GetAccesser().GetAccesserSessionKeyId() == sessionKeyId) {
+        if (strcpy_s(peerUdid, UDID_BUF_LEN, sinkDeviceId.c_str()) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        return SOFTBUS_OK;
+    } else if (aclProfile.GetAccessee().GetAccesseeSessionKeyId() == sessionKeyId) {
+        if (strcpy_s(peerUdid, UDID_BUF_LEN, sourceDeviceId.c_str()) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+}
+
+int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid)
+{
+    if (peerUdid == nullptr) {
+        LNN_LOGE(LNN_STATE, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
+        return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    }
+    for (auto &aclProfile : aclProfiles) {
+        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s",
+            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
+        if (aclProfile.GetAccesser().GetAccesserSessionKeyId() != sessionKeyId &&
+            aclProfile.GetAccessee().GetAccesseeSessionKeyId() != sessionKeyId) {
+            continue;
+        }
+        return IsSKIdAclInfoInner(sessionKeyId, peerUdid, aclProfile);
+    }
+    LNN_LOGE(LNN_STATE, "key not found");
+    return SOFTBUS_AUTH_ACL_NOT_FOUND;
+}

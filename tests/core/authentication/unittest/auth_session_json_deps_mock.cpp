@@ -604,6 +604,11 @@ bool AddNumberToJsonObject(cJSON *json, const char *const string, int32_t num)
     return GetInterface()->AddNumberToJsonObject(json, string, num);
 }
 
+int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid)
+{
+    return GetInterface()->IsSKIdFindAclInfo(sessionKeyId, peerUdid);
+}
+
 int32_t AuthSessionGetSourceUserId(int64_t authSeq)
 {
     (void)authSeq;

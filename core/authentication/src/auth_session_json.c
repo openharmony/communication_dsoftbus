@@ -3293,6 +3293,23 @@ static bool IsInvalidExternalAuthInfo(JsonObj *obj, NodeInfo *nodeInfo, const Au
     return false;
 }
 
+static bool OldVersionInvalidExternalAuthInfo(const AuthSessionInfo *info)
+{
+    if (!info->deviceKeyId.hasDeviceKeyId) {
+        return false;
+    }
+    char aclPeerUdid[UDID_BUF_LEN] = { 0 };
+    if (IsSKIdFindAclInfo(info->deviceKeyId.localDeviceKeyId, aclPeerUdid) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get acl udid fail");
+        return true;
+    }
+    if (StrCmpIgnoreCase(info->udid, aclPeerUdid) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "acl udid change!");
+        return true;
+    }
+    return false;
+}
+
 static bool IsInvalidDeviceInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSessionInfo *info)
 {
     if (obj == NULL || nodeInfo == NULL || info == NULL) {
@@ -3306,12 +3323,15 @@ static bool IsInvalidDeviceInfo(JsonObj *obj, NodeInfo *nodeInfo, const AuthSess
     int32_t authVersion = 0;
     if (!JSON_GetInt32FromOject(obj, AUTH_VERSION_TAG, (int32_t *)&authVersion)) {
         AUTH_LOGW(AUTH_FSM, "peer not send authVersion.");
-        return false;
+        return OldVersionInvalidExternalAuthInfo(info);
     }
     AUTH_LOGI(AUTH_FSM, "authVersion new=%{public}d, old=%{public}d", authVersion, info->authVersion);
     if (authVersion != (int32_t)info->authVersion) {
         AUTH_LOGE(AUTH_FSM, "authVersion change!");
         return true;
+    }
+    if (authVersion < AUTH_VERSION_V2) {
+        return OldVersionInvalidExternalAuthInfo(info);
     }
     if (authVersion >= AUTH_VERSION_V2 && IsInvalidExternalAuthInfo(obj, nodeInfo, info)) {
         AUTH_LOGE(AUTH_FSM, "is invalid ExternalAuthInfo!");

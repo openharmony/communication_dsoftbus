@@ -130,6 +130,7 @@ public:
     virtual char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
         const char *udidHash) = 0;
     virtual void CredTypesSort(int32_t *credTypes, int32_t credTypesLen) = 0;
+    virtual int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -217,6 +218,7 @@ public:
     MOCK_METHOD4(IdServiceGetCredIdByCredType, char *(int32_t localUserId, int32_t peerUserId, int32_t credType,
         const char *udidHash));
     MOCK_METHOD2(CredTypesSort, void(int32_t *credTypes, int32_t credTypesLen));
+    MOCK_METHOD2(IsSKIdFindAclInfo, int32_t(int32_t sessionKeyId, char *peerUdid));
 };
 
 extern "C" {

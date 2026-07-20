@@ -1612,4 +1612,50 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_006, TestSize.Lev
     bool ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
     EXPECT_FALSE(ret);
 }
+
+/*
+ * @tc.name: IS_SK_ID_ACL_INFO_INNER_TEST_001
+ * @tc.desc: find udid ok
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_ACL_INFO_INNER_TEST_001, TestSize.Level1)
+{
+    int32_t sessionKeyId = 1;
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    int32_t ret = IsSKIdAclInfoInner(sessionKeyId, peerUdid, aclProfile);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserSessionKeyId(1);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeSessionKeyId(3);
+    aclProfile.SetAccessee(accessee);
+    ret = IsSKIdAclInfoInner(sessionKeyId, peerUdid, aclProfile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    sessionKeyId = 3;
+    ret = IsSKIdAclInfoInner(sessionKeyId, peerUdid, aclProfile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: IS_SK_ID_FIND_ACL_INFO_TEST_001
+ * @tc.desc: peerUdid is nullptr.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_FIND_ACL_INFO_TEST_001, TestSize.Level1)
+{
+    int32_t sessionKeyId = 1;
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    int32_t ret = IsSKIdFindAclInfo(sessionKeyId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = IsSKIdFindAclInfo(sessionKeyId, peerUdid);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
+}
 } // namespace OHOS

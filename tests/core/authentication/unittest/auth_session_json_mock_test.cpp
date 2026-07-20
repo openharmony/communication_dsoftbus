@@ -2470,4 +2470,37 @@ HWTEST_F(AuthSessionJsonMockTest, GET_LOCAL_DEVICE_ID_TEST_002, TestSize.Level1)
     ret = GetLocalDeviceId(uuid, udid, networkId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: OLD_VERSION_INVALID_ECTERNAL_AUTH_INFO_TEST_001
+ * @tc.desc: test func GetLocalDeviceId succ
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, OLD_VERSION_INVALID_ECTERNAL_AUTH_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    AuthSessionInfo info;
+    char udid[] = "1111";
+    memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.deviceKeyId.hasDeviceKeyId = false;
+    bool ret = OldVersionInvalidExternalAuthInfo(&info);
+    EXPECT_FALSE(ret);
+    info.deviceKeyId.hasDeviceKeyId = true;
+    EXPECT_CALL(mocker, IsSKIdFindAclInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    ret = OldVersionInvalidExternalAuthInfo(&info);
+    EXPECT_TRUE(ret);
+    EXPECT_CALL(mocker, IsSKIdFindAclInfo)
+        .WillOnce(DoAll(SetArrayArgument<1>(udid, udid + strlen(udid) + 1), Return(SOFTBUS_OK)));
+    ret = OldVersionInvalidExternalAuthInfo(&info);
+    EXPECT_TRUE(ret);
+    if (strcpy_s(info.udid, UDID_BUF_LEN, udid)!= EOK) {
+        return;
+    }
+    EXPECT_CALL(mocker, IsSKIdFindAclInfo)
+        .WillOnce(DoAll(SetArrayArgument<1>(udid, udid + strlen(udid) + 1), Return(SOFTBUS_OK)));
+    ret = OldVersionInvalidExternalAuthInfo(&info);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS

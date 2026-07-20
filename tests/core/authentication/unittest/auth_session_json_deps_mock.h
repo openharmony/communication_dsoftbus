@@ -180,6 +180,7 @@ public:
     virtual bool LnnIsDefaultOhosAccount(void) = 0;
     virtual cJSON *cJSON_Duplicate(const cJSON *item, cJSON_bool recurse) = 0;
     virtual bool AddNumberToJsonObject(cJSON *json, const char *const string, int32_t num) = 0;
+    virtual int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -299,6 +300,7 @@ public:
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));
     MOCK_METHOD2(cJSON_Duplicate, cJSON *(const cJSON *item, cJSON_bool recurse));
     MOCK_METHOD3(AddNumberToJsonObject, bool(cJSON *json, const char *const string, int32_t num));
+    MOCK_METHOD2(IsSKIdFindAclInfo, int32_t(int32_t sessionKeyId, char *peerUdid));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H
