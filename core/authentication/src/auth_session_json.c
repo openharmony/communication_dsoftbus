@@ -1418,12 +1418,6 @@ static void UnpackCredNegoInfo(JsonObj *obj, AuthSessionInfo *info, int64_t auth
     if (info->credNegoState == CRED_NEGO_STATE_COMPATIBLE) {
         return;
     }
-    if (info->normalizedType == NORMALIZED_SUPPORT) {
-        AUTH_LOGI(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, authSeq=%{public}"
-            PRId64, info->credNegoState, authSeq);
-        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
-        return;
-    }
     if (!UnpackCredNegoInfoJson(obj, info, authSeq)) {
         AUTH_LOGE(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, authSeq=%{public}"
             PRId64, info->credNegoState, authSeq);
@@ -1431,6 +1425,12 @@ static void UnpackCredNegoInfo(JsonObj *obj, AuthSessionInfo *info, int64_t auth
         return;
     }
     ProcessCredInfo(info, authSeq);
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        AUTH_LOGI(AUTH_FSM, "credNegoState: %{public}d->STATE_COMPATIBLE, authSeq=%{public}"
+            PRId64, info->credNegoState, authSeq);
+        info->credNegoState = CRED_NEGO_STATE_COMPATIBLE;
+        return;
+    }
 }
 
 static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info, int64_t authSeq)
@@ -1560,7 +1560,7 @@ static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
         AUTH_LOGI(AUTH_FSM, "lower version don't need check acl");
         return true;
     }
-    if (info->credNegoState != CRED_NEGO_STATE_COMPATIBLE && info->externalUserIds != NULL) {
+    if (info->credNegoState != CRED_NEGO_STATE_COMPATIBLE || info->externalUserIds != NULL) {
         int32_t size = GetArrayItemNum(info->externalUserIds);
         for (int32_t i = 0; i < size; i++) {
             cJSON *item = GetArrayItemFromArray(info->externalUserIds, i);
