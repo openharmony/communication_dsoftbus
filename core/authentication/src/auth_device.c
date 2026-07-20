@@ -389,7 +389,9 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId, Handle
         LnnDeleteLinkFinderInfo(peerUdid);
     }
     if (type == DP_DEVICE_TYPE) {
-        LnnDeleteSpecificTrustedDevInfo(peerUdid);
+        if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {
+            LnnDeleteSpecificTrustedDevInfo(peerUdid);
+        }
         char networkId[NETWORK_ID_BUF_LEN] = {0};
         if (LnnGetNetworkIdByUdid(peerUdid, networkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK) {
             LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);

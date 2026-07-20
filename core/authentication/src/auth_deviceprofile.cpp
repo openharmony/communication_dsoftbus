@@ -143,6 +143,62 @@ static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
     return SOFTBUS_OK;
 }
 
+static std::string GetAclLocalAccountId(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice)
+{
+    if (trustDevice.GetTrustDeviceId() == trustDevice.GetAccessee().GetAccesseeDeviceId()) {
+        return trustDevice.GetAccesser().GetAccesserAccountId();
+    }
+    return trustDevice.GetAccessee().GetAccesseeAccountId();
+}
+
+static bool IsDeviceHashMatched(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice,
+    const char *deviceIdHash, const char *anonyDeviceIdHash, int32_t localUserId)
+{
+    char *anonyUdid = nullptr;
+    Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
+    LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s, localUserId=%{public}d",
+        AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyDeviceIdHash), localUserId);
+    AnonymizeFree(anonyUdid);
+    uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
+    char hashStr[CUST_UDID_LEN + 1] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)trustDevice.GetTrustDeviceId().c_str(),
+        trustDevice.GetTrustDeviceId().length(), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "generate udidhash fail");
+        return false;
+    }
+    if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash, CUST_UDID_LEN / HEXIFY_UNIT_LEN) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "convert udidhash hex string fail");
+        return false;
+    }
+    if (strncmp(hashStr, deviceIdHash, strlen(deviceIdHash)) == 0) {
+        LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s",
+            AnonymizeWrapper(anonyDeviceIdHash));
+        return true;
+    }
+    return false;
+}
+
+static bool IsAccountMatched(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice,
+    int32_t localUserId)
+{
+    int64_t localAccountId = 0;
+    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+    if (LnnGetAccountIdByUserId(localUserId, &localAccountId, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get local accountId fail, localUserId=%{public}d", localUserId);
+        return false;
+    }
+    std::string aclLocalAccountId = GetAclLocalAccountId(trustDevice);
+    if (aclLocalAccountId.empty()) {
+        return false;
+    }
+    if (std::to_string(localAccountId) == aclLocalAccountId) {
+        LNN_LOGI(LNN_STATE, "account matched, localUserId=%{public}d", localUserId);
+        return true;
+    }
+    return false;
+}
+
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash, bool isOnlyPointToPoint)
 {
@@ -165,26 +221,11 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
                 localUserId != GetAclLocalUserId(trustDevice)) {
                 continue;
             }
-            char *anonyUdid = nullptr;
-            Anonymize(trustDevice.GetTrustDeviceId().c_str(), &anonyUdid);
-            LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s, localUserId=%{public}d",
-                AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyDeviceIdHash), localUserId);
-            AnonymizeFree(anonyUdid);
-            uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
-            char hashStr[CUST_UDID_LEN + 1] = { 0 };
-            if (SoftBusGenerateStrHash((const unsigned char *)trustDevice.GetTrustDeviceId().c_str(),
-                trustDevice.GetTrustDeviceId().length(), udidHash) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_STATE, "generate udidhash fail");
-                continue;
+            if (IsDeviceHashMatched(trustDevice, deviceIdHash, anonyDeviceIdHash, localUserId)) {
+                SoftBusFree(userIds);
+                return true;
             }
-            if (ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash, CUST_UDID_LEN / HEXIFY_UNIT_LEN) !=
-                SOFTBUS_OK) {
-                LNN_LOGE(LNN_STATE, "convert udidhash hex string fail");
-                continue;
-            }
-            if (strncmp(hashStr, deviceIdHash, strlen(deviceIdHash)) == 0) {
-                LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s",
-                    AnonymizeWrapper(anonyDeviceIdHash));
+            if (IsAccountMatched(trustDevice, localUserId)) {
                 SoftBusFree(userIds);
                 return true;
             }
