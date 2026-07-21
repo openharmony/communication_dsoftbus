@@ -645,6 +645,7 @@ static int32_t ScenarioManagerAddScenario(ScenarioManager *manager, const char *
     const char *peerMac, int32_t localPid, int32_t businessType)
 {
     OriginalScenario scenarioInfo;
+    (void)memset_s(&scenarioInfo, sizeof(OriginalScenario), 0, sizeof(OriginalScenario));
     OriginalScenarioInit(&scenarioInfo, localMac, peerMac, localPid, businessType);
     int32_t ret = UpdateOriginalScenario(manager, &scenarioInfo, true);
     if (ret != SOFTBUS_OK) {
@@ -658,6 +659,7 @@ static int32_t ScenarioManagerDelScenario(ScenarioManager *manager, const char *
     const char *peerMac, int32_t localPid, int32_t businessType)
 {
     OriginalScenario scenarioInfo;
+    (void)memset_s(&scenarioInfo, sizeof(OriginalScenario), 0, sizeof(OriginalScenario));
     OriginalScenarioInit(&scenarioInfo, localMac, peerMac, localPid, businessType);
     int32_t ret = UpdateOriginalScenario(manager, &scenarioInfo, false);
     if (ret != SOFTBUS_OK) {

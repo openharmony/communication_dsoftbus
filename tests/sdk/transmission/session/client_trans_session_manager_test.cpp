@@ -2197,21 +2197,23 @@ HWTEST_F(TransClientSessionManagerTest, IsMultiPathSessionTest, TestSize.Level1)
 
 /*
  * @tc.name: ClientGetenableMultipathBySocket001
- * @tc.desc: Transmission sdk session manager get enablemultipath by socket.
+ * @tc.desc: Transmission sdk session manager get enablemultipath by socket with invalid socket.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransClientSessionManagerTest, ClientGetenableMultipathBySocket001, TestSize.Level1)
 {
     int32_t socket = -1;
-    bool enableMultipath;
-    int32_t ret = ClientGetenableMultipathBySocket(socket, &enableMultipath);
+    int32_t ret = ClientGetenableMultipathBySocket(socket, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    bool enableMultipath = false;
+    ret = ClientGetenableMultipathBySocket(socket, &enableMultipath);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_ID, ret);
 }
 
 /*
  * @tc.name: ClientGetDataTypeBySocket001
- * @tc.desc: Transmission sdk session manager get datatype by socket.
+ * @tc.desc: Transmission sdk session manager get datatype by socket with invalid socket.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -2219,6 +2221,9 @@ HWTEST_F(TransClientSessionManagerTest, ClientGetDataTypeBySocket001, TestSize.L
 {
     int32_t socket = -1;
     int32_t ret = ClientGetDataTypeBySocket(socket, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    int32_t dataType;
+    ret = ClientGetDataTypeBySocket(socket, &dataType);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_ID, ret);
 }
 
