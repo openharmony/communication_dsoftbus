@@ -42,23 +42,83 @@ void TransSdkCommStreamTest::TearDownTestCase(void)
 {}
 
 /*
- * @tc.name: SendCommStreamTest001
- * @tc.desc: start common stream client
- *           send wrong param
+ * @tc.name: SendStreamTest01
+ * @tc.desc: test SendStream with null data param
+ *           Transmission sdk common stream send stream
  * @tc.type: FUNC
  * @tc.require: I5KRE8
  */
-HWTEST_F(TransSdkCommStreamTest, SendCommStreamTest001, TestSize.Level1)
+HWTEST_F(TransSdkCommStreamTest, SendStreamTest01, TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    const StreamData extData = {0};
+    const StreamFrameInfo frameInfo = {0};
+    int32_t ret = SendStream(sessionId, nullptr, &extData, &frameInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SendStreamTest02
+ * @tc.desc: test SendStream with null ext param
+ *           Transmission sdk common stream send stream
+ * @tc.type: FUNC
+ * @tc.require: I5KRE8
+ */
+HWTEST_F(TransSdkCommStreamTest, SendStreamTest02, TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    const StreamData streamData = {0};
+    const StreamFrameInfo frameInfo = {0};
+    int32_t ret = SendStream(sessionId, &streamData, nullptr, &frameInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SendStreamTest03
+ * @tc.desc: test SendStream with null StreamFrameInfo param
+ *           Transmission sdk common stream send stream
+ * @tc.type: FUNC
+ * @tc.require: I5KRE8
+ */
+HWTEST_F(TransSdkCommStreamTest, SendStreamTest03, TestSize.Level1)
 {
     int32_t sessionId = 1;
     const StreamData streamData = {0};
     const StreamData extData = {0};
+    int32_t ret = SendStream(sessionId, &streamData, &extData, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SendStreamTest04
+ * @tc.desc: test SendStream with ext bufLen greater than UINT16_MAX
+ *           Transmission sdk common stream send stream
+ * @tc.type: FUNC
+ * @tc.require: I5KRE8
+ */
+HWTEST_F(TransSdkCommStreamTest, SendStreamTest04, TestSize.Level1)
+{
+    int32_t sessionId = 1;
+    const StreamData streamData = {0};
+    StreamData extData = {nullptr, UINT16_MAX + 1};
     const StreamFrameInfo frameInfo = {0};
+    int32_t ret = SendStream(sessionId, &streamData, &extData, &frameInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 
+/*
+ * @tc.name: SendStreamTest05
+ * @tc.desc: test SendStream with invalid sessionId
+ *           Transmission sdk common stream send stream
+ * @tc.type: FUNC
+ * @tc.require: I5KRE8
+ */
+HWTEST_F(TransSdkCommStreamTest, SendStreamTest05, TestSize.Level1)
+{
+    const StreamData streamData = {0};
+    const StreamData extData = {0};
+    const StreamFrameInfo frameInfo = {0};
     int32_t ret = SendStream(-1, &streamData, &extData, &frameInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = SendStream(sessionId, nullptr, &extData, &frameInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 }
