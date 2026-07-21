@@ -601,6 +601,98 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
 }
 
 /*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_001
+ * @tc.desc: Verify that IsAccountConsistent returns false when LnnGetAccountIdByUserId fails.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
+    aclProfile.SetAccesser(accesser);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetAccountIdByUserId).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_002
+ * @tc.desc: Verify that IsAccountConsistent returns false when ACL local accountId is empty.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_002, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetAccountIdByUserId)
+        .WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_003
+ * @tc.desc: Verify that IsAccountConsistent returns false when accountId does not match.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_003, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId("987654321");
+    aclProfile.SetAccesser(accesser);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetAccountIdByUserId)
+        .WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_004
+ * @tc.desc: Verify that IsAccountConsistent returns true when accountId matches.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_004, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
+    aclProfile.SetAccesser(accesser);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetAccountIdByUserId)
+        .WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_TRUE(result);
+}
+
+/*
  * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001
  * @tc.desc: Verify that CompareAclWithPeerDeviceInfo handles failures in retrieving local string
  *           or byte information, returning false.
