@@ -956,8 +956,12 @@ int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enable
 
 int32_t ClientGetenableMultipathBySocket(int32_t socket, bool *enableMultipath)
 {
+    if (enableMultipath == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (socket < 0) {
-        TRANS_LOGE(TRANS_INIT, "invalid socket=%{public}d", socket);
+        TRANS_LOGE(TRANS_SDK, "invalid socket=%{public}d", socket);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
 
@@ -1010,8 +1014,12 @@ int32_t ClientSetEnableMultipathBySocket(int32_t socket, bool enableMultipath)
 
 int32_t ClientGetDataTypeBySocket(int32_t socket, int32_t *dataType)
 {
+    if (dataType == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (socket < 0) {
-        TRANS_LOGE(TRANS_INIT, "invalid socket=%{public}d", socket);
+        TRANS_LOGE(TRANS_SDK, "invalid socket=%{public}d", socket);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
 
