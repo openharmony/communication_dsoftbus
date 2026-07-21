@@ -31,13 +31,6 @@ extern "C" {
 #endif
 
 typedef enum {
-    TYPE_LNN_FAST_OFFLINE = 0,
-    TYPE_AGENT_COMMUNICATION,
-    WATCH_WECHAT,
-    FAR_FIELD_BUSINESS_MAX,
-} FarFieldBusiness;
-
-typedef enum {
     CONVERSATION_FAR_FIELD_PUSH = 0,
     CONVERSATION_FAR_FIELD_P2P,
     CONVERSATION_NEAR_FIELD_WIFI_DIRECT,
@@ -45,7 +38,7 @@ typedef enum {
 } ConversationChannelType;
 
 typedef void (*FragmentRecvCallback)(const char *udid, const char *data,
-    uint32_t dataLen, ConversationChannelType channelType, FarFieldBusiness businessType);
+    uint32_t dataLen, ConversationChannelType channelType, uint32_t businessType);
 
 typedef struct {
     uint8_t *buffer;
@@ -55,19 +48,13 @@ typedef struct {
 typedef struct {
     const char *msg;
     uint32_t msgLen;
-    FarFieldBusiness businessType;
+    uint32_t businessType;
 } InputMsg;
 
 typedef struct {
     uint8_t *data;
     uint32_t len;
 } OutputData;
-
-typedef struct {
-    uint32_t magic;
-    uint32_t type;
-    uint32_t len;
-} FarFiledPktHead;
 
 typedef void(*LnnCloudHandler)(const void *obj);
 typedef int32_t(*LnnCloudRemoveCompareFunc)(const void *obj, void *param);
