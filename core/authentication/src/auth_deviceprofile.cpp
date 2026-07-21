@@ -25,7 +25,6 @@
 #include "bus_center_manager.h"
 #include "distributed_device_profile_client.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_device_info_struct.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
@@ -145,6 +144,7 @@ static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
 static std::string GetAclLocalAccountId(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice)
 {
     if (trustDevice.GetTrustDeviceId() == trustDevice.GetAccessee().GetAccesseeDeviceId()) {
@@ -152,25 +152,12 @@ static std::string GetAclLocalAccountId(const OHOS::DistributedDeviceProfile::Ac
     }
     return trustDevice.GetAccessee().GetAccesseeAccountId();
 }
-
-static bool IsLocalSingleFrameCar()
-{
-    int32_t localDevTypeId = TYPE_UNKNOW_ID;
-    int32_t localOsType = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
-        LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &localOsType) == SOFTBUS_OK &&
-        localDevTypeId == TYPE_CAR_ID && localOsType == OH_OS_TYPE) {
-        return true;
-    }
-    return false;
-}
+#endif
 
 static bool IsAccountConsistent(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice,
     int32_t localUserId)
 {
-    if (!IsLocalSingleFrameCar()) {
-        return true;
-    }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     char localAccountUid[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
     if (GetOsAccountUidByUserId(localAccountUid, ACCOUNT_UID_LEN_MAX - 1, &size, localUserId) != SOFTBUS_OK) {
@@ -188,10 +175,12 @@ static bool IsAccountConsistent(const OHOS::DistributedDeviceProfile::AccessCont
             localUserId, localAccountUid);
         return true;
     }
-    LNN_LOGW(LNN_STATE,
-        "account not consistent, localUserId=%{public}d, local=%{public}s, acl=%{public}s",
-        localUserId, localAccountUid, aclLocalAccountId.c_str());
+    LNN_LOGW(LNN_STATE, "account not consistent, localUserId=%{public}d", localUserId);
     return false;
+#else
+    LNN_LOGD(LNN_STATE, "not car device, no need handle, localUserId=%{public}d", localUserId);
+    return true;
+#endif
 }
 
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
