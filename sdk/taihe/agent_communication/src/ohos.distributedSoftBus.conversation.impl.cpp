@@ -40,7 +40,14 @@ static std::map<std::string, std::shared_ptr<DataCallback>> g_dataCallbackMap;
 
 static void OnDataReceivedAdapter(const char *deviceId, const char *data, uint32_t len, const char *abilityName)
 {
-    COMM_LOGI(COMM_SDK, "OnDataReceivedAdapter, len=%{public}u", len);
+    char *anonyDeviceId = nullptr;
+    char *anonyAbilityName = nullptr;
+    Anonymize(deviceId, &anonyDeviceId);
+    Anonymize(abilityName, &anonyAbilityName);
+    COMM_LOGI(COMM_SDK, "recv data deviceId=%{public}s, abilityName=%{public}s, len=%{public}u",
+        AnonymizeWrapper(anonyDeviceId), AnonymizeWrapper(anonyAbilityName), len);
+    AnonymizeFree(anonyDeviceId);
+    AnonymizeFree(anonyAbilityName);
     if (data == nullptr || len == 0) {
         COMM_LOGE(COMM_SDK, "invalid data");
         return;
@@ -61,6 +68,7 @@ static void OnDataReceivedAdapter(const char *deviceId, const char *data, uint32
     std::string devStr = (deviceId != nullptr) ? deviceId : "";
     std::vector<uint8_t> buffer(data, data + len);
     (*callback)(devStr, ::taihe::array<uint8_t>(buffer));
+    COMM_LOGI(COMM_SDK, "callback invoked");
 }
 
 static ::ConversationListener g_listener = {
@@ -102,12 +110,14 @@ static void LogListenerEntry(const std::string &bundleName, const std::string &a
 
 ::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo> GetTrustedDevices()
 {
-    COMM_LOGI(COMM_SDK, "GetTrustedDevices start");
+    COMM_LOGI(COMM_SDK, "start");
     if (!IsSystemApp()) {
+        COMM_LOGE(COMM_SDK, "not system app");
         ThrowBusinessException(CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
         return ::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo>({});
     }
     if (!CheckPermission()) {
+        COMM_LOGE(COMM_SDK, "permission denied");
         ThrowBusinessException(CONVERSATION_PERMISSION_ERR);
         return ::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo>({});
     }
@@ -139,6 +149,7 @@ static void LogListenerEntry(const std::string &bundleName, const std::string &a
     if (list != nullptr) {
         ::FreeDeviceNodeInfo(list);
     }
+    COMM_LOGI(COMM_SDK, "nums=%{public}d", nums);
     return ::taihe::array<::ohos::distributedSoftBus::conversation::DeviceNodeInfo>(
         taihe::move_data, devices.data(), devices.size());
 }
@@ -151,10 +162,12 @@ void PostConversationDataAsync(::taihe::string_view deviceId,
     std::string abilityNameStr(abilityName);
     DumpPostConversationParam(deviceId, bundleNameStr, abilityNameStr, static_cast<uint32_t>(msg.size()));
     if (!IsSystemApp()) {
+        COMM_LOGE(COMM_SDK, "not system app");
         ThrowBusinessException(CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
         return;
     }
     if (!CheckPermission()) {
+        COMM_LOGE(COMM_SDK, "permission denied");
         ThrowBusinessException(CONVERSATION_PERMISSION_ERR);
         return;
     }
@@ -183,11 +196,11 @@ void PostConversationDataAsync(::taihe::string_view deviceId,
     int32_t ret = ::PostConversationData(deviceIdStr.c_str(), &cBusiness,
         reinterpret_cast<const char *>(msg.data()), static_cast<uint32_t>(msg.size()));
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "PostConversationData fail, ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "ret=%{public}d", ret);
         ThrowBusinessException(ConvertToJsErrcode(ret));
         return;
     }
-    COMM_LOGI(COMM_SDK, "PostConversationDataAsync finish");
+    COMM_LOGI(COMM_SDK, "success");
 }
 
 void RegisterConversationListener(::taihe::string_view bundleName, ::taihe::string_view abilityName,
@@ -197,10 +210,12 @@ void RegisterConversationListener(::taihe::string_view bundleName, ::taihe::stri
     std::string abilityNameStr(abilityName);
     LogListenerEntry(bundleNameStr, abilityNameStr, "RegisterConversationListener");
     if (!IsSystemApp()) {
+        COMM_LOGE(COMM_SDK, "not system app");
         ThrowBusinessException(CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
         return;
     }
     if (!CheckPermission()) {
+        COMM_LOGE(COMM_SDK, "permission denied");
         ThrowBusinessException(CONVERSATION_PERMISSION_ERR);
         return;
     }
@@ -217,25 +232,27 @@ void RegisterConversationListener(::taihe::string_view bundleName, ::taihe::stri
     {
         std::lock_guard<std::mutex> lock(g_callbackMutex);
         if (g_dataCallbackMap.find(abilityNameStr) != g_dataCallbackMap.end()) {
-            COMM_LOGI(COMM_SDK, "conversation listener already exist");
+            COMM_LOGI(COMM_SDK, "conversation listener already exist, update callback");
             isExisting = true;
         } else {
-            g_dataCallbackMap[abilityNameStr] = dataCallback;
+            COMM_LOGI(COMM_SDK, "add conversation listener");
         }
+        g_dataCallbackMap[abilityNameStr] = dataCallback;
     }
 
     ::ConversationBusiness cBusiness;
     FillConversationBusiness(cBusiness, bundleNameStr, abilityNameStr);
-
     int32_t ret = ::RegisterConversationListener(&cBusiness, &g_listener);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "RegisterConversationListener fail, ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "ret=%{public}d", ret);
         if (!isExisting) {
             std::lock_guard<std::mutex> lock(g_callbackMutex);
             g_dataCallbackMap.erase(abilityNameStr);
         }
         ThrowBusinessException(ConvertToJsErrcode(ret));
+        return;
     }
+    COMM_LOGI(COMM_SDK, "success");
 }
 
 void UnregisterConversationListener(::taihe::string_view bundleName, ::taihe::string_view abilityName)
@@ -244,10 +261,12 @@ void UnregisterConversationListener(::taihe::string_view bundleName, ::taihe::st
     std::string abilityNameStr(abilityName);
     LogListenerEntry(bundleNameStr, abilityNameStr, "UnregisterConversationListener");
     if (!IsSystemApp()) {
+        COMM_LOGE(COMM_SDK, "not system app");
         ThrowBusinessException(CONVERSATION_PERMISSION_SYSTEMAPI_ERR);
         return;
     }
     if (!CheckPermission()) {
+        COMM_LOGE(COMM_SDK, "permission denied");
         ThrowBusinessException(CONVERSATION_PERMISSION_ERR);
         return;
     }
@@ -268,9 +287,11 @@ void UnregisterConversationListener(::taihe::string_view bundleName, ::taihe::st
         g_dataCallbackMap.erase(abilityNameStr);
     }
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "UnregisterConversationListener fail, ret=%{public}d", ret);
+        COMM_LOGE(COMM_SDK, "ret=%{public}d", ret);
         ThrowBusinessException(ConvertToJsErrcode(ret));
+        return;
     }
+    COMM_LOGI(COMM_SDK, "success");
 }
 
 } // namespace Softbus

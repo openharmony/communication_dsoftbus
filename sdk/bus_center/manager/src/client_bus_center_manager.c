@@ -2174,6 +2174,7 @@ int32_t RegisterConversationListenerInner(const ConversationBusiness *info, cons
         if (strcmp(item->info.bundleName, info->bundleName) == 0 &&
             strcmp(item->info.abilityName, info->abilityName) == 0) {
             LNN_LOGE(LNN_STATE, "conversation listener already exist");
+            item->listener.OnDataReceived = listener->OnDataReceived;
             (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
             return ServerIpcRegisterConversationListener(info);
         }
