@@ -602,7 +602,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_001
- * @tc.desc: Verify that IsAccountConsistent returns false when LnnGetAccountIdByUserId fails.
+ * @tc.desc: Verify that IsAccountConsistent returns false when GetOsAccountUidByUserId fails.
  * @tc.type: FUNC
  * @tc.level: Level1
  * @tc.require:
@@ -618,7 +618,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_001, TestSize.Level1)
     accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
     aclProfile.SetAccesser(accesser);
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetAccountIdByUserId).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, GetOsAccountUidByUserId).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
     EXPECT_FALSE(result);
 }
@@ -638,8 +638,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_002, TestSize.Level1)
     accessee.SetAccesseeDeviceId(TEST_UDID);
     aclProfile.SetAccessee(accessee);
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetAccountIdByUserId)
-        .WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, GetOsAccountUidByUserId).WillOnce(Return(SOFTBUS_OK));
     bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
     EXPECT_FALSE(result);
 }
@@ -662,8 +661,11 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_003, TestSize.Level1)
     accesser.SetAccesserAccountId("987654321");
     aclProfile.SetAccesser(accesser);
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetAccountIdByUserId)
-        .WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
+    const char *testUid = "123456789";
+    uint32_t testUidLen = static_cast<uint32_t>(strlen(testUid));
+    EXPECT_CALL(mock, GetOsAccountUidByUserId)
+        .WillOnce(DoAll(SetArrayArgument<0>(testUid, testUid + testUidLen + 1),
+            SetArgPointee<2>(testUidLen), Return(SOFTBUS_OK)));
     bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
     EXPECT_FALSE(result);
 }
@@ -686,8 +688,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_004, TestSize.Level1)
     accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
     aclProfile.SetAccesser(accesser);
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetAccountIdByUserId)
-        .WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
+    std::string testUidStr = std::to_string(TEST_ACCOUNT_ID);
+    const char *testUid = testUidStr.c_str();
+    uint32_t testUidLen = static_cast<uint32_t>(strlen(testUid));
+    EXPECT_CALL(mock, GetOsAccountUidByUserId)
+        .WillOnce(DoAll(SetArrayArgument<0>(testUid, testUid + testUidLen + 1),
+            SetArgPointee<2>(testUidLen), Return(SOFTBUS_OK)));
     bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
     EXPECT_TRUE(result);
 }

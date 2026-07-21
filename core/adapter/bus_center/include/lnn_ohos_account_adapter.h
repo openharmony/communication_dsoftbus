@@ -18,6 +18,10 @@
 
 #include <stdint.h>
 
+#ifndef ACCOUNT_UID_LEN_MAX
+#define ACCOUNT_UID_LEN_MAX 65
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

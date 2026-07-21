@@ -28,7 +28,6 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
-#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "ohos_account_kits.h"
 #include "softbus_adapter_crypto.h"
