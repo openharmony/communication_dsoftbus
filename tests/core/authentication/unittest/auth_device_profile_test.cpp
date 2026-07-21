@@ -618,6 +618,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_001, TestSize.Level1)
     accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
     aclProfile.SetAccesser(accesser);
     AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<1>(TYPE_CAR_ID), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, GetOsAccountUidByUserId).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
     EXPECT_FALSE(result);
@@ -638,6 +641,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_002, TestSize.Level1)
     accessee.SetAccesseeDeviceId(TEST_UDID);
     aclProfile.SetAccessee(accessee);
     AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<1>(TYPE_CAR_ID), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, GetOsAccountUidByUserId).WillOnce(Return(SOFTBUS_OK));
     bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
     EXPECT_FALSE(result);
@@ -661,6 +667,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_003, TestSize.Level1)
     accesser.SetAccesserAccountId("987654321");
     aclProfile.SetAccesser(accesser);
     AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<1>(TYPE_CAR_ID), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
     const char *testUid = "123456789";
     uint32_t testUidLen = static_cast<uint32_t>(strlen(testUid));
     EXPECT_CALL(mock, GetOsAccountUidByUserId)
@@ -688,6 +697,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_004, TestSize.Level1)
     accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
     aclProfile.SetAccesser(accesser);
     AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<1>(TYPE_CAR_ID), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
     std::string testUidStr = std::to_string(TEST_ACCOUNT_ID);
     const char *testUid = testUidStr.c_str();
     uint32_t testUidLen = static_cast<uint32_t>(strlen(testUid));

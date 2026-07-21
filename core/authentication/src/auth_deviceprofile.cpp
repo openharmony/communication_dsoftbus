@@ -25,6 +25,7 @@
 #include "bus_center_manager.h"
 #include "distributed_device_profile_client.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_device_info_struct.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
@@ -152,9 +153,24 @@ static std::string GetAclLocalAccountId(const OHOS::DistributedDeviceProfile::Ac
     return trustDevice.GetAccessee().GetAccesseeAccountId();
 }
 
+static bool IsLocalSingleFrameCar()
+{
+    int32_t localDevTypeId = TYPE_UNKNOW_ID;
+    int32_t localOsType = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
+        LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &localOsType) == SOFTBUS_OK &&
+        localDevTypeId == TYPE_CAR_ID && localOsType == OH_OS_TYPE) {
+        return true;
+    }
+    return false;
+}
+
 static bool IsAccountConsistent(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice,
     int32_t localUserId)
 {
+    if (!IsLocalSingleFrameCar()) {
+        return true;
+    }
     char localAccountUid[ACCOUNT_UID_LEN_MAX] = {0};
     uint32_t size = 0;
     if (GetOsAccountUidByUserId(localAccountUid, ACCOUNT_UID_LEN_MAX - 1, &size, localUserId) != SOFTBUS_OK) {
