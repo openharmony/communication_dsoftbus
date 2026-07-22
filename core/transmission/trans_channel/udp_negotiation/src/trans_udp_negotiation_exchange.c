@@ -84,6 +84,11 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectNumberItem(msg, "UDP_CHANNEL_CAPABILITY", (int32_t *)&(appInfo->udpChannelCapability))) {
         appInfo->udpChannelCapability = 0;
     }
+    UdpChannelOptType udpChannelOptType = TYPE_INVALID_CHANNEL;
+    (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int32_t *)&udpChannelOptType);
+    if (udpChannelOptType == TYPE_UDP_CHANNEL_OPEN && appInfo->udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
+        return SOFTBUS_TRANS_UDP_CHANNEL_DISABLE;
+    }
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
@@ -318,6 +323,7 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddNumberToJsonObject(msg, "API_VERSION", (int32_t)appInfo->myData.apiVersion);
     (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
     (void)AddNumberToJsonObject(msg, "UDP_CHANNEL_CAPABILITY", (int32_t)appInfo->udpChannelCapability);
+    (void)AddNumberToJsonObject(msg, "CHANNEL_TYPE", appInfo->udpChannelOptType);
     return SOFTBUS_OK;
 }
 

@@ -829,6 +829,7 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
         ret = TransUnpackExtDeviceReplyInfo(msg, &(channel.info));
     } else {
         ret = TransUnpackReplyUdpInfo(msg, &(channel.info));
+        TRANS_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_TRANS_UDP_CHANNEL_DISABLE, TRANS_CTRL, "channel is close");
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack reply udp info fail and close channel channelId=%{public}" PRId64,
