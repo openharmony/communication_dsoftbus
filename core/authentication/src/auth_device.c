@@ -408,6 +408,8 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId, Handle
         return;
     }
     g_verifyListener.onDeviceNotTrusted(peerUdid);
+    LnnHbOnTrustedRelationReduced();
+    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
 }
 
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)

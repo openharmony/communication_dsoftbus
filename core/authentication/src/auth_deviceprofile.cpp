@@ -28,7 +28,6 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
-#include "softbus_adapter_mem.h"
 #include "ohos_account_kits.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -41,6 +40,7 @@
 #define DEFAULT_UKID_TIME           (-1)
 #define DEFAULT_USERID              (-1)
 #define MAX_BUNDLE_NAME_LEN         200
+#define ACCOUNT_UID_LEN_MAX         65
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
 static std::set<std::string> g_notTrustedDevices;
@@ -171,11 +171,9 @@ static bool IsAccountConsistent(const OHOS::DistributedDeviceProfile::AccessCont
     }
     std::string localUidStr(localAccountUid, size);
     if (localUidStr == aclLocalAccountId) {
-        LNN_LOGI(LNN_STATE, "account consistent, localUserId=%{public}d, accountUid=%{public}s",
-            localUserId, localAccountUid);
         return true;
     }
-    LNN_LOGW(LNN_STATE, "account not consistent, localUserId=%{public}d", localUserId);
+    LNN_LOGD(LNN_STATE, "account not consistent, localUserId=%{public}d", localUserId);
     return false;
 #else
     LNN_LOGD(LNN_STATE, "not car device, no need handle, localUserId=%{public}d", localUserId);

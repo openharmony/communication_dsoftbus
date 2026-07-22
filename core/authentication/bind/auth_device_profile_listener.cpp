@@ -126,7 +126,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         return SOFTBUS_OK;
     }
     g_deviceProfileChange.onDeviceProfileDeleted(
-        profile.GetDeviceId().c_str(), profile.GetLocalUserId(), DP_DEVICE_TYPE);
+        profile.GetDeviceId().c_str(), profile.GetLocalUserId(), DP_USER_TYPE);
     AUTH_LOGD(AUTH_INIT, "OnTrustDeviceProfileDelete success!");
     return SOFTBUS_OK;
 }
