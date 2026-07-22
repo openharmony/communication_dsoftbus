@@ -52,8 +52,11 @@ constexpr int32_t RESULT_REASON = -1;
 constexpr char PKGNAME[] = "softbustest";
 constexpr char IP_TEST[IP_LEN] = "192.168.51.170";
 constexpr char TEST_MSG[] = "testmsg";
+constexpr char SDK_CONV_BUNDLE[] = "com.sdk.conv";
+constexpr char SDK_CONV_ABILITY[] = "SdkConvAbility";
 static int32_t g_deviceFoundCallCount = 0;
 static const DeviceInfo *g_lastFoundDevice = nullptr;
+static int32_t g_sdkConvRecvCount = 0;
 
 static void ResetRefreshTestCounters()
 {
@@ -2413,5 +2416,147 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_REFRESH_DEVICE_FOUND_Test_009, TestSiz
     LnnOnRefreshDeviceFound(&deviceInfo);
     EXPECT_EQ(g_deviceFoundCallCount, 1);
     ResetBuscenterClientCbs();
+}
+
+static void OnSdkConvDataReceived(const char *deviceId, const char *data, uint32_t len, const char *abilityName)
+{
+    (void)deviceId;
+    (void)data;
+    (void)len;
+    (void)abilityName;
+    g_sdkConvRecvCount++;
+}
+
+static ConversationBusiness CreateConvInfo(const char *bundle, const char *ability)
+{
+    ConversationBusiness info;
+    (void)memset_s(&info, sizeof(ConversationBusiness), 0, sizeof(ConversationBusiness));
+    (void)strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundle);
+    (void)strcpy_s(info.abilityName, ABILITY_NAME_LEN, ability);
+    return info;
+}
+
+HWTEST_F(ClientBusCentManagerTest, RegisterConversationListenerInner_Test_001, TestSize.Level1)
+{
+    ConversationListener listener = {};
+    EXPECT_EQ(RegisterConversationListenerInner(nullptr, &listener), SOFTBUS_INVALID_PARAM);
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    EXPECT_EQ(RegisterConversationListenerInner(&info, nullptr), SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(ClientBusCentManagerTest, RegisterConversationListenerInner_Test_002, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    ConversationListener listener = {};
+    EXPECT_EQ(RegisterConversationListenerInner(&info, &listener), SOFTBUS_NO_INIT);
+}
+
+HWTEST_F(ClientBusCentManagerTest, RegisterConversationListenerInner_Test_003, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    ConversationListener listener = {};
+    listener.OnDataReceived = OnSdkConvDataReceived;
+    EXPECT_EQ(RegisterConversationListenerInner(&info, &listener), SOFTBUS_OK);
+    BusCenterClientDeinit();
+}
+
+HWTEST_F(ClientBusCentManagerTest, RegisterConversationListenerInner_Test_004, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    ConversationListener listener = {};
+    listener.OnDataReceived = OnSdkConvDataReceived;
+    EXPECT_EQ(RegisterConversationListenerInner(&info, &listener), SOFTBUS_OK);
+    EXPECT_EQ(RegisterConversationListenerInner(&info, &listener), SOFTBUS_OK);
+    BusCenterClientDeinit();
+}
+
+HWTEST_F(ClientBusCentManagerTest, UnregisterConversationListenerInner_Test_001, TestSize.Level1)
+{
+    EXPECT_EQ(UnregisterConversationListenerInner(nullptr), SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(ClientBusCentManagerTest, UnregisterConversationListenerInner_Test_002, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    EXPECT_EQ(UnregisterConversationListenerInner(&info), SOFTBUS_NO_INIT);
+}
+
+HWTEST_F(ClientBusCentManagerTest, UnregisterConversationListenerInner_Test_003, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, ServerIpcUnregisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    ConversationListener listener = {};
+    listener.OnDataReceived = OnSdkConvDataReceived;
+    RegisterConversationListenerInner(&info, &listener);
+    EXPECT_EQ(UnregisterConversationListenerInner(&info), SOFTBUS_OK);
+    BusCenterClientDeinit();
+}
+
+HWTEST_F(ClientBusCentManagerTest, LnnConversationRecvMsg_Test_001, TestSize.Level1)
+{
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    EXPECT_EQ(LnnConversationRecvMsg(nullptr, "net", "data", 4), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnConversationRecvMsg(&info, nullptr, "data", 4), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnConversationRecvMsg(&info, "net", nullptr, 4), SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(ClientBusCentManagerTest, LnnConversationRecvMsg_Test_002, TestSize.Level1)
+{
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    EXPECT_EQ(LnnConversationRecvMsg(&info, "net", "data", 0), SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(ClientBusCentManagerTest, LnnConversationRecvMsg_Test_003, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    EXPECT_EQ(LnnConversationRecvMsg(&info, "net", "data", 4), SOFTBUS_NO_INIT);
+}
+
+HWTEST_F(ClientBusCentManagerTest, LnnConversationRecvMsg_Test_004, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    ConversationListener listener = {};
+    listener.OnDataReceived = OnSdkConvDataReceived;
+    g_sdkConvRecvCount = 0;
+    RegisterConversationListenerInner(&info, &listener);
+
+    EXPECT_EQ(LnnConversationRecvMsg(&info, "net123", "hello", 5), SOFTBUS_OK);
+    EXPECT_EQ(g_sdkConvRecvCount, 1);
+
+    ConversationBusiness infoUnknown = CreateConvInfo("unknown.bundle", "UnknownAbility");
+    EXPECT_EQ(LnnConversationRecvMsg(&infoUnknown, "net123", "hello", 5), SOFTBUS_OK);
+    EXPECT_EQ(g_sdkConvRecvCount, 1);
+    BusCenterClientDeinit();
 }
 } // namespace OHOS
