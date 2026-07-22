@@ -17,8 +17,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <securec.h>
-#include <string.h>
 
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
@@ -989,7 +989,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringArrayToObjectTest001, TestSize.Le
     ASSERT_NE(nullptr, obj);
     const char *arr[] = { "a", "bb", "ccc" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
-    char *out[ARRAY_CAP_LARGE] = { 0 };
+    char *out[ARRAY_CAP_LARGE] = { nullptr };
     int32_t len = ARRAY_CAP_LARGE;
     EXPECT_TRUE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     EXPECT_EQ(static_cast<int32_t>(ArraySize(arr)), len);
@@ -1015,7 +1015,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringArrayToObjectTest002, TestSize.Le
     ASSERT_NE(nullptr, obj);
     const char *arr[] = { "only" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
-    char *out[ARRAY_CAP_SMALL] = { 0 };
+    char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_TRUE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     EXPECT_EQ(static_cast<int32_t>(ArraySize(arr)), len);
@@ -1052,7 +1052,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringArrayToObjectTest003, TestSize.Le
  */
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest001, TestSize.Level1)
 {
-    char *out[ARRAY_CAP_SMALL] = { 0 };
+    char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(nullptr, KEY_ARR, out, &len));
     JsonObj *obj = JSON_CreateObject();
@@ -1076,7 +1076,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest002, TestSize.L
     ASSERT_NE(nullptr, obj);
     const char *arr[] = { "a" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
-    char *out[ARRAY_CAP_SMALL] = { 0 };
+    char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = 0;  // non-positive capacity hint
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     len = -1;
@@ -1093,7 +1093,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest002, TestSize.L
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest003, TestSize.Level1)
 {
     JsonObj nullObj = MakeNullContextObj();
-    char *out[ARRAY_CAP_SMALL] = { 0 };
+    char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(&nullObj, KEY_ARR, out, &len));
 }
@@ -1109,7 +1109,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest004, TestSize.L
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_TRUE(JSON_AddStringToObject(obj, KEY_STR, "v"));
-    char *out[ARRAY_CAP_SMALL] = { 0 };
+    char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_STR, out, &len));
     JSON_Delete(obj);
@@ -1125,7 +1125,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest005, TestSize.L
 {
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
-    char *out[ARRAY_CAP_SMALL] = { 0 };
+    char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_MISSING, out, &len));
     JSON_Delete(obj);
@@ -1143,7 +1143,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest006, TestSize.L
     ASSERT_NE(nullptr, obj);
     const char *arr[] = { "a", "b", "c" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
-    char *out[ARRAY_CAP_LARGE] = { 0 };
+    char *out[ARRAY_CAP_LARGE] = { nullptr };
     int32_t len = ARRAY_LEN_TOO_SMALL;  // smaller than the stored array
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     JSON_Delete(obj);
@@ -1160,7 +1160,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest007, TestSize.L
     const char *text = "{\"arr\":[1,2,3]}";
     JsonObj *obj = JSON_Parse(text, strlen(text));
     ASSERT_NE(nullptr, obj);
-    char *out[ARRAY_CAP_LARGE] = { 0 };
+    char *out[ARRAY_CAP_LARGE] = { nullptr };
     int32_t len = ARRAY_CAP_LARGE;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, "arr", out, &len));
     JSON_Delete(obj);
@@ -1178,7 +1178,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest008, TestSize.L
     ASSERT_NE(nullptr, obj);
     const char *arr[] = { "x", "y" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
-    char *out[ARRAY_CAP_LARGE] = { 0 };
+    char *out[ARRAY_CAP_LARGE] = { nullptr };
     int32_t len = static_cast<int32_t>(ArraySize(arr));  // exactly the array size
     EXPECT_TRUE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     EXPECT_EQ(static_cast<int32_t>(ArraySize(arr)), len);
@@ -1416,7 +1416,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonRoundTripTest001, TestSize.Level1)
     EXPECT_TRUE(JSON_AddInt32ToObject(src, "i32", RT_INT32));
     EXPECT_TRUE(JSON_AddInt64ToObject(src, "i64", RT_INT64));
     EXPECT_TRUE(JSON_AddStringToObject(src, "s", "softbus"));
-    EXPECT_TRUE(JSON_AddBytesToObject(src, "by", const_cast<uint8_t *>(BYTES_PAYLOAD_ALT), ArraySize(BYTES_PAYLOAD_ALT)));
+    EXPECT_TRUE(JSON_AddBytesToObject(src, "by", const_cast<uint8_t *>(BYTES_PAYLOAD_ALT),
+                                      ArraySize(BYTES_PAYLOAD_ALT)));
 
     char *dump = JSON_PrintUnformatted(src);
     ASSERT_NE(nullptr, dump);
@@ -1482,7 +1483,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonNullContextExhaustiveTest001, TestSize.Lev
     int64_t i64 = 0;
     bool b = false;
     char buf[BUF_SIZE_SMALL] = { 0 };
-    char *out[ARRAY_CAP_SMALL] = { 0 };
+    char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     uint8_t bytes[ARRAY_CAP_SMALL] = { 0 };
     uint32_t size = 0;
