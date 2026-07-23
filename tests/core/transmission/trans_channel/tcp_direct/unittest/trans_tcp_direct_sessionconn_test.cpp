@@ -235,6 +235,22 @@ HWTEST_F(TransTcpDirectSessionConnTest, SetAppInfoById001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: SetAppInfoById002
+ * @tc.desc: Verify that SetAppInfoById returns SOFTBUS_INVALID_PARAM when appInfo is NULL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectSessionConnTest, SetAppInfoById002, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t ret = SetAppInfoById(channelId, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    channelId = -1;
+    ret = SetAppInfoById(channelId, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: UpdateAccessInfoById
  * @tc.desc: Ensure that the UpdateAccessInfoById function correctly returns the SOFTBUS_INVALID_PARAM error code
  *           when an empty pointer or incomplete parameters are passed
