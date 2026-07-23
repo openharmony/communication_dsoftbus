@@ -600,9 +600,9 @@ void LnnIpAddrChangeEventHandler(void)
     GetLnnOhosAccountInterface()->LnnIpAddrChangeEventHandler();
 }
 
-void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId)
 {
-    GetLnnOhosAccountInterface()->LnnNotifyAccountStateChangeEvent(state);
+    GetLnnOhosAccountInterface()->LnnNotifyAccountStateChangeEvent(state, userId);
 }
 
 void LnnNotifyAllTypeOffline(ConnectionAddrType type)

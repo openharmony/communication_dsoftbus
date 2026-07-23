@@ -49,7 +49,7 @@ void LnnNotifyDifferentAccountChangeEvent(SoftBusDifferentAccountState state);
 void LnnNotifyBtStateChangeEvent(void *state);
 void LnnNotifySleStateChangeEvent(void *state);
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state);
-void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state);
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId);
 void LnnNotifyUserStateChangeEvent(SoftBusUserState state);
 void LnnNotifyNightModeStateChangeEvent(void *state);
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);
@@ -105,6 +105,11 @@ void LnnNotifyLpMcuUpdateHbInfo(int32_t type);
 void LnnNotifyVirLinkReportEvent(const uint8_t *data, uint32_t len);
 
 void LnnNotifyDmHookRegisteredEvent(void);
+
+void LnnNotifyAccountSwitchCheckEvent(int32_t userId);
+
+void LnnNotifyAccountAclChangeEvent(
+    const char *udid, int32_t localUserId, int32_t peerUserId, const int64_t *serviceIdList, uint32_t serviceIdCount);
 
 #ifdef __cplusplus
 }

@@ -34,6 +34,7 @@
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_local_user_info.h"
 #include "lnn_multi_user_process.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
@@ -843,7 +844,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         AuthRecoveryApplyKey();
         LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {
-            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, JudgeDeviceTypeAndGetOsAccountIds());
         }
     }
     lockState = lockState == SOFTBUS_USER_UNLOCK ? SOFTBUS_SCREEN_UNLOCK : lockState;
@@ -1104,6 +1105,15 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
         default:
             return;
     }
+}
+
+static void HbAccountSwitchCheckHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_ACCOUNT_SWITCH_CHECK) {
+        LNN_LOGE(LNN_HEART_BEAT, "account switch check evt handler get invalid param");
+        return;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "account switch check, no process");
 }
 
 static void HbLpEventHandler(const LnnEventBasicInfo *info)
@@ -1515,6 +1525,10 @@ static int32_t LnnRegisterHeartbeatEvent(void)
         LNN_LOGE(LNN_INIT, "regist account change evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_SWITCH_CHECK, HbAccountSwitchCheckHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist account switch check evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
     if (LnnRegisterEventHandler(LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED, HbDifferentAccountEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist different account evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
@@ -1607,6 +1621,7 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, HbSleStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DEVICE_RISK_STATE_CHANGED, HbDeviceRiskStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, HbConstraintStateChangeHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_SWITCH_CHECK, HbAccountSwitchCheckHandler);
 }
 
 int32_t LnnTriggerDataLevelHeartbeat(void)

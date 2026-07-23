@@ -1537,7 +1537,7 @@ HWTEST_F(AuthDeviceTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, DpHasAccessControlProfile(_, true, localUserId)).WillOnce(Return(true));
     EXPECT_CALL(mock, LnnDeleteSpecificTrustedDevInfo).Times(0);
     (void)memset_s(&g_verifyListener, sizeof(g_verifyListener), 0, sizeof(g_verifyListener));
-    EXPECT_NO_FATAL_FAILURE(OnDeviceNotTrusted(TEST_UDID, localUserId));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceNotTrusted(TEST_UDID, localUserId, HICHAIN_DEVICE));
 }
 
 /*
@@ -1560,7 +1560,7 @@ HWTEST_F(AuthDeviceTest, ON_DEVICE_NOT_TRUSTED_TEST_002, TestSize.Level1)
     EXPECT_CALL(mock, LnnDeleteSpecificTrustedDevInfo).Times(1);
     EXPECT_CALL(mock, LnnHbOnTrustedRelationReduced).Times(1);
     EXPECT_CALL(mock, AuthRemoveDeviceKeyByUdidPacked).Times(1);
-    EXPECT_NO_FATAL_FAILURE(OnDeviceNotTrusted(TEST_UDID, localUserId));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceNotTrusted(TEST_UDID, localUserId, HICHAIN_DEVICE));
     EXPECT_TRUE(g_callbackCalled);
     g_verifyListener.onDeviceNotTrusted = nullptr;
 }

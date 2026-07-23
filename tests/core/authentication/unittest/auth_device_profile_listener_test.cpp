@@ -56,10 +56,11 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     (void)groupInfo;
 }
 
-static void OnDeviceNotTrusted(const char *udid, int32_t localUserId)
+static void OnDeviceNotTrusted(const char *udid, int32_t localUserId, HandleNotTrustedType type)
 {
     (void)udid;
     (void)localUserId;
+    (void)type;
 }
 
 static DeviceProfileChangeListener g_deviceProfilePara = {
@@ -333,6 +334,66 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST, T
     DistributedDeviceProfile::TrustDeviceProfile profile;
     EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = listener->OnTrustDeviceProfileInactive(profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_DELETE_TEST
+ * @tc.desc: Verify that OnAccountAclDelete correctly handles account ACL deletion.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_DELETE_TEST, TestSize.Level1)
+{
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    int32_t ret = listener->OnAccountAclDelete(profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_DELETE_VALID_TEST
+ * @tc.desc: Verify that OnAccountAclDelete handles valid profile with car device.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_DELETE_VALID_TEST, TestSize.Level1)
+{
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_udid_for_car");
+    int32_t ret = listener->OnAccountAclDelete(profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_INACTIVE_TEST
+ * @tc.desc: Verify that OnAccountAclInactive correctly handles account ACL inactivation.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_INACTIVE_TEST, TestSize.Level1)
+{
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    int32_t ret = listener->OnAccountAclInactive(profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_INACTIVE_VALID_TEST
+ * @tc.desc: Verify that OnAccountAclInactive handles valid profile with car device.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_INACTIVE_VALID_TEST, TestSize.Level1)
+{
+    AuthDeviceProfileListenerInterfaceMock mocker;
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_udid_for_car");
+    EXPECT_CALL(mocker, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NOT_FIND));
+    int32_t ret = listener->OnAccountAclInactive(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

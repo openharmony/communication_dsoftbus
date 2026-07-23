@@ -69,6 +69,8 @@ typedef enum {
     LNN_EVENT_HA_LEAVE_META_NODE,
     LNN_EVENT_CONSTRAINT_ENABLE,
     LNN_EVENT_VIR_CONN_REPORT_SH,
+    LNN_EVENT_ACCOUNT_SWITCH_CHECK,
+    LNN_EVENT_ACCOUNT_ACL_CHANGE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -231,6 +233,7 @@ typedef struct {
 typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
+    int32_t userId;
 } LnnMonitorHbStateChangedEvent;
 
 typedef struct {
@@ -355,6 +358,21 @@ typedef struct {
     const uint8_t *data;
     uint32_t dataLen;
 } LnnVirLinkReportEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    int32_t userId;
+} LnnAccountSwitchCheckEvent;
+
+#define DP_SERVICE_ID_LIST_MAX_SIZE 1000
+typedef struct {
+    LnnEventBasicInfo basic;
+    char udid[UDID_BUF_LEN];
+    int32_t localUserId;
+    int32_t peerUserId;
+    uint32_t serviceIdCount;
+    int64_t *serviceIdList;
+} LnnAccountAclChangeEvent;
 
 #ifdef __cplusplus
 }

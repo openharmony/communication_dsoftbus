@@ -15,6 +15,10 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include <functional>
+#include <unordered_map>
+
+#include "bus_center_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
@@ -31,72 +35,139 @@ static const int32_t RETRY_MAX = 20;
 
 namespace OHOS {
 namespace EventFwk {
+
+using EventHandler = std::function<void(const CommonEventData &)>;
+
+static void HandleScreenOff(const CommonEventData &data)
+{
+    (void)data;
+    LnnNotifyScreenStateChangeEvent(SOFTBUS_SCREEN_OFF);
+}
+
+static void HandleScreenOn(const CommonEventData &data)
+{
+    (void)data;
+    LnnNotifyScreenStateChangeEvent(SOFTBUS_SCREEN_ON);
+}
+
+static void HandleUserUnlocked(const CommonEventData &data)
+{
+    (void)data;
+    LnnNotifyScreenLockStateChangeEvent(SOFTBUS_USER_UNLOCK);
+}
+
+static void HandleScreenUnlocked(const CommonEventData &data)
+{
+    (void)data;
+    LnnNotifyScreenLockStateChangeEvent(SOFTBUS_SCREEN_UNLOCK);
+}
+
+static void HandleDataShareReady(const CommonEventData &data)
+{
+    (void)data;
+    LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
+}
+
+static void HandleTimeChanged(const CommonEventData &data)
+{
+    (void)data;
+    LnnNotifySysTimeChangeEvent();
+}
+
+static void HandleBootCompleted(const CommonEventData &data)
+{
+    (void)data;
+    LnnNotifyDeviceRiskStateChangeEvent();
+}
+
+static void HandleDistributedAccountChange(const CommonEventData &data)
+{
+    const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
+    int32_t eventUserId = wantParams.GetIntParam("userId", -1);
+    std::string action = data.GetWant().GetAction();
+    if (action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN) {
+        LNN_LOGI(LNN_EVENT, "login eventUserId=%{public}d", eventUserId);
+        LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
+        if (LnnIsSameAccountGroupDeviceByUserId(eventUserId)) {
+            LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, eventUserId);
+        } else {
+            LNN_LOGI(LNN_EVENT, "login but no same account group, skip LOG_IN, wait for hichain onGroupCreated");
+        }
+        return;
+    }
+    if (action != CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT &&
+        action != CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF) {
+        return;
+    }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LNN_LOGI(LNN_EVENT, "logout eventUserId=%{public}d", eventUserId);
+    (void)HbMultiUserHandleLogout(eventUserId);
+    LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT, eventUserId);
+#else
+    int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
+    LNN_LOGI(LNN_EVENT, "logout activeUserId=%{public}d, eventUserId=%{public}d", activeUserId, eventUserId);
+    if (eventUserId == activeUserId) {
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_OUT, eventUserId);
+    }
+#endif
+}
+
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+static void HandleSubProfileSwitched(const CommonEventData &data)
+{
+    const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
+    int32_t userId = wantParams.GetIntParam("userId", -1);
+    if (userId < 0) {
+        LNN_LOGE(LNN_EVENT, "SWITCHED event missing userId, skip check, please check event params");
+        return;
+    }
+    LNN_LOGI(LNN_EVENT, "SWITCHED event for userId=%{public}d", userId);
+    LnnNotifyAccountSwitchCheckEvent(userId);
+}
+#endif
+
+static void HandleUserSwitched(const CommonEventData &data)
+{
+    (void)data;
+    LnnUpdateConstraintMapForCurrentAccount();
+    LnnNotifyUserSwitchEvent(SOFTBUS_USER_SWITCHED);
+}
+
 class CommonEventMonitor : public CommonEventSubscriber {
 public:
     explicit CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo);
     virtual ~CommonEventMonitor() {}
     virtual void OnReceiveEvent(const CommonEventData &data);
+private:
+    std::unordered_map<std::string, EventHandler> eventHandlers_;
 };
 
 CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo)
-    :CommonEventSubscriber(subscriberInfo)
+    : CommonEventSubscriber(subscriberInfo)
 {
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_SCREEN_OFF] = HandleScreenOff;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_SCREEN_ON] = HandleScreenOn;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_USER_UNLOCKED] = HandleUserUnlocked;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED] = HandleScreenUnlocked;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY] = HandleDataShareReady;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_TIME_CHANGED] = HandleTimeChanged;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED] = HandleBootCompleted;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT] = HandleDistributedAccountChange;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF] = HandleDistributedAccountChange;
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN] = HandleDistributedAccountChange;
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED] = HandleSubProfileSwitched;
+#endif
+    eventHandlers_[CommonEventSupport::COMMON_EVENT_USER_SWITCHED] = HandleUserSwitched;
 }
 
 void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
     LNN_LOGI(LNN_EVENT, "notify common event=%{public}s", action.c_str());
-
-    if (action == CommonEventSupport::COMMON_EVENT_TIME_CHANGED) {
-        LnnNotifySysTimeChangeEvent();
-    }
-    if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
-        LnnNotifyDeviceRiskStateChangeEvent();
-    }
-
-    SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;
-    if (action == CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
-        screenState = SOFTBUS_SCREEN_OFF;
-    } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
-        screenState = SOFTBUS_SCREEN_ON;
-    } else if (action == CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
-        LnnNotifyScreenLockStateChangeEvent(SOFTBUS_USER_UNLOCK);
-    } else if (action == CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
-        LnnNotifyScreenLockStateChangeEvent(SOFTBUS_SCREEN_UNLOCK);
-    } else if (action == CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY) {
-        LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
-    }
-    if (screenState != SOFTBUS_SCREEN_UNKNOWN) {
-        LnnNotifyScreenStateChangeEvent(screenState);
-    }
-
-    SoftBusAccountState state = SOFTBUS_ACCOUNT_UNKNOWN;
-
-    if (action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT ||
-        action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF) {
-        const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
-        int32_t eventUserId = -1;
-        std::string userIdKey = "userId";
-        eventUserId = wantParams.GetIntParam(userIdKey, -1);
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-        state = SOFTBUS_ACCOUNT_LOG_OUT;
-        (void)HbMultiUserHandleLogout(eventUserId);
-#else
-        int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
-        LNN_LOGI(LNN_EVENT, "activeUserId=%{public}d, eventUserId=%{public}d", activeUserId, eventUserId);
-        if (eventUserId == activeUserId) {
-            state = SOFTBUS_ACCOUNT_LOG_OUT;
-        }
-#endif
-    }
-    if (state != SOFTBUS_ACCOUNT_UNKNOWN) {
-        LnnNotifyAccountStateChangeEvent(state);
-    }
-
-    if (action == CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-        LnnUpdateConstraintMapForCurrentAccount();
-        LnnNotifyUserSwitchEvent(SOFTBUS_USER_SWITCHED);
+    auto it = eventHandlers_.find(action);
+    if (it != eventHandlers_.end()) {
+        it->second(data);
     }
 }
 
@@ -114,6 +185,10 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED);
+#endif
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
@@ -158,7 +233,7 @@ int32_t LnnSubscribeCommonEvent(void)
     LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
     LnnUpdateConstraintMapForCurrentAccount();
     if (!LnnIsDefaultOhosAccount()) {
-        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, JudgeDeviceTypeAndGetOsAccountIds());
     }
     (void)LnnQueryLocalScreenStatusOnce(true);
     delete subscriberPtr;

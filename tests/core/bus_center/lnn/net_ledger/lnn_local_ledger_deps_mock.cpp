@@ -423,9 +423,9 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
     return GetLocalLedgerDepsInterface()->LnnNotifyOOBEStateChangeEvent(state);
 }
 
-void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state, int32_t userId)
 {
-    return GetLocalLedgerDepsInterface()->LnnNotifyAccountStateChangeEvent(state);
+    return GetLocalLedgerDepsInterface()->LnnNotifyAccountStateChangeEvent(state, userId);
 }
 
 void LnnDeinitPhysicalSubnetManager(void)

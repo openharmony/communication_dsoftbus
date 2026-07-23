@@ -53,6 +53,8 @@ public:
     virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
     virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *accountHash, uint32_t len) = 0;
+    virtual int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId) = 0;
 };
 
 class AuthDeviceProfileInterfaceMock : public AuthDeviceProfileInterface {
@@ -78,6 +80,8 @@ public:
     MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
     MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey, int32_t *));
+    MOCK_METHOD4(LnnGetAccountIdByUserId, int32_t(int32_t, int64_t *, uint8_t *, uint32_t));
+    MOCK_METHOD4(GetOsAccountUidByUserId, int32_t(char *, uint32_t, uint32_t *, int32_t));
 };
 } // namespace OHOS
 #endif

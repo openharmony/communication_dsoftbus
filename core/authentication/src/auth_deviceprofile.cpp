@@ -40,6 +40,7 @@
 #define DEFAULT_UKID_TIME           (-1)
 #define DEFAULT_USERID              (-1)
 #define MAX_BUNDLE_NAME_LEN         200
+#define ACCOUNT_UID_LEN_MAX         65
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
 static std::set<std::string> g_notTrustedDevices;
@@ -143,6 +144,43 @@ static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+static std::string GetAclLocalAccountId(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice)
+{
+    if (trustDevice.GetTrustDeviceId() == trustDevice.GetAccessee().GetAccesseeDeviceId()) {
+        return trustDevice.GetAccesser().GetAccesserAccountId();
+    }
+    return trustDevice.GetAccessee().GetAccesseeAccountId();
+}
+#endif
+
+static bool IsAccountConsistent(const OHOS::DistributedDeviceProfile::AccessControlProfile &trustDevice,
+    int32_t localUserId)
+{
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    char localAccountUid[ACCOUNT_UID_LEN_MAX] = {0};
+    uint32_t size = 0;
+    if (GetOsAccountUidByUserId(localAccountUid, ACCOUNT_UID_LEN_MAX - 1, &size, localUserId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get local accountUid fail, localUserId=%{public}d", localUserId);
+        return false;
+    }
+    std::string aclLocalAccountId = GetAclLocalAccountId(trustDevice);
+    if (aclLocalAccountId.empty()) {
+        LNN_LOGE(LNN_STATE, "acl local accountId is empty, localUserId=%{public}d", localUserId);
+        return false;
+    }
+    std::string localUidStr(localAccountUid, size);
+    if (localUidStr == aclLocalAccountId) {
+        return true;
+    }
+    LNN_LOGD(LNN_STATE, "account not consistent, localUserId=%{public}d", localUserId);
+    return false;
+#else
+    LNN_LOGD(LNN_STATE, "not car device, no need handle, localUserId=%{public}d", localUserId);
+    return true;
+#endif
+}
+
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash, bool isOnlyPointToPoint)
 {
@@ -162,7 +200,7 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
             if (trustDevice.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
                 trustDevice.GetTrustDeviceId().empty() ||
                 trustDevice.GetStatus() == (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE ||
-                localUserId != GetAclLocalUserId(trustDevice)) {
+                localUserId != GetAclLocalUserId(trustDevice) || !IsAccountConsistent(trustDevice, localUserId)) {
                 continue;
             }
             char *anonyUdid = nullptr;
