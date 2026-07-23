@@ -1953,6 +1953,18 @@ int32_t LnnSendAgentDataPacked(const char *udid, const char *data, uint32_t leng
     return pfnLnnEnhanceFuncList->lnnSendAgentData(udid, data, length, extra, isAckMsg);
 }
 
+bool FarfieldParseModuleTypePacked(const uint8_t *data, uint32_t dataLen, uint32_t *moduleType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->farfieldParseModuleType) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->farfieldParseModuleType(data, dataLen, moduleType);
+}
+
 int32_t PostLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs)
 {

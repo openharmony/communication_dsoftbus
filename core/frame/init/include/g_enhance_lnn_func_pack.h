@@ -250,6 +250,7 @@ int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid);
 int32_t LnnGetAllRemoteDevInfoPacked(NodeInfo **info, int32_t *nums);
 int32_t LnnSendAgentDataPacked(const char *udid, const char *data, uint32_t length, LnnEventExtra *extra,
     bool isAckMsg);
+bool FarfieldParseModuleTypePacked(const uint8_t *data, uint32_t dataLen, uint32_t *moduleType);
 int32_t PostLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
 int32_t RemoveLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);

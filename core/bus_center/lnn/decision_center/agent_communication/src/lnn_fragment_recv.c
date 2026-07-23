@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "common_list.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_device_cloud_convergence_struct.h"
 #include "lnn_log.h"
 #include "lnn_cloud_query_fragment.h"
@@ -33,7 +34,7 @@
 typedef struct {
     ListNode node;
     uint32_t msgId;
-    FarFieldBusiness moduleType;
+    uint32_t moduleType;
     uint64_t createTime;
 } FragmentRecvContext;
 
@@ -99,7 +100,7 @@ static FragmentRecvContext *FindFragmentContext(uint32_t msgId)
     return NULL;
 }
 
-static FragmentRecvContext *CreateFragmentContext(uint32_t msgId, FarFieldBusiness moduleType)
+static FragmentRecvContext *CreateFragmentContext(uint32_t msgId, uint32_t moduleType)
 {
     FragmentRecvContext *ctx = (FragmentRecvContext *)SoftBusCalloc(sizeof(FragmentRecvContext));
     if (ctx == NULL) {
@@ -148,43 +149,6 @@ void FragmentRecvClearAll(void)
     LNN_LOGI(LNN_EVENT, "clear all fragment recv context");
 }
 
-static bool ParseModuleType(const uint8_t *data, uint32_t dataLen, FarFieldBusiness *moduleType)
-{
-    if (dataLen < FAR_FIELD_PKT_HEAD_SIZE) {
-        LNN_LOGE(LNN_EVENT, "data too short for pkt head, dataLen=%{public}u", dataLen);
-        return false;
-    }
-    FarFiledPktHead header;
-    uint32_t magic = 0;
-    uint32_t type = 0;
-    uint32_t len = 0;
-    if (memcpy_s(&magic, sizeof(uint32_t), data, sizeof(uint32_t)) != EOK ||
-        memcpy_s(&type, sizeof(uint32_t), data + sizeof(uint32_t), sizeof(uint32_t)) != EOK ||
-        memcpy_s(&len, sizeof(uint32_t), data + sizeof(uint32_t) + sizeof(uint32_t), sizeof(uint32_t)) != EOK) {
-        LNN_LOGE(LNN_EVENT, "memcpy_s failed");
-        return false;
-    }
-    header.magic = ntohl(magic);
-    header.type = ntohl(type);
-    header.len = ntohl(len);
-
-    if (header.magic != 0xBABEFACE) {
-        LNN_LOGE(LNN_EVENT, "invalid magic=%{public}x", header.magic);
-        return false;
-    }
-    if (header.len > dataLen) {
-        LNN_LOGE(LNN_EVENT, "header.len=%{public}u exceeds dataLen=%{public}u", header.len, dataLen);
-        return false;
-    }
-
-    *moduleType = (FarFieldBusiness)header.type;
-    if (*moduleType >= FAR_FIELD_BUSINESS_MAX) {
-        LNN_LOGE(LNN_EVENT, "invalid moduleType=%{public}d", *moduleType);
-        return false;
-    }
-    return true;
-}
-
 static void CleanupTimeoutContexts(void)
 {
     uint64_t currentTime = SoftBusGetTimeMs();
@@ -198,7 +162,7 @@ static void CleanupTimeoutContexts(void)
     }
 }
 
-static int32_t GetOrCreateFragmentContext(uint32_t msgId, FarFieldBusiness moduleType)
+static int32_t GetOrCreateFragmentContext(uint32_t msgId, uint32_t moduleType)
 {
     SoftBusMutexLock(&g_fragmentMutex);
     FragmentRecvContext *ctx = FindFragmentContext(msgId);
@@ -241,8 +205,8 @@ static int32_t ProcessSingleFragment(SingleFragmentData *singleData, Conversatio
         return SOFTBUS_INVALID_PARAM;
     }
 
-    FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
-    if (!ParseModuleType(singleData->data + *(singleData->offset),
+    uint32_t moduleType = 0;
+    if (!FarfieldParseModuleTypePacked(singleData->data + *(singleData->offset),
         singleData->dataLen - *(singleData->offset), &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
@@ -301,14 +265,14 @@ int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t data
     SoftBusMutexUnlock(&g_fragmentMutex);
 
     // 解析模块类型，判断是否需要分片处理
-    FarFieldBusiness moduleType = FAR_FIELD_BUSINESS_MAX;
-    if (!ParseModuleType(data, dataLen, &moduleType)) {
+    uint32_t moduleType = 0;
+    if (!FarfieldParseModuleTypePacked(data, dataLen, &moduleType)) {
         LNN_LOGE(LNN_EVENT, "parse module type failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
     // TYPE_LNN_FAST_OFFLINE 不需要分片处理，直接传递给回调
-    if (moduleType == TYPE_LNN_FAST_OFFLINE) {
+    if (moduleType == 0) {
         LNN_LOGI(LNN_EVENT, "TYPE_LNN_FAST_OFFLINE, no fragment needed");
         // 跳过 FarFiledPktHead 包头（12字节）
         if (dataLen <= FAR_FIELD_PKT_HEAD_SIZE) {
