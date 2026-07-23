@@ -38,9 +38,9 @@ const char *NETWORK_ID = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF
 
 class TransInnerSessionTest : public testing::Test {
 public:
-    TransInnerSessionTest()
+    TransInnerSessionTest(void)
     {}
-    ~TransInnerSessionTest()
+    ~TransInnerSessionTest(void)
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -89,6 +89,7 @@ static int32_t OnSetChannelInfoByReqId(uint32_t reqId, int32_t channelId, int32_
 
 static void OnLinkDown(const char *networkId, int32_t routeType, const char *pkgName)
 {
+    (void)pkgName;
     TRANS_LOGI(TRANS_TEST, "link down, networkId=%{public}s, routeType=%{public}d", networkId, routeType);
 }
 
@@ -102,7 +103,7 @@ static ISessionListenerInner g_innerSessionListener = {
 
 /*
  * @tc.name: InnerMessageHandlerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: inner message handler returns no init when inner listener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -115,7 +116,7 @@ HWTEST_F(TransInnerSessionTest, InnerMessageHandlerTest001, TestSize.Level1)
 
 /*
  * @tc.name: TransOnSetChannelInfoByReqIdTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans on set channel info by req id returns invalid param when inner listener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,7 +129,7 @@ HWTEST_F(TransInnerSessionTest, TransOnSetChannelInfoByReqIdTest001, TestSize.Le
 
 /*
  * @tc.name: TransOnSessionOpenedInnerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans on session opened inner returns no init when inner listener is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -138,56 +139,135 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest001, TestSize.Level
     int32_t ret = TransOnSessionOpenedInner(
         TRANS_TEST_SESSION_ID, CHANNEL_TYPE_UNDEFINED, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
+}
+
+/*
+ * @tc.name: TransOnSessionClosedInnerTest001
+ * @tc.desc: trans on session closed inner handles gracefully when inner listener is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, TransOnSessionClosedInnerTest001, TestSize.Level1)
+{
+    int32_t channelId = TRANS_TEST_SESSION_ID;
+    EXPECT_NO_FATAL_FAILURE(TransOnSessionClosedInner(channelId));
+    EXPECT_NO_FATAL_FAILURE(TransOnSessionClosedInner(0));
+    EXPECT_NO_FATAL_FAILURE(TransOnSessionClosedInner(-1));
+    EXPECT_NO_FATAL_FAILURE(TransOnSessionClosedInner(1));
 }
 
 /*
  * @tc.name: GetIsClientInfoByIdTest001
- * @tc.desc: Should return SOFTBUS_OK when given valid param.
+ * @tc.desc: get is client info by id returns invalid param when isClient pointer is null
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransInnerSessionTest, GetIsClientInfoByIdTest001, TestSize.Level1)
 {
-    bool isClient = 0;
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
-    NiceMock<TransInnerSessionInterfaceMock> TransInnerMock;
-    EXPECT_CALL(TransInnerMock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, GetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
+    int32_t ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     channelType = CHANNEL_TYPE_PROXY;
-    EXPECT_CALL(TransInnerMock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
+    ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: GetIsClientInfoByIdTest002
+ * @tc.desc: get is client info by id returns ok for tcp direct channel when GetAppInfoById succeeds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, GetIsClientInfoByIdTest002, TestSize.Level1)
+{
+    bool isClient = false;
+    int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_CALL(TransInnerMock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
+}
+
+/*
+ * @tc.name: GetIsClientInfoByIdTest003
+ * @tc.desc: get is client info by id returns error for tcp direct when GetAppInfoById fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, GetIsClientInfoByIdTest003, TestSize.Level1)
+{
+    bool isClient = false;
+    int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: GetIsClientInfoByIdTest004
+ * @tc.desc: get is client info by id returns ok for proxy channel when TransProxyGetAppInfoById succeeds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, GetIsClientInfoByIdTest004, TestSize.Level1)
+{
+    bool isClient = false;
+    int32_t channelType = CHANNEL_TYPE_PROXY;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: GetIsClientInfoByIdTest005
+ * @tc.desc: get is client info by id returns error for proxy when TransProxyGetAppInfoById fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, GetIsClientInfoByIdTest005, TestSize.Level1)
+{
+    bool isClient = false;
+    int32_t channelType = CHANNEL_TYPE_PROXY;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
  * @tc.name: TransCreateSessionServerInnerTest001
- * @tc.desc: Should return SOFTBUS_OK when param is valid.
+ * @tc.desc: trans create session server inner returns ok when TransCreateSessionServer succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransInnerSessionTest, TransCreateSessionServerInnerTest001, TestSize.Level1)
 {
-    NiceMock<TransInnerSessionInterfaceMock> TransInnerMock;
-    EXPECT_CALL(TransInnerMock, TransCreateSessionServer).WillOnce(Return(SOFTBUS_OK));
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, TransCreateSessionServer).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = TransCreateSessionServerInner(
         PKG_NAME, SESSION_NAME, &g_innerSessionListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransOnLinkDownInner(NETWORK_ID, 1, PKG_NAME);
+}
+
+/*
+ * @tc.name: TransOnLinkDownInnerTest001
+ * @tc.desc: trans on link down inner handles link down event for non block mode route type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, TransOnLinkDownInnerTest001, TestSize.Level1)
+{
+    int32_t routeType = 1;
+    EXPECT_NO_FATAL_FAILURE(TransOnLinkDownInner(NETWORK_ID, routeType, PKG_NAME));
+    EXPECT_NO_FATAL_FAILURE(TransOnLinkDownInner(nullptr, routeType, nullptr));
+    EXPECT_NO_FATAL_FAILURE(TransOnLinkDownInner(NETWORK_ID, 0, PKG_NAME));
 }
 
 /*
  * @tc.name: TransOnSetChannelInfoByReqIdTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans on set channel info by req id returns ok when inner listener is set
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -200,7 +280,7 @@ HWTEST_F(TransInnerSessionTest, TransOnSetChannelInfoByReqIdTest002, TestSize.Le
 
 /*
  * @tc.name: TransOnSessionOpenedInnerTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans on session opened inner returns ok for undefined channel type with listener set
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -210,15 +290,25 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest002, TestSize.Level
     int32_t ret = TransOnSessionOpenedInner(
         TRANS_TEST_SESSION_ID, CHANNEL_TYPE_UNDEFINED, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    NiceMock<TransInnerSessionInterfaceMock> TransInnerMock;
-    EXPECT_CALL(TransInnerMock, ProxyDataRecvHandler).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransOnBytesReceivedInner(TRANS_TEST_SESSION_ID, TRANS_TEST_DATA, static_cast<uint32_t>(strlen(TRANS_TEST_DATA)));
 }
 
+/*
+ * @tc.name: TransOnBytesReceivedInnerTest001
+ * @tc.desc: trans on bytes received inner calls ProxyDataRecvHandler with channel data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, TransOnBytesReceivedInnerTest001, TestSize.Level1)
+{
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, ProxyDataRecvHandler).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    TransOnBytesReceivedInner(TRANS_TEST_SESSION_ID, TRANS_TEST_DATA,
+        static_cast<uint32_t>(strlen(TRANS_TEST_DATA)));
+}
 
 /*
  * @tc.name: TransOnSessionOpenedInnerTest003
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans on session opened inner returns ok when result is not ok for tcp direct channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -232,16 +322,16 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest003, TestSize.Level
 
 /*
  * @tc.name: TransOnSessionOpenedInnerTest004
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans on session opened inner returns invalid param when DirectChannelCreateListener fails
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest004, TestSize.Level1)
 {
     int32_t result = SOFTBUS_OK;
-    NiceMock<TransInnerSessionInterfaceMock> TransInnerMock;
-    EXPECT_CALL(TransInnerMock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransInnerMock, DirectChannelCreateListener).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, DirectChannelCreateListener).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransOnSessionOpenedInner(
         TRANS_TEST_SESSION_ID, CHANNEL_TYPE_TCP_DIRECT, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -250,7 +340,7 @@ HWTEST_F(TransInnerSessionTest, TransOnSessionOpenedInnerTest004, TestSize.Level
 
 /*
  * @tc.name: InnerMessageHandlerTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is not null.
+ * @tc.desc: inner message handler returns ok when inner listener is set
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -262,71 +352,187 @@ HWTEST_F(TransInnerSessionTest, InnerMessageHandlerTest002, TestSize.Level1)
 }
 
 /*
+ * @tc.name: OnSessionOpenedInnerTest001
+ * @tc.desc: on session opened inner returns invalid param when DirectChannelCreateListener fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest001, TestSize.Level1)
+{
+    int32_t result = 0;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, DirectChannelCreateListener).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
+}
+
+/*
  * @tc.name: OnSessionOpenedInnerTest002
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is not null.
+ * @tc.desc: on session opened inner returns error when GetAppInfoById fails for tcp direct
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest002, TestSize.Level1)
 {
     int32_t result = 0;
-    NiceMock<TransInnerSessionInterfaceMock> TransInnerMock;
-    EXPECT_CALL(TransInnerMock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransInnerMock, DirectChannelCreateListener).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
+}
+
+/*
+ * @tc.name: OnSessionOpenedInnerTest003
+ * @tc.desc: on session opened inner returns error when TransProxyGetAppInfoById fails for proxy
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest003, TestSize.Level1)
+{
+    int32_t result = 0;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, GetAppInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(TransInnerMock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
+    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
+}
+
+/*
+ * @tc.name: OnSessionOpenedInnerTest004
+ * @tc.desc: on session opened inner returns invalid param when InnerAddSession fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest004, TestSize.Level1)
+{
+    int32_t result = 0;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, TransProxyGetAppInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, InnerAddSession).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, TransProxyGetAppInfoById).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransInnerMock, InnerAddSession).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
+    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
+}
+
+/*
+ * @tc.name: OnSessionOpenedInnerTest005
+ * @tc.desc: on session opened inner returns invalid param when TransInnerAddDataBufNode fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest005, TestSize.Level1)
+{
+    int32_t result = 0;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, TransProxyGetAppInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, InnerAddSession).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransInnerAddDataBufNode).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, InnerAddSession).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransInnerMock, TransInnerAddDataBufNode).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
+    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
+}
+
+/*
+ * @tc.name: OnSessionOpenedInnerTest006
+ * @tc.desc: on session opened inner returns invalid param when ServerSideSendAck fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest006, TestSize.Level1)
+{
+    int32_t result = 0;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, TransProxyGetAppInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, InnerAddSession).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransInnerAddDataBufNode).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ServerSideSendAck).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, TransInnerAddDataBufNode).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransInnerMock, ServerSideSendAck).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, ServerSideSendAck).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
+    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
+}
+
+/*
+ * @tc.name: OnSessionOpenedInnerTest007
+ * @tc.desc: on session opened inner returns ok when all steps succeed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, OnSessionOpenedInnerTest007, TestSize.Level1)
+{
+    int32_t result = 0;
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, GetAppInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, TransProxyGetAppInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, InnerAddSession).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransInnerAddDataBufNode).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ServerSideSendAck).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = OnSessionOpenedInner(TRANS_TEST_SESSION_ID, const_cast<char *>(NETWORK_ID), result);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    TransOnSessionClosedInner(TRANS_TEST_SESSION_ID);
 }
 
 /*
  * @tc.name: TransOpenSessionInnerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans open session inner returns error when TransOpenChannel fails
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransInnerSessionTest, TransOpenSessionInnerTest001, TestSize.Level1)
 {
-    NiceMock<TransInnerSessionInterfaceMock> TransInnerMock;
-    EXPECT_CALL(TransInnerMock, TransOpenChannel).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, TransOpenChannel).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransOpenSessionInner(SESSION_NAME, const_cast<char *>(NETWORK_ID), TRANS_TEST_REQ_ID);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, TransOpenChannel).WillOnce(Return(SOFTBUS_OK));
-    ret = TransOpenSessionInner(SESSION_NAME, const_cast<char *>(NETWORK_ID), TRANS_TEST_REQ_ID);
+}
+
+/*
+ * @tc.name: TransOpenSessionInnerTest002
+ * @tc.desc: trans open session inner returns ok when TransOpenChannel succeeds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, TransOpenSessionInnerTest002, TestSize.Level1)
+{
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, TransOpenChannel).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransOpenSessionInner(SESSION_NAME, const_cast<char *>(NETWORK_ID), TRANS_TEST_REQ_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
  * @tc.name: TransSendDataInnerTest001
- * @tc.desc: Should return SOFTBUS_NO_INIT when g_InnerListener is null.
+ * @tc.desc: trans send data inner returns error when TransSendData fails
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransInnerSessionTest, TransSendDataInnerTest001, TestSize.Level1)
 {
-    NiceMock<TransInnerSessionInterfaceMock> TransInnerMock;
-    EXPECT_CALL(TransInnerMock, TransSendData).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = TransSendData(TRANS_TEST_SESSION_ID, TRANS_TEST_DATA, static_cast<uint32_t>(strlen(TRANS_TEST_DATA)));
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, TransSendData).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransSendDataInner(TRANS_TEST_SESSION_ID, TRANS_TEST_DATA,
+        static_cast<uint32_t>(strlen(TRANS_TEST_DATA)));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(TransInnerMock, TransSendData).WillOnce(Return(SOFTBUS_OK));
-    ret = TransSendData(TRANS_TEST_SESSION_ID, TRANS_TEST_DATA, static_cast<uint32_t>(strlen(TRANS_TEST_DATA)));
+}
+
+/*
+ * @tc.name: TransSendDataInnerTest002
+ * @tc.desc: trans send data inner returns ok when TransSendData succeeds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransInnerSessionTest, TransSendDataInnerTest002, TestSize.Level1)
+{
+    NiceMock<TransInnerSessionInterfaceMock> mock;
+    EXPECT_CALL(mock, TransSendData).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransSendDataInner(TRANS_TEST_SESSION_ID, TRANS_TEST_DATA,
+        static_cast<uint32_t>(strlen(TRANS_TEST_DATA)));
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }
