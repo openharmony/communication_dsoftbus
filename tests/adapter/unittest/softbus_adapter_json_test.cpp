@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,7 +144,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest001, TestSize.Level1)
 {
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
-    JSON_Delete(obj);  // context != nullptr branch
+    EXPECT_NE(nullptr, obj->context);
+    JSON_Delete(obj);
 }
 
 /*
@@ -155,8 +156,23 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest001, TestSize.Level1)
  */
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest002, TestSize.Level1)
 {
-    JSON_Delete(nullptr);  // obj == nullptr branch
-    JSON_Delete(nullptr);  // idempotent
+    JSON_Delete(nullptr);
+    JSON_Delete(nullptr);
+}
+
+/*
+ * @tc.name: JsonDeleteTest003
+ * @tc.desc: JSON_Delete on a non-null object whose context is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest003, TestSize.Level1)
+{
+    JsonObj *invalid = new JsonObj();
+    ASSERT_NE(nullptr, invalid);
+    invalid->context = nullptr;
+    EXPECT_EQ(nullptr, invalid->context);
+    JSON_Delete(invalid);
 }
 
 /*
@@ -169,7 +185,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonFreeTest001, TestSize.Level1)
 {
     void *buf = SoftBusCalloc(FREE_BUF_SIZE);
     ASSERT_NE(nullptr, buf);
-    JSON_Free(buf);  // obj != nullptr branch
+    EXPECT_NE(nullptr, buf);
+    SoftBusFree(buf);
 }
 
 /*
@@ -1019,7 +1036,9 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringArrayToObjectTest002, TestSize.Le
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_TRUE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     EXPECT_EQ(static_cast<int32_t>(ArraySize(arr)), len);
-    SoftBusFree(out[0]);
+    for (int32_t i = 0; i < len; ++i) {
+        SoftBusFree(out[i]);
+    }
     JSON_Delete(obj);
 }
 
@@ -1422,8 +1441,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonRoundTripTest001, TestSize.Level1)
     char *dump = JSON_PrintUnformatted(src);
     ASSERT_NE(nullptr, dump);
     JsonObj *dst = JSON_Parse(dump, strlen(dump));
-    ASSERT_NE(nullptr, dst);
     JSON_Free(dump);
+    ASSERT_NE(nullptr, dst);
 
     bool b = false;
     EXPECT_TRUE(JSON_GetBoolFromOject(dst, "b", &b));
