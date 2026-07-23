@@ -307,7 +307,7 @@ void ClientDeathCallback(const char *pkgName, int32_t pid)
 {
     DiscServerDeathCallback(pkgName, pid);
     TransServerDeathCallback(pkgName, pid);
-    BusCenterServerDeathCallback(pkgName);
+    BusCenterServerDeathCallback(pkgName, pid);
     AuthServerDeathCallback(pkgName, pid);
     ConnDeathCallback(pkgName, pid);
     BrProxyClientDeathClearResource(pid);

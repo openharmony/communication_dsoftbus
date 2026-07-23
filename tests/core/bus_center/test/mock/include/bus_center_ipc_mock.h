@@ -22,6 +22,7 @@
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_conversation_query.h"
 #include "lnn_heartbeat_utils_struct.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_ranging_manager.h"
@@ -76,6 +77,10 @@ public:
     virtual void LnnUnregSleRangeCbPacked(void) = 0;
     virtual int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo) = 0;
     virtual void SdMgrDeathCallbackPacked(const char *pkgName);
+    virtual int32_t LnnRegisterConversationListener(const ConversationBusiness *info) = 0;
+    virtual int32_t LnnUnregisterConversationListener(const ConversationBusiness *info) = 0;
+    virtual void ClientOnConversationRecvMsg(int32_t pid, const ConversationBusiness *info,
+        const char *deviceId, const char *data, uint32_t length) = 0;
 };
 class BusCenterIpcInterfaceMock : public BusCenterIpcInterface {
 public:
@@ -117,6 +122,10 @@ public:
     MOCK_METHOD0(LnnUnregSleRangeCbPacked, void(void));
     MOCK_METHOD3(ClientOnRangeResult, int32_t(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo));
     MOCK_METHOD1(SdMgrDeathCallbackPacked, void(const char *pkgName));
+    MOCK_METHOD1(LnnRegisterConversationListener, int32_t(const ConversationBusiness *));
+    MOCK_METHOD1(LnnUnregisterConversationListener, int32_t(const ConversationBusiness *));
+    MOCK_METHOD5(ClientOnConversationRecvMsg, void(int32_t, const ConversationBusiness *,
+        const char *, const char *, uint32_t));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
