@@ -127,5 +127,10 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetTransLanePendingTestInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
+
+int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errorCode)
+{
+    return GetTransLanePendingTestInterface()->ClientIpcOnChannelOpenFailed(data, errorCode);
+}
 }
 }

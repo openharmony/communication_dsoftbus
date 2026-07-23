@@ -24,6 +24,7 @@
 #include "softbus_config_type.h"
 #include "softbus_trans_def.h"
 #include "softbus_utils.h"
+#include "trans_client_proxy.h"
 
 namespace OHOS {
 class TransLanePendingTestInterface {
@@ -52,6 +53,7 @@ public:
     virtual int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
+    virtual int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errorCode) = 0;
 };
 
 class TransLanePendingTestInterfaceMock : public TransLanePendingTestInterface {
@@ -80,6 +82,7 @@ public:
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char *networkId, InfoKey key, char *info, uint32_t len));
     MOCK_METHOD2(LnnGetDLAuthCapacity, int32_t (const char *networkId, uint32_t *authCapacity));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
+    MOCK_METHOD2(ClientIpcOnChannelOpenFailed, int32_t (ChannelMsg *data, int32_t errorCode));
 };
 } // namespace OHOS
 #endif // TRANS_LANE_COMMON_TEST_MOCK_H
