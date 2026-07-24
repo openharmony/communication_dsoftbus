@@ -746,6 +746,8 @@ int32_t DirectChannelCreateListener(int32_t fd)
         int32_t ret = StartBaseClient(g_baseListenerModule, &listener);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "start client base listener failed, ret=%{public}d", ret);
+            DestroyBaseListener(g_baseListenerModule);
+            g_baseListenerModule = UNUSE_BUTT;
             return ret;
         }
         TRANS_LOGI(TRANS_CTRL, "init tcp direct channel success, fd=%{public}d", fd);
