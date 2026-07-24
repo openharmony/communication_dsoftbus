@@ -65,7 +65,10 @@ void AuthUkManagerTest::TearDownTestCase()
     DeinitUserKeyList();
     LnnDeinitDistributedLedger();
     LnnDeinitLocalLedger();
+<<<<<<< HEAD
     LooperDeinit();
+=======
+>>>>>>> 393ce3c5b (fix: 修复静态检查问题（删除注释代码和多余空行）)
 }
 
 void AuthUkManagerTest::SetUp() { }

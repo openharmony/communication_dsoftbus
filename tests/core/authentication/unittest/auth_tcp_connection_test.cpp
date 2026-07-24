@@ -740,7 +740,12 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Leve
     TriggerType trigger = READ_TRIGGER;
 
     int32_t ret = AuthTcpCreateListener(module, fd, trigger);
+<<<<<<< HEAD
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+=======
+
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+>>>>>>> 393ce3c5b (fix: 修复静态检查问题（删除注释代码和多余空行）)
 }
 
 /*
