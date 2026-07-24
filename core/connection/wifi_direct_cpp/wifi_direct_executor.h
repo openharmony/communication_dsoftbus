@@ -41,6 +41,7 @@ public:
     bool IsActive() const;
     void SetActive(bool active);
     bool CanAcceptNegotiateData(WifiDirectCommand &command);
+    bool HasConnectCommand(const WifiDirectConnectInfo &info);
 
     template<typename Content>
     void SendEvent(const Content &content)
