@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <iostream>
 #include <gtest/gtest.h>
+#include <iostream>
 
 #include "session.h"
 #include "softbus_error_code.h"
@@ -26,23 +26,17 @@ using namespace testing::ext;
 namespace OHOS {
 class StreamAdaptorTest : public testing::Test {
 public:
-    StreamAdaptorTest()
-    {}
-    ~StreamAdaptorTest()
-    {}
+    StreamAdaptorTest() { }
+    ~StreamAdaptorTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void StreamAdaptorTest::SetUpTestCase(void)
-{}
+void StreamAdaptorTest::SetUpTestCase(void) { }
 
-void StreamAdaptorTest::TearDownTestCase(void)
-{}
+void StreamAdaptorTest::TearDownTestCase(void) { }
 
 void SetStatus(int32_t channelId, int32_t status)
 {
@@ -123,7 +117,7 @@ HWTEST_F(StreamAdaptorTest, InitAdaptorTest03, TestSize.Level1)
 HWTEST_F(StreamAdaptorTest, EncryptTest01, TestSize.Level1)
 {
     int32_t channelId = 1;
-    StreamData streamData = {const_cast<char *>(""), 0};
+    StreamData streamData = { const_cast<char *>(""), 0 };
     std::shared_ptr<StreamAdaptor> adaptor = std::make_shared<StreamAdaptor>(g_pkgName);
     adaptor->InitAdaptor(channelId, &g_param, true, &g_callback);
     ssize_t dataLen = streamData.bufLen + adaptor->GetEncryptOverhead();
@@ -143,7 +137,7 @@ HWTEST_F(StreamAdaptorTest, EncryptTest01, TestSize.Level1)
 HWTEST_F(StreamAdaptorTest, EncryptTest02, TestSize.Level1)
 {
     int32_t channelId = 1;
-    StreamData streamData = {const_cast<char *>("balabalab"), STREAM_ADAPT_DATA_LENGTH};
+    StreamData streamData = { const_cast<char *>("balabalab"), STREAM_ADAPT_DATA_LENGTH };
     std::shared_ptr<StreamAdaptor> adaptor = std::make_shared<StreamAdaptor>(g_pkgName);
     adaptor->InitAdaptor(channelId, &g_param, true, &g_callback);
     ssize_t dataLen = streamData.bufLen + adaptor->GetEncryptOverhead();
@@ -163,7 +157,7 @@ HWTEST_F(StreamAdaptorTest, EncryptTest02, TestSize.Level1)
 HWTEST_F(StreamAdaptorTest, DecryptTest01, TestSize.Level1)
 {
     int32_t channelId = 1;
-    StreamData streamData = {const_cast<char *>(""), 0};
+    StreamData streamData = { const_cast<char *>(""), 0 };
     std::shared_ptr<StreamAdaptor> adaptor = std::make_shared<StreamAdaptor>(g_pkgName);
     adaptor->InitAdaptor(channelId, &g_param, true, &g_callback);
     ssize_t dataLen = streamData.bufLen + adaptor->GetEncryptOverhead();
@@ -183,15 +177,15 @@ HWTEST_F(StreamAdaptorTest, DecryptTest01, TestSize.Level1)
 HWTEST_F(StreamAdaptorTest, DecryptTest02, TestSize.Level1)
 {
     int32_t channelId = 1;
-    StreamData streamData = {const_cast<char *>("balabalab"), STREAM_ADAPT_DATA_LENGTH};
+    StreamData streamData = { const_cast<char *>("balabalab"), STREAM_ADAPT_DATA_LENGTH };
     std::shared_ptr<StreamAdaptor> adaptor = std::make_shared<StreamAdaptor>(g_pkgName);
     adaptor->InitAdaptor(channelId, &g_param, true, &g_callback);
     ssize_t dataLen = streamData.bufLen + adaptor->GetEncryptOverhead();
     std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
     adaptor->Encrypt(streamData.buf, streamData.bufLen, data.get(), dataLen, adaptor->GetSessionKey());
-    int32_t ret = adaptor->Decrypt(data.get(), dataLen + 1, streamData.buf, streamData.bufLen,
-        adaptor->GetSessionKey());
+    int32_t ret =
+        adaptor->Decrypt(data.get(), dataLen + 1, streamData.buf, streamData.bufLen, adaptor->GetSessionKey());
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     adaptor->ReleaseAdaptor();
 }
-}
+} // namespace OHOS
