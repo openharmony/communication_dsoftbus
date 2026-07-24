@@ -1225,6 +1225,7 @@ static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
         return;
     }
     BrProxyInfo proxyInfo;
+    (void)memset_s(&proxyInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
     ret = GetBrProxy(info.proxyInfo.brMac, info.proxyInfo.uuid, info.requestId, &proxyInfo);
     if (ret == SOFTBUS_OK && proxyInfo.isEnable) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] the connecet requestId=%{public}d is virtual connect", requestId);
@@ -1592,7 +1593,7 @@ void TransOnBrProxyOpened(pid_t pid, int32_t channelId, const char *brMac, const
 int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall)
 {
     TRANS_LOGI(TRANS_SVC, "[br_proxy] enter, channelId:%{public}d", channelId);
-    ServerBrProxyChannelInfo info;
+    ServerBrProxyChannelInfo info = {0};
     int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret:%{public}d, channelId:%{public}d", ret, channelId);
@@ -1782,7 +1783,7 @@ static int32_t PostStopAppEvent(const char *bundleName, pid_t pid, pid_t uid)
 
 int32_t ApplyForUnrestricted(int32_t channelId)
 {
-    ServerBrProxyChannelInfo info;
+    ServerBrProxyChannelInfo info = {0};
     int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret:%{public}d, channelId:%{public}d", ret, channelId);
@@ -1790,6 +1791,7 @@ int32_t ApplyForUnrestricted(int32_t channelId)
     }
 
     BrProxyInfo proxyInfo;
+    (void)memset_s(&proxyInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
     ret = GetBrProxy(info.proxyInfo.brMac, info.proxyInfo.uuid, info.requestId, &proxyInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get brproxy failed. ret:%{public}d", ret);
@@ -2036,7 +2038,7 @@ static void NotifyChannelState(const char *brMac, const char *uuid, int32_t chan
 
 int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable)
 {
-    ServerBrProxyChannelInfo info;
+    ServerBrProxyChannelInfo info = {0};
     int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
