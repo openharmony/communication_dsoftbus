@@ -751,6 +751,10 @@ static char *GetCredIdByIdService(
     char *credId = NULL;
     char accountHashStr[SHA_256_HEX_HASH_LEN] = { 0 };
 
+    if (accountHash == NULL || strlen(accountHash) < SHA_256_HASH_LEN) {
+        AUTH_LOGE(AUTH_CONN, "invalid accountHash");
+        return credId;
+    }
     if (ConvertBytesToHexString(accountHashStr, SHA_256_HEX_HASH_LEN, (unsigned char *)accountHash, SHA_256_HASH_LEN) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "convert account to string fail");

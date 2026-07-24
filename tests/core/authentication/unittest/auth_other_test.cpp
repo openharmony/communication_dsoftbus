@@ -34,7 +34,9 @@
 #include "auth_tcp_connection_mock.h"
 #include "lnn_connection_mock.h"
 #include "lnn_lane_interface.h"
+#include "message_handler.h"
 #include "softbus_adapter_json.h"
+#include "softbus_base_listener.h"
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 
@@ -54,18 +56,24 @@ public:
 
 void AuthOtherTest::SetUpTestCase()
 {
+    LooperInit();
     int32_t ret = AuthCommonInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 void AuthOtherTest::TearDownTestCase()
 {
-    AuthCommonDeinit();
+
 }
 
-void AuthOtherTest::SetUp() { }
 
-void AuthOtherTest::TearDown() { }
+void AuthOtherTest::SetUp()
+{
+}
+
+void AuthOtherTest::TearDown()
+{
+}
 
 void OnConnectResultTest(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
@@ -380,6 +388,7 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
     connInfo.type = AUTH_LINK_TYPE_BR;
     ret = AuthDeviceOpenConn(&connInfo, requestId, &cb);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+
 }
 
 /*
@@ -1274,6 +1283,10 @@ HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
 {
+   
+    AuthTcpConnectionInterfaceMock tcpConnMock;
+    EXPECT_CALL(tcpConnMock, StopSessionKeyListening).Times(1);
+
     ListenerModule module = AUTH;
     int32_t fd = 1;
 

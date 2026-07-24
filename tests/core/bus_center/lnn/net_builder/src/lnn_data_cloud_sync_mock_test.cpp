@@ -25,6 +25,7 @@
 #include "lnn_data_cloud_sync_deps_mock.h"
 #include "lnn_kv_adapter_wrapper_mock.h"
 #include "lnn_net_ledger_mock.h"
+#include "lnn_physical_subnet_manager.h"
 
 constexpr char MACTEST[BT_MAC_LEN] = "00:11:22:33:44";
 constexpr char PEERUUID[UUID_BUF_LEN] = "021315ASD";
@@ -52,9 +53,15 @@ public:
     void TearDown();
 };
 
-void LNNDataCloudSyncMockTest::SetUpTestCase() { }
+void LNNDataCloudSyncMockTest::SetUpTestCase()
+{
+    LnnInitPhysicalSubnetManager();
+}
 
-void LNNDataCloudSyncMockTest::TearDownTestCase() { }
+void LNNDataCloudSyncMockTest::TearDownTestCase()
+{
+    LnnDeinitPhysicalSubnetManager();
+}
 
 void LNNDataCloudSyncMockTest::SetUp() { }
 
@@ -600,6 +607,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     PrintSyncNodeInfo(nullptr, &userInfo);
     PrintSyncNodeInfo(&cacheInfo, &userInfo);
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    NiceMock<LnnNetLedgertInterfaceMock> NetLedgerMock;
     EXPECT_CALL(DataCloudSyncMock, LnnUnPackCloudSyncDeviceInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<1>(cacheInfo), Return(SOFTBUS_OK)));
@@ -609,10 +617,12 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     EXPECT_CALL(DataCloudSyncMock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+        .WillRepeatedly(DoAll(SetArgPointee<0>(cacheInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(DataCloudSyncMock, LnnUpdateDistributedUserInfo)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(DataCloudSyncMock, PackUserInfoToJsonInner)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetLedgerMock, LnnUpdateDistributedNodeInfo)
         .WillRepeatedly(Return(SOFTBUS_OK));
     const char *key = "key";
     const char *value = TMPMSG;

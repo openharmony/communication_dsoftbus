@@ -482,6 +482,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 
@@ -554,6 +555,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_002, TestSize.Level1)
     EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 }
@@ -593,6 +595,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
     EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 }
@@ -653,6 +656,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, Test
     EXPECT_CALL(mock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
     std::string accountId1 = "8bb0cf6eb9b17d0f";
