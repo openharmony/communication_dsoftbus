@@ -394,7 +394,7 @@ typedef int8_t (*BleGetAdvPowerFunc)(int32_t businessType);
 typedef int32_t (*SendParamsToLpDeviceFunc)(const uint8_t *data, uint32_t dataSize, int32_t type);
 typedef void (*LnnNotifyVirLinkReportEventFunc)(const uint8_t *data, uint32_t dataSize);
 typedef int32_t (*FragmentRecvProcessFunc)(const char *udid, const uint8_t *data, uint32_t dataLen,
-    FragmentRecvCallback callback);
+    ConversationChannelType channelType, FragmentRecvCallback callback);
 typedef void (*OnRecvCloudQueryInfoFunc)(const char *udid, const char *data, uint32_t length);
 typedef void (*LnnNotifyDmHookRegisteredEventFunc)(void);
 

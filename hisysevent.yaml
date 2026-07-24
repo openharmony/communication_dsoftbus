@@ -182,6 +182,8 @@ BUSCENTER_BEHAVIOR:
   CHANNEL_RTT: { type: INT32, desc: channel Rtt }
   P2P_RESULT: { type: INT32, desc: p2p result }
   P2P_LATENCY: { type: INT32, desc: p2p latency }
+  PUSH_TX_COUNT: { type: UINT32, desc: push tx count }
+  PUSH_RX_COUNT: { type: UINT32, desc: push rx count }
   SOURCE_TYPE: { type: UINT8, desc: spark link send source type }
   DATA_TYPE: { type: UINT8, desc: spark link send data type }
   IS_RELIABLE: { type: UINT8, desc: spark link send data is reliable }
