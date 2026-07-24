@@ -1562,11 +1562,9 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_005, TestSize.Leve
     int32_t ret;
 
     ret = AuthTcpCreateListener(module, fd, READ_TRIGGER);
-    // EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     ret = AuthTcpCreateListener(module, fd, WRITE_TRIGGER);
-    // EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 

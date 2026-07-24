@@ -63,7 +63,6 @@ void AuthOtherTest::SetUpTestCase()
 
 void AuthOtherTest::TearDownTestCase()
 {
-
 }
 
 
@@ -1283,7 +1282,6 @@ HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
 {
-   
     AuthTcpConnectionInterfaceMock tcpConnMock;
     EXPECT_CALL(tcpConnMock, StopSessionKeyListening).Times(1);
 
