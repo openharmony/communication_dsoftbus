@@ -62,6 +62,9 @@ void AuthUkManagerTest::SetUpTestCase()
 void AuthUkManagerTest::TearDownTestCase()
 {
     AUTH_LOGI(AUTH_CONN, "AuthUkManagerTest end");
+    DeinitUserKeyList();
+    LnnDeinitDistributedLedger();
+    LnnDeinitLocalLedger();
 }
 
 void AuthUkManagerTest::SetUp() { }

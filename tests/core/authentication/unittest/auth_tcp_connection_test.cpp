@@ -14,7 +14,6 @@
  */
 
 #include <cinttypes>
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <securec.h>
 #include <sys/time.h>
@@ -22,7 +21,6 @@
 #include "auth_log.h"
 #include "auth_tcp_connection.c"
 #include "auth_tcp_connection.h"
-#include "auth_tcp_connection_mock.h"
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 
@@ -744,7 +742,6 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Leve
 
     int32_t ret = AuthTcpCreateListener(module, fd, trigger);
 
-    //EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
