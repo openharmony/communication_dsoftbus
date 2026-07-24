@@ -26,9 +26,6 @@
 using namespace testing::ext;
 
 namespace {
-// JsonObj is a public POD struct { void *context; }. Building one with a null
-// context lets us reach every `json == nullptr` branch in the adapter without
-// any memory mocking.
 JsonObj MakeNullContextObj()
 {
     JsonObj obj;
@@ -36,15 +33,12 @@ JsonObj MakeNullContextObj()
     return obj;
 }
 
-// Compile-time element count of a fixed-size array, used in assertions instead
-// of repeating the literal element count.
 template <typename T, std::size_t N>
 constexpr std::size_t ArraySize(const T (&)[N])
 {
     return N;
 }
 
-// ---- Keys reused across cases --------------------------------------------
 constexpr char KEY_BOOL[] = "bool_key";
 constexpr char KEY_INT[] = "int_key";
 constexpr char KEY_STR[] = "str_key";
@@ -52,37 +46,31 @@ constexpr char KEY_ARR[] = "arr_key";
 constexpr char KEY_BYTES[] = "bytes_key";
 constexpr char KEY_MISSING[] = "missing_key";
 
-// ---- Lifecycle -----------------------------------------------------------
-constexpr int32_t CREATE_REPEAT_COUNT = 16;  // create/free repetitions for leak check
-constexpr uint32_t FREE_BUF_SIZE = 32;       // scratch buffer handed to JSON_Free
+constexpr int32_t CREATE_REPEAT_COUNT = 16;
+constexpr uint32_t FREE_BUF_SIZE = 32;
 
-// ---- Buffer capacities ---------------------------------------------------
-constexpr uint32_t BUF_SIZE_SMALL = 8;       // bytes, for short string reads
-constexpr uint32_t BUF_SIZE_MEDIUM = 16;     // bytes
-constexpr uint32_t BUF_SIZE_LARGE = 64;      // bytes, for longer string reads
-constexpr int32_t ARRAY_CAP_SMALL = 4;       // elements, for the out-array slot list
-constexpr int32_t ARRAY_CAP_LARGE = 8;       // elements, for the out-array slot list
+constexpr uint32_t BUF_SIZE_SMALL = 8;
+constexpr uint32_t BUF_SIZE_MEDIUM = 16;
+constexpr uint32_t BUF_SIZE_LARGE = 64;
+constexpr int32_t ARRAY_CAP_SMALL = 4;
+constexpr int32_t ARRAY_CAP_LARGE = 8;
 
-// ---- Sizes deliberately too small, used to drive failure paths -----------
-constexpr uint32_t DST_SIZE_TOO_SMALL_ZERO = 1;    // room for the NUL byte only
-constexpr uint32_t DST_SIZE_TOO_SMALL_PARTIAL = 3; // shorter than the stored "value"
-constexpr int32_t ARRAY_LEN_TOO_SMALL = 2;         // less than the 3-element array
-constexpr uint32_t BYTES_BUFLEN_TOO_SMALL = 2;     // less than the 4-byte payload
+constexpr uint32_t DST_SIZE_TOO_SMALL_ZERO = 1;
+constexpr uint32_t DST_SIZE_TOO_SMALL_PARTIAL = 3;
+constexpr int32_t ARRAY_LEN_TOO_SMALL = 2;
+constexpr uint32_t BYTES_BUFLEN_TOO_SMALL = 2;
 
-// ---- Canonical values written & read back through typed accessors --------
 constexpr int16_t VAL_INT16 = 1234;
 constexpr int32_t VAL_INT32 = 100000;
 constexpr int64_t VAL_INT64 = 10000000000LL;
 constexpr int32_t VAL_INT32_NEG = -12345;
 constexpr int32_t VAL_PRINT_INT = 42;
 
-// Round-trip / overwrite payload values
 constexpr int16_t RT_INT16 = 16;
 constexpr int32_t RT_INT32 = 3200;
 constexpr int64_t RT_INT64 = 64000000LL;
 constexpr int32_t RT_OVERWRITE_INT = 100;
 
-// ---- Byte payloads -------------------------------------------------------
 constexpr uint8_t BYTES_PAYLOAD[] = { 0x00, 0x01, 0x02, 0xFF };
 constexpr uint8_t BYTES_PAYLOAD_ALT[] = { 0x10, 0x20, 0x30 };
 }  // namespace
@@ -100,10 +88,6 @@ void AdaptorDsoftbusJsonTest::TearDownTestCase(void) { }
 void AdaptorDsoftbusJsonTest::SetUp() { }
 void AdaptorDsoftbusJsonTest::TearDown() { }
 
-// ---------------------------------------------------------------------------
-// JSON_CreateObject / JSON_Delete / JSON_Free
-// ---------------------------------------------------------------------------
-
 /*
  * @tc.name: JsonCreateObjectTest001
  * @tc.desc: JSON_CreateObject returns a non-null object with a valid context
@@ -116,7 +100,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonCreateObjectTest001, TestSize.Level1)
     EXPECT_NE(nullptr, obj);
     ASSERT_NE(nullptr, obj);
     EXPECT_NE(nullptr, obj->context);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -130,7 +114,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonCreateObjectTest002, TestSize.Level1)
     for (int32_t i = 0; i < CREATE_REPEAT_COUNT; ++i) {
         JsonObj *obj = JSON_CreateObject();
         EXPECT_NE(nullptr, obj);
-        JSON_Delete(obj);
+        EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     }
 }
 
@@ -145,7 +129,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest001, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_NE(nullptr, obj->context);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -156,8 +140,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest001, TestSize.Level1)
  */
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest002, TestSize.Level1)
 {
-    JSON_Delete(nullptr);
-    JSON_Delete(nullptr);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(nullptr));
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(nullptr));
 }
 
 /*
@@ -172,7 +156,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest003, TestSize.Level1)
     ASSERT_NE(nullptr, invalid);
     invalid->context = nullptr;
     EXPECT_EQ(nullptr, invalid->context);
-    JSON_Delete(invalid);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(invalid));
 }
 
 /*
@@ -184,9 +168,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonDeleteTest003, TestSize.Level1)
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonFreeTest001, TestSize.Level1)
 {
     void *buf = SoftBusCalloc(FREE_BUF_SIZE);
-    ASSERT_NE(nullptr, buf);
     EXPECT_NE(nullptr, buf);
-    SoftBusFree(buf);
+    EXPECT_NO_FATAL_FAILURE(SoftBusFree(buf));
 }
 
 /*
@@ -197,12 +180,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonFreeTest001, TestSize.Level1)
  */
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonFreeTest002, TestSize.Level1)
 {
-    JSON_Free(nullptr);  // obj == nullptr branch
+    EXPECT_NO_FATAL_FAILURE(JSON_Free(nullptr));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_PrintUnformatted
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonPrintUnformattedTest001
@@ -221,9 +200,9 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonPrintUnformattedTest001, TestSize.Level1)
     EXPECT_NE(nullptr, str);
     if (str != nullptr) {
         EXPECT_NE(nullptr, strstr(str, "hello"));
-        JSON_Free(str);
+        EXPECT_NO_FATAL_FAILURE(JSON_Free(str));
     }
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -238,8 +217,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonPrintUnformattedTest002, TestSize.Level1)
     ASSERT_NE(nullptr, obj);
     char *str = JSON_PrintUnformatted(obj);
     EXPECT_NE(nullptr, str);
-    JSON_Free(str);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Free(str));
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -250,7 +229,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonPrintUnformattedTest002, TestSize.Level1)
  */
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonPrintUnformattedTest003, TestSize.Level1)
 {
-    EXPECT_EQ(nullptr, JSON_PrintUnformatted(nullptr));  // obj == nullptr
+    EXPECT_EQ(nullptr, JSON_PrintUnformatted(nullptr));
 }
 
 /*
@@ -262,12 +241,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonPrintUnformattedTest003, TestSize.Level1)
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonPrintUnformattedTest004, TestSize.Level1)
 {
     JsonObj nullObj = MakeNullContextObj();
-    EXPECT_EQ(nullptr, JSON_PrintUnformatted(&nullObj));  // context == nullptr
+    EXPECT_EQ(nullptr, JSON_PrintUnformatted(&nullObj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_Parse
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonParseTest001
@@ -289,7 +264,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonParseTest001, TestSize.Level1)
     bool flag = false;
     EXPECT_TRUE(JSON_GetBoolFromOject(obj, "flag", &flag));
     EXPECT_EQ(true, flag);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -303,7 +278,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonParseTest002, TestSize.Level1)
     const char *text = "{}";
     JsonObj *obj = JSON_Parse(text, strlen(text));
     EXPECT_NE(nullptr, obj);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -317,7 +292,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonParseTest003, TestSize.Level1)
     const char *text = "{\"outer\":{\"inner\":1},\"list\":[1,2,3]}";
     JsonObj *obj = JSON_Parse(text, strlen(text));
     EXPECT_NE(nullptr, obj);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -341,14 +316,9 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonParseTest004, TestSize.Level1)
 HWTEST_F(AdaptorDsoftbusJsonTest, JsonParseTest005, TestSize.Level1)
 {
     const char *full = "{\"k\":\"value\"}";
-    // length stops before the value's closing quote -> malformed payload
     const uint32_t truncatedLen = 6;
     EXPECT_EQ(nullptr, JSON_Parse(full, truncatedLen));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_AddBoolToObject / JSON_GetBoolFromOject
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonAddBoolToObjectTest001
@@ -364,7 +334,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddBoolToObjectTest001, TestSize.Level1)
     bool v = false;
     EXPECT_TRUE(JSON_GetBoolFromOject(obj, KEY_BOOL, &v));
     EXPECT_EQ(true, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -381,7 +351,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddBoolToObjectTest002, TestSize.Level1)
     bool v = true;
     EXPECT_TRUE(JSON_GetBoolFromOject(obj, KEY_BOOL, &v));
     EXPECT_EQ(false, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -406,7 +376,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddBoolToObjectTest004, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_AddBoolToObject(obj, nullptr, true));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -445,7 +415,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBoolFromOjectTest002, TestSize.Level1)
     ASSERT_NE(nullptr, obj);
     bool v = false;
     EXPECT_FALSE(JSON_GetBoolFromOject(obj, nullptr, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -459,7 +429,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBoolFromOjectTest003, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetBoolFromOject(obj, KEY_BOOL, nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -488,7 +458,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBoolFromOjectTest005, TestSize.Level1)
     EXPECT_TRUE(JSON_AddStringToObject(obj, KEY_STR, "v"));
     bool v = false;
     EXPECT_FALSE(JSON_GetBoolFromOject(obj, KEY_STR, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -503,12 +473,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBoolFromOjectTest006, TestSize.Level1)
     ASSERT_NE(nullptr, obj);
     bool v = false;
     EXPECT_FALSE(JSON_GetBoolFromOject(obj, KEY_MISSING, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_AddInt16ToObject / JSON_GetInt16FromOject
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonAddInt16ToObjectTest001
@@ -524,7 +490,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt16ToObjectTest001, TestSize.Level1)
     int16_t v = 0;
     EXPECT_TRUE(JSON_GetInt16FromOject(obj, KEY_INT, &v));
     EXPECT_EQ(VAL_INT16, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -547,7 +513,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt16ToObjectTest002, TestSize.Level1)
     EXPECT_EQ(INT16_MAX, v);
     EXPECT_TRUE(JSON_GetInt16FromOject(obj, "zero", &v));
     EXPECT_EQ(0, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -562,7 +528,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt16ToObjectTest003, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_AddInt16ToObject(obj, nullptr, VAL_INT16));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_AddInt16ToObject(&nullObj, KEY_INT, VAL_INT16));
 }
@@ -578,7 +544,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt16FromOjectTest001, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetInt16FromOject(obj, KEY_INT, nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -594,7 +560,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt16FromOjectTest002, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetInt16FromOject(obj, nullptr, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -624,12 +590,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt16FromOjectTest004, TestSize.Level1)
     int16_t v = 0;
     EXPECT_FALSE(JSON_GetInt16FromOject(obj, KEY_STR, &v));
     EXPECT_FALSE(JSON_GetInt16FromOject(obj, KEY_MISSING, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_AddInt32ToObject / JSON_GetInt32FromOject
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonAddInt32ToObjectTest001
@@ -645,7 +607,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt32ToObjectTest001, TestSize.Level1)
     int32_t v = 0;
     EXPECT_TRUE(JSON_GetInt32FromOject(obj, KEY_INT, &v));
     EXPECT_EQ(VAL_INT32, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -668,7 +630,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt32ToObjectTest002, TestSize.Level1)
     EXPECT_EQ(INT32_MAX, v);
     EXPECT_TRUE(JSON_GetInt32FromOject(obj, "neg", &v));
     EXPECT_EQ(VAL_INT32_NEG, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -683,7 +645,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt32ToObjectTest003, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_AddInt32ToObject(obj, nullptr, VAL_INT32));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_AddInt32ToObject(&nullObj, KEY_INT, VAL_INT32));
 }
@@ -699,7 +661,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt32FromOjectTest001, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetInt32FromOject(obj, KEY_INT, nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -715,7 +677,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt32FromOjectTest002, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetInt32FromOject(obj, nullptr, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -745,12 +707,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt32FromOjectTest004, TestSize.Level1)
     int32_t v = 0;
     EXPECT_FALSE(JSON_GetInt32FromOject(obj, KEY_STR, &v));
     EXPECT_FALSE(JSON_GetInt32FromOject(obj, KEY_MISSING, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_AddInt64ToObject / JSON_GetInt64FromOject
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonAddInt64ToObjectTest001
@@ -766,7 +724,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt64ToObjectTest001, TestSize.Level1)
     int64_t v = 0;
     EXPECT_TRUE(JSON_GetInt64FromOject(obj, KEY_INT, &v));
     EXPECT_EQ(VAL_INT64, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -786,7 +744,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt64ToObjectTest002, TestSize.Level1)
     EXPECT_EQ(INT64_MIN, v);
     EXPECT_TRUE(JSON_GetInt64FromOject(obj, "max", &v));
     EXPECT_EQ(INT64_MAX, v);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -801,7 +759,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddInt64ToObjectTest003, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_AddInt64ToObject(obj, nullptr, VAL_INT64));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_AddInt64ToObject(&nullObj, KEY_INT, VAL_INT64));
 }
@@ -817,7 +775,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt64FromOjectTest001, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetInt64FromOject(obj, KEY_INT, nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -833,7 +791,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt64FromOjectTest002, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetInt64FromOject(obj, nullptr, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -863,12 +821,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetInt64FromOjectTest004, TestSize.Level1)
     int64_t v = 0;
     EXPECT_FALSE(JSON_GetInt64FromOject(obj, KEY_STR, &v));
     EXPECT_FALSE(JSON_GetInt64FromOject(obj, KEY_MISSING, &v));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_AddStringToObject / JSON_GetStringFromObject
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonAddStringToObjectTest001
@@ -884,7 +838,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringToObjectTest001, TestSize.Level1)
     char buf[BUF_SIZE_LARGE] = {0};
     EXPECT_TRUE(JSON_GetStringFromObject(obj, KEY_STR, buf, sizeof(buf)));
     EXPECT_STREQ("value", buf);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -901,7 +855,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringToObjectTest002, TestSize.Level1)
     char buf[BUF_SIZE_SMALL] = {0};
     EXPECT_TRUE(JSON_GetStringFromObject(obj, KEY_STR, buf, sizeof(buf)));
     EXPECT_STREQ("", buf);
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -917,7 +871,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringToObjectTest003, TestSize.Level1)
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_AddStringToObject(obj, nullptr, "v"));
     EXPECT_FALSE(JSON_AddStringToObject(obj, KEY_STR, nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_AddStringToObject(&nullObj, KEY_STR, "v"));
 }
@@ -936,7 +890,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringFromObjectTest001, TestSize.Level
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_GetStringFromObject(obj, nullptr, buf, sizeof(buf)));
     EXPECT_FALSE(JSON_GetStringFromObject(obj, KEY_STR, nullptr, sizeof(buf)));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_GetStringFromObject(&nullObj, KEY_STR, buf, sizeof(buf)));
 }
@@ -954,7 +908,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringFromObjectTest002, TestSize.Level
     EXPECT_TRUE(JSON_AddInt32ToObject(obj, KEY_INT, VAL_INT32));
     char buf[BUF_SIZE_SMALL] = {0};
     EXPECT_FALSE(JSON_GetStringFromObject(obj, KEY_INT, buf, sizeof(buf)));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -969,7 +923,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringFromObjectTest003, TestSize.Level
     ASSERT_NE(nullptr, obj);
     char buf[BUF_SIZE_SMALL] = {0};
     EXPECT_FALSE(JSON_GetStringFromObject(obj, KEY_MISSING, buf, sizeof(buf)));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -984,15 +938,10 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringFromObjectTest004, TestSize.Level
     ASSERT_NE(nullptr, obj);
     EXPECT_TRUE(JSON_AddStringToObject(obj, KEY_STR, "value"));
     char buf[BUF_SIZE_LARGE] = {0};
-    // destination sizes deliberately too small to hold "value"
     EXPECT_FALSE(JSON_GetStringFromObject(obj, KEY_STR, buf, DST_SIZE_TOO_SMALL_ZERO));
     EXPECT_FALSE(JSON_GetStringFromObject(obj, KEY_STR, buf, DST_SIZE_TOO_SMALL_PARTIAL));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_AddStringArrayToObject / JSON_GetStringArrayFromOject
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonAddStringArrayToObjectTest001
@@ -1015,9 +964,9 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringArrayToObjectTest001, TestSize.Le
     EXPECT_STREQ("bb", out[1]);
     EXPECT_STREQ("ccc", out[2]);
     for (int32_t i = 0; i < len; ++i) {
-        SoftBusFree(out[i]);
+        EXPECT_NO_FATAL_FAILURE(SoftBusFree(out[i]));
     }
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1037,9 +986,9 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringArrayToObjectTest002, TestSize.Le
     EXPECT_TRUE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     EXPECT_EQ(static_cast<int32_t>(ArraySize(arr)), len);
     for (int32_t i = 0; i < len; ++i) {
-        SoftBusFree(out[i]);
+        EXPECT_NO_FATAL_FAILURE(SoftBusFree(out[i]));
     }
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1058,7 +1007,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddStringArrayToObjectTest003, TestSize.Le
     EXPECT_FALSE(JSON_AddStringArrayToObject(obj, KEY_ARR, nullptr, ArraySize(arr)));
     EXPECT_FALSE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, 0));
     EXPECT_FALSE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, -1));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_AddStringArrayToObject(&nullObj, KEY_ARR, arr, ArraySize(arr)));
 }
@@ -1080,7 +1029,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest001, TestSize.L
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_ARR, nullptr, &len));
     len = ARRAY_CAP_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1096,11 +1045,11 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest002, TestSize.L
     const char *arr[] = { "a" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
     char *out[ARRAY_CAP_SMALL] = { nullptr };
-    int32_t len = 0;  // non-positive capacity hint
+    int32_t len = 0;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     len = -1;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1131,7 +1080,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest004, TestSize.L
     char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_STR, out, &len));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1147,7 +1096,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest005, TestSize.L
     char *out[ARRAY_CAP_SMALL] = { nullptr };
     int32_t len = ARRAY_CAP_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_MISSING, out, &len));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1163,9 +1112,9 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest006, TestSize.L
     const char *arr[] = { "a", "b", "c" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
     char *out[ARRAY_CAP_LARGE] = { nullptr };
-    int32_t len = ARRAY_LEN_TOO_SMALL;  // smaller than the stored array
+    int32_t len = ARRAY_LEN_TOO_SMALL;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1182,7 +1131,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest007, TestSize.L
     char *out[ARRAY_CAP_LARGE] = { nullptr };
     int32_t len = ARRAY_CAP_LARGE;
     EXPECT_FALSE(JSON_GetStringArrayFromOject(obj, "arr", out, &len));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1198,18 +1147,14 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetStringArrayFromOjectTest008, TestSize.L
     const char *arr[] = { "x", "y" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
     char *out[ARRAY_CAP_LARGE] = { nullptr };
-    int32_t len = static_cast<int32_t>(ArraySize(arr));  // exactly the array size
+    int32_t len = static_cast<int32_t>(ArraySize(arr));
     EXPECT_TRUE(JSON_GetStringArrayFromOject(obj, KEY_ARR, out, &len));
     EXPECT_EQ(static_cast<int32_t>(ArraySize(arr)), len);
     for (int32_t i = 0; i < len; ++i) {
-        SoftBusFree(out[i]);
+        EXPECT_NO_FATAL_FAILURE(SoftBusFree(out[i]));
     }
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_AddBytesToObject / JSON_GetBytesFromObject
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonAddBytesToObjectTest001
@@ -1227,7 +1172,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddBytesToObjectTest001, TestSize.Level1)
     EXPECT_TRUE(JSON_GetBytesFromObject(obj, KEY_BYTES, buf, sizeof(buf), &size));
     EXPECT_EQ(static_cast<uint32_t>(ArraySize(BYTES_PAYLOAD)), size);
     EXPECT_EQ(0, memcmp(buf, BYTES_PAYLOAD, ArraySize(BYTES_PAYLOAD)));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1245,7 +1190,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonAddBytesToObjectTest002, TestSize.Level1)
     EXPECT_FALSE(JSON_AddBytesToObject(obj, nullptr, data, ArraySize(data)));
     EXPECT_FALSE(JSON_AddBytesToObject(obj, KEY_BYTES, nullptr, ArraySize(data)));
     EXPECT_FALSE(JSON_AddBytesToObject(obj, KEY_BYTES, data, 0));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_AddBytesToObject(&nullObj, KEY_BYTES, data, ArraySize(data)));
 }
@@ -1267,7 +1212,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBytesFromObjectTest001, TestSize.Level1
     EXPECT_FALSE(JSON_GetBytesFromObject(obj, KEY_BYTES, nullptr, sizeof(buf), &size));
     EXPECT_FALSE(JSON_GetBytesFromObject(obj, KEY_BYTES, buf, 0, &size));
     EXPECT_FALSE(JSON_GetBytesFromObject(obj, KEY_BYTES, buf, sizeof(buf), nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1297,7 +1242,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBytesFromObjectTest003, TestSize.Level1
     uint8_t buf[BUF_SIZE_SMALL] = { 0 };
     uint32_t size = 0;
     EXPECT_FALSE(JSON_GetBytesFromObject(obj, KEY_MISSING, buf, sizeof(buf), &size));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1314,7 +1259,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBytesFromObjectTest004, TestSize.Level1
     uint8_t buf[BUF_SIZE_SMALL] = { 0 };
     uint32_t size = 0;
     EXPECT_FALSE(JSON_GetBytesFromObject(obj, KEY_STR, buf, sizeof(buf), &size));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1330,13 +1275,9 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonGetBytesFromObjectTest005, TestSize.Level1
     EXPECT_TRUE(JSON_AddBytesToObject(obj, KEY_BYTES, const_cast<uint8_t *>(BYTES_PAYLOAD), ArraySize(BYTES_PAYLOAD)));
     uint8_t buf[BUF_SIZE_MEDIUM] = { 0 };
     uint32_t size = 0;
-    EXPECT_FALSE(JSON_GetBytesFromObject(obj, KEY_BYTES, buf, BYTES_BUFLEN_TOO_SMALL, &size));  // bufLen < size
-    JSON_Delete(obj);
+    EXPECT_FALSE(JSON_GetBytesFromObject(obj, KEY_BYTES, buf, BYTES_BUFLEN_TOO_SMALL, &size));
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// JSON_IsArrayExist
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonIsArrayExistTest001
@@ -1351,7 +1292,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonIsArrayExistTest001, TestSize.Level1)
     const char *arr[] = { "a" };
     EXPECT_TRUE(JSON_AddStringArrayToObject(obj, KEY_ARR, arr, ArraySize(arr)));
     EXPECT_TRUE(JSON_IsArrayExist(obj, KEY_ARR));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1366,7 +1307,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonIsArrayExistTest002, TestSize.Level1)
     ASSERT_NE(nullptr, obj);
     EXPECT_TRUE(JSON_AddStringToObject(obj, KEY_STR, "v"));
     EXPECT_FALSE(JSON_IsArrayExist(obj, KEY_STR));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1380,7 +1321,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonIsArrayExistTest003, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_IsArrayExist(obj, KEY_MISSING));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
@@ -1395,7 +1336,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonIsArrayExistTest004, TestSize.Level1)
     JsonObj *obj = JSON_CreateObject();
     ASSERT_NE(nullptr, obj);
     EXPECT_FALSE(JSON_IsArrayExist(obj, nullptr));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
     JsonObj nullObj = MakeNullContextObj();
     EXPECT_FALSE(JSON_IsArrayExist(&nullObj, KEY_ARR));
 }
@@ -1413,12 +1354,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonIsArrayExistTest005, TestSize.Level1)
     ASSERT_NE(nullptr, obj);
     EXPECT_TRUE(JSON_IsArrayExist(obj, "arr"));
     EXPECT_FALSE(JSON_IsArrayExist(obj, "s"));
-    JSON_Delete(obj);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
-
-// ---------------------------------------------------------------------------
-// Round-trip / integration scenarios
-// ---------------------------------------------------------------------------
 
 /*
  * @tc.name: JsonRoundTripTest001
@@ -1441,7 +1378,7 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonRoundTripTest001, TestSize.Level1)
     char *dump = JSON_PrintUnformatted(src);
     ASSERT_NE(nullptr, dump);
     JsonObj *dst = JSON_Parse(dump, strlen(dump));
-    JSON_Free(dump);
+    EXPECT_NO_FATAL_FAILURE(JSON_Free(dump));
     ASSERT_NE(nullptr, dst);
 
     bool b = false;
@@ -1464,8 +1401,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonRoundTripTest001, TestSize.Level1)
     EXPECT_TRUE(JSON_GetBytesFromObject(dst, "by", out, sizeof(out), &outSize));
     EXPECT_EQ(static_cast<uint32_t>(ArraySize(BYTES_PAYLOAD_ALT)), outSize);
 
-    JSON_Delete(src);
-    JSON_Delete(dst);
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(src));
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(dst));
 }
 
 /*
@@ -1484,8 +1421,8 @@ HWTEST_F(AdaptorDsoftbusJsonTest, JsonOverwriteKeyTest001, TestSize.Level1)
     EXPECT_TRUE(JSON_GetStringFromObject(obj, KEY_STR, buf, sizeof(buf)));
     EXPECT_STREQ("text", buf);
     int32_t i = 0;
-    EXPECT_FALSE(JSON_GetInt32FromOject(obj, KEY_STR, &i));  // no longer a number
-    JSON_Delete(obj);
+    EXPECT_FALSE(JSON_GetInt32FromOject(obj, KEY_STR, &i));
+    EXPECT_NO_FATAL_FAILURE(JSON_Delete(obj));
 }
 
 /*
