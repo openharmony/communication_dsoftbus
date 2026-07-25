@@ -20,6 +20,7 @@
 
 #include "anonymizer.h"
 #include "conn_log.h"
+#include "softbus_adapter_atomic.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
@@ -48,6 +49,7 @@
 static int32_t g_tcpMaxConnNum;
 static int32_t g_tcpTimeOut;
 static uint32_t g_tcpMaxLen;
+static _Atomic uint32_t g_tcpConnSeqNum = 0;
 
 typedef struct {
     ListenerModule moduleId;
@@ -391,7 +393,6 @@ static int32_t TcpOnDataEventIn(ListenerModule module, int32_t fd)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_tcpConnInfoList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
         CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d", module, fd);
-    uint32_t connectionId = CalTcpConnectionId(fd);
     TcpConnInfoNode tcpInfo;
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
     if (GetTcpInfoByFd(fd, &tcpInfo) != SOFTBUS_OK) {
@@ -399,6 +400,7 @@ static int32_t TcpOnDataEventIn(ListenerModule module, int32_t fd)
         CONN_LOGE(CONN_COMMON, "get tcp info fail. module=%{public}d, fd=%{public}d", module, fd);
         return SOFTBUS_NOT_FIND;
     }
+    uint32_t connectionId = tcpInfo.connectionId;
     ConnPktHead head = {0};
     uint32_t headSize = sizeof(ConnPktHead);
     ssize_t bytes = ConnRecvSocketData(fd, (char *)&head, headSize, g_tcpTimeOut);
@@ -437,8 +439,14 @@ int32_t TcpOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
         return TcpOnDataEventOut(module, fd);
     }
     CONN_LOGI(CONN_COMMON, "recv tcp invalid events=%{public}d, fd=%{public}d", events, fd);
-    uint32_t connectionId = CalTcpConnectionId(fd);
-    DelTcpConnInfo(connectionId, module, fd);
+
+    TcpConnInfoNode tcpInfo;
+    (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
+    if (GetTcpInfoByFd(fd, &tcpInfo) == SOFTBUS_OK) {
+        CONN_LOGI(
+            CONN_COMMON, "TCP invalid event found fd=%{public}d, connectionId=%{public}u", fd, tcpInfo.connectionId);
+        DelTcpConnInfo(tcpInfo.connectionId, module, fd);
+    }
     return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
 }
 
@@ -478,8 +486,8 @@ static void DelAllConnInfo(ListenerModule moduleId)
 
 uint32_t CalTcpConnectionId(int32_t fd)
 {
-    uint32_t connectType = (uint32_t)CONNECT_TCP;
-    uint32_t connectionId = ((uint32_t)fd & 0xffff) | (connectType << CONNECT_TYPE_SHIFT);
+    const uint32_t seq = (++g_tcpConnSeqNum) & 0x3FF;
+    uint32_t connectionId = ((uint32_t)CONNECT_TCP << CONNECT_TYPE_SHIFT) | (seq << 16) | ((uint32_t)fd & 0xFFFF);
     return connectionId;
 }
 

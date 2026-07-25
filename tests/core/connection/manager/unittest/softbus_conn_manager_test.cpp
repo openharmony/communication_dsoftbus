@@ -29,7 +29,7 @@
 #include "message_handler.h"
 
 static const uint32_t CONN_HEAD_SIZE = 24;
-static const uint32_t SHIFT_BITS = 16;
+static const uint32_t SHIFT_BITS = 26;
 
 static ConnectCallback *g_mangerCb = nullptr;
 static ConnectionInfo g_connInfo = {0};

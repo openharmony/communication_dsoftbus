@@ -607,7 +607,7 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket004, TestSize.Level1)
 HWTEST_F(ConnectionBrTest, testBrPendingPacket005, TestSize.Level1)
 {
     int32_t ret;
-    uint32_t id = 0x20000;
+    uint32_t id = (CONNECT_BR << CONNECT_TYPE_SHIFT);
     ConnectOption info;
 
     info.type = CONNECT_BR;
