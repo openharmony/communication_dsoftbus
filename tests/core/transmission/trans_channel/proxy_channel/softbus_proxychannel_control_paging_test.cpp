@@ -38,15 +38,15 @@ namespace OHOS {
 
 class SoftbusProxyChannelControlPagingTest : public testing::Test {
 public:
-    SoftbusProxyChannelControlPagingTest()
+    SoftbusProxyChannelControlPagingTest(void)
     {}
-    ~SoftbusProxyChannelControlPagingTest()
+    ~SoftbusProxyChannelControlPagingTest(void)
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
+    void SetUp(void) override
     {}
-    void TearDown() override
+    void TearDown(void) override
     {}
 };
 
@@ -60,7 +60,7 @@ void SoftbusProxyChannelControlPagingTest::TearDownTestCase(void)
 
 /*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest001
- * @tc.desc: test ConvertConnectType2AuthLinkType CONNECT_TCP
+ * @tc.desc: test ConvertConnectType2AuthLinkType with CONNECT_TCP
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -68,11 +68,15 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, ConvertConnectType2AuthLinkTypeTe
 {
     AuthLinkType ret = ConvertConnectType2AuthLinkType(CONNECT_TCP);
     EXPECT_EQ(AUTH_LINK_TYPE_WIFI, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BR, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_P2P, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_SLE, ret);
 }
 
 /*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest002
- * @tc.desc: test ConvertConnectType2AuthLinkType CONNECT_BLE
+ * @tc.desc: test ConvertConnectType2AuthLinkType with CONNECT_BLE
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -80,11 +84,15 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, ConvertConnectType2AuthLinkTypeTe
 {
     AuthLinkType ret = ConvertConnectType2AuthLinkType(CONNECT_BLE);
     EXPECT_EQ(AUTH_LINK_TYPE_BLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_WIFI, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BR, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_P2P, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_SLE, ret);
 }
 
 /*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest003
- * @tc.desc: test ConvertConnectType2AuthLinkType CONNECT_BLE_DIRECT
+ * @tc.desc: test ConvertConnectType2AuthLinkType with CONNECT_BLE_DIRECT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -92,11 +100,15 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, ConvertConnectType2AuthLinkTypeTe
 {
     AuthLinkType ret = ConvertConnectType2AuthLinkType(CONNECT_BLE_DIRECT);
     EXPECT_EQ(AUTH_LINK_TYPE_BLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_WIFI, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BR, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_P2P, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_SLE, ret);
 }
 
 /*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest004
- * @tc.desc: test ConvertConnectType2AuthLinkType CONNECT_BR
+ * @tc.desc: test ConvertConnectType2AuthLinkType with CONNECT_BR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -104,11 +116,15 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, ConvertConnectType2AuthLinkTypeTe
 {
     AuthLinkType ret = ConvertConnectType2AuthLinkType(CONNECT_BR);
     EXPECT_EQ(AUTH_LINK_TYPE_BR, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_WIFI, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_P2P, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_SLE, ret);
 }
 
 /*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest005
- * @tc.desc: test ConvertConnectType2AuthLinkType CONNECT_SLE
+ * @tc.desc: test ConvertConnectType2AuthLinkType with CONNECT_SLE
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -116,11 +132,15 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, ConvertConnectType2AuthLinkTypeTe
 {
     AuthLinkType ret = ConvertConnectType2AuthLinkType(CONNECT_SLE);
     EXPECT_EQ(AUTH_LINK_TYPE_SLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_WIFI, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BR, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_P2P, ret);
 }
 
 /*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest006
- * @tc.desc: test ConvertConnectType2AuthLinkType CONNECT_SLE_DIRECT
+ * @tc.desc: test ConvertConnectType2AuthLinkType with CONNECT_SLE_DIRECT
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,11 +148,15 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, ConvertConnectType2AuthLinkTypeTe
 {
     AuthLinkType ret = ConvertConnectType2AuthLinkType(CONNECT_SLE_DIRECT);
     EXPECT_EQ(AUTH_LINK_TYPE_SLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_WIFI, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BR, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_P2P, ret);
 }
 
 /*
  * @tc.name: ConvertConnectType2AuthLinkTypeTest007
- * @tc.desc: test ConvertConnectType2AuthLinkType default P2P
+ * @tc.desc: test ConvertConnectType2AuthLinkType with CONNECT_P2P
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -140,6 +164,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, ConvertConnectType2AuthLinkTypeTe
 {
     AuthLinkType ret = ConvertConnectType2AuthLinkType(CONNECT_P2P);
     EXPECT_EQ(AUTH_LINK_TYPE_P2P, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_WIFI, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BLE, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_BR, ret);
+    EXPECT_NE(AUTH_LINK_TYPE_SLE, ret);
 }
 
 /*
@@ -153,10 +181,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest001, T
     ProxyChannelInfo info = {0};
     info.appInfo.peerData.deviceId[0] = '1';
     info.type = CONNECT_TCP;
-    uint8_t cipher = 0;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle invalidHandle = { AUTH_INVALID_ID, 0 };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(invalidHandle));
+    uint8_t cipher = 0;
     int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED, ret);
 }
@@ -172,11 +200,11 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest002, T
     ProxyChannelInfo info = {0};
     info.appInfo.peerData.deviceId[0] = '1';
     info.type = CONNECT_TCP;
-    uint8_t cipher = 0;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(validHandle));
     EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    uint8_t cipher = 0;
     int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -192,12 +220,12 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest003, T
     ProxyChannelInfo info = {0};
     info.appInfo.peerData.deviceId[0] = '1';
     info.type = CONNECT_TCP;
-    uint8_t cipher = 0;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(validHandle));
     EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    uint8_t cipher = 0;
     int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -213,13 +241,16 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest004, T
     ProxyChannelInfo info = {0};
     info.appInfo.peerData.deviceId[0] = '1';
     info.type = CONNECT_TCP;
-    uint8_t cipher = 0;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(validHandle));
     EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, AuthGetServerSide).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    uint8_t cipher = 0;
     int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -235,13 +266,16 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest005, T
     ProxyChannelInfo info = {0};
     info.appInfo.peerData.deviceId[0] = '1';
     info.type = CONNECT_TCP;
-    uint8_t cipher = 0;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(validHandle));
     EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(true), Return(SOFTBUS_OK)));
+    uint8_t cipher = 0;
     int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(cipher & AUTH_SERVER_SIDE, AUTH_SERVER_SIDE);
@@ -259,7 +293,6 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest006, T
     ProxyChannelInfo info = {0};
     info.appInfo.peerData.deviceId[0] = '1';
     info.type = CONNECT_BLE;
-    uint8_t cipher = 0;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle validHandle = { 1, AUTH_LINK_TYPE_BLE };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(validHandle));
@@ -269,6 +302,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest006, T
     connInfo.type = AUTH_LINK_TYPE_BLE;
     EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    uint8_t cipher = 0;
     int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(cipher & USE_BLE_CIPHER, USE_BLE_CIPHER);
@@ -286,7 +320,6 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest007, T
     ProxyChannelInfo info = {0};
     info.appInfo.peerData.deviceId[0] = '1';
     info.type = CONNECT_TCP;
-    uint8_t cipher = 0;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(validHandle));
@@ -296,6 +329,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest007, T
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    uint8_t cipher = 0;
     int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
@@ -304,26 +338,116 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest007, T
 }
 
 /*
+ * @tc.name: SetCipherOfHandshakeMsgTest008
+ * @tc.desc: test SetCipherOfHandshakeMsg keyType KEY_TYPE_META isMeta true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest008, TestSize.Level1)
+{
+    ProxyChannelInfo info = {0};
+    info.appInfo.peerData.deviceId[0] = '1';
+    info.type = CONNECT_TCP;
+    info.appInfo.keyType = KEY_TYPE_META;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
+    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, true, _)).WillOnce(SetArgPointee<3>(validHandle));
+    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    uint8_t cipher = 0;
+    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(info.appInfo.keyType, KEY_TYPE_META);
+    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
+}
+
+/*
+ * @tc.name: SetCipherOfHandshakeMsgTest009
+ * @tc.desc: test SetCipherOfHandshakeMsg keyType KEY_TYPE_NORMAL isMeta false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest009, TestSize.Level1)
+{
+    ProxyChannelInfo info = {0};
+    info.appInfo.peerData.deviceId[0] = '1';
+    info.type = CONNECT_TCP;
+    info.appInfo.keyType = KEY_TYPE_NORMAL;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
+    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, false, _)).WillOnce(SetArgPointee<3>(validHandle));
+    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    uint8_t cipher = 0;
+    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(info.appInfo.keyType, KEY_TYPE_NORMAL);
+    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
+}
+
+/*
+ * @tc.name: SetCipherOfHandshakeMsgTest010
+ * @tc.desc: test SetCipherOfHandshakeMsg keyType out of range reassigned to KEY_TYPE_NORMAL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest010, TestSize.Level1)
+{
+    ProxyChannelInfo info = {0};
+    info.appInfo.peerData.deviceId[0] = '1';
+    info.type = CONNECT_TCP;
+    info.appInfo.keyType = KEY_TYPE_DEFAULT;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
+    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, false, _)).WillOnce(SetArgPointee<3>(validHandle));
+    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
+    uint8_t cipher = 0;
+    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
+}
+
+/*
  * @tc.name: TransPagingHandshakeEventTest001
- * @tc.desc: test TransPagingHandshakeEvent info null
+ * @tc.desc: test TransPagingHandshakeEvent with null info does not crash
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeEventTest001, TestSize.Level1)
 {
     TransPagingHandshakeEvent(TEST_CHANNEL_ID, nullptr);
+    TransPagingHandshakeEvent(0, nullptr);
+    TransPagingHandshakeEvent(-1, nullptr);
+    TransPagingHandshakeEvent(INVALID_CHANNEL_ID, nullptr);
+    SUCCEED();
 }
 
 /*
  * @tc.name: TransPagingHandshakeEventTest002
- * @tc.desc: test TransPagingHandshakeEvent valid info
+ * @tc.desc: test TransPagingHandshakeEvent with valid info does not crash
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeEventTest002, TestSize.Level1)
 {
     ProxyChannelInfo info = {0};
+    info.myId = TEST_CHANNEL_ID;
+    info.peerId = TEST_CHANNEL_ID;
     TransPagingHandshakeEvent(TEST_CHANNEL_ID, &info);
+    SUCCEED();
 }
 
 /*
@@ -339,12 +463,12 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendEncryptInnerMessage
     info.peerId = TEST_CHANNEL_ID;
     info.connId = TEST_CONN_ID;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
     char payLoad[] = "test";
     uint32_t payLoadLen = strlen(payLoad) + 1;
     ProxyMessageHead msgHead = {0};
     ProxyDataInfo dataInfo = {0};
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
-    EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
     int32_t ret = TransProxySendEncryptInnerMessage(&info, payLoad, payLoadLen, &msgHead, &dataInfo);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
@@ -362,13 +486,13 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendEncryptInnerMessage
     info.peerId = TEST_CHANNEL_ID;
     info.connId = TEST_CONN_ID;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     char payLoad[] = "test";
     uint32_t payLoadLen = strlen(payLoad) + 1;
     ProxyMessageHead msgHead = {0};
     ProxyDataInfo dataInfo = {0};
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
-    EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransProxySendEncryptInnerMessage(&info, payLoad, payLoadLen, &msgHead, &dataInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
@@ -386,14 +510,14 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendEncryptInnerMessage
     info.peerId = TEST_CHANNEL_ID;
     info.connId = TEST_CONN_ID;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
-    char payLoad[] = "test";
-    uint32_t payLoadLen = strlen(payLoad) + 1;
-    ProxyMessageHead msgHead = {0};
-    ProxyDataInfo dataInfo = {0};
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    char payLoad[] = "test";
+    uint32_t payLoadLen = strlen(payLoad) + 1;
+    ProxyMessageHead msgHead = {0};
+    ProxyDataInfo dataInfo = {0};
     int32_t ret = TransProxySendEncryptInnerMessage(&info, payLoad, payLoadLen, &msgHead, &dataInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -411,14 +535,14 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendEncryptInnerMessage
     info.peerId = TEST_CHANNEL_ID;
     info.connId = TEST_CONN_ID;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
-    char payLoad[] = "test";
-    uint32_t payLoadLen = strlen(payLoad) + 1;
-    ProxyMessageHead msgHead = {0};
-    ProxyDataInfo dataInfo = {0};
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+    char payLoad[] = "test";
+    uint32_t payLoadLen = strlen(payLoad) + 1;
+    ProxyMessageHead msgHead = {0};
+    ProxyDataInfo dataInfo = {0};
     int32_t ret = TransProxySendEncryptInnerMessage(&info, payLoad, payLoadLen, &msgHead, &dataInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -434,6 +558,8 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest001
     char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(nullptr, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
 /*
@@ -447,6 +573,8 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest002
     ProxyChannelInfo info = {0};
     int32_t ret = TransProxySendInnerMessage(&info, nullptr, 0, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
 /*
@@ -464,9 +592,9 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest003
     info.appInfo.channelCapability = TRANS_CHANNEL_INNER_ENCRYPT;
     info.appInfo.myData.pid = 1;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
-    char payLoad[] = "test";
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
+    char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(&info, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
@@ -486,10 +614,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest004
     info.appInfo.channelCapability = TRANS_CHANNEL_INNER_ENCRYPT;
     info.appInfo.myData.pid = 1;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
-    char payLoad[] = "test";
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(&info, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
@@ -509,11 +637,11 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest005
     info.appInfo.channelCapability = TRANS_CHANNEL_INNER_ENCRYPT;
     info.appInfo.myData.pid = 1;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
-    char payLoad[] = "test";
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(&info, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -532,9 +660,9 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest006
     info.connId = TEST_CONN_ID;
     info.appInfo.channelCapability = 0;
     info.appInfo.myData.pid = 1;
-    char payLoad[] = "test";
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(&info, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
@@ -553,10 +681,10 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest007
     info.connId = TEST_CONN_ID;
     info.appInfo.channelCapability = 0;
     info.appInfo.myData.pid = 1;
-    char payLoad[] = "test";
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(&info, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -576,11 +704,11 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest008
     info.appInfo.channelCapability = TRANS_CHANNEL_INNER_ENCRYPT;
     info.appInfo.myData.pid = 1;
     (void)memset_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, 1, SESSION_KEY_LENGTH);
-    char payLoad[] = "test";
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+    char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(&info, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -599,17 +727,17 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxySendInnerMessageTest009
     info.connId = TEST_CONN_ID;
     info.appInfo.channelCapability = 0;
     info.appInfo.myData.pid = 1;
-    char payLoad[] = "test";
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+    char payLoad[] = "test";
     int32_t ret = TransProxySendInnerMessage(&info, payLoad, strlen(payLoad) + 1, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
  * @tc.name: TransProxyHandshakeTest001
- * @tc.desc: test TransProxyHandshake info null
+ * @tc.desc: test TransProxyHandshake with null info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -617,12 +745,15 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyHandshakeTest001, TestS
 {
     int32_t ret = TransProxyHandshake(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED, ret);
+    EXPECT_NE(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR, ret);
+    EXPECT_NE(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR, ret);
 }
 
 /*
  * @tc.name: TransProxyHandshakeTest002
- * @tc.desc: test TransProxyHandshake APP_TYPE_AUTH skip cipher
- *           pack handshake fail
+ * @tc.desc: test TransProxyHandshake APP_TYPE_AUTH skip cipher pack handshake fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -807,12 +938,14 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckHandshakeTest001, Te
 {
     int32_t ret = TransProxyAckHandshake(TEST_CONN_ID, nullptr, SOFTBUS_OK);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
+    EXPECT_NE(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
 }
 
 /*
  * @tc.name: TransProxyAckHandshakeTest002
- * @tc.desc: test TransProxyAckHandshake APP_TYPE_AUTH skip encrypt
- *           errMsg payload null
+ * @tc.desc: test TransProxyAckHandshake APP_TYPE_AUTH skip encrypt errMsg payload null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -925,8 +1058,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckHandshakeTest006, Te
 
 /*
  * @tc.name: TransProxyAckHandshakeTest007
- * @tc.desc: test TransProxyAckHandshake APP_TYPE_NORMAL encrypt
- *           errMsg PackMessage fail
+ * @tc.desc: test TransProxyAckHandshake APP_TYPE_NORMAL encrypt errMsg PackMessage fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -976,19 +1108,22 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckHandshakeTest008, Te
 
 /*
  * @tc.name: TransProxyKeepaliveTest001
- * @tc.desc: test TransProxyKeepalive info null
+ * @tc.desc: test TransProxyKeepalive with null info does not crash
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyKeepaliveTest001, TestSize.Level1)
 {
     TransProxyKeepalive(TEST_CONN_ID, nullptr);
+    TransProxyKeepalive(0, nullptr);
+    TransProxyKeepalive(-1, nullptr);
+    TransProxyKeepalive(INVALID_CHANNEL_ID, nullptr);
+    SUCCEED();
 }
 
 /*
  * @tc.name: TransProxyKeepaliveTest002
- * @tc.desc: test TransProxyKeepalive APP_TYPE_AUTH skip encrypt
- *           pack identity fail
+ * @tc.desc: test TransProxyKeepalive APP_TYPE_AUTH skip encrypt pack identity fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1002,6 +1137,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyKeepaliveTest002, TestS
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     EXPECT_CALL(mock, TransProxyPackIdentity).WillOnce(Return(nullptr));
     TransProxyKeepalive(TEST_CONN_ID, &info);
+    SUCCEED();
 }
 
 /*
@@ -1025,6 +1161,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyKeepaliveTest003, TestS
     EXPECT_CALL(mock, TransProxyPackIdentity).WillOnce(Return(buf));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     TransProxyKeepalive(TEST_CONN_ID, &info);
+    SUCCEED();
 }
 
 /*
@@ -1049,6 +1186,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyKeepaliveTest004, TestS
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     TransProxyKeepalive(TEST_CONN_ID, &info);
+    SUCCEED();
 }
 
 /*
@@ -1072,6 +1210,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyKeepaliveTest005, TestS
     EXPECT_CALL(mock, TransProxyPackIdentity).WillOnce(Return(buf));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     TransProxyKeepalive(TEST_CONN_ID, &info);
+    SUCCEED();
 }
 
 /*
@@ -1096,6 +1235,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyKeepaliveTest006, TestS
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
     TransProxyKeepalive(TEST_CONN_ID, &info);
+    SUCCEED();
 }
 
 /*
@@ -1108,12 +1248,14 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckKeepaliveTest001, Te
 {
     int32_t ret = TransProxyAckKeepalive(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED);
+    EXPECT_NE(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
 /*
  * @tc.name: TransProxyAckKeepaliveTest002
- * @tc.desc: test TransProxyAckKeepalive APP_TYPE_AUTH skip encrypt
- *           pack identity fail
+ * @tc.desc: test TransProxyAckKeepalive APP_TYPE_AUTH skip encrypt pack identity fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1184,8 +1326,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckKeepaliveTest004, Te
 
 /*
  * @tc.name: TransProxyAckKeepaliveTest005
- * @tc.desc: test TransProxyAckKeepalive APP_TYPE_NORMAL encrypt
- *           PackMessage fail
+ * @tc.desc: test TransProxyAckKeepalive APP_TYPE_NORMAL encrypt PackMessage fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1236,80 +1377,192 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckKeepaliveTest006, Te
 
 /*
  * @tc.name: TransPagingHandshakeTest001
- * @tc.desc: test TransPagingHandshake param check and branches
+ * @tc.desc: test TransPagingHandshake with invalid params returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
-    uint8_t authKey[SESSION_KEY_LENGTH];
-    (void)memset_s(authKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    (void)memset_s(authKey, SESSION_KEY_LENGTH - 1, 1, SESSION_KEY_LENGTH - 1);
-    uint32_t keyLen = SESSION_KEY_LENGTH + 1;
+    uint8_t authKey[SESSION_KEY_LENGTH] = {0};
     int32_t ret = TransPagingHandshake(channelId, authKey, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    uint32_t keyLen = SESSION_KEY_LENGTH + 1;
     ret = TransPagingHandshake(channelId, authKey, keyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     keyLen = SESSION_KEY_LENGTH;
     ret = TransPagingHandshake(channelId, nullptr, keyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransProxyGetSendMsgChanInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingHandshake(channelId, authKey, keyLen);
+}
+
+/*
+ * @tc.name: TransPagingHandshakeTest002
+ * @tc.desc: test TransPagingHandshake when TransProxyGetSendMsgChanInfo fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest002, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    uint8_t authKey[SESSION_KEY_LENGTH] = {0};
+    uint32_t keyLen = SESSION_KEY_LENGTH;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransProxyGetSendMsgChanInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingHandshake(channelId, authKey, keyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(ProxyPagingMock, TransProxyGetSendMsgChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
+}
+
+/*
+ * @tc.name: TransPagingHandshakeTest003
+ * @tc.desc: test TransPagingHandshake when TransPagingPackMessage fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest003, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    uint8_t authKey[SESSION_KEY_LENGTH];
+    (void)memset_s(authKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    (void)memset_s(authKey, SESSION_KEY_LENGTH - 1, 1, SESSION_KEY_LENGTH - 1);
+    uint32_t keyLen = SESSION_KEY_LENGTH;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransProxyGetSendMsgChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
     cJSON *root = cJSON_CreateObject();
-    bool res = AddStringToJsonObject(root, JSON_KEY_PKG_NAME, (char *)authKey);
+    bool res = AddStringToJsonObject(root, JSON_KEY_PKG_NAME, reinterpret_cast<char *>(authKey));
     ASSERT_TRUE(res);
     char *payLoadBuf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandShakeMsg).WillRepeatedly(Return(payLoadBuf));
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingHandshake(channelId, authKey, keyLen);
+    EXPECT_CALL(mock, TransPagingPackHandShakeMsg).WillRepeatedly(Return(payLoadBuf));
+    EXPECT_CALL(mock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingHandshake(channelId, authKey, keyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingHandshake(channelId, authKey, keyLen);
+}
+
+/*
+ * @tc.name: TransPagingHandshakeTest004
+ * @tc.desc: test TransPagingHandshake when TransProxyTransSendMsg fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest004, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    uint8_t authKey[SESSION_KEY_LENGTH];
+    (void)memset_s(authKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    (void)memset_s(authKey, SESSION_KEY_LENGTH - 1, 1, SESSION_KEY_LENGTH - 1);
+    uint32_t keyLen = SESSION_KEY_LENGTH;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransProxyGetSendMsgChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    cJSON *root = cJSON_CreateObject();
+    bool res = AddStringToJsonObject(root, JSON_KEY_PKG_NAME, reinterpret_cast<char *>(authKey));
+    ASSERT_TRUE(res);
+    char *payLoadBuf = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    EXPECT_CALL(mock, TransPagingPackHandShakeMsg).WillRepeatedly(Return(payLoadBuf));
+    EXPECT_CALL(mock, TransPagingPackMessage).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingHandshake(channelId, authKey, keyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = TransPagingHandshake(channelId, authKey, keyLen);
+}
+
+/*
+ * @tc.name: TransPagingHandshakeTest005
+ * @tc.desc: test TransPagingHandshake success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest005, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    uint8_t authKey[SESSION_KEY_LENGTH];
+    (void)memset_s(authKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    (void)memset_s(authKey, SESSION_KEY_LENGTH - 1, 1, SESSION_KEY_LENGTH - 1);
+    uint32_t keyLen = SESSION_KEY_LENGTH;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransProxyGetSendMsgChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    cJSON *root = cJSON_CreateObject();
+    bool res = AddStringToJsonObject(root, JSON_KEY_PKG_NAME, reinterpret_cast<char *>(authKey));
+    ASSERT_TRUE(res);
+    char *payLoadBuf = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    EXPECT_CALL(mock, TransPagingPackHandShakeMsg).WillRepeatedly(Return(payLoadBuf));
+    EXPECT_CALL(mock, TransPagingPackMessage).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyTransSendMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = TransPagingHandshake(channelId, authKey, keyLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
  * @tc.name: TransPagingGetAuthKeyTest001
- * @tc.desc: test TransPagingGetAuthKey branches
+ * @tc.desc: test TransPagingGetAuthKey when first ConvertBytesToHexString fails
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingGetAuthKeyTest001, TestSize.Level1)
 {
-    ProxyChannelInfo chan;
-    PagingProxyMessage msg;
-    uint8_t authKey[SESSION_KEY_LENGTH];
-    (void)memset_s(authKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ProxyChannelInfo chan = {0};
+    PagingProxyMessage msg = {0};
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransPagingGetAuthKey(&chan, &msg);
     EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK)).WillOnce(
-        Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingGetAuthKey(&chan, &msg);
+}
+
+/*
+ * @tc.name: TransPagingGetAuthKeyTest002
+ * @tc.desc: test TransPagingGetAuthKey when second ConvertBytesToHexString fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingGetAuthKeyTest002, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {0};
+    PagingProxyMessage msg = {0};
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingGetAuthKey(&chan, &msg);
     EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingGetAuthKey(&chan, &msg);
+}
+
+/*
+ * @tc.name: TransPagingGetAuthKeyTest003
+ * @tc.desc: test TransPagingGetAuthKey when AuthFindApplyKey fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingGetAuthKeyTest003, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {0};
+    PagingProxyMessage msg = {0};
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindApplyKey).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingGetAuthKey(&chan, &msg);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(
-        DoAll(SetArgPointee<1>(*authKey), Return(SOFTBUS_OK)));
-    ret = TransPagingGetAuthKey(&chan, &msg);
+}
+
+/*
+ * @tc.name: TransPagingGetAuthKeyTest004
+ * @tc.desc: test TransPagingGetAuthKey success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingGetAuthKeyTest004, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {0};
+    PagingProxyMessage msg = {0};
+    uint8_t authKey[SESSION_KEY_LENGTH];
+    (void)memset_s(authKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindApplyKey).WillRepeatedly(DoAll(SetArgPointee<1>(*authKey), Return(SOFTBUS_OK)));
+    int32_t ret = TransPagingGetAuthKey(&chan, &msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
  * @tc.name: TransPagingAckHandshakeTest001
- * @tc.desc: test TransPagingAckHandshake NULL check and errMsg path
+ * @tc.desc: test TransPagingAckHandshake with null chan returns SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1317,177 +1570,197 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest001, T
 {
     int32_t ret = TransPagingAckHandshake(nullptr, SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-    };
-    int32_t retCode = SOFTBUS_INVALID_PARAM;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeErrMsg).WillOnce(Return(nullptr));
-    ret = TransPagingAckHandshake(&chan, retCode);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
-    cJSON *root = cJSON_CreateObject();
-    AddNumberToJsonObject(root, ERR_CODE, SOFTBUS_INVALID_PARAM);
-    AddNumberToJsonObject(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
-    char *errMsgBuf = cJSON_PrintUnformatted(root);
-    cJSON_Delete(root);
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingAckHandshake(&chan, retCode);
-    EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
+    EXPECT_NE(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
 }
 
 /*
  * @tc.name: TransPagingAckHandshakeTest002
- * @tc.desc: test TransPagingAckHandshake ackMsg payload null
+ * @tc.desc: test TransPagingAckHandshake errMsg payload null
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest002, TestSize.Level1)
 {
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-    };
-    int32_t retCode = SOFTBUS_OK;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeAckMsg).WillOnce(Return(nullptr));
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransPagingPackHandshakeErrMsg).WillOnce(Return(nullptr));
     int32_t ret = TransPagingAckHandshake(&chan, retCode);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
 
 /*
  * @tc.name: TransPagingAckHandshakeTest003
- * @tc.desc: test TransPagingAckHandshake getAuthKey fail
+ * @tc.desc: test TransPagingAckHandshake ConvertBytesToHexString fails
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest003, TestSize.Level1)
 {
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-    };
-    int32_t retCode = SOFTBUS_OK;
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     cJSON *root = cJSON_CreateObject();
-    bool res = AddNumberToJsonObject(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, TEST_CHANNEL_ID);
-    EXPECT_EQ(true, res);
-    char *buf = cJSON_PrintUnformatted(root);
+    AddNumberToJsonObject(root, ERR_CODE, SOFTBUS_INVALID_PARAM);
+    AddNumberToJsonObject(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
+    char *errMsgBuf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeAckMsg).WillOnce(Return(buf));
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransPagingAckHandshake(&chan, retCode);
     EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
 }
 
 /*
  * @tc.name: TransPagingAckHandshakeTest004
- * @tc.desc: test TransPagingAckHandshake PackMessage fail
+ * @tc.desc: test TransPagingAckHandshake ackMsg payload null
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest004, TestSize.Level1)
 {
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-    };
-    int32_t retCode = SOFTBUS_INVALID_PARAM;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    cJSON *errMsgRoot = cJSON_CreateObject();
-    AddNumberToJsonObject(errMsgRoot, ERR_CODE, SOFTBUS_INVALID_PARAM);
-    AddNumberToJsonObject(errMsgRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
-    char *errMsgBuf = cJSON_PrintUnformatted(errMsgRoot);
-    cJSON_Delete(errMsgRoot);
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
+    int32_t retCode = SOFTBUS_OK;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransPagingPackHandshakeAckMsg).WillOnce(Return(nullptr));
     int32_t ret = TransPagingAckHandshake(&chan, retCode);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
 
 /*
  * @tc.name: TransPagingAckHandshakeTest005
- * @tc.desc: test TransPagingAckHandshake SendMsg fail
+ * @tc.desc: test TransPagingAckHandshake getAuthKey fails
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest005, TestSize.Level1)
 {
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-    };
-    int32_t retCode = SOFTBUS_INVALID_PARAM;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    cJSON *errMsgRoot = cJSON_CreateObject();
-    AddNumberToJsonObject(errMsgRoot, ERR_CODE, SOFTBUS_INVALID_PARAM);
-    AddNumberToJsonObject(errMsgRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
-    char *errMsgBuf = cJSON_PrintUnformatted(errMsgRoot);
-    cJSON_Delete(errMsgRoot);
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = TransPagingAckHandshake(&chan, retCode);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-}
-
-/*
- * @tc.name: TransPagingAckHandshakeTest006
- * @tc.desc: test TransPagingAckHandshake errMsg success
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest006, TestSize.Level1)
-{
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-    };
-    int32_t retCode = SOFTBUS_INVALID_PARAM;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    cJSON *errMsgRoot = cJSON_CreateObject();
-    AddNumberToJsonObject(errMsgRoot, ERR_CODE, SOFTBUS_INVALID_PARAM);
-    AddNumberToJsonObject(errMsgRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
-    char *errMsgBuf = cJSON_PrintUnformatted(errMsgRoot);
-    cJSON_Delete(errMsgRoot);
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = TransPagingAckHandshake(&chan, retCode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
- * @tc.name: TransPagingAckHandshakeTest007
- * @tc.desc: test TransPagingAckHandshake ackMsg success
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest007, TestSize.Level1)
-{
-    ProxyChannelInfo chan = {
-        .peerId = TEST_CHANNEL_ID,
-    };
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
     int32_t retCode = SOFTBUS_OK;
     cJSON *root = cJSON_CreateObject();
     bool res = AddNumberToJsonObject(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, TEST_CHANNEL_ID);
     EXPECT_EQ(true, res);
     char *buf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackHandshakeAckMsg).WillOnce(Return(buf));
-    EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransPagingPackHandshakeAckMsg).WillOnce(Return(buf));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingAckHandshake(&chan, retCode);
+    EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
+}
+
+/*
+ * @tc.name: TransPagingAckHandshakeTest006
+ * @tc.desc: test TransPagingAckHandshake PackMessage fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest006, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    cJSON *errMsgRoot = cJSON_CreateObject();
+    AddNumberToJsonObject(errMsgRoot, ERR_CODE, SOFTBUS_INVALID_PARAM);
+    AddNumberToJsonObject(errMsgRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
+    char *errMsgBuf = cJSON_PrintUnformatted(errMsgRoot);
+    cJSON_Delete(errMsgRoot);
+    EXPECT_CALL(mock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingAckHandshake(&chan, retCode);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
+}
+
+/*
+ * @tc.name: TransPagingAckHandshakeTest007
+ * @tc.desc: test TransPagingAckHandshake SendMsg fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest007, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    cJSON *errMsgRoot = cJSON_CreateObject();
+    AddNumberToJsonObject(errMsgRoot, ERR_CODE, SOFTBUS_INVALID_PARAM);
+    AddNumberToJsonObject(errMsgRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
+    char *errMsgBuf = cJSON_PrintUnformatted(errMsgRoot);
+    cJSON_Delete(errMsgRoot);
+    EXPECT_CALL(mock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransPagingAckHandshake(&chan, retCode);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: TransPagingAckHandshakeTest008
+ * @tc.desc: test TransPagingAckHandshake errMsg success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest008, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
+    int32_t retCode = SOFTBUS_INVALID_PARAM;
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    cJSON *errMsgRoot = cJSON_CreateObject();
+    AddNumberToJsonObject(errMsgRoot, ERR_CODE, SOFTBUS_INVALID_PARAM);
+    AddNumberToJsonObject(errMsgRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, 0);
+    char *errMsgBuf = cJSON_PrintUnformatted(errMsgRoot);
+    cJSON_Delete(errMsgRoot);
+    EXPECT_CALL(mock, TransPagingPackHandshakeErrMsg).WillOnce(Return(errMsgBuf));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransPagingAckHandshake(&chan, retCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: TransPagingAckHandshakeTest009
+ * @tc.desc: test TransPagingAckHandshake ackMsg success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest009, TestSize.Level1)
+{
+    ProxyChannelInfo chan = {0};
+    chan.peerId = TEST_CHANNEL_ID;
+    int32_t retCode = SOFTBUS_OK;
+    cJSON *root = cJSON_CreateObject();
+    bool res = AddNumberToJsonObject(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, TEST_CHANNEL_ID);
+    EXPECT_EQ(true, res);
+    char *buf = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
+    EXPECT_CALL(mock, TransPagingPackHandshakeAckMsg).WillOnce(Return(buf));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransPagingPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = TransPagingAckHandshake(&chan, retCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
  * @tc.name: TransProxyResetPeerTest001
- * @tc.desc: test TransProxyResetPeer null check
+ * @tc.desc: test TransProxyResetPeer with null chan
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1495,11 +1768,14 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyResetPeerTest001, TestS
 {
     int32_t ret = TransProxyResetPeer(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED, ret);
+    EXPECT_NE(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
 
 /*
  * @tc.name: TransPagingResetTest001
- * @tc.desc: test TransPagingReset
+ * @tc.desc: test TransPagingReset ConvertBytesToHexString fails
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1507,10 +1783,9 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingResetTest001, TestSize
 {
     ProxyChannelInfo chan = {
         .peerId = TEST_CHANNEL_ID,
-        .myId = -1,
+        .myId = TEST_CHANNEL_ID,
     };
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
-    chan.myId = TEST_CHANNEL_ID;
     cJSON *chanIdRoot = cJSON_CreateObject();
     AddNumberToJsonObject(chanIdRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, TEST_CHANNEL_ID);
     char *chanIdBuf = cJSON_PrintUnformatted(chanIdRoot);
@@ -1523,8 +1798,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingResetTest001, TestSize
 
 /*
  * @tc.name: TransProxyResetPeerTest002
- * @tc.desc: test TransProxyResetPeer isD2D path
- *           TransProxyPagingPackChannelId fail
+ * @tc.desc: test TransProxyResetPeer isD2D TransProxyPagingPackChannelId fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1543,7 +1817,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyResetPeerTest002, TestS
 
 /*
  * @tc.name: TransProxyResetPeerTest003
- * @tc.desc: test TransProxyResetPeer isD2D success path
+ * @tc.desc: test TransProxyResetPeer isD2D success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1693,87 +1967,5 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyResetPeerTest008, TestS
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = TransProxyResetPeer(&chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
-}
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest008
- * @tc.desc: test SetCipherOfHandshakeMsg keyType KEY_TYPE_META isMeta true
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest008, TestSize.Level1)
-{
-    ProxyChannelInfo info = {0};
-    info.appInfo.peerData.deviceId[0] = '1';
-    info.type = CONNECT_TCP;
-    info.appInfo.keyType = KEY_TYPE_META;
-    uint8_t cipher = 0;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
-    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
-    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, true, _)).WillOnce(SetArgPointee<3>(validHandle));
-    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
-    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(info.appInfo.keyType, KEY_TYPE_META);
-    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
-}
-
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest009
- * @tc.desc: test SetCipherOfHandshakeMsg keyType KEY_TYPE_NORMAL isMeta false
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest009, TestSize.Level1)
-{
-    ProxyChannelInfo info = {0};
-    info.appInfo.peerData.deviceId[0] = '1';
-    info.type = CONNECT_TCP;
-    info.appInfo.keyType = KEY_TYPE_NORMAL;
-    uint8_t cipher = 0;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
-    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
-    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, false, _)).WillOnce(SetArgPointee<3>(validHandle));
-    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
-    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(info.appInfo.keyType, KEY_TYPE_NORMAL);
-    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
-}
-
-/*
- * @tc.name: SetCipherOfHandshakeMsgTest010
- * @tc.desc: test SetCipherOfHandshakeMsg keyType out of range reassigned to KEY_TYPE_NORMAL
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest010, TestSize.Level1)
-{
-    ProxyChannelInfo info = {0};
-    info.appInfo.peerData.deviceId[0] = '1';
-    info.type = CONNECT_TCP;
-    info.appInfo.keyType = KEY_TYPE_DEFAULT;
-    uint8_t cipher = 0;
-    NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
-    AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
-    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, false, _)).WillOnce(SetArgPointee<3>(validHandle));
-    EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
-    int32_t ret = SetCipherOfHandshakeMsg(&info, &cipher);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
 }
 } // namespace OHOS
