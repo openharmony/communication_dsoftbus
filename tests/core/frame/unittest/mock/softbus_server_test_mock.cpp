@@ -43,11 +43,6 @@ bool IsValidString(const char *input, uint32_t maxLen)
     return GetSoftbusServerTestInterface()->IsValidString(input, maxLen);
 }
 
-bool IsValidStringSafe(const char *input, uint32_t maxLen)
-{
-    return GetSoftbusServerTestInterface()->IsValidStringSafe(input, maxLen);
-}
-
 GeneralConnectionManager *GetGeneralConnectionManager(void)
 {
     return GetSoftbusServerTestInterface()->GetGeneralConnectionManager();

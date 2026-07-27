@@ -26,7 +26,6 @@ public:
     SoftbusServerTestInterface() {};
     virtual ~SoftbusServerTestInterface() {};
     virtual bool IsValidString(const char *input, uint32_t maxLen) = 0;
-    virtual bool IsValidStringSafe(const char *input, uint32_t maxLen) = 0;
     virtual GeneralConnectionManager *GetGeneralConnectionManager(void) = 0;
 };
 class SoftbusServerTestInterfaceMock : public SoftbusServerTestInterface {
@@ -34,7 +33,6 @@ public:
     SoftbusServerTestInterfaceMock();
     ~SoftbusServerTestInterfaceMock() override;
     MOCK_METHOD2(IsValidString, bool (const char *input, uint32_t maxLen));
-    MOCK_METHOD2(IsValidStringSafe, bool (const char *input, uint32_t maxLen));
     MOCK_METHOD0(GetGeneralConnectionManager, GeneralConnectionManager* (void));
 };
 }
