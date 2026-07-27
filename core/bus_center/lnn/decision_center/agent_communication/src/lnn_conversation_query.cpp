@@ -1518,7 +1518,7 @@ static int32_t RemoveMessageHmlLinkTimeOutCustom(const void *obj, void *param)
     if (obj == nullptr || param == nullptr) {
         return COMPARE_FAILED;
     }
-    if (static_cast<const char *>(obj) == static_cast<const char *>(param)) {
+    if (strcmp(static_cast<const char *>(obj), static_cast<const char *>(param)) == 0) {
         return COMPARE_SUCCESS;
     }
     return COMPARE_FAILED;
