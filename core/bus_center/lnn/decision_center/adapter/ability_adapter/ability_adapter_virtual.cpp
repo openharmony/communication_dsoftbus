@@ -17,15 +17,23 @@
 
 int32_t StartAbility(const char *bundleName, const char *abilityName)
 {
+    (void)bundleName;
+    (void)abilityName;
+    (void)userId;
     return 0;
 }
 
 bool IsRunningProcess(const char *bundleName, int32_t userId)
 {
+    (void)bundleName;
+    (void)userId;
     return false;
 }
 
 bool IsExtensionAbility(const char *bundleName, const char *abilityName, int32_t upperLimit)
 {
+    (void)bundleName;
+    (void)abilityName;
+    (void)upperLimit;
     return false;
 }
