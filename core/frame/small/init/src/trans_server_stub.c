@@ -117,37 +117,45 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
     return SOFTBUS_OK;
 }
 
-static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
+static bool ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
 {
     if (getAttr == NULL || req == NULL) {
         TRANS_LOGE(TRANS_CTRL, "getAttr and req is NULL");
-        return;
+        return false;
     }
     LinkType *pGetArr = NULL;
 
     if (!ReadInt32(req, &getAttr->dataType)) {
         TRANS_LOGE(TRANS_CTRL, "read dataType failed");
-        return;
+        return false;
     }
 
     if (!ReadInt32(req, &getAttr->linkTypeNum)) {
         TRANS_LOGE(TRANS_CTRL, "read linkTypeNum failed");
-        return;
+        return false;
     }
-
+    if (getAttr->linkTypeNum > LINK_TYPE_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "invalid link type number=%{public}d", getAttr->linkTypeNum);
+        return false;
+    }
     if (getAttr->linkTypeNum > 0) {
-        pGetArr = (LinkType *)ReadBuffer(req, sizeof(LinkType) * getAttr->linkTypeNum);
-    }
-
-    if (pGetArr != NULL && getAttr->linkTypeNum <= LINK_TYPE_MAX) {
-        (void)memcpy_s(getAttr->linkType, sizeof(LinkType) * LINK_TYPE_MAX,
-                       pGetArr, sizeof(LinkType) * getAttr->linkTypeNum);
+        pGetArr = (LinkType *)ReadBuffer(req, sizeof(LinkType) *getAttr->linkTypeNum);
+        if (pGetArr == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "read linkType array failed");
+            return false;
+        }
+        if (memcpy_s(getAttr->linkType, sizeof(getAttr->linkType),
+                     pGetArr, sizeof(LinkType) *getAttr->linkTypeNum) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "memcpy linkType failed");
+            return false;
+        }
     }
 
     if (!ReadInt32(req, &getAttr->attr.streamAttr.streamType)) {
         TRANS_LOGE(TRANS_CTRL, "read streamType failed");
-        return;
+        return false;
     }
+    return true;
 }
 
 static bool ReadQosInfo(IpcIo *req, SessionParam *param)
@@ -198,10 +206,9 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
 {
     TRANS_LOGI(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
     int32_t ret;
     size_t size;
     SessionParam param;
@@ -218,13 +225,13 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     ReadBool(req, &param.isAsync);
     ReadInt32(req, &param.sessionId);
     ReadInt32(req, &param.keyType);
-    ServerReadSessionAttrs(req, &getAttr);
-    param.attr = &getAttr;
-    if (!ReadQosInfo(req, &param)) {
-        TRANS_LOGE(TRANS_CTRL, "failed to read qos info");
+    if (!ServerReadSessionAttrs(req, &getAttr)) {
         return SOFTBUS_IPC_ERR;
     }
-
+    param.attr = &getAttr;
+    if (!ReadQosInfo(req, &param)) {
+        return SOFTBUS_IPC_ERR;
+    }
     if (!CheckNameContainServiceId(param.sessionName)) {
         ret = CheckOpenSessionPremission(param.sessionName, param.peerSessionName);
         if (ret != SOFTBUS_OK) {

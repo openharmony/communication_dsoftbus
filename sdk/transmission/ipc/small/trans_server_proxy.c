@@ -208,7 +208,10 @@ static bool TransWriteIpcSessionAttrs(IpcIo *request, const SessionAttribute *at
         TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs linkTypeNum failed!");
         return false;
     }
-
+    if (attrs->linkTypeNum > LINK_TYPE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "Invalid linkType");
+        return false;
+    }
     if (attrs->linkTypeNum > 0) {
         if (!WriteBuffer(request, attrs->linkType, sizeof(LinkType) * attrs->linkTypeNum)) {
             TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs linkType failed!");

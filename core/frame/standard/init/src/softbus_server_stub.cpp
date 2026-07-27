@@ -21,6 +21,7 @@
 #include "accesstoken_kit.h"
 #include "access_control.h"
 #include "access_token.h"
+#include "br_proxy.h"
 #include "ipc_skeleton.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_access_token_adapter.h"
@@ -2655,6 +2656,10 @@ int32_t SoftBusServerStub::SendBrProxyDataInner(MessageParcel &data, MessageParc
     if (!data.ReadUint32(dataLen)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] read dataLen failed!");
         return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+    }
+    if (dataLen == 0 || dataLen > BR_PROXY_SEND_MAX_LEN) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] invalid dataLen=%{public}d", dataLen);
+        return SOFTBUS_TRANS_BR_PROXY_DATA_TOO_LONG;
     }
 
     auto rawData = data.ReadRawData(dataLen);
