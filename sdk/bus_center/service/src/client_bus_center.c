@@ -703,6 +703,15 @@ int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t m
     return SyncTrustedRelationShipInner(pkgName, msg, msgLen);
 }
 
+int32_t ProcessPushMsg(PushMsg msg)
+{
+    if (msg.data == NULL || msg.len == 0 || msg.len > MAX_PUSH_MSG_SIZE) {
+        LNN_LOGE(LNN_STATE, "invalid ProcessPushMsg para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ProcessPushMsgInner(msg.data, msg.len);
+}
+
 int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || nameData == NULL) {

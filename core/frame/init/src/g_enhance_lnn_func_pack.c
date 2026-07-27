@@ -399,6 +399,15 @@ int32_t LnnSyncTrustedRelationShipPacked(const char *pkgName, const char *msg, u
     return pfnLnnEnhanceFuncList->lnnSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
+int32_t LnnProcessPushMsgPacked(const uint8_t *data, uint32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnProcessPushMsg) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnProcessPushMsg(data, len);
+}
+
 void LnnCoapConnectPacked(const char *ip)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();

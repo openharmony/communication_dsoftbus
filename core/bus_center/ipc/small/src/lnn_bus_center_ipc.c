@@ -404,6 +404,14 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnIpcProcessPushMsg(const uint8_t *data, uint32_t len)
+{
+    (void)data;
+    (void)len;
+    LNN_LOGW(LNN_EVENT, "not implement");
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId,
     int32_t retCode)
 {

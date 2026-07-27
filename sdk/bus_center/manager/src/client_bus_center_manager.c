@@ -1385,6 +1385,11 @@ int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint3
     return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
 }
 
+int32_t ProcessPushMsgInner(const uint8_t *data, uint32_t len)
+{
+    return ServerIpcProcessPushMsg(data, len);
+}
+
 int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len)
 {
     return ServerIpcSetDisplayName(pkgName, nameData, len);
