@@ -155,8 +155,6 @@ if (defined(ohos_lite)) {
           "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
           "$dsoftbus_dfx_path/statistics/instant/wifi_statistic.cpp",
         ]
-        external_deps +=
-            [ "hiview_xcommradar_plugin:communication_radar_client" ]
       } else {
         sources += [ "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp" ]
       }
@@ -277,8 +275,6 @@ if (defined(ohos_lite)) {
             "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
             "$dsoftbus_dfx_path/statistics/instant/wifi_statistic.cpp",
           ]
-          external_deps +=
-              [ "hiview_xcommradar_plugin:communication_radar_client" ]
         } else {
           sources += [ "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp" ]
         }
@@ -496,8 +492,6 @@ if (defined(ohos_lite)) {
           "$dsoftbus_dfx_path/statistics/instant/instant_statistics.cpp",
           "$dsoftbus_dfx_path/statistics/instant/wifi_statistic.cpp",
         ]
-        external_deps +=
-            [ "hiview_xcommradar_plugin:communication_radar_client" ]
       } else {
         sources += [ "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp" ]
       }
