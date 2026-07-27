@@ -77,14 +77,14 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_001, TestSize.
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_002, TestSize.Level1)
 {
     int32_t ret = SOFTBUS_OK;
+    static LnnProtocolManager lnnProtocolManager = {
+        .id = LNN_PROTOCOL_IP,
+    };
+    static LnnPhysicalSubnet subnet = {
+        .protocol = &lnnProtocolManager,
+        .status = LNN_SUBNET_RUNNING,
+    };
     for (int32_t i = 0; i <= 6; i++) {
-        LnnProtocolManager lnnProtocolManager = {
-            .id = LNN_PROTOCOL_IP,
-        };
-        LnnPhysicalSubnet subnet = {
-            .protocol = &lnnProtocolManager,
-            .status = LNN_SUBNET_RUNNING,
-        };
         ret += LnnRegistPhysicalSubnet(&subnet);
     }
     EXPECT_NE(ret, SOFTBUS_OK);

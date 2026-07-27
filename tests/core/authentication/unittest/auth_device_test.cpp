@@ -880,7 +880,6 @@ HWTEST_F(AuthDeviceTest, AUTH_DEVICE_NOT_TRUST_TEST_004, TestSize.Level1)
     EXPECT_CALL(mock, RemoveNotPassedAuthManagerByUdid).Times(1);
     EXPECT_CALL(mock, AuthSessionHandleDeviceNotTrusted).Times(1);
     EXPECT_CALL(mock, LnnDeleteSpecificTrustedDevInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(100));
     EXPECT_CALL(mock, LnnHbOnTrustedRelationReduced).Times(1);
     EXPECT_CALL(mock, AuthRemoveDeviceKeyByUdidPacked).Times(1);
     EXPECT_CALL(mock, LnnRequestLeaveSpecific).WillOnce(Return(SOFTBUS_OK));
