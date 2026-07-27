@@ -45,6 +45,7 @@ void LnnNotifyMigrate(bool isOnline, NodeBasicInfo *info);
 
 void LnnNotifyWlanStateChangeEvent(void *state);
 void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state);
+void LnnNotifyMultiScreenStateChangeEvent(SoftBusMultiScreenState state, int64_t screenId);
 void LnnNotifyDifferentAccountChangeEvent(SoftBusDifferentAccountState state);
 void LnnNotifyBtStateChangeEvent(void *state);
 void LnnNotifySleStateChangeEvent(void *state);

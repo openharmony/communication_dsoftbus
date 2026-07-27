@@ -650,6 +650,17 @@ void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyMultiScreenStateChangeEvent(SoftBusMultiScreenState state, int64_t screenId)
+{
+    if (state < SOFTBUS_MULTI_SCREEN_ON || state >= SOFTBUS_MULTI_SCREEN_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad multi screen state=%{public}d", state);
+        return;
+    }
+    LnnMultiScreenStateChangedEvent event = {.basic.event = LNN_EVENT_MULTI_SCREEN_STATE_CHANGED,
+        .status = state, .screenId = screenId};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifyBtStateChangeEvent(void *state)
 {
     SoftBusBtState *btState = (SoftBusBtState *)state;
