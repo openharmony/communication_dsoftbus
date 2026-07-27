@@ -1636,7 +1636,7 @@ static int32_t ReadIPCReceiveTrustedDevices(DeviceNodeInfo **info, int32_t *nums
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums)
+int32_t BusCenterServerProxy::GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(info != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid info");
     LNN_CHECK_AND_RETURN_RET_LOGE(nums != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "invalid nums");

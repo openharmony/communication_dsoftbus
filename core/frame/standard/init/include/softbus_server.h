@@ -107,7 +107,7 @@ public:
         const char *data, uint32_t len) override;
     int32_t RegisterConversationListener(const ConversationBusiness *info) override;
     int32_t UnregisterConversationListener(const ConversationBusiness *info) override;
-    int32_t GetTrustedDevice(DeviceNodeInfo **info, int32_t *nums) override;
+    int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums) override;
 protected:
     void OnStart() override;
     void OnStop() override;
