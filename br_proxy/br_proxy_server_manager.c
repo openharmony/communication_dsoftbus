@@ -2282,7 +2282,6 @@ void TransBrProxyRemoveObject(int32_t pid)
 
 void UninstallHandler(const char *bundleName, int32_t appIndex, int32_t userId)
 {
-    (void)bundleName;
     if (g_proxyList == NULL) {
         TRANS_LOGW(TRANS_SVC, "[br_proxy] proxy list not init!");
         return;
