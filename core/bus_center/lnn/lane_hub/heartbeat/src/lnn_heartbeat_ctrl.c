@@ -960,7 +960,7 @@ static void HbDifferentAccountEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusDifferentAccountState difAccountState = (SoftBusDifferentAccountState)event->status;
-    if ((LnnEventType)difAccountState == LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED) {
+    if (difAccountState == SOFTBUS_DIF_ACCOUNT_DEV_CHANGE) {
         HbConditionChanged(false);
         LnnUpdateSendInfoStrategy(UPDATE_HB_NETWORK_INFO);
         RestartCoapDiscovery();
