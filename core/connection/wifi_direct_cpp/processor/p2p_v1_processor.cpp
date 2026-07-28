@@ -1733,7 +1733,6 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     if (result.errorCode_ != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "connect group fail, errorCode=%{public}d", result.errorCode_);
         LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, msg.GetRemoteDeviceId());
-        P2pEntity::GetInstance().Disconnect(P2pAdapter::DestroyGroupParam { IF_NAME_P2P });
         return result.errorCode_;
     }
     auto ret = UpdateWhenConnectSuccess(groupConfig, msg);
