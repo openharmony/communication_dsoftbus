@@ -229,7 +229,8 @@ static bool ParseSendMsgParams(napi_env env, size_t argc, napi_value *argv, Send
     }
     if (!ParseString(env, ctx->deviceId, argv[0]) || !ParseString(env, ctx->bundleName, argv[ARGC_ONE]) ||
         !ParseString(env, ctx->abilityName, argv[ARGC_TWO]) ||
-        ctx->bundleName.size() >= BUNDLE_NAME_LEN || ctx->abilityName.size() >= ABILITY_NAME_LEN) {
+        ctx->bundleName.size() >= BUNDLE_NAME_LEN || ctx->abilityName.size() >= ABILITY_NAME_LEN ||
+        ctx->bundleName.empty() || ctx->abilityName.empty()) {
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return false;
     }
@@ -347,7 +348,8 @@ static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc
     std::string abilityName;
  
     if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1]) ||
-        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN) {
+        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN ||
+        bundleName.empty() || abilityName.empty()) {
         COMM_LOGE(COMM_SDK, "Invalid business args");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return nullptr;
@@ -424,7 +426,8 @@ static napi_value NapiunRegisterConversationListenerSync(napi_env env, size_t ar
     std::string abilityName;
 
     if (!ParseString(env, bundleName, argv[0]) || !ParseString(env, abilityName, argv[1]) ||
-        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN) {
+        bundleName.size() >= BUNDLE_NAME_LEN || abilityName.size() >= ABILITY_NAME_LEN ||
+        bundleName.empty() || abilityName.empty()) {
         COMM_LOGE(COMM_SDK, "Invalid business args");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return nullptr;
