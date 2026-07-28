@@ -14,6 +14,7 @@
 group("fuzztest") {
   testonly = true
   deps = [
+    "softbusclientongroupstatechange_fuzzer:fuzztest",
     "softbusclientstub2_fuzzer:fuzztest",
     "softbusclientstub_fuzzer:fuzztest",
   ]
