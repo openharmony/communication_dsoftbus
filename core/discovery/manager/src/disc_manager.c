@@ -888,6 +888,12 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
             ModifyCapabilityCallTimes(info->item, info, type, false);
             ListDelete(&(info->node));
             info->item->infoNum--;
+            if (info->item->infoNum == 0) {
+                ListDelete(&(info->item->node));
+                g_publishInfoList->cnt--;
+                SoftBusFree(info->item);
+                info->item = NULL;
+            }
         }
     } while (false);
 
@@ -963,6 +969,12 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
             RemoveDiscInfoFromCapabilityList(info, type);
             ListDelete(&(info->node));
             info->item->infoNum--;
+            if (info->item->infoNum == 0) {
+                ListDelete(&(info->item->node));
+                g_discoveryInfoList->cnt--;
+                SoftBusFree(info->item);
+                info->item = NULL;
+            }
         }
     } while (false);
 
