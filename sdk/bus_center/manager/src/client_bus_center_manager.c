@@ -1888,7 +1888,7 @@ void LnnOnRefreshDeviceFound(const void *device)
         IRefreshCallback cb = item->cb;
         (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
         cb.OnDeviceFound(deviceInfo);
-        LNN_LOGD(LNN_STATE, "RefreshLNN finally OnDeviceFound, cap=%{public}u", capBit);
+        LNN_LOGI(LNN_STATE, "RefreshLNN finally OnDeviceFound, cap=%{public}u", capBit);
         isReportAnyDevice = true;
     }
     if (!isReportAnyDevice && g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
