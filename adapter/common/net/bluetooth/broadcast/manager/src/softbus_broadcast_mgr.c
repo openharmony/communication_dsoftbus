@@ -1488,7 +1488,7 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
     ret = CopyScanFilterManufacture(srcFilter, dstFilter);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "cpy manufacture failed=%{public}d", ret);
     if (srcFilter->filterIndex == 0) {
-        DISC_LOGD(DISC_BROADCAST, "invalid filterIndex");
+        DISC_LOGD(DISC_BROADCAST, "invaild filterIndex");
     }
     dstFilter->filterIndex = srcFilter->filterIndex;
     dstFilter->advIndReport = srcFilter->advIndReport;
@@ -2794,7 +2794,7 @@ static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter
     g_scanManager[listenerId].deleted = (uint8_t *)SoftBusCalloc(g_scanManager[listenerId].filterSize *
         sizeof(uint8_t));
     if (g_scanManager[listenerId].deleted == NULL) {
-        DISC_LOGE(DISC_BROADCAST, "memory allocation failed");
+        DISC_LOGI(DISC_BROADCAST, "memory allocation failed");
         ReleaseScanIdx(listenerId);
         return SOFTBUS_MALLOC_ERR;
     }
