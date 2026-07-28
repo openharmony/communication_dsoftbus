@@ -1893,7 +1893,7 @@ void LnnOnRefreshDeviceFound(const void *device)
     }
     if (!isReportAnyDevice && g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
         g_busCenterClient.refreshCb.OnDeviceFound(deviceInfo);
-        LNN_LOGD(LNN_STATE, "RefreshLNN finally OnDeviceFound by default cb, cap=%{public}u",
+        LNN_LOGI(LNN_STATE, "RefreshLNN finally OnDeviceFound by default cb, cap=%{public}u",
             deviceInfo->capabilityBitmap[0]);
         isReportAnyDevice = true;
     }
