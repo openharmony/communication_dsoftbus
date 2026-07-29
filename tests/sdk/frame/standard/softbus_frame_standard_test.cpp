@@ -1444,4 +1444,400 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnErrorAuthResultInnerTest, TestSize.Level
     data.WriteCString(buffer.c_str());
     EXPECT_EQ(g_stub->OnErrorAuthResultInner(data, reply), SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: MessageTcpParcelReadTest001
+ * @tc.desc: MessageTcpParcelRead, channelType is not TCP_DIRECT returns SOFTBUS_OK without reading fd
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageTcpParcelReadTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    channel.channelType = CHANNEL_TYPE_PROXY;
+    int32_t ret = MessageTcpParcelRead(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: MessageTcpParcelReadTest002
+ * @tc.desc: MessageTcpParcelRead, channelType is TCP_DIRECT and myIp is nullptr returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageTcpParcelReadTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    channel.channelType = CHANNEL_TYPE_TCP_DIRECT;
+    int32_t ret = MessageTcpParcelRead(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: MessageParcelReadExTest001
+ * @tc.desc: MessageParcelReadEx, isD2D is false and tokenType read fails returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadExTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    data.WriteBool(false);
+    int32_t ret = MessageParcelReadEx(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: MessageParcelReadExTest002
+ * @tc.desc: MessageParcelReadEx, isD2D is true and isSupportNewHead read fails returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadExTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    data.WriteBool(true);
+    int32_t ret = MessageParcelReadEx(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: MessageParcelReadTest001
+ * @tc.desc: MessageParcelRead, keyLen exceeds SESSION_KEY_LENGTH returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(false);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(CHANNEL_TYPE_PROXY);
+    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    data.WriteBool(false);
+    data.WriteBool(false);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(SESSION_KEY_LENGTH + 1);
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    int32_t ret = MessageParcelRead(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: MessageParcelReadTest002
+ * @tc.desc: MessageParcelRead, channelType is UDP and myIp is nullptr returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(false);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(CHANNEL_TYPE_UDP);
+    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    data.WriteBool(false);
+    data.WriteBool(false);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteUint32(0);
+    data.WriteCString("peerSessionName");
+    data.WriteInt32(0);
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    int32_t ret = MessageParcelRead(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: OnJoinLNNResultInnerTest002
+ * @tc.desc: OnJoinLNNResultInner, addr is valid but retCode read fails returns SOFTBUS_TRANS_PROXY_READINT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnJoinLNNResultInnerTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ConnectionAddr addr;
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    data.WriteUint32(sizeof(ConnectionAddr));
+    data.WriteRawData(&addr, sizeof(ConnectionAddr));
+    EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+}
+
+/**
+ * @tc.name: OnJoinLNNResultInnerTest003
+ * @tc.desc: OnJoinLNNResultInner, retCode is zero and networkId is nullptr returns
+ * SOFTBUS_TRANS_PROXY_READCSTRING_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnJoinLNNResultInnerTest003, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ConnectionAddr addr;
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    data.WriteUint32(sizeof(ConnectionAddr));
+    data.WriteRawData(&addr, sizeof(ConnectionAddr));
+    data.WriteInt32(0); // retCode == 0
+    EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+}
+
+/**
+ * @tc.name: OnJoinLNNResultInnerTest004
+ * @tc.desc: OnJoinLNNResultInner, retCode is non-zero skips networkId and returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnJoinLNNResultInnerTest004, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ConnectionAddr addr;
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    data.WriteUint32(sizeof(ConnectionAddr));
+    data.WriteRawData(&addr, sizeof(ConnectionAddr));
+    data.WriteInt32(1); // retCode != 0
+    EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnJoinLNNResultInnerTest005
+ * @tc.desc: OnJoinLNNResultInner, retCode is zero and networkId is valid returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnJoinLNNResultInnerTest005, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ConnectionAddr addr;
+    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    data.WriteUint32(sizeof(ConnectionAddr));
+    data.WriteRawData(&addr, sizeof(ConnectionAddr));
+    data.WriteInt32(0); // retCode == 0
+    data.WriteCString("networkId");
+    EXPECT_EQ(g_stub->OnJoinLNNResultInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: MessageParcelReadCollabInfoTest001
+ * @tc.desc: MessageParcelReadCollabInfo, accountId and deviceId read return nullptr returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadCollabInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    CollabInfo info;
+    (void)memset_s(&info, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    int32_t ret = MessageParcelReadCollabInfo(data, info);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+    MessageParcel data2;
+    CollabInfo info2;
+    (void)memset_s(&info2, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    data2.WriteCString("accountId");
+    data2.WriteUint64(0);
+    data2.WriteInt32(0);
+    data2.WriteInt32(0);
+    ret = MessageParcelReadCollabInfo(data2, info2);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: MessageParcelReadCollabInfoTest002
+ * @tc.desc: MessageParcelReadCollabInfo, all fields are valid returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadCollabInfoTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    CollabInfo info;
+    (void)memset_s(&info, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    data.WriteCString("accountId");
+    data.WriteUint64(100);
+    data.WriteInt32(1);
+    data.WriteInt32(2);
+    data.WriteCString("deviceId");
+    int32_t ret = MessageParcelReadCollabInfo(data, info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(info.userId, 1);
+}
+
+/**
+ * @tc.name: OnGroupStateChangeInnerTest001
+ * @tc.desc: OnGroupStateChangeInner, ReadInt32 fails returns SOFTBUS_TRANS_PROXY_READINT_FAILED, success returns
+ * SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnGroupStateChangeInnerTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnGroupStateChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnGroupStateChangeInner(data2, reply2), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnCheckCollabRelationInnerTest001
+ * @tc.desc: OnCheckCollabRelationInner, isSinkSide or source info read fails returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnCheckCollabRelationInnerTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnCheckCollabRelationInner(data, reply), SOFTBUS_IPC_ERR);
+    data.WriteBool(false);
+    EXPECT_EQ(g_stub->OnCheckCollabRelationInner(data, reply), SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: OnCheckCollabRelationInnerTest002
+ * @tc.desc: OnCheckCollabRelationInner, sink info deviceId is nullptr returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnCheckCollabRelationInnerTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(false);
+    data.WriteCString("sourceAccountId");
+    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteCString("sourceDeviceId");
+    data.WriteCString("sinkAccountId");
+    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnCheckCollabRelationInner(data, reply), SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: OnCheckCollabRelationInnerTest003
+ * @tc.desc: OnCheckCollabRelationInner, isSinkSide is true reads channelId and channelType then returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnCheckCollabRelationInnerTest003, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    data.WriteCString("sourceAccountId");
+    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteCString("sourceDeviceId");
+    data.WriteCString("sinkAccountId");
+    data.WriteUint64(0);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteCString("sinkDeviceId");
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnCheckCollabRelationInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnConversationRecvMsgInnerTest001
+ * @tc.desc: OnConversationRecvMsgInner, abilityName/bundleName/deviceId is nullptr returns
+ * SOFTBUS_NETWORK_READCSTRING_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnConversationRecvMsgInnerTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data1;
+    MessageParcel reply1;
+    EXPECT_EQ(g_stub->OnConversationRecvMsgInner(data1, reply1), SOFTBUS_NETWORK_READCSTRING_FAILED);
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteCString("ability");
+    EXPECT_EQ(g_stub->OnConversationRecvMsgInner(data2, reply2), SOFTBUS_NETWORK_READCSTRING_FAILED);
+    MessageParcel data3;
+    MessageParcel reply3;
+    data3.WriteCString("ability");
+    data3.WriteCString("bundle");
+    EXPECT_EQ(g_stub->OnConversationRecvMsgInner(data3, reply3), SOFTBUS_NETWORK_READCSTRING_FAILED);
+}
+
+/**
+ * @tc.name: OnConversationRecvMsgInnerTest002
+ * @tc.desc: OnConversationRecvMsgInner, length read fails or msg is nullptr returns error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnConversationRecvMsgInnerTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteCString("ability");
+    data.WriteCString("bundle");
+    data.WriteCString("deviceId");
+    EXPECT_EQ(g_stub->OnConversationRecvMsgInner(data, reply), SOFTBUS_NETWORK_READINT32_FAILED);
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteCString("ability");
+    data2.WriteCString("bundle");
+    data2.WriteCString("deviceId");
+    data2.WriteUint32(4);
+    EXPECT_EQ(g_stub->OnConversationRecvMsgInner(data2, reply2), SOFTBUS_NETWORK_READRAWDATA_FAILED);
+}
+
+/**
+ * @tc.name: OnConversationRecvMsgInnerTest003
+ * @tc.desc: OnConversationRecvMsgInner, all fields are valid returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnConversationRecvMsgInnerTest003, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteCString("ability");
+    data.WriteCString("bundle");
+    data.WriteCString("deviceId");
+    std::string msg = "msg";
+    data.WriteUint32(msg.size() + 1);
+    data.WriteRawData(msg.c_str(), msg.size() + 1);
+    EXPECT_EQ(g_stub->OnConversationRecvMsgInner(data, reply), SOFTBUS_OK);
+}
 } // namespace OHOS
