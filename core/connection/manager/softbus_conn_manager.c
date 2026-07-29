@@ -382,8 +382,7 @@ int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(type != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "param error");
 
-    ConnectType temp;
-    temp = (connectionId >> CONNECT_TYPE_SHIFT);
+    const ConnectType temp = (ConnectType)((connectionId >> CONNECT_TYPE_SHIFT) & 0x3F);
     if (ConnTypeCheck(temp) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "connectionId type is err. type=%{public}u", temp);
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
