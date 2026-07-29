@@ -161,10 +161,6 @@ private:
     
     std::string GetProcessorName() const override;
     std::string GetState() const override;
-    bool IsActiveConnectCommand(const WifiDirectConnectInfo &info) const override
-    {
-        return connectCommand_ != nullptr && connectCommand_->IsSameCommand(info);
-    }
     [[noreturn]] void Terminate();
 
     ProcessorState state_;

@@ -38,32 +38,6 @@ ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDire
     CONN_LOGE(CONN_WIFI_DIRECT, "remoteNetworkId empty!!");
 }
 
-ConnectCommand::ConnectCommand(const ConnectCommand &other)
-    : info_(other.info_), callback_(other.callback_), successCallback_(other.successCallback_),
-      failureCallback_(other.failureCallback_), remoteDeviceId_(other.remoteDeviceId_),
-      hasRetried_(other.hasRetried_), retryReason_(other.retryReason_), connectType_(other.info_.info_.connectType)
-{
-    GetWifiDirectManager()->operationHmlConnectingCount(true, connectType_);
-}
-
-ConnectCommand& ConnectCommand::operator=(const ConnectCommand &other)
-{
-    if (this == &other) {
-        return *this;
-    }
-    GetWifiDirectManager()->operationHmlConnectingCount(false, other.connectType_);
-    info_ = other.info_;
-    callback_ = other.callback_;
-    successCallback_ = other.successCallback_;
-    failureCallback_ = other.failureCallback_;
-    remoteDeviceId_ = other.remoteDeviceId_;
-    hasRetried_ = other.hasRetried_;
-    retryReason_ = other.retryReason_;
-    connectType_ = other.info_.info_.connectType;
-    GetWifiDirectManager()->operationHmlConnectingCount(true, connectType_);
-    return *this;
-}
-
 ConnectCommand::~ConnectCommand()
 {
     GetWifiDirectManager()->operationHmlConnectingCount(false, connectType_);

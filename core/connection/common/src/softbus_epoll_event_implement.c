@@ -140,6 +140,9 @@ static uint32_t EpollEventToTriggerEvent(uint32_t epollEvent)
     if ((epollEvent & EPOLLPRI) != 0) {
         events |= EXCEPT_TRIGGER;
     }
+    if ((epollEvent & (EPOLLERR | EPOLLHUP)) != 0) {
+        events |= READ_TRIGGER | WRITE_TRIGGER;
+    }
     return events;
 }
 
@@ -168,6 +171,13 @@ int32_t WatchEvent(EventWatcher *watcher, int32_t timeoutMS, ListNode *out)
     int32_t nEvents = SoftBusSocketEpollWait(watcher->watcherId, events, SOFTBUS_FD_EVENT, timeoutMS);
     CONN_CHECK_AND_RETURN_RET_LOGD(nEvents > 0, nEvents, CONN_COMMON,
         "epoll wait fail or not exist ready event, status=%{public}d", nEvents);
+    for (int32_t i = 0; i < nEvents; i++) {
+        if ((events[i].events & (EPOLLERR | EPOLLHUP)) != 0) {
+            CONN_LOGE(CONN_COMMON, "epoll detect abnormal event, remove from epoll, fd=%{public}d, events=0x%{public}x",
+                events[i].data.fd, events[i].events);
+            RemoveEvent(watcher, events[i].data.fd);
+        }
+    }
     SetReadyFdEvent(events, nEvents, out);
     return nEvents;
 }
@@ -195,6 +205,11 @@ static int32_t WaitEpollReadyEvent(struct epoll_event fdEvent, int32_t fd, int32
     struct epoll_event events = {0};
     ret = SoftBusSocketEpollWait(epollFd, &events, 1, timeoutMs);
     SoftBusSocketClose(epollFd);
+    if (ret > 0 && (events.events & (EPOLLERR | EPOLLHUP)) != 0) {
+        CONN_LOGE(CONN_COMMON, "wait event detect abnormal event, fd=%{public}d, events=0x%{public}x",
+            fd, events.events);
+        return SOFTBUS_CONN_EPOLL_ABNORMAL_EVENT;
+    }
     return ret;
 }
 

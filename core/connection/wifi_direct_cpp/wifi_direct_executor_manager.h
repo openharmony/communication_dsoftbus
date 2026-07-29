@@ -33,7 +33,6 @@ public:
     void Insert(const std::string &remoteId, const std::shared_ptr<WifiDirectExecutor> &executor);
     void Erase(const std::string &remoteId);
     size_t Size();
-    bool HasConnectCommand(const WifiDirectConnectInfo &info);
     void Dump(std::list<std::shared_ptr<ProcessorSnapshot>> &snapshots);
 
 private:

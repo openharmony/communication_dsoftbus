@@ -36,15 +36,10 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
         info.isStrictProtocol, info.ratePreference, info.isVirtualLink);
     DumpNegotiateChannel(info.negoChannel);
 
-    std::shared_ptr<WifiDirectExecutor> executor;
-    std::lock_guard executorLock(executorLock_);
-    if (IsConnectCommandExist(info)) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "connect command already exist, reqId=%{public}d, pid=%{public}d",
-            info.requestId, info.pid);
-        return SOFTBUS_OK;
-    }
     auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
     command->SetRetried(markRetried);
+    std::shared_ptr<WifiDirectExecutor> executor;
+    std::lock_guard executorLock(executorLock_);
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command fail");
     if (executor != nullptr) {
@@ -74,24 +69,6 @@ int WifiDirectScheduler::CancelConnectDevice(const WifiDirectConnectInfo &info)
 int WifiDirectScheduler::ConnectDevice(const std::shared_ptr<ConnectCommand> &command, bool markRetried)
 {
     return ConnectDevice(command->GetConnectInfo().info_, command->GetConnectCallback(), markRetried);
-}
-
-bool WifiDirectScheduler::IsConnectCommandExist(const WifiDirectConnectInfo &info)
-{
-    std::lock_guard executorLock(executorLock_);
-    if (executorManager_.HasConnectCommand(info)) {
-        return true;
-    }
-    std::lock_guard commandLock(commandLock_);
-    for (const auto &command : commandList_) {
-        if (command != nullptr && command->GetType() == CommandType::CONNECT_COMMAND) {
-            auto connectCommand = std::static_pointer_cast<ConnectCommand>(command);
-            if (connectCommand != nullptr && connectCommand->IsSameCommand(info)) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback)

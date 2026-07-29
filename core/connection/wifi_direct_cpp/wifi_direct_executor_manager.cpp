@@ -89,16 +89,6 @@ size_t WifiDirectExecutorManager::Size()
     return executors_.size();
 }
 
-bool WifiDirectExecutorManager::HasConnectCommand(const WifiDirectConnectInfo &info)
-{
-    for (const auto &node : executors_) {
-        if (node.executor_ != nullptr && node.executor_->HasConnectCommand(info)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 std::string WifiDirectExecutorManager::GetDumpString(const std::string &remoteId)
 {
     if (WifiDirectUtils::IsDeviceId(remoteId)) {

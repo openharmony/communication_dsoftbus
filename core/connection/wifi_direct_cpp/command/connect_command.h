@@ -43,8 +43,6 @@ public:
     using FailureCallback = std::function<void(int32_t reason)>;
 
     ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback);
-    ConnectCommand(const ConnectCommand &other);
-    ConnectCommand& operator=(const ConnectCommand &other);
     ~ConnectCommand() override;
 
     std::string GetRemoteDeviceId() const override;
