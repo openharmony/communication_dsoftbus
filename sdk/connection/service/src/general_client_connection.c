@@ -270,6 +270,7 @@ int32_t AcceptConnect(const char *name, uint32_t handle)
 
 void DataReceived(uint32_t handle, const uint8_t *data, uint32_t len)
 {
+    CONN_CHECK_AND_RETURN_LOGE(len > 0 && len <= GENERAL_SEND_DATA_MAX_LEN, CONN_COMMON, "len=%{public}u", len);
     CONN_LOGI(CONN_COMMON, "sdk data received, handle=%{public}u, len=%{public}u", handle, len);
     if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "lock fail");
