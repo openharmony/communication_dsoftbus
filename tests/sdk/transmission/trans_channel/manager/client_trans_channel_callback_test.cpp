@@ -525,4 +525,23 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationTest002, Test
     int32_t ret = TransOnCheckCollabRelation(&sourceInfo, isSinkSide, &sinkInfo, channelId, channelType);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
+
+/*
+ * @tc.name: TransOnCheckCollabRelationInvalidParamTest001
+ * @tc.desc: test TransOnCheckCollabRelation returns SOFTBUS_INVALID_PARAM
+ *           when sourceInfo or sinkInfo is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransChannelCallbackTest, TransOnCheckCollabRelationInvalidParamTest001, TestSize.Level1)
+{
+    CollabInfo info;
+    (void)memset_s(&info, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    int32_t ret = TransOnCheckCollabRelation(nullptr, true, &info, INVALID_CHANNEL_ID, CHANNEL_TYPE_AUTH);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransOnCheckCollabRelation(&info, false, nullptr, INVALID_CHANNEL_ID, CHANNEL_TYPE_PROXY);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransOnCheckCollabRelation(nullptr, true, nullptr, INVALID_CHANNEL_ID, CHANNEL_TYPE_AUTH);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS
