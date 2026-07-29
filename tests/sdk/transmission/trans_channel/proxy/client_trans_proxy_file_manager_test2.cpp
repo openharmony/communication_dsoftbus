@@ -1071,4 +1071,24 @@ HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthNoChannelTest001, Test
     ret = CheckFrameLength(2, PROXY_BLE_MAX_PACKET_SIZE, osType, &packetSize);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
+
+/*
+ * @tc.name: ProxyChannelSendFileStreamInvalidParamTest001
+ * @tc.desc: test ProxyChannelSendFileStream returns SOFTBUS_INVALID_PARAM
+ *           when data is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ProxyChannelSendFileStreamInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = ProxyChannelSendFileStream(
+        TEST_CHANNEL_ID, nullptr, TEST_HEADER_LENGTH, TEST_SESSION_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProxyChannelSendFileStream(
+        TEST_SESSION_ID, nullptr, TEST_HEADER_LENGTH, TEST_FILE_CNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProxyChannelSendFileStream(
+        TEST_CHANNEL_ID, nullptr, TEST_DATA_LENGTH, TEST_SESSION_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

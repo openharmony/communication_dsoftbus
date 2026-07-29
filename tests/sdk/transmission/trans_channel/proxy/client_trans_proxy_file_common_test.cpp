@@ -366,4 +366,21 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest001, TestSize.Level1)
     ret = FileUnLock(fd);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
+
+/*
+ * @tc.name: FileLockInvalidParamTest001
+ * @tc.desc: test FileLock returns SOFTBUS_INVALID_PARAM
+ *           when fd is invalid (less than zero)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileCommonTest, FileLockInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = FileLock(TEST_FD, SOFTBUS_F_RDLCK, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = FileLock(TEST_FD, SOFTBUS_F_WRLCK, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = FileLock(TEST_FD, SOFTBUS_F_RDLCK, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

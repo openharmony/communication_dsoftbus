@@ -529,4 +529,24 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelAsyncSendMessageTest00
         ClientTransChannelAsyncSendMessage(channelId, CHANNEL_TYPE_TCP_DIRECT, data, TEST_DATA_LENGTH, dataSeq);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
+
+/*
+ * @tc.name: ClientTransCloseReserveChannelInvalidParamTest001
+ * @tc.desc: test ClientTransCloseReserveChannel returns SOFTBUS_INVALID_PARAM
+ *           when channelId is invalid (less than zero)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseReserveChannelInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = ClientTransCloseReserveChannel(
+        INVALID_CHANNEL_ID, CHANNEL_TYPE_AUTH, INVALID_CHANNEL_ID, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientTransCloseReserveChannel(
+        INVALID_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT, INVALID_CHANNEL_ID, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientTransCloseReserveChannel(
+        INVALID_CHANNEL_ID, CHANNEL_TYPE_AUTH, INVALID_CHANNEL_ID, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

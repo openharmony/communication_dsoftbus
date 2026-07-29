@@ -2078,4 +2078,73 @@ HWTEST_F(TransClientSessionTest, SoftBusIsBtUnderlayerErrorTest001, TestSize.Lev
     ret = SoftBusIsBtUnderlayerError(SOFTBUS_PARSE_JSON_ERR);
     EXPECT_EQ(ret, false);
 }
+
+/*
+ * @tc.name: ClientBindInvalidParamTest001
+ * @tc.desc: test ClientBind returns SOFTBUS_INVALID_PARAM
+ *           when socket is invalid or listener is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientBindInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = ClientBind(TRANS_TEST_INVALID_SESSION_ID, nullptr, 0, nullptr, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientBind(TRANS_TEST_SESSION_ID, nullptr, 0, nullptr, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientBind(TRANS_TEST_INVALID_SESSION_ID, nullptr, 0, nullptr, false);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ClientListenInvalidParamTest001
+ * @tc.desc: test ClientListen returns SOFTBUS_INVALID_PARAM
+ *           when listener is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientListenInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = ClientListen(TRANS_TEST_SESSION_ID, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientListen(TRANS_TEST_INVALID_SESSION_ID, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientListen(TRANS_TEST_SESSION_ID, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetSocketMtuSizeInvalidParamTest001
+ * @tc.desc: test GetSocketMtuSize returns SOFTBUS_INVALID_PARAM
+ *           when socket is invalid or mtuSize is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, GetSocketMtuSizeInvalidParamTest001, TestSize.Level1)
+{
+    uint32_t mtuSize = 0;
+    int32_t ret = GetSocketMtuSize(TRANS_TEST_INVALID_SESSION_ID, &mtuSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketMtuSize(TRANS_TEST_SESSION_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketMtuSize(TRANS_TEST_INVALID_SESSION_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ClientDfsBindInvalidParamTest001
+ * @tc.desc: test ClientDfsBind returns SOFTBUS_INVALID_PARAM
+ *           when socket is invalid or listener is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, ClientDfsBindInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = ClientDfsBind(TRANS_TEST_INVALID_SESSION_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientDfsBind(TRANS_TEST_SESSION_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientDfsBind(TRANS_TEST_INVALID_SESSION_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 }
