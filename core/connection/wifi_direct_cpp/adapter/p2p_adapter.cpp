@@ -281,6 +281,8 @@ int32_t P2pAdapter::GetSelfWifiConfigInfo(std::string &config)
 
 int32_t P2pAdapter::SetPeerWifiConfigInfo(const std::string &config)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(config.size() <= CFG_DATA_MAX_BYTES, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
+        "invalid config size=%{public}zu", config.size());
     auto peerCfgLen = config.size() + 1;
     auto decodeCfg = new uint8_t[peerCfgLen];
     size_t decodeLen = 0;
