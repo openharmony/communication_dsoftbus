@@ -175,6 +175,7 @@ static void BleExitConnectingState(void)
 static void DfxRecordBleConnectFail(
     uint32_t reqId, uint32_t pId, ConnBleDevice *device, const ConnectStatistics *statistics, int32_t reason)
 {
+    CONN_CHECK_AND_RETURN_LOGW(device != NULL, CONN_BLE, "device is null");
     CONN_CHECK_AND_RETURN_LOGW(statistics != NULL, CONN_BLE, "statistics is null");
 
     SoftBusConnType connType =
