@@ -261,6 +261,7 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get local ptk fail");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
+    (void)memset_s(ptkBytes, sizeof(ptkBytes), 0, sizeof(ptkBytes));
     return result;
 }
 
@@ -290,6 +291,7 @@ std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetw
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk fail");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
+    (void)memset_s(ptkBytes, sizeof(ptkBytes), 0, sizeof(ptkBytes));
     return result;
 }
 
