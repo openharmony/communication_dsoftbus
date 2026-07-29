@@ -124,6 +124,59 @@ if (defined(ohos_lite)) {
     ]
   }
 
+  ohos_unittest("TransSdkFileTest2") {
+    module_out_path = module_output_path
+    sources = [ "trans_sdk_file_test2.cpp" ]
+
+    include_dirs = [
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/adaptor/include",
+      "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+      "dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/src",
+      "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/statistics/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/src",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/core",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
+      "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/src",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      #"$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/core",
+      "dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile/interface",
+      "dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile/core",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
+      "$dsoftbus_root_path/adapter/common/security/access_token/include",
+    ]
+
+    deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/core/frame:softbus_server",
+      "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+    ]
+
+    if (!defined(global_parts_info) ||
+      defined(global_parts_info.communication_dsoftbus_service_ext)) {
+      deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
+    } else {
+      deps += [ "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open" ]
+    }
+
+    external_deps = [
+      "bounds_checking_function:libsec_static",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+
   ohos_unittest("ClientTransFileTest") {
     module_out_path = module_output_path
     sources = [
@@ -183,6 +236,7 @@ if (defined(ohos_lite)) {
         if (!defined(ohos_lite)) {
           deps += [
             ":TransSdkFileTest",
+            ":TransSdkFileTest2",
           ]
         }
       }
