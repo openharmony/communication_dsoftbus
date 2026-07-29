@@ -67,6 +67,8 @@ public:
         return SOFTBUS_OK;
     };
 
+    virtual bool HasActiveConnectCommand(WifiDirectLinkType linkType) const { return false; }
+
     virtual std::string GetProcessorName() const = 0;
     virtual std::string GetState() const = 0;
 

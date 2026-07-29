@@ -116,6 +116,27 @@ bool WifiDirectExecutor::CanAcceptNegotiateData(WifiDirectCommand &command)
     return processor_->CanAcceptNegotiateData(command);
 }
 
+bool WifiDirectExecutor::HasAnyConnectCommand(WifiDirectLinkType linkType)
+{
+    bool found = false;
+    GetSender().ProcessUnHandle([&](std::shared_ptr<WifiDirectEventBase> &content) {
+        if (found || content == nullptr) {
+            return;
+        }
+        if (content->getContentTypeid() == typeid(std::shared_ptr<ConnectCommand>).name()) {
+            auto cw = std::static_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<ConnectCommand>>>(content);
+            if (cw->content_ != nullptr && cw->content_->GetLinkType() == linkType) {
+                found = true;
+            }
+        }
+    });
+    if (found) {
+        return true;
+    }
+    std::lock_guard lock(processorLock_);
+    return processor_ != nullptr && processor_->HasActiveConnectCommand(linkType);
+}
+
 WifiDirectEventDispatcher WifiDirectExecutor::WaitEvent()
 {
     return receiver_.Wait();
