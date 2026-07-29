@@ -258,7 +258,7 @@ static napi_value NapiGetTrustedDevicesSync(napi_env env, napi_value thisVar)
         COMM_LOGE(COMM_SDK, "resultCode=%{public}d", resultCode);
         ThrowBusinessError(env, resultCode);
         return resultArray;
-    } else if (nums > 0) {
+    } else if (nums > 0 && list != nullptr) {
         for (int i = 0; i < nums; ++i) {
             napi_value jsDevice;
             FillJsDeviceNode(env, jsDevice, &list[i]);
