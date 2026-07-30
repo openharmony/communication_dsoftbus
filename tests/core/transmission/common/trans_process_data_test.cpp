@@ -930,11 +930,14 @@ HWTEST_F(TransProcessDataTest, TransProxyD2DFirstNewHeadSliceProcessTest001, Tes
  */
 HWTEST_F(TransProcessDataTest, TransTdcDecryptInvalidParamTest001, TestSize.Level1)
 {
+    char outBuf[32] = {0};
     int32_t ret = TransTdcDecrypt(nullptr, nullptr, TEST_CHANNEL_ID, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransTdcDecrypt("key", nullptr, TEST_CHANNEL_ID, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransTdcDecrypt(nullptr, "in", TEST_CHANNEL_ID, nullptr, nullptr);
+    ret = TransTdcDecrypt("key", "in", TEST_CHANNEL_ID, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransTdcDecrypt("key", "in", TEST_CHANNEL_ID, outBuf, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -947,11 +950,10 @@ HWTEST_F(TransProcessDataTest, TransTdcDecryptInvalidParamTest001, TestSize.Leve
  */
 HWTEST_F(TransProcessDataTest, TransTdcEncryptWithSeqInvalidParamTest001, TestSize.Level1)
 {
-    int32_t ret = TransTdcEncryptWithSeq(nullptr, TEST_CHANNEL_ID, nullptr);
+    EncrptyInfo enInfo = {0};
+    int32_t ret = TransTdcEncryptWithSeq("key", TEST_CHANNEL_ID, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransTdcEncryptWithSeq("key", TEST_CHANNEL_ID, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransTdcEncryptWithSeq(nullptr, TEST_CHANNEL_ID, nullptr);
+    ret = TransTdcEncryptWithSeq(nullptr, TEST_CHANNEL_ID, &enInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -964,11 +966,12 @@ HWTEST_F(TransProcessDataTest, TransTdcEncryptWithSeqInvalidParamTest001, TestSi
  */
 HWTEST_F(TransProcessDataTest, TransProxyParseTlvInvalidParamTest001, TestSize.Level1)
 {
+    DataHeadTlvPacketHead head = {0};
     int32_t ret = TransProxyParseTlv(TEST_CHANNEL_ID, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransProxyParseTlv(TEST_CHANNEL_ID, "data", nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransProxyParseTlv(TEST_CHANNEL_ID, nullptr, nullptr, nullptr);
+    ret = TransProxyParseTlv(TEST_CHANNEL_ID, "data", &head, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
