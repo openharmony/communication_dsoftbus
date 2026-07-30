@@ -1683,7 +1683,7 @@ HWTEST_F(ConnBleTransExtTest, ConnBleTransConfigPostLimit007, TestSize.Level1)
 {
     LimitConfiguration config;
     config.type = CONNECT_BLE;
-    config.active = true;
+    config.active = false;
     config.windowInMillis = 500;
     config.quotaInBytes = 5000;
 
@@ -1737,7 +1737,7 @@ HWTEST_F(ConnBleTransExtTest, ConnBleTransConfigPostLimit010, TestSize.Level1)
 {
     LimitConfiguration config;
     config.type = CONNECT_BLE;
-    config.active = true;
+    config.active = false;
     config.windowInMillis = 10000;
     config.quotaInBytes = 100000;
 
