@@ -370,7 +370,7 @@ static void ConstructProxyConnectionListDisconnecting(void)
     CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is nullptr");
     ListInit(&proxyConnection->node);
     if (SoftBusMutexInit(&proxyConnection->lock, nullptr) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "init lock fail");
+        CONN_LOGE(CONN_PROXY, "init lock failed, please check resource");
         SoftBusFree(proxyConnection);
         return;
     }
@@ -388,7 +388,7 @@ static void ConstructProxyConnectionListDisconnecting(void)
     }
     int32_t ret = SoftBusMutexLock(&GetProxyChannelManager()->proxyConnectionList->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList fail");
+        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList failed, please check lock state");
         SoftBusMutexDestroy(&proxyConnection->lock);
         SoftBusFree(proxyConnection);
         return;
@@ -418,7 +418,7 @@ static void ConstructProxyConnectionList(void)
     CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is nullptr");
     ListInit(&proxyConnection->node);
     if (SoftBusMutexInit(&proxyConnection->lock, nullptr)!= SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "init lock fail");
+        CONN_LOGE(CONN_PROXY, "init lock failed, please check resource");
         SoftBusFree(proxyConnection);
         return;
     }
@@ -427,7 +427,7 @@ static void ConstructProxyConnectionList(void)
     proxyConnection->dereference = ProxyChannelDereference;
     int32_t ret = SoftBusMutexLock(&GetProxyChannelManager()->proxyConnectionList->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList fail");
+        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList failed, please check lock state");
         SoftBusMutexDestroy(&proxyConnection->lock);
         SoftBusFree(proxyConnection);
         return;
@@ -444,7 +444,7 @@ static void ConstructProxyConnectionListConnecting(void)
     CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is nullptr");
     ListInit(&proxyConnection->node);
     if (SoftBusMutexInit(&proxyConnection->lock, nullptr) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "init lock fail");
+        CONN_LOGE(CONN_PROXY, "init lock failed, please check resource");
         SoftBusFree(proxyConnection);
         return;
     }
@@ -462,7 +462,7 @@ static void ConstructProxyConnectionListConnecting(void)
     }
     int32_t ret = SoftBusMutexLock(&GetProxyChannelManager()->proxyConnectionList->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList fail");
+        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList failed, please check lock state");
         SoftBusMutexDestroy(&proxyConnection->lock);
         SoftBusFree(proxyConnection);
         return;

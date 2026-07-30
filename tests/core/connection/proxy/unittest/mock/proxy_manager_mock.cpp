@@ -29,7 +29,7 @@ int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *liste
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return -1;
     }
     return mocker->SoftBusAddBtStateListener(listener, listenerId);
@@ -39,7 +39,7 @@ SppSocketDriver *InitSppSocketDriver(void)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return nullptr;
     }
     return mocker->InitSppSocketDriver();
@@ -49,7 +49,7 @@ int32_t RegisterHfpListener(const ProxyListener listener)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return -1;
     }
     return mocker->RegisterHfpListener(listener);
@@ -59,7 +59,7 @@ void InitProxyChannelManagerWrapper(void)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return;
     }
     return mocker->InitProxyChannelManagerWrapper();
@@ -69,7 +69,7 @@ bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return false;
     }
     return mocker->IsPairedDevice(addr, isRealMac, isSupportHfp);
@@ -79,7 +79,7 @@ int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return -1;
     }
     return mocker->GetRealMac(realAddr, realAddrLen, hashAddr);
@@ -254,7 +254,7 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallbac
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return  -1;
     }
     return mocker->Connect(uuid, mac, connectCallback);
@@ -270,7 +270,7 @@ static int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t len)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return  -1;
     }
     return mocker->Write(clientFd, buf, len);
@@ -280,7 +280,7 @@ static int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t len)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
-        CONN_LOGE(CONN_PROXY, "mock is nullptr");
+        CONN_LOGE(CONN_PROXY, "mock is nullptr, please check mock setup");
         return  -1;
     }
     return mocker->Read(clientFd, buf, len);

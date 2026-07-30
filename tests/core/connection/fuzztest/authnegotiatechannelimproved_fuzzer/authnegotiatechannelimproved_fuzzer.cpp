@@ -79,7 +79,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     if (data == nullptr || size < sizeof(int32_t)) {
-        CONN_LOGE(CONN_TEST, "Invalid param");
+        CONN_LOGE(CONN_TEST, "param invalid, please check input");
         return SOFTBUS_INVALID_PARAM;
     }
 
