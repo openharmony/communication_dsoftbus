@@ -43,6 +43,7 @@ public:
     using FailureCallback = std::function<void(int32_t reason)>;
 
     ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback);
+    ~ConnectCommand() override;
 
     std::string GetRemoteDeviceId() const override;
     std::shared_ptr<WifiDirectProcessor> GetProcessor() override;
@@ -74,6 +75,7 @@ protected:
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
     ConnectCommandRetryReason retryReason_ = ConnectCommandRetryReason::RETRY_FOR_NOTHING;
+    enum WifiDirectConnectType connectType_;
 };
 }
 #endif
