@@ -2099,17 +2099,18 @@ HWTEST_F(TransClientSessionTest, ClientBindInvalidParamTest001, TestSize.Level1)
 /*
  * @tc.name: ClientListenInvalidParamTest001
  * @tc.desc: test ClientListen returns SOFTBUS_INVALID_PARAM
- *           when listener is nullptr
+ *           when listener is nullptr or qos is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransClientSessionTest, ClientListenInvalidParamTest001, TestSize.Level1)
 {
+    ISocketListener listener = {0};
+    listener.OnBind = [](int32_t, PeerSocketInfo) {};
+    listener.OnShutdown = [](int32_t, ShutdownReason) {};
     int32_t ret = ClientListen(TRANS_TEST_SESSION_ID, nullptr, 0, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientListen(TRANS_TEST_INVALID_SESSION_ID, nullptr, 0, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientListen(TRANS_TEST_SESSION_ID, nullptr, 0, nullptr);
+    ret = ClientListen(TRANS_TEST_SESSION_ID, nullptr, 1, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
