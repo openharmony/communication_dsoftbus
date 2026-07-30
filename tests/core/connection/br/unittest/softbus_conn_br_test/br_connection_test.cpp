@@ -182,7 +182,7 @@ ConnBrEventListener g_eventListener = {
 
 HWTEST_F(BrConnectionTest, ConnBrCreateConnectionTest001, TestSize.Level1)
 {
-    ConnBrConnection *connection = ConnBrCreateConnection(nullptr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
+    ConnBrConnection *connection = ConnBrCreateConnection(NULL, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     EXPECT_EQ(nullptr, connection);
 }
 
@@ -190,7 +190,7 @@ HWTEST_F(BrConnectionTest, ConnBrCreateConnectionTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -214,7 +214,7 @@ HWTEST_F(BrConnectionTest, ConnBrCreateConnectionTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -236,7 +236,7 @@ HWTEST_F(BrConnectionTest, ConnBrCreateConnectionTest004, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillOnce(Return(SOFTBUS_LOCK_ERR));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -252,7 +252,7 @@ HWTEST_F(BrConnectionTest, ConnBrCreateConnectionTest005, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(reinterpret_cast<SoftBusList *>nullptr));
+    EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return((SoftBusList *)NULL));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     
     char addr[BT_MAC_LEN] = "11:22:33:44:55:66";
@@ -264,7 +264,7 @@ HWTEST_F(BrConnectionTest, ConnBrFreeConnectionTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -281,7 +281,7 @@ HWTEST_F(BrConnectionTest, ConnBrFreeConnectionTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -290,14 +290,14 @@ HWTEST_F(BrConnectionTest, ConnBrFreeConnectionTest003, TestSize.Level1)
     char addr[BT_MAC_LEN] = "11:22:33:44:55:66";
     ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     ASSERT_NE(nullptr, connection);
-    connection->connectProcessStatus = nullptr;
+    connection->connectProcessStatus = NULL;
     ConnBrFreeConnection(connection);
     SoftBusFree(list);
 }
 
 HWTEST_F(BrConnectionTest, ConnBrUpdateConnectionRcTest001, TestSize.Level1)
 {
-    int32_t ret = ConnBrUpdateConnectionRc(nullptr, 1);
+    int32_t ret = ConnBrUpdateConnectionRc(NULL, 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -305,12 +305,12 @@ HWTEST_F(BrConnectionTest, ConnBrUpdateConnectionRcTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
-    EXPECT_CALL(brMock, ConnBrGetConnectionById).WillOnce(Return(reinterpret_cast<ConnBrConnection *>nullptr));
+    EXPECT_CALL(brMock, ConnBrGetConnectionById).WillOnce(Return((ConnBrConnection *)NULL));
     
     char addr[BT_MAC_LEN] = "11:22:33:44:55:66";
     ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
@@ -325,13 +325,13 @@ HWTEST_F(BrConnectionTest, ConnBrUpdateConnectionRcTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     
-    ConnBrConnection *testConnection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *testConnection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, testConnection);
     testConnection->connectionId = 1;
     testConnection->isOccupied = false;
@@ -354,13 +354,13 @@ HWTEST_F(BrConnectionTest, ConnBrUpdateConnectionRcTest004, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     
-    ConnBrConnection *testConnection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *testConnection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, testConnection);
     testConnection->connectionId = 1;
     testConnection->isOccupied = true;
@@ -383,13 +383,13 @@ HWTEST_F(BrConnectionTest, ConnBrUpdateConnectionRcTest005, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     
-    ConnBrConnection *testConnection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *testConnection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, testConnection);
     testConnection->connectionId = 1;
     testConnection->isOccupied = false;
@@ -412,7 +412,7 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceRequestTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -434,12 +434,12 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceRequestTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
-    EXPECT_CALL(brMock, ConnBrGetConnectionById).WillOnce(Return(reinterpret_cast<ConnBrConnection *>nullptr));
+    EXPECT_CALL(brMock, ConnBrGetConnectionById).WillOnce(Return((ConnBrConnection *)NULL));
     
     char addr[BT_MAC_LEN] = "11:22:33:44:55:66";
     ConnBrConnection *connection = ConnBrCreateConnection(addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
@@ -459,13 +459,13 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceRequestTest004, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     
-    ConnBrConnection *testConnection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *testConnection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, testConnection);
     testConnection->connectionId = 1;
     testConnection->isOccupied = false;
@@ -494,13 +494,13 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceRequestTest005, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     
-    ConnBrConnection *testConnection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *testConnection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, testConnection);
     testConnection->connectionId = 1;
     testConnection->isOccupied = false;
@@ -529,13 +529,13 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceRequestTest006, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     
-    ConnBrConnection *testConnection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *testConnection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, testConnection);
     testConnection->connectionId = 1;
     testConnection->isOccupied = true;
@@ -563,13 +563,13 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceRequestTest007, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, DestroySoftBusList).WillRepeatedly(Return());
     
-    ConnBrConnection *testConnection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *testConnection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, testConnection);
     testConnection->connectionId = 1;
     testConnection->isOccupied = false;
@@ -597,7 +597,7 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceRequestTest007, TestSize.Level1)
 
 HWTEST_F(BrConnectionTest, ConnBrOnReferenceResponseTest001, TestSize.Level1)
 {
-    int32_t ret = ConnBrOnReferenceResponse(nullptr, nullptr);
+    int32_t ret = ConnBrOnReferenceResponse(NULL, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -605,7 +605,7 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceResponseTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -627,7 +627,7 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceResponseTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -650,7 +650,7 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceResponseTest004, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -675,7 +675,7 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceResponseTest005, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -700,7 +700,7 @@ HWTEST_F(BrConnectionTest, ConnBrOnReferenceResponseTest006, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -725,7 +725,7 @@ HWTEST_F(BrConnectionTest, ConnBrConnectTest001, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -745,7 +745,7 @@ HWTEST_F(BrConnectionTest, ConnBrConnectTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -765,7 +765,7 @@ HWTEST_F(BrConnectionTest, ConnBrConnectTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -785,7 +785,7 @@ HWTEST_F(BrConnectionTest, ConnBrDisconnectNowTest001, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -807,7 +807,7 @@ HWTEST_F(BrConnectionTest, ConnBrDisconnectNowTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -830,7 +830,7 @@ HWTEST_F(BrConnectionTest, ConnBrDisconnectNowTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -885,7 +885,7 @@ HWTEST_F(BrConnectionTest, ConnBrRefreshIdleTimeoutTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -905,7 +905,7 @@ HWTEST_F(BrConnectionTest, ConnBrRefreshIdleTimeoutTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -924,7 +924,7 @@ HWTEST_F(BrConnectionTest, ConnBrRefreshIdleTimeoutTest003, TestSize.Level1)
 
 HWTEST_F(BrConnectionTest, ConnBrSetIdleCheckTest001, TestSize.Level1)
 {
-    int32_t ret = ConnBrSetIdleCheck(nullptr, true);
+    int32_t ret = ConnBrSetIdleCheck(NULL, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -932,7 +932,7 @@ HWTEST_F(BrConnectionTest, ConnBrSetIdleCheckTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -957,7 +957,7 @@ HWTEST_F(BrConnectionTest, ConnBrSetIdleCheckTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -976,7 +976,7 @@ HWTEST_F(BrConnectionTest, ConnBrOccupyTest002, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -997,7 +997,7 @@ HWTEST_F(BrConnectionTest, ConnBrOccupyTest003, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1015,7 +1015,7 @@ HWTEST_F(BrConnectionTest, ConnBrOccupyTest004, TestSize.Level1)
 {
     BrConnectionInterfaceMock brMock;
     EXPECT_CALL(brMock, SoftBusMutexInit).WillRepeatedly(Return(SOFTBUS_OK));
-    SoftBusList *list = reinterpret_cast<SoftBusList *>SoftBusCalloc(sizeof(SoftBusList));
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
     ListInit(&list->list);
     EXPECT_CALL(brMock, CreateSoftBusList).WillOnce(Return(list));
     EXPECT_CALL(brMock, SoftBusMutexDestroy).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1048,7 +1048,7 @@ HWTEST_F(BrConnectionTest, ConnBrConnectionMuduleInitTest001, TestSize.Level1)
 
 HWTEST_F(BrConnectionTest, ConnBrConnectionMuduleInitTest002, TestSize.Level1)
 {
-    int32_t ret = ConnBrConnectionMuduleInit(nullptr, &g_sppDriver, &g_eventListener);
+    int32_t ret = ConnBrConnectionMuduleInit(NULL, &g_sppDriver, &g_eventListener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -1057,7 +1057,7 @@ HWTEST_F(BrConnectionTest, ConnBrConnectionMuduleInitTest003, TestSize.Level1)
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     ASSERT_NE(nullptr, looper);
     
-    int32_t ret = ConnBrConnectionMuduleInit(looper, nullptr, &g_eventListener);
+    int32_t ret = ConnBrConnectionMuduleInit(looper, NULL, &g_eventListener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -1066,7 +1066,7 @@ HWTEST_F(BrConnectionTest, ConnBrConnectionMuduleInitTest004, TestSize.Level1)
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
     ASSERT_NE(nullptr, looper);
     
-    int32_t ret = ConnBrConnectionMuduleInit(looper, &g_sppDriver, nullptr);
+    int32_t ret = ConnBrConnectionMuduleInit(looper, &g_sppDriver, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

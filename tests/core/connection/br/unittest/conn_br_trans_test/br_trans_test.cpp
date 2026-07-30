@@ -79,9 +79,9 @@ public:
     static ConnSlideWindowController g_flowController;
 };
 
-SppSocketDriver ConnBrTransUnitTest::g_sppDriver = {};
-ConnBrTransEventListener ConnBrTransUnitTest::g_listener = {};
-ConnSlideWindowController ConnBrTransUnitTest::g_flowController = {};
+SppSocketDriver ConnBrTransUnitTest::g_sppDriver = {0};
+ConnBrTransEventListener ConnBrTransUnitTest::g_listener = {0};
+ConnSlideWindowController ConnBrTransUnitTest::g_flowController = {0};
 
 void ConnBrTransUnitTest::SetUpTestCase(void)
 {
@@ -143,7 +143,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest002, TestSize.Level1)
  */
 HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest003, TestSize.Level1)
 {
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Write = MockSppWrite;
     int32_t ret = ConnBrTransMuduleInit(&driver, &ConnBrTransUnitTest::g_listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -157,7 +157,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest003, TestSize.Level1)
  */
 HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest004, TestSize.Level1)
 {
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = MockSppRead;
     int32_t ret = ConnBrTransMuduleInit(&driver, &ConnBrTransUnitTest::g_listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -171,10 +171,10 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest004, TestSize.Level1)
  */
 HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest005, TestSize.Level1)
 {
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = MockSppRead;
     driver.Write = MockSppWrite;
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -188,10 +188,10 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest005, TestSize.Level1)
 HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest006, TestSize.Level1)
 {
     NiceMock<ConnBrTransTestMock> mock;
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = MockSppRead;
     driver.Write = MockSppWrite;
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = MockOnPostByteFinished;
 
     EXPECT_CALL(mock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_ERR));
@@ -209,10 +209,10 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest006, TestSize.Level1)
 HWTEST_F(ConnBrTransUnitTest, ConnBrTransMuduleInitTest007, TestSize.Level1)
 {
     NiceMock<ConnBrTransTestMock> mock;
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = MockSppRead;
     driver.Write = MockSppWrite;
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = MockOnPostByteFinished;
 
     EXPECT_CALL(mock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
@@ -247,7 +247,7 @@ HWTEST_F(ConnBrTransUnitTest, BrTransSendTest001, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t data[10] = {};
+    uint8_t data[10] = {0};
     g_sppWriteRetVal = 0;
     ret = BrTransSend(1, 1, 1024, data, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -264,7 +264,7 @@ HWTEST_F(ConnBrTransUnitTest, BrTransSendTest002, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t data[100] = {};
+    uint8_t data[100] = {0};
     g_sppWriteRetVal = 100;
     g_flowCtrlApplyRetVal = 0;
     ret = BrTransSend(1, 1, 1024, data, 100);
@@ -284,7 +284,7 @@ HWTEST_F(ConnBrTransUnitTest, BrTransSendTest003, TestSize.Level1)
     int32_t ret = InitTransModuleForTest(mock);
 
     uint32_t dataLen = 2048;
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(dataLen);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(dataLen);
     ASSERT_NE(data, nullptr);
 
     g_sppWriteRetVal = 1024;
@@ -306,7 +306,7 @@ HWTEST_F(ConnBrTransUnitTest, BrTransSendTest004, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t data[100] = {};
+    uint8_t data[100] = {0};
     g_sppWriteRetVal = -1;
     g_flowCtrlApplyRetVal = 0;
     ret = BrTransSend(1, 1, 1024, data, 100);
@@ -324,7 +324,7 @@ HWTEST_F(ConnBrTransUnitTest, BrTransSendTest005, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t data[100] = {};
+    uint8_t data[100] = {0};
     g_flowCtrlApplyRetVal = 0;
     g_sppWriteCallCount = 0;
     g_sppWriteRetVal = CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_QUEUE_FULL;
@@ -343,7 +343,7 @@ HWTEST_F(ConnBrTransUnitTest, BrTransSendTest006, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t data[100] = {};
+    uint8_t data[100] = {0};
     g_flowCtrlApplyRetVal = 0;
     g_sppWriteCallCount = 0;
     g_sppWriteRetVal = CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_INTERRUPTION;
@@ -363,7 +363,7 @@ HWTEST_F(ConnBrTransUnitTest, BrTransSendTest007, TestSize.Level1)
     int32_t ret = InitTransModuleForTest(mock);
 
     uint32_t dataLen = 200;
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(dataLen);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(dataLen);
     ASSERT_NE(data, nullptr);
 
     g_flowCtrlApplyRetVal = 0;
@@ -393,8 +393,8 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransReadOneFrameTest001, TestSize.Level1)
     int32_t socketHandle = 0;
     uint8_t *outData = nullptr;
 
-    uint8_t bufferData[10] = {};
-    LimitedBuffer buffer = {};
+    uint8_t bufferData[10] = {0};
+    LimitedBuffer buffer = {0};
     buffer.buffer = bufferData;
     buffer.capacity = 10;
     buffer.length = 5;
@@ -422,15 +422,15 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransReadOneFrameTest002, TestSize.Level1)
     int32_t socketHandle = 0;
     uint8_t *outData = nullptr;
 
-    ConnPktHead head = {};
+    ConnPktHead head = {0};
     head.magic = MAGIC_NUMBER + 1;
     head.len = 10;
     head.module = 0;
     head.seq = 0;
     head.flag = 0;
 
-    LimitedBuffer buffer = {};
-    buffer.buffer = reinterpret_cast<uint8_t *>&head;
+    LimitedBuffer buffer = {0};
+    buffer.buffer = (uint8_t *)&head;
     buffer.capacity = sizeof(ConnPktHead) + 10;
     buffer.length = sizeof(ConnPktHead) + 10;
 
@@ -457,8 +457,8 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransReadOneFrameTest003, TestSize.Level1)
     int32_t socketHandle = 0;
     uint8_t *outData = nullptr;
 
-    uint8_t bufferData[100] = {};
-    LimitedBuffer buffer = {};
+    uint8_t bufferData[100] = {0};
+    LimitedBuffer buffer = {0};
     buffer.buffer = bufferData;
     buffer.capacity = 100;
     buffer.length = 5;
@@ -486,15 +486,15 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransReadOneFrameTest004, TestSize.Level1)
     int32_t socketHandle = 0;
     uint8_t *outData = nullptr;
 
-    ConnPktHead head = {};
+    ConnPktHead head = {0};
     head.magic = MAGIC_NUMBER;
     head.len = 200;
     head.module = 0;
     head.seq = 0;
     head.flag = 0;
 
-    LimitedBuffer buffer = {};
-    buffer.buffer = reinterpret_cast<uint8_t *>&head;
+    LimitedBuffer buffer = {0};
+    buffer.buffer = (uint8_t *)&head;
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead) + 50;
 
@@ -521,15 +521,15 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransReadOneFrameTest005, TestSize.Level1)
     int32_t socketHandle = 0;
     uint8_t *outData = nullptr;
 
-    ConnPktHead head = {};
+    ConnPktHead head = {0};
     head.magic = MAGIC_NUMBER;
     head.len = 50;
     head.module = 0;
     head.seq = 0;
     head.flag = 0;
 
-    LimitedBuffer buffer = {};
-    buffer.buffer = reinterpret_cast<uint8_t *>&head;
+    LimitedBuffer buffer = {0};
+    buffer.buffer = (uint8_t *)&head;
     buffer.capacity = 200;
     buffer.length = sizeof(ConnPktHead) + 10;
 
@@ -551,7 +551,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest001, TestSize.Level1)
 
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 1;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_REQUEST;
@@ -577,7 +577,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest002, TestSize.Level1)
 
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 2;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_RESPONSE;
@@ -602,7 +602,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest003, TestSize.Level1)
 
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 3;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -628,7 +628,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest004, TestSize.Level1)
 
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 4;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_ACK_RESPONSE;
@@ -652,7 +652,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest005, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 5;
     ctx.flag = CONN_HIGH;
     ctx.method = (enum BrCtlMessageMethod)999;
@@ -675,7 +675,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest006, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 6;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_REQUEST;
@@ -698,7 +698,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest007, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 7;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_REQUEST;
@@ -721,7 +721,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest008, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 8;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -744,7 +744,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest009, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 9;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -770,7 +770,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPackCtlMessageTest010, TestSize.Level1)
 
     (void)InitTransModuleForTest(mock);
 
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 10;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -807,7 +807,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest001, TestSize.Level1)
  */
 HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest002, TestSize.Level1)
 {
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
     int32_t ret = ConnBrPostBytes(2, data, 0, 0, CONN_HIGH, MODULE_CONNECTION, 2);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -822,7 +822,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest002, TestSize.Level1)
 HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest003, TestSize.Level1)
 {
     uint32_t len = MAX_DATA_LEN + 1;
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(len);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(len);
     ASSERT_NE(data, nullptr);
     int32_t ret = ConnBrPostBytes(3, data, len, 0, CONN_HIGH, MODULE_CONNECTION, 3);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -839,7 +839,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest004, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
 
     EXPECT_CALL(mock, ConnBrGetConnectionById).WillOnce(Return(nullptr));
@@ -859,7 +859,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest005, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
 
     ConnBrConnection connection = {};
@@ -886,7 +886,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest006, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
 
     ConnBrConnection connection = {};
@@ -913,7 +913,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest007, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
 
     ConnBrConnection connection = {};
@@ -942,7 +942,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest008, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
 
     ConnBrConnection connection = {};
@@ -969,7 +969,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest009, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
 
     ConnBrConnection connection = {};
@@ -997,7 +997,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrPostBytesTest010, TestSize.Level1)
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
 
     ConnBrConnection connection = {};
@@ -1039,7 +1039,7 @@ HWTEST_F(ConnBrTransUnitTest, ConnBrTransConfigPostLimitTest002, TestSize.Level1
     NiceMock<ConnBrTransTestMock> mock;
     int32_t ret = InitTransModuleForTest(mock);
 
-    LimitConfiguration config = {};
+    LimitConfiguration config = {0};
     config.type = CONNECT_TCP;
     ret = ConnBrTransConfigPostLimit(&config);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);

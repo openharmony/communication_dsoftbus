@@ -60,7 +60,7 @@ protected:
             if (addr != nullptr) {
                 strcpy_s(conn->addr, BT_MAC_LEN, addr);
             }
-            conn->connectStatus = reinterpret_cast<SoftBusList *>malloc(sizeof(SoftBusList));
+            conn->connectStatus = (SoftBusList *)malloc(sizeof(SoftBusList));
             if (conn->connectStatus != nullptr) {
                 ListInit(&conn->connectStatus->list);
                 pthread_mutex_init(reinterpret_cast<pthread_mutex_t*>(&conn->connectStatus->lock), nullptr);
@@ -88,7 +88,7 @@ protected:
 
 /*
 * @tc.name: ConnBleCreateConnectionTest001
-* @tc.desc: test ConnBleCreateConnection ble addr is nullptr
+* @tc.desc: test ConnBleCreateConnection ble addr is NULL
 * @tc.type: FUNC
 * @tc.require:
 */

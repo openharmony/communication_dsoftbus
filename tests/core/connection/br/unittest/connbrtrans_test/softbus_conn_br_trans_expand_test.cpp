@@ -72,7 +72,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest001, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest002, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransConfigPostLimit002, Start");
-    LimitConfiguration config = {};
+    LimitConfiguration config = {0};
     config.type = CONNECT_TCP;
     int32_t ret = ConnBrTransConfigPostLimit(&config);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -87,7 +87,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest002, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit001, Start");
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     int32_t ret = ConnBrTransMuduleInit(nullptr, &listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -101,7 +101,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest001, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest002, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit002, Start");
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     int32_t ret = ConnBrTransMuduleInit(&driver, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -115,8 +115,8 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest002, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest003, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit003, Start");
-    SppSocketDriver driver = {};
-    ConnBrTransEventListener listener = {};
+    SppSocketDriver driver = {0};
+    ConnBrTransEventListener listener = {0};
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -130,9 +130,9 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest003, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest004, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit004, Start");
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -146,10 +146,10 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest004, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest005, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit005, Start");
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -165,11 +165,11 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest006, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit006, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     EXPECT_CALL(transMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_ERR));
@@ -189,11 +189,11 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest007, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit007, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     EXPECT_CALL(transMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
@@ -213,11 +213,11 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest008, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit008, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     EXPECT_CALL(transMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
@@ -237,11 +237,11 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest009, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit009, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
 
     EXPECT_CALL(transMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
@@ -259,7 +259,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest009, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage001, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 1;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_REQUEST;
@@ -267,7 +267,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest001, TestSize.Level1)
     ctx.referenceRequest.referenceNumber = 20;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -288,14 +288,14 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest001, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest002, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage002, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 2;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_RESPONSE;
     ctx.referenceResponse.referenceNumber = 30;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -316,7 +316,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest002, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest003, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage003, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 3;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -324,7 +324,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest003, TestSize.Level1)
     ctx.ackRequestResponse.seq = 100;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -345,7 +345,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest003, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest004, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage004, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 4;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_ACK_RESPONSE;
@@ -353,7 +353,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest004, TestSize.Level1)
     ctx.ackRequestResponse.seq = 200;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -374,13 +374,13 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest004, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest005, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage005, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 5;
     ctx.flag = CONN_HIGH;
     ctx.method = (enum BrCtlMessageMethod)999;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_LT(seq, 0);
@@ -396,7 +396,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest005, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest006, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage006, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 6;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_REQUEST;
@@ -404,7 +404,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest006, TestSize.Level1)
     ctx.referenceRequest.referenceNumber = 20;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -436,7 +436,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPostBytesTest001, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPostBytesTest002, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPostBytes002, Start");
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
     
     int32_t ret = ConnBrPostBytes(2, data, 0, 0, CONN_HIGH, MODULE_CONNECTION, 2);
@@ -454,7 +454,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPostBytesTest003, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrPostBytes003, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
     
     EXPECT_CALL(transMock, ConnBrGetConnectionById).WillOnce(Return(nullptr));
@@ -474,7 +474,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPostBytesTest004, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrPostBytes004, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusCalloc(100);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(100);
     ASSERT_NE(data, nullptr);
     
     ConnBrConnection connection = {};
@@ -498,7 +498,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPostBytesTest004, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, BrTransSendTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "BrTransSend001, Start");
-    uint8_t data[100] = {};
+    uint8_t data[100] = {0};
     
     int32_t ret = BrTransSend(1, 1, 1024, data, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -513,7 +513,7 @@ HWTEST_F(ConnBrTransTest, BrTransSendTest001, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest005, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransConfigPostLimit005, Start");
-    LimitConfiguration config = {};
+    LimitConfiguration config = {0};
     config.type = CONNECT_BR;
     config.active = true;
     config.windowInMillis = 500;
@@ -532,7 +532,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest005, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest007, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage007, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 7;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -540,9 +540,9 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest007, TestSize.Level1)
     ctx.ackRequestResponse.seq = 300;
     
     uint8_t *data1 = nullptr;
-    uint32_t dataLen1 = {};
+    uint32_t dataLen1 = {0};
     uint8_t *data2 = nullptr;
-    uint32_t dataLen2 = {};
+    uint32_t dataLen2 = {0};
     
     int64_t seq1 = ConnBrPackCtlMessage(ctx, &data1, &dataLen1);
     int64_t seq2 = ConnBrPackCtlMessage(ctx, &data2, &dataLen2);
@@ -566,13 +566,13 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest007, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest008, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage008, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 8;
     ctx.flag = CONN_HIGH;
     ctx.method = (enum BrCtlMessageMethod)999;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_LT(seq, 0);
@@ -588,7 +588,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest008, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest010, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage010, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 10;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_REQUEST;
@@ -596,7 +596,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest010, TestSize.Level1)
     ctx.referenceRequest.referenceNumber = 100;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -617,14 +617,14 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest010, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest011, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage011, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 11;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_RESPONSE;
     ctx.referenceResponse.referenceNumber = 150;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -645,7 +645,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest011, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest012, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage012, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 12;
     ctx.flag = CONN_LOW;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -653,7 +653,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest012, TestSize.Level1)
     ctx.ackRequestResponse.seq = 500;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -676,11 +676,11 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest014, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit014, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     
@@ -701,11 +701,11 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest015, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit015, Start");
     NiceMock<ConnectionBrTransMock> transMock;
     
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
@@ -721,7 +721,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest015, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest013, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage013, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 13;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -729,7 +729,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest013, TestSize.Level1)
     ctx.ackRequestResponse.seq = 600;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -750,7 +750,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest013, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest014, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage014, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 14;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_ACK_RESPONSE;
@@ -758,7 +758,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest014, TestSize.Level1)
     ctx.ackRequestResponse.seq = 700;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -779,7 +779,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest014, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest008, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransConfigPostLimit008, Start");
-    LimitConfiguration config = {};
+    LimitConfiguration config = {0};
     config.type = CONNECT_BR;
     config.active = true;
     config.windowInMillis = MIN_WINDOW_IN_MILLIS;
@@ -798,7 +798,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest008, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest009, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransConfigPostLimit009, Start");
-    LimitConfiguration config = {};
+    LimitConfiguration config = {0};
     config.type = CONNECT_BR;
     config.active = true;
     config.windowInMillis = MAX_WINDOW_IN_MILLIS;
@@ -817,7 +817,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest009, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest015, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage015, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 15;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -825,7 +825,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest015, TestSize.Level1)
     ctx.ackRequestResponse.seq = 0;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -846,7 +846,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest015, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest016, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage016, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 16;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_ACK_RESPONSE;
@@ -854,7 +854,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest016, TestSize.Level1)
     ctx.ackRequestResponse.seq = -100;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -875,13 +875,13 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest016, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest010, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransConfigPostLimit010, Start");
-    LimitConfiguration config1 = {};
+    LimitConfiguration config1 = {0};
     config1.type = CONNECT_BR;
     config1.active = true;
     config1.windowInMillis = 1000;
     config1.quotaInBytes = 1024;
     
-    LimitConfiguration config2 = {};
+    LimitConfiguration config2 = {0};
     config2.type = CONNECT_BR;
     config2.active = false;
     
@@ -901,10 +901,10 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest010, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest017, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit017, Start");
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Read = [](int32_t, uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
@@ -920,10 +920,10 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest017, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest018, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit018, Start");
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     driver.Write = [](int32_t, const uint8_t*, int32_t) -> int32_t { return 0; };
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
@@ -939,7 +939,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest018, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest017, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage017, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 17;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -947,7 +947,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest017, TestSize.Level1)
     ctx.ackRequestResponse.seq = 800;
     
     uint8_t *data = nullptr;
-    uint32_t dataLen = {};
+    uint32_t dataLen = {0};
     
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     EXPECT_GE(seq, 0);
@@ -968,7 +968,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest017, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest011, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransConfigPostLimit011, Start");
-    LimitConfiguration config = {};
+    LimitConfiguration config = {0};
     config.type = CONNECT_BR;
     config.active = true;
     config.windowInMillis = 50;
@@ -987,7 +987,7 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest011, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest018, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrPackCtlMessage018, Start");
-    BrCtlMessageSerializationContext ctx = {};
+    BrCtlMessageSerializationContext ctx = {0};
     ctx.connectionId = 18;
     ctx.flag = CONN_HIGH;
     ctx.method = BR_METHOD_NOTIFY_ACK;
@@ -996,7 +996,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest018, TestSize.Level1)
     
     for (int i = 0; i < 5; i++) {
         uint8_t *data = nullptr;
-        uint32_t dataLen = {};
+        uint32_t dataLen = {0};
         
         int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
         EXPECT_GE(seq, 0);
@@ -1018,7 +1018,7 @@ HWTEST_F(ConnBrTransTest, ConnBrPackCtlMessageTest018, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest012, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransConfigPostLimit012, Start");
-    LimitConfiguration config = {};
+    LimitConfiguration config = {0};
     config.type = CONNECT_BR;
     config.active = true;
     config.windowInMillis = 1000;
@@ -1039,9 +1039,9 @@ HWTEST_F(ConnBrTransTest, ConnBrTransConfigPostLimitTest012, TestSize.Level1)
 HWTEST_F(ConnBrTransTest, ConnBrTransMuduleInitTest020, TestSize.Level1)
 {
     CONN_LOGI(CONN_BR, "ConnBrTransMuduleInit020, Start");
-    SppSocketDriver driver = {};
+    SppSocketDriver driver = {0};
     
-    ConnBrTransEventListener listener = {};
+    ConnBrTransEventListener listener = {0};
     listener.onPostByteFinshed = [](uint32_t, uint32_t, int32_t, int32_t, int32_t, int64_t, int32_t) -> void {};
     
     int32_t ret = ConnBrTransMuduleInit(&driver, &listener);
