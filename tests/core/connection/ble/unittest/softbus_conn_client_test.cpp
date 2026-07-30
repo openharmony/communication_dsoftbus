@@ -546,7 +546,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
         .dataLen = 50,
         .charaUuid.uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
-    param.charaUuid.uuid = reinterpret_cast<char *>SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
     ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_SERVICE_UUID);
     EXPECT_EQ(EOK, ret);
@@ -559,7 +559,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
     param.charaUuid.uuid = nullptr;
 
     param.charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID);
-    param.charaUuid.uuid = reinterpret_cast<char *>SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
     ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLECONN_UUID);
     EXPECT_EQ(EOK, ret);
@@ -570,7 +570,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
     SoftBusFree(param.charaUuid.uuid);
     param.charaUuid.uuid = nullptr;
     param.charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID);
-    param.charaUuid.uuid = reinterpret_cast<char *>SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
     ASSERT_NE(nullptr, param.charaUuid.uuid);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
@@ -602,7 +602,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback002, TestSize.Level1)
         .dataLen = 50,
         .charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
     };
-    param.charaUuid.uuid = reinterpret_cast<char *>SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLECONN_UUID);
     EXPECT_EQ(EOK, ret);
 
@@ -645,7 +645,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback003, TestSize.Level1)
         .dataLen = 50,
         .charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
     };
-    param.charaUuid.uuid = reinterpret_cast<char *>SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
 
@@ -689,7 +689,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback004, TestSize.Level1)
         .dataLen = 50,
         .charaUuid.uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
     };
-    param.charaUuid.uuid = reinterpret_cast<char *>SoftBusCalloc(param.charaUuid.uuidLen + 1);
+    param.charaUuid.uuid = (char *)SoftBusCalloc(param.charaUuid.uuidLen + 1);
     ret = strcpy_s(param.charaUuid.uuid, param.charaUuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);
 

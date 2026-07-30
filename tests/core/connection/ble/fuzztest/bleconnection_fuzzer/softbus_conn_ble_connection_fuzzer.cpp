@@ -36,12 +36,12 @@ template <class T> T GetData()
     T objetct{};
     size_t objetctSize = sizeof(objetct);
     if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
-        CONN_LOGE(CONN_TEST, "data invalid");
+        COMM_LOGE(COMM_TEST, "data Invalid");
         return objetct;
     }
     errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
     if (ret != EOK) {
-        CONN_LOGE(CONN_TEST, "memcpy failed");
+        COMM_LOGE(COMM_TEST, "memcpy err");
         return {};
     }
     g_baseFuzzPos += objetctSize;
@@ -51,7 +51,7 @@ template <class T> T GetData()
 void BleOnDataReceivedFuzzTest(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
-        CONN_LOGE(CONN_TEST, "param invalid");
+        COMM_LOGE(COMM_TEST, "Invalid param");
         return;
     }
     ConnBleServerEventListener eventListener;
@@ -61,13 +61,13 @@ void BleOnDataReceivedFuzzTest(const uint8_t* data, size_t size)
 
     uint32_t connectionId = GetData<uint32_t>();
     bool isConnCharacterisic = GetData<bool>();
-    uint8_t *buf = reinterpret_cast<uint8_t *>SoftBusCalloc(size * sizeof(uint8_t));
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size * sizeof(uint8_t));
     if (buf == nullptr) {
-        CONN_LOGE(CONN_TEST, "calloc failed");
+        COMM_LOGE(COMM_TEST, "calloc faild");
         return;
     }
     if (memcpy_s(buf, size, data, size) != EOK) {
-        CONN_LOGE(CONN_TEST, "memcpy failed");
+        COMM_LOGE(COMM_TEST, "memcpy err");
         SoftBusFree(buf);
         return;
     }

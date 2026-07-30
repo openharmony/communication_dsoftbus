@@ -242,7 +242,7 @@ HWTEST_F(ConnectionBleManagerTest, TestConflictGetConnection001, TestSize.Level1
     EXPECT_EQ(2, ret);
 
     int32_t underlayHandle = 2;
-    uint8_t *data = reinterpret_cast<uint8_t *>malloc(sizeof(uint8_t));
+    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_OK));
     bool res = g_conflictListener.postBytes(underlayHandle, data, sizeof(uint8_t));
@@ -350,7 +350,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface001, TestSize.Level1)
 
     EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillRepeatedly(Return(SOFTBUS_OK));
     uint32_t connectionId = 131001;
-    uint8_t *data = reinterpret_cast<uint8_t *>malloc(sizeof(uint8_t));
+    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
     uint32_t dataLen = sizeof(uint8_t);
     int32_t pid = 0;
     int32_t flag = 2;
@@ -931,7 +931,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleSend001, TestSize.Level1)
     ASSERT_EQ(EOK, ret);
     connection->protocol = BLE_GATT;
     connection->side = CONN_SIDE_SERVER;
-    uint8_t *data = reinterpret_cast<uint8_t *>SoftBusMalloc(sizeof(uint8_t));
+    uint8_t *data = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
     uint32_t dataLen = sizeof(uint8_t);
 
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;

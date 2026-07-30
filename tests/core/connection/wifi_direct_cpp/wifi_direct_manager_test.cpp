@@ -699,8 +699,8 @@ HWTEST_F(WifiDirectManagerCppTest, GetLocalAndRemoteMacByRemoteIpTest, TestSize.
     std::string remoteIp("172.30.1.2");
     std::string remoteIpv6("fe80::a446:b4ff:fec1:7323");
     constexpr int32_t macLen = 18;
-    char localMac[macLen] = {};
-    char remoteMac[macLen] = {};
+    char localMac[macLen] = {0};
+    char remoteMac[macLen] = {0};
 
     // Test with no links
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
@@ -1027,8 +1027,8 @@ HWTEST_F(WifiDirectManagerCppTest, GetLocalAndRemoteMacByLocalIpWithIpv6Test, Te
     std::string uuid("0123456789ABCDE9");
     std::string localIpv6("fe80::200:22ff:fe6b:262d");
     constexpr int32_t macLen = 18;
-    char localMac[macLen] = {};
-    char remoteMac[macLen] = {};
+    char localMac[macLen] = {0};
+    char remoteMac[macLen] = {0};
 
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 

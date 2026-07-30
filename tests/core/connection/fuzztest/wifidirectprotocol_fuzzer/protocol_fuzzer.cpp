@@ -56,7 +56,7 @@ static void StringToBytes(const std::string &s, std::vector<uint8_t> output)
         delete[] buf;
         return;
     }
-    CONN_LOGI(CONN_TEST, "fuzz test successful, '%{public}s'", s.c_str());
+    CONN_LOGE(CONN_TEST, "success, '%{public}s'", s.c_str());
     output.insert(output.end(), buf, buf + size);
     delete[] buf;
 }

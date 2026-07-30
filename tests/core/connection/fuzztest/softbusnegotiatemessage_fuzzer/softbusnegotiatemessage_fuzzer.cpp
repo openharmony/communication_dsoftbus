@@ -31,12 +31,12 @@ T GetData()
     T objetct {};
     size_t objetctSize = sizeof(objetct);
     if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
-        CONN_LOGE(CONN_TEST, "data invalid");
+        COMM_LOGE(COMM_TEST, "data Invalid");
         return objetct;
     }
     errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
     if (ret != EOK) {
-        CONN_LOGE(CONN_TEST, "memcpy failed");
+        COMM_LOGE(COMM_TEST, "memcpy err");
         return {};
     }
     g_baseFuzzPos += objetctSize;
@@ -46,7 +46,7 @@ T GetData()
 void SoftBusNegotiateMessageUnmarshallingFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
-        CONN_LOGE(CONN_TEST, "param invalid");
+        COMM_LOGE(COMM_TEST, "Invalid param");
         return;
     }
     g_baseFuzzSize = size;

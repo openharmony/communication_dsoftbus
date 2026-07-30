@@ -433,7 +433,7 @@ HWTEST_F(ServiceConnectionTest, ServiceStopCallback001, TestSize.Level1)
     SoftBusBtUuid uuid = {
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
-    uuid.uuid = reinterpret_cast<char *>SoftBusCalloc(uuid.uuidLen+1);
+    uuid.uuid = (char *)SoftBusCalloc(uuid.uuidLen+1);
     ASSERT_NE(nullptr, uuid.uuid);
     int32_t ret = strcpy_s(uuid.uuid, uuid.uuidLen + 1, SOFTBUS_CHARA_BLENET_UUID);
     EXPECT_EQ(EOK, ret);

@@ -83,7 +83,7 @@ HWTEST_F(WifiDirectInitTest, ReAuthTransListener001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED);
 
     ret = 1;
-    EXPECT_CALL(*mockDlsym, dlopen(_, _)).WillRepeatedly(Return(reinterpret_cast<void *>&ret));
+    EXPECT_CALL(*mockDlsym, dlopen(_, _)).WillRepeatedly(Return((void *)&ret));
     EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
     ret = DBinderSoftbusServer::GetInstance().RegAuthTransListener(MODULE_P2P_LINK, nullptr);
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);

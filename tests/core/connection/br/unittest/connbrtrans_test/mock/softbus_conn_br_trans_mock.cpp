@@ -82,7 +82,7 @@ void ConnSlideWindowControllerDelete(struct ConnSlideWindowController *self)
     GetConnectionBrTransInterface()->ConnSlideWindowControllerDelete(self);
 }
 
-int32_t ConnStartActionAsync(const void *looper, void (*threadEntry)reinterpret_cast<void *>, void *arg)
+int32_t ConnStartActionAsync(const void *looper, void (*threadEntry)(void *), void *arg)
 {
     return GetConnectionBrTransInterface()->ConnStartActionAsync(looper, threadEntry, arg);
 }

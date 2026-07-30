@@ -193,7 +193,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger003, TestSize.Level1)
     ret = ConnConnectDevice(&info, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -339,7 +339,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger007, TestSize.Level1)
     ret = ConnConnectDevice(&info, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -443,7 +443,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger009, TestSize.Level1)
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -502,7 +502,7 @@ HWTEST_F(ConnectionBrTest, testConnmanger010, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -574,7 +574,7 @@ HWTEST_F(ConnectionBrTest, CheckActiveConnection001, TestSize.Level1)
 
 HWTEST_F(ConnectionBrTest, CheckActiveConnection002, TestSize.Level1)
 {
-    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     int32_t ret = SoftBusMutexInit(&connection->lock, nullptr);
     ASSERT_EQ(EOK, ret);
@@ -779,7 +779,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans001, TestSize.Level1)
     head.len = 70;
     buffer.capacity = 140;
     buffer.length = 100;
-    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
+    buffer.buffer = (uint8_t *)(&head);
     connectionId = 1;
     ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -788,7 +788,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans001, TestSize.Level1)
     head.len = 70;
     buffer.capacity = 140;
     buffer.length = 100;
-    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
+    buffer.buffer = (uint8_t *)(&head);
     connectionId = 1;
     ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
     EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL, ret);
@@ -807,7 +807,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans002, TestSize.Level1)
     head.len = 70;
     buffer.capacity = 70;
     buffer.length = 100;
-    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
+    buffer.buffer = (uint8_t *)(&head);
     connectionId = 1;
     ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
     EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL, ret);
@@ -826,7 +826,7 @@ HWTEST_F(ConnectionBrTest, testBrBrans003, TestSize.Level1)
     head.len = 70;
     buffer.capacity = 140;
     buffer.length = 90;
-    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
+    buffer.buffer = (uint8_t *)(&head);
     connectionId = 1;
     ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
     EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL, ret);
@@ -893,13 +893,13 @@ HWTEST_F(ConnectionBrTest, testBrBrans005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     len = MAX_DATA_LEN + 1;
-    data = reinterpret_cast<uint8_t *>SoftBusCalloc(len);
+    data = (uint8_t *)SoftBusCalloc(len);
     ASSERT_NE(nullptr, data);
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     len = MAX_DATA_LEN;
-    data = reinterpret_cast<uint8_t *>SoftBusCalloc(len);
+    data = (uint8_t *)SoftBusCalloc(len);
     ASSERT_NE(nullptr, data);
     ret = ConnBrPostBytes(connectionId, data, len, pid, flag, module, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);

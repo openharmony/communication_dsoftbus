@@ -38,7 +38,7 @@ static ConnectionBrInterface *GetConnectionBrInterface()
 int32_t ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1(ConfigType type, unsigned char *val, uint32_t len)
 {
     unsigned char val1[4] =  {'B', 'a'};
-    if (memcpy_s(reinterpret_cast<void *>val, sizeof(int32_t), val1, sizeof(val1)) != EOK) {
+    if (memcpy_s((void *)val, sizeof(int32_t), val1, sizeof(val1)) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -47,7 +47,7 @@ int32_t ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1(ConfigType type, un
 int32_t ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2(ConfigType type, unsigned char *val, uint32_t len)
 {
     unsigned char val1[4] = {1, 0, 0, 0};
-    if (memcpy_s(reinterpret_cast<void *>val, sizeof(int32_t), val1, sizeof(val1)) != EOK) {
+    if (memcpy_s((void *)val, sizeof(int32_t), val1, sizeof(val1)) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -170,7 +170,7 @@ int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
 }
 
 int32_t SoftBusThreadCreate(
-    SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) reinterpret_cast<void *>, void *arg)
+    SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *), void *arg)
 {
     return GetConnectionBrInterface()->SoftBusThreadCreate(thread, threadAttr, threadEntry, arg);
 }

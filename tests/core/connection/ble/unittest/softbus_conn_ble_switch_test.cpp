@@ -133,7 +133,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
     ret = ConnConnectDevice(&info, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -226,7 +226,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger003, TestSize.Level1)
 
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -332,7 +332,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger005, TestSize.Level1)
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -391,7 +391,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -491,7 +491,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
 
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;
@@ -600,7 +600,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
     ret = ConnConnectDevice(&info, reqId2, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + 1, strlen(str), str);
         data.len = CONN_HEAD_SIZE + 20;

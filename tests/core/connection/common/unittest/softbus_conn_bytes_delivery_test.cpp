@@ -47,7 +47,7 @@ public:
  */
 HWTEST_F(ConnBytesDeliveryTest, CreateDestoryDeliveryTest, TestSize.Level1)
 {
-    ConnBytesDelivery *delivery = ConnCreateBytesDelivery(nullptr);
+    ConnBytesDelivery *delivery = ConnCreateBytesDelivery(NULL);
     ASSERT_EQ(delivery, nullptr);
 
     struct ConnBytesDeliveryConfig config = {

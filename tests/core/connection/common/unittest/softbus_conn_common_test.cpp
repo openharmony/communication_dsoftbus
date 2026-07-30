@@ -248,7 +248,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
     SoftbusAdapterMock mock;
     EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
  
-    int32_t fdArray[1024] = {};
+    int32_t fdArray[1024] = {0};
     for (int32_t index = 0; index < 1024; index++) {
         fdArray[index] = epoll_create(0);
     }
@@ -407,7 +407,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener026, TestSize.Level1)
 
 /*
  * @tc.name: testBaseListener027
- * @tc.desc: Test StopBaseListener failed g_listenerList[module].info = nullptr.
+ * @tc.desc: Test StopBaseListener failed g_listenerList[module].info = NULL.
  * @tc.in: Test module, Test number, Test Levels.
  * @tc.out: NonZero
  * @tc.type: FUNC
@@ -788,7 +788,7 @@ HWTEST_F(SoftbusConnCommonTest, AddEvent001, TestSize.Level1)
     int32_t ret = AddEvent(nullptr, fd, READ_TRIGGER);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
-    EventWatcher watcher = {};
+    EventWatcher watcher = {0};
     watcher.watcherId = -1;
  
     ret = AddEvent(&watcher, fd, READ_TRIGGER);
@@ -828,7 +828,7 @@ HWTEST_F(SoftbusConnCommonTest, ModifyEvent001, TestSize.Level1)
     int32_t ret = ModifyEvent(nullptr, fd, READ_TRIGGER);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
-    EventWatcher watcher = {};
+    EventWatcher watcher = {0};
     watcher.watcherId = -1;
     ret = ModifyEvent(&watcher, fd, EXCEPT_TRIGGER);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -868,7 +868,7 @@ HWTEST_F(SoftbusConnCommonTest, RemoveEvent001, TestSize.Level1)
     int32_t ret = RemoveEvent(nullptr, fd);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
-    EventWatcher watcher = {};
+    EventWatcher watcher = {0};
     watcher.watcherId = -1;
     ret = RemoveEvent(&watcher, fd);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -909,7 +909,7 @@ HWTEST_F(SoftbusConnCommonTest, WatchEvent001, TestSize.Level1)
     int32_t ret = WatchEvent(nullptr, -1, &fdEventNode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
-    EventWatcher watcher = {};
+    EventWatcher watcher = {0};
     watcher.watcherId = -1;
     ret = WatchEvent(&watcher, -1, &fdEventNode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
