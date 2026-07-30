@@ -436,6 +436,7 @@ group("unittest") {
     "dfx:unittest",
     "entity:unittest",
     "processor:unittest",
+    "protocol:unittest",
     "utils:unittest",
     "dbinder:unittest",
   ]
