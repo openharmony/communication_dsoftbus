@@ -424,7 +424,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection012, TestSize.Level1)
     serverState->traceId = 0;
     serverState->serverId = 1;
     SoftBusMutexInit(&g_serverStateMutex, nullptr);
-    ret = ListenTask((void *)serverState);
+    ret = ListenTask(reinterpret_cast<void *>(serverState));
     EXPECT_EQ(nullptr, ret);
 }
 
