@@ -750,10 +750,6 @@ static char *GetCredIdByIdService(
     char *credList = NULL;
     char *credId = NULL;
     char accountHashStr[SHA_256_HEX_HASH_LEN] = { 0 };
-<<<<<<< HEAD
-
-=======
->>>>>>> 393ce3c5b (fix: 修复静态检查问题（删除注释代码和多余空行）)
     if (ConvertBytesToHexString(accountHashStr, SHA_256_HEX_HASH_LEN, (unsigned char *)accountHash, SHA_256_HASH_LEN) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "convert account to string fail");

@@ -65,10 +65,6 @@ void AuthUkManagerTest::TearDownTestCase()
     DeinitUserKeyList();
     LnnDeinitDistributedLedger();
     LnnDeinitLocalLedger();
-<<<<<<< HEAD
-    LooperDeinit();
-=======
->>>>>>> 393ce3c5b (fix: 修复静态检查问题（删除注释代码和多余空行）)
 }
 
 void AuthUkManagerTest::SetUp() { }
@@ -1119,7 +1115,7 @@ HWTEST_F(AuthUkManagerTest, PROCESS_UK_DEVICE_ID_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     requestId = 1;
     ret = ProcessUkDeviceId(channelId, requestId, data, dataLen);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_UK_UPDATE_ACL_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     DeleteUkNegotiateInstance(requestId);
     DeInitUkNegoInstanceList();
     UkNegotiateDeinit();

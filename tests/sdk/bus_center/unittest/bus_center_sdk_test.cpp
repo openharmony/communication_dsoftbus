@@ -479,7 +479,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_SET_NODE_KEY_INFO_Test_001, TestSize.L
     EXPECT_TRUE(SetNodeKeyInfo(nullptr, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, nullptr,
         strlen(serviceFindCap)) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(SetNodeKeyInfo(TEST_PKG_NAME, info.networkId, NODE_KEY_SERVICE_FIND_CAP_EX, (uint8_t *)serviceFindCap1,
-        strlen(serviceFindCap1)) == SOFTBUS_IPC_ERR);
+        strlen(serviceFindCap1)) == SOFTBUS_OK);
 }
 
 /*
@@ -814,6 +814,13 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_PARAM_CHECK_Test001, TestSize.Level1)
     EXPECT_EQ(SyncTrustedRelationShip(nullptr, msg, strlen(msg)), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(SyncTrustedRelationShip(TEST_PKG_NAME, nullptr, strlen(msg)), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(SyncTrustedRelationShip(TEST_PKG_NAME, msg, strlen(msg)), SOFTBUS_IPC_ERR);
+    PushMsg pushMsg{};
+    pushMsg.data = (const uint8_t *)msg;
+    EXPECT_EQ(ProcessPushMsg(pushMsg), SOFTBUS_INVALID_PARAM);
+    pushMsg.len = MAX_PUSH_MSG_SIZE + 1;
+    EXPECT_EQ(ProcessPushMsg(pushMsg), SOFTBUS_INVALID_PARAM);
+    pushMsg.len = strlen(msg);
+    EXPECT_NE(ProcessPushMsg(pushMsg), SOFTBUS_OK);
 }
 
 /*

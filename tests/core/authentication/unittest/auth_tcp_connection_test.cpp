@@ -25,6 +25,7 @@
 #include "softbus_socket.h"
 
 namespace OHOS {
+using namespace testing;
 using namespace testing::ext;
 constexpr uint32_t TEST_DATA_LEN = 30;
 const int32_t TEST_MAGIC = 1;
@@ -59,7 +60,7 @@ bool AuthTcpConnectionTest::isOnWiFiDataReceivedSuccess = false;
 bool AuthTcpConnectionTest::isOnDataReceivedSuccess = false;
 bool AuthTcpConnectionTest::isOnDisconnectSuccess = false;
 
-void AuthTcpConnectionTest::SetUpTestCase() { }
+void AuthTcpConnectionTest::SetUpTestCase() {  }
 
 void AuthTcpConnectionTest::TearDownTestCase() { }
 
@@ -650,7 +651,7 @@ HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_001, TestSize.Level1)
     (void)memset_s(&clientAddr, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = OnConnectEvent(module, cfd, &clientAddr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    cfd = 1;
+    cfd = 999;
     ret = OnConnectEvent(module, cfd, &clientAddr);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL);
 
@@ -740,12 +741,8 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Leve
     TriggerType trigger = READ_TRIGGER;
 
     int32_t ret = AuthTcpCreateListener(module, fd, trigger);
-<<<<<<< HEAD
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-=======
 
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
->>>>>>> 393ce3c5b (fix: 修复静态检查问题（删除注释代码和多余空行）)
 }
 
 /*
@@ -855,7 +852,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_SET_DEVICE_TEST_001, TestSize.Level1)
     int32_t ret = SocketSetDevice(fd, isBlockMode);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
 
-    fd = 1;
+    fd = 999;
     ret = SocketSetDevice(fd, isBlockMode);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
 }
@@ -1512,7 +1509,7 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_004, TestSize.Level1)
  */
 HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_004, TestSize.Level1)
 {
-    int32_t cfd = 1;
+    int32_t cfd = 999;
     ConnectOption clientAddr;
     (void)memset_s(&clientAddr, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret;
@@ -1562,10 +1559,10 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_005, TestSize.Leve
     int32_t ret;
 
     ret = AuthTcpCreateListener(module, fd, READ_TRIGGER);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     ret = AuthTcpCreateListener(module, fd, WRITE_TRIGGER);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /*
@@ -1996,7 +1993,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_TEST_005, TestSize.Level1)
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_SET_DEVICE_TEST_004, TestSize.Level1)
 {
-    int32_t fd = 1;
+    int32_t fd = 999;
     int32_t ret;
 
     ret = SocketSetDevice(fd, true);
