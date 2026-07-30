@@ -142,7 +142,7 @@ ConnBrConnection* BrManagerTest::CreateConnectionAndSave(const char *mac, ConnSi
     NiceMock<BrManagerTestMock> mock;
     EXPECT_CALL(mock, ActionOfConnBrCreateConnection(_, _, _))
         .WillRepeatedly(Invoke([](const char *addr, ConnSideType s, int32_t handle) -> ConnBrConnection* {
-            ConnBrConnection *conn = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+            ConnBrConnection *conn = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
             if (conn != nullptr) {
                 static uint32_t g_connectionId = 1;
                 conn->connectionId = g_connectionId++;
@@ -186,7 +186,7 @@ HWTEST_F(BrManagerTest, CONN_INIT_BR_FAIL_002, TestSize.Level1)
 */
 HWTEST_F(BrManagerTest, CONN_INIT_BR_FAIL_003, TestSize.Level1)
 {
-    ConnectCallback invalidCallback = {0};
+    ConnectCallback invalidCallback = {};
     invalidCallback.OnConnected = nullptr;
     invalidCallback.OnReusedConnected = TestOnReusedConnected;
     invalidCallback.OnDisconnected = TestOnDisconnected;
@@ -204,7 +204,7 @@ HWTEST_F(BrManagerTest, CONN_INIT_BR_FAIL_003, TestSize.Level1)
 */
 HWTEST_F(BrManagerTest, CONN_INIT_BR_FAIL_004, TestSize.Level1)
 {
-    ConnectCallback invalidCallback = {0};
+    ConnectCallback invalidCallback = {};
     invalidCallback.OnConnected = TestOnConnected;
     invalidCallback.OnReusedConnected = TestOnReusedConnected;
     invalidCallback.OnDisconnected = nullptr;
@@ -222,7 +222,7 @@ HWTEST_F(BrManagerTest, CONN_INIT_BR_FAIL_004, TestSize.Level1)
 */
 HWTEST_F(BrManagerTest, CONN_INIT_BR_FAIL_005, TestSize.Level1)
 {
-    ConnectCallback invalidCallback = {0};
+    ConnectCallback invalidCallback = {};
     invalidCallback.OnConnected = TestOnConnected;
     invalidCallback.OnReusedConnected = TestOnReusedConnected;
     invalidCallback.OnDisconnected = TestOnDisconnected;
@@ -460,7 +460,7 @@ HWTEST_F(BrManagerTest, INTERFACE_CONNECT_DEVICE_SUCCESS_015, TestSize.Level1)
     EXPECT_CALL(mock, ConnBrCreateBrPendingPacket(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ActionOfConnBrCreateConnection(_, _, _))
         .WillRepeatedly(Invoke([](const char *addr, ConnSideType side, int32_t handle) -> ConnBrConnection* {
-            ConnBrConnection *conn = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+            ConnBrConnection *conn = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
             if (conn != nullptr) {
                 static uint32_t g_connectionId = 100;
                 conn->connectionId = g_connectionId++;

@@ -290,7 +290,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection004, TestSize.Level1)
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
     BtUuid uuid = {
-        .uuid = (char *)SOFTBUS_CHARA_CONN_UUID,
+        .uuid = reinterpret_cast<char *>SOFTBUS_CHARA_CONN_UUID,
         .uuidLen = strlen(SOFTBUS_CHARA_CONN_UUID),
     };
     EXPECT_NO_FATAL_FAILURE(BrConnectStatusCallback(&addr, uuid, result, status));
@@ -357,28 +357,28 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection009, TestSize.Level1)
 
     msg.what = MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT;
     args.what = MSG_CONNECTION_RETRY_NOTIFY_REFERENCE;
-    ret = BrCompareConnectionLooperEventFunc(&msg, (void *)(&args));
+    ret = BrCompareConnectionLooperEventFunc(&msg, reinterpret_cast<void *>(&args));
     EXPECT_EQ(COMPARE_FAILED, ret);
 
     msg.what = MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT;
     args.what = MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT;
     msg.arg1 = 10;
     args.arg1 = 10;
-    ret = BrCompareConnectionLooperEventFunc(&msg, (void *)(&args));
+    ret = BrCompareConnectionLooperEventFunc(&msg, reinterpret_cast<void *>(&args));
     EXPECT_EQ(COMPARE_SUCCESS, ret);
 
     msg.what = MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT;
     args.what = MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT;
     msg.arg1 = 9;
     args.arg1 = 10;
-    ret = BrCompareConnectionLooperEventFunc(&msg, (void *)(&args));
+    ret = BrCompareConnectionLooperEventFunc(&msg, reinterpret_cast<void *>(&args));
     EXPECT_EQ(COMPARE_FAILED, ret);
 
     msg.what = MSG_CONNECTION_RETRY_NOTIFY_REFERENCE;
     args.what = MSG_CONNECTION_RETRY_NOTIFY_REFERENCE;
     msg.arg1 = 9;
     args.arg1 = 10;
-    ret = BrCompareConnectionLooperEventFunc(&msg, (void *)(&args));
+    ret = BrCompareConnectionLooperEventFunc(&msg, reinterpret_cast<void *>(&args));
     EXPECT_EQ(COMPARE_FAILED, ret);
 
     msg.what = MSG_CONNECTION_RETRY_NOTIFY_REFERENCE;
@@ -386,7 +386,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection009, TestSize.Level1)
     args.arg1 = 0;
     args.arg2 = 0;
     args.obj = nullptr;
-    ret = BrCompareConnectionLooperEventFunc(&msg, (void *)(&args));
+    ret = BrCompareConnectionLooperEventFunc(&msg, reinterpret_cast<void *>(&args));
     EXPECT_EQ(COMPARE_SUCCESS, ret);
 }
 
@@ -399,7 +399,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection010, TestSize.Level1)
     ctx = (ServerServeContext *)SoftBusCalloc(sizeof(*ctx));
     ASSERT_NE(nullptr, ctx);
     ctx->socketHandle = 0;
-    ret = StartServerServe((void *)(ctx));
+    ret = StartServerServe(reinterpret_cast<void *>(ctx));
     EXPECT_EQ(nullptr, ret);
 }
 
@@ -407,7 +407,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection011, TestSize.Level1)
 {
     ConnBrConnection *connection;
 
-    connection = (ConnBrConnection *)SoftBusCalloc(sizeof(*connection));
+    connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(*connection));
     ASSERT_NE(nullptr, connection);
     connection->connectProcessStatus = nullptr;
     ConnBrFreeConnection(connection);
@@ -424,7 +424,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection012, TestSize.Level1)
     serverState->traceId = 0;
     serverState->serverId = 1;
     SoftBusMutexInit(&g_serverStateMutex, nullptr);
-    ret = ListenTask((void *)serverState);
+    ret = ListenTask(reinterpret_cast<void *>serverState);
     EXPECT_EQ(nullptr, ret);
 }
 
@@ -440,38 +440,38 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
 
     val = MAX_BR_READ_BUFFER_CAPACITY + 1;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
-        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
+    memcpy_s(reinterpret_cast<void *>(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, reinterpret_cast<void *>(&val), sizeof(int));
     ret = InitProperty();
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
-        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
+    memcpy_s(reinterpret_cast<void *>(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, reinterpret_cast<void *>(&val), sizeof(int));
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 0;
     ret = InitProperty();
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
-        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
+    memcpy_s(reinterpret_cast<void *>(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, reinterpret_cast<void *>(&val), sizeof(int));
     mtu = MAX_BR_MTU_SIZE + 1;
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 4;
-    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
-        g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, (void *)(&mtu), sizeof(int));
+    memcpy_s(reinterpret_cast<void *>(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
+        g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, reinterpret_cast<void *>(&mtu), sizeof(int));
     ret = InitProperty();
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
-        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
+    memcpy_s(reinterpret_cast<void *>(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+        g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, reinterpret_cast<void *>(&val), sizeof(int));
     mtu = MAX_BR_MTU_SIZE;
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 4;
-    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
-        g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, (void *)(&mtu), sizeof(int));
+    memcpy_s(reinterpret_cast<void *>(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
+        g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, reinterpret_cast<void *>(&mtu), sizeof(int));
     ret = InitProperty();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -685,7 +685,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager014, TestSize.Level1)
 
     EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
-    target = (ConnBrConnection *)SoftBusCalloc(sizeof(*target));
+    target = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(*target));
     ASSERT_NE(nullptr, target);
     SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
     (void)strcpy_s(target->addr, BT_MAC_LEN, "abcde");
@@ -799,7 +799,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager019, TestSize.Level1)
     head->flag = 0;
     head->module = 0;
     head->seq = 0;
-    ctx.data = (uint8_t *)head;
+    ctx.data = reinterpret_cast<uint8_t *>head;
     ctx.connectionId = 0;
     DataReceived(&ctx);
 }
@@ -828,7 +828,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager020, TestSize.Level1)
     head->flag = 0;
     head->module = MODULE_CONNECTION;
     head->seq = 0;
-    ctx.data = (uint8_t *)head;
+    ctx.data = reinterpret_cast<uint8_t *>head;
     ctx.connectionId = 0;
     DataReceived(&ctx);
 }
@@ -855,7 +855,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager021, TestSize.Level1)
     head->flag = 0;
     head->module = MODULE_NIP_BR_CHANNEL;
     head->seq = (int64_t)BR_NIP_SEQ;
-    ctx.data = (uint8_t *)head;
+    ctx.data = reinterpret_cast<uint8_t *>head;
     ctx.connectionId = 0;
     DataReceived(&ctx);
 }
@@ -882,7 +882,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
     head->flag = 0;
     head->module = MODULE_OLD_NEARBY;
     head->seq = (int64_t)BR_NIP_SEQ;
-    ctx.data = (uint8_t *)head;
+    ctx.data = reinterpret_cast<uint8_t *>head;
     ctx.connectionId = 0;
     DataReceived(&ctx);
 }
@@ -903,10 +903,10 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
     ReceivedControlData(connection, nullptr, 0);
 
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(false));
-    ReceivedControlData(connection, (uint8_t *)data, DATASIZE);
+    ReceivedControlData(connection, reinterpret_cast<uint8_t *>data, DATASIZE);
 
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
-    ReceivedControlData(connection, (uint8_t *)data, DATASIZE);
+    ReceivedControlData(connection, reinterpret_cast<uint8_t *>data, DATASIZE);
     SoftBusFree(connection);
 }
 

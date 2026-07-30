@@ -25,7 +25,7 @@ using namespace testing::ext;
 using namespace testing;
 
 namespace OHOS {
-static struct GeneralConnection *g_generalConnection = NULL;
+static struct GeneralConnection *g_generalConnection = nullptr;
 static void CreateParam(GeneralConnectionParam &param)
 {
     if (strcpy_s(param.name, GENERAL_NAME_LEN, "test")) {
@@ -56,8 +56,8 @@ static void PrepareConnection(bool isClient)
 static void DestroyConnection(void)
 {
     SoftBusMutexLock(&g_generalManager.connections->lock);
-    struct GeneralConnection *item = NULL;
-    struct GeneralConnection *nextItem = NULL;
+    struct GeneralConnection *item = nullptr;
+    struct GeneralConnection *nextItem = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_generalManager.connections->list, struct GeneralConnection, node) {
         if (item->underlayerHandle == g_generalConnection->underlayerHandle) {
             ListDelete(&item->node);
@@ -240,7 +240,7 @@ void ProcessInnerMessageByTypeTest(FuzzedDataProvider &provider)
 
 void OnCommDisconnectedTest(FuzzedDataProvider &provider)
 {
-    ConnectionInfo info = {0};
+    ConnectionInfo info = {};
     OnCommDisconnected(1, &info);
 
     PrepareConnection(true);

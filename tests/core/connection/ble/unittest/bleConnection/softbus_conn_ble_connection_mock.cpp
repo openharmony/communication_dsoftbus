@@ -104,7 +104,7 @@ SoftBusList *CreateSoftBusList(void)
 {
     auto mock = OHOS::SoftBus::BleConnectionTestMock::GetMock();
     if (mock == nullptr) {
-        SoftBusList *list = (SoftBusList *)malloc(sizeof(SoftBusList));
+        SoftBusList *list = reinterpret_cast<SoftBusList *>malloc(sizeof(SoftBusList));
         if (list != nullptr) {
             ListInit(&list->list);
             SoftBusMutexInit(&list->lock, nullptr);

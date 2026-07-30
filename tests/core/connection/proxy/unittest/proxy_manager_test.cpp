@@ -96,7 +96,7 @@ static void TestOnProxyChannelDataReceived(struct ProxyChannel *channel, const u
 static void TestOnProxyChannelDisconnected(struct ProxyChannel *channel, int32_t reason)
 {
     CONN_LOGI(CONN_PROXY, "test disconnected reason=%{public}d", reason);
-    ProxyConnectInfo *it = NULL;
+    ProxyConnectInfo *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         if (!it->isInnerRequest) {
             it->isAclConnected = false;
@@ -339,7 +339,7 @@ static void ProxyChannelReference(struct ProxyConnection *proxyConnection)
 
 static void ProxyChannelDereferenceSafe(struct ProxyConnection *proxyConnection)
 {
-    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is null");
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is null");
     int32_t ret = SoftBusMutexLock(&proxyConnection->lock);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_PROXY,
         "lock channel fail. channelId=%{public}u, error=%{public}d", proxyConnection->channelId, ret);
@@ -355,7 +355,7 @@ static void ProxyChannelDereferenceSafe(struct ProxyConnection *proxyConnection)
 
 static void ProxyChannelReferenceSafe(struct ProxyConnection *proxyConnection)
 {
-    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is null");
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is null");
     int32_t ret = SoftBusMutexLock(&proxyConnection->lock);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_PROXY,
         "lock channel fail. channelId=%{public}u, error=%{public}d", proxyConnection->channelId, ret);
@@ -367,9 +367,9 @@ static void ConstructProxyConnectionListDisconnecting(void)
 {
     struct ProxyConnection *proxyConnection =
         (struct ProxyConnection *)SoftBusCalloc(sizeof(struct ProxyConnection));
-    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is NULL");
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is nullptr");
     ListInit(&proxyConnection->node);
-    if (SoftBusMutexInit(&proxyConnection->lock, NULL) != SOFTBUS_OK) {
+    if (SoftBusMutexInit(&proxyConnection->lock, nullptr) != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "init lock fail");
         SoftBusFree(proxyConnection);
         return;
@@ -415,9 +415,9 @@ static void ConstructProxyChannelRequestInfo(void)
 static void ConstructProxyConnectionList(void)
 {
     struct ProxyConnection *proxyConnection = (struct ProxyConnection *)SoftBusCalloc(sizeof(struct ProxyConnection));
-    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is NULL");
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is nullptr");
     ListInit(&proxyConnection->node);
-    if (SoftBusMutexInit(&proxyConnection->lock, NULL)!= SOFTBUS_OK) {
+    if (SoftBusMutexInit(&proxyConnection->lock, nullptr)!= SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "init lock fail");
         SoftBusFree(proxyConnection);
         return;
@@ -441,9 +441,9 @@ static void ConstructProxyConnectionListConnecting(void)
 {
     struct ProxyConnection *proxyConnection =
         (struct ProxyConnection *)SoftBusCalloc(sizeof(struct ProxyConnection));
-    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is NULL");
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != nullptr, CONN_PROXY, "proxyConnection is nullptr");
     ListInit(&proxyConnection->node);
-    if (SoftBusMutexInit(&proxyConnection->lock, NULL) != SOFTBUS_OK) {
+    if (SoftBusMutexInit(&proxyConnection->lock, nullptr) != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "init lock fail");
         SoftBusFree(proxyConnection);
         return;
@@ -705,7 +705,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest013, TestSize.Level1)
     const char *uuid = "0000FEEA-0000-1000-8000-00805F9B34FB";
     BtUuid testBtUuid = {
         .uuidLen = strlen(uuid),
-        .uuid = (char *)uuid,
+        .uuid = reinterpret_cast<char *>uuid,
     };
     ProxyChannelMock::TestBtSocketConnectionCallback(&bdAddr, testBtUuid, 0, 0);
     sleep(4);
@@ -749,7 +749,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest014, TestSize.Level1)
     g_channel->close(&proxyChannel, false);
     sleep(1);
     bool reconnectDeviceExist = false;
-    ProxyConnectInfo *it = NULL;
+    ProxyConnectInfo *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         reconnectDeviceExist = true;
     }
@@ -883,7 +883,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest019, TestSize.Level1)
 
     // Verify reconnect device info exists
     bool reconnectDeviceExist = false;
-    ProxyConnectInfo *it = NULL;
+    ProxyConnectInfo *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         reconnectDeviceExist = true;
         EXPECT_EQ(it->innerRetryNum, 0);
@@ -1029,7 +1029,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest022, TestSize.Level1)
 
     // Verify both devices are in reconnect list
     int reconnectCount = 0;
-    ProxyConnectInfo *it = NULL;
+    ProxyConnectInfo *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         reconnectCount++;
     }
@@ -1087,7 +1087,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest024, TestSize.Level1)
     sleep(1);
 
     // Verify reconnect device info still exists but isAclConnected is false
-    ProxyConnectInfo *it = NULL;
+    ProxyConnectInfo *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         EXPECT_EQ(it->isAclConnected, false);
     }
@@ -1481,7 +1481,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest038, TestSize.Level1)
     uint32_t firstChannelId = g_channelId;
     EXPECT_NE(firstChannelId, 0);
 
-    ProxyConnectInfo *it = NULL;
+    ProxyConnectInfo *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         it->isSupportHfp = false;
     }
@@ -1773,7 +1773,7 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest047, TestSize.Level1)
     uint32_t originalChannelId = g_channelId;
     EXPECT_NE(originalChannelId, 0);
 
-    ProxyConnectInfo *it = NULL;
+    ProxyConnectInfo *it = nullptr;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
         it->isSupportHfp = false;
     }

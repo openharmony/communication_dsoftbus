@@ -61,7 +61,7 @@ void BleOnDataReceivedFuzzTest(const uint8_t* data, size_t size)
 
     uint32_t connectionId = GetData<uint32_t>();
     bool isConnCharacterisic = GetData<bool>();
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(size * sizeof(uint8_t));
+    uint8_t *buf = reinterpret_cast<uint8_t *>SoftBusCalloc(size * sizeof(uint8_t));
     if (buf == nullptr) {
         COMM_LOGE(COMM_TEST, "calloc faild");
         return;

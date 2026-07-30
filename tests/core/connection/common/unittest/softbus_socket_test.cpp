@@ -334,7 +334,7 @@ HWTEST_F(SoftBusSocketTest, ConnToggleNonBlockModeTest_AlreadyInState, TestSize.
  */
 HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_InvalidParams, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     auto ret = ConnSendSocketData(-1, buf, 10, 1000);
     EXPECT_EQ(ret, -1);
@@ -353,7 +353,7 @@ HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_InvalidParams, TestSize.Level
  */
 HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_WaitEventFail, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_OUT, _))
         .WillOnce(Return(-1));
@@ -408,7 +408,7 @@ HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_PartialSend, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_InvalidParams, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     auto ret = ConnRecvSocketData(-1, buf, 10, 1000);
     EXPECT_EQ(ret, -1);
@@ -427,7 +427,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_InvalidParams, TestSize.Level
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_WaitEventFail, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(-1));
@@ -443,7 +443,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_WaitEventFail, TestSize.Level
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_RecvSuccess, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -461,7 +461,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_RecvSuccess, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_NoTimeout, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     EXPECT_CALL(*mock, SocketRecvHook(_, _, _, _))
         .WillOnce(Return(5));
@@ -477,7 +477,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_NoTimeout, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_EAGAIN, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -495,7 +495,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_EAGAIN, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_PeerClose, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -513,7 +513,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_PeerClose, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_InvalidParams, TestSize.Level1)
 {
-    SoftBusMsgHdr msg = {0};
+    SoftBusMsgHdr msg = {};
 
     auto ret = ConnRecvSocketMsg(-1, &msg, 1000, 0);
     EXPECT_EQ(ret, -1);
@@ -529,7 +529,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_InvalidParams, TestSize.Level1
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_WaitEventFail, TestSize.Level1)
 {
-    SoftBusMsgHdr msg = {0};
+    SoftBusMsgHdr msg = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(-1));
@@ -545,7 +545,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_WaitEventFail, TestSize.Level1
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_RecvSuccess, TestSize.Level1)
 {
-    SoftBusMsgHdr msg = {0};
+    SoftBusMsgHdr msg = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -605,7 +605,7 @@ HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_GetPeerNameFail, TestSize
 HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_IPv4, TestSize.Level1)
 {
     SocketAddr socketAddr = {{0}, 0};
-    SoftBusSockAddr addr = {0};
+    SoftBusSockAddr addr = {};
     auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
 
     addrIn->sinFamily = SOFTBUS_AF_INET;
@@ -656,7 +656,7 @@ HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_GetPeerNameFail, TestSize.
 HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_IPv4, TestSize.Level1)
 {
     SocketAddr socketAddr = {{0}, 0};
-    SoftBusSockAddr addr = {0};
+    SoftBusSockAddr addr = {};
     auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
 
     addrIn->sinFamily = SOFTBUS_AF_INET;
@@ -746,12 +746,12 @@ HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_IPv4, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_NullParams, TestSize.Level1)
 {
-    char addr[IP_LEN] = {0};
+    char addr[IP_LEN] = {};
 
     auto ret = Ipv6AddrInToAddr(nullptr, addr, IP_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
     ret = Ipv6AddrInToAddr(&addrIn6, nullptr, IP_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -766,8 +766,8 @@ HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_NullParams, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_InetNtoPFail, TestSize.Level1)
 {
-    SoftBusSockAddrIn6 addrIn6 = {0};
-    char addr[IP_LEN] = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
+    char addr[IP_LEN] = {};
 
     EXPECT_CALL(*mock, InetNtoPHook(SOFTBUS_AF_INET6, _, _, _))
         .WillOnce(Return(nullptr));
@@ -783,7 +783,7 @@ HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_InetNtoPFail, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_WithIfName, TestSize.Level1)
 {
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
     const char *ip = "fe80::1%wlan0";
 
     EXPECT_CALL(*mock, IfNameToIndexHook(_))
@@ -803,7 +803,7 @@ HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_WithIfName, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_IfNameToIndexFail, TestSize.Level1)
 {
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
     const char *ip = "fe80::1%wlan0";
 
     EXPECT_CALL(*mock, IfNameToIndexHook(_))
@@ -820,7 +820,7 @@ HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_IfNameToIndexFail, TestSize.Lev
  */
 HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_NullParams, TestSize.Level1)
 {
-    SoftBusSockAddrIn addrIn = {0};
+    SoftBusSockAddrIn addrIn = {};
 
     auto ret = Ipv4AddrToAddrIn(nullptr, "192.168.1.1", 8080);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -836,7 +836,7 @@ HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_NullParams, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_InetPtoNFail, TestSize.Level1)
 {
-    SoftBusSockAddrIn addrIn = {0};
+    SoftBusSockAddrIn addrIn = {};
 
     EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET, "192.168.1.1", _))
         .WillOnce(Return(-1));
@@ -896,7 +896,7 @@ HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_NonHmlIPv4, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_IPv6, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     // For IPv6, BindToInterface should not bind (interface name should remain empty)
     BindToInterface("fe80::1", SOFTBUS_AF_INET6, 10, ifName, IF_NAME_SIZE);
@@ -910,7 +910,7 @@ HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_IPv6, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_NullIp, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     // For null IP, BindToInterface should not bind (interface name should remain empty)
     BindToInterface(nullptr, SOFTBUS_AF_INET, 10, ifName, IF_NAME_SIZE);
@@ -924,7 +924,7 @@ HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_NullIp, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_BindAddrAll, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     // For BIND_ADDR_ALL ("0"), BindToInterface should not bind
     BindToInterface("0", SOFTBUS_AF_INET, 10, ifName, IF_NAME_SIZE);
@@ -938,7 +938,7 @@ HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_BindAddrAll, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_GetIfAddrsFail, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     EXPECT_CALL(*mock, GetIfAddrsHook())
         .WillOnce(Return(-1));
@@ -955,7 +955,7 @@ HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_GetIfAddrsFail, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_InetAtonFail, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     EXPECT_CALL(*mock, GetIfAddrsHook())
         .WillOnce(Return(0));
@@ -976,7 +976,7 @@ HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_InetAtonFail, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_NotFound, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     mock->SetTestIfAddr("10.0.0.1", "wlan0");
 
@@ -1037,7 +1037,7 @@ HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_Timeout, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_RecvFail, TestSize.Level1)
 {
-    char buf[10] = {0};
+    char buf[10] = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -1055,7 +1055,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_RecvFail, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_RecvMsgFail, TestSize.Level1)
 {
-    SoftBusMsgHdr msg = {0};
+    SoftBusMsgHdr msg = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -1073,7 +1073,7 @@ HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_RecvMsgFail, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketMsgTest_EAGAIN, TestSize.Level1)
 {
-    SoftBusMsgHdr msg = {0};
+    SoftBusMsgHdr msg = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -1123,7 +1123,7 @@ HWTEST_F(SoftBusSocketTest, ConnGetLocalSocketPortTest_NotInitialized, TestSize.
 HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_IPv6, TestSize.Level1)
 {
     SocketAddr socketAddr = {{0}, 0};
-    SoftBusSockAddr addr = {0};
+    SoftBusSockAddr addr = {};
     auto *addrIn6 = reinterpret_cast<SoftBusSockAddrIn6 *>(&addr);
 
     addrIn6->sin6Family = SOFTBUS_AF_INET6;
@@ -1147,7 +1147,7 @@ HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_IPv6, TestSize.Level1)
 HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_IPv6, TestSize.Level1)
 {
     SocketAddr socketAddr = {{0}, 0};
-    SoftBusSockAddr addr = {0};
+    SoftBusSockAddr addr = {};
     auto *addrIn6 = reinterpret_cast<SoftBusSockAddrIn6 *>(&addr);
 
     addrIn6->sin6Family = SOFTBUS_AF_INET6;
@@ -1276,7 +1276,7 @@ HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_GlobalIPv6, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_NullIp, TestSize.Level1)
 {
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
 
     auto ret = Ipv6AddrToAddrIn(&addrIn6, nullptr, 8080);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -1289,7 +1289,7 @@ HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_NullIp, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_NoIfName, TestSize.Level1)
 {
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
     const char *ip = "fe80::1";
 
     EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET6, _, _))
@@ -1307,7 +1307,7 @@ HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_NoIfName, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_InetPtoNFail, TestSize.Level1)
 {
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
     const char *ip = "fe80::1";
 
     EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET6, _, _))
@@ -1324,7 +1324,7 @@ HWTEST_F(SoftBusSocketTest, Ipv6AddrToAddrInTest_InetPtoNFail, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_Success, TestSize.Level1)
 {
-    SoftBusSockAddrIn addrIn = {0};
+    SoftBusSockAddrIn addrIn = {};
     const char *ip = "192.168.1.1";
 
     EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET, _, _))
@@ -1341,7 +1341,7 @@ HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_Success, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, Ipv4AddrToAddrInTest_ZeroPort, TestSize.Level1)
 {
-    SoftBusSockAddrIn addrIn = {0};
+    SoftBusSockAddrIn addrIn = {};
     const char *ip = "192.168.1.1";
 
     EXPECT_CALL(*mock, InetPtoNHook(SOFTBUS_AF_INET, _, _))
@@ -1402,7 +1402,7 @@ HWTEST_F(SoftBusSocketTest, IsHmlIpAddrTest_PrivateIPv4, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_InvalidFamily, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     // Invalid family - should not bind
     BindToInterface("192.168.1.1", AF_MAX, 10, ifName, IF_NAME_SIZE);
@@ -1601,7 +1601,7 @@ HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_OneByte, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, ConnRecvSocketDataTest_OneByte, TestSize.Level1)
 {
-    char buf[1] = {0};
+    char buf[1] = {};
 
     EXPECT_CALL(*mock, WaitEventHook(_, SOFTBUS_SOCKET_IN, _))
         .WillOnce(Return(1));
@@ -1654,9 +1654,9 @@ HWTEST_F(SoftBusSocketTest, ConnGetLocalSocketPortTest_VeryLargeFd, TestSize.Lev
  */
 HWTEST_F(SoftBusSocketTest, Ipv6AddrInToAddrTest_InvalidFamily, TestSize.Level1)
 {
-    SoftBusSockAddrIn6 addrIn6 = {0};
+    SoftBusSockAddrIn6 addrIn6 = {};
     addrIn6.sin6Family = AF_MAX; // Invalid family
-    char addr[IP_LEN] = {0};
+    char addr[IP_LEN] = {};
 
     auto ret = Ipv6AddrInToAddr(&addrIn6, addr, IP_LEN);
     EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
@@ -1692,7 +1692,7 @@ HWTEST_F(SoftBusSocketTest, ConnSendSocketDataTest_MultiplePartialSend, TestSize
 HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_ZeroPort, TestSize.Level1)
 {
     SocketAddr socketAddr = {{0}, 0};
-    SoftBusSockAddr addr = {0};
+    SoftBusSockAddr addr = {};
     auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
 
     addrIn->sinFamily = SOFTBUS_AF_INET;
@@ -1716,7 +1716,7 @@ HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddr6Test_ZeroPort, TestSize.Level1
 HWTEST_F(SoftBusSocketTest, ConnGetPeerSocketAddrTest_ZeroPort, TestSize.Level1)
 {
     SocketAddr socketAddr = {{0}, 0};
-    SoftBusSockAddr addr = {0};
+    SoftBusSockAddr addr = {};
     auto *addrIn = reinterpret_cast<SoftBusSockAddrIn *>(&addr);
 
     addrIn->sinFamily = SOFTBUS_AF_INET;
@@ -1772,7 +1772,7 @@ HWTEST_F(SoftBusSocketTest, GetDomainByAddrTest_BroadcastIPv4, TestSize.Level1)
  */
 HWTEST_F(SoftBusSocketTest, BindToInterfaceTest_BroadcastAddr, TestSize.Level1)
 {
-    char ifName[IF_NAME_SIZE] = {0};
+    char ifName[IF_NAME_SIZE] = {};
 
     // Broadcast address - should not bind
     BindToInterface("255.255.255.255", SOFTBUS_AF_INET, 10, ifName, IF_NAME_SIZE);

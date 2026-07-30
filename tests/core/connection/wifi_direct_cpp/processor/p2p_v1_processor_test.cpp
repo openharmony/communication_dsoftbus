@@ -1402,7 +1402,7 @@ static std::string GenerateCmdConnV1Req()
     std::vector<uint8_t> output;
     auto marshalProtocol = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::JSON);
     message.Marshalling(*marshalProtocol, output);
-    return std::string((char *)output.data(), output.size());
+    return std::string(reinterpret_cast<char *>output.data(), output.size());
 }
 
 /*

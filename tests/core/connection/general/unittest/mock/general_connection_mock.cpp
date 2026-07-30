@@ -20,8 +20,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 void *g_connectionGeneralInterface;
-static ConnectCallback g_connectCallback = {0};
-static ConnectResult g_connectResult = {0};
+static ConnectCallback g_connectCallback = {};
+static ConnectResult g_connectResult = {};
 
 GeneralConnectionInterfaceMock::GeneralConnectionInterfaceMock()
 {
@@ -121,19 +121,19 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     (void)callback;
-    return NULL;
+    return nullptr;
 }
 
 ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
 {
     (void)callback;
-    return NULL;
+    return nullptr;
 }
 
 ConnectFuncInterface *ConnSleInit(const ConnectCallback *callback)
 {
     (void)callback;
-    return NULL;
+    return nullptr;
 }
 
 int32_t ProxyChannelManagerInit(void)

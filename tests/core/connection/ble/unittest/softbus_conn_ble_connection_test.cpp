@@ -116,7 +116,7 @@ HWTEST_F(ConnectionBleTest, TransTest002, TestSize.Level1)
 
     tmp.total = MAX_DATA_LEN + 1;
     dataLen = 17;
-    data = (uint8_t *)(&tmp);
+    data = reinterpret_cast<uint8_t *>(&tmp);
     outLen = (uint32_t *)SoftBusCalloc(buffer.total);
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, outLen);
     ASSERT_TRUE(value == nullptr);
@@ -125,7 +125,7 @@ HWTEST_F(ConnectionBleTest, TransTest002, TestSize.Level1)
     tmp.size = 2;
     tmp.offset = 0;
     tmp.total = MAX_DATA_LEN + 1;
-    data = (uint8_t *)(&tmp);
+    data = reinterpret_cast<uint8_t *>(&tmp);
     buffer.seq = 1;
     outLen = (uint32_t *)SoftBusCalloc(buffer.total);
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, outLen);
@@ -152,9 +152,9 @@ HWTEST_F(ConnectionBleTest, TransTest003, TestSize.Level1)
     head.len = 70;
     buffer.capacity = 140;
     buffer.length = 100;
-    buffer.buffer = (uint8_t *)(&head);
+    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
     connectionId = 1;
-    outLen = (int32_t *)SoftBusCalloc(head.len + sizeof(ConnPktHead));
+    outLen = reinterpret_cast<int32_t *>SoftBusCalloc(head.len + sizeof(ConnPktHead));
     value = ConnCocTransRecv(connectionId, &buffer, outLen);
     ASSERT_TRUE(value != nullptr);
 
@@ -162,7 +162,7 @@ HWTEST_F(ConnectionBleTest, TransTest003, TestSize.Level1)
     head.len = 70;
     buffer.capacity = 140;
     buffer.length = 100;
-    buffer.buffer = (uint8_t *)(&head);
+    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
     connectionId = 1;
     value = ConnCocTransRecv(connectionId, &buffer, outLen);
     ASSERT_TRUE(value == nullptr);

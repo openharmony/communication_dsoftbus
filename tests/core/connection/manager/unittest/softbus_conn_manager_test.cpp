@@ -32,7 +32,7 @@ static const uint32_t CONN_HEAD_SIZE = 24;
 static const uint32_t SHIFT_BITS = 26;
 
 static ConnectCallback *g_mangerCb = nullptr;
-static ConnectionInfo g_connInfo = {0};
+static ConnectionInfo g_connInfo = {};
 static unsigned int g_connId = 0;
 
 using namespace testing::ext;
@@ -295,7 +295,7 @@ HWTEST_F(ConnectionManagerTest, testConnmanger003, TestSize.Level1)
     ret = ConnConnectDevice(&info, reqId, &connRet);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (g_connId != 0) {
-        data.buf = (char *)calloc(1, CONN_HEAD_SIZE + 20);
+        data.buf = reinterpret_cast<char *>calloc(1, CONN_HEAD_SIZE + 20);
         ASSERT_TRUE(data.buf != nullptr);
         (void)strcpy_s(data.buf + CONN_HEAD_SIZE, 20, str);
         data.len = CONN_HEAD_SIZE + 20;

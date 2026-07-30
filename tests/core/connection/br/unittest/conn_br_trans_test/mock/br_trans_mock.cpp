@@ -92,7 +92,7 @@ void ConnSlideWindowControllerDelete(struct ConnSlideWindowController *self)
     GetConnBrTransTestInterface()->ConnSlideWindowControllerDelete(self);
 }
 
-int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *taskName)
+int32_t ConnStartActionAsync(void *arg, void *(*runnable)reinterpret_cast<void *>, const char *taskName)
 {
     return GetConnBrTransTestInterface()->ConnStartActionAsync(arg, runnable, taskName);
 }

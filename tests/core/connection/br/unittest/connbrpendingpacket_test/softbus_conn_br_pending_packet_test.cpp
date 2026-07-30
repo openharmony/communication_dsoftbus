@@ -337,12 +337,12 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrGetBrPendingPacketTest003, TestSize.Leve
     int32_t ret = ConnBrCreateBrPendingPacket(id, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     ret = ConnBrGetBrPendingPacket(id, seq, waitMillis, &data);
     EXPECT_EQ(SOFTBUS_ALREADY_TRIGGERED, ret);
-    EXPECT_EQ(NULL, data);
+    EXPECT_EQ(nullptr, data);
 }
 
 /*
@@ -398,7 +398,7 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrSetBrPendingPacketTest001, TestSize.Leve
     uint32_t id = 20;
     int64_t seq = 20;
     
-    int32_t ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    int32_t ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_CONN_BR_SET_PENDING_PACKET_ERR, ret);
 }
 
@@ -418,7 +418,7 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrSetBrPendingPacketTest002, TestSize.Leve
     int32_t ret = ConnBrCreateBrPendingPacket(id, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     ConnBrDelBrPendingPacket(id, seq);
@@ -440,10 +440,10 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrSetBrPendingPacketTest003, TestSize.Leve
     int32_t ret = ConnBrCreateBrPendingPacket(id, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     ConnBrDelBrPendingPacket(id, seq);
@@ -498,11 +498,11 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckRequestTest002, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckRequest002, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
     connection->window = 10;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -530,11 +530,11 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckRequestTest003, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckRequest003, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
     connection->window = 10;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -563,11 +563,11 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckRequestTest004, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckRequest004, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
     connection->window = 10;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -597,18 +597,18 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckRequestTest005, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckRequest005, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
     connection->window = 10;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
     cJSON_AddNumberToObject(json, KEY_WINDOWS, 20);
     cJSON_AddNumberToObject(json, KEY_ACK_SEQ_NUM, 100);
     
-    uint8_t *testData = (uint8_t *)SoftBusCalloc(10);
+    uint8_t *testData = reinterpret_cast<uint8_t *>SoftBusCalloc(10);
     ASSERT_NE(nullptr, testData);
     
     EXPECT_CALL(pendingMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(true));
@@ -652,10 +652,10 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckResponseTest002, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckResponse002, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -683,10 +683,10 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckResponseTest003, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckResponse003, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -715,10 +715,10 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckResponseTest004, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckResponse004, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -747,10 +747,10 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckResponseTest005, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckResponse005, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -779,10 +779,10 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckResponseTest006, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckResponse006, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
@@ -814,18 +814,18 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrOnAckRequestTest006, TestSize.Level1)
     CONN_LOGI(CONN_BR, "ConnBrOnAckRequest006, Start");
     NiceMock<ConnectionBrPendingPacketMock> pendingMock;
     
-    ConnBrConnection *connection = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *connection = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     ASSERT_NE(nullptr, connection);
     connection->connectionId = 1;
     connection->window = 10;
-    (void)SoftBusMutexInit(&connection->lock, NULL);
+    (void)SoftBusMutexInit(&connection->lock, nullptr);
     
     cJSON *json = cJSON_CreateObject();
     ASSERT_NE(nullptr, json);
     cJSON_AddNumberToObject(json, KEY_WINDOWS, 20);
     cJSON_AddNumberToObject(json, KEY_ACK_SEQ_NUM, 100);
     
-    uint8_t *testData = (uint8_t *)SoftBusCalloc(10);
+    uint8_t *testData = reinterpret_cast<uint8_t *>SoftBusCalloc(10);
     ASSERT_NE(nullptr, testData);
     
     EXPECT_CALL(pendingMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(true));
@@ -860,12 +860,12 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrGetBrPendingPacketTest006, TestSize.Leve
     int32_t ret = ConnBrCreateBrPendingPacket(id, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     ret = ConnBrGetBrPendingPacket(id, seq, waitMillis, &data);
     EXPECT_EQ(SOFTBUS_ALREADY_TRIGGERED, ret);
-    EXPECT_EQ(NULL, data);
+    EXPECT_EQ(nullptr, data);
 }
 
 /*
@@ -930,13 +930,13 @@ HWTEST_F(ConnBrPendingPacketTest, ConnBrSetBrPendingPacketTest005, TestSize.Leve
     int32_t ret = ConnBrCreateBrPendingPacket(id, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
-    ret = ConnBrSetBrPendingPacket(id, seq, NULL);
+    ret = ConnBrSetBrPendingPacket(id, seq, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     ConnBrDelBrPendingPacket(id, seq);

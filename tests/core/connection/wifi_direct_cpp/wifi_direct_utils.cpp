@@ -142,7 +142,7 @@ int32_t WifiDirectUtils::FrequencyToChannel(int32_t frequency)
 static int32_t LnnGetRecommendChannelPacked(const char *udid, int32_t *preferChannel)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetRecommendChannel) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer(reinterpret_cast<void *>pfnLnnEnhanceFuncList->lnnGetRecommendChannel) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->lnnGetRecommendChannel(udid, preferChannel);
@@ -195,7 +195,7 @@ std::string WifiDirectUtils::GetLocalUuid()
 static int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer(reinterpret_cast<void *>pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid(uuid, localPtk, len);
@@ -204,7 +204,7 @@ static int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint
 static int32_t LnnGetLocalDefaultPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer(reinterpret_cast<void *>pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid(uuid, localPtk, len);
@@ -216,9 +216,9 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
-    auto ret = LnnGetLocalPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    auto ret = LnnGetLocalPtkByUuidPacked(remoteUuid.c_str(), reinterpret_cast<char *>ptkBytes, sizeof(ptkBytes));
     if (ret == SOFTBUS_NOT_FIND) {
-        ret = LnnGetLocalDefaultPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+        ret = LnnGetLocalDefaultPtkByUuidPacked(remoteUuid.c_str(), reinterpret_cast<char *>ptkBytes, sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get local ptk fail");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
@@ -228,7 +228,7 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
 static int32_t LnnGetRemoteDefaultPtkByUuidPacked(const char *uuid, char *remotePtk, uint32_t len)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer(reinterpret_cast<void *>pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid(uuid, remotePtk, len);
@@ -242,7 +242,7 @@ std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetw
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     int32_t ret = LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK, ptkBytes, sizeof(ptkBytes));
     if (ret == SOFTBUS_OK && memcmp(ptkBytes, zeroPtkBytes, PTK_DEFAULT_LEN) == 0) {
-        ret = LnnGetRemoteDefaultPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+        ret = LnnGetRemoteDefaultPtkByUuidPacked(remoteUuid.c_str(), reinterpret_cast<char *>ptkBytes, sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk fail");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);

@@ -286,7 +286,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
     NiceMock<ConnectionBrInterfaceMock> brMock;
     EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
     uint32_t connectionId = 1;
-    uint8_t *data1 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *data1 = reinterpret_cast<uint8_t *>SoftBusCalloc(sizeof(uint8_t));
     ASSERT_NE(nullptr, data1);
     (void)memset_s(data1, sizeof(uint8_t), 0, sizeof(uint8_t));
     int32_t pid = 1;
@@ -295,7 +295,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
     int32_t ret = g_connectFuncInterface->PostBytes(connectionId, data1, 0, pid, flag, MODULE_BLE_CONN, seq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    uint8_t *data2 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *data2 = reinterpret_cast<uint8_t *>SoftBusCalloc(sizeof(uint8_t));
     ASSERT_NE(nullptr, data2);
     (void)memset_s(data2, sizeof(uint8_t), 0, sizeof(uint8_t));
     ConnBrDevice *device = (ConnBrDevice *)SoftBusCalloc(sizeof(ConnBrDevice));
@@ -304,7 +304,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
     ret = g_connectFuncInterface->PostBytes(connectionId, data2, 3, pid, flag, MODULE_BLE_CONN, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, ret);
 
-    uint8_t *data3 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *data3 = reinterpret_cast<uint8_t *>SoftBusCalloc(sizeof(uint8_t));
     ASSERT_NE(nullptr, data3);
     (void)memset_s(data3, sizeof(uint8_t), 0, sizeof(uint8_t));
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
@@ -312,7 +312,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest004, TestSize.Level1)
     ret = g_connectFuncInterface->PostBytes(connection->connectionId, data3, 3, pid, flag, MODULE_BLE_CONN, seq);
     EXPECT_EQ(SOFTBUS_CONN_BR_CONNECTION_NOT_READY_ERR, ret);
 
-    uint8_t *data4 = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *data4 = reinterpret_cast<uint8_t *>SoftBusCalloc(sizeof(uint8_t));
     ASSERT_NE(nullptr, data4);
     (void)memset_s(data4, sizeof(uint8_t), 0, sizeof(uint8_t));
     EXPECT_CALL(brMock, ConnBrEnqueueNonBlock).WillOnce(Return(SOFTBUS_OK));
@@ -426,10 +426,10 @@ HWTEST_F(ConnectionBrConnectionTest, ConnBrTransReadOneFrame, TestSize.Level1)
         .capacity = 0,
     };
 
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER + 1;
     head.len = sizeof(ConnPktHead);
-    buffer.buffer = (uint8_t *)(&head);
+    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
 
     uint8_t *outData = nullptr;
     uint32_t connectionId = 1;
@@ -444,7 +444,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrTransSend, TestSize.Level1)
 {
     uint32_t connectionId = 1;
     int32_t socketHandle = 1;
-    uint8_t data = {0};
+    uint8_t data = {};
     uint32_t dataLen = 1;
     uint32_t mtu = 0;
     NiceMock<ConnectionBrInterfaceMock> brMock;

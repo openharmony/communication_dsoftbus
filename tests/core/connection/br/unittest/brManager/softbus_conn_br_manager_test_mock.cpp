@@ -44,7 +44,7 @@ ConnBrConnection *BrManagerTestMock::ActionOfConnBrCreateConnectionImpl(
     if (g_createConnectionResult != nullptr) {
         return g_createConnectionResult;
     }
-    ConnBrConnection *conn = (ConnBrConnection *)SoftBusCalloc(sizeof(ConnBrConnection));
+    ConnBrConnection *conn = reinterpret_cast<ConnBrConnection *>SoftBusCalloc(sizeof(ConnBrConnection));
     if (conn != nullptr) {
         static uint32_t g_connectionId = 1;
         conn->connectionId = g_connectionId++;
@@ -229,7 +229,7 @@ void LnnDCReportConnectException(const ConnectOption *option, int32_t errorCode)
 }
 
 int32_t SoftBusThreadCreate(
-    SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)(void *), void *arg)
+    SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)reinterpret_cast<void *>, void *arg)
 {
     auto mock = BrManagerTestMock::GetMock();
     if (mock != nullptr) {

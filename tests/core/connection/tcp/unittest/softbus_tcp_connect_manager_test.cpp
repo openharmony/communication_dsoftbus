@@ -310,23 +310,23 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
     option.socketOption.moduleId = PROXY;
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.len = strlen(g_data);
 
-    pthread_create(&pid, nullptr, (void *(*)(void *))CreateServer, nullptr);
+    pthread_create(&pid, nullptr, (void *(*)reinterpret_cast<void *>)CreateServer, nullptr);
     sleep(1);
     EXPECT_EQ(clientPort, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
     for (int32_t i = 0; i < 3; i++) {
-        char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
+        char *data = reinterpret_cast<char *>SoftBusCalloc(sizeof(head) + head.len);
         if (data == nullptr) {
             continue;
         }
         (void)memcpy_s(data, sizeof(head), (void*)&head, sizeof(head));
         (void)memcpy_s(data + sizeof(head), (unsigned int)head.len, g_data, (unsigned int)head.len);
         EXPECT_EQ(SOFTBUS_OK,
-            TcpPostBytes(g_connectionId, (uint8_t *)data, sizeof(ConnPktHead) + head.len, 0, 0, 0, 0));
+            TcpPostBytes(g_connectionId, reinterpret_cast<uint8_t *>data, sizeof(ConnPktHead) + head.len, 0, 0, 0, 0));
         sleep(1);
         EXPECT_EQ(int(sizeof(ConnPktHead) + head.len), g_receivedDatalength);
         g_receivedDatalength = 0;
@@ -407,10 +407,10 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
         CONN_LOGE(CONN_TEST, "get maxDataLen fail");
     }
     printf("maxDataLen: %d\n", maxDataLen);
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.len = maxDataLen + 1;
 
-    char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);
+    char *data = reinterpret_cast<char *>SoftBusCalloc(sizeof(head) + head.len);
     if (data == nullptr) {
         printf("Failed to assign memory to data.");
         return;
@@ -421,7 +421,7 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
     sleep(1);
-    EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, (uint8_t *)data, sizeof(ConnPktHead) + head.len, 0, 0, 0, 0));
+    EXPECT_EQ(SOFTBUS_OK, TcpPostBytes(g_connectionId, reinterpret_cast<uint8_t *>data, sizeof(ConnPktHead) + head.len, 0, 0, 0, 0));
     sleep(1);
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
 }
@@ -1354,7 +1354,7 @@ HWTEST_F(TcpManagerTest, testTcpManager039, TestSize.Level1)
     LocalListenerInfo info = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = {},
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1597,7 +1597,7 @@ HWTEST_F(TcpManagerTest, testTcpManager048, TestSize.Level1)
     LocalListenerInfo info = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = {},
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP

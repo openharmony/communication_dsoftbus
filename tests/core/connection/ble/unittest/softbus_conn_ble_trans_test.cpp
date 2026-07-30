@@ -96,17 +96,17 @@ void ConnectionBleTransTest::TearDownTestCase()
 HWTEST_F(ConnectionBleTransTest, TransRecv, TestSize.Level1)
 {
     uint32_t connectionId = 1;
-    LimitedBuffer buffer = {0};
+    LimitedBuffer buffer = {};
     int32_t *outLen = nullptr;
     uint8_t *data = nullptr;
 
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER + 1;
     head.len = sizeof(ConnPktHead);
     buffer.capacity = 140;
     buffer.length = sizeof(ConnPktHead) - 1;
-    buffer.buffer = (uint8_t *)(&head);
-    outLen = (int32_t *)SoftBusCalloc(sizeof(ConnPktHead));
+    buffer.buffer = reinterpret_cast<uint8_t *>(&head);
+    outLen = reinterpret_cast<int32_t *>SoftBusCalloc(sizeof(ConnPktHead));
     ASSERT_NE(nullptr, outLen);
     data = ConnCocTransRecv(connectionId, &buffer, outLen);
     EXPECT_EQ(nullptr, data);
@@ -155,7 +155,7 @@ HWTEST_F(ConnectionBleTransTest, TransPackMsg, TestSize.Level1)
     int64_t ret = ConnBlePackCtlMessage(ctx, &data, &dataLen);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
 
-    cJSON json = {0};
+    cJSON json = {};
     EXPECT_CALL(bleMock, cJSON_CreateObject).WillOnce(Return(&json));
     EXPECT_CALL(bleMock, AddNumberToJsonObject).WillOnce(Return(false));
     ret = ConnBlePackCtlMessage(ctx, &data, &dataLen);
@@ -175,7 +175,7 @@ HWTEST_F(ConnectionBleTransTest, TransPackMsg, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
 
     const char *val = "test001";
-    char value[7] = {0};
+    char value[7] = {};
     strcpy_s(value, sizeof(value), val);
     EXPECT_CALL(bleMock, cJSON_PrintUnformatted).WillOnce(Return(value));
     ret = ConnBlePackCtlMessage(ctx, &data, &dataLen);
@@ -257,12 +257,12 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv001, TestSize.Level1)
     tmp.offset = 0;
     tmp.total = 0x10;
 
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
 
     tmp.size = 0x11;
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
 }
@@ -288,41 +288,41 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv003, TestSize.Level1)
     tmp.offset = 0;
     tmp.total = ntohl(0x10000);
 
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     ConnBleReadBuffer buffer = { 0 };
     uint8_t *value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
 
     tmp.total = 0;
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
 
     tmp.total = ntohl(0x10);
     tmp.offset = tmp.total;
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
 
     tmp.offset = 0;
     tmp.total = tmp.size;
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_NE(nullptr, value);
 
     tmp.total = ntohl(0x10);
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     ListInit(&buffer.packets);
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
 
     tmp.total = tmp.size;
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_NE(nullptr, value);
 
     tmp.total = ntohl(0x10);
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_EQ(nullptr, value);
     CONN_LOGI(CONN_BLE, "GattTransRecv003, out");
@@ -349,7 +349,7 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv004, TestSize.Level1)
     tmp.offset = ntohl(0x0F);
     tmp.total = ntohl(0x10);
 
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     ConnBleReadBuffer buffer = { 0 };
     buffer.seq = ntohl(tmp.seq) + 1;
     buffer.total = ntohl(tmp.total) + 1;
@@ -365,11 +365,11 @@ HWTEST_F(ConnectionBleTransTest, GattTransRecv004, TestSize.Level1)
     buffer.seq = 0;
     for (uint32_t i = 1; i < ntohl(tmp.total) - 1; i++) {
         tmp.offset = ntohl(0x0F - i);
-        data = (uint8_t *)&tmp;
+        data = reinterpret_cast<uint8_t *>&tmp;
         ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     }
     tmp.offset = 0;
-    data = (uint8_t *)&tmp;
+    data = reinterpret_cast<uint8_t *>&tmp;
     value = ConnGattTransRecv(connectionId, data, dataLen, &buffer, &outLen);
     EXPECT_NE(nullptr, value);
     CONN_LOGI(CONN_BLE, "GattTransRecv004, out");

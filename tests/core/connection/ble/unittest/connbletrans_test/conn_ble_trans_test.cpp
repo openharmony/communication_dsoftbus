@@ -545,7 +545,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv001, TestSize.Level1)
 
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead);
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 200;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -554,7 +554,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv001, TestSize.Level1)
     EXPECT_EQ(nullptr, result);
 
     buffer.length = sizeof(ConnPktHead);
-    ConnPktHead head2 = {0};
+    ConnPktHead head2 = {};
     head2.magic = MAGIC_NUMBER + 1;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head2);
     result = ConnCocTransRecv(connectionId, &buffer, &outLen);
@@ -576,7 +576,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv002, TestSize.Level1)
 
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead);
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 200;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -600,7 +600,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv003, TestSize.Level1)
 
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead) + 10;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 20;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -623,7 +623,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv004, TestSize.Level1)
 
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead) + 20;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 20;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -650,7 +650,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv005, TestSize.Level1)
 
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead) + 40;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 20;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -677,7 +677,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv006, TestSize.Level1)
 
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead) + 40;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 20;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -1595,7 +1595,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv007, TestSize.Level1)
 
     buffer.capacity = 200;
     buffer.length = sizeof(ConnPktHead) + 1;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 1;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -1622,7 +1622,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv008, TestSize.Level1)
 
     buffer.capacity = 200;
     buffer.length = sizeof(ConnPktHead) + 50;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 50;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -1649,7 +1649,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv009, TestSize.Level1)
 
     buffer.capacity = 300;
     buffer.length = sizeof(ConnPktHead) + 60;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 30;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -1677,7 +1677,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv010, TestSize.Level1)
 
     buffer.capacity = 100;
     buffer.length = sizeof(ConnPktHead);
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER + 2;
     head.len = 10;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -1701,7 +1701,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv011, TestSize.Level1)
 
     buffer.capacity = 50;
     buffer.length = sizeof(ConnPktHead);
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 100;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
@@ -1725,7 +1725,7 @@ HWTEST_F(ConnBleTransTest, ConnCocTransRecv012, TestSize.Level1)
 
     buffer.capacity = 200;
     buffer.length = sizeof(ConnPktHead) + 10;
-    ConnPktHead head = {0};
+    ConnPktHead head = {};
     head.magic = MAGIC_NUMBER;
     head.len = 10;
     buffer.buffer = reinterpret_cast<uint8_t *>(&head);
