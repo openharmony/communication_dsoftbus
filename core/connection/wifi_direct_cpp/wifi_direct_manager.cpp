@@ -778,9 +778,9 @@ static void NotifyFrequencyChanged(int32_t frequency)
 
 static bool CheckOnlyVirtualLink(void)
 {
-    if (g_hmlConnectingCount > 0) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "has HML connecting, g_hmlConnectingCount=%{public}u",
-            g_hmlConnectingCount.load());
+    if (OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().IsAnyConnectCommandExist(
+        WIFI_DIRECT_LINK_TYPE_HML)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "has HML connecting command");
         return false;
     }
     return OHOS::SoftBus::LinkManager::GetInstance().CheckOnlyVirtualLink();
