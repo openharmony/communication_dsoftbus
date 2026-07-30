@@ -38,12 +38,12 @@ template <class T> T GetData()
     T objetct{};
     size_t objetctSize = sizeof(objetct);
     if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
-        CONN_LOGE(CONN_TEST, "data invalid, please check input");
+        CONN_LOGE(CONN_TEST, "data invalid");
         return objetct;
     }
     errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
     if (ret != EOK) {
-        CONN_LOGE(CONN_TEST, "memcpy failed, please check buffer");
+        CONN_LOGE(CONN_TEST, "memcpy failed");
         return {};
     }
     g_baseFuzzPos += objetctSize;

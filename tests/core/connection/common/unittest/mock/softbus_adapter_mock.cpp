@@ -71,7 +71,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
 int32_t SoftbusAdapterMock::ActionOfSoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr)
 {
     if (addr == nullptr) {
-        CONN_LOGE(CONN_TEST, "get peer name failed, please check input");
+        CONN_LOGE(CONN_TEST, "get peer name failed");
         return SOFTBUS_ADAPTER_ERR;
     }
     addr->saFamily = SOFTBUS_AF_INET6;
