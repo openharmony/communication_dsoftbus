@@ -45,6 +45,7 @@ group("unittest") {
       "ble:BleConnectionServiceTest",
       "ble:BleHidumperTest",
       "ble:BleTransTest",
+      "ble:ConnBleTransExtTest",
       "ble:ConnectionBleSwitchTest",
       "ble:ConnectionBleTest",
       "general:GeneralConnectionTest",

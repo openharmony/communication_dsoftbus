@@ -168,7 +168,6 @@ private:
     bool canAcceptNegotiateData_ = true;
     bool exclusive_ = false;
 
-    std::shared_ptr<ConnectCommand> connectCommand_;
     std::string clientJoiningMac_;
 
     bool active_;

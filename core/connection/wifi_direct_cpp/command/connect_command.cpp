@@ -159,6 +159,20 @@ bool ConnectCommand::IsSameCommand(const WifiDirectConnectInfo &info) const
     return (info.requestId == info_.info_.requestId) && (info.pid == info_.info_.pid);
 }
 
+WifiDirectLinkType ConnectCommand::GetLinkType() const
+{
+    switch (info_.info_.connectType) {
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML:
+            return WIFI_DIRECT_LINK_TYPE_HML;
+        default:
+            return WIFI_DIRECT_LINK_TYPE_P2P;
+    }
+}
+
 void ConnectCommand::ResetConnectType(WifiDirectConnectType connectType)
 {
     auto oldConnectType = info_.info_.connectType;

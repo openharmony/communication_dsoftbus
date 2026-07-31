@@ -65,6 +65,7 @@ public:
     virtual void OnSuccess(const WifiDirectLink &link) const;
     virtual void OnFailure(int32_t reason) const;
     bool IsSameCommand(const WifiDirectConnectInfo &info) const;
+    WifiDirectLinkType GetLinkType() const;
     void ResetConnectType(WifiDirectConnectType connectType);
 
 protected:

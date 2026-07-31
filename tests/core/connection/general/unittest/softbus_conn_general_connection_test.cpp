@@ -23,75 +23,89 @@
 
 using namespace testing::ext;
 using namespace testing;
-using namespace std;
 
-#define GENERAL_PKGNAME_MAX_COUNT          (10)
+namespace {
+constexpr uint32_t GENERAL_PKGNAME_MAX_COUNT = 10;
 
-static ConnectCallback *g_ConnectCallback = nullptr;
-static uint32_t g_handle = 0;
-static uint32_t g_ConnectionId = 0;
+ConnectCallback *g_ConnectCallback = nullptr;
+uint32_t g_handle = 0;
+uint32_t g_isServerGeneralId = 0;
+bool g_connectCallbackFlag = false;
+int32_t g_failCallbackFlag = 0;
+bool g_isRecvNewConnection = false;
+bool g_recvDataFlag = false;
 
-static uint32_t  g_isServerGeneralId = 0;
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos = 0;
 
-static bool g_connectCallbackFlag = false;
-static int32_t g_failCallbackFlag = false;
-static bool g_isRecvNewConnection = false;
-static bool g_recvDataFlag = false;
-
-namespace OHOS {
-static void ConnectSuccess(GeneralConnectionParam *info, uint32_t generalHandle);
-static void ConnectFailed(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason);
-static void AcceptConnect(GeneralConnectionParam *info, uint32_t generalHandle);
-static void DataReceived(GeneralConnectionParam *info, uint32_t generalHandle, const uint8_t *data, uint32_t dataLen);
-static void ConnectionDisconnected(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason);
-static void GeneralServerStopped(GeneralConnectionParam *info);
-
-class GeneralConnectionTest : public testing::Test {
-public:
-    GeneralConnectionTest() { }
-    ~GeneralConnectionTest() { }
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
-};
-
-void GeneralConnectionTest::SetUpTestCase(void)
+void ConnectSuccess(GeneralConnectionParam *info, uint32_t generalHandle)
 {
-    LooperInit();
-    SoftbusConfigInit();
-    auto ret = ConnServerInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    GeneralConnectionManager *manager = GetGeneralConnectionManager();
-    EXPECT_NE(manager, nullptr);
-
-    GeneralConnectionListener listener = {
-        .onConnectSuccess = ConnectSuccess,
-        .onConnectFailed = ConnectFailed,
-        .onAcceptConnect = AcceptConnect,
-        .onDataReceived = DataReceived,
-        .onConnectionDisconnected = ConnectionDisconnected,
-        .onServerStopped =  GeneralServerStopped,
-    };
-
-    ret = manager->registerListener(&listener);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    (void)info;
+    (void)generalHandle;
+    g_connectCallbackFlag = true;
 }
 
-void GeneralConnectionTest::TearDownTestCase(void)
+void ConnectFailed(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason)
 {
-    ConnServerDeinit();
+    (void)info;
+    (void)generalHandle;
+    (void)reason;
+    g_failCallbackFlag = reason;
 }
 
-void GeneralConnectionTest::SetUp() { }
+void AcceptConnect(GeneralConnectionParam *info, uint32_t generalHandle)
+{
+    (void)info;
+    (void)generalHandle;
+    g_isRecvNewConnection = true;
+    g_isServerGeneralId = generalHandle;
+}
 
-void GeneralConnectionTest::TearDown() { }
+void DataReceived(GeneralConnectionParam *info, uint32_t generalHandle, const uint8_t *data, uint32_t dataLen)
+{
+    (void)info;
+    (void)generalHandle;
+    (void)data;
+    (void)dataLen;
+    g_recvDataFlag = true;
+}
 
-static OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t localId, uint32_t peerId)
+void ConnectionDisconnected(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason)
+{
+    (void)info;
+    (void)generalHandle;
+    (void)reason;
+}
+
+void GeneralServerStopped(GeneralConnectionParam *info)
+{
+    (void)info;
+}
+
+int32_t GetFailCallbackReason()
+{
+    if (g_failCallbackFlag < 0) {
+        int32_t reason = g_failCallbackFlag;
+        g_failCallbackFlag = SOFTBUS_OK;
+        return reason;
+    }
+    return SOFTBUS_OK;
+}
+
+bool GetRecvDataFlag()
+{
+    if (g_recvDataFlag) {
+        g_recvDataFlag = false;
+        return true;
+    }
+    return false;
+}
+
+OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t localId, uint32_t peerId)
 {
     uint32_t tmpLen = GENERAL_CONNECTION_HEADER_SIZE + dataLen;
-    GeneralConnectionHead *dataTmp = (GeneralConnectionHead *)SoftBusCalloc(tmpLen);
+    GeneralConnectionHead *dataTmp = static_cast<GeneralConnectionHead *>(SoftBusCalloc(tmpLen));
     if (dataTmp == nullptr) {
         return nullptr;
     }
@@ -100,20 +114,21 @@ static OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t 
     dataTmp->peerId = peerId;
     dataTmp->msgType = GENERAL_CONNECTION_MSG_TYPE_NORMAL;
 
-    if (memcpy_s((uint8_t *)dataTmp + GENERAL_CONNECTION_HEADER_SIZE, dataLen, data, dataLen) != EOK) {
+    if (memcpy_s(reinterpret_cast<uint8_t *>(dataTmp) + GENERAL_CONNECTION_HEADER_SIZE,
+        dataLen, data, dataLen) != EOK) {
         SoftBusFree(dataTmp);
         return nullptr;
     }
 
     uint32_t connectHeadLen = ConnGetHeadSize();
     uint32_t totalLen = tmpLen + connectHeadLen;
-    OutData *outData = (OutData *)SoftBusCalloc(sizeof(OutData));
+    OutData *outData = static_cast<OutData *>(SoftBusCalloc(sizeof(OutData)));
     if (outData == nullptr) {
         SoftBusFree(dataTmp);
         return nullptr;
     }
     outData->dataLen = totalLen;
-    outData->data = (uint8_t *)SoftBusCalloc(totalLen);
+    outData->data = static_cast<uint8_t *>(SoftBusCalloc(totalLen));
     if (outData->data == nullptr) {
         SoftBusFree(dataTmp);
         SoftBusFree(outData);
@@ -130,130 +145,114 @@ static OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t 
     return outData;
 }
 
-static ConnPostData *PackInnerMsg(GeneralConnectionInfo *info, GeneralConnectionMsgType msgType, int32_t module)
+void FreeConnPostData(ConnPostData *data)
+{
+    if (data != nullptr) {
+        SoftBusFree(data->buf);
+        SoftBusFree(data);
+    }
+}
+
+ConnPostData *PackInnerMsg(GeneralConnectionInfo *info, GeneralConnectionMsgType msgType, int32_t module)
 {
     OutData *data = GeneralConnectionPackMsg(info, msgType);
     EXPECT_NE(data, nullptr);
+    if (data == nullptr) {
+        return nullptr;
+    }
 
     uint32_t size = ConnGetHeadSize();
-
-    static ConnPostData buff = {0};
-    buff.seq = 0;
-    buff.flag = CONN_HIGH;
-    buff.pid = 0;
-
-    buff.len = data->dataLen + size;
-    buff.buf = (char *)SoftBusCalloc(buff.len);
-    buff.module = module;
-
-    if (buff.buf == NULL || memcpy_s(buff.buf + size, data->dataLen, data->data, data->dataLen) != EOK) {
-        SoftBusFree(buff.buf);
+    ConnPostData *buff = static_cast<ConnPostData *>(SoftBusCalloc(sizeof(ConnPostData)));
+    if (buff == nullptr) {
         FreeOutData(data);
         return nullptr;
     }
+    buff->seq = 0;
+    buff->flag = CONN_HIGH;
+    buff->pid = 0;
+    buff->len = data->dataLen + size;
+    buff->buf = static_cast<char *>(SoftBusCalloc(buff->len));
+    buff->module = module;
+
+    if (buff->buf == nullptr || memcpy_s(buff->buf + size, data->dataLen, data->data, data->dataLen) != EOK) {
+        FreeOutData(data);
+        FreeConnPostData(buff);
+        return nullptr;
+    }
     FreeOutData(data);
-    return &buff;
+    return buff;
 }
 
-static bool GetConnectCallbackFlag()
+void FillGeneralConnectionParam(GeneralConnectionParam &param,
+    const char *name, const char *pkgName, const char *bundleName)
 {
-    if (g_connectCallbackFlag) {
-        g_connectCallbackFlag = false;
-        return true;
-    }
-    return false;
+    EXPECT_EQ(strcpy_s(param.name, GENERAL_NAME_LEN, name), EOK);
+    EXPECT_EQ(strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName), EOK);
+    EXPECT_EQ(strcpy_s(param.bundleName, BUNDLE_NAME_MAX, bundleName), EOK);
 }
 
-static int32_t GetFailCallbackReason()
-{
-    if (g_failCallbackFlag < 0) {
-        int32_t reason = g_failCallbackFlag;
-        g_failCallbackFlag = SOFTBUS_OK;
-        return reason;
-    }
-    return SOFTBUS_OK;
-}
-
-static bool GetRecvDataFlag()
-{
-    if (g_recvDataFlag) {
-        g_recvDataFlag = false;
-        return true;
-    }
-    return false;
-}
-
-static void ConnectSuccess(GeneralConnectionParam *info, uint32_t generalHandle)
-{
-    (void)info;
-    (void)generalHandle;
-    g_connectCallbackFlag = true;
-}
-
-static void ConnectFailed(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason)
-{
-    (void)info;
-    (void)generalHandle;
-    (void)reason;
-    g_failCallbackFlag = reason;
-}
-
-static void AcceptConnect(GeneralConnectionParam *info, uint32_t generalHandle)
-{
-    (void)info;
-    (void)generalHandle;
-    g_isRecvNewConnection = true;
-    g_isServerGeneralId = generalHandle;
-}
-
-static void DataReceived(GeneralConnectionParam *info, uint32_t generalHandle, const uint8_t *data, uint32_t dataLen)
-{
-    (void)info;
-    (void)generalHandle;
-    (void)data;
-    (void)dataLen;
-    g_recvDataFlag = true;
-}
-
-static void ConnectionDisconnected(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason)
-{
-    (void)info;
-    (void)generalHandle;
-    (void)reason;
-}
-
-static void GeneralServerStopped(GeneralConnectionParam *info)
-{
-    (void)info;
-}
-
-const uint8_t *g_baseFuzzData = nullptr;
-size_t g_baseFuzzSize = 0;
-size_t g_baseFuzzPos;
 template <class T>
 T GetConnGeneralRandomData()
 {
-    T objetct {};
-    size_t objetctSize = sizeof(objetct);
-    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
         COMM_LOGE(COMM_TEST, "data invalid");
-        return objetct;
+        return object;
     }
-    errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
+    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
     if (ret != EOK) {
         COMM_LOGE(COMM_TEST, "memory copy error");
         return {};
     }
-    g_baseFuzzPos += objetctSize;
-    return objetct;
+    g_baseFuzzPos += objectSize;
+    return object;
+}
+}
+
+namespace OHOS {
+class GeneralConnectionTest : public testing::Test {
+public:
+    GeneralConnectionTest() = default;
+    ~GeneralConnectionTest() override = default;
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+};
+
+void GeneralConnectionTest::SetUpTestCase()
+{
+    LooperInit();
+    SoftbusConfigInit();
+    auto ret = ConnServerInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    EXPECT_NE(manager, nullptr);
+
+    GeneralConnectionListener listener = {
+        .onConnectSuccess = ConnectSuccess,
+        .onConnectFailed = ConnectFailed,
+        .onAcceptConnect = AcceptConnect,
+        .onDataReceived = DataReceived,
+        .onConnectionDisconnected = ConnectionDisconnected,
+        .onServerStopped = GeneralServerStopped,
+    };
+
+    ret = manager->registerListener(&listener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+void GeneralConnectionTest::TearDownTestCase()
+{
+    ConnServerDeinit();
 }
 
 /*
-* @tc.name: TestInit
-* @tc.desc: test init general connection
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: TestInit
+ * @tc.desc: test init general connection
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test init in");
@@ -262,7 +261,7 @@ HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
     ClearGeneralConnection(pkgName, 0);
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
-    GeneralConnectionParam param = {0};
+    GeneralConnectionParam param = {};
     manager->closeServer(&param);
     g_ConnectCallback = GeneralConnectionInterfaceMock::GetConnectCallbackMock();
     ASSERT_NE(g_ConnectCallback, nullptr);
@@ -270,39 +269,29 @@ HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
 }
 
 /*
-* @tc.name: TestCreateServerMax
-* @tc.desc: test create server include max count(10) and normal case
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
+ * @tc.name: TestCreateServer
+ * @tc.desc: test create server include max count(10) and normal case
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test createServer in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
-    GeneralConnectionParam param = {0};
-
-    const char *name = "test";
-    int32_t ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test");
-    EXPECT_EQ(ret, EOK);
-    const char *pkgName = "testPkgName";
-    ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
-    EXPECT_EQ(ret, EOK);
-
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameServer");
-    EXPECT_EQ(ret, EOK);
+    GeneralConnectionParam param = {};
+    FillGeneralConnectionParam(param, "test", "testPkgName", "testBundleNameServer");
 
     GeneralConnectionInterfaceMock mock;
     EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
 
-    ret = manager->createServer(&param);
+    int32_t ret = manager->createServer(&param);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = manager->createServer(&param);
     EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_DUPLICATE_SERVER);
     for (uint32_t i = 0; i < GENERAL_PKGNAME_MAX_COUNT; ++i) {
-        string nameTemp = name + to_string(i);
-        ret = strcpy_s(param.name, GENERAL_NAME_LEN, nameTemp.c_str());
-        EXPECT_EQ(ret, EOK);
+        std::string nameTemp = "test" + std::to_string(i);
+        EXPECT_EQ(strcpy_s(param.name, GENERAL_NAME_LEN, nameTemp.c_str()), EOK);
         ret = manager->createServer(&param);
         int32_t expectedRet = (i == GENERAL_PKGNAME_MAX_COUNT - 1) ?
             SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX : SOFTBUS_OK;
@@ -310,89 +299,67 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
     }
 
     manager->closeServer(&param);
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test9");
-    EXPECT_EQ(ret, EOK);
+    EXPECT_EQ(strcpy_s(param.name, GENERAL_NAME_LEN, "test9"), EOK);
     manager->closeServer(&param);
 
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test8");
-    EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.bundleName, GENERAL_NAME_LEN, "testBundleName0");
-    EXPECT_EQ(ret, EOK);
+    EXPECT_EQ(strcpy_s(param.name, GENERAL_NAME_LEN, "test8"), EOK);
+    EXPECT_EQ(strcpy_s(param.bundleName, GENERAL_NAME_LEN, "testBundleName0"), EOK);
     manager->closeServer(&param);
     CONN_LOGI(CONN_BLE, "test createServer out");
 }
 
 /*
-* @tc.name: TestCreateServerConstraint
-* @tc.desc: test create server blocked by account constraint
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
+ * @tc.name: TestCreateServerConstraint
+ * @tc.desc: test create server blocked by account constraint
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestCreateServerConstraint, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test createServer constraint in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
-    GeneralConnectionParam param = {0};
-
-    const char *pkgName = "testConstraintPkg";
-    int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
-    EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameServer");
-    EXPECT_EQ(ret, EOK);
-
-    const char *name = "testConstraint";
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, name);
-    EXPECT_EQ(ret, EOK);
+    GeneralConnectionParam param = {};
+    FillGeneralConnectionParam(param, "testConstraint", "testConstraintPkg", "testBundleNameServer");
 
     GeneralConnectionInterfaceMock mock;
     EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
 
-    ret = manager->createServer(&param);
+    int32_t ret = manager->createServer(&param);
     EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
     CONN_LOGI(CONN_BLE, "test createServer constraint out");
 }
 
 /*
-* @tc.name: TestConnect
-* @tc.desc: test connect include to max count(10) and normal case
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
+ * @tc.name: TestConnect
+ * @tc.desc: test connect include to max count(10) and normal case
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test connect in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
-    GeneralConnectionParam param = {0};
-
-    const char *pkgName = "testPkgName";
-    int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
-    EXPECT_EQ(ret, EOK);
-    
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameConnect");
-    EXPECT_EQ(ret, EOK);
-    const char *name = "test";
+    GeneralConnectionParam param = {};
+    FillGeneralConnectionParam(param, "test", "testPkgName", "testBundleNameConnect");
     const char *addr = "11:22:33:44:55:66";
     param.pid = 0;
     GeneralConnectionInterfaceMock mock;
     EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
     for (uint32_t i = 0; i < GENERAL_PKGNAME_MAX_COUNT; ++i) {
-        string nameTemp = name + to_string(i);
-        ret = strcpy_s(param.name, GENERAL_NAME_LEN, nameTemp.c_str());
-        EXPECT_EQ(ret, EOK);
-        ret = manager->connect(&param, addr);
-        EXPECT_EQ(ret > 0, true);
+        std::string nameTemp = "test" + std::to_string(i);
+        EXPECT_EQ(strcpy_s(param.name, GENERAL_NAME_LEN, nameTemp.c_str()), EOK);
+        int32_t ret = manager->connect(&param, addr);
+        EXPECT_GT(ret, 0);
     }
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test10");
-    EXPECT_EQ(ret, EOK);
-    ret = manager->connect(&param, addr);
+    EXPECT_EQ(strcpy_s(param.name, GENERAL_NAME_LEN, "test10"), EOK);
+    int32_t ret = manager->connect(&param, addr);
     EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_CREATE_CLIENT_MAX);
     manager->cleanupGeneralConnection(param.pkgName, param.pid);
 
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test9");
-    EXPECT_EQ(ret, EOK);
+    EXPECT_EQ(strcpy_s(param.name, GENERAL_NAME_LEN, "test9"), EOK);
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_STRCPY_ERR));
     ret = manager->connect(&param, addr);
     EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_CONNECT_FAILED);
@@ -401,102 +368,35 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
 }
 
 /*
-* @tc.name: TestConnectConstraint
-* @tc.desc: test connect blocked by account constraint
-* @tc.type: FUNC
-* @tc.require: AR000GIRGE
-*/
+ * @tc.name: TestConnectConstraint
+ * @tc.desc: test connect blocked by account constraint
+ * @tc.type: FUNC
+ * @tc.require: AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestConnectConstraint, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test connect constraint in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
-    GeneralConnectionParam param = {0};
-
-    const char *pkgName = "testConstraintPkg";
-    int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
-    EXPECT_EQ(ret, EOK);
-    const char *name = "testConstraint";
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, name);
-    EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameConnect");
-    EXPECT_EQ(ret, EOK);
+    GeneralConnectionParam param = {};
+    FillGeneralConnectionParam(param, "testConstraint", "testConstraintPkg", "testBundleNameConnect");
     const char *addr = "11:22:33:44:55:66";
     param.pid = 0;
 
     GeneralConnectionInterfaceMock mock;
     EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
 
-    ret = manager->connect(&param, addr);
+    int32_t ret = manager->connect(&param, addr);
     EXPECT_EQ(ret, SOFTBUS_ACCOUNT_CONSTRAINT_ENABLE);
     CONN_LOGI(CONN_BLE, "test connect constraint out");
 }
 
 /*
-* @tc.name: test send
-* @tc.desc: test send
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
-HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
-{
-    CONN_LOGI(CONN_BLE, "test send in");
-    GeneralConnectionManager *manager = GetGeneralConnectionManager();
-    ASSERT_NE(manager, nullptr);
-    GeneralConnectionParam param = {
-        .pkgName = "testPkgName1",
-        .bundleName = "testBundleNameSend",
-        .name = "test",
-    };
-    const char *addr = "11:22:33:44:55:66";
-    param.pid = 0;
-    NiceMock<GeneralConnectionInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
-    EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
-    g_handle = manager->connect(&param, addr); // to get handle
-    EXPECT_EQ(g_handle > 0, true);
-    uint8_t *data = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
-    EXPECT_NE(data, nullptr);
-    int32_t ret = manager->send(g_handle, data, 0, 0); // unexpect state
-    EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_CONNECTION_NOT_READY);
-    GeneralConnectionInfo info = {{0}};
-    info.peerId = g_handle;
-    OutData *dataRecv = GeneralConnectionPackMsg(&info, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE_ACK);
-    EXPECT_NE(dataRecv, nullptr);
-    uint32_t size = ConnGetHeadSize();
-    uint32_t dataLen = dataRecv->dataLen + size;
-    char *buff = (char *)SoftBusCalloc(dataLen);
-    EXPECT_NE(buff, nullptr);
-    ret = memcpy_s(buff + size, dataRecv->dataLen, dataRecv->data, dataRecv->dataLen);
-    EXPECT_EQ(ret, EOK);
-    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, buff, dataRecv->dataLen);
-    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
-    g_ConnectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT);
-    ConnectResult *connectResult = GeneralConnectionInterfaceMock::GetConnectResultMock();
-    uint32_t requestId = 12;
-    ConnectionInfo infos = {0};
-    connectResult->OnConnectSuccessed(requestId, g_ConnectionId, &infos); // save connectionId
-    g_ConnectCallback->OnDataReceived(g_ConnectionId, MODULE_BLE_GENERAL, 0, buff, dataLen); // state change to success
-    EXPECT_EQ(true, GetConnectCallbackFlag());
-    uint32_t ConnectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
-    g_ConnectCallback->OnDataReceived(ConnectionId, MODULE_BLE_GENERAL, 0, buff, dataLen); // not target connId
-
-    EXPECT_CALL(mock, ConnBlePostBytesMock).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = manager->send(g_handle, data, sizeof(uint8_t), 0);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = manager->send(g_handle, data, sizeof(uint8_t), 1);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    SoftBusFree(data);
-    SoftBusFree(buff);
-    CONN_LOGI(CONN_BLE, "test send out");
-}
-
-/*
-* @tc.name: TestSendConstraint
-* @tc.desc: test send blocked by account constraint
-* @tc.type: FUNC
-* @tc.require: AR000GIRGE
-*/
+ * @tc.name: TestSendConstraint
+ * @tc.desc: test send blocked by account constraint
+ * @tc.type: FUNC
+ * @tc.require: AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestSendConstraint, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test send constraint in");
@@ -508,7 +408,7 @@ HWTEST_F(GeneralConnectionTest, TestSendConstraint, TestSize.Level1)
         .name = "testConstraint",
     };
     param.pid = 0;
-    uint8_t *data = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *data = static_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     EXPECT_NE(data, nullptr);
     NiceMock<GeneralConnectionInterfaceMock> mock;
     EXPECT_CALL(mock, LnnIsOsAccountConstraint).WillRepeatedly(Return(true));
@@ -522,11 +422,11 @@ HWTEST_F(GeneralConnectionTest, TestSendConstraint, TestSize.Level1)
 }
 
 /*
-* @tc.name: test recv
-* @tc.desc: test recv normal message
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
+ * @tc.name: TestRecv
+ * @tc.desc: test recv normal message
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestRecv, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test recv in");
@@ -542,43 +442,45 @@ HWTEST_F(GeneralConnectionTest, TestRecv, TestSize.Level1)
     NiceMock<GeneralConnectionInterfaceMock> mock;
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
     auto handle = manager->connect(&param, addr);
-    EXPECT_EQ(handle > 0, true);
+    EXPECT_GT(handle, 0);
 
     auto connectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 2;
     ConnectResult *connectResult = GeneralConnectionInterfaceMock::GetConnectResultMock();
     uint32_t requestId = 69;
-    ConnectionInfo infos = { 0 };
+    ConnectionInfo infos = {};
     connectResult->OnConnectSuccessed(requestId, connectionId, &infos);
 
-    uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
+    uint8_t *data = static_cast<uint8_t *>(SoftBusMalloc(sizeof(uint8_t)));
     EXPECT_NE(data, nullptr);
-    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_CONN, 0, (char *)data, GENERAL_CONNECTION_HEADER_SIZE + 1);
-    EXPECT_EQ(GetRecvDataFlag(), false);
+    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_CONN, 0,
+        reinterpret_cast<char *>(data), GENERAL_CONNECTION_HEADER_SIZE + 1);
+    EXPECT_FALSE(GetRecvDataFlag());
     OutData *dataRecv = PackReceiveData(data, sizeof(uint8_t), 0, handle);
     EXPECT_NE(dataRecv, nullptr);
     connectionId = 0;
-    g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
-    EXPECT_EQ(GetRecvDataFlag(), true);
-    // not target connId
-    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
+    g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0,
+        reinterpret_cast<char *>(dataRecv->data), dataRecv->dataLen);
+    EXPECT_TRUE(GetRecvDataFlag());
+    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0,
+        reinterpret_cast<char *>(dataRecv->data), dataRecv->dataLen);
     SoftBusFree(data);
     FreeOutData(dataRecv);
     CONN_LOGI(CONN_BLE, "test recv out");
 }
 
 /*
-* @tc.name: Test GetPeerDeviceId
-* @tc.desc: test recv normal message
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
+ * @tc.name: TestGetPeerDeviceId
+ * @tc.desc: test get peer device id
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestGetPeerDeviceId, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test get peer deviceId in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     ASSERT_NE(manager, nullptr);
-    
-    char addr[BT_MAC_LEN] = {0};
+
+    char addr[BT_MAC_LEN] = {};
     int32_t ret = manager->getPeerDeviceId(g_handle, addr, BT_MAC_LEN - 1, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -591,68 +493,61 @@ HWTEST_F(GeneralConnectionTest, TestGetPeerDeviceId, TestSize.Level1)
 }
 
 /*
-* @tc.name: Test OnConnectDisconnected
-* @tc.desc: test OnConnectDisconnected
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
+ * @tc.name: TestOnConnectDisconnected
+ * @tc.desc: test OnConnectDisconnected
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test on connect disconnect in");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     ASSERT_NE(manager, nullptr);
 
-    GeneralConnectionParam param = {0};
-    const char *pkgName = "testPkgName1";
-    int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
-    EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameDisconnected");
-    EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test1");
-    EXPECT_EQ(ret, EOK);
+    GeneralConnectionParam param = {};
+    FillGeneralConnectionParam(param, "test1", "testPkgName1", "testBundleNameDisconnected");
     const char *addr = "11:22:33:44:55:66";
     param.pid = 0;
     NiceMock<GeneralConnectionInterfaceMock> mock;
-    EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
+    uint32_t actualRequestId = 0;
+    EXPECT_CALL(mock, BleConnectDeviceMock)
+        .WillRepeatedly(DoAll(SaveArg<1>(&actualRequestId), Return(SOFTBUS_OK)));
     int32_t handle = manager->connect(&param, addr);
-    EXPECT_EQ(handle > 0, true);
+    EXPECT_GT(handle, 0);
 
     ConnectResult *connectResult = GeneralConnectionInterfaceMock::GetConnectResultMock();
-    uint32_t requestId = 14;
-    ConnectionInfo infos = {0};
+    ConnectionInfo infos = {};
     uint32_t connectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
-    connectResult->OnConnectSuccessed(requestId, connectionId, &infos);
+    connectResult->OnConnectSuccessed(actualRequestId, connectionId, &infos);
 
     GeneralConnectionInfo info = {
-        .peerId = handle,
+        .peerId = static_cast<uint32_t>(handle),
     };
     ConnPostData *data = PackInnerMsg(&info, GENERAL_CONNECTION_MSG_TYPE_RESET, MODULE_BLE_GENERAL);
     EXPECT_NE(data, nullptr);
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
     EXPECT_EQ(GetFailCallbackReason(), SOFTBUS_CONN_GENERAL_PEER_CONNECTION_CLOSE);
 
-    // not target connId
     g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, data->buf, data->len);
     EXPECT_EQ(GetFailCallbackReason(), SOFTBUS_OK);
-    
+
     g_ConnectCallback->OnDisconnected(connectionId, &infos);
-    SoftBusFree(data->buf);
+    FreeConnPostData(data);
     CONN_LOGI(CONN_BLE, "test on connect disconnect out");
 }
 
 /*
-* @tc.name: TestRecvNewConnection
-* @tc.desc: test recv GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
+ * @tc.name: TestRecvNewConnection
+ * @tc.desc: test recv GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE
+ * @tc.type: FUNC
+ * @tc.require:AR000GIRGE
+ */
 HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
 {
     CONN_LOGI(CONN_BLE, "test recv new connection in ");
     NiceMock<GeneralConnectionInterfaceMock> mock;
     EXPECT_CALL(mock, ConnBlePostBytesMock).WillRepeatedly(Return(SOFTBUS_OK));
 
-    // test recv peer connect and not create server
     uint32_t handle = 199657;
     uint32_t connectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
     GeneralConnectionInfo info = {
@@ -662,9 +557,8 @@ HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
     };
     ConnPostData *data = PackInnerMsg(&info, GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE, MODULE_BLE_GENERAL);
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
-    EXPECT_EQ(g_isRecvNewConnection, false);
+    EXPECT_FALSE(g_isRecvNewConnection);
 
-    // test recv peer connect and notify upperLayer success
     GeneralConnectionParam param = {
         .name = "test",
         .bundleName = "testApp",
@@ -673,17 +567,17 @@ HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
     EXPECT_NE(manager, nullptr);
     manager->createServer(&param);
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
-    EXPECT_EQ(g_isRecvNewConnection, true);
-    CONN_LOGI(CONN_BLE, "test recv new connection out");
+    EXPECT_TRUE(g_isRecvNewConnection);
 
-    // test recv merge message
     GeneralConnectionInfo info1 = {
         .peerId = g_isServerGeneralId,
         .updateHandle = 222,
     };
+    FreeConnPostData(data);
     data = PackInnerMsg(&info1, GENERAL_CONNECTION_MSG_TYPE_MERGE, MODULE_BLE_GENERAL);
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
-    SoftBusFree(data->buf);
+    FreeConnPostData(data);
+    CONN_LOGI(CONN_BLE, "test recv new connection out");
 }
 
 /*
@@ -707,6 +601,84 @@ HWTEST_F(GeneralConnectionTest, TestDataReceivedFuzzTest, TestSize.Level1)
     ConnPostData *data = PackInnerMsg(
         &info, GetConnGeneralRandomData<GeneralConnectionMsgType>(), GetConnGeneralRandomData<ConnModule>());
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
-    SoftBusFree(data->buf);
+    FreeConnPostData(data);
+}
+
+/*
+ * @tc.name: TestConnectParamNull
+ * @tc.desc: test connect with null param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GeneralConnectionTest, TestConnectParamNull, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test connect param null in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    ASSERT_NE(manager, nullptr);
+    const char *addr = "11:22:33:44:55:66";
+    int32_t ret = manager->connect(nullptr, addr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TestConnectAddrNull
+ * @tc.desc: test connect with null addr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GeneralConnectionTest, TestConnectAddrNull, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test connect addr null in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    ASSERT_NE(manager, nullptr);
+    GeneralConnectionParam param = {};
+    FillGeneralConnectionParam(param, "testAddrNull", "testPkgAddrNull", "testBundleAddrNull");
+    int32_t ret = manager->connect(&param, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TestSendDataNull
+ * @tc.desc: test send with null data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GeneralConnectionTest, TestSendDataNull, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test send data null in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    ASSERT_NE(manager, nullptr);
+    int32_t ret = manager->send(g_handle, nullptr, 0, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TestCreateServerParamNull
+ * @tc.desc: test createServer with null param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GeneralConnectionTest, TestCreateServerParamNull, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test createServer param null in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    ASSERT_NE(manager, nullptr);
+    int32_t ret = manager->createServer(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TestGetPeerDeviceIdAddrNull
+ * @tc.desc: test getPeerDeviceId with null addr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GeneralConnectionTest, TestGetPeerDeviceIdAddrNull, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test getPeerDeviceId addr null in");
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    ASSERT_NE(manager, nullptr);
+    int32_t ret = manager->getPeerDeviceId(g_handle, nullptr, BT_MAC_LEN, 0, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 }

@@ -71,6 +71,24 @@ int WifiDirectScheduler::ConnectDevice(const std::shared_ptr<ConnectCommand> &co
     return ConnectDevice(command->GetConnectInfo().info_, command->GetConnectCallback(), markRetried);
 }
 
+bool WifiDirectScheduler::IsAnyConnectCommandExist(WifiDirectLinkType linkType)
+{
+    std::lock_guard executorLock(executorLock_);
+    if (executorManager_.HasAnyConnectCommand(linkType)) {
+        return true;
+    }
+    std::lock_guard commandLock(commandLock_);
+    for (const auto &command : commandList_) {
+        if (command != nullptr && command->GetType() == CommandType::CONNECT_COMMAND) {
+            auto connectCommand = std::static_pointer_cast<ConnectCommand>(command);
+            if (connectCommand != nullptr && connectCommand->GetLinkType() == linkType) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback)
 {
     auto innerLink = LinkManager::GetInstance().GetLinkById(info.linkId);
