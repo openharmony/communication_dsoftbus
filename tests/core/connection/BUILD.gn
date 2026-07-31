@@ -53,7 +53,10 @@ group("unittest") {
       "general:GeneralNegotiationTest",
       "proxy:ProxyChannelManagerTest",
       "ble/unittest/bleConnection:ConnBleConnectionTest",
-      "ble/unittest/ble_manager:BleManagerTest"
+      "ble/unittest/ble_manager:BleManagerTest",
+      "ble:BleSnapshotTest",
+      "ble:BleProtocolInterfaceFactoryTest",
+      "ble:BleTransExpandTest",
     ]
   }
   if (dsoftbus_feature_conn_tcp_comm && dsoftbus_feature_conn_tcp_proxy) {
