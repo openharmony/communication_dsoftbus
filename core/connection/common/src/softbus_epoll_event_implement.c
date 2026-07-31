@@ -142,7 +142,7 @@ static uint32_t EpollEventToTriggerEvent(uint32_t epollEvent)
     }
     // EPOLLERR/EPOLLHUP: abnormal; trigger read+write so recv/send surfaces error/EOF for cleanup.
     if ((epollEvent & (EPOLLERR | EPOLLHUP)) != 0) {
-        events |= READ_TRIGGER | WRITE_TRIGGER;
+        events |= (READ_TRIGGER | WRITE_TRIGGER);
     }
     return events;
 }
