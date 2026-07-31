@@ -455,7 +455,7 @@ ohos_unittest("BleTransExpandTest") {
     "$softbus_adapter_common/include",
     "$dsoftbus_dfx_path/interface/include",
   ]
- 	 
+
   sources = [
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_trans.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_send_queue.c",
@@ -464,13 +464,13 @@ ohos_unittest("BleTransExpandTest") {
     "$dsoftbus_root_path/tests/core/connection/ble/unittest/ble_gatt_stub.cpp",
     "$dsoftbus_root_path/tests/core/connection/ble/unittest/softbus_conn_ble_trans_expand_test.cpp",
   ]
- 	 
+
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
   ]
   deps += dsoftbus_log_label_deps
- 	 
+
   external_deps = [
     "bluetooth:btframework",
     "bounds_checking_function:libsec_shared",
