@@ -84,7 +84,8 @@
       "CollaborationFwk",
       "car_distributed_engine",
       "wear_link_service",
-      "device_manager"
+      "device_manager",
+      "fusion_communication_framework"
     ]
   },
   {
@@ -94,7 +95,8 @@
       "CollaborationFwk",
       "car_distributed_engine",
       "wear_link_service",
-      "device_manager"
+      "device_manager",
+      "fusion_communication_framework"
     ]
   },
   {
