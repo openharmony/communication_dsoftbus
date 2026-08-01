@@ -251,7 +251,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, ParseFragmentHeader_AllZeros_Test, TestSize.
  */
 HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_NullInfo_Test, TestSize.Level1)
 {
-    int32_t ret = DataSlice("test_udid", nullptr, nullptr);
+    int32_t ret = DataSlice("test_udid", nullptr, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -265,7 +265,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_NullUdid_Test, TestSize.Level1)
 {
     uint8_t data[] = "test_data";
     DataFragmentMsgInfo info = {data, sizeof(data), MAX_SLICE_LEN, 1};
-    int32_t ret = DataSlice(nullptr, &info, nullptr);
+    int32_t ret = DataSlice(nullptr, &info, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -278,7 +278,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_NullUdid_Test, TestSize.Level1)
 HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_NullData_Test, TestSize.Level1)
 {
     DataFragmentMsgInfo info = {nullptr, 100, MAX_SLICE_LEN, 1};
-    int32_t ret = DataSlice("test_udid", &info, nullptr);
+    int32_t ret = DataSlice("test_udid", &info, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -292,7 +292,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_ZeroDataLen_Test, TestSize.Level1)
 {
     uint8_t data[] = "test";
     DataFragmentMsgInfo info = {data, 0, MAX_SLICE_LEN, 1};
-    int32_t ret = DataSlice("test_udid", &info, nullptr);
+    int32_t ret = DataSlice("test_udid", &info, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -306,7 +306,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_ZeroSliceLen_Test, TestSize.Level1
 {
     uint8_t data[] = "test_data";
     DataFragmentMsgInfo info = {data, sizeof(data), 0, 1};
-    int32_t ret = DataSlice("test_udid", &info, nullptr);
+    int32_t ret = DataSlice("test_udid", &info, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -320,7 +320,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_SliceLenTooLarge_Test, TestSize.Le
 {
     uint8_t data[] = "test_data";
     DataFragmentMsgInfo info = {data, sizeof(data), MAX_SLICE_LEN + 1, 1};
-    int32_t ret = DataSlice("test_udid", &info, nullptr);
+    int32_t ret = DataSlice("test_udid", &info, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -336,7 +336,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_DataLenTooLarge_Test, TestSize.Lev
     ASSERT_NE(data, nullptr);
     
     DataFragmentMsgInfo info = {data, 11 * 1024 * 1024, MAX_SLICE_LEN, 1};
-    int32_t ret = DataSlice("test_udid", &info, nullptr);
+    int32_t ret = DataSlice("test_udid", &info, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     SoftBusFree(data);
@@ -358,7 +358,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataSlice_SliceTotalTooLarge_Test, TestSize.
     memset_s(data, dataLen, 'a', dataLen);
     
     DataFragmentMsgInfo info = {data, dataLen, sliceLen, 1};
-    int32_t ret = DataSlice("test_udid", &info, nullptr);
+    int32_t ret = DataSlice("test_udid", &info, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     SoftBusFree(data);
@@ -575,7 +575,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataAggregate_ValidFragment_Test, TestSize.L
     int32_t ret = DataAggregate(data, sizeof(data), &assembledData, &assembledLen, &msgId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(msgId, 1);
-    EXPECT_EQ(assembledLen, 0);
+    EXPECT_EQ(assembledLen, 100);
     
     if (assembledData != nullptr) {
         SoftBusFree(assembledData);
@@ -620,7 +620,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataAggregate_MultipleFragments_Test, TestSi
                 SoftBusFree(assembledData);
             }
         } else {
-            EXPECT_EQ(assembledLen, 0);
+            EXPECT_EQ(assembledLen, 30);
         }
     }
 }
@@ -733,7 +733,7 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataAggregate_FragmentOffsetNotZero_Test, Te
     int32_t ret = DataAggregate(data, sizeof(data), &assembledData, &assembledLen, &msgId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(msgId, 1);
-    EXPECT_EQ(assembledLen, 0);
+    EXPECT_EQ(assembledLen, 20);
 }
 
 /*

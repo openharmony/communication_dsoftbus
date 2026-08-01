@@ -99,8 +99,14 @@ static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
         .peerUserId = nodeInfo.userId,
         .localUserId = nodeInfo.localUserId
     };
-    UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
+    bool isNeedUpdateAclState = false;
+    UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState, &isNeedUpdateAclState);
     SetDpGroupShare(info, authHandle);
+    if (isNeedUpdateAclState) {
+        LnnUpdateAclState(nodeInfo.deviceInfo.deviceUdid, ACL_CAN_WRITE);
+    } else {
+        LnnUpdateAclState(nodeInfo.deviceInfo.deviceUdid, ACL_WRITE_DEFAULT);
+    }
 }
 
 static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onlineType)

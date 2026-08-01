@@ -191,5 +191,15 @@ int32_t ServerIpcProcessAccountAuth(const char *pkgName, int64_t requestId, cons
 {
     return GetBusCenterManagerInterface()->ServerIpcProcessAccountAuth(pkgName, requestId, data, dataLen);
 }
+
+int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info)
+{
+    return GetBusCenterManagerInterface()->ServerIpcRegisterConversationListener(info);
+}
+
+int32_t ServerIpcUnregisterConversationListener(const ConversationBusiness *info)
+{
+    return GetBusCenterManagerInterface()->ServerIpcUnregisterConversationListener(info);
+}
 } // extern "C"
 } // namespace OHOS

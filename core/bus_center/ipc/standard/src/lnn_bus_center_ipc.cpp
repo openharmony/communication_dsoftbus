@@ -1002,7 +1002,41 @@ static void StopTimeSyncReq(const char *pkgName)
     }
 }
 
-void BusCenterServerDeathCallback(const char *pkgName)
+static void RemoveAgentCommunicationInfoByPid(int32_t pid)
+{
+    std::vector<ConversationBusiness> coreCleanupList;
+    {
+        std::lock_guard<std::mutex> autoLock(g_lock);
+        std::vector<AgentCommunicationInfo *>::iterator iter;
+        for (iter = g_agentCommunicationInfo.begin(); iter != g_agentCommunicationInfo.end();) {
+            if ((*iter) == nullptr) {
+                LNN_LOGE(LNN_EVENT, "iter is nullptr");
+                iter = g_agentCommunicationInfo.erase(iter);
+                continue;
+            }
+            if ((*iter)->pid != pid) {
+                ++iter;
+                continue;
+            }
+            char *anonyBundlename = nullptr;
+            char *anonyAbilityname = nullptr;
+            Anonymize((*iter)->info.bundleName, &anonyBundlename);
+            Anonymize((*iter)->info.abilityName, &anonyAbilityname);
+            LNN_LOGI(LNN_EVENT, "delete by pid=%{public}d, bundlename=%{public}s, abilityname=%{public}s",
+                pid, AnonymizeWrapper(anonyBundlename), AnonymizeWrapper(anonyAbilityname));
+            AnonymizeFree(anonyBundlename);
+            AnonymizeFree(anonyAbilityname);
+            coreCleanupList.push_back((*iter)->info);
+            delete *iter;
+            iter = g_agentCommunicationInfo.erase(iter);
+        }
+    }
+    for (const auto &info : coreCleanupList) {
+        LnnUnregisterConversationListener(&info);
+    }
+}
+
+void BusCenterServerDeathCallback(const char *pkgName, int32_t pid)
 {
     if (pkgName == nullptr) {
         return;
@@ -1014,6 +1048,7 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveGroupByPkgName(pkgName);
     RemoveAccountAuthInfoByPkgName(pkgName);
     StopTimeSyncReq(pkgName);
+    RemoveAgentCommunicationInfoByPid(pid);
     SdMgrDeathCallbackPacked(pkgName);
 }
 
@@ -1066,8 +1101,18 @@ static int32_t GetAccountAuthInfo(int64_t requestId, PkgNameAndPidInfo *info)
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t AddAgentCommunicationInfo(const ConversationBusiness *info, int32_t pid)
+static int32_t AddOrUpdateAgentCommunicationInfo(const ConversationBusiness *info, int32_t pid)
 {
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    for (const auto &iter : g_agentCommunicationInfo) {
+        if (strcmp(info->bundleName, (*iter).info.bundleName) == 0 &&
+            strcmp(info->abilityName, (*iter).info.abilityName) == 0) {
+            (*iter).pid = pid;
+            LNN_LOGI(LNN_EVENT, "update pid=%{public}d success", pid);
+            return SOFTBUS_OK;
+        }
+    }
+
     AgentCommunicationInfo *item = new (std::nothrow) AgentCommunicationInfo();
     if (item == nullptr) {
         LNN_LOGE(LNN_EVENT, "create agent communication info fail");
@@ -1080,22 +1125,9 @@ static int32_t AddAgentCommunicationInfo(const ConversationBusiness *info, int32
         return SOFTBUS_STRCPY_ERR;
     }
     item->pid = pid;
-    std::lock_guard<std::mutex> autoLock(g_lock);
+    LNN_LOGI(LNN_EVENT, "add pid=%{public}d success", pid);
     g_agentCommunicationInfo.push_back(item);
     return SOFTBUS_OK;
-}
-
-static bool IsRepeatAgentCommunicationRequest(const ConversationBusiness *info)
-{
-    std::lock_guard<std::mutex> autoLock(g_lock);
-    for (const auto &iter : g_agentCommunicationInfo) {
-        if (strncmp(info->bundleName, (*iter).info.bundleName, strlen(info->bundleName)) != 0 ||
-            strncmp(info->abilityName, (*iter).info.abilityName, strlen(info->abilityName)) != 0) {
-            continue;
-        }
-        return true;
-    }
-    return false;
 }
 
 static void RemoveAgentCommunicationInfo(const ConversationBusiness *info)
@@ -1107,8 +1139,8 @@ static void RemoveAgentCommunicationInfo(const ConversationBusiness *info)
             LNN_LOGE(LNN_EVENT, "iter is nullptr");
             break;
         }
-        if (strncmp(info->bundleName, (*iter)->info.bundleName, strlen(info->bundleName)) != 0 ||
-            strncmp(info->abilityName, (*iter)->info.abilityName, strlen(info->abilityName)) != 0) {
+        if (strcmp(info->bundleName, (*iter)->info.bundleName) != 0 ||
+            strcmp(info->abilityName, (*iter)->info.abilityName) != 0) {
             ++iter;
             continue;
         }
@@ -1117,7 +1149,7 @@ static void RemoveAgentCommunicationInfo(const ConversationBusiness *info)
         Anonymize(info->bundleName, &anonyBundlename);
         Anonymize(info->abilityName, &anonyAbilityname);
         LNN_LOGI(LNN_EVENT, "delete success, bundlename=%{public}s, abilityname=%{public}s",
-            anonyBundlename, anonyAbilityname);
+            AnonymizeWrapper(anonyBundlename), AnonymizeWrapper(anonyAbilityname));
         AnonymizeFree(anonyBundlename);
         AnonymizeFree(anonyAbilityname);
         delete *iter;
@@ -1134,8 +1166,8 @@ static int32_t GetAgentCommunicationInfo(const ConversationBusiness *info, int32
             LNN_LOGE(LNN_EVENT, "iter is nullptr");
             break;
         }
-        if (strncmp(info->bundleName, (*iter)->info.bundleName, strlen(info->bundleName)) == 0 ||
-            strncmp(info->abilityName, (*iter)->info.abilityName, strlen(info->abilityName)) == 0) {
+        if (strcmp(info->bundleName, (*iter)->info.bundleName) == 0 &&
+            strcmp(info->abilityName, (*iter)->info.abilityName) == 0) {
             *pid = (*iter)->pid;
             return SOFTBUS_OK;
         }
@@ -1282,13 +1314,10 @@ int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int
         LNN_LOGE(LNN_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = SOFTBUS_OK;
-    if (!IsRepeatAgentCommunicationRequest(info)) {
-        ret = AddAgentCommunicationInfo(info, pid);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "add agent communication info failed, ret=%{public}d", ret);
-            return ret;
-        }
+    int32_t ret = AddOrUpdateAgentCommunicationInfo(info, pid);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "add agent communication info failed, ret=%{public}d", ret);
+        return ret;
     }
     ret = LnnRegisterConversationListener(info);
     if (ret != SOFTBUS_OK) {

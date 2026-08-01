@@ -32,18 +32,21 @@ bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t loca
 }
 
 void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
-    AclWriteState aclState)
+    AclWriteState aclState, bool *isNeedUpdateAclState)
 {
     (void)aclParams;
     (void)sessionKey;
     (void)isNeedUpdateDk;
     (void)aclState;
+    (void)isNeedUpdateAclState;
 }
 
-void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState,
+    bool *isNeedUpdateAclState)
 {
     (void)aclParams;
     (void)aclState;
+    (void)isNeedUpdateAclState;
 }
 
 void DelNotTrustDevice(const char *udid)

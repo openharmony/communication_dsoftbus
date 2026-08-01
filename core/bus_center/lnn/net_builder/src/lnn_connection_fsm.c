@@ -426,7 +426,13 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
         .peerUserId = info->userId,
         .localUserId = info->localUserId
     };
-    UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
+    bool isNeedUpdateAclState = false;
+    UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState, &isNeedUpdateAclState);
+    if (isNeedUpdateAclState) {
+        LnnUpdateAclState(info->deviceInfo.deviceUdid, ACL_CAN_WRITE);
+    } else {
+        LnnUpdateAclState(info->deviceInfo.deviceUdid, ACL_WRITE_DEFAULT);
+    }
 }
 
 static void UpdateDeviceInfoToMcu(const char *udid)

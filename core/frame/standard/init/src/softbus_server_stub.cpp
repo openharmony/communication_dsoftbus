@@ -318,6 +318,7 @@ void SoftBusServerStub::InitMemberConstraintSet()
     memberConstraintSet_.insert(SERVER_GET_ALL_ONLINE_NODE_INFO);
     memberConstraintSet_.insert(SERVER_SET_DATA_LEVEL);
     memberConstraintSet_.insert(SERVER_TRIGGER_RANGE_FOR_MSDP);
+    memberConstraintSet_.insert(SERVER_POST_CONVERSATION_DATA);
 }
 
 int32_t SoftBusServerStub::CheckPermission(uint32_t code)
@@ -2725,8 +2726,9 @@ static int32_t CheckBundleName(const char *bundleName)
         COMM_LOGE(COMM_SVC, "invalid bundleName");
         return SOFTBUS_INVALID_PARAM;
     }
-    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.check.sysytem.app", true);
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.check.system.app", true);
     if (!support) {
+        COMM_LOGI(COMM_SVC, "tester set check system false");
         return SOFTBUS_OK;
     }
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
@@ -2770,6 +2772,7 @@ int32_t SoftBusServerStub::GetTrustedDevicesInner(MessageParcel &data, MessagePa
         SoftBusFree(nodeInfo);
         return retReply;
     }
+    COMM_LOGI(COMM_SVC, "infoNum=%{public}d", infoNum);
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == nullptr)) {
         SoftBusFree(nodeInfo);
         COMM_LOGE(COMM_SVC, "node info is invalid");
@@ -2780,7 +2783,6 @@ int32_t SoftBusServerStub::GetTrustedDevicesInner(MessageParcel &data, MessagePa
         SoftBusFree(nodeInfo);
         return SOFTBUS_NETWORK_WRITEINT32_FAILED;
     }
-    COMM_LOGI(COMM_SVC, "infoNum=%{public}d", infoNum);
     if (infoNum > 0) {
         if (!reply.WriteRawData(nodeInfo, static_cast<int32_t>(sizeof(DeviceNodeInfo) * infoNum))) {
             COMM_LOGE(COMM_SVC, "write node info failed!");
@@ -2791,9 +2793,36 @@ int32_t SoftBusServerStub::GetTrustedDevicesInner(MessageParcel &data, MessagePa
     return retReply;
 }
 
+static int32_t ReadConversationBusiness(MessageParcel &data, ConversationBusiness &info)
+{
+    const char *abilityName = data.ReadCString();
+    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
+        COMM_LOGE(COMM_SVC, "read abilityName failed!");
+        return SOFTBUS_NETWORK_READCSTRING_FAILED;
+    }
+    const char *bundleName = data.ReadCString();
+    int32_t ret = CheckBundleName(bundleName);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "verify bundleName failed ret=%{public}d", ret);
+        return ret;
+    }
+    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
+        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
+        COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerStub::PostConversationDataInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGI(COMM_SVC, "enter.");
+#ifdef SUPPORT_BUNDLENAME
+    if (CheckMDMControl()) {
+        COMM_LOGE(COMM_SVC, "MDM control, not allow");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+#endif
     int32_t ret = BasicPermissionVerify(SERVER_POST_CONVERSATION_DATA);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "permission verification failed");
@@ -2814,24 +2843,11 @@ int32_t SoftBusServerStub::PostConversationDataInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SVC, "read deviceId failed!");
         return SOFTBUS_NETWORK_READCSTRING_FAILED;
     }
-    const char *abilityName = data.ReadCString();
-    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
-        COMM_LOGE(COMM_SVC, "read abilityName failed!");
-        return SOFTBUS_NETWORK_READCSTRING_FAILED;
-    }
-    const char *bundleName = data.ReadCString();
-    ret = CheckBundleName(bundleName);
+    ConversationBusiness info {};
+    ret = ReadConversationBusiness(data, info);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "verify bundleName failed ret=%{public}d", ret);
         return ret;
     }
-    ConversationBusiness info {};
-    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
-        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
-        COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
-        return SOFTBUS_STRCPY_ERR;
-    }
-
     int32_t retReply = PostConversationData(deviceId, &info, msg, len);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write reply failed!");
@@ -2848,22 +2864,10 @@ int32_t SoftBusServerStub::RegisterConversationListenerInner(MessageParcel &data
         COMM_LOGE(COMM_SVC, "permission verification failed");
         return ret;
     }
-    const char *abilityName = data.ReadCString();
-    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
-        COMM_LOGE(COMM_SVC, "read abilityName failed!");
-        return SOFTBUS_NETWORK_READCSTRING_FAILED;
-    }
-    const char *bundleName = data.ReadCString();
-    ret = CheckBundleName(bundleName);
+    ConversationBusiness info {};
+    ret = ReadConversationBusiness(data, info);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "verify bundleName failed ret=%{public}d", ret);
         return ret;
-    }
-    ConversationBusiness info;
-    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
-        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
-        COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
-        return SOFTBUS_STRCPY_ERR;
     }
     int32_t retReply = RegisterConversationListener(&info);
     if (!reply.WriteInt32(retReply)) {
@@ -2881,22 +2885,10 @@ int32_t SoftBusServerStub::UnregisterConversationListenerInner(MessageParcel &da
         COMM_LOGE(COMM_SVC, "permission verification failed");
         return ret;
     }
-    const char *abilityName = data.ReadCString();
-    if (abilityName == nullptr || strnlen(abilityName, ABILITY_NAME_LEN) >= ABILITY_NAME_LEN) {
-        COMM_LOGE(COMM_SVC, "read abilityName failed!");
-        return SOFTBUS_NETWORK_READCSTRING_FAILED;
-    }
-    const char *bundleName = data.ReadCString();
-    ret = CheckBundleName(bundleName);
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "verify bundleName failed ret=%{public}d", ret);
-        return ret;
-    }
     ConversationBusiness info {};
-    if (strcpy_s(info.abilityName, ABILITY_NAME_LEN, abilityName) != EOK ||
-        strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundleName) != EOK) {
-        COMM_LOGE(COMM_SVC, "strcpy abilityName or bundleName failed!");
-        return SOFTBUS_STRCPY_ERR;
+    ret = ReadConversationBusiness(data, info);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     int32_t retReply = UnregisterConversationListener(&info);
     if (!reply.WriteInt32(retReply)) {
@@ -2970,9 +2962,10 @@ int32_t SoftBusServerStub::BasicPermissionVerify(uint32_t code)
 {
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
     uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
-    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.check.sysytem.app", true);
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.check.system.app", true);
     if (support && !OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingFullTokenId)) {
-        COMM_LOGE(COMM_SVC, "permission denied, is not system app");
+        COMM_LOGE(COMM_SVC, "permission denied, is not system app, check=%{public}s",
+            support ? "true" : "false");
         return SOFTBUS_PERMISSION_DENIED;
     }
     if (OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(

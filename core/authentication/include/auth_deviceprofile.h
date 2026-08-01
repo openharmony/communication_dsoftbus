@@ -63,8 +63,9 @@ typedef struct {
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);
 bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId);
 void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
-    AclWriteState aclState);
-void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState);
+    AclWriteState aclState, bool *isNeedUpdateAclState);
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState,
+    bool *isNeedUpdateAclState);
 void UpdateGroupShareToDp(SoftBusAclInfo *peerAclInfo, int32_t creIdType, SessionKey sessionKey, bool isNeedUpdateDk);
 void DelNotTrustDevice(const char *udid);
 void DelSessionKeyProfile(int32_t sessionKeyId);

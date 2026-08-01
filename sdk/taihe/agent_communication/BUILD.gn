@@ -1,0 +1,117 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../../dsoftbus.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
+
+config("conversation_taihe_config") {
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/sdk/taihe/agent_communication/include",
+    "$dsoftbus_root_path/sdk/napi/agent_communication/include",
+  ]
+}
+
+subsystem_name = "communication"
+part_name = "dsoftbus"
+taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name/sdk/agent_communication"
+
+copy_taihe_idl("copy_conversation") {
+  sources = [ "idl/ohos.distributedSoftBus.conversation.taihe" ]
+}
+
+ohos_taihe("run_conversation_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":copy_conversation" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.distributedSoftBus.conversation.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.distributedSoftBus.conversation.abi.c",
+  ]
+}
+
+taihe_shared_library("conversation_taihe_native") {
+  public_configs = [ ":conversation_taihe_config" ]
+  sources = get_target_outputs(":run_conversation_taihe")
+
+  if (dsoftbus_feature_compile_guard) {
+    sources += [
+      "src/ani_constructor.cpp",
+      "src/ohos.distributedSoftBus.conversation.impl_virtual.cpp",
+    ]
+    deps = [
+      ":run_conversation_taihe",
+    ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "napi:ace_napi",
+    ]
+  } else {
+    sources += [
+      "src/ani_constructor.cpp",
+      "src/ohos.distributedSoftBus.conversation.impl.cpp",
+      "src/agent_communication_utils_taihe.cpp",
+    ]
+    deps = [
+      ":run_conversation_taihe",
+      "${dsoftbus_dfx_path}:softbus_dfx",
+      "${dsoftbus_root_path}/adapter:softbus_adapter",
+      "${dsoftbus_root_path}/core/common:softbus_utils",
+      "${dsoftbus_root_path}/sdk:softbus_client",
+      "${dsoftbus_dfx_path}/dumper/legacy:softbus_dfx_dump",
+    ]
+    external_deps = [
+      "c_utils:utils",
+      "access_token:libaccesstoken_sdk",
+      "access_token:libtokenid_sdk",
+      "ipc:ipc_core",
+      "bounds_checking_function:libsec_shared",
+      "hilog:libhilog",
+      "napi:ace_napi",
+    ]
+  }
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  part_name = "$part_name"
+  subsystem_name = "$subsystem_name"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+}
+
+generate_static_abc("conversation_taihe_ani") {
+  base_url = "$taihe_generated_file_path"
+  files = [ "$taihe_generated_file_path/@ohos.distributedSoftBus.conversation.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "system/framework/conversation_taihe_ani.abc"
+  dependencies = [ ":run_conversation_taihe" ]
+}
+
+ohos_prebuilt_etc("conversation_abc_etc") {
+  source = "$target_out_dir/conversation_taihe_ani.abc"
+  module_install_dir = "framework"
+  subsystem_name = "$subsystem_name"
+  part_name = "$part_name"
+  deps = [ ":conversation_taihe_ani" ]
+}
+
+group("conversation_taihe") {
+  deps = [
+    ":conversation_abc_etc",
+    ":conversation_taihe_native",
+  ]
+}

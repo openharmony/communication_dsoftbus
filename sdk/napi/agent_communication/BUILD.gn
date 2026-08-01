@@ -44,14 +44,14 @@ ohos_shared_library("conversation") {
       "ipc:ipc_core",
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
-      "napi:ace_napi",
+      "napi:ace_napi"
     ]
   } else {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/bus_center",
     ]
     external_deps += [
-      "napi:ace_napi"
+      "napi:ace_napi",
     ]
     sources += [
       "$dsoftbus_sdk_path/napi/agent_communication/virtual/napi_agent_communication_virtual.cpp",
@@ -63,6 +63,7 @@ ohos_shared_library("conversation") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
  
   relative_install_dir = "module/distributedsoftbus"
  
