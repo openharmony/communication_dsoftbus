@@ -46,6 +46,7 @@ int32_t AuthMetaGetDeviceIdByMetaNodeIdPacked(const char *metaNodeId, char *devi
 int32_t AuthMetaGetP2pMacByMetaNodeIdPacked(const char *metaNodeId, char *p2pMacAddr, int32_t len);
 bool AuthMetaGetMetaValueByMetaNodeIdPacked(const char *metaNodeId);
 int32_t AuthMetaGetFeatureSDKByMetaNodeIdPacked(const char *metaNodeId, uint64_t *featureSDK);
+void AuthDelMetaNodeInfoPacked(const char *metaNodeId);
 #ifdef __cplusplus
 }
 #endif

@@ -21,6 +21,7 @@
 #include "auth_manager.h"
 #include "auth_pre_link.h"
 #include "bus_center_manager.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
@@ -1020,10 +1021,17 @@ static bool IsRepeatDeviceId(NodeInfo *info)
         LNN_LOGE(LNN_BUILDER, "nodeInfo err");
         return false;
     }
+    int32_t osType = UNKNOW_OS_TYPE;
     NodeInfo oldInfo;
     (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &oldInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "device not found");
+        if (LnnGetOsTypeByNetworkId(info->networkId, &osType) == SOFTBUS_OK && osType == OTHER_OS_TYPE) {
+            LNN_LOGE(LNN_BUILDER, "other osType node online");
+            AuthDelMetaNodeInfoPacked(info->networkId);
+        } else {
+            LNN_LOGE(LNN_BUILDER, "device not found in ledger");
+        }
         return false;
     }
     if (strcmp(info->deviceInfo.deviceUdid, oldInfo.deviceInfo.deviceUdid) == 0) {

@@ -45,6 +45,7 @@ typedef int32_t (*AuthMetaGetDeviceIdByMetaNodeIdFunc)(const char *metaNodeId, c
 typedef int32_t (*AuthMetaGetP2pMacByMetaNodeIdFunc)(const char *metaNodeId, char *p2pMacAddr, int32_t len);
 typedef bool (*AuthMetaGetMetaValueByMetaNodeIdFunc)(const char *metaNodeId);
 typedef int32_t (*AuthMetaGetFeatureSDKByMetaNodeIdFunc)(const char *metaNodeId, uint64_t *featureSDK);
+typedef void (*AuthDelMetaNodeInfoFunc)(const char *metaNodeId);
 typedef struct TagAuthEnhanceFuncList {
     AuthMetaInitFunc authMetaInit;
     AuthMetaNotifyDataReceivedFunc authMetaNotifyDataReceived;
@@ -62,6 +63,7 @@ typedef struct TagAuthEnhanceFuncList {
     AuthMetaGetP2pMacByMetaNodeIdFunc authMetaGetP2pMacByMetaNodeId;
     AuthMetaGetMetaValueByMetaNodeIdFunc authMetaGetMetaValueByMetaNodeId;
     AuthMetaGetFeatureSDKByMetaNodeIdFunc authMetaGetFeatureSDKByMetaNodeId;
+    AuthDelMetaNodeInfoFunc authDelMetaNodeInfo;
 } AuthEnhanceFuncList;
 
 AuthEnhanceFuncList *AuthEnhanceFuncListGet(void);
