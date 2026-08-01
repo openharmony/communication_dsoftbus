@@ -56,5 +56,10 @@ bool IsSameAccountId(int64_t accountId)
 {
     return GetAuthInterface()->IsSameAccountId(accountId);
 }
+
+void AuthDelMetaNodeInfoPacked(const char *metaNodeId)
+{
+    return GetAuthInterface()->AuthDelMetaNodeInfoPacked(metaNodeId);
+}
 }
 } // namespace OHOS

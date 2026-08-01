@@ -213,7 +213,7 @@ typedef enum {
 } SoftBusDeviceRiskState;
 
 typedef enum {
-    SOFTBUS_HB_AP_ENABLE,
+    SOFTBUS_HB_AP_ENABLE = 1,
     SOFTBUS_HB_AP_DISABLE,
     SOFTBUS_HB_AP_STATE_UNKNOWN,
 } SoftBusHbApState;

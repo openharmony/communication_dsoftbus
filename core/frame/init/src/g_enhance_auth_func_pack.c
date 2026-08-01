@@ -162,3 +162,12 @@ int32_t AuthMetaGetFeatureSDKByMetaNodeIdPacked(const char *metaNodeId, uint64_t
     }
     return pfnAuthEnhanceFuncList->authMetaGetFeatureSDKByMetaNodeId(metaNodeId, featureSDK);
 }
+
+void AuthDelMetaNodeInfoPacked(const char *metaNodeId)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authDelMetaNodeInfo) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnAuthEnhanceFuncList->authDelMetaNodeInfo(metaNodeId);
+}

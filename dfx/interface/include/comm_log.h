@@ -16,11 +16,20 @@
 #ifndef DSOFTBUS_COMM_LOG_H
 #define DSOFTBUS_COMM_LOG_H
 
+#include <stdint.h>
+
 #include "softbus_log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define COMM_ADAPTER_TAG            0xd005708
+#define LNN_IP_UTILS_FD_TAG         1
+#define SOFTBUS_ADAPTER_FILE_FD_TAG 2
+#define LNN_IP_UTILS_FD_OWNER_TAG ((uint64_t)COMM_ADAPTER_TAG << 32 | LNN_IP_UTILS_FD_TAG)
+#define SOFTBUS_ADAPTER_FILE_FD_OWNER_TAG ((uint64_t)COMM_ADAPTER_TAG << 32 | SOFTBUS_ADAPTER_FILE_FD_TAG)
+
 typedef enum {
     COMM_SDK,
     COMM_SVC,

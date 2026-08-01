@@ -44,5 +44,6 @@ int32_t AuthRegisterEnhanceFunc(void *soHandle)
     g_authEnhanceFuncList.authMetaGetP2pMacByMetaNodeId = dlsym(soHandle, "AuthMetaGetP2pMacByMetaNodeId");
     g_authEnhanceFuncList.authMetaGetMetaValueByMetaNodeId = dlsym(soHandle, "AuthMetaGetMetaValueByMetaNodeId");
     g_authEnhanceFuncList.authMetaGetFeatureSDKByMetaNodeId = dlsym(soHandle, "AuthMetaGetFeatureSDKByMetaNodeId");
+    g_authEnhanceFuncList.authDelMetaNodeInfo = dlsym(soHandle, "AuthDelMetaNodeInfo");
     return SOFTBUS_OK;
 }

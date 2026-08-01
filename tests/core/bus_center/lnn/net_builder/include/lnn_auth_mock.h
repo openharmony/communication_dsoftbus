@@ -31,6 +31,7 @@ public:
     virtual int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version) = 0;
     virtual int32_t RegGroupChangeListener(const GroupChangeListener *listener) = 0;
     virtual bool IsSameAccountId(int64_t accountId) = 0;
+    virtual void AuthDelMetaNodeInfoPacked(const char *meteNodeId) = 0;
 };
 
 class LnnAuthtInterfaceMock : public LnnAuthInterface {
@@ -41,6 +42,7 @@ public:
     MOCK_METHOD2(AuthGetVersion, int32_t(int64_t, SoftBusVersion *));
     MOCK_METHOD1(RegGroupChangeListener, int32_t(const GroupChangeListener *));
     MOCK_METHOD1(IsSameAccountId, bool(int64_t));
+    MOCK_METHOD1(AuthDelMetaNodeInfoPacked, void(const char *));
 };
 } // namespace OHOS
 #endif // LNN_AUTH_MOCK_H
