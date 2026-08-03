@@ -522,9 +522,10 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void 
     return ClientOnTimeSyncResult(pkgName, pid, info, infoTypeLen, retCode);
 }
 
-void BusCenterServerDeathCallback(const char *pkgName)
+void BusCenterServerDeathCallback(const char *pkgName, int32_t pid)
 {
     (void)pkgName;
+    (void)pid;
 }
 
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)

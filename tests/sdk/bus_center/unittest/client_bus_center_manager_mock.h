@@ -67,6 +67,8 @@ public:
     virtual int32_t ServerIpcStartAccountAuth(const char *pkgName, int64_t requestId, const char *serviceId) = 0;
     virtual int32_t ServerIpcProcessAccountAuth(
         const char *pkgName, int64_t requestId, const uint8_t *data, uint32_t dataLen) = 0;
+    virtual int32_t ServerIpcRegisterConversationListener(const ConversationBusiness *info) = 0;
+    virtual int32_t ServerIpcUnregisterConversationListener(const ConversationBusiness *info) = 0;
 };
 class ClientBusCenterManagerInterfaceMock : public ClientBusCenterManagerInterface {
 public:
@@ -104,6 +106,8 @@ public:
     MOCK_METHOD1(InitSoftBus, int32_t (const char *));
     MOCK_METHOD3(ServerIpcStartAccountAuth, int32_t (const char *, int64_t, const char *));
     MOCK_METHOD4(ServerIpcProcessAccountAuth, int32_t (const char *, int64_t, const uint8_t *, uint32_t));
+    MOCK_METHOD1(ServerIpcRegisterConversationListener, int32_t (const ConversationBusiness *));
+    MOCK_METHOD1(ServerIpcUnregisterConversationListener, int32_t (const ConversationBusiness *));
 };
 } // namespace OHOS
 #endif // CLIENT_BUS_CENTER_MANAGER_MOCK_H

@@ -86,12 +86,13 @@ int32_t PostConversationData(const char *deviceId, const ConversationBusiness *i
  * @param deviceId Indicates the pointer to the deviceId of the sender device.
  * @param data Indicates the pointer to the received data.
  * @param len Indicates the length of the received data.
+ * @param abilityName Indicates the pointer to the abilityName of the receiver business.
  *
  * @since 1.0
  * @version 1.0
  */
 typedef struct {
-    void (*OnDataReceived)(const char *deviceId, const char *data, uint32_t len);
+    void (*OnDataReceived)(const char *deviceId, const char *data, uint32_t len, const char *abilityName);
 } ConversationListener;
 
 /**

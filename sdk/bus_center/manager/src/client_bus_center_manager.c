@@ -36,7 +36,6 @@
 static int32_t g_maxNodeStateCbCount;
 static SoftBusList *g_publishMsgList = NULL;
 static SoftBusList *g_discoveryMsgList = NULL;
-static SoftBusList *g_conversationCbList = NULL;
 static bool g_isInited = false;
 static SoftBusMutex g_isInitedLock;
 static char g_regDataLevelChangePkgName[PKG_NAME_SIZE_MAX] = {0};
@@ -89,7 +88,7 @@ typedef struct {
     IAccountAuthCallback accountAuthCb;
     bool isInit;
     SoftBusMutex lock;
-    SoftBusList *g_conversationCbList;
+    ListNode conversationCbList;
 } BusCenterClient;
 
 typedef struct {
@@ -359,6 +358,17 @@ static void ClearNodeStateCbList(ListNode *list)
     NodeStateCallbackItem *next = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, list, NodeStateCallbackItem, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+}
+
+static void ClearConversationCbList(ListNode *list)
+{
+    ConversationCbListItem *item = NULL;
+    ConversationCbListItem *next = NULL;
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, list, ConversationCbListItem, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
     }
@@ -702,15 +712,6 @@ static int32_t DiscoveryMsgListDeInit()
     return SOFTBUS_OK;
 }
 
-static int32_t ConversationCbListDeInit()
-{
-    DestroySoftBusList(g_conversationCbList);
-    g_conversationCbList = NULL;
-
-    LNN_LOGI(LNN_STATE, "conversation deinit success");
-    return SOFTBUS_OK;
-}
-
 void BusCenterClientDeinit(void)
 {
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
@@ -722,7 +723,7 @@ void BusCenterClientDeinit(void)
         (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
         return;
     }
-    ConversationCbListDeInit();
+    ClearConversationCbList(&g_busCenterClient.conversationCbList);
     ClearJoinLNNList();
     ClearLeaveLNNList();
     ClearTimeSyncList(&g_busCenterClient.timeSyncCbList);
@@ -738,17 +739,6 @@ void BusCenterClientDeinit(void)
     g_busCenterClient.rangeCb.onRangeStateChange = NULL;
     SoftBusMutexDestroy(&g_busCenterClient.lock);
     BusCenterServerProxyDeInit();
-}
-
-static int32_t ConversationListInit(void)
-{
-    g_conversationCbList = CreateSoftBusList();
-    if (g_conversationCbList == NULL) {
-        LNN_LOGE(LNN_INIT, "g_conversationCbList init failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    LNN_LOGI(LNN_EVENT, "conversation list init success");
-    return SOFTBUS_OK;
 }
 
 int32_t BusCenterClientInit(void)
@@ -768,23 +758,18 @@ int32_t BusCenterClientInit(void)
         LNN_LOGE(LNN_INIT, "DiscoveryMsgListInit fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (ConversationListInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "ConversationListInit fail");
-        BusCenterClientDeinit();
-        return SOFTBUS_MALLOC_ERR;
-    }
 
     ListInit(&g_busCenterClient.joinLNNCbList);
     ListInit(&g_busCenterClient.leaveLNNCbList);
     ListInit(&g_busCenterClient.nodeStateCbList);
     ListInit(&g_busCenterClient.timeSyncCbList);
+    ListInit(&g_busCenterClient.conversationCbList);
     (void)memset_s(&g_busCenterClient.refreshCbItems, sizeof(g_busCenterClient.refreshCbItems), 0,
         sizeof(g_busCenterClient.refreshCbItems));
     g_busCenterClient.isInit = true;
     if (BusCenterServerProxyInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "bus center server proxy init failed");
         BusCenterClientDeinit();
-        ConversationCbListDeInit();
         return SOFTBUS_SERVER_NOT_INIT;
     }
     LNN_LOGI(LNN_INIT, "BusCenterClientInit init OK");
@@ -2091,22 +2076,26 @@ int32_t DiscRecoverySubscribe()
 int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *networkId,
     const char *data, uint32_t length)
 {
-    if (info == NULL || data == NULL) {
+    if (info == NULL || data == NULL || networkId == NULL) {
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (g_busCenterClient.g_conversationCbList == NULL) {
-        LNN_LOGI(LNN_STATE, "g_conversationCbList is NULL");
-        return SOFTBUS_OK;
+    if (length == 0 || length > COMMUNICATION_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_STATE, "invalid length=%{public}u", length);
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&(g_busCenterClient.g_conversationCbList->lock)) != SOFTBUS_OK) {
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     ConversationCbListItem *item = NULL;
     ConversationListener listener = { NULL };
     bool found = false;
-    LIST_FOR_EACH_ENTRY(item, &(g_busCenterClient.g_conversationCbList->list), ConversationCbListItem, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.conversationCbList, ConversationCbListItem, node) {
         if (strcmp(item->info.abilityName, info->abilityName) == 0 &&
             strcmp(item->info.bundleName, info->bundleName) == 0) {
             listener.OnDataReceived = item->listener.OnDataReceived;
@@ -2114,16 +2103,22 @@ int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *net
             break;
         }
     }
-    (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
 
+    char *anonyBundlename = NULL;
+    char *anonyAbilityname = NULL;
+    Anonymize(info->bundleName, &anonyBundlename);
+    Anonymize(info->abilityName, &anonyAbilityname);
     if (!found) {
         LNN_LOGI(LNN_STATE, "callback not exist, abilityName=%{public}s, bundleName=%{public}s",
-            info->abilityName, info->bundleName);
+            AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
     } else if (found && listener.OnDataReceived != NULL) {
-        listener.OnDataReceived(networkId, data, length);
+        listener.OnDataReceived(networkId, data, length, info->abilityName);
         LNN_LOGI(LNN_STATE, "notify abilityName=%{public}s, bundleName=%{public}s",
-            info->abilityName, info->bundleName);
+            AnonymizeWrapper(anonyAbilityname), AnonymizeWrapper(anonyBundlename));
     }
+    AnonymizeFree(anonyBundlename);
+    AnonymizeFree(anonyAbilityname);
     return SOFTBUS_OK;
 }
  
@@ -2144,55 +2139,51 @@ int32_t RegisterConversationListenerInner(const ConversationBusiness *info, cons
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
- 
-    if (g_busCenterClient.g_conversationCbList == NULL) {
-        LNN_LOGI(LNN_STATE, "init g_busCenterClient.g_conversationCbList");
-        g_busCenterClient.g_conversationCbList = CreateSoftBusList();
-        if (g_busCenterClient.g_conversationCbList == NULL) {
-            LNN_LOGE(LNN_STATE, "init g_busCenterClient.g_conversationCbList failed");
-            return SOFTBUS_MALLOC_ERR;
-        }
+
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "client not init");
+        return SOFTBUS_NO_INIT;
     }
- 
-    if (SoftBusMutexLock(&(g_busCenterClient.g_conversationCbList->lock)) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get lock failed");
         return SOFTBUS_LOCK_ERR;
     }
- 
+
     ConversationCbListItem *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &(g_busCenterClient.g_conversationCbList->list), ConversationCbListItem, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.conversationCbList, ConversationCbListItem, node) {
         if (strcmp(item->info.bundleName, info->bundleName) == 0 &&
             strcmp(item->info.abilityName, info->abilityName) == 0) {
             LNN_LOGE(LNN_STATE, "conversation listener already exist");
-            (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
+            item->listener.OnDataReceived = listener->OnDataReceived;
+            (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
             return ServerIpcRegisterConversationListener(info);
         }
     }
- 
+
     ConversationCbListItem *newItem = (ConversationCbListItem *)SoftBusCalloc(sizeof(*newItem));
     if (newItem == NULL) {
         LNN_LOGE(LNN_STATE, "malloc conversation cb list item failed");
-        (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&newItem->node);
- 
+
     if (strncpy_s(newItem->info.abilityName, ABILITY_NAME_LEN, info->abilityName, strlen(info->abilityName)) != EOK ||
         strncpy_s(newItem->info.bundleName, BUNDLE_NAME_LEN, info->bundleName, strlen(info->bundleName)) != EOK) {
         LNN_LOGE(LNN_STATE, "strcpy info fail");
         SoftBusFree(newItem);
-        (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
         return SOFTBUS_STRCPY_ERR;
     }
- 
+
     newItem->listener.OnDataReceived = listener->OnDataReceived;
- 
-    ListAdd(&(g_busCenterClient.g_conversationCbList->list), &newItem->node);
-    (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
- 
+
+    ListAdd(&g_busCenterClient.conversationCbList, &newItem->node);
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+
     LNN_LOGI(LNN_STATE, "add conversation cb succ, bundleName=%{public}s, abilityName=%{public}s",
              info->bundleName, info->abilityName);
- 
+
     return ServerIpcRegisterConversationListener(info);
 }
  
@@ -2202,26 +2193,21 @@ int32_t UnregisterConversationListenerInner(const ConversationBusiness *info)
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
- 
-    if (g_busCenterClient.g_conversationCbList == NULL) {
-        LNN_LOGI(LNN_STATE, "init g_busCenterClient.g_conversationCbList");
-        g_busCenterClient.g_conversationCbList = CreateSoftBusList();
-        if (g_busCenterClient.g_conversationCbList == NULL) {
-            LNN_LOGE(LNN_STATE, "init g_busCenterClient.g_conversationCbList failed");
-            return SOFTBUS_MALLOC_ERR;
-        }
+
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "client not init");
+        return SOFTBUS_NO_INIT;
     }
- 
-    if (SoftBusMutexLock(&(g_busCenterClient.g_conversationCbList->lock)) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get lock failed");
         return SOFTBUS_LOCK_ERR;
     }
- 
+
     ConversationCbListItem *item = NULL;
     ConversationCbListItem *next = NULL;
     bool found = false;
- 
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_busCenterClient.g_conversationCbList->list),
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_busCenterClient.conversationCbList,
         ConversationCbListItem, node) {
         if (strcmp(item->info.bundleName, info->bundleName) == 0 &&
             strcmp(item->info.abilityName, info->abilityName) == 0) {
@@ -2233,9 +2219,9 @@ int32_t UnregisterConversationListenerInner(const ConversationBusiness *info)
             break;
         }
     }
- 
-    (void)SoftBusMutexUnlock(&(g_busCenterClient.g_conversationCbList->lock));
- 
+
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+
     if (found) {
         return ServerIpcUnregisterConversationListener(info);
     } else {

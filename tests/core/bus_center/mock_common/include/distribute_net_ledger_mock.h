@@ -46,6 +46,7 @@ public:
     virtual int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp) = 0;
     virtual int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp) = 0;
     virtual void LnnRemoveUserInfoNode(const char *udid) = 0;
+    virtual void LnnUpdateAclState(const char *udid, AclWriteState aclState) = 0;
 };
 class DistributeLedgerInterfaceMock : public DistributeLedgerInterface {
 public:
@@ -68,6 +69,7 @@ public:
     MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
     MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
     MOCK_METHOD1(LnnRemoveUserInfoNode, void(const char *));
+    MOCK_METHOD2(LnnUpdateAclState, void(const char *, AclWriteState));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

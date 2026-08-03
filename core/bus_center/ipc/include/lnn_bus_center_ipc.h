@@ -79,7 +79,7 @@ int32_t LnnIpcCreateGroupOwner(const char *pkgName, int32_t callingPid, const st
 void LnnIpcDestroyGroupOwner(const char *pkgName);
 int32_t LnnIpcNotifyOnGroupStateChange(int32_t retCode);
 
-void BusCenterServerDeathCallback(const char *pkgName);
+void BusCenterServerDeathCallback(const char *pkgName, int32_t pid);
 int32_t LnnIpcAccountAuthInit(void);
 int32_t LnnIpcStartAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const char *serviceId);
 int32_t LnnIpcProcessAccountAuth(const char *pkgName, int32_t pid, int64_t requestId, const uint8_t *data,

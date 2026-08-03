@@ -210,5 +210,21 @@ void SdMgrDeathCallbackPacked(const char *pkgName)
 {
     return BusCenterIpcInterfaceInstance()->SdMgrDeathCallbackPacked(pkgName);
 }
+
+int32_t LnnRegisterConversationListener(const ConversationBusiness *info)
+{
+    return BusCenterIpcInterfaceInstance()->LnnRegisterConversationListener(info);
+}
+
+int32_t LnnUnregisterConversationListener(const ConversationBusiness *info)
+{
+    return BusCenterIpcInterfaceInstance()->LnnUnregisterConversationListener(info);
+}
+
+void ClientOnConversationRecvMsg(int32_t pid, const ConversationBusiness *info,
+    const char *deviceId, const char *data, uint32_t length)
+{
+    return BusCenterIpcInterfaceInstance()->ClientOnConversationRecvMsg(pid, info, deviceId, data, length);
+}
 }
 } // namespace OHOS
