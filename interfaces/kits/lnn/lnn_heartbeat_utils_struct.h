@@ -153,18 +153,18 @@ typedef uint32_t LnnHeartbeatType;
 #define DEVICE_NAME_BUF_LEN                     128
 
 typedef struct {
-	bool isScreenOn;
-	bool isLocked;
+    bool isScreenOn;
+    bool isLocked;
     bool isPlugged;
     bool isOffline;
-	uint8_t netcap;
+    uint8_t netcap;
     uint8_t devType[SLE_DEV_INFO_DEV_TYPE_LEN];
     uint8_t devWeight[SLE_DEV_INFO_DEV_WEIGHT_LEN];
-	char devName[DEVICE_NAME_BUF_LEN];
+    char devName[DEVICE_NAME_BUF_LEN];
     uint8_t advUserId[SLE_MAIN_USER_ID_LEN];
-	int16_t stateVersion;
-	uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
-	char udid[UDID_BUF_LEN];
+    int16_t stateVersion;
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
+    char udid[UDID_BUF_LEN];
     uint16_t staticLength;
     uint16_t staticLevel;
     uint16_t switchLength;
