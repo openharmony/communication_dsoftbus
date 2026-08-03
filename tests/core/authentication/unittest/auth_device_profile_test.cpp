@@ -609,6 +609,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
  */
 HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_001, TestSize.Level1)
 {
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
     aclProfile.SetTrustDeviceId(TEST_UDID);
     DistributedDeviceProfile::Accessee accessee;
@@ -632,6 +635,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_002, TestSize.Level1)
 {
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
     aclProfile.SetTrustDeviceId(TEST_UDID);
     DistributedDeviceProfile::Accessee accessee;
@@ -652,6 +658,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_002, TestSize.Level1)
  */
 HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_003, TestSize.Level1)
 {
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
     aclProfile.SetTrustDeviceId(TEST_UDID);
     DistributedDeviceProfile::Accessee accessee;
@@ -679,6 +688,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_003, TestSize.Level1)
  */
 HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_004, TestSize.Level1)
 {
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
     aclProfile.SetTrustDeviceId(TEST_UDID);
     DistributedDeviceProfile::Accessee accessee;
