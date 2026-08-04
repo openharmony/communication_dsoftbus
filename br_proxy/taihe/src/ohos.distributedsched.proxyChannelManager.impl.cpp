@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <mutex>
+#include <new>
 #include <pthread.h>
 #include <securec.h>
 #include <semaphore.h>
@@ -73,18 +74,16 @@ static int32_t InitTaiheChannelList(void)
 
 static int32_t AddChannelInfoList(int32_t channelId)
 {
-    TaiheChannelInfo *chan = reinterpret_cast<TaiheChannelInfo *>(SoftBusCalloc(sizeof(TaiheChannelInfo)));
+    TaiheChannelInfo *chan = new (std::nothrow) TaiheChannelInfo();
     if (chan == nullptr) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] channelId=%{public}d add list failed.", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
     chan->channelId = channelId;
-    chan->recvCallback = nullptr;
-    chan->stateCallback = nullptr;
     ListInit(&chan->node);
     if (SoftBusMutexLock(&(g_channelInfoList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
-        SoftBusFree(chan);
+        delete chan;
         return SOFTBUS_LOCK_ERR;
     }
     ListAdd(&g_channelInfoList->list, &chan->node);
@@ -203,7 +202,7 @@ static int32_t DeleteChannelInfoById(int32_t channelId)
         }
         TRANS_LOGI(TRANS_SDK, "[br_proxy]delete node success, channelId=%{public}d", chan->channelId);
         ListDelete(&chan->node);
-        SoftBusFree(chan);
+        delete chan;
         (void)SoftBusMutexUnlock(&(g_channelInfoList->lock));
         return SOFTBUS_OK;
     }
@@ -229,8 +228,7 @@ static void OnDataReceived(int32_t channelId, const char *data, uint32_t dataLen
         TRANS_LOGE(TRANS_SDK, "[br_proxy] invalid param.");
         return;
     }
-    TaiheChannelInfo chan;
-    (void)memset_s(&chan, sizeof(TaiheChannelInfo), 0, sizeof(TaiheChannelInfo));
+    TaiheChannelInfo chan{};
     int32_t ret = GetChannelInfoByChannelId(channelId, &chan);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] channelId=%{public}d get channel info failed.", channelId);
@@ -271,8 +269,7 @@ static ::ohos::distributedsched::proxyChannelManager::ChannelState SetChannelSta
 
 static void OnChannelStatusChanged(int32_t channelId, int32_t status)
 {
-    TaiheChannelInfo chan;
-    (void)memset_s(&chan, sizeof(TaiheChannelInfo), 0, sizeof(TaiheChannelInfo));
+    TaiheChannelInfo chan{};
     int32_t ret = GetChannelInfoByChannelId(channelId, &chan);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] channelId=%{public}d get channel info failed.", channelId);
