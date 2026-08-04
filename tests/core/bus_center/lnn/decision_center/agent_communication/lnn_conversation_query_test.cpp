@@ -182,4 +182,52 @@ HWTEST_F(LnnConversationQueryTest, DESTORY_NEAR_FIELD_CHANNEL_TEST_001, TestSize
     int32_t ret = DestroyNearFieldChannel(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/*
+ * @tc.name: ON_RECV_CLOUD_QUERY_INFO_TEST_004
+ * @tc.desc: test OnRecvCloudQueryInfo with null udid.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnConversationQueryTest, ON_RECV_CLOUD_QUERY_INFO_NULL_UDID_TEST, TestSize.Level1)
+{
+    const char *data = "test_data";
+    EXPECT_NO_FATAL_FAILURE(OnRecvCloudQueryInfo(nullptr, data, strlen(data)));
+}
+
+/*
+ * @tc.name: ON_RECV_CLOUD_QUERY_INFO_TEST_005
+ * @tc.desc: test OnRecvCloudQueryInfo with null data.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnConversationQueryTest, ON_RECV_CLOUD_QUERY_INFO_NULL_DATA_TEST, TestSize.Level1)
+{
+    const char *udid = "test_udid";
+    EXPECT_NO_FATAL_FAILURE(OnRecvCloudQueryInfo(udid, nullptr, 10));
+}
+
+/*
+ * @tc.name: ON_RECV_CLOUD_QUERY_INFO_TEST_006
+ * @tc.desc: test OnRecvCloudQueryInfo with zero length.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnConversationQueryTest, ON_RECV_CLOUD_QUERY_INFO_ZERO_LENGTH_TEST, TestSize.Level1)
+{
+    const char *udid = "test_udid";
+    const char *data = "test_data";
+    EXPECT_NO_FATAL_FAILURE(OnRecvCloudQueryInfo(udid, data, 0));
+}
+
+/*
+ * @tc.name: ON_RECV_CLOUD_QUERY_INFO_TEST_007
+ * @tc.desc: test OnRecvCloudQueryInfo with all null params.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnConversationQueryTest, ON_RECV_CLOUD_QUERY_INFO_ALL_NULL_TEST, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(OnRecvCloudQueryInfo(nullptr, nullptr, 0));
+}
 } // namespace OHOS

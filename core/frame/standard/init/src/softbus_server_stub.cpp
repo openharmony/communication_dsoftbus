@@ -2728,7 +2728,7 @@ int32_t SoftBusServerStub::RegisterPushHookInner(MessageParcel &data, MessagePar
 
 static int32_t CheckBundleName(const char *bundleName)
 {
-    if (bundleName == nullptr || strnlen(bundleName, BUNDLE_NAME_MAX_LEN) >= BUNDLE_NAME_MAX_LEN) {
+    if (bundleName == nullptr || strnlen(bundleName, BUNDLE_NAME_LEN) >= BUNDLE_NAME_LEN) {
         COMM_LOGE(COMM_SVC, "invalid bundleName");
         return SOFTBUS_INVALID_PARAM;
     }
