@@ -2619,7 +2619,7 @@ HWTEST_F(SoftbusServerStubTest, ConstraintSetSizeTest001, TestSize.Level1)
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(softBusServer, nullptr);
 
-    EXPECT_EQ(softBusServer->memberConstraintSet_.size(), 12u);
+    EXPECT_EQ(softBusServer->memberConstraintSet_.size(), 14u);
 }
 
 /*

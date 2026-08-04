@@ -365,8 +365,10 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_DELETE_TEST, TestSize.Lev
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_DELETE_VALID_TEST, TestSize.Level1)
 {
+    AuthDeviceProfileListenerInterfaceMock mocker;
     DistributedDeviceProfile::TrustDeviceProfile profile;
     profile.SetDeviceId("test_udid_for_car");
+    EXPECT_CALL(mocker, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NOT_FIND));
     int32_t ret = listener->OnAccountAclDelete(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
