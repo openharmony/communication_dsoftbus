@@ -1228,7 +1228,8 @@ static AuthChannelInfo *TransOpenAuthChannelPrepareParam(const char *sessionName
 int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt,
     int32_t *channelId, const char *reqId)
 {
-    if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP || g_authChannelList == NULL) {
+    if (connOpt == NULL || channelId == NULL ||
+        connOpt->type != CONNECT_TCP || g_authChannelList == NULL || reqId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     AuthChannelInfo *channel = TransOpenAuthChannelPrepareParam(sessionName, connOpt, channelId, reqId);

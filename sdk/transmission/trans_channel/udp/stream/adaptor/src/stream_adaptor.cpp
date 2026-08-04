@@ -94,8 +94,10 @@ void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
 
 void StreamAdaptor::ReleaseAdaptor(bool isDestroyStreamSocket)
 {
-    isDestroyStreamSocket ? streamManager_->DestroyStreamDataChannel() : streamManager_->ClearSocketMap();
-    streamManager_->DestroyEnvironment(pkgName_);
+    if (streamManager_ != nullptr) {
+        isDestroyStreamSocket ? streamManager_->DestroyStreamDataChannel() : streamManager_->ClearSocketMap();
+        streamManager_->DestroyEnvironment(pkgName_);
+    }
     channelId_ = -1;
     if (sessionKey_.first != nullptr) {
         (void)memset_s(sessionKey_.first, sessionKey_.second, 0, sessionKey_.second);

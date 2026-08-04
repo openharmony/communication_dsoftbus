@@ -130,6 +130,10 @@ static bool ResetChanIsEqual(int8_t status, ProxyChannelInfo *a, ProxyChannelInf
 
 int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *appType)
 {
+    if (identity == NULL || appType == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -2637,6 +2641,8 @@ void TransProxyCloseChannelByRequestId(uint32_t requestId)
     TRANS_LOGI(TRANS_CTRL, "close channel by reqId=%{public}d", requestId);
     TRANS_CHECK_AND_RETURN_LOGE(
         g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(
+        requestId <= INT32_MAX, TRANS_CTRL, "requestId overflow.");
     ListNode destroyList;
     ListInit(&destroyList);
     ProxyChannelInfo *item = NULL;
@@ -2954,14 +2960,20 @@ int32_t TransDisableConnBrIdleCheck(int32_t channelId)
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t connId = 0;
+    bool isExist = false;
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId && item->appInfo.linkType == LANE_BR) {
             connId = item->connId;
+            isExist = true;
             break;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    if (!isExist) {
+        TRANS_LOGW(TRANS_CTRL, "connId not found by channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_NODE_NOT_FOUND;
+    }
 
     UpdateOption option = {
         .type = CONNECT_BR,

@@ -136,6 +136,27 @@ HWTEST_F(TransAuthManagerTest, TransOpenAuthMsgChannelTest002, TestSize.Level1)
 }
 
 /*
+ * @tc.name: TransOpenAuthMsgChannelTest003
+ * @tc.desc: TransOpenAuthMsgChannel with null reqId and valid other params returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthManagerTest, TransOpenAuthMsgChannelTest003, TestSize.Level1)
+{
+    int32_t ret = TransAuthInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ConnectOption *connOpt = reinterpret_cast<ConnectOption *>(SoftBusCalloc(sizeof(ConnectOption)));
+    ASSERT_TRUE(connOpt != nullptr);
+    connOpt->type = CONNECT_TCP;
+    int32_t channelId = 0;
+    ret = TransOpenAuthMsgChannel(g_sessionName, connOpt, &channelId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(connOpt);
+    TransAuthDeinit();
+}
+
+/*
  * @tc.name: TransCloseAuthChannelTest001
  * @tc.desc: TransCloseAuthChannel with non-existent channel returns SOFTBUS_TRANS_NODE_NOT_FOUND
  * @tc.type: FUNC

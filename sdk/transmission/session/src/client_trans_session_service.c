@@ -434,6 +434,7 @@ int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo,
     }
 
     transInfo.channelId = ServerIpcOpenAuthSession(sessionName, addr);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(transInfo.channelId >= SOFTBUS_OK, ret, TRANS_SDK, "invalid channelId.");
     if (addr->type == CONNECTION_ADDR_BR || addr->type == CONNECTION_ADDR_BLE ||
         addr->type == CONNECTION_ADDR_RAW_BLE_DIRECT) {
         transInfo.channelType = CHANNEL_TYPE_PROXY;
