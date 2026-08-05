@@ -111,6 +111,49 @@ HWTEST_F(TransClientSessionCallbackExTest, FillSessionInfoTest01, TestSize.Level
     SoftBusFree(channel.peerExtraAccessInfo);
 }
 
+/**
+ * @tc.name: FillSessionInfoTest02
+ * @tc.desc: FillSessionInfo with isD2D=true and various dataLen values.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackExTest, FillSessionInfoTest02, TestSize.Level1)
+{
+    SessionInfo session;
+    (void)memset_s(&session, sizeof(SessionInfo), 0, sizeof(SessionInfo));
+    char extraData[] = "test";
+    ChannelInfo channel = {
+        .peerSessionName = reinterpret_cast<char *>(SoftBusCalloc(SESSION_NAME_SIZE_MAX)),
+        .peerDeviceId = reinterpret_cast<char *>(SoftBusCalloc(DEVICE_ID_SIZE_MAX)),
+        .groupId = reinterpret_cast<char *>(SoftBusCalloc(GROUP_ID_SIZE_MAX)),
+        .isD2D = true,
+        .isServer = false,
+        .extraData = extraData,
+        .dataLen = 0,
+    };
+    ASSERT_TRUE(channel.peerSessionName != nullptr);
+    ASSERT_TRUE(channel.peerDeviceId != nullptr);
+    ASSERT_TRUE(channel.groupId != nullptr);
+    strcpy_s(channel.peerSessionName, SESSION_NAME_SIZE_MAX, "peerSessionName");
+    strcpy_s(channel.peerDeviceId, DEVICE_ID_SIZE_MAX, "peerDeviceId");
+    strcpy_s(channel.groupId, GROUP_ID_SIZE_MAX, "groupId");
+
+    int32_t ret = FillSessionInfo(&session, &channel, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    channel.dataLen = strlen(extraData);
+    ret = FillSessionInfo(&session, &channel, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    channel.dataLen = EXTRA_DATA_MAX_LEN + 1;
+    ret = FillSessionInfo(&session, &channel, 0);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+
+    SoftBusFree(channel.peerSessionName);
+    SoftBusFree(channel.peerDeviceId);
+    SoftBusFree(channel.groupId);
+}
+
 void MyOnError(int32_t socket, int32_t errCode)
 {
     (void)socket;

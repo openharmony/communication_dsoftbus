@@ -733,17 +733,7 @@ int32_t CheckBindSocketInfo(const SessionInfo *session)
     }
     if (!IsValidStringSafe(session->info.peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidStringSafe(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX)) {
-        char *anonySessionName = NULL;
-        char *anonyNetworkId = NULL;
-        Anonymize(session->info.peerSessionName, &anonySessionName);
-        Anonymize(session->info.peerDeviceId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK,
-            "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
-            "peerNetworkIdLen=%{public}zu",
-            AnonymizeWrapper(anonySessionName), strlen(session->info.peerSessionName), AnonymizeWrapper(anonyNetworkId),
-            strlen(session->info.peerDeviceId));
-        AnonymizeFree(anonyNetworkId);
-        AnonymizeFree(anonySessionName);
+        TRANS_LOGE(TRANS_SDK, "invalid peerSessionName or peerDeviceId.");
         return SOFTBUS_INVALID_PARAM;
     }
 

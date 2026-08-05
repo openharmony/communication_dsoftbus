@@ -86,8 +86,10 @@ static int32_t FillSessionInfo(SessionInfo *session, const ChannelInfo *channel,
     session->keyType = channel->keyType;
     if (channel->isD2D) {
         session->isD2D = channel->isD2D;
-        session->dataLen = channel->dataLen;
-        if (channel->dataLen > 0 && channel->dataLen <= EXTRA_DATA_MAX_LEN &&
+        if (channel->dataLen <= EXTRA_DATA_MAX_LEN) {
+            session->dataLen = channel->dataLen;
+        }
+        if (session->dataLen > 0 &&
             memcpy_s(session->extraData, EXTRA_DATA_MAX_LEN, channel->extraData, channel->dataLen) != EOK) {
             TRANS_LOGE(TRANS_SDK, "copy extraData failed");
             return SOFTBUS_MEM_ERR;
