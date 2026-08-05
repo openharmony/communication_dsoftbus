@@ -238,7 +238,7 @@ typedef int32_t (*InitSoftbusChainFunc)(SoftbusCertChain *softbusCertChain);
 typedef int32_t (*AuthMetaOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
 typedef int32_t (*AuthMetaPostTransDataFunc)(int64_t authId, const AuthTransData *dataInfo);
 typedef void (*AuthMetaCloseConnFunc)(int64_t authId);
-typedef int32_t (*AuthMetaGetPreferConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo);
+typedef int32_t (*AuthMetaGetPreferConnInfoFunc)(const char *networkId, AuthConnInfo *connInfo);
 typedef int64_t (*AuthMetaGetIdByConnInfoFunc)(const AuthConnInfo *connInfo, bool isServer);
 typedef int64_t (*AuthMetaGetIdByUuidFunc)(const char *uuid, AuthLinkType type, bool isServer);
 typedef int64_t (*AuthMetaGetIdByIpFunc)(const char *ip);

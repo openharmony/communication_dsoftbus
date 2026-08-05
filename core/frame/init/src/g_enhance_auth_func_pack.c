@@ -17,13 +17,13 @@
 #include "g_enhance_auth_func.h"
 #include "softbus_init_common.h"
 
-int32_t AuthMetaGetConnInfoBySidePacked(const char *uuid, bool isClient, AuthConnInfo *connInfo)
+int32_t AuthMetaGetConnInfoBySidePacked(const char *networkId, bool isClient, AuthConnInfo *connInfo)
 {
     AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
     if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetConnInfoBySide) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnAuthEnhanceFuncList->authMetaGetConnInfoBySide(uuid, isClient, connInfo);
+    return pfnAuthEnhanceFuncList->authMetaGetConnInfoBySide(networkId, isClient, connInfo);
 }
 
 int32_t AuthMetaInitPacked(const AuthTransCallback *callback)
@@ -161,4 +161,87 @@ int32_t AuthMetaGetFeatureSDKByMetaNodeIdPacked(const char *metaNodeId, uint64_t
         return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnAuthEnhanceFuncList->authMetaGetFeatureSDKByMetaNodeId(metaNodeId, featureSDK);
+}
+
+int32_t AuthMetaGetLocalUuidByPeerMetaNodeIdPacked(const char *peerMetaNodeId, char *localUuid, uint32_t len)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetLocalUuidByPeerMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetLocalUuidByPeerMetaNodeId(peerMetaNodeId, localUuid, len);
+}
+
+int32_t AuthMetaGetAuthHandleByPeerMetaNodeIdPacked(const char *peerMetaNodeId, AuthHandle *authHandle)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetAuthHandleByPeerMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetAuthHandleByPeerMetaNodeId(peerMetaNodeId, authHandle);
+}
+
+int32_t AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(int64_t peerAuthId, char *peerMetaNodeId, uint32_t len)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetPeerMetaNodeIdByPeerAuthId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetPeerMetaNodeIdByPeerAuthId(peerAuthId, peerMetaNodeId, len);
+}
+
+bool AuthMetaIsSupportConcurrentByConnectionIdPacked(uint32_t connectionId)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaIsSupportConcurrentByConnectionId) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnAuthEnhanceFuncList->authMetaIsSupportConcurrentByConnectionId(connectionId);
+}
+
+int32_t AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(
+    const char *peerMetaNodeId, char *localMetaNodeId, uint32_t len)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetLocalMetaNodeIdByPeerMetaNodeId) !=
+        SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetLocalMetaNodeIdByPeerMetaNodeId(peerMetaNodeId, localMetaNodeId, len);
+}
+
+int32_t AuthMetaGetPeerUdidByMetaNodeIdPacked(const char *metaNodeId, char *peerUdid, uint32_t len)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetPeerUdidByMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetPeerUdidByMetaNodeId(metaNodeId, peerUdid, len);
+}
+
+bool AuthMetaIsSupportConcurrentByRemoteIpPacked(const char *ip)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaIsSupportConcurrentByRemoteIp) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnAuthEnhanceFuncList->authMetaIsSupportConcurrentByRemoteIp(ip);
+}
+
+bool AuthMetaIsSupportConcurrentByMetaNodeIdPacked(const char *metaNodeId)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaIsSupportConcurrentByMetaNodeId) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnAuthEnhanceFuncList->authMetaIsSupportConcurrentByMetaNodeId(metaNodeId);
+}
+
+int32_t AuthMetaGetNetworkIdsPacked(const char *udid, char **networkIds, uint32_t *networkIdCount)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetNetworkIds) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetNetworkIds(udid, networkIds, networkIdCount);
 }

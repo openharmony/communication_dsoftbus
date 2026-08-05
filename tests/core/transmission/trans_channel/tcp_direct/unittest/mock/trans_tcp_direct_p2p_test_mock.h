@@ -44,7 +44,8 @@ public:
     virtual int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode) = 0;
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
-    virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetPreferConnInfo(
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta) = 0;
     virtual char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc) = 0;
@@ -78,7 +79,8 @@ public:
     MOCK_METHOD2(NotifyChannelOpenFailed, int32_t (int32_t channelId, int32_t errCode));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
-    MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
+    MOCK_METHOD4(AuthGetPreferConnInfo, int32_t (
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta));
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta));
     MOCK_METHOD3(VerifyP2pPackError, char *(int32_t code, int32_t errCode, const char *errDesc));

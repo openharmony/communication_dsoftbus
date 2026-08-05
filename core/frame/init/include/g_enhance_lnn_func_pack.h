@@ -50,7 +50,7 @@ extern "C" {
 int32_t AuthMetaOpenConnPacked(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
 int32_t AuthMetaPostTransDataPacked(int64_t authId, const AuthTransData *dataInfo);
 void AuthMetaCloseConnPacked(int64_t authId);
-int32_t AuthMetaGetPreferConnInfoPacked(const char *uuid, AuthConnInfo *connInfo);
+int32_t AuthMetaGetPreferConnInfoPacked(const char *networkId, AuthConnInfo *connInfo);
 int64_t AuthMetaGetIdByConnInfoPacked(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthMetaGetIdByUuidPacked(const char *uuid, AuthLinkType type, bool isServer);
 int64_t AuthMetaGetIdByIpPacked(const char *ip);

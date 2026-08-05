@@ -81,9 +81,10 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return GetTransUdpNegoStaticInterface()->LnnGetLocalStrInfo(key, info, len);
 }
 
-int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient)
+int32_t AuthGetConnInfoBySide(
+    const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta, bool isClient)
 {
-    return GetTransUdpNegoStaticInterface()->AuthGetConnInfoBySide(uuid, connInfo, isMeta, isClient);
+    return GetTransUdpNegoStaticInterface()->AuthGetConnInfoBySide(uuid, networkId, connInfo, isMeta, isClient);
 }
 
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
@@ -101,9 +102,9 @@ int32_t AuthGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return GetTransUdpNegoStaticInterface()->AuthGetUsbConnInfo(uuid, connInfo, isMeta);
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfo(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
-    return GetTransUdpNegoStaticInterface()->AuthGetHmlConnInfo(uuid, connInfo, isMeta);
+    return GetTransUdpNegoStaticInterface()->AuthGetPreferConnInfo(uuid, networkId, connInfo, isMeta);
 }
 
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)

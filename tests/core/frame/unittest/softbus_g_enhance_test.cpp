@@ -1203,4 +1203,44 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest036, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     EXPECT_EQ(pid, 0);
 }
+
+/*
+ * @tc.name: SoftbusGEnhanceTest037
+ * @tc.desc: AuthMeta concurrent packed function test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest037, TestSize.Level1)
+{
+    int32_t ret = AuthMetaGetLocalUuidByPeerMetaNodeIdPacked(nullptr, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = AuthMetaGetAuthHandleByPeerMetaNodeIdPacked(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(nullptr, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = AuthMetaGetPeerUdidByMetaNodeIdPacked(nullptr, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+}
+
+/*
+ * @tc.name: SoftbusGEnhanceTest038
+ * @tc.desc: AuthMeta concurrent bool packed function test
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest038, TestSize.Level1)
+{
+    int32_t ret = AuthMetaIsSupportConcurrentByConnectionIdPacked(0);
+    EXPECT_EQ(ret, false);
+    ret = AuthMetaIsSupportConcurrentByRemoteIpPacked(nullptr);
+    EXPECT_EQ(ret, false);
+    ret = AuthMetaIsSupportConcurrentByMetaNodeIdPacked(nullptr);
+    EXPECT_EQ(ret, false);
+    ret = AuthMetaGetNetworkIdsPacked(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+}
 }

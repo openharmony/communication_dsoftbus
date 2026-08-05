@@ -116,13 +116,13 @@ void AuthMetaCloseConnPacked(int64_t authId)
     return pfnLnnEnhanceFuncList->authMetaCloseConn(authId);
 }
 
-int32_t AuthMetaGetPreferConnInfoPacked(const char *uuid, AuthConnInfo *connInfo)
+int32_t AuthMetaGetPreferConnInfoPacked(const char *networkId, AuthConnInfo *connInfo)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetPreferConnInfo) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnLnnEnhanceFuncList->authMetaGetPreferConnInfo(uuid, connInfo);
+    return pfnLnnEnhanceFuncList->authMetaGetPreferConnInfo(networkId, connInfo);
 }
 
 int64_t AuthMetaGetIdByConnInfoPacked(const AuthConnInfo *connInfo, bool isServer)

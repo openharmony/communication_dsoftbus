@@ -44,5 +44,22 @@ int32_t AuthRegisterEnhanceFunc(void *soHandle)
     g_authEnhanceFuncList.authMetaGetP2pMacByMetaNodeId = dlsym(soHandle, "AuthMetaGetP2pMacByMetaNodeId");
     g_authEnhanceFuncList.authMetaGetMetaValueByMetaNodeId = dlsym(soHandle, "AuthMetaGetMetaValueByMetaNodeId");
     g_authEnhanceFuncList.authMetaGetFeatureSDKByMetaNodeId = dlsym(soHandle, "AuthMetaGetFeatureSDKByMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetLocalUuidByPeerMetaNodeId =
+        dlsym(soHandle, "AuthMetaGetLocalUuidByPeerMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetAuthHandleByPeerMetaNodeId =
+        dlsym(soHandle, "AuthMetaGetAuthHandleByPeerMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetPeerMetaNodeIdByPeerAuthId =
+        dlsym(soHandle, "AuthMetaGetPeerMetaNodeIdByPeerAuthId");
+    g_authEnhanceFuncList.authMetaIsSupportConcurrentByConnectionId =
+        dlsym(soHandle, "AuthMetaIsSupportConcurrentByConnectionId");
+    g_authEnhanceFuncList.authMetaGetLocalMetaNodeIdByPeerMetaNodeId =
+        dlsym(soHandle, "AuthMetaGetLocalMetaNodeIdByPeerMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetPeerUdidByMetaNodeId =
+        dlsym(soHandle, "AuthMetaGetPeerUdidByMetaNodeId");
+    g_authEnhanceFuncList.authMetaIsSupportConcurrentByRemoteIp =
+        dlsym(soHandle, "AuthMetaIsSupportConcurrentByRemoteIp");
+    g_authEnhanceFuncList.authMetaIsSupportConcurrentByMetaNodeId =
+        dlsym(soHandle, "AuthMetaIsSupportConcurrentByMetaNodeId");
+    g_authEnhanceFuncList.authMetaGetNetworkIds = dlsym(soHandle, "AuthMetaGetNetworkIds");
     return SOFTBUS_OK;
 }
