@@ -80,6 +80,17 @@ typedef struct {
 
 static SoftBusList *g_tcpSrvDataList = NULL;
 
+static void ReleaseSessionConn(SessionConn *chan)
+{
+    if (chan == NULL) {
+        return;
+    }
+    if (chan->appInfo.fastTransData != NULL) {
+        SoftBusFree((void *)chan->appInfo.fastTransData);
+    }
+    SoftBusFree(chan);
+}
+
 static void PackTdcPacketHead(TdcPacketHead *data)
 {
     data->magicNumber = SoftBusHtoLl(data->magicNumber);
@@ -791,6 +802,43 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
     AnonymizeFree(tmpPeerName);
 }
 
+static SessionConn *SetupConnAfterUnpack(SessionConn *conn, const cJSON *request, uint32_t flags)
+{
+    if (conn == NULL || request == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return NULL;
+    }
+    int64_t flIdentity = 0;
+    if (GetJsonObjectNumber64Item(request, "FL_IDENTITY", (int64_t *)&flIdentity)) {
+        ServerUpdateHtpChannelPacked(flIdentity, conn->channelId);
+    }
+    (void)LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, conn->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
+    int32_t osType = 0;
+    (void)GetOsTypeByNetworkId(conn->appInfo.peerNetWorkId, &osType);
+    if (osType != OH_OS_TYPE) {
+        DisableCapabilityBit(&conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
+    }
+    if (GetCapabilityBit(conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        if (SoftBusGenerateSessionKey(conn->appInfo.sinkSessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "Generate sink SessionKey failed channelId=%{public}d, fd=%{public}d",
+                conn->channelId, conn->appInfo.fd);
+            (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0,
+                sizeof(conn->appInfo.sessionKey));
+            (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0,
+                sizeof(conn->appInfo.sinkSessionKey));
+            ReleaseSessionConn(conn);
+            return NULL;
+        }
+        EnableCapabilityBit(&conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
+    }
+    if (((flags & FLAG_EXTERNAL_DEVICE) != 0) || ((flags & FLAG_AUTH_META) != 0)) {
+        conn->appInfo.keyType = KEY_TYPE_META;
+    } else {
+        conn->appInfo.keyType = KEY_TYPE_NORMAL;
+    }
+    return conn;
+}
+
 static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request, uint32_t flags)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
@@ -807,39 +855,14 @@ static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
         ret = UnpackRequest(request, &conn->appInfo);
     }
     if (ret != SOFTBUS_OK) {
-        (void)memset_s(
-            conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+        (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
         (void)memset_s(conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0,
             sizeof(conn->appInfo.sinkSessionKey));
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "UnpackRequest error");
         return NULL;
     }
-    int64_t flIdentity = 0;
-    if (GetJsonObjectNumber64Item(request, "FL_IDENTITY", (int64_t *)&flIdentity)) {
-        ServerUpdateHtpChannelPacked(flIdentity, channelId);
-    }
-    (void)LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, conn->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
-    int32_t osType = 0;
-    (void)GetOsTypeByNetworkId(conn->appInfo.peerNetWorkId, &osType);
-    if (osType != OH_OS_TYPE) {
-        DisableCapabilityBit(&conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
-    }
-    if (GetCapabilityBit(conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
-        if (SoftBusGenerateSessionKey(conn->appInfo.sinkSessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "Generate sink SessionKey failed channelId=%{public}d, fd=%{public}d",
-                conn->channelId, conn->appInfo.fd);
-            SoftBusFree(conn);
-            return NULL;
-        }
-        EnableCapabilityBit(&conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
-    }
-    if (((flags & FLAG_EXTERNAL_DEVICE) != 0) || ((flags & FLAG_AUTH_META) != 0)) {
-        conn->appInfo.keyType = KEY_TYPE_META;
-    } else {
-        conn->appInfo.keyType = KEY_TYPE_NORMAL;
-    }
-    return conn;
+    return SetupConnAfterUnpack(conn, request, flags);
 }
 
 static void NotifyFastDataRecv(SessionConn *conn, int32_t channelId)
@@ -890,17 +913,6 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
     }
     TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
-}
-
-static void ReleaseSessionConn(SessionConn *chan)
-{
-    if (chan == NULL) {
-        return;
-    }
-    if (chan->appInfo.fastTransData != NULL) {
-        SoftBusFree((void *)chan->appInfo.fastTransData);
-    }
-    SoftBusFree(chan);
 }
 
 static void ReportTransEventExtra(
@@ -1056,38 +1068,51 @@ static int32_t HandleDataBusReply(
     return SOFTBUS_OK;
 }
 
+static int32_t VerifyAuthMetaPermission(int32_t channelId, const SessionConn *conn, uint32_t flags)
+{
+    if (conn == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param, channelId=%{public}d", channelId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (((flags & FLAG_EXTERNAL_DEVICE) == 0) && ((flags & FLAG_AUTH_META) == 0)) {
+        return SOFTBUS_OK;
+    }
+    AuthHandle authHandle = { 0 };
+    int32_t ret = GetAuthHandleByChanId(channelId, &authHandle);
+    if (ret != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_CTRL, "get auth id fail, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+    }
+    int32_t pid = 0;
+    ret = AuthMetaGetPidByAuthIdPacked(authHandle.authId, &pid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get pid by auth id fail, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+    }
+    int32_t localUid = 0;
+    int32_t localPid = 0;
+    if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName, &localUid, &localPid) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get pid add uid by session name fail, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
+    }
+    if (pid != localPid) {
+        TRANS_LOGE(TRANS_CTRL, "authMeta pid no match, authMeta pid=%{public}d, pid=%{public}d.", pid, localPid);
+        return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, flags=%{public}d, seq=%{public}" PRIu64, channelId, flags, seq);
     SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request, flags);
     TRANS_CHECK_AND_RETURN_RET_LOGE(conn != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "conn is null");
-    if (((flags & FLAG_EXTERNAL_DEVICE) != 0) || ((flags & FLAG_AUTH_META) != 0)) {
-        AuthHandle authHandle = { 0 };
-        int32_t ret = GetAuthHandleByChanId(channelId, &authHandle);
-        if (ret != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
-            TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
-            return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
-        }
-        int32_t pid = 0;
-        ret = AuthMetaGetPidByAuthIdPacked(authHandle.authId, &pid);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_BYTES, "get pid by auth id fail, channelId=%{public}d", channelId);
-            return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
-        }
-        int32_t localUid = 0;
-        int32_t localPid = 0;
-        if (TransTdcGetUidAndPid(
-            conn->appInfo.myData.sessionName, &localUid, &localPid) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_BYTES, "get pid add uid by session name fail, channelId=%{public}d", channelId);
-            return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
-        }
-        if (pid != localPid) {
-            TRANS_LOGE(TRANS_CTRL, "authMeta pid no match, authMeta pid=%{public}d, pid=%{public}d.",
-                pid, localPid);
-            return SOFTBUS_TRANS_QUERY_PERMISSION_FAILED;
-        }
+    int32_t ret = VerifyAuthMetaPermission(channelId, conn, flags);
+    if (ret != SOFTBUS_OK) {
+        ReleaseSessionConn(conn);
+        return ret;
     }
-    TransEventExtra extra;
+    TransEventExtra extra = {0};
     char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
