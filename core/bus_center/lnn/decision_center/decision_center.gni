@@ -24,4 +24,8 @@ if (is_standard_system) {
         "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/src/lnn_cloud_query_fragment.c",
         "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/src/lnn_fragment_recv.c"
     ]
+} else {
+    bus_center_decision_center_src += [
+        "$dsoftbus_root_path/core/bus_center/lnn/decision_center/agent_communication/src/lnn_conversation_query_virtual.cpp"
+    ]
 }
