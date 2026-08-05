@@ -95,6 +95,7 @@ int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, co
 bool LnnIsLocalSupportMcuFeature(void);
 bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit);
 void LnnUpdateAclState(const char *udid, AclWriteState aclState);
+int32_t AuthGetAllNetworkId(const char *udid, char **networkIds, uint32_t *networkIdCount);
 #ifdef __cplusplus
 }
 #endif

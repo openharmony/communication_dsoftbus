@@ -220,20 +220,12 @@ int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConn
         }
     }
     int32_t ret = SOFTBUS_OK;
-    do {
-        if (authClient != NULL) {
-            ret = CheckSessionKeyAvailable(&authClient->sessionKeyList, type);
-            if (ret != SOFTBUS_OK) {
-                break;
-            }
-        }
-        if (authServer != NULL) {
-            ret = CheckSessionKeyAvailable(&authServer->sessionKeyList, type);
-            if (ret != SOFTBUS_OK) {
-                break;
-            }
-        }
-    } while (false);
+    if (authClient != NULL) {
+        ret = CheckSessionKeyAvailable(&authClient->sessionKeyList, type);
+    }
+    if (ret == SOFTBUS_OK && authServer != NULL) {
+        ret = CheckSessionKeyAvailable(&authServer->sessionKeyList, type);
+    }
     DelDupAuthManager(authClient);
     DelDupAuthManager(authServer);
     return ret;
@@ -315,18 +307,18 @@ void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle)
     RemoveAuthManagerByAuthId(authHandle);
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfo(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
-        return AuthMetaGetPreferConnInfoPacked(uuid, connInfo);
+        return AuthMetaGetPreferConnInfoPacked(networkId, connInfo);
     }
     return AuthDeviceGetPreferConnInfo(uuid, connInfo);
 }
 
-int32_t AuthGetPreferConnInfoWithoutSle(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfoWithoutSle(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
     if (isMeta) {
-        return AuthMetaGetPreferConnInfoPacked(uuid, connInfo);
+        return AuthMetaGetPreferConnInfoPacked(networkId, connInfo);
     }
     return AuthDeviceGetPreferConnInfoWithoutSle(uuid, connInfo);
 }
@@ -339,10 +331,11 @@ int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo 
     return AuthDeviceGetConnInfoByType(uuid, type, connInfo);
 }
 
-int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient)
+int32_t AuthGetConnInfoBySide(
+    const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta, bool isClient)
 {
     if (isMeta) {
-        return AuthMetaGetConnInfoBySidePacked(uuid, isClient, connInfo);
+        return AuthMetaGetConnInfoBySidePacked(networkId, isClient, connInfo);
     }
     return AuthDeviceGetPreferConnInfo(uuid, connInfo);
 }

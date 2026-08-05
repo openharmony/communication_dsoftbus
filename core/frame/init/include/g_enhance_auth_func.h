@@ -36,7 +36,7 @@ typedef int32_t (*VerifyCertificateFunc)(
 typedef void (*AuthUpdateNormalizeKeyIndexFunc)(
     const char *udidHash, int64_t index, AuthLinkType type, SessionKey *normalizedKey, bool isServer);
 typedef void (*DelAuthMetaManagerByConnectionIdFunc)(uint32_t connectionId);
-typedef int32_t (*AuthMetaGetConnInfoBySideFunc)(const char *uuid, bool isClient, AuthConnInfo *connInfo);
+typedef int32_t (*AuthMetaGetConnInfoBySideFunc)(const char *networkId, bool isClient, AuthConnInfo *connInfo);
 typedef void (*AuthClearDeviceKeyFunc)(void);
 typedef int32_t (*AuthMetaGetOsTypeByMetaNodeIdFunc)(const char *metaNodeId, int32_t *osType);
 typedef int32_t (*AuthMetaGetMetaTypeByMetaNodeIdFunc)(const char *metaNodeId, int32_t *metaType);
@@ -45,6 +45,19 @@ typedef int32_t (*AuthMetaGetDeviceIdByMetaNodeIdFunc)(const char *metaNodeId, c
 typedef int32_t (*AuthMetaGetP2pMacByMetaNodeIdFunc)(const char *metaNodeId, char *p2pMacAddr, int32_t len);
 typedef bool (*AuthMetaGetMetaValueByMetaNodeIdFunc)(const char *metaNodeId);
 typedef int32_t (*AuthMetaGetFeatureSDKByMetaNodeIdFunc)(const char *metaNodeId, uint64_t *featureSDK);
+typedef int32_t (*AuthMetaGetLocalUuidByPeerMetaNodeIdFunc)(
+    const char *peerMetaNodeId, char *localUuid, uint32_t len);
+typedef int32_t (*AuthMetaGetAuthHandleByPeerMetaNodeIdFunc)(
+    const char *peerMetaNodeId, AuthHandle *authHandle);
+typedef int32_t (*AuthMetaGetPeerMetaNodeIdByPeerAuthIdFunc)(
+    int64_t peerAuthId, char *peerMetaNodeId, uint32_t len);
+typedef bool (*AuthMetaIsSupportConcurrentByConnectionIdFunc)(uint32_t connectionId);
+typedef int32_t (*AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdFunc)(
+    const char *peerMetaNodeId, char *localMetaNodeId, uint32_t len);
+typedef int32_t (*AuthMetaGetPeerUdidByMetaNodeIdFunc)(const char *metaNodeId, char *peerUdid, uint32_t len);
+typedef bool (*AuthMetaIsSupportConcurrentByRemoteIpFunc)(const char *ip);
+typedef bool (*AuthMetaIsSupportConcurrentByMetaNodeIdFunc)(const char *metaNodeId);
+typedef int32_t (*AuthMetaGetNetworkIdsFunc)(const char *udid, char **networkIds, uint32_t *networkIdCount);
 typedef struct TagAuthEnhanceFuncList {
     AuthMetaInitFunc authMetaInit;
     AuthMetaNotifyDataReceivedFunc authMetaNotifyDataReceived;
@@ -62,6 +75,15 @@ typedef struct TagAuthEnhanceFuncList {
     AuthMetaGetP2pMacByMetaNodeIdFunc authMetaGetP2pMacByMetaNodeId;
     AuthMetaGetMetaValueByMetaNodeIdFunc authMetaGetMetaValueByMetaNodeId;
     AuthMetaGetFeatureSDKByMetaNodeIdFunc authMetaGetFeatureSDKByMetaNodeId;
+    AuthMetaGetLocalUuidByPeerMetaNodeIdFunc authMetaGetLocalUuidByPeerMetaNodeId;
+    AuthMetaGetAuthHandleByPeerMetaNodeIdFunc authMetaGetAuthHandleByPeerMetaNodeId;
+    AuthMetaGetPeerMetaNodeIdByPeerAuthIdFunc authMetaGetPeerMetaNodeIdByPeerAuthId;
+    AuthMetaIsSupportConcurrentByConnectionIdFunc authMetaIsSupportConcurrentByConnectionId;
+    AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdFunc authMetaGetLocalMetaNodeIdByPeerMetaNodeId;
+    AuthMetaGetPeerUdidByMetaNodeIdFunc authMetaGetPeerUdidByMetaNodeId;
+    AuthMetaIsSupportConcurrentByRemoteIpFunc authMetaIsSupportConcurrentByRemoteIp;
+    AuthMetaIsSupportConcurrentByMetaNodeIdFunc authMetaIsSupportConcurrentByMetaNodeId;
+    AuthMetaGetNetworkIdsFunc authMetaGetNetworkIds;
 } AuthEnhanceFuncList;
 
 AuthEnhanceFuncList *AuthEnhanceFuncListGet(void);

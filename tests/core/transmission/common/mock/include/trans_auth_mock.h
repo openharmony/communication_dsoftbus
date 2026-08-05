@@ -51,7 +51,8 @@ public:
         const AuthConnCallback *callback, bool isMeta) = 0;
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
-    virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetPreferConnInfo(
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
 
@@ -121,7 +122,7 @@ public:
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo *, uint32_t, const AuthConnCallback *, bool));
     MOCK_METHOD1(AuthCloseConn, void (AuthHandle));
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
-    MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char *, AuthConnInfo *, bool));
+    MOCK_METHOD4(AuthGetPreferConnInfo, int32_t (const char *, const char *, AuthConnInfo *, bool));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char *, AuthConnInfo *, bool));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char *, AuthConnInfo *, bool));
 

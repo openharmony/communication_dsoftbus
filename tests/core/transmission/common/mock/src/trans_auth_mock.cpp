@@ -116,9 +116,9 @@ int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
     return GetTransAuthInterface()->AuthPostTransData(authHandle, dataInfo);
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfo(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
-    return GetTransAuthInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
+    return GetTransAuthInterface()->AuthGetPreferConnInfo(uuid, networkId, connInfo, isMeta);
 }
 
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)

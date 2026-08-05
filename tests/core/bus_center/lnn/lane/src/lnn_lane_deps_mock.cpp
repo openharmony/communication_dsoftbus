@@ -235,9 +235,9 @@ int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint
     return GetLaneDepsInterface()->LnnGetRemoteStrInfo(netWorkId, key, info, len);
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfo(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
-    return GetLaneDepsInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
+    return GetLaneDepsInterface()->AuthGetPreferConnInfo(uuid, networkId, connInfo, isMeta);
 }
 
 int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta)

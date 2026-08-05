@@ -224,7 +224,7 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
     }
     int32_t ret = AuthGetHmlConnInfo(uuid, connInfo, isMetaAuth);
     if (ret != SOFTBUS_OK) {
-        ret = AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
+        ret = AuthGetPreferConnInfo(uuid, uuid, connInfo, isMetaAuth);
     }
     return ret;
 }

@@ -1157,13 +1157,13 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
         ret = AuthGetUsbConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK && isMeta == true) {
-        ret = AuthGetConnInfoBySide(peerUdid, &auth, isMeta, isClient);
+        ret = AuthGetConnInfoBySide(peerUdid, peerUdid, &auth, isMeta, isClient);
     }
     if (ret != SOFTBUS_OK && linkType != LANE_USB) {
-        ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
+        ret = AuthGetPreferConnInfo(peerUdid, peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK && linkType != LANE_USB) {
-        ret = AuthGetPreferConnInfo(peerUdid, &auth, true);
+        ret = AuthGetPreferConnInfo(peerUdid, peerUdid, &auth, true);
         isMeta = true;
     }
     if (ret != SOFTBUS_OK) {
