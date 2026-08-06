@@ -14,9 +14,9 @@
  */
 
 #include <unistd.h>
-
 #include "anonymizer.h"
 #include "disc_manager.h"
+#include "bus_center_client_proxy.h"
 #include "bus_center_event.h"
 #include "common_list.h"
 #include "disc_ble_dispatcher.h"
@@ -105,6 +105,23 @@ typedef struct {
     int32_t pid;
 } IdContainer;
 
+#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+typedef struct {
+    char packageName[PKG_NAME_SIZE_MAX];
+    int32_t id;
+    int32_t pid;
+    ServiceType type;
+} DiscScreenActiveNodeInfo;
+
+typedef struct {
+    DiscScreenActiveNodeInfo *nodes;
+    uint32_t maxCount;
+} DiscScreenActiveCollector;
+
+static bool g_screenOn[DISC_SCREEN_TYPE_BUTT] = {false};
+static SoftBusMutex g_screenLock;
+#endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
+
 #define DFX_RECORD_DISC_CALL_START(infoNode, packageName, interfaceType)   \
     do {                                                                   \
         DiscEventExtra extra = { 0 };                                      \
@@ -133,6 +150,10 @@ static const char *g_discModuleMap[MODULE_MAX] = {
     "MODULE_CONN",
 };
 bool DiscIsOsAccountConstraint(void);
+static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, const ServiceType type,
+    int32_t callingPid);
+static int32_t InnerUnPublishService(const char *packageName, int32_t publishId, const ServiceType type,
+    int32_t callingPid);
 
 static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {
@@ -863,6 +884,345 @@ static DiscInfo *RemoveInfoFromDiscoveryList(const char *packageName, const int3
     return RemoveInfoFromList(g_discoveryInfoList, packageName, id, type, callingPid);
 }
 
+
+#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+
+static bool DiscIsAllScreenOff(void)
+{
+    if (SoftBusMutexLock(&g_screenLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_CONTROL, "lock screen fail");
+        return false;
+    }
+    bool allOff = true;
+    for (int32_t i = 0; i < DISC_SCREEN_TYPE_BUTT; i++) {
+        if (g_screenOn[i]) {
+            allOff = false;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_screenLock);
+    return allOff;
+}
+
+static bool DiscIsAnyScreenOn(void)
+{
+    if (SoftBusMutexLock(&g_screenLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_CONTROL, "lock screen fail");
+        return true;
+    }
+    bool anyOn = false;
+    for (int32_t i = 0; i < DISC_SCREEN_TYPE_BUTT; i++) {
+        if (g_screenOn[i]) {
+            anyOn = true;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_screenLock);
+    return anyOn;
+}
+
+static bool DiscShouldStopForBizType(DiscScreenBizType bizType, DiscScreenType screenType,
+    bool allScreenOff)
+{
+    if (bizType == DISC_SCREEN_BIZ_A) {
+        return screenType == DISC_SCREEN_CENTER;
+    }
+    if (bizType == DISC_SCREEN_BIZ_B) {
+        return allScreenOff;
+    }
+    return false;
+}
+
+static bool DiscShouldRecoverForBizType(DiscScreenBizType bizType, DiscScreenType screenType,
+    bool anyScreenOn)
+{
+    if (bizType == DISC_SCREEN_BIZ_A) {
+        return screenType == DISC_SCREEN_CENTER;
+    }
+    if (bizType == DISC_SCREEN_BIZ_B) {
+        return anyScreenOn;
+    }
+    return false;
+}
+
+static DiscScreenBizType DiscInfoGetScreenBizType(const DiscInfo *info, ServiceType type)
+{
+    uint32_t bitmap = (type == PUBLISH_SERVICE || type == PUBLISH_INNER_SERVICE) ?
+        info->option.publishOption.capabilityBitmap[0] : info->option.subscribeOption.capabilityBitmap[0];
+    for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
+        if (IsBitmapSet((const uint32_t *)&bitmap, pos)) {
+            DiscScreenBizType bizType = DiscMgrGetScreenBizType((int32_t)pos);
+            if (bizType != DISC_SCREEN_BIZ_NONE) {
+                return bizType;
+            }
+        }
+    }
+    return DISC_SCREEN_BIZ_NONE;
+}
+
+static void DiscScreenOffStopPassive(SoftBusList *infoList, ServiceType type, DiscScreenType screenType,
+    bool allScreenOff)
+{
+    InterfaceFuncType funcType = (type == PUBLISH_SERVICE) ? UNPUBLISH_FUNC : STOPDISCOVERY_FUNC;
+    int32_t ret = SoftBusMutexLock(&infoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    DiscItem *itemNode = NULL;
+    DiscInfo *infoNode = NULL;
+    LIST_FOR_EACH_ENTRY(itemNode, &(infoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
+                continue;
+            }
+            DiscScreenBizType bizType = DiscInfoGetScreenBizType(infoNode, type);
+            if (!DiscShouldStopForBizType(bizType, screenType, allScreenOff)) {
+                continue;
+            }
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, funcType);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, funcType);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "screen off stop passive fail, type=%{public}d, medium=%{public}d",
+                    type, infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&infoList->lock);
+}
+
+static uint32_t DiscScreenOffCollectActive(SoftBusList *infoList, ServiceType type,
+    DiscScreenType screenType, bool allScreenOff, const DiscScreenActiveCollector *collector)
+{
+    int32_t ret = SoftBusMutexLock(&infoList->lock);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, 0, DISC_CONTROL, "lock fail");
+    uint32_t count = 0;
+    DiscItem *itemNode = NULL;
+    DiscInfo *infoNode = NULL;
+    LIST_FOR_EACH_ENTRY(itemNode, &(infoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            if (infoNode->mode != DISCOVER_MODE_ACTIVE) {
+                continue;
+            }
+            DiscScreenBizType bizType = DiscInfoGetScreenBizType(infoNode, type);
+            if (!DiscShouldStopForBizType(bizType, screenType, allScreenOff)) {
+                continue;
+            }
+            if (collector != NULL && collector->nodes != NULL && count < collector->maxCount) {
+                if (strncpy_s(collector->nodes[count].packageName, PKG_NAME_SIZE_MAX,
+                        itemNode->packageName, strlen(itemNode->packageName)) == EOK) {
+                    collector->nodes[count].id = infoNode->id;
+                    collector->nodes[count].pid = infoNode->pid;
+                    collector->nodes[count].type = type;
+                }
+            }
+            count++;
+        }
+    }
+    SoftBusMutexUnlock(&infoList->lock);
+    return count;
+}
+
+static void DiscScreenOffStop(DiscScreenType screenType)
+{
+    // Cache screen state before acquiring infoList locks to avoid AB-BA deadlock
+    // (DiscShouldStopForBizType -> DiscIsAllScreenOff would acquire g_screenLock
+    // while holding infoList->lock, which can deadlock with other paths)
+    bool allScreenOff = DiscIsAllScreenOff();
+
+    // Phase 1: Stop passive nodes via CallInterfaceByMedium (keep DiscInfo in list)
+    DiscScreenOffStopPassive(g_discoveryInfoList, SUBSCRIBE_SERVICE, screenType, allScreenOff);
+    DiscScreenOffStopPassive(g_publishInfoList, PUBLISH_SERVICE, screenType, allScreenOff);
+
+    // Phase 2: Collect active node info, then fully clean up outside lock
+    uint32_t activeCount = DiscScreenOffCollectActive(g_discoveryInfoList, SUBSCRIBE_SERVICE,
+        screenType, allScreenOff, NULL);
+    activeCount += DiscScreenOffCollectActive(g_publishInfoList, PUBLISH_SERVICE,
+        screenType, allScreenOff, NULL);
+    if (activeCount == 0) {
+        return;
+    }
+
+    DiscScreenActiveNodeInfo *activeNodes = SoftBusCalloc(activeCount * sizeof(DiscScreenActiveNodeInfo));
+    DISC_CHECK_AND_RETURN_LOGE(activeNodes != NULL, DISC_CONTROL, "calloc fail");
+    DiscScreenActiveCollector filler = { activeNodes, activeCount };
+    uint32_t idx = DiscScreenOffCollectActive(g_discoveryInfoList, SUBSCRIBE_SERVICE,
+        screenType, allScreenOff, &filler);
+    filler.nodes = activeNodes + idx;
+    filler.maxCount = activeCount - idx;
+    idx += DiscScreenOffCollectActive(g_publishInfoList, PUBLISH_SERVICE,
+        screenType, allScreenOff, &filler);
+
+    for (uint32_t i = 0; i < idx; i++) {
+        if (activeNodes[i].type == SUBSCRIBE_SERVICE) {
+            DISC_LOGI(DISC_CONTROL, "screen off stop active discovery, pkg=%{public}s, id=%{public}d",
+                activeNodes[i].packageName, activeNodes[i].id);
+            InnerStopDiscovery(activeNodes[i].packageName, activeNodes[i].id,
+                SUBSCRIBE_SERVICE, activeNodes[i].pid);
+            ClientOnRefreshLNNResult(activeNodes[i].packageName, activeNodes[i].pid,
+                activeNodes[i].id, REFRESH_LNN_INTERNAL);
+        } else {
+            DISC_LOGI(DISC_CONTROL, "screen off stop active publish, pkg=%{public}s, id=%{public}d",
+                activeNodes[i].packageName, activeNodes[i].id);
+            InnerUnPublishService(activeNodes[i].packageName, activeNodes[i].id,
+                PUBLISH_SERVICE, activeNodes[i].pid);
+            ClientOnPublishLNNResult(activeNodes[i].packageName, activeNodes[i].pid,
+                activeNodes[i].id, PUBLISH_LNN_INTERNAL);
+        }
+    }
+    SoftBusFree(activeNodes);
+}
+
+static void DiscScreenOnRecover(DiscScreenType screenType)
+{
+    // Cache screen state before acquiring infoList locks to avoid AB-BA deadlock
+    // (DiscShouldRecoverForBizType -> DiscIsAnyScreenOn would acquire g_screenLock
+    // while holding infoList->lock, which can deadlock with other paths)
+    bool anyScreenOn = DiscIsAnyScreenOn();
+
+    DiscItem *itemNode = NULL;
+    DiscInfo *infoNode = NULL;
+
+    // Recover passive discovery only
+    int32_t ret = SoftBusMutexLock(&g_discoveryInfoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    LIST_FOR_EACH_ENTRY(itemNode, &(g_discoveryInfoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
+                continue;
+            }
+            DiscScreenBizType bizType = DiscInfoGetScreenBizType(infoNode, SUBSCRIBE_SERVICE);
+            if (!DiscShouldRecoverForBizType(bizType, screenType, anyScreenOn)) {
+                continue;
+            }
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, STARTDISCOVERTY_FUNC);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, STARTDISCOVERTY_FUNC);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "screen on recover passive discovery fail, medium=%{public}d", infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_discoveryInfoList->lock);
+
+    // Recover passive publish only
+    ret = SoftBusMutexLock(&g_publishInfoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    LIST_FOR_EACH_ENTRY(itemNode, &(g_publishInfoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
+                continue;
+            }
+            DiscScreenBizType bizType = DiscInfoGetScreenBizType(infoNode, PUBLISH_SERVICE);
+            if (!DiscShouldRecoverForBizType(bizType, screenType, anyScreenOn)) {
+                continue;
+            }
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, PUBLISH_FUNC);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, PUBLISH_FUNC);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "screen on recover passive publish fail, medium=%{public}d", infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_publishInfoList->lock);
+}
+
+static bool DiscIsScreenOffForBizType(DiscScreenBizType bizType, bool allScreenOff)
+{
+    if (bizType == DISC_SCREEN_BIZ_A) {
+        if (SoftBusMutexLock(&g_screenLock) != SOFTBUS_OK) {
+            DISC_LOGE(DISC_CONTROL, "lock screen fail");
+            return false;
+        }
+        bool off = !g_screenOn[DISC_SCREEN_CENTER];
+        (void)SoftBusMutexUnlock(&g_screenLock);
+        return off;
+    }
+    if (bizType == DISC_SCREEN_BIZ_B) {
+        return allScreenOff;
+    }
+    return false;
+}
+
+static bool DiscPublishScreenOffCheck(DiscInfo *info, ServiceType type, int32_t *retCode,
+    bool allScreenOff)
+{
+    uint32_t bitmap = info->option.publishOption.capabilityBitmap[0];
+    DiscScreenBizType bizType = DISC_SCREEN_BIZ_NONE;
+    for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
+        if (IsBitmapSet((const uint32_t *)&bitmap, pos)) {
+            bizType = DiscMgrGetScreenBizType((int32_t)pos);
+            if (bizType != DISC_SCREEN_BIZ_NONE) {
+                break;
+            }
+        }
+    }
+    if (!DiscIsScreenOffForBizType(bizType, allScreenOff)) {
+        return false;
+    }
+    if (info->mode == DISCOVER_MODE_ACTIVE) {
+        DISC_LOGW(DISC_CONTROL, "screen off, reject active publish");
+        ModifyCapabilityCallTimes(info->item, info, type, false);
+        ListDelete(&(info->node));
+        info->item->infoNum--;
+        *retCode = SOFTBUS_DISCOVER_MANAGER_SCREEN_OFF_REJECTED;
+    } else {
+        DISC_LOGI(DISC_CONTROL, "screen off, passive publish added to list without starting BLE");
+        *retCode = SOFTBUS_OK;
+    }
+    return true;
+}
+
+static bool DiscSubscribeScreenOffCheck(DiscInfo *info, ServiceType type, int32_t *retCode,
+    bool allScreenOff)
+{
+    uint32_t bitmap = info->option.subscribeOption.capabilityBitmap[0];
+    DiscScreenBizType bizType = DISC_SCREEN_BIZ_NONE;
+    for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
+        if (IsBitmapSet((const uint32_t *)&bitmap, pos)) {
+            bizType = DiscMgrGetScreenBizType((int32_t)pos);
+            if (bizType != DISC_SCREEN_BIZ_NONE) {
+                break;
+            }
+        }
+    }
+    if (!DiscIsScreenOffForBizType(bizType, allScreenOff)) {
+        return false;
+    }
+    if (info->mode == DISCOVER_MODE_ACTIVE) {
+        DISC_LOGW(DISC_CONTROL, "screen off, reject active discovery");
+        ModifyCapabilityCallTimes(info->item, info, type, false);
+        RemoveDiscInfoFromCapabilityList(info, type);
+        ListDelete(&(info->node));
+        info->item->infoNum--;
+        *retCode = SOFTBUS_DISCOVER_MANAGER_SCREEN_OFF_REJECTED;
+    } else {
+        DISC_LOGI(DISC_CONTROL, "screen off, passive discovery added to list without starting BLE");
+        *retCode = SOFTBUS_OK;
+    }
+    return true;
+}
+
+void DiscOnScreenStatusChanged(DiscScreenType screenType, bool onScreen)
+{
+    DISC_LOGI(DISC_CONTROL, "screen status changed, screenType=%{public}d, onScreen=%{public}d",
+        screenType, onScreen);
+    if (screenType < 0 || screenType >= DISC_SCREEN_TYPE_BUTT) {
+        DISC_LOGE(DISC_CONTROL, "invalid screenType=%{public}d", screenType);
+        return;
+    }
+    if (SoftBusMutexLock(&g_screenLock) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_CONTROL, "lock screen fail");
+        return;
+    }
+    g_screenOn[screenType] = onScreen;
+    (void)SoftBusMutexUnlock(&g_screenLock);
+
+    if (onScreen) {
+        DiscScreenOnRecover(screenType);
+    } else {
+        DiscScreenOffStop(screenType);
+    }
+}
+
+#endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
+
 static int32_t InnerPublishService(const char *packageName, DiscInfo *info, const ServiceType type)
 {
     int32_t ret = SoftBusMutexLock(&g_publishInfoList->lock);
@@ -880,6 +1240,16 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
             SoftBusMutexUnlock(&g_publishInfoList->lock);
             return SOFTBUS_OK;
         }
+
+#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+        // Cache screen state before check to avoid acquiring g_screenLock while holding infoList->lock
+        bool allScreenOff = DiscIsAllScreenOff();
+        int32_t screenRetCode = SOFTBUS_OK;
+        if (DiscPublishScreenOffCheck(info, type, &screenRetCode, allScreenOff)) {
+            SoftBusMutexUnlock(&g_publishInfoList->lock);
+            return screenRetCode;
+        }
+#endif
 
         DFX_RECORD_DISC_CALL_START(info, packageName, PUBLISH_FUNC);
         ret = CallInterfaceByMedium(info, packageName, PUBLISH_FUNC);
@@ -953,6 +1323,16 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
             SoftBusMutexUnlock(&g_discoveryInfoList->lock);
             return SOFTBUS_OK;
         }
+
+#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+        // Cache screen state before check to avoid acquiring g_screenLock while holding infoList->lock
+        bool allScreenOff = DiscIsAllScreenOff();
+        int32_t screenRetCode = SOFTBUS_OK;
+        if (DiscSubscribeScreenOffCheck(info, type, &screenRetCode, allScreenOff)) {
+            SoftBusMutexUnlock(&g_discoveryInfoList->lock);
+            return screenRetCode;
+        }
+#endif
 
         UpdateDdmpStartDiscoveryTime(info);
         DFX_RECORD_DISC_CALL_START(info, packageName, STARTDISCOVERTY_FUNC);
@@ -1512,10 +1892,29 @@ static void ConstraintEventChangeHandler(const LnnEventBasicInfo *info)
     DiscProcessConstraintChanged(nowIsConstraint);
 }
 
+static void MultiScreenStateChangedEvtHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_MULTI_SCREEN_STATE_CHANGED) {
+        DISC_LOGE(DISC_CONTROL, "multi screen state evt handler get invalid param");
+        return;
+    }
+    const LnnMultiScreenStateChangedEvent *event = (const LnnMultiScreenStateChangedEvent *)info;
+    bool onScreen = (event->status == SOFTBUS_MULTI_SCREEN_ON);
+    DiscScreenType screenType = (DiscScreenType)event->screenId;
+    if (screenType < 0 || screenType >= DISC_SCREEN_TYPE_BUTT) {
+        DISC_LOGE(DISC_CONTROL, "invalid screenType from screenId");
+        return;
+    }
+    DiscOnScreenStatusChanged(screenType, onScreen);
+}
+
 int32_t DiscConstraintEventInit(void)
 {
     int32_t ret = LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, ConstraintEventChangeHandler);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init constraint event handler fail");
+
+    ret = LnnRegisterEventHandler(LNN_EVENT_MULTI_SCREEN_STATE_CHANGED, MultiScreenStateChangedEvtHandler);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init multi screen state event handler fail");
 
     DISC_LOGI(DISC_INIT, "init disc constraint event succ");
     return SOFTBUS_OK;
@@ -1524,6 +1923,7 @@ int32_t DiscConstraintEventInit(void)
 void DiscConstraintEventDeInit(void)
 {
     LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, ConstraintEventChangeHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_MULTI_SCREEN_STATE_CHANGED, MultiScreenStateChangedEvtHandler);
 }
 
 int32_t DiscMgrInit(void)
@@ -1552,6 +1952,18 @@ int32_t DiscMgrInit(void)
         ListInit(&g_capabilityList[i]);
     }
 
+#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+    if (SoftBusMutexInit(&g_screenLock, NULL) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_INIT, "init screen lock fail");
+        DestroySoftBusList(g_publishInfoList);
+        DestroySoftBusList(g_discoveryInfoList);
+        g_publishInfoList = NULL;
+        g_discoveryInfoList = NULL;
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
+    g_screenOn[0] = true;
+#endif
+
     g_isInited = true;
     return SOFTBUS_OK;
 }
@@ -1574,6 +1986,10 @@ void DiscMgrDeinit(void)
     DiscNfcDispatcherDeinit();
 
     g_isInited = false;
+
+#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+    (void)SoftBusMutexDestroy(&g_screenLock);
+#endif
     DISC_LOGI(DISC_INIT, "disc manager deinit success");
 }
 
