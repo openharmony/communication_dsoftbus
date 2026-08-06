@@ -71,6 +71,7 @@ typedef struct {
     int32_t (*OnServerDeviceFound)(const char *packageName, const DeviceInfo *device,
                                    const InnerDeviceInfoAddtions *additions, int32_t subscribeId);
 } IServerDiscInnerCallback;
+
 #ifdef __cplusplus
 #if __cplusplus
 }
