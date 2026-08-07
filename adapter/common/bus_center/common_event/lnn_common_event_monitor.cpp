@@ -26,6 +26,7 @@
 #include "lnn_multi_user_process.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
+#include "long_wrapper.h"
 #include "power_mgr_client.h"
 #include "softbus_error_code.h"
 #include "lnn_init_monitor.h"
@@ -113,6 +114,9 @@ static void HandleDistributedAccountChange(const CommonEventData &data)
 }
 
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+static const char *COMMON_EVENT_MULTI_SCREEN_OFF = "usual.event.MULTI_SCREEN_OFF";
+static const char *COMMON_EVENT_MULTI_SCREEN_ON = "usual.event.MULTI_SCREEN_ON";
+
 static void HandleSubProfileSwitched(const CommonEventData &data)
 {
     const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
@@ -123,6 +127,35 @@ static void HandleSubProfileSwitched(const CommonEventData &data)
     }
     LNN_LOGI(LNN_EVENT, "SWITCHED event for userId=%{public}d", userId);
     LnnNotifyAccountSwitchCheckEvent(userId);
+}
+
+static int64_t ParseMultiScreenId(const AAFwk::WantParams &wantParams)
+{
+    auto interfacePtr = wantParams.GetParam("screenId");
+    auto longValue = AAFwk::ILong::Query(interfacePtr);
+    if (longValue == nullptr) {
+        LNN_LOGW(LNN_EVENT, "multi screen event missing screenId");
+        return 0;
+    }
+    return AAFwk::Long::Unbox64(longValue);
+}
+
+static void HandleMultiScreenOn(const CommonEventData &data)
+{
+    const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
+    int64_t screenId = ParseMultiScreenId(wantParams);
+    int32_t reason = wantParams.GetIntParam("reason", -1);
+    LNN_LOGI(LNN_EVENT, "multi screen on screenId=%{public}" PRId64 ", reason=%{public}d", screenId, reason);
+    LnnNotifyMultiScreenStateChangeEvent(SOFTBUS_MULTI_SCREEN_ON, screenId);
+}
+
+static void HandleMultiScreenOff(const CommonEventData &data)
+{
+    const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
+    int64_t screenId = ParseMultiScreenId(wantParams);
+    int32_t reason = wantParams.GetIntParam("reason", -1);
+    LNN_LOGI(LNN_EVENT, "multi screen off screenId=%{public}" PRId64 ", reason=%{public}d", screenId, reason);
+    LnnNotifyMultiScreenStateChangeEvent(SOFTBUS_MULTI_SCREEN_OFF, screenId);
 }
 #endif
 
@@ -157,6 +190,8 @@ CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscribe
     eventHandlers_[CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN] = HandleDistributedAccountChange;
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     eventHandlers_[CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED] = HandleSubProfileSwitched;
+    eventHandlers_[COMMON_EVENT_MULTI_SCREEN_OFF] = HandleMultiScreenOff;
+    eventHandlers_[COMMON_EVENT_MULTI_SCREEN_ON] = HandleMultiScreenOn;
 #endif
     eventHandlers_[CommonEventSupport::COMMON_EVENT_USER_SWITCHED] = HandleUserSwitched;
 }
@@ -188,6 +223,8 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_OS_ACCOUNT_SUB_PROFILE_SWITCHED);
+    matchingSkills.AddEvent(COMMON_EVENT_MULTI_SCREEN_OFF);
+    matchingSkills.AddEvent(COMMON_EVENT_MULTI_SCREEN_ON);
 #endif
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
