@@ -1924,7 +1924,11 @@ int32_t DiscConstraintEventInit(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init constraint event handler fail");
 
     ret = LnnRegisterEventHandler(LNN_EVENT_MULTI_SCREEN_STATE_CHANGED, MultiScreenStateChangedEvtHandler);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init multi screen state event handler fail");
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_INIT, "init multi screen state event handler fail");
+        LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, ConstraintEventChangeHandler);
+        return ret;
+    }
 
     DISC_LOGI(DISC_INIT, "init disc constraint event succ");
     return SOFTBUS_OK;
