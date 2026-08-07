@@ -23,7 +23,6 @@
 #include "disc_interface.h"
 #include "disc_log.h"
 #include "disc_manager.h"
-#include "disc_screen_manager.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "usb_mock.h"
