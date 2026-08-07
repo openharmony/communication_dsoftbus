@@ -1081,55 +1081,40 @@ static void DiscScreenOffStop(DiscScreenType screenType)
     SoftBusFree(activeNodes);
 }
 
+static void DiscScreenOnRecoverPassive(SoftBusList *infoList, ServiceType type,
+    DiscScreenType screenType, bool anyScreenOn, InterfaceFuncType funcType)
+{
+    int32_t ret = SoftBusMutexLock(&infoList->lock);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
+    DiscItem *itemNode = NULL;
+    DiscInfo *infoNode = NULL;
+    LIST_FOR_EACH_ENTRY(itemNode, &(infoList->list), DiscItem, node) {
+        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+            if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
+                continue;
+            }
+            DiscScreenBusinessType bizType = DiscInfoGetScreenBizType(infoNode, type);
+            if (!DiscShouldRecoverForBizType(bizType, screenType, anyScreenOn)) {
+                continue;
+            }
+            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, funcType);
+            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, funcType);
+            if (ret != SOFTBUS_OK) {
+                DISC_LOGE(DISC_CONTROL, "screen on recover passive fail, type=%{public}d, medium=%{public}d",
+                    type, infoNode->medium);
+            }
+        }
+    }
+    SoftBusMutexUnlock(&infoList->lock);
+}
+
 static void DiscScreenOnRecover(DiscScreenType screenType)
 {
     bool anyScreenOn = DiscIsAnyScreenOn();
-
-    DiscItem *itemNode = NULL;
-    DiscInfo *infoNode = NULL;
-
-    // Recover passive discovery only
-    int32_t ret = SoftBusMutexLock(&g_discoveryInfoList->lock);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
-    LIST_FOR_EACH_ENTRY(itemNode, &(g_discoveryInfoList->list), DiscItem, node) {
-        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
-            if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
-                continue;
-            }
-            DiscScreenBusinessType bizType = DiscInfoGetScreenBizType(infoNode, SUBSCRIBE_SERVICE);
-            if (!DiscShouldRecoverForBizType(bizType, screenType, anyScreenOn)) {
-                continue;
-            }
-            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, STARTDISCOVERTY_FUNC);
-            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, STARTDISCOVERTY_FUNC);
-            if (ret != SOFTBUS_OK) {
-                DISC_LOGE(DISC_CONTROL,
-                    "screen on recover passive discovery fail, medium=%{public}d", infoNode->medium);
-            }
-        }
-    }
-    SoftBusMutexUnlock(&g_discoveryInfoList->lock);
-
-    // Recover passive publish only
-    ret = SoftBusMutexLock(&g_publishInfoList->lock);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_CONTROL, "lock fail");
-    LIST_FOR_EACH_ENTRY(itemNode, &(g_publishInfoList->list), DiscItem, node) {
-        LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
-            if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
-                continue;
-            }
-            DiscScreenBusinessType bizType = DiscInfoGetScreenBizType(infoNode, PUBLISH_SERVICE);
-            if (!DiscShouldRecoverForBizType(bizType, screenType, anyScreenOn)) {
-                continue;
-            }
-            DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, PUBLISH_FUNC);
-            ret = CallInterfaceByMedium(infoNode, itemNode->packageName, PUBLISH_FUNC);
-            if (ret != SOFTBUS_OK) {
-                DISC_LOGE(DISC_CONTROL, "screen on recover passive publish fail, medium=%{public}d", infoNode->medium);
-            }
-        }
-    }
-    SoftBusMutexUnlock(&g_publishInfoList->lock);
+    DiscScreenOnRecoverPassive(g_discoveryInfoList, SUBSCRIBE_SERVICE,
+        screenType, anyScreenOn, STARTDISCOVERTY_FUNC);
+    DiscScreenOnRecoverPassive(g_publishInfoList, PUBLISH_SERVICE,
+        screenType, anyScreenOn, PUBLISH_FUNC);
 }
 
 static bool DiscIsScreenOffForBizType(DiscScreenBusinessType bizType, bool allScreenOff)
