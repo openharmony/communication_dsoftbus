@@ -64,14 +64,12 @@ typedef struct {
     uint64_t nowTimes;
 } RaiseHandDeviceInfo;
 
-#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
 typedef enum {
     DISC_SCREEN_CENTER = 0,
     DISC_SCREEN_PASSENGER = 1,
     DISC_SCREEN_REAR = 2,
     DISC_SCREEN_TYPE_BUTT,
 } DiscScreenType;
-#endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
 
 #ifdef __cplusplus
 }
