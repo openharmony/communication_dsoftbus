@@ -1031,12 +1031,7 @@ static uint32_t DiscScreenOffCollectActive(SoftBusList *infoList, ServiceType ty
 
 static void DiscScreenOffStop(DiscScreenType screenType)
 {
-    // Cache screen state before acquiring infoList locks to avoid AB-BA deadlock
-    // (DiscShouldStopForBizType -> DiscIsAllScreenOff would acquire g_screenLock
-    // while holding infoList->lock, which can deadlock with other paths)
     bool allScreenOff = DiscIsAllScreenOff();
-
-    // Phase 1: Stop passive nodes via CallInterfaceByMedium (keep DiscInfo in list)
     DiscScreenOffStopPassive(g_discoveryInfoList, SUBSCRIBE_SERVICE, screenType, allScreenOff);
     DiscScreenOffStopPassive(g_publishInfoList, PUBLISH_SERVICE, screenType, allScreenOff);
 
@@ -1065,7 +1060,6 @@ static void DiscScreenOffStop(DiscScreenType screenType)
     if (idx > activeCount) {
         idx = activeCount;
     }
-
     for (uint32_t i = 0; i < idx; i++) {
         if (activeNodes[i].type == SUBSCRIBE_SERVICE) {
             DISC_LOGI(DISC_CONTROL, "screen off stop active discovery, pkg=%{public}s, id=%{public}d",
@@ -1088,9 +1082,6 @@ static void DiscScreenOffStop(DiscScreenType screenType)
 
 static void DiscScreenOnRecover(DiscScreenType screenType)
 {
-    // Cache screen state before acquiring infoList locks to avoid AB-BA deadlock
-    // (DiscShouldRecoverForBizType -> DiscIsAnyScreenOn would acquire g_screenLock
-    // while holding infoList->lock, which can deadlock with other paths)
     bool anyScreenOn = DiscIsAnyScreenOn();
 
     DiscItem *itemNode = NULL;
