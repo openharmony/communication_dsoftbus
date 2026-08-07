@@ -1907,11 +1907,13 @@ static void ConstraintEventChangeHandler(const LnnEventBasicInfo *info)
     DiscProcessConstraintChanged(nowIsConstraint);
 }
 
+#else
 void DiscOnScreenStatusChanged(DiscScreenType screenType, bool onScreen)
 {
     (void)screenType;
     (void)onScreen;
 }
+#endif
 
 static void MultiScreenStateChangedEvtHandler(const LnnEventBasicInfo *info)
 {
