@@ -996,7 +996,7 @@ static void DiscScreenFillCollectorNode(const DiscScreenActiveCollector *collect
         return;
     }
     if (strncpy_s(collector->nodes[index].packageName, PKG_NAME_SIZE_MAX,
-            itemNode->packageName, strlen(itemNode->packageName)) != EOK) {
+        itemNode->packageName, strlen(itemNode->packageName)) != EOK) {
         return;
     }
     collector->nodes[index].id = infoNode->id;
