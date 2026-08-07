@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 int32_t DiscMgrGetMaxCallTimes(int32_t bitmap);
-DiscScreenBusinessType DiscMgrGetScreenBizType(int32_t bitmap);
+DiscScreenBusinessType DiscMgrGetScreenBusinessType(int32_t bitmap);
 
 #ifdef __cplusplus
 }

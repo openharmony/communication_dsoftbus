@@ -922,39 +922,39 @@ static bool DiscIsAnyScreenOn(void)
     return anyOn;
 }
 
-static bool DiscShouldStopForBizType(DiscScreenBusinessType bizType, DiscScreenType screenType,
+static bool DiscShouldStopForBusinessType(DiscScreenBusinessType businessType, DiscScreenType screenType,
     bool allScreenOff)
 {
-    if (bizType == DISC_SCREEN_BUSINESS_A) {
+    if (businessType == DISC_SCREEN_BUSINESS_A) {
         return screenType == DISC_SCREEN_CENTER;
     }
-    if (bizType == DISC_SCREEN_BUSINESS_B) {
+    if (businessType == DISC_SCREEN_BUSINESS_B) {
         return allScreenOff;
     }
     return false;
 }
 
-static bool DiscShouldRecoverForBizType(DiscScreenBusinessType bizType, DiscScreenType screenType,
+static bool DiscShouldRecoverForBusinessType(DiscScreenBusinessType businessType, DiscScreenType screenType,
     bool anyScreenOn)
 {
-    if (bizType == DISC_SCREEN_BUSINESS_A) {
+    if (businessType == DISC_SCREEN_BUSINESS_A) {
         return screenType == DISC_SCREEN_CENTER;
     }
-    if (bizType == DISC_SCREEN_BUSINESS_B) {
+    if (businessType == DISC_SCREEN_BUSINESS_B) {
         return anyScreenOn;
     }
     return false;
 }
 
-static DiscScreenBusinessType DiscInfoGetScreenBizType(const DiscInfo *info, ServiceType type)
+static DiscScreenBusinessType DiscInfoGetScreenBusinessType(const DiscInfo *info, ServiceType type)
 {
     uint32_t bitmap = (type == PUBLISH_SERVICE || type == PUBLISH_INNER_SERVICE) ?
         info->option.publishOption.capabilityBitmap[0] : info->option.subscribeOption.capabilityBitmap[0];
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (IsBitmapSet((const uint32_t *)&bitmap, pos)) {
-            DiscScreenBusinessType bizType = DiscMgrGetScreenBizType((int32_t)pos);
-            if (bizType != DISC_SCREEN_BUSINESS_NONE) {
-                return bizType;
+            DiscScreenBusinessType businessType = DiscMgrGetScreenBusinessType((int32_t)pos);
+            if (businessType != DISC_SCREEN_BUSINESS_NONE) {
+                return businessType;
             }
         }
     }
@@ -974,8 +974,8 @@ static void DiscScreenOffStopPassive(SoftBusList *infoList, ServiceType type, Di
             if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
                 continue;
             }
-            DiscScreenBusinessType bizType = DiscInfoGetScreenBizType(infoNode, type);
-            if (!DiscShouldStopForBizType(bizType, screenType, allScreenOff)) {
+            DiscScreenBusinessType businessType = DiscInfoGetScreenBusinessType(infoNode, type);
+            if (!DiscShouldStopForBusinessType(businessType, screenType, allScreenOff)) {
                 continue;
             }
             DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, funcType);
@@ -1017,8 +1017,8 @@ static uint32_t DiscScreenOffCollectActive(SoftBusList *infoList, ServiceType ty
             if (infoNode->mode != DISCOVER_MODE_ACTIVE) {
                 continue;
             }
-            DiscScreenBusinessType bizType = DiscInfoGetScreenBizType(infoNode, type);
-            if (!DiscShouldStopForBizType(bizType, screenType, allScreenOff)) {
+            DiscScreenBusinessType businessType = DiscInfoGetScreenBusinessType(infoNode, type);
+            if (!DiscShouldStopForBusinessType(businessType, screenType, allScreenOff)) {
                 continue;
             }
             DiscScreenFillCollectorNode(collector, count, itemNode, infoNode, type);
@@ -1093,8 +1093,8 @@ static void DiscScreenOnRecoverPassive(SoftBusList *infoList, ServiceType type,
             if (infoNode->mode != DISCOVER_MODE_PASSIVE) {
                 continue;
             }
-            DiscScreenBusinessType bizType = DiscInfoGetScreenBizType(infoNode, type);
-            if (!DiscShouldRecoverForBizType(bizType, screenType, anyScreenOn)) {
+            DiscScreenBusinessType businessType = DiscInfoGetScreenBusinessType(infoNode, type);
+            if (!DiscShouldRecoverForBusinessType(businessType, screenType, anyScreenOn)) {
                 continue;
             }
             DFX_RECORD_DISC_CALL_START(infoNode, itemNode->packageName, funcType);
@@ -1117,9 +1117,9 @@ static void DiscScreenOnRecover(DiscScreenType screenType)
         screenType, anyScreenOn, PUBLISH_FUNC);
 }
 
-static bool DiscIsScreenOffForBizType(DiscScreenBusinessType bizType, bool allScreenOff)
+static bool DiscIsScreenOffForBusinessType(DiscScreenBusinessType businessType, bool allScreenOff)
 {
-    if (bizType == DISC_SCREEN_BUSINESS_A) {
+    if (businessType == DISC_SCREEN_BUSINESS_A) {
         if (SoftBusMutexLock(&g_screenLock) != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "lock screen fail");
             return false;
@@ -1128,7 +1128,7 @@ static bool DiscIsScreenOffForBizType(DiscScreenBusinessType bizType, bool allSc
         (void)SoftBusMutexUnlock(&g_screenLock);
         return off;
     }
-    if (bizType == DISC_SCREEN_BUSINESS_B) {
+    if (businessType == DISC_SCREEN_BUSINESS_B) {
         return allScreenOff;
     }
     return false;
@@ -1138,16 +1138,16 @@ static bool DiscPublishScreenOffCheck(DiscInfo *info, ServiceType type, int32_t 
     bool allScreenOff)
 {
     uint32_t bitmap = info->option.publishOption.capabilityBitmap[0];
-    DiscScreenBusinessType bizType = DISC_SCREEN_BUSINESS_NONE;
+    DiscScreenBusinessType businessType = DISC_SCREEN_BUSINESS_NONE;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (IsBitmapSet((const uint32_t *)&bitmap, pos)) {
-            bizType = DiscMgrGetScreenBizType((int32_t)pos);
-            if (bizType != DISC_SCREEN_BUSINESS_NONE) {
+            businessType = DiscMgrGetScreenBusinessType((int32_t)pos);
+            if (businessType != DISC_SCREEN_BUSINESS_NONE) {
                 break;
             }
         }
     }
-    if (!DiscIsScreenOffForBizType(bizType, allScreenOff)) {
+    if (!DiscIsScreenOffForBusinessType(businessType, allScreenOff)) {
         return false;
     }
     if (info->mode == DISCOVER_MODE_ACTIVE) {
@@ -1172,16 +1172,16 @@ static bool DiscSubscribeScreenOffCheck(DiscInfo *info, ServiceType type, int32_
     bool allScreenOff)
 {
     uint32_t bitmap = info->option.subscribeOption.capabilityBitmap[0];
-    DiscScreenBusinessType bizType = DISC_SCREEN_BUSINESS_NONE;
+    DiscScreenBusinessType businessType = DISC_SCREEN_BUSINESS_NONE;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (IsBitmapSet((const uint32_t *)&bitmap, pos)) {
-            bizType = DiscMgrGetScreenBizType((int32_t)pos);
-            if (bizType != DISC_SCREEN_BUSINESS_NONE) {
+            businessType = DiscMgrGetScreenBusinessType((int32_t)pos);
+            if (businessType != DISC_SCREEN_BUSINESS_NONE) {
                 break;
             }
         }
     }
-    if (!DiscIsScreenOffForBizType(bizType, allScreenOff)) {
+    if (!DiscIsScreenOffForBusinessType(businessType, allScreenOff)) {
         return false;
     }
     if (info->mode == DISCOVER_MODE_ACTIVE) {
@@ -1226,6 +1226,14 @@ void DiscOnScreenStatusChanged(DiscScreenType screenType, bool onScreen)
 }
 
 #endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
+
+#ifndef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+void DiscOnScreenStatusChanged(DiscScreenType screenType, bool onScreen)
+{
+    (void)screenType;
+    (void)onScreen;
+}
+#endif
 
 static int32_t InnerPublishService(const char *packageName, DiscInfo *info, const ServiceType type)
 {
@@ -1893,14 +1901,6 @@ static void ConstraintEventChangeHandler(const LnnEventBasicInfo *info)
     oldIsConstraint = nowIsConstraint;
     DiscProcessConstraintChanged(nowIsConstraint);
 }
-
-#else
-void DiscOnScreenStatusChanged(DiscScreenType screenType, bool onScreen)
-{
-    (void)screenType;
-    (void)onScreen;
-}
-#endif
 
 static void MultiScreenStateChangedEvtHandler(const LnnEventBasicInfo *info)
 {
