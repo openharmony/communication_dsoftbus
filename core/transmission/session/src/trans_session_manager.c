@@ -236,7 +236,7 @@ int32_t CheckAndUpdateTimeBySessionName(const char *sessionName, uint64_t timest
     SessionServer *pos = NULL;
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
-            if (pos->timestamp < timestamp) {
+            if (pos->timestamp <= timestamp) {
                 pos->timestamp = timestamp;
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 return SOFTBUS_OK;
