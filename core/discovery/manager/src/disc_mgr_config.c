@@ -21,7 +21,7 @@
 
 typedef struct {
     int32_t maxCallTimes;
-    DiscScreenBizType screenBizType;
+    DiscScreenBusinessType screenBizType;
 } DiscMgrConfig;
 
 static const DiscMgrConfig g_discMgrConfig[CAPABILITY_MAX_BITNUM] = {
@@ -33,7 +33,7 @@ static const DiscMgrConfig g_discMgrConfig[CAPABILITY_MAX_BITNUM] = {
     },
     [CASTPLUS_CAPABILITY_BITMAP] = {
         .maxCallTimes = DEFAULT_CALL_TIMES,
-        .screenBizType = DISC_SCREEN_BIZ_B,
+        .screenBizType = DISC_SCREEN_BUSINESS_B,
     },
     [AA_CAPABILITY_BITMAP] = {
         .maxCallTimes = NO_LIMITED_TIMES,
@@ -46,33 +46,33 @@ static const DiscMgrConfig g_discMgrConfig[CAPABILITY_MAX_BITNUM] = {
     },
     [OSD_CAPABILITY_BITMAP] = {
         .maxCallTimes = DEFAULT_CALL_TIMES,
-        .screenBizType = DISC_SCREEN_BIZ_A,
+        .screenBizType = DISC_SCREEN_BUSINESS_A,
     },
     [SHARE_CAPABILITY_BITMAP] = {
         .maxCallTimes = DEFAULT_CALL_TIMES,
-        .screenBizType = DISC_SCREEN_BIZ_A,
+        .screenBizType = DISC_SCREEN_BUSINESS_A,
     },
     [APPROACH_CAPABILITY_BITMAP] = {
         .maxCallTimes = NO_LIMITED_TIMES,
-        .screenBizType = DISC_SCREEN_BIZ_A,
+        .screenBizType = DISC_SCREEN_BUSINESS_A,
     },
     [VLINK_CAPABILITY_BITMAP] = {
         .maxCallTimes = NO_LIMITED_TIMES,
     },
     [TOUCH_CAPABILITY_BITMAP] = {
         .maxCallTimes = DEFAULT_CALL_TIMES,
-        .screenBizType = DISC_SCREEN_BIZ_B,
+        .screenBizType = DISC_SCREEN_BUSINESS_B,
     },
     [OOP_CAPABILITY_BITMAP] = {
         .maxCallTimes = DEFAULT_CALL_TIMES,
     },
     [OH_APPROACH_CAPABILITY_BITMAP] = {
         .maxCallTimes = NO_LIMITED_TIMES,
-        .screenBizType = DISC_SCREEN_BIZ_A,
+        .screenBizType = DISC_SCREEN_BUSINESS_A,
     },
     [SD_CAPABILITY_BITMAP] = {
         .maxCallTimes = NO_LIMITED_TIMES,
-        .screenBizType = DISC_SCREEN_BIZ_B,
+        .screenBizType = DISC_SCREEN_BUSINESS_B,
     },
     [RAISE_HAND_CAPABILITY_BITMAP] = {
         .maxCallTimes = NO_LIMITED_TIMES,
@@ -96,10 +96,10 @@ int32_t DiscMgrGetMaxCallTimes(int32_t bitmap)
     return g_discMgrConfig[bitmap].maxCallTimes;
 }
 
-DiscScreenBizType DiscMgrGetScreenBizType(int32_t bitmap)
+DiscScreenBusinessType DiscMgrGetScreenBizType(int32_t bitmap)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(bitmap >= 0 &&
-        bitmap < (int32_t)ARRAY_SIZE(g_discMgrConfig), DISC_SCREEN_BIZ_NONE, DISC_CONTROL,
+        bitmap < (int32_t)ARRAY_SIZE(g_discMgrConfig), DISC_SCREEN_BUSINESS_NONE, DISC_CONTROL,
         "invalid bitmap: %{public}d", bitmap);
     return g_discMgrConfig[bitmap].screenBizType;
 }
