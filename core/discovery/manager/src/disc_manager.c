@@ -17,7 +17,6 @@
 
 #include "anonymizer.h"
 #include "disc_manager.h"
-#include "bus_center_client_proxy.h"
 #include "bus_center_event.h"
 #include "common_list.h"
 #include "disc_ble_dispatcher.h"
@@ -107,6 +106,8 @@ typedef struct {
 } IdContainer;
 
 #ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+#include "bus_center_client_proxy.h"
+
 typedef struct {
     char packageName[PKG_NAME_SIZE_MAX];
     int32_t id;
