@@ -1169,6 +1169,11 @@ static bool DiscPublishScreenOffCheck(DiscInfo *info, ServiceType type, int32_t 
         ModifyCapabilityCallTimes(info->item, info, type, false);
         ListDelete(&(info->node));
         info->item->infoNum--;
+        if (info->item->infoNum == 0) {
+            g_publishInfoList->cnt--;
+            ListDelete(&(info->item->node));
+            SoftBusFree(info->item);
+        }
         *retCode = SOFTBUS_DISCOVER_MANAGER_SCREEN_OFF_REJECTED;
     } else {
         DISC_LOGI(DISC_CONTROL, "screen off, passive publish added to list without starting BLE");
@@ -1199,6 +1204,11 @@ static bool DiscSubscribeScreenOffCheck(DiscInfo *info, ServiceType type, int32_
         RemoveDiscInfoFromCapabilityList(info, type);
         ListDelete(&(info->node));
         info->item->infoNum--;
+        if (info->item->infoNum == 0) {
+            g_discoveryInfoList->cnt--;
+            ListDelete(&(info->item->node));
+            SoftBusFree(info->item);
+        }
         *retCode = SOFTBUS_DISCOVER_MANAGER_SCREEN_OFF_REJECTED;
     } else {
         DISC_LOGI(DISC_CONTROL, "screen off, passive discovery added to list without starting BLE");
