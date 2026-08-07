@@ -1036,10 +1036,11 @@ static void DiscScreenOffStop(DiscScreenType screenType)
     DiscScreenOffStopPassive(g_publishInfoList, PUBLISH_SERVICE, screenType, allScreenOff);
 
     // Phase 2: Collect active node info, then fully clean up outside lock
-    uint32_t activeCount = DiscScreenOffCollectActive(g_discoveryInfoList, SUBSCRIBE_SERVICE,
+    uint32_t discoveryCount = DiscScreenOffCollectActive(g_discoveryInfoList, SUBSCRIBE_SERVICE,
         screenType, allScreenOff, NULL);
-    activeCount += DiscScreenOffCollectActive(g_publishInfoList, PUBLISH_SERVICE,
+    uint32_t publishCount = DiscScreenOffCollectActive(g_publishInfoList, PUBLISH_SERVICE,
         screenType, allScreenOff, NULL);
+    uint32_t activeCount = discoveryCount + publishCount;
     if (activeCount == 0) {
         return;
     }
@@ -1049,17 +1050,17 @@ static void DiscScreenOffStop(DiscScreenType screenType)
     DiscScreenActiveCollector filler = { activeNodes, activeCount };
     uint32_t idx = DiscScreenOffCollectActive(g_discoveryInfoList, SUBSCRIBE_SERVICE,
         screenType, allScreenOff, &filler);
-    if (idx > activeCount) {
-        idx = activeCount;
+    if (idx > discoveryCount) {
+        idx = discoveryCount;
     }
     filler.nodes = activeNodes + idx;
     filler.maxCount = activeCount - idx;
     uint32_t idx2 = DiscScreenOffCollectActive(g_publishInfoList, PUBLISH_SERVICE,
         screenType, allScreenOff, &filler);
-    idx += idx2;
-    if (idx > activeCount) {
-        idx = activeCount;
+    if (idx2 > publishCount) {
+        idx2 = publishCount;
     }
+    idx += idx2;
     for (uint32_t i = 0; i < idx; i++) {
         if (activeNodes[i].type == SUBSCRIBE_SERVICE) {
             DISC_LOGI(DISC_CONTROL, "screen off stop active discovery, pkg=%{public}s, id=%{public}d",
