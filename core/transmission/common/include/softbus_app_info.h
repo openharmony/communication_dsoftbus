@@ -168,6 +168,7 @@ typedef struct {
     uint32_t channelCapability;
     uint32_t udpChannelCapability;
     int32_t metaType;
+    bool isSupportConcurrentMetaNode;
     int32_t linkedChannelId;
     const uint8_t *fastTransData;
     int64_t timeStart;

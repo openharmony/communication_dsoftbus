@@ -853,9 +853,7 @@ HWTEST_F(TransLaneTest, TransWaitingRequestCallbackTest001, TestSize.Level1)
     TransReqLanePendingDeinit();
     uint32_t laneHandle = 1;
     int32_t ret = TransWaitingRequestCallback(laneHandle);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-    EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_NE(ret, SOFTBUS_NO_INIT);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     (void)TransReqLanePendingInit();
     TransReqLanePendingDeinit();
 }
@@ -1309,7 +1307,7 @@ HWTEST_F(TransLaneTest, CheckSessionNameValidOnAuthChannelTest002, TestSize.Leve
     EXPECT_NE(ret, false);
     const char *newSessionName = "IShareAuthSession";
     ret = CheckSessionNameValidOnAuthChannel(newSessionName);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /*

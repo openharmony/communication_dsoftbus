@@ -2230,6 +2230,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillChannelInfoTest001, TestS
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->appInfo.callingTokenId = TOKENID_NOT_SET;
     msg->data = TransProxyPackHandshakeMsg(chan);
+    ASSERT_TRUE(msg->data != nullptr);
     msg->dataLen = strlen(msg->data) + 1;
 
     int32_t ret = TransProxyFillChannelInfo(msg, nullptr);

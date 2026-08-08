@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -192,6 +192,11 @@ int32_t AuthCheckSessionKeyValidByConnInfo(const char *networkId, const AuthConn
     if (networkId == NULL || connInfo == NULL) {
         AUTH_LOGE(AUTH_CONN, "param is null");
         return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(networkId, &osType) == SOFTBUS_OK && osType == OTHER_OS_TYPE) {
+        AUTH_LOGI(AUTH_CONN, "not need check session key valid by connInfo");
+        return SOFTBUS_OK;
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));

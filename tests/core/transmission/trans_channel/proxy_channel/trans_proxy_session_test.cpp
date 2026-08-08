@@ -284,7 +284,8 @@ HWTEST_F(TransProxySessionTest, TransProxySendInnerMessageTest001, TestSize.Leve
     EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
 
-    int32_t ret = TransProxySendInnerMessage(&info, "testPayLoad", payLoadLen, priority);
+    char testPayLoad[] = "testPayLoad";
+    int32_t ret = TransProxySendInnerMessage(&info, testPayLoad, payLoadLen, priority);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -477,10 +478,10 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest001, TestSize.Level1)
     proxyChannelInfo.appInfo.appType = APP_TYPE_AUTH;
 
     SoftbusTransProxyNetworkMock networkObj;
-    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(nullptr));
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(static_cast<char *>(nullptr)));
 
     int32_t ret = TransProxyHandshake(&proxyChannelInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR);
 }
 
 /**
@@ -499,7 +500,8 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest002, TestSize.Level1)
     (void)strcpy_s(payLoad, 32, "testpayload");
 
     SoftbusTransProxyNetworkMock networkObj;
-    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoad));
+    char *payLoadPtr = payLoad;
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoadPtr));
     EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR));
 
     int32_t ret = TransProxyHandshake(&proxyChannelInfo);
@@ -523,7 +525,8 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest003, TestSize.Level1)
     TransPagingHandshakeEvent(TEST_NUMBER_256, nullptr);
 
     SoftbusTransProxyNetworkMock networkObj;
-    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoad));
+    char *payLoadPtr = payLoad;
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoadPtr));
     EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT));
 
@@ -550,7 +553,8 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest004, TestSize.Level1)
     (void)strcpy_s(payLoad, 32, "testpayload");
 
     SoftbusTransProxyNetworkMock networkObj;
-    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoad));
+    char *payLoadPtr = payLoad;
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoadPtr));
     EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
 

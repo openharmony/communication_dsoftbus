@@ -249,6 +249,11 @@ void LnnUpdateAclState(const char *udid, AclWriteState aclState)
 {
     return GetNetLedgerInterface()->LnnUpdateAclState(udid, aclState);
 }
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetNetLedgerInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)

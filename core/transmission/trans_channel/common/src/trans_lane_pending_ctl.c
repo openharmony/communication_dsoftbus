@@ -21,6 +21,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
@@ -34,6 +35,7 @@
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
 #include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_utils.h"
 #include "trans_channel_common.h"
@@ -653,17 +655,26 @@ static int32_t TransUpdateLaneConnInfoByLaneHandle(uint32_t laneHandle, bool bSu
 static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNetworkId, AppInfo *appInfo)
 {
     int32_t ret = SOFTBUS_TRANS_GET_APP_INFO_FAILED;
-    int32_t osType = 0;
-    GetOsTypeByNetworkId(peerNetworkId, &osType);
-    appInfo->osType = osType;
+    GetOsTypeByNetworkId(peerNetworkId, &appInfo->osType);
+    LnnGetRemoteNumInfo(peerNetworkId, NUM_KEY_META_TYPE, &appInfo->metaType);
+    appInfo->isSupportConcurrentMetaNode = AuthMetaIsSupportConcurrentByMetaNodeIdPacked(peerNetworkId);
     appInfo->appType = APP_TYPE_INNER;
     appInfo->myData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;
     appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
-    ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get local uuid fail. ret=%{public}d", ret);
-        return ret;
+    if (appInfo->osType == OTHER_OS_TYPE) {
+        int32_t ret = AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(peerNetworkId, appInfo->myData.deviceId,
+            sizeof(appInfo->myData.deviceId));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local metaNodeId failed ret=%{public}d", ret);
+            return ret;
+        }
+    } else {
+        ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local uuid fail. ret=%{public}d", ret);
+            return ret;
+        }
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
         TRANS_LOGE(TRANS_SVC, "strcpy_s my sessionName failed");
@@ -826,6 +837,7 @@ static int32_t CreateAppInfoByParam(uint32_t laneHandle, const SessionParam *par
 {
     GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
     (void)LnnGetRemoteNumInfo(param->peerDeviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
+    appInfo->isSupportConcurrentMetaNode = AuthMetaIsSupportConcurrentByMetaNodeIdPacked(param->peerDeviceId);
     int32_t ret = TransCommonGetAppInfo(param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "GetAppInfo is null. ret=%{public}d", ret);
@@ -1990,6 +2002,10 @@ static int32_t SetUsbConnInfo(const UsbConnInfo *connInfo, ConnectOption *connOp
 
 static int32_t SetP2pExtConnInfo(const P2pConnInfo *p2pInfo, ConnectOption *connOpt)
 {
+    if (p2pInfo == NULL || connOpt == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_LOGI(TRANS_SVC, "set p2pExt conn info.");
     connOpt->type = CONNECT_P2P;
     if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), p2pInfo->peerIp) != EOK) {

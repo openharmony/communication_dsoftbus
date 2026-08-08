@@ -19,6 +19,7 @@
 
 #include "access_control.h"
 #include "bus_center_manager.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
@@ -312,6 +313,22 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
     if (errCode != SOFTBUS_OK) {
         return errCode;
     }
+    GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
+    LnnGetRemoteNumInfo(param->peerDeviceId, NUM_KEY_META_TYPE, &appInfo->metaType);
+    if (appInfo->osType == OTHER_OS_TYPE && appInfo->metaType == META_HA) {
+        int32_t ret = AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(param->peerDeviceId, appInfo->myData.deviceId,
+            sizeof(appInfo->myData.deviceId));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local meta node failed ret=%{public}d", ret);
+            return ret;
+        }
+    } else {
+        int32_t ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed ret=%{public}d", ret);
+            return ret;
+        }
+    }
     errCode = strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName);
     TRANS_CHECK_AND_RETURN_RET_LOGE(errCode == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "copy peerData sessionName failed");
     errCode = TransGetPeerDeviceId(appInfo, param);
@@ -354,12 +371,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     } else if (param->attr->dataType == TYPE_BYTES) {
         appInfo->businessType = BUSINESS_TYPE_BYTE;
     }
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed ret=%{public}d", ret);
-        return ret;
-    }
-    ret = CopyAppInfoFromSessionParam(appInfo, param);
+    int32_t ret = CopyAppInfoFromSessionParam(appInfo, param);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "CopyAppInfoFromSessionParam failed ret=%{public}d", ret);
         return ret;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,15 @@ typedef struct {
 } ProxyMessageHead;
 
 typedef struct {
+    uint8_t type;
+    uint8_t cipher;
+    int16_t myId;
+    int16_t peerId;
+    int16_t reserved;
+    int64_t authId;
+} ProxyExternalMessageHead;
+
+typedef struct {
     uint8_t type; // MsgType
     int16_t myId;
     int16_t peerId;
@@ -123,6 +132,7 @@ typedef struct {
 
 #define VERSION 1
 #define PROXY_CHANNEL_HEAD_LEN 8
+#define PROXY_CHANNEL_EXTERNAL_HEAD_LEN 16
 #define PROXY_CHANNEL_D2D_HEAD_LEN 6
 #define PROXY_CHANNEL_MESSAGE_HEAD_LEN 7
 #define PROXY_CHANNEL_BYTES_HEAD_LEN 6

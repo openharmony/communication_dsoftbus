@@ -16,6 +16,7 @@
 #ifndef SOFTBUS_PROXYCHANNEL_MESSAGE_H
 #define SOFTBUS_PROXYCHANNEL_MESSAGE_H
 
+#include "auth_interface_struct.h"
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_proxychannel_message_struct.h"
@@ -31,15 +32,22 @@ int32_t TransProxyUnPackRestErrMsg(const char *msg, int32_t *errCode, int32_t le
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len);
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char *TransProxyPackHandshakeErrMsg(int32_t errCode);
-int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth);
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
+int32_t TransProxyParseMessage(
+    char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth, bool isSupportConcurrentMetaNode);
+int32_t TransProxyPackMessage(
+    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
+int32_t PackEncryptedExternalMessage(
+    const ProxyExternalMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char *TransProxyPackIdentity(const char *identity);
 int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len);
 int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo);
+int32_t PackPlaintextExternalMessage(const ProxyExternalMessageHead *msg, ProxyDataInfo *dataInfo);
+
 int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len);
-int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash);
+int32_t TransPagingPackMessage(
+    PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash);
 int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg);
 char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan);
 void TransPagingProcessHandshakeMsg(
@@ -50,6 +58,16 @@ char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId);
 char *TransProxyPagingPackChannelId(int16_t channelId);
 
 int32_t TransProxyParseD2DData(const char *data, int32_t len);
+
+void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, uint32_t size);
+void PackProxyExternalMessageHead(const ProxyExternalMessageHead *msgHead, uint8_t *buf, uint32_t size);
+int32_t UnpackProxyExternalMessageHead(const char *data, int32_t len, ProxyMessage *msg);
+int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo);
+
+char *TransProxyPackExternalDeviceHandshakeMsg(ProxyChannelInfo *info);
+int32_t TransProxyUnpackExternalDeviceHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
+char *TransProxyPackExternalDeviceHandshakeAckMsg(ProxyChannelInfo *chan);
+int32_t TransProxyUnpackExternalDeviceHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len);
 
 #ifdef __cplusplus
 }

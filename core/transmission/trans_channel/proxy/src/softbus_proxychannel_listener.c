@@ -118,13 +118,20 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
             appInfo->myData.sessionName, &info);
     }
     if (appInfo->appType != APP_TYPE_AUTH) {
-        ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
-        if (ret != SOFTBUS_OK) {
-            char *anonyUuid = NULL;
-            Anonymize(appInfo->peerData.deviceId, &anonyUuid);
-            TRANS_LOGE(TRANS_CTRL, "get info networkId fail, uuid=%{public}s", AnonymizeWrapper(anonyUuid));
-            AnonymizeFree(anonyUuid);
-            return ret;
+        if (appInfo->osType == OTHER_OS_TYPE && appInfo->metaType == META_HA) {
+            if (strcpy_s(buf, NETWORK_ID_BUF_LEN, appInfo->peerData.deviceId) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "copy peerDeviceId failed");
+                return SOFTBUS_STRCPY_ERR;
+            }
+        } else {
+            ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
+            if (ret != SOFTBUS_OK) {
+                char *anonyUuid = NULL;
+                Anonymize(appInfo->peerData.deviceId, &anonyUuid);
+                TRANS_LOGE(TRANS_CTRL, "get info networkId fail, uuid=%{public}s", AnonymizeWrapper(anonyUuid));
+                AnonymizeFree(anonyUuid);
+                return ret;
+            }
         }
         info.peerDeviceId = buf;
         info.tokenType = appInfo->myData.tokenType;

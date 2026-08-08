@@ -79,6 +79,7 @@ public:
     virtual int32_t LnnInitLocalLedger(void) = 0;
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
     virtual void LnnUpdateAclState(const char *udid, AclWriteState aclState) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
@@ -127,6 +128,7 @@ public:
     MOCK_METHOD0(LnnInitLocalLedger, int32_t (void));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey key, const uint8_t *info, uint32_t len));
     MOCK_METHOD2(LnnUpdateAclState, void(const char *, AclWriteState));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t(const char *, int32_t *));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

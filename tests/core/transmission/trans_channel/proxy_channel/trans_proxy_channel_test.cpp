@@ -226,11 +226,11 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
     info.channelId = m_testProxyChannelId;
 
     ret = TransProxyHandshake(&info);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR);
 
     info.authHandle.authId = AUTH_INVALID_ID;
     ret = TransProxyHandshake(&info);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR);
 
     TestDelTestProxyChannel();
 }
@@ -641,7 +641,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest001, TestSize.Level1)
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
 
     ProxyMessage msg;
-    int32_t ret = TransProxyParseMessage(data, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(data, len, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(data);
@@ -662,7 +662,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest002, TestSize.Level1)
 
     ProxyMessage msg;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
-    int32_t ret = TransProxyParseMessage(data, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(data, len, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(data);
@@ -681,7 +681,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest003, TestSize.Level1)
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
 
     ProxyMessage msg;
-    int32_t ret = TransProxyParseMessage(data, PROXY_CHANNEL_HEAD_LEN - 1, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(data, PROXY_CHANNEL_HEAD_LEN - 1, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(data);
@@ -778,4 +778,5 @@ HWTEST_F(TransProxyChannelTest, ConvertConnectType2AuthLinkTypeTest001, TestSize
     ret = ConvertConnectType2AuthLinkType(type);
     EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
 }
+
 } // namespace OHOS

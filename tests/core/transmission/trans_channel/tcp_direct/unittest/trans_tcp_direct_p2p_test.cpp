@@ -451,7 +451,6 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
     if (appInfo == nullptr) {
         return ;
     }
-    int32_t ret;
     int32_t reason = 1;
     uint32_t requestId = 1;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
@@ -459,9 +458,13 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
     ConnectType type = CONNECT_TCP;
 
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
+
     OnAuthConnOpenFailed(requestId, reason);
     OnAuthConnOpened(requestId, authHandle);
-    ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, isMeta, type);
+    int32_t ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, isMeta, type);
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 
     SoftBusFree(appInfo);
@@ -524,6 +527,10 @@ HWTEST_F(TransTcpDirectP2pTest, OpenNewAuthConn004, TestSize.Level1)
     ret = OpenNewAuthConn(appInfo, nullptr, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
+
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
     ret = OpenNewAuthConn(appInfo, conn, type);
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
@@ -553,6 +560,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
         appInfo = nullptr;
         return ;
     }
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
+
     int32_t ret;
     ConnectType type = CONNECT_P2P;
 
@@ -685,6 +696,10 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfoTest001, TestSize.Level1)
         appInfo = nullptr;
     }
     EXPECT_NE(conn, nullptr);
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
+
     ConnectType type = CONNECT_P2P;
 
     int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);

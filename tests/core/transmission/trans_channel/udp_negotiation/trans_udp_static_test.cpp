@@ -58,9 +58,16 @@ static int32_t TransServerOnChannelClosed(
     return SOFTBUS_OK;
 }
 
+static int32_t TransServerOnChannelOpenFailed(
+    const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t errCode)
+{
+    return SOFTBUS_OK;
+}
+
 IServerChannelCallBack *TestTransServerGetChannelCb(void)
 {
     g_testchannelCallBack.OnChannelClosed = TransServerOnChannelClosed;
+    g_testchannelCallBack.OnChannelOpenFailed = TransServerOnChannelOpenFailed;
     return &g_testchannelCallBack;
 }
 
@@ -168,7 +175,7 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest004, TestSize.Level1)
 
 /*
  * @tc.name: TransUdpStaticTest005
- * @tc.desc: CheckAuthConnStatus test
+ * @tc.desc: OpenAuthConnAndCheckChannel test
  *           Verify the correctness and stability of the UDP channel management module in scenarios
  *           such as abnormal state detection, channel lifecycle management, and resource reclamation
  * @tc.type: FUNC
@@ -176,22 +183,27 @@ HWTEST_F(TransUdpStaticTest, TransUdpStaticTest004, TestSize.Level1)
  */
 HWTEST_F(TransUdpStaticTest, TransUdpStaticTest005, TestSize.Level1)
 {
-    TransUdpChannelMgrInit();
+    IServerChannelCallBack *cb = TestTransServerGetChannelCb();
+    int32_t ret = TransUdpChannelInit(cb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     uint32_t requestId = 0;
-    int32_t ret = CheckAuthConnStatus(requestId);
-    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
+    AuthConnInfo auth;
+    (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    const char *peerUdid = "test_peer_udid";
+    ret = OpenAuthConnAndCheckChannel(&auth, peerUdid, requestId, 0, false);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
-    UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
     ASSERT_NE(nullptr, channel);
     channel->seq = TEST_SEQ;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = CheckAuthConnStatus(requestId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = OpenAuthConnAndCheckChannel(&auth, peerUdid, requestId, 0, false);
+    EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransDelUdpChannel(channel->info.myData.channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransUdpChannelMgrDeinit();
+    TransUdpChannelDeinit();
 }
 
 /*

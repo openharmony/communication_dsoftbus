@@ -68,7 +68,7 @@ void TransTcpDirectMessageStaticTest::SetUpTestCase(void)
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
-    const IServerChannelCallBack *cb = TransServerGetChannelCb();
+    IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTdcSetCallBack(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -269,7 +269,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReply0007, TestSize.
     AppInfo *appInfo = TestSetAppInfo();
 
     ret = OpenDataBusRequestReply(appInfo, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
@@ -425,10 +425,15 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
  */
 HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkTypeTest001, TestSize.Level1)
 {
-    TdcPacketHead data;
+    TdcPacketHead data = {
+        .magicNumber = MAGIC_NUMBER,
+        .module = MODULE_SESSION,
+        .seq = 1,
+        .flags = 0,
+        .dataLen = TEST_TDC_FASTDATA_SIZE,
+    };
     PackTdcPacketHead(&data);
     UnpackTdcPacketHead(&data);
-    UnpackTdcPacketHead(nullptr);
     uint32_t cipherFlag = FLAG_BR;
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_BR);
@@ -572,7 +577,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostReplyMsgTest001, TestSize.
     uint32_t flags = 1;
 
     int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
 /*

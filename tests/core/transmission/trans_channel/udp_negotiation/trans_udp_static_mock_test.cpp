@@ -27,6 +27,25 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
+
+static int32_t TransGetRemoteUuidByAuthHandle(AuthHandle authHandle, char *peerUuid)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (authHandle.type == AUTH_LINK_TYPE_BLE) {
+        AuthHandle authHandleTmp = { 0 };
+        ret = TransProxyGetAuthId(authHandle.authId, &authHandleTmp);
+        if (ret == SOFTBUS_TRANS_NODE_NOT_FOUND) {
+            authHandleTmp.authId = authHandle.authId;
+        }
+        ret = AuthGetDeviceUuid(authHandleTmp.authId, peerUuid, UUID_BUF_LEN);
+    } else {
+        ret = AuthGetDeviceUuid(authHandle.authId, peerUuid, UUID_BUF_LEN);
+    }
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
 static int32_t DefaultOnChannelOpened(
     const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
 {
@@ -340,6 +359,9 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest001, TestSize.Level1)
     (void)TransUdpChannelInit(&g_callbacks);
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked).WillRepeatedly(
+        Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillRepeatedly(Return(SOFTBUS_OK));
 
     appInfo->callingTokenId = 1;
     (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "123");
@@ -376,6 +398,7 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest001, TestSize.Level1)
  */
 HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
 {
+    (void)TransUdpChannelInit(&g_callbacks);
     AuthHandle authHandle = {
         .authId = 6859453
     };
@@ -389,6 +412,8 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
     ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
@@ -396,6 +421,8 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
     int32_t osType = OTHER_OS_TYPE;
     char peerUuid[UUID_BUF_LEN] = "test.peer.uid123";
     (void)strcpy_s(appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, "7645723048r4h20test");
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid)
         .WillOnce(DoAll(SetArrayArgument<1>(peerUuid, peerUuid + 32), Return(SOFTBUS_OK)));
     EXPECT_CALL(TransUdpStaticMock, LnnGetOsTypeByNetworkId)
@@ -406,6 +433,7 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
     ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
 
+    TransUdpChannelDeinit();
     cJSON_Delete(cJson);
 }
 
@@ -468,7 +496,7 @@ HWTEST_F(TransUdpStaticMockTest, ReportUdpRequestHandShakeStartEventTest001, Tes
 HWTEST_F(TransUdpStaticMockTest, UdpOpenAuthConnTest001, TestSize.Level1)
 {
     int32_t ret = 0;
-    const char *peerUdid = "";
+    const char *peerUdid = "1234";
     uint32_t requestId = 0;
     bool isMeta = true;
     int32_t linkType = LANE_USB;
@@ -960,17 +988,21 @@ HWTEST_F(TransUdpStaticMockTest, TransGetUdpChannelLocalIp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
-    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
-    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetLocalIpByMetaNodeIdPacked)
         .WillOnce(Return(SOFTBUS_TRANS_GET_LOCAL_IP_FAILED));
     ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
 
     char localIp[IP_LEN] = "00.11.22.34";
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetLocalIpByMetaNodeIdPacked)
         .WillOnce(DoAll(SetArrayArgument<1>(localIp, localIp + 15), Return(SOFTBUS_OK)));
     ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
@@ -1087,7 +1119,8 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest003, TestSize.Level1)
     (void)TransUdpChannelInit(&g_callbacks);
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
-    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked).WillOnce(Return(SOFTBUS_NOT_IMPLEMENT));
     int32_t ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
@@ -1122,7 +1155,8 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest004, TestSize.Level1)
     (void)TransUdpChannelInit(&g_callbacks);
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
-    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked)
         .WillOnce(DoAll(SetArgPointee<1>(200), Return(SOFTBUS_OK)));
@@ -1158,7 +1192,8 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest005, TestSize.Level1)
     (void)TransUdpChannelInit(&g_callbacks);
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
-    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPidByAuthIdPacked)
         .WillOnce(DoAll(SetArgPointee<1>(100), Return(SOFTBUS_OK)));
@@ -1194,7 +1229,8 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest006, TestSize.Level1)
     (void)TransUdpChannelInit(&g_callbacks);
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
-    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx)
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR));

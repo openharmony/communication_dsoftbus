@@ -181,7 +181,12 @@ int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *local
 {
     return GetTransUdpNegoStaticInterface()->AuthMetaGetLocalIpByMetaNodeIdPacked(metaNodeId, localIp, len);
 }
- 
+
+int32_t AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(int64_t authId, char *peerNetWorkId, uint32_t len)
+{
+    return GetTransUdpNegoStaticInterface()->AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authId, peerNetWorkId, len);
+}
+
 struct WifiDirectManager *GetWifiDirectManager(void)
 {
     return GetTransUdpNegoStaticInterface()->GetWifiDirectManager();

@@ -574,6 +574,10 @@ HWTEST_F(TransServerTcpDirectTest, OpenAuthConn001, TestSize.Level1)
     uint32_t reqId = 1;
     ConnectType type = CONNECT_HML;
 
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
+
     int32_t ret = OpenAuthConn(uuid, reqId, false, type);
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
 

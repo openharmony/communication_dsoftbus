@@ -19,12 +19,14 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 #define DC_MSG_PACKET_HEAD_SIZE 24
+#define DC_MSG_PACKET_EXTERNAL_HEAD_SIZE 32
 #define SESSION_KEY_INDEX_SIZE 4
 #define MESSAGE_INDEX_SIZE 4
 
@@ -51,6 +53,15 @@ typedef struct {
     uint32_t dataLen;
 } TdcPacketHead;
 
+typedef struct {
+    uint32_t magicNumber;
+    uint32_t module;
+    uint64_t seq;
+    uint32_t flags;
+    uint32_t dataLen;
+    int64_t authId;
+} TdcExternalPacketHead;
+
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb);
 
 void TransTcpDirectDeinit(void);
@@ -60,6 +71,9 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid);
 int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 
 void TransTdcStopSessionProc(ListenerModule listenMod);
+
+int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data);
+int32_t TransTdcPostExternalBytes(int32_t channelId, TdcExternalPacketHead *packetHead, const char *data);
 
 #ifdef __cplusplus
 }

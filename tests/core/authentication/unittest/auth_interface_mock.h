@@ -66,6 +66,7 @@ public:
     virtual int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info) = 0;
     virtual int32_t CustomizedSecurityProtocolInitPacked(void) = 0;
     virtual int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 class AuthOtherInterfaceMock : public AuthOtherInterface {
 public:
@@ -98,6 +99,7 @@ public:
     static int32_t ActionOfLnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
     MOCK_METHOD0(CustomizedSecurityProtocolInitPacked, int32_t(void));
     MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkIdPacked, int32_t(const char *, NodeInfo *));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t(const char *, int32_t *));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_conn_func.h"
 #include "g_enhance_conn_func_pack.h"
 #include "g_enhance_lnn_func.h"
@@ -947,18 +948,36 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg, const AuthHandle *
     dataInfo.outData = NULL;
     dataInfo.outLen = 0;
 
-    msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    if (AuthCheckSessionKeyValidByAuthHandle(authHandle) == SOFTBUS_AUTH_SESSION_KEY_INVALID) {
-        TRANS_LOGE(TRANS_MSG, "ble single online, send renegotiate msg");
-        msg->msgHead.cipher |= AUTH_SINGLE_CIPHER;
+    bool isSupportConcurrentMetaNode = AuthMetaIsSupportConcurrentByConnectionIdPacked(msg->connId);
+    int32_t ret;
+    if (isSupportConcurrentMetaNode) {
+        ProxyExternalMessageHead metaMsgHead = {0};
+        metaMsgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+        metaMsgHead.myId = msg->msgHead.myId;
+        metaMsgHead.peerId = msg->msgHead.peerId;
+        if (AuthCheckSessionKeyValidByAuthHandle(authHandle) == SOFTBUS_AUTH_SESSION_KEY_INVALID) {
+            TRANS_LOGE(TRANS_MSG, "ble single online, send bad key renegotiate msg");
+            metaMsgHead.cipher |= AUTH_SINGLE_CIPHER;
+        } else {
+            metaMsgHead.cipher |= BAD_CIPHER;
+        }
+        TRANS_LOGW(TRANS_MSG, "send bad key msg myChannelId=%{public}d, peerChannelId=%{public}d",
+            metaMsgHead.myId, metaMsgHead.peerId);
+        ret = PackPlaintextExternalMessage(&metaMsgHead, &dataInfo);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "PackPlaintextExternalMessage fail");
     } else {
-        msg->msgHead.cipher |= BAD_CIPHER;
+        msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+        if (AuthCheckSessionKeyValidByAuthHandle(authHandle) == SOFTBUS_AUTH_SESSION_KEY_INVALID) {
+            TRANS_LOGE(TRANS_MSG, "ble single online, send renegotiate msg");
+            msg->msgHead.cipher |= AUTH_SINGLE_CIPHER;
+        } else {
+            msg->msgHead.cipher |= BAD_CIPHER;
+        }
+        TRANS_LOGW(TRANS_MSG, "send msg is bad key myChannelId=%{public}d, peerChannelId=%{public}d",
+            msg->msgHead.myId, msg->msgHead.peerId);
+        ret = PackPlaintextMessage(&msg->msgHead, &dataInfo);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "PackPlaintextMessage fail");
     }
-    TRANS_LOGW(TRANS_MSG, "send msg is bad key myChannelId=%{public}d, peerChannelId=%{public}d",
-        msg->msgHead.myId, msg->msgHead.peerId);
-
-    int32_t ret = PackPlaintextMessage(&msg->msgHead, &dataInfo);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "PackPlaintextMessage fail");
 
     ret = TransProxyTransSendMsg(msg->connId, dataInfo.outData, dataInfo.outLen, CONN_HIGH, 0);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_MSG, "send bad key buf fail");
@@ -994,7 +1013,8 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         return;
     }
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    ret = TransProxyParseMessage((char *)data, len, &msg, &authHandle);
+    bool isSupportConcurrentMetaNode = AuthMetaIsSupportConcurrentByConnectionIdPacked(connectionId);
+    ret = TransProxyParseMessage((char *)data, len, &msg, &authHandle, isSupportConcurrentMetaNode);
     if (((ret == SOFTBUS_AUTH_NOT_FOUND) || (ret == SOFTBUS_DECRYPT_ERR)) &&
         (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE)) {
         TransReportBadKeyEvent(ret, connectionId, seq, len);

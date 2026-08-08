@@ -198,7 +198,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
     ret = TransCloseUdpChannel(TEST_CHANNEL_ID);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = TransDelUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 }
 
 /*

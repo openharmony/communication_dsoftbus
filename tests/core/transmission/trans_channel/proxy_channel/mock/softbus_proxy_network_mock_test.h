@@ -35,7 +35,8 @@ public:
     virtual int32_t SoftBusEncryptData(AesGcmCipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
         unsigned char *encryptData, uint32_t *encryptLen) = 0;
     
-    virtual int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo) = 0;
+    virtual int32_t TransProxyPackMessage(
+        ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo) = 0;
 
     virtual int32_t TransProxyTransSendMsg(
         uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid) = 0;
