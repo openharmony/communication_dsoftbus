@@ -66,6 +66,8 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener);
 void UnregAuthTransListener(int32_t module);
 
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta);
+int32_t AuthOpenConnWithOtherOsType(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback);
 int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);
 void AuthCloseConn(AuthHandle authHandle);
 

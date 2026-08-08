@@ -1989,3 +1989,16 @@ int32_t RemoveLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudRemoveCompareFu
     }
     return pfnLnnEnhanceFuncList->removeLnnCloudEvent(event, func, param);
 }
+
+int32_t AuthMetaOpenConnWithOtherOsTypePacked(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaOpenConnWithOtherOsType) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->authMetaOpenConnWithOtherOsType(info, networkId, requestId, callback);
+}

@@ -48,6 +48,8 @@ extern "C" {
 #endif
 
 int32_t AuthMetaOpenConnPacked(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
+int32_t AuthMetaOpenConnWithOtherOsTypePacked(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback);
 int32_t AuthMetaPostTransDataPacked(int64_t authId, const AuthTransData *dataInfo);
 void AuthMetaCloseConnPacked(int64_t authId);
 int32_t AuthMetaGetPreferConnInfoPacked(const char *networkId, AuthConnInfo *connInfo);
