@@ -1113,7 +1113,7 @@ HWTEST_F(LNNLaneAllocTest, LANE_RE_ALLOC_TEST_002, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForP2p);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -1163,7 +1163,7 @@ HWTEST_F(LNNLaneAllocTest, LANE_RE_ALLOC_TEST_003, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForWlan5g);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -1207,7 +1207,7 @@ HWTEST_F(LNNLaneAllocTest, LANE_RE_ALLOC_TEST_004, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForHml);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -1248,7 +1248,7 @@ HWTEST_F(LNNLaneAllocTest, LANE_RE_ALLOC_TEST_005, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &g_listenerCbForBr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SetIsNeedCondWait();
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -1673,9 +1673,9 @@ HWTEST_F(LNNLaneAllocTest, LANE_ALLOC_TEST_019, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     SetIsNeedCondWait();
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);

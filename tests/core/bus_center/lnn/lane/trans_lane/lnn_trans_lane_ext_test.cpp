@@ -427,4 +427,55 @@ HWTEST_F(LNNTransLaneExtTest, LNN_NOTIFY_FREE_LANE_RESULT_002, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(REQ_ID, SOFTBUS_OK));
     EXPECT_FALSE(g_freeLaneNotified);
 }
+
+HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_FIND_FAIL_TEST_001, TestSize.Level1)
+{
+    SoftBusMessage msg = {
+        .arg1 = REQ_ID,
+        .arg2 = LANE_ID,
+    };
+    NiceMock<TransLaneExtInterfaceMock> transMock;
+    EXPECT_CALL(transMock, FindLaneResourceByLaneId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(transMock, DestroyLink).Times(0);
+    EXPECT_NO_FATAL_FAILURE(HandleDelayDestroyLink(&msg));
+}
+
+HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_GET_REQ_FAIL_TEST_001, TestSize.Level1)
+{
+    SoftBusMessage msg = {
+        .arg1 = REQ_ID,
+        .arg2 = LANE_ID,
+    };
+    LaneResource resourceItem = {
+        .link.type = LANE_P2P,
+        .clientRef = 1,
+    };
+    NiceMock<TransLaneExtInterfaceMock> transMock;
+    EXPECT_CALL(transMock, FindLaneResourceByLaneId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(resourceItem), Return(SOFTBUS_OK)));
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(transMock, DestroyLink).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HandleDelayDestroyLink(&msg));
+}
+
+HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_SUCCESS_TEST_001, TestSize.Level1)
+{
+    SoftBusMessage msg = {
+        .arg1 = REQ_ID,
+        .arg2 = LANE_ID,
+    };
+    LaneResource resourceItem = {
+        .link.type = LANE_P2P,
+        .clientRef = 1,
+    };
+    TransReqInfo reqInfo = {};
+    ASSERT_EQ(strcpy_s(reqInfo.allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
+    NiceMock<TransLaneExtInterfaceMock> transMock;
+    EXPECT_CALL(transMock, FindLaneResourceByLaneId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(resourceItem), Return(SOFTBUS_OK)));
+    EXPECT_CALL(transMock, GetTransReqInfoByLaneReqId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(reqInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(transMock, DestroyLink).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HandleDelayDestroyLink(&msg));
+}
 } // namespace OHOS

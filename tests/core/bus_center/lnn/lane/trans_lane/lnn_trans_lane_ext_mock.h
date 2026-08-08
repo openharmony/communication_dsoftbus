@@ -42,6 +42,7 @@ public:
     virtual int32_t UpdateAndGetReqInfoByFree(uint32_t laneReqId, TransReqInfo *reqInfo) = 0;
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len) = 0;
     virtual int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type) = 0;
+    virtual int32_t PostNotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode, uint64_t delayMillis) = 0;
 };
 
 class TransLaneExtInterfaceMock : public TransLaneExtInterface {
@@ -61,6 +62,7 @@ public:
     MOCK_METHOD2(UpdateAndGetReqInfoByFree, int32_t (uint32_t, TransReqInfo *reqInfo));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *, char *, uint32_t));
     MOCK_METHOD3(DestroyLink, int32_t (const char *, uint32_t, LaneLinkType));
+    MOCK_METHOD3(PostNotifyFreeLaneResult, int32_t (uint32_t, int32_t, uint64_t));
 };
 } // namespace OHOS
 #endif // LNN_TRANS_LANE_EXT_MOCK_H

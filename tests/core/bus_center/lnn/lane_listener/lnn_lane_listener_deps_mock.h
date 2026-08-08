@@ -41,7 +41,7 @@ public:
     virtual int32_t ClearLaneResourceByLaneId(uint64_t laneId) = 0;
     virtual void RemoveDelayDestroyMessage(uint64_t laneId) = 0;
     virtual int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide) = 0;
-    virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
+    virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide, const char *networkId) = 0;
     virtual void DetectDisableWifiDirectApply(void) = 0;
     virtual int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo) = 0;
     virtual int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo) = 0;
@@ -66,7 +66,7 @@ public:
     MOCK_METHOD1(ClearLaneResourceByLaneId, int32_t (uint64_t laneId));
     MOCK_METHOD1(RemoveDelayDestroyMessage, void (uint64_t laneId));
     MOCK_METHOD3(AddLaneResourceToPool, int32_t (const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide));
-    MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
+    MOCK_METHOD3(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide, const char *networkId));
     MOCK_METHOD0(DetectDisableWifiDirectApply, void (void));
     MOCK_METHOD1(HandleLaneQosChange, int32_t (const LaneLinkInfo *laneLinkInfo));
     MOCK_METHOD2(GetTransReqInfoByLaneReqId, int32_t (uint32_t laneReqId, TransReqInfo *reqInfo));

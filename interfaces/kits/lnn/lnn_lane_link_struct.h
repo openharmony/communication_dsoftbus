@@ -112,6 +112,7 @@ typedef struct {
 typedef struct {
     char peerUdid[UDID_BUF_LEN];
     char netifName[NET_IF_NAME_LEN];
+    char networkId[NETWORK_ID_BUF_LEN];
     LaneLinkType type;
     union {
         WlanLinkInfo wlan;
@@ -127,11 +128,18 @@ typedef struct {
 } LaneLinkInfo;
 
 typedef struct {
+    ListNode node;
+    char networkId[NETWORK_ID_BUF_LEN];
+    uint32_t networkIdRef;
+} NetworkIdInfo;
+
+typedef struct {
     bool isServerSide;
     uint32_t laneScore;
     uint32_t laneFload;
     uint32_t clientRef;
     LaneLinkInfo link;
+    ListNode *networkIdList;
     ListNode node;
     uint64_t laneId;
 } LaneResource;

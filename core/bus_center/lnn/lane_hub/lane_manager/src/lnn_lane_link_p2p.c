@@ -287,7 +287,7 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
     }
     int32_t ret = AuthGetHmlConnInfo(uuid, connInfo, isMetaAuth);
     if (ret != SOFTBUS_OK) {
-        ret = AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
+        ret = AuthGetPreferConnInfo(uuid, networkId, connInfo, isMetaAuth);
     }
     return ret;
 }
@@ -1882,7 +1882,16 @@ static int32_t OpenAuthToDisconnP2p(const char *networkId, int32_t linkId)
     };
     LNN_LOGI(LNN_LANE, "open auth to disconnect wifidirect, linkId=%{public}d, authRequestId=%{public}u",
         linkId, authRequestId);
-    ret = AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth);
+    int32_t osType = 0;
+    ret = LnnGetOsTypeByNetworkId(networkId, &osType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "disconn p2p get osType fail, ret=%{public}d", ret);
+    }
+    if (osType == OTHER_OS_TYPE) {
+        ret = AuthOpenConnWithOtherOsType(&connInfo, networkId, authRequestId, &cb);
+    } else {
+        ret = AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth);
+    }
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "open auth conn fail, authRequestId=%{public}u", authRequestId);
         return ret;
@@ -2096,7 +2105,7 @@ static int32_t GetAuthConnInfoWithoutMeta(const LinkRequest *request, uint32_t l
         LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
         ret = AuthGetConnInfoByType(uuid, AUTH_LINK_TYPE_BR, connInfo, false);
     } else {
-        ret = AuthGetPreferConnInfo(uuid, connInfo, false);
+        ret = AuthGetPreferConnInfo(uuid, request->peerNetworkId, connInfo, false);
     }
     return ret;
 }
@@ -2141,7 +2150,7 @@ static int32_t GetMetaAuthConnInfo(const LinkRequest *request, uint32_t laneReqI
         LNN_LOGE(LNN_LANE, "get peer uuid fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    return AuthGetPreferConnInfo(uuid, connInfo, true);
+    return AuthGetPreferConnInfo(uuid, request->peerNetworkId, connInfo, true);
 }
 
 static void OnMetaAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)
@@ -2174,7 +2183,16 @@ static int32_t OpenMetaAuthToConnP2p(const LinkRequest *request, uint32_t laneRe
     };
     LNN_EVENT(EVENT_SCENE_LANE, EVENT_STAGE_LNN_LANE_SELECT_START, extra);
     LNN_LOGI(LNN_LANE, "open auth with authRequestId=%{public}u", authRequestId);
-    ret = AuthOpenConn(&connInfo, authRequestId, &cb, true);
+    int32_t osType = 0;
+    ret = LnnGetOsTypeByNetworkId(request->peerNetworkId, &osType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "conn p2p get osType fail, ret=%{public}d", ret);
+    }
+    if (osType == OTHER_OS_TYPE) {
+        ret = AuthOpenConnWithOtherOsType(&connInfo, request->peerNetworkId, authRequestId, &cb);
+    } else {
+        ret = AuthOpenConn(&connInfo, authRequestId, &cb, true);
+    }
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "open auth conn fail");
         (void)DelP2pLinkReqByReqId(ASYNC_RESULT_AUTH, authRequestId);

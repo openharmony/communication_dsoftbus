@@ -976,6 +976,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_002, TestSize.Lev
     LaneLinkInfo info = {
         .type = LANE_WLAN_5G,
     };
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
     ResetQosEventResult();
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
     EXPECT_EQ(g_qosEvent[LANE_REQ_ID_ONE], false);
@@ -1035,6 +1036,7 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_003, TestSize.Lev
     LaneLinkInfo info = {
         .type = LANE_HML,
     };
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
     ResetQosEventResult();
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
     EXPECT_EQ(g_qosEvent[LANE_REQ_ID_ONE], true);
@@ -1430,9 +1432,6 @@ HWTEST_F(LNNTransLaneMockTest, LNN_RELEASE_UNDELIVERABLE_LINK_001, TestSize.Leve
     EXPECT_CALL(transLaneMock, DestroyLink)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneMock, LnnGetNetworkIdByUdid)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(LaneDepsInterfaceMock::ActionOfLnnGetNetworkIdByUdid);
     EXPECT_CALL(lnnMock, RemoveAuthSessionServer).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(ReleaseUndeliverableLink(laneReqId, LANE_ID_BASE));
     EXPECT_NO_FATAL_FAILURE(ReleaseUndeliverableLink(laneReqId, LANE_ID_BASE));
@@ -1531,5 +1530,16 @@ HWTEST_F(LNNTransLaneMockTest, ALLOC_LANE_BY_SPECIFIED_LINK_TEST_001, TestSize.L
     EXPECT_CALL(mock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
     ret = transObj->allocLaneByQos(laneReqId, &allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
+}
+
+HWTEST_F(LNNTransLaneMockTest, HANDLE_LANE_QOS_CHANGE_NEW_TEST_001, TestSize.Level1)
+{
+    LaneLinkInfo info = {};
+    EXPECT_EQ(HandleLaneQosChange(nullptr), SOFTBUS_INVALID_PARAM);
+    info.type = LANE_BR;
+    EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    EXPECT_NO_FATAL_FAILURE(HandleLaneQosChange(&info));
 }
 } // namespace OHOS

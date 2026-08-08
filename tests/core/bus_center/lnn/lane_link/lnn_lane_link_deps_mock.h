@@ -44,7 +44,7 @@ public:
     virtual int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource) = 0;
     virtual int32_t InitLaneLink(void) = 0;
     virtual int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide) = 0;
-    virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide) = 0;
+    virtual int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide, const char *networkId) = 0;
     virtual void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode) = 0;
     virtual LinkConflictType GetConflictTypeWithErrcode(int32_t conflictErrcode) = 0;
     virtual int32_t FindLinkConflictInfoByDevId(const DevIdentifyInfo *inputInfo, LinkConflictType conflictType,
@@ -88,7 +88,7 @@ public:
     MOCK_METHOD2(FindLaneResourceByLaneId, int32_t (uint64_t laneId, LaneResource *resource));
     MOCK_METHOD0(InitLaneLink, int32_t (void));
     MOCK_METHOD3(AddLaneResourceToPool, int32_t (const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide));
-    MOCK_METHOD2(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide));
+    MOCK_METHOD3(DelLaneResourceByLaneId, int32_t (uint64_t laneId, bool isServerSide, const char *networkId));
     MOCK_METHOD2(NotifyFreeLaneResult, void (uint32_t laneReqId, int32_t errCode));
     MOCK_METHOD1(GetConflictTypeWithErrcode, LinkConflictType (int32_t conflictErrcode));
     MOCK_METHOD3(FindLinkConflictInfoByDevId, int32_t (const DevIdentifyInfo *inputInfo,

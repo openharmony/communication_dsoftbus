@@ -74,6 +74,8 @@ public:
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta) = 0;
+    virtual int32_t AuthOpenConnWithOtherOsType(const AuthConnInfo *info, const char *networkId,
+        uint32_t requestId, const AuthConnCallback *callback) = 0;
     virtual int32_t SoftBusFrequencyToChannel(int32_t frequency) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
@@ -127,6 +129,8 @@ public:
     virtual int32_t AuthMetaGetConnectionTypeByMetaNodeId(const char *metaNodeId,
         NetworkConnectionType *connectionType) = 0;
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
+    virtual int32_t AuthGetAllNetworkId(const char *udid, char **networkIds,
+        uint32_t *networkIdCount) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -145,6 +149,8 @@ public:
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo*, uint32_t, const AuthConnCallback*, bool));
+    MOCK_METHOD4(AuthOpenConnWithOtherOsType, int32_t (const AuthConnInfo*, const char*, uint32_t,
+        const AuthConnCallback*));
     MOCK_METHOD1(SoftBusFrequencyToChannel, int32_t (int));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
@@ -202,6 +208,8 @@ public:
     MOCK_METHOD2(AuthMetaGetConnectionTypeByMetaNodeId, int32_t (const char *metaNodeId,
         NetworkConnectionType *connectionType));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t (InfoKey, const uint8_t *, uint32_t));
+    MOCK_METHOD3(AuthGetAllNetworkId, int32_t (const char *udid, char **networkIds,
+        uint32_t *networkIdCount));
 
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
@@ -214,6 +222,8 @@ public:
         const AuthConnCallback *callback, bool isMeta);
     static int32_t ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
         bool isMeta);
+    static int32_t ActionOfConnOpenedForOtherOsType(const AuthConnInfo *info, const char *networkId,
+        uint32_t requestId, const AuthConnCallback *callback);
     static int32_t ActionOfLnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);
     static int32_t socketEvent;
     static int32_t ActionOfGetRemoteStrInfoByIfnameIdx
