@@ -1242,5 +1242,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest038, TestSize.Level1)
     EXPECT_EQ(ret, false);
     ret = AuthMetaGetNetworkIdsPacked(nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = AuthMetaOpenConnWithOtherOsTypePacked(nullptr, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 }

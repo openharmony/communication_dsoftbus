@@ -269,6 +269,16 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return AuthDeviceOpenConn(info, requestId, callback);
 }
 
+int32_t AuthOpenConnWithOtherOsType(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback)
+{
+    if (info == NULL || networkId == NULL || callback == NULL) {
+        AUTH_LOGE(AUTH_CONN, "info or networkId or callback is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return AuthMetaOpenConnWithOtherOsTypePacked(info, networkId, requestId, callback);
+}
+
 int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
     if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {

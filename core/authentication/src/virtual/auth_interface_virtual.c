@@ -99,6 +99,16 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t AuthOpenConnWithOtherOsType(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback)
+{
+    (void)info;
+    (void)networkId;
+    (void)requestId;
+    (void)callback;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
     (void)authHandle;

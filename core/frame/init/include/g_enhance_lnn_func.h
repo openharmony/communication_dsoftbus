@@ -312,6 +312,8 @@ typedef bool (*FarfieldParseModuleTypeFunc)(const uint8_t *data, uint32_t dataLe
 typedef int32_t (*PostLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
 typedef int32_t (*RemoveLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);
+typedef int32_t (*AuthMetaOpenConnWithOtherOsTypeFunc)(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -546,6 +548,7 @@ typedef struct TagLnnEnhanceFuncList {
     AuthInsertDeviceKeyFunc authInsertDeviceKey;
     AuthUpdateKeyIndexFunc authUpdateKeyIndex;
     AuthMetaGetPidByAuthIdFunc authMetaGetPidByAuthId;
+    AuthMetaOpenConnWithOtherOsTypeFunc authMetaOpenConnWithOtherOsType;
     CalcHKDFFunc calcHKDF;
     // ccmp
     CustomizedSecurityProtocolInitFunc customizedSecurityProtocolInit;
