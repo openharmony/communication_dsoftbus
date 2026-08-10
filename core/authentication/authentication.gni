@@ -108,8 +108,9 @@ if (defined(ohos_lite)) {
       [ "$authentication_path/src/auth_hichain_system_ability_monitor.cpp" ]
 }
 
-if (!defined(global_parts_info) ||
-    defined(global_parts_info.deviceprofile_device_info_manager)) {
+if (!defined(ohos_lite) &&
+    (!defined(global_parts_info) ||
+     defined(global_parts_info.deviceprofile_device_info_manager))) {
   auth_server_src += [
     "$authentication_path/bind/auth_device_profile_listener.cpp",
     "$authentication_path/src/auth_deviceprofile.cpp",
