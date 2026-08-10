@@ -1204,7 +1204,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         goto EXIT_ERR;
     }
     peerPort = conn->appInfo.peerData.port;
-    int32_t myPort == conn->appInfo.myData.port;
+    int32_t myPort = conn->appInfo.myData.port;
     ReleaseSessionConnLock();
 
     if (TransSrvAddDataBufNode(channelId, fd) != SOFTBUS_OK) {
