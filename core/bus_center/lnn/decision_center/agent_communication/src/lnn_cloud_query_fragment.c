@@ -30,6 +30,7 @@
 #include "softbus_error_code.h"
 #include "g_enhance_lnn_func_pack.h"
 
+#define MAX_FRAGMENT_CONTEXT_NUM 5000
 #define MAX_FRAGMENT_NUM 1024
 #define MAX_ASSEMBLED_LEN (10 * 1024 * 1024) // 10MB
 #define BASE_RANDOM_ID 10000
@@ -333,13 +334,30 @@ int32_t ParseFragmentHeader(const uint8_t *data, uint32_t dataLen, DataFragmentI
     }
 
     uint32_t offset = 0;
-    header->msgId = ntohl(*((uint32_t *)(data + offset)));
+    uint32_t tempVal = 0;
+    if (memcpy_s(&tempVal, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy msgId failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    header->msgId = ntohl(tempVal);
     offset += sizeof(uint32_t);
-    header->size = ntohl(*((uint32_t *)(data + offset)));
+    if (memcpy_s(&tempVal, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy size failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    header->size = ntohl(tempVal);
     offset += sizeof(uint32_t);
-    header->offset = ntohl(*((uint32_t *)(data + offset)));
+    if (memcpy_s(&tempVal, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy offset failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    header->offset = ntohl(tempVal);
     offset += sizeof(uint32_t);
-    header->total = ntohl(*((uint32_t *)(data + offset)));
+    if (memcpy_s(&tempVal, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy total failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    header->total = ntohl(tempVal);
     return SOFTBUS_OK;
 }
 
@@ -409,10 +427,19 @@ static int32_t FindOrCreateFragmentContext(const DataFragmentInfo *header, Fragm
 {
     int32_t ret = FindFragmentContext(header->msgId, ctx);
     if (ret == SOFTBUS_OK) {
+        if ((*ctx)->total != header->total) {
+            LNN_LOGE(LNN_EVENT, "total mismatch, ctxTotal=%{public}u, headerTotal=%{public}u",
+                (*ctx)->total, header->total);
+            return SOFTBUS_INVALID_PARAM;
+        }
         return SOFTBUS_OK;
     }
 
     uint32_t sliceTotal = (header->total + MAX_SLICE_LEN - 1) / MAX_SLICE_LEN;
+    if (sliceTotal == 0 || sliceTotal > MAX_FRAGMENT_NUM) {
+        LNN_LOGE(LNN_EVENT, "sliceTotal=%{public}u invalid", sliceTotal);
+        return SOFTBUS_INVALID_PARAM;
+    }
     *ctx = CreateFragmentContext(header->msgId, header->total, sliceTotal);
     if (*ctx == NULL) {
         LNN_LOGE(LNN_EVENT, "create fragment context failed");
@@ -422,7 +449,7 @@ static int32_t FindOrCreateFragmentContext(const DataFragmentInfo *header, Fragm
     return SOFTBUS_OK;
 }
 
-static void CleanupTimeoutFragmentContexts(void)
+static void CleanupTimeoutFragmentContexts(uint32_t *count)
 {
     uint64_t currentTime = SoftBusGetSysTimeMs();
     FragmentContext *item = NULL;
@@ -431,8 +458,30 @@ static void CleanupTimeoutFragmentContexts(void)
         if (currentTime - item->createTime > FRAGMENT_CONTEXT_TIMEOUT_MS) {
             LNN_LOGW(LNN_EVENT, "fragment context timeout, msgId=%{public}u", item->msgId);
             ClearFragmentContext(item);
+        } else {
+            (*count)++;
         }
     }
+}
+
+static int32_t WriteFragmentToContext(FragmentContext *ctx, const ProcessFragmentInput *input)
+{
+    if (memcpy_s(ctx->buffer + input->header->offset, ctx->total - input->header->offset,
+        input->fragmentData, input->header->size) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy_s failed");
+        ClearFragmentContext(ctx);
+        return SOFTBUS_MEM_ERR;
+    }
+    uint32_t sliceIndex = input->header->offset / MAX_SLICE_LEN;
+    ctx->sliceBitmap[sliceIndex / BYTE_BITS] |= (1 << (sliceIndex % BYTE_BITS));
+    ctx->receivedSliceCount++;
+    if (ctx->receivedSliceCount == ctx->sliceTotal) {
+        int32_t ret = AssembleData(ctx, input->assembledData, input->assembledLen);
+        ClearFragmentContext(ctx);
+        LNN_LOGI(LNN_EVENT, "assemble data done, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t ProcessFragmentWithLock(const ProcessFragmentInput *input)
@@ -441,16 +490,25 @@ static int32_t ProcessFragmentWithLock(const ProcessFragmentInput *input)
         LNN_LOGE(LNN_EVENT, "lock fragment mutex failed");
         return SOFTBUS_LOCK_ERR;
     }
-
-    CleanupTimeoutFragmentContexts();
-
+    uint32_t count = 0;
+    CleanupTimeoutFragmentContexts(&count);
+    if (count > MAX_FRAGMENT_CONTEXT_NUM) {
+        LNN_LOGE(LNN_EVENT, "avoid resource exhaution in short time, count=%{public}u", count);
+        (void)SoftBusMutexUnlock(&g_fragmentMutex);
+        return SOFTBUS_INVALID_PARAM;
+    }
     FragmentContext *ctx = NULL;
     int32_t ret = FindOrCreateFragmentContext(input->header, &ctx);
     if (ret != SOFTBUS_OK || ctx == NULL) {
         (void)SoftBusMutexUnlock(&g_fragmentMutex);
         return ret;
     }
-
+    if (input->header->offset + input->header->size > ctx->total) {
+        LNN_LOGE(LNN_EVENT, "offset=%{public}u, size=%{public}u, total=%{public}u",
+            input->header->offset, input->header->size, ctx->total);
+        (void)SoftBusMutexUnlock(&g_fragmentMutex);
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t sliceIndex = input->header->offset / MAX_SLICE_LEN;
     if (sliceIndex >= ctx->sliceTotal ||
         (ctx->sliceBitmap[sliceIndex / BYTE_BITS] & (1 << (sliceIndex % BYTE_BITS))) != 0) {
@@ -459,28 +517,9 @@ static int32_t ProcessFragmentWithLock(const ProcessFragmentInput *input)
         (void)SoftBusMutexUnlock(&g_fragmentMutex);
         return SOFTBUS_OK;
     }
-
-    if (memcpy_s(ctx->buffer + input->header->offset, input->header->size,
-        input->fragmentData, input->header->size) != EOK) {
-        LNN_LOGE(LNN_EVENT, "memcpy_s failed");
-        ClearFragmentContext(ctx);
-        (void)SoftBusMutexUnlock(&g_fragmentMutex);
-        return SOFTBUS_MEM_ERR;
-    }
-
-    ctx->sliceBitmap[sliceIndex / BYTE_BITS] |= (1 << (sliceIndex % BYTE_BITS));
-    ctx->receivedSliceCount++;
-
-    if (ctx->receivedSliceCount == ctx->sliceTotal) {
-        ret = AssembleData(ctx, input->assembledData, input->assembledLen);
-        ClearFragmentContext(ctx);
-        LNN_LOGI(LNN_EVENT, "assemble data done, ret=%{public}d", ret);
-        (void)SoftBusMutexUnlock(&g_fragmentMutex);
-        return ret;
-    }
-
+    ret = WriteFragmentToContext(ctx, input);
     (void)SoftBusMutexUnlock(&g_fragmentMutex);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t DataAggregate(const uint8_t *data, uint32_t dataLen, uint8_t **assembledData, uint32_t *assembledLen,
