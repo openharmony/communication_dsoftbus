@@ -149,7 +149,7 @@ HWTEST_F(TransQosStatClientTest, SendStreamNoQosEventTest001, TestSize.Level1)
     StreamFrameInfo tmpf = { };
     for (int32_t times = 0; times < TEST_SEND_TIMES; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
         sleep(TEST_SEND_INTERVAL_SEC);
     }
     EXPECT_EQ(g_qosEventCount[sessionId], 0);
@@ -184,7 +184,7 @@ HWTEST_F(TransQosStatClientTest, SendStreamNoQosTimeDiffTest001, TestSize.Level0
     StreamFrameInfo tmpf = { };
     for (int32_t times = 0; times < TEST_SEND_TIMES; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
         sleep(TEST_SEND_INTERVAL_SEC);
     }
     EXPECT_EQ(g_qosEventCount[sessionId], 0);

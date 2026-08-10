@@ -1510,6 +1510,52 @@ HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadExTest002, TestSize.Level
 }
 
 /**
+ * @tc.name: MessageParcelReadExTest003
+ * @tc.desc: MessageParcelReadEx, D2D dataLen exceeds EXTRA_DATA_MAX_LEN returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadExTest003, TestSize.Level1)
+{
+    MessageParcel data;
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    data.WriteBool(true);
+    data.WriteBool(true);
+    data.WriteInt32(0);
+    data.WriteUint32(0);
+    data.WriteUint32(0);
+    char nonce[PAGING_NONCE_LEN] = {0};
+    data.WriteRawData(nonce, PAGING_NONCE_LEN);
+    char key[SHORT_SESSION_KEY_LENGTH] = {0};
+    data.WriteRawData(key, SHORT_SESSION_KEY_LENGTH);
+    data.WriteUint32(EXTRA_DATA_MAX_LEN + 1);
+    int32_t ret = MessageParcelReadEx(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
+ * @tc.name: MessageParcelReadExTest004
+ * @tc.desc: MessageParcelReadEx, non-D2D peerExtraAccessInfo is nullptr returns SOFTBUS_IPC_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, MessageParcelReadExTest004, TestSize.Level1)
+{
+    MessageParcel data;
+    ChannelInfo channel;
+    (void)memset_s(&channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
+    channel.channelType = CHANNEL_TYPE_PROXY;
+    channel.isServer = true;
+    data.WriteBool(false);
+    data.WriteInt32(ACCESS_TOKEN_TYPE_HAP + 1);
+    data.WriteInt32(0);
+    data.WriteUint64(0);
+    int32_t ret = MessageParcelReadEx(data, &channel);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
+}
+
+/**
  * @tc.name: MessageParcelReadTest001
  * @tc.desc: MessageParcelRead, keyLen exceeds SESSION_KEY_LENGTH returns SOFTBUS_IPC_ERR
  * @tc.type: FUNC

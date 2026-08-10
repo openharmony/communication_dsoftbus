@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1193,6 +1193,66 @@ HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProcTest004, TestSize.Level1
     EXPECT_CALL(mock, ClientIpcSetChannelInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransLaneMgrAddLane).WillRepeatedly(Return(SOFTBUS_OK));
     TransAsyncOpenChannelProc(TEST_LANE_ID, param, &appInfo, &extra, &connInnerInfo);
+    SoftBusFree(const_cast<SessionAttribute *>(param->attr));
+    param->attr = nullptr;
+    SoftBusFree(param);
+    param = nullptr;
+}
+
+/*
+ * @tc.name: TransAsyncOpenChannelProcTest005
+ * @tc.desc: trans async open channel proc sets addr from p2p localIp when osType is OTHER_OS_TYPE and lane type is
+ * LANE_P2P
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProcTest005, TestSize.Level1)
+{
+    SessionParam *param = TestCreateSessionParam();
+    ASSERT_TRUE(param != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.osType = OTHER_OS_TYPE;
+    TransEventExtra extra;
+    extra.peerUdid = PEER_UDID;
+    LaneConnInfo connInnerInfo;
+    (void)memset_s(&connInnerInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
+    connInnerInfo.type = LANE_P2P;
+    (void)strcpy_s(connInnerInfo.connInfo.p2p.localIp, IP_LEN, TEST_IP);
+    (void)strcpy_s(connInnerInfo.connInfo.p2p.peerIp, IP_LEN, TEST_IP);
+    NiceMock<TransLanePendingTestInterfaceMock> mock;
+    EXPECT_CALL(mock, TransOpenChannelProc).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    TransAsyncOpenChannelProc(TEST_LANE_ID, param, &appInfo, &extra, &connInnerInfo);
+    EXPECT_STREQ(TEST_IP, appInfo.myData.addr);
+    SoftBusFree(const_cast<SessionAttribute *>(param->attr));
+    param->attr = nullptr;
+    SoftBusFree(param);
+    param = nullptr;
+}
+
+/*
+ * @tc.name: TransAsyncOpenChannelProcTest006
+ * @tc.desc: trans async open channel proc does not set addr from wrong union member when osType is OTHER_OS_TYPE but
+ * lane type is not P2P or HML
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLanePendingTest, TransAsyncOpenChannelProcTest006, TestSize.Level1)
+{
+    SessionParam *param = TestCreateSessionParam();
+    ASSERT_TRUE(param != nullptr);
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.osType = OTHER_OS_TYPE;
+    TransEventExtra extra;
+    extra.peerUdid = PEER_UDID;
+    LaneConnInfo connInnerInfo;
+    (void)memset_s(&connInnerInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
+    connInnerInfo.type = LANE_WLAN_2P4G;
+    NiceMock<TransLanePendingTestInterfaceMock> mock;
+    EXPECT_CALL(mock, TransOpenChannelProc).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    TransAsyncOpenChannelProc(TEST_LANE_ID, param, &appInfo, &extra, &connInnerInfo);
+    EXPECT_EQ('\0', appInfo.myData.addr[0]);
     SoftBusFree(const_cast<SessionAttribute *>(param->attr));
     param->attr = nullptr;
     SoftBusFree(param);

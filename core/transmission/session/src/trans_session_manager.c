@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -181,12 +181,8 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
 
 int32_t TransSessionServerDelItem(const char *sessionName)
 {
-    if (sessionName == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (g_sessionServerList == NULL) {
-        return SOFTBUS_NO_INIT;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionServerList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "not init");
 
     bool isFind = false;
     SessionServer *pos = NULL;

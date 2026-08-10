@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,6 +201,8 @@ static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
         COMM_CHECK_AND_RETURN_RET_LOGE(channel->pagingSessionkey != nullptr, SOFTBUS_IPC_ERR,
             COMM_SDK, "read pagingSessionkey failed");
         READ_PARCEL_WITH_RET(data, Uint32, channel->dataLen, SOFTBUS_IPC_ERR);
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->dataLen <= EXTRA_DATA_MAX_LEN, SOFTBUS_IPC_ERR,
+            COMM_SDK, "channel->dataLen invalid");
         if (channel->dataLen > 0) {
             channel->extraData = (char *)data.ReadRawData(channel->dataLen);
             COMM_CHECK_AND_RETURN_RET_LOGE(channel->extraData != nullptr, SOFTBUS_IPC_ERR,
@@ -218,6 +220,8 @@ static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
             READ_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
             READ_PARCEL_WITH_RET(data, Uint64, channel->peerTokenId, SOFTBUS_IPC_ERR);
             channel->peerExtraAccessInfo = (char *)data.ReadCString();
+            COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerExtraAccessInfo != nullptr,
+                SOFTBUS_IPC_ERR, COMM_SDK, "read peerExtraAccessInfo failed");
         }
         channel->sessionKey = (char *)data.ReadRawData(channel->keyLen);
         COMM_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr, SOFTBUS_IPC_ERR,
