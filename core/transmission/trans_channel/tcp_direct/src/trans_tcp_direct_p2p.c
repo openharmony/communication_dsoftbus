@@ -1164,6 +1164,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     char myAddr[IP_LEN] = { 0 };
     char peerUuid[UUID_BUF_LEN] = { 0 };
     int32_t peerPort = -1;
+    int32_t myPort = -1;
 
     if (GetSessionConnLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "getsessionconnlock fail");
@@ -1204,7 +1205,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         goto EXIT_ERR;
     }
     peerPort = conn->appInfo.peerData.port;
-    int32_t myPort = conn->appInfo.myData.port;
+    myPort = conn->appInfo.myData.port;
     ReleaseSessionConnLock();
 
     if (TransSrvAddDataBufNode(channelId, fd) != SOFTBUS_OK) {
