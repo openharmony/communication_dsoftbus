@@ -220,8 +220,8 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
     while (offset < AUTH_PKT_HEAD_LEN) {
         ssize_t recvLen =
             ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset), RECV_DATA_TIMEOUT);
-        if (recvLen < 0) {
-            AUTH_LOGE(AUTH_CONN, "recv head fail.");
+        if (recvLen <= 0) {
+            AUTH_LOGE(AUTH_CONN, "recv head fail, recvLen=%{public}zd.", recvLen);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         offset += (uint32_t)recvLen;
@@ -239,8 +239,8 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
     uint32_t offset = 0;
     while (offset < len) {
         ssize_t recvLen = ConnRecvSocketData(fd, (char *)(data + offset), (size_t)(len - offset), RECV_DATA_TIMEOUT);
-        if (recvLen < 0) {
-            AUTH_LOGE(AUTH_CONN, "recv data fail.");
+        if (recvLen <= 0) {
+            AUTH_LOGE(AUTH_CONN, "recv data fail, recvLen=%{public}zd.", recvLen);
             SoftBusFree(data);
             return NULL;
         }
@@ -477,6 +477,8 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         AUTH_LOGE(AUTH_CONN, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
+    /* Accepted fd is block mode by default, set to non-block after accepted. */
+    (void)ConnToggleNonBlockMode(cfd, true);
     if (ConnSetTcpKeepalive(cfd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set keepalive fail!");
@@ -952,6 +954,8 @@ int32_t AuthOpenChannelWithAllIp(const char *localIp, const char *remoteIp, int3
         AUTH_LOGE(AUTH_CONN, "connect fail.");
         return INVALID_CHANNEL_ID;
     }
+    /* Block mode connect, then set fd to non-block after connection established. */
+    (void)ConnToggleNonBlockMode(fd, true);
     AUTH_LOGI(AUTH_CONN, "open auth channel succ, channelId=%{public}d.", fd);
     return fd;
 }

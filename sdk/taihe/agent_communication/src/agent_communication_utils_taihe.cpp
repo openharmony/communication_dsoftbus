@@ -37,10 +37,10 @@ static std::map<int32_t, std::string> taiheErrMsgMap {
     {CONVERSATION_PERMISSION_SYSTEMAPI_ERR, "Permission denied. A non-system application calls a system API."},
     {CONVERSATION_INVALID_PARAM, "Invalid argument."},
     {CONVERSATION_INTERNAL_ERR, "Internal error."},
-    {CONVERSATION_INTERNAL_REMOTE_NOT_SUPPORT, "Remote not support."},
-    {CONVERSATION_DUPLICATE_CALLS, "Duplicate calls, previous call still in progress."},
-    {CONVERSATION_SEND_DATA_FAILED, "Send data failed."},
-    {CONVERSATION_WAIT_ACK_TIMEOUT, "Wait remote ack timeout."},
+    {CONVERSATION_INTERNAL_REMOTE_NOT_SUPPORT, "Remote system version is too low."},
+    {CONVERSATION_ABILITY_NOT_EXIST, "Failed to start ability on the remote side."},
+    {CONVERSATION_SEND_DATA_FAILED, "Failed to send data."},
+    {CONVERSATION_WAIT_ACK_TIMEOUT, "Timeout while waiting for acknowledgement from the remote side."},
 };
 
 int32_t ConvertToJsErrcode(int32_t err)
@@ -54,8 +54,8 @@ int32_t ConvertToJsErrcode(int32_t err)
             return CONVERSATION_PERMISSION_ERR;
         case SOFTBUS_NETWORK_NOT_SUPPORT:
             return CONVERSATION_INTERNAL_REMOTE_NOT_SUPPORT;
-        case SOFTBUS_AGENT_BUSY:
-            return CONVERSATION_DUPLICATE_CALLS;
+        case SOFTBUS_RESOLVE_ABILITY_ERR:
+            return CONVERSATION_ABILITY_NOT_EXIST;
         case SOFTBUS_CLOUD_SEND_FAIL:
             return CONVERSATION_SEND_DATA_FAILED;
         case SOFTBUS_TIMOUT:

@@ -70,4 +70,5 @@ declare_args() {
   dsoftbus_feature_trans_io_uring = false
   dsoftbus_feature_lnn_push = false
   dsoftbus_feature_multi_foreground_user = false
+  dsoftbus_feature_disc_cockpit_multi_user = false
 }

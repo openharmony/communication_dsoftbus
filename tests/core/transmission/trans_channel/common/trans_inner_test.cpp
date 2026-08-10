@@ -1208,6 +1208,7 @@ HWTEST_F(TransInnerTest, DirectChannelOnDataEventTest001, TestSize.Level1)
  */
 HWTEST_F(TransInnerTest, DirectChannelCreateListenerTest001, TestSize.Level1)
 {
+    InnerListInit();
     NiceMock<TransInnerInterfaceMock> TransInnerMock;
     EXPECT_CALL(TransInnerMock, CreateListenerModule).WillRepeatedly(Return(AUTH_RAW_P2P_CLIENT));
     EXPECT_CALL(TransInnerMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1216,6 +1217,9 @@ HWTEST_F(TransInnerTest, DirectChannelCreateListenerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = DirectChannelCreateListener(TRANS_TEST_FD);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    g_isInitedFlag = false;
+    g_baseListenerModule = UNUSE_BUTT;
+    InnerListDeinit();
 }
 
 /*

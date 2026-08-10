@@ -108,6 +108,24 @@ HWTEST_F(StreamAdaptorTest, InitAdaptorTest03, TestSize.Level1)
 }
 
 /*
+ * @tc.name: ReleaseAdaptorTest01
+ * @tc.desc: test ReleaseAdaptor without InitAdaptor so streamManager_ is nullptr,
+ *           should not crash and channelId should be set to -1
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(StreamAdaptorTest, ReleaseAdaptorTest01, TestSize.Level1)
+{
+    std::shared_ptr<StreamAdaptor> adaptor = std::make_shared<StreamAdaptor>(g_pkgName);
+    EXPECT_EQ(adaptor->GetChannelId(), -1);
+    adaptor->ReleaseAdaptor(true);
+    EXPECT_EQ(adaptor->GetChannelId(), -1);
+
+    adaptor->ReleaseAdaptor(false);
+    EXPECT_EQ(adaptor->GetChannelId(), -1);
+}
+
+/*
  * @tc.name: EncryptTest01
  * @tc.desc: test Encrypt with empty data returns encrypt error
  *           Stream adaptor encrypt with empty data

@@ -16,6 +16,7 @@
 #include "trans_server_proxy_standard.h"
 
 #include "ipc_skeleton.h"
+#include "session.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
@@ -201,6 +202,11 @@ static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel 
         return false;
     }
 
+    if (attrs->linkTypeNum > LINK_TYPE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "Invalid linkType");
+        return false;
+    }
+
     if (attrs->linkTypeNum > 0) {
         if (!data.WriteBuffer(attrs->linkType, sizeof(LinkType) * attrs->linkTypeNum)) {
             TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs linkType failed!");
@@ -244,6 +250,10 @@ static bool WriteQosInfo(const SessionParam *param, MessageParcel &data)
 
 int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {
+    if (param == nullptr || info == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (param->sessionName == nullptr || param->peerSessionName == nullptr ||
         param->peerDeviceId == nullptr || param->groupId == nullptr) {
         return SOFTBUS_INVALID_PARAM;

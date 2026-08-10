@@ -2575,4 +2575,60 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_Test_
     EXPECT_EQ(udidNum, 1);
     SoftBusFree(udids);
 }
+
+/*
+ * @tc.name: AUTH_GET_ALL_NETWORKID_Test_001
+ * @tc.desc: Verify AuthGetAllNetworkId returns SOFTBUS_INVALID_PARAM
+ *           with null parameters
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, AUTH_GET_ALL_NETWORKID_Test_001, TestSize.Level1)
+{
+    char *networkIds = nullptr;
+    uint32_t networkIdCount = 0;
+    int32_t ret = AuthGetAllNetworkId(nullptr, &networkIds, &networkIdCount);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthGetAllNetworkId(NODE1_UDID, nullptr, &networkIdCount);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthGetAllNetworkId(NODE1_UDID, &networkIds, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: AUTH_GET_ALL_NETWORKID_Test_002
+ * @tc.desc: Verify AuthGetAllNetworkId returns SOFTBUS_OK and gets networkId
+ *           for online node in distributed ledger
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, AUTH_GET_ALL_NETWORKID_Test_002, TestSize.Level1)
+{
+    char *networkIds = nullptr;
+    uint32_t networkIdCount = 0;
+    int32_t ret = AuthGetAllNetworkId(NODE1_UDID, &networkIds, &networkIdCount);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(networkIdCount, 1);
+    ASSERT_NE(networkIds, nullptr);
+    EXPECT_STREQ(networkIds, NODE1_NETWORK_ID);
+    SoftBusFree(networkIds);
+}
+
+/*
+ * @tc.name: AUTH_GET_ALL_NETWORKID_Test_003
+ * @tc.desc: Verify AuthGetAllNetworkId returns SOFTBUS_NOT_IMPLEMENT
+ *           for udid not found in distributed ledger
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, AUTH_GET_ALL_NETWORKID_Test_003, TestSize.Level1)
+{
+    char *networkIds = nullptr;
+    uint32_t networkIdCount = 0;
+    int32_t ret = AuthGetAllNetworkId(NODE2_UDID, &networkIds, &networkIdCount);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+}
 } // namespace OHOS

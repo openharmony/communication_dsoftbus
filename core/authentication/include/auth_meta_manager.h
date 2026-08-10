@@ -36,8 +36,8 @@ int32_t AuthMetaEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen,
 int32_t AuthMetaDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen);
 
-int32_t AuthMetaGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
-int32_t AuthMetaGetConnInfoBySide(const char *uuid, bool isClient, AuthConnInfo *connInfo);
+int32_t AuthMetaGetPreferConnInfo(const char *networkId, AuthConnInfo *connInfo);
+int32_t AuthMetaGetConnInfoBySide(const char *networkId, bool isClient, AuthConnInfo *connInfo);
 int32_t AuthMetaOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
 void AuthMetaNotifyDataReceived(uint32_t connectionId, const SocketPktHead *pktHead, const uint8_t *data);
 void AuthMetaCloseConn(int64_t authId);

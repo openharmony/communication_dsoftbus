@@ -2200,7 +2200,7 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CRED_NEGO_INFO_TEST_001, TestSize.Level
     info.isSupportFastAuth = false;
     int64_t authSeq = 1;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(Return(false));
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillRepeatedly(Return(false));
     // STATE_COMPATIBLE
     info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
     EXPECT_NO_FATAL_FAILURE(UnpackCredNegoInfo(&obj, &info, authSeq));

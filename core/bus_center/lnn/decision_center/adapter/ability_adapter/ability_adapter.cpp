@@ -95,7 +95,12 @@ int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t us
     OHOS::AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
     want.SetParam("launch_type", std::string("softbus_agent_communication"));
-    return client->StartAbility(want);
+    int32_t ret = client->StartAbility(want);
+    if (ret == OHOS::AAFwk::RESOLVE_ABILITY_ERR) {
+        LNN_LOGE(LNN_EVENT, "abilityname err");
+        ret = SOFTBUS_RESOLVE_ABILITY_ERR;
+    }
+    return ret;
 }
 
 bool IsRunningProcess(const char *bundleName, int32_t userId)
@@ -120,6 +125,10 @@ bool IsRunningProcess(const char *bundleName, int32_t userId)
         return false;
     }
     OHOS::sptr<OHOS::AppExecFwk::IAppMgr> appMgr = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(appObj);
+    if (appMgr == nullptr) {
+        LNN_LOGE(LNN_EVENT, "appMgr is nullptr");
+        return false;
+    }
     std::vector<OHOS::AppExecFwk::RunningProcessInfo> processInfos;
     int32_t ret = appMgr->GetRunningProcessInformation(bundleName, userId, processInfos);
     LNN_LOGI(LNN_EVENT, "RunningProcessInfo size: %{public}zu", processInfos.size());

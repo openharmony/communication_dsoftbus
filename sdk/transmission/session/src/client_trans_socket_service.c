@@ -44,20 +44,12 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
     }
 
     if (info->peerName != NULL && !IsValidStringSafe(info->peerName, SESSION_NAME_SIZE_MAX)) {
-        char *anonySessionName = NULL;
-        Anonymize(info->peerName, &anonySessionName);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
-            AnonymizeWrapper(anonySessionName), strlen(info->peerName));
-        AnonymizeFree(anonySessionName);
+        TRANS_LOGE(TRANS_SDK, "invalid peerName.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (info->peerNetworkId != NULL && !IsValidStringSafe(info->peerNetworkId, DEVICE_ID_SIZE_MAX)) {
-        char *anonyNetworkId = NULL;
-        Anonymize(info->peerNetworkId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId failed, peerNetworkId=%{public}s, peerNetworkIdLen=%{public}zu",
-            AnonymizeWrapper(anonyNetworkId), strlen(info->peerNetworkId));
-        AnonymizeFree(anonyNetworkId);
+        TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId.");
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;

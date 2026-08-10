@@ -44,11 +44,13 @@ public:
     virtual int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel, bool isReply) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
-    virtual int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient) = 0;
+    virtual int32_t AuthGetConnInfoBySide(
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta, bool isClient) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetUsbConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
-    virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetPreferConnInfo(
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthOpenConn(
         const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta) = 0;
     virtual int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel) = 0;
@@ -87,12 +89,13 @@ public:
     MOCK_METHOD3(TransGetUdpChannelBySeq, int32_t (int64_t seq, UdpChannelInfo *channel, bool isReply));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey key, char *info, uint32_t len));
-    MOCK_METHOD4(AuthGetConnInfoBySide, int32_t (
-        const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient));
+    MOCK_METHOD5(AuthGetConnInfoBySide, int32_t (
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta, bool isClient));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
     MOCK_METHOD3(AuthGetUsbConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
-    MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
+    MOCK_METHOD4(AuthGetPreferConnInfo, int32_t (
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta));
     MOCK_METHOD4(AuthOpenConn, int32_t (
         const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta));
     MOCK_METHOD2(TransGetUdpChannelByRequestId, int32_t (uint32_t requestId, UdpChannelInfo *channel));

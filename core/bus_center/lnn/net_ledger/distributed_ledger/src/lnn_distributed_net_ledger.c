@@ -2420,3 +2420,38 @@ bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit)
     AnonymizeFree(anonyNetworkId);
     return ((authCapacity & (1 << (uint32_t)capaBit)) != 0);
 }
+
+static int32_t AuthDeviceGetNetworkId(const char *udid, char **networkIds, uint32_t *networkIdCount)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo) != SOFTBUS_OK ||
+        !LnnIsNodeOnline(&nodeInfo)) {
+        return SOFTBUS_NOT_FIND;
+    }
+    char *ids = (char *)SoftBusCalloc(NETWORK_ID_BUF_LEN);
+    if (ids == NULL) {
+        LNN_LOGE(LNN_LEDGER, "calloc fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(ids, NETWORK_ID_BUF_LEN, nodeInfo.networkId, sizeof(nodeInfo.networkId)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy networkId fail");
+        SoftBusFree(ids);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    *networkIds = ids;
+    *networkIdCount = 1;
+    return SOFTBUS_OK;
+}
+
+int32_t AuthGetAllNetworkId(const char *udid, char **networkIds, uint32_t *networkIdCount)
+{
+    if (udid == NULL || networkIds == NULL || networkIdCount == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (AuthDeviceGetNetworkId(udid, networkIds, networkIdCount) == SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return AuthMetaGetNetworkIdsPacked(udid, networkIds, networkIdCount);
+}

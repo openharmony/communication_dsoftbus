@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -385,6 +385,7 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
         .udpChannelOptType = TYPE_INVALID_CHANNEL
     };
 
+    (void)TransUdpChannelInit(&g_callbacks);
     int32_t ret = ParseRequestAppInfo(authHandle, cJson, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -406,6 +407,7 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
     ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
 
+    TransUdpChannelDeinit();
     cJSON_Delete(cJson);
 }
 
@@ -723,8 +725,10 @@ HWTEST_F(TransUdpStaticMockTest, UdpModuleCbTest002, TestSize.Level1)
     UdpModuleCb(authHandle, data);
 
     data->flag = 0;
+    g_channelCb = &g_callbacks;
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     UdpModuleCb(authHandle, data);
+    g_channelCb = nullptr;
 
     SoftBusFree(data);
 }
@@ -1203,5 +1207,105 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest006, TestSize.Level1)
 
     TransUdpChannelDeinit();
     cJSON_Delete(cJson);
+}
+
+/**
+ * @tc.name: TransUdpChannelInitNullCbTest
+ * @tc.desc: TransUdpChannelInit with NULL callback returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransUdpChannelInitNullCbTest, TestSize.Level1)
+{
+    int32_t ret = TransUdpChannelInit(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyUdpChannelOpenedCbNullTest
+ * @tc.desc: NotifyUdpChannelOpened with g_channelCb NULL returns SOFTBUS_TRANS_INIT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelOpenedCbNullTest, TestSize.Level1)
+{
+    AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    int32_t ret = NotifyUdpChannelOpened(appInfo, false);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INIT_FAILED);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: NotifyUdpChannelClosedCbNullTest
+ * @tc.desc: NotifyUdpChannelClosed with g_channelCb NULL returns SOFTBUS_TRANS_INIT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelClosedCbNullTest, TestSize.Level1)
+{
+    AppInfo *info = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(info != nullptr);
+    int32_t ret = NotifyUdpChannelClosed(info, 0);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INIT_FAILED);
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: NotifyUdpChannelBindCbNullTest
+ * @tc.desc: NotifyUdpChannelBind with g_channelCb NULL returns SOFTBUS_TRANS_INIT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelBindCbNullTest, TestSize.Level1)
+{
+    AppInfo *info = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(info != nullptr);
+    int32_t ret = NotifyUdpChannelBind(info);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INIT_FAILED);
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: NotifyUdpChannelOpenFailedCbNullTest
+ * @tc.desc: NotifyUdpChannelOpenFailed with g_channelCb NULL returns SOFTBUS_TRANS_INIT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelOpenFailedCbNullTest, TestSize.Level1)
+{
+    AppInfo *info = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(info != nullptr);
+    int32_t ret = NotifyUdpChannelOpenFailed(info, 0);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INIT_FAILED);
+    SoftBusFree(info);
+}
+
+/**
+ * @tc.name: NotifyUdpQosEventCbNullTest
+ * @tc.desc: NotifyUdpQosEvent with g_channelCb NULL returns SOFTBUS_TRANS_INIT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpQosEventCbNullTest, TestSize.Level1)
+{
+    int32_t ret = NotifyUdpQosEvent(nullptr, 0, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INIT_FAILED);
+}
+
+/**
+ * @tc.name: ParseRequestAppInfoCbNullTest
+ * @tc.desc: ParseRequestAppInfo with g_channelCb NULL returns SOFTBUS_TRANS_INIT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoCbNullTest, TestSize.Level1)
+{
+    AuthHandle authHandle = {0};
+    AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    int32_t ret = ParseRequestAppInfo(authHandle, nullptr, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INIT_FAILED);
+    SoftBusFree(appInfo);
 }
 }

@@ -1511,8 +1511,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->keyType = channel->keyType;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt || channel->isD2D) {
                     ClientSetAuthSessionTimer(serverNode, sessionNode);
-                    if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
-                        channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
+                    if (strcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK) {
                         UnlockClientSessionServerList();
                         return SOFTBUS_MEM_ERR;
                     }
@@ -1538,8 +1537,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->enableMultipath = channel->enableMultipath;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt || channel->isD2D) {
                     ClientSetAuthSessionTimer(serverNode, sessionNode);
-                    if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
-                        channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
+                    if (strcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK) {
                         UnlockClientSessionServerList();
                         return SOFTBUS_MEM_ERR;
                     }

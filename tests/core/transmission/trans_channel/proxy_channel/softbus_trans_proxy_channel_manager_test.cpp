@@ -1043,4 +1043,21 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDisableConnBrIdleCheckTest001
 
     ListDelete(&(proxyChannelInfo->node));
 }
+
+/*
+ * @tc.name: TransDisableConnBrIdleCheckTest002
+ * @tc.desc: TransDisableConnBrIdleCheck with non-existent channelId returns SOFTBUS_TRANS_NODE_NOT_FOUND.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDisableConnBrIdleCheckTest002, TestSize.Level1)
+{
+    if (g_proxyChannelList == nullptr) {
+        g_proxyChannelList = CreateSoftBusList();
+    }
+    ASSERT_TRUE(g_proxyChannelList != nullptr);
+
+    int32_t ret = TransDisableConnBrIdleCheck(TEST_CHANNEL_ID + 9999);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+}
 } // namespace OHOS

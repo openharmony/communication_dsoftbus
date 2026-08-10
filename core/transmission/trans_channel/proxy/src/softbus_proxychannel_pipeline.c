@@ -174,47 +174,82 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
     return SOFTBUS_TRANS_REGISTER_LISTENER_FAILED;
 }
 
-int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
+static int32_t ValidateOpenChannelParams(const char *networkId,
     const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
 {
-    TRANS_LOGD(TRANS_CTRL, "enter.");
-    if (!IsValidStringSafe(networkId, ID_MAX_LEN)) {
+    if (!IsValidStringSafe(networkId, NETWORK_ID_BUF_LEN)) {
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "option invalid");
     TRANS_CHECK_AND_RETURN_RET_LOGE(networkId, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid network id");
     TRANS_CHECK_AND_RETURN_RET_LOGE(callback && callback->onChannelOpened && callback->onChannelOpenFailed,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid callback");
-
     if (option->bleDirect) {
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             ConnBleDirectIsEnablePacked(BLE_COC), SOFTBUS_FUNC_NOT_SUPPORT,
                 TRANS_CTRL, "ble direct is not enable");
     }
+    return SOFTBUS_OK;
+}
+
+static struct PipelineChannelItem *CreatePipeLineChannelItem(int32_t requestId, const char *networkId,
+    const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
+{
+    if (!IsValidStringSafe(networkId, NETWORK_ID_BUF_LEN) || option == NULL || callback == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return NULL;
+    }
     struct PipelineChannelItem *item = (struct PipelineChannelItem *)SoftBusCalloc(sizeof(struct PipelineChannelItem));
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc item failed, reqId=%{public}d", requestId);
+        item != NULL, NULL, TRANS_CTRL, "malloc item failed, reqId=%{public}d", requestId);
     item->requestId = requestId;
     if (strcpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "strcpy_s network id failed, reqId=%{public}d", requestId);
         SoftBusFree(item);
-        return SOFTBUS_STRCPY_ERR;
+        return NULL;
     }
     item->option = *option;
     item->callback = *callback;
     item->channelId = INVALID_CHANNEL_ID;
+    return item;
+}
 
+static struct SoftBusMessage *CreateOpenChannelMessage(int32_t requestId)
+{
     struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc msg failed, reqId=%{public}d", requestId);
-        SoftBusFree(item);
-        return SOFTBUS_MALLOC_ERR;
+        return NULL;
     }
     msg->what = LOOPER_MSG_TYPE_OPEN_CHANNEL;
     msg->arg1 = (uint64_t)requestId;
     msg->handler = &g_manager.handler;
     msg->FreeMessage = TransProxyPipelineFreeMessage;
+    return msg;
+}
 
+int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
+    const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
+{
+    TRANS_LOGD(TRANS_CTRL, "enter.");
+    int32_t ret = ValidateOpenChannelParams(networkId, option, callback);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "invalid param");
+    struct PipelineChannelItem *item = CreatePipeLineChannelItem(requestId, networkId, option, callback);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "create item failed");
+    struct SoftBusMessage *msg = CreateOpenChannelMessage(requestId);
+    if (msg == NULL) {
+        SoftBusFree(item);
+        TRANS_LOGE(TRANS_CTRL, "create msg failed, reqId=%{public}d", requestId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    if (!atomic_load_explicit(&(g_manager.inited), memory_order_acquire) ||
+        g_manager.channels == NULL || g_manager.looper == NULL) {
+        SoftBusFree(item);
+        SoftBusFree(msg);
+        TRANS_LOGE(TRANS_CTRL, "pipeline not inited, reqId=%{public}d", requestId);
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&g_manager.channels->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock channels failed, reqId=%{public}d", requestId);
         SoftBusFree(item);
@@ -260,13 +295,17 @@ int32_t TransProxyPipelineSendMessage(
 int32_t TransProxyPipelineGetChannelIdByNetworkId(const char *networkId)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
-    if (!IsValidStringSafe(networkId, ID_MAX_LEN)) {
+    if (!IsValidStringSafe(networkId, NETWORK_ID_BUF_LEN)) {
         return SOFTBUS_INVALID_PARAM;
     }
     char uuid[UUID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get remote uuid by network id fail, ret=%{public}d", ret);
+        return INVALID_CHANNEL_ID;
+    }
+    if (!atomic_load_explicit(&(g_manager.inited), memory_order_acquire) || g_manager.channels == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return INVALID_CHANNEL_ID;
     }
 

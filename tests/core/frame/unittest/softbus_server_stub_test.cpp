@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2619,7 +2619,7 @@ HWTEST_F(SoftbusServerStubTest, ConstraintSetSizeTest001, TestSize.Level1)
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(softBusServer, nullptr);
 
-    EXPECT_EQ(softBusServer->memberConstraintSet_.size(), 12u);
+    EXPECT_EQ(softBusServer->memberConstraintSet_.size(), 14u);
 }
 
 /*

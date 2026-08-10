@@ -91,9 +91,9 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return GetTransTcpDirectP2pInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfo(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
-    return GetTransTcpDirectP2pInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
+    return GetTransTcpDirectP2pInterface()->AuthGetPreferConnInfo(uuid, networkId, connInfo, isMeta);
 }
 
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta)

@@ -103,6 +103,7 @@ if (defined(ohos_lite)) {
           "-DNSTACKX_WITH_LITEOS",
           "-Os",
           "-fvisibility=hidden",
+          "-DLWIP_LITEOS_A_COMPAT",
         ]
       } else {
         cflags += [ "-DNSTACKX_WITH_LINUX" ]

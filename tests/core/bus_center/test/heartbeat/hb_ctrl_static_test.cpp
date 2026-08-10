@@ -180,6 +180,12 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_HEART_BEAT_TEST_001, TestSize.Lev
     ret = LnnRegisterHeartbeatEvent();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
 
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_ACCOUNT_SWITCH_CHECK), _))
+        .WillOnce(Return(SOFTBUS_MEM_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = LnnRegisterHeartbeatEvent();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR);
+
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED), _))
         .WillOnce(Return(SOFTBUS_MEM_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));

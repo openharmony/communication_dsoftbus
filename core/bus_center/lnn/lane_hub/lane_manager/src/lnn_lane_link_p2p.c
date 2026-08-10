@@ -287,7 +287,7 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
     }
     int32_t ret = AuthGetHmlConnInfo(uuid, connInfo, isMetaAuth);
     if (ret != SOFTBUS_OK) {
-        ret = AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
+        ret = AuthGetPreferConnInfo(uuid, uuid, connInfo, isMetaAuth);
     }
     return ret;
 }
@@ -2096,7 +2096,7 @@ static int32_t GetAuthConnInfoWithoutMeta(const LinkRequest *request, uint32_t l
         LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
         ret = AuthGetConnInfoByType(uuid, AUTH_LINK_TYPE_BR, connInfo, false);
     } else {
-        ret = AuthGetPreferConnInfo(uuid, connInfo, false);
+        ret = AuthGetPreferConnInfo(uuid, uuid, connInfo, false);
     }
     return ret;
 }
@@ -2141,7 +2141,7 @@ static int32_t GetMetaAuthConnInfo(const LinkRequest *request, uint32_t laneReqI
         LNN_LOGE(LNN_LANE, "get peer uuid fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    return AuthGetPreferConnInfo(uuid, connInfo, true);
+    return AuthGetPreferConnInfo(uuid, uuid, connInfo, true);
 }
 
 static void OnMetaAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)

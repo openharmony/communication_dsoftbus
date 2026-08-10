@@ -764,7 +764,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     appInfo->connectType = connOpt.type;
     appInfo->myData.sessionId = param->sessionId;
     extra->linkType = connOpt.type;
-    if (appInfo->osType == OTHER_OS_TYPE &&
+    if (appInfo->osType == OTHER_OS_TYPE && connInnerInfo->type == LANE_P2P &&
         strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), connInnerInfo->connInfo.p2p.localIp) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "set p2p localIp err.");
     }

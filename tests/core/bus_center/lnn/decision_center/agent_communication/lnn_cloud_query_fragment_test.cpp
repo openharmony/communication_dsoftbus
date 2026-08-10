@@ -795,4 +795,116 @@ HWTEST_F(LnnCloudQueryFragmentTest, DataAggregate_LargeSliceSize_Test, TestSize.
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
+/* ==================== DataAggregate新增验证测试 ==================== */
+
+/*
+ * @tc.name: DATA_AGGREGATE_TEST_018
+ * @tc.desc: test DataAggregate total mismatch with existing context.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnCloudQueryFragmentTest, DataAggregate_TotalMismatch_Test, TestSize.Level1)
+{
+    uint32_t total1 = MAX_SLICE_LEN + 100;
+    uint8_t data1[FRAGMENT_HEADER_LEN + 10] = {0};
+    *reinterpret_cast<uint32_t *>(data1) = htonl(55555);
+    *reinterpret_cast<uint32_t *>(data1 + 4) = htonl(10);
+    *reinterpret_cast<uint32_t *>(data1 + 8) = htonl(0);
+    *reinterpret_cast<uint32_t *>(data1 + 12) = htonl(total1);
+
+    uint8_t *assembledData = nullptr;
+    uint32_t assembledLen = 0;
+    uint32_t msgId = 0;
+
+    int32_t ret = DataAggregate(data1, sizeof(data1), &assembledData, &assembledLen, &msgId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(msgId, 55555);
+
+    uint8_t data2[FRAGMENT_HEADER_LEN + 10] = {0};
+    *reinterpret_cast<uint32_t *>(data2) = htonl(55555);
+    *reinterpret_cast<uint32_t *>(data2 + 4) = htonl(10);
+    *reinterpret_cast<uint32_t *>(data2 + 8) = htonl(10);
+    *reinterpret_cast<uint32_t *>(data2 + 12) = htonl(200);
+
+    assembledData = nullptr;
+    assembledLen = 0;
+    msgId = 0;
+
+    ret = DataAggregate(data2, sizeof(data2), &assembledData, &assembledLen, &msgId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    uint8_t data3[FRAGMENT_HEADER_LEN + 10] = {0};
+    *reinterpret_cast<uint32_t *>(data3) = htonl(55555);
+    *reinterpret_cast<uint32_t *>(data3 + 4) = htonl(10);
+    *reinterpret_cast<uint32_t *>(data3 + 8) = htonl(10);
+    *reinterpret_cast<uint32_t *>(data3 + 12) = htonl(total1);
+
+    assembledData = nullptr;
+    assembledLen = 0;
+    msgId = 0;
+
+    ret = DataAggregate(data3, sizeof(data3), &assembledData, &assembledLen, &msgId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    if (assembledData != nullptr) {
+        SoftBusFree(assembledData);
+    }
+}
+
+/*
+ * @tc.name: DATA_AGGREGATE_TEST_019
+ * @tc.desc: test DataAggregate offset+size overflow total.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnCloudQueryFragmentTest, DataAggregate_OffsetSizeOverflowTotal_Test, TestSize.Level1)
+{
+    uint8_t data[FRAGMENT_HEADER_LEN + 10] = {0};
+    *reinterpret_cast<uint32_t *>(data) = htonl(1);
+    *reinterpret_cast<uint32_t *>(data + 4) = htonl(10);
+    *reinterpret_cast<uint32_t *>(data + 8) = htonl(95);
+    *reinterpret_cast<uint32_t *>(data + 12) = htonl(100);
+
+    uint8_t *assembledData = nullptr;
+    uint32_t assembledLen = 0;
+    uint32_t msgId = 0;
+
+    int32_t ret = DataAggregate(data, sizeof(data), &assembledData, &assembledLen, &msgId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: DATA_AGGREGATE_TEST_020
+ * @tc.desc: test DataAggregate duplicate fragment.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnCloudQueryFragmentTest, DataAggregate_DuplicateFragment_Test, TestSize.Level1)
+{
+    uint8_t data[FRAGMENT_HEADER_LEN + 10] = {0};
+    *reinterpret_cast<uint32_t *>(data) = htonl(77777);
+    *reinterpret_cast<uint32_t *>(data + 4) = htonl(10);
+    *reinterpret_cast<uint32_t *>(data + 8) = htonl(0);
+    *reinterpret_cast<uint32_t *>(data + 12) = htonl(20);
+
+    uint8_t *assembledData = nullptr;
+    uint32_t assembledLen = 0;
+    uint32_t msgId = 0;
+
+    int32_t ret = DataAggregate(data, sizeof(data), &assembledData, &assembledLen, &msgId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    if (assembledData != nullptr) {
+        SoftBusFree(assembledData);
+    }
+
+    assembledData = nullptr;
+    assembledLen = 0;
+    msgId = 0;
+
+    ret = DataAggregate(data, sizeof(data), &assembledData, &assembledLen, &msgId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    if (assembledData != nullptr) {
+        SoftBusFree(assembledData);
+    }
+}
+
 } // namespace OHOS

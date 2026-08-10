@@ -959,7 +959,7 @@ HWTEST_F(TcpManagerTest, testTcpManager025, TestSize.Level1)
 
     clientfd = tcp->OpenClientSocket(&option, "127.0.0.1", true);
     bytes = ConnSendSocketData(clientfd, "Hello world", 11, 0);
-    EXPECT_EQ(bytes, -1);
+    EXPECT_EQ(bytes, SOFTBUS_CONN_EPOLL_ABNORMAL_EVENT);
     ConnShutdownSocket(clientfd);
 };
 
@@ -999,7 +999,7 @@ HWTEST_F(TcpManagerTest, testTcpManager026, TestSize.Level1)
     EXPECT_EQ(bytes, -1);
 
     bytes = ConnSendSocketData(clientfd, "hello world!", 12, 0);
-    EXPECT_EQ(bytes, -1);
+    EXPECT_EQ(bytes, SOFTBUS_CONN_EPOLL_ABNORMAL_EVENT);
     ConnShutdownSocket(clientfd);
 };
 
