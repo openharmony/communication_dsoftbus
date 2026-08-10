@@ -48,8 +48,12 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.myIp = (char *)ReadString(data, &size);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(channel.myIp != NULL, SOFTBUS_IPC_ERR, TRANS_CTRL, "pointer null error");
+        TRANS_CHECK_AND_RETURN_RET_LOGE(channel.myIp != NULL, SOFTBUS_IPC_ERR, TRANS_CTRL, "myIp is null");
         channel.fd = ReadFileDescriptor(data);
+        channel.peerIp = (char *)ReadString(data, &size);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(channel.peerIp != NULL, SOFTBUS_IPC_ERR, TRANS_CTRL, "peerIp is null");
+        channel.pkgName = (char *)ReadString(data, &size);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(channel.pkgName != NULL, SOFTBUS_IPC_ERR, TRANS_CTRL, "pkgName is null");
     }
     ReadInt32(data, &(channel.businessType));
     if (channel.channelType == CHANNEL_TYPE_UDP) {
