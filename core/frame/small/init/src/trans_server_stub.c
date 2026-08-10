@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,14 +81,19 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
         TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer sessionName is null");
         return SOFTBUS_IPC_ERR;
     }
+    int32_t callingUid = GetCallingUid();
+    int32_t callingPid = GetCallingPid();
     if (!CheckNameContainServiceId(sessionName)) {
-        int32_t callingUid = GetCallingUid();
-        int32_t callingPid = GetCallingPid();
         if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "no permission");
             WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
             return SOFTBUS_PERMISSION_DENIED;
         }
+    }
+    if (!CheckUidAndPid(sessionName, callingUid, callingPid)) {
+        TRANS_LOGE(TRANS_CTRL, "Check Uid and Pid failed!");
+        WriteInt32(reply, SOFTBUS_TRANS_CHECK_PID_ERROR);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     int32_t ret = TransRemoveSessionServer(pkgName, sessionName);
     WriteInt32(reply, ret);
@@ -202,6 +207,39 @@ static bool ReadQosInfo(IpcIo *req, SessionParam *param)
     return true;
 }
 
+static bool ServerReadSessionParam(IpcIo *req, SessionParam *param)
+{
+    if (req == NULL || param == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return false;
+    }
+    size_t size;
+    param->sessionName = (const char*)ReadString(req, &size);
+    if (param->sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "sessionName is null");
+        return false;
+    }
+    param->peerSessionName = (const char *)ReadString(req, &size);
+    if (param->peerSessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "peerSessionName is null");
+        return false;
+    }
+    param->peerDeviceId = (const char *)ReadString(req, &size);
+    if (param->peerDeviceId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "peerDeviceId is null");
+        return false;
+    }
+    param->groupId = (const char *)ReadString(req, &size);
+    if (param->groupId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "groupId is null");
+        return false;
+    }
+    ReadBool(req, &param->isAsync);
+    ReadInt32(req, &param->sessionId);
+    ReadInt32(req, &param->keyType);
+    return true;
+}
+
 int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
 {
     TRANS_LOGI(TRANS_CTRL, "ipc server pop");
@@ -210,7 +248,6 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret;
-    size_t size;
     SessionParam param;
     SessionAttribute getAttr;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -218,13 +255,9 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     TransSerializer transSerializer;
     transSerializer.transInfo.channelId = INVALID_CHANNEL_ID;
     transSerializer.transInfo.channelType = CHANNEL_TYPE_BUTT;
-    param.sessionName = (const char*)ReadString(req, &size);
-    param.peerSessionName = (const char *)ReadString(req, &size);
-    param.peerDeviceId = (const char *)ReadString(req, &size);
-    param.groupId = (const char *)ReadString(req, &size);
-    ReadBool(req, &param.isAsync);
-    ReadInt32(req, &param.sessionId);
-    ReadInt32(req, &param.keyType);
+    if (!ServerReadSessionParam(req, &param)) {
+        return SOFTBUS_IPC_ERR;
+    }
     if (!ServerReadSessionAttrs(req, &getAttr)) {
         return SOFTBUS_IPC_ERR;
     }

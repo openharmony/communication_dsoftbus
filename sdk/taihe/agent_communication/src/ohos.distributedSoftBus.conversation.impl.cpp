@@ -191,6 +191,11 @@ void PostConversationDataAsync(::taihe::string_view deviceId,
         ThrowBusinessException(CONVERSATION_INVALID_PARAM);
         return;
     }
+    if (msg.size() > COMMUNICATION_DATA_MAX_LEN) {
+        COMM_LOGE(COMM_SDK, "msg too large, size=%{public}zu", msg.size());
+        ThrowBusinessException(CONVERSATION_INVALID_PARAM);
+        return;
+    }
 
     ::ConversationBusiness cBusiness;
     FillConversationBusiness(cBusiness, bundleNameStr, abilityNameStr);

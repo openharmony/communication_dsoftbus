@@ -14,13 +14,14 @@
  */
 
 #include "ability_adapter.h"
+#include "softbus_error_code.h"
 
 int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t userId)
 {
     (void)bundleName;
     (void)abilityName;
     (void)userId;
-    return 0;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 bool IsRunningProcess(const char *bundleName, int32_t userId)

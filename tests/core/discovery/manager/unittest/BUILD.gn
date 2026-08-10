@@ -102,64 +102,68 @@ ohos_unittest("DiscManagerMockTest") {
   ]
 }
 
-ohos_unittest("DiscManagerScreenTest") {
-  module_out_path = module_output_path
-  defines += [
-    "DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER",
-    "ENABLE_OS_ACCOUNT_CONSTRAINT",
-  ]
-  sources = [
-    "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
-    "$dsoftbus_core_path/discovery/manager/src/disc_mgr_config.c",
-    "ble_mock.cpp",
-    "constraint_mock.cpp",
-    "coap_mock.cpp",
-    "disc_manager_screen_test.cpp",
-    "nfc_mock.cpp",
-    "usb_mock.cpp",
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
-  ]
+if (dsoftbus_feature_disc_cockpit_multi_user) {
+  ohos_unittest("DiscManagerScreenTest") {
+    module_out_path = module_output_path
+    defines += [
+      "DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER",
+      "ENABLE_OS_ACCOUNT_CONSTRAINT",
+    ]
+    sources = [
+      "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
+      "$dsoftbus_core_path/discovery/manager/src/disc_mgr_config.c",
+      "ble_mock.cpp",
+      "constraint_mock.cpp",
+      "coap_mock.cpp",
+      "disc_manager_screen_test.cpp",
+      "nfc_mock.cpp",
+      "usb_mock.cpp",
+      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
+    ]
 
-  include_dirs = [
-    "$softbus_adapter_common/include",
-    "$dsoftbus_core_path/common/include",
-    "$dsoftbus_dfx_path/interface/include",
-    "$dsoftbus_core_path/discovery/interface",
-    "$dsoftbus_core_path/discovery/ipc/include",
-    "$dsoftbus_core_path/discovery/manager/include",
-    "$dsoftbus_core_path/bus_center/interface",
-    "$dsoftbus_core_path/bus_center/ipc/standard/include",
-    "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
-    "$dsoftbus_core_path/bus_center/service/include",
-    "$dsoftbus_core_path/discovery/ble/dispatcher/include",
-    "$dsoftbus_core_path/discovery/usb/dispatcher/include",
-    "$dsoftbus_core_path/discovery/coap/interface",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_core_path/discovery/ble/approach_ble/include",
-    "$dsoftbus_core_path/discovery/ble/virtual_link_ble/include",
-    "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-  ]
+    include_dirs = [
+      "$softbus_adapter_common/include",
+      "$dsoftbus_core_path/common/include",
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_core_path/discovery/interface",
+      "$dsoftbus_core_path/discovery/ipc/include",
+      "$dsoftbus_core_path/discovery/manager/include",
+      "$dsoftbus_core_path/bus_center/interface",
+      "$dsoftbus_core_path/bus_center/ipc/standard/include",
+      "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
+      "$dsoftbus_core_path/bus_center/service/include",
+      "$dsoftbus_core_path/discovery/ble/dispatcher/include",
+      "$dsoftbus_core_path/discovery/usb/dispatcher/include",
+      "$dsoftbus_core_path/discovery/coap/interface",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "$dsoftbus_core_path/discovery/ble/approach_ble/include",
+      "$dsoftbus_core_path/discovery/ble/virtual_link_ble/include",
+      "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
+      "$dsoftbus_root_path/core/adapter/bus_center/include",
+    ]
 
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/dfx:softbus_dfx",
-  ]
-  external_deps = [
-    "googletest:gmock",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-  ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/dfx:softbus_dfx",
+    ]
+    external_deps = [
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
 }
 
 group("unittest") {
   testonly = true
   deps = [
     ":DiscManagerMockTest",
-    ":DiscManagerScreenTest",
     ":DiscManagerTest",
   ]
+  if (dsoftbus_feature_disc_cockpit_multi_user) {
+    deps += [ ":DiscManagerScreenTest" ]
+  }
 }

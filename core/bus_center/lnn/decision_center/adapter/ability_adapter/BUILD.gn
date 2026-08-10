@@ -41,6 +41,7 @@ ohos_shared_library("ability_adapter") {
       ]
       sources = [ "$ability_adapter_path/ability_adapter.cpp" ]
     } else {
+      deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
       sources = [ "$ability_adapter_path/ability_adapter_virtual.cpp" ]
     }
 

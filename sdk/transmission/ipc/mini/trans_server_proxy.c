@@ -15,10 +15,13 @@
 
 #include "trans_server_proxy.h"
 
+#include <unistd.h>
+
 #include "lnn_connection_addr_utils.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "trans_channel_manager.h"
+#include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
 
@@ -40,12 +43,18 @@ void TransServerProxyClear(void)
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)timestamp;
-    return TransCreateSessionServer(pkgName, sessionName, 0, 0);
+    return TransCreateSessionServer(pkgName, sessionName, (int32_t)getuid(), (int32_t)getpid());
 }
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)timestamp;
+    int32_t callingUid = (int32_t)getuid();
+    int32_t callingPid = (int32_t)getpid();
+    if (!CheckUidAndPid(sessionName, callingUid, callingPid)) {
+        TRANS_LOGE(TRANS_SDK, "Check Uid and Pid failed!");
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 

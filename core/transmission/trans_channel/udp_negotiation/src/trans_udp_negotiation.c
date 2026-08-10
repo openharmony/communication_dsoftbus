@@ -249,6 +249,8 @@ int32_t NotifyUdpChannelClosed(const AppInfo *info, int32_t messageType)
         TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
         return SOFTBUS_INVALID_PARAM;
     }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_channelCb != NULL, SOFTBUS_TRANS_INIT_FAILED,
+        TRANS_CTRL, "g_channelCb is null.");
 
     TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s.", info->myData.pkgName);
     int32_t ret = g_channelCb->OnChannelClosed(info->myData.pkgName, info->myData.pid,
@@ -266,6 +268,8 @@ static int32_t NotifyUdpChannelBind(const AppInfo *info)
         TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
         return SOFTBUS_INVALID_PARAM;
     }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_channelCb != NULL, SOFTBUS_TRANS_INIT_FAILED,
+        TRANS_CTRL, "g_channelCb is null.");
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}" PRId64, info->myData.channelId);
     int32_t ret = g_channelCb->OnChannelBind(info->myData.pkgName, info->myData.pid,
         (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP);
@@ -280,10 +284,10 @@ static int32_t NotifyUdpChannelBind(const AppInfo *info)
 int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 {
     TRANS_LOGW(TRANS_CTRL, "enter.");
-    if (info == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM,
+        TRANS_CTRL, "appInfo is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_channelCb != NULL, SOFTBUS_TRANS_INIT_FAILED,
+        TRANS_CTRL, "g_channelCb is null.");
 
     int64_t timeStart = info->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
@@ -334,6 +338,8 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     TRANS_LOGI(TRANS_QOS, "notify udp qos eventId=%{public}d.", eventId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_channelCb != NULL, SOFTBUS_TRANS_INIT_FAILED,
+        TRANS_QOS, "g_channelCb is null.");
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
     int32_t ret = g_channelCb->GetPkgNameBySessionName(info->myData.sessionName, pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
@@ -450,8 +456,8 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo, AuthHandle *authHandle
     ret = CheckCollabRelation(appInfo, udpChannelId, CHANNEL_TYPE_UDP);
     if (ret == SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION) {
         ret = NotifyUdpChannelOpened(appInfo, true);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-            TRANS_CTRL, "Trans send on channel opened request fail. ret=%{public}d.", ret);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, ret, TRANS_CTRL, "Trans send on channel opened request fail. ret=%{public}d.", ret);
     }
 
     return SOFTBUS_OK;
@@ -742,6 +748,8 @@ static int32_t ParseRequestAppInfoEx(AppInfo *appInfo, AuthHandle authHandle)
 static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppInfo *appInfo)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_channelCb != NULL, SOFTBUS_TRANS_INIT_FAILED,
+        TRANS_CTRL, "g_channelCb is null.");
     int32_t ret = SetPeerDeviceIdByAuth(authHandle, appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_PEER_PROC_ERR, TRANS_CTRL, "set deviceId failed.");
     GetOsTypeByNetworkId(appInfo->peerData.deviceId, &appInfo->osType);
@@ -1458,6 +1466,8 @@ static void UdpModuleCb(AuthHandle authHandle, const AuthTransData *data)
 
 int32_t TransUdpChannelInit(IServerChannelCallBack *callback)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(callback != NULL, SOFTBUS_INVALID_PARAM,
+        TRANS_INIT, "callback is null.");
     g_channelCb = callback;
     int32_t ret = SoftBusMutexInit(&g_udpNegLock, NULL);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_TRANS_INIT_FAILED,

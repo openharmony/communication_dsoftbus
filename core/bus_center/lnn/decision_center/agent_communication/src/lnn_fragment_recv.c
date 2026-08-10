@@ -61,7 +61,10 @@ void FragmentRecvInit(void)
         LNN_LOGE(LNN_EVENT, "init fragment mutex failed");
         return;
     }
-    SoftBusMutexLock(&g_fragmentMutex);
+    if (SoftBusMutexLock(&g_fragmentMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "lock fragment mutex failed");
+        return;
+    }
     if (g_isInit) {
         SoftBusMutexUnlock(&g_fragmentMutex);
         return;
@@ -76,7 +79,10 @@ void FragmentRecvDeinit(void)
     if (!g_isInit) {
         return;
     }
-    SoftBusMutexLock(&g_fragmentMutex);
+    if (SoftBusMutexLock(&g_fragmentMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "lock fragment mutex failed");
+        return;
+    }
     FragmentRecvContext *item = NULL;
     FragmentRecvContext *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_fragmentList, FragmentRecvContext, node) {
@@ -128,7 +134,10 @@ static void DestroyFragmentContext(FragmentRecvContext *ctx)
 
 void FragmentRecvClear(uint32_t msgId)
 {
-    SoftBusMutexLock(&g_fragmentMutex);
+    if (SoftBusMutexLock(&g_fragmentMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "lock fragment mutex failed");
+        return;
+    }
     FragmentRecvContext *ctx = FindFragmentContext(msgId);
     if (ctx != NULL) {
         DestroyFragmentContext(ctx);
@@ -139,7 +148,10 @@ void FragmentRecvClear(uint32_t msgId)
 
 void FragmentRecvClearAll(void)
 {
-    SoftBusMutexLock(&g_fragmentMutex);
+    if (SoftBusMutexLock(&g_fragmentMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "lock fragment mutex failed");
+        return;
+    }
     FragmentRecvContext *item = NULL;
     FragmentRecvContext *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_fragmentList, FragmentRecvContext, node) {
@@ -164,7 +176,10 @@ static void CleanupTimeoutContexts(void)
 
 static int32_t GetOrCreateFragmentContext(uint32_t msgId, uint32_t moduleType)
 {
-    SoftBusMutexLock(&g_fragmentMutex);
+    if (SoftBusMutexLock(&g_fragmentMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "lock fragment mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     FragmentRecvContext *ctx = FindFragmentContext(msgId);
     if (ctx == NULL) {
         ctx = CreateFragmentContext(msgId, moduleType);
@@ -180,6 +195,10 @@ static int32_t GetOrCreateFragmentContext(uint32_t msgId, uint32_t moduleType)
 static int32_t ExtractFragmentData(const uint8_t *data, uint32_t offset, uint32_t fragmentTotalSize,
     uint8_t **buffer, uint32_t *fragmentDataSize)
 {
+    if (fragmentTotalSize < FAR_FIELD_PKT_HEAD_SIZE) {
+        LNN_LOGE(LNN_EVENT, "fragmentTotalSize=%{public}u invalid", fragmentTotalSize);
+        return SOFTBUS_INVALID_PARAM;
+    }
     *fragmentDataSize = fragmentTotalSize - FAR_FIELD_PKT_HEAD_SIZE;
     *buffer = (uint8_t *)SoftBusCalloc(*fragmentDataSize);
     if (*buffer == NULL) {
@@ -222,6 +241,10 @@ static int32_t ProcessSingleFragment(SingleFragmentData *singleData, Conversatio
     if (ret != SOFTBUS_OK) {
         return ret;
     }
+    if (header.size > MAX_SLICE_LEN) {
+        LNN_LOGE(LNN_EVENT, "fragment size exceeds limit, size=%{public}u", header.size);
+        return SOFTBUS_INVALID_PARAM;
+    }
 
     uint32_t fragmentTotalSize = totalHeaderSize + header.size;
     if (singleData->dataLen - *(singleData->offset) < fragmentTotalSize) {
@@ -260,7 +283,10 @@ int32_t FragmentRecvProcess(const char *udid, const uint8_t *data, uint32_t data
 
     FragmentRecvInit();
 
-    SoftBusMutexLock(&g_fragmentMutex);
+    if (SoftBusMutexLock(&g_fragmentMutex) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "lock fragment mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     CleanupTimeoutContexts();
     SoftBusMutexUnlock(&g_fragmentMutex);
 
