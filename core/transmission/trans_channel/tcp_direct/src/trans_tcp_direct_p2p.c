@@ -911,7 +911,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         return ret;
     }
     char peerUuid[UUID_BUF_LEN] = { 0 };
-    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);	 
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get remote uuid failed.");
     char peerNetWorkId[NETWORK_ID_BUF_LEN] = { 0 };
     AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authHandle.authId, peerNetWorkId, NETWORK_ID_BUF_LEN);
