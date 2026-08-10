@@ -99,7 +99,11 @@ if (defined(ohos_lite)) {
         external_deps += [ "bounds_checking_function:libsec_shared" ]
       }
       if (ohos_kernel_type == "liteos_a") {
-        cflags += [ "-DNSTACKX_WITH_LITEOS" ]
+        cflags += [
+          "-DNSTACKX_WITH_LITEOS",
+          "-Os",
+          "-fvisibility=hidden",
+        ]
       } else {
         cflags += [ "-DNSTACKX_WITH_LINUX" ]
       }
