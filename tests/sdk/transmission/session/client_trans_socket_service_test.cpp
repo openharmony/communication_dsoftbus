@@ -329,7 +329,7 @@ HWTEST_F(TransClientSocketServiceTest, DfsBind004, TestSize.Level1)
 {
     ISocketListener listener = { .OnShutdown = OnShutdown };
     int32_t ret = DfsBind(1, &listener);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 
 /*
@@ -627,7 +627,7 @@ HWTEST_F(TransClientSocketServiceTest, SetCommonSocketOpt005, TestSize.Level1)
     int32_t optValueSize = DATA_LENS;
     void *optValue = &optValueSize;
     int32_t ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 
 /*
@@ -745,7 +745,7 @@ HWTEST_F(TransClientSocketServiceTest, GetCommonSocketOpt005, TestSize.Level1)
     int32_t optValueSize = DATA_LENS;
     void *optValue = &optValueSize;
     int32_t ret = GetCommonSocketOpt(socket, level, optType, optValue, &optValueSize);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 
 /*
@@ -780,7 +780,7 @@ HWTEST_F(TransClientSocketServiceTest, GetCommonSocketOpt007, TestSize.Level1)
     int32_t optValueSize = DATA_LENS;
     void *optValue = &optValueSize;
     int32_t ret = GetCommonSocketOpt(socket, level, optType, optValue, &optValueSize);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 
 /*

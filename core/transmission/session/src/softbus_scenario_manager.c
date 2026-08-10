@@ -241,6 +241,10 @@ static bool ScenarioManagerAddIfaceNameByLocalMac(ScenarioManager *manager,
 
 static const char *ScenarioManagerFindIfaceNameByLocalMac(const char *localMac)
 {
+    if (localMac == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return NULL;
+    }
     // it's fake, gonna replaced by wifi interface
     static const char *LOCAL_MAC_1 = "18:65";
     static const char *LOCAL_MAC_2 = "82:13";
@@ -588,7 +592,7 @@ static int32_t UpdateOriginalScenario(ScenarioManager *manager, OriginalScenario
 
 static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
 {
-    if (manager->scenarioItemList == NULL) {
+    if (manager == NULL || manager->macIfacePairList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return;
     }
@@ -620,7 +624,7 @@ static void ScenarioManagerClearBusinessCounterList(ListNode *list)
 
 static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
 {
-    if (manager->scenarioItemList == NULL) {
+    if (manager == NULL || manager->scenarioItemList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return;
     }
@@ -684,7 +688,17 @@ int32_t ScenarioManagerInit(void)
     static ScenarioManager manager;
     if (g_manager == NULL) {
         manager.macIfacePairList = CreateSoftBusList();
+        if (manager.macIfacePairList == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "macIfacePairList init failed");
+            return SOFTBUS_NO_INIT;
+        }
         manager.scenarioItemList = CreateSoftBusList();
+        if (manager.scenarioItemList == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "scenarioItemList init failed");
+            DestroySoftBusList(manager.macIfacePairList);
+            manager.macIfacePairList = NULL;
+            return SOFTBUS_NO_INIT;
+        }
         g_manager = &manager;
     }
     TRANS_LOGI(TRANS_CTRL, "creat g_manager success!");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,8 +61,9 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     WriteBuffer(&io, channel->sessionKey, channel->keyLen);
     WriteString(&io, channel->peerSessionName);
     WriteString(&io, channel->peerDeviceId);
-    if ((channel->channelType == CHANNEL_TYPE_TCP_DIRECT) && (!WriteString(&io, channel->myIp) ||
-        !WriteFileDescriptor(&io, channel->fd))) {
+    if ((channel->channelType == CHANNEL_TYPE_TCP_DIRECT) &&
+        (!WriteString(&io, channel->myIp) || !WriteFileDescriptor(&io, channel->fd) ||
+            !WriteString(&io, channel->peerIp) || !WriteString(&io, channel->pkgName))) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     SvcIdentity svc = { 0 };

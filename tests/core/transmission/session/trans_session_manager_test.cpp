@@ -894,4 +894,73 @@ HWTEST_F(TransSessionManagerTest, GetAccessInfoBySessionNameTest001, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
+
+/*
+ * @tc.name: CheckUidAndPidTest001
+ * @tc.desc: test CheckUidAndPid, when uid and pid both match should return true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, CheckUidAndPidTest001, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SessionServer *sessionServer = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(sessionServer != nullptr);
+    (void)strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
+    sessionServer->uid = TEST_UID;
+    sessionServer->pid = TEST_PID;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool result = CheckUidAndPid(g_sessionName, TEST_UID, TEST_PID);
+    EXPECT_TRUE(result);
+    TransSessionServerDelItem(g_sessionName);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: CheckUidAndPidTest002
+ * @tc.desc: test CheckUidAndPid, when uid mismatch should return false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, CheckUidAndPidTest002, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SessionServer *sessionServer = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(sessionServer != nullptr);
+    (void)strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
+    sessionServer->uid = TEST_UID;
+    sessionServer->pid = TEST_PID;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool result = CheckUidAndPid(g_sessionName, TEST_UID + 1, TEST_PID);
+    EXPECT_FALSE(result);
+    TransSessionServerDelItem(g_sessionName);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: CheckUidAndPidTest003
+ * @tc.desc: test CheckUidAndPid, when pid mismatch should return false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, CheckUidAndPidTest003, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SessionServer *sessionServer = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(sessionServer != nullptr);
+    (void)strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), g_sessionName);
+    sessionServer->uid = TEST_UID;
+    sessionServer->pid = TEST_PID;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool result = CheckUidAndPid(g_sessionName, TEST_UID, TEST_PID + 1);
+    EXPECT_FALSE(result);
+    TransSessionServerDelItem(g_sessionName);
+    TransSessionMgrDeinit();
+}
 }
