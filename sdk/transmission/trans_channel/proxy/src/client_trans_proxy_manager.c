@@ -1521,11 +1521,10 @@ static int32_t ClientTransProxySubPacketProc(int32_t channelId, const SliceHead 
     } else {
         ret = TransProxyNormalSliceProcess(processor, head, data, len);
     }
-
-    SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     if (ret != SOFTBUS_OK) {
         TransProxyClearProcessor(processor);
     }
+    SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     return ret;
 }
 
