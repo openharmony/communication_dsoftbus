@@ -381,12 +381,24 @@ void AuthNotifyDeviceDisconnect(AuthHandle authHandle)
     g_verifyListener.onDeviceDisconnect(authHandle);
 }
 
-static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
+static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId, HandleNotTrustedType type)
 {
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
     if (!DpHasAccessControlProfile(peerUdid, false, localUserId)) {
         LnnDeleteLinkFinderInfo(peerUdid);
+    }
+    if (type == DP_DEVICE_TYPE) {
+        if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {
+            LnnDeleteSpecificTrustedDevInfo(peerUdid);
+        }
+        char networkId[NETWORK_ID_BUF_LEN] = {0};
+        if (LnnGetNetworkIdByUdid(peerUdid, networkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK) {
+            LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX, DEVICE_LEAVE_REASON_DEFAULT);
+        }
+        LnnHbOnTrustedRelationReduced();
+        AuthRemoveDeviceKeyByUdidPacked(peerUdid);
+        return;
     }
     if (!DpHasAccessControlProfile(peerUdid, true, localUserId)) {
         LnnDeleteSpecificTrustedDevInfo(peerUdid);

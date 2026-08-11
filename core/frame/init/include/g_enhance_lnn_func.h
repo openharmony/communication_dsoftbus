@@ -238,7 +238,7 @@ typedef int32_t (*InitSoftbusChainFunc)(SoftbusCertChain *softbusCertChain);
 typedef int32_t (*AuthMetaOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback);
 typedef int32_t (*AuthMetaPostTransDataFunc)(int64_t authId, const AuthTransData *dataInfo);
 typedef void (*AuthMetaCloseConnFunc)(int64_t authId);
-typedef int32_t (*AuthMetaGetPreferConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo);
+typedef int32_t (*AuthMetaGetPreferConnInfoFunc)(const char *networkId, AuthConnInfo *connInfo);
 typedef int64_t (*AuthMetaGetIdByConnInfoFunc)(const AuthConnInfo *connInfo, bool isServer);
 typedef int64_t (*AuthMetaGetIdByUuidFunc)(const char *uuid, AuthLinkType type, bool isServer);
 typedef int64_t (*AuthMetaGetIdByIpFunc)(const char *ip);
@@ -308,9 +308,12 @@ typedef int32_t (*AuthMetaGetConnectionTypeByMetaNodeIdFunc)(const char *metaNod
     NetworkConnectionType *connectionType);
 typedef int32_t (*LnnSendAgentDataFunc)(const char *udid, const char *data, uint32_t length,
     LnnEventExtra *extra, bool isAckMsg);
+typedef bool (*FarfieldParseModuleTypeFunc)(const uint8_t *data, uint32_t dataLen, uint32_t *moduleType);
 typedef int32_t (*PostLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
 typedef int32_t (*RemoveLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);
+typedef int32_t (*AuthMetaOpenConnWithOtherOsTypeFunc)(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -503,6 +506,7 @@ typedef struct TagLnnEnhanceFuncList {
     InitActionBleConcurrencyFunc initActionBleConcurrency;
     InitActionStateAdapterFunc initActionStateAdapter;
     LnnSendAgentDataFunc lnnSendAgentData;
+    FarfieldParseModuleTypeFunc farfieldParseModuleType;
     PostLnnCloudEventFunc postLnnCloudEvent;
     RemoveLnnCloudEventFunc removeLnnCloudEvent;
     // adapter bus_center
@@ -544,6 +548,7 @@ typedef struct TagLnnEnhanceFuncList {
     AuthInsertDeviceKeyFunc authInsertDeviceKey;
     AuthUpdateKeyIndexFunc authUpdateKeyIndex;
     AuthMetaGetPidByAuthIdFunc authMetaGetPidByAuthId;
+    AuthMetaOpenConnWithOtherOsTypeFunc authMetaOpenConnWithOtherOsType;
     CalcHKDFFunc calcHKDF;
     // ccmp
     CustomizedSecurityProtocolInitFunc customizedSecurityProtocolInit;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,26 +269,31 @@ int32_t InitSoftBus(const char *pkgName)
     }
     if (SoftBusTimerInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "client timer init fail");
-        goto EXIT;
+        goto EXIT_FREE_PKG;
     }
     if (ClientModuleInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ctx init fail");
-        goto EXIT;
+        goto EXIT_DEINIT_TIMER;
     }
     if (ClientStubInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "service init fail");
-        goto EXIT;
+        goto EXIT_DEINIT_MODULE;
     }
 
     if (ClientRegisterService(pkgName) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ClientRegisterService fail");
-        goto EXIT;
+        goto EXIT_DEINIT_MODULE;
     }
     g_isInited = true;
     SoftBusMutexUnlock(&g_isInitedLock);
     COMM_LOGD(COMM_SDK, "softbus sdk frame init success.");
     return SOFTBUS_OK;
-EXIT:
+
+EXIT_DEINIT_MODULE:
+    ClientModuleDeinit();
+EXIT_DEINIT_TIMER:
+    SoftBusTimerDeInit();
+EXIT_FREE_PKG:
     FreeClientPkgName();
     SoftBusMutexUnlock(&g_isInitedLock);
     return SOFTBUS_NO_INIT;

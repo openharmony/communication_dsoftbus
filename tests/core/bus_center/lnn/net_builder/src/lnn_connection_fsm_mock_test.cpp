@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "distribute_net_ledger_mock.h"
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
@@ -293,6 +294,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnAddOnlineNode).WillOnce(Return(REPORT_CHANGE)).WillRepeatedly(Return(REPORT_ONLINE));
 
     OnlineStateEnter(nullptr);

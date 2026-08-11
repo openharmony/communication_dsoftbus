@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "securec.h"
+#include <gtest/gtest.h>
 
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_manager.h"
@@ -23,10 +23,8 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
-#define TEST_SESSION_ID 0
-#define TEST_SEQ 1
-#define TEST_SESSION_ID_SECOND 2
-#define TEST_SEQ_SECOND 2
+#define TEST_CHANNEL_ID    1
+#define TEST_SEQ           0
 #define TEST_WAIT_ACK_TIME 10
 
 using namespace std;
@@ -35,12 +33,12 @@ using namespace testing::ext;
 namespace OHOS {
 class ClientTransPendingTest : public testing::Test {
 public:
-    ClientTransPendingTest() {}
-    ~ClientTransPendingTest() {}
+    ClientTransPendingTest() { }
+    ~ClientTransPendingTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override {}
-    void TearDown() override {}
+    void SetUp(void) override { }
+    void TearDown(void) override { }
 };
 
 void ClientTransPendingTest::SetUpTestCase(void)
@@ -51,72 +49,197 @@ void ClientTransPendingTest::SetUpTestCase(void)
     ret = TransClientInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
-void ClientTransPendingTest::TearDownTestCase(void) {}
 
-/**
- * @tc.name: TransPendingTest001
- * @tc.desc: client trans pending test,use the wrong or normal parameter.
+void ClientTransPendingTest::TearDownTestCase(void) { }
+
+/*
+ * @tc.name: CreatePendingPacketTest001
+ * @tc.desc: create a new pending packet returns ok
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level1)
+HWTEST_F(ClientTransPendingTest, CreatePendingPacketTest001, TestSize.Level1)
 {
-    uint32_t id = 1;
-    uint64_t seq = 0;
-
-    int32_t ret = CreatePendingPacket(id, seq);
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreatePendingPacket(TEST_SESSION_ID, seq);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreatePendingPacket(id, TEST_SEQ);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreatePendingPacket(id, seq);
-    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
-
-    uint32_t waitMillis = TEST_WAIT_ACK_TIME;
-    ret = GetPendingPacketData(id, seq, waitMillis, true, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    TransPendData pendDate = {0};
-    ret = GetPendingPacketData(TEST_SESSION_ID_SECOND, TEST_SEQ_SECOND, waitMillis, true, &pendDate);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = GetPendingPacketData(TEST_SESSION_ID_SECOND, seq, waitMillis, true, &pendDate);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = GetPendingPacketData(id, TEST_SEQ_SECOND, waitMillis, true, &pendDate);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = SetPendingPacketData(id, seq, &pendDate);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = SetPendingPacketData(id, seq, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = SetPendingPacketData(TEST_SESSION_ID_SECOND, TEST_SEQ_SECOND, &pendDate);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = SetPendingPacketData(TEST_SESSION_ID_SECOND, seq, &pendDate);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = SetPendingPacketData(id, TEST_SEQ_SECOND, &pendDate);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = GetPendingPacketData(id, seq, waitMillis, false, &pendDate);
-    EXPECT_EQ(SOFTBUS_ALREADY_TRIGGERED, ret);
-
-    ret = GetPendingPacketData(id, TEST_SEQ, waitMillis, true, &pendDate);
-    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
-
-    DeletePendingPacket(id, seq);
-
-    DeletePendingPacket(TEST_SESSION_ID, seq);
-
-    DeletePendingPacket(id, TEST_SEQ);
-
-    DeletePendingPacket(TEST_SESSION_ID_SECOND, TEST_SEQ_SECOND);
+    DeletePendingPacket(channelId, seq);
 }
-} // namespace OHOS nvv
+
+/*
+ * @tc.name: CreatePendingPacketTest002
+ * @tc.desc: create a duplicate pending packet returns already existed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, CreatePendingPacketTest002, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
+    DeletePendingPacket(channelId, seq);
+}
+
+/*
+ * @tc.name: GetPendingPacketDataTest001
+ * @tc.desc: get pending packet data with null data returns invalid param, get non-existent packet returns not find
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, GetPendingPacketDataTest001, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = GetPendingPacketData(channelId, seq, TEST_WAIT_ACK_TIME, true, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    TransPendData pendData = { };
+    ret = GetPendingPacketData(channelId, seq, TEST_WAIT_ACK_TIME, true, &pendData);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/*
+ * @tc.name: GetPendingPacketDataTest002
+ * @tc.desc: get already-triggered pending packet with isdelete false returns already triggered
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, GetPendingPacketDataTest002, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransPendData pendData = { };
+    ret = SetPendingPacketData(channelId, seq, &pendData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = GetPendingPacketData(channelId, seq, TEST_WAIT_ACK_TIME, false, &pendData);
+    EXPECT_EQ(SOFTBUS_ALREADY_TRIGGERED, ret);
+}
+
+/*
+ * @tc.name: GetPendingPacketDataTest003
+ * @tc.desc: get untriggered pending packet with isdelete true times out and deletes node
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, GetPendingPacketDataTest003, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransPendData pendData = { };
+    ret = GetPendingPacketData(channelId, seq, TEST_WAIT_ACK_TIME, true, &pendData);
+    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+}
+
+/*
+ * @tc.name: GetPendingPacketDataTest004
+ * @tc.desc: get untriggered pending packet with isdelete false times out and node survives
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, GetPendingPacketDataTest004, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransPendData pendData = { };
+    ret = GetPendingPacketData(channelId, seq, TEST_WAIT_ACK_TIME, false, &pendData);
+    EXPECT_EQ(SOFTBUS_TIMOUT, ret);
+    ret = SetPendingPacketData(channelId, seq, &pendData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeletePendingPacket(channelId, seq);
+}
+
+/*
+ * @tc.name: SetPendingPacketDataTest001
+ * @tc.desc: set pending packet data with valid data on existing packet returns ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, SetPendingPacketDataTest001, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransPendData pendData = { };
+    ret = SetPendingPacketData(channelId, seq, &pendData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeletePendingPacket(channelId, seq);
+}
+
+/*
+ * @tc.name: SetPendingPacketDataTest002
+ * @tc.desc: set pending packet data with null data on existing packet returns ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, SetPendingPacketDataTest002, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SetPendingPacketData(channelId, seq, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeletePendingPacket(channelId, seq);
+}
+
+/*
+ * @tc.name: SetPendingPacketDataTest003
+ * @tc.desc: set pending packet data on non-existent packet returns not find
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, SetPendingPacketDataTest003, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    TransPendData pendData = { };
+    int32_t ret = SetPendingPacketData(channelId, seq, &pendData);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/*
+ * @tc.name: DeletePendingPacketTest001
+ * @tc.desc: delete existing pending packet makes subsequent get return not find
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, DeletePendingPacketTest001, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeletePendingPacket(channelId, seq);
+    TransPendData pendData = { };
+    ret = GetPendingPacketData(channelId, seq, TEST_WAIT_ACK_TIME, true, &pendData);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/*
+ * @tc.name: DeletePendingPacketTest002
+ * @tc.desc: delete non-existent pending packet does not corrupt list state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransPendingTest, DeletePendingPacketTest002, TestSize.Level1)
+{
+    uint32_t channelId = TEST_CHANNEL_ID;
+    uint64_t seq = TEST_SEQ;
+    int32_t ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DeletePendingPacket(channelId, seq + 1);
+    ret = CreatePendingPacket(channelId, seq);
+    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
+    DeletePendingPacket(channelId, seq);
+}
+} // namespace OHOS

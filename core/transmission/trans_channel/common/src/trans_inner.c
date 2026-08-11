@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "softbus_proxychannel_manager.h"
@@ -62,6 +63,7 @@ static SoftBusList *g_sessionList = NULL;
 static SoftBusList *g_innerChannelSliceProcessorList = NULL;
 static SoftBusList *g_innerChannelDataBufList = NULL;
 static bool g_isInitedFlag = false;
+static SoftBusMutex g_directChannelInitLock;
 
 void ClientTransInnerSliceListDeinit(void)
 {
@@ -733,6 +735,10 @@ static int32_t DirectChannelOnDataEvent(ListenerModule module, int32_t events, i
 
 int32_t DirectChannelCreateListener(int32_t fd)
 {
+    if (SoftBusMutexLock(&g_directChannelInitLock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
     if (!g_isInitedFlag) {
         static SoftbusBaseListener listener = {
             .onConnectEvent = DirectChannelOnConnectEvent,
@@ -741,37 +747,51 @@ int32_t DirectChannelCreateListener(int32_t fd)
         g_baseListenerModule = (ListenerModule)CreateListenerModule();
         if (g_baseListenerModule == UNUSE_BUTT) {
             TRANS_LOGE(TRANS_CTRL, "create listener module fialed");
+            (void)SoftBusMutexUnlock(&g_directChannelInitLock);
             return SOFTBUS_TRANS_ILLEGAL_MODULE;
         }
         int32_t ret = StartBaseClient(g_baseListenerModule, &listener);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "start client base listener failed, ret=%{public}d", ret);
+            DestroyBaseListener(g_baseListenerModule);
+            g_baseListenerModule = UNUSE_BUTT;
+            (void)SoftBusMutexUnlock(&g_directChannelInitLock);
             return ret;
         }
         TRANS_LOGI(TRANS_CTRL, "init tcp direct channel success, fd=%{public}d", fd);
         g_isInitedFlag = true;
     }
+    ListenerModule module = g_baseListenerModule;
+    (void)SoftBusMutexUnlock(&g_directChannelInitLock);
     TRANS_LOGI(TRANS_CTRL, "add fd=%{public}d", fd);
-    return AddTrigger(g_baseListenerModule, fd, READ_TRIGGER);
+    return AddTrigger(module, fd, READ_TRIGGER);
 }
 
 void StopDirectChannelListener(void)
 {
+    if (SoftBusMutexLock(&g_directChannelInitLock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return;
+    }
     if (g_baseListenerModule < 0 || g_baseListenerModule >= UNUSE_BUTT) {
         TRANS_LOGE(TRANS_CTRL, "g_baseListenerModule not init");
+        (void)SoftBusMutexUnlock(&g_directChannelInitLock);
         return;
     }
     if (!g_isInitedFlag) {
         TRANS_LOGE(TRANS_CTRL, " not start listener, no need to stop");
+        (void)SoftBusMutexUnlock(&g_directChannelInitLock);
         return;
     }
     int32_t ret = StopBaseListener(g_baseListenerModule);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "StopBaseListener failed, ret=%{public}d", ret);
+        (void)SoftBusMutexUnlock(&g_directChannelInitLock);
         return;
     }
     g_isInitedFlag = false;
     g_baseListenerModule = UNUSE_BUTT;
+    (void)SoftBusMutexUnlock(&g_directChannelInitLock);
 }
 
 int32_t TdcSendData(int32_t channelId, const void *data, uint32_t len)
@@ -1218,6 +1238,10 @@ int32_t GetSessionInfo(int32_t channelId, int32_t *fd, int32_t *channelType, cha
 
 int32_t InnerListInit(void)
 {
+    if (SoftBusMutexInit(&g_directChannelInitLock, NULL) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "g_directChannelInitLock init failed");
+        return SOFTBUS_NO_INIT;
+    }
     g_innerChannelSliceProcessorList = CreateSoftBusList();
     if (g_innerChannelSliceProcessorList == NULL) {
         TRANS_LOGI(TRANS_CTRL, "g_innerChannelSliceProcessorList init failed");
@@ -1254,6 +1278,7 @@ void InnerListDeinit(void)
     ClientTransInnerSliceListDeinit();
     ClientTransInnerDataBufDeinit();
     ClientTransInnerSessionDeinit();
+    (void)SoftBusMutexDestroy(&g_directChannelInitLock);
 }
 
 int32_t ServerSideSendAck(int32_t sessionId, int32_t result)

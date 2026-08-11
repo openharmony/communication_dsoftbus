@@ -59,6 +59,16 @@ void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
     (void)udid;
 }
 
+void LnnNotifyAccountAclChangeEvent(
+    const char *udid, int32_t localUserId, int32_t peerUserId, const int64_t *serviceIdList, uint32_t serviceIdCount)
+{
+    (void)udid;
+    (void)localUserId;
+    (void)peerUserId;
+    (void)serviceIdList;
+    (void)serviceIdCount;
+}
+
 bool LnnIsLocalSupportBurstFeature(void)
 {
     return GetInterface()->LnnIsLocalSupportBurstFeature();

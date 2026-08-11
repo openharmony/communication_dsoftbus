@@ -42,6 +42,19 @@
 
 static _Atomic bool g_transSessionInitFlag = false;
 
+static void TransInitOptionalModules(void)
+{
+    if (ScenarioManagerInit() != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_INIT, "ScenarioManager init Failed");
+    }
+    if (InitSoftbusPagingResPullPacked() != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_INIT, "InitSoftbusPagingResPullPacked Failed");
+    }
+    if (InitSoftbusPagingPacked() != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_INIT, "InitSoftbusPagingPacked Failed");
+    }
+}
+
 int32_t TransServerInit(void)
 {
     if (atomic_load_explicit(&g_transSessionInitFlag, memory_order_acquire)) {
@@ -55,37 +68,37 @@ int32_t TransServerInit(void)
     ret = TransSessionMgrInit();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "TransSessionMgrInit failed");
-        return ret;
+        goto DEINIT_PERMISSION;
     }
     ret = TransChannelInit();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "TransChannelInit failed");
-        return ret;
+        goto DEINIT_SESSION_MGR;
     }
     ret = InitQosPacked();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
-        return ret;
+        goto DEINIT_CHANNEL;
     }
     ret = InnerListInit();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "InnerListInit Failed");
-        return ret;
+        goto DEINIT_CHANNEL;
     }
-    if (ScenarioManagerInit() != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_INIT, "ScenarioManager init Failed");
-    }
-    if (InitSoftbusPagingResPullPacked() != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_INIT, "InitSoftbusPagingResPullPacked Failed");
-    }
-    if (InitSoftbusPagingPacked() != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_INIT, "InitSoftbusPagingPacked Failed");
-    }
+    TransInitOptionalModules();
     RegisterPermissionChangeCallback();
     TransBrProxyInit();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
     return SOFTBUS_OK;
+
+DEINIT_CHANNEL:
+    TransChannelDeinit();
+DEINIT_SESSION_MGR:
+    TransSessionMgrDeinit();
+DEINIT_PERMISSION:
+    TransPermissionDeinit();
+    return ret;
 }
 
 void TransServerDeinit(void)
@@ -211,7 +224,7 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
         TRANS_LOGE(TRANS_CTRL, "SessionParam check failed");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (param->groupId == NULL || strlen(param->groupId) >= GROUP_ID_SIZE_MAX) {
+    if (!IsValidStringSafe(param->groupId, GROUP_ID_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "invalid groupId");
         return SOFTBUS_TRANS_SESSION_GROUP_INVALID;
     }

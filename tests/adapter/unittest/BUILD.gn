@@ -118,6 +118,23 @@ if (defined(ohos_lite)) {
     ]
   }
 
+  ohos_unittest("AdapterDsoftbusJsonTest") {
+    module_out_path = module_output_path
+    sources = [ "softbus_adapter_json_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/core/common/include/",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+    deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+
+    external_deps = [
+      "bounds_checking_function:libsec_static",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+
   ohos_unittest("AdapterDsoftbusRangeTest") {
     module_out_path = module_output_path
     sources = [ "softbus_adapter_range_test.cpp" ]
@@ -413,6 +430,7 @@ if (defined(ohos_lite)) {
     deps = [
       ":AdapterDsoftbusAesCryptoTest",
       ":AdapterDsoftbusDfxTest",
+      ":AdapterDsoftbusJsonTest",
       ":AdapterDsoftbusOtherTest",
       ":AdapterDsoftbusRangeTest",
       ":AdapterDsoftbusSocketTest",

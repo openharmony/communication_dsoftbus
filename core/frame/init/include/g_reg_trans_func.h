@@ -85,7 +85,7 @@ typedef void (*TransProxyCloseChannelByRequestIdFunc)(uint32_t requestId);
 typedef int32_t (*TransProxyGetProxyChannelInfoByChannelIdFunc)(int32_t channelId, ProxyChannelInfo *chan);
 typedef int32_t (*TransProxyGetProxyChannelIdByAuthReqFunc)(uint32_t reqId, int32_t *channelId);
 typedef void (*ReleaseProxyChannelIdFunc)(int32_t channelId);
-typedef int32_t (*TransProxyDelChanByChanIdFunc)(int32_t channelId);
+typedef void (*TransProxyDelChanByChanIdFunc)(int32_t channelId);
 typedef int32_t (*TransProxyCreatePagingChanInfoFunc)(ProxyChannelInfo *chan);
 typedef void (*TransProxyPagingHandshakeMsgToLoopFunc)(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
 typedef int32_t (*TransPagingWaitListenStatusFunc)(const uint32_t businessFlag, PagingWaitListenStatus status);

@@ -1992,6 +1992,35 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSi
 }
 
 /*
+ * @tc.name: TransProxyGetAppInfoTypeTest002
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when identity or appType is null.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest002, TestSize.Level1)
+{
+    int16_t myId = 1;
+    AppType appType;
+    int32_t ret = TransProxyGetAppInfoType(myId, nullptr, &appType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransProxyGetAppInfoType(myId, "test", nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: TransProxyCloseChannelByRequestIdTest001
+ * @tc.desc: TransProxyCloseChannelByRequestId with requestId overflow should return early without crash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseChannelByRequestIdTest001, TestSize.Level1)
+{
+    uint32_t overflowReqId = (uint32_t)INT32_MAX + 1;
+    EXPECT_NO_FATAL_FAILURE(TransProxyCloseChannelByRequestId(overflowReqId));
+}
+
+/*
  * @tc.name: TransProxySpecialUpdateChanInfoTest001
  * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
  * @tc.type: FUNC

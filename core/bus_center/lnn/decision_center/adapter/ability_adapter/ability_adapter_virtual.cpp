@@ -14,18 +14,27 @@
  */
 
 #include "ability_adapter.h"
+#include "softbus_error_code.h"
 
 int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t userId)
 {
-    return 0;
+    (void)bundleName;
+    (void)abilityName;
+    (void)userId;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 bool IsRunningProcess(const char *bundleName, int32_t userId)
 {
+    (void)bundleName;
+    (void)userId;
     return false;
 }
 
 bool IsExtensionAbility(const char *bundleName, const char *abilityName, int32_t upperLimit)
 {
+    (void)bundleName;
+    (void)abilityName;
+    (void)upperLimit;
     return false;
 }

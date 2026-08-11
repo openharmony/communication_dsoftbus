@@ -124,5 +124,15 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return GetInterface()->LnnGetLocalNumInfo(key, info);
 }
+
+int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *accountHash, uint32_t len)
+{
+    return GetInterface()->LnnGetAccountIdByUserId(userId, accountId, accountHash, len);
+}
+
+int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId)
+{
+    return GetInterface()->GetOsAccountUidByUserId(id, idLen, len, userId);
+}
 }
 } // namespace OHOS

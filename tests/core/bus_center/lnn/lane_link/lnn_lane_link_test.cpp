@@ -987,7 +987,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_002, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(connInfo), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthGetConnInfoByType)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1202,7 +1202,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(connInfo), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillOnce(linkMock.ActionOfConnOpenFailed)
@@ -1467,7 +1467,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_004, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(connInfo), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, AuthGetConnInfoByType)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1526,7 +1526,7 @@ HWTEST_F(LNNLaneLinkTest, LnnCancelWifiDirect_001, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR)));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(connInfo), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpened);
@@ -1585,7 +1585,7 @@ HWTEST_F(LNNLaneLinkTest, LnnCancelWifiDirect_002, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR)));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(connInfo), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpened);
@@ -1633,7 +1633,7 @@ static void SetCommonFunction(uint32_t laneReqId, LaneLinkType linkType, struct 
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remote), Return(SOFTBUS_LANE_GET_LEDGER_INFO_ERR)));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(connInfo), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpened);

@@ -56,10 +56,11 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     (void)groupInfo;
 }
 
-static void OnDeviceNotTrusted(const char *udid, int32_t localUserId)
+static void OnDeviceNotTrusted(const char *udid, int32_t localUserId, HandleNotTrustedType type)
 {
     (void)udid;
     (void)localUserId;
+    (void)type;
 }
 
 static DeviceProfileChangeListener g_deviceProfilePara = {
@@ -129,7 +130,9 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001,
 {
     RegisterToDp(&g_deviceProfilePara);
     AuthToDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_device_id");
     AuthDeviceProfileListenerInterfaceMock mocker;
+    EXPECT_CALL(mocker, LnnGetRemoteNodeInfoById(_, _, _)).WillRepeatedly(Return(0));
     int32_t ret = listener->OnTrustDeviceProfileDelete(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -307,6 +310,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_UPDATE_TEST, T
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, TestSize.Level1)
 {
     DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_device_id");
     AuthDeviceProfileListenerInterfaceMock mocker;
     EXPECT_CALL(mocker, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_OFF));
     EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillOnce(Return(false));
@@ -330,9 +334,73 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, Tes
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST, TestSize.Level1)
 {
     AuthDeviceProfileListenerInterfaceMock mocker;
+    EXPECT_CALL(mocker, LnnGetRemoteNodeInfoById(_, _, _)).WillRepeatedly(Return(0));
     DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_device_id");
     EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = listener->OnTrustDeviceProfileInactive(profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_DELETE_TEST
+ * @tc.desc: Verify that OnAccountAclDelete correctly handles account ACL deletion.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_DELETE_TEST, TestSize.Level1)
+{
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    int32_t ret = listener->OnAccountAclDelete(profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_DELETE_VALID_TEST
+ * @tc.desc: Verify that OnAccountAclDelete handles valid profile with car device.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_DELETE_VALID_TEST, TestSize.Level1)
+{
+    AuthDeviceProfileListenerInterfaceMock mocker;
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_udid_for_car");
+    EXPECT_CALL(mocker, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NOT_FIND));
+    int32_t ret = listener->OnAccountAclDelete(profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_INACTIVE_TEST
+ * @tc.desc: Verify that OnAccountAclInactive correctly handles account ACL inactivation.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_INACTIVE_TEST, TestSize.Level1)
+{
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    int32_t ret = listener->OnAccountAclInactive(profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ON_ACCOUNT_ACL_INACTIVE_VALID_TEST
+ * @tc.desc: Verify that OnAccountAclInactive handles valid profile with car device.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileListenerTest, ON_ACCOUNT_ACL_INACTIVE_VALID_TEST, TestSize.Level1)
+{
+    AuthDeviceProfileListenerInterfaceMock mocker;
+    DistributedDeviceProfile::TrustDeviceProfile profile;
+    profile.SetDeviceId("test_udid_for_car");
+    EXPECT_CALL(mocker, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NOT_FIND));
+    int32_t ret = listener->OnAccountAclInactive(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

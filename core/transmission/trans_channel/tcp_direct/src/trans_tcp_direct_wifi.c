@@ -128,6 +128,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_USB, false, &newConn->authHandle);
         if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, newConn->appInfo.myData.addr,
             sizeof(newConn->appInfo.myData.addr), USB_IF) != SOFTBUS_OK) {
+            SoftBusFree(newConn);
             TRANS_LOGE(TRANS_CTRL, "get local ip failed");
             return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
         }

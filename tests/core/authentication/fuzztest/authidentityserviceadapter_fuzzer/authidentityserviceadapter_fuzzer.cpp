@@ -56,9 +56,9 @@ void ProcessServiceGetCred(FuzzedDataProvider &provider, HiChainAuthParam &hiCha
     IdServiceGenerateAuthParam(&hiChainParam);
     IdServiceCopyCredId(hiChainParam.credId);
     int32_t credType = provider.ConsumeIntegral<int32_t>();
-    IdServiceGetCredTypeByCredId(hiChainParam.userId, hiChainParam.credId, &credType);
+    IdServiceGetCredTypeByCredId(hiChainParam.peerUserId, hiChainParam.credId, &credType);
     string credList = provider.ConsumeRandomLengthString(CREATE_LIST_LEN);
-    IdServiceGetCredIdFromCredList(hiChainParam.userId, credList.c_str());
+    IdServiceGetCredIdFromCredList(hiChainParam.peerUserId, credList.c_str());
     IsInvalidCredList(credList.c_str());
     string strCredInfo = provider.ConsumeRandomLengthString(CREATE_LIST_LEN);
     OnCredAdd(hiChainParam.credId, strCredInfo.c_str());
@@ -66,7 +66,7 @@ void ProcessServiceGetCred(FuzzedDataProvider &provider, HiChainAuthParam &hiCha
     IsLocalCredInfo(hiChainParam.udid);
     OnCredUpdate(hiChainParam.credId, strCredInfo.c_str());
     GetCredInfoFromJson(strCredInfo.c_str(), &credInfo);
-    GetCredInfoByUserIdAndCredId(hiChainParam.userId, hiChainParam.credId, &credInfo);
+    GetCredInfoByUserIdAndCredId(hiChainParam.peerUserId, hiChainParam.credId, &credInfo);
     string shortUdidHash = provider.ConsumeRandomLengthString(UDID_HASH_LEN);
     string shortAccountIdHash = provider.ConsumeRandomLengthString(MAX_ACCOUNT_HASH_LEN);
     IdServiceIsPotentialTrustedDevice(shortUdidHash.c_str(), shortAccountIdHash.c_str(), true);
@@ -74,9 +74,9 @@ void ProcessServiceGetCred(FuzzedDataProvider &provider, HiChainAuthParam &hiCha
     string credList2 = provider.ConsumeRandomLengthString(CREATE_LIST_LEN);
     const char *ptrCredList[] = { credList1.c_str(), credList2.c_str() };
     AuthIdServiceQueryCredential(
-        hiChainParam.userId, shortUdidHash.c_str(), shortAccountIdHash.c_str(), true, (char **)ptrCredList);
+        hiChainParam.peerUserId, shortUdidHash.c_str(), shortAccountIdHash.c_str(), true, (char **)ptrCredList);
     IdServiceQueryCredential(
-        hiChainParam.userId, shortUdidHash.c_str(), shortAccountIdHash.c_str(), true, (char **)ptrCredList);
+        hiChainParam.peerUserId, shortUdidHash.c_str(), shortAccountIdHash.c_str(), true, (char **)ptrCredList);
     IdServiceGenerateQueryParam(shortUdidHash.c_str(), shortAccountIdHash.c_str(), true);
 }
 
@@ -84,7 +84,7 @@ bool AuthIdentityServiceAdapterFuzzTest(FuzzedDataProvider &provider)
 {
     HiChainAuthParam hiChainParam;
     (void)memset_s(&hiChainParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
-    hiChainParam.userId = provider.ConsumeIntegral<int32_t>();
+    hiChainParam.peerUserId = provider.ConsumeIntegral<int32_t>();
     string udid = provider.ConsumeRandomLengthString(UDID_BUF_LEN);
     if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, udid.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s udid failed!");

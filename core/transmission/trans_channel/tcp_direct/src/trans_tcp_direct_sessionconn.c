@@ -212,6 +212,10 @@ int32_t GetSessionConnById(int32_t channelId, SessionConn *conn)
 
 int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
 {
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid accessInfo.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     SessionConn *conn = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;

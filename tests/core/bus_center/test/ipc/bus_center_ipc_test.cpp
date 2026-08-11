@@ -37,6 +37,13 @@ using namespace testing;
 #define TEST_MSDP_PKGNAME  "ohos.msdp.spatialawareness"
 
 constexpr char TEST_MSG[] = "testmsg";
+constexpr char TEST_CONV_BUNDLE[] = "com.test.conv";
+constexpr char TEST_CONV_BUNDLE2[] = "com.test.conv2";
+constexpr char TEST_CONV_ABILITY[] = "AbilityA";
+constexpr char TEST_CONV_ABILITY2[] = "AbilityB";
+constexpr char TEST_CONV_DEVICE_ID[] = "networkId123";
+constexpr int32_t TEST_CONV_PID = 1001;
+constexpr int32_t TEST_CONV_PID2 = 1002;
 
 class BusCenterIpcTest : public testing::Test {
 public:
@@ -52,6 +59,10 @@ void BusCenterIpcTest::TearDownTestCase()
 {
     g_joinLNNRequestInfo.clear();
     g_leaveLNNRequestInfo.clear();
+    for (auto *item : g_agentCommunicationInfo) {
+        delete item;
+    }
+    g_agentCommunicationInfo.clear();
 }
 
 void BusCenterIpcTest::SetUp() { }
@@ -196,8 +207,8 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_03, TestSize.Level1)
     AddLeaveLNNInfo(TEST_PKGNAME, 0, TEST_NETWORK_ID);
     AddLeaveLNNInfo(TEST_PKGNAME2, 0, TEST_NETWORK_ID);
     RemoveLeaveRequestInfoByPkgName(TEST_PKGNAME);
-    BusCenterServerDeathCallback(nullptr);
-    BusCenterServerDeathCallback(TEST_PKGNAME);
+    BusCenterServerDeathCallback(nullptr, 0);
+    BusCenterServerDeathCallback(TEST_PKGNAME, 0);
 
     ON_CALL(busCenterIpcMock, LnnServerLeave).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = LnnIpcServerLeave(nullptr, 0, nullptr);
@@ -456,5 +467,218 @@ HWTEST_F(BusCenterIpcTest, LnnIpcCreateGroupOwnerTest_003, TestSize.Level0)
 
     int32_t ret = LnnIpcCreateGroupOwner(pkgName, callingPid, &config, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+static void FillConvInfo(ConversationBusiness &info, const char *bundle, const char *ability)
+{
+    (void)memset_s(&info, sizeof(ConversationBusiness), 0, sizeof(ConversationBusiness));
+    (void)strcpy_s(info.bundleName, BUNDLE_NAME_LEN, bundle);
+    (void)strcpy_s(info.abilityName, ABILITY_NAME_LEN, ability);
+}
+
+static void ClearAgentCommunicationInfo()
+{
+    for (auto *item : g_agentCommunicationInfo) {
+        delete item;
+    }
+    g_agentCommunicationInfo.clear();
+}
+
+HWTEST_F(BusCenterIpcTest, AddOrUpdateAgentCommunicationInfo_Test_001, TestSize.Level1)
+{
+    ClearAgentCommunicationInfo();
+    ConversationBusiness info;
+    FillConvInfo(info, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+
+    EXPECT_EQ(AddOrUpdateAgentCommunicationInfo(&info, TEST_CONV_PID), SOFTBUS_OK);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+
+    int32_t pid = 0;
+    EXPECT_EQ(GetAgentCommunicationInfo(&info, &pid), SOFTBUS_OK);
+    EXPECT_EQ(pid, TEST_CONV_PID);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, AddOrUpdateAgentCommunicationInfo_Test_002, TestSize.Level1)
+{
+    ClearAgentCommunicationInfo();
+    ConversationBusiness info;
+    FillConvInfo(info, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+
+    EXPECT_EQ(AddOrUpdateAgentCommunicationInfo(&info, TEST_CONV_PID), SOFTBUS_OK);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+    EXPECT_EQ(AddOrUpdateAgentCommunicationInfo(&info, TEST_CONV_PID2), SOFTBUS_OK);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+
+    int32_t pid = 0;
+    EXPECT_EQ(GetAgentCommunicationInfo(&info, &pid), SOFTBUS_OK);
+    EXPECT_EQ(pid, TEST_CONV_PID2);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, RemoveAgentCommunicationInfo_Test_001, TestSize.Level1)
+{
+    ClearAgentCommunicationInfo();
+    ConversationBusiness info;
+    FillConvInfo(info, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+
+    AddOrUpdateAgentCommunicationInfo(&info, TEST_CONV_PID);
+    RemoveAgentCommunicationInfo(&info);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 0u);
+
+    int32_t pid = 0;
+    EXPECT_NE(GetAgentCommunicationInfo(&info, &pid), SOFTBUS_OK);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, RemoveAgentCommunicationInfo_Test_002, TestSize.Level1)
+{
+    ClearAgentCommunicationInfo();
+    ConversationBusiness infoLong;
+    ConversationBusiness infoShort;
+    FillConvInfo(infoLong, "com.test.conv.abc", TEST_CONV_ABILITY);
+    FillConvInfo(infoShort, "com.test.conv", TEST_CONV_ABILITY);
+
+    AddOrUpdateAgentCommunicationInfo(&infoLong, TEST_CONV_PID);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+    RemoveAgentCommunicationInfo(&infoShort);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+
+    int32_t pid = 0;
+    EXPECT_EQ(GetAgentCommunicationInfo(&infoLong, &pid), SOFTBUS_OK);
+    EXPECT_EQ(pid, TEST_CONV_PID);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, GetAgentCommunicationInfo_Test_001, TestSize.Level1)
+{
+    ClearAgentCommunicationInfo();
+    ConversationBusiness info1;
+    ConversationBusiness info2;
+    FillConvInfo(info1, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+    FillConvInfo(info2, TEST_CONV_BUNDLE2, TEST_CONV_ABILITY);
+
+    AddOrUpdateAgentCommunicationInfo(&info1, TEST_CONV_PID);
+    AddOrUpdateAgentCommunicationInfo(&info2, TEST_CONV_PID2);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 2u);
+
+    int32_t pid = 0;
+    EXPECT_EQ(GetAgentCommunicationInfo(&info1, &pid), SOFTBUS_OK);
+    EXPECT_EQ(pid, TEST_CONV_PID);
+    pid = 0;
+    EXPECT_EQ(GetAgentCommunicationInfo(&info2, &pid), SOFTBUS_OK);
+    EXPECT_EQ(pid, TEST_CONV_PID2);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, RemoveAgentCommunicationInfoByPid_Test_001, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    EXPECT_CALL(busCenterIpcMock, LnnUnregisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCenterIpcMock, SdMgrDeathCallbackPacked(_)).WillRepeatedly(Return());
+    ClearAgentCommunicationInfo();
+
+    ConversationBusiness info1;
+    ConversationBusiness info2;
+    FillConvInfo(info1, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+    FillConvInfo(info2, TEST_CONV_BUNDLE2, TEST_CONV_ABILITY2);
+    AddOrUpdateAgentCommunicationInfo(&info1, TEST_CONV_PID);
+    AddOrUpdateAgentCommunicationInfo(&info2, TEST_CONV_PID);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 2u);
+
+    BusCenterServerDeathCallback("conv.death.test", TEST_CONV_PID);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 0u);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, RemoveAgentCommunicationInfoByPid_Test_002, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    EXPECT_CALL(busCenterIpcMock, LnnUnregisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCenterIpcMock, SdMgrDeathCallbackPacked(_)).WillRepeatedly(Return());
+    ClearAgentCommunicationInfo();
+
+    ConversationBusiness info1;
+    ConversationBusiness info2;
+    FillConvInfo(info1, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+    FillConvInfo(info2, TEST_CONV_BUNDLE2, TEST_CONV_ABILITY2);
+    AddOrUpdateAgentCommunicationInfo(&info1, TEST_CONV_PID);
+    AddOrUpdateAgentCommunicationInfo(&info2, TEST_CONV_PID2);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 2u);
+
+    BusCenterServerDeathCallback("conv.death.test", TEST_CONV_PID);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+    int32_t pid = 0;
+    EXPECT_EQ(GetAgentCommunicationInfo(&info2, &pid), SOFTBUS_OK);
+    EXPECT_EQ(pid, TEST_CONV_PID2);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, OnConversationRecvMsg_Test_001, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    ClearAgentCommunicationInfo();
+    ConversationBusiness info;
+    FillConvInfo(info, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+    AddOrUpdateAgentCommunicationInfo(&info, TEST_CONV_PID);
+
+    EXPECT_CALL(busCenterIpcMock, ClientOnConversationRecvMsg(TEST_CONV_PID, _, _, _, _)).Times(1);
+    OnConversationRecvMsg(&info, TEST_CONV_DEVICE_ID, TEST_MSG, static_cast<uint32_t>(strlen(TEST_MSG)));
+    testing::Mock::VerifyAndClearExpectations(&busCenterIpcMock);
+
+    ConversationBusiness infoUnknown;
+    FillConvInfo(infoUnknown, "unknown.bundle", "UnknownAbility");
+    EXPECT_CALL(busCenterIpcMock, ClientOnConversationRecvMsg(_, _, _, _, _)).Times(0);
+    OnConversationRecvMsg(&infoUnknown, TEST_CONV_DEVICE_ID, TEST_MSG,
+        static_cast<uint32_t>(strlen(TEST_MSG)));
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, LnnIpcRegisterConversationListener_Test_001, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    EXPECT_CALL(busCenterIpcMock, LnnRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ClearAgentCommunicationInfo();
+
+    ConversationBusiness info;
+    FillConvInfo(info, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+    EXPECT_EQ(LnnIpcRegisterConversationListener(&info, TEST_CONV_PID), SOFTBUS_OK);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, LnnIpcRegisterConversationListener_Test_002, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    EXPECT_CALL(busCenterIpcMock, LnnRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ClearAgentCommunicationInfo();
+
+    ConversationBusiness info;
+    FillConvInfo(info, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+    EXPECT_EQ(LnnIpcRegisterConversationListener(&info, TEST_CONV_PID), SOFTBUS_OK);
+    EXPECT_EQ(LnnIpcRegisterConversationListener(&info, TEST_CONV_PID2), SOFTBUS_OK);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+
+    int32_t pid = 0;
+    EXPECT_EQ(GetAgentCommunicationInfo(&info, &pid), SOFTBUS_OK);
+    EXPECT_EQ(pid, TEST_CONV_PID2);
+    ClearAgentCommunicationInfo();
+}
+
+HWTEST_F(BusCenterIpcTest, LnnIpcUnregisterConversationListener_Test_001, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    EXPECT_CALL(busCenterIpcMock, LnnRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCenterIpcMock, LnnUnregisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    ClearAgentCommunicationInfo();
+
+    ConversationBusiness info;
+    FillConvInfo(info, TEST_CONV_BUNDLE, TEST_CONV_ABILITY);
+    LnnIpcRegisterConversationListener(&info, TEST_CONV_PID);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 1u);
+
+    EXPECT_EQ(LnnIpcUnregisterConversationListener(&info, TEST_CONV_PID), SOFTBUS_OK);
+    EXPECT_EQ(g_agentCommunicationInfo.size(), 0u);
+    ClearAgentCommunicationInfo();
 }
 } // namespace OHOS

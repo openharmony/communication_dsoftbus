@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include <securec.h>
 
-#include "gtest/gtest.h"
 #include "softbus_error_code.h"
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_callback.h"
@@ -28,23 +28,24 @@ using namespace testing::ext;
 
 namespace OHOS {
 
-#define TEST_SESSION_NAME "SoftBusProxyChannelNetworkTest"
-
-#define TEST_VALID_SESSIONNAME "com.test.sessionname"
-#define TEST_VALID_PEER_NETWORKID "12345678"
+#define TEST_SESSION_NAME       "SoftBusProxyChannelNetworkTest"
+#define TEST_CHANNEL_ID         1
+#define TEST_INVALID_CHANNEL_ID (-1)
+#define TEST_MSG_DATA           "test data"
 
 class TransProxyNetworkTest : public testing::Test {
 public:
-    TransProxyNetworkTest()
-    {}
-    ~TransProxyNetworkTest()
-    {}
+    TransProxyNetworkTest() { }
+    ~TransProxyNetworkTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    {
+        m_channelOpenFailedFlag = false;
+        m_channelClosedFlag = false;
+        m_messageReceivedFlag = false;
+    }
+    void TearDown() override { }
 
     static int32_t TestOnNetworkChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer);
     static void TestOnNetworkChannelOpenFailed(int32_t channelId, const char *uuid);
@@ -70,8 +71,8 @@ int32_t TestNormalChannelOpened(const char *pkgName, int32_t pid, const char *se
     return SOFTBUS_OK;
 }
 
-int32_t TestChannelDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
-    TransReceiveData* receiveData)
+int32_t TestChannelDataReceived(
+    const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, TransReceiveData *receiveData)
 {
     (void)pkgName;
     (void)pid;
@@ -83,15 +84,13 @@ int32_t TestChannelDataReceived(const char *pkgName, int32_t pid, int32_t channe
 
 void TransProxyNetworkTest::SetUpTestCase(void)
 {
-    IServerChannelCallBack cb;
+    IServerChannelCallBack cb = { };
     cb.OnChannelOpened = TestNormalChannelOpened;
     cb.OnDataReceived = TestChannelDataReceived;
     ASSERT_EQ(SOFTBUS_OK, TransProxySetCallBack(&cb));
 }
 
-void TransProxyNetworkTest::TearDownTestCase(void)
-{
-}
+void TransProxyNetworkTest::TearDownTestCase(void) { }
 
 int32_t TransProxyNetworkTest::TestOnNetworkChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
 {
@@ -128,7 +127,7 @@ void TransProxyNetworkTest::TestOnNetworkMessageReceived(int32_t channelId, cons
 
 void TransProxyNetworkTest::TestRegisterNetworkingChannelListener(void)
 {
-    INetworkingListener listener;
+    INetworkingListener listener = { };
     listener.onChannelClosed = TransProxyNetworkTest::TestOnNetworkChannelClosed;
     listener.onChannelOpened = TransProxyNetworkTest::TestOnNetworkChannelOpened;
     listener.onChannelOpenFailed = TransProxyNetworkTest::TestOnNetworkChannelOpenFailed;
@@ -137,136 +136,197 @@ void TransProxyNetworkTest::TestRegisterNetworkingChannelListener(void)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
- * @tc.name: TransNoRegisterListenerTest001
- * @tc.desc: test callback after no register networking channel listener.
+/*
+ * @tc.name: NotifyNetworkingNoListenerTest001
+ * @tc.desc: verify Notify functions return error or do not invoke callbacks when no listener is registered
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level1)
+HWTEST_F(TransProxyNetworkTest, NotifyNetworkingNoListenerTest001, TestSize.Level1)
 {
-    int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, 1, nullptr, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, TEST_CHANNEL_ID, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
-    NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, 1, nullptr);
-    EXPECT_NE(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
-    NotifyNetworkingChannelClosed(TEST_SESSION_NAME, 1);
-    EXPECT_NE(true, TransProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(TEST_SESSION_NAME, 1, nullptr, 0);
-    EXPECT_NE(true, TransProxyNetworkTest::m_messageReceivedFlag);
+    NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, TEST_CHANNEL_ID, nullptr);
+    EXPECT_FALSE(m_channelOpenFailedFlag);
+    NotifyNetworkingChannelClosed(TEST_SESSION_NAME, TEST_CHANNEL_ID);
+    EXPECT_FALSE(m_channelClosedFlag);
+    NotifyNetworkingMsgReceived(TEST_SESSION_NAME, TEST_CHANNEL_ID, nullptr, 0);
+    EXPECT_FALSE(m_messageReceivedFlag);
 }
 
-/**
- * @tc.name: TransRegisterListenerTest001
- * @tc.desc: test callback after register networking channel listener.
+/*
+ * @tc.name: NotifyNetworkingWithListenerTest001
+ * @tc.desc: verify Notify functions invoke callbacks after registering networking channel listener
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
+HWTEST_F(TransProxyNetworkTest, NotifyNetworkingWithListenerTest001, TestSize.Level1)
 {
-    TransProxyNetworkTest::TestRegisterNetworkingChannelListener();
-
-    int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, 1, nullptr, 0);
+    TestRegisterNetworkingChannelListener();
+    int32_t ret = NotifyNetworkingChannelOpened(TEST_SESSION_NAME, TEST_CHANNEL_ID, nullptr, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    
-    NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, 1, nullptr);
-    EXPECT_EQ(true, TransProxyNetworkTest::m_channelOpenFailedFlag);
-    NotifyNetworkingChannelClosed(TEST_SESSION_NAME, 1);
-    EXPECT_EQ(true, TransProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(TEST_SESSION_NAME, 1, nullptr, 0);
-    EXPECT_EQ(false, TransProxyNetworkTest::m_messageReceivedFlag);
+    NotifyNetworkingChannelOpenFailed(TEST_SESSION_NAME, TEST_CHANNEL_ID, nullptr);
+    EXPECT_TRUE(m_channelOpenFailedFlag);
+    NotifyNetworkingChannelClosed(TEST_SESSION_NAME, TEST_CHANNEL_ID);
+    EXPECT_TRUE(m_channelClosedFlag);
+    NotifyNetworkingMsgReceived(TEST_SESSION_NAME, TEST_CHANNEL_ID, nullptr, 0);
+    EXPECT_FALSE(m_messageReceivedFlag);
 }
 
-/**
-  * @tc.name: TransOnProxyChannelOpenFailedTest001
-  * @tc.desc: test proxy channel open failed with wrong param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize.Level1)
+/*
+ * @tc.name: OnProxyChannelOpenFailedNullParamTest001
+ * @tc.desc: OnProxyChannelOpenFailed with null appInfo returns SOFTBUS_INVALID_PARAM,
+ *           and APP_TYPE_NOT_CARE returns SOFTBUS_INVALID_APPTYPE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelOpenFailedNullParamTest001, TestSize.Level1)
 {
-    int32_t channelId = -1;
-    AppInfo appInfo;
-    int32_t errCode = SOFTBUS_MEM_ERR;
-    /* test app info is null */
-    int32_t ret = OnProxyChannelOpenFailed(channelId, nullptr, errCode);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is other */
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelOpenFailed(channelId, nullptr, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    AppInfo appInfo = { };
     appInfo.appType = APP_TYPE_NOT_CARE;
-    ret = OnProxyChannelOpenFailed(channelId, &appInfo, errCode);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = OnProxyChannelOpenFailed(channelId, &appInfo, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(SOFTBUS_INVALID_APPTYPE, ret);
 }
 
-/**
-  * @tc.name: TransOnProxyChannelClosedTest001
-  * @tc.desc: test proxy channel closed with wrong param.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Level1)
+/*
+ * @tc.name: OnProxyChannelClosedNullParamTest001
+ * @tc.desc: OnProxyChannelClosed with null appInfo returns SOFTBUS_INVALID_PARAM,
+ *           and APP_TYPE_NOT_CARE returns SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelClosedNullParamTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
-    int32_t channelId = -1;
-    AppInfo appInfo;
-    /* test app info is null */
-    ret = OnProxyChannelClosed(channelId, nullptr);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is other */
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelClosed(channelId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    AppInfo appInfo = { };
     appInfo.appType = APP_TYPE_NOT_CARE;
-    ret = OnProxyChannelClosed(channelId, &appInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is inner */
-    appInfo.appType = APP_TYPE_INNER;
     ret = OnProxyChannelClosed(channelId, &appInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
 
-/**
-  * @tc.name: TransOnProxyChannelMsgReceivedTest001
-  * @tc.desc: test proxy channel msg received.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(TransProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSize.Level1)
+/*
+ * @tc.name: OnProxyChannelClosedInnerAppTypeTest001
+ * @tc.desc: OnProxyChannelClosed with APP_TYPE_INNER returns SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelClosedInnerAppTypeTest001, TestSize.Level1)
 {
-    int32_t channelId = -1;
-    AppInfo appInfo;
-    const char *data = "test data";
-    uint32_t len = strlen(data) + 1;
-
-    /* test invalid param */
-    int32_t ret = OnProxyChannelMsgReceived(channelId, nullptr, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, nullptr, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, 0);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is other */
-    appInfo.appType = APP_TYPE_NOT_CARE;
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test app type is inner */
+    AppInfo appInfo = { };
     appInfo.appType = APP_TYPE_INNER;
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test app type is auth */
-    appInfo.appType = APP_TYPE_AUTH;
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test app type is normal and return err */
-    appInfo.appType = APP_TYPE_NORMAL;
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, 1);
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelClosed(channelId, &appInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+}
+
+/*
+ * @tc.name: OnProxyChannelMsgReceivedNullParamTest001
+ * @tc.desc: OnProxyChannelMsgReceived with null appInfo, null data, or zero len returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelMsgReceivedNullParamTest001, TestSize.Level1)
+{
+    const char *data = TEST_MSG_DATA;
+    uint32_t len = strlen(data) + 1;
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelMsgReceived(channelId, nullptr, data, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    AppInfo appInfo = { };
+    ret = OnProxyChannelMsgReceived(channelId, &appInfo, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, 0);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: OnProxyChannelMsgReceivedInvalidAppTypeTest001
+ * @tc.desc: OnProxyChannelMsgReceived with APP_TYPE_NOT_CARE returns SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelMsgReceivedInvalidAppTypeTest001, TestSize.Level1)
+{
+    const char *data = TEST_MSG_DATA;
+    uint32_t len = strlen(data) + 1;
+    AppInfo appInfo = { };
+    appInfo.appType = APP_TYPE_NOT_CARE;
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+}
+
+/*
+ * @tc.name: OnProxyChannelMsgReceivedInnerAppTypeTest001
+ * @tc.desc: OnProxyChannelMsgReceived with APP_TYPE_INNER returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelMsgReceivedInnerAppTypeTest001, TestSize.Level1)
+{
+    const char *data = TEST_MSG_DATA;
+    uint32_t len = strlen(data) + 1;
+    AppInfo appInfo = { };
+    appInfo.appType = APP_TYPE_INNER;
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
-  * @tc.name: TransProxySetCallBackTest001
-  * @tc.desc: TransProxySetCallBack test
-  * @tc.type: FUNC
-  * @tc.require:
-  */
+/*
+ * @tc.name: OnProxyChannelMsgReceivedAuthAppTypeTest001
+ * @tc.desc: OnProxyChannelMsgReceived with APP_TYPE_AUTH returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelMsgReceivedAuthAppTypeTest001, TestSize.Level1)
+{
+    const char *data = TEST_MSG_DATA;
+    uint32_t len = strlen(data) + 1;
+    AppInfo appInfo = { };
+    appInfo.appType = APP_TYPE_AUTH;
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: OnProxyChannelMsgReceivedNormalAppTypeTest001
+ * @tc.desc: OnProxyChannelMsgReceived with APP_TYPE_NORMAL returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyNetworkTest, OnProxyChannelMsgReceivedNormalAppTypeTest001, TestSize.Level1)
+{
+    const char *data = TEST_MSG_DATA;
+    uint32_t len = strlen(data) + 1;
+    AppInfo appInfo = { };
+    appInfo.appType = APP_TYPE_NORMAL;
+    int32_t channelId = TEST_INVALID_CHANNEL_ID;
+    int32_t ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: TransProxySetCallBackTest001
+ * @tc.desc: TransProxySetCallBack with valid callback returns SOFTBUS_OK,
+ *           and null callback returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(TransProxyNetworkTest, TransProxySetCallBackTest001, TestSize.Level1)
 {
-    int32_t ret = TransProxySetCallBack(nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    IServerChannelCallBack cb = { };
+    cb.OnChannelOpened = TestNormalChannelOpened;
+    cb.OnDataReceived = TestChannelDataReceived;
+    int32_t ret = TransProxySetCallBack(&cb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransProxySetCallBack(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // namespace OHOS

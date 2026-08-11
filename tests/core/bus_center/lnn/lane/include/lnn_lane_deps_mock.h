@@ -68,7 +68,8 @@ public:
         uint32_t len, int32_t ifIdx) = 0;
     virtual int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *netWorkId, InfoKey key, int32_t *info,
         int32_t ifIdx) = 0;
-    virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetPreferConnInfo(
+        const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetConnInfoByType(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
@@ -144,7 +145,7 @@ public:
     MOCK_METHOD2(LnnGetOnlineStateById, bool (const char*, IdCategory));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char*, uint32_t));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char*, InfoKey, char*, uint32_t));
-    MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char*, AuthConnInfo*, bool));
+    MOCK_METHOD4(AuthGetPreferConnInfo, int32_t (const char*, const char*, AuthConnInfo*, bool));
     MOCK_METHOD4(AuthGetConnInfoByType, int32_t (const char*, AuthLinkType, AuthConnInfo *, bool));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char*, AuthConnInfo*, bool));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char*, AuthConnInfo*, bool));

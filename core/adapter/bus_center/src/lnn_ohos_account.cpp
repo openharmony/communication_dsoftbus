@@ -315,3 +315,13 @@ bool LnnIsDefaultOhosAccount(void)
     }
     return memcmp(localAccountHash, defaultAccountHash, SHA_256_HASH_LEN) == 0;
 }
+
+bool LnnIsSameAccountGroupDevice(void)
+{
+    return IsSameAccountGroupDevice();
+}
+
+bool LnnIsSameAccountGroupDeviceByUserId(int32_t userId)
+{
+    return IsSameAccountGroupDeviceByUserId(userId);
+}

@@ -47,6 +47,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_device_info_struct.h"
 #include "lnn_device_cloud_convergence_struct.h"
 
 #define CAPABILITY_ISACKMAG 0x01
@@ -190,6 +191,7 @@ typedef struct {
     uint64_t timestamp;
     std::promise<int32_t> promise;
     bool futureRetrieved;
+    bool valueSet;
 } AckWaitItem;
 
 static std::vector<AckWaitItem> g_ackWaitList;
@@ -382,7 +384,7 @@ static void ClearExpiredCacheWithoutLock(void)
     int32_t timeoutCount = 0;
 
     for (auto item = g_recvMsgCacheVec.begin(); item != g_recvMsgCacheVec.end();) {
-        if (currentTime - item->timestamp > CACHE_TIMEOUT_MS) {
+        if (currentTime < item->timestamp || currentTime - item->timestamp > CACHE_TIMEOUT_MS) {
             LNN_LOGI(LNN_EVENT, "cached msg timeout, len=%{public}u, channel=%{public}d", item->length, item->channel);
             SoftBusFree(item->data);
             item = g_recvMsgCacheVec.erase(item);
@@ -469,57 +471,72 @@ static int32_t PackCloudQueryDataHeader(uint8_t *buf, uint32_t totalLen,
     offset += sizeof(uint8_t);
     buf[offset] = capability;
     offset += sizeof(uint8_t);
-    *reinterpret_cast<uint16_t *>(buf + offset) = optionLen;
+    if (memcpy_s(buf + offset, sizeof(uint16_t), &optionLen, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy optionLen failed");
+        return SOFTBUS_MEM_ERR;
+    }
 
+    return SOFTBUS_OK;
+}
+
+typedef struct {
+    uint8_t *buf;
+    uint32_t totalLen;
+    uint32_t offset;
+} TlvPackCtx;
+
+static int32_t PackTlvStringField(TlvPackCtx *ctx, uint8_t type, const char *value, uint16_t maxLen)
+{
+    uint16_t valueLen = static_cast<uint16_t>(strnlen(value, maxLen));
+    ctx->buf[ctx->offset] = type;
+    ctx->offset += sizeof(uint8_t);
+    if (memcpy_s(ctx->buf + ctx->offset, sizeof(uint16_t), &valueLen, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy valueLen failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    ctx->offset += sizeof(uint16_t);
+    if (valueLen > 0 && memcpy_s(ctx->buf + ctx->offset, ctx->totalLen - ctx->offset, value, valueLen) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy value failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    ctx->offset += valueLen;
     return SOFTBUS_OK;
 }
 
 static int32_t PackCloudQueryDataTlv(uint8_t *buf, uint32_t totalLen, const CloudQueryDataPack *pack)
 {
-    uint32_t offset = sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t);
-    uint16_t bundleNameLen = static_cast<uint16_t>(strnlen(pack->info->bundleName, BUNDLE_NAME_LEN));
-    uint16_t abilityNameLen = static_cast<uint16_t>(strnlen(pack->info->abilityName, ABILITY_NAME_LEN));
-
-    buf[offset] = TLV_TYPE_BUNDLE_NAME;
-    offset += sizeof(uint8_t);
-    *reinterpret_cast<uint16_t *>(buf + offset) = bundleNameLen;
-    offset += sizeof(uint16_t);
-    if (bundleNameLen > 0 &&
-        memcpy_s(buf + offset, totalLen - offset, pack->info->bundleName, bundleNameLen) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy bundleName failed");
+    TlvPackCtx ctx = {buf, totalLen, sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t)};
+    int32_t ret = PackTlvStringField(&ctx, TLV_TYPE_BUNDLE_NAME, pack->info->bundleName, BUNDLE_NAME_LEN);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ret = PackTlvStringField(&ctx, TLV_TYPE_ABILITY_NAME, pack->info->abilityName, ABILITY_NAME_LEN);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ctx.buf[ctx.offset] = TLV_TYPE_ERROR_CODE;
+    ctx.offset += sizeof(uint8_t);
+    uint16_t errCodeLen = static_cast<uint16_t>(sizeof(int32_t));
+    if (memcpy_s(ctx.buf + ctx.offset, sizeof(uint16_t), &errCodeLen, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy errCodeLen failed");
         return SOFTBUS_MEM_ERR;
     }
-    offset += bundleNameLen;
-
-    buf[offset] = TLV_TYPE_ABILITY_NAME;
-    offset += sizeof(uint8_t);
-    *reinterpret_cast<uint16_t *>(buf + offset) = abilityNameLen;
-    offset += sizeof(uint16_t);
-    if (abilityNameLen > 0 &&
-        memcpy_s(buf + offset, totalLen - offset, pack->info->abilityName, abilityNameLen) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy abilityName failed");
-        return SOFTBUS_MEM_ERR;
-    }
-    offset += abilityNameLen;
-
-    buf[offset] = TLV_TYPE_ERROR_CODE;
-    offset += sizeof(uint8_t);
-    *reinterpret_cast<uint16_t *>(buf + offset) = static_cast<uint16_t>(sizeof(int32_t));
-    offset += sizeof(uint16_t);
-    if (memcpy_s(buf + offset, totalLen - offset, &pack->errCode, sizeof(int32_t)) != EOK) {
+    ctx.offset += sizeof(uint16_t);
+    if (memcpy_s(ctx.buf + ctx.offset, ctx.totalLen - ctx.offset, &pack->errCode, sizeof(int32_t)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy errcode failed");
         return SOFTBUS_MEM_ERR;
     }
-    offset += sizeof(int32_t);
-
-    *reinterpret_cast<uint16_t *>(buf + offset) = static_cast<uint16_t>(pack->msgLen);
-    offset += sizeof(uint16_t);
-
-    if (pack->msgLen > 0 && memcpy_s(buf + offset, totalLen - offset, pack->msg, pack->msgLen) != EOK) {
+    ctx.offset += sizeof(int32_t);
+    uint16_t msgLenVal = static_cast<uint16_t>(pack->msgLen);
+    if (memcpy_s(ctx.buf + ctx.offset, sizeof(uint16_t), &msgLenVal, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy msgLenVal failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    ctx.offset += sizeof(uint16_t);
+    if (pack->msgLen > 0 && memcpy_s(ctx.buf + ctx.offset, ctx.totalLen - ctx.offset, pack->msg, pack->msgLen) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy msg failed");
         return SOFTBUS_MEM_ERR;
     }
-
     return SOFTBUS_OK;
 }
 
@@ -581,7 +598,12 @@ static int32_t UnpackCloudQueryHeader(const uint8_t *data, uint32_t length, Unpa
     ctx->pack->isAckMsg = (capability & CAPABILITY_ISACKMAG) != 0;
     *(ctx->isNeedCompress) = (capability & CAPABILITY_ISCOMPRESS) != 0;
 
-    *(ctx->optionLen) = *reinterpret_cast<const uint16_t *>(data + *(ctx->offset));
+    uint16_t optionLenVal = 0;
+    if (memcpy_s(&optionLenVal, sizeof(uint16_t), data + *(ctx->offset), sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy optionLen failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    *(ctx->optionLen) = optionLenVal;
     *(ctx->offset) += sizeof(uint16_t);
 
     if (*(ctx->offset) > length || length - *(ctx->offset) < *(ctx->optionLen)) {
@@ -609,7 +631,11 @@ static int32_t UnpackTlvBundleName(const uint8_t *data, uint32_t length,
         LNN_LOGE(LNN_EVENT, "offset out of bounds for nameLen, offset=%{public}u, length=%{public}u", *offset, length);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint16_t nameLen = *reinterpret_cast<const uint16_t *>(data + *offset);
+    uint16_t nameLen = 0;
+    if (memcpy_s(&nameLen, sizeof(uint16_t), data + *offset, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy nameLen failed");
+        return SOFTBUS_MEM_ERR;
+    }
     *offset += sizeof(uint16_t);
     if (nameLen >= BUNDLE_NAME_LEN) {
         LNN_LOGE(LNN_EVENT, "bundleName too long, len=%{public}u, max=%{public}d",
@@ -649,7 +675,11 @@ static int32_t UnpackTlvAbilityName(const uint8_t *data, uint32_t length,
         LNN_LOGE(LNN_EVENT, "offset out of bounds for nameLen, offset=%{public}u, length=%{public}u", *offset, length);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint16_t nameLen = *reinterpret_cast<const uint16_t *>(data + *offset);
+    uint16_t nameLen = 0;
+    if (memcpy_s(&nameLen, sizeof(uint16_t), data + *offset, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy nameLen failed");
+        return SOFTBUS_MEM_ERR;
+    }
     *offset += sizeof(uint16_t);
     if (nameLen >= ABILITY_NAME_LEN) {
         LNN_LOGE(LNN_EVENT, "abilityName too long, len=%{public}u, max=%{public}d",
@@ -690,7 +720,11 @@ static int32_t UnpackTlvErrorCode(const uint8_t *data, uint32_t length,
             "offset=%{public}u, length=%{public}u", *offset, length);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint16_t errCodeLen = *reinterpret_cast<const uint16_t *>(data + *offset);
+    uint16_t errCodeLen = 0;
+    if (memcpy_s(&errCodeLen, sizeof(uint16_t), data + *offset, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy errCodeLen failed");
+        return SOFTBUS_MEM_ERR;
+    }
     *offset += sizeof(uint16_t);
     if (errCodeLen != sizeof(int32_t)) {
         LNN_LOGE(LNN_EVENT, "invalid errcode len=%{public}u", errCodeLen);
@@ -701,7 +735,11 @@ static int32_t UnpackTlvErrorCode(const uint8_t *data, uint32_t length,
             "offset=%{public}u, errCodeLen=%{public}u, length=%{public}u", *offset, errCodeLen, length);
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t errCode = *reinterpret_cast<const int32_t *>(data + *offset);
+    int32_t errCode = 0;
+    if (memcpy_s(&errCode, sizeof(int32_t), data + *offset, sizeof(int32_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy errCode failed");
+        return SOFTBUS_MEM_ERR;
+    }
     *offset += errCodeLen;
     pack->errCode = errCode;
     LNN_LOGI(LNN_EVENT, "unpack errCode=%{public}d", errCode);
@@ -711,7 +749,11 @@ static int32_t UnpackTlvErrorCode(const uint8_t *data, uint32_t length,
 static int32_t UnpackCloudQueryDataPayload(const uint8_t *data, uint32_t length,
     uint32_t offset, CloudQueryDataPack *pack)
 {
-    uint16_t dataLen = *reinterpret_cast<const uint16_t *>(data + offset);
+    uint16_t dataLen = 0;
+    if (memcpy_s(&dataLen, sizeof(uint16_t), data + offset, sizeof(uint16_t)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "memcpy dataLen failed");
+        return SOFTBUS_MEM_ERR;
+    }
     offset += sizeof(uint16_t);
 
     if (dataLen > COMMUNICATION_DATA_MAX_LEN) {
@@ -817,6 +859,12 @@ static int32_t DecompressCloudQueryData(CloudQueryDataPack *pack, bool isNeedCom
             return ret;
         }
         LNN_LOGI(LNN_EVENT, "after decompress, datalen=%{public}u", decompressLen);
+        if (decompressLen > COMMUNICATION_DATA_MAX_LEN) {
+            LNN_LOGE(LNN_EVENT, "datalen invalid, decompress failed");
+            SoftBusFree(*decompressData);
+            *decompressData = nullptr;
+            return SOFTBUS_INVALID_PARAM;
+        }
         *actualMsg = reinterpret_cast<const char *>(*decompressData);
         *actualMsgLen = decompressLen;
     } else {
@@ -850,6 +898,7 @@ static int32_t AddAckWaitItem(uint32_t msgId, const char *udid, const Conversati
     item.msgId = msgId;
     item.timestamp = SoftBusGetSysTimeMs();
     item.futureRetrieved = false;
+    item.valueSet = false;
     if (strcpy_s(item.udid, UDID_BUF_LEN, udid) != EOK ||
         strcpy_s(item.info.bundleName, BUNDLE_NAME_LEN, info->bundleName) != EOK ||
         strcpy_s(item.info.abilityName, ABILITY_NAME_LEN, info->abilityName) != EOK) {
@@ -866,9 +915,10 @@ static void RemoveAckWaitItem(uint32_t msgId, bool isNeedSet)
     std::unique_lock<std::mutex> lock(g_ackWaitLock);
     for (auto it = g_ackWaitList.begin(); it != g_ackWaitList.end(); ++it) {
         if (it->msgId == msgId) {
-            if (isNeedSet) {
+            if (isNeedSet && !it->valueSet) {
                 LNN_LOGI(LNN_EVENT, "need set");
                 it->promise.set_value(SOFTBUS_TIMOUT);
+                it->valueSet = true;
             }
             g_ackWaitList.erase(it);
             LNN_LOGI(LNN_EVENT, "remove ack wait item, msgId=%{public}u", msgId);
@@ -921,7 +971,12 @@ static void HandleAckReceived(uint32_t msgId, int32_t errCode)
     std::unique_lock<std::mutex> lock(g_ackWaitLock);
     for (auto it = g_ackWaitList.begin(); it != g_ackWaitList.end(); ++it) {
         if (it->msgId == msgId) {
+            if (it->valueSet) {
+                LNN_LOGI(LNN_EVENT, "ack already recevied, msgId=%{public}u", msgId);
+                return;
+            }
             it->promise.set_value(errCode);
+            it->valueSet = true;
             LNN_LOGI(LNN_EVENT, "ack signal sent, msgId=%{public}u, errCode=%{public}d", msgId, errCode);
             return;
         }
@@ -1055,8 +1110,23 @@ static bool IsSupportNearField(const NodeInfo *nodeInfo)
     return true;
 }
 
+static bool IsLocalDevicePc(void)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "get local info failed");
+        return false;
+    }
+    return info.deviceInfo.deviceTypeId == TYPE_2IN1_ID;
+}
+
 static bool IsSupportFarField(const NodeInfo *nodeInfo)
 {
+    if (nodeInfo == nullptr) {
+        LNN_LOGI(LNN_EVENT, "device not found, just try send far field");
+        return true;
+    }
     if (!IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_AGENT_COMMUNICATION)) {
         LNN_LOGE(LNN_EVENT, "peer not support agent communication");
         return false;
@@ -1271,16 +1341,16 @@ static void SortInfoArrayByTimestamp(NodeInfo *basicInfo, int32_t basicInfoNum,
 static bool IsLocalDeviceInfo(const char *udid)
 {
     if (udid == nullptr) {
-        LNN_LOGE(LNN_LANE, "SH invalid param");
+        LNN_LOGE(LNN_LANE, "invalid param");
         return false;
     }
     NodeInfo info;
     if (memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
-        LNN_LOGE(LNN_LANE, "SH memset_s failed");
+        LNN_LOGE(LNN_LANE, "memset_s failed");
         return false;
     }
     if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "SH get local info failed");
+        LNN_LOGE(LNN_LANE, "get local info failed");
         return false;
     }
     if (strcmp(udid, info.deviceInfo.deviceUdid) == EOK) {
@@ -1298,7 +1368,7 @@ static int32_t CollectCloudDevices(NodeInfo *basicInfo, int32_t basicInfoNum,
         Anonymize(basicInfo[i].networkId, &anonyNetworkId);
         if (!IsFeatureSupport(basicInfo[i].feature, BIT_SUPPORT_AGENT_COMMUNICATION)) {
             LNN_LOGE(LNN_EVENT, "conversation not support, networkid=%{public}s, feature=%{public}" PRIu64,
-            anonyNetworkId, basicInfo[i].feature);
+            AnonymizeWrapper(anonyNetworkId), basicInfo[i].feature);
             AnonymizeFree(anonyNetworkId);
             continue;
         }
@@ -1518,7 +1588,7 @@ static int32_t RemoveMessageHmlLinkTimeOutCustom(const void *obj, void *param)
     if (obj == nullptr || param == nullptr) {
         return COMPARE_FAILED;
     }
-    if (static_cast<const char *>(obj) == static_cast<const char *>(param)) {
+    if (strcmp(static_cast<const char *>(obj), static_cast<const char *>(param)) == 0) {
         return COMPARE_SUCCESS;
     }
     return COMPARE_FAILED;
@@ -1681,7 +1751,7 @@ static bool CheckAndSendPrimaryUserAck(const ProcessReceivedDataInput *input)
         SendMsgData msgData = {"", 0};
         int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData, input->udid, input->info, &ackInfo);
         LNN_LOGI(LNN_EVENT, "send ack done, msgId=%{public}u, errCode=%{public}d, sendRet=%{public}d",
-            input->msgId, SOFTBUS_SOURCE_IS_NOT_PRIMARY_USER, sendRet);
+            input->msgId, SOFTBUS_SINK_IS_NOT_PRIMARY_USER, sendRet);
         return true;
     }
     return false;
@@ -1716,7 +1786,7 @@ static bool IsMsgIdInRecentList(const std::vector<uint32_t> &recentMsgIds, uint3
     return false;
 }
 
-static bool IsReplayMessage(const char *udid, uint32_t msgId)
+static bool CheckAndUpdateReplay(const char *udid, uint32_t msgId)
 {
     if (udid == nullptr) {
         return false;
@@ -1724,36 +1794,25 @@ static bool IsReplayMessage(const char *udid, uint32_t msgId)
     std::unique_lock<std::mutex> lock(g_antiReplayLock);
     for (auto &item : g_antiReplayList) {
         if (strcmp(item.udid, udid) == 0) {
-            return IsMsgIdInRecentList(item.recentMsgIds, msgId, udid);
-        }
-    }
-    return false;
-}
-
-static void UpdateAntiReplayList(const char *udid, uint32_t msgId)
-{
-    if (udid == nullptr) {
-        return;
-    }
-    std::unique_lock<std::mutex> lock(g_antiReplayLock);
-    for (auto &item : g_antiReplayList) {
-        if (strcmp(item.udid, udid) == 0) {
+            if (IsMsgIdInRecentList(item.recentMsgIds, msgId, udid)) {
+                return true;
+            }
             if (item.recentMsgIds.size() >= MAX_RECENT_MSG_ID_COUNT) {
                 item.recentMsgIds.erase(item.recentMsgIds.begin());
             }
             item.recentMsgIds.push_back(msgId);
-            return;
+            return false;
         }
     }
     if (g_antiReplayList.size() > MAX_TRUSTED_DEVICE_NUM) {
         g_antiReplayList.erase(g_antiReplayList.begin());
     }
     AntiReplayEntry entry;
-    (void)memset_s(&entry, sizeof(AntiReplayEntry), 0, sizeof(AntiReplayEntry));
     if (strcpy_s(entry.udid, UDID_BUF_LEN, udid) == EOK) {
         entry.recentMsgIds.push_back(msgId);
         g_antiReplayList.push_back(std::move(entry));
     }
+    return false;
 }
 
 static int32_t ProcessReceivedCloudQueryData(const ProcessReceivedDataInput *input)
@@ -1762,10 +1821,9 @@ static int32_t ProcessReceivedCloudQueryData(const ProcessReceivedDataInput *inp
         LNN_LOGI(LNN_EVENT, "received ack message or empty message");
         return SOFTBUS_OK;
     }
-    if (IsReplayMessage(input->udid, input->msgId)) {
+    if (CheckAndUpdateReplay(input->udid, input->msgId)) {
         return SOFTBUS_OK;
     }
-    UpdateAntiReplayList(input->udid, input->msgId);
     NodeInfo nodeInfo;
     memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     const char *deviceId = GetDeviceIdByUdid(input->udid, &nodeInfo);
@@ -1810,6 +1868,10 @@ static int32_t ProcessReceivedCloudQueryData(const ProcessReceivedDataInput *inp
 
 void OnRecvCloudQueryInfo(const char *udid, const char *data, uint32_t length)
 {
+    if (udid == nullptr || data == nullptr || length == 0) {
+        LNN_LOGE(LNN_EVENT, "param invalid");
+        return;
+    }
     uint8_t *assembledData = nullptr;
     uint32_t assembledLen = 0;
     uint32_t msgId = 0;
@@ -1919,11 +1981,13 @@ static void DelSendMsgCacheByNetworkId(const char *networkId)
         LNN_LOGE(LNN_EVENT, "param invalid");
         return;
     }
+    bool found = false;
     std::unique_lock<std::mutex> lock(g_sendMsgCacheLock);
     char *anonyNetworkId = nullptr;
     Anonymize(networkId, &anonyNetworkId);
     for (auto it = g_sendMsgCacheVec.begin(); it != g_sendMsgCacheVec.end();) {
         if (strcmp(it->networkId, networkId) == 0) {
+            found = true;
             SoftBusFree(it->data);
             it = g_sendMsgCacheVec.erase(it);
             LNN_LOGI(LNN_EVENT, "del send msg cache, networkId=%{public}s",
@@ -1933,14 +1997,15 @@ static void DelSendMsgCacheByNetworkId(const char *networkId)
             ++it;
         }
     }
-    LNN_LOGE(LNN_EVENT, "not found, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    if (!found) {
+        LNN_LOGE(LNN_EVENT, "not found, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    }
     AnonymizeFree(anonyNetworkId);
 }
 
 typedef struct {
     char *data;
     uint32_t length;
-    char networkId[NETWORK_ID_BUF_LEN];
     ConversationBusiness info;
 } CachedMsgToSend;
 
@@ -1950,7 +2015,7 @@ static std::vector<CachedMsgToSend> ExtractCachedMessagesToSend(const char *netw
 
     std::unique_lock<std::mutex> lock(g_sendMsgCacheLock);
     for (auto it = g_sendMsgCacheVec.begin(); it != g_sendMsgCacheVec.end();) {
-        if (it->channel != channel) {
+        if (it->channel != channel || strcmp(it->networkId, networkId) != 0) {
             ++it;
             continue;
         }
@@ -1970,12 +2035,6 @@ static std::vector<CachedMsgToSend> ExtractCachedMessagesToSend(const char *netw
             continue;
         }
         msgToSend.length = it->length;
-        if (strcpy_s(msgToSend.networkId, NETWORK_ID_BUF_LEN, it->networkId) != EOK) {
-            LNN_LOGE(LNN_EVENT, "networkId memcpy_s failed");
-            SoftBusFree(msgToSend.data);
-            ++it;
-            continue;
-        }
         msgToSend.info = it->info;
         msgsToSend.push_back(msgToSend);
         SoftBusFree(it->data);
@@ -2020,7 +2079,7 @@ static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *connInfo
         ExtractCachedMessagesToSend(networkId, CONVERSATION_NEAR_FIELD_WIFI_DIRECT);
 
     for (const auto &msg : msgsToSend) {
-        int32_t sendRet = SendNearFieldMsg(msg.data, msg.length, msg.networkId, &msg.info, nullptr);
+        int32_t sendRet = SendNearFieldMsg(msg.data, msg.length, networkId, &msg.info, nullptr);
         LNN_LOGI(LNN_EVENT, "send cached msg done, ret=%{public}d", sendRet);
         SoftBusFree(msg.data);
     }
@@ -2038,29 +2097,35 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t reason)
     LNN_LOGE(LNN_EVENT, "near field lane alloc fail, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     int32_t ret = GetNearFieldNetworkIdByLaneHandle(laneHandle, networkId);
-    if (ret == SOFTBUS_OK) {
-        LNN_LOGI(LNN_EVENT, "near field lane alloc fail, try far field");
-
-        std::vector<CachedMsgToSend> msgsToSend =
-            ExtractCachedMessagesToSend(networkId, CONVERSATION_NEAR_FIELD_WIFI_DIRECT);
-
-        for (const auto &msg : msgsToSend) {
-            NodeInfo nodeInfo;
-            ret = GetDeviceNodeInfo(msg.networkId, &nodeInfo);
-            if (ret != SOFTBUS_OK) {
-                LNN_LOGE(LNN_EVENT, "get device node info failed, skip cached msg, ret=%{public}d", ret);
-                SoftBusFree(msg.data);
-                continue;
-            }
-            SendMsgData msgData = {msg.data, msg.length};
-            int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData,
-                nodeInfo.deviceInfo.deviceUdid, &msg.info, nullptr);
-            LNN_LOGI(LNN_EVENT, "send cached msg done, ret=%{public}d", sendRet);
-            SoftBusFree(msg.data);
-        }
-        LNN_LOGI(LNN_EVENT, "send cached msg count=%{public}zu", msgsToSend.size());
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "get networkId fail, ret=%{public}d", ret);
+        DelNearFieldChannelNodeByLaneHandle(laneHandle);
+        return;
     }
     DelNearFieldChannelNodeByLaneHandle(laneHandle);
+    if (IsLocalDevicePc()) {
+        DelSendMsgCacheByNetworkId(networkId);
+        return;
+    }
+    LNN_LOGI(LNN_EVENT, "near field lane alloc fail, try far field");
+    std::vector<CachedMsgToSend> msgsToSend =
+        ExtractCachedMessagesToSend(networkId, CONVERSATION_NEAR_FIELD_WIFI_DIRECT);
+
+    for (const auto &msg : msgsToSend) {
+        NodeInfo nodeInfo;
+        ret = GetDeviceNodeInfo(networkId, &nodeInfo);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "get device node info failed, skip cached msg, ret=%{public}d", ret);
+            SoftBusFree(msg.data);
+            continue;
+        }
+        SendMsgData msgData = {msg.data, msg.length};
+        int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData,
+            nodeInfo.deviceInfo.deviceUdid, &msg.info, nullptr);
+        LNN_LOGI(LNN_EVENT, "send cached msg done, ret=%{public}d", sendRet);
+        SoftBusFree(msg.data);
+    }
+    LNN_LOGI(LNN_EVENT, "send cached msg count=%{public}zu", msgsToSend.size());
 }
 
 static void OnNearFieldDisconnected(AuthHandle authHandle)
@@ -2214,7 +2279,7 @@ void DeinitConversationQuery(void)
     LNN_LOGI(LNN_EVENT, "unreg conversation sync looper success");
 }
 
-int32_t CreateNearFieldChannel(const char *networkId)
+static int32_t CreateNearFieldChannel(const char *networkId)
 {
     if (GetLaneManager() == nullptr || GetLaneManager()->lnnGetLaneHandle == nullptr ||
         GetLaneManager()->lnnFreeLane == nullptr || GetLaneManager()->lnnAllocTargetLane == nullptr) {
@@ -2327,7 +2392,7 @@ static bool IsLocalDeviceId(const char *deviceId)
 
 static uint64_t InitConverDataEventExtra(ConDataEventParam *param, LnnEventExtra *extra = nullptr)
 {
-    if (param == nullptr || extra == nullptr) {
+    if (param == nullptr || extra == nullptr || param->info == nullptr) {
         return SoftBusGetTimeMs();
     }
  
@@ -2380,7 +2445,8 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
 
     NodeInfo nodeInfo;
     memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = PrintAndGetDeviceNodeInfo(len, deviceId, &nodeInfo);
+    int32_t nodeRet = PrintAndGetDeviceNodeInfo(len, deviceId, &nodeInfo);
+
     uint32_t msgId = GenerateMsgId();
     if (msgId == 0) {
         LNN_LOGE(LNN_EVENT, "generate msgId failed");
@@ -2390,30 +2456,26 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
     char peerDevTypeStr[INT64_TO_STR_MAX_LEN] = { 0 };
     ConDataEventParam param = { deviceId, info, len, nodeInfo.deviceInfo.deviceTypeId, peerDevTypeStr };
     uint64_t beginTime = InitConverDataEventExtra(&param, &extra);
-    SendMsgData msgData = {data, len};
-    if (ret == SOFTBUS_OK) {
-        ret = AddAckWaitItem(msgId, nodeInfo.deviceInfo.deviceUdid, info);
-        if (ret != SOFTBUS_OK) {
-            return ret;
-        }
-        ret = SOFTBUS_NETWORK_NOT_SUPPORT;
-        if (IsSupportNearField(&nodeInfo)) {
-            ret = LnnSendCtrlMsgByNearField(data, len, nodeInfo.networkId, info);
-            LNN_LOGI(LNN_EVENT, "send by near field ret=%{public}d", ret);
-        }
-        if (ret != SOFTBUS_OK && IsSupportFarField(&nodeInfo)) {
-            ret = LnnSendCtrlMsgByFarField(&msgData, nodeInfo.deviceInfo.deviceUdid, info, nullptr, &extra);
-            LNN_LOGI(LNN_EVENT, "send by far field ret=%{public}d", ret);
-        }
-    } else {
-        ret = AddAckWaitItem(msgId, deviceId, info);
-        if (ret != SOFTBUS_OK) {
-            return ret;
-        }
-        LNN_LOGI(LNN_EVENT, "device not found, just try send far field");
-        ret = LnnSendCtrlMsgByFarField(&msgData, deviceId, info, nullptr, &extra);
+    const char *peerDeviceId = (nodeRet == SOFTBUS_OK) ? nodeInfo.deviceInfo.deviceUdid : deviceId;
+    int32_t ret = AddAckWaitItem(msgId, peerDeviceId, info);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
 
+    SendMsgData msgData = {data, len};
+    ret = SOFTBUS_NETWORK_NOT_SUPPORT;
+    if (nodeRet == SOFTBUS_OK && IsSupportNearField(&nodeInfo)) {
+        ret = LnnSendCtrlMsgByNearField(data, len, nodeInfo.networkId, info);
+        LNN_LOGI(LNN_EVENT, "send by near field ret=%{public}d", ret);
+        if (ret != SOFTBUS_OK && IsLocalDevicePc()) {
+            DfxRecordPostConversationData(beginTime, ret, &extra);
+            RemoveAckWaitItem(msgId, true);
+            return ret;
+        }
+    }
+    if (ret != SOFTBUS_OK && IsSupportFarField((nodeRet == SOFTBUS_OK) ? &nodeInfo : nullptr)) {
+        ret = LnnSendCtrlMsgByFarField(&msgData, peerDeviceId, info, nullptr, &extra);
+    }
     if (ret != SOFTBUS_OK) {
         DfxRecordPostConversationData(beginTime, ret, &extra);
         RemoveAckWaitItem(msgId, true);

@@ -198,7 +198,9 @@ HWTEST_F(TransScenarioManagerTest, ScenarioManagerIsBusinesExisted001, TestSize.
 HWTEST_F(TransScenarioManagerTest, ScenarioManagerClearScenarioItemList001, TestSize.Level1)
 {
     ScenarioManager managerInstance = { nullptr, nullptr };
+    EXPECT_NO_FATAL_FAILURE(ScenarioManagerClearMacIfacePairList(nullptr));
     EXPECT_NO_FATAL_FAILURE(ScenarioManagerClearMacIfacePairList(&managerInstance));
+    EXPECT_NO_FATAL_FAILURE(ScenarioManagerClearScenarioItemList(nullptr));
     EXPECT_NO_FATAL_FAILURE(ScenarioManagerClearScenarioItemList(&managerInstance));
 }
 

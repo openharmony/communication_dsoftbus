@@ -15,9 +15,12 @@
 #ifndef WIFI_DIRECT_PROCESSOR_H
 #define WIFI_DIRECT_PROCESSOR_H
 
+#include <memory>
+
 #include "conn_log.h"
 #include "dfx/processor_snapshot.h"
 
+#include "command/connect_command.h"
 #include "event/wifi_direct_event_dispatcher.h"
 #include "wifi_direct_types.h"
 
@@ -67,12 +70,18 @@ public:
         return SOFTBUS_OK;
     };
 
+    virtual bool HasActiveConnectCommand(WifiDirectLinkType linkType) const
+    {
+        return connectCommand_ != nullptr && connectCommand_->GetLinkType() == linkType;
+    }
+
     virtual std::string GetProcessorName() const = 0;
     virtual std::string GetState() const = 0;
 
 protected:
     std::string remoteDeviceId_;
     WifiDirectExecutor *executor_ {};
+    std::shared_ptr<ConnectCommand> connectCommand_;
 
 private:
     std::atomic<bool> acceptNegotiateData_;

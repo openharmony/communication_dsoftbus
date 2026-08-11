@@ -135,15 +135,17 @@ static void LogListenerEntry(const std::string &bundleName, const std::string &a
     }
 
     std::vector<::ohos::distributedSoftBus::conversation::DeviceNodeInfo> devices;
-    for (int32_t i = 0; i < nums; ++i) {
-        ::ohos::distributedSoftBus::conversation::DeviceNodeInfo info = {
-            .networkId = list[i].networkId,
-            .deviceName = list[i].deviceName,
-            .deviceTypeId = list[i].deviceTypeId,
-            .nearby = list[i].nearby,
-            .udid = list[i].udid,
-        };
-        devices.push_back(info);
+    if (nums > 0 && list != nullptr) {
+        for (int32_t i = 0; i < nums; ++i) {
+            ::ohos::distributedSoftBus::conversation::DeviceNodeInfo info = {
+                .networkId = list[i].networkId,
+                .deviceName = list[i].deviceName,
+                .deviceTypeId = list[i].deviceTypeId,
+                .nearby = list[i].nearby,
+                .udid = list[i].udid,
+            };
+            devices.push_back(info);
+        }
     }
 
     if (list != nullptr) {
@@ -186,6 +188,11 @@ void PostConversationDataAsync(::taihe::string_view deviceId,
     }
     if (msg.empty()) {
         COMM_LOGE(COMM_SDK, "msg is empty");
+        ThrowBusinessException(CONVERSATION_INVALID_PARAM);
+        return;
+    }
+    if (msg.size() > COMMUNICATION_DATA_MAX_LEN) {
+        COMM_LOGE(COMM_SDK, "msg too large, size=%{public}zu", msg.size());
         ThrowBusinessException(CONVERSATION_INVALID_PARAM);
         return;
     }

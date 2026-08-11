@@ -116,49 +116,59 @@ static void DelDataCallbackData(DataCallbackData *cb)
     }
 }
 
+static bool CreateDataCallbackArgv(napi_env env, const DataCallbackData *cb, napi_value argv[ARGC_TWO])
+{
+    napi_value networkId = nullptr;
+    napi_status status = napi_create_string_utf8(env, cb->deviceId.c_str(), cb->deviceId.size(), &networkId);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create networkId failed");
+        return false;
+    }
+    napi_value msg = nullptr;
+    void *msgData = nullptr;
+    status = napi_create_arraybuffer(env, cb->dataLen, &msgData, &msg);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create arraybuffer failed");
+        return false;
+    }
+    if (memcpy_s(msgData, cb->dataLen, cb->data, cb->dataLen) != EOK) {
+        COMM_LOGE(COMM_SDK, "memcpy data failed");
+        return false;
+    }
+    argv[0] = networkId;
+    argv[ARGC_ONE] = msg;
+    return true;
+}
+
 static void CallDataJsCallback(napi_env env, napi_value jsCallback, void *context, void *rawData)
 {
     DataCallbackData *cb = static_cast<DataCallbackData *>(rawData);
-
     if (env == nullptr || jsCallback == nullptr || cb == nullptr) {
         COMM_LOGE(COMM_SDK, "invalid param");
         DelDataCallbackData(cb);
         return;
     }
-
-    napi_handle_scope scope;
-    napi_status statu = napi_open_handle_scope(env, &scope);
-    if (statu != napi_ok || scope == nullptr) {
+    napi_handle_scope scope = nullptr;
+    napi_status status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
         COMM_LOGE(COMM_SDK, "open handle scope failed");
         DelDataCallbackData(cb);
         return;
     }
-    napi_value networkId;
-    napi_create_string_utf8(env, cb->deviceId.c_str(), NAPI_AUTO_LENGTH, &networkId);
-
-    napi_value msg;
-    void *msgData;
-    napi_status status = napi_create_arraybuffer(env, cb->dataLen, &msgData, &msg);
+    napi_value argv[ARGC_TWO] = {nullptr};
+    if (!CreateDataCallbackArgv(env, cb, argv)) {
+        napi_close_handle_scope(env, scope);
+        DelDataCallbackData(cb);
+        return;
+    }
+    napi_value global = nullptr;
+    status = napi_get_global(env, &global);
     if (status != napi_ok) {
-        COMM_LOGE(COMM_SDK, "create arraybuffer failed");
+        COMM_LOGE(COMM_SDK, "get global failed");
         napi_close_handle_scope(env, scope);
         DelDataCallbackData(cb);
         return;
     }
-    if (memcpy_s(msgData, cb->dataLen, cb->data, cb->dataLen) != EOK) {
-        COMM_LOGE(COMM_SDK, "memcpy data failed");
-        napi_close_handle_scope(env, scope);
-        DelDataCallbackData(cb);
-        return;
-    }
-
-    napi_value argv[ARGC_TWO];
-    argv[0] = networkId;
-    argv[ARGC_ONE] = msg;
-
-    napi_value global;
-    napi_get_global(env, &global);
-
     status = napi_call_function(env, global, jsCallback, ARGC_TWO, argv, nullptr);
     if (status != napi_ok) {
         COMM_LOGE(COMM_SDK, "call js callback failed");
@@ -188,54 +198,96 @@ static void ExecuteSendMsg(napi_env env, void *data)
                                         reinterpret_cast<char *>(ctx->msg), ctx->msgLen);
     ctx->resultCode = ConvertToJsErrcode(ret);
     COMM_LOGI(COMM_SDK, "ret=%{public}d, resultCode=%{public}d", ret, ctx->resultCode);
- 
-    delete[] ctx->msg;
 }
 
 static void CompleteSendMsg(napi_env env, napi_status status, void *data)
 {
     SendMsgContext *ctx = static_cast<SendMsgContext *>(data);
+    napi_value result = nullptr;
+    napi_status napiStatus;
     if (ctx->resultCode != CONVERSATION_OK) {
-        napi_value error = CreateBusinessErrorValue(env, ctx->resultCode);
-        napi_reject_deferred(env, ctx->deferred, error);
         COMM_LOGE(COMM_SDK, "reject resultCode=%{public}d", ctx->resultCode);
+        napi_reject_deferred(env, ctx->deferred, CreateBusinessErrorValue(env, ctx->resultCode));
+        goto cleanup;
+    }
+    napiStatus = napi_get_undefined(env, &result);
+    if (napiStatus != napi_ok) {
+        COMM_LOGE(COMM_SDK, "get undefined failed");
+        napi_reject_deferred(env, ctx->deferred, CreateBusinessErrorValue(env, CONVERSATION_INTERNAL_ERR));
+        goto cleanup;
+    }
+    napiStatus = napi_resolve_deferred(env, ctx->deferred, result);
+    if (napiStatus != napi_ok) {
+        COMM_LOGE(COMM_SDK, "resolve promise failed");
+        napi_reject_deferred(env, ctx->deferred, CreateBusinessErrorValue(env, CONVERSATION_INTERNAL_ERR));
     } else {
-        napi_value result;
-        napi_get_undefined(env, &result);
-        napi_resolve_deferred(env, ctx->deferred, result);
         COMM_LOGI(COMM_SDK, "resolve success");
     }
 
+cleanup:
+    delete[] ctx->msg;
     napi_delete_async_work(env, ctx->work);
 
     delete ctx;
 }
 
-static void FillJsDeviceNode(napi_env env, napi_value &jsDevice, const DeviceNodeInfo *node)
+static bool SetJsStringProperty(napi_env env, napi_value jsObj, const char *name, const char *value, size_t maxLen)
 {
-    napi_create_object(env, &jsDevice);
-    napi_value networkId;
-    napi_create_string_utf8(env, node->networkId, NAPI_AUTO_LENGTH, &networkId);
-    napi_set_named_property(env, jsDevice, "networkId", networkId);
-    napi_value deviceName;
-    napi_create_string_utf8(env, node->deviceName, NAPI_AUTO_LENGTH, &deviceName);
-    napi_set_named_property(env, jsDevice, "deviceName", deviceName);
-    napi_value deviceTypeId;
-    napi_create_int32(env, node->deviceTypeId, &deviceTypeId);
-    napi_set_named_property(env, jsDevice, "deviceTypeId", deviceTypeId);
-    napi_value nearby;
-    napi_get_boolean(env, node->nearby, &nearby);
-    napi_set_named_property(env, jsDevice, "nearby", nearby);
-    napi_value udid;
-    napi_create_string_utf8(env, node->udid, NAPI_AUTO_LENGTH, &udid);
-    napi_set_named_property(env, jsDevice, "udid", udid);
+    napi_value prop = nullptr;
+    size_t len = strnlen(value, maxLen);
+    napi_status status = napi_create_string_utf8(env, value, len, &prop);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create %s failed", name);
+        return false;
+    }
+    status = napi_set_named_property(env, jsObj, name, prop);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "set %s failed", name);
+        return false;
+    }
+    return true;
+}
+
+static bool FillJsDeviceNode(napi_env env, napi_value &jsDevice, const DeviceNodeInfo *node)
+{
+    napi_status status = napi_create_object(env, &jsDevice);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create object failed");
+        return false;
+    }
+    if (!SetJsStringProperty(env, jsDevice, "networkId", node->networkId, NETWORK_ID_BUF_LEN)) {
+        return false;
+    }
+    if (!SetJsStringProperty(env, jsDevice, "deviceName", node->deviceName, DEVICE_NAME_BUF_LEN)) {
+        return false;
+    }
+    napi_value deviceTypeId = nullptr;
+    status = napi_create_int32(env, node->deviceTypeId, &deviceTypeId);
+    if (status != napi_ok || napi_set_named_property(env, jsDevice, "deviceTypeId", deviceTypeId) != napi_ok) {
+        COMM_LOGE(COMM_SDK, "set deviceTypeId failed");
+        return false;
+    }
+    napi_value nearby = nullptr;
+    status = napi_get_boolean(env, node->nearby, &nearby);
+    if (status != napi_ok || napi_set_named_property(env, jsDevice, "nearby", nearby) != napi_ok) {
+        COMM_LOGE(COMM_SDK, "set nearby failed");
+        return false;
+    }
+    if (!SetJsStringProperty(env, jsDevice, "udid", node->udid, UDID_BUF_LEN)) {
+        return false;
+    }
+    return true;
 }
 
 static napi_value NapiGetTrustedDevicesSync(napi_env env, napi_value thisVar)
 {
     COMM_LOGI(COMM_SDK, "start");
-    napi_value resultArray;
-    napi_create_array(env, &resultArray);
+    napi_value resultArray = nullptr;
+    napi_status status = napi_create_array(env, &resultArray);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create array failed");
+        return nullptr;
+    }
 
     if (!IsSystemApp()) {
         COMM_LOGE(COMM_SDK, "not system app");
@@ -258,11 +310,18 @@ static napi_value NapiGetTrustedDevicesSync(napi_env env, napi_value thisVar)
         COMM_LOGE(COMM_SDK, "resultCode=%{public}d", resultCode);
         ThrowBusinessError(env, resultCode);
         return resultArray;
-    } else if (nums > 0) {
+    } else if (nums > 0 && list != nullptr) {
         for (int i = 0; i < nums; ++i) {
-            napi_value jsDevice;
-            FillJsDeviceNode(env, jsDevice, &list[i]);
-            napi_set_element(env, resultArray, i, jsDevice);
+            napi_value jsDevice = nullptr;
+            if (!FillJsDeviceNode(env, jsDevice, &list[i])) {
+                COMM_LOGE(COMM_SDK, "fill device node failed, index=%{public}d", i);
+                break;
+            }
+            status = napi_set_element(env, resultArray, i, jsDevice);
+            if (status != napi_ok) {
+                COMM_LOGE(COMM_SDK, "set element failed, index=%{public}d", i);
+                break;
+            }
         }
     }
 
@@ -282,28 +341,28 @@ static napi_value NapiGetTrustedDevicesWrapper(napi_env env, napi_callback_info 
 static bool ParseMsgArrayBuffer(napi_env env, napi_value arg, SendMsgContext *ctx)
 {
     napi_valuetype valueType;
-    napi_typeof(env, arg, &valueType);
-    if (valueType != napi_object) {
+    napi_status status = napi_typeof(env, arg, &valueType);
+    if (status != napi_ok || valueType != napi_object) {
         COMM_LOGE(COMM_SDK, "arg is not object");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return false;
     }
     bool isArrayBuffer = false;
-    napi_is_arraybuffer(env, arg, &isArrayBuffer);
-    if (!isArrayBuffer) {
+    status = napi_is_arraybuffer(env, arg, &isArrayBuffer);
+    if (status != napi_ok || !isArrayBuffer) {
         COMM_LOGE(COMM_SDK, "arg is not arraybuffer");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return false;
     }
     void *data = nullptr;
     size_t byteLen = 0;
-    napi_get_arraybuffer_info(env, arg, &data, &byteLen);
-    if (data == nullptr || byteLen == 0) {
+    status = napi_get_arraybuffer_info(env, arg, &data, &byteLen);
+    if (status != napi_ok || data == nullptr || byteLen == 0) {
         COMM_LOGE(COMM_SDK, "invalid arraybuffer, byteLen=%{public}zu", byteLen);
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return false;
     }
-    ctx->msg = new uint8_t[byteLen];
+    ctx->msg = new (std::nothrow) uint8_t[byteLen];
     if (ctx->msg == nullptr) {
         COMM_LOGE(COMM_SDK, "alloc msg failed");
         ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
@@ -344,6 +403,39 @@ static bool ParseSendMsgParams(napi_env env, size_t argc, napi_value *argv, Send
     return ParseMsgArrayBuffer(env, argv[ARGC_THREE], ctx);
 }
 
+static napi_value CreateSendMsgAsyncWork(napi_env env, SendMsgContext *ctx)
+{
+    napi_value promise = nullptr;
+    napi_value resourceName = nullptr;
+    napi_status status = napi_create_promise(env, &ctx->deferred, &promise);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create promise failed");
+        ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
+        return nullptr;
+    }
+    status = napi_create_string_utf8(env, "SendMsgAsync", NAPI_AUTO_LENGTH, &resourceName);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create resource name failed");
+        napi_reject_deferred(env, ctx->deferred, CreateBusinessErrorValue(env, CONVERSATION_INTERNAL_ERR));
+        return nullptr;
+    }
+    status = napi_create_async_work(env, nullptr, resourceName, ExecuteSendMsg, CompleteSendMsg, ctx, &ctx->work);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create async work failed");
+        napi_reject_deferred(env, ctx->deferred, CreateBusinessErrorValue(env, CONVERSATION_INTERNAL_ERR));
+        return nullptr;
+    }
+    status = napi_queue_async_work(env, ctx->work);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "queue async work failed");
+        napi_delete_async_work(env, ctx->work);
+        ctx->work = nullptr;
+        napi_reject_deferred(env, ctx->deferred, CreateBusinessErrorValue(env, CONVERSATION_INTERNAL_ERR));
+        return nullptr;
+    }
+    return promise;
+}
+
 static napi_value NapiPostConversationDataAsync(napi_env env, napi_callback_info info)
 {
     COMM_LOGI(COMM_SDK, "start");
@@ -357,26 +449,33 @@ static napi_value NapiPostConversationDataAsync(napi_env env, napi_callback_info
         ThrowBusinessError(env, CONVERSATION_PERMISSION_ERR);
         return nullptr;
     }
-
-    auto *ctx = new SendMsgContext();
+    auto *ctx = new (std::nothrow) SendMsgContext();
+    if (ctx == nullptr) {
+        COMM_LOGE(COMM_SDK, "alloc ctx failed");
+        ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
+        return nullptr;
+    }
     ctx->env = env;
     size_t argc = SEND_ARGS_SIZE;
-    napi_value argv[SEND_ARGS_SIZE];
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-
+    napi_value argv[SEND_ARGS_SIZE] = {nullptr};
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "get cb info failed");
+        ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
+        delete ctx;
+        return nullptr;
+    }
     if (!ParseSendMsgParams(env, argc, argv, ctx)) {
         COMM_LOGE(COMM_SDK, "parse params failed");
         delete ctx;
         return nullptr;
     }
     LogBusinessParam("NapiPostConversationData", ctx->deviceId, ctx->bundleName, ctx->abilityName, ctx->msgLen);
-
-    napi_value promise;
-    napi_create_promise(env, &ctx->deferred, &promise);
-    napi_value resourceName;
-    napi_create_string_utf8(env, "SendMsgAsync", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName, ExecuteSendMsg, CompleteSendMsg, ctx, &ctx->work);
-    napi_queue_async_work(env, ctx->work);
+    napi_value promise = CreateSendMsgAsyncWork(env, ctx);
+    if (promise == nullptr) {
+        delete[] ctx->msg;
+        delete ctx;
+    }
     return promise;
 }
 
@@ -396,22 +495,27 @@ static void OnDataRecvCallback(const char *deviceId, const char *data, uint32_t 
         COMM_LOGE(COMM_SDK, "tsfn not found");
         return;
     }
-    DataCallbackData *cb = new DataCallbackData();
+    DataCallbackData *cb = new (std::nothrow) DataCallbackData();
+    if (cb == nullptr) {
+        COMM_LOGE(COMM_SDK, "alloc cb failed");
+        return;
+    }
     if (deviceId != nullptr) {
         cb->deviceId = deviceId;
     }
     if (data != nullptr && length > 0) {
-        cb->data = new uint8_t[length];
-        if (cb->data != nullptr) {
-            cb->dataLen = length;
-            if (memcpy_s(cb->data, cb->dataLen, data, length) != 0) {
-                COMM_LOGE(COMM_SDK, "memcpy data failed");
-                delete[] cb->data;
-                cb->data = nullptr;
-                cb->dataLen = 0;
-                delete cb;
-                return;
-            }
+        cb->data = new (std::nothrow) uint8_t[length];
+        if (cb->data == nullptr) {
+            COMM_LOGE(COMM_SDK, "alloc data failed");
+            delete cb;
+            return;
+        }
+        cb->dataLen = length;
+        if (memcpy_s(cb->data, cb->dataLen, data, length) != 0) {
+            COMM_LOGE(COMM_SDK, "memcpy data failed");
+            delete[] cb->data;
+            delete cb;
+            return;
         }
     }
     napi_status status = napi_call_threadsafe_function(tsfn, cb, napi_tsfn_nonblocking);
@@ -436,10 +540,15 @@ static void RemoveTsfnFromMap(const std::string &abilityName)
 
 static bool StoreTsfn(napi_env env, napi_value dataCallback, const std::string &abilityName, bool &isExisting)
 {
-    napi_value dataResourceName;
-    napi_create_string_utf8(env, "CloudDataCallback", NAPI_AUTO_LENGTH, &dataResourceName);
+    napi_value dataResourceName = nullptr;
+    napi_status status = napi_create_string_utf8(env, "CloudDataCallback", NAPI_AUTO_LENGTH, &dataResourceName);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "create resource name failed");
+        ThrowBusinessError(env, CONVERSATION_INTERNAL_ERR);
+        return false;
+    }
     napi_threadsafe_function tsfn = nullptr;
-    napi_status status = napi_create_threadsafe_function(env, dataCallback, nullptr,
+    status = napi_create_threadsafe_function(env, dataCallback, nullptr,
         dataResourceName, 0, 1, nullptr, nullptr, nullptr, CallDataJsCallback, &tsfn);
     if (status != napi_ok) {
         COMM_LOGE(COMM_SDK, "create data tsfn failed");
@@ -484,8 +593,8 @@ static napi_value NapiRegisterConversationListenerSync(napi_env env, size_t argc
 
     napi_value dataCallback = argv[2];
     napi_valuetype dataType;
-    napi_typeof(env, dataCallback, &dataType);
-    if (dataType != napi_function) {
+    napi_status status = napi_typeof(env, dataCallback, &dataType);
+    if (status != napi_ok || dataType != napi_function) {
         COMM_LOGE(COMM_SDK, "dataCallback must be function");
         ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
         return nullptr;
@@ -527,10 +636,15 @@ static napi_value NapiRegisterConversationListenerWarpper(napi_env env, napi_cal
         return nullptr;
     }
     size_t argc = REGISTER_ARGS_SIZE;
-    napi_value argv[REGISTER_ARGS_SIZE];
-    napi_value thisVar;
+    napi_value argv[REGISTER_ARGS_SIZE] = {nullptr};
+    napi_value thisVar = nullptr;
 
-    napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "get cb info failed");
+        ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
+        return nullptr;
+    }
     return NapiRegisterConversationListenerSync(env, argc, argv);
 }
 
@@ -583,10 +697,15 @@ static napi_value NapiUnregisterConversationListenerWarpper(napi_env env, napi_c
         return nullptr;
     }
     size_t argc = ARGS_SIZE_TWO;
-    napi_value argv[ARGS_SIZE_TWO];
-    napi_value thisVar;
+    napi_value argv[ARGS_SIZE_TWO] = {nullptr};
+    napi_value thisVar = nullptr;
 
-    napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "get cb info failed");
+        ThrowBusinessError(env, CONVERSATION_INVALID_PARAM);
+        return nullptr;
+    }
     return NapiunRegisterConversationListenerSync(env, argc, argv);
 }
 
@@ -599,7 +718,11 @@ static napi_value Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("registerConversationListener", NapiRegisterConversationListenerWarpper),
         DECLARE_NAPI_FUNCTION("unregisterConversationListener", NapiUnregisterConversationListenerWarpper)
     };
-    napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_status status = napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc);
+    if (status != napi_ok) {
+        COMM_LOGE(COMM_SDK, "define properties failed");
+        return nullptr;
+    }
     return exports;
 }
 EXTERN_C_END

@@ -180,6 +180,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     TransDeleteSocketChannelInfoByChannel(channelId, channelType);
     if (ClientIpcOnChannelOpenFailed(&data, errCode) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel open fail");
+        SoftbusHitraceStop();
         return SOFTBUS_IPC_ERR;
     }
     SoftbusHitraceStop();

@@ -81,9 +81,9 @@ int32_t PostConversationData(const char *deviceId, const ConversationBusiness *i
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t deviceIdLen = strnlen(deviceId, NETWORK_ID_BUF_LEN);
+    uint32_t deviceIdLen = strnlen(deviceId, NETWORK_ID_BUF_LEN);
     if (deviceIdLen != NETWORK_ID_BUF_LEN - 1) {
-        LNN_LOGE(LNN_EVENT, "invalid deviceId, len=%{public}d", deviceIdLen);
+        LNN_LOGE(LNN_EVENT, "invalid deviceId, len=%{public}u", deviceIdLen);
         DfxRecordSdkPostConversationData(deviceId, info, len, timeMs, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }

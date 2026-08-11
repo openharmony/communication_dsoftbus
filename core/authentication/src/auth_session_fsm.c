@@ -40,6 +40,7 @@
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_manager.h"
@@ -1384,11 +1385,13 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
         return SOFTBUS_STRCPY_ERR;
     }
     authParam.cb = NULL;
-    authParam.userId = authFsm->info.userId;
+    authParam.peerUserId = authFsm->info.userId;
+    authParam.localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (authFsm->info.credNegoState != CRED_NEGO_STATE_COMPATIBLE) {
         if (authFsm->info.credTypeInfo == NULL ||
-            !GetJsonObjectNumberItem(authFsm->info.credTypeInfo, SINK_USERID, &authParam.userId)) {
-            AUTH_LOGE(AUTH_FSM, "parse peerUserId from chosenCredTypes fail");
+            !GetJsonObjectNumberItem(authFsm->info.credTypeInfo, SINK_USERID, &authParam.peerUserId) ||
+            !GetJsonObjectNumberItem(authFsm->info.credTypeInfo, SOURCE_USERID, &authParam.localUserId)) {
+            AUTH_LOGE(AUTH_FSM, "parse peerUserId/localUserId from chosenCredTypes fail");
             authFsm->info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
             return SOFTBUS_PARSE_JSON_ERR;
         }

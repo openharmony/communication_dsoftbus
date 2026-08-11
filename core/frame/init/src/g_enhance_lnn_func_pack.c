@@ -116,13 +116,13 @@ void AuthMetaCloseConnPacked(int64_t authId)
     return pfnLnnEnhanceFuncList->authMetaCloseConn(authId);
 }
 
-int32_t AuthMetaGetPreferConnInfoPacked(const char *uuid, AuthConnInfo *connInfo)
+int32_t AuthMetaGetPreferConnInfoPacked(const char *networkId, AuthConnInfo *connInfo)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetPreferConnInfo) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnLnnEnhanceFuncList->authMetaGetPreferConnInfo(uuid, connInfo);
+    return pfnLnnEnhanceFuncList->authMetaGetPreferConnInfo(networkId, connInfo);
 }
 
 int64_t AuthMetaGetIdByConnInfoPacked(const AuthConnInfo *connInfo, bool isServer)
@@ -1953,6 +1953,18 @@ int32_t LnnSendAgentDataPacked(const char *udid, const char *data, uint32_t leng
     return pfnLnnEnhanceFuncList->lnnSendAgentData(udid, data, length, extra, isAckMsg);
 }
 
+bool FarfieldParseModuleTypePacked(const uint8_t *data, uint32_t dataLen, uint32_t *moduleType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->farfieldParseModuleType) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->farfieldParseModuleType(data, dataLen, moduleType);
+}
+
 int32_t PostLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs)
 {
@@ -1976,4 +1988,17 @@ int32_t RemoveLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudRemoveCompareFu
         return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->removeLnnCloudEvent(event, func, param);
+}
+
+int32_t AuthMetaOpenConnWithOtherOsTypePacked(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaOpenConnWithOtherOsType) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->authMetaOpenConnWithOtherOsType(info, networkId, requestId, callback);
 }

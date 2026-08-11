@@ -226,6 +226,44 @@ HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: OpenSessionTest002
+ * @tc.desc: Verify OpenSession returns SOFTBUS_INVALID_PARAM when param or info is nullptr,
+ *           and returns error when linkTypeNum exceeds LINK_TYPE_MAX
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransIpcStandardTest, OpenSessionTest002, TestSize.Level1)
+{
+    TransServerProxy transServerProxy(nullptr);
+    SessionParam *param = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
+    TransInfo *info = (TransInfo*)SoftBusCalloc(sizeof(TransInfo));
+    ASSERT_TRUE(param != nullptr);
+    ASSERT_TRUE(info != nullptr);
+    (void)memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    (void)memset_s(info, sizeof(TransInfo), 0, sizeof(TransInfo));
+
+    int32_t ret = transServerProxy.OpenSession(nullptr, info);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = transServerProxy.OpenSession(param, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    param->sessionName = g_sessionName;
+    param->peerSessionName = g_peerSessionName;
+    param->peerDeviceId = g_peerDeviceId;
+    param->groupId = g_groupId;
+    SessionAttribute sessionAttribute;
+    sessionAttribute.dataType = 1;
+    sessionAttribute.linkTypeNum = LINK_TYPE_MAX + 1;
+    param->attr = &sessionAttribute;
+    ret = transServerProxy.OpenSession(param, info);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+
+    SoftBusFree(param);
+    SoftBusFree(info);
+}
+
+/*
  * @tc.name: OpenAuthSessionTest001
  * @tc.desc: Verify the method error handling capability under different input parameter condititons
  * @tc.type: FUNC

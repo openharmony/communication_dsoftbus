@@ -99,6 +99,16 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t AuthOpenConnWithOtherOsType(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback)
+{
+    (void)info;
+    (void)networkId;
+    (void)requestId;
+    (void)callback;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
     (void)authHandle;
@@ -112,17 +122,19 @@ void AuthCloseConn(AuthHandle authHandle)
     return;
 }
 
-int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfo(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
     (void)uuid;
+    (void)networkId;
     (void)connInfo;
     (void)isMeta;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthGetPreferConnInfoWithoutSle(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+int32_t AuthGetPreferConnInfoWithoutSle(const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta)
 {
     (void)uuid;
+    (void)networkId;
     (void)connInfo;
     (void)isMeta;
     return SOFTBUS_NOT_IMPLEMENT;
@@ -307,9 +319,11 @@ int32_t AuthGetAuthHandleByIndexForBle(const AuthConnInfo *connInfo, char *netwo
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthGetConnInfoBySide(const char *uuid, AuthConnInfo *connInfo, bool isMeta, bool isClient)
+int32_t AuthGetConnInfoBySide(
+    const char *uuid, const char *networkId, AuthConnInfo *connInfo, bool isMeta, bool isClient)
 {
     (void)uuid;
+    (void)networkId;
     (void)connInfo;
     (void)isMeta;
     (void)isClient;

@@ -68,6 +68,58 @@ ohos_unittest("TransClientSessionManagerTest") {
   }
 }
 
+ohos_unittest("TransClientSessionManagerTest2") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
+  }
+  module_out_path = module_output_path
+  sources = [ "client_trans_session_manager_test2.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 ohos_unittest("TransClientSessionManagerExTest") {
   sanitize = {
     cfi = true
@@ -555,6 +607,7 @@ group("unittest") {
     ":TransClientMsgServiceTest",
     ":TransClientSessionCallbackTest",
     ":TransClientSessionManagerTest",
+    ":TransClientSessionManagerTest2",
     ":TransClientSessionManagerExTest",
     ":TransClientSessionServiceTest",
     ":TransClientSocketServiceTest",

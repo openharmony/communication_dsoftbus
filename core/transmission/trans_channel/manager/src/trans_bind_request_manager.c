@@ -218,7 +218,7 @@ static void TransDelTimestampFromList(BindRequestParam *bindRequestParam, uint64
                 break;
             }
         }
-        if (bindRequest->count == 0 && !bindRequest->bindDeniedFlag) {
+        if (bindRequest->count <= 0 && !bindRequest->bindDeniedFlag) {
             ListDelete(&bindRequest->node);
             SoftBusFree(bindRequest);
         }

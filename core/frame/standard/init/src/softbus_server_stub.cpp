@@ -21,6 +21,7 @@
 #include "accesstoken_kit.h"
 #include "access_control.h"
 #include "access_token.h"
+#include "br_proxy.h"
 #include "ipc_skeleton.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_access_token_adapter.h"
@@ -2656,6 +2657,10 @@ int32_t SoftBusServerStub::SendBrProxyDataInner(MessageParcel &data, MessageParc
         COMM_LOGE(COMM_SVC, "[br_proxy] read dataLen failed!");
         return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
     }
+    if (dataLen == 0 || dataLen > BR_PROXY_SEND_MAX_LEN) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] invalid dataLen=%{public}d", dataLen);
+        return SOFTBUS_TRANS_BR_PROXY_DATA_TOO_LONG;
+    }
 
     auto rawData = data.ReadRawData(dataLen);
     COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "[br_proxy] read data failed!");
@@ -2723,7 +2728,7 @@ int32_t SoftBusServerStub::RegisterPushHookInner(MessageParcel &data, MessagePar
 
 static int32_t CheckBundleName(const char *bundleName)
 {
-    if (bundleName == nullptr || strnlen(bundleName, BUNDLE_NAME_MAX_LEN) >= BUNDLE_NAME_MAX_LEN) {
+    if (bundleName == nullptr || strnlen(bundleName, BUNDLE_NAME_LEN) >= BUNDLE_NAME_LEN) {
         COMM_LOGE(COMM_SVC, "invalid bundleName");
         return SOFTBUS_INVALID_PARAM;
     }

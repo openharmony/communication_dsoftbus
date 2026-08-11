@@ -18,7 +18,7 @@
 
 #include "softbus_conn_interface_struct.h"
 
-#define CONNECT_TYPE_SHIFT 16
+#define CONNECT_TYPE_SHIFT 26
 
 #ifdef __cplusplus
 extern "C" {

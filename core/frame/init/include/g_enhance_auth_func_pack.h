@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-int32_t AuthMetaGetConnInfoBySidePacked(const char *uuid, bool isClient, AuthConnInfo *connInfo);
+int32_t AuthMetaGetConnInfoBySidePacked(const char *networkId, bool isClient, AuthConnInfo *connInfo);
 int32_t AuthMetaInitPacked(const AuthTransCallback *callback);
 void AuthUpdateNormalizeKeyIndexPacked(const char *udidHash, int64_t index,
     AuthLinkType type, SessionKey *normalizedKey, bool isServer);
@@ -46,6 +46,16 @@ int32_t AuthMetaGetDeviceIdByMetaNodeIdPacked(const char *metaNodeId, char *devi
 int32_t AuthMetaGetP2pMacByMetaNodeIdPacked(const char *metaNodeId, char *p2pMacAddr, int32_t len);
 bool AuthMetaGetMetaValueByMetaNodeIdPacked(const char *metaNodeId);
 int32_t AuthMetaGetFeatureSDKByMetaNodeIdPacked(const char *metaNodeId, uint64_t *featureSDK);
+int32_t AuthMetaGetLocalUuidByPeerMetaNodeIdPacked(const char *peerMetaNodeId, char *localUuid, uint32_t len);
+int32_t AuthMetaGetAuthHandleByPeerMetaNodeIdPacked(const char *peerMetaNodeId, AuthHandle *authHandle);
+int32_t AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(int64_t peerAuthId, char *peerMetaNodeId, uint32_t len);
+bool AuthMetaIsSupportConcurrentByConnectionIdPacked(uint32_t connectionId);
+int32_t AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(
+    const char *peerMetaNodeId, char *localMetaNodeId, uint32_t len);
+int32_t AuthMetaGetPeerUdidByMetaNodeIdPacked(const char *metaNodeId, char *peerUdid, uint32_t len);
+bool AuthMetaIsSupportConcurrentByRemoteIpPacked(const char *ip);
+bool AuthMetaIsSupportConcurrentByMetaNodeIdPacked(const char *metaNodeId);
+int32_t AuthMetaGetNetworkIdsPacked(const char *udid, char **networkIds, uint32_t *networkIdCount);
 #ifdef __cplusplus
 }
 #endif

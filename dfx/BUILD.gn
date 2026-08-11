@@ -92,6 +92,7 @@ if (defined(ohos_lite)) {
         debug = false
       }
       branch_protector_ret = "pac_ret"
+      branch_protector_frt = "bti"
       include_dirs = [
         "event/src",
         "interface/include",

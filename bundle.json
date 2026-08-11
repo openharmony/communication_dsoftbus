@@ -78,7 +78,8 @@
       "dsoftbus_feature_lnn_d2d_auth",
       "dsoftbus_feature_trans_io_uring",
       "dsoftbus_feature_lnn_push",
-      "dsoftbus_feature_multi_foreground_user"
+      "dsoftbus_feature_multi_foreground_user",
+      "dsoftbus_feature_disc_cockpit_multi_user"
     ],
     "rom": "3000KB",
     "ram": "40MB",
@@ -129,7 +130,9 @@
         "liburing",
         "node",
         "libuv",
-        "taihe_ffi_gen"
+        "taihe_ffi_gen",
+        "hdf_core",
+        "drivers_interface_udx"
       ],
       "third_party": [
         "cJSON",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,23 +23,17 @@ using namespace testing::ext;
 namespace OHOS {
 class TransSdkCommStreamTest : public testing::Test {
 public:
-    TransSdkCommStreamTest()
-    {}
-    ~TransSdkCommStreamTest()
-    {}
+    TransSdkCommStreamTest() { }
+    ~TransSdkCommStreamTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void TransSdkCommStreamTest::SetUpTestCase(void)
-{}
+void TransSdkCommStreamTest::SetUpTestCase(void) { }
 
-void TransSdkCommStreamTest::TearDownTestCase(void)
-{}
+void TransSdkCommStreamTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: SendStreamTest01
@@ -51,8 +45,8 @@ void TransSdkCommStreamTest::TearDownTestCase(void)
 HWTEST_F(TransSdkCommStreamTest, SendStreamTest01, TestSize.Level1)
 {
     int32_t sessionId = 1;
-    const StreamData extData = {0};
-    const StreamFrameInfo frameInfo = {0};
+    const StreamData extData = { 0 };
+    const StreamFrameInfo frameInfo = { 0 };
     int32_t ret = SendStream(sessionId, nullptr, &extData, &frameInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -67,8 +61,8 @@ HWTEST_F(TransSdkCommStreamTest, SendStreamTest01, TestSize.Level1)
 HWTEST_F(TransSdkCommStreamTest, SendStreamTest02, TestSize.Level1)
 {
     int32_t sessionId = 1;
-    const StreamData streamData = {0};
-    const StreamFrameInfo frameInfo = {0};
+    const StreamData streamData = { 0 };
+    const StreamFrameInfo frameInfo = { 0 };
     int32_t ret = SendStream(sessionId, &streamData, nullptr, &frameInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -83,8 +77,8 @@ HWTEST_F(TransSdkCommStreamTest, SendStreamTest02, TestSize.Level1)
 HWTEST_F(TransSdkCommStreamTest, SendStreamTest03, TestSize.Level1)
 {
     int32_t sessionId = 1;
-    const StreamData streamData = {0};
-    const StreamData extData = {0};
+    const StreamData streamData = { 0 };
+    const StreamData extData = { 0 };
     int32_t ret = SendStream(sessionId, &streamData, &extData, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -99,9 +93,9 @@ HWTEST_F(TransSdkCommStreamTest, SendStreamTest03, TestSize.Level1)
 HWTEST_F(TransSdkCommStreamTest, SendStreamTest04, TestSize.Level1)
 {
     int32_t sessionId = 1;
-    const StreamData streamData = {0};
-    StreamData extData = {nullptr, UINT16_MAX + 1};
-    const StreamFrameInfo frameInfo = {0};
+    const StreamData streamData = { 0 };
+    StreamData extData = { nullptr, UINT16_MAX + 1 };
+    const StreamFrameInfo frameInfo = { 0 };
     int32_t ret = SendStream(sessionId, &streamData, &extData, &frameInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -115,10 +109,10 @@ HWTEST_F(TransSdkCommStreamTest, SendStreamTest04, TestSize.Level1)
  */
 HWTEST_F(TransSdkCommStreamTest, SendStreamTest05, TestSize.Level1)
 {
-    const StreamData streamData = {0};
-    const StreamData extData = {0};
-    const StreamFrameInfo frameInfo = {0};
+    const StreamData streamData = { 0 };
+    const StreamData extData = { 0 };
+    const StreamFrameInfo frameInfo = { 0 };
     int32_t ret = SendStream(-1, &streamData, &extData, &frameInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
-}
+} // namespace OHOS

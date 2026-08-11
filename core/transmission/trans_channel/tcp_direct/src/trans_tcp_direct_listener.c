@@ -332,6 +332,7 @@ void CloseTcpDirectFd(ListenerModule module, int32_t fd)
 static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t channelId, int32_t fd)
 {
     SessionConn conn;
+    (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     int32_t ret = GetSessionConnById(channelId, &conn);
     if (errCode != SOFTBUS_OK) {
         TransEventExtra extra = {

@@ -23,9 +23,16 @@
 extern "C" {
 #endif
 #endif
+
+typedef enum {
+    DP_USER_TYPE = 0,
+    DP_DEVICE_TYPE = 1,
+    HICHAIN_DEVICE = 2,
+} HandleNotTrustedType;
+
 typedef struct {
     void (*onDeviceProfileAdd)(const char *udid, const char *groupInfo);
-    void (*onDeviceProfileDeleted)(const char *udid, int32_t localUserId);
+    void (*onDeviceProfileDeleted)(const char *udid, int32_t localUserId, HandleNotTrustedType type);
 } DeviceProfileChangeListener;
 
 #ifdef __cplusplus

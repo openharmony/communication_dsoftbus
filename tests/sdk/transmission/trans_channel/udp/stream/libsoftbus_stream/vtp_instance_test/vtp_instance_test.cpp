@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #include <securec.h>
 
 #define private public
-#include "vtp_instance.h"
 #include "vtp_instance.cpp"
+#include "vtp_instance.h"
 #undef private
 
 using namespace testing::ext;
@@ -26,28 +26,21 @@ namespace OHOS {
 
 class VtpInstanceTest : public testing::Test {
 public:
-    VtpInstanceTest()
-    {}
-    ~VtpInstanceTest()
-    {}
+    VtpInstanceTest() { }
+    ~VtpInstanceTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
-    void SetUp() override
-    {}
-    void TearDown() override
-    {}
+    void SetUp() override { }
+    void TearDown() override { }
 };
 
-void VtpInstanceTest::SetUpTestCase(void)
-{}
+void VtpInstanceTest::SetUpTestCase(void) { }
 
-void VtpInstanceTest::TearDownTestCase(void)
-{}
+void VtpInstanceTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: UpdateVtpLogLevel001
- * @tc.desc: test UpdateVtpLogLevel
- *           use the wrong parameter
+ * @tc.desc: test UpdateVtpLogLevel returns FILLP_DBG_LVL_DEBUG
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -59,8 +52,7 @@ HWTEST_F(VtpInstanceTest, UpdateVtpLogLevel001, TestSize.Level1)
 
 /*
  * @tc.name: GetVersion001
- * @tc.desc: test GetVersion
- *           use the wrong parameter
+ * @tc.desc: test GetVersion returns VTP_V1.0
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -75,8 +67,7 @@ HWTEST_F(VtpInstanceTest, GetVersion001, TestSize.Level1)
 
 /*
  * @tc.name: CryptoRand001
- * @tc.desc: test CryptoRand
- *           use the wrong parameter
+ * @tc.desc: test CryptoRand returns non-zero value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -91,10 +82,7 @@ HWTEST_F(VtpInstanceTest, CryptoRand001, TestSize.Level1)
 
 /*
  * @tc.name: PreSetFillpCoreParams001
- * @tc.desc: test PreSetFillpCoreParams
- *           use the wrong parameter
- * @tc.desc: test InitVtp
- *           use the wrong parameter
+ * @tc.desc: test PreSetFillpCoreParams and InitVtp succeeds
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -113,12 +101,7 @@ HWTEST_F(VtpInstanceTest, PreSetFillpCoreParams001, TestSize.Level1)
 
 /*
  * @tc.name: WaitForDestroy001
- * @tc.desc: test WaitForDestroy
- *           use the wrong parameter
- * @tc.desc: test DestroyVtp
- *           use the wrong parameter
- * @tc.desc: test UpdateSocketStreamCount
- *           use the wrong parameter
+ * @tc.desc: test WaitForDestroy sets isDestroyed_ to true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -126,35 +109,107 @@ HWTEST_F(VtpInstanceTest, WaitForDestroy001, TestSize.Level1)
 {
     std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
         std::make_shared<Communication::SoftBus::VtpInstance>();
-
     vtpInstance->PreSetFillpCoreParams();
-
-    std::string pkgName = "0111test";
-    const int32_t delayTimes =  1;
-
+    const int32_t delayTimes = 1;
     vtpInstance->WaitForDestroy(delayTimes);
     EXPECT_TRUE(vtpInstance->isDestroyed_);
+}
 
+/*
+ * @tc.name: InitVtp001
+ * @tc.desc: test InitVtp succeeds when isDestroyed_ is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpInstanceTest, InitVtp001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
+    vtpInstance->PreSetFillpCoreParams();
     vtpInstance->isDestroyed_ = true;
+    std::string pkgName = "InitVtp001";
+    bool res = vtpInstance->InitVtp(pkgName);
+    EXPECT_TRUE(res);
+    vtpInstance->DestroyVtp(pkgName);
+}
+
+/*
+ * @tc.name: InitVtp002
+ * @tc.desc: test InitVtp succeeds when isDestroyed_ is false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpInstanceTest, InitVtp002, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
+    vtpInstance->PreSetFillpCoreParams();
+    vtpInstance->isDestroyed_ = false;
+    std::string pkgName = "InitVtp002";
+    bool res = vtpInstance->InitVtp(pkgName);
+    EXPECT_TRUE(res);
+    vtpInstance->DestroyVtp(pkgName);
+}
+
+/*
+ * @tc.name: UpdateSocketStreamCount001
+ * @tc.desc: test UpdateSocketStreamCount increments count when add is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpInstanceTest, UpdateSocketStreamCount001, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
+    vtpInstance->PreSetFillpCoreParams();
+    std::string pkgName = "UpdateSocketStreamCount001";
     bool res = vtpInstance->InitVtp(pkgName);
     ASSERT_TRUE(res);
-    vtpInstance->DestroyVtp(pkgName);
-
-    vtpInstance->isDestroyed_ = false;
-    std::string packageName = "Test";
-    res = vtpInstance->InitVtp(packageName);
-    ASSERT_TRUE(res);
-
     bool add = true;
     vtpInstance->UpdateSocketStreamCount(add);
-
-    add = false;
-    vtpInstance->socketStreamCount_ = 0;
-    vtpInstance->UpdateSocketStreamCount(add);
-
-    vtpInstance->socketStreamCount_ = 1;
-    vtpInstance->UpdateSocketStreamCount(add);
-
-    vtpInstance->DestroyVtp(packageName);
+    EXPECT_EQ(1, vtpInstance->socketStreamCount_);
+    vtpInstance->DestroyVtp(pkgName);
 }
-} // OHOS
+
+/*
+ * @tc.name: UpdateSocketStreamCount002
+ * @tc.desc: test UpdateSocketStreamCount does not decrement when count is 0 and add is false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpInstanceTest, UpdateSocketStreamCount002, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
+    vtpInstance->PreSetFillpCoreParams();
+    std::string pkgName = "UpdateSocketStreamCount002";
+    bool res = vtpInstance->InitVtp(pkgName);
+    ASSERT_TRUE(res);
+    vtpInstance->socketStreamCount_ = 0;
+    bool add = false;
+    vtpInstance->UpdateSocketStreamCount(add);
+    EXPECT_EQ(0, vtpInstance->socketStreamCount_);
+    vtpInstance->DestroyVtp(pkgName);
+}
+
+/*
+ * @tc.name: UpdateSocketStreamCount003
+ * @tc.desc: test UpdateSocketStreamCount decrements count when count is 1 and add is false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpInstanceTest, UpdateSocketStreamCount003, TestSize.Level1)
+{
+    std::shared_ptr<Communication::SoftBus::VtpInstance> vtpInstance =
+        std::make_shared<Communication::SoftBus::VtpInstance>();
+    vtpInstance->PreSetFillpCoreParams();
+    std::string pkgName = "UpdateSocketStreamCount003";
+    bool res = vtpInstance->InitVtp(pkgName);
+    ASSERT_TRUE(res);
+    vtpInstance->socketStreamCount_ = 1;
+    bool add = false;
+    vtpInstance->UpdateSocketStreamCount(add);
+    EXPECT_EQ(0, vtpInstance->socketStreamCount_);
+    vtpInstance->DestroyVtp(pkgName);
+}
+} // namespace OHOS

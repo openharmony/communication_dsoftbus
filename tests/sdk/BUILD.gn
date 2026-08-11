@@ -78,7 +78,7 @@ ohos_static_library("softbus_client_static") {
   defines += TRANS_SDK_DEFINES
 
   if (defined(ohos_lite)) {
-    cflags_cc = [ "-stdc=c++14" ]
+    cflags_cc = [ "-std=c++14" ]
     if (board_toolchain_type != "iccarm") {
       configs -= [ "//build/lite/config:language_cpp" ]
       cflags = [ "-fPIC" ]

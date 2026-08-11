@@ -712,7 +712,7 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta, Conne
         ret = AuthGetP2pConnInfo(uuid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {
-        ret = AuthGetPreferConnInfoWithoutSle(uuid, &auth, isMeta);
+        ret = AuthGetPreferConnInfoWithoutSle(uuid, uuid, &auth, isMeta);
     }
     cb.onConnOpened = OnAuthConnOpened;
     cb.onConnOpenFailed = OnAuthConnOpenFailed;
@@ -1164,6 +1164,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     char myAddr[IP_LEN] = { 0 };
     char peerUuid[UUID_BUF_LEN] = { 0 };
     int32_t peerPort = -1;
+    int32_t myPort = -1;
 
     if (GetSessionConnLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "getsessionconnlock fail");
@@ -1204,12 +1205,13 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
         goto EXIT_ERR;
     }
     peerPort = conn->appInfo.peerData.port;
+    myPort = conn->appInfo.myData.port;
     ReleaseSessionConnLock();
 
     if (TransSrvAddDataBufNode(channelId, fd) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (AddP2pOrHmlTrigger(fd, myAddr, seq, conn->appInfo.myData.port, peerUuid) != SOFTBUS_OK) {
+    if (AddP2pOrHmlTrigger(fd, myAddr, seq, myPort, peerUuid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddP2pOrHmlTrigger fail");
         goto EXIT_ERR;
     }

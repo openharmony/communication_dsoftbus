@@ -285,7 +285,9 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnGetAllRemoteDevInfo = dlsym(soHandle, "LnnGetAllRemoteDevInfo");
     g_lnnEnhanceFuncList.lnnSendAgentData = dlsym(soHandle, "LnnSendAgentData");
     g_lnnEnhanceFuncList.postLnnCloudEvent = dlsym(soHandle, "PostLnnCloudEvent");
+    g_lnnEnhanceFuncList.farfieldParseModuleType = dlsym(soHandle, "LnnFarFieldParseModuleType");
     g_lnnEnhanceFuncList.removeLnnCloudEvent = dlsym(soHandle, "RemoveLnnCloudEvent");
+    g_lnnEnhanceFuncList.authMetaOpenConnWithOtherOsType = dlsym(soHandle, "AuthMetaOpenConnWithOtherOsType");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

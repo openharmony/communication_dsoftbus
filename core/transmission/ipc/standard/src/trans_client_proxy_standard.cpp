@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,49 @@ int32_t TransClientProxy::OnClientPermissionChange(const char *pkgName, int32_t 
     return SOFTBUS_OK;
 }
 
+static int32_t WriteD2DChannelInfo(MessageParcel &data, const ChannelInfo *channel)
+{
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isSupportNewHead, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->pagingId, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->pagingNonce, PAGING_NONCE_LEN),
+        SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write pagingNonce failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->pagingSessionkey, SHORT_SESSION_KEY_LENGTH),
+        SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write pagingSessionkey failed");
+    WRITE_PARCEL_WITH_RET(data, Uint32, channel->dataLen, SOFTBUS_IPC_ERR);
+    if (channel->dataLen > 0 && channel->dataLen <= EXTRA_DATA_MAX_LEN) {
+        TRANS_CHECK_AND_RETURN_RET_LOGE(channel->extraData != nullptr,
+            SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "extraData is null");
+        TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->extraData, channel->dataLen),
+            SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write extraData failed");
+    }
+    if (channel->isServer) {
+        WRITE_PARCEL_WITH_RET(data, CString, channel->pagingAccountId, SOFTBUS_IPC_ERR);
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t WriteChannelInfo(MessageParcel &data, const ChannelInfo *channel)
+{
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
+    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH &&
+        channel->isServer) {
+        WRITE_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, Uint64, channel->peerTokenId, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, CString, channel->peerExtraAccessInfo, SOFTBUS_IPC_ERR);
+    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(channel->keyLen <= SESSION_KEY_LENGTH,
+        SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "keyLen=%{public}u invalid", channel->keyLen);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr,
+        SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "sessionKey is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->sessionKey, channel->keyLen),
+        SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write sessionKey and keyLen failed.");
+    WRITE_PARCEL_WITH_RET(data, CString, channel->groupId, SOFTBUS_IPC_ERR);
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->cancelEncryption, SOFTBUS_IPC_ERR);
+    return SOFTBUS_OK;
+}
+
 static int32_t MessageParcelWriteEx(MessageParcel &data, const ChannelInfo *channel)
 {
     WRITE_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
@@ -69,37 +112,9 @@ static int32_t MessageParcelWriteEx(MessageParcel &data, const ChannelInfo *chan
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, CString, channel->peerDeviceId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isD2D, SOFTBUS_IPC_ERR);
-    if (channel->isD2D) {
-        WRITE_PARCEL_WITH_RET(data, Bool, channel->isSupportNewHead, SOFTBUS_IPC_ERR);
-        WRITE_PARCEL_WITH_RET(data, Int32, channel->pagingId, SOFTBUS_IPC_ERR);
-        WRITE_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
-        WRITE_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->pagingNonce, PAGING_NONCE_LEN),
-            SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write pagingNonce failed");
-        TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->pagingSessionkey, SHORT_SESSION_KEY_LENGTH),
-            SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write pagingSessionkey failed");
-        WRITE_PARCEL_WITH_RET(data, Uint32, channel->dataLen, SOFTBUS_IPC_ERR);
-        if (channel->dataLen > 0) {
-            TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->extraData, channel->dataLen),
-                SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write extraData failed");
-        }
-        if (channel->isServer) {
-            WRITE_PARCEL_WITH_RET(data, CString, channel->pagingAccountId, SOFTBUS_IPC_ERR);
-        }
-    } else {
-        WRITE_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
-        if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH &&
-            channel->isServer) {
-            WRITE_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
-            WRITE_PARCEL_WITH_RET(data, Uint64, channel->peerTokenId, SOFTBUS_IPC_ERR);
-            WRITE_PARCEL_WITH_RET(data, CString, channel->peerExtraAccessInfo, SOFTBUS_IPC_ERR);
-        }
-        if (!data.WriteRawData(channel->sessionKey, channel->keyLen)) {
-            TRANS_LOGE(TRANS_CTRL, "write sessionKey and keyLen failed.");
-            return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
-        }
-        WRITE_PARCEL_WITH_RET(data, CString, channel->groupId, SOFTBUS_IPC_ERR);
-        WRITE_PARCEL_WITH_RET(data, Bool, channel->cancelEncryption, SOFTBUS_IPC_ERR);
+    int32_t ret = channel->isD2D ? WriteD2DChannelInfo(data, channel) : WriteChannelInfo(data, channel);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isMultiNeg, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->linkedChannelId, SOFTBUS_IPC_ERR);

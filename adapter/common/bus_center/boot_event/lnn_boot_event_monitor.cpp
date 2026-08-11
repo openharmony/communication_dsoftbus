@@ -52,7 +52,7 @@ static int32_t ProcessBootEvent(void)
         return SOFTBUS_EVENT_MONITER_INIT_FAILED;
     }
     if (!LnnIsDefaultOhosAccount()) {
-        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, JudgeDeviceTypeAndGetOsAccountIds());
     }
     EhLoginEventHandlerPacked();
     LnnStartHeartbeat(0);

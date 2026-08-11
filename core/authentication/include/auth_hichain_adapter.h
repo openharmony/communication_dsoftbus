@@ -38,6 +38,7 @@ bool CheckHasRelatedGroupInfo(HichainGroup groupType);
 void DestroyDeviceAuth(void);
 bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint);
 bool IsSameAccountGroupDevice(void);
+bool IsSameAccountGroupDeviceByUserId(int32_t userId);
 void CancelRequest(int64_t authReqId, const char *appId);
 char *GenDeviceLevelParam(HiChainAuthParam *hiChainParam);
 

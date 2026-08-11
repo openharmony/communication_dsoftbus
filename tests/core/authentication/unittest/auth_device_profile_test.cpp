@@ -40,7 +40,6 @@ const int64_t TEST_SINK_TOKEN_ID = 4;
 const int32_t TEST_USER_ID_ONE = 1;
 const int32_t TEST_USER_ID_TWO = 2;
 const int32_t TEST_USER_ID_THREE = 3;
-const uint32_t TEST_ERROR_USER_ID = -1;
 
 class AuthDeviceProfileTest : public testing::Test {
 public:
@@ -442,11 +441,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_003, TestSize.Level
 {
     uint8_t sessionKey = 0;
     uint32_t length = 0;
-    AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(TEST_ERROR_USER_ID));
     bool result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
     EXPECT_FALSE(result);
-    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
     EXPECT_FALSE(result);
 }
@@ -486,6 +482,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 
@@ -558,6 +555,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_002, TestSize.Level1)
     EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 }
@@ -597,8 +595,119 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
     EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_001
+ * @tc.desc: Verify that IsAccountConsistent returns false when GetOsAccountUidByUserId fails.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_001, TestSize.Level1)
+{
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
+    aclProfile.SetAccesser(accesser);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, GetOsAccountUidByUserId).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_002
+ * @tc.desc: Verify that IsAccountConsistent returns false when ACL local accountId is empty.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_002, TestSize.Level1)
+{
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, GetOsAccountUidByUserId).WillOnce(Return(SOFTBUS_OK));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_003
+ * @tc.desc: Verify that IsAccountConsistent returns false when accountId does not match.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_003, TestSize.Level1)
+{
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId("987654321");
+    aclProfile.SetAccesser(accesser);
+    AuthDeviceProfileInterfaceMock mock;
+    const char *testUid = "123456789";
+    uint32_t testUidLen = static_cast<uint32_t>(strlen(testUid));
+    EXPECT_CALL(mock, GetOsAccountUidByUserId)
+        .WillOnce(DoAll(SetArrayArgument<0>(testUid, testUid + testUidLen + 1),
+            SetArgPointee<2>(testUidLen), Return(SOFTBUS_OK)));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_ACCOUNT_CONSISTENT_TEST_004
+ * @tc.desc: Verify that IsAccountConsistent returns true when accountId matches.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_ACCOUNT_CONSISTENT_TEST_004, TestSize.Level1)
+{
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    GTEST_SKIP() << "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER disabled, IsAccountConsistent always returns true";
+#endif
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    aclProfile.SetTrustDeviceId(TEST_UDID);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(TEST_UDID);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId(std::to_string(TEST_ACCOUNT_ID));
+    aclProfile.SetAccesser(accesser);
+    AuthDeviceProfileInterfaceMock mock;
+    std::string testUidStr = std::to_string(TEST_ACCOUNT_ID);
+    const char *testUid = testUidStr.c_str();
+    uint32_t testUidLen = static_cast<uint32_t>(strlen(testUid));
+    EXPECT_CALL(mock, GetOsAccountUidByUserId)
+        .WillOnce(DoAll(SetArrayArgument<0>(testUid, testUid + testUidLen + 1),
+            SetArgPointee<2>(testUidLen), Return(SOFTBUS_OK)));
+    bool result = IsAccountConsistent(aclProfile, TEST_USER_ID_ONE);
+    EXPECT_TRUE(result);
 }
 
 /*
@@ -657,6 +766,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, Test
     EXPECT_CALL(mock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, GetAllForegroundAccountIds).WillRepeatedly(Return(0));
     bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
     std::string accountId1 = "8bb0cf6eb9b17d0f";

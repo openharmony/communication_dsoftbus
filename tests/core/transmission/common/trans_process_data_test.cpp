@@ -920,4 +920,183 @@ HWTEST_F(TransProcessDataTest, TransProxyD2DFirstNewHeadSliceProcessTest001, Tes
         SoftBusFree(sliceProcessor.data);
     }
 }
+
+/*
+ * @tc.name: TransTdcDecryptInvalidParamTest001
+ * @tc.desc: test TransTdcDecrypt returns SOFTBUS_INVALID_PARAM
+ *           when sessionKey, in, out, or outLen is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransTdcDecryptInvalidParamTest001, TestSize.Level1)
+{
+    char outBuf[32] = {0};
+    int32_t ret = TransTdcDecrypt(nullptr, nullptr, TEST_CHANNEL_ID, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransTdcDecrypt("key", nullptr, TEST_CHANNEL_ID, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransTdcDecrypt("key", "in", TEST_CHANNEL_ID, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransTdcDecrypt("key", "in", TEST_CHANNEL_ID, outBuf, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransTdcEncryptWithSeqInvalidParamTest001
+ * @tc.desc: test TransTdcEncryptWithSeq returns SOFTBUS_INVALID_PARAM
+ *           when sessionKey or info is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransTdcEncryptWithSeqInvalidParamTest001, TestSize.Level1)
+{
+    EncrptyInfo enInfo = {0};
+    int32_t ret = TransTdcEncryptWithSeq("key", TEST_CHANNEL_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransTdcEncryptWithSeq(nullptr, TEST_CHANNEL_ID, &enInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransProxyParseTlvInvalidParamTest001
+ * @tc.desc: test TransProxyParseTlv returns SOFTBUS_INVALID_PARAM
+ *           when data, head, or headSize is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProxyParseTlvInvalidParamTest001, TestSize.Level1)
+{
+    DataHeadTlvPacketHead head = {0};
+    int32_t ret = TransProxyParseTlv(TEST_CHANNEL_ID, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransProxyParseTlv(TEST_CHANNEL_ID, "data", nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransProxyParseTlv(TEST_CHANNEL_ID, "data", &head, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransProxyCheckSliceHeadInvalidParamTest001
+ * @tc.desc: test TransProxyCheckSliceHead returns SOFTBUS_INVALID_PARAM
+ *           when head is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProxyCheckSliceHeadInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = TransProxyCheckSliceHead(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransProxyCheckSliceHead(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransProxyCheckSliceHead(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: BuildNeedAckTlvDataInvalidParamTest001
+ * @tc.desc: test BuildNeedAckTlvData returns SOFTBUS_INVALID_PARAM
+ *           when pktHead or tlvBufferSize is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, BuildNeedAckTlvDataInvalidParamTest001, TestSize.Level1)
+{
+    int32_t tlvBufferSize = TEST_CHANNEL_ID;
+    int32_t ret = BuildNeedAckTlvData(nullptr, true, TEST_CHANNEL_ID, &tlvBufferSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    DataHead head = {0};
+    ret = BuildNeedAckTlvData(&head, false, TEST_CHANNEL_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = BuildNeedAckTlvData(nullptr, true, TEST_CHANNEL_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: ProxyBuildNeedAckTlvDataInvalidParamTest001
+ * @tc.desc: test ProxyBuildNeedAckTlvData returns SOFTBUS_INVALID_PARAM
+ *           when pktHead is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, ProxyBuildNeedAckTlvDataInvalidParamTest001, TestSize.Level1)
+{
+    int32_t tlvBufferSize = TEST_CHANNEL_ID;
+    int32_t ret = ProxyBuildNeedAckTlvData(nullptr, true, TEST_CHANNEL_ID, &tlvBufferSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProxyBuildNeedAckTlvData(nullptr, false, TEST_CHANNEL_ID, &tlvBufferSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ProxyBuildNeedAckTlvData(nullptr, true, TEST_CHANNEL_ID, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransGenerateToBytesRandIvInvalidParamTest001
+ * @tc.desc: test TransGenerateToBytesRandIv returns SOFTBUS_INVALID_PARAM
+ *           when sessionIv or nonce is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransGenerateToBytesRandIvInvalidParamTest001, TestSize.Level1)
+{
+    unsigned char iv = 0;
+    uint32_t nonce = TEST_CHANNEL_ID;
+    int32_t ret = TransGenerateToBytesRandIv(nullptr, &nonce);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransGenerateToBytesRandIv(&iv, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransGenerateToBytesRandIv(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransTdcParseTlvInvalidParamTest001
+ * @tc.desc: test TransTdcParseTlv returns SOFTBUS_INVALID_PARAM
+ *           when data or head is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransTdcParseTlvInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = TransTdcParseTlv(TEST_CHANNEL_ID, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    char testData[] = "data";
+    ret = TransTdcParseTlv(TEST_CHANNEL_ID, testData, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransTdcParseTlv(TEST_CHANNEL_ID, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransPackD2DToBytesExtraDataInvalidParamTest001
+ * @tc.desc: test TransPackD2DToBytesExtraData returns SOFTBUS_INVALID_PARAM
+ *           when dataInfo is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransPackD2DToBytesExtraDataInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = TransPackD2DToBytesExtraData(nullptr, TRANS_SESSION_BYTES, TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPackD2DToBytesExtraData(nullptr, TRANS_SESSION_BYTES, TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPackD2DToBytesExtraData(nullptr, TRANS_SESSION_BYTES, TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TransPackNewHeadD2DToBytesExtraDataInvalidParamTest001
+ * @tc.desc: test TransPackNewHeadD2DToBytesExtraData returns SOFTBUS_INVALID_PARAM
+ *           when dataInfo is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransPackNewHeadD2DToBytesExtraDataInvalidParamTest001, TestSize.Level1)
+{
+    int32_t ret = TransPackNewHeadD2DToBytesExtraData(nullptr, TRANS_SESSION_BYTES, TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPackNewHeadD2DToBytesExtraData(nullptr, TRANS_SESSION_BYTES, TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransPackNewHeadD2DToBytesExtraData(nullptr, TRANS_SESSION_BYTES, TEST_CHANNEL_ID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 }

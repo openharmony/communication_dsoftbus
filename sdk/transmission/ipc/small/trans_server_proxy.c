@@ -28,6 +28,14 @@
 
 #define WAIT_SERVER_READY_INTERVAL_COUNT 50
 
+#define WRITE_IPC_WITH_RET(io, type, data, retval)                                    \
+    do {                                                                              \
+        if (!Write##type((io), (data))) {                                             \
+            TRANS_LOGE(TRANS_SDK, "write data failed.");                              \
+            return (retval);                                                          \
+        }                                                                             \
+    } while (false)
+
 static IClientProxy *g_serverProxy = NULL;
 static IClientProxy *g_oldServerProxy = NULL;
 
@@ -146,9 +154,8 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, pkgName);
-    WriteString(&request, sessionName);
-
+    WRITE_IPC_WITH_RET(&request, String, pkgName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_IPC_WITH_RET(&request, String, sessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
@@ -175,9 +182,8 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, pkgName);
-    WriteString(&request, sessionName);
-
+    WRITE_IPC_WITH_RET(&request, String, pkgName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_IPC_WITH_RET(&request, String, sessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {
@@ -208,7 +214,10 @@ static bool TransWriteIpcSessionAttrs(IpcIo *request, const SessionAttribute *at
         TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs linkTypeNum failed!");
         return false;
     }
-
+    if (attrs->linkTypeNum > LINK_TYPE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "Invalid linkType");
+        return false;
+    }
     if (attrs->linkTypeNum > 0) {
         if (!WriteBuffer(request, attrs->linkType, sizeof(LinkType) * attrs->linkTypeNum)) {
             TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs linkType failed!");
@@ -224,26 +233,34 @@ static bool TransWriteIpcSessionAttrs(IpcIo *request, const SessionAttribute *at
     return true;
 }
 
+static bool TransWriteSessionParam(IpcIo *request, const SessionParam *param)
+{
+    WRITE_IPC_WITH_RET(request, String, param->sessionName, false);
+    WRITE_IPC_WITH_RET(request, String, param->peerSessionName, false);
+    WRITE_IPC_WITH_RET(request, String, param->peerDeviceId, false);
+    WRITE_IPC_WITH_RET(request, String, param->groupId, false);
+    WRITE_IPC_WITH_RET(request, Bool, param->isAsync, false);
+    WRITE_IPC_WITH_RET(request, Int32, param->sessionId, false);
+    WRITE_IPC_WITH_RET(request, Int32, param->keyType, false);
+    if (!TransWriteIpcSessionAttrs(request, param->attr)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
+        return false;
+    }
+    if (!WriteQosInfo(request, param)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write qosinfo failed!");
+        return false;
+    }
+    return true;
+}
+
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
 {
     TRANS_LOGD(TRANS_SDK, "enter.");
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, param->sessionName);
-    WriteString(&request, param->peerSessionName);
-    WriteString(&request, param->peerDeviceId);
-    WriteString(&request, param->groupId);
-    WriteBool(&request, param->isAsync);
-    WriteInt32(&request, param->sessionId);
-    WriteInt32(&request, param->keyType);
-    if (!TransWriteIpcSessionAttrs(&request, param->attr)) {
-        TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
-        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
-    }
-
-    if (!WriteQosInfo(&request, param)) {
-        TRANS_LOGE(TRANS_SDK, "OpenSession write qosinfo failed!");
+    if (!TransWriteSessionParam(&request, param)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write param failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
 
@@ -274,9 +291,9 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, sessionName);
-    bool value = WriteRawData(&request, (void*)addrInfo, sizeof(ConnectionAddr));
-    if (!value) {
+    WRITE_IPC_WITH_RET(&request, String, sessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    if (!WriteRawData(&request, (void*)addrInfo, sizeof(ConnectionAddr))) {
+        TRANS_LOGE(TRANS_SDK, "write data failed.");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
 
@@ -299,8 +316,8 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&request, channelId);
-    WriteInt32(&request, channelType);
+    WRITE_IPC_WITH_RET(&request, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_IPC_WITH_RET(&request, Int32, channelType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     int32_t ret = SOFTBUS_NO_INIT;
     if (g_serverProxy == NULL) {
         TRANS_LOGE(TRANS_SDK, "server proxy not init");
@@ -319,7 +336,7 @@ int32_t ServerIpcReleaseResources(int32_t channelId)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&request, channelId);
+    WRITE_IPC_WITH_RET(&request, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
 
     int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
@@ -341,10 +358,10 @@ int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&request, channelId);
-    WriteInt32(&request, channelType);
+    WRITE_IPC_WITH_RET(&request, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_IPC_WITH_RET(&request, Int32, channelType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
-        WriteString(&request, sessionName);
+        WRITE_IPC_WITH_RET(&request, String, sessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     }
     int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
@@ -371,31 +388,41 @@ int32_t ServerIpcCloseChannelWithStatistics(int32_t channelId, int32_t channelTy
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+static bool TransWriteSendMsg(IpcIo *request, int32_t channelId, int32_t channelType, int32_t msgType, uint32_t len)
+{
+    WRITE_IPC_WITH_RET(request, Int32, channelId, false);
+    WRITE_IPC_WITH_RET(request, Int32, channelType, false);
+    WRITE_IPC_WITH_RET(request, Int32, msgType, false);
+    WRITE_IPC_WITH_RET(request, Uint32, len, false);
+    return true;
+}
+
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
     TRANS_LOGD(TRANS_SDK, "enter.");
+    if (g_serverProxy == NULL) {
+        TRANS_LOGE(TRANS_SDK, "server proxy not init");
+        return SOFTBUS_NO_INIT;
+    }
     uint32_t ipcDataLen = len + MAX_SOFT_BUS_IPC_LEN;
     uint8_t *ipcData = (uint8_t *)SoftBusCalloc(ipcDataLen);
     if (ipcData == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc failed!");
         return SOFTBUS_MALLOC_ERR;
     }
-
     IpcIo request = {0};
     IpcIoInit(&request, ipcData, ipcDataLen, 0);
-    WriteInt32(&request, channelId);
-    WriteInt32(&request, channelType);
-    WriteInt32(&request, msgType);
-    WriteUint32(&request, len);
-    WriteBuffer(&request, data, len);
 
-    int32_t ret = SOFTBUS_NO_INIT;
-    /* sync */
-    if (g_serverProxy == NULL) {
-        TRANS_LOGE(TRANS_SDK, "server proxy not init");
+    if (!TransWriteSendMsg(&request, channelId, channelType, msgType, len)) {
         SoftBusFree(ipcData);
-        return ret;
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
+    if (!WriteBuffer(&request, data, len)) {
+        TRANS_LOGE(TRANS_SDK, "write data failed.");
+        SoftBusFree(ipcData);
+        return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+    int32_t ret = SOFTBUS_NO_INIT;
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SESSION_SENDMSG, &request, &ret, ProxyCallback);
     SoftBusFree(ipcData);
     if (ans != EC_SUCCESS) {
@@ -460,10 +487,10 @@ int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&request, eventType);
-    WriteUint32(&request, len);
-    bool value = WriteRawData(&request, buf, len);
-    if (!value) {
+    WRITE_IPC_WITH_RET(&request, Int32, eventType, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_IPC_WITH_RET(&request, Uint32, len, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    if (!WriteRawData(&request, buf, len)) {
+        TRANS_LOGE(TRANS_SDK, "write data failed.");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
     }
     int32_t ret = SOFTBUS_NO_INIT;
@@ -484,9 +511,9 @@ int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteUint64(&request, tokenId);
-    WriteInt32(&request, pid);
-    WriteString(&request, peerNetworkId);
+    WRITE_IPC_WITH_RET(&request, Uint64, tokenId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_IPC_WITH_RET(&request, Int32, pid, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_IPC_WITH_RET(&request, String, peerNetworkId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {

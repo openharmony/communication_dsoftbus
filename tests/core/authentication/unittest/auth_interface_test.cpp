@@ -936,4 +936,29 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_ID_TEST_004, TestSize.Level1)
     EXPECT_CALL(authMock, LnnIsDefaultOhosAccount()).WillOnce(Return(false));
     EXPECT_TRUE(IsSameAccountId(localId));
 }
+
+/*
+ * @tc.name: AUTH_OPEN_CONN_WITH_OTHER_OS_TYPE_TEST_001
+ * @tc.desc: Verify that AuthOpenConnWithOtherOsType returns SOFTBUS_INVALID_PARAM when provided with
+ *           null info, null networkId, or null callback.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherMockTest, AUTH_OPEN_CONN_WITH_OTHER_OS_TYPE_TEST_001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    const char *networkId = "networkId";
+    uint32_t requestId = 1;
+    AuthConnCallback callback;
+    (void)memset_s(&callback, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
+
+    int32_t ret = AuthOpenConnWithOtherOsType(nullptr, networkId, requestId, &callback);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthOpenConnWithOtherOsType(&connInfo, nullptr, requestId, &callback);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthOpenConnWithOtherOsType(&connInfo, networkId, requestId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

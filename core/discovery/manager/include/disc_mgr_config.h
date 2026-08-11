@@ -21,11 +21,18 @@
 #define DEFAULT_CALL_TIMES (32)
 #define NO_LIMITED_TIMES (-1)
 
+typedef enum {
+    DISC_SCREEN_BUSINESS_NONE = 0,
+    DISC_SCREEN_BUSINESS_A = 1,
+    DISC_SCREEN_BUSINESS_B = 2,
+} DiscScreenBusinessType;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int32_t DiscMgrGetMaxCallTimes(int32_t bitmap);
+DiscScreenBusinessType DiscMgrGetScreenBusinessType(int32_t bitmap);
 
 #ifdef __cplusplus
 }

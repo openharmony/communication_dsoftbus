@@ -122,6 +122,48 @@ HWTEST_F(TransBindRequestManagerTest, TransDelTimestampFromList001, TestSize.Lev
 }
 
 /**
+ * @tc.name: TransDelTimestampFromList002
+ * @tc.desc: TransDelTimestampFromList with count already zero should not underflow.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransBindRequestManagerTest, TransDelTimestampFromList002, TestSize.Level1)
+{
+    g_bindRequestList = CreateSoftBusList();
+    ASSERT_TRUE(g_bindRequestList != nullptr);
+
+    BindRequestManager *bindRequest =
+        (BindRequestManager *)SoftBusCalloc(sizeof(BindRequestManager));
+    ASSERT_TRUE(bindRequest != nullptr);
+    (void)memset_s(bindRequest, sizeof(BindRequestManager), 0, sizeof(BindRequestManager));
+    (void)strcpy_s(bindRequest->bindRequestParam.mySocketName, SESSION_NAME_SIZE_MAX, g_mySocketName);
+    (void)strcpy_s(bindRequest->bindRequestParam.peerSocketName, SESSION_NAME_SIZE_MAX, g_peerSocketName);
+    (void)strcpy_s(bindRequest->bindRequestParam.peerNetworkId, NETWORK_ID_BUF_LEN, g_peerNetworkid);
+    bindRequest->count = 0;
+    bindRequest->bindDeniedFlag = false;
+    ListInit(&bindRequest->timestampList);
+
+    BindFailInfo *failItem = (BindFailInfo *)SoftBusCalloc(sizeof(BindFailInfo));
+    ASSERT_TRUE(failItem != nullptr);
+    (void)memset_s(failItem, sizeof(BindFailInfo), 0, sizeof(BindFailInfo));
+    uint64_t testTimestamp = 15844733;
+    failItem->timestamp = testTimestamp;
+    ListAdd(&bindRequest->timestampList, &failItem->node);
+
+    ListAdd(&g_bindRequestList->list, &bindRequest->node);
+
+    BindRequestParam bindRequestParam = { {0} };
+    GenerateParam(g_mySocketName, g_peerSocketName, g_peerNetworkid, &bindRequestParam);
+    EXPECT_NO_FATAL_FAILURE(TransDelTimestampFromList(&bindRequestParam, testTimestamp));
+
+    bool isEmpty = IsListEmpty(&g_bindRequestList->list);
+    EXPECT_TRUE(isEmpty);
+
+    DestroySoftBusList(g_bindRequestList);
+    g_bindRequestList = nullptr;
+}
+
+/**
  * @tc.name: TransBindRequestManagerInit001
  * @tc.desc: TransBindRequestManagerInitTest
  * @tc.type: FUNC

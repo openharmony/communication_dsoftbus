@@ -27,6 +27,8 @@
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 
+#define INVALID_KEY (-1)
+
 static int32_t CheckPermission(const char *pkgName, int32_t uid)
 {
     if (pkgName == NULL) {
@@ -284,7 +286,7 @@ int32_t ServerSetNodeKeyInfo(IpcIo *req, IpcIo *reply)
         LNN_LOGE(LNN_STATE, "read networkId failed");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t key;
+    int32_t key = INVALID_KEY;
     ReadInt32(req, &key);
     int32_t infoLen  = LnnIpcSetNodeKeyInfoLen(key);
     if (infoLen == SOFTBUS_INVALID_NUM) {
