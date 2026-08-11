@@ -34,6 +34,8 @@ int32_t TransCloseStreamChannel(int32_t channelId);
 int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
 
 int32_t TransSetStreamMultiLayer(int32_t channelId, const void *optValue);
+
+void TransDeleteVtpStreamAdaptor(int32_t channelId);
 #ifdef __cplusplus
 }
 #endif
