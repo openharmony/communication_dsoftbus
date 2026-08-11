@@ -816,6 +816,11 @@ static void UnpackNormalizedKeyInner(JsonObj *obj, AuthSessionInfo *info, bool i
         info->normalizedType = NORMALIZED_SUPPORT;
         return;
     }
+    if (info->normalizedKey != NULL) {
+        (void)memset_s(info->normalizedKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+        SoftBusFree(info->normalizedKey);
+        info->normalizedKey = NULL;
+    }
     info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
     if (info->normalizedKey == NULL) {
         AUTH_LOGE(AUTH_FSM, "malloc fail");
