@@ -290,3 +290,8 @@ int32_t TransCloseStreamChannel(int32_t channelId)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_STREAM, "close stream channel failed.");
     return SOFTBUS_OK;
 }
+
+void TransDeleteVtpStreamAdaptor(int32_t channelId)
+{
+    DeleteVtpStreamAdaptor(channelId);
+}
