@@ -329,6 +329,7 @@ ListenerModule GetModuleByHmlIp(const char *ip)
         TRANS_LOGE(TRANS_CTRL, "ip is null.");
         return UNUSE_BUTT;
     }
+    ListenerModule module = UNUSE_BUTT;
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
     if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
@@ -337,8 +338,9 @@ ListenerModule GetModuleByHmlIp(const char *ip)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
         if (strncmp(item->myIp, ip, IP_LEN) == 0) {
+            module = item->moudleType;
             (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
-            return item->moudleType;
+            return module;
         }
     }
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
@@ -658,8 +660,8 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     }
     myDataPort = conn->appInfo.myData.port;
     reqNum = conn->req;
-    ReleaseSessionConnLock();
     FillVerifyP2pInfo(conn, myDataAddr, peerDataAddr, myDataPort, &info);
+    ReleaseSessionConnLock();
     if (VerifyP2p(authHandle, reqNum, &info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "verify p2p fail");
         goto EXIT_ERR;
