@@ -101,9 +101,9 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     return GetTransLaneIf()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
 }
 
-int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide, const char *networkId)
 {
-    return GetTransLaneIf()->DelLaneResourceByLaneId(laneId, isServerSide);
+    return GetTransLaneIf()->DelLaneResourceByLaneId(laneId, isServerSide, networkId);
 }
 
 int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem)

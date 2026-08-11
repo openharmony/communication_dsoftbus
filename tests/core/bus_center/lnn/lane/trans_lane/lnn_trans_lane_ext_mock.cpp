@@ -97,5 +97,10 @@ int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type
 {
     return GetTransLaneExtIf()->DestroyLink(networkId, laneReqId, type);
 }
+
+int32_t PostNotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode, uint64_t delayMillis)
+{
+    return GetTransLaneExtIf()->PostNotifyFreeLaneResult(laneReqId, errCode, delayMillis);
+}
 }
 } // namespace OHOS

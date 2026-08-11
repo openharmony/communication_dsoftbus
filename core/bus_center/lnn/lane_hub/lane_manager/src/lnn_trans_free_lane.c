@@ -145,7 +145,7 @@ void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)
         case NOTIFY_TYPE_NORMAL: {
             LNN_LOGI(LNN_LANE, "notify free lane result, laneReqId=%{public}d, errCode=%{public}d", laneReqId, errCode);
             ReportLaneEventWithFreeLinkInfo(laneReqId, errCode);
-            DelLaneResourceByLaneId(reqInfo.laneId, false);
+            DelLaneResourceByLaneId(reqInfo.laneId, false, reqInfo.allocInfo.networkId);
             NotifyFreeLaneCallback(&reqInfo, errCode);
             DeleteRequestNode(laneReqId);
             FreeLaneReqId(laneReqId);
@@ -183,7 +183,7 @@ static void AsyncNotifyWhenDelayFree(uint32_t laneReqId)
             reqInfo.listener.onLaneFreeSuccess(laneReqId);
         }
     } else {
-        DelLaneResourceByLaneId(reqInfo.laneId, false);
+        DelLaneResourceByLaneId(reqInfo.laneId, false, reqInfo.allocInfo.networkId);
         if (reqInfo.isWithQos && reqInfo.listener.onLaneFreeSuccess != NULL) {
             UpdateFreeLaneStatus(laneReqId);
             reqInfo.listener.onLaneFreeSuccess(laneReqId);
@@ -204,12 +204,12 @@ static int32_t FreeLaneLink(uint32_t laneReqId, uint64_t laneId)
         LNN_LOGI(LNN_LANE, "del flag for raw hml laneReqId=%{public}u", laneReqId);
         (void)RemoveAuthSessionServer(resourceItem.link.linkInfo.rawWifiDirect.peerIp);
     }
-    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    int32_t ret = LnnGetNetworkIdByUdid(resourceItem.link.peerUdid, networkId, sizeof(networkId));
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get networkId fail, ret=%{public}d", ret);
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get transReqInfo fail, laneHandle=%{public}u", laneReqId);
     }
-    return DestroyLink(networkId, laneReqId, resourceItem.link.type);
+    return DestroyLink(reqInfo.allocInfo.networkId, laneReqId, resourceItem.link.type);
 }
 
 void HandleDelayDestroyLink(SoftBusMessage *msg)
@@ -252,14 +252,14 @@ static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDel
         *isDelayFree = false;
         return;
     }
-    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (LnnConvertDlId(resourceItem.link.peerUdid, CATEGORY_UDID, CATEGORY_NETWORK_ID,
-        networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnConvertDlId fail");
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get transReqInfo fail, laneHandle=%{public}u", laneReqId);
         *isDelayFree = false;
         return;
     }
-    bool isHichain = GetAuthType(networkId);
+    bool isHichain = GetAuthType(reqInfo.allocInfo.networkId);
     LNN_LOGD(LNN_LANE, "isHichain=%{public}d", isHichain);
     if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 && isHichain &&
         !HaveConcurrencyPreLinkNodeByLaneReqIdPacked(laneReqId, true) &&
@@ -351,12 +351,13 @@ void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo)
     }
     LNN_LOGI(LNN_LANE, "free unused link, laneReqId=%{public}u", laneReqId);
     if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
-        char networkId[NETWORK_ID_BUF_LEN] = {0};
-        if (LnnGetNetworkIdByUdid(linkInfo->peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "get networkId fail, laneReqId=%{public}u", laneReqId);
+        TransReqInfo reqInfo;
+        (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+        if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get transReqInfo fail, laneHandle=%{public}u", laneReqId);
             return;
         }
-        LnnDisconnectP2p(networkId, laneReqId);
+        LnnDisconnectP2p(reqInfo.allocInfo.networkId, laneReqId);
     }
 }
 

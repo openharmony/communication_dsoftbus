@@ -199,6 +199,17 @@ int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint
     return SOFTBUS_OK;
 }
 
+int32_t LaneDepsInterfaceMock::ActionOfConnOpenedForOtherOsType(const AuthConnInfo *info,
+    const char *networkId, uint32_t requestId, const AuthConnCallback *callback)
+{
+    AuthHandle authHandle = {
+        .authId = 0,
+        .type = (info == nullptr) ? AUTH_LINK_TYPE_P2P : info->type,
+    };
+    callback->onConnOpened(requestId, authHandle);
+    return SOFTBUS_OK;
+}
+
 extern "C" {
 int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList)
 {
@@ -259,6 +270,12 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
     const AuthConnCallback *callback, bool isMeta)
 {
     return GetLaneDepsInterface()->AuthOpenConn(info, requestId, callback, isMeta);
+}
+
+int32_t AuthOpenConnWithOtherOsType(const AuthConnInfo *info, const char *networkId,
+    uint32_t requestId, const AuthConnCallback *callback)
+{
+    return GetLaneDepsInterface()->AuthOpenConnWithOtherOsType(info, networkId, requestId, callback);
 }
 
 int32_t SoftBusFrequencyToChannel(int32_t frequency)
@@ -532,6 +549,11 @@ int32_t AuthMetaGetConnectionTypeByMetaNodeId(const char *metaNodeId, NetworkCon
 int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
 {
     return GetLaneDepsInterface()->LnnSetLocalByteInfo(key, info, len);
+}
+
+int32_t AuthGetAllNetworkId(const char *udid, char **networkIds, uint32_t *networkIdCount)
+{
+    return GetLaneDepsInterface()->AuthGetAllNetworkId(udid, networkIds, networkIdCount);
 }
 }
 } // namespace OHOS

@@ -102,9 +102,9 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     return GetLaneLinkDepsInterface()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
 }
 
-int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide, const char *networkId)
 {
-    return GetLaneLinkDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide);
+    return GetLaneLinkDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide, networkId);
 }
 
 void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode)

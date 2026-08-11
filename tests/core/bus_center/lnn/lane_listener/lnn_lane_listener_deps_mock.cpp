@@ -86,9 +86,9 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     return GetLaneListenerDepsInterface()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
 }
 
-int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide, const char *networkId)
 {
-    return GetLaneListenerDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide);
+    return GetLaneListenerDepsInterface()->DelLaneResourceByLaneId(laneId, isServerSide, networkId);
 }
 
 void DetectDisableWifiDirectApply(void)

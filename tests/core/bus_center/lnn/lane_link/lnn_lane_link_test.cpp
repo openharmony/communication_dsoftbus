@@ -1766,7 +1766,7 @@ HWTEST_F(LNNLaneLinkTest, GET_MAC_INFO_BY_LANE_ID_MOCK_TEST_002, TestSize.Level1
     ret = GetMacInfoByLaneId(USEABLE_LANE_ID, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = DelLaneResourceByLaneId(USEABLE_LANE_ID, false);
+    ret = DelLaneResourceByLaneId(USEABLE_LANE_ID, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

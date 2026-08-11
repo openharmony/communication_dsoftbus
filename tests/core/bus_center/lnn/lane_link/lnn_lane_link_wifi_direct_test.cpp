@@ -929,4 +929,61 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownVirtualLinkTest_001, TestSize
     g_manager.forceDisconnectDeviceSync = MockForceDisconnectDeviceSyncSuccess;
     EXPECT_EQ(HandleForceDownVirtualLink(), SOFTBUS_OK);
 }
+
+/*
+* @tc.name: WifiDirectForceDownOtherOsType_001
+* @tc.desc: test OpenAuthToForceDisconnect with OTHER_OS_TYPE
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDownOtherOsType_001, TestSize.Level1)
+{
+    LinkRequest request;
+    (void)memset_s(&request, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+    EXPECT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
+    request.linkType = LANE_HML;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
+    request.actionAddr = 123;
+    uint32_t laneReqId = 25;
+    uint32_t authRequestId = 2;
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND))
+        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(laneLinkMock, GetConflictTypeWithErrcode).WillRepeatedly(Return(CONFLICT_LINK_NUM_LIMITED));
+    LinkConflictInfo conflictItem = {};
+    conflictItem.devIdCnt = 1;
+    char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
+    ASSERT_TRUE(devId != nullptr);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
+    conflictItem.devIdList = devId;
+    EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_LANE_NOT_FOUND));
+    EXPECT_CALL(laneLinkMock, RemoveConflictInfoTimelinessMsg).WillRepeatedly(Return());
+    EXPECT_CALL(laneLinkMock, DelLinkConflictInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(OTHER_OS_TYPE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, AuthOpenConnWithOtherOsType(_, StrEq(NODE_NETWORK_ID), authRequestId, NotNull()))
+        .WillOnce(linkMock.ActionOfConnOpenedForOtherOsType).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(authRequestId));
+    EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
+    g_connectDeviceTimes = 0;
+    g_isNeedNegotiateChannel = true;
+
+    int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, g_laneLinkResult);
+    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
+    LnnDestroyP2p();
+    g_isNeedNegotiateChannel = false;
+}
 } // namespace OHOS

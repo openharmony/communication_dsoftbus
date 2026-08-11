@@ -918,7 +918,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_001, TestSize.Level1)
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    DelLaneResourceByLaneId(laneId, false);
+    DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -974,7 +974,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     ret = LaneDetectReliability(INVALID_LANE_REQ_ID, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -1021,7 +1021,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_003, TestSize.Level1)
 
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_LANE_DETECT_FAIL);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

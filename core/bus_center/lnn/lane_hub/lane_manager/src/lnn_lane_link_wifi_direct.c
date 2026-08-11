@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
@@ -224,7 +225,7 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
     }
     int32_t ret = AuthGetHmlConnInfo(uuid, connInfo, isMetaAuth);
     if (ret != SOFTBUS_OK) {
-        ret = AuthGetPreferConnInfo(uuid, uuid, connInfo, isMetaAuth);
+        ret = AuthGetPreferConnInfo(uuid, networkId, connInfo, isMetaAuth);
     }
     return ret;
 }
@@ -441,7 +442,16 @@ static int32_t OpenAuthToForceDisconnect(const char *forceDownDevId, uint32_t fo
         .onConnOpenFailed = OnConnOpenFailedForForceDisconnect,
     };
     LNN_LOGI(LNN_LANE, "open auth for force disconnect wifidirect, authRequestId=%{public}u", authRequestId);
-    ret = AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth);
+    int32_t osType = 0;
+    ret = LnnGetOsTypeByNetworkId(forceDownDevId, &osType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "force disconn get osType fail, ret=%{public}d", ret);
+    }
+    if (osType == OTHER_OS_TYPE) {
+        ret = AuthOpenConnWithOtherOsType(&connInfo, forceDownDevId, authRequestId, &cb);
+    } else {
+        ret = AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth);
+    }
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "open auth conn fail, authRequestId=%{public}u", authRequestId);
         return ret;

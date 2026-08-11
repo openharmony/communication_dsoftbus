@@ -363,6 +363,12 @@ static TransReqInfo *CreateRequestNode(uint32_t laneReqId, const TransOption *op
         SoftBusFree(newNode);
         return NULL;
     }
+    if (memcpy_s(&newNode->allocInfo.networkId, NETWORK_ID_BUF_LEN,
+        option->networkId, NETWORK_ID_BUF_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy fail for allocInfo networkId");
+        SoftBusFree(newNode);
+        return NULL;
+    }
     newNode->isWithQos = false;
     newNode->isCanceled = false;
     newNode->isNotified = false;
@@ -1138,14 +1144,14 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get reqInfo failed, ret=%{public}d", ret);
         ReleaseUndeliverableLink(laneReqId, laneId);
-        (void)DelLaneResourceByLaneId(laneId, false);
+        (void)DelLaneResourceByLaneId(laneId, false, reqInfo.allocInfo.networkId);
         return;
     }
     if (reqInfo.isWithQos && !reqInfo.isNotified) {
         LNN_LOGE(LNN_LANE, "request status abnormal. laneReqId=%{public}u isCanceled=%{public}d notifyFree=%{public}d",
             reqInfo.laneReqId, reqInfo.isCanceled, reqInfo.notifyFree);
         ReleaseUndeliverableLink(laneReqId, laneId);
-        (void)DelLaneResourceByLaneId(laneId, false);
+        (void)DelLaneResourceByLaneId(laneId, false, reqInfo.allocInfo.networkId);
         if (reqInfo.isCanceled) {
             reqInfo.listener.onLaneAllocFail(laneReqId, SOFTBUS_LANE_SUCC_AFTER_CANCELED);
         }
@@ -1525,6 +1531,11 @@ static void NotifyLinkSucc(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "generate laneId fail, laneReqId=%{public}u", laneReqId);
         ret = SOFTBUS_LANE_ID_GENERATE_FAIL;
         goto FAIL;
+    }
+    TransReqInfo transReqInfo;
+    (void)memset_s(&transReqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if (GetTransReqInfoByLaneReqId(laneReqId, &transReqInfo) == SOFTBUS_OK) {
+        (void)strcpy_s(info.networkId, sizeof(info.networkId), transReqInfo.allocInfo.networkId);
     }
     ret = AddLaneResourceToPool(&info, laneId, false);
     if (ret != SOFTBUS_OK) {
@@ -2090,14 +2101,13 @@ int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
         return SOFTBUS_OK;
     }
     char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
-    int32_t ret = LnnGetNetworkIdByUdid(laneLinkInfo->peerUdid, peerNetworkId, sizeof(peerNetworkId));
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get networkId by udid fail");
-        return ret;
+    if (strcpy_s(peerNetworkId, sizeof(peerNetworkId), laneLinkInfo->networkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "copy networkId fail");
+        return SOFTBUS_STRCPY_ERR;
     }
     ListNode reqInfoList;
     ListInit(&reqInfoList);
-    ret = GetNodeToNotifyQosEvent(peerNetworkId, &reqInfoList);
+    int32_t ret = GetNodeToNotifyQosEvent(peerNetworkId, &reqInfoList);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get list fail, ret=%{public}d", ret);
         return ret;

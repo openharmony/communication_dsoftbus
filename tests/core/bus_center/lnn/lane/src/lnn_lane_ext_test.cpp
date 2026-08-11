@@ -56,6 +56,8 @@ constexpr char PEER_UDID_HASH[] = "1111222233334444";
 constexpr char LOCAL_UDID[] = "444455556666abcdef";
 constexpr uint64_t LANE_ID_BASE = 1122334455667788;
 constexpr uint16_t PRI = 1;
+constexpr uint32_t TEST_META_NID_COUNT = 2;
+constexpr uint8_t EXPECTED_LINK_CNT_TWO = 2;
 
 static NodeInfo g_NodeInfo = {
     .p2pInfo.p2pRole = 1,
@@ -408,7 +410,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Le
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -463,7 +465,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Le
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -510,7 +512,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Leve
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -552,18 +554,18 @@ HWTEST_F(LNNLaneExtMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Lev
     EXPECT_FALSE(laneResourse.isServerSide);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(INVALID_LANE_ID, false);
+    ret = DelLaneResourceByLaneId(INVALID_LANE_ID, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     clientRef--;
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
@@ -607,13 +609,13 @@ HWTEST_F(LNNLaneExtMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_002, TestSize.Lev
     EXPECT_TRUE(laneResourse.isServerSide);
     EXPECT_EQ(laneResourse.clientRef, serverRef);
 
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = DelLaneResourceByLaneId(laneId, true);
+    ret = DelLaneResourceByLaneId(laneId, true, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -710,7 +712,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_PPOCESS_VAP_INFO_001, TestSize.Level1)
     EXPECT_TRUE(!laneResourse.isServerSide);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(laneIdExt, false);
+    ret = DelLaneResourceByLaneId(laneIdExt, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -751,7 +753,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_PPOCESS_VAP_INFO_002, TestSize.Level1)
     EXPECT_TRUE(!laneResourse.isServerSide);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(laneIdExt, false);
+    ret = DelLaneResourceByLaneId(laneIdExt, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -774,7 +776,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.type = LANE_P2P_REUSE;
@@ -782,7 +784,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.type = LANE_HML;
@@ -790,7 +792,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.type = LANE_ETH;
@@ -799,7 +801,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_01, TestSize.Level1)
     EXPECT_CALL(laneDepMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -825,7 +827,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_02, TestSize.Level1)
     EXPECT_CALL(laneDepMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -858,7 +860,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_UPDATE_LANE_ID_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = UpdateLaneResourceLaneId(laneId, laneIdNew, PEER_UDID);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneIdNew, false);
+    ret = DelLaneResourceByLaneId(laneIdNew, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -898,7 +900,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001, TestSize.Lev
     DetectDisableWifiDirectApply();
     DetectEnableWifiDirectApply();
     DetectDisableWifiDirectApply();
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.linkInfo.p2p.bw = LANE_BW_80P80M;
@@ -911,9 +913,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001, TestSize.Lev
     ret = AddLaneResourceToPool(&linkInfo, laneIdRaw, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     DetectEnableWifiDirectApply();
-    ret = DelLaneResourceByLaneId(laneIdRaw, false);
+    ret = DelLaneResourceByLaneId(laneIdRaw, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -946,9 +948,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_CHECK_LANE_RESOURCE_NUM_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = CheckLaneResourceNumByLinkType(PEER_UDID, LANE_HML, &laneNum);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -974,9 +976,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.type = LANE_BR;
@@ -984,9 +986,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.type = LANE_BLE;
@@ -994,9 +996,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -1021,9 +1023,9 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.type = LANE_WLAN_5G;
@@ -1031,15 +1033,15 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     linkInfo.type = LANE_LINK_TYPE_BUTT;
     ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -1062,7 +1064,7 @@ HWTEST_F(LNNLaneExtMockTest, CHECK_LANE_LINK_EXIST_BY_TYPE_001, TestSize.Level1)
     uint64_t laneId = LANE_ID_BASE;
     EXPECT_EQ(SOFTBUS_OK, AddLaneResourceToPool(&linkInfo, laneId, false));
     EXPECT_TRUE(ExistsLaneLinkByType(LANE_HML));
-    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
+    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false, nullptr));
 }
 
 struct SelectProtocolReq {
@@ -1208,14 +1210,15 @@ HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_LINK_TYPE_TEST_001, TestSize.Leve
 
     LaneLinkInfo info = {};
     ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
     uint64_t laneId = 1;
-    info.type = LANE_HML;
+    info.type = LANE_P2P;
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = AddLaneResourceToPool(&info, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = GetAllDevIdWithLinkType(LANE_HML, &linkList, &linkCnt);
+    ret = GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt);
     ASSERT_NE(linkList, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(linkList);
@@ -1382,7 +1385,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_DEV_ID, TestSize.
     EXPECT_EQ(SOFTBUS_LANE_RESOURCE_NOT_FOUND, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
     EXPECT_EQ(SOFTBUS_OK, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
 
-    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
+    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false, nullptr));
 }
 
 /*
@@ -1417,6 +1420,340 @@ HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_UDID_HASH, TestSi
     EXPECT_EQ(SOFTBUS_LANE_RESOURCE_NOT_FOUND, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
     EXPECT_EQ(SOFTBUS_OK, QueryOtherLaneResource(&inputInfo, LANE_SOFTAP_P2P));
 
-    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
+    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false, nullptr));
+}
+
+HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_CREATE_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList != nullptr) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_NON_P2P_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_HML;
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_HML, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_EMPTY_NID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    info.type = LANE_P2P;
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    EXPECT_EQ(linkList, nullptr);
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_REUSE_REMOVE_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(DelLaneResourceByLaneId(laneId, false, NODE_NETWORK_ID), SOFTBUS_OK);
+    linkList = nullptr;
+    linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(DelLaneResourceByLaneId(laneId, false, NODE_NETWORK_ID), SOFTBUS_OK);
+    linkList = nullptr;
+    linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    (void)ClearLaneResourceByLaneId(laneId);
+}
+
+HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_NO_MATCH_NULL_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    EXPECT_EQ(DelLaneResourceByLaneId(laneId, false, "DIFFERENT_NETWORK_ID"), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    EXPECT_EQ(DelLaneResourceByLaneId(laneId, false, nullptr), SOFTBUS_OK);
+    linkList = nullptr;
+    linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    (void)ClearLaneResourceByLaneId(laneId);
+}
+
+HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_SERVER_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    EXPECT_EQ(DelLaneResourceByLaneId(laneId, true, nullptr), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(DelLaneResourceByLaneId(laneId, false, nullptr), SOFTBUS_OK);
+    linkList = nullptr;
+    linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    (void)ClearLaneResourceByLaneId(laneId);
+}
+
+static int32_t ActionOfGetTwoNetworkIds(const char *udid, char **networkIds, uint32_t *networkIdCount)
+{
+    uint32_t count = TEST_META_NID_COUNT;
+    char *buf = (char *)SoftBusCalloc(count * NETWORK_ID_BUF_LEN);
+    if (buf == nullptr) {
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (void)strcpy_s(buf, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
+    (void)strcpy_s(buf + NETWORK_ID_BUF_LEN, NETWORK_ID_BUF_LEN, "DIFFERENT_NETWORK_ID");
+    *networkIds = buf;
+    *networkIdCount = count;
+    return SOFTBUS_OK;
+}
+
+HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_SUCCESS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Invoke(ActionOfGetTwoNetworkIds));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, EXPECTED_LINK_CNT_TWO);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_DEDUP_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Invoke(ActionOfGetTwoNetworkIds));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, EXPECTED_LINK_CNT_TWO);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_FAIL_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_EMPTY_UDID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_ZERO_COUNT_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, ADD_NID_TO_RESOURCE_NULL_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    uint64_t laneId = LANE_ID_BASE;
+    EXPECT_EQ(AddLaneResourceToPool(nullptr, laneId, false), SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(LNNLaneExtMockTest, ADD_NID_TO_RESOURCE_EMPTY_NID_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    info.type = LANE_P2P;
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, IS_NID_IN_LIST_NOT_FOUND_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    LaneLinkInfo info2 = {};
+    ASSERT_EQ(strcpy_s(info2.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info2.networkId, sizeof(info2.networkId), "DIFFERENT_NETWORK_ID"), EOK);
+    info2.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info2.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    ASSERT_EQ(AddLaneResourceToPool(&info2, laneId, false), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, EXPECTED_LINK_CNT_TWO);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
+}
+
+HWTEST_F(LNNLaneExtMockTest, GET_ALL_DEVID_AFTER_DEDUP_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
+    info.type = LANE_P2P;
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, "1.2.3.4"), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    ASSERT_EQ(AddLaneResourceToPool(&info, laneId, false), SOFTBUS_OK);
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
+    EXPECT_EQ(linkCnt, 1);
+    if (linkList) {
+        SoftBusFree(linkList);
+    }
+    EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 } // namespace OHOS

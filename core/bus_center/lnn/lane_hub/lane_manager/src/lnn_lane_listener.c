@@ -348,22 +348,6 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
     return SOFTBUS_OK;
 }
 
-static int32_t GetRemoteUdidByUuid(const char *peerUuid, char *peerUdid)
-{
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    int32_t ret = LnnGetNetworkIdByUuid(peerUuid, networkId, sizeof(networkId));
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get networkId by uuid failed, ret=%{public}d", ret);
-        return ret;
-    }
-    ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get udid failed, ret=%{public}d", ret);
-        return ret;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, LaneLinkInfo *laneLinkInfo)
 {
     if (peerIp == NULL || peerUuid == NULL || laneLinkInfo == NULL) {
@@ -375,7 +359,7 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, Lane
         LNN_LOGE(LNN_STATE, "strncpy peerIp fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (GetRemoteUdidByUuid(peerUuid, laneLinkInfo->peerUdid) != SOFTBUS_OK) {
+    if (LnnConvertDLidToUdid(peerUuid, CATEGORY_UUID, laneLinkInfo->peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(peerUuid, &anonyUuid);
         LNN_LOGE(LNN_STATE, "get remote udid failed, peerUuid=%{public}s", AnonymizeWrapper(anonyUuid));
@@ -504,7 +488,7 @@ static int32_t CreateSinkLinkInfo(const struct WifiDirectSinkLink *link, LaneLin
         linkInfo->type = LANE_HML_RAW;
         return SOFTBUS_OK;
     }
-    if (GetRemoteUdidByUuid(link->remoteUuid, linkInfo->peerUdid) != SOFTBUS_OK) {
+    if (LnnConvertDLidToUdid(link->remoteUuid, CATEGORY_UUID, linkInfo->peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         char *anonyUuid = NULL;
         Anonymize(link->remoteUuid, &anonyUuid);
         LNN_LOGE(LNN_STATE, "get remote udid failed, remoteUuid=%{public}s", AnonymizeWrapper(anonyUuid));
@@ -568,7 +552,7 @@ static void TryClearResourceWithoutUdid(const struct WifiDirectSinkLink *link)
         LNN_LOGE(LNN_STATE, "find hml lane resource fail");
         return;
     }
-    DelLaneResourceByLaneId(laneId, true);
+    DelLaneResourceByLaneId(laneId, true, NULL);
 }
 
 static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *link)
@@ -583,7 +567,7 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
         link->linkType, AnonymizeWrapper(anonyUuid));
     AnonymizeFree(anonyUuid);
     char remoteUdid[UDID_BUF_LEN] = {0};
-    if (GetRemoteUdidByUuid(link->remoteUuid, remoteUdid) != SOFTBUS_OK) {
+    if (LnnConvertDLidToUdid(link->remoteUuid, CATEGORY_UUID, remoteUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get remote udid failed");
         TryClearResourceWithoutUdid(link);
         return;
@@ -602,7 +586,7 @@ static void LnnOnWifiDirectDisconnectedForSink(const struct WifiDirectSinkLink *
             return;
         }
     }
-    DelLaneResourceByLaneId(resourceItem.laneId, true);
+    DelLaneResourceByLaneId(resourceItem.laneId, true, NULL);
 }
 
 static void RegisterWifiDirectListener(void)
@@ -685,7 +669,7 @@ static void ProcessRemoteBrDisconnected(const ConnectionInfo *info)
         LNN_LOGE(LNN_LANE, "find lane resource fail, ret=%{public}d", ret);
         return;
     }
-    (void)DelLaneResourceByLaneId(resourceItem.laneId, true);
+    (void)DelLaneResourceByLaneId(resourceItem.laneId, true, NULL);
 }
 
 static void OnCommConnected(uint32_t connectionId, const ConnectionInfo *info)

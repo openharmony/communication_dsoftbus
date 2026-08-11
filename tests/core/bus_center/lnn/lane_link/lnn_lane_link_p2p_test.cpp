@@ -1811,4 +1811,61 @@ HWTEST_F(LNNLaneLinkP2pTest, ON_WIFI_DIRECT_CONNECT_FAILURE_TEST_003, TestSize.L
     ret = DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, P2P_REQ_ID);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+* @tc.name: OPEN_AUTH_TO_DISCONN_P2P_OTHER_OS_TEST_001
+* @tc.desc: OpenAuthToDisconnP2p with OTHER_OS_TYPE
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, OPEN_AUTH_TO_DISCONN_P2P_OTHER_OS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGetHmlConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(AUTH_REQUEST_ID));
+    P2pLinkReqList reqInfo = {};
+    ASSERT_EQ(AddNewP2pLinkedInfo(&reqInfo, LINK_ID_ONE, LANE_HML), SOFTBUS_OK);
+    EXPECT_CALL(linkMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(OTHER_OS_TYPE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, AuthOpenConnWithOtherOsType)
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OpenAuthToDisconnP2p(NODE_NETWORK_ID, LINK_ID_ONE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = OpenAuthToDisconnP2p(NODE_NETWORK_ID, LINK_ID_ONE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DelP2pLinkedByLinkId(LINK_ID_ONE));
+}
+
+/*
+* @tc.name: OPEN_META_AUTH_TO_CONN_P2P_OTHER_OS_TEST_001
+* @tc.desc: OpenMetaAuthToConnP2p with OTHER_OS_TYPE
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, OPEN_META_AUTH_TO_CONN_P2P_OTHER_OS_TEST_001, TestSize.Level1)
+{
+    LinkRequest request = {
+        .linkType = LANE_HML,
+    };
+    ASSERT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
+    LaneLinkCb callback = {0};
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(AUTH_REQUEST_ID));
+    EXPECT_CALL(linkMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(OTHER_OS_TYPE), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, AuthOpenConnWithOtherOsType)
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OpenMetaAuthToConnP2p(&request, LANEREQID, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = OpenMetaAuthToConnP2p(&request, LANEREQID, &callback);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_NO_FATAL_FAILURE(DelP2pLinkReqByReqId(ASYNC_RESULT_AUTH, AUTH_REQUEST_ID));
+    EXPECT_NO_FATAL_FAILURE(DelGuideInfoItem(LANEREQID, LANE_HML));
+}
 }
