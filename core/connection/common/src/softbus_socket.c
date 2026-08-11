@@ -252,7 +252,7 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
 
     if (timeout != 0) {
         int err = WaitEvent(fd, SOFTBUS_SOCKET_IN, timeout);
-        if (err < 0) {
+        if (err <= 0) {
             CONN_LOGE(CONN_COMMON, "recv data wait event err=%{public}d", err);
             return err;
         }

@@ -304,13 +304,6 @@ int32_t InitBaseListener(void)
     if (atomic_load_explicit(&g_initBaseListener, memory_order_acquire)) {
         return SOFTBUS_OK;
     }
-    // flag : if the client and server are in the same process, this function can be executed only once.
-    static bool flag = false;
-    if (flag) {
-        return SOFTBUS_OK;
-    }
-    flag = true;
-
     CONN_CHECK_AND_RETURN_RET_LOGE(InitBaseListenerLock() == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_COMMON,
         "init lock fail");
     int32_t ret = SoftBusMutexLock(&g_listenerListLock);
@@ -506,7 +499,7 @@ static int32_t StartServerListenUnsafe(SoftbusListenerNode *node, const LocalLis
 
 static void CleanupServerListenInfoUnsafe(SoftbusListenerNode *node)
 {
-    memset_s(&node->info.listenerInfo, sizeof(SoftbusBaseListenerInfo), 0, sizeof(SoftbusBaseListenerInfo));
+    memset_s(&node->info.listenerInfo, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
     if (node->info.listenFd > 0) {
         ConnShutdownSocket(node->info.listenFd);
     }
