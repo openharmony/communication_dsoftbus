@@ -99,7 +99,10 @@ target(build_type, "softbus_client") {
       cflags_cc = [ "-std=c++14" ]
       if (board_toolchain_type != "iccarm") {
         configs -= [ "//build/lite/config:language_cpp" ]
-        cflags = [ "-fPIC" ]
+        cflags = [
+          "-fPIC",
+          "-Os",
+        ]
         cflags_cc += [ "-fPIC" ]
       } else {
         cflags = [
@@ -107,7 +110,10 @@ target(build_type, "softbus_client") {
           "Pa153",
         ]
       }
-      ldflags = [ "-lstdc++" ]
+      ldflags = [
+        "-lstdc++",
+        "-Wl,--version-script," + rebase_path("libsoftbus_client_map", root_build_dir),
+      ]
     } else {
       sanitize = {
         ubsan = true

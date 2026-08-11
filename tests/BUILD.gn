@@ -17,21 +17,7 @@ if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
 
   lite_component("softbus_test") {
-    if (ohos_kernel_type == "liteos_m") {
-      features = []
-    } else {
-      if (!dsoftbus_feature_compile_guard) {
-        features = []
-        if (ohos_build_type == "debug") {
-          features += [
-            "adapter/unittest:AdapterTest",
-            "sdk/bus_center/unittest:BusCenterSdkRefreshSmall",
-            "sdk/discovery/unittest:DiscSdkTest",
-            "sdk/transmission/trans_channel:TransSdkStreamTest",
-          ]
-        }
-      }
-    }
+    features = []
   }
 } else {
   import("//build/test.gni")

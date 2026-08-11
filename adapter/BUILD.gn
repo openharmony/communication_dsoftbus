@@ -155,6 +155,7 @@ if (defined(ohos_lite)) {
           "-Werror",
           "-fPIC",
           "-fno-builtin",
+          "-Os",
           "-std=c99",
         ]
         cflags_cc = [ "-fPIC" ]
