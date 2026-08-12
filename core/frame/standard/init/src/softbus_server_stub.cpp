@@ -671,11 +671,13 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         COMM_LOGE(COMM_SVC, "Check Uid and Pid failed!");
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    if (SoftBusCheckTimestamp(data, sessionName) != SOFTBUS_OK) {
+    uint64_t timestamp = 0;
+    if (!data.ReadUint64(timestamp)) {
+        COMM_LOGE(COMM_SVC, "read timestamp failed");
         retReply = SOFTBUS_TRANS_PROXY_READUINT_FAILED;
         goto EXIT;
     }
-    retReply = RemoveSessionServer(pkgName, sessionName, 0);
+    retReply = RemoveSessionServer(pkgName, sessionName, timestamp);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "RemoveSessionServerInner write reply failed!");

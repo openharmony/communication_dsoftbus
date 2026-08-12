@@ -81,6 +81,11 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
         TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer sessionName is null");
         return SOFTBUS_IPC_ERR;
     }
+    uint64_t timeStamp = 0;
+    if (!ReadUint64(req, &timeStamp)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read timeStamp");
+        return SOFTBUS_IPC_ERR;
+    }
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
     if (!CheckNameContainServiceId(sessionName)) {
@@ -95,7 +100,7 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
         WriteInt32(reply, SOFTBUS_TRANS_CHECK_PID_ERROR);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    int32_t ret = TransRemoveSessionServer(pkgName, sessionName);
+    int32_t ret = TransRemoveSessionServer(pkgName, sessionName, timeStamp);
     WriteInt32(reply, ret);
     return ret;
 }

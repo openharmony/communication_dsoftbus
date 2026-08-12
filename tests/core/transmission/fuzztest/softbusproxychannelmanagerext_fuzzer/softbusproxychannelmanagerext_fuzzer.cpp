@@ -528,7 +528,7 @@ void TransDealProxyCheckCollabResultTest(FuzzedDataProvider &provider)
     FillAppInfo(provider, &appInfo);
     (void)TransProxyCreateChanInfo(info, info->channelId, &appInfo);
     (void)TransDealProxyCheckCollabResult(channelId, checkResult, newNode->pid);
-    (void)TransSessionServerDelItem(DMS_SESSIONNAME);
+    (void)TransSessionServerDelItem(DMS_SESSIONNAME, 1);
     (void)TransProxyDelChanByChanId(channelId);
     (void)TransSessionMgrDeinit();
 }

@@ -108,7 +108,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransCreateSessionServer(g_pkgName, g_sessionName, TRANS_TEST_INVALID_UID, TRANS_TEST_INVALID_PID);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransSessionServerDelItem(g_sessionName);
+    ret = TransSessionServerDelItem(g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -120,11 +120,11 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest02, TestSize.Level1)
  */
 HWTEST_F(TransSessionServiceTest, TransSessionServiceTest03, TestSize.Level1)
 {
-    int32_t ret = TransRemoveSessionServer(nullptr, g_sessionName);
+    int32_t ret = TransRemoveSessionServer(nullptr, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransRemoveSessionServer(g_pkgName, nullptr);
+    ret = TransRemoveSessionServer(g_pkgName, nullptr, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransRemoveSessionServer(g_pkgName, g_sessionName);
+    ret = TransRemoveSessionServer(g_pkgName, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -190,7 +190,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
     sessionPara.attr = &g_sessionAttr;
     ret = TransOpenSession(&sessionPara, transInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
-    ret = TransSessionServerDelItem(g_sessionName);
+    ret = TransSessionServerDelItem(g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(transInfo);
 }
