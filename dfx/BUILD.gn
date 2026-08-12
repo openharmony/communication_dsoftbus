@@ -70,9 +70,6 @@ if (defined(ohos_lite)) {
       deps = [ "$hilog_lite_deps_path" ]
       external_deps = libsec_external_deps
       public_configs = [ ":dsoftbus_dfx_interface_lite" ]
-      if (ohos_kernel_type == "liteos_a") {
-        cflags = [ "-fvisibility=hidden" ]
-      }
     }
   }
 } else {

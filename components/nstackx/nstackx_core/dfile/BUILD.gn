@@ -29,11 +29,7 @@ if (defined(ohos_lite)) {
       "-DLWIP_LITEOS_A_COMPAT",
       "-DMBEDTLS_INCLUDED",
       "-DDFILE_ENABLE_HIDUMP",
-      "-ffunction-sections",
-      "-fdata-sections",
-      "-fno-unwind-tables",
       "-Os",
-      "-fvisibility=hidden",
     ]
     cflags_cc = cflags
   }

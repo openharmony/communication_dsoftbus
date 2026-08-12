@@ -248,7 +248,7 @@ static void ReclaimMemForSoftBus(void *para)
     close(fd);
 }
 
-__attribute__((visibility("default"))) void InitSoftBusServer(void)
+void InitSoftBusServer(void)
 {
     ServerFuncInit();
     SoftbusConfigInit();
