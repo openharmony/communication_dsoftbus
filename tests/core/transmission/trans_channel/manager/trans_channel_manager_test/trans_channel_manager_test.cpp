@@ -2085,7 +2085,7 @@ HWTEST_F(TransChannelManagerTest, TransSetAccessInfo002, TestSize.Level1)
     ret = TransSetAccessInfo(testBuffer, TEST_BUF_LEN, callingPid);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
