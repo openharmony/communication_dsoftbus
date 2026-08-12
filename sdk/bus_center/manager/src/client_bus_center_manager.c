@@ -691,7 +691,7 @@ static int32_t DiscoveryMsgListInit()
     g_isInited = true;
     (void)SoftBusMutexUnlock(&g_isInitedLock);
     static uint32_t callCount = 0;
-    LNN_LOGI(LNN_STATE, "disc list init success, callCount=%{public}u", callCount++);
+    LNN_LOGD(LNN_STATE, "disc list init success, callCount=%{public}u", callCount++);
     return SOFTBUS_OK;
 }
 

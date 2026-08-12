@@ -588,7 +588,7 @@ static int32_t GetOnlineInfoNum(int32_t *nums)
         return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     if (netInfo == NULL || infoNum == 0) {
-        LNN_LOGI(LNN_BUILDER, "online device num is 0, not need to send network info");
+        LNN_LOGD(LNN_BUILDER, "online device num is 0, not need to send network info");
         return SOFTBUS_NO_ONLINE_DEVICE;
     }
     *nums = infoNum;
