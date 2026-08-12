@@ -515,6 +515,7 @@ void TransDealProxyCheckCollabResultTest(FuzzedDataProvider &provider)
     newNode->pid = provider.ConsumeIntegral<int32_t>();
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     int32_t checkResult = provider.ConsumeIntegral<int32_t>();
+    uint64_t timeStamp = provider.ConsumeIntegral<uint64_t>();
     (void)TransSessionServerAddItem(newNode);
     ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
@@ -528,7 +529,7 @@ void TransDealProxyCheckCollabResultTest(FuzzedDataProvider &provider)
     FillAppInfo(provider, &appInfo);
     (void)TransProxyCreateChanInfo(info, info->channelId, &appInfo);
     (void)TransDealProxyCheckCollabResult(channelId, checkResult, newNode->pid);
-    (void)TransSessionServerDelItem(DMS_SESSIONNAME, 1);
+    (void)TransSessionServerDelItem(DMS_SESSIONNAME, timeStamp);
     (void)TransProxyDelChanByChanId(channelId);
     (void)TransSessionMgrDeinit();
 }

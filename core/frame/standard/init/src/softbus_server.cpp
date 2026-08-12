@@ -110,7 +110,6 @@ int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sess
 
 int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
-    timestamp;
     return TransRemoveSessionServer(pkgName, sessionName, timestamp);
 }
 

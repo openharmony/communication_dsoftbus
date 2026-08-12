@@ -644,6 +644,7 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
+    uint64_t timestamp = 0;
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "RemoveSessionServerInner read pkgName failed!");
@@ -671,7 +672,6 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         COMM_LOGE(COMM_SVC, "Check Uid and Pid failed!");
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    uint64_t timestamp = 0;
     if (!data.ReadUint64(timestamp)) {
         COMM_LOGE(COMM_SVC, "read timestamp failed");
         retReply = SOFTBUS_TRANS_PROXY_READUINT_FAILED;
