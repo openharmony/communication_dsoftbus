@@ -287,7 +287,7 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, boo
         return;
     }
     if (infoNum == 0) {
-        LNN_LOGI(LNN_BUILDER, "online device num is 0, not need to send network info");
+        LNN_LOGD(LNN_BUILDER, "online device num is 0, not need to send network info");
         SoftBusFree(msg);
         return;
     }

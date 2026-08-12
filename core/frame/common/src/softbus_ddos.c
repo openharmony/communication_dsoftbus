@@ -142,7 +142,7 @@ static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interface
     ddosInfo->totalCount = (int32_t)g_callRecord->cnt;
     int32_t column = 0;
     int32_t ret = SOFTBUS_OK;
-    LNN_LOGI(LNN_EVENT, "ddos info, recordCount=%{public}d, idCount=%{public}d, "
+    LNN_LOGD(LNN_EVENT, "ddos info, recordCount=%{public}d, idCount=%{public}d, "
         "userCount=%{public}d, totalCount=%{public}d, interfaceid=%{public}d",
         ddosInfo->recordCount, ddosInfo->idCount, ddosInfo->userCount, ddosInfo->totalCount, interfaceId);
     if (ddosInfo->recordCount > callTable[interfaceId][column++]) {
