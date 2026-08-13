@@ -21,7 +21,6 @@ bus_center_adapter_inc = [
   "$dsoftbus_dfx_path/interface/include",
 ]
 bus_center_adapter_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
-bus_center_adapter_cflags = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
@@ -55,7 +54,6 @@ if (defined(ohos_lite)) {
       ]
     }
   } else if (ohos_kernel_type == "liteos_a") {
-    bus_center_adapter_cflags += [ "-fvisibility=hidden" ]
     bus_center_adapter_inc += [
       "//drivers/hdf_core/adapter/uhdf/posix/include",
       "//drivers/hdf_core/framework/include/utils",
