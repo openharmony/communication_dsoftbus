@@ -114,9 +114,13 @@ private:
     std::recursive_mutex pendingOperationLock_;
     std::queue<std::shared_ptr<P2pOperation>> pendingOperations_;
 
+    struct JoiningClientInfo {
+        uint32_t timerId;
+        std::string remoteDeviceId;
+    };
     OHOS::Utils::Timer timer_;
     std::recursive_mutex joiningClientsLock_;
-    std::map<std::string, uint32_t> joiningClients_;
+    std::map<std::string, JoiningClientInfo> joiningClients_;
 };
 } // namespace OHOS::SoftBus
 #endif
