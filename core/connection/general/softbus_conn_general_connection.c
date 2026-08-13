@@ -40,7 +40,7 @@
 
 #define GENERAL_PKGNAME_MAX_COUNT          (10)
 
-static _Atomic uint64_t g_seq = 0;
+static _Atomic int64_t g_seq = 0;
 
 enum GeneralFeatureCapability {
     GENERAL_FEATURE_SUPPORT_COC = 1
