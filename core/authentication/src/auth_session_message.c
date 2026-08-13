@@ -298,6 +298,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
     InDataInfo inDataInfo = { .inData = data, .inLen = len };
     if (DecryptInner(&sessionKeyList, info->connInfo.type, &inDataInfo, &msg, &msgSize) != SOFTBUS_OK) {
+        DestroySessionKeyList(&sessionKeyList);
         AUTH_LOGE(AUTH_FSM, "decrypt device info fail");
         return SOFTBUS_DECRYPT_ERR;
     }
