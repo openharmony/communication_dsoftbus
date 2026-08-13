@@ -32,11 +32,7 @@ if (defined(ohos_lite)) {
           "-DLWIP_LITEOS_A_COMPAT",
           "-DMBEDTLS_INCLUDED",
           "-DENABLE_USER_LOG",
-          "-ffunction-sections",
-          "-fdata-sections",
-          "-fno-unwind-tables",
           "-Os",
-          "-fvisibility=hidden",
         ]
         cflags_cc = cflags
         include_dirs = [

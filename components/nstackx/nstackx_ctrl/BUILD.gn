@@ -190,7 +190,6 @@ if (defined(ohos_lite)) {
             cflags += [
               "-DNSTACKX_WITH_LITEOS",
               "-DLWIP_LITEOS_A_COMPAT",
-              "-fvisibility=hidden",
             ]
           }
           cflags += [

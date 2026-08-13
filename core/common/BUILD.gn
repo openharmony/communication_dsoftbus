@@ -98,7 +98,6 @@ if (defined(ohos_lite)) {
       cflags = [
         "-ffunction-sections",
         "-fdata-sections",
-        "-fno-unwind-tables",
         "-Os",
       ]
     } else {
@@ -132,9 +131,6 @@ if (defined(ohos_lite)) {
           "-fPIC",
           "-std=c99",
         ]
-      }
-      if (ohos_kernel_type == "liteos_a") {
-        cflags += [ "-fvisibility=hidden" ]
       }
       if (ohos_kernel_type == "liteos_m") {
         defines += [ "SOFTBUS_LITEOS_M" ]

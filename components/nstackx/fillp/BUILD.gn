@@ -101,8 +101,6 @@ if (defined(ohos_lite)) {
       if (ohos_kernel_type == "liteos_a") {
         cflags += [
           "-DNSTACKX_WITH_LITEOS",
-          "-Os",
-          "-fvisibility=hidden",
           "-DLWIP_LITEOS_A_COMPAT",
         ]
       } else {

@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-__attribute__((visibility("default"))) void InitSoftBusServer(void);
+void InitSoftBusServer(void);
 bool GetServerIsInit(void);
 void ClientDeathCallback(const char *pkgName, int32_t pid);
 

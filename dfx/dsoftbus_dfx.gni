@@ -29,7 +29,6 @@ if (defined(ohos_lite)) {
       ohos_lite_cflags = [
         "-ffunction-sections",
         "-fdata-sections",
-        "-fno-unwind-tables",
         "-Os",
         "-Wall",
         "-fPIC",
