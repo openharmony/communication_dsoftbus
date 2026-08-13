@@ -172,7 +172,6 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
-    (void)timestamp;
     TRANS_LOGD(TRANS_SDK, "enter.");
     if ((pkgName == NULL) || (sessionName == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -184,6 +183,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WRITE_IPC_WITH_RET(&request, String, pkgName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     WRITE_IPC_WITH_RET(&request, String, sessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_IPC_WITH_RET(&request, Uint64, timestamp, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     int32_t ret = SOFTBUS_NO_INIT;
     /* sync */
     if (g_serverProxy == NULL) {

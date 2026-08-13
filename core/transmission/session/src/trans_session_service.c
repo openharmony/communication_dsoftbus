@@ -199,12 +199,12 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     return SOFTBUS_OK;
 }
 
-int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timeStamp)
 {
     if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX) || !IsValidStringSafe(sessionName, SESSION_NAME_SIZE_MAX)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = TransSessionServerDelItem(sessionName);
+    int32_t ret = TransSessionServerDelItem(sessionName, timeStamp);
     TransEventExtra extra = {
         .socketName = sessionName,
         .callerPkg = pkgName,

@@ -148,9 +148,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest03, TestSize.Level1)
  */
 HWTEST_F(TransSessionManagerTest, TransSessionManagerTest04, TestSize.Level1)
 {
-    int32_t ret = TransSessionServerDelItem(nullptr);
+    int32_t ret = TransSessionServerDelItem(nullptr, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransSessionServerDelItem(g_sessionName);
+    ret = TransSessionServerDelItem(g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
     ret = TransGetCallingFullTokenId(nullptr);
@@ -174,7 +174,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest05, TestSize.Level1)
 {
     int32_t ret = TransSessionMgrInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    TransSessionServerDelItem(g_sessionName);
+    TransSessionServerDelItem(g_sessionName, 1);
     TransSessionMgrDeinit();
 }
 
@@ -261,7 +261,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest09, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = strncmp(pkgName, g_pkgName, strlen(g_pkgName));
     EXPECT_EQ(ret, EOK);
-    ret = TransSessionServerDelItem(g_sessionName);
+    ret = TransSessionServerDelItem(g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
 }
@@ -314,7 +314,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest11, TestSize.Level1)
     newSessionServer->pid = TRANS_TEST_INVALID_PID;
     ret = TransSessionServerAddItem(newSessionServer);
     EXPECT_EQ(ret, SOFTBUS_SERVER_NAME_REPEATED);
-    ret = TransSessionServerDelItem(g_sessionName);
+    ret = TransSessionServerDelItem(g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(newSessionServer);
     TransSessionMgrDeinit();
@@ -340,7 +340,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest12, TestSize.Level1)
     ret = TransGetUidAndPid(g_sessionName, &uid, &pid);
     EXPECT_EQ(uid, TRANS_TEST_INVALID_UID);
     EXPECT_EQ(pid, TRANS_TEST_INVALID_PID);
-    ret = TransSessionServerDelItem(g_sessionName);
+    ret = TransSessionServerDelItem(g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
 }
@@ -422,7 +422,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest15, TestSize.Level1)
         char sessionNme[SESSION_NAME_SIZE_MAX] = {0};
         ret = sprintf_s(sessionNme, SESSION_NAME_SIZE_MAX, "%s%d", g_sessionName, i);
         EXPECT_GT(ret, 0);
-        ret = TransSessionServerDelItem(sessionNme);
+        ret = TransSessionServerDelItem(sessionNme, 1);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     TransSessionMgrDeinit();
@@ -465,7 +465,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest16, TestSize.Level1)
     ret = TransGetTokenIdBySessionName(sessionNme0, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransSessionServerDelItem(g_sessionName);
+    ret = TransSessionServerDelItem(g_sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
@@ -613,7 +613,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest23, TestSize.Level1)
     ret = GetAccessInfoBySessionName(sessionName, &userId, &tokenId, businessAccountId, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
     SoftBusFree(accessInfo.extraAccessInfo);
@@ -647,7 +647,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest24, TestSize.Level1)
     ret = AddAccessInfoBySessionName(sessionName, &accessInfo, 0);
     EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
@@ -683,7 +683,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest25, TestSize.Level1)
     ret = CheckAndUpdateTimeBySessionName(sessionName, time);
     EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
@@ -714,7 +714,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest26, TestSize.Level1)
     ret = TransSessionForEachShowInfo(fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
@@ -795,7 +795,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest29, TestSize.Level1)
     ret = GetTokenTypeBySessionName(sessionName, &tokenType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
@@ -832,7 +832,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest30, TestSize.Level1)
     ret = TransGetAclInfoBySessionName(sessionName, &tokenId, &callingUid, &callingPid);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
@@ -890,7 +890,7 @@ HWTEST_F(TransSessionManagerTest, GetAccessInfoBySessionNameTest001, TestSize.Le
     ret = GetAccessInfoBySessionName("sessionName.test", &userId, &tokenId, businessAccountId, extraAccessInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
 
-    ret = TransSessionServerDelItem(sessionName);
+    ret = TransSessionServerDelItem(sessionName, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
@@ -914,7 +914,7 @@ HWTEST_F(TransSessionManagerTest, CheckUidAndPidTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     bool result = CheckUidAndPid(g_sessionName, TEST_UID, TEST_PID);
     EXPECT_TRUE(result);
-    TransSessionServerDelItem(g_sessionName);
+    TransSessionServerDelItem(g_sessionName, 1);
     TransSessionMgrDeinit();
 }
 
@@ -937,7 +937,7 @@ HWTEST_F(TransSessionManagerTest, CheckUidAndPidTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     bool result = CheckUidAndPid(g_sessionName, TEST_UID + 1, TEST_PID);
     EXPECT_FALSE(result);
-    TransSessionServerDelItem(g_sessionName);
+    TransSessionServerDelItem(g_sessionName, 1);
     TransSessionMgrDeinit();
 }
 
@@ -960,7 +960,7 @@ HWTEST_F(TransSessionManagerTest, CheckUidAndPidTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     bool result = CheckUidAndPid(g_sessionName, TEST_UID, TEST_PID + 1);
     EXPECT_FALSE(result);
-    TransSessionServerDelItem(g_sessionName);
+    TransSessionServerDelItem(g_sessionName, 1);
     TransSessionMgrDeinit();
 }
 }

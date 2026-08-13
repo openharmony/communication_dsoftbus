@@ -179,7 +179,7 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
     return SOFTBUS_OK;
 }
 
-int32_t TransSessionServerDelItem(const char *sessionName)
+int32_t TransSessionServerDelItem(const char *sessionName, uint64_t timeStamp)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param invalid");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionServerList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "not init");
@@ -192,7 +192,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
-        if (strcmp(pos->sessionName, sessionName) == 0) {
+        if (strcmp(pos->sessionName, sessionName) == 0 && pos->timestamp < timeStamp) {
             isFind = true;
             break;
         }
@@ -232,7 +232,7 @@ int32_t CheckAndUpdateTimeBySessionName(const char *sessionName, uint64_t timest
     SessionServer *pos = NULL;
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
-            if (pos->timestamp <= timestamp) {
+            if (pos->timestamp < timestamp) {
                 pos->timestamp = timestamp;
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 return SOFTBUS_OK;

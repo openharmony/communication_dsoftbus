@@ -1029,7 +1029,7 @@ HWTEST_F(TransLaneTest, TransSessionServerAddItemTest001, TestSize.Level1)
         "normal sessionName", strlen("normal sessionName") + 1);
     int32_t ret = TransSessionServerAddItem(node);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    TransSessionServerDelItem(g_sessionName);
+    TransSessionServerDelItem(g_sessionName, 1);
     SoftBusFree(node);
     TransReqLanePendingDeinit();
 }

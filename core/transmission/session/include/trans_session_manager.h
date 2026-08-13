@@ -54,7 +54,7 @@ bool TransSessionServerIsExist(const char *sessionName);
 
 int32_t TransSessionServerAddItem(SessionServer *newNode);
 
-int32_t TransSessionServerDelItem(const char *sessionName);
+int32_t TransSessionServerDelItem(const char *sessionName, uint64_t timeStamp);
 
 void TransDelItemByPackageName(const char *pkgName, int32_t pid);
 

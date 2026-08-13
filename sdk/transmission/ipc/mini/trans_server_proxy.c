@@ -48,14 +48,13 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
 
 int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
-    (void)timestamp;
     int32_t callingUid = (int32_t)getuid();
     int32_t callingPid = (int32_t)getpid();
     if (!CheckUidAndPid(sessionName, callingUid, callingPid)) {
         TRANS_LOGE(TRANS_SDK, "Check Uid and Pid failed!");
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    return TransRemoveSessionServer(pkgName, sessionName);
+    return TransRemoveSessionServer(pkgName, sessionName, timestamp);
 }
 
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
