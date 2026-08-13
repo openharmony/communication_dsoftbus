@@ -1090,10 +1090,10 @@ static int32_t ClientTransProxySubPacketProc(int32_t channelId, const SliceHead 
         ret = TransProxyNormalSliceProcess(processor, head, data, len);
     }
 
-    (void)SoftBusMutexUnlock(&g_innerChannelSliceProcessorList->lock);
     if (ret != SOFTBUS_OK) {
         TransProxyClearProcessor(processor);
     }
+    (void)SoftBusMutexUnlock(&g_innerChannelSliceProcessorList->lock);
     return ret;
 }
 
