@@ -376,7 +376,7 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
     }
     if (scanResult.data.rspData.payload != NULL && scanResult.data.rspData.payloadLen > RSP_DATA_MAX_LEN) {
         DISC_LOGE(DISC_BLE_ADAPTER, "rsp payloadLen=%{public}u is too long", scanResult.data.rspData.payloadLen);
-        scanResult.data.bcData.payloadLen = RSP_DATA_MAX_LEN;
+        scanResult.data.rspData.payloadLen = RSP_DATA_MAX_LEN;
     }
     callback.OnReportScanDataCallback(BROADCAST_PROTOCOL_BLE, channelId, &scanResult);
     SoftBusFree(scanResult.data.bcData.payload);
