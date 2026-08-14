@@ -174,6 +174,7 @@ static int32_t ReadCollabInfo(IpcIo *data, CollabInfo *info)
     if (accountId == NULL) {
         COMM_LOGE(COMM_SDK, "read accountId failed");
     } else {
+        COMM_CHECK_AND_RETURN_RET_LOGE(size <= ACCOUNT_UID_LEN_MAX, SOFTBUS_IPC_ERR, COMM_SDK, "accountId invalid");
         if (strcpy_s(info->accountId, size, accountId) != EOK) {
             COMM_LOGE(COMM_SDK, "strcpy_s failed to copy accountId");
         }
@@ -184,6 +185,7 @@ static int32_t ReadCollabInfo(IpcIo *data, CollabInfo *info)
     ReadInt32(data, &info->pid);
     char *deviceId = (char *)ReadString(data, &size);
     COMM_CHECK_AND_RETURN_RET_LOGE(deviceId != NULL, SOFTBUS_IPC_ERR, COMM_SDK, "read deviceId failed.");
+    COMM_CHECK_AND_RETURN_RET_LOGE(size <= DEVICE_ID_LEN_MAX, SOFTBUS_IPC_ERR, COMM_SDK, "deviceId invalid");
     if (strcpy_s(info->deviceId, size, deviceId) != EOK) {
         COMM_LOGI(COMM_SDK, "strcpy_s failed to copy deviceId.");
         return SOFTBUS_STRCPY_ERR;

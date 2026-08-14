@@ -1053,9 +1053,9 @@ int32_t SoftBusServerStub::CloseChannelWithStatisticsInner(MessageParcel &data, 
         COMM_LOGE(COMM_SVC, "CloseChannelWithStatisticsInner dataInfo len failed!");
         return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
     }
-
+    COMM_CHECK_AND_RETURN_RET_LOGE(len <= MAX_SOCKET_RESOURCE_LEN, SOFTBUS_IPC_ERR, COMM_SVC, "read len failed.");
     auto rawData = data.ReadRawData(len);
-    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read len failed.");
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read rawData failed.");
     void *dataInfo = const_cast<void *>(rawData);
 
     int32_t retReply = CloseChannelWithStatistics(channelId, channelType, laneId, dataInfo, len);
