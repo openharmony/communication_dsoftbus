@@ -22,7 +22,11 @@
 #include "auth_negotiate_channel.h"
 #include "softbus_common.h"
 #include "softbus_conn_interface_struct.h"
+#include "wifi_direct_executor_factory.h"
 #include "wifi_direct_mock.h"
+#include "wifi_direct_protocol.h"
+#include "wifi_direct_protocol_factory.h"
+#include "wifi_direct_utils.h"
 
 using namespace testing;
 using ::testing::_;
@@ -33,9 +37,45 @@ static constexpr int MAX_AUTH_DATA_LEN = 131072;
 // Maximum data size for fuzz testing to prevent excessive memory allocation
 static constexpr uint32_t MAX_FUZZ_DATA_SIZE = 4096;
 
-// Global authentication listener - initialized once and reused
-// Note: Fuzzer runs are single-threaded by default, so no synchronization needed
+static AuthTransListener g_originalListener = { };
 static AuthTransListener g_authListener = { };
+
+class StubExecutor : public SoftBus::WifiDirectExecutor {
+public:
+    StubExecutor(const std::string &remoteDeviceId, SoftBus::WifiDirectScheduler &scheduler,
+        std::shared_ptr<SoftBus::WifiDirectProcessor> &processor, bool active)
+        : WifiDirectExecutor(remoteDeviceId, scheduler, processor, active)
+    {
+        started_ = true;
+    }
+};
+
+static void SafeOnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
+{
+    if (data == nullptr || data->len > MAX_AUTH_DATA_LEN || data->data == nullptr) {
+        return;
+    }
+    auto channel = std::make_shared<SoftBus::AuthNegotiateChannel>(handle);
+    auto remoteDeviceId = channel->GetRemoteDeviceId();
+    SoftBus::ProtocolType type = SoftBus::ProtocolType::TLV;
+    if (!remoteDeviceId.empty() &&
+        (!SoftBus::WifiDirectUtils::IsLocalSupportTlv() ||
+            !SoftBus::WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId))) {
+        type = SoftBus::ProtocolType::JSON;
+    }
+    auto protocol = SoftBus::WifiDirectProtocolFactory::CreateProtocol(type);
+    if (protocol == nullptr) {
+        return;
+    }
+    std::vector<uint8_t> input(data->data, data->data + data->len);
+    SoftBus::NegotiateMessage msg;
+    msg.Unmarshalling(*protocol, input);
+    if (msg.GetMessageType() == SoftBus::NegotiateMessageType::CMD_DETECT_LINK_REQ ||
+        msg.GetMessageType() == SoftBus::NegotiateMessageType::CMD_DETECT_LINK_RSP) {
+        return;
+    }
+    g_originalListener.onDataReceived(handle, data);
+}
 
 /**
  * @brief Initialize mock objects and authentication listener
@@ -50,14 +90,18 @@ static void InitMockAndListener()
         return;
     }
 
-    static OHOS::SoftBus::WifiDirectInterfaceMock mock;
-    // Set up mock expectations for authentication listener registration
+    static SoftBus::WifiDirectInterfaceMock mock;
+    SoftBus::WifiDirectExecutorFactory::GetInstance().Register(
+        [](const std::string &remoteDeviceId, SoftBus::WifiDirectScheduler &scheduler,
+            std::shared_ptr<SoftBus::WifiDirectProcessor> &processor,
+            bool active) -> std::shared_ptr<SoftBus::WifiDirectExecutor> {
+            return std::make_shared<StubExecutor>(remoteDeviceId, scheduler, processor, active);
+        });
     EXPECT_CALL(mock, RegAuthTransListener(_, _)).WillRepeatedly([](int32_t module, const AuthTransListener *listener) {
         if (listener != nullptr) {
-            // Safety note: AuthTransListener is a POD struct containing only primitive types
-            // and function pointers. Shallow copy is safe as function pointers remain valid
-            // throughout the fuzzer lifecycle.
+            g_originalListener = *const_cast<AuthTransListener *>(listener);
             g_authListener = *const_cast<AuthTransListener *>(listener);
+            g_authListener.onDataReceived = SafeOnAuthDataReceived;
         }
         return SOFTBUS_OK;
     });
@@ -509,10 +553,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     };
     static constexpr size_t fuzzFuncCount = sizeof(fuzzFuncs) / sizeof(fuzzFuncs[0]);
 
-    auto provider = FuzzedDataProvider(data, size);
-    // Array size is calculated at compile time - no magic numbers
-    const auto testCase = provider.ConsumeIntegralInRange<int>(0, static_cast<int>(fuzzFuncCount) - 1);
-    fuzzFuncs[testCase](data, size);
+    fuzzFuncs[data[0] % fuzzFuncCount](data, size);
 
     return SOFTBUS_OK;
 }

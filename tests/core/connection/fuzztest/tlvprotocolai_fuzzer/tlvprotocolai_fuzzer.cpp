@@ -414,11 +414,9 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         OHOS::SoftBus::TlvProtocolMultipleItemsFuzzTest,
         OHOS::SoftBus::TlvProtocolMaxLengthFuzzTest,
     };
-    static constexpr size_t fuzzFuncCount = std::size(fuzzFuncs);
+    static constexpr size_t fuzzFuncCount = sizeof(fuzzFuncs) / sizeof(fuzzFuncs[0]);
 
-    auto provider = FuzzedDataProvider(data, size);
-    const auto testCase = provider.ConsumeIntegralInRange<int>(0, static_cast<int>(fuzzFuncCount) - 1);
-    fuzzFuncs[testCase](data, size);
+    fuzzFuncs[data[0] % fuzzFuncCount](data, size);
 
     return SOFTBUS_OK;
 }
