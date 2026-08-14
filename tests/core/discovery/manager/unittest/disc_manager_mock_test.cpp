@@ -31,6 +31,26 @@
 using namespace testing::ext;
 using testing::Return;
 
+extern "C" {
+int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)publishId;
+    (void)reason;
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refreshId, int32_t reason)
+{
+    (void)pkgName;
+    (void)pid;
+    (void)refreshId;
+    (void)reason;
+    return SOFTBUS_OK;
+}
+}
+
 namespace {
 uint32_t g_segmentFaultCount = 0;
 

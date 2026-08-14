@@ -25,6 +25,7 @@ public:
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual bool LnnIsOsAccountConstraint(void) = 0;
+    virtual bool LnnIsAllMultiScreenOff(void) = 0;
 };
 
 class ConstraintMock : ConstraintMockInterface {
@@ -39,6 +40,7 @@ public:
     MOCK_METHOD(int32_t, LnnRegisterEventHandler, (LnnEventType event, LnnEventHandler handler), (override));
     MOCK_METHOD(void, LnnUnregisterEventHandler, (LnnEventType event, LnnEventHandler handler), (override));
     MOCK_METHOD(bool, LnnIsOsAccountConstraint, (), (override));
+    MOCK_METHOD(bool, LnnIsAllMultiScreenOff, (), (override));
 
 private:
     static inline ConstraintMock *instance_;

@@ -20,6 +20,7 @@
 
 using testing::Return;
 
+extern "C" {
 int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     return ConstraintMock::Get()->LnnRegisterEventHandler(event, handler);
@@ -33,6 +34,12 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
 bool LnnIsOsAccountConstraint(void)
 {
     return ConstraintMock::Get()->LnnIsOsAccountConstraint();
+}
+
+bool LnnIsAllMultiScreenOff(void)
+{
+    return ConstraintMock::Get()->LnnIsAllMultiScreenOff();
+}
 }
 
 ConstraintMock *ConstraintMock::Get()
@@ -74,4 +81,5 @@ void ConstraintMock::SetupStub()
         registeredHandler_ = nullptr;
     });
     EXPECT_CALL(*this, LnnIsOsAccountConstraint()).WillRepeatedly(Return(false));
+    EXPECT_CALL(*this, LnnIsAllMultiScreenOff()).WillRepeatedly(Return(false));
 }
