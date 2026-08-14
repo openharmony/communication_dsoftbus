@@ -525,7 +525,7 @@ static void TransPagingProcessBadKeyMsg(const ProxyMessage *msg)
     TransPagingBadKeyRetry(msg->msgHead.myId);
 }
 
-static int32_t TransPagingUnPackResetMsg(const ProxyMessage *msg, int32_t *peerId)
+static int32_t TransPagingUnPackResetMsg(const ProxyMessage *msg, int16_t *peerId)
 {
     cJSON *root = NULL;
     root = cJSON_ParseWithLength(msg->data, msg->dataLen);
@@ -533,12 +533,17 @@ static int32_t TransPagingUnPackResetMsg(const ProxyMessage *msg, int32_t *peerI
         TRANS_LOGE(TRANS_CTRL, "parse json failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
-
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, peerId)) {
+    int32_t sinkChannelId = 0;
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, &sinkChannelId)) {
         TRANS_LOGE(TRANS_CTRL, "fail to get json item");
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
     }
+    if (sinkChannelId < INT16_MIN || sinkChannelId > INT16_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "invalid sinkChannelId.");
+        return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+    }
+    *peerId = (int16_t)sinkChannelId;
     cJSON_Delete(root);
     return SOFTBUS_OK;
 }
@@ -551,7 +556,7 @@ static void TransPagingProcessResetMsg(const ProxyMessage *msg)
         return;
     }
     TRANS_LOGI(TRANS_CTRL, "recv reset myChannelId=%{public}d", msg->msgHead.myId);
-    if (TransPagingUnPackResetMsg(msg, (int32_t *)&info->peerId) != SOFTBUS_OK) {
+    if (TransPagingUnPackResetMsg(msg, &info->peerId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack reset msg failed");
         SoftBusFree(info);
         return;
