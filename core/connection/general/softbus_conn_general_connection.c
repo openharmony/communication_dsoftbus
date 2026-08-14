@@ -147,7 +147,7 @@ static void GeneralManagerMsgHandler(SoftBusMessage *msg)
 static int32_t SendInner(OutData *outData, uint32_t underlayerHandle, int32_t module, int32_t pid)
 {
     ConnPostData buff = {0};
-    buff.seq = atomic_fetch_add_explicit(&g_seq, 1, memory_order_relaxed);
+    buff.seq = (int64_t)atomic_fetch_add_explicit(&g_seq, 1, memory_order_relaxed);
     buff.flag = CONN_HIGH;
     buff.pid = pid;
 
