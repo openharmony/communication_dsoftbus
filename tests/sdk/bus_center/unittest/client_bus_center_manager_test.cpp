@@ -2515,6 +2515,68 @@ HWTEST_F(ClientBusCentManagerTest, UnregisterConversationListenerInner_Test_003,
     BusCenterClientDeinit();
 }
 
+/*
+ * @tc.name: RESTART_REGISTER_CONVERSATION_LISTENER_Test_001
+ * @tc.desc: restart register conversation listener when client not init
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, RESTART_REGISTER_CONVERSATION_LISTENER_Test_001, TestSize.Level1)
+{
+    g_busCenterClient.isInit = false;
+    EXPECT_NO_FATAL_FAILURE(RestartRegisterConversationListener());
+}
+
+/*
+ * @tc.name: RESTART_REGISTER_CONVERSATION_LISTENER_Test_002
+ * @tc.desc: restart register conversation listener with no listener registered
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, RESTART_REGISTER_CONVERSATION_LISTENER_Test_002, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+
+    EXPECT_NO_FATAL_FAILURE(RestartRegisterConversationListener());
+    BusCenterClientDeinit();
+}
+
+/*
+ * @tc.name: RESTART_REGISTER_CONVERSATION_LISTENER_Test_003
+ * @tc.desc: restart register conversation listener with registered listener
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, RESTART_REGISTER_CONVERSATION_LISTENER_Test_003, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+
+    ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);
+    ConversationListener listener = {};
+    listener.OnDataReceived = OnSdkConvDataReceived;
+    EXPECT_EQ(RegisterConversationListenerInner(&info, &listener), SOFTBUS_OK);
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegisterConversationListener(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(RestartRegisterConversationListener());
+
+    EXPECT_CALL(busCentManagerMock, ServerIpcRegisterConversationListener(_))
+        .WillRepeatedly(Return(SOFTBUS_SERVER_NOT_INIT));
+    EXPECT_NO_FATAL_FAILURE(RestartRegisterConversationListener());
+    BusCenterClientDeinit();
+}
+
 HWTEST_F(ClientBusCentManagerTest, LnnConversationRecvMsg_Test_001, TestSize.Level1)
 {
     ConversationBusiness info = CreateConvInfo(SDK_CONV_BUNDLE, SDK_CONV_ABILITY);

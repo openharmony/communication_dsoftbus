@@ -2239,3 +2239,35 @@ int32_t GetTrustedDevicesInner(DeviceNodeInfo **info, int32_t *nums)
     }
     return ret;
 }
+
+void RestartRegisterConversationListener(void)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGI(LNN_STATE, "buscenter client not init");
+        return;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get lock failed");
+        return;
+    }
+    ConversationCbListItem *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.conversationCbList, ConversationCbListItem, node) {
+        char *anonyBundleName = NULL;
+        char *anonyAbilityName = NULL;
+        Anonymize(item->info.bundleName, &anonyBundleName);
+        Anonymize(item->info.abilityName, &anonyAbilityName);
+        if (ServerIpcRegisterConversationListener(&item->info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "recovery register conversation listener failed, "
+                "bundleName=%{public}s, abilityName=%{public}s",
+                AnonymizeWrapper(anonyBundleName), AnonymizeWrapper(anonyAbilityName));
+        } else {
+            LNN_LOGI(LNN_STATE, "recovery register conversation listener success, "
+                "bundleName=%{public}s, abilityName=%{public}s",
+                AnonymizeWrapper(anonyBundleName), AnonymizeWrapper(anonyAbilityName));
+        }
+        AnonymizeFree(anonyBundleName);
+        AnonymizeFree(anonyAbilityName);
+    }
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+}

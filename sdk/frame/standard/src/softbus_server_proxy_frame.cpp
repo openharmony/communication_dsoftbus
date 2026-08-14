@@ -211,6 +211,7 @@ void ClientDeathProcTask(void)
     DiscRecoverySubscribe();
     DiscRecoveryPolicyPacked();
     RestartRegDataLevelChange();
+    RestartRegisterConversationListener();
 }
 
 void RestartAuthParaCallbackUnregister(void)
