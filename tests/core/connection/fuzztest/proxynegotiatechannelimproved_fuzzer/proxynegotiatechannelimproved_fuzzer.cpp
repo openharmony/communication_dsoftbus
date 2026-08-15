@@ -20,14 +20,27 @@
 
 #include "conn_log.h"
 #include "proxy_negotiate_channel.h"
+#include "wifi_direct_executor_factory.h"
 #include "wifi_direct_mock.h"
+
+namespace OHOS::SoftBus {
+class StubExecutor : public WifiDirectExecutor {
+public:
+    StubExecutor(const std::string &remoteDeviceId, WifiDirectScheduler &scheduler,
+        std::shared_ptr<WifiDirectProcessor> &processor, bool active)
+        : WifiDirectExecutor(remoteDeviceId, scheduler, processor, active)
+    {
+        started_ = true;
+    }
+};
+} // namespace OHOS::SoftBus
 
 using namespace testing::ext;
 using namespace testing;
 using ::testing::_;
 using ::testing::Invoke;
 namespace OHOS {
-static ITransProxyPipelineListener g_proxyListener = {};
+static ITransProxyPipelineListener g_proxyListener = { };
 static bool g_alreadyInit = false;
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 static constexpr int WAIT_CLEAE_TIME = 500;
@@ -70,6 +83,17 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (data == nullptr || size < sizeof(int32_t)) {
         CONN_LOGE(CONN_TEST, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+
+    static bool factoryRegistered = false;
+    if (!factoryRegistered) {
+        OHOS::SoftBus::WifiDirectExecutorFactory::GetInstance().Register(
+            [](const std::string &remoteDeviceId, OHOS::SoftBus::WifiDirectScheduler &scheduler,
+                std::shared_ptr<OHOS::SoftBus::WifiDirectProcessor> &processor,
+                bool active) -> std::shared_ptr<OHOS::SoftBus::WifiDirectExecutor> {
+                return std::make_shared<OHOS::SoftBus::StubExecutor>(remoteDeviceId, scheduler, processor, active);
+            });
+        factoryRegistered = true;
     }
 
     if (OHOS::g_maxCoverageRunTime == 1) {
