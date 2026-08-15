@@ -122,8 +122,8 @@ typedef struct {
     uint32_t maxCount;
 } DiscScreenActiveCollector;
 
-static atomic_bool g_centerScreenOn = false;
-static bool g_wasAllScreenOff = true;
+static atomic_bool g_centerScreenOn = true;
+static bool g_wasAllScreenOff = false;
 #endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
 
 #define DFX_RECORD_DISC_CALL_START(infoNode, packageName, interfaceType)   \
@@ -1940,8 +1940,8 @@ int32_t DiscMgrInit(void)
     }
 
 #ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
-    g_wasAllScreenOff = true;
-    g_centerScreenOn = false;
+    g_wasAllScreenOff = false;
+    g_centerScreenOn = true;
 #endif
 
     g_isInited = true;
