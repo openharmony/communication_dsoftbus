@@ -844,7 +844,6 @@ bool ProcessAccountAuthInnerFuzzTest(const uint8_t *data, size_t size)
     uint32_t authDataLen = AUTHDATA_SIZE_MAX;
 
     MessageParcel datas;
-
     datas.WriteCString(pkgName);
     datas.WriteInt64(requestId);
     datas.WriteUint32(authDataLen);
