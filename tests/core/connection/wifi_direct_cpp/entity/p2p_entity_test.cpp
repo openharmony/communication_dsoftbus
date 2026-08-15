@@ -431,11 +431,16 @@ HWTEST_F(P2pEntityTest, NotifyNewClientJoining001, TestSize.Level1)
 {
     std::string remoteMac = "11:22:33:44:55:66";
     std::string invaildMac = "11:22:33:44:55:dd";
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, "0123456789ABCDEF", [](InnerLink &link) {
+        link.SetRemoteBaseMac("11:22:33:44:55:66");
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
     P2pEntity::GetInstance().NotifyNewClientJoining(remoteMac, P2P_V1_WAITING_CLIENT_JOIN_MS);
     size_t count =P2pEntity::GetInstance().GetJoiningClientCount();
     EXPECT_EQ(count, 1);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     sleep(11);
-    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, "0123456789ABCDEF", [](InnerLink &link) {
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, "0123456789ABCDEF", [](InnerLink &link) {
         link.SetRemoteBaseMac("11:22:33:44:55:66");
         link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
     });
@@ -452,6 +457,7 @@ HWTEST_F(P2pEntityTest, NotifyNewClientJoining001, TestSize.Level1)
     P2pEntity::GetInstance().ClearJoiningClient();
     count =P2pEntity::GetInstance().GetJoiningClientCount();
     EXPECT_EQ(count, 0);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
 }
 
 /*
