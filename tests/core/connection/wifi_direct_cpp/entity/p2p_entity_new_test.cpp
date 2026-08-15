@@ -47,6 +47,7 @@ static constexpr int P2P_TEST_FREQUENCY = 5180;
 static constexpr char P2P_TEST_MAC[] = "AA:BB:CC:DD:EE:FF";
 static constexpr char P2P_TEST_MAC_2[] = "11:22:33:44:55:66";
 static constexpr char P2P_TEST_DEVICE_ID[] = "TEST123456789ABC";
+static constexpr char P2P_TEST_DEVICE_ID_2[] = "TEST0123456789AB";
 static constexpr char P2P_TEST_CONN_INFO[] = "test\nAA:BB:CC:DD:EE:FF\n555\n16\n1";
 
 class P2pEntityNewTest : public testing::Test {
@@ -551,9 +552,11 @@ HWTEST_F(P2pEntityNewTest, NotifyNewClientJoiningTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "---------NotifyNewClientJoiningTest001 in---------");
     std::string mac = P2P_TEST_MAC;
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTING);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac, P2P_WAIT_CLIENT_JOIN_MS);
     size_t count = P2pEntity::GetInstance().GetJoiningClientCount();
     EXPECT_EQ(count, 1);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------NotifyNewClientJoiningTest001 out---------");
 }
 
@@ -585,10 +588,13 @@ HWTEST_F(P2pEntityNewTest, NotifyNewClientJoiningTest003, TestSize.Level1)
     std::string mac1 = P2P_TEST_MAC;
     std::string mac2 = P2P_TEST_MAC_2;
 
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTING);
+    CreateTestLink(P2P_TEST_DEVICE_ID_2, P2P_TEST_MAC_2, InnerLink::LinkState::CONNECTING);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac1, P2P_WAIT_CLIENT_JOIN_MS);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac2, P2P_WAIT_CLIENT_JOIN_MS);
     size_t count = P2pEntity::GetInstance().GetJoiningClientCount();
     EXPECT_EQ(count, 2);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------NotifyNewClientJoiningTest003 out---------");
 }
 
@@ -602,11 +608,13 @@ HWTEST_F(P2pEntityNewTest, CancelNewClientJoiningTest001, TestSize.Level1)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "---------CancelNewClientJoiningTest001 in---------");
     std::string mac = P2P_TEST_MAC;
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTING);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac, P2P_WAIT_CLIENT_JOIN_MS);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
 
     P2pEntity::GetInstance().CancelNewClientJoining(mac);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 0);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------CancelNewClientJoiningTest001 out---------");
 }
 
@@ -622,11 +630,13 @@ HWTEST_F(P2pEntityNewTest, CancelNewClientJoiningTest002, TestSize.Level1)
     std::string mac1 = P2P_TEST_MAC;
     std::string mac2 = P2P_TEST_MAC_2;
 
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTING);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac1, P2P_WAIT_CLIENT_JOIN_MS);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
 
     P2pEntity::GetInstance().CancelNewClientJoining(mac2);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------CancelNewClientJoiningTest002 out---------");
 }
 
@@ -640,11 +650,13 @@ HWTEST_F(P2pEntityNewTest, CancelNewClientJoiningTest003, TestSize.Level1)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "---------CancelNewClientJoiningTest003 in---------");
     std::string mac = P2P_TEST_MAC;
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTING);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac, P2P_WAIT_CLIENT_JOIN_MS);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
 
     P2pEntity::GetInstance().CancelNewClientJoining("");
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------CancelNewClientJoiningTest003 out---------");
 }
 
@@ -680,11 +692,13 @@ HWTEST_F(P2pEntityNewTest, RemoveNewClientJoiningTest002, TestSize.Level1)
     std::string mac1 = P2P_TEST_MAC;
     std::string mac2 = P2P_TEST_MAC_2;
 
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTED);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac1, P2P_WAIT_CLIENT_JOIN_MS);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
 
     P2pEntity::GetInstance().RemoveNewClientJoining(mac2);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------RemoveNewClientJoiningTest002 out---------");
 }
 
@@ -698,11 +712,13 @@ HWTEST_F(P2pEntityNewTest, RemoveNewClientJoiningTest003, TestSize.Level1)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "---------RemoveNewClientJoiningTest003 in---------");
     std::string mac = P2P_TEST_MAC;
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTED);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac, P2P_WAIT_CLIENT_JOIN_MS);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
 
     P2pEntity::GetInstance().RemoveNewClientJoining("");
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------RemoveNewClientJoiningTest003 out---------");
 }
 
@@ -718,12 +734,15 @@ HWTEST_F(P2pEntityNewTest, ClearJoiningClientTest001, TestSize.Level1)
     std::string mac1 = P2P_TEST_MAC;
     std::string mac2 = P2P_TEST_MAC_2;
 
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTING);
+    CreateTestLink(P2P_TEST_DEVICE_ID_2, P2P_TEST_MAC_2, InnerLink::LinkState::CONNECTING);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac1, P2P_WAIT_CLIENT_JOIN_MS);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac2, P2P_WAIT_CLIENT_JOIN_MS);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 2);
 
     P2pEntity::GetInstance().ClearJoiningClient();
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 0);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------ClearJoiningClientTest001 out---------");
 }
 
@@ -754,11 +773,13 @@ HWTEST_F(P2pEntityNewTest, GetJoiningClientCountTest001, TestSize.Level1)
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 0);
 
     std::string mac = P2P_TEST_MAC;
+    CreateTestLink(P2P_TEST_DEVICE_ID, P2P_TEST_MAC, InnerLink::LinkState::CONNECTING);
     P2pEntity::GetInstance().NotifyNewClientJoining(mac, P2P_WAIT_CLIENT_JOIN_MS);
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 1);
 
     P2pEntity::GetInstance().ClearJoiningClient();
     EXPECT_EQ(P2pEntity::GetInstance().GetJoiningClientCount(), 0);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
     CONN_LOGI(CONN_WIFI_DIRECT, "---------GetJoiningClientCountTest001 out---------");
 }
 

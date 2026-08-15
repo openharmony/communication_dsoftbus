@@ -794,7 +794,7 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupFailureAction()
 {
     auto run = []() {
         WifiP2pLinkedInfo info;
-        info.connectState = P2P_CONNECTED;
+        info.connectState = P2P_DISCONNECTED;
         connectionCallback_(info);
     };
     std::thread thread(run);
