@@ -327,6 +327,7 @@ typedef struct TagLnnOpenFuncList {
     LnnNotifyVirLinkReportEventFunc lnnNotifyVirLinkReportEvent;
     LnnNotifyDmHookRegisteredEventFunc lnnNotifyDmHookRegisteredEvent;
     BleGetAdvPowerFunc bleGetAdvPower;
+    LnnIsAllMultiScreenOffFunc lnnIsAllMultiScreenOff;
 } LnnOpenFuncList;
 
 #ifdef __cplusplus
