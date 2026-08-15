@@ -36,6 +36,7 @@
 #define QOS_NUM             8
 #define INPUT_NAME_SIZE_MAX 70
 #define NETWORKID_SIZE_MAX  20
+#define AUTHDATA_SIZE_MAX   32
 
 #define SIZE_NUM_THREE 3
 #define SIZE_NUM_FOUR 4
@@ -826,7 +827,7 @@ bool ProcessAccountAuthInnerFuzzTest(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> object = GetRemoteObject();
     if (object == nullptr || data == nullptr || size >= INT32_MAX - 1 ||
-        size < INPUT_NAME_SIZE_MAX + NETWORKID_SIZE_MAX + sizeof(int64_t) + sizeof(uint32_t)) {
+        size < INPUT_NAME_SIZE_MAX + AUTHDATA_SIZE_MAX + sizeof(int64_t)) {
         return false;
     }
     uint32_t offset = 0;
@@ -840,9 +841,10 @@ bool ProcessAccountAuthInnerFuzzTest(const uint8_t *data, size_t size)
     offset += INPUT_NAME_SIZE_MAX;
     int64_t requestId = *reinterpret_cast<const int64_t *>(data + offset);
     offset += sizeof(int64_t);
-    uint32_t authDataLen = *reinterpret_cast<const uint32_t *>(data + offset);
+    uint32_t authDataLen = AUTHDATA_SIZE_MAX;
 
     MessageParcel datas;
+
     datas.WriteCString(pkgName);
     datas.WriteInt64(requestId);
     datas.WriteUint32(authDataLen);
