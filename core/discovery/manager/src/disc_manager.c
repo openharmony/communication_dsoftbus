@@ -123,7 +123,7 @@ typedef struct {
 } DiscScreenActiveCollector;
 
 static atomic_bool g_centerScreenOn = true;
-static bool g_wasAllScreenOff = false;
+static atomic_bool g_wasAllScreenOff = false;
 #endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
 
 #define DFX_RECORD_DISC_CALL_START(infoNode, packageName, interfaceType)   \
@@ -998,9 +998,8 @@ static uint32_t DiscScreenOffCollectActive(SoftBusList *infoList, ServiceType ty
     return count;
 }
 
-static void DiscScreenOffStop(DiscScreenType screenType)
+static void DiscScreenOffStop(DiscScreenType screenType, bool allScreenOff)
 {
-    bool allScreenOff = LnnIsAllMultiScreenOff();
     DiscScreenOffStopPassive(g_discoveryInfoList, SUBSCRIBE_SERVICE, screenType, allScreenOff);
     DiscScreenOffStopPassive(g_publishInfoList, PUBLISH_SERVICE, screenType, allScreenOff);
 
@@ -1173,16 +1172,16 @@ void DiscOnScreenStatusChanged(DiscScreenType screenType, bool onScreen)
         DISC_LOGE(DISC_CONTROL, "invalid screenType=%{public}d", screenType);
         return;
     }
-    bool isFirstScreenOn = g_wasAllScreenOff;
+    bool isFirstScreenOn = atomic_load(&g_wasAllScreenOff);
     if (screenType == DISC_SCREEN_CENTER) {
         atomic_store(&g_centerScreenOn, onScreen);
     }
-    g_wasAllScreenOff = onScreen ? false : LnnIsAllMultiScreenOff();
+    atomic_store(&g_wasAllScreenOff, onScreen ? false : LnnIsAllMultiScreenOff());
 
     if (onScreen) {
         DiscScreenOnRecover(screenType, isFirstScreenOn);
     } else {
-        DiscScreenOffStop(screenType);
+        DiscScreenOffStop(screenType, atomic_load(&g_wasAllScreenOff));
     }
 }
 
@@ -1940,8 +1939,8 @@ int32_t DiscMgrInit(void)
     }
 
 #ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
-    g_wasAllScreenOff = false;
-    g_centerScreenOn = true;
+    atomic_store(&g_wasAllScreenOff, false);
+    atomic_store(&g_centerScreenOn, true);
 #endif
 
     g_isInited = true;
