@@ -399,6 +399,7 @@ typedef void (*OnRecvCloudQueryInfoFunc)(const char *udid, const char *data, uin
 typedef void (*LnnNotifyDmHookRegisteredEventFunc)(void);
 
 typedef const SoftBusList *(*LnnGetLocalUserLedgerFunc)(void);
+typedef bool (*LnnIsAllMultiScreenOffFunc)(void);
 
 #ifdef __cplusplus
 }
