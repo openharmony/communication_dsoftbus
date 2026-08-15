@@ -361,7 +361,7 @@ static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkT
         g_promiseMap.erase(info.requestId);
         return ret;
     }
-    auto future = g_promiseMap[info.requestId]->get_future();
+    auto future = promise->get_future();
     auto status = future.wait_for(std::chrono::seconds(FORCE_DISCONNECT_TIME_OUT));
     int32_t result = status == std::future_status::ready ? future.get() : SOFTBUS_CONN_FORCE_DISCONNECT_TIME_OUT;
     CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect reqId=%{public}d reason=%{public}d", info.requestId, result);
