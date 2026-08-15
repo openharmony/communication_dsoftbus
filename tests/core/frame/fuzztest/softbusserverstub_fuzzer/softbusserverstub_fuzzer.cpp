@@ -840,7 +840,7 @@ bool ProcessAccountAuthInnerFuzzTest(const uint8_t *data, size_t size)
     offset += INPUT_NAME_SIZE_MAX;
     int64_t requestId = *reinterpret_cast<const int64_t *>(data + offset);
     offset += sizeof(int64_t);
-    uint32_t authDataLen = static_cast<uint32_t>(data + offset);;
+    uint32_t authDataLen = static_cast<uint32_t>(data + offset);
 
     MessageParcel datas;
     datas.WriteCString(pkgName);
