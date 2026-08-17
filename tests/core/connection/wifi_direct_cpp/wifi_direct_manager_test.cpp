@@ -1118,4 +1118,25 @@ HWTEST_F(WifiDirectManagerCppTest, OperationHmlConnectingCountAllHmlTypesTest, T
     EXPECT_EQ(isOnlyVirtual, false);
     CONN_LOGI(CONN_WIFI_DIRECT, "OperationHmlConnectingCountAllHmlTypesTest out");
 }
+
+/*
+ * @tc.name: OperationHmlConnectingCountUnderflowTest
+ * @tc.desc: check OperationHmlConnectingCount does not underflow when count is already 0
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, OperationHmlConnectingCountUnderflowTest, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "OperationHmlConnectingCountUnderflowTest in");
+    g_hmlConnectingCount = 0;
+    GetWifiDirectManager()->operationHmlConnectingCount(false, WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML);
+    EXPECT_EQ(g_hmlConnectingCount.load(), 0u);
+
+    GetWifiDirectManager()->operationHmlConnectingCount(false, WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML);
+    EXPECT_EQ(g_hmlConnectingCount.load(), 0u);
+
+    GetWifiDirectManager()->operationHmlConnectingCount(false, WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML);
+    EXPECT_EQ(g_hmlConnectingCount.load(), 0u);
+    CONN_LOGI(CONN_WIFI_DIRECT, "OperationHmlConnectingCountUnderflowTest out");
+}
 } // namespace OHOS::SoftBus

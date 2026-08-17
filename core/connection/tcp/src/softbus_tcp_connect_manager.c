@@ -415,6 +415,11 @@ static int32_t TcpOnDataEventIn(ListenerModule module, int32_t fd)
         (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
+    if ((uint32_t)(head.magic) != MAGIC_NUMBER) {
+        CONN_LOGE(CONN_COMMON, "recv unknown data: magic=0x%{public}x, fd=%{public}d", head.magic, fd);
+        (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
+        return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
+    }
     char *data = RecvData(&head, fd, head.len);
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
     if (data == NULL) {

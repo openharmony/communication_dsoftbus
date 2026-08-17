@@ -318,6 +318,28 @@ HWTEST_F(P2pAdapterTest, GetSelfWifiConfigInfoTest001, TestSize.Level1)
 }
 
 /*
+* @tc.name: GetSelfWifiConfigInfoInvalidSizeTest
+* @tc.desc: check GetSelfWifiConfigInfo with invalid wifiConfigSize (negative or over CFG_DATA_MAX_BYTES)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, GetSelfWifiConfigInfoInvalidSizeTest, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    std::string config;
+
+    int32_t wifiConfigSize = -1;
+    EXPECT_CALL(mock, Hid2dGetSelfWifiCfgInfo).WillOnce(DoAll(SetArgPointee<2>(wifiConfigSize), Return(WIFI_SUCCESS)));
+    int32_t ret = P2pAdapter::GetSelfWifiConfigInfo(config);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    wifiConfigSize = CFG_DATA_MAX_BYTES + 1;
+    EXPECT_CALL(mock, Hid2dGetSelfWifiCfgInfo).WillOnce(DoAll(SetArgPointee<2>(wifiConfigSize), Return(WIFI_SUCCESS)));
+    ret = P2pAdapter::GetSelfWifiConfigInfo(config);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
 * @tc.name: SetPeerWifiConfigInfoTest001
 * @tc.desc: get self wifi config info
 * @tc.type: FUNC

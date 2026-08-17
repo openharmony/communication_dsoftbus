@@ -1710,7 +1710,7 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     auto gcIp = msg.GetLegacyP2pGcIp();
     CONN_LOGI(CONN_WIFI_DIRECT, "goPort=%{public}d, gcIp=%{public}s", goPort, WifiDirectAnonymizeIp(gcIp).c_str());
     std::vector<std::string> configs = WifiDirectUtils::SplitString(groupConfig, "\n");
-    if (configs.size() < P2P_GROUP_CONFIG_INDEX_FREQ) {
+    if (configs.size() < P2P_GROUP_CONFIG_INDEX_FREQ + 1) {
         CONN_LOGI(CONN_WIFI_DIRECT, "wifi config spilt size is invaild param");
         return SOFTBUS_INVALID_PARAM;
     }

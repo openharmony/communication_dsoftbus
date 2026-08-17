@@ -29,6 +29,7 @@
 #include "kits/c/wifi_device.h"
 
 #include "channel/proxy_negotiate_channel.h"
+#include "channel/dummy_negotiate_channel.h"
 #include "command/command_factory.h"
 #include "data/interface_manager.h"
 #include "data/link_manager.h"
@@ -1463,5 +1464,32 @@ HWTEST_F(P2pV1ProcessorTest, FuzzTestChannelData, TestSize.Level1)
 
     // ugly way (sleep 1s) to wait processor terminate, as mock environment will be cleanup before processor terminate.
     sleep(1);
+}
+
+/*
+ * @tc.name: ConnectGroupInvalidConfigTest
+ * @tc.desc: check ConnectGroup returns SOFTBUS_INVALID_PARAM when groupConfig has insufficient entries
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(P2pV1ProcessorTest, ConnectGroupInvalidConfigTest, TestSize.Level1)
+{
+    P2pV1Processor processor("remote_device_id");
+    NegotiateMessage msg;
+    msg.SetLegacyP2pGoPort(1234);
+    msg.SetLegacyP2pGcIp("192.168.49.3");
+    msg.SetLegacyP2pGroupConfig("ssid\nmac\nport");
+
+    auto channel = std::make_shared<DummyNegotiateChannel>();
+    auto ret = processor.ConnectGroup(msg, channel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    msg.SetLegacyP2pGroupConfig("ssid");
+    ret = processor.ConnectGroup(msg, channel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    msg.SetLegacyP2pGroupConfig("");
+    ret = processor.ConnectGroup(msg, channel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS::SoftBus

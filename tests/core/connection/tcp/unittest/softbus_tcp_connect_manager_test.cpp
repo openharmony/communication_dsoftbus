@@ -311,6 +311,7 @@ HWTEST_F(TcpManagerTest, testTcpManager007, TestSize.Level1)
     (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ip);
 
     ConnPktHead head = {0};
+    head.magic = MAGIC_NUMBER;
     head.len = strlen(g_data);
 
     pthread_create(&pid, nullptr, (void *(*)(void *))CreateServer, nullptr);
@@ -408,6 +409,7 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
     }
     printf("maxDataLen: %d\n", maxDataLen);
     ConnPktHead head = {0};
+    head.magic = MAGIC_NUMBER;
     head.len = maxDataLen + 1;
 
     char *data = (char *)SoftBusCalloc(sizeof(head) + head.len);

@@ -106,6 +106,25 @@ HWTEST_F(P2pEntityTest, CreateGroupTest002, TestSize.Level1)
 }
 
 /*
+* @tc.name: CreateGroupTest004
+* @tc.desc: check create group with connected state but null groupInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pEntityTest, CreateGroupTest004, TestSize.Level1)
+{
+    sleep(2);
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, AuthStopListeningForWifiDirect).WillRepeatedly(Return());
+    EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(ERROR_WIFI_UNKNOWN));
+    EXPECT_CALL(mock, Hid2dCreateGroup(_, _)).WillOnce(WifiDirectInterfaceMock::CreateGroupSuccessAction);
+    P2pCreateGroupParam param{5180, true};
+    P2pOperationResult result = P2pEntity::GetInstance().CreateGroup(param);
+    EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_P2P_CALLBACK_PARAM_NULL);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
+}
+
+/*
 * @tc.name: CreateGroupTest003
 * @tc.desc: check create group
 * @tc.type: FUNC

@@ -72,6 +72,8 @@ static void OperationHmlConnectingCount(bool isIncrease, WifiDirectConnectType c
                     g_hmlConnectingCount.load());
                 return;
             }
+            CONN_CHECK_AND_RETURN_LOGE(
+                g_hmlConnectingCount > 0, CONN_WIFI_DIRECT, "HML connecting count is already 0, skip decrease");
             g_hmlConnectingCount--;
             CONN_LOGI(CONN_WIFI_DIRECT, "HML connecting count decreased to %{public}u",
                 g_hmlConnectingCount.load());
@@ -159,7 +161,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
         OHOS::SoftBus::DurationStatisticCalculatorFactory::GetInstance().NewInstance(info->connectType));
     OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TOTAL_START);
 
-    ConnEventExtra extra;
+    ConnEventExtra extra { };
     SetElementTypeExtra(info, &extra);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
 
