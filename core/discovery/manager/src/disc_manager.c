@@ -35,8 +35,8 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "legacy/softbus_hisysevt_discreporter.h"
-#include "lnn_battery_info.h"
 #include "lnn_devicename_info.h"
+#include "lnn_event_monitor_impl.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_utils.h"
 

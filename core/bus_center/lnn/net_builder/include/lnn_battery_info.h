@@ -24,9 +24,8 @@ extern "C" {
 #endif
 
 int32_t LnnSyncBatteryInfo(const char *udid, int32_t level, bool isCharging);
-int32_t LnnInitBatteryInfo(void);
+int32_t  LnnInitBatteryInfo(void);
 void LnnDeinitBatteryInfo(void);
-bool LnnIsAllMultiScreenOff(void);
 
 #ifdef __cplusplus
 }
