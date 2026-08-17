@@ -132,7 +132,8 @@
         "libuv",
         "taihe_ffi_gen",
         "hdf_core",
-        "drivers_interface_udx"
+        "drivers_interface_udx",
+        "drivers_interface_usb"
       ],
       "third_party": [
         "cJSON",
