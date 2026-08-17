@@ -171,10 +171,9 @@ static int32_t ReadCollabInfo(IpcIo *data, CollabInfo *info)
     }
     size_t size = 0;
     char *accountId = (char *)ReadString(data, &size);
-    if (accountId == NULL) {
-        COMM_LOGE(COMM_SDK, "read accountId failed");
+    if (accountId == NULL || size > ACCOUNT_UID_LEN_MAX) {
+        COMM_LOGE(COMM_SDK, "read accountId failed, size=%{public}" PRIU64, size);
     } else {
-        COMM_CHECK_AND_RETURN_RET_LOGE(size <= ACCOUNT_UID_LEN_MAX, SOFTBUS_IPC_ERR, COMM_SDK, "accountId invalid");
         if (strcpy_s(info->accountId, size, accountId) != EOK) {
             COMM_LOGE(COMM_SDK, "strcpy_s failed to copy accountId");
         }
