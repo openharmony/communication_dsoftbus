@@ -140,7 +140,7 @@ if (defined(ohos_lite)) {
     ]
     bus_center_core_adapter_inc += [ "$dsoftbus_root_path/interfaces/kits/lnn" ]
     bus_center_core_adapter_external_deps += [ 
-      "cJson:cjson",
+      "cJSON:cjson",
       "usb_manager:usbsrv_client",
       "drivers_interface_usb:usb_idl_headers_1.1",
       "drivers_interface_usb:usb_idl_headers_1.2",
