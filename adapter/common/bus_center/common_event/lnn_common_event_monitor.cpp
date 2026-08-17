@@ -16,6 +16,8 @@
 #include "lnn_event_monitor_impl.h"
 
 #include <functional>
+#include <list>
+#include <mutex>
 #include <unordered_map>
 
 #include "bus_center_event.h"
@@ -33,6 +35,31 @@
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
+
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+struct LnnMultiScreenStateNode {
+    int64_t screenId;
+    SoftBusMultiScreenState state;
+};
+
+static std::mutex g_multiScreenLock;
+static std::list<LnnMultiScreenStateNode> g_multiScreenStateList;
+
+static void UpdateMultiScreenState(int64_t screenId, SoftBusMultiScreenState state)
+{
+    std::lock_guard<std::mutex> lock(g_multiScreenLock);
+    for (auto &item : g_multiScreenStateList) {
+        if (item.screenId == screenId) {
+            item.state = state;
+            return;
+        }
+    }
+    LnnMultiScreenStateNode node = { .screenId = screenId, .state = state };
+    g_multiScreenStateList.push_back(node);
+    LNN_LOGI(LNN_EVENT, "add multi screen state screenId=%{public}" PRId64 ", state=%{public}d, listSize=%{public}zu",
+        screenId, state, g_multiScreenStateList.size());
+}
+#endif
 
 namespace OHOS {
 namespace EventFwk {
@@ -146,6 +173,7 @@ static void HandleMultiScreenOn(const CommonEventData &data)
     int64_t screenId = ParseMultiScreenId(wantParams);
     int32_t reason = wantParams.GetIntParam("reason", -1);
     LNN_LOGI(LNN_EVENT, "multi screen on screenId=%{public}" PRId64 ", reason=%{public}d", screenId, reason);
+    UpdateMultiScreenState(screenId, SOFTBUS_MULTI_SCREEN_ON);
     LnnNotifyMultiScreenStateChangeEvent(SOFTBUS_MULTI_SCREEN_ON, screenId);
 }
 
@@ -155,6 +183,7 @@ static void HandleMultiScreenOff(const CommonEventData &data)
     int64_t screenId = ParseMultiScreenId(wantParams);
     int32_t reason = wantParams.GetIntParam("reason", -1);
     LNN_LOGI(LNN_EVENT, "multi screen off screenId=%{public}" PRId64 ", reason=%{public}d", screenId, reason);
+    UpdateMultiScreenState(screenId, SOFTBUS_MULTI_SCREEN_OFF);
     LnnNotifyMultiScreenStateChangeEvent(SOFTBUS_MULTI_SCREEN_OFF, screenId);
 }
 #endif
@@ -253,6 +282,28 @@ bool LnnQueryLocalScreenStatusOnce(bool notify)
     }
     return isScreenOn;
 }
+
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+bool LnnIsAllMultiScreenOff(void)
+{
+    std::lock_guard<std::mutex> lock(g_multiScreenLock);
+    bool allOff = true;
+    for (const auto &item : g_multiScreenStateList) {
+        if (item.state != SOFTBUS_MULTI_SCREEN_OFF) {
+            allOff = false;
+            LNN_LOGI(LNN_EVENT, "screen not off, screenId=%{public}" PRId64, item.screenId);
+            break;
+        }
+    }
+    LNN_LOGI(LNN_EVENT, "all multi screen off=%{public}d, listSize=%{public}zu", allOff, g_multiScreenStateList.size());
+    return allOff;
+}
+#else
+bool LnnIsAllMultiScreenOff(void)
+{
+    return false;
+}
+#endif
 
 int32_t LnnSubscribeCommonEvent(void)
 {

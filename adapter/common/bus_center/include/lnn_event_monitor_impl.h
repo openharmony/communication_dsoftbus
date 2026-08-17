@@ -57,6 +57,7 @@ void LnnDeinitNetManagerMonitorImpl(void);
 int32_t LnnSubscribeAccountBootEvent(AccountEventHandle handle);
 
 bool LnnQueryLocalScreenStatusOnce(bool notify);
+bool LnnIsAllMultiScreenOff(void);
 #ifdef __cplusplus
 }
 #endif

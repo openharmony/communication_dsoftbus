@@ -88,6 +88,7 @@ ohos_unittest("DiscManagerMockTest") {
     "$dsoftbus_core_path/discovery/ble/virtual_link_ble/include",
     "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/adapter/common/bus_center/include",
   ]
 
   deps = [
@@ -142,6 +143,7 @@ if (dsoftbus_feature_disc_cockpit_multi_user) {
       "$dsoftbus_core_path/discovery/ble/virtual_link_ble/include",
       "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
+      "$dsoftbus_root_path/adapter/common/bus_center/include",
     ]
 
     deps = [
