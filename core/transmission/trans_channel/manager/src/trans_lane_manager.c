@@ -91,7 +91,7 @@ static int32_t TransLaneChannelForEachShowInfo(int32_t fd)
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return SOFTBUS_NO_INIT;
     }
-    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         TRANS_LOGE(TRANS_SVC, "TransSessionInfoForEach malloc appInfo failed");
         return SOFTBUS_MALLOC_ERR;
