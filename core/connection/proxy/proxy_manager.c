@@ -889,6 +889,7 @@ static void ProxyChannelDisconnectHandler(ProxyChannelNotifyContext *ctx)
     NotifyDisconnected(&proxyConnection->proxyChannel, reason);
     RemoveProxyChannelByChannelId(channelId);
     PostEventByAddr(MSG_OPEN_PROXY_CHANNEL_RETRY, proxyConnection->brMac, RECONNECT_AFTER_DISCONNECT_WAIT_MS);
+    proxyConnection->dereference(proxyConnection);
 }
 
 static void OnProxyChannelDisconnected(uint32_t channelId, int32_t reason)
@@ -964,6 +965,21 @@ static bool CheckNeedToRetry(char *brAddr, ProxyConnectInfo *reconnectDeviceInfo
     return true;
 }
 
+static int32_t ProxyChannelConstruct(struct ProxyChannel *proxyChannel, const ProxyConnectInfo *connectInfo)
+{
+    proxyChannel->requestId = connectInfo->requestId;
+    proxyChannel->channelId = 0;
+    proxyChannel->send = ProxyChannelSend;
+    proxyChannel->close = ProxyChannelClose;
+    int32_t ret = connectInfo->isRealMac ?
+        strcpy_s(proxyChannel->brMac, BT_MAC_MAX_LEN, connectInfo->brMac) :
+        strcpy_s(proxyChannel->brMac, BT_MAC_MAX_LEN, connectInfo->brHashMac);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, CONN_PROXY, "cpy brMac err");
+    ret = strcpy_s(proxyChannel->uuid, UUID_STRING_LEN, connectInfo->uuid);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, CONN_PROXY, "cpy uuid err");
+    return SOFTBUS_OK;
+}
+
 static void AttemptReconnectDevice(char *brAddr)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
@@ -987,12 +1003,8 @@ static void AttemptReconnectDevice(char *brAddr)
             reconnectDeviceInfo->innerRetryNum);
         reconnectDeviceInfo->innerRetryNum = 0;
         struct ProxyChannel proxyChannel = { 0 };
-        int32_t ret = reconnectDeviceInfo->isRealMac ?
-            strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, reconnectDeviceInfo->brMac) :
-            strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, reconnectDeviceInfo->brHashMac);
-        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy mac err");
-        ret = strcpy_s(proxyChannel.uuid, UUID_STRING_LEN, reconnectDeviceInfo->uuid);
-        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy uuid err");
+        int32_t ret = ProxyChannelConstruct(&proxyChannel, reconnectDeviceInfo);
+        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "ProxyChannelConstruct fail, ret=%{public}d", ret);
         NotifyDisconnected(&proxyChannel, SOFTBUS_CONN_PROXY_RETRY_FAILED);
         return;
     }
@@ -1123,16 +1135,8 @@ static void ProxyDeviceUnpaired(const char *brAddr)
     ProxyConnectInfo *target = GetReconnectDeviceInfoByAddrUnsafe(brAddr);
     CONN_CHECK_AND_RETURN_LOGE(target != NULL, CONN_PROXY, "ignore addr=%{public}s", anomizeAddress);
     struct ProxyChannel proxyChannel = { 0 };
-    proxyChannel.requestId = target->requestId;
-    int32_t ret = target->isRealMac ? strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, target->brMac) :
-        strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, target->brHashMac);
-    if (ret != EOK) {
-        CONN_LOGW(CONN_PROXY, "cpy brMac err!");
-    }
-    ret = strcpy_s(proxyChannel.uuid, UUID_STRING_LEN, target->uuid);
-    if (ret != EOK) {
-        CONN_LOGW(CONN_PROXY, "cpy uuid err!");
-    }
+    int32_t ret = ProxyChannelConstruct(&proxyChannel, target);
+    CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "ProxyChannelConstruct fail, ret=%{public}d", ret);
     RemoveReconnectDeviceInfoByAddrUnsafe(brAddr);
     NotifyDisconnected(&proxyChannel, SOFTBUS_CONN_BR_UNPAIRED);
 }
