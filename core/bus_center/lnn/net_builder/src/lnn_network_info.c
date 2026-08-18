@@ -43,6 +43,7 @@ static bool g_isWifiDirectSupported = false;
 static bool g_isApCoexistSupported = false;
 static bool g_isWifiEnable = false;
 static bool g_isApEnable = false;
+static SoftBusWifiState g_curState = SOFTBUS_WIFI_UNKNOWN;
 
 static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, uint32_t len)
 {
@@ -273,7 +274,7 @@ static void SendSleCapabilityToRemote(NodeInfo *nodeInfo, NodeBasicInfo netInfo,
     AnonymizeFree(anonyNetworkId);
 }
 
-static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, bool isSyncSle)
+static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, bool isSyncSle, bool isWifiRoaming)
 {
     uint8_t *msg = ConvertCapabilityToMsg(netCapability);
     if (msg ==NULL) {
@@ -300,6 +301,10 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, boo
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
+        if (nodeInfo.deviceInfo.deviceTypeId == TYPE_WATCH_ID
+            && nodeInfo.deviceInfo.osType == OH_OS_TYPE && isWifiRoaming) {
+            continue;
+        }
         if (!isSyncSle) {
             DoSendCapability(nodeInfo, netInfo[i], msg, netCapability, type);
         } else {
@@ -310,7 +315,8 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, boo
     SoftBusFree(msg);
 }
 
-static void WifiStateProcess(CapabilityOption addCapability, CapabilityOption delCapability, bool isSend)
+static void WifiStateProcess(
+    CapabilityOption addCapability, CapabilityOption delCapability, bool isSend, bool isWifiRoaming)
 {
     int32_t ret = LnnSetLocalByteInfo(NUM_KEY_NET_CAP, (uint8_t *)&addCapability, sizeof(CapabilityOption));
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_NEED_UPDATE) {
@@ -329,7 +335,7 @@ static void WifiStateProcess(CapabilityOption addCapability, CapabilityOption de
         return;
     }
     uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
-    SendNetCapabilityToRemote(netCapability, type, false);
+    SendNetCapabilityToRemote(netCapability, type, false, isWifiRoaming);
     LNN_LOGD(LNN_BUILDER, "WifiStateEventHandler exit");
     return;
 }
@@ -470,10 +476,12 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
     CapabilityOption delCapability = {.isAdd = false, .capabilitySet = 0};
     bool needSync = false;
+    bool isWifiRoaming = ((g_curState == wifiState) && (wifiState == SOFTBUS_WIFI_CONNECTED));
+    g_curState = wifiState;
     GetNetworkCapability(wifiState, &(addCapability.capabilitySet), &(delCapability.capabilitySet), &needSync);
     LNN_LOGI(LNN_EVENT, "WifiState=%{public}d, local capabilty change:needSync=%{public}d",
         wifiState, needSync);
-    WifiStateProcess(addCapability, delCapability, needSync);
+    WifiStateProcess(addCapability, delCapability, needSync, isWifiRoaming);
 }
 
 static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
@@ -523,7 +531,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
-    SendNetCapabilityToRemote(netCapability, 1 << (uint32_t)DISCOVERY_TYPE_WIFI, false);
+    SendNetCapabilityToRemote(netCapability, 1 << (uint32_t)DISCOVERY_TYPE_WIFI, false, false);
     return;
 }
 
@@ -568,7 +576,7 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
-    SendNetCapabilityToRemote(netCapability, 0, true);
+    SendNetCapabilityToRemote(netCapability, 0, true, false);
 }
 
 static int32_t UpdateLocalFeatureByWifiVspRes(void)

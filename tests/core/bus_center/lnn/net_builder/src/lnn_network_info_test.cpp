@@ -286,9 +286,9 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_001, TestSize.Level1
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillRepeatedly(Return(true));
     CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
     CapabilityOption delCapability = {.isAdd = false, .capabilitySet = 0};
-    WifiStateProcess(addCapability, delCapability, true);
-    WifiStateProcess(addCapability, delCapability, false);
-    SendNetCapabilityToRemote(TYPE_63, TYPE_1, false);
+    WifiStateProcess(addCapability, delCapability, true, false);
+    WifiStateProcess(addCapability, delCapability, false, false);
+    SendNetCapabilityToRemote(TYPE_63, TYPE_1, false, false);
     uint8_t *ret = ConvertCapabilityToMsg(TYPE_63);
     EXPECT_TRUE(ret != nullptr);
     SoftBusFree(ret);
@@ -1436,15 +1436,15 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_CAPABILITY_TO_MSG_TEST_002, TestSize.Level1
     CapabilityOption addCapability = {.isAdd = true, .capabilitySet = 0};
     CapabilityOption delCapability = {.isAdd = false, .capabilitySet = 0};
     EXPECT_CALL(netBuilderMock, LnnSetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, true));
+    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, true, false));
     EXPECT_CALL(netBuilderMock, LnnSetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, false));
+    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, false, false));
     EXPECT_CALL(netBuilderMock, LnnSetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_NOT_NEED_UPDATE));
-    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, true));
+    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, true, false));
     EXPECT_CALL(netBuilderMock, LnnSetLocalByteInfo)
     .WillOnce(Return(SOFTBUS_OK))
     .WillRepeatedly(Return(SOFTBUS_NOT_NEED_UPDATE));
-    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, false));
+    EXPECT_NO_FATAL_FAILURE(WifiStateProcess(addCapability, delCapability, false, false));
 }
 
 /*
