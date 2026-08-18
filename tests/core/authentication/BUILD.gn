@@ -305,6 +305,11 @@ ohos_unittest("AuthEnhanceMockTest") {
 
 ohos_unittest("AuthTestCallBackTest") {
   module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "$dsoftbus_root_path/core/adapter/authentication/src/lnn_extdata_config_virtual.c",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp",
@@ -1712,6 +1717,11 @@ ohos_unittest("AuthRequestTest") {
 
 ohos_unittest("AuthApplyKeyManagerTest") {
   module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "unittest/auth_apply_key_manager_mock.cpp",
