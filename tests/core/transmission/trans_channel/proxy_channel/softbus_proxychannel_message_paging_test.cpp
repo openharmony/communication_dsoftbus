@@ -611,7 +611,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeAckMsg
 HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackResetMsgTest001, TestSize.Level1)
 {
     ProxyMessage msg;
-    int32_t peerId = TEST_CHANNEL_ID;
+    int16_t peerId = TEST_CHANNEL_ID;
     cJSON *testRootTest = nullptr;
     testRootTest = cJSON_CreateObject();
     ASSERT_TRUE(testRootTest != nullptr);
