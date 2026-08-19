@@ -1304,7 +1304,6 @@ HWTEST_F(TransLaneTest, CheckSessionNameValidOnAuthChannelTest002, TestSize.Leve
     const char *sessionName = "ohos.distributedhardware.devicemanager.resident";
     bool ret = CheckSessionNameValidOnAuthChannel(sessionName);
     EXPECT_TRUE(ret);
-    EXPECT_NE(ret, false);
     const char *newSessionName = "IShareAuthSession";
     ret = CheckSessionNameValidOnAuthChannel(newSessionName);
     EXPECT_FALSE(ret);
