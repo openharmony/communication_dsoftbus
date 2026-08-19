@@ -55,7 +55,7 @@ if (dsoftbus_feature_lnn_frame) {
     "$authentication_path/userkey/auth_user_common_key.c",
   ]
 
-  if (defined(ohos_lite)) {
+  if (defined(ohos_lite) && ohos_kernel_type == "liteos_m") {
     auth_server_src += [ "$authentication_path/src/virtual/auth_identity_service_adapter_virtual.c" ]
     AUTH_SERVER_DEFINES += [ "DISABLE_IDENTITY_SERVICE" ]
   } else {
