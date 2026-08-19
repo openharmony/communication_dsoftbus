@@ -853,7 +853,7 @@ HWTEST_F(TransLaneTest, TransWaitingRequestCallbackTest001, TestSize.Level1)
     TransReqLanePendingDeinit();
     uint32_t laneHandle = 1;
     int32_t ret = TransWaitingRequestCallback(laneHandle);
-    EXPECT_EQ(SOFTBUS_NO_INIT ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     (void)TransReqLanePendingInit();
     TransReqLanePendingDeinit();
 }
