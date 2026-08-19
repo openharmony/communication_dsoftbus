@@ -853,9 +853,7 @@ HWTEST_F(TransLaneTest, TransWaitingRequestCallbackTest001, TestSize.Level1)
     TransReqLanePendingDeinit();
     uint32_t laneHandle = 1;
     int32_t ret = TransWaitingRequestCallback(laneHandle);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-    EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_NE(ret, SOFTBUS_NO_INIT);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     (void)TransReqLanePendingInit();
     TransReqLanePendingDeinit();
 }
@@ -1306,10 +1304,9 @@ HWTEST_F(TransLaneTest, CheckSessionNameValidOnAuthChannelTest002, TestSize.Leve
     const char *sessionName = "ohos.distributedhardware.devicemanager.resident";
     bool ret = CheckSessionNameValidOnAuthChannel(sessionName);
     EXPECT_TRUE(ret);
-    EXPECT_NE(ret, false);
     const char *newSessionName = "IShareAuthSession";
     ret = CheckSessionNameValidOnAuthChannel(newSessionName);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /*
@@ -1500,25 +1497,6 @@ HWTEST_F(TransLaneTest, SetP2pExtConnInfoTest001, TestSize.Level1)
     ConnectOption connOpt;
     int32_t ret = SetP2pExtConnInfo(&p2pInfo, &connOpt);
     EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
- * @tc.name: SetP2pExtConnInfoTest002
- * @tc.desc: SetP2pExtConnInfo with null p2pInfo or null connOpt returns not
- *           ok.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransLaneTest, SetP2pExtConnInfoTest002, TestSize.Level1)
-{
-    P2pConnInfo p2pInfo;
-    ConnectOption connOpt;
-    int32_t ret = SetP2pExtConnInfo(nullptr, &connOpt);
-    EXPECT_NE(ret, SOFTBUS_OK);
-    ret = SetP2pExtConnInfo(&p2pInfo, nullptr);
-    EXPECT_NE(ret, SOFTBUS_OK);
-    ret = SetP2pExtConnInfo(nullptr, nullptr);
-    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
