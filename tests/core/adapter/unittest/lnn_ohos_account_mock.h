@@ -131,7 +131,6 @@ public:
     virtual int32_t LnnInitP2p(void);
     virtual int32_t LnnInitPhysicalSubnetManager(void);
     virtual int32_t LnnInitSyncInfoManager(void);
-    virtual int32_t LnnInitTopoManager(void);
     virtual int32_t LnnInitWifiDirect(void);
     virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
         bool isNeedConnect);
@@ -171,7 +170,6 @@ public:
     virtual void LnnDeinitP2p(void);
     virtual void LnnDeinitPhysicalSubnetManager(void);
     virtual void LnnDeinitSyncInfoManager(void);
-    virtual void LnnDeinitTopoManager(void);
     virtual void LnnDeinitWifiDirect(void);
     virtual void LnnHbClearRecvList(void);
     virtual void LnnIpAddrChangeEventHandler(void);
@@ -224,7 +222,6 @@ public:
     MOCK_METHOD0(LnnDeinitP2p, void());
     MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void(void));
     MOCK_METHOD0(LnnDeinitSyncInfoManager, void());
-    MOCK_METHOD0(LnnDeinitTopoManager, void());
     MOCK_METHOD0(LnnDeinitWifiDirect, void());
     MOCK_METHOD0(LnnHbClearRecvList, void(void));
     MOCK_METHOD0(LnnInitDevicename, int32_t());
@@ -232,7 +229,6 @@ public:
     MOCK_METHOD0(LnnInitP2p, int32_t());
     MOCK_METHOD0(LnnInitPhysicalSubnetManager, int32_t(void));
     MOCK_METHOD0(LnnInitSyncInfoManager, int32_t());
-    MOCK_METHOD0(LnnInitTopoManager, int32_t());
     MOCK_METHOD0(LnnInitWifiDirect, int32_t());
     MOCK_METHOD0(LnnIpAddrChangeEventHandler, void(void));
     MOCK_METHOD0(LnnIsAutoNetWorkingEnabled, bool(void));

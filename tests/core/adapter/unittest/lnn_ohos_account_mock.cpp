@@ -403,11 +403,6 @@ int32_t LnnInitSyncInfoManager(void)
     return GetLnnOhosAccountInterface()->LnnInitSyncInfoManager();
 }
 
-int32_t LnnInitTopoManager(void)
-{
-    return GetLnnOhosAccountInterface()->LnnInitTopoManager();
-}
-
 int32_t LnnInitWifiDirect(void)
 {
     return GetLnnOhosAccountInterface()->LnnInitWifiDirect();
@@ -578,11 +573,6 @@ void LnnDeinitPhysicalSubnetManager(void)
 void LnnDeinitSyncInfoManager(void)
 {
     GetLnnOhosAccountInterface()->LnnDeinitSyncInfoManager();
-}
-
-void LnnDeinitTopoManager(void)
-{
-    GetLnnOhosAccountInterface()->LnnDeinitTopoManager();
 }
 
 void LnnDeinitWifiDirect(void)

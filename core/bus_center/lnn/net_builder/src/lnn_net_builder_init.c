@@ -34,7 +34,6 @@
 #include "lnn_sa_status_monitor.h"
 #include "lnn_sle_capability.h"
 #include "lnn_sync_item_info.h"
-#include "lnn_topo_manager.h"
 #include "lnn_net_builder_process.h"
 #include "lnn_init_monitor.h"
 #include "softbus_adapter_mem.h"
@@ -845,7 +844,6 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "init sync info manager fail, rc=%{public}d", rc);
         return rc;
     }
-    LnnInitTopoManager();
     UpdateLocalNetCapability();
     InitNodeInfoSync();
     LnnInitConnIdCallbackManager();
@@ -927,7 +925,6 @@ void LnnDeinitNetBuilder(void)
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler);
     LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler);
     UnregAuthVerifyListener();
-    LnnDeinitTopoManager();
     DeinitNodeInfoSync();
     LnnDeinitFastOfflinePacked();
     LnnDeinitSyncInfoManager();
