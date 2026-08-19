@@ -269,6 +269,8 @@ int32_t P2pAdapter::GetSelfWifiConfigInfo(std::string &config)
         CONN_LOGI(CONN_WIFI_DIRECT, "empty wifi cfg");
         return SOFTBUS_OK;
     }
+    CONN_CHECK_AND_RETURN_RET_LOGE(wifiConfigSize > 0 && wifiConfigSize <= CFG_DATA_MAX_BYTES, SOFTBUS_INVALID_PARAM,
+        CONN_WIFI_DIRECT, "invalid wifiConfigSize=%{public}d", wifiConfigSize);
 
     uint8_t encode[CFG_DATA_MAX_BYTES] = { 0 };
     size_t encodeSize = 0;

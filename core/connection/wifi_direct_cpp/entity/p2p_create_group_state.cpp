@@ -104,6 +104,9 @@ void P2pCreateGroupState::OnP2pConnectionChangeEvent(
     if (info.connectState == P2P_DISCONNECTED) {
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
         CONN_LOGE(CONN_WIFI_DIRECT, "create group call event fail, error=%{public}d", result.errorCode_);
+    } else if (groupInfo == nullptr) {
+        result.errorCode_ = SOFTBUS_CONN_P2P_CALLBACK_PARAM_NULL;
+        CONN_LOGE(CONN_WIFI_DIRECT, "groupInfo is null");
     } else {
         InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [this] (InterfaceInfo &info) {
             info.SetIsCreateGo(true);
