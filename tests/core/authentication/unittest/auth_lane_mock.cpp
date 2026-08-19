@@ -299,16 +299,6 @@ void LnnDeinitSyncInfoManager(void)
     return GetAuthLaneMockInterface()->LnnDeinitSyncInfoManager();
 }
 
-int32_t LnnInitTopoManager(void)
-{
-    return GetAuthLaneMockInterface()->LnnInitTopoManager();
-}
-
-void LnnDeinitTopoManager(void)
-{
-    return GetAuthLaneMockInterface()->LnnDeinitTopoManager();
-}
-
 int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
 {
     return GetAuthLaneMockInterface()->LnnRegSyncInfoHandler(type, handler);

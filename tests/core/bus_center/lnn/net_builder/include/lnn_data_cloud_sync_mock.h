@@ -43,7 +43,6 @@
 #include "lnn_state_machine.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
-#include "lnn_topo_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
@@ -127,8 +126,6 @@ public:
     virtual int32_t LnnInitDevicename(void);
     virtual int32_t LnnInitSyncInfoManager(void);
     virtual void LnnDeinitSyncInfoManager(void);
-    virtual int32_t LnnInitTopoManager(void);
-    virtual void LnnDeinitTopoManager(void);
     virtual int32_t RegAuthVerifyListener(const AuthVerifyListener *listener);
     virtual void UnregAuthVerifyListener(void);
     virtual int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler);
@@ -256,8 +253,6 @@ public:
     MOCK_METHOD0(LnnInitDevicename, int32_t());
     MOCK_METHOD0(LnnInitSyncInfoManager, int32_t());
     MOCK_METHOD0(LnnDeinitSyncInfoManager, void());
-    MOCK_METHOD0(LnnInitTopoManager, int32_t());
-    MOCK_METHOD0(LnnDeinitTopoManager, void());
     MOCK_METHOD1(RegAuthVerifyListener, int32_t(const AuthVerifyListener *));
     MOCK_METHOD0(UnregAuthVerifyListener, void());
     MOCK_METHOD2(LnnRegSyncInfoHandler, int32_t(LnnSyncInfoType, LnnSyncInfoMsgHandler));

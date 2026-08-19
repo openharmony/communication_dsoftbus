@@ -746,16 +746,6 @@ void LnnDeinitSyncInfoManager(void)
     return GetLocalLedgerDepsInterface()->LnnDeinitSyncInfoManager();
 }
 
-int32_t LnnInitTopoManager(void)
-{
-    return GetLocalLedgerDepsInterface()->LnnInitTopoManager();
-}
-
-void LnnDeinitTopoManager(void)
-{
-    return GetLocalLedgerDepsInterface()->LnnDeinitTopoManager();
-}
-
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
 {
     return GetLocalLedgerDepsInterface()->RegAuthVerifyListener(listener);

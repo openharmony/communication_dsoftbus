@@ -106,7 +106,6 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnInitSyncInfoManager())
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(NetBuilderMock, LnnInitTopoManager()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, RegAuthVerifyListener(_))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
