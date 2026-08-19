@@ -20,6 +20,7 @@
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
+#include "lnn_connection_fsm_mock.h"
 #include "lnn_connection_fsm_process.c"
 #include "lnn_connection_fsm_process.h"
 #include "lnn_devicename_info.h"
@@ -73,6 +74,19 @@ static void LnnConnectionFsmStopCallback(struct tagLnnConnectionFsm *connFsm)
     return;
 }
 
+static void DestroyConnFsm(LnnConnectionFsm *connFsm)
+{
+    if (connFsm == nullptr) {
+        return;
+    }
+    SoftBusLooper *looper = connFsm->fsm.looper;
+    if (looper != nullptr && looper->RemoveMessageCustom != nullptr) {
+        looper->RemoveMessageCustom(looper, &connFsm->fsm.handler, nullptr, nullptr);
+    }
+    connFsm->fsm.looper = nullptr;
+    LnnDestroyConnectionFsm(connFsm);
+}
+
 /*
  * @tc.name: LNN_IS_NODE_INFO_CHANGED_TEST_001
  * @tc.desc: Verify IsNodeInfoChanged detects node info changes when sessionPort,
@@ -88,50 +102,39 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
         .info.ip.port = PORT1,
     };
     (void)strcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, DEVICE_IP1);
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
     LnnConnectionFsm *connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
-    int32_t ret = LnnStartConnectionFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     NodeInfo oldNodeInfo;
     NodeInfo newNodeInfo;
     ConnectionAddrType type;
+    (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)memset_s(&newNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strcpy_s(oldNodeInfo.networkId, NETWORK_ID_BUF_LEN, NETWORKID1);
     (void)strcpy_s(newNodeInfo.networkId, NETWORK_ID_BUF_LEN, NETWORKID1);
     (void)strcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
     (void)strcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
-    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT1;
-    newNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT1;
-    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT1;
-    newNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT1;
-    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT1;
-    newNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT1;
 
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    bool ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
+    bool ret = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
+    EXPECT_FALSE(ret);
+    ret = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
+    EXPECT_FALSE(ret);
     newNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT2;
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == true);
+    ret = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
+    EXPECT_TRUE(ret);
     newNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT2;
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == true);
+    ret = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
+    EXPECT_TRUE(ret);
     newNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT2;
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == true);
+    ret = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
+    EXPECT_TRUE(ret);
     (void)strcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP2);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == true);
-    LnnStopConnectionFsm(connFsm, LnnConnectionFsmStopCallback);
-    LnnDestroyConnectionFsm(connFsm);
+    ret = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
+    EXPECT_TRUE(ret);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -145,8 +148,12 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
 HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
     LnnConnectionFsm *connFsm = nullptr;
-    connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusCalloc(sizeof(LnnConnectionFsm)));
+    ConnectionAddr target = {
+        .type = CONNECTION_ADDR_WLAN,
+    };
+    connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     void *para = nullptr;
     para = reinterpret_cast<void *>(SoftBusCalloc(sizeof(int32_t)));
@@ -158,21 +165,21 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
     connFsm->isSession = false;
     EXPECT_CALL(serviceMock, LnnNotifyJoinResult).WillRepeatedly(Return());
     bool ret = AuthStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
-    EXPECT_TRUE(ret == false);
+    EXPECT_FALSE(ret);
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, para);
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(ret);
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, nullptr);
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(ret);
     connFsm->isDead = true;
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, nullptr);
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(ret);
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, para1);
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(ret);
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_DISCONNECT, nullptr);
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(ret);
     ret = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, nullptr);
-    EXPECT_TRUE(ret == true);
-    SoftBusFree(connFsm);
+    EXPECT_TRUE(ret);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -189,6 +196,8 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
     };
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
@@ -207,8 +216,8 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
     EXPECT_CALL(authtMock, AuthStartVerify).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
     bool ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
-    LnnDestroyConnectionFsm(connFsm);
+    EXPECT_TRUE(ret1);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -224,53 +233,47 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnAuthtInterfaceMock> authtMock;
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
     EXPECT_CALL(authtMock, AuthGetVersion).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(serviceMock, AuthGetDeviceUuid)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
 
-    int32_t *retCode = nullptr;
-    retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    int32_t *retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode != nullptr);
     *retCode = SOFTBUS_OK;
-    int32_t *retCode1 = nullptr;
-    retCode1 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    int32_t *retCode1 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode1 != nullptr);
     *retCode1 = SOFTBUS_OK;
-    int32_t *retCode2 = nullptr;
-    retCode2 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    int32_t *retCode2 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode2 != nullptr);
     *retCode2 = SOFTBUS_OK;
-    int32_t *retCode3 = nullptr;
-    retCode3 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    int32_t *retCode3 = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     EXPECT_TRUE(retCode3 != nullptr);
     *retCode3 = SOFTBUS_OK;
-    LnnConnectionFsm *connFsm = nullptr;
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_WLAN,
         .info.ip.port = PORT1,
     };
     (void)strcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, DEVICE_IP1);
-    connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
+    LnnConnectionFsm *connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
-    int32_t ret = LnnStartConnectionFsm(connFsm);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     connFsm->isDead = false;
     connFsm->fsm.flag = 0;
-    connFsm->fsm.looper = nullptr;
 
     bool ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode1));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode2));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     (void)strcpy_s(connFsm->connInfo.nodeInfo->uuid, UUID_BUF_LEN, NODE_UDID);
     ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode3));
-    EXPECT_TRUE(ret1 == true);
-    LnnDestroyConnectionFsm(connFsm);
+    EXPECT_TRUE(ret1);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -282,6 +285,10 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
  */
 HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
 {
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     LnnConnectionFsm *connFsm = nullptr;
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
@@ -292,9 +299,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
-    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
+    EXPECT_CALL(connFsmMock, LnnIsOsAccountConstraint).WillRepeatedly(Return(false));
     EXPECT_CALL(netLedgerMock, LnnAddOnlineNode).WillOnce(Return(REPORT_CHANGE)).WillRepeatedly(Return(REPORT_ONLINE));
 
     OnlineStateEnter(nullptr);
@@ -302,7 +307,7 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusCalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     OnlineStateEnter(&connFsm->fsm);
-    LnnDestroyConnectionFsm(connFsm);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -315,6 +320,8 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, TestSize.Level1)
 {
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
     LnnConnectionFsm *connFsm = nullptr;
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
@@ -322,6 +329,7 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
     int32_t *retCode = nullptr;
     retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     *retCode = SOFTBUS_OK;
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
@@ -337,25 +345,25 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
     EXPECT_CALL(netLedgerMock, LnnIsNodeOnline).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     bool ret1 =
         CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 =
         CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 =
         CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_NOT_TRUSTED, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_DISCONNECT, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_INITIATE_ONLINE, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 =
         CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == false);
-    LnnDestroyConnectionFsm(connFsm);
+    EXPECT_FALSE(ret1);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -368,6 +376,7 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
  */
 HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     LnnConnectionFsm *connFsm = nullptr;
@@ -376,16 +385,17 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
     };
     int32_t *retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     *retCode = SOFTBUS_OK;
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     bool ret1 = OnlineStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = OnlineStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
-    LnnDestroyConnectionFsm(connFsm);
+    EXPECT_TRUE(ret1);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -401,6 +411,8 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
     };
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
@@ -410,7 +422,7 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     LeavingStateEnter(nullptr);
     LeavingStateEnter(&connFsm->fsm);
-    LnnDestroyConnectionFsm(connFsm);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -429,6 +441,8 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
     };
     int32_t *retCode = reinterpret_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
     *retCode = SOFTBUS_OK;
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
     int32_t ret = LnnStartConnectionFsm(connFsm);
@@ -436,12 +450,12 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
 
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     bool ret1 = LeavingStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = LeavingStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == true);
+    EXPECT_TRUE(ret1);
     ret1 = LeavingStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode));
-    EXPECT_TRUE(ret1 == false);
-    LnnDestroyConnectionFsm(connFsm);
+    EXPECT_FALSE(ret1);
+    DestroyConnFsm(connFsm);
 }
 
 /*
@@ -454,11 +468,13 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
  */
 HWTEST_F(LNNConnectionFsmMockTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     LnnConnectionFsm *connFsm = nullptr;
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
     };
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(DEVICE_IP1));
     int32_t ret = LnnStopConnectionFsm(connFsm, LnnConnectionFsmStopCallback);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
