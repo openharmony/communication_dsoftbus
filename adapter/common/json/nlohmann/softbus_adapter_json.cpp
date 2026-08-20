@@ -103,7 +103,7 @@ JsonObj *JSON_Parse(const char *str, uint32_t len)
     }
     std::string jsonString(str, len);
     nlohmann::json entity = nlohmann::json::parse(jsonString, nullptr, false);
-    if (entity.is_discarded()) {
+    if (entity.is_discarded() || !entity.is_object()) {
         JSON_Delete(obj);
         COMM_LOGE(COMM_ADAPTER, "parse json fail");
         return nullptr;
@@ -367,6 +367,12 @@ bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value
     if (!item.is_array()) {
         COMM_LOGW(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
         return false;
+    }
+    for (const auto &el : item) {
+        if (!el.is_number_unsigned()) {
+            COMM_LOGE(COMM_ADAPTER, "invalid element type. key=%{public}s", key);
+            return false;
+        }
     }
     std::vector<uint8_t> bytes = item.get<std::vector<uint8_t>>();
     if (bufLen < bytes.size()) {
