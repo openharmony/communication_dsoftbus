@@ -370,7 +370,7 @@ int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply)
     int32_t channelType = 0;
     const char *sessionName = NULL;
     size_t size;
-    if (!ReadInt32(req, &channelId) || ReadInt32(req, &channelType)) {
+    if (!ReadInt32(req, &channelId) || !ReadInt32(req, &channelType)) {
         TRANS_LOGE(TRANS_CTRL, "failed to read channelId or channelType");
         return SOFTBUS_IPC_ERR;
     }
