@@ -1010,4 +1010,118 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDeleteDevInfoSyncToDB_Test_001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: LnnInitCloudSyncModule_Test_001
+ * @tc.desc: LnnInitCloudSyncModule test execute success
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnInitCloudSyncModule_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnKvAdapterInterfaceMock> kvAdapterMock;
+    EXPECT_CALL(kvAdapterMock, LnnCreateKvAdapter).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(kvAdapterMock, LnnRegisterDataChangeListener).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(LnnInitCloudSyncModule());
+}
+
+/*
+ * @tc.name: LnnInitCloudSyncModule_Test_002
+ * @tc.desc: LnnInitCloudSyncModule LnnCreateKvAdapter fail and async retry fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnInitCloudSyncModule_Test_002, TestSize.Level1)
+{
+    NiceMock<LnnKvAdapterInterfaceMock> kvAdapterMock;
+    NiceMock<LnnDataCloudSyncInterfaceMock> dataCloudSyncMock;
+    EXPECT_CALL(kvAdapterMock, LnnCreateKvAdapter).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(dataCloudSyncMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(LnnInitCloudSyncModule());
+}
+
+/*
+ * @tc.name: LnnInitCloudSyncModule_Test_003
+ * @tc.desc: LnnInitCloudSyncModule LnnRegisterDataChangeListener fail and async retry fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnInitCloudSyncModule_Test_003, TestSize.Level1)
+{
+    NiceMock<LnnKvAdapterInterfaceMock> kvAdapterMock;
+    NiceMock<LnnDataCloudSyncInterfaceMock> dataCloudSyncMock;
+    EXPECT_CALL(kvAdapterMock, LnnCreateKvAdapter).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(kvAdapterMock, LnnRegisterDataChangeListener).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(dataCloudSyncMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(LnnInitCloudSyncModule());
+}
+
+/*
+ * @tc.name: KvDataRegisterRetryCallback_Test_001
+ * @tc.desc: KvDataRegisterRetryCallback para is null
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, KvDataRegisterRetryCallback_Test_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(KvDataRegisterRetryCallback(nullptr));
+}
+
+/*
+ * @tc.name: KvDataRegisterRetryCallback_Test_002
+ * @tc.desc: KvDataRegisterRetryCallback test execute success
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, KvDataRegisterRetryCallback_Test_002, TestSize.Level1)
+{
+    NiceMock<LnnKvAdapterInterfaceMock> kvAdapterMock;
+    EXPECT_CALL(kvAdapterMock, LnnCreateKvAdapter).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(kvAdapterMock, LnnRegisterDataChangeListener).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t *retryCount = static_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    ASSERT_TRUE(retryCount != nullptr);
+    *retryCount = 0;
+    EXPECT_NO_FATAL_FAILURE(KvDataRegisterRetryCallback(retryCount));
+}
+
+/*
+ * @tc.name: KvDataRegisterRetryCallback_Test_003
+ * @tc.desc: KvDataRegisterRetryCallback retry count exceeds max
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, KvDataRegisterRetryCallback_Test_003, TestSize.Level1)
+{
+    NiceMock<LnnKvAdapterInterfaceMock> kvAdapterMock;
+    EXPECT_CALL(kvAdapterMock, LnnCreateKvAdapter).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t *retryCount = static_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    ASSERT_TRUE(retryCount != nullptr);
+    *retryCount = MAX_KV_DATA_REGISTER_RETRY_COUNT;
+    EXPECT_NO_FATAL_FAILURE(KvDataRegisterRetryCallback(retryCount));
+}
+
+/*
+ * @tc.name: KvDataRegisterRetryCallback_Test_004
+ * @tc.desc: KvDataRegisterRetryCallback async retry fail
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, KvDataRegisterRetryCallback_Test_004, TestSize.Level1)
+{
+    NiceMock<LnnKvAdapterInterfaceMock> kvAdapterMock;
+    NiceMock<LnnDataCloudSyncInterfaceMock> dataCloudSyncMock;
+    EXPECT_CALL(kvAdapterMock, LnnCreateKvAdapter).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(dataCloudSyncMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t *retryCount = static_cast<int32_t *>(SoftBusCalloc(sizeof(int32_t)));
+    ASSERT_TRUE(retryCount != nullptr);
+    *retryCount = 0;
+    EXPECT_NO_FATAL_FAILURE(KvDataRegisterRetryCallback(retryCount));
+}
+
 } // namespace OHOS

@@ -47,6 +47,8 @@
 #define PUT_VALUE_MAX_LEN    156
 #define UDID_HASH_HEX_LEN    16
 #define SOFTBUS_STRTOLL_BASE 10
+#define MAX_KV_DATA_REGISTER_RETRY_COUNT 10
+#define KV_DATA_REGISTER_RETRY_DELAY_MS 1000
 
 static int32_t g_dbId = 0;
 
@@ -1535,16 +1537,62 @@ int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
     return SOFTBUS_OK;
 }
 
+static void KvDataRegisterRetryCallback(void *para)
+{
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "para is invalid");
+        return;
+    }
+    int32_t *retryCount = (int32_t *)para;
+    int32_t dbId = 0;
+    int32_t ret = LnnCreateKvAdapter(&dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+    if (ret == SOFTBUS_OK) {
+        ret = LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+        if (ret == SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "register data change listener success after retry");
+            g_dbId = dbId;
+            SoftBusFree(retryCount);
+            return;
+        }
+    }
+    (*retryCount)++;
+    LNN_LOGW(LNN_BUILDER, "register data change listener failed, retry=%{public}d", *retryCount);
+    if (*retryCount >= MAX_KV_DATA_REGISTER_RETRY_COUNT) {
+        LNN_LOGE(LNN_BUILDER, "register data change listener failed after max retry");
+        SoftBusFree(retryCount);
+        return;
+    }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), KvDataRegisterRetryCallback,
+        retryCount, KV_DATA_REGISTER_RETRY_DELAY_MS) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async retry register data change listener fail");
+        SoftBusFree(retryCount);
+    }
+}
+
 void LnnInitCloudSyncModule(void)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = 0;
-    if (LnnCreateKvAdapter(&dbId, APPID, strlen(APPID), STOREID, strlen(STOREID)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Lnn Init Cloud Sync Module fail");
+    int32_t ret = LnnCreateKvAdapter(&dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+    if (ret == SOFTBUS_OK) {
+        ret = LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+        if (ret == SOFTBUS_OK) {
+            g_dbId = dbId;
+            return;
+        }
+    }
+    LNN_LOGW(LNN_BUILDER, "init cloud sync module failed, start async retry, ret=%{public}d", ret);
+    int32_t *retryCount = (int32_t *)SoftBusCalloc(sizeof(int32_t));
+    if (retryCount == NULL) {
+        LNN_LOGE(LNN_BUILDER, "calloc retry count fail");
         return;
     }
-    LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
-    g_dbId = dbId;
+    *retryCount = 0;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), KvDataRegisterRetryCallback,
+        retryCount, KV_DATA_REGISTER_RETRY_DELAY_MS) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async retry init cloud sync module fail");
+        SoftBusFree(retryCount);
+    }
 }
 
 void LnnDeInitCloudSyncModule(void)

@@ -46,7 +46,7 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
     return GetKvAdapterInterface()->LnnDestroyKvAdapter(dbId);
 }
 
-void LnnRegisterDataChangeListener(
+int32_t LnnRegisterDataChangeListener(
     int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen)
 {
     return GetKvAdapterInterface()->LnnRegisterDataChangeListener(dbId, appId, appIdLen, storeId, storeIdLen);

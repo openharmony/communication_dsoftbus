@@ -73,7 +73,7 @@ int32_t LnnCloudSync(int32_t dbId)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
+int32_t LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
     int32_t storeIdLen)
 {
     (void)dbId;
@@ -81,6 +81,7 @@ void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appI
     (void)appIdLen;
     (void)storeId;
     (void)storeIdLen;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void LnnUnRegisterDataChangeListener(int32_t dbId)
