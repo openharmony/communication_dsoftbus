@@ -1920,13 +1920,17 @@ static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option)
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invaliad param, option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "invaliad param, not ble connect type. type=%{public}d", option->type);
-    CONN_LOGI(CONN_BLE, "priority=%{public}d", option->bleOption.priority);
+    CONN_LOGI(CONN_BLE, "priority=%{public}d isCancelIdleTimeout=%{public}d",
+        option->bleOption.priority, option->bleOption.isCancelIdleTimeout);
 
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
         "connection is not exist, connId=%{public}u", connectionId);
 
     int32_t ret = ConnBleUpdateConnectionPriority(connection, option->bleOption.priority);
+    if (option->bleOption.isCancelIdleTimeout) {
+        ConnBleCancelIdleTimeout(connection);
+    }
     ConnBleReturnConnection(&connection);
     return ret;
 }

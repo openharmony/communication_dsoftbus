@@ -277,6 +277,7 @@ typedef struct {
     union {
         struct {
             ConnectBlePriority priority;
+            bool isCancelIdleTimeout;
         } bleOption;
         struct {
             ConnectSlePowerLevel slePowerLevel;
