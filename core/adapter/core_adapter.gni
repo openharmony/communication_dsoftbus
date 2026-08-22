@@ -139,7 +139,12 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
     ]
     bus_center_core_adapter_inc += [ "$dsoftbus_root_path/interfaces/kits/lnn" ]
-    bus_center_core_adapter_external_deps += [ "usb_manager:usbsrv_client" ]
+    bus_center_core_adapter_external_deps += [ 
+      "cJSON:cjson",
+      "usb_manager:usbsrv_client",
+      "drivers_interface_usb:usb_idl_headers_1.1",
+      "drivers_interface_usb:usb_idl_headers_1.2",
+    ]
   } else {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter_virtual.cpp" ]
   }
