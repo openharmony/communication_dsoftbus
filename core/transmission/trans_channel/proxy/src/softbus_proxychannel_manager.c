@@ -1473,6 +1473,17 @@ static int32_t TransServerProxyChannelOpened(ProxyChannelInfo *chan, TransEventE
         return ret;
     }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, *extra);
+    if (chan->appInfo.appType == APP_TYPE_AUTH &&
+        strcmp(chan->appInfo.myData.sessionName, "IFusionCommAuthSession") == 0 && chan->appInfo.routeType == BT_BLE) {
+        TRANS_LOGI(TRANS_CTRL, "start ConnUpdateConnection, connId=%{public}u, routeType=%{public}d",
+            chan->connId, chan->appInfo.routeType);
+        UpdateOption option;
+        (void)memset_s(&option, sizeof(UpdateOption), 0, sizeof(UpdateOption));
+        option.type = CONNECT_BLE;
+        option.bleOption.priority = CONN_BLE_PRIORITY_BALANCED;
+        option.bleOption.isCancelIdleTimeout = true;
+        ConnUpdateConnection(chan->connId, &option);
+    }
     return SOFTBUS_OK;
 }
 
@@ -1941,6 +1952,21 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         (msg->msgHead.cipher & AUTH_SINGLE_CIPHER) == AUTH_SINGLE_CIPHER &&
         TransProxyProcessReNegotiateMsg(msg, info) == SOFTBUS_OK) {
         goto EXIT;
+    }
+
+    if (info->status == PROXY_CHANNEL_STATUS_COMPLETED && info->appInfo.appType == APP_TYPE_AUTH &&
+        strcmp(info->appInfo.myData.sessionName, "IFusionCommAuthSession") == 0 && info->appInfo.routeType == BT_BLE) {
+        int32_t connId = 0;
+        if (TransProxyGetConnIdByChanId(info->myId, &connId) == SOFTBUS_OK) {
+            TRANS_LOGI(TRANS_CTRL, "reset ConnUpdateConnection, connId=%{public}u, routeType=%{public}d",
+                connId, info->appInfo.routeType);
+            UpdateOption option;
+            (void)memset_s(&option, sizeof(UpdateOption), 0, sizeof(UpdateOption));
+            option.type = CONNECT_BLE;
+            option.bleOption.priority = CONN_BLE_PRIORITY_BALANCED;
+            option.bleOption.isCancelIdleTimeout = false;
+            ConnUpdateConnection((uint32_t)connId, &option);
+        }
     }
 
     if (TransProxyResetChan(info) != SOFTBUS_OK) {
