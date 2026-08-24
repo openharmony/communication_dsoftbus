@@ -243,6 +243,8 @@ int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
     }
     for (size_t i = 0; i < count; i++) {
         (*userIds)[i] = foregroundAccountIds[i].localId;
+        LNN_LOGI(LNN_STATE, "foreground user, userId=%{public}d, displayId=%{public}" PRIu64,
+            foregroundAccountIds[i].localId, foregroundAccountIds[i].displayId);
     }
     *userIdsLen = static_cast<uint32_t>(count);
     LNN_LOGD(LNN_STATE, "GetAllOsAccountIds succ, count=%{public}d", *userIdsLen);

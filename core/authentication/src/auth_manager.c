@@ -2386,7 +2386,7 @@ int32_t AuthDeviceSetIsCreatedSessionKey(int64_t authId, const bool isCreatedSes
     }
     AuthManager *auth = FindAuthManagerByAuthId(authId);
     if (auth == NULL) {
-        AUTH_LOGE(AUTH_FSM, "auth manager not found, authId=%{public}" PRId64, authId);
+        AUTH_LOGE(AUTH_INIT, "auth manager not found, authId=%{public}" PRId64, authId);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
     }

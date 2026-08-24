@@ -93,10 +93,9 @@ int32_t LnnSubcribeKvStoreService(void)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode)
+int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
 {
     (void)dbId;
     (void)isEnableCloud;
-    (void)filterMode;
     return SOFTBUS_NOT_IMPLEMENT;
 }

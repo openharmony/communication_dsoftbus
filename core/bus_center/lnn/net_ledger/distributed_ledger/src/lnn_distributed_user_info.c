@@ -25,7 +25,7 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
-static bool g_distributedUserLedgerStatus = false;
+static bool g_isDistributedUserLedgerInit = false;
 static Map g_distributedUserMap;
 static SoftBusMutex g_distributedUserLedgerLock;
 
@@ -51,7 +51,7 @@ static void FreeDistributedUserInfo(DistributedUserInfo *multiUserInfo)
 
 int32_t LnnInitDistributedUserLedger(void)
 {
-    if (g_distributedUserLedgerStatus == true) {
+    if (g_isDistributedUserLedgerInit) {
         LNN_LOGI(LNN_LEDGER, "distributed user ledger already init");
         return SOFTBUS_OK;
     }
@@ -60,14 +60,14 @@ int32_t LnnInitDistributedUserLedger(void)
         return SOFTBUS_LOCK_ERR;
     }
     LnnMapInit(&g_distributedUserMap);
-    g_distributedUserLedgerStatus = true;
+    g_isDistributedUserLedgerInit = true;
     LNN_LOGI(LNN_LEDGER, "init distributed user ledger successful");
     return SOFTBUS_OK;
 }
 
 void LnnDeinitDistributedUserLedger(void)
 {
-    if (g_distributedUserLedgerStatus == false) {
+    if (!g_isDistributedUserLedgerInit) {
         LNN_LOGI(LNN_LEDGER, "distributed user ledger not init");
         return;
     }
@@ -89,7 +89,7 @@ void LnnDeinitDistributedUserLedger(void)
     }
     LnnMapDeinitIterator(it);
     LnnMapDelete(&g_distributedUserMap);
-    g_distributedUserLedgerStatus = false;
+    g_isDistributedUserLedgerInit = false;
     (void)SoftBusMutexUnlock(&g_distributedUserLedgerLock);
     SoftBusMutexDestroy(&g_distributedUserLedgerLock);
     LNN_LOGI(LNN_LEDGER, "deinit distributed user ledger successful");

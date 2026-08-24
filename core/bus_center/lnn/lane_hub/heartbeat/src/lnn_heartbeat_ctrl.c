@@ -672,6 +672,7 @@ static void HbDelayConditionChanged(void *para)
     HbConditionChanged(false);
 }
 
+#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
 static int32_t HbTryCloudSync(void)
 {
     NodeInfo info;
@@ -693,6 +694,7 @@ static int32_t HbTryCloudSync(void)
     }
     return ret;
 }
+#endif
 
 static void HbScreenOnOnceTryCloudSync(void)
 {
@@ -701,8 +703,8 @@ static void HbScreenOnOnceTryCloudSync(void)
         g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN &&
         g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK) {
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-        HbTryCloudSync();
-        HbDelayConditionChanged(NULL);
+        HbTryHandleMultiUserCloudSync();
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL, 0);
 #else
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
             HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
@@ -829,6 +831,28 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbScreenUnlockAsyncHandler(void)
+{
+    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
+        g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN) {
+        LnnAsyncCallbackDelayHelper(
+            GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, HB_CLOUD_SYNC_DELAY_LEN);
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
+            HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        HbTryHandleMultiUserCloudSync();
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL, 0);
+#else
+        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
+            HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
+#endif
+    }
+    if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
+        g_hbConditionState.accountState != SOFTBUS_ACCOUNT_LOG_IN) {
+        HbConditionChanged(false);
+    }
+}
+
 static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_SCREEN_LOCK_CHANGED) {
@@ -858,19 +882,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
             HbRefreshConditionState();
-            if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
-                g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN) {
-                LnnAsyncCallbackDelayHelper(
-                    GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetHighScanParam, NULL, HB_CLOUD_SYNC_DELAY_LEN);
-                LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelaySetNormalScanParam, NULL,
-                    HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
-                LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
-                    HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
-            }
-            if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON &&
-                g_hbConditionState.accountState != SOFTBUS_ACCOUNT_LOG_IN) {
-                HbConditionChanged(false);
-            }
+            HbScreenUnlockAsyncHandler();
             break;
         case SOFTBUS_SCREEN_LOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_LOCK");
@@ -889,7 +901,7 @@ static void HbHandleAccountLogin(void)
         HB_CLOUD_SYNC_DELAY_LEN + HB_START_DELAY_LEN + HB_SEND_RELAY_LEN_ONCE);
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     (void)HbMultiUserHandleLogin();
-    HbDelayConditionChanged(NULL);
+    LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL, 0);
 #else
     LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayConditionChanged, NULL,
         HbTryCloudSync() == SOFTBUS_OK ? HB_CLOUD_SYNC_DELAY_LEN : 0);
@@ -900,7 +912,7 @@ static void HbHandleAccountLogout(void)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
 #ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
+    LnnSetCloudAbility(false);
     if (LnnDeleteSyncToDB(0, 0, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB clear local cache fail");
     }

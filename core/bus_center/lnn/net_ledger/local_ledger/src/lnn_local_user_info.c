@@ -91,7 +91,7 @@ int32_t LnnAddLocalUserInfo(const UserInfo *userInfo)
         return SOFTBUS_LOCK_ERR;
     }
     UserInfo *existUser = FindUserByUserId(g_localUserLedger, userInfo->userId);
-    if (existUser != NULL && existUser->accountId == 0) {
+    if (existUser != NULL) {
         if (memcpy_s(existUser, sizeof(UserInfo), userInfo, sizeof(UserInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy user info failed");
             (void)SoftBusMutexUnlock(&g_localUserLedger->lock);
@@ -175,7 +175,7 @@ static void ProcessUserLogoutInfo(int32_t userId)
     LIST_FOR_EACH_ENTRY_SAFE(user, userNext, &g_localUserLedger->list, UserStorageInfo, node) {
         if (user->info.userId == userId && user->info.accountId != 0) {
             bool isMainScreenUserId = (user->info.displayId == MAIN_SCREEN_USER_TYPE) ? true : false;
-            LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
+            LnnSetCloudAbility(false);
             if (LnnDeleteSyncToDB(user->info.userId, user->info.accountId, isMainScreenUserId) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_LEDGER, "delete local cache failed");
             }

@@ -139,11 +139,6 @@ int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *acc
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     *accountId = strtoll(accountInfo, nullptr, ACCOUNT_STRTOLL_BASE);
-    if (*accountId == 0) {
-        SoftBusFree(accountInfo);
-        LNN_LOGE(LNN_STATE, "strtoll accountInfo fail");
-        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
-    }
     SoftBusFree(accountInfo);
     return SOFTBUS_OK;
 }
