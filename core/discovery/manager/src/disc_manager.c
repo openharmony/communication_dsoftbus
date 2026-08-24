@@ -1168,10 +1168,7 @@ void DiscOnScreenStatusChanged(DiscScreenType screenType, bool onScreen)
 {
     DISC_LOGI(DISC_CONTROL, "screen status changed, screenType=%{public}d, onScreen=%{public}d",
         screenType, onScreen);
-    if (screenType < 0 || screenType >= DISC_SCREEN_TYPE_BUTT) {
-        DISC_LOGE(DISC_CONTROL, "invalid screenType=%{public}d", screenType);
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(screenType >= 0, DISC_CONTROL, "invalid screenType=%{public}d", screenType);
     bool isFirstScreenOn = atomic_load(&g_wasAllScreenOff);
     if (screenType == DISC_SCREEN_CENTER) {
         atomic_store(&g_centerScreenOn, onScreen);
@@ -1883,10 +1880,7 @@ static void MultiScreenStateChangedEvtHandler(const LnnEventBasicInfo *info)
     const LnnMultiScreenStateChangedEvent *event = (const LnnMultiScreenStateChangedEvent *)info;
     bool onScreen = (event->status == SOFTBUS_MULTI_SCREEN_ON);
     DiscScreenType screenType = (DiscScreenType)event->screenId;
-    if (screenType < 0 || screenType >= DISC_SCREEN_TYPE_BUTT) {
-        DISC_LOGE(DISC_CONTROL, "invalid screenType from screenId");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(screenType >= 0, DISC_CONTROL, "invalid screenType from screenId");
     DiscOnScreenStatusChanged(screenType, onScreen);
 }
 
