@@ -98,7 +98,6 @@ HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged001 begin ----");
     EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(static_cast<DiscScreenType>(-1), true));
-    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(DISC_SCREEN_TYPE_BUTT, true));
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged001 end ----");
 }
 
@@ -166,6 +165,20 @@ HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged006, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(DISC_SCREEN_CENTER, true));
     EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(DISC_SCREEN_CENTER, false));
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged006 end ----");
+}
+
+/*
+ * @tc.name: DiscOnScreenStatusChanged007
+ * @tc.desc: test DiscOnScreenStatusChanged with screenType beyond enum range
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged007, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged007 begin ----");
+    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(static_cast<DiscScreenType>(3), true));
+    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(static_cast<DiscScreenType>(3), false));
+    DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged007 end ----");
 }
 
 /*
