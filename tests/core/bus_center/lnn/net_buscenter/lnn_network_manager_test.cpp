@@ -30,6 +30,8 @@
 #include "softbus_error_code.h"
 #include "softbus_protocol_def.h"
 
+#define DEFAULT_MAIN_SCREEN_USER_ID 100
+
 namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
@@ -545,11 +547,11 @@ HWTEST_F(LNNNetworkManagerMockTest, GET_ALL_PROTOCOLS_TEST_001, TestSize.Level1)
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(managerMock, LnnNotifyAccountStateChangeEvent).WillRepeatedly(Return());
     EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
-    (void)OnGroupCreated(groupId, groupType);
+    (void)OnGroupCreated(groupId, groupType, DEFAULT_MAIN_SCREEN_USER_ID);
     groupType = AUTH_PEER_TO_PEER_GROUP;
     EXPECT_CALL(managerMock, LnnUpdateOhosAccount).WillRepeatedly(Return());
     EXPECT_CALL(managerMock, LnnNotifyAccountStateChangeEvent).WillRepeatedly(Return());
-    (void)OnGroupCreated(groupId, groupType);
+    (void)OnGroupCreated(groupId, groupType, DEFAULT_MAIN_SCREEN_USER_ID);
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     void *data = nullptr;
     VisitNextChoice ret = GetAllProtocols(nullptr, data);
@@ -712,10 +714,10 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
     const char *groupId = "groupId";
     int32_t groupType = AUTH_IDENTICAL_ACCOUNT_GROUP;
     EXPECT_CALL(managerMock, LnnOnOhosAccountLogout).WillRepeatedly(Return());
-    (void)OnGroupDeleted(groupId, groupType);
+    (void)OnGroupDeleted(groupId, groupType, DEFAULT_MAIN_SCREEN_USER_ID);
     groupType = AUTH_PEER_TO_PEER_GROUP;
     EXPECT_CALL(managerMock, LnnOnOhosAccountLogout).WillRepeatedly(Return());
-    (void)OnGroupDeleted(groupId, groupType);
+    (void)OnGroupDeleted(groupId, groupType, DEFAULT_MAIN_SCREEN_USER_ID);
     int32_t ret = SOFTBUS_OK;
     EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnRegisterEvent();

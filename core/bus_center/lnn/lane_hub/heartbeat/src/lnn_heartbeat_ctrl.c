@@ -896,10 +896,15 @@ static void HbHandleAccountLogin(void)
 #endif
 }
 
-static void HbHandleAccountLogout(void)
+static void HbHandleAccountLogout(int32_t userId)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
-#ifndef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT, userId=%{public}d", userId);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    (void)HbMultiUserHandleLogout(userId);
+    if (userId != JudgeDeviceTypeAndGetOsAccountIds()) {
+        return;
+    }
+#else
     LnnSetCloudAbility(false, OPEN_FILTER_USERID_MODE);
     if (LnnDeleteSyncToDB(0, 0, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB clear local cache fail");
@@ -927,7 +932,7 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
             HbHandleAccountLogin();
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
-            HbHandleAccountLogout();
+            HbHandleAccountLogout(event->userId);
             break;
         default:
             return;

@@ -24,6 +24,7 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_multi_user_process.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_physical_subnet_manager.h"
@@ -640,25 +641,33 @@ void RestartCoapDiscovery(void)
     }
 }
 
-static void OnGroupCreated(const char *groupId, int32_t groupType)
+static void OnGroupCreated(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
-    LNN_LOGI(LNN_BUILDER, "OnGroupCreated, groupType=%{public}d", groupType);
+    LNN_LOGI(LNN_BUILDER, "OnGroupCreated, groupType=%{public}d, userId=%{public}d", groupType, userId);
     LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
     LnnHbOnTrustedRelationIncreased(groupType);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
-        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, JudgeDeviceTypeAndGetOsAccountIds());
+        int32_t notifyUserId = (userId > 0) ? userId : JudgeDeviceTypeAndGetOsAccountIds();
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, notifyUserId);
     }
     RestartCoapDiscovery();
     DfxRecordWifiTriggerTimestamp(WIFI_GROUP_CREATED);
     EhLoginEventHandlerPacked();
 }
 
-static void OnGroupDeleted(const char *groupId, int32_t groupType)
+static void OnGroupDeleted(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
-    LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupDeleted");
+    LNN_LOGI(LNN_BUILDER, "OnGroupDeleted, groupType=%{public}d, userId=%{public}d", groupType, userId);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        (void)HbMultiUserHandleLogout(userId);
+        if (userId > 0 && userId != JudgeDeviceTypeAndGetOsAccountIds()) {
+            LnnHbOnTrustedRelationReduced();
+            return;
+        }
+#endif
         LnnOnOhosAccountLogout();
     }
     LnnHbOnTrustedRelationReduced();

@@ -75,17 +75,19 @@ void AuthTest::SetUp()
     AUTH_LOGI(AUTH_TEST, "AuthTest start");
 }
 
-static void OnGroupCreated(const char *groupId, int32_t groupType)
+static void OnGroupCreated(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
     (void)groupType;
+    (void)userId;
     return;
 }
 
-static void OnGroupDeleted(const char *groupId, int32_t groupType)
+static void OnGroupDeleted(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
     (void)groupType;
+    (void)userId;
     return;
 }
 

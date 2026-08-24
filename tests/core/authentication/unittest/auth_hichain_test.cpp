@@ -64,16 +64,18 @@ void OnDeviceNotTrustedTest(const char *peerUdid, int32_t localUserId, HandleNot
     (void)peerUdid;
 }
 
-void OnGroupCreatedTest(const char *groupId, int32_t groupType)
+void OnGroupCreatedTest(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
     (void)groupType;
+    (void)userId;
 }
 
-void OnGroupDeletedTest(const char *groupId, int32_t groupType)
+void OnGroupDeletedTest(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
     (void)groupType;
+    (void)userId;
 }
 
 void OnDeviceBound(const char *udid, const char *groupInfo)

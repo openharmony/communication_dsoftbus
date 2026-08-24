@@ -22,6 +22,8 @@
 #include "auth_log.h"
 #include "softbus_error_code.h"
 
+#define DEFAULT_MAIN_SCREEN_USER_ID 100
+
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
@@ -44,12 +46,12 @@ static void CallbackDeviceDisconnect(AuthHandle authHandle)
     g_callbackCalled = true;
 }
 
-static void CallbackGroupCreated(const char *groupId, int32_t groupType)
+static void CallbackGroupCreated(const char *groupId, int32_t groupType, int32_t userId)
 {
     g_callbackCalled = true;
 }
 
-static void CallbackGroupDeleted(const char *groupId, int32_t groupType)
+static void CallbackGroupDeleted(const char *groupId, int32_t groupType, int32_t userId)
 {
     g_callbackCalled = true;
 }
@@ -1087,7 +1089,7 @@ HWTEST_F(AuthDeviceTest, UNREG_GROUP_CHANGE_LISTENER_TEST_001, TestSize.Level1)
 HWTEST_F(AuthDeviceTest, ON_GROUP_CREATED_TEST_001, TestSize.Level1)
 {
     (void)memset_s(&g_groupChangeListener, sizeof(g_groupChangeListener), 0, sizeof(g_groupChangeListener));
-    EXPECT_NO_FATAL_FAILURE(OnGroupCreated("groupId", 1));
+    EXPECT_NO_FATAL_FAILURE(OnGroupCreated("groupId", 1, DEFAULT_MAIN_SCREEN_USER_ID));
 }
 
 /*
@@ -1100,7 +1102,7 @@ HWTEST_F(AuthDeviceTest, ON_GROUP_CREATED_TEST_002, TestSize.Level1)
 {
     g_callbackCalled = false;
     g_groupChangeListener.onGroupCreated = CallbackGroupCreated;
-    EXPECT_NO_FATAL_FAILURE(OnGroupCreated("groupId", 1));
+    EXPECT_NO_FATAL_FAILURE(OnGroupCreated("groupId", 1, DEFAULT_MAIN_SCREEN_USER_ID));
     EXPECT_TRUE(g_callbackCalled);
     g_groupChangeListener.onGroupCreated = nullptr;
 }
@@ -1114,7 +1116,7 @@ HWTEST_F(AuthDeviceTest, ON_GROUP_CREATED_TEST_002, TestSize.Level1)
 HWTEST_F(AuthDeviceTest, ON_GROUP_DELETED_TEST_001, TestSize.Level1)
 {
     (void)memset_s(&g_groupChangeListener, sizeof(g_groupChangeListener), 0, sizeof(g_groupChangeListener));
-    EXPECT_NO_FATAL_FAILURE(OnGroupDeleted("groupId", 1));
+    EXPECT_NO_FATAL_FAILURE(OnGroupDeleted("groupId", 1, DEFAULT_MAIN_SCREEN_USER_ID));
 }
 
 /*
@@ -1127,7 +1129,7 @@ HWTEST_F(AuthDeviceTest, ON_GROUP_DELETED_TEST_002, TestSize.Level1)
 {
     g_callbackCalled = false;
     g_groupChangeListener.onGroupDeleted = CallbackGroupDeleted;
-    EXPECT_NO_FATAL_FAILURE(OnGroupDeleted("groupId", 1));
+    EXPECT_NO_FATAL_FAILURE(OnGroupDeleted("groupId", 1, DEFAULT_MAIN_SCREEN_USER_ID));
     EXPECT_TRUE(g_callbackCalled);
     g_groupChangeListener.onGroupDeleted = nullptr;
 }

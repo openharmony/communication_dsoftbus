@@ -53,8 +53,8 @@ typedef enum {
 } HiChainAuthMode;
 
 typedef struct {
-    void (*onGroupCreated)(const char *groupId, int32_t groupType);
-    void (*onGroupDeleted)(const char *groupId, int32_t groupType);
+    void (*onGroupCreated)(const char *groupId, int32_t groupType, int32_t userId);
+    void (*onGroupDeleted)(const char *groupId, int32_t groupType, int32_t userId);
     void (*onDeviceNotTrusted)(const char *udid, int32_t localUserId, HandleNotTrustedType type);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } TrustDataChangeListener;
