@@ -129,7 +129,7 @@ HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged003, TestSize.Level1)
 
 /*
  * @tc.name: DiscOnScreenStatusChanged004
-     * @tc.desc: test DiscOnScreenStatusChanged screen on for passenger screen
+ * @tc.desc: test DiscOnScreenStatusChanged screen on for passenger screen
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -142,7 +142,7 @@ HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged004, TestSize.Level1)
 
 /*
  * @tc.name: DiscOnScreenStatusChanged005
-     * @tc.desc: test DiscOnScreenStatusChanged screen off for passenger screen
+ * @tc.desc: test DiscOnScreenStatusChanged screen off for passenger screen
  * @tc.type: FUNC
  * @tc.require:
  */

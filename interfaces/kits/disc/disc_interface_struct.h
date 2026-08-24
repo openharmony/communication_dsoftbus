@@ -64,8 +64,6 @@ typedef struct {
     uint64_t nowTimes;
 } RaiseHandDeviceInfo;
 
-#define DISC_SCREEN_CENTER 0
-
 #ifdef __cplusplus
 }
 #endif
