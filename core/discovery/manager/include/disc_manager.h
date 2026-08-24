@@ -110,7 +110,7 @@ void DiscConstraintEventDeInit(void);
 bool DiscIsOsAccountConstraint(void);
 
 #ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
-void DiscOnScreenStatusChanged(int32_t screenType, bool onScreen);
+void DiscOnScreenStatusChanged(int32_t screenId, bool onScreen);
 #endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
 
 #ifdef __cplusplus

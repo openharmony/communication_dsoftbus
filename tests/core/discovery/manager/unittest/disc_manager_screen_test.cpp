@@ -90,7 +90,7 @@ public:
 
 /*
  * @tc.name: DiscOnScreenStatusChanged001
- * @tc.desc: test DiscOnScreenStatusChanged with invalid screenType
+ * @tc.desc: test DiscOnScreenStatusChanged with invalid screenId
  * @tc.type: FUNC
  * @tc.require:
  */
