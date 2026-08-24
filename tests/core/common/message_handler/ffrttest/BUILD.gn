@@ -36,6 +36,7 @@ ohos_unittest("MessageHandlerFfrtTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 group("unittest") {

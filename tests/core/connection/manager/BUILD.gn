@@ -58,4 +58,5 @@ ohos_unittest("ConnectionManagerTest") {
     "softbus_conn_flow_control_test.cpp",
     "softbus_conn_manager_test.cpp",
   ]
+  deps += dsoftbus_log_label_deps
 }

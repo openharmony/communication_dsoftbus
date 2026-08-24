@@ -78,4 +78,5 @@ ohos_fuzztest("AuthApplyKeyProcessFuzzTest") {
     "hitrace:libhitracechain",
     "init:libbegetutil",
   ]
+  deps += dsoftbus_log_label_deps
 }

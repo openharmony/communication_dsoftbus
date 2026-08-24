@@ -130,6 +130,7 @@ ohos_unittest("BusCenterEventTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
+  deps += dsoftbus_log_label_deps
 
   bus_center_event_test_external_deps = [
     "c_utils:utils",
@@ -205,6 +206,7 @@ ohos_unittest("BusCenterManagerTest") {
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
+  deps += dsoftbus_log_label_deps
 
   bus_center_manager_test_external_deps = [
     "c_utils:utils",

@@ -62,6 +62,7 @@ ohos_fuzztest("SoftbusMessageOpenChannelFuzzTest") {
     "dsoftbus:softbus_client",
     "hilog:libhilog",
   ]
+  deps += dsoftbus_log_label_deps
 }
 
 group("fuzztest") {
