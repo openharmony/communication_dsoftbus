@@ -81,6 +81,11 @@ public:
     virtual void *LnnMapGet(const Map *map, const char *key) = 0;
     virtual int32_t LnnMapErase(Map *map, const char *key) = 0;
     virtual void LnnMapDelete(Map *map) = 0;
+    virtual uint32_t MapGetSize(Map *map) = 0;
+    virtual MapIterator *LnnMapInitIterator(Map *map) = 0;
+    virtual bool LnnMapHasNext(MapIterator *it) = 0;
+    virtual MapIterator *LnnMapNext(MapIterator *it) = 0;
+    virtual void LnnMapDeinitIterator(MapIterator *it) = 0;
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
@@ -144,6 +149,11 @@ public:
     MOCK_METHOD2(LnnMapGet, void *(const Map *, const char *));
     MOCK_METHOD2(LnnMapErase, int32_t(Map *, const char *));
     MOCK_METHOD1(LnnMapDelete, void(Map *));
+    MOCK_METHOD1(MapGetSize, uint32_t(Map *));
+    MOCK_METHOD1(LnnMapInitIterator, MapIterator *(Map *));
+    MOCK_METHOD1(LnnMapHasNext, bool(MapIterator *));
+    MOCK_METHOD1(LnnMapNext, MapIterator *(MapIterator *));
+    MOCK_METHOD1(LnnMapDeinitIterator, void(MapIterator *));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t(const char *, char *, uint32_t));
     MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t(const char *, NodeInfo *));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
