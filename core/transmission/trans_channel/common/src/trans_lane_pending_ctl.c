@@ -45,8 +45,9 @@
 #include "trans_log.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
-#include "trans_uk_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
+#include "trans_uk_manager.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -748,6 +749,46 @@ static void RecordFailOpenSessionKpi(AppInfo *appInfo, const LaneConnInfo *connI
         GetSoftbusRecordTimeMillis() - timeStart);
 }
 
+static void TransFillAppInfoByConnOpt(SessionParam *param, AppInfo *appInfo, const LaneConnInfo *connInnerInfo,
+    const ConnectOption *connOpt, TransEventExtra *extra)
+{
+    if (param == NULL || appInfo == NULL || connInnerInfo == NULL || connOpt == NULL || extra == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Invalid param");
+        return;
+    }
+    extra->peerUdid = appInfo->peerUdid;
+    extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
+    extra->linkType = connOpt->type;
+    appInfo->connectType = connOpt->type;
+    appInfo->myData.sessionId = param->sessionId;
+    if (appInfo->osType == OTHER_OS_TYPE &&
+        strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), connInnerInfo->connInfo.p2p.localIp) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "set p2p localIp err.");
+    }
+}
+
+static bool TransCheckTcpDirectChannelCompensation(const SessionParam *param, const AppInfo *appInfo,
+    const TransInfo *transInfo)
+{
+    /* For P2P TCP_DIRECT, auth verify may fail synchronously inside TransOpenChannelProc:
+     * OnChannelOpenFail deletes the SessionConn and notifies the client before we reach here.
+     * Detect by the missing SessionConn, clean up the lane just added, and skip the error path.
+     * TransLaneMgrDelLane frees the lane internally; do NOT call TransFreeLane. */
+    if (transInfo->channelType != CHANNEL_TYPE_TCP_DIRECT ||
+        (appInfo->connectType != CONNECT_P2P && appInfo->connectType != CONNECT_HML)) {
+        return false;
+    }
+    if (GetSessionConnById(transInfo->channelId, NULL) == SOFTBUS_OK) {
+        return false;
+    }
+    TRANS_LOGW(TRANS_SVC, "channel already failed inside TransOpenChannelProc. channelId=%{public}d",
+        transInfo->channelId);
+    (void)TransLaneMgrDelLane(transInfo->channelId, transInfo->channelType, true);
+    (void)TransDeleteSocketChannelInfoByChannel(transInfo->channelId, transInfo->channelType);
+    (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
+    return true;
+}
+
 static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, AppInfo *appInfo,
     TransEventExtra *extra, const LaneConnInfo *connInnerInfo)
 {
@@ -759,15 +800,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, appInfo->timeStart);
         goto EXIT_ERR;
     }
-    extra->peerUdid = appInfo->peerUdid;
-    extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
-    appInfo->connectType = connOpt.type;
-    appInfo->myData.sessionId = param->sessionId;
-    extra->linkType = connOpt.type;
-    if (appInfo->osType == OTHER_OS_TYPE &&
-        strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), connInnerInfo->connInfo.p2p.localIp) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "set p2p localIp err.");
-    }
+    TransFillAppInfoByConnOpt(param, appInfo, connInnerInfo, &connOpt, extra);
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);
     TransOpenChannelSetModule(transInfo.channelType, &connOpt);
     TRANS_LOGI(TRANS_SVC, "laneHandle=%{public}u, channelType=%{public}u, linkedChannelId=%{public}d",
@@ -795,6 +828,9 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, appInfo->timeStart);
         (void)TransCommonCloseChannel(NULL, transInfo.channelId, transInfo.channelType);
         goto EXIT_ERR;
+    }
+    if (TransCheckTcpDirectChannelCompensation(param, appInfo, &transInfo)) {
+        return;
     }
     AddChannelStatisticsInfo(transInfo.channelId, transInfo.channelType);
     return;
