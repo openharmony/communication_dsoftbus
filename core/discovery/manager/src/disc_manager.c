@@ -124,6 +124,7 @@ typedef struct {
 
 static atomic_bool g_centerScreenOn = true;
 static atomic_bool g_wasAllScreenOff = false;
+#define DISC_SCREEN_CENTER 0
 #endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
 
 #define DFX_RECORD_DISC_CALL_START(infoNode, packageName, interfaceType)   \
